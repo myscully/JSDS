@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JIRAN Design System</title>
+<meta name="description" content="지란지교시큐리티 디자인 시스템: 제품 메인 컬러를 제외한 공통 UI 기준">
+<!-- 소스 미리보기 셸. 아이콘(icons.gen.js) · 데이터(data.js · components.data.js · patterns.data.js) · 공용 함수(lib.js) · 렌더러(render.js) · 런타임(app.src.js) · 스타일(style.src.css)을 로드합니다.
+     build.js 가 이 파일을 열어 정적 사이트를 생성합니다. 직접 열어 볼 때는 _build 폴더에서 `python3 -m http.server 8090` 후 http://localhost:8090/jiran-design-system-guide.standalone.html -->
+<link rel="stylesheet" href="style.src.css">
+</head>
+<body>
+
+<header class="header">
+  <a class="brand" href="#/home/overview"><span>JS Design System</span></a>
+  <span class="ver" id="ver">v0.4</span>
+  <nav class="topnav" id="topnav" aria-label="섹션"></nav>
+  <div class="header-right">
+    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
+    <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+    <div class="search-results" id="searchResults" hidden></div>
+    <button class="theme-btn" id="themeBtn" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg>테마</button>
+  </div>
+</header>
+<div class="shell" id="shell">
+  <aside class="sidebar" id="sidebar"><nav class="nav" id="nav" aria-label="서브메뉴"></nav><div class="sidebar-foot" id="foot"></div></aside>
+  <div class="main" id="main"></div>
+</div>
+
+<script src="icons.gen.js"></script>
+<script src="data.js"></script>
+<script src="components.data.js"></script>
+<script src="patterns.data.js"></script>
+<script src="lib.js"></script>
+<script src="foundations.js"></script>
+<script src="render.js"></script>
+<script src="app.src.js"></script>
+<script src="ds.src.js"></script>
+</body>
+</html>

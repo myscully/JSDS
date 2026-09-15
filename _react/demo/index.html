@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>@jiran/ds-react demo</title>
+<style>
+  body{margin:0}
+  .demo-bar{position:sticky;top:0;z-index:50;display:flex;gap:12px;align-items:center;padding:10px 24px;border-bottom:1px solid var(--border-default);background:var(--bg-surface)}
+  .demo-bar h1{font-size:16px;margin:0 auto 0 0}
+  .demo-page{max-width:1120px;margin:0 auto;padding:32px 24px 80px}
+  .demo-sec{margin:40px 0 8px;font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .demo-ex{border:1px solid var(--border-default);border-radius:12px;margin:16px 0;overflow:hidden;background:var(--bg-surface)}
+  .demo-ex .demo-title{padding:8px 14px;font-size:12.5px;color:var(--text-tertiary);border-bottom:1px solid var(--border-default);font-family:var(--font-mono)}
+  .demo-ex .example-preview{background:var(--bg-panel);padding:40px 32px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:24px;min-height:160px}
+  .demo-ex .example-preview.left{justify-content:flex-start}.demo-ex .example-preview.top{align-items:flex-start}.demo-ex .example-preview.stack{flex-direction:column;align-items:stretch;justify-content:flex-start}.demo-ex .example-preview.tall{min-height:340px;align-items:flex-start}.demo-ex .example-preview.white{background:var(--bg-surface)}
+</style>
+</head>
+<body class="ds-root">
+<div id="root"></div>
+<script type="module" src="./main.tsx"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.visual/
+src/icons/icons.data.ts
+demo/dist/
