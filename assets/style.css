@@ -79,7 +79,7 @@ html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
 html{min-width:1200px;height:100%}
 body{min-width:1200px;min-height:100%}
-body{margin:0;background:var(--bg-canvas);color:var(--text-primary);font-family:var(--font-sans);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+body{margin:0;background:var(--bg-canvas);color:var(--text-primary);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 a{color:inherit}
 /* 고정폭은 코드 블록(pre)에만. 인라인 code·kbd 등 나머지는 전부 Pretendard */
 pre,pre code{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
@@ -137,7 +137,7 @@ code{font-size:inherit}
 /* ---------- Content typography ---------- */
 h1{font-size:44px;line-height:1.2;letter-spacing:-.025em;margin:0 0 var(--space-4);text-wrap:balance;display:flex;align-items:center;gap:12px}
 h1 .n{font-size:14px;font-weight:800;line-height:1;padding:5px 6px;border-radius:5px;background:var(--text-primary);color:var(--bg-surface);letter-spacing:0}
-.lead{font-size:18px;color:var(--text-secondary);margin:0 0 var(--space-10);max-width:62ch;line-height:1.7}
+.lead{font-size:16px;font-weight:500;color:var(--text-secondary);margin:0 0 var(--space-10);line-height:1.6}
 h2{font-size:28px;letter-spacing:-.02em;margin:var(--space-16) 0 var(--space-5);scroll-margin-top:calc(var(--header-h) + 16px)}
 h2:first-of-type{margin-top:var(--space-6)}
 h3{font-size:20px;margin:var(--space-10) 0 var(--space-3);letter-spacing:-.01em}
