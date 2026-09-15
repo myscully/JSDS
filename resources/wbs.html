@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WBS · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="resources" data-page="wbs" data-root="../">
+<header class="header">
+  <a class="brand" href="../index.html"><span>JS Design System</span></a>
+  <span class="ver">v0.6</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/getting-started.html" class="">Home</a><a href="../foundations/overview.html" class="">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../resources/react.html" class="active">Resources</a></nav>
+  <div class="header-right">
+    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
+    <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+    <div class="search-results" id="searchResults" hidden></div>
+    <button class="theme-btn" id="themeBtn" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg>테마</button>
+  </div>
+</header>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><h4>Resources</h4><a href="../resources/react.html">React Package</a><a href="../resources/design-token.html">Design Token<span class="n">N</span></a><a href="../resources/figma.html">Figma Library</a><a href="../resources/tokens.html">Token Download</a><a href="../resources/changelog.html">Changelog</a><a href="../resources/contribution.html">Contribution</a><a href="../resources/wbs.html" class="active">WBS</a></nav><div class="sidebar-foot">v0.6 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>WBS</h1><p class="lead">사이트·Figma 동기화 상태(v0.6)를 기준선으로 삼고, 11/30 까지 59개 페이지를 메뉴별로 하나씩 업데이트해 v1.0 으로 공개합니다. 페이지를 고치면 그 주 안에 사이트 재배포와 Figma 반영까지 끝내는 것을 한 묶음으로 봅니다.</p>
+<div class="meta"><span class="doc-tag wip">작업 중</span><span class="doc-tag">2026.09.15 → 11.30 · 11주</span><span class="doc-tag">Home 3 · Foundations 6 · Components 30 · Patterns 11 · Resources 6</span><span class="doc-tag">v1.0 공개 시 이 페이지 제거</span></div>
+<h2 id="milestones">마일스톤</h2><div class="kv"><dt>09.18</dt><dd>기준선 확정 — 동기화 상태 점검, 완료 정의 합의</dd><dt>10.02</dt><dd>Foundations 완료</dd><dt>11.06</dt><dd>Components 완료</dd><dt>11.20</dt><dd>Patterns · Resources 완료</dd><dt>11.27</dt><dd>QA 완료</dd><dt>11.30</dt><dd><b>v1.0 공개</b></dd></div>
+<h2 id="gantt">주차별 일정</h2><div class="tablewrap"><table class="wbs"><tbody><tr><th>단계<small>주차 / 기간</small></th><th class="">W1<small>09.15–18</small></th><th class="hol">W2<small>09.21–25</small></th><th class="hol">W3<small>09.28–10.02</small></th><th class="hol">W4<small>10.05–09</small></th><th class="">W5<small>10.12–16</small></th><th class="">W6<small>10.19–23</small></th><th class="">W7<small>10.26–30</small></th><th class="">W8<small>11.02–06</small></th><th class="">W9<small>11.09–13</small></th><th class="">W10<small>11.16–20</small></th><th class="">W11<small>11.23–27</small></th><th class=" end">완료<small>11.30</small></th></tr><tr class=""><td><b>P0 기준선</b><span>동기화 상태 점검 · 완료 정의</span></td><td class="base ms"><span class="l">기준선</span></td><td class="hol"></td><td class="hol"></td><td class="hol"></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class=""><td><b>P1 Home</b><span>3 페이지</span></td><td class="bar"><span class="l">Home 3</span></td><td class="bar hol"></td><td class="hol"></td><td class="hol"></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class=""><td><b>P2 Foundations</b><span>6 페이지</span></td><td class=""></td><td class="bar hol"><span class="l">Foundations 6</span></td><td class="bar hol ms"></td><td class="hol"></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class=""><td><b>P3 Components</b><span>30 페이지 · 주 6~8개</span></td><td class=""></td><td class="hol"></td><td class="hol"></td><td class="bar hol"><span class="l">Components 30</span></td><td class="bar"></td><td class="bar"></td><td class="bar"></td><td class="bar ms"></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class="sub"><td><b>입력 · 선택</b><span>10</span></td><td class=""></td><td class="hol"></td><td class="hol"></td><td class="sub hol"><span class="l">W4–5 · 10</span></td><td class="sub"></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class="sub"><td><b>탐색 · 표시</b><span>7</span></td><td class=""></td><td class="hol"></td><td class="hol"></td><td class="hol"></td><td class=""></td><td class="sub"><span class="l">W6 · 7</span></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class="sub"><td><b>컨테이너 · 피드백</b><span>8</span></td><td class=""></td><td class="hol"></td><td class="hol"></td><td class="hol"></td><td class=""></td><td class=""></td><td class="sub"><span class="l">W7 · 8</span></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class="sub"><td><b>데이터</b><span>5</span></td><td class=""></td><td class="hol"></td><td class="hol"></td><td class="hol"></td><td class=""></td><td class=""></td><td class=""></td><td class="sub"><span class="l">W8 · 5</span></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td></tr><tr class=""><td><b>P4 Patterns</b><span>11 페이지</span></td><td class=""></td><td class="hol"></td><td class="hol"></td><td class="hol"></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class="bar"><span class="l">Patterns 11</span></td><td class="bar"></td><td class=""></td><td class=""></td></tr><tr class=""><td><b>P5 Resources</b><span>6 페이지</span></td><td class=""></td><td class="hol"></td><td class="hol"></td><td class="hol"></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class="bar ms"><span class="l">Res. 6</span></td><td class=""></td><td class=""></td></tr><tr class=""><td><b>P6 마무리</b><span>QA · 최종 동기화 · 공개</span></td><td class=""></td><td class="hol"></td><td class="hol"></td><td class="hol"></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class=""></td><td class="final"><span class="l">QA → v1.0</span></td><td class="final ms"></td></tr><tr class=""><td><b>상시</b><span>매주 반복</span></td><td class="always"><span class="l">페이지 수정 → 재빌드·배포 → Figma 동기화</span></td><td class="always hol"></td><td class="always hol"></td><td class="always hol"></td><td class="always"></td><td class="always"></td><td class="always"></td><td class="always"></td><td class="always"></td><td class="always"></td><td class="always"></td><td class="always"></td></tr></tbody></table></div>
+<div class="wbs-legend"><span><i></i>작업 구간</span><span><i class="sub"></i>Components 세부 묶음</span><span><i class="final"></i>마무리</span><span><i class="ms"></i>마일스톤</span><span><i class="hol"></i>공휴일 포함 주(추석 09.24–28 · 개천절 대체 10.05 · 한글날 10.09)</span></div>
+<h2 id="phases">단계별 범위</h2><div class="spec">
+<div><b>P0 기준선 · W1</b><span>동기화 상태 점검 · 완료 정의 합의 · 업데이트 순서 확정</span></div>
+<div><b>P1 Home · W1–2 · 3</b><span>Getting started · About · UX Principles</span></div>
+<div><b>P2 Foundations · W2–3 · 6</b><span>Overview · Colors · Typography · Grid · Icons · Elevation</span></div>
+<div><b>P3 입력 · 선택 · W4–5 · 10</b><span>Button · Text Field · Search · Select Button · Slider · Date Picker · Checkbox · Chip · Radio Button · Switch</span></div>
+<div><b>P3 탐색 · 표시 · W6 · 7</b><span>Tab · Breadcrumb · Pagination · Navigation · Top Navigation · Dropdown · Tag</span></div>
+<div><b>P3 컨테이너 · 피드백 · W7 · 8</b><span>Accordion · Card · Popup · Tooltip · Notification · Loading · Indicator · Divider</span></div>
+<div><b>P3 데이터 · W8 · 5</b><span>Data Table · Table · List · Item Tile · Data Visual</span></div>
+<div><b>P4 Patterns · W9–10 · 11</b><span>Common UI: 입력 폼 · 약관 동의 · 빈 화면 · 유의사항<br>Service: 온보딩 · 검색 · 시스템 상태<br>Security Console: 대시보드 · 로그 뷰어 · 정책 설정 · 심각도 표시</span></div>
+<div><b>P5 Resources · W10 · 6</b><span>React Package · Design Token · Figma Library · Token Download · Changelog · Contribution</span></div>
+<div><b>P6 마무리 · W11 → 11.30</b><span>빌드 검증 · 동작 테스트 · 라이트 · 다크 시각 점검 · Figma 최종 동기화 · Changelog · v1.0 · 공개 · 공유</span></div>
+</div>
+<h2 id="dod">페이지 1개 업데이트 = 이 네 단계를 마친 것</h2><ol class="guide-steps">
+<li><b>검토</b>내용 · 예제 · Props 가 현재 규칙과 맞는지 확인합니다.</li>
+<li><b>수정 · 배포</b>소스 수정 → 재빌드 → 검증 통과 → 사이트 배포.</li>
+<li><b>Figma 반영</b>같은 섹션의 프레임 · 텍스트 · 변수를 동기화합니다.</li>
+<li><b>체크</b>업데이트 목록에 완료 표시. 한 주에 끝내지 못한 페이지는 다음 주 첫 순서로 넘기고 단계 완료일은 그대로 둡니다.</li>
+</ol>
+    </article></div>
+  </div>
+</div>
+</body>
+</html>
