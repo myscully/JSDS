@@ -125,18 +125,94 @@ const tokenSection = (id, title, prefixes, note) => `<h3 id="${id}">${title}</h3
 const sw = (v, label) => `<div style="background:var(${v})" title="${v} 복사" data-copy-text="var(${v})"><i>${label}</i></div>`;
 
 /* ============ page renderers ============ */
+/* 문서 탭(대상별 안내 등): .doc-tabset — 클릭 전환은 app.src.js 가 처리 */
+function docTabs(tabs, panes) {
+  return `<div class="doc-tabset"><div class="doc-tabs" role="tablist">${tabs.map(([k, t], i) => `<button type="button" role="tab" data-doctab="${k}" class="${i ? "" : "on"}" aria-selected="${i ? "false" : "true"}">${t}</button>`).join("")}</div>${tabs.map(([k], i) => `<div data-docpane="${k}"${i ? " hidden" : ""}>${panes[i]}</div>`).join("")}</div>`;
+}
+const GS_REACT_INSTALL = `npm i @jiran/ds-react
+
+// main.tsx — 앱 진입점에서 한 번
+import "@jiran/ds-react/style.css";   // 토큰 + 컴포넌트 CSS
+import { ToastProvider, applyAccent } from "@jiran/ds-react";
+
+applyAccent("#0B4171");               // 제품 메인 컬러 → --accent-50~900 생성
+
+createRoot(document.getElementById("root")!).render(
+  <ToastProvider>
+    <App />
+  </ToastProvider>,
+);`;
+const GS_REACT_USE = `import { Button, TextField, Tag } from "@jiran/ds-react";
+
+<TextField label="정책 이름" required />
+<Tag tone="critical">Critical</Tag>
+<Button size="md" variant="primary">정책 저장</Button>`;
+const GS_REACT_THEME = `<!-- 다크 테마: html 요소에 지정. 없으면 시스템 설정을 따릅니다 -->
+<html data-theme="dark">
+<!-- 앱 루트에 .ds-root 를 붙이면 서체·본문 색·배경 토큰이 적용됩니다 -->
+<div id="root" class="ds-root"></div>`;
+const GS_HTML_LINK = `<!-- assets/ 폴더(style.css · ds.js · fonts/)를 프로젝트에 복사한 뒤 -->
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/ds.js" defer></script>`;
+const GS_HTML_USE = `<!-- 컴포넌트 페이지 HTML+CSS 탭에서 복사한 마크업을 그대로 붙입니다 -->
+<button class="btn md primary">정책 저장</button>
+<span class="tag critical">Critical</span>
+
+<!-- 동작이 필요한 곳은 ds.js 의 API -->
+<script>
+  DS.toast("저장되었습니다");
+  DS.popup.open("#confirm-delete");
+  DS.init(document.getElementById("dynamic-area")); // 동적으로 넣은 마크업
+</script>`;
+const GS_ACCENT_CSS = `/* 제품 메인 컬러 하나로 생성한 10단계를 :root 에 덮어씁니다 (생성 함수는 Design Token › Accent 스케일 생성) */
+:root{
+  --accent-50:#EEF4FA; --accent-100:#D6E3F1; --accent-200:#ADC7E3; --accent-300:#7FA8D2; --accent-400:#4F86BC;
+  --accent-500:#2A669E; --accent-600:#0B4171; --accent-700:#09365E; --accent-800:#072A49; --accent-900:#051E34;
+}`;
 const PAGES = {
+  "home/getting-started": () => {
+    const designer = `<ol class="guide-steps">
+<li><b>Figma 파일 열기</b><a href="${FIGMA}" target="_blank" rel="noopener">JS Design System Figma 파일 ↗</a> — 페이지 구성(Home · Foundations · Components · Patterns · Resources)은 이 사이트와 같습니다. 어느 페이지에 무엇이 있는지는 <a href="#/resources/figma">Figma Library</a> 표를 참고하세요.</li>
+<li><b>내 디자인 파일에서 라이브러리 켜기</b>작업할 파일을 열고 왼쪽 <b>Assets</b> 패널 → 책 모양(Libraries) 아이콘 → <b>JS Design System</b> 을 켭니다. 한 번 켜 두면 그 파일에서 계속 쓸 수 있습니다.</li>
+<li><b>컴포넌트 넣기</b>Assets 검색창에 이름(예: Button, Tag, Data Table)을 입력하고 캔버스로 끌어다 놓습니다. 넣은 것은 인스턴스라 원본은 바뀌지 않고, 원본이 갱신되면 따라서 갱신됩니다.</li>
+<li><b>변형·상태 바꾸기</b>인스턴스를 선택하면 오른쪽 패널에 <code>variant</code> · <code>size</code> · <code>state</code> 드롭다운이 보입니다. 이름은 이 사이트 각 컴포넌트 페이지의 Props 표와 같아서, 개발자와 같은 말로 이야기할 수 있습니다.</li>
+<li><b>색·글자·그림자는 스타일만</b>직접 색을 고르지 말고 채우기 → <b>Variables</b> 탭에서 <code>bg/</code> <code>text/</code> <code>border/</code> <code>primary/</code> <code>status/</code> <code>severity/</code> 변수를 씁니다. 글자는 Text Style, 그림자는 Effect Style. 이렇게 해야 제품 컬러·다크 테마가 자동으로 맞춰집니다.</li>
+<li><b>이 사이트에서 확인하기</b>같은 이름의 <a href="#/components/overview">컴포넌트 페이지</a>에서 Examples 로 실제 동작과 상태를, Props 표로 허용되는 변형을 확인합니다. 헤더의 <b>Accent</b> 선택으로 제품별 컬러를, <b>테마</b> 버튼으로 다크 모드를 미리 볼 수 있습니다. 필요한 컴포넌트가 없으면 <a href="#/resources/contribution">Contribution</a> 절차로 제안합니다.</li>
+</ol>
+<p>사이트 둘러보기: 상단 메뉴 Foundations(색·글자·간격 규칙) → Components(30개) → Patterns(11개 화면 패턴). 키보드 <code>/</code> 를 누르면 검색창으로 이동합니다.</p>`;
+    const react = `<ol class="guide-steps">
+<li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyAccent</code> 에 제품 메인 컬러 HEX 하나를 넣으면 나머지 색은 자동입니다.${codeBlock("gs-react-install", GS_REACT_INSTALL, "tsx", "복사")}</li>
+<li><b>컴포넌트 가져다 쓰기</b>각 컴포넌트 페이지의 <b>React 탭</b> 코드가 곧 사용법입니다. 변형은 HTML 클래스와 같은 이름의 prop 입니다. 전체 목록은 <a href="#/resources/react#map">React Package › 컴포넌트 ↔ 클래스</a>.${codeBlock("gs-react-use", GS_REACT_USE, "tsx", "복사")}</li>
+<li><b>테마·서체</b>다크 테마는 <code>html</code> 요소의 <code>data-theme</code> 로 정하고(또는 <code>setTheme("dark")</code>), 앱 루트에 <code>.ds-root</code> 를 붙입니다.${codeBlock("gs-react-theme", GS_REACT_THEME, "html", "복사")}</li>
+<li><b>확인</b>패키지는 React 18 · 19, TypeScript, ESM · CJS 를 지원하고 <code>color-mix()</code> 를 쓰므로 Chrome 111+ · Safari 16.2+ · Firefox 113+ 가 필요합니다. 패키지 버전의 major.minor 는 이 가이드 버전(${VERSION})과 같습니다. 자세한 내용은 <a href="#/resources/react">React Package</a>.</li>
+</ol>`;
+    const html = `<ol class="guide-steps">
+<li><b>assets 폴더 복사</b><a href="https://github.com/myscully/JSDS" target="_blank" rel="noopener">저장소 ↗</a>의 <code>assets/style.css</code> · <code>assets/ds.js</code> · <code>assets/fonts/</code> 세 가지를 함께 프로젝트에 넣습니다. <code>style.css</code> 가 <code>fonts/PretendardVariable.woff2</code> 를 상대 경로로 참조하므로 폴더 구조를 유지하세요.</li>
+<li><b>HTML 에 연결</b>스타일시트 한 줄, 동작 스크립트 한 줄입니다. <code>ds.js</code> 는 의존성 없는 순수 JS 로 드롭다운·탭·달력·표 정렬·토스트 등을 붙여 줍니다.${codeBlock("gs-html-link", GS_HTML_LINK, "html", "복사")}</li>
+<li><b>컴포넌트 페이지에서 복사</b>원하는 <a href="#/components/overview">컴포넌트 페이지</a>에서 예제 아래 <b>코드 보기 → 복사</b>. 전체 CSS 대신 일부만 쓰려면 같은 곳의 <b>Component CSS</b> 와 <a href="#/resources/design-token">Design Token</a> 의 <code>:root</code> 토큰만 가져갑니다.${codeBlock("gs-html-use", GS_HTML_USE, "html", "복사")}</li>
+<li><b>확인</b>이 사이트의 모든 프리뷰가 같은 <code>style.css</code> + <code>ds.js</code> 로 동작하므로, 사이트에서 되는 것은 제품에서도 그대로 됩니다. 이벤트(<code>ds:select</code> · <code>ds:tab</code> 등)와 API 는 <a href="#/resources/react#dsjs">React Package › assets/ds.js</a> 를 참고하세요.</li>
+</ol>`;
+    return `<h1>시작하기${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 제외한 모든 기본 구성(색 · 글자 · 간격 · 컴포넌트 · 패턴)을 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
+<div class="meta">${tagOf("ready")}${figmaLink}<span class="doc-tag">Figma · React · HTML+CSS</span><span class="doc-tag">${VERSION}</span></div>
+<h2 id="who">누구에게 무엇이 필요한가</h2><div class="kv"><dt>디자이너 · 기획자</dt><dd>Figma 라이브러리 + 이 사이트. 설치할 것이 없습니다</dd><dt>React 개발자</dt><dd><code>@jiran/ds-react</code> 패키지 하나</dd><dt>HTML+CSS 개발자</dt><dd><code>assets/style.css</code> + <code>assets/ds.js</code> 두 파일</dd></div>
+${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자"], ["html", "HTML+CSS 개발자"]], [designer, react, html])}
+<h2 id="accent">공통: 제품 컬러 적용</h2><p>모든 색은 토큰을 참조하므로 <code>--accent-*</code> 열 단계만 제품 메인 컬러로 바꾸면 나머지는 그대로 씁니다. 그 외 토큰(무채색 · 상태색 · 간격 · 반경)은 제품이 달라도 공통입니다.</p>
+<div class="kv"><dt>React</dt><dd><code>applyAccent("#0B4171")</code> 한 줄. 런타임에 <code>--accent-50~900</code> 을 생성해 <code>:root</code> 에 넣습니다</dd><dt>HTML+CSS</dt><dd>아래처럼 <code>:root</code> 에 덮어씁니다. HEX 하나로 10단계를 만드는 함수는 <a href="#/resources/design-token#accent-js">Design Token › Accent 스케일 생성</a></dd><dt>미리보기</dt><dd>이 사이트 헤더의 <b>Accent</b> 선택으로 각 제품 컬러가 적용된 모습을 볼 수 있습니다. 실제 제품 컬러는 <code>_build/data.js</code> 의 <code>PRODUCTS</code> 에 등록합니다</dd><dt>브랜드</dt><dd><code>#FF7F00</code>(<code>--brand</code>)은 회사 브랜드 강조에만. 제품 메인 컬러를 대신하지 않습니다</dd></div>
+${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}
+<h2 id="faq">문제가 생기면</h2><div class="kv"><dt>글자가 기본 서체로 보임</dt><dd><code>assets/fonts/</code> 가 함께 복사됐는지, 서버에 <code>.woff2</code> MIME(<code>font/woff2</code>)이 등록돼 있는지 확인</dd><dt>색이 일부 안 나옴</dt><dd><code>color-mix()</code> 를 쓰므로 Chrome 111+ · Safari 16.2+ · Firefox 113+ 필요</dd><dt>다크 테마가 안 됨</dt><dd><code>data-theme="dark"</code> 는 <code>body</code> 가 아니라 <code>html</code> 요소에</dd><dt>드롭다운·탭이 안 움직임</dt><dd><code>ds.js</code> 가 <code>defer</code> 로 로드됐는지 확인. 나중에 넣은 마크업은 <code>DS.init(요소)</code> 한 번 호출</dd><dt>필요한 컴포넌트가 없음</dt><dd><a href="#/resources/contribution">Contribution</a> 절차(제안 → 디자인 리뷰 → 구현 리뷰 → 배포)로 요청</dd></div>`;
+  },
   "home/overview": () => {
     const secs = Object.entries(SITE).filter(([s]) => s !== "home");
     const art = { foundations: ["일관된 기반을 만드는", "규칙과 토큰"], components: ["복사해서 바로 쓰는", "UI 컴포넌트 코드"], patterns: ["반복 업무를 해결하는", "화면 패턴"], resources: ["바로 가져다 쓰는", "라이브러리와 토큰"] };
     return `<section class="hero"><h1>JS Design System</h1><p class="sub">제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다. 모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</p>
-  <div class="cta"><a class="btn md primary" href="#/components/overview">Components 보기</a><a class="btn md secondary" href="#/resources/design-token">토큰 복사</a></div>
+  <div class="cta"><a class="btn md primary" href="#/home/getting-started">시작하기</a><a class="btn md secondary" href="#/components/overview">Components 보기</a><a class="btn md secondary" href="#/resources/design-token">토큰 복사</a></div>
   <svg class="wave" viewBox="0 0 1440 160" preserveAspectRatio="none"><path d="M0 90C240 20 480 20 720 80s480 90 720 10v70H0z" fill="url(#g)"/><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E2E8F0" stop-opacity=".6"/><stop offset="1" stop-color="#E2E8F0" stop-opacity="0"/></linearGradient></defs></svg></section>
   <div class="home-grid">${secs.map(([s, d]) => `<a class="home-card" href="${firstPage(s)}"><div class="art"><b>${art[s][0]}<br>${art[s][1]}</b><span>${d.title}</span></div><div class="body"><b>${d.title}</b><span>${d.desc}</span></div></a>`).join("")}</div>`;
   },
   "home/about": () => `<h1>About</h1><p class="lead">지란지교시큐리티 디자인 시스템은 보안 솔루션 제품군이 공유하는 하나의 UI 언어입니다.</p>
 <h2 id="why">왜 만드나</h2><p>제품마다 메인 컬러가 다르고 출시 시기도 다르지만, 사용자는 같은 회사의 제품을 씁니다. 리뉴얼이나 신규 제품을 시작할 때마다 무채색·서체·간격·컴포넌트를 새로 정하지 않도록, <b>메인 컬러를 제외한 나머지 기본 구성</b>을 이 시스템이 제공합니다.</p>
 <h2 id="how">어떻게 쓰나</h2><div class="kv"><dt>디자이너</dt><dd>Figma 라이브러리의 컴포넌트를 쓰고, 이 가이드의 예제·Props 로 변형과 상태를 확인합니다</dd><dt>개발자</dt><dd>React 제품은 <a href="#/resources/react"><code>@jiran/ds-react</code></a> 패키지를 설치하고 각 페이지 React 탭 코드를 그대로 씁니다. 그 외에는 HTML+CSS 탭 코드에 <code>assets/style.css</code> + <code>assets/ds.js</code>(동작)</dd><dt>제품 적용</dt><dd><a href="#/resources/design-token">Design Token</a>에서 <code>--accent-*</code> 만 제품 메인 컬러로 바꿉니다</dd></div>
+<p>역할별 단계 안내는 <a href="#/home/getting-started">시작하기</a>를 참고하세요.</p>
 <h2 id="scope">범위</h2><div class="kv"><dt>제공하는 것</dt><dd>Gray Scale, 타이포그래피, 간격·반경·엘리베이션, 아이콘 규칙, 컴포넌트 30개(Desktop, 코드 포함), 패턴 11개, 토큰</dd><dt>제품이 정하는 것</dt><dd>Accent Primary(제품 메인 컬러). 헤더의 Accent 선택으로 각 제품 컬러가 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd><code>#FF7F00</code>. 회사 브랜드를 강조할 때 Accent Primary를 대체하거나 포인트로 사용</dd><dt>플랫폼</dt><dd>Desktop 웹 (관리 콘솔) 우선</dd></div>
 <h2 id="team">운영</h2><p>기획팀 디자인파트가 운영하며, Figma 라이브러리와 이 가이드를 함께 갱신합니다. 제안·기여 절차는 <a href="#/resources/contribution">Contribution</a>을 참고하세요.</p>`,
   "home/principles": () => `<h1>UX Principles</h1><p class="lead">보안 관리자는 하루 종일 콘솔을 봅니다. 화려함보다 정확함, 밀도, 예측 가능성이 우선입니다.</p>

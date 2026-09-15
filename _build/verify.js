@@ -40,6 +40,10 @@ for (const f of ["components/button.html", "index.html"]) if (fs.existsSync(path
 const app = read("assets/app.js"); const idx = JSON.parse((app.match(/const SEARCH_INDEX=(\[.*?\]);\n/s) || [])[1] || "[]");
 const routes = Object.keys(DATA.SITE).flatMap(s => LIB.allPages(DATA.SITE, s)).length; if (idx.length !== routes) fails.push(`SEARCH_INDEX ${idx.length} ≠ 라우트 ${routes}`);
 if (!fs.existsSync(path.join(OUT, "resources/react.html"))) fails.push("resources/react.html 없음");
+// Home › 시작하기: 페이지 존재 · 복사 대상 id · 링크 변환 · 첫 화면 CTA
+if (!fs.existsSync(path.join(OUT, "home/getting-started.html"))) fails.push("home/getting-started.html 없음");
+else { const gs = article(read("home/getting-started.html")); for (const m of gs.matchAll(/data-copy="([^"]+)"/g)) if (!new RegExp(`id="${m[1]}"`).test(gs)) fails.push(`home/getting-started.html: data-copy 대상 #${m[1]} 없음`); if (/href="#\//.test(gs)) fails.push('home/getting-started.html: 변환되지 않은 href="#/"'); if (!/data-doctab="designer"/.test(gs) || !/class="guide-steps"/.test(gs)) fails.push("home/getting-started.html: 대상별 탭·단계 목록 없음"); }
+if (!/href="home\/getting-started\.html"/.test(read("index.html"))) fails.push("index.html: 시작하기 CTA 없음");
 // Foundations: Montage 구성(Overview + Base material 5) 그대로, 옛 페이지 없음
 const fnd = fs.readdirSync(path.join(OUT, "foundations")).filter(f => f.endsWith(".html")).sort().join(",");
 if (fnd !== "colors.html,elevation.html,grid.html,icons.html,index.html,overview.html,typography.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);

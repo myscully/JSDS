@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>시작하기 · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="home" data-page="getting-started" data-root="../">
+<header class="header">
+  <a class="brand" href="../index.html"><span>JS Design System</span></a>
+  <span class="ver">v0.6</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/getting-started.html" class="active">Home</a><a href="../foundations/overview.html" class="">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../resources/react.html" class="">Resources</a></nav>
+  <div class="header-right">
+    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
+    <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+    <div class="search-results" id="searchResults" hidden></div>
+    <button class="theme-btn" id="themeBtn" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg>테마</button>
+  </div>
+</header>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><h4>Home</h4><a href="../home/getting-started.html" class="active">시작하기<span class="n">N</span></a><a href="../home/about.html">About</a><a href="../home/principles.html">UX Principles</a></nav><div class="sidebar-foot">v0.6 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>시작하기<span class="n">N</span></h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 제외한 모든 기본 구성(색 · 글자 · 간격 · 컴포넌트 · 패턴)을 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
+<div class="meta"><span class="doc-tag ok">완료</span><a class="doc-tag" href="https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV" target="_blank" rel="noopener">Figma ↗</a><span class="doc-tag">Figma · React · HTML+CSS</span><span class="doc-tag">v0.6</span></div>
+<h2 id="who">누구에게 무엇이 필요한가</h2><div class="kv"><dt>디자이너 · 기획자</dt><dd>Figma 라이브러리 + 이 사이트. 설치할 것이 없습니다</dd><dt>React 개발자</dt><dd><code>@jiran/ds-react</code> 패키지 하나</dd><dt>HTML+CSS 개발자</dt><dd><code>assets/style.css</code> + <code>assets/ds.js</code> 두 파일</dd></div>
+<div class="doc-tabset"><div class="doc-tabs" role="tablist"><button type="button" role="tab" data-doctab="designer" class="on" aria-selected="true">디자이너 · 기획자</button><button type="button" role="tab" data-doctab="react" class="" aria-selected="false">React 개발자</button><button type="button" role="tab" data-doctab="html" class="" aria-selected="false">HTML+CSS 개발자</button></div><div data-docpane="designer"><ol class="guide-steps">
+<li><b>Figma 파일 열기</b><a href="https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV" target="_blank" rel="noopener">JS Design System Figma 파일 ↗</a> — 페이지 구성(Home · Foundations · Components · Patterns · Resources)은 이 사이트와 같습니다. 어느 페이지에 무엇이 있는지는 <a href="../resources/figma.html">Figma Library</a> 표를 참고하세요.</li>
+<li><b>내 디자인 파일에서 라이브러리 켜기</b>작업할 파일을 열고 왼쪽 <b>Assets</b> 패널 → 책 모양(Libraries) 아이콘 → <b>JS Design System</b> 을 켭니다. 한 번 켜 두면 그 파일에서 계속 쓸 수 있습니다.</li>
+<li><b>컴포넌트 넣기</b>Assets 검색창에 이름(예: Button, Tag, Data Table)을 입력하고 캔버스로 끌어다 놓습니다. 넣은 것은 인스턴스라 원본은 바뀌지 않고, 원본이 갱신되면 따라서 갱신됩니다.</li>
+<li><b>변형·상태 바꾸기</b>인스턴스를 선택하면 오른쪽 패널에 <code>variant</code> · <code>size</code> · <code>state</code> 드롭다운이 보입니다. 이름은 이 사이트 각 컴포넌트 페이지의 Props 표와 같아서, 개발자와 같은 말로 이야기할 수 있습니다.</li>
+<li><b>색·글자·그림자는 스타일만</b>직접 색을 고르지 말고 채우기 → <b>Variables</b> 탭에서 <code>bg/</code> <code>text/</code> <code>border/</code> <code>primary/</code> <code>status/</code> <code>severity/</code> 변수를 씁니다. 글자는 Text Style, 그림자는 Effect Style. 이렇게 해야 제품 컬러·다크 테마가 자동으로 맞춰집니다.</li>
+<li><b>이 사이트에서 확인하기</b>같은 이름의 <a href="../components/overview.html">컴포넌트 페이지</a>에서 Examples 로 실제 동작과 상태를, Props 표로 허용되는 변형을 확인합니다. 헤더의 <b>Accent</b> 선택으로 제품별 컬러를, <b>테마</b> 버튼으로 다크 모드를 미리 볼 수 있습니다. 필요한 컴포넌트가 없으면 <a href="../resources/contribution.html">Contribution</a> 절차로 제안합니다.</li>
+</ol>
+<p>사이트 둘러보기: 상단 메뉴 Foundations(색·글자·간격 규칙) → Components(30개) → Patterns(11개 화면 패턴). 키보드 <code>/</code> 를 누르면 검색창으로 이동합니다.</p></div><div data-docpane="react" hidden=""><ol class="guide-steps">
+<li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyAccent</code> 에 제품 메인 컬러 HEX 하나를 넣으면 나머지 색은 자동입니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-react-install" data-label="복사">복사</button><pre><code id="gs-react-install">npm i @jiran/ds-react
+
+<span class="tk-cmt">// main.tsx — 앱 진입점에서 한 번</span>
+<span class="tk-kw">import</span> <span class="tk-str">"@jiran/ds-react/style.css"</span>;   <span class="tk-cmt">// 토큰 + 컴포넌트 CSS</span>
+<span class="tk-kw">import</span> { ToastProvider, applyAccent } <span class="tk-kw">from</span> <span class="tk-str">"@jiran/ds-react"</span>;
+
+applyAccent(<span class="tk-str">"#0B4171"</span>);               <span class="tk-cmt">// 제품 메인 컬러 → --accent-50~900 생성</span>
+
+createRoot(document.getElementById(<span class="tk-str">"root"</span>)!).render(
+  <span class="tk-punc">&lt;</span><span class="tk-tag">ToastProvider</span><span class="tk-punc">&gt;</span>
+    <span class="tk-punc">&lt;</span><span class="tk-tag">App</span> <span class="tk-punc">/&gt;</span>
+  <span class="tk-punc">&lt;/</span><span class="tk-tag">ToastProvider</span><span class="tk-punc">&gt;</span>,
+);</code></pre></div></li>
+<li><b>컴포넌트 가져다 쓰기</b>각 컴포넌트 페이지의 <b>React 탭</b> 코드가 곧 사용법입니다. 변형은 HTML 클래스와 같은 이름의 prop 입니다. 전체 목록은 <a href="../resources/react.html#map">React Package › 컴포넌트 ↔ 클래스</a>.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-react-use" data-label="복사">복사</button><pre><code id="gs-react-use"><span class="tk-kw">import</span> { Button, TextField, Tag } <span class="tk-kw">from</span> <span class="tk-str">"@jiran/ds-react"</span>;
+
+<span class="tk-punc">&lt;</span><span class="tk-tag">TextField</span> <span class="tk-attr">label</span>=<span class="tk-str">"정책 이름"</span> required <span class="tk-punc">/&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">Tag</span> <span class="tk-attr">tone</span>=<span class="tk-str">"critical"</span><span class="tk-punc">&gt;</span>Critical<span class="tk-punc">&lt;/</span><span class="tk-tag">Tag</span><span class="tk-punc">&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">Button</span> <span class="tk-attr">size</span>=<span class="tk-str">"md"</span> <span class="tk-attr">variant</span>=<span class="tk-str">"primary"</span><span class="tk-punc">&gt;</span>정책 저장<span class="tk-punc">&lt;/</span><span class="tk-tag">Button</span><span class="tk-punc">&gt;</span></code></pre></div></li>
+<li><b>테마·서체</b>다크 테마는 <code>html</code> 요소의 <code>data-theme</code> 로 정하고(또는 <code>setTheme("dark")</code>), 앱 루트에 <code>.ds-root</code> 를 붙입니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-react-theme" data-label="복사">복사</button><pre><code id="gs-react-theme"><span class="tk-cmt">&lt;!-- 다크 테마: html 요소에 지정. 없으면 시스템 설정을 따릅니다 --&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">html</span> <span class="tk-attr">data-theme</span><span class="tk-punc">=</span><span class="tk-str">"dark"</span><span class="tk-punc">&gt;</span>
+<span class="tk-cmt">&lt;!-- 앱 루트에 .ds-root 를 붙이면 서체·본문 색·배경 토큰이 적용됩니다 --&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">div</span> <span class="tk-attr">id</span><span class="tk-punc">=</span><span class="tk-str">"root"</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"ds-root"</span><span class="tk-punc">&gt;</span><span class="tk-punc">&lt;/</span><span class="tk-tag">div</span><span class="tk-punc">&gt;</span></code></pre></div></li>
+<li><b>확인</b>패키지는 React 18 · 19, TypeScript, ESM · CJS 를 지원하고 <code>color-mix()</code> 를 쓰므로 Chrome 111+ · Safari 16.2+ · Firefox 113+ 가 필요합니다. 패키지 버전의 major.minor 는 이 가이드 버전(v0.6)과 같습니다. 자세한 내용은 <a href="../resources/react.html">React Package</a>.</li>
+</ol></div><div data-docpane="html" hidden=""><ol class="guide-steps">
+<li><b>assets 폴더 복사</b><a href="https://github.com/myscully/JSDS" target="_blank" rel="noopener">저장소 ↗</a>의 <code>assets/style.css</code> · <code>assets/ds.js</code> · <code>assets/fonts/</code> 세 가지를 함께 프로젝트에 넣습니다. <code>style.css</code> 가 <code>fonts/PretendardVariable.woff2</code> 를 상대 경로로 참조하므로 폴더 구조를 유지하세요.</li>
+<li><b>HTML 에 연결</b>스타일시트 한 줄, 동작 스크립트 한 줄입니다. <code>ds.js</code> 는 의존성 없는 순수 JS 로 드롭다운·탭·달력·표 정렬·토스트 등을 붙여 줍니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-html-link" data-label="복사">복사</button><pre><code id="gs-html-link"><span class="tk-cmt">&lt;!-- assets/ 폴더(style.css · ds.js · fonts/)를 프로젝트에 복사한 뒤 --&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">link</span> <span class="tk-attr">rel</span><span class="tk-punc">=</span><span class="tk-str">"stylesheet"</span> <span class="tk-attr">href</span><span class="tk-punc">=</span><span class="tk-str">"assets/style.css"</span><span class="tk-punc">&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">script</span> <span class="tk-attr">src</span><span class="tk-punc">=</span><span class="tk-str">"assets/ds.js"</span> <span class="tk-attr">defer</span><span class="tk-punc">&gt;</span><span class="tk-punc">&lt;/</span><span class="tk-tag">script</span><span class="tk-punc">&gt;</span></code></pre></div></li>
+<li><b>컴포넌트 페이지에서 복사</b>원하는 <a href="../components/overview.html">컴포넌트 페이지</a>에서 예제 아래 <b>코드 보기 → 복사</b>. 전체 CSS 대신 일부만 쓰려면 같은 곳의 <b>Component CSS</b> 와 <a href="../resources/design-token.html">Design Token</a> 의 <code>:root</code> 토큰만 가져갑니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-html-use" data-label="복사">복사</button><pre><code id="gs-html-use"><span class="tk-cmt">&lt;!-- 컴포넌트 페이지 HTML+CSS 탭에서 복사한 마크업을 그대로 붙입니다 --&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">button</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"btn md primary"</span><span class="tk-punc">&gt;</span>정책 저장<span class="tk-punc">&lt;/</span><span class="tk-tag">button</span><span class="tk-punc">&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">span</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"tag critical"</span><span class="tk-punc">&gt;</span>Critical<span class="tk-punc">&lt;/</span><span class="tk-tag">span</span><span class="tk-punc">&gt;</span>
+
+<span class="tk-cmt">&lt;!-- 동작이 필요한 곳은 ds.js 의 API --&gt;</span>
+<span class="tk-punc">&lt;</span><span class="tk-tag">script</span><span class="tk-punc">&gt;</span>
+  DS.toast("저장되었습니다");
+  DS.popup.open("#confirm-delete");
+  DS.init(document.getElementById("dynamic-area")); // 동적으로 넣은 마크업
+<span class="tk-punc">&lt;/</span><span class="tk-tag">script</span><span class="tk-punc">&gt;</span></code></pre></div></li>
+<li><b>확인</b>이 사이트의 모든 프리뷰가 같은 <code>style.css</code> + <code>ds.js</code> 로 동작하므로, 사이트에서 되는 것은 제품에서도 그대로 됩니다. 이벤트(<code>ds:select</code> · <code>ds:tab</code> 등)와 API 는 <a href="../resources/react.html#dsjs">React Package › assets/ds.js</a> 를 참고하세요.</li>
+</ol></div></div>
+<h2 id="accent">공통: 제품 컬러 적용</h2><p>모든 색은 토큰을 참조하므로 <code>--accent-*</code> 열 단계만 제품 메인 컬러로 바꾸면 나머지는 그대로 씁니다. 그 외 토큰(무채색 · 상태색 · 간격 · 반경)은 제품이 달라도 공통입니다.</p>
+<div class="kv"><dt>React</dt><dd><code>applyAccent("#0B4171")</code> 한 줄. 런타임에 <code>--accent-50~900</code> 을 생성해 <code>:root</code> 에 넣습니다</dd><dt>HTML+CSS</dt><dd>아래처럼 <code>:root</code> 에 덮어씁니다. HEX 하나로 10단계를 만드는 함수는 <a href="../resources/design-token.html#accent-js">Design Token › Accent 스케일 생성</a></dd><dt>미리보기</dt><dd>이 사이트 헤더의 <b>Accent</b> 선택으로 각 제품 컬러가 적용된 모습을 볼 수 있습니다. 실제 제품 컬러는 <code>_build/data.js</code> 의 <code>PRODUCTS</code> 에 등록합니다</dd><dt>브랜드</dt><dd><code>#FF7F00</code>(<code>--brand</code>)은 회사 브랜드 강조에만. 제품 메인 컬러를 대신하지 않습니다</dd></div>
+<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-accent" data-label="CSS 복사">CSS 복사</button><pre><code id="gs-accent"><span class="tk-cmt">/* 제품 메인 컬러 하나로 생성한 10단계를 :root 에 덮어씁니다 (생성 함수는 Design Token › Accent 스케일 생성) */</span><span class="tk-tag">
+:root</span><span class="tk-punc">{</span>
+  <span class="tk-attr">--accent-50</span><span class="tk-punc">:</span><span class="tk-str">#EEF4FA</span><span class="tk-punc">;</span> <span class="tk-attr">--accent-100</span><span class="tk-punc">:</span><span class="tk-str">#D6E3F1</span><span class="tk-punc">;</span> <span class="tk-attr">--accent-200</span><span class="tk-punc">:</span><span class="tk-str">#ADC7E3</span><span class="tk-punc">;</span> <span class="tk-attr">--accent-300</span><span class="tk-punc">:</span><span class="tk-str">#7FA8D2</span><span class="tk-punc">;</span> <span class="tk-attr">--accent-400</span><span class="tk-punc">:</span><span class="tk-str">#4F86BC</span><span class="tk-punc">;</span>
+  <span class="tk-attr">--accent-500</span><span class="tk-punc">:</span><span class="tk-str">#2A669E</span><span class="tk-punc">;</span> <span class="tk-attr">--accent-600</span><span class="tk-punc">:</span><span class="tk-str">#0B4171</span><span class="tk-punc">;</span> <span class="tk-attr">--accent-700</span><span class="tk-punc">:</span><span class="tk-str">#09365E</span><span class="tk-punc">;</span> <span class="tk-attr">--accent-800</span><span class="tk-punc">:</span><span class="tk-str">#072A49</span><span class="tk-punc">;</span> <span class="tk-attr">--accent-900</span><span class="tk-punc">:</span><span class="tk-str">#051E34</span><span class="tk-punc">;</span>
+<span class="tk-punc">}</span></code></pre></div>
+<h2 id="faq">문제가 생기면</h2><div class="kv"><dt>글자가 기본 서체로 보임</dt><dd><code>assets/fonts/</code> 가 함께 복사됐는지, 서버에 <code>.woff2</code> MIME(<code>font/woff2</code>)이 등록돼 있는지 확인</dd><dt>색이 일부 안 나옴</dt><dd><code>color-mix()</code> 를 쓰므로 Chrome 111+ · Safari 16.2+ · Firefox 113+ 필요</dd><dt>다크 테마가 안 됨</dt><dd><code>data-theme="dark"</code> 는 <code>body</code> 가 아니라 <code>html</code> 요소에</dd><dt>드롭다운·탭이 안 움직임</dt><dd><code>ds.js</code> 가 <code>defer</code> 로 로드됐는지 확인. 나중에 넣은 마크업은 <code>DS.init(요소)</code> 한 번 호출</dd><dt>필요한 컴포넌트가 없음</dt><dd><a href="../resources/contribution.html">Contribution</a> 절차(제안 → 디자인 리뷰 → 구현 리뷰 → 배포)로 요청</dd></div>
+    </article></div>
+  </div>
+</div>
+</body>
+</html>
