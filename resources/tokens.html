@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Token Download · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="resources" data-page="tokens" data-root="../">
+<header class="header">
+  <a class="brand" href="../index.html"><span>JS Design System</span></a>
+  <span class="ver">v0.6</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/about.html" class="">Home</a><a href="../foundations/overview.html" class="">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../resources/react.html" class="active">Resources</a></nav>
+  <div class="header-right">
+    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
+    <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+    <div class="search-results" id="searchResults" hidden></div>
+    <button class="theme-btn" id="themeBtn" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg>테마</button>
+  </div>
+</header>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><h4>Resources</h4><a href="../resources/react.html">React Package</a><a href="../resources/design-token.html">Design Token<span class="n">N</span></a><a href="../resources/figma.html">Figma Library</a><a href="../resources/tokens.html" class="active">Token Download</a><a href="../resources/changelog.html">Changelog</a><a href="../resources/contribution.html">Contribution</a></nav><div class="sidebar-foot">v0.6 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>Token Download</h1><p class="lead">CSS 변수와 JSON 형식으로 토큰을 내려받습니다.</p><div class="meta"><span class="doc-tag ok">완료</span></div>
+<p><a href="../resources/design-token.html">Design Token</a> 페이지에서 CSS 전체를 복사할 수 있고, 빌드 산출물 <code>_build/components.json</code> 에 토큰(light/dark)과 컴포넌트 스펙·예제 코드가 함께 들어 있습니다. JSON(Style Dictionary) 예시:</p>
+<div class="code-block"><button type="button" class="copy-btn" data-copy="tok-json" data-label="복사">복사</button><pre><code id="tok-json">{
+  <span class="tk-str">"color"</span>: { <span class="tk-str">"accent"</span>: { <span class="tk-str">"600"</span>: { <span class="tk-str">"value"</span>: <span class="tk-str">"{product.main}"</span> } }, <span class="tk-str">"brand"</span>: { <span class="tk-str">"500"</span>: { <span class="tk-str">"value"</span>: <span class="tk-str">"#FF7F00"</span> } } },
+  <span class="tk-str">"space"</span>: { <span class="tk-str">"4"</span>: { <span class="tk-str">"value"</span>: <span class="tk-str">"16px"</span> } }, <span class="tk-str">"radius"</span>: { <span class="tk-str">"md"</span>: { <span class="tk-str">"value"</span>: <span class="tk-str">"8px"</span> } }
+}</code></pre></div><p>Figma Variables → JSON 내보내기 연동은 예정입니다.</p>
+    </article></div>
+  </div>
+</div>
+</body>
+</html>

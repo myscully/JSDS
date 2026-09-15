@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+.claude/
+_build/.behave/
+_build/_edit.tmp.js
+_react/.visual/
+_react/dist/
+_react/demo/dist/

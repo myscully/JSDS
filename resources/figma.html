@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Figma Library · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="resources" data-page="figma" data-root="../">
+<header class="header">
+  <a class="brand" href="../index.html"><span>JS Design System</span></a>
+  <span class="ver">v0.6</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/about.html" class="">Home</a><a href="../foundations/overview.html" class="">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../resources/react.html" class="active">Resources</a></nav>
+  <div class="header-right">
+    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
+    <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+    <div class="search-results" id="searchResults" hidden></div>
+    <button class="theme-btn" id="themeBtn" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg>테마</button>
+  </div>
+</header>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><h4>Resources</h4><a href="../resources/react.html">React Package</a><a href="../resources/design-token.html">Design Token<span class="n">N</span></a><a href="../resources/figma.html" class="active">Figma Library</a><a href="../resources/tokens.html">Token Download</a><a href="../resources/changelog.html">Changelog</a><a href="../resources/contribution.html">Contribution</a></nav><div class="sidebar-foot">v0.6 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>Figma Library</h1><p class="lead">디자인 파일과 라이브러리 구조입니다. 사이트의 각 컴포넌트 페이지와 Figma 섹션이 1:1 로 대응합니다.</p><div class="meta"><span class="doc-tag ok">완료</span><a class="doc-tag" href="https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV" target="_blank" rel="noopener">파일 열기 ↗</a></div>
+<div class="tablewrap"><table><thead><tr><th>페이지</th><th>내용</th><th>가이드 대응</th></tr></thead><tbody><tr><td>Home</td><td>커버, Overview(파일 구성·작업 규칙), About, UX Principles</td><td>Home</td></tr><tr><td>Foundations</td><td>Overview · Base material(Colors · Elevation · Grid · Icons · Typography). Radius · Motion · Accessibility · 토큰 원본은 Resources › Design Token</td><td>Foundations</td></tr><tr><td>Components</td><td>30개 컴포넌트 (Selection Controls · Table 그룹 포함). 각 섹션에 사이트 코드와 같은 스펙의 Variant · Size · State 프레임과 HTML 코드 참조</td><td>Components</td></tr><tr><td>Patterns</td><td>Common UI · Service Pattern · Security Console. 각 패턴의 대표 예시 프레임</td><td>Patterns</td></tr><tr><td>Resources</td><td>Figma Library · Token Download · Changelog · Contribution</td><td>Resources</td></tr><tr><td>_Archive · …(v0.1)</td><td>이전 뼈대 페이지 보관 (참고용, 사용 안 함)</td><td>—</td></tr></tbody></table></div>
+<h2 id="vars">Variables · Styles</h2><ul><li><b>Primitive</b>: color/{gray·accent·red·amber·emerald·sky}/{step}, color/brand/{step}, space/{n}, radius/{name}, size/{card-padding…}</li><li><b>Semantic</b>(Light/Dark): bg/ text/ border/ primary(=Accent)/ status/ severity/ — CSS 변수 이름과 1:1</li><li><b>Text Styles</b> 14단계 Pretendard(= <code>.t-*</code> 클래스) · <b>Effect Styles</b> Shadow Normal xs~xl · Spread sm/md(= <code>--shadow-*</code>, 1~3 은 별칭)</li></ul>
+<h2 id="rules">작업 규칙</h2><ul><li>색은 Semantic 변수만, 글자는 Text Style만, 그림자는 Effect Style만.</li><li>Variant 속성명은 소문자(variant / size / state). 사이트 Props 표의 클래스 이름과 같게.</li><li>컴포넌트 Description에 용도·사용 규칙과 사이트 페이지 링크 기입.</li></ul>
+    </article></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Changelog · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="resources" data-page="changelog" data-root="../">
+<header class="header">
+  <a class="brand" href="../index.html"><span>JS Design System</span></a>
+  <span class="ver">v0.6</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/about.html" class="">Home</a><a href="../foundations/overview.html" class="">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../resources/react.html" class="active">Resources</a></nav>
+  <div class="header-right">
+    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
+    <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+    <div class="search-results" id="searchResults" hidden></div>
+    <button class="theme-btn" id="themeBtn" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg>테마</button>
+  </div>
+</header>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><h4>Resources</h4><a href="../resources/react.html">React Package</a><a href="../resources/design-token.html">Design Token<span class="n">N</span></a><a href="../resources/figma.html">Figma Library</a><a href="../resources/tokens.html">Token Download</a><a href="../resources/changelog.html" class="active">Changelog</a><a href="../resources/contribution.html">Contribution</a></nav><div class="sidebar-foot">v0.6 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>Changelog</h1><p class="lead">버전별 변경 이력입니다. 가이드와 Figma 파일의 버전을 함께 올립니다.</p>
+<div class="tablewrap"><table><thead><tr><th>버전</th><th>날짜</th><th>내용</th></tr></thead><tbody><tr><td><code>v0.6</code></td><td>2026-09-09</td><td>Foundations 재편(Web Desktop): Overview + Base material(Colors · Elevation · Grid · Icons · Typography). Colors 는 Semantic/Atomic 탭(Primary·Label·Fill·Line·Background·Static·Inverse·Interaction·Status·Severity·Brand·Material, Light/Dark 값 표시), Elevation 은 Shadow type(Normal/Spread) · Composition · Style 표(xs~xl 토큰 신설, --shadow-1~3 은 별칭), Grid 는 Artboard · Breakpoint · Spacing · Layout(12 컬럼), Icons 는 검색·Outline/Filled 갤러리, Typography 는 Basic · Word break · Style 표(행간 px, Pretendard 권장 자간). Radius · Motion · Accessibility · 토큰 원본은 Resources › Design Token 으로 이동. Semantic 토큰 추가(fill/line/static/interaction/dimmer/text-strong/border-subtle/accent-inverse/sev-*-bg), Primitive 팔레트 전 단계 보강.</td></tr><tr><td><code>v0.5</code></td><td>2026-09-08</td><td>React 컴포넌트 패키지 @jiran/ds-react 추가(_react/): 30개 컴포넌트·패턴 래퍼를 실제 React 컴포넌트로 구현(동작·접근성 포함), 사이트 React 탭을 패키지 사용 코드로 전환(예제 118개, 사이트 HTML 과 구조 일치 테스트). 아이콘을 assets/icons(Tabler) 로 통일하고 Iconography 갤러리 구성. Resources › React Package 페이지 추가. 사이트 프리뷰 전체를 실제로 동작하게 하는 순수 JS 동작 스크립트 assets/ds.js 추가(드롭다운·탭·페이지네이션·달력·표 정렬/선택·토스트·팝업 등) — HTML+CSS 로 쓰는 제품은 이 파일 한 줄로 같은 동작.</td></tr><tr><td><code>v0.4</code></td><td>2026-09-07</td><td>코드 중심 가이드로 전환: 컴포넌트 30개·패턴 11개 전부 라이브 프리뷰 + 복사 가능한 코드(HTML+CSS / React) + Props 표. 컴포넌트 CSS 를 style.css 의 'Live component samples' 블록으로 정리하고 페이지별로 자동 추출. Foundations 에 토큰 복사 블록 추가. 소스를 _build/data·components·patterns·lib·render·app.src 로 분리. Figma Components/Patterns 페이지에 코드 스펙과 동일한 변형 프레임 배치.</td></tr><tr><td><code>v0.3</code></td><td>2026-09-04</td><td>IA·레이아웃 재구성: 상단 메뉴(Home·Foundations·Components·Patterns·Resources) + 섹션 서브메뉴, Desktop 기준 컴포넌트 문서 템플릿(Anatomy·Type·State·Spec·Guideline). 컬러 모델을 Gray 기반 + Accent(제품 메인 컬러 슬롯) + Brand(#FF7F00)로 정리.</td></tr><tr><td><code>v0.2</code></td><td>2026-09-03</td><td>디자인 가이드라인 반영: 무채색 slate, 상태색(에메랄드/앰버/로즈), 여백 1.3~1.5배, 보더 최소화·그림자 구획, 테이블 행 높이·호버·정렬 아이콘.</td></tr><tr><td><code>v0.1</code></td><td>2026-09-03</td><td>틀 생성: Figma 파일(페이지·변수·텍스트/이펙트 스타일·섹션) 및 제품가이드 골격.</td></tr></tbody></table></div>
+    </article></div>
+  </div>
+</div>
+</body>
+</html>

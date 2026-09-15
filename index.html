@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/app.js" defer></script>
+<script src="assets/ds.js" defer></script>
+</head>
+<body data-section="home" data-page="index" data-root="./">
+<header class="header">
+  <a class="brand" href="index.html"><span>JS Design System</span></a>
+  <span class="ver">v0.6</span>
+  <nav class="topnav" aria-label="섹션"><a href="home/about.html" class="">Home</a><a href="foundations/overview.html" class="">Foundations</a><a href="components/overview.html" class="">Components<span class="n">N</span></a><a href="patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="resources/react.html" class="">Resources</a></nav>
+  <div class="header-right">
+    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
+    <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+    <div class="search-results" id="searchResults" hidden></div>
+    <button class="theme-btn" id="themeBtn" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg>테마</button>
+  </div>
+</header>
+<div class="shell full">
+  <div class="main">
+<div id="content" class="home">
+<section class="hero"><h1>JS Design System</h1><p class="sub">제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다.<br>모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</p>
+  <div class="cta"><a class="btn md primary" href="components/overview.html">Components 보기</a><a class="btn md secondary" href="resources/design-token.html">토큰 복사</a></div>
+  <svg class="wave" viewBox="0 0 1440 160" preserveAspectRatio="none"><path d="M0 90C240 20 480 20 720 80s480 90 720 10v70H0z" fill="url(#g)"></path><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E2E8F0" stop-opacity=".6"></stop><stop offset="1" stop-color="#E2E8F0" stop-opacity="0"></stop></linearGradient></defs></svg></section>
+  <div class="home-grid"><a class="home-card" href="foundations/overview.html"><div class="art"><b>일관된 기반을 만드는<br>규칙과 토큰</b><span>Foundations</span></div><div class="body"><b>Foundations</b><span>모든 디자인 요소의 기반이 되는 가장 원자적인 단위</span></div></a><a class="home-card" href="components/overview.html"><div class="art"><b>복사해서 바로 쓰는<br>UI 컴포넌트 코드</b><span>Components</span></div><div class="body"><b>Components</b><span>사용자 인터페이스를 구성하는 재사용 가능한 요소</span></div></a><a class="home-card" href="patterns/overview.html"><div class="art"><b>반복 업무를 해결하는<br>화면 패턴</b><span>Patterns</span></div><div class="body"><b>Patterns</b><span>반복되는 업무 단위와 문제를 해결하는 가이드라인</span></div></a><a class="home-card" href="resources/react.html"><div class="art"><b>바로 가져다 쓰는<br>라이브러리와 토큰</b><span>Resources</span></div><div class="body"><b>Resources</b><span>라이브러리, 토큰, 변경 이력</span></div></a></div>
+</div>
+  </div>
+</div>
+</body>
+</html>

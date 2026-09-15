@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Overview · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="foundations" data-page="overview" data-root="../">
+<header class="header">
+  <a class="brand" href="../index.html"><span>JS Design System</span></a>
+  <span class="ver">v0.6</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/about.html" class="">Home</a><a href="../foundations/overview.html" class="active">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../resources/react.html" class="">Resources</a></nav>
+  <div class="header-right">
+    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
+    <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+    <div class="search-results" id="searchResults" hidden></div>
+    <button class="theme-btn" id="themeBtn" type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg>테마</button>
+  </div>
+</header>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><h4>Foundations</h4><a href="../foundations/overview.html" class="active">Overview</a><h5>Base material</h5><a href="../foundations/colors.html">Colors<span class="n">N</span></a><a href="../foundations/elevation.html">Elevation</a><a href="../foundations/grid.html">Grid</a><a href="../foundations/icons.html">Icons<span class="n">N</span></a><a href="../foundations/typography.html">Typography</a></nav><div class="sidebar-foot">v0.6 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>Foundations</h1><p class="lead">모든 디자인 요소의 기반이 되는 가장 원자적인 단위입니다. 컬러, 타이포그래피, 간격·그리드, 아이콘, 엘리베이션처럼 시각 언어의 최소 단위로 구성되며, 컴포넌트는 이 단위(토큰)만 참조합니다.</p>
+<div class="fnd-hero" aria-hidden="true"><div style="background:conic-gradient(var(--accent) 0 25%,var(--brand) 0 50%,var(--success) 0 75%,var(--gray-300) 0)"></div><div style="background:var(--bg-surface);box-shadow:var(--shadow-md);font-size:44px;letter-spacing:-.03em">Aa</div><div style="background:repeating-linear-gradient(90deg,var(--accent-subtle) 0 12px,transparent 12px 22px);border:1px solid var(--border-subtle)"></div><div style="background:var(--bg-surface);border:1px solid var(--border-subtle);color:var(--accent)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"></path></svg></div><div style="background:var(--bg-surface);box-shadow:var(--shadow-xl)"><i style="display:block;width:48px;height:48px;border-radius:12px;background:var(--bg-surface);box-shadow:var(--shadow-md)"></i></div></div>
+<h2 id="base">Base material</h2>
+<div class="base-list"><a href="../foundations/colors.html"><b>Colors<span class="n">N</span></b><span>색상의 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../foundations/typography.html"><b>Typography</b><span>화면의 텍스트를 읽기 쉽고 아름답게 표현하도록 돕습니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../foundations/grid.html"><b>Grid</b><span>일관된 간격 체계를 사용하여 조화로운 비율과 정렬을 만들어냅니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../foundations/icons.html"><b>Icons<span class="n">N</span></b><span>아이콘을 사용하여 인터페이스를 빠르게 이해하고 탐색할 수 있도록 돕습니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../foundations/elevation.html"><b>Elevation</b><span>컴포넌트 간의 명확한 깊이감과 시각적 계층을 만들어냅니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a></div>
+<p>토큰 원본(CSS 변수 전체 · Radius · Motion · Accessibility)은 <a href="../resources/design-token.html">Resources › Design Token</a> 에 있습니다.</p>
+    </article></div>
+  </div>
+</div>
+</body>
+</html>
