@@ -161,6 +161,14 @@ ul,ol{padding-left:1.3em;max-width:70ch}li{margin-bottom:6px}
 .base-list a{display:grid;grid-template-columns:160px 1fr auto;gap:var(--space-6);align-items:center;padding:22px 0;border-bottom:1px solid var(--border-default);text-decoration:none;color:inherit}
 .base-list a b{font-size:16px}.base-list a span{font-size:14px;color:var(--text-secondary)}.base-list a svg{color:var(--text-tertiary)}
 .base-list a:hover b{color:var(--accent)}
+/* Getting Started (Home › 시작하기) — 번호 단계 목록 */
+.guide-steps{list-style:none;padding:0;margin:var(--space-4) 0 var(--space-8);counter-reset:gs;max-width:none}
+.guide-steps>li{position:relative;padding:0 0 var(--space-6) 40px;counter-increment:gs;font-size:14px;color:var(--text-secondary)}
+.guide-steps>li::before{content:counter(gs);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-on);font-size:12px;font-weight:700;display:grid;place-items:center}
+.guide-steps>li>b:first-child{display:block;font-size:16px;color:var(--text-primary);margin-bottom:4px}
+.guide-steps>li b{color:var(--text-primary)}
+.guide-steps .code-block{margin:var(--space-3) 0 0}
+.guide-steps>li:last-child{padding-bottom:0}
 .sem-row{display:flex;gap:2px;margin:var(--space-3) 0 var(--space-10)}
 .sem-row>div{flex:1;min-width:0;cursor:pointer}
 .sem-row .bar{height:40px;background:var(--checker-bg,transparent);position:relative;border-radius:2px;overflow:hidden}
