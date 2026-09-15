@@ -117,11 +117,11 @@ ${isHome ? `<div id="content" class="home">\n${rewrite(parts.content, root)}\n</
 
 > **이 폴더의 HTML/CSS/JS 는 생성물입니다.** \`_build\` 의 소스를 고친 뒤 재빌드하세요. 생성물을 직접 수정하면 다음 빌드에서 사라집니다.
 
-처음이라면 **Home › 시작하기**(https://myscully.github.io/JSDS/home/getting-started.html)에서 디자이너 · React 개발자 · HTML+CSS 개발자 별 사용법을 3~6단계로 확인하세요.
+처음이라면 **Home › Getting started**(https://myscully.github.io/JSDS/home/getting-started.html)에서 디자이너 · React 개발자 · HTML+CSS 개발자 별 사용법을 3~6단계로 확인하세요.
 
 ## 폴더 구조
 - \`index.html\` — 첫 화면. 사이드 메뉴 없이 Home Overview 콘텐츠만 표시
-- 상단 Home 탭 → \`home/getting-started.html\`. Home 섹션 사이드 메뉴는 시작하기 · About · UX Principles (Overview 는 첫 화면에만 있음)
+- 상단 Home 탭 → \`home/getting-started.html\`. Home 섹션 사이드 메뉴는 Getting started · About · UX Principles (Overview 는 첫 화면에만 있음)
 - \`home/\` \`foundations/\` \`components/\` \`patterns/\` \`resources/\` — 상단 메뉴 5개 섹션. 각 페이지가 개별 HTML 파일이며 섹션 폴더의 \`index.html\` 은 첫 페이지로 이동
 - \`assets/style.css\` — 디자인 토큰(\`:root\`) + 문서 레이아웃 + **컴포넌트 CSS**('Live component samples' 블록). Light/Dark 지원. 제품에서는 이 파일 하나를 연결하거나 각 페이지의 "컴포넌트 CSS"만 복사
 - \`assets/app.js\` — 테마 전환, Accent(제품 메인 컬러) 미리보기, 검색, 코드 복사/탭
