@@ -21,7 +21,7 @@ const SITE = {
     ["Service Pattern", [["onboarding", "온보딩"], ["search", "검색"], ["system-status", "시스템 상태"]]],
     ["Security Console", [["dashboard", "대시보드"], ["log-viewer", "로그 뷰어"], ["policy-settings", "정책 설정"], ["severity", "심각도 표시"]]],
   ] },
-  resources: { title: "Resources", desc: "라이브러리, 토큰, 변경 이력", pages: { react: "React Package", "design-token": "Design Token", figma: "Figma Library", tokens: "Token Download", changelog: "Changelog", contribution: "Contribution" } },
+  resources: { title: "Resources", desc: "라이브러리, 토큰, 변경 이력", pages: { react: "React Package", "design-token": "Design Token", figma: "Figma Library", tokens: "Token Download", changelog: "Changelog", contribution: "Contribution", wbs: "WBS" /* v1.0 공개(2026-11-30) 시 제거 — render.js "resources/wbs" · style.src.css .wbs 도 함께 */ } },
 };
 /* 제품별 Accent(메인 컬러) 프리셋. 실제 제품 컬러로 교체 */
 const PRODUCTS = [

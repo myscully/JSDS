@@ -270,6 +270,39 @@ ${codeBlock("react-usage", `import { Button, TextField, Tag, DataTable, useToast
 ${codeBlock("tok-json", `{\n  "color": { "accent": { "600": { "value": "{product.main}" } }, "brand": { "500": { "value": "#FF7F00" } } },\n  "space": { "4": { "value": "16px" } }, "radius": { "md": { "value": "8px" } }\n}`, "tsx")}<p>Figma Variables → JSON 내보내기 연동은 예정입니다.</p>`,
   "resources/changelog": () => `<h1>Changelog</h1><p class="lead">버전별 변경 이력입니다. 가이드와 Figma 파일의 버전을 함께 올립니다.</p>
 <div class="tablewrap"><table><thead><tr><th>버전</th><th>날짜</th><th>내용</th></tr></thead><tbody>${CHANGELOG.map(c => `<tr><td><code>${c[0]}</code></td><td>${c[1]}</td><td>${c[2]}</td></tr>`).join("")}</tbody></table></div>`,
+  /* 임시 페이지: v1.0 공개(2026-11-30) 시 제거 — data.js resources.pages.wbs · style.src.css table.wbs 도 함께 */
+  "resources/wbs": () => {
+    const W = [["W1", "09.15–18"], ["W2", "09.21–25", 1], ["W3", "09.28–10.02", 1], ["W4", "10.05–09", 1], ["W5", "10.12–16"], ["W6", "10.19–23"], ["W7", "10.26–30"], ["W8", "11.02–06"], ["W9", "11.09–13"], ["W10", "11.16–20"], ["W11", "11.23–27"], ["완료", "11.30", 0, 1]];
+    const R = [["P0 기준선", "동기화 상태 점검 · 완료 정의", 1, 1, "base", "기준선", 1], ["P1 Home", "3 페이지", 1, 2, "bar", "Home 3"], ["P2 Foundations", "6 페이지", 2, 3, "bar", "Foundations 6", 3],
+      ["P3 Components", "30 페이지 · 주 6~8개", 4, 8, "bar", "Components 30", 8], ["입력 · 선택", "10", 4, 5, "sub", "W4–5 · 10"], ["탐색 · 표시", "7", 6, 6, "sub", "W6 · 7"], ["컨테이너 · 피드백", "8", 7, 7, "sub", "W7 · 8"], ["데이터", "5", 8, 8, "sub", "W8 · 5"],
+      ["P4 Patterns", "11 페이지", 9, 10, "bar", "Patterns 11"], ["P5 Resources", "6 페이지", 10, 10, "bar", "Res. 6", 10], ["P6 마무리", "QA · 최종 동기화 · 공개", 11, 12, "final", "QA → v1.0", 12], ["상시", "매주 반복", 1, 12, "always", "페이지 수정 → 재빌드·배포 → Figma 동기화"]];
+    const head = `<tr><th>단계<small>주차 / 기간</small></th>${W.map(w => `<th class="${w[2] ? "hol" : ""}${w[3] ? " end" : ""}">${w[0]}<small>${w[1]}</small></th>`).join("")}</tr>`;
+    const row = r => `<tr class="${r[4] === "sub" ? "sub" : ""}"><td><b>${r[0]}</b><span>${r[1]}</span></td>${W.map((w, i) => { const c = i + 1, on = c >= r[2] && c <= r[3]; const cls = [on ? r[4] : "", w[2] ? "hol" : "", r[6] === c ? "ms" : ""].filter(Boolean).join(" "); return `<td class="${cls}">${on && c === r[2] ? `<span class="l">${r[5]}</span>` : ""}</td>`; }).join("")}</tr>`;
+    const chips = a => a.join(" · ");
+    return `<h1>WBS${nb("resources", "wbs")}</h1><p class="lead">사이트·Figma 동기화 상태(v0.6)를 기준선으로 삼고, 11/30 까지 59개 페이지를 메뉴별로 하나씩 업데이트해 v1.0 으로 공개합니다. 페이지를 고치면 그 주 안에 사이트 재배포와 Figma 반영까지 끝내는 것을 한 묶음으로 봅니다.</p>
+<div class="meta">${tagOf("wip")}<span class="doc-tag">2026.09.15 → 11.30 · 11주</span><span class="doc-tag">Home 3 · Foundations 6 · Components 30 · Patterns 11 · Resources 6</span><span class="doc-tag">v1.0 공개 시 이 페이지 제거</span></div>
+<h2 id="milestones">마일스톤</h2><div class="kv"><dt>09.18</dt><dd>기준선 확정 — 동기화 상태 점검, 완료 정의 합의</dd><dt>10.02</dt><dd>Foundations 완료</dd><dt>11.06</dt><dd>Components 완료</dd><dt>11.20</dt><dd>Patterns · Resources 완료</dd><dt>11.27</dt><dd>QA 완료</dd><dt>11.30</dt><dd><b>v1.0 공개</b></dd></div>
+<h2 id="gantt">주차별 일정</h2><div class="tablewrap"><table class="wbs">${head}${R.map(row).join("")}</table></div>
+<div class="wbs-legend"><span><i></i>작업 구간</span><span><i class="sub"></i>Components 세부 묶음</span><span><i class="final"></i>마무리</span><span><i class="ms"></i>마일스톤</span><span><i class="hol"></i>공휴일 포함 주(추석 09.24–28 · 개천절 대체 10.05 · 한글날 10.09)</span></div>
+<h2 id="phases">단계별 범위</h2><div class="spec">
+<div><b>P0 기준선 · W1</b><span>${chips(["동기화 상태 점검", "완료 정의 합의", "업데이트 순서 확정"])}</span></div>
+<div><b>P1 Home · W1–2 · 3</b><span>${chips(["Getting started", "About", "UX Principles"])}</span></div>
+<div><b>P2 Foundations · W2–3 · 6</b><span>${chips(["Overview", "Colors", "Typography", "Grid", "Icons", "Elevation"])}</span></div>
+<div><b>P3 입력 · 선택 · W4–5 · 10</b><span>${chips(["Button", "Text Field", "Search", "Select Button", "Slider", "Date Picker", "Checkbox", "Chip", "Radio Button", "Switch"])}</span></div>
+<div><b>P3 탐색 · 표시 · W6 · 7</b><span>${chips(["Tab", "Breadcrumb", "Pagination", "Navigation", "Top Navigation", "Dropdown", "Tag"])}</span></div>
+<div><b>P3 컨테이너 · 피드백 · W7 · 8</b><span>${chips(["Accordion", "Card", "Popup", "Tooltip", "Notification", "Loading", "Indicator", "Divider"])}</span></div>
+<div><b>P3 데이터 · W8 · 5</b><span>${chips(["Data Table", "Table", "List", "Item Tile", "Data Visual"])}</span></div>
+<div><b>P4 Patterns · W9–10 · 11</b><span>Common UI: ${chips(["입력 폼", "약관 동의", "빈 화면", "유의사항"])}<br>Service: ${chips(["온보딩", "검색", "시스템 상태"])}<br>Security Console: ${chips(["대시보드", "로그 뷰어", "정책 설정", "심각도 표시"])}</span></div>
+<div><b>P5 Resources · W10 · 6</b><span>${chips(["React Package", "Design Token", "Figma Library", "Token Download", "Changelog", "Contribution"])}</span></div>
+<div><b>P6 마무리 · W11 → 11.30</b><span>${chips(["빌드 검증 · 동작 테스트", "라이트 · 다크 시각 점검", "Figma 최종 동기화", "Changelog · v1.0", "공개 · 공유"])}</span></div>
+</div>
+<h2 id="dod">페이지 1개 업데이트 = 이 네 단계를 마친 것</h2><ol class="guide-steps">
+<li><b>검토</b>내용 · 예제 · Props 가 현재 규칙과 맞는지 확인합니다.</li>
+<li><b>수정 · 배포</b>소스 수정 → 재빌드 → 검증 통과 → 사이트 배포.</li>
+<li><b>Figma 반영</b>같은 섹션의 프레임 · 텍스트 · 변수를 동기화합니다.</li>
+<li><b>체크</b>업데이트 목록에 완료 표시. 한 주에 끝내지 못한 페이지는 다음 주 첫 순서로 넘기고 단계 완료일은 그대로 둡니다.</li>
+</ol>`;
+  },
   "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><div class="meta">${tagOf("wip")}</div>
 <ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인파트 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
 };
