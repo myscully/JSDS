@@ -192,7 +192,7 @@ const PAGES = {
 <li><b>컴포넌트 페이지에서 복사</b>원하는 <a href="#/components/overview">컴포넌트 페이지</a>에서 예제 아래 <b>코드 보기 → 복사</b>. 전체 CSS 대신 일부만 쓰려면 같은 곳의 <b>Component CSS</b> 와 <a href="#/resources/design-token">Design Token</a> 의 <code>:root</code> 토큰만 가져갑니다.${codeBlock("gs-html-use", GS_HTML_USE, "html", "복사")}</li>
 <li><b>확인</b>이 사이트의 모든 프리뷰가 같은 <code>style.css</code> + <code>ds.js</code> 로 동작하므로, 사이트에서 되는 것은 제품에서도 그대로 됩니다. 이벤트(<code>ds:select</code> · <code>ds:tab</code> 등)와 API 는 <a href="#/resources/react#dsjs">React Package › assets/ds.js</a> 를 참고하세요.</li>
 </ol>`;
-    return `<h1>시작하기${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 제외한 모든 기본 구성(색 · 글자 · 간격 · 컴포넌트 · 패턴)을 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
+    return `<h1>Getting started${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 제외한 모든 기본 구성(색 · 글자 · 간격 · 컴포넌트 · 패턴)을 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
 <div class="meta">${tagOf("ready")}${figmaLink}<span class="doc-tag">Figma · React · HTML+CSS</span><span class="doc-tag">${VERSION}</span></div>
 <h2 id="who">누구에게 무엇이 필요한가</h2><div class="kv"><dt>디자이너 · 기획자</dt><dd>Figma 라이브러리 + 이 사이트. 설치할 것이 없습니다</dd><dt>React 개발자</dt><dd><code>@jiran/ds-react</code> 패키지 하나</dd><dt>HTML+CSS 개발자</dt><dd><code>assets/style.css</code> + <code>assets/ds.js</code> 두 파일</dd></div>
 ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자"], ["html", "HTML+CSS 개발자"]], [designer, react, html])}
@@ -212,7 +212,7 @@ ${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}
   "home/about": () => `<h1>About</h1><p class="lead">지란지교시큐리티 디자인 시스템은 보안 솔루션 제품군이 공유하는 하나의 UI 언어입니다.</p>
 <h2 id="why">왜 만드나</h2><p>제품마다 메인 컬러가 다르고 출시 시기도 다르지만, 사용자는 같은 회사의 제품을 씁니다. 리뉴얼이나 신규 제품을 시작할 때마다 무채색·서체·간격·컴포넌트를 새로 정하지 않도록, <b>메인 컬러를 제외한 나머지 기본 구성</b>을 이 시스템이 제공합니다.</p>
 <h2 id="how">어떻게 쓰나</h2><div class="kv"><dt>디자이너</dt><dd>Figma 라이브러리의 컴포넌트를 쓰고, 이 가이드의 예제·Props 로 변형과 상태를 확인합니다</dd><dt>개발자</dt><dd>React 제품은 <a href="#/resources/react"><code>@jiran/ds-react</code></a> 패키지를 설치하고 각 페이지 React 탭 코드를 그대로 씁니다. 그 외에는 HTML+CSS 탭 코드에 <code>assets/style.css</code> + <code>assets/ds.js</code>(동작)</dd><dt>제품 적용</dt><dd><a href="#/resources/design-token">Design Token</a>에서 <code>--accent-*</code> 만 제품 메인 컬러로 바꿉니다</dd></div>
-<p>역할별 단계 안내는 <a href="#/home/getting-started">시작하기</a>를 참고하세요.</p>
+<p>역할별 단계 안내는 <a href="#/home/getting-started">Getting started</a>를 참고하세요.</p>
 <h2 id="scope">범위</h2><div class="kv"><dt>제공하는 것</dt><dd>Gray Scale, 타이포그래피, 간격·반경·엘리베이션, 아이콘 규칙, 컴포넌트 30개(Desktop, 코드 포함), 패턴 11개, 토큰</dd><dt>제품이 정하는 것</dt><dd>Accent Primary(제품 메인 컬러). 헤더의 Accent 선택으로 각 제품 컬러가 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd><code>#FF7F00</code>. 회사 브랜드를 강조할 때 Accent Primary를 대체하거나 포인트로 사용</dd><dt>플랫폼</dt><dd>Desktop 웹 (관리 콘솔) 우선</dd></div>
 <h2 id="team">운영</h2><p>기획팀 디자인파트가 운영하며, Figma 라이브러리와 이 가이드를 함께 갱신합니다. 제안·기여 절차는 <a href="#/resources/contribution">Contribution</a>을 참고하세요.</p>`,
   "home/principles": () => `<h1>UX Principles</h1><p class="lead">보안 관리자는 하루 종일 콘솔을 봅니다. 화려함보다 정확함, 밀도, 예측 가능성이 우선입니다.</p>
