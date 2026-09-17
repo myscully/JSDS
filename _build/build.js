@@ -157,7 +157,7 @@ ${isHome ? `<div id="content" class="home">\n${rewrite(parts.content, root)}\n</
 \`@jiran/ds-react\` — 30개 컴포넌트 + 패턴 래퍼를 실제 React 컴포넌트로 구현. 같은 클래스 마크업을 렌더링하므로 \`dist/style.css\`(토큰 + 컴포넌트 CSS 만 합성) 하나로 동작합니다.
 - \`src/components/<page>/\` 컴포넌트 · \`examples/<sec>/<page>/<id>.tsx\` 예제(= 사이트 React 탭 소스 = 테스트 대상) · \`tests/site-consistency.test.tsx\` 사이트 HTML 과 구조 비교
 - \`cd _react && npm i && npm test && npm run build\` → \`dist/\`(ESM·CJS·d.ts·style.css·fonts). \`npm run demo\` 로 전체 예제 확인
-- 사용: \`import "@jiran/ds-react/style.css"\` · \`<html data-theme="dark">\` · \`applyAccent("#0B4171")\` · 앱 루트에 \`<ToastProvider>\`. 자세한 내용은 사이트 Resources › React Package
+- 사용: \`import "@jiran/ds-react/style.css"\` · \`<html data-theme="dark">\` · \`applyAccent("#2563EB")\` · 앱 루트에 \`<ToastProvider>\`. 자세한 내용은 사이트 Resources › React Package
 
 ### 재빌드
 \`\`\`

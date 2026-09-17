@@ -30,10 +30,12 @@ function hslToHex(h: number, s: number, l: number): string {
 
 /** 제품 메인 컬러 HEX 하나로 --accent-50~900 스케일을 만든다 (600 = 원값) */
 export function accentScale(hex: string): AccentScale {
-  const [h, s] = hexToHsl(hex);
-  const L: Record<number, number> = { 50: 96, 100: 90, 200: 80, 300: 68, 400: 56, 500: 46, 700: 30, 800: 22, 900: 14 };
+  const [h, s, l6] = hexToHsl(hex);
+  const up = (t: number) => l6 + (88 - l6) * t, dn = (t: number) => l6 * t;
+  const L: Record<number, number> = { 50: 96, 100: 90, 200: 80, 300: up(0.55), 400: up(0.32), 500: up(0.13), 700: dn(0.78), 800: dn(0.58), 900: dn(0.38) };
+  const S: Record<number, number> = { 50: 0.7, 100: 0.7, 200: 0.7, 300: 0.8, 400: 0.85, 500: 0.9 };
   const out = {} as AccentScale;
-  for (const [k, l] of Object.entries(L)) (out as Record<string, string>)[k] = hslToHex(h, Math.min(100, s * (Number(k) < 300 ? 0.7 : 1)), l);
+  for (const [k, l] of Object.entries(L)) (out as Record<string, string>)[k] = hslToHex(h, Math.min(100, s * (S[Number(k)] ?? 1)), Math.max(0, Math.min(100, l)));
   out[600] = hex.toUpperCase();
   return out;
 }
