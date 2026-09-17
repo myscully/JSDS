@@ -25,7 +25,6 @@ const SITE = {
 };
 /* 제품별 Accent(메인 컬러) 프리셋. 실제 제품 컬러로 교체 */
 const PRODUCTS = [
-  { key: "sample", name: "예시 · 네이비", hex: "#0B4171", note: "기본 예시 값" },
   { key: "product-a", name: "제품 A", hex: "#2563EB", note: "제품 컬러로 교체" },
   { key: "product-b", name: "제품 B", hex: "#0F766E", note: "제품 컬러로 교체" },
   { key: "product-c", name: "제품 C", hex: "#7C3AED", note: "제품 컬러로 교체" },

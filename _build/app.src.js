@@ -10,8 +10,10 @@
   function hexToHsl(hex) { const n = parseInt(hex.slice(1), 16); const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2; if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); switch (mx) { case r: h = (g - b) / d + (g < b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; default: h = (r - g) / d + 4; } h /= 6; } return [h * 360, s * 100, l * 100]; }
   function hslToHex(h, s, l) { s /= 100; l /= 100; const k = n => (n + h / 30) % 12; const a = s * Math.min(l, 1 - l); const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return "#" + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, "0")).join("").toUpperCase(); }
   function accentScale(hex) { const [h, s] = hexToHsl(hex); const L = { 50: 96, 100: 90, 200: 80, 300: 68, 400: 56, 500: 46, 700: 30, 800: 22, 900: 14 }; const out = {}; for (const [k, l] of Object.entries(L)) out[k] = hslToHex(h, Math.min(100, s * (k < 300 ? 0.7 : 1)), l); out[600] = hex.toUpperCase(); return out; }
+  const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   function applyAccent(key) {
-    const p = products.find(x => x.key === key) || products[0]; if (!p) return;
+    const p = products.find(x => x.key === key);
+    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--accent-" + k); delete root.dataset.accent; try { localStorage.removeItem("jsds-accent"); } catch (e) { } const s0 = document.getElementById("accentSel"); if (s0 && s0.value !== "") s0.value = ""; return; }
     const sc = accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--accent-" + k, v);
     root.dataset.accent = p.key; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
     const sel = document.getElementById("accentSel"); if (sel && sel.value !== p.key) sel.value = p.key;
@@ -25,9 +27,9 @@
 
   /* Accent 선택 */
   const sel = document.getElementById("accentSel");
-  if (sel) { sel.innerHTML = products.map(p => '<option value="' + p.key + '">' + p.name + "</option>").join(""); sel.addEventListener("change", e => applyAccent(e.target.value)); }
+  if (sel) { sel.innerHTML = '<option value="">기본 (토큰 값)</option>' + products.map(p => '<option value="' + p.key + '">' + p.name + "</option>").join(""); sel.addEventListener("change", e => applyAccent(e.target.value)); }
   let saved = null; try { saved = localStorage.getItem("jsds-accent"); } catch (e) { }
-  applyAccent(saved || (products[0] && products[0].key));
+  applyAccent(saved || "");
 
   /* 검색 (생성 사이트) */
   const q = document.getElementById("q"); const box = document.getElementById("searchResults");
