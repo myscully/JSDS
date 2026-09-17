@@ -75,7 +75,7 @@ ${tbl(["역할", "쓰는 곳", "쓰지 않는 곳"], [
   ["<b>Severity</b><br><small>보안 위협 등급</small>", "위협·이벤트 등급 태그, 점·밴드, 표 행 강조, 대시보드 KPI. <b>항상 라벨(Critical 등)을 병기</b>", "버튼·링크, 일반 처리 결과(성공/실패), 색만 있는 점·배경"],
   ["<b>Brand</b><br><small>회사 정체성</small>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "제품 UI 의 Accent · CTA · 위험도 · 상태. 헤더 Accent 선택지에 없음 — 브랜드 디자인 시스템은 별도 제작"],
   ["<b>Gray</b><br><small>바탕과 구조</small>", "화면 바탕, 텍스트, 구분선, 비활성 상태. 정보 밀도가 높은 콘솔의 기본 색", "강조. 회색 톤 차이만으로 상태나 등급을 표현"]
-])}
+], "roles")}
 <div class="dodont">
   <div class="do"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn md primary">정책 저장</button><button type="button" class="btn md secondary">취소</button><span style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><i style="width:18px;height:18px;border-radius:50%;background:var(--brand);display:inline-block"></i>JS Console</span></div><div class="body"><p>주요 행동은 제품 Primary, 회사 정체성은 헤더 마크에만. 두 색이 같은 화면에 있어도 역할이 겹치지 않습니다.</p></div></div>
   <div class="dont"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn md primary" style="background:var(--brand)">정책 저장</button><button type="button" class="btn md secondary" style="color:var(--brand);border-color:var(--brand)">취소</button></div><div class="body"><p>브랜드 색을 CTA 나 보조 버튼에 쓰지 않습니다. 제품 컬러가 바뀌어도 브랜드 색은 그대로라 제품 간 구분이 사라지고, 강조 위계도 깨집니다.</p></div></div>
