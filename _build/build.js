@@ -130,7 +130,7 @@ ${isHome ? `<div id="content" class="home">\n${rewrite(parts.content, root)}\n</
 - \`assets/icons/outline\` \`assets/icons/filled\` — Tabler Icons(MIT) 전체 세트(원본, 빌드가 건드리지 않음). 사이트가 쓰는 아이콘 목록은 \`_build/icons.js\` 의 \`ICON_NAMES\`, 갤러리는 Foundations › Icons
 
 ## 컬러 모델
-- Gray Scale(무채색)이 바탕, \`--accent-*\` 가 제품 메인 컬러 슬롯, \`--brand-*\` 가 지란지교시큐리티 브랜드(#FF7F00)
+- Gray Scale(무채색)이 바탕, \`--accent-*\` 가 제품 메인 컬러 슬롯. \`--brand-*\`(#FF7F00)는 로고·헤더 마크 등 회사 정체성 표기 전용이며 제품 UI Accent 선택지가 아님(브랜드 디자인 시스템은 별도 제작 예정)
 - 제품에 적용할 때: 제품 메인 컬러 HEX 하나로 \`--accent-50~900\` 을 생성(\`app.js\` 의 accentScale 참고)하고 나머지 토큰은 그대로 사용
 - 헤더의 Accent 선택은 미리보기용입니다. 실제 제품 컬러는 \`_build/data.js\` 의 \`PRODUCTS\` 에 등록하세요
 
