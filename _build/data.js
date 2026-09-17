@@ -25,9 +25,9 @@ const SITE = {
 };
 /* 제품별 Accent(메인 컬러) 프리셋. 실제 제품 컬러로 교체 */
 const PRODUCTS = [
-  { key: "product-a", name: "제품 A", hex: "#2563EB", note: "제품 컬러로 교체" },
-  { key: "product-b", name: "제품 B", hex: "#0F766E", note: "제품 컬러로 교체" },
-  { key: "product-c", name: "제품 C", hex: "#7C3AED", note: "제품 컬러로 교체" },
+  { key: "product-a", name: "제품 A", hex: "#00AAB6", note: "제품 컬러로 교체" },
+  { key: "product-b", name: "제품 B", hex: "#C30D2A", note: "제품 컬러로 교체" },
+  { key: "product-c", name: "제품 C", hex: "#00AD7B", note: "제품 컬러로 교체" },
 ];
 const CHANGELOG = [
   ["v0.6", "2026-09-09", "Foundations 재편(Web Desktop): Overview + Base material(Colors · Elevation · Grid · Icons · Typography). Colors 는 Semantic/Atomic 탭(Primary·Label·Fill·Line·Background·Static·Inverse·Interaction·Status·Severity·Brand·Material, Light/Dark 값 표시), Elevation 은 Shadow type(Normal/Spread) · Composition · Style 표(xs~xl 토큰 신설, --shadow-1~3 은 별칭), Grid 는 Artboard · Breakpoint · Spacing · Layout(12 컬럼), Icons 는 검색·Outline/Filled 갤러리, Typography 는 Basic · Word break · Style 표(행간 px, Pretendard 권장 자간). Radius · Motion · Accessibility · 토큰 원본은 Resources › Design Token 으로 이동. Semantic 토큰 추가(fill/line/static/interaction/dimmer/text-strong/border-subtle/accent-inverse/sev-*-bg), Primitive 팔레트 전 단계 보강."],

@@ -12,7 +12,7 @@
   /* Brand: 지란지교시큐리티 */
   --brand-50:#FFF4E8;--brand-100:#FFE4C7;--brand-200:#FFD1A3;--brand-300:#FFB870;--brand-400:#FF9C33;--brand-500:#FF7F00;--brand-600:#E06F00;--brand-700:#B85A00;--brand-800:#8A4300;--brand-900:#5C2D00;
   /* Accent: 제품 메인 컬러 슬롯 (기본값은 예시. 제품별로 교체) */
-  --accent-50:#EEF4FA;--accent-100:#D6E3F1;--accent-200:#ADC7E3;--accent-300:#7FA8D2;--accent-400:#4F86BC;--accent-500:#2A669E;--accent-600:#0B4171;--accent-700:#09365E;--accent-800:#072A49;--accent-900:#051E34;
+  --accent-50:#EFF3FB;--accent-100:#D7E0F4;--accent-200:#AEC1EA;--accent-300:#8AA7E7;--accent-400:#648CE4;--accent-500:#4375E4;--accent-600:#2563EB;--accent-700:#1249C2;--accent-800:#0D3691;--accent-900:#09245F;
   /* Feedback */
   --red-50:#FEF2F2;--red-100:#FEE2E2;--red-200:#FECACA;--red-300:#FCA5A5;--red-400:#F87171;--red-500:#EF4444;--red-600:#DC2626;--red-700:#B91C1C;--red-800:#991B1B;--red-900:#7F1D1D;--red-950:#450A0A;
   --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-300:#FCD34D;--amber-400:#FBBF24;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;--amber-800:#92400E;--amber-900:#78350F;--amber-950:#451A03;

@@ -1,5 +1,5 @@
 /* @jiran/ds-react — 지란지교시큐리티 Design System React 컴포넌트
-   CSS: import "@jiran/ds-react/style.css"  ·  테마: <html data-theme="dark">  ·  제품 컬러: applyAccent("#0B4171") */
+   CSS: import "@jiran/ds-react/style.css"  ·  테마: <html data-theme="dark">  ·  제품 컬러: applyAccent("#2563EB") */
 
 export * from "./types";
 export { cx } from "./utils/cx";

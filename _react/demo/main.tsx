@@ -14,7 +14,7 @@ const LAYOUT: Record<string, string> = {
   "components/loading/skeleton": "white", "patterns/search/toolbar": "stack", "patterns/system-status/overview": "stack", "patterns/dashboard/full": "stack",
   "patterns/log-viewer/viewer": "stack", "patterns/policy-settings/sections": "stack", "patterns/severity/scale": "left",
 };
-const PRODUCTS = [["#0B4171", "예시 · 네이비"], ["#FF7F00", "Brand"], ["#2563EB", "제품 A"], ["#0F766E", "제품 B"], ["#7C3AED", "제품 C"]];
+const PRODUCTS = [["#2563EB", "기본 (토큰 값)"], ["#00AAB6", "제품 A"], ["#C30D2A", "제품 B"], ["#00AD7B", "제품 C"]];
 
 const keys = Object.keys(modules).map((f) => f.replace(/^\.\.\/examples\//, "").replace(/\.tsx$/, "")).sort();
 const byPage = new Map<string, string[]>();
