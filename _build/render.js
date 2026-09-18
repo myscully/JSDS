@@ -213,7 +213,7 @@ ${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}
   "home/overview": () => {
     const secs = Object.entries(SITE).filter(([s]) => s !== "home");
     const art = { foundations: ["일관된 기반을 만드는", "규칙과 토큰"], components: ["복사해서 바로 쓰는", "UI 컴포넌트 코드"], patterns: ["반복 업무를 해결하는", "화면 패턴"], resources: ["바로 가져다 쓰는", "라이브러리와 토큰"] };
-    return `<section class="hero"><h1>JS Design System</h1><p class="sub">제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다. 모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</p>
+    return `<section class="hero"><h1>JS Design System</h1><p class="sub">제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다.<br>모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</p>
   <div class="cta"><a class="btn md primary" href="#/home/getting-started">시작하기</a><a class="btn md secondary" href="#/components/overview">Components 보기</a><a class="btn md secondary" href="#/resources/design-token">토큰 복사</a></div>
   <svg class="wave" viewBox="0 0 1440 160" preserveAspectRatio="none"><path d="M0 90C240 20 480 20 720 80s480 90 720 10v70H0z" fill="url(#g)"/><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E2E8F0" stop-opacity=".6"/><stop offset="1" stop-color="#E2E8F0" stop-opacity="0"/></linearGradient></defs></svg></section>
   <div class="home-grid">${secs.map(([s, d]) => `<a class="home-card" href="${firstPage(s)}"><div class="art"><b>${art[s][0]}<br>${art[s][1]}</b><span>${d.title}</span></div><div class="body"><b>${d.title}</b><span>${d.desc}</span></div></a>`).join("")}</div>`;
