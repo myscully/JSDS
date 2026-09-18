@@ -38,13 +38,13 @@ const COMPONENTS = {
         <button class="btn md primary" disabled>Disabled</button>
         <button class="btn md primary loading">저장 중</button>
         <button class="btn md secondary loading">불러오는 중</button>` },
-      { id: "group", title: "Group / Block", desc: "폼 하단은 오른쪽 정렬(.btn-group.end), 저장이 가장 오른쪽. 전체 폭은 .block.", html: `
-        <div class="btn-group end" style="max-width:520px">
+      { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(8px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
+        <div class="btn-group">
           <button class="btn md text">초기화</button>
           <button class="btn md secondary">취소</button>
           <button class="btn md primary">정책 저장</button>
         </div>
-        <button class="btn lg primary block" style="max-width:320px">시작하기</button>`, layout: "stack" },
+        <button class="btn lg primary block" style="max-width:320px">시작하기</button>`, layout: "stack center" },
     ],
     props: [
       ["variant", "primary | secondary | tertiary | text | danger", "—", "우선순위. danger 는 secondary 와 조합하면 아웃라인"],
@@ -202,7 +202,7 @@ const COMPONENTS = {
         <div class="slider">
           <div class="row"><label for="s2">로그 보관</label><span class="val">90일</span></div>
           <input id="s2" type="range" min="30" max="180" step="30" value="90" style="--p:40%">
-          <div class="ticks"><span>30</span><span>60</span><span>90</span><span>120</span><span>150</span><span>180</span></div>
+          <div class="ticks"><span>30</span><span>180</span></div>
         </div>` },
       { id: "disabled", title: "Disabled", html: `
         <div class="slider">
@@ -226,21 +226,18 @@ const COMPONENTS = {
         <div class="datepicker"><label>시작일</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
         <div class="datepicker"><label>조회 기간</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false">2026-09-01 <span class="sep">~</span> 2026-09-07${I("calendar")}</button></div>`, layout: "top" },
       { id: "calendar", title: "Calendar", desc: "열린 상태의 달력. 오늘(.today), 선택(.on), 다른 달(.muted), 선택 불가([disabled]).", html: `
-        <div class="datepicker open">
-          <button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="true">2026-09-07${I("calendar")}</button>
-          <div class="calendar" role="dialog" aria-label="날짜 선택">
-            <div class="cal-head"><button type="button" aria-label="이전 달">${I("chevron-left",16)}</button><span>2026년 9월</span><button type="button" aria-label="다음 달">${I("chevron-right",16)}</button></div>
-            <div class="cal-grid">
-              <span class="dow">일</span><span class="dow">월</span><span class="dow">화</span><span class="dow">수</span><span class="dow">목</span><span class="dow">금</span><span class="dow">토</span>
-              <button type="button" class="day muted">30</button><button type="button" class="day muted">31</button><button type="button" class="day">1</button><button type="button" class="day">2</button><button type="button" class="day">3</button><button type="button" class="day">4</button><button type="button" class="day">5</button>
-              <button type="button" class="day">6</button><button type="button" class="day on today" aria-selected="true">7</button><button type="button" class="day">8</button><button type="button" class="day">9</button><button type="button" class="day">10</button><button type="button" class="day">11</button><button type="button" class="day">12</button>
-              <button type="button" class="day">13</button><button type="button" class="day">14</button><button type="button" class="day">15</button><button type="button" class="day">16</button><button type="button" class="day">17</button><button type="button" class="day">18</button><button type="button" class="day">19</button>
-              <button type="button" class="day">20</button><button type="button" class="day">21</button><button type="button" class="day">22</button><button type="button" class="day">23</button><button type="button" class="day">24</button><button type="button" class="day">25</button><button type="button" class="day">26</button>
-              <button type="button" class="day">27</button><button type="button" class="day">28</button><button type="button" class="day">29</button><button type="button" class="day">30</button><button type="button" class="day muted" disabled>1</button><button type="button" class="day muted" disabled>2</button><button type="button" class="day muted" disabled>3</button>
-            </div>
-            <div class="cal-foot"><button type="button" class="btn sm text">오늘</button><button type="button" class="btn sm primary">적용</button></div>
+        <div class="calendar" role="dialog" aria-label="날짜 선택">
+          <div class="cal-head"><button type="button" aria-label="이전 달">${I("chevron-left",16)}</button><span>2026년 9월</span><button type="button" aria-label="다음 달">${I("chevron-right",16)}</button></div>
+          <div class="cal-grid">
+            <span class="dow">일</span><span class="dow">월</span><span class="dow">화</span><span class="dow">수</span><span class="dow">목</span><span class="dow">금</span><span class="dow">토</span>
+            <button type="button" class="day muted">30</button><button type="button" class="day muted">31</button><button type="button" class="day">1</button><button type="button" class="day">2</button><button type="button" class="day">3</button><button type="button" class="day">4</button><button type="button" class="day">5</button>
+            <button type="button" class="day">6</button><button type="button" class="day on today" aria-selected="true">7</button><button type="button" class="day">8</button><button type="button" class="day">9</button><button type="button" class="day">10</button><button type="button" class="day">11</button><button type="button" class="day">12</button>
+            <button type="button" class="day">13</button><button type="button" class="day">14</button><button type="button" class="day">15</button><button type="button" class="day">16</button><button type="button" class="day">17</button><button type="button" class="day">18</button><button type="button" class="day">19</button>
+            <button type="button" class="day">20</button><button type="button" class="day">21</button><button type="button" class="day">22</button><button type="button" class="day">23</button><button type="button" class="day">24</button><button type="button" class="day">25</button><button type="button" class="day">26</button>
+            <button type="button" class="day">27</button><button type="button" class="day">28</button><button type="button" class="day">29</button><button type="button" class="day">30</button><button type="button" class="day muted" disabled>1</button><button type="button" class="day muted" disabled>2</button><button type="button" class="day muted" disabled>3</button>
           </div>
-        </div>`, layout: "tall top" },
+          <div class="cal-foot"><button type="button" class="btn sm text">오늘</button><button type="button" class="btn sm primary">적용</button></div>
+        </div>` },
       { id: "range", title: "Range", desc: "기간 선택. 시작·끝은 .on, 사이는 .in-range.", html: `
         <div class="calendar" role="dialog" aria-label="날짜 선택">
           <div class="cal-head"><button type="button" aria-label="이전 달">${I("chevron-left",16)}</button><span>2026년 9월</span><button type="button" aria-label="다음 달">${I("chevron-right",16)}</button></div>
@@ -292,12 +289,12 @@ const COMPONENTS = {
       { id: "group", title: "Group", desc: "세로 기본, 짧은 항목은 .row 로 가로 배치. 전체 선택은 Indeterminate 와 함께.", html: `
         <div class="checkbox-group">
           ${cb("<b>전체 선택</b>", 'class="mixed"')}
-          <div class="checkbox-group row" style="padding-left:28px">${cb("Critical", "checked")}${cb("High", "checked")}${cb("Medium")}${cb("Low")}</div>
+          <div class="checkbox-group row" style="padding-left:24px">${cb("Critical", "checked")}${cb("High", "checked")}${cb("Medium")}${cb("Low")}</div>
         </div>` },
     ],
     props: [[".checkbox", "label wrapper", "—", "input[type=checkbox] + span(라벨, small 설명)"], ["checked / disabled", "attribute", "—", "네이티브 상태"], [".mixed", "boolean", "false", "부분 선택 외형(JS indeterminate 대체)"], [".checkbox-group", "container", "—", "세로 12px 간격. .row 로 가로 24px"]],
-    spec: [["Size", "박스 20 · 라벨 Body/2 14 · 클릭 영역 라벨 포함"], ["Container", "radius/sm 4 · border/strong 1.5px · 선택 accent"], ["Label", "Body/2 14 · 설명 Caption 12.5 tertiary"], ["Placement", "폼 옵션, 테이블 행 선택(.tbl .check)"]],
-    figma: { frame: "Checkbox", radius: "radius/sm", sizes: { md: { box: 20 } }, variants: { default: { stroke: "--border-strong" }, checked: { bg: "--accent" } }, states: ["unchecked", "checked", "indeterminate", "disabled", "focused"] },
+    spec: [["Size", "박스 16 · 라벨 Body/2 14 · 클릭 영역 라벨 포함"], ["Container", "radius/sm 4 · border/strong 1.5px · 선택 accent"], ["Label", "Body/2 14 · 설명 Caption 12.5 tertiary"], ["Placement", "폼 옵션, 테이블 행 선택(.tbl .check)"]],
+    figma: { frame: "Checkbox", radius: "radius/sm", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--border-strong" }, checked: { bg: "--accent" } }, states: ["unchecked", "checked", "indeterminate", "disabled", "focused"] },
     guideline: { do: ["라벨을 클릭해도 토글되도록 label 로 감쌉니다.", "목록 전체 선택은 부분 선택 상태를 표현합니다."], dont: ["하나만 고르는 옵션에 체크박스를 쓰지 않습니다(그때는 Radio)."] },
   },
 
@@ -305,9 +302,9 @@ const COMPONENTS = {
   "chip": {
     status: "ready", react: ["Chip","ChipGroup"], css: [".chip", ".chip-group"],
     desc: "필터 조건이나 입력된 값을 작은 캡슐로 보여줍니다. 선택 가능한 Filter Chip 과 삭제 가능한 Input Chip 을 구분합니다. 상태 표시는 Tag 를 씁니다.",
-    thumb: `<button class="chip on">Critical</button><button class="chip">High</button><button class="chip">Medium</button>`,
+    thumb: `<button class="chip on" aria-pressed="true">Critical</button><button class="chip" aria-pressed="false">High</button><button class="chip" aria-pressed="false">Medium</button>`,
     examples: [
-      { id: "filter", title: "Filter Chip", desc: "토글 선택. 선택되면 .on + 체크 표시. aria-pressed 로 상태를 알립니다.", html: `
+      { id: "filter", title: "Filter Chip", desc: "토글 선택. aria-pressed 가 있는 칩은 체크 아이콘을 항상 두고(비활성 색), 선택되면 .on 으로 색만 바뀌어 폭이 흔들리지 않습니다.", html: `
         <div class="chip-group">
           <button type="button" class="chip on" aria-pressed="true">Critical</button>
           <button type="button" class="chip on" aria-pressed="true">High</button>
@@ -386,8 +383,8 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".radio", "label wrapper", "—", "input[type=radio] + span(라벨, small)"], ["name", "attribute", "—", "같은 그룹은 같은 name"], [".card", "boolean", "false", "카드형(보더 + 선택 시 accent)"], [".radio-group", "container", "—", "세로 12px. .row 로 가로"]],
-    spec: [["Size", "원 20 · 선택 내부 점 10"], ["Container", "radius/full · border/strong 1.5px"], ["Label", "Body/2 14 · 설명 Caption 12.5"], ["Placement", "폼의 배타 옵션, 설정의 동작 선택"]],
-    figma: { frame: "Radio Button", radius: "radius/full", sizes: { md: { box: 20 } }, variants: { default: { stroke: "--border-strong" }, checked: { stroke: "--accent" }, card: { stroke: "--border-default" } }, states: ["unchecked", "checked", "disabled", "focused"] },
+    spec: [["Size", "원 16 · 선택 내부 점 8"], ["Container", "radius/full · border/strong 1.5px"], ["Label", "Body/2 14 · 설명 Caption 12.5"], ["Placement", "폼의 배타 옵션, 설정의 동작 선택"]],
+    figma: { frame: "Radio Button", radius: "radius/full", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--border-strong" }, checked: { stroke: "--accent" }, card: { stroke: "--border-default" } }, states: ["unchecked", "checked", "disabled", "focused"] },
     guideline: { do: ["기본값을 하나 선택해 둡니다.", "옵션은 2~5개."], dont: ["선택 해제가 필요한 경우 라디오를 쓰지 않습니다(Checkbox 또는 Switch)."] },
   },
 
@@ -474,6 +471,13 @@ const COMPONENTS = {
       { id: "select", title: "Select", desc: "값 선택. 닫힘/열림(.open). 열린 메뉴는 role=listbox, 항목 aria-selected.", html: `
         <div class="dropdown">
           <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false"><span class="placeholder">그룹 선택</span></button>
+          <ul class="menu" role="listbox" aria-label="그룹">
+            <li class="menu-item" role="option">전체</li>
+            <li class="menu-item" role="option">영업팀</li>
+            <li class="menu-item" role="option">개발팀</li>
+            <li class="menu-item" role="option">인프라팀</li>
+            <li class="menu-item" role="option" aria-disabled="true">외주(권한 없음)</li>
+          </ul>
         </div>
         <div class="dropdown open">
           <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="true">영업팀</button>
@@ -510,7 +514,7 @@ const COMPONENTS = {
           <button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button>
           <ul class="menu" role="menu" style="left:auto;right:0">
             <li class="menu-label">정책</li>
-            <li class="menu-item" role="menuitem">${I("pencil")}편집<span class="hint">E</span></li>
+            <li class="menu-item" role="menuitem">${I("pencil")}편집</li>
             <li class="menu-item" role="menuitem">${I("download")}내보내기</li>
             <li class="menu-sep" role="separator"></li>
             <li class="menu-item danger" role="menuitem">${I("trash")}삭제</li>
@@ -899,8 +903,7 @@ const COMPONENTS = {
           <div class="toast danger"><span class="ico">${I("alert-circle",20)}</span>내보내기에 실패했습니다<button type="button" class="action">다시 시도</button></div>
         </div>` },
       { id: "banner", title: "Banner", desc: "시스템 전체 공지(점검·라이선스). 헤더 위 전체 폭, 닫기 가능.", html: `
-        <div class="banner" role="status">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다. 점검 중 콘솔 접속이 제한됩니다.<button type="button" class="btn sm secondary">자세히</button></div>
-        <div class="banner warning" role="alert">${I("info-circle")}라이선스가 3일 후 만료됩니다.<button type="button" class="btn sm primary">갱신</button></div>`, layout: "stack", style: "padding:24px 0;gap:8px" },
+        <div class="banner" role="status">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다. 점검 중 콘솔 접속이 제한됩니다.<button type="button" class="btn sm secondary">자세히</button></div>`, layout: "stack", style: "padding:24px 0;gap:8px" },
     ],
     props: [[".notice", "div", "—", "role=status | alert. .ico + div(b 제목 + 본문 + .actions) + .close"], ["tone", "info | success | warning | danger", "neutral", "톤별 subtle 배경 + 30% 보더"], [".toast", "div", "—", "폭 360, 어두운 배경. .action 하나"], [".toast-stack", "container", "—", "aria-live=polite, 우측 하단 고정"], [".banner", "div", "—", "전체 폭. accent / .warning / .danger"]],
     spec: [["Size", "Notice 최소 높이 56 · Toast 폭 360 · Banner 높이 44"], ["Container", "Notice radius/lg 12 · tone subtle + 30% 보더 · Toast bg/inverse"], ["Label", "Title Semibold 14 · Body 14"], ["Placement", "Notice 는 페이지 헤더 아래, Toast 우측 하단, Banner 헤더 위"]],
@@ -928,8 +931,8 @@ const COMPONENTS = {
       { id: "progress", title: "Progress", desc: "진행률을 알 때. 배포·검사 진행. 완료는 success, 실패는 danger.", html: `
         <div style="width:100%;max-width:480px;display:flex;flex-direction:column;gap:20px">
           <div class="progress-row"><div class="row"><span>정책 배포 중</span><span>842 / 1,284</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"><i style="width:66%"></i></div></div>
-          <div class="progress-row"><div class="row"><span>전체 검사 완료</span><span>100%</span></div><div class="progress success sm" role="progressbar" aria-valuenow="100"><i style="width:100%"></i></div></div>
-          <div class="progress-row"><div class="row"><span>업데이트 실패</span><span>38%</span></div><div class="progress danger sm" role="progressbar" aria-valuenow="38"><i style="width:38%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>전체 검사 완료</span><span>100%</span></div><div class="progress success" role="progressbar" aria-valuenow="100"><i style="width:100%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>업데이트 실패</span><span>38%</span></div><div class="progress danger" role="progressbar" aria-valuenow="38"><i style="width:38%"></i></div></div>
         </div>` },
     ],
     props: [[".spinner", "span", "—", "role=status aria-label. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"]],
@@ -1052,7 +1055,7 @@ const COMPONENTS = {
         <div class="tbl-wrap">
           <table class="tbl">
             <thead><tr><th>시간</th><th>심각도</th><th>이벤트</th><th>대상</th></tr></thead>
-            <tbody><tr><td colspan="4" class="empty">조건에 맞는 이벤트가 없습니다. <a href="#" class="link">필터 초기화</a></td></tr></tbody>
+            <tbody><tr><td colspan="4" class="empty"><div class="empty">조건에 맞는 이벤트가 없습니다. <a href="#" class="link">필터 초기화</a></div></td></tr></tbody>
           </table>
         </div>` },
     ],

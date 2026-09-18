@@ -260,8 +260,8 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-group">5. Group / Block</h3><p>폼 하단은 오른쪽 정렬(.btn-group.end), 저장이 가장 오른쪽. 전체 폭은 .block.</p><section class="example" id="ex-button-group">
-<div class="example-preview panel stack"><div class="btn-group end" style="max-width:520px">
+</section><h3 id="ex-group">5. Group / Block</h3><p>버튼 묶음은 .btn-group(8px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.</p><section class="example" id="ex-button-group">
+<div class="example-preview panel stack center"><div class="btn-group">
   <button class="btn md text">초기화</button>
   <button class="btn md secondary">취소</button>
   <button class="btn md primary">정책 저장</button>
@@ -269,7 +269,7 @@
 <button class="btn lg primary block" style="max-width:320px">시작하기</button></div>
 <div class="example-bar"><div class="code-tabs" role="tablist"><button type="button" class="on" data-tab="html" role="tab" aria-selected="true">HTML+CSS</button><button type="button" data-tab="react" role="tab" aria-selected="false">React</button></div><div class="example-actions"><button type="button" data-copy="ex-button-group-html" data-label="복사">복사</button><button type="button" data-toggle="" aria-expanded="false">코드 보기</button></div></div>
 <div class="example-code" hidden="">
-<div data-pane="html"><div class="code-head"><span>HTML</span></div><pre><code id="ex-button-group-html"><span class="tk-punc">&lt;</span><span class="tk-tag">div</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"btn-group end"</span> <span class="tk-attr">style</span><span class="tk-punc">=</span><span class="tk-str">"max-width:520px"</span><span class="tk-punc">&gt;</span>
+<div data-pane="html"><div class="code-head"><span>HTML</span></div><pre><code id="ex-button-group-html"><span class="tk-punc">&lt;</span><span class="tk-tag">div</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"btn-group"</span><span class="tk-punc">&gt;</span>
   <span class="tk-punc">&lt;</span><span class="tk-tag">button</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"btn md text"</span><span class="tk-punc">&gt;</span>초기화<span class="tk-punc">&lt;/</span><span class="tk-tag">button</span><span class="tk-punc">&gt;</span>
   <span class="tk-punc">&lt;</span><span class="tk-tag">button</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"btn md secondary"</span><span class="tk-punc">&gt;</span>취소<span class="tk-punc">&lt;/</span><span class="tk-tag">button</span><span class="tk-punc">&gt;</span>
   <span class="tk-punc">&lt;</span><span class="tk-tag">button</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"btn md primary"</span><span class="tk-punc">&gt;</span>정책 저장<span class="tk-punc">&lt;/</span><span class="tk-tag">button</span><span class="tk-punc">&gt;</span>
@@ -313,7 +313,7 @@
 <span class="tk-kw">export</span> <span class="tk-kw">default</span> <span class="tk-kw">function</span> Example() {
   <span class="tk-kw">return</span> (
     &lt;<span class="tk-punc">&gt;</span>
-      <span class="tk-punc">&lt;</span><span class="tk-tag">ButtonGroup</span> end <span class="tk-attr">style</span>={{ maxWidth: 520 }}<span class="tk-punc">&gt;</span>
+      <span class="tk-punc">&lt;</span><span class="tk-tag">ButtonGroup</span><span class="tk-punc">&gt;</span>
         <span class="tk-punc">&lt;</span><span class="tk-tag">Button</span> <span class="tk-attr">variant</span>=<span class="tk-str">"text"</span><span class="tk-punc">&gt;</span>초기화<span class="tk-punc">&lt;/</span><span class="tk-tag">Button</span><span class="tk-punc">&gt;</span>
         <span class="tk-punc">&lt;</span><span class="tk-tag">Button</span> <span class="tk-attr">variant</span>=<span class="tk-str">"secondary"</span><span class="tk-punc">&gt;</span>취소<span class="tk-punc">&lt;/</span><span class="tk-tag">Button</span><span class="tk-punc">&gt;</span>
         <span class="tk-punc">&lt;</span><span class="tk-tag">Button</span><span class="tk-punc">&gt;</span>정책 저장<span class="tk-punc">&lt;/</span><span class="tk-tag">Button</span><span class="tk-punc">&gt;</span>

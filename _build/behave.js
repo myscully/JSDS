@@ -20,7 +20,7 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   const dd = page.locator(`${ex("dropdown", "select")} .dropdown`).first();
   await dd.locator(".trigger").click();
   ok("dropdown open on click", await dd.evaluate((e) => e.classList.contains("open") && e.querySelector(".trigger").getAttribute("aria-expanded") === "true"));
-  ok("dropdown generates no menu (static example has none)", (await dd.locator(".menu").count()) === 0);
+  ok("dropdown shows its own menu when opened", await dd.evaluate((e) => { const m = e.querySelector(".menu"); return !!m && getComputedStyle(m).display !== "none"; }));
   await page.mouse.click(5, 5);
   ok("dropdown closes on outside click", await dd.evaluate((e) => !e.classList.contains("open")));
   const dd2 = page.locator(`${ex("dropdown", "select")} .dropdown`).nth(1);
@@ -103,6 +103,8 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   ok("range field builds range calendar", await rdp.evaluate((e) => e.querySelectorAll(".day.on").length === 2 && e.querySelectorAll(".day.in-range").length === 5));
   await page.screenshot({ path: SHOT + "/datepicker.png", clip: await rdp.boundingBox().then((bb) => ({ x: bb.x - 10, y: bb.y - 10, width: bb.width + 40, height: bb.height + 340 })) });
   const cal = page.locator(`${ex("date-picker", "calendar")} .calendar`).first();
+  await page.keyboard.press("Escape"); // 앞서 연 필드 달력(absolute) 닫기
+  await cal.evaluate((c) => c.scrollIntoView({ block: "center", behavior: "instant" })); // 상단 고정 헤더에 가리지 않게
   await cal.locator(".cal-head button").last().click();
   ok("static calendar next month", await cal.evaluate((e) => e.querySelector(".cal-head span").textContent.includes("10월")));
   await cal.locator(".day:not(.muted)").nth(4).click();
