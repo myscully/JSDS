@@ -13,7 +13,7 @@ export default function Example() {
   const [group, setGroup] = useState<string | null>("sales");
   return (
     <>
-      <Select options={GROUPS} placeholder="그룹 선택" label="그룹" />
+      <Select options={GROUPS} placeholder="그룹 선택" label="그룹" keepMounted />
       <Select options={GROUPS} value={group} onChange={setGroup} label="그룹" defaultOpen />
     </>
   );

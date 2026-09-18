@@ -30,6 +30,7 @@ interface DDCtx {
   menuId: string;
   align: "start" | "end";
   disabled?: boolean;
+  keepMounted?: boolean;
   rootRef: React.RefObject<HTMLDivElement | null>;
 }
 const Ctx = createContext<DDCtx | null>(null);
@@ -48,13 +49,15 @@ export interface DropdownProps extends Omit<HTMLAttributes<HTMLDivElement>, "onC
   /** 메뉴 정렬. end 는 트리거 우측 기준 */
   align?: "start" | "end";
   disabled?: boolean;
+  /** 닫혀 있어도 ul.menu 를 hidden 으로 유지(정적 마크업과 동일 구조) */
+  keepMounted?: boolean;
 }
 
 const ITEM_SEL = '[role="option"]:not([aria-disabled="true"]),[role="menuitem"]:not([aria-disabled="true"])';
 
 /** 열림/닫힘 · 바깥 클릭 · Esc · 방향키를 관리하는 컨테이너(.dropdown) */
 export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropdown(
-  { open, defaultOpen = false, onOpenChange, kind = "select", align = "start", disabled, className, children, onKeyDown, ...rest },
+  { open, defaultOpen = false, onOpenChange, kind = "select", align = "start", disabled, keepMounted, className, children, onKeyDown, ...rest },
   ref,
 ) {
   const [isOpen, setOpen] = useControllable<boolean>({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
@@ -93,7 +96,7 @@ export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropd
     if (e.key === "Tab") setOpen(false);
   };
   return (
-    <Ctx.Provider value={{ open: isOpen, setOpen, kind, menuId, align, disabled, rootRef }}>
+    <Ctx.Provider value={{ open: isOpen, setOpen, kind, menuId, align, disabled, keepMounted, rootRef }}>
       <div ref={mergeRefs(rootRef, ref)} className={cx("dropdown", isOpen && "open", className)} onKeyDown={keyDown} {...rest}>
         {children}
       </div>
@@ -134,12 +137,12 @@ export interface MenuProps extends HTMLAttributes<HTMLUListElement> {
   /** aria-label */
   label?: string;
 }
-/** ul.menu — 열려 있을 때만 렌더. role 은 Dropdown kind 를 따른다 */
+/** ul.menu — 열려 있을 때만 렌더(keepMounted 면 hidden 으로 유지). role 은 Dropdown kind 를 따른다 */
 export const Menu = forwardRef<HTMLUListElement, MenuProps>(function Menu({ label, className, style, ...rest }, ref) {
-  const { open, kind, menuId, align } = useDD();
-  if (!open) return null;
+  const { open, kind, menuId, align, keepMounted } = useDD();
+  if (!open && !keepMounted) return null;
   const alignStyle: CSSProperties | undefined = align === "end" ? { left: "auto", right: 0 } : undefined;
-  return <ul ref={ref} id={menuId} className={cx("menu", className)} role={kind === "select" ? "listbox" : "menu"} aria-label={label} style={{ ...alignStyle, ...style }} {...rest} />;
+  return <ul ref={ref} id={menuId} className={cx("menu", className)} role={kind === "select" ? "listbox" : "menu"} aria-label={label} hidden={!open || undefined} style={{ ...alignStyle, ...style }} {...rest} />;
 });
 
 export interface MenuItemProps extends Omit<LiHTMLAttributes<HTMLLIElement>, "onSelect"> {

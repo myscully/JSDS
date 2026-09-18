@@ -8,7 +8,7 @@ export default function Example() {
       </DropdownTrigger>
       <Menu>
         <MenuLabel>정책</MenuLabel>
-        <MenuItem icon="pencil" hint="E" onSelect={() => {}}>편집</MenuItem>
+        <MenuItem icon="pencil" onSelect={() => {}}>편집</MenuItem>
         <MenuItem icon="download" onSelect={() => {}}>내보내기</MenuItem>
         <MenuSep />
         <MenuItem icon="trash" danger onSelect={() => {}}>삭제</MenuItem>

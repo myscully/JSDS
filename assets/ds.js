@@ -248,6 +248,8 @@
   doc.addEventListener("click", function (e) {
     var t = e.target; if (!(t instanceof Element)) return;
     var el;
+    // Anatomy 데모(.anat)는 정적 — 열림/선택 동작 없음
+    if (closest(t, ".anat")) { if (closest(t, 'a[href="#"]')) e.preventDefault(); return; }
     // 데모용 # 링크는 이동하지 않음
     var a = closest(t, 'a[href="#"]'); if (a) e.preventDefault();
 
