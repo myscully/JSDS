@@ -861,7 +861,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .tbl .actions .btn{height:32px;padding:0 10px;font-size:12px}
 .tbl.kv th{width:200px;height:auto;padding:12px 16px;font-size:14px;color:var(--text-secondary);font-weight:500;border-right:1px solid var(--border-default);white-space:normal;vertical-align:top}
 .tbl.kv td{height:auto}
-.tbl td.empty{display:table-cell;text-align:center;color:var(--text-tertiary);height:auto;padding:24px 16px;font-size:14px}
+.tbl td.empty{display:table-cell;text-align:center;color:var(--text-tertiary);height:auto;padding:24px 16px;font-size:14px;border:none;border-radius:0;background:transparent}
 .tbl .link{color:var(--accent);text-decoration:none;font-weight:500}
 .tbl .link:hover{text-decoration:underline}
 .action-bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--accent-subtle);border-bottom:1px solid var(--border-default);font-size:14px}
