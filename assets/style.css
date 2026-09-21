@@ -278,8 +278,7 @@ table.type-table td .smp{display:block;color:var(--text-primary)}
 .hero .sub{color:var(--text-secondary);margin:0 auto}
 .hero svg.wave{position:absolute;left:0;right:0;bottom:-10px;width:100%;height:160px;z-index:-1;opacity:.9}
 .hero .cta{display:flex;justify-content:center;gap:10px;margin-top:var(--space-6)}
-.home-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--card-gap);padding:var(--space-12) var(--space-16) var(--space-20);max-width:1040px;margin:0 auto}
-@media (max-width:760px){.home-grid{grid-template-columns:1fr}}
+.home-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--card-gap);padding:var(--space-12) var(--space-16) var(--space-20);max-width:1120px;margin:0 auto}
 .home-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--border-default);border-radius:var(--radius-md);overflow:hidden;background:var(--bg-surface);transition:box-shadow .15s,border-color .15s}
 .home-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-2)}
 .home-card .art{height:220px;background:var(--bg-subtle);padding:var(--space-8);display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
@@ -310,7 +309,6 @@ table.type-table td .smp{display:block;color:var(--text-primary)}
 /* Colors › 브랜드 역할 맵 표: 가운데 정렬, 역할 열은 내용 폭 */
 table.roles th,table.roles td{text-align:center;vertical-align:middle}
 table.roles th:first-child,table.roles td:first-child{white-space:nowrap;width:240px}
-@media (max-width:640px){.dodont{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse;font-size:14px;margin:var(--space-4) 0 var(--space-6)}
 .tablewrap{overflow-x:auto;border:1px solid var(--border-default);border-radius:var(--radius-lg)}
 .tablewrap table{margin:0}
@@ -388,7 +386,6 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .tiles div{width:150px;height:96px;background:var(--bg-surface);border-radius:var(--radius-lg);display:grid;place-items:center;font-size:12px;color:var(--text-secondary);text-align:center}
 .tiles.radius div{background:var(--accent-subtle);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent);width:96px}
 
-@media (max-width:1100px){.page{padding:var(--space-10) var(--space-8) var(--space-16)}}
 
 /* ---------- Live component samples ---------- */
 /* 글리프(체크·마이너스·라디오 점·스위치 손잡이·셰브론·슬래시·정렬 화살표)는 icons-css.js 가 assets/icons 의 SVG 를 data URI mask 로 삽입. 직접 수정 금지 */

@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 45 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 55 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = "/Users/jeonghee/Documents/02 제품별/디자인시스템";
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -217,6 +217,17 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   for (const sec of ["components", "patterns"]) for (const f of fs.readdirSync(path.join(SITE, sec))) { await go(`${sec}/${f}`); }
   await go("index.html");
   ok("all pages load without JS errors", errors.length === 0, errors.slice(0, 3).join(" | "));
+
+  // 가이드 사이트 최소 폭(1280)에서 전 페이지 가로 넘침 없음
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const wide = [];
+  for (const sec of ["", "home", "foundations", "components", "patterns", "resources"]) for (const f of fs.readdirSync(path.join(SITE, sec))) {
+    if (!f.endsWith(".html") || f.includes("standalone")) continue;
+    await go(path.join(sec, f));
+    const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    if (over > 1) wide.push(path.join(sec, f) + " +" + over);
+  }
+  ok("no horizontal overflow at 1280 on any page", wide.length === 0, wide.slice(0, 5).join(" | "));
 
   await b.close();
   let fail = 0;
