@@ -1,5 +1,5 @@
 // dist/style.css 합성: _build/style.src.css 에서 토큰 블록 + 최소 base + 'Live component samples' 블록만 뽑는다.
-// 사이트 크롬(header/sidebar/page, min-width:1200px, 본문 h1/h2/p 규칙, 코드 패널)은 제외.
+// 사이트 크롬(header/sidebar/page, min-width:1280px, 본문 h1/h2/p 규칙, 코드 패널)은 제외.
 import { createRequire } from "node:module";
 import fs from "node:fs";
 import path from "node:path";
@@ -38,7 +38,7 @@ ${samples}
 `;
 
 // 크롬 유출 방지 검사
-for (const bad of [".header{", ".sidebar{", ".shell{", "min-width:1200px", ".example{", ".code-tabs{"]) {
+for (const bad of [".header{", ".sidebar{", ".shell{", "min-width:1280px", ".example{", ".code-tabs{"]) {
   if (out.includes(bad)) throw new Error(`sync-css: 사이트 크롬 규칙이 포함됨: ${bad}`);
 }
 for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"]) {
