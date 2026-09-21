@@ -77,8 +77,8 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
-html{min-width:1200px;height:100%}
-body{min-width:1200px;min-height:100%}
+html{min-width:1280px;height:100%}
+body{min-width:1280px;min-height:100%}
 body{margin:0;background:var(--bg-canvas);color:var(--text-primary);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 /* 고정폭은 코드 블록(pre)에만. 인라인 code·kbd 등 나머지는 전부 Pretendard */
@@ -130,7 +130,7 @@ code{font-size:inherit}
 .sidebar-foot{margin-top:var(--space-8);padding:0 var(--space-3);font-size:12px;color:var(--text-tertiary)}
 
 .main{min-width:0;display:flex;justify-content:center}
-.page{width:100%;max-width:1040px;margin:0 auto;padding:var(--space-12) var(--space-16) var(--space-20)}
+.page{width:100%;max-width:1120px;margin:0 auto;padding:var(--space-12) var(--space-16) var(--space-20)}
 .shell.full .main{display:block}
 .main>.home{width:100%;min-width:0}
 
@@ -267,7 +267,7 @@ table.type-table td .smp{display:block;color:var(--text-primary)}
 .ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--card-gap);margin:var(--space-6) 0}
 .ov-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--border-default);border-radius:var(--radius-md);overflow:hidden;background:var(--bg-surface);transition:border-color .15s,box-shadow .15s}
 .ov-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-2)}
-.ov-card .thumb{height:160px;background:var(--bg-subtle);display:grid;place-items:center;color:var(--text-tertiary);border-bottom:1px solid var(--border-default);overflow:hidden;padding:16px}
+.ov-card .thumb{height:200px;background:var(--bg-subtle);display:grid;place-items:center;color:var(--text-tertiary);border-bottom:1px solid var(--border-default);overflow:hidden;padding:16px}
 .ov-card .thumb>svg{width:96px;height:64px}
 .ov-card .thumb .mini{transform:scale(.85);pointer-events:none;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:100%}
 .ov-card .label{padding:14px 16px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
