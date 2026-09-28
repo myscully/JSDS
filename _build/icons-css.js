@@ -12,11 +12,11 @@ function dataUri(name, style = "outline", opt = {}) {
 }
 const mask = (name, style, opt = {}) => { const u = `url("${dataUri(name, style, opt)}") center/${opt.size || "contain"} no-repeat`; return `-webkit-mask:${u};mask:${u}`; };
 
-/* [셀렉터(정확히 일치), 새 선언부, (없으면 이 셀렉터 규칙 뒤에 삽입)]. 아이콘: check(굵게) · minus · point(라디오 점) · circle(스위치 손잡이) · chevron-down · slash · arrows-sort · arrow-up · arrow-down */
+/* [셀렉터(정확히 일치), 새 선언부, (없으면 이 셀렉터 규칙 뒤에 삽입)]. 아이콘: check(굵게) · minus · circle(스위치 손잡이) · chevron-down · slash · arrows-sort · arrow-up · arrow-down
+   라디오 점은 글리프가 아니라 단순 원이므로 마스크를 쓰지 않는다 — style.src.css 의 .radio input:checked::after 에 직접 둔다(마스크로 그리면 Safari 에서 0.4~0.75px 어긋남). */
 const RULES = [
   [".checkbox input:checked::after", `content:"";width:12px;height:12px;background:var(--accent-on);${mask("check", "outline", { strokeWidth: 3.5 })}`],
   [".radio input:checked", "border-color:var(--accent);background:var(--accent)"],
-  [".radio input:checked::after", `content:"";width:16px;height:16px;background:var(--accent-on);${mask("point", "filled", { size: "120%" })}`, ".radio input:checked"],
   [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;${mask("circle", "filled", { size: "120%" })};transition:left var(--motion-fast)`],
   [".switch input:checked::after", "left:22px"],
   [".switch.sm input::after", "width:16px;height:16px"],
@@ -46,7 +46,7 @@ function apply() {
     const j = css.indexOf("}", i);
     if (css.slice(i + 1, j + 1) !== next) { css = css.slice(0, i + 1) + next + css.slice(j + 1); n++; }
   }
-  const marker = "/* 글리프(체크·마이너스·라디오 점·스위치 손잡이·셰브론·슬래시·정렬 화살표)는 icons-css.js 가 assets/icons 의 SVG 를 data URI mask 로 삽입. 직접 수정 금지 */";
+  const marker = "/* 글리프(체크·마이너스·스위치 손잡이·셰브론·슬래시·정렬 화살표)는 icons-css.js 가 assets/icons 의 SVG 를 data URI mask 로 삽입. 직접 수정 금지 */";
   if (!css.includes(marker)) css = css.replace("/* ---------- Live component samples ---------- */", "/* ---------- Live component samples ---------- */\n" + marker);
   fs.writeFileSync(CSS, css); return n;
 }
