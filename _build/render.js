@@ -24,7 +24,7 @@ function sectionItems(sec, f) {
 function buildNav(filter = "") {
   const f = filter.trim().toLowerCase(); let h = "";
   if (f) { for (const sec of Object.keys(SITE)) { const it = sectionItems(sec, f); if (it) h += `<div class="sec-label">${SITE[sec].title}</div>${it}`; } if (!h) h = `<p style="padding:0 12px;color:var(--text-tertiary);font-size:12px">검색 결과가 없습니다.</p>`; }
-  else { const sec = currentSection(); h = `<h4>${SITE[sec].title}</h4>` + sectionItems(sec, ""); }
+  else { h = sectionItems(currentSection(), ""); } /* 섹션 타이틀(h4)은 상단 메뉴와 중복이라 두지 않는다 */
   $("#nav").innerHTML = h; $("#foot").textContent = VERSION + " · 지란지교시큐리티 기획팀 디자인파트"; markActive();
 }
 function markActive() { const cur = location.hash || "#/home/overview"; document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === cur)); }

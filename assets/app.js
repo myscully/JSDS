@@ -17,26 +17,67 @@ const ROOT=document.body.dataset.root||'../';
   const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   function applyAccent(key) {
     const p = products.find(x => x.key === key);
-    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--accent-" + k); delete root.dataset.accent; try { localStorage.removeItem("jsds-accent"); } catch (e) { } const s0 = document.getElementById("accentSel"); if (s0 && s0.value !== "") s0.value = ""; return; }
+    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--accent-" + k); delete root.dataset.accent; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
     const sc = accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--accent-" + k, v);
     root.dataset.accent = p.key; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
-    const sel = document.getElementById("accentSel"); if (sel && sel.value !== p.key) sel.value = p.key;
+    paintAccent();
   }
   window.applyAccent = applyAccent;
 
-  /* 테마 */
-  try { const t = localStorage.getItem("jsds-theme"); if (t) root.setAttribute("data-theme", t); } catch (e) { }
-  const btn = document.getElementById("themeBtn");
-  if (btn) btn.addEventListener("click", () => { const cur = root.getAttribute("data-theme"); const next = cur === "dark" ? "light" : cur === "light" ? "" : "dark"; if (next) root.setAttribute("data-theme", next); else root.removeAttribute("data-theme"); try { localStorage.setItem("jsds-theme", next); } catch (e) { } });
+  /* 테마: 라이트 ↔ 다크 2단. 저장값이 없으면 시스템 설정을 따른다(아이콘 전환은 CSS 담당) */
+  try { const t = localStorage.getItem("jsds-theme"); if (t === "dark" || t === "light") root.setAttribute("data-theme", t); } catch (e) { }
+  const mql = window.matchMedia("(prefers-color-scheme: dark)");
+  const themeBtn = document.getElementById("themeBtn");
+  if (themeBtn) themeBtn.addEventListener("click", () => {
+    const cur = root.getAttribute("data-theme") || (mql.matches ? "dark" : "light");
+    const next = cur === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("jsds-theme", next); } catch (e) { }
+  });
 
-  /* Accent 선택 */
-  const sel = document.getElementById("accentSel");
-  if (sel) { sel.innerHTML = '<option value="">기본 (토큰 값)</option>' + products.map(p => '<option value="' + p.key + '">' + p.name + "</option>").join(""); sel.addEventListener("change", e => applyAccent(e.target.value)); }
+  /* Accent 팝오버 (팔레트 아이콘의 점이 현재 색) */
+  const accentBtn = document.getElementById("accentBtn"), accentPop = document.getElementById("accentPop");
+  function paintAccent() {
+    const key = root.dataset.accent || "", p = products.find(x => x.key === key);
+    const dot = accentBtn && accentBtn.querySelector(".dot"); if (dot) dot.style.background = p ? p.hex : "";
+    if (accentPop) accentPop.querySelectorAll("[data-accent]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.accent === key)));
+  }
+  if (accentPop) {
+    accentPop.innerHTML = '<button type="button" role="menuitemradio" aria-checked="false" data-accent=""><i style="background:var(--accent-600)"></i>기본 (토큰 값)</button>'
+      + products.map(p => '<button type="button" role="menuitemradio" aria-checked="false" data-accent="' + p.key + '"><i style="background:' + p.hex + '"></i>' + p.name + "</button>").join("");
+    /* stopPropagation 금지 — 바깥 클릭 닫기가 이 이벤트에 얹혀 있다 */
+    accentPop.addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if (b) { applyAccent(b.dataset.accent); closePop(accentBtn, accentPop); accentBtn.focus(); } });
+  }
   let saved = null; try { saved = localStorage.getItem("jsds-accent"); } catch (e) { }
   applyAccent(saved || "");
 
-  /* 검색 (생성 사이트) */
-  const q = document.getElementById("q"); const box = document.getElementById("searchResults");
+  /* 팝오버 공통 (검색 · Accent) */
+  const q = document.getElementById("q"), box = document.getElementById("searchResults");
+  const searchBtn = document.getElementById("searchBtn"), searchPop = document.getElementById("searchPop");
+  const POPS = [[searchBtn, searchPop], [accentBtn, accentPop]].filter(x => x[0] && x[1]);
+  function closePop(btn, pop) {
+    if (pop.hidden) return;
+    pop.hidden = true; btn.setAttribute("aria-expanded", "false");
+    /* 미리보기 셸에서 #q 는 사이드바 필터도 겸한다 — 닫을 때 비우고 알려야 필터가 걸린 채 굳지 않는다 */
+    if (pop === searchPop && q && q.value) { q.value = ""; q.dispatchEvent(new Event("input", { bubbles: true })); }
+    if (pop === searchPop && box) box.hidden = true;
+  }
+  function closeAll(except) { POPS.forEach(([b, p]) => { if (p !== except) closePop(b, p); }); }
+  function openPop(btn, pop) { closeAll(pop); pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
+  POPS.forEach(([btn, pop]) => btn.addEventListener("click", () => {
+    if (!pop.hidden) { closePop(btn, pop); return; }
+    openPop(btn, pop);
+    const f = pop === searchPop ? q : pop.querySelector("button");
+    if (f) { f.focus(); if (f.select) f.select(); }
+  }));
+  document.addEventListener("click", e => { if (!e.target.closest(".hmenu")) closeAll(); });
+  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu")) closeAll(); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") { const o = POPS.find(x => !x[1].hidden); if (o) { closePop(o[0], o[1]); o[0].focus(); } return; }
+    if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && searchBtn && searchPop) { e.preventDefault(); openPop(searchBtn, searchPop); if (q) { q.focus(); q.select(); } }
+  });
+
+  /* 검색 결과 (생성 사이트 전용 — 미리보기 셸은 render.js 가 같은 #q 로 사이드바를 필터한다) */
   if (q && box && typeof SEARCH_INDEX !== "undefined") {
     const run = () => {
       const f = q.value.trim().toLowerCase(); if (!f) { box.hidden = true; return; }
@@ -45,10 +86,7 @@ const ROOT=document.body.dataset.root||'../';
       box.hidden = false;
     };
     q.addEventListener("input", run); q.addEventListener("focus", run);
-    document.addEventListener("click", e => { if (!box.contains(e.target) && e.target !== q) box.hidden = true; });
-    document.addEventListener("keydown", e => { if (e.key === "Escape") { box.hidden = true; q.blur(); } });
   }
-  if (q) document.addEventListener("keydown", e => { if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); q.focus(); } });
 
   /* 코드 패널: 복사 · 탭 · 접기 (이벤트 위임 — 해시 라우팅으로 DOM 이 다시 그려져도 유지) */
   function copyText(text) { if (navigator.clipboard) return navigator.clipboard.writeText(text); const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) { } ta.remove(); return Promise.resolve(); }

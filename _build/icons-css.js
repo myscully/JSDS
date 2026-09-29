@@ -31,6 +31,8 @@ const RULES = [
   [".tbl th.sortable::after", `content:"";display:inline-block;width:14px;height:14px;margin-left:6px;vertical-align:-3px;opacity:.45;background:currentColor;${mask("arrows-sort")}`],
   [".tbl th.sorted::after", `opacity:1;${mask("arrow-up")}`],
   [".tbl th.sorted.desc::after", mask("arrow-down")],
+  /* 좌측 메뉴: 활성 항목 박스의 맨 오른쪽 화살표. 마크업이 아니라 ::after 인 이유는 build.js 의 navOf() 정규식이 nav <a> 의 내부 구조에 의존하기 때문 */
+  [".nav a.active::after", `content:"";width:16px;height:16px;flex:none;margin-left:auto;opacity:.45;background:currentColor;${mask("arrow-right")}`, ".nav a.active"],
 ];
 
 function apply() {

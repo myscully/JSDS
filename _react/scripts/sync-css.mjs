@@ -37,8 +37,8 @@ ${base}
 ${samples}
 `;
 
-// 크롬 유출 방지 검사
-for (const bad of [".header{", ".sidebar{", ".shell{", "min-width:1280px", ".example{", ".code-tabs{"]) {
+// 크롬 유출 방지 검사 (부분 문자열 비교이므로 샘플 규칙과 겹치지 않는 것만 넣는다 — 예: ".nav a{" 는 샘플의 ".sidenav a{" 에 걸린다)
+for (const bad of [".header{", ".sidebar{", ".shell{", "min-width:1280px", ".example{", ".code-tabs{", ".topnav{", ".header-right{", ".hbtn{", ".hmenu{", ".pop{", ".sidebar-foot{"]) {
   if (out.includes(bad)) throw new Error(`sync-css: 사이트 크롬 규칙이 포함됨: ${bad}`);
 }
 for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"]) {

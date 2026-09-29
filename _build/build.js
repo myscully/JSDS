@@ -69,6 +69,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${parts.title}</title>
 <link rel="stylesheet" href="${root}assets/style.css">
+<script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <script src="${root}assets/app.js" defer></script>
 <script src="${root}assets/ds.js" defer></script>
 </head>
@@ -78,10 +79,20 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   <span class="ver">${VERSION}</span>
   <nav class="topnav" aria-label="섹션">${topActive ? topnavOf(root) : topnavOf(root).replace(/ class="active"/g, ' class=""')}</nav>
   <div class="header-right">
-    <label class="accent-pick" title="제품 메인 컬러(Accent) 미리보기"><i></i><select id="accentSel" aria-label="Accent 컬러 선택"></select></label>
-    <label class="search">${I("search", 18)}<input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
-    <div class="search-results" id="searchResults" hidden></div>
-    <button class="theme-btn" id="themeBtn" type="button">${I("moon", 14)}테마</button>
+    <div class="hmenu">
+      <button class="hbtn" id="accentBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="제품 메인 컬러(Accent) 선택" title="Accent">${I("palette", 20)}<span class="dot"></span></button>
+      <div class="pop accent-pop" id="accentPop" role="menu" aria-label="Accent" hidden></div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="searchBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="검색 (/)" title="검색 (/)">${I("search", 20)}</button>
+      <div class="pop search-pop" id="searchPop" hidden>
+        <label class="search">${I("search", 18)}<input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="themeBtn" type="button" aria-label="테마 전환" title="테마 전환"><span class="i-sun">${I("sun", 20)}</span><span class="i-moon">${I("moon", 20)}</span></button>
+    </div>
   </div>
 </header>
 <div class="shell${full ? " full" : ""}">
