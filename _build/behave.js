@@ -1,6 +1,6 @@
 // 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 55 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
-const SITE = "/Users/jeonghee/Documents/02 제품별/디자인시스템";
+const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
 const SHOT = path.join(__dirname, ".behave");
 require("fs").mkdirSync(SHOT, { recursive: true });

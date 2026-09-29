@@ -16,7 +16,7 @@ const ICON_NAMES = [
   // 도메인 · 내비게이션
   "home", "list", "user", "server", "shield", "bell", "settings", "chart-bar", "calendar", "inbox", "layout-grid",
   // 사이트 크롬
-  "moon",
+  "moon", "sun", "palette",
 ];
 function parse(file) {
   if (!fs.existsSync(file)) return null;
