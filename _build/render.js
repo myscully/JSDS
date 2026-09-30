@@ -129,10 +129,11 @@ const sw = (v, label) => `<div style="background:var(${v})" title="${v} 복사" 
 function docTabs(tabs, panes) {
   return `<div class="doc-tabset"><div class="doc-tabs" role="tablist">${tabs.map(([k, t], i) => `<button type="button" role="tab" data-doctab="${k}" class="${i ? "" : "on"}" aria-selected="${i ? "false" : "true"}">${t}</button>`).join("")}</div>${tabs.map(([k], i) => `<div data-docpane="${k}"${i ? " hidden" : ""}>${panes[i]}</div>`).join("")}</div>`;
 }
-const GS_REACT_INSTALL = `npm i @jiran/ds-react
+/* 설치 코드는 Getting started 와 Resources › React Package 두 곳에서 같이 쓴다(한쪽만 고쳐 어긋나지 않게) */
+const REACT_INSTALL = `npm i @jiran/ds-react
 
 // main.tsx — 앱 진입점에서 한 번
-import "@jiran/ds-react/style.css";   // 토큰 + 컴포넌트 CSS
+import "@jiran/ds-react/style.css";   // 토큰 + 컴포넌트 CSS (사이트 크롬 제외)
 import { ToastProvider, applyAccent } from "@jiran/ds-react";
 
 applyAccent("#2563EB");               // 제품 메인 컬러 → --accent-50~900 생성
@@ -154,15 +155,13 @@ const GS_REACT_THEME = `<!-- 다크 테마: html 요소에 지정. 없으면 시
 const GS_HTML_LINK = `<!-- assets/ 폴더(style.css · ds.js · fonts/)를 프로젝트에 복사한 뒤 -->
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/ds.js" defer></script>`;
+/* ds.js 의 프로그램 API(DS.toast · DS.popup · 이벤트)는 Resources › React Package › assets/ds.js 가 단일 출처. 여기는 붙여넣기 예시만 둔다 */
 const GS_HTML_USE = `<!-- 컴포넌트 페이지 HTML+CSS 탭에서 복사한 마크업을 그대로 붙입니다 -->
 <button class="btn md primary">정책 저장</button>
 <span class="tag critical">Critical</span>
 
-<!-- 동작이 필요한 곳은 ds.js 의 API -->
 <script>
-  DS.toast("저장되었습니다");
-  DS.popup.open("#confirm-delete");
-  DS.init(document.getElementById("dynamic-area")); // 동적으로 넣은 마크업
+  DS.init(document.getElementById("dynamic-area")); // 나중에 DOM 에 넣은 마크업만 한 번
 </script>`;
 const GS_ACCENT_CSS = `/* 제품 메인 컬러 하나로 생성한 10단계를 :root 에 덮어씁니다 (생성 함수는 Design Token › Accent 스케일 생성) */
 :root{
@@ -180,7 +179,7 @@ const PAGES = {
 </ol>
 <p>사이트 둘러보기: 상단 메뉴 Foundations(색·글자·간격 규칙) → Components(30개) → Patterns(11개 화면 패턴). 헤더의 <b>Accent</b> 선택으로 제품별 컬러를, <b>테마</b> 버튼으로 다크 모드를 미리 볼 수 있고, 키보드 <code>/</code> 를 누르면 검색창으로 이동합니다.</p>`;
     const react = `<ol class="guide-steps">
-<li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyAccent</code> 에 제품 메인 컬러 HEX 하나를 넣으면 나머지 색은 자동입니다.${codeBlock("gs-react-install", GS_REACT_INSTALL, "tsx", "복사")}</li>
+<li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyAccent</code> 에 제품 메인 컬러 HEX 하나를 넣으면 나머지 색은 자동입니다.${codeBlock("gs-react-install", REACT_INSTALL, "tsx", "복사")}</li>
 <li><b>컴포넌트 가져다 쓰기</b>변형은 HTML 클래스와 같은 이름의 prop 입니다. 전체 목록은 <a href="#/resources/react#map">React Package › 컴포넌트 ↔ 클래스</a>.${codeBlock("gs-react-use", GS_REACT_USE, "tsx", "복사")}</li>
 <li><b>테마·서체</b>다크 테마는 <code>html</code> 요소의 <code>data-theme</code> 로 정하고(또는 <code>setTheme("dark")</code>), 앱 루트에 <code>.ds-root</code> 를 붙입니다.${codeBlock("gs-react-theme", GS_REACT_THEME, "html", "복사")}</li>
 </ol>`;
@@ -248,7 +247,7 @@ ${codeBlock("a11y-css", `:focus-visible{outline:2px solid var(--border-focus);ou
   "patterns/overview": () => overviewPage("patterns"),
   "resources/react": () => `<h1>React Package${nb("resources", "react")}</h1><p class="lead"><code>@jiran/ds-react</code> — 이 가이드의 30개 컴포넌트와 패턴 래퍼를 실제 React 컴포넌트로 구현한 패키지입니다. 사이트와 같은 클래스 마크업을 렌더링하므로 스타일시트 하나로 동작하고, 각 컴포넌트 페이지의 React 탭 코드가 곧 사용법입니다.</p>
 <div class="meta">${tagOf("ready")}<span class="doc-tag">React 18 · 19</span><span class="doc-tag">TypeScript</span><span class="doc-tag">ESM · CJS</span><span class="doc-tag">${VERSION}</span></div>
-<h2 id="install">설치</h2>${codeBlock("react-install", `npm i @jiran/ds-react\n\n// main.tsx — 앱 진입점에서 한 번\nimport "@jiran/ds-react/style.css";   // 토큰 + 컴포넌트 CSS (사이트 크롬 제외)\nimport { ToastProvider, applyAccent } from "@jiran/ds-react";\n\napplyAccent("#2563EB");               // 제품 메인 컬러 → --accent-50~900 생성\n\ncreateRoot(document.getElementById("root")!).render(\n  <ToastProvider>\n    <App />\n  </ToastProvider>,\n);`, "tsx", "복사")}
+<h2 id="install">설치</h2>${codeBlock("react-install", REACT_INSTALL, "tsx", "복사")}
 <div class="kv"><dt>테마</dt><dd><code>&lt;html data-theme="dark"&gt;</code> 또는 <code>setTheme("dark")</code>. 없으면 시스템 설정을 따릅니다. 포털(Popup·Toast)도 <code>&lt;html&gt;</code> 에서 토큰을 상속합니다</dd><dt>서체·배경</dt><dd>앱 루트에 <code>.ds-root</code> 를 붙이면 Pretendard · 본문 색 · 배경 토큰이 적용됩니다</dd><dt>브라우저</dt><dd><code>color-mix()</code> 사용 — Chrome 111+ · Safari 16.2+ · Firefox 113+</dd><dt>버전</dt><dd>패키지 major.minor 는 이 가이드 버전(${VERSION})과 같이 올립니다</dd></div>
 <h2 id="usage">사용</h2><p>모든 컴포넌트는 <code>forwardRef</code> · <code>className</code> 병합 · 나머지 props 전달을 지원합니다. 변형은 HTML 클래스와 같은 이름의 prop 입니다.</p>
 ${codeBlock("react-usage", `import { Button, TextField, Tag, DataTable, useToast } from "@jiran/ds-react";\n\nfunction PolicyForm() {\n  const toast = useToast();\n  return (\n    <form onSubmit={(e) => { e.preventDefault(); toast.show("정책이 저장되었습니다"); }}>\n      <TextField label="정책 이름" required help="2~40자" />\n      <Tag tone="critical">Critical</Tag>\n      <Button type="submit" size="md" variant="primary">정책 저장</Button>\n    </form>\n  );\n}`, "tsx", "복사")}
