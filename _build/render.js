@@ -294,7 +294,7 @@ ${codeBlock("tok-json", `{\n  "color": { "accent": { "600": { "value": "{product
 <li><b>체크</b>업데이트 목록에 완료 표시. 한 주에 끝내지 못한 페이지는 다음 주 첫 순서로 넘기고 단계 완료일은 그대로 둡니다.</li>
 </ol>`;
   },
-  "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인파트 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
+  "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><p>이 문서는 아직 작업 중입니다. 아래 절차는 큰 흐름이며, 각 단계의 서식과 기준이 확정되면 이 페이지를 갱신합니다.</p><ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인파트 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
 };
 
 Object.assign(PAGES, window.FOUNDATION_PAGES({ codeBlock, tokenSection, sw, nb, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent }));
