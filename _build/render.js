@@ -195,14 +195,13 @@ const PAGES = {
 <h2 id="who">누구에게 무엇이 필요한가</h2><div class="kv"><dt>디자이너 · 기획자</dt><dd>Figma 라이브러리 + 이 사이트. 설치할 것이 없습니다</dd><dt>React 개발자</dt><dd><code>@jiran/ds-react</code> 패키지 하나</dd><dt>HTML+CSS 개발자</dt><dd><code>assets/style.css</code> + <code>assets/ds.js</code> 두 파일</dd></div>
 <p>어느 역할이든 <b>각 <a href="#/components/overview">컴포넌트 페이지</a>가 사용법의 단일 출처</b>입니다 — Examples 로 실제 동작과 상태를, Props 표로 허용되는 변형을, 코드 보기로 HTML+CSS · React 코드를 확인합니다. 필요한 컴포넌트가 없으면 <a href="#/resources/contribution">Contribution</a> 절차로 제안합니다.</p>
 ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자"], ["html", "HTML+CSS 개발자"]], [designer, react, html])}
-<h2 id="platforms">지원 환경</h2><p>이 시스템은 <b>데스크톱 웹(관리 콘솔)</b> 만 공식 지원합니다. 아래 기준은 물리 해상도가 아니라 브라우저 <b>viewport CSS px</b> 기준이며, 값의 단일 출처는 <a href="#/foundations/grid">Foundations › Grid</a> 입니다. 새 화면은 이 표의 기준 프레임에서 시작하고, 미지원 범위를 "반응형 완료" 로 표기하지 않습니다.</p>
-<div class="tablewrap"><table><thead><tr><th>지원 등급</th><th>viewport</th><th>Figma · QA 기준 프레임</th><th>레이아웃 원칙</th></tr></thead><tbody>
-<tr><td>미지원 · Mobile</td><td>0–767</td><td style="white-space:nowrap">프레임 없음</td><td>데스크톱 콘솔을 축소해 제공하지 않음. 필요해지면 별도 Mobile 기반 규칙과 업무 범위를 정의</td></tr>
-<tr><td>미지원 · Tablet</td><td style="white-space:nowrap">768–1023</td><td style="white-space:nowrap">프레임 없음</td><td>터치 현장 업무가 확인되기 전까지 공식 지원으로 표기하지 않음</td></tr>
-<tr><td>지원 · Compact desktop <code>md</code></td><td style="white-space:nowrap">1024–1279</td><td>1024×768 · 전환점 1280×800</td><td>사이드 내비 64 · 콘텐츠 좌우 20. 정보는 유지하되 보조 탐색·고급 필터를 접음</td></tr>
-<tr><td>지원 · Standard desktop <code>lg</code></td><td style="white-space:nowrap">1280–1919</td><td>1440×960</td><td>사이드 내비 240 · 콘텐츠 최대 1160 · 좌우 24 · 12열 gutter 24</td></tr>
-<tr><td>지원 · Wide desktop <code>xl</code></td><td style="white-space:nowrap">1920 이상</td><td>1920×1080</td><td>사이드 내비 240 · 콘텐츠 최대 1600. 여백만 넓히고 본문·폼·카드를 늘리지 않음</td></tr>
+<h2 id="platforms">지원 환경</h2><p>이 시스템은 <b>데스크톱 웹(관리 콘솔)</b> 만 공식 지원합니다. 아래 기준은 물리 해상도가 아니라 브라우저 <b>viewport CSS px</b> 기준이며, 새 화면은 이 표의 기준 프레임에서 시작합니다. 사이드 내비 폭·콘텐츠 최대 너비·컬럼 같은 레이아웃 값의 단일 출처는 <a href="#/foundations/grid">Foundations › Grid</a> 입니다.</p>
+<div class="tablewrap"><table><thead><tr><th>지원 등급</th><th>viewport</th><th>Figma · QA 기준 프레임</th></tr></thead><tbody>
+<tr><td>Compact desktop <code>md</code></td><td style="white-space:nowrap">1024–1279</td><td>1024×768 · 전환점 1280×800</td></tr>
+<tr><td>Standard desktop <code>lg</code> (기준)</td><td style="white-space:nowrap">1280–1919</td><td>1440×960</td></tr>
+<tr><td>Wide desktop <code>xl</code></td><td style="white-space:nowrap">1920 이상</td><td>1920×1080</td></tr>
 </tbody></table></div>
+<p>1023 이하(모바일 · 태블릿)는 <b>미지원</b>입니다. 데스크톱 콘솔을 축소해 제공하지 않으며, 터치 현장 업무가 확인되면 그때 별도 규칙과 업무 범위를 정의합니다. 미지원 범위를 "반응형 완료" 로 표기하지 않습니다.</p>
 <div class="kv"><dt>이 가이드 사이트</dt><dd>1280px 이상에서 봅니다. 위 표는 제품 UI 의 지원 기준이며, 가이드 사이트의 표시 폭과는 별개입니다</dd><dt>표준 스냅샷</dt><dd><code>1024</code> · <code>1280</code> · <code>1440</code> · <code>1920</code> 네 폭을 매 릴리스에서 확인합니다</dd><dt>브라우저</dt><dd>Chrome 111+ · Safari 16.2+ · Firefox 113+ (<code>color-mix()</code> 사용). 100% 와 200% 확대에서 핵심 조치가 가능해야 합니다</dd><dt>입력 방식</dt><dd>마우스 · 키보드. 모든 인터랙션은 키보드로 도달·실행 가능해야 하고, 터치 전용 동작은 두지 않습니다</dd><dt>기준 갱신</dt><dd>실제 사용자 기기·브라우저 로그와 제품 책임자의 결정으로 확정·갱신하며, 변경 전까지 위 표를 공식 약속으로 봅니다</dd><dt>React 패키지</dt><dd>React 18 · 19 · TypeScript · ESM/CJS 지원. 패키지 버전의 major.minor 는 이 가이드 버전(${VERSION})과 같습니다 — <a href="#/resources/react">React Package</a></dd></div>`;
   },
   "home/overview": () => {
