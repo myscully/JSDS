@@ -3,7 +3,7 @@
    render.js 가 PAGES 에 병합한다: Object.assign(PAGES, FOUNDATION_PAGES(helpers))
    ========================================================= */
 window.FOUNDATION_PAGES = function (H) {
-  const { codeBlock, tokenSection, sw, nb, tagOf, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent } = H;
+  const { codeBlock, tokenSection, sw, nb, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent } = H;
   const attr = s => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 
   /* ---------- 토큰 값 해석 (Light / Dark) ---------- */
@@ -67,7 +67,6 @@ ${pal("Emerald", t11, "emerald", "Positive")}
 ${pal("Sky", t11, "sky", "Informative · Severity Low")}
 ${tokenSection("primitive-css", "CSS · Primitive 토큰", [/^--(gray|brand|accent|red|amber|emerald|sky)-\d+$/, /^--static-/], "제품 적용 시 <code>--accent-*</code> 블록만 제품 컬러로 교체합니다(HEX 하나로 스케일을 만드는 <code>accentScale()</code> 은 <a href=\"#/resources/design-token\">Design Token</a> 참고).")}`;
       return `<h1>Colors${nb("foundations", "colors")}</h1><p class="lead">컬러 시스템은 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다. Gray Scale 이 화면의 바탕이고, Primary(제품 메인 컬러)는 핵심 정보를 강조하는 데만 씁니다. 상황에 맞는 색을 이름으로 고를 수 있도록 Semantic 토큰으로 제공하며, 스와치를 클릭하면 토큰이 복사됩니다.</p>
-<div class="meta">${tagOf("ready")}<span class="doc-tag">Web Desktop</span><span class="doc-tag">Light · Dark</span><span class="doc-tag">Figma: Variables › Semantic · Primitive</span></div>
 <h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>제품 Primary</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다. 이 시스템은 관리자 웹 제품 기준이라 Brand 는 제품 UI 의 Accent 가 아닙니다.</p>
 ${tbl(["역할", "쓰는 곳", "쓰지 않는 곳"], [
   ["<b>제품 Primary</b>", "주요 행동 버튼(화면당 하나), 링크, 활성·선택 상태(탭 · 내비게이션 · 체크 · 스위치), 포커스 링", "위험도나 처리 결과 표현, 넓은 면의 장식 배경, 로고"],
@@ -93,7 +92,6 @@ ${tabset([["semantic", "Semantic"], ["atomic", "Atomic"]], [semantic, atomic])}`
       const levels = list => `<div class="elev-levels">${list.map(([n, k]) => `<div data-copy-text="var(--shadow-${k})" title="var(--shadow-${k}) 복사"><i style="box-shadow:var(--shadow-${k})"></i><small>${n}</small></div>`).join("")}</div>`;
       const rows = [["1", "Shadow Normal XSmall", "--shadow-xs", "평면에 가깝지만 미세한 구분이 필요한 경우 (테이블 컨테이너, 입력 필드 hover)"], ["2", "Shadow Normal Small", "--shadow-sm", "페이지 위에 떠 있는 경우 (카드 · 패널 기본 구획 = <code>--shadow-1</code>)"], ["3", "Shadow Normal Medium", "--shadow-md", "상호작용 상태에서 강조가 필요한 경우 (카드 hover · 드롭다운 · 팝오버 = <code>--shadow-2</code>)"], ["4", "Shadow Normal Large", "--shadow-lg", "일시적으로 주요한 정보를 표시하는 더 높은 레이어 (토스트 · 드로어)"], ["5", "Shadow Normal XLarge", "--shadow-xl", "사용자의 시선을 완전히 집중시켜야 하는 주요 오버레이 (팝업 = <code>--shadow-3</code>)"], ["1", "Shadow Spread Small", "--shadow-spread-sm", "배경과 콘텐츠의 경계 사방에 구분이 필요한 경우 (화면 중앙 카드)"], ["2", "Shadow Spread Medium", "--shadow-spread-md", "경계 분리와 함께 보다 강조가 필요한 경우 (중앙 정렬 다이얼로그)"]];
       return `<h1>Elevation</h1><p class="lead">Elevation 은 Z축을 기준으로 두 표면 사이의 거리를 나타내는 시각적 체계입니다. 그림자와 배경 명도 차이를 조합하여 UI 컴포넌트 간의 깊이감과 시각적 계층을 만듭니다. 구획은 1px 보더를 겹치는 대신 배경 차이와 아주 부드러운 그림자로 만들어, 밀도가 높은 콘솔 화면에서도 정돈된 구조를 전달합니다.</p>
-<div class="meta">${tagOf("ready")}<span class="doc-tag">Web Desktop</span><span class="doc-tag">Figma: Effect Styles</span></div>
 <h2 id="type">Shadow type</h2>
 <div class="elev-types"><div><div class="demo"><i style="box-shadow:var(--shadow-lg)"></i></div><b>Normal</b><span>빛의 위치에 따라 아래쪽으로 그림자가 생기는 일반적인 경우 사용합니다. 카드 · 드롭다운 · 팝업.</span></div><div><div class="demo"><i style="box-shadow:var(--shadow-spread-md)"></i></div><b>Spread</b><span>Dialog 처럼 그림자가 사방으로 고르게 퍼져야 하는 경우 사용합니다. 화면 중앙에 홀로 놓이는 표면.</span></div></div>
 ${tabset([["normal", "Normal"], ["spread", "Spread"]], [levels(normal), levels(spread)])}
@@ -108,7 +106,6 @@ ${tokenSection("shadow-css", "CSS", "shadow")}`;
     "foundations/grid": () => {
       const spaces = [[1, 4], [2, 8], [3, 12], [4, 16], [5, 20], [6, 24], [8, 32], [10, 40], [12, 48], [16, 64], [20, 80]];
       return `<h1>Grid</h1><p class="lead">그리드 시스템은 4px 기반의 일관된 간격 체계를 사용하여 모든 화면에서 조화로운 비율과 정렬을 만들어냅니다. Desktop 관리 콘솔을 기준으로 사이드 내비게이션 + 유동 콘텐츠 영역의 레이아웃을 쓰며, 콘텐츠 영역 안은 12단 컬럼 그리드로 배치합니다.</p>
-<div class="meta">${tagOf("ready")}<span class="doc-tag">Web Desktop</span><span class="doc-tag">4px base · 12 columns</span></div>
 <h2 id="artboard">Artboard size</h2><p>디자이너는 해상도별 모든 화면을 디자인할 필요 없이 아래 대표 규격만 설계합니다. 기준은 1440 이며, 대형 모니터는 콘텐츠 최대 너비만 넓어집니다.</p>
 ${tbl(["환경", "너비", "높이", "콘텐츠 최대 너비"], [["Web desktop (기준)", "1440px", "960px", "1160px"], ["Web desktop (대형)", "1920px", "1080px", "1600px"]])}
 <h2 id="breakpoint">Breakpoint</h2><p>모바일·태블릿은 대응하지 않는 Desktop 전용 콘솔입니다. 1280 미만에서는 사이드 내비게이션을 접어 콘텐츠 폭을 확보합니다.</p>
@@ -130,7 +127,6 @@ ${codeBlock("grid-css", `.grid{display:grid;grid-template-columns:repeat(12,minm
       const names = Object.keys(ICONS).sort();
       const tile = n => { const m = ICONS[n]; const kw = [n, m.category, ...(m.tags || []), KO[n] || ""].join(" ").toLowerCase(); return `<button type="button" class="icon-tile${m.f ? "" : " no-f"}" data-name="${n}" data-cat="${attr(m.category || "")}" data-tags="${attr((m.tags || []).join("|"))}" data-ko="${attr(KO[n] || "")}" data-kw="${attr(kw)}" data-copy-o="${attr(I(n, 24))}"${m.f ? ` data-copy-f="${attr(I(n, 24, { style: "filled" }))}"` : ""} title="${n}" aria-label="${n} 상세 보기" aria-haspopup="dialog"><span class="o">${I(n, 24)}</span>${m.f ? `<span class="f">${I(n, 24, { style: "filled" })}</span>` : ""}</button>`; };
       return `<h1>Icons${nb("foundations", "icons")}</h1><p class="lead">아이콘은 기능이나 콘텐츠를 시각적으로 표현하는 요소로, 사용자가 인터페이스를 빠르게 탐색할 수 있도록 돕습니다. 24px 그리드 · 스트로크 2px · 라운드 캡의 단순하고 현대적인 형태(Tabler Icons · MIT)를 쓰며, 기본은 Outline 이고 선택·활성 상태 강조에만 Filled 를 씁니다.</p>
-<div class="meta">${tagOf("ready")}<span class="doc-tag">Web Desktop</span><span class="doc-tag">24 grid · stroke 2 · currentColor</span><span class="doc-tag">assets/icons/outline · filled</span></div>
 <h2 id="search">Search icons</h2><p>사이트와 컴포넌트가 실제로 사용하는 아이콘입니다(전체 세트 3,000+ 는 <code>assets/icons/</code>). 검색 시 이름뿐 아니라 연상되는 유사한 키워드(한글 포함)를 함께 검색합니다. 아이콘을 클릭하면 이름 · 키워드 · 사용 코드와 함께 SVG 를 복사·다운로드할 수 있습니다.</p>
 <div class="icon-tools"><div class="searchbar" role="search">${I("search")}<input type="search" id="iconSearch" placeholder="아이콘을 검색해주세요" aria-label="아이콘 검색"></div><div class="select-btn" role="group" aria-label="아이콘 스타일" id="iconStyle"><button type="button" class="on" aria-pressed="true" data-style="outline">Outline</button><button type="button" aria-pressed="false" data-style="filled">Filled</button></div><span id="iconCount" style="font-size:12px;color:var(--text-tertiary)">${names.length}개</span></div>
 <div class="icon-grid" id="iconGrid">${names.map(tile).join("")}</div><div class="icon-empty" id="iconEmpty" hidden>검색 결과가 없습니다. 세트 밖의 아이콘은 <code>assets/icons/</code> 에서 찾아 <code>_build/icons.js</code> 의 <code>ICON_NAMES</code> 에 추가하세요.</div>
@@ -154,7 +150,6 @@ ${codeBlock("icon-img", `<!-- 정적 파일 (색 상속 불가, 장식용) -->\n
       const ramp = [["Display 1", "t-display-1", 40, 52, "-0.0282em", 700], ["Display 2", "t-display-2", 32, 44, "-0.0253em", 700], ["Heading 1", "t-heading-1", 28, 38, "-0.0236em", 700], ["Heading 2", "t-heading-2", 24, 32, "-0.023em", 700], ["Heading 3", "t-heading-3", 20, 28, "-0.012em", 700], ["Heading 4", "t-heading-4", 18, 26, "-0.002em", 700], ["Title 1", "t-title-1", 16, 24, "0.0057em", 500], ["Title 2", "t-title-2", 14, 20, "0.0145em", 500], ["Body 1", "t-body-1", 16, 26, "0.0057em", 400], ["Body 2", "t-body-2", 14, 22, "0.0145em", 400], ["Label 1", "t-label-1", 14, 20, "0.0145em", 500], ["Label 2", "t-label-2", 12, 16, "0.0252em", 500], ["Caption 1", "t-caption-1", 12, 18, "0.0252em", 400], ["Caption 2", "t-caption-2", 10, 14, "0.0311em", 400]];
       const wname = { 700: "Bold", 500: "Medium", 400: "Regular" };
       return `<h1>Typography</h1><p class="lead">타이포그래피는 텍스트를 읽기 쉽고 아름답게 표현하는 시각적 체계로, 폰트 선택 · 크기 · 굵기 · 행간 · 자간을 조합하여 정보의 위계와 가독성을 만들어냅니다. 서체 하나(Pretendard)로 타이틀 · 본문 · 숫자 · 캡션의 크기와 굵기 차이를 분명히 두어 위계를 만들고, 각 단계는 <code>.t-*</code> 유틸리티 클래스로 제공합니다.</p>
-<div class="meta">${tagOf("ready")}<span class="doc-tag">Web Desktop</span><span class="doc-tag">Pretendard Variable</span><span class="doc-tag">Figma: Text Styles ${ramp.length}</span></div>
 <h2 id="basic">Basic typography</h2><p>한국어와 영어를 함께 쓰는 관리 콘솔의 기본 글꼴로 <a href="https://github.com/orioncactus/pretendard" target="_blank" rel="noopener">Pretendard</a> 를 사용합니다. 가변 서체 하나(Regular 400 · Medium 500 · Bold 700)로 모든 굵기를 표현하며, 숫자는 자릿수가 바뀌어도 폭이 같은 고정폭 숫자(tabular numbers)로 표 · KPI 의 정렬을 유지합니다.</p>
 <div class="type-sample"><b>Pretendard 프리텐다드 Aa</b><span class="num t-num">0123456789 · 1,284 · 99.2%</span></div>
 ${codeBlock("typo-font", `@font-face{font-family:"Pretendard";font-weight:45 920;font-style:normal;font-display:swap;src:url("fonts/PretendardVariable.woff2") format("woff2-variations")}\n:root{--font-sans:"Pretendard",-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;--font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"D2Coding",monospace}\nbody{font-family:var(--font-sans);font-size:16px;line-height:1.65;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}`, "css", "CSS 복사")}

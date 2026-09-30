@@ -36,7 +36,7 @@
   <div class="main">
     <div class="page"><article id="content">
 <h1>Design Token<span class="n">N</span></h1><p class="lead">이 가이드가 쓰는 토큰 원본(CSS 변수 · Light/Dark)과 Radius · Motion · Accessibility 규칙입니다. <code>--accent-*</code> 만 제품 컬러로 바꾸면 나머지는 그대로 씁니다. 색의 의미와 사용 규칙은 <a href="../foundations/colors.html">Foundations › Colors</a> 를 참고하세요.</p>
-<div class="meta"><span class="doc-tag ok">완료</span><button class="btn sm secondary" type="button" data-copy="tokencss" data-label="전체 CSS 복사">전체 CSS 복사</button></div>
+<p><button class="btn sm secondary" type="button" data-copy="tokencss" data-label="전체 CSS 복사">전체 CSS 복사</button></p>
 <h2 id="layers">Token Layers</h2><div class="kv"><dt>Primitive</dt><dd><code>--gray-*</code> <code>--brand-*</code> <code>--accent-*</code> <code>--red-*</code>… 값의 원천. 컴포넌트에서 직접 쓰지 않음 (<a href="../foundations/colors.html">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--bg-*</code> <code>--text-*</code> <code>--fill-*</code> <code>--line-*</code> <code>--border-*</code> <code>--accent</code> <code>--danger</code> <code>--sev-*</code>… 컴포넌트는 이것만 참조 (<a href="../foundations/colors.html">Colors › Semantic</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--accent-50~900</code>을 생성(명도 전개) → 나머지 토큰은 공통</dd></div>
 <h2 id="css">CSS Variables</h2><p>Light 기본값 + Dark 오버라이드(<code>prefers-color-scheme</code> 및 <code>[data-theme="dark"]</code>)를 포함합니다.</p><div class="code-block"><button type="button" class="copy-btn" data-copy="tokencss" data-label="CSS 복사">CSS 복사</button><pre><code id="tokencss"><span class="tk-tag">:root</span><span class="tk-punc">{</span>
   <span class="tk-cmt">/* Gray scale (slate) */</span>

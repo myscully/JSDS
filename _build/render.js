@@ -6,12 +6,10 @@ const { esc, dedent, cssFor, tokenBlock, htmlToJsx, hl } = LIB;
 const $ = s => document.querySelector(s);
 const STYLE = () => window.STYLE_TEXT || "";
 const nb = (sec, key) => NEW.has(`${sec}/${key}`) ? '<span class="n">N</span>' : "";
-const tagOf = s => s === "ready" ? '<span class="doc-tag ok">완료</span>' : s === "wip" ? '<span class="doc-tag wip">작업 중</span>' : '<span class="doc-tag todo">예정</span>';
 const allPages = sec => LIB.allPages(SITE, sec);
 const firstPage = sec => `#/${sec}/${allPages(sec)[0].key}`;
 function currentSection() { const h = (location.hash || "#/home/overview").split("/"); return SITE[h[1]] ? h[1] : "home"; }
 function titleOf(sec, key) { const p = allPages(sec).find(p => p.key === key); return p ? p.title : key; }
-const figmaLink = `<a class="doc-tag" href="${FIGMA}" target="_blank" rel="noopener">Figma ↗</a>`;
 
 /* ============ chrome ============ */
 function buildTopNav() { const cur = currentSection(); $("#topnav").innerHTML = Object.entries(SITE).map(([sec, d]) => `<a href="${firstPage(sec)}" class="${sec === cur ? "active" : ""}">${d.title}${d.isNew ? '<span class="n">N</span>' : ""}</a>`).join(""); }
@@ -47,8 +45,7 @@ function overviewPage(sec) {
 }
 function templatePage(sec, key) {
   const d = SITE[sec]; const t = titleOf(sec, key);
-  return `<h1>${t}${nb(sec, key)}</h1><p class="lead">${t}의 정의와 사용 기준을 씁니다. (${d.title}, 아직 틀 상태입니다)</p><div class="meta">${tagOf("todo")}${figmaLink}</div>
-  <h2 id="usage">Usage</h2><div class="ph">사용 예시 · 원칙<small>작성 예정</small></div>
+  return `<h1>${t}${nb(sec, key)}</h1><p class="lead">${t}의 정의와 사용 기준을 씁니다. (${d.title}, 아직 틀 상태입니다)</p>  <h2 id="usage">Usage</h2><div class="ph">사용 예시 · 원칙<small>작성 예정</small></div>
   <h2 id="guideline">Guideline</h2><div class="dodont"><div class="do"><div class="body"><p>권장 사용 예를 씁니다.</p></div></div><div class="dont"><div class="body"><p>피해야 할 사용 예를 씁니다.</p></div></div></div>`;
 }
 
@@ -99,10 +96,9 @@ const dodont = g => g ? `<h2 id="guideline">Guideline</h2><div class="dodont"><d
 
 function componentPage(key) {
   const c = COMPONENTS[key]; const t = titleOf("components", key);
-  if (!c) return `<h1>${t}</h1><p class="lead">${t} 컴포넌트는 아직 작성되지 않았습니다.</p><div class="meta">${tagOf("todo")}${figmaLink}</div><div class="ph">라이브 프리뷰 · 코드<small>components.data.js 에 항목을 추가하세요</small></div>`;
+  if (!c) return `<h1>${t}</h1><p class="lead">${t} 컴포넌트는 아직 작성되지 않았습니다.</p><div class="ph">라이브 프리뷰 · 코드<small>components.data.js 에 항목을 추가하세요</small></div>`;
   const css = cssOf(c); const label = [].concat(c.css || []).join(", ");
-  return `<h1>${t}${nb("components", key)}</h1><p class="lead">${c.desc}</p><div class="meta">${tagOf(c.status)}${figmaLink}<span class="doc-tag">Desktop</span><span class="doc-tag">HTML+CSS · React</span></div>
-${c.anatomy ? `<h2 id="anatomy">Anatomy</h2><div class="panel">${dedent(c.anatomy.demo)}</div><ol class="legend">${c.anatomy.items.map((x, i) => `<li><span class="marker">${i + 1}</span>${x}</li>`).join("")}</ol>` : ""}
+  return `<h1>${t}${nb("components", key)}</h1><p class="lead">${c.desc}</p>${c.anatomy ? `<h2 id="anatomy">Anatomy</h2><div class="panel">${dedent(c.anatomy.demo)}</div><ol class="legend">${c.anatomy.items.map((x, i) => `<li><span class="marker">${i + 1}</span>${x}</li>`).join("")}</ol>` : ""}
 <h2 id="examples">Examples</h2>${(c.examples || []).map((ex, i) => `<h3 id="ex-${ex.id}">${i + 1}. ${ex.title}</h3>${ex.desc ? `<p>${ex.desc}</p>` : ""}${exampleBlock("components", key, ex, css, label)}`).join("")}
 <h2 id="props">Props</h2><p>HTML 에서는 클래스와 속성으로, React(<code>@jiran/ds-react</code>)에서는 같은 이름의 prop(<code>variant</code> · <code>size</code> …)으로 변형·상태를 지정합니다.</p>${propsTable(c.props)}
 ${usageBlock(key, css, label, c.react || [])}`;
@@ -113,8 +109,7 @@ function patternPage(key) {
   const uses = c.uses || []; const prefixes = [...new Set([...uses.flatMap(u => [].concat((COMPONENTS[u] || {}).css || [])), ...[].concat(c.css || [])])];
   const css = cssFor(prefixes, STYLE(), VERSION); const label = prefixes.join(", ");
   const group = (allPages("patterns").find(p => p.key === key) || {}).group;
-  return `<h1>${t}${nb("patterns", key)}</h1><p class="lead">${c.desc}</p><div class="meta">${tagOf(c.status)}${figmaLink}${group ? `<span class="doc-tag">${group}</span>` : ""}<span class="doc-tag">HTML+CSS · React</span></div>
-<h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses">${uses.map(u => `<a href="#/components/${u}">${titleOf("components", u)}</a>`).join("")}</div>
+  return `<h1>${t}${nb("patterns", key)}</h1><p class="lead">${c.desc}</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses">${uses.map(u => `<a href="#/components/${u}">${titleOf("components", u)}</a>`).join("")}</div>
 ${c.principles ? `<div class="kv">${c.principles.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</div>` : ""}
 <h2 id="examples">Examples</h2>${(c.examples || []).map((ex, i) => `<h3 id="ex-${ex.id}">${i + 1}. ${ex.title}</h3>${ex.desc ? `<p>${ex.desc}</p>` : ""}${exampleBlock("patterns", key, ex, css, label)}`).join("")}
 ${usageBlock(key, css, label, [...new Set([...(c.react || []), ...uses.flatMap(u => (COMPONENTS[u] || {}).react || [])])])}`;
@@ -189,7 +184,6 @@ const PAGES = {
 <li><b>제품 컬러 적용</b><code>--accent-*</code> 열 단계만 제품 메인 컬러로 바꾸면 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다. HEX 하나로 10단계를 만드는 함수는 <a href="#/resources/design-token#accent-js">Design Token › Accent 스케일 생성</a>.${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}</li>
 </ol>`;
     return `<h1>Getting started${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 제외한 모든 기본 구성(색 · 글자 · 간격 · 컴포넌트 · 패턴)을 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
-<div class="meta">${tagOf("ready")}${figmaLink}<span class="doc-tag">Figma · React · HTML+CSS</span><span class="doc-tag">${VERSION}</span></div>
 <p class="t-body-2">어느 역할이든 각 <a href="#/components/overview">컴포넌트 페이지</a>가 사용법의 단일 출처입니다. Examples 로 실제 동작과 상태를, Props 표로 허용되는 변형을, 코드 보기로 HTML+CSS · React 코드를 확인합니다. 필요한 컴포넌트가 없으면 <a href="#/resources/contribution">Contribution</a> 절차로 제안합니다.</p>
 <p class="t-body-2">헤더의 Accent 선택으로 제품별 컬러를, 테마 버튼으로 다크 모드를 미리 볼 수 있고, 키보드 <code>/</code> 로 검색창을 엽니다.</p>
 ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자"], ["html", "HTML+CSS 개발자"]], [designer, react, html])}
@@ -225,7 +219,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
   "resources/design-token": () => {
     const css = STYLE(); const root = css.slice(css.indexOf(":root{"), css.indexOf("*{box-sizing")).trim();
     return `<h1>Design Token${nb("resources", "design-token")}</h1><p class="lead">이 가이드가 쓰는 토큰 원본(CSS 변수 · Light/Dark)과 Radius · Motion · Accessibility 규칙입니다. <code>--accent-*</code> 만 제품 컬러로 바꾸면 나머지는 그대로 씁니다. 색의 의미와 사용 규칙은 <a href="#/foundations/colors">Foundations › Colors</a> 를 참고하세요.</p>
-<div class="meta">${tagOf("ready")}<button class="btn sm secondary" type="button" data-copy="tokencss" data-label="전체 CSS 복사">전체 CSS 복사</button></div>
+<p><button class="btn sm secondary" type="button" data-copy="tokencss" data-label="전체 CSS 복사">전체 CSS 복사</button></p>
 <h2 id="layers">Token Layers</h2><div class="kv"><dt>Primitive</dt><dd><code>--gray-*</code> <code>--brand-*</code> <code>--accent-*</code> <code>--red-*</code>… 값의 원천. 컴포넌트에서 직접 쓰지 않음 (<a href="#/foundations/colors">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--bg-*</code> <code>--text-*</code> <code>--fill-*</code> <code>--line-*</code> <code>--border-*</code> <code>--accent</code> <code>--danger</code> <code>--sev-*</code>… 컴포넌트는 이것만 참조 (<a href="#/foundations/colors">Colors › Semantic</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--accent-50~900</code>을 생성(명도 전개) → 나머지 토큰은 공통</dd></div>
 <h2 id="css">CSS Variables</h2><p>Light 기본값 + Dark 오버라이드(<code>prefers-color-scheme</code> 및 <code>[data-theme="dark"]</code>)를 포함합니다.</p>${codeBlock("tokencss", root, "css", "CSS 복사")}
 <h2 id="radius">Radius</h2><p>역할별로 반경을 정해 두고, 모든 블록에 같은 반경을 찍지 않습니다. 타일을 클릭하면 토큰이 복사됩니다.</p>
@@ -245,7 +239,6 @@ ${codeBlock("a11y-css", `:focus-visible{outline:2px solid var(--border-focus);ou
   "components/overview": () => overviewPage("components"),
   "patterns/overview": () => overviewPage("patterns"),
   "resources/react": () => `<h1>React Package${nb("resources", "react")}</h1><p class="lead"><code>@jiran/ds-react</code> — 이 가이드의 30개 컴포넌트와 패턴 래퍼를 실제 React 컴포넌트로 구현한 패키지입니다. 사이트와 같은 클래스 마크업을 렌더링하므로 스타일시트 하나로 동작하고, 각 컴포넌트 페이지의 React 탭 코드가 곧 사용법입니다.</p>
-<div class="meta">${tagOf("ready")}<span class="doc-tag">React 18 · 19</span><span class="doc-tag">TypeScript</span><span class="doc-tag">ESM · CJS</span><span class="doc-tag">${VERSION}</span></div>
 <h2 id="install">설치</h2>${codeBlock("react-install", REACT_INSTALL, "tsx", "복사")}
 <div class="kv"><dt>테마</dt><dd><code>&lt;html data-theme="dark"&gt;</code> 또는 <code>setTheme("dark")</code>. 없으면 시스템 설정을 따릅니다. 포털(Popup·Toast)도 <code>&lt;html&gt;</code> 에서 토큰을 상속합니다</dd><dt>서체·배경</dt><dd>앱 루트에 <code>.ds-root</code> 를 붙이면 Pretendard · 본문 색 · 배경 토큰이 적용됩니다</dd><dt>브라우저</dt><dd><code>color-mix()</code> 사용 — Chrome 111+ · Safari 16.2+ · Firefox 113+</dd><dt>버전</dt><dd>패키지 major.minor 는 이 가이드 버전(${VERSION})과 같이 올립니다</dd></div>
 <h2 id="usage">사용</h2><p>모든 컴포넌트는 <code>forwardRef</code> · <code>className</code> 병합 · 나머지 props 전달을 지원합니다. 변형은 HTML 클래스와 같은 이름의 prop 입니다.</p>
@@ -262,12 +255,10 @@ ${codeBlock("react-usage", `import { Button, TextField, Tag, DataTable, useToast
           DS.popup.open("#confirm-delete"); // .popup 요소를 배경과 함께 표시(Esc·배경 클릭·[data-popup-close] 로 닫힘)
           document.addEventListener("ds:select", e => console.log(e.detail.value)); // ds:select · ds:tab · ds:page · ds:date · ds:slide
         <\/script>`), "html", "복사")}<table class="tbl compact"><thead><tr><th>컴포넌트</th><th>ds.js 가 붙이는 동작</th></tr></thead><tbody><tr><td>Dropdown / Select</td><td>트리거 토글, 항목 선택 시 트리거 텍스트 갱신(listbox), 바깥 클릭·Esc 닫힘, ↑↓ Home End Enter</td></tr><tr><td>Tabs · Select Button · Chip · Tile · List · Card</td><td><code>.on</code> + <code>aria-selected/pressed</code> 전환, Tabs ←→ 키와 <code>.tab-panel</code> 텍스트 갱신, Chip <code>.x</code> 제거, <code>.tile-grid[data-single]</code> 단일 선택, <code>.card-grid .card.clickable</code> 선택</td></tr><tr><td>Breadcrumb · Steps · Text Field</td><td><code>.more[data-items]</code> 상위 경로 펼치기, <code>.onboard [data-step=prev|next]</code> 단계 이동, <code>[maxlength]</code> 입력 시 <code>.counter</code> 갱신</td></tr><tr><td>Pagination · SideNav · TopBar</td><td>현재 페이지/메뉴 이동(<code>aria-current</code>), 이전/다음 비활성 계산</td></tr><tr><td>Slider · Search</td><td><code>--p</code> 트랙 채움·<code>.val</code> 표시, 지우기 버튼 표시/동작</td></tr><tr><td>DatePicker · Calendar</td><td>열기/닫기, 달력 없으면 자동 생성(기간 필드는 range), 달 이동, 날짜·기간 선택, 오늘·적용, <code>[data-preset=N]</code> 최근 N일</td></tr><tr><td>Checkbox · Terms · Data Table</td><td>전체 선택 ↔ indeterminate, 필수 약관 미동의 시 다음 비활성, 헤더 정렬(<code>aria-sort</code>) · 행 선택 · 액션 바 개수</td></tr><tr><td>Notice · Toast · Popup</td><td>닫기/액션 제거, <code>data-duration</code> 자동 소멸, <code>DS.toast()</code> · <code>DS.popup.open()</code>, 배경 클릭·Esc</td></tr></tbody></table><h2 id="dev">개발·검증</h2><div class="kv"><dt>소스</dt><dd><code>_react/src</code> · 예제 <code>_react/examples/&lt;sec&gt;/&lt;page&gt;/&lt;id&gt;.tsx</code>(= 이 사이트 React 탭 소스)</dd><dt>테스트</dt><dd><code>npm test</code> — 컴포넌트 동작 + <b>사이트 HTML 과 React 렌더 구조 일치</b>(태그·클래스·상태 속성) 118개 예제</dd><dt>빌드</dt><dd><code>npm run build</code> → <code>dist/</code> ESM·CJS·d.ts·style.css·fonts. <code>npm run demo</code> 전체 예제 미리보기</dd><dt>추가 규칙</dt><dd>컴포넌트를 추가하면 <code>components.data.js</code>(HTML·props) + <code>style.src.css</code> + <code>_react/src</code> + <code>_react/examples</code> 를 함께 갱신. verify 가 React 탭 누락을 잡습니다</dd></div>`,
-  "resources/figma": () => `<h1>Figma Library</h1><p class="lead">디자인 파일과 라이브러리 구조입니다. 사이트의 각 컴포넌트 페이지와 Figma 섹션이 1:1 로 대응합니다.</p><div class="meta">${tagOf("ready")}<a class="doc-tag" href="${FIGMA}" target="_blank" rel="noopener">파일 열기 ↗</a></div>
-<div class="tablewrap"><table><thead><tr><th>페이지</th><th>내용</th><th>가이드 대응</th></tr></thead><tbody><tr><td>Home</td><td>커버, Overview(파일 구성·작업 규칙), About, UX Principles</td><td>Home</td></tr><tr><td>Foundations</td><td>Overview · Base material(Colors · Elevation · Grid · Icons · Typography). Radius · Motion · Accessibility · 토큰 원본은 Resources › Design Token</td><td>Foundations</td></tr><tr><td>Components</td><td>30개 컴포넌트 (Selection Controls · Table 그룹 포함). 각 섹션에 사이트 코드와 같은 스펙의 Variant · Size · State 프레임과 HTML 코드 참조</td><td>Components</td></tr><tr><td>Patterns</td><td>Common UI · Service Pattern · Security Console. 각 패턴의 대표 예시 프레임</td><td>Patterns</td></tr><tr><td>Resources</td><td>Figma Library · Token Download · Changelog · Contribution</td><td>Resources</td></tr><tr><td>_Archive · …(v0.1)</td><td>이전 뼈대 페이지 보관 (참고용, 사용 안 함)</td><td>—</td></tr></tbody></table></div>
+  "resources/figma": () => `<h1>Figma Library</h1><p class="lead">디자인 파일과 라이브러리 구조입니다. 사이트의 각 컴포넌트 페이지와 Figma 섹션이 1:1 로 대응합니다. <a href="${FIGMA}" target="_blank" rel="noopener">파일 열기 ↗</a></p><div class="tablewrap"><table><thead><tr><th>페이지</th><th>내용</th><th>가이드 대응</th></tr></thead><tbody><tr><td>Home</td><td>커버, Overview(파일 구성·작업 규칙), About, UX Principles</td><td>Home</td></tr><tr><td>Foundations</td><td>Overview · Base material(Colors · Elevation · Grid · Icons · Typography). Radius · Motion · Accessibility · 토큰 원본은 Resources › Design Token</td><td>Foundations</td></tr><tr><td>Components</td><td>30개 컴포넌트 (Selection Controls · Table 그룹 포함). 각 섹션에 사이트 코드와 같은 스펙의 Variant · Size · State 프레임과 HTML 코드 참조</td><td>Components</td></tr><tr><td>Patterns</td><td>Common UI · Service Pattern · Security Console. 각 패턴의 대표 예시 프레임</td><td>Patterns</td></tr><tr><td>Resources</td><td>Figma Library · Token Download · Changelog · Contribution</td><td>Resources</td></tr><tr><td>_Archive · …(v0.1)</td><td>이전 뼈대 페이지 보관 (참고용, 사용 안 함)</td><td>—</td></tr></tbody></table></div>
 <h2 id="vars">Variables · Styles</h2><ul><li><b>Primitive</b>: color/{gray·accent·red·amber·emerald·sky}/{step}, color/brand/{step}, space/{n}, radius/{name}, size/{card-padding…}</li><li><b>Semantic</b>(Light/Dark): bg/ text/ border/ primary(=Accent)/ status/ severity/ — CSS 변수 이름과 1:1</li><li><b>Text Styles</b> 14단계 Pretendard(= <code>.t-*</code> 클래스) · <b>Effect Styles</b> Shadow Normal xs~xl · Spread sm/md(= <code>--shadow-*</code>, 1~3 은 별칭)</li></ul>
 <h2 id="rules">작업 규칙</h2><ul><li>색은 Semantic 변수만, 글자는 Text Style만, 그림자는 Effect Style만.</li><li>Variant 속성명은 소문자(variant / size / state). 사이트 Props 표의 클래스 이름과 같게.</li><li>컴포넌트 Description에 용도·사용 규칙과 사이트 페이지 링크 기입.</li></ul>`,
-  "resources/tokens": () => `<h1>Token Download</h1><p class="lead">CSS 변수와 JSON 형식으로 토큰을 내려받습니다.</p><div class="meta">${tagOf("ready")}</div>
-<p><a href="#/resources/design-token">Design Token</a> 페이지에서 CSS 전체를 복사할 수 있고, 빌드 산출물 <code>_build/components.json</code> 에 토큰(light/dark)과 컴포넌트 스펙·예제 코드가 함께 들어 있습니다. JSON(Style Dictionary) 예시:</p>
+  "resources/tokens": () => `<h1>Token Download</h1><p class="lead">CSS 변수와 JSON 형식으로 토큰을 내려받습니다.</p><p><a href="#/resources/design-token">Design Token</a> 페이지에서 CSS 전체를 복사할 수 있고, 빌드 산출물 <code>_build/components.json</code> 에 토큰(light/dark)과 컴포넌트 스펙·예제 코드가 함께 들어 있습니다. JSON(Style Dictionary) 예시:</p>
 ${codeBlock("tok-json", `{\n  "color": { "accent": { "600": { "value": "{product.main}" } }, "brand": { "500": { "value": "#FF7F00" } } },\n  "space": { "4": { "value": "16px" } }, "radius": { "md": { "value": "8px" } }\n}`, "tsx")}<p>Figma Variables → JSON 내보내기 연동은 예정입니다.</p>`,
   "resources/changelog": () => `<h1>Changelog</h1><p class="lead">버전별 변경 이력입니다. 가이드와 Figma 파일의 버전을 함께 올립니다.</p>
 <div class="tablewrap"><table><thead><tr><th>버전</th><th>날짜</th><th>내용</th></tr></thead><tbody>${CHANGELOG.map(c => `<tr><td><code>${c[0]}</code></td><td>${c[1]}</td><td>${c[2]}</td></tr>`).join("")}</tbody></table></div>`,
@@ -281,7 +272,6 @@ ${codeBlock("tok-json", `{\n  "color": { "accent": { "600": { "value": "{product
     const row = r => `<tr class="${r[4] === "sub" ? "sub" : ""}"><td><b>${r[0]}</b><span>${r[1]}</span></td>${W.map((w, i) => { const c = i + 1, on = c >= r[2] && c <= r[3]; const cls = [on ? r[4] : "", w[2] ? "hol" : "", r[6] === c ? "ms" : ""].filter(Boolean).join(" "); return `<td class="${cls}">${on && c === r[2] ? `<span class="l">${r[5]}</span>` : ""}</td>`; }).join("")}</tr>`;
     const chips = a => a.join(" · ");
     return `<h1>WBS${nb("resources", "wbs")}</h1><p class="lead">사이트·Figma 동기화 상태(v0.6)를 기준선으로 삼고, 11/30 까지 59개 페이지를 메뉴별로 하나씩 업데이트해 v1.0 으로 공개합니다. 페이지를 고치면 그 주 안에 사이트 재배포와 Figma 반영까지 끝내는 것을 한 묶음으로 봅니다.</p>
-<div class="meta">${tagOf("wip")}<span class="doc-tag">2026.09.15 → 11.30 · 11주</span><span class="doc-tag">Home 3 · Foundations 6 · Components 30 · Patterns 11 · Resources 6</span><span class="doc-tag">v1.0 공개 시 이 페이지 제거</span></div>
 <h2 id="milestones">마일스톤</h2><div class="kv"><dt>09.18</dt><dd>기준선 확정 — 동기화 상태 점검, 완료 정의 합의</dd><dt>10.02</dt><dd>Foundations 완료</dd><dt>11.06</dt><dd>Components 완료</dd><dt>11.20</dt><dd>Patterns · Resources 완료</dd><dt>11.27</dt><dd>QA 완료</dd><dt>11.30</dt><dd><b>v1.0 공개</b></dd></div>
 <h2 id="gantt">주차별 일정</h2><div class="tablewrap"><table class="wbs">${head}${R.map(row).join("")}</table></div>
 <div class="wbs-legend"><span><i></i>작업 구간</span><span><i class="sub"></i>Components 세부 묶음</span><span><i class="final"></i>마무리</span><span><i class="ms"></i>마일스톤</span><span><i class="hol"></i>공휴일 포함 주(추석 09.24–28 · 개천절 대체 10.05 · 한글날 10.09)</span></div>
@@ -304,11 +294,10 @@ ${codeBlock("tok-json", `{\n  "color": { "accent": { "600": { "value": "{product
 <li><b>체크</b>업데이트 목록에 완료 표시. 한 주에 끝내지 못한 페이지는 다음 주 첫 순서로 넘기고 단계 완료일은 그대로 둡니다.</li>
 </ol>`;
   },
-  "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><div class="meta">${tagOf("wip")}</div>
-<ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인파트 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
+  "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인파트 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
 };
 
-Object.assign(PAGES, window.FOUNDATION_PAGES({ codeBlock, tokenSection, sw, nb, tagOf, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent }));
+Object.assign(PAGES, window.FOUNDATION_PAGES({ codeBlock, tokenSection, sw, nb, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent }));
 
 /* ============ router ============ */
 function render() {
