@@ -50,7 +50,7 @@
 <li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyAccent</code> 에 제품 메인 컬러 HEX 하나를 넣으면 나머지 색은 자동입니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-react-install" data-label="복사">복사</button><pre><code id="gs-react-install">npm i @jiran/ds-react
 
 <span class="tk-cmt">// main.tsx — 앱 진입점에서 한 번</span>
-<span class="tk-kw">import</span> <span class="tk-str">"@jiran/ds-react/style.css"</span>;   <span class="tk-cmt">// 토큰 + 컴포넌트 CSS</span>
+<span class="tk-kw">import</span> <span class="tk-str">"@jiran/ds-react/style.css"</span>;   <span class="tk-cmt">// 토큰 + 컴포넌트 CSS (사이트 크롬 제외)</span>
 <span class="tk-kw">import</span> { ToastProvider, applyAccent } <span class="tk-kw">from</span> <span class="tk-str">"@jiran/ds-react"</span>;
 
 applyAccent(<span class="tk-str">"#2563EB"</span>);               <span class="tk-cmt">// 제품 메인 컬러 → --accent-50~900 생성</span>
@@ -78,11 +78,8 @@ createRoot(document.getElementById(<span class="tk-str">"root"</span>)!).render(
 <span class="tk-punc">&lt;</span><span class="tk-tag">button</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"btn md primary"</span><span class="tk-punc">&gt;</span>정책 저장<span class="tk-punc">&lt;/</span><span class="tk-tag">button</span><span class="tk-punc">&gt;</span>
 <span class="tk-punc">&lt;</span><span class="tk-tag">span</span> <span class="tk-attr">class</span><span class="tk-punc">=</span><span class="tk-str">"tag critical"</span><span class="tk-punc">&gt;</span>Critical<span class="tk-punc">&lt;/</span><span class="tk-tag">span</span><span class="tk-punc">&gt;</span>
 
-<span class="tk-cmt">&lt;!-- 동작이 필요한 곳은 ds.js 의 API --&gt;</span>
 <span class="tk-punc">&lt;</span><span class="tk-tag">script</span><span class="tk-punc">&gt;</span>
-  DS.toast("저장되었습니다");
-  DS.popup.open("#confirm-delete");
-  DS.init(document.getElementById("dynamic-area")); // 동적으로 넣은 마크업
+  DS.init(document.getElementById("dynamic-area")); // 나중에 DOM 에 넣은 마크업만 한 번
 <span class="tk-punc">&lt;/</span><span class="tk-tag">script</span><span class="tk-punc">&gt;</span></code></pre></div></li>
 <li><b>제품 컬러 적용</b><code>--accent-*</code> 열 단계만 제품 메인 컬러로 바꾸면 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다. HEX 하나로 10단계를 만드는 함수는 <a href="../resources/design-token.html#accent-js">Design Token › Accent 스케일 생성</a>.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-accent" data-label="CSS 복사">CSS 복사</button><pre><code id="gs-accent"><span class="tk-cmt">/* 제품 메인 컬러 하나로 생성한 10단계를 :root 에 덮어씁니다 (생성 함수는 Design Token › Accent 스케일 생성) */</span><span class="tk-tag">
 :root</span><span class="tk-punc">{</span>
