@@ -99,7 +99,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 ${full ? "" : `  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴">${navOf(root)}</nav><div class="sidebar-foot">${parts.foot}</div></aside>\n`}  <div class="main">
 ${isHome ? `<div id="content" class="home">\n${rewrite(parts.content, root)}\n</div>` : `    <div class="page"><article id="content">\n${rewrite(parts.content, root)}\n    </article></div>`}
   </div>
-</div>
+${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" hidden></aside>\n`}</div>
 </body>
 </html>
 `;

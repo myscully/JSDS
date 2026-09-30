@@ -1,6 +1,6 @@
 {
   "version": "v0.6",
-  "generatedAt": "2026-09-30T08:12:45.421Z",
+  "generatedAt": "2026-09-30T09:19:16.568Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -171,7 +171,8 @@
       "--font-sans": "\"Pretendard\",-apple-system,\"Apple SD Gothic Neo\",\"Noto Sans KR\",sans-serif",
       "--font-mono": "ui-monospace,\"SF Mono\",Menlo,Consolas,\"D2Coding\",monospace",
       "--header-h": "64px",
-      "--sidebar-w": "232px"
+      "--sidebar-w": "232px",
+      "--toc-w": "200px"
     },
     "dark": {
       "--bg-canvas": "var(--gray-950)",
