@@ -176,8 +176,7 @@ const PAGES = {
 <li><b>컴포넌트 넣기</b>Assets 검색창에 이름(예: Button, Tag, Data Table)을 입력하고 캔버스로 끌어다 놓습니다. 넣은 것은 인스턴스라 원본은 바뀌지 않고, 원본이 갱신되면 따라서 갱신됩니다.</li>
 <li><b>변형·상태 바꾸기</b>인스턴스를 선택하면 오른쪽 패널에 <code>variant</code> · <code>size</code> · <code>state</code> 드롭다운이 보입니다. 이름은 이 사이트 각 컴포넌트 페이지의 Props 표와 같아서, 개발자와 같은 말로 이야기할 수 있습니다.</li>
 <li><b>색·글자·그림자는 스타일만</b>직접 색을 고르지 말고 채우기 → <b>Variables</b> 탭에서 <code>bg/</code> <code>text/</code> <code>border/</code> <code>primary/</code> <code>status/</code> <code>severity/</code> 변수를 씁니다. 글자는 Text Style, 그림자는 Effect Style. 이렇게 해야 제품 컬러·다크 테마가 자동으로 맞춰집니다.</li>
-</ol>
-<p>사이트 둘러보기: 상단 메뉴 Foundations(색·글자·간격 규칙) → Components(30개) → Patterns(11개 화면 패턴). 헤더의 <b>Accent</b> 선택으로 제품별 컬러를, <b>테마</b> 버튼으로 다크 모드를 미리 볼 수 있고, 키보드 <code>/</code> 를 누르면 검색창으로 이동합니다.</p>`;
+</ol>`;
     const react = `<ol class="guide-steps">
 <li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyAccent</code> 에 제품 메인 컬러 HEX 하나를 넣으면 나머지 색은 자동입니다.${codeBlock("gs-react-install", REACT_INSTALL, "tsx", "복사")}</li>
 <li><b>컴포넌트 가져다 쓰기</b>변형은 HTML 클래스와 같은 이름의 prop 입니다. 전체 목록은 <a href="#/resources/react#map">React Package › 컴포넌트 ↔ 클래스</a>.${codeBlock("gs-react-use", GS_REACT_USE, "tsx", "복사")}</li>
@@ -191,8 +190,8 @@ const PAGES = {
 </ol>`;
     return `<h1>Getting started${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 제외한 모든 기본 구성(색 · 글자 · 간격 · 컴포넌트 · 패턴)을 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
 <div class="meta">${tagOf("ready")}${figmaLink}<span class="doc-tag">Figma · React · HTML+CSS</span><span class="doc-tag">${VERSION}</span></div>
-<h2 id="who">누구에게 무엇이 필요한가</h2><div class="kv"><dt>디자이너 · 기획자</dt><dd>Figma 라이브러리 + 이 사이트. 설치할 것이 없습니다</dd><dt>React 개발자</dt><dd><code>@jiran/ds-react</code> 패키지 하나</dd><dt>HTML+CSS 개발자</dt><dd><code>assets/style.css</code> + <code>assets/ds.js</code> 두 파일</dd></div>
-<p>어느 역할이든 <b>각 <a href="#/components/overview">컴포넌트 페이지</a>가 사용법의 단일 출처</b>입니다 — Examples 로 실제 동작과 상태를, Props 표로 허용되는 변형을, 코드 보기로 HTML+CSS · React 코드를 확인합니다. 필요한 컴포넌트가 없으면 <a href="#/resources/contribution">Contribution</a> 절차로 제안합니다.</p>
+<p class="t-body-2">어느 역할이든 각 <a href="#/components/overview">컴포넌트 페이지</a>가 사용법의 단일 출처입니다. Examples 로 실제 동작과 상태를, Props 표로 허용되는 변형을, 코드 보기로 HTML+CSS · React 코드를 확인합니다. 필요한 컴포넌트가 없으면 <a href="#/resources/contribution">Contribution</a> 절차로 제안합니다.</p>
+<p class="t-body-2">헤더의 Accent 선택으로 제품별 컬러를, 테마 버튼으로 다크 모드를 미리 볼 수 있고, 키보드 <code>/</code> 로 검색창을 엽니다.</p>
 ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자"], ["html", "HTML+CSS 개발자"]], [designer, react, html])}
 <h2 id="platforms">지원 환경</h2><p>이 시스템은 <b>데스크톱 웹(관리 콘솔)</b> 만 공식 지원합니다. 아래 기준은 물리 해상도가 아니라 브라우저 <b>viewport CSS px</b> 기준이며, 새 화면은 이 표의 기준 프레임에서 시작합니다. 사이드 내비 폭·콘텐츠 최대 너비·컬럼 같은 레이아웃 값의 단일 출처는 <a href="#/foundations/grid">Foundations › Grid</a> 입니다.</p>
 <div class="tablewrap"><table><thead><tr><th>지원 등급</th><th>viewport</th><th>Figma · QA 기준 프레임</th></tr></thead><tbody>
