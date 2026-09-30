@@ -160,7 +160,7 @@ h3{font-size:16px;margin:var(--space-10) 0 var(--space-3);letter-spacing:-.01em}
 h4{font-size:14px;margin:var(--space-6) 0 var(--space-2)}
 p{margin:0 0 var(--space-3)}
 ul,ol{padding-left:1.3em;max-width:70ch}li{margin-bottom:6px}
-.doc-tabset{margin:0 0 var(--space-12)}
+.doc-tabset{margin:var(--space-12) 0}
 .doc-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--border-default);margin:0 0 var(--space-8)}
 .doc-tabs button{appearance:none;background:none;border:0;cursor:pointer;font:inherit;padding:10px 2px;font-size:16px;font-weight:500;color:var(--text-tertiary);border-bottom:2px solid transparent;margin-bottom:-1px}
 .doc-tabs button.on{color:var(--text-primary);font-weight:700;border-bottom-color:var(--text-primary)}
