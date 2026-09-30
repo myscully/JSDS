@@ -176,8 +176,11 @@ cd _build
 npm i            # 최초 1회 (playwright)
 npx playwright install chromium   # 최초 1회
 node build.js    # 생성 + verify
+git config core.hooksPath _build/git-hooks   # 최초 1회 (클론마다)
 \`\`\`
 샘플 코드 작성 규칙: 문자열 안에 백틱 · \\\${ · onclick · <script · href="#/" 를 쓰지 않습니다(링크는 href="#").
+
+\`style.src.css\` 를 고치면 반드시 \`node build.js\` 를 돌려야 \`assets/style.css\` 와 생성 페이지에 반영됩니다. 위 \`core.hooksPath\` 를 걸어두면 빌드를 빠뜨린 커밋을 pre-commit 훅이 막아줍니다(우회: \`git commit --no-verify\`).
 
 ## 서버 배포 메모
 - 모든 링크는 상대 경로라 하위 경로(예: \`/design-system/\`)에 배치해도 됩니다.

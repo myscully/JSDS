@@ -99,7 +99,7 @@ code{font-size:inherit}
 .topnav a.active{color:var(--text-primary);font-weight:700;border-bottom-color:var(--text-primary)}
 .topnav a .n{font-size:9px;font-weight:800;line-height:1;padding:2px 4px;border-radius:3px;background:var(--text-primary);color:var(--bg-surface)}
 /* 우측 아이콘 버튼 3종 (Accent · 검색 · 테마) */
-.header-right{display:flex;align-items:center;gap:4px;margin-left:var(--space-4)}
+.header-right{display:flex;align-items:center;gap:8px;margin-left:var(--space-4)}
 .hmenu{position:relative;display:flex;align-items:center}
 .hbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:0;border-radius:var(--radius-md);background:transparent;color:var(--text-secondary);cursor:pointer;transition:background var(--motion-fast),color var(--motion-fast)}
 .hbtn:hover{background:var(--fill-normal);color:var(--text-primary)}
