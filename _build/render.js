@@ -328,7 +328,9 @@ function render() {
   else if (SITE[sec] && allPages(sec).some(p => p.key === key)) html = templatePage(sec, key);
   if (!html) { html = `<h1>페이지를 찾을 수 없습니다</h1><p><a href="#/home/overview">홈으로</a></p>`; }
   $("#main").innerHTML = isHome ? `<div id="content" class="home">${html}</div>` : `<div class="page"><article id="content">${html}</article></div>`;
-  document.title = (isHome ? "" : `${titleOf(sec, key)} · `) + "지란지교시큐리티 Design System";
+  /* Overview 페이지는 본문 제목과 같게 섹션 제목을 쓴다(항목명 "Overview" 대신) */
+  const tabTitle = key === "overview" ? SITE[sec].title : titleOf(sec, key);
+  document.title = (isHome ? "" : `${tabTitle} · `) + "지란지교시큐리티 Design System";
   buildTopNav(); if (!$("#q").value.trim()) buildNav(); else markActive(); window.scrollTo(0, 0);
   document.body.dataset.route = `${sec}/${key}`;
 }
