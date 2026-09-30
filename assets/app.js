@@ -153,4 +153,45 @@ const ROOT=document.body.dataset.root||'../';
     grid.querySelectorAll(".icon-tile.on").forEach(t => t.classList.remove("on")); tile.classList.add("on");
     if (window.DS && window.DS.popup) window.DS.popup.open(m); else m.parentElement.hidden = false;
   }
+
+  /* 오른쪽 페이지 목차(On this page) — 1600 이상에서만 CSS 로 보인다.
+     본문 DOM 을 실제로 만들어야 하므로 이 파일에서 유일하게 라우트마다 다시 그린다.
+     미리보기 셸은 render.js 가 hashchange 를 먼저 등록하므로, 아래 리스너는 #main 이 다시 그려진 뒤 실행된다. */
+  let tocSpy = null;
+  function buildToc() {
+    const toc = document.getElementById("toc"), art = document.getElementById("content");
+    if (!toc) return;
+    if (tocSpy) { tocSpy.disconnect(); tocSpy = null; }
+    /* 예제 미리보기 안의 제목(.page-head .title 등)은 섹션이 아니므로 제외 */
+    const hs = art ? [].slice.call(art.querySelectorAll("h2[id], h3[id]")).filter(h => !h.closest(".example")) : [];
+    if (hs.length < 2) { toc.innerHTML = ""; toc.hidden = true; return; }
+    toc.innerHTML = '<h6>이 페이지</h6>' + hs.map(h =>
+      '<a href="#' + h.id + '"' + (h.tagName === "H3" ? ' class="sub"' : "") + ">" + h.textContent.trim() + "</a>").join("");
+    toc.hidden = false;
+    const links = {}; toc.querySelectorAll("a").forEach(a => { links[a.getAttribute("href").slice(1)] = a; });
+    const seen = new Set();
+    const mark = () => {
+      let cur = null;
+      hs.forEach(h => { if (seen.has(h.id)) cur = h.id; });
+      if (!cur) cur = hs[0].id;
+      Object.keys(links).forEach(id => {
+        links[id].classList.toggle("on", id === cur);
+        if (id === cur) links[id].setAttribute("aria-current", "true"); else links[id].removeAttribute("aria-current");
+      });
+    };
+    tocSpy = new IntersectionObserver(es => {
+      es.forEach(e => { if (e.isIntersecting || e.boundingClientRect.top < 0) seen.add(e.target.id); else if (e.boundingClientRect.top > 0) seen.delete(e.target.id); });
+      mark();
+    }, { rootMargin: "-" + (64 + 16) + "px 0px -70% 0px" });
+    hs.forEach(h => tocSpy.observe(h));
+    mark();
+  }
+  buildToc();
+  window.addEventListener("hashchange", buildToc);
+  /* 미리보기 셸은 style.src.css 를 fetch 한 뒤 첫 render() 를 하므로 이 스크립트가 먼저 돌 수 있다.
+     그때는 #content 가 아직 없으니 처음 생길 때 한 번만 다시 그린다(정적 사이트에서는 실행되지 않음). */
+  if (document.getElementById("toc") && !document.getElementById("content")) {
+    const mo = new MutationObserver(() => { if (document.getElementById("content")) { mo.disconnect(); buildToc(); } });
+    mo.observe(document.body, { childList: true, subtree: true });
+  }
 })();
