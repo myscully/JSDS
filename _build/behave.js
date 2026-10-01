@@ -235,10 +235,18 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await go("components/button.html");
   const hamVisible = await page.evaluate(() => { const b = document.getElementById("menuBtn"); return !!b && b.getBoundingClientRect().width > 0; });
   await page.click("#menuBtn");
-  const drawer = await page.evaluate(() => { const p = document.getElementById("menuPop"); return { open: !p.hidden, sec: p.querySelectorAll(".d-sec a").length, sub: p.querySelectorAll(".d-sub a").length }; });
-  ok("drawer opens below 1200 with both menus", hamVisible && drawer.open && drawer.sec >= 5 && drawer.sub > 5, JSON.stringify(drawer));
+  const step1 = await page.evaluate(() => { const p = document.getElementById("menuPop"); return { open: !p.hidden, secs: p.querySelectorAll("[data-drawer-sec]").length, back: !!p.querySelector("[data-drawer-back]"), dim: !document.getElementById("menuDim").hidden }; });
+  ok("drawer step 1 lists sections", hamVisible && step1.open && step1.secs === 5 && !step1.back && step1.dim, JSON.stringify(step1));
+  const url0 = page.url();
+  await page.click('[data-drawer-sec="Foundations"]');
+  await page.waitForSelector("[data-drawer-back]", { timeout: 3000 });   /* 화면 전환은 다음 틱에 그려진다 */
+  const step2 = await page.evaluate(() => { const p = document.getElementById("menuPop"); return { links: p.querySelectorAll(".drawer-body a").length, back: !!p.querySelector("[data-drawer-back]"), title: (p.querySelector("h2") || {}).textContent }; });
+  ok("drawer step 2 shows section pages without navigating", step2.links >= 5 && step2.back && step2.title === "Foundations" && page.url() === url0, JSON.stringify(step2));
+  await page.click("[data-drawer-back]");
+  await page.waitForSelector("[data-drawer-sec]", { timeout: 3000 });
+  ok("drawer back returns to step 1", await page.evaluate(() => document.getElementById("menuPop").querySelectorAll("[data-drawer-sec]").length === 5));
   await page.keyboard.press("Escape");
-  ok("drawer closes on Escape", await page.evaluate(() => document.getElementById("menuPop").hidden));
+  ok("drawer closes on Escape", await page.evaluate(() => document.getElementById("menuPop").hidden && document.getElementById("menuDim").hidden));
   await page.setViewportSize({ width: 1440, height: 900 });
   await go("components/button.html");
   ok("hamburger hidden at 1440", await page.evaluate(() => document.getElementById("menuBtn").getBoundingClientRect().width === 0));

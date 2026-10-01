@@ -95,10 +95,11 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
     </div>
     <div class="hmenu hmenu-nav">
       <button class="hbtn" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="메뉴" title="메뉴">${I("menu-2", 20)}</button>
-      <div class="pop drawer" id="menuPop" hidden></div>
     </div>
   </div>
 </header>
+<div class="drawer-dim" id="menuDim" hidden></div>
+<div class="drawer" id="menuPop" role="dialog" aria-label="메뉴" hidden></div>
 <div class="shell${full ? " full" : ""}">
 ${full ? "" : `  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴">${navOf(root)}</nav><div class="sidebar-foot">${parts.foot}</div></aside>\n`}  <div class="main">
 ${isHome ? `<div id="content" class="home">\n${rewrite(parts.content, root)}\n</div>` : `    <div class="page"><article id="content">\n${rewrite(parts.content, root)}\n    </article></div>`}
