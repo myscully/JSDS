@@ -55,10 +55,11 @@ ${sem("sev-bg", "Severity - Background", "심각도를 배경(태그 바탕, 표
 ${sem("brand", "Brand", "지란지교시큐리티 브랜드 컬러입니다. 이 시스템은 관리자 웹 제품 기준이라 제품 UI 의 Accent(Primary)로 쓰지 않으며, 헤더의 Accent 선택지에도 넣지 않습니다. 로고·헤더 마크 같은 회사 정체성 표기에만 쓰고, 브랜드 디자인 시스템은 별도로 제작합니다.", [["Normal", "--brand"], ["Subtle", "--brand-subtle"]])}
 ${sem("material", "Material", "팝업처럼 층위가 생길 때 배경과의 구분을 위해 뒤를 어둡게 표시해야 할 때 사용합니다.", [["Dimmer", "--dimmer"]], { alpha: true })}
 ${tokenSection("semantic-css", "CSS · Semantic 토큰", [/^--(bg|text|fill|line|border|interaction|sev)-/, /^--(accent|brand|danger|warning|success|info)(-(hover|pressed|subtle|on|inverse))?$/, /^--(static-white|static-black|dimmer)$/], "컴포넌트 CSS 는 아래 의미 토큰만 참조합니다. Dark 테마는 같은 이름에 다른 값을 매핑합니다(전체 원본은 <a href=\"#/resources/design-token\">Design Token</a>).")}`;
-      const g = [0, 50, 100, 150, 200, 300, 400, 500, 550, 600, 700, 800, 900, 950], t11 = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+      const g = [0, 50, 100, 150, 200, 300, 400, 500, 550, 600, 700, 800, 900, 950], n = [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950, 980], t11 = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
       const atomic = `<p>Semantic 토큰이 참조하는 원천 값(Primitive)입니다. 컴포넌트에서 직접 쓰지 않고, 새 의미 토큰을 만들 때 여기서 고릅니다. 숫자는 명도 단계(작을수록 밝음)입니다.</p>
 ${pal("Common", ["white", "black"], "static")}
 ${pal("Gray", g, "gray", "slate · 400 이하는 구조 요소, 500 이상은 텍스트")}
+${pal("Neutral", n, "neutral", "다크 모드 기준 중립 회색 · 다크의 배경·텍스트·보더가 이 램프를 참조")}
 ${pal("Brand", [50, 100, 200, 300, 400, 500, 600, 700, 800, 900], "brand", "#FF7F00 = 500")}
 ${pal("Accent", [50, 100, 200, 300, 400, 500, 600, 700, 800, 900], "accent", "제품 메인 컬러 = 600 · HEX 하나로 명도 전개")}
 ${pal("Red", t11, "red", "Negative · Severity Critical/High")}
