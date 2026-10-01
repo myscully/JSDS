@@ -114,11 +114,13 @@ code{font-size:inherit}
 .hbtn>span{display:flex}
 .hbtn .dot{position:absolute;right:4px;bottom:4px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--bg-canvas)}
 .hmenu-nav{display:none}   /* ☰ 는 1200 미만에서만 */
-/* 테마 아이콘은 현재 상태를 보여준다(다크=달 · 라이트=해). 아래 선택자는 토큰 블록의 다크 선택자와 같아야 한다 */
-.hbtn .i-moon{display:none}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hbtn .i-moon{display:flex}:root:not([data-theme="light"]) .hbtn .i-sun{display:none}}
-:root[data-theme="dark"] .hbtn .i-moon{display:flex}
-:root[data-theme="dark"] .hbtn .i-sun{display:none}
+/* 테마 아이콘은 현재 상태를 보여준다(다크=달 · 라이트=해). Colors 값 모달 제목도 같은 규칙을 쓴다 — 어느 테마의 값인지 알려주기 위해.
+   아래 선택자는 토큰 블록의 다크 선택자와 같아야 한다 */
+.color-modal .i-sun,.color-modal .i-moon{display:flex}
+.hbtn .i-moon,.color-modal .i-moon{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hbtn .i-moon,:root:not([data-theme="light"]) .color-modal .i-moon{display:flex}:root:not([data-theme="light"]) .hbtn .i-sun,:root:not([data-theme="light"]) .color-modal .i-sun{display:none}}
+:root[data-theme="dark"] .hbtn .i-moon,:root[data-theme="dark"] .color-modal .i-moon{display:flex}
+:root[data-theme="dark"] .hbtn .i-sun,:root[data-theme="dark"] .color-modal .i-sun{display:none}
 /* 팝오버 (검색 · Accent) */
 .pop{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-surface);border:1px solid var(--line-neutral);border-radius:var(--radius-lg);box-shadow:var(--shadow-3);padding:6px;z-index:30}
 .search-pop{width:min(380px,calc(100vw - 32px));padding:8px}
@@ -284,14 +286,13 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand)}
 .wbs-legend i{display:inline-block;width:14px;height:10px;border-radius:2px;background:var(--accent);vertical-align:-1px;margin-right:6px}
 .wbs-legend i.sub{background:var(--accent-300)}.wbs-legend i.final{background:var(--brand)}.wbs-legend i.hol{background:var(--bg-subtle);border:1px solid var(--border-default)}.wbs-legend i.ms{width:3px;border-radius:0;background:var(--brand)}
 .sem-row{display:flex;gap:2px;margin:var(--space-3) 0 var(--space-10)}
-.sem-row>div{flex:1;min-width:0;cursor:pointer}
+.sem-row>.sem-cell{flex:1;min-width:0;cursor:pointer;display:block;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:left}
 .sem-row .bar{height:40px;background:var(--checker-bg,transparent);position:relative;border-radius:2px;overflow:hidden}
 .sem-row .bar i{position:absolute;inset:0;display:block}
 .sem-row .bar.line i{inset:auto 0 0 0;height:2px;top:50%;transform:translateY(-50%)}
 .sem-row:not(.checker) .bar.line{background:var(--bg-subtle)}
-.sem-row>div:first-child .bar{border-radius:var(--radius-md) 2px 2px var(--radius-md)}.sem-row>div:last-child .bar{border-radius:2px var(--radius-md) var(--radius-md) 2px}
+.sem-row>*:first-child .bar{border-radius:var(--radius-md) 2px 2px var(--radius-md)}.sem-row>*:last-child .bar{border-radius:2px var(--radius-md) var(--radius-md) 2px}
 .sem-row .name{font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:8px}
-.sem-row>div.copied .name{color:var(--accent)}
 .checker{--checker-bg:repeating-conic-gradient(rgba(112,115,124,.16) 0 25%,transparent 0 50%) 0 0/12px 12px}
 .pal{margin:0 0 var(--space-8)}.pal h3{margin:0 0 8px;font-size:16px}
 .pal .scale{margin:0}.pal .scale div{height:44px;border-radius:3px}.pal .scale div i{font-size:10px;left:0;right:0;bottom:-18px;text-align:center;mix-blend-mode:normal;color:var(--text-secondary);font-weight:500}
@@ -340,7 +341,7 @@ table.type-table td .smp{display:block;color:var(--text-primary)}
 .icon-grid.filled .icon-tile.no-f{display:none}
 .icon-empty{padding:var(--space-8);text-align:center;color:var(--text-tertiary);font-size:14px}
 /* Icons 상세 모달 */
-.icon-modal{width:min(420px,calc(100vw - 32px));gap:16px}
+.popup.icon-modal{width:min(420px,calc(100vw - 32px));gap:16px}
 .icon-modal .popup-title code{font-size:16px;background:none;padding:0;color:var(--text-primary)}
 .icon-modal .popup-title .tag{font-weight:500}
 .icon-modal .tag::before{display:none}
@@ -351,6 +352,19 @@ table.type-table td .smp{display:block;color:var(--text-primary)}
 .icon-kws .tag{font-weight:500}
 .icon-code{margin:0;padding:12px 14px;font-size:12px;line-height:1.6;border-radius:var(--radius-md)}
 .icon-modal .popup-actions{margin-top:0}
+/* Colors 값 모달 — 값은 app.js 가 클릭 시점의 렌더 색에서 채운다. 각 줄과 하단 버튼이 복사 대상 */
+.popup.color-modal{width:min(360px,calc(100vw - 32px));gap:16px}
+.color-modal .popup-title{font-size:16px;padding-right:36px}
+.color-modal .popup-title svg{display:block;width:18px;height:18px;color:var(--text-secondary)}
+.color-rows{display:flex;flex-direction:column;gap:2px}
+.color-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-md);cursor:pointer;font-size:13px;transition:background var(--motion-fast)}
+.color-row:hover{background:var(--fill-normal)}
+.color-row>b{flex:none;width:48px;font-size:12px;font-weight:600;color:var(--text-secondary)}
+.color-row>span{font-family:var(--font-mono);color:var(--text-primary);overflow-wrap:anywhere}
+.color-row>i{flex:none;width:14px;height:14px;border-radius:50%;border:1px solid var(--line-normal)}
+.color-row.copied{background:var(--accent-subtle)}
+.color-row.copied>span{color:var(--accent)}
+.color-modal .popup-actions{margin-top:0}
 
 /* Overview card grid */
 .ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--card-gap);margin:var(--space-6) 0}

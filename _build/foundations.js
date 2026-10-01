@@ -13,11 +13,15 @@ window.FOUNDATION_PAGES = function (H) {
   }
 
   /* ---------- Semantic 스와치 행 ---------- */
+  /* 셀은 버튼이다 — 클릭하면 app.js 의 openColor() 가 값 모달을 띄운다(키보드로도 열림).
+     data-copy-text 를 두면 복사 위임 핸들러가 먼저 걸려 모달이 열리지 않으므로 붙이지 않는다.
+     값(Hex·RGBA)은 테마·제품 컬러에 따라 달라지므로 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다. */
   function semRow(items, o = {}) {
-    /* 이름만 둔다 — 토큰명은 title, 값은 Design Token 페이지가 단일 출처 */
-    return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<div data-copy-text="var(${tok})" title="var(${tok}) 복사"><div class="bar${o.line ? " line" : ""}"><i style="background:var(${tok})"></i></div><div class="name">${name}</div></div>`).join("")}</div>`;
+    /* "Background - Normal" 섹션의 "Normal" 처럼 섹션 제목이 이미 이름으로 끝나면 되풀이하지 않는다 */
+    const label = name => (!o.group ? name : o.group.toLowerCase().endsWith(name.toLowerCase()) ? o.group : o.group + " / " + name);
+    return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<button type="button" class="sem-cell" data-token="${tok}" data-label="${attr(label(name))}" aria-haspopup="dialog" title="${attr(label(name))} 값 보기"><div class="bar${o.line ? " line" : ""}"><i style="background:var(${tok})"></i></div><div class="name">${name}</div></button>`).join("")}</div>`;
   }
-  const sem = (id, title, desc, items, o) => `<h2 id="${id}">${title}</h2><p>${desc}</p>${semRow(items, o)}`;
+  const sem = (id, title, desc, items, o) => `<h2 id="${id}">${title}</h2><p>${desc}</p>${semRow(items, Object.assign({ group: title }, o))}`;
   const pal = (title, steps, pre, note) => `<div class="pal"><h3>${title}${note ? ` <small style="font-weight:400;color:var(--text-tertiary);font-size:12px">${note}</small>` : ""}</h3><div class="scale" style="grid-template-columns:repeat(${steps.length},1fr)">${steps.map(s => sw(`--${pre}-${s}`, s)).join("")}</div></div>`;
   const tabset = (tabs, panes) => `<div class="doc-tabset"><div class="doc-tabs" role="tablist">${tabs.map(([k, t], i) => `<button type="button" role="tab" data-doctab="${k}" class="${i ? "" : "on"}" aria-selected="${i ? "false" : "true"}">${t}</button>`).join("")}</div>${tabs.map(([k], i) => `<div data-docpane="${k}"${i ? " hidden" : ""}>${panes[i]}</div>`).join("")}</div>`;
   const tbl = (head, rows, cls = "") => `<div class="tablewrap"><table class="${cls}"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
@@ -65,7 +69,7 @@ ${pal("Amber", t11, "amber", "Cautionary · Severity Medium")}
 ${pal("Emerald", t11, "emerald", "Positive")}
 ${pal("Sky", t11, "sky", "Informative · Severity Low")}
 ${tokenSection("primitive-css", "CSS · Primitive 토큰", [/^--(gray|brand|accent|red|amber|emerald|sky)-\d+$/, /^--static-/], "제품 적용 시 <code>--accent-*</code> 블록만 제품 컬러로 교체합니다(HEX 하나로 스케일을 만드는 <code>accentScale()</code> 은 <a href=\"#/resources/design-token\">Design Token</a> 참고).")}`;
-      return `<h1>Colors${nb("foundations", "colors")}</h1><p class="lead">컬러 시스템은 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다. Gray Scale 이 화면의 바탕이고, Primary(제품 메인 컬러)는 핵심 정보를 강조하는 데만 씁니다. 상황에 맞는 색을 이름으로 고를 수 있도록 Semantic 토큰으로 제공하며, 스와치를 클릭하면 토큰이 복사됩니다.</p>
+      return `<h1>Colors${nb("foundations", "colors")}</h1><p class="lead">컬러 시스템은 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다. Gray Scale 이 화면의 바탕이고, Primary(제품 메인 컬러)는 핵심 정보를 강조하는 데만 씁니다. 상황에 맞는 색을 이름으로 고를 수 있도록 Semantic 토큰으로 제공하며, 스와치를 클릭하면 Hex · RGBA · 토큰을 보고 복사할 수 있습니다.</p>
 <h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>제품 Primary</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다. 이 시스템은 관리자 웹 제품 기준이라 Brand 는 제품 UI 의 Accent 가 아닙니다.</p>
 ${tbl(["역할", "쓰는 곳", "쓰지 않는 곳"], [
   ["<b>제품 Primary</b>", "주요 행동 버튼(화면당 하나), 링크, 활성·선택 상태(탭 · 내비게이션 · 체크 · 스위치), 포커스 링", "위험도나 처리 결과 표현, 넓은 면의 장식 배경, 로고"],
@@ -80,7 +84,17 @@ ${tbl(["역할", "쓰는 곳", "쓰지 않는 곳"], [
   <div class="do"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div><div class="body"><p>심각도는 Severity 색 + 라벨을 함께 씁니다. 색을 구분하지 못해도 등급을 읽을 수 있고, 다크 테마에서도 의미가 같습니다.</p></div></div>
   <div class="dont"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-critical);display:inline-block"></i><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-high);display:inline-block"></i><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-medium);display:inline-block"></i><button type="button" class="btn md primary" style="background:var(--sev-critical)">차단</button></div><div class="body"><p>색만 있는 점으로 등급을 전달하거나, 심각도 색을 버튼에 쓰지 않습니다. 파괴적 행동은 Status 의 <code>danger</code> 버튼입니다.</p></div></div>
 </div>
-${tabset([["semantic", "Semantic"], ["atomic", "Atomic"]], [semantic, atomic])}`;
+${tabset([["semantic", "Semantic"], ["atomic", "Atomic"]], [semantic, atomic])}
+<div hidden id="colorModalHome"><div class="popup color-modal" id="colorModal" role="dialog" aria-modal="true" aria-labelledby="colorModalTitle">
+<div class="popup-title"><span class="i-sun" title="Light 테마 값">${I("sun", 18)}</span><span class="i-moon" title="Dark 테마 값">${I("moon", 18)}</span><span id="colorModalTitle">Color</span></div>
+<button type="button" class="btn sm tertiary icon popup-close" data-popup-close aria-label="닫기">${I("x", 18)}</button>
+<div class="color-rows">
+<div class="color-row" id="colorModalHexRow" data-copy-text="" title="Hex 복사"><b>Hex</b><span id="colorModalHex"></span></div>
+<div class="color-row" id="colorModalRgbaRow" data-copy-text="" title="RGBA 복사"><b>RGBA</b><span id="colorModalRgba"></span></div>
+<div class="color-row" id="colorModalTokenRow" data-copy-text="" title="토큰 복사"><b>Token</b><i id="colorModalDot"></i><span id="colorModalToken"></span></div>
+</div>
+<div class="popup-actions"><button type="button" class="btn sm secondary" id="colorModalHexBtn" data-copy-text="" data-label="HEX 복사">HEX 복사</button><button type="button" class="btn sm primary" id="colorModalTokenBtn" data-copy-text="" data-label="토큰 복사">토큰 복사</button></div>
+</div></div>`;
     },
 
     /* ================= Elevation ================= */
