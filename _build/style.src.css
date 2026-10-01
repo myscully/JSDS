@@ -107,11 +107,11 @@ code{font-size:inherit}
 .hbtn svg{display:block;width:20px;height:20px}
 .hbtn>span{display:flex}
 .hbtn .dot{position:absolute;right:4px;bottom:4px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px var(--bg-canvas)}
-/* 테마 아이콘은 현재 상태를 보여준다(다크=해 · 라이트=달). 아래 선택자는 토큰 블록의 다크 선택자와 같아야 한다 */
-.hbtn .i-sun{display:none}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hbtn .i-sun{display:flex}:root:not([data-theme="light"]) .hbtn .i-moon{display:none}}
-:root[data-theme="dark"] .hbtn .i-sun{display:flex}
-:root[data-theme="dark"] .hbtn .i-moon{display:none}
+/* 테마 아이콘은 현재 상태를 보여준다(다크=달 · 라이트=해). 아래 선택자는 토큰 블록의 다크 선택자와 같아야 한다 */
+.hbtn .i-moon{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hbtn .i-moon{display:flex}:root:not([data-theme="light"]) .hbtn .i-sun{display:none}}
+:root[data-theme="dark"] .hbtn .i-moon{display:flex}
+:root[data-theme="dark"] .hbtn .i-sun{display:none}
 /* 팝오버 (검색 · Accent) */
 .pop{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-surface);border:1px solid var(--line-neutral);border-radius:var(--radius-lg);box-shadow:var(--shadow-3);padding:6px;z-index:30}
 .search-pop{width:380px;padding:8px}
