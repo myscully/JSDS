@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 68 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 70 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -206,25 +206,35 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.keyboard.press("Escape");
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
 
-  // Colors: Semantic 스와치 클릭 → 값 모달 (Hex/RGBA/Token + 복사)
+  // Colors: Semantic 스와치 클릭 → 값 팝오버 (딤 없이 바 아래, 토큰 복사)
   await go("foundations/colors.html");
   await page.locator("#primary").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
-  await page.locator(".sem-row .sem-cell").first().click();
-  await page.waitForSelector("body > .popup-backdrop[data-ds-popup] #colorModal", { timeout: 2000 });
+  const cellSel = '.sem-cell[data-token="--accent"]';
+  await page.locator(cellSel).click();
+  await page.waitForSelector("#colorPop:not([hidden])", { timeout: 2000 });
   const cv = await page.evaluate(() => ({
-    title: document.getElementById("colorModalTitle").textContent,
-    hex: document.getElementById("colorModalHex").textContent,
-    rgba: document.getElementById("colorModalRgba").textContent,
-    tok: document.getElementById("colorModalToken").textContent,
+    title: colorPopTitle.textContent,
+    hex: colorPopHex.textContent,
+    rgba: colorPopRgba.textContent,
+    tok: colorPopToken.textContent,
+    dim: !!document.querySelector(".popup-backdrop,.drawer-dim:not([hidden])"),
+    mono: getComputedStyle(colorPopHex).fontFamily.toLowerCase().includes("mono"),
   }));
-  ok("color modal opens with values", /^#[0-9A-F]{6,8}$/.test(cv.hex) && /^\d+\/\d+\/\d+\/[\d.]+$/.test(cv.rgba) && /^var\(--[\w-]+\)$/.test(cv.tok) && cv.title.includes("/"), JSON.stringify(cv));
-  await page.screenshot({ path: SHOT + "/color-modal.png" });
-  await page.locator("#colorModalTokenRow").click();
-  ok("color modal row copy feedback", await page.locator("#colorModalTokenRow").evaluate((e) => e.classList.contains("copied")));
-  await page.locator("#colorModalTokenBtn").click();
-  ok("color modal 토큰 복사 label swaps", (await page.locator("#colorModalTokenBtn").textContent()) === "복사됨");
-  await page.keyboard.press("Escape");
-  ok("color modal Esc closes", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && document.getElementById("colorModalHome").hidden));
+  ok("color pop shows values, no dimmer, Pretendard", /^#[0-9A-F]{6,8}$/.test(cv.hex) && /^\d+\/\d+\/\d+\/[\d.]+$/.test(cv.rgba) && /^var\(--[\w-]+\)$/.test(cv.tok) && cv.title.includes("/") && !cv.dim && !cv.mono, JSON.stringify(cv));
+  const pos = await page.evaluate((sel) => {
+    const bar = document.querySelector(sel).querySelector(".bar").getBoundingClientRect(), p = document.getElementById("colorPop").getBoundingClientRect();
+    return { below: Math.round(p.top - bar.bottom), offCenter: Math.round(Math.abs((p.left + p.width / 2) - (bar.left + bar.width / 2))) };
+  }, cellSel);
+  ok("color pop sits just below the swatch, centered", pos.below >= 0 && pos.below <= 16 && pos.offCenter <= 2, JSON.stringify(pos));
+  await page.screenshot({ path: SHOT + "/color-pop.png" });
+  await page.locator("#colorPopCopy").click();
+  ok("copy button keeps its icon + marks copied", await page.locator("#colorPopCopy").evaluate((e) => e.classList.contains("copied") && !!e.querySelector("svg")));
+  await page.locator(cellSel).click();
+  ok("same swatch toggles closed", await page.locator("#colorPop").evaluate((e) => e.hidden));
+  await page.locator(cellSel).click(); await page.mouse.click(5, 300);
+  ok("outside click closes color pop", await page.locator("#colorPop").evaluate((e) => e.hidden));
+  await page.locator(cellSel).click(); await page.keyboard.press("Escape");
+  ok("Esc closes color pop + restores focus", await page.evaluate((sel) => document.getElementById("colorPop").hidden && document.activeElement === document.querySelector(sel), cellSel));
 
   // app.js doc chrome still works: code tab switch + copy button present
   await go("components/button.html");
