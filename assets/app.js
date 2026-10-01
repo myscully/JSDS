@@ -161,7 +161,12 @@ const ROOT=document.body.dataset.root||'../';
   }
 
   /* 코드 패널: 복사 · 탭 · 접기 (이벤트 위임 — 해시 라우팅으로 DOM 이 다시 그려져도 유지) */
-  function copyText(text) { if (navigator.clipboard) return navigator.clipboard.writeText(text); const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) { } ta.remove(); return Promise.resolve(); }
+  function copyText(text) {
+    /* Clipboard API 는 보안 컨텍스트·권한이 없으면 거부(reject)되므로 반드시 execCommand 로 폴백한다 */
+    const fallback = () => { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) { } ta.remove(); };
+    if (navigator.clipboard) return navigator.clipboard.writeText(text).catch(fallback);
+    fallback(); return Promise.resolve();
+  }
   document.addEventListener("click", e => {
     const copy = e.target.closest("[data-copy],[data-copy-text]");
     if (copy) {
@@ -196,6 +201,9 @@ const ROOT=document.body.dataset.root||'../';
     /* Icons: 타일 클릭 → 상세 모달 */
     const tile = e.target.closest("#iconGrid .icon-tile");
     if (tile) { openIcon(tile); return; }
+    /* Colors: Semantic 스와치 클릭 → 값 모달 */
+    const cell = e.target.closest(".sem-cell");
+    if (cell) { openColor(cell); return; }
   });
   function toggle(ex) {
     const code = ex.querySelector(".example-code"), tog = ex.querySelector("[data-toggle]"); if (!code) return;
@@ -223,6 +231,28 @@ const ROOT=document.body.dataset.root||'../';
     const dl = document.getElementById("iconModalDl"); dl.href = siteRoot + "assets/icons/" + style + "/" + name + ".svg"; dl.setAttribute("download", name + ".svg");
     document.getElementById("iconModalCopy").dataset.copyText = svg;
     grid.querySelectorAll(".icon-tile.on").forEach(t => t.classList.remove("on")); tile.classList.add("on");
+    if (window.DS && window.DS.popup) window.DS.popup.open(m); else m.parentElement.hidden = false;
+  }
+
+  /* Colors: 스와치 → 값 모달. 값은 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다 —
+     현재 테마와 헤더에서 고른 제품 컬러(--accent*)가 모두 반영된 최종 색이어야 하기 때문. */
+  function openColor(cell) {
+    const m = document.getElementById("colorModal"), i = cell.querySelector(".bar i");
+    if (!m || !i) return;
+    const css = getComputedStyle(i).backgroundColor, p = (css.match(/[\d.]+/g) || []).map(Number);
+    const r = p[0] || 0, g = p[1] || 0, b = p[2] || 0, a = p.length > 3 ? p[3] : 1;
+    const h2 = v => Math.round(v).toString(16).padStart(2, "0").toUpperCase();
+    const hex = "#" + h2(r) + h2(g) + h2(b) + (a < 1 ? h2(a * 255) : "");          /* 알파가 있으면 8자리 */
+    const rgba = [Math.round(r), Math.round(g), Math.round(b), Math.round(a * 100) / 100].join("/");
+    const tok = "var(" + (cell.dataset.token || "") + ")";
+    const put = (id, text, row) => { const el = document.getElementById(id); if (el) el.textContent = text; const rw = document.getElementById(row); if (rw) rw.dataset.copyText = text; };
+    document.getElementById("colorModalTitle").textContent = cell.dataset.label || "Color";
+    put("colorModalHex", hex, "colorModalHexRow");
+    put("colorModalRgba", rgba, "colorModalRgbaRow");
+    put("colorModalToken", tok, "colorModalTokenRow");
+    document.getElementById("colorModalDot").style.background = css;
+    document.getElementById("colorModalHexBtn").dataset.copyText = hex;
+    document.getElementById("colorModalTokenBtn").dataset.copyText = tok;
     if (window.DS && window.DS.popup) window.DS.popup.open(m); else m.parentElement.hidden = false;
   }
 
