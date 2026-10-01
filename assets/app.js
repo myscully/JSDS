@@ -142,10 +142,12 @@ const ROOT=document.body.dataset.root||'../';
     window.addEventListener("hashchange", () => closePop(menuBtn, menuPop));
     window.addEventListener("resize", () => { if (window.innerWidth >= 1200) closePop(menuBtn, menuPop); });
   }
-  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer")) closeAll(); });
-  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer")) closeAll(); });
+  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".sem-cell,#colorPop,.copy-helper")) closeColorPop(); });
+  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".sem-cell,#colorPop,.copy-helper")) closeColorPop(); });
+  window.addEventListener("hashchange", closeColorPop);
+  window.addEventListener("resize", closeColorPop);
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape") { const o = POPS.find(x => !x[1].hidden); if (o) { closePop(o[0], o[1]); o[0].focus(); } return; }
+    if (e.key === "Escape") { const c = colorCell; if (closeColorPop()) { c.focus(); return; } const o = POPS.find(x => !x[1].hidden); if (o) { closePop(o[0], o[1]); o[0].focus(); } return; }
     if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && searchBtn && searchPop) { e.preventDefault(); openPop(searchBtn, searchPop); if (q) { q.focus(); q.select(); } }
   });
 
@@ -163,7 +165,8 @@ const ROOT=document.body.dataset.root||'../';
   /* 코드 패널: 복사 · 탭 · 접기 (이벤트 위임 — 해시 라우팅으로 DOM 이 다시 그려져도 유지) */
   function copyText(text) {
     /* Clipboard API 는 보안 컨텍스트·권한이 없으면 거부(reject)되므로 반드시 execCommand 로 폴백한다 */
-    const fallback = () => { const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) { } ta.remove(); };
+    /* 임시 textarea 에 포커스가 가면 focusin 으로 열려 있던 팝오버가 닫히므로 .copy-helper 로 표시하고 포커스를 되돌린다 */
+    const fallback = () => { const act = document.activeElement; const ta = document.createElement("textarea"); ta.className = "copy-helper"; ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) { } ta.remove(); if (act && act.focus) act.focus(); };
     if (navigator.clipboard) return navigator.clipboard.writeText(text).catch(fallback);
     fallback(); return Promise.resolve();
   }
@@ -172,7 +175,8 @@ const ROOT=document.body.dataset.root||'../';
     if (copy) {
       const text = copy.dataset.copyText !== undefined ? copy.dataset.copyText : ((document.getElementById(copy.dataset.copy) || {}).textContent || "");
       copyText(text);
-      if (copy.tagName === "BUTTON") { const label = copy.dataset.label || copy.textContent; copy.dataset.label = label; copy.textContent = "복사됨"; setTimeout(() => { copy.textContent = label; }, 1500); }
+      /* 아이콘 전용 버튼(.icon)은 글자를 바꾸면 SVG 가 지워지므로 .copied 로 피드백한다 */
+      if (copy.tagName === "BUTTON" && !copy.classList.contains("icon")) { const label = copy.dataset.label || copy.textContent; copy.dataset.label = label; copy.textContent = "복사됨"; setTimeout(() => { copy.textContent = label; }, 1500); }
       else { copy.classList.add("copied"); setTimeout(() => copy.classList.remove("copied"), 1200); }
       return;
     }
@@ -237,23 +241,31 @@ const ROOT=document.body.dataset.root||'../';
   /* Colors: 스와치 → 값 모달. 값은 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다 —
      현재 테마와 헤더에서 고른 제품 컬러(--accent*)가 모두 반영된 최종 색이어야 하기 때문. */
   function openColor(cell) {
-    const m = document.getElementById("colorModal"), i = cell.querySelector(".bar i");
-    if (!m || !i) return;
+    const pop = document.getElementById("colorPop"), bar = cell.querySelector(".bar"), i = cell.querySelector(".bar i");
+    if (!pop || !bar || !i) return;
+    if (colorCell === cell && !pop.hidden) { closeColorPop(); return; }          /* 같은 스와치 재클릭 = 토글 */
     const css = getComputedStyle(i).backgroundColor, p = (css.match(/[\d.]+/g) || []).map(Number);
     const r = p[0] || 0, g = p[1] || 0, b = p[2] || 0, a = p.length > 3 ? p[3] : 1;
     const h2 = v => Math.round(v).toString(16).padStart(2, "0").toUpperCase();
     const hex = "#" + h2(r) + h2(g) + h2(b) + (a < 1 ? h2(a * 255) : "");          /* 알파가 있으면 8자리 */
     const rgba = [Math.round(r), Math.round(g), Math.round(b), Math.round(a * 100) / 100].join("/");
     const tok = "var(" + (cell.dataset.token || "") + ")";
-    const put = (id, text, row) => { const el = document.getElementById(id); if (el) el.textContent = text; const rw = document.getElementById(row); if (rw) rw.dataset.copyText = text; };
-    document.getElementById("colorModalTitle").textContent = cell.dataset.label || "Color";
-    put("colorModalHex", hex, "colorModalHexRow");
-    put("colorModalRgba", rgba, "colorModalRgbaRow");
-    put("colorModalToken", tok, "colorModalTokenRow");
-    document.getElementById("colorModalDot").style.background = css;
-    document.getElementById("colorModalHexBtn").dataset.copyText = hex;
-    document.getElementById("colorModalTokenBtn").dataset.copyText = tok;
-    if (window.DS && window.DS.popup) window.DS.popup.open(m); else m.parentElement.hidden = false;
+    const put = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    put("colorPopTitle", cell.dataset.label || "Color"); put("colorPopHex", hex); put("colorPopRgba", rgba); put("colorPopToken", tok);
+    document.getElementById("colorPopDot").style.background = css;
+    const btn = document.getElementById("colorPopCopy"); btn.dataset.copyText = tok; btn.classList.remove("copied");
+    /* 위치: 숨김을 푼 뒤 같은 태스크에서 재므로 깜빡이지 않는다. offsetParent 기준이라 스크롤을 따라다닌다 */
+    pop.hidden = false;
+    const host = pop.offsetParent || document.body, hr = host.getBoundingClientRect(), br = bar.getBoundingClientRect();
+    const w = pop.offsetWidth, max = host.clientWidth - w - 16;
+    pop.style.left = Math.max(16, Math.min(br.left - hr.left + br.width / 2 - w / 2, max)) + "px";
+    pop.style.top = (br.bottom - hr.top + 8) + "px";
+    colorCell = cell; pop.focus();   /* 버튼이 아니라 다이얼로그에 포커스 — 마우스로 열었을 때 버튼이 눌린 듯 보이지 않게. Tab 하면 복사 버튼 */
+  }
+  let colorCell = null;
+  function closeColorPop() {
+    const pop = document.getElementById("colorPop"); if (!pop || pop.hidden) return false;
+    pop.hidden = true; colorCell = null; return true;
   }
 
   /* 오른쪽 페이지 목차(On this page) — 1600 이상에서만 CSS 로 보인다.
