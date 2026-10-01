@@ -32,6 +32,7 @@ const RULES = [
   [".tbl th.sorted::after", `opacity:1;${mask("arrow-up")}`],
   [".tbl th.sorted.desc::after", mask("arrow-down")],
   /* 좌측 메뉴: 활성 항목 박스의 맨 오른쪽 화살표. 마크업이 아니라 ::after 인 이유는 build.js 의 navOf() 정규식이 nav <a> 의 내부 구조에 의존하기 때문 */
+  [".drawer .d-item.on::after", `content:"";width:16px;height:16px;flex:none;margin-left:auto;opacity:.45;background:currentColor;${mask("arrow-right")}`, ".drawer .d-item.on"],
   [".nav a.active::after", `content:"";width:16px;height:16px;flex:none;margin-left:auto;opacity:.45;background:currentColor;${mask("arrow-right")}`, ".nav a.active"],
 ];
 

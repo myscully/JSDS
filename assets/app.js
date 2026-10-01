@@ -56,27 +56,77 @@ const ROOT=document.body.dataset.root||'../';
   const searchBtn = document.getElementById("searchBtn"), searchPop = document.getElementById("searchPop");
   const menuBtn = document.getElementById("menuBtn"), menuPop = document.getElementById("menuPop");
   const POPS = [[searchBtn, searchPop], [accentBtn, accentPop], [menuBtn, menuPop]].filter(x => x[0] && x[1]);
-  /* ☰ 드로어: 1200 미만에서 상단 메뉴 + 현재 섹션 하위 메뉴를 한 패널에 모은다.
-     여는 시점에 현재 DOM 에서 만들어 정적 사이트와 미리보기 셸 양쪽에서 같은 코드로 동작한다. */
-  function buildDrawer() {
-    if (!menuPop) return;
-    const top = [].slice.call(document.querySelectorAll(".topnav a")).map(a =>
-      '<a href="' + a.getAttribute("href") + '"' + (a.classList.contains("active") ? ' class="active"' : "") + ">" + a.innerHTML + "</a>").join("");
-    const sub = document.querySelector(".sidebar .nav");
-    menuPop.innerHTML = (top ? '<div class="d-sec">' + top + "</div>" : "") + (sub ? '<nav class="nav d-sub" aria-label="서브메뉴">' + sub.innerHTML + "</nav>" : "");
+  const menuDim = document.getElementById("menuDim");
+  /* ☰ 드로어: 우측 오프캔버스 2단계. 1단계는 대메뉴, 고르면 그 섹션의 하위 메뉴(2단계)로 넘어간다.
+     하위 목록은 정적 사이트의 SEARCH_INDEX(= 전 페이지 색인) 또는 미리보기 셸의 SITE 로 만든다 — 현재 섹션뿐 아니라 모든 섹션을 보여 줄 수 있다. */
+  const ICO = { back: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"/><path d="M5 12l6 6"/><path d="M5 12l6 -6"/></svg>',
+    close: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>' };
+  function esc(t) { return String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+  /* 섹션 목록: 상단 메뉴에서 이름·링크·현재 여부를 가져온다(두 환경 공통) */
+  function sections() {
+    return [].slice.call(document.querySelectorAll(".topnav a")).map(a => {
+      const c = a.cloneNode(true), n = c.querySelector(".n"); if (n) n.remove();   /* N 배지 글자가 섹션명에 섞이지 않게 */
+      return { title: c.textContent.trim(), href: a.getAttribute("href"), on: a.classList.contains("active"), badge: !!a.querySelector(".n") };
+    });
   }
+  /* 섹션 제목 → 하위 항목 [{t, g, u}] */
+  function pagesOf(title) {
+    if (typeof SEARCH_INDEX !== "undefined") return SEARCH_INDEX.filter(i => i.s === title).map(i => ({ t: i.t, g: i.g, u: siteRoot + i.u }));
+    if (typeof SITE !== "undefined") {
+      const key = Object.keys(SITE).find(k => SITE[k].title === title); if (!key) return [];
+      const d = SITE[key], out = [];
+      for (const k of Object.keys(d.pages || {})) out.push({ t: d.pages[k], g: "", u: "#/" + key + "/" + k });
+      for (const [g, list] of (d.groups || [])) for (const [k, t] of list) out.push({ t: t, g: g, u: "#/" + key + "/" + k });
+      return out;
+    }
+    return [];
+  }
+  function drawerTop(back) {
+    return '<div class="drawer-top">' +
+      (back ? '<button class="hbtn" type="button" data-drawer-back aria-label="뒤로">' + ICO.back + "</button>" : '<span class="spacer"></span>') +
+      '<span class="spacer"></span><button class="hbtn" type="button" data-drawer-close aria-label="닫기">' + ICO.close + "</button></div>";
+  }
+  /* title 이 없으면 1단계(대메뉴), 있으면 2단계(그 섹션 하위) */
+  function renderDrawer(title) {
+    if (!menuPop) return;
+    let body;
+    if (!title) {
+      body = sections().map(s => '<button class="d-item' + (s.on ? " on" : "") + '" type="button" data-drawer-sec="' + esc(s.title) + '">' + esc(s.title) + (s.badge ? ' <span class="n">N</span>' : "") + "</button>").join("");
+    } else {
+      const here = location.pathname.split("/").pop() || "index.html", hash = location.hash;
+      let g = null;
+      body = "<h2>" + esc(title) + "</h2>" + pagesOf(title).map(p => {
+        const head = p.g && p.g !== g ? (g = p.g, '<div class="d-group">' + esc(p.g) + "</div>") : (p.g ? "" : (g = null, ""));
+        const on = p.u.indexOf("#/") === 0 ? p.u === hash : p.u.split("/").pop() === here;
+        return head + '<a class="d-item' + (on ? " on" : "") + '" href="' + esc(p.u) + '">' + esc(p.t) + "</a>";
+      }).join("");
+    }
+    menuPop.innerHTML = drawerTop(!!title) + '<div class="drawer-body">' + body + "</div>";
+  }
+  /* 화면 전환은 다음 틱에 — 지금 바로 innerHTML 을 갈아끼우면 클릭 대상이 DOM 에서 빠져
+     문서 레벨 "바깥 클릭" 판정(closest)이 실패해 드로어가 닫혀 버린다. */
+  function swap(title, focusSel) {
+    setTimeout(() => { renderDrawer(title); const f = menuPop.querySelector(focusSel); if (f) f.focus(); }, 0);
+  }
+  if (menuPop) menuPop.addEventListener("click", e => {
+    const sec = e.target.closest("[data-drawer-sec]");
+    if (sec) { swap(sec.dataset.drawerSec, ".drawer-body a,.drawer-body button"); return; }
+    if (e.target.closest("[data-drawer-back]")) { swap(null, ".d-item"); return; }
+    if (e.target.closest("[data-drawer-close]")) closePop(menuBtn, menuPop);
+  });
   function closePop(btn, pop) {
     if (pop.hidden) return;
     pop.hidden = true; btn.setAttribute("aria-expanded", "false");
+    if (pop === menuPop && menuDim) menuDim.hidden = true;
     /* 미리보기 셸에서 #q 는 사이드바 필터도 겸한다 — 닫을 때 비우고 알려야 필터가 걸린 채 굳지 않는다 */
     if (pop === searchPop && q && q.value) { q.value = ""; q.dispatchEvent(new Event("input", { bubbles: true })); }
     if (pop === searchPop && box) box.hidden = true;
   }
   function closeAll(except) { POPS.forEach(([b, p]) => { if (p !== except) closePop(b, p); }); }
-  function openPop(btn, pop) { closeAll(pop); pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
+  function openPop(btn, pop) { closeAll(pop); pop.hidden = false; btn.setAttribute("aria-expanded", "true"); if (pop === menuPop && menuDim) menuDim.hidden = false; }
   POPS.forEach(([btn, pop]) => btn.addEventListener("click", () => {
     if (!pop.hidden) { closePop(btn, pop); return; }
-    if (pop === menuPop) buildDrawer();
+    if (pop === menuPop) renderDrawer(null);
     openPop(btn, pop);
     const f = pop === searchPop ? q : pop.querySelector("a,button,input");
     if (f) { f.focus(); if (f.select) f.select(); }
@@ -87,8 +137,8 @@ const ROOT=document.body.dataset.root||'../';
     window.addEventListener("hashchange", () => closePop(menuBtn, menuPop));
     window.addEventListener("resize", () => { if (window.innerWidth >= 1200) closePop(menuBtn, menuPop); });
   }
-  document.addEventListener("click", e => { if (!e.target.closest(".hmenu")) closeAll(); });
-  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu")) closeAll(); });
+  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer")) closeAll(); });
+  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer")) closeAll(); });
   document.addEventListener("keydown", e => {
     if (e.key === "Escape") { const o = POPS.find(x => !x[1].hidden); if (o) { closePop(o[0], o[1]); o[0].focus(); } return; }
     if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && searchBtn && searchPop) { e.preventDefault(); openPop(searchBtn, searchPop); if (q) { q.focus(); q.select(); } }
