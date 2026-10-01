@@ -29,7 +29,9 @@
     const next = cur === "dark" ? "light" : "dark";
     root.setAttribute("data-theme", next);
     try { localStorage.setItem("jsds-theme", next); } catch (e) { }
+    markFaintSwatches();
   });
+  mql.addEventListener("change", markFaintSwatches);
 
   /* Accent 팝오버 (팔레트 아이콘의 점이 현재 색) */
   const accentBtn = document.getElementById("accentBtn"), accentPop = document.getElementById("accentPop");
@@ -37,6 +39,7 @@
     const key = root.dataset.accent || "", p = products.find(x => x.key === key);
     const dot = accentBtn && accentBtn.querySelector(".dot"); if (dot) dot.style.background = p ? p.hex : "";
     if (accentPop) accentPop.querySelectorAll("[data-accent]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.accent === key)));
+    markFaintSwatches();
   }
   if (accentPop) {
     accentPop.innerHTML = '<button type="button" role="menuitemradio" aria-checked="false" data-accent=""><i style="background:var(--accent-600)"></i>기본 (토큰 값)</button>'
@@ -305,6 +308,24 @@
     mo.observe(document.body, { childList: true, subtree: true });
   }
 
+  /* 바탕과 거의 구분되지 않는 스와치(라이트의 흰색, 각 Subtle 틴트, 다크의 Surface 등)에 1px 라인을 둘러 형태가 보이게 한다.
+     테마와 제품 컬러에 따라 달라지므로 빌드가 아니라 렌더 색을 재서 판단한다. Atomic 팔레트는 CSS 로 늘 라인을 두르고 있다 */
+  function markFaintSwatches() {
+    const bars = document.querySelectorAll(".sem-row:not(.checker) .bar:not(.line)");
+    if (!bars.length) return;
+    const lin = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+    const lum = c => .2126 * lin(c[0]) + .7152 * lin(c[1]) + .0722 * lin(c[2]);
+    const rgb = el => (getComputedStyle(el).backgroundColor.match(/[\d.]+/g) || []).map(Number);
+    const bg = rgb(document.body), bl = lum(bg);
+    bars.forEach(bar => {
+      const i = bar.querySelector("i"); if (!i) return;
+      const c = rgb(i), a = c.length > 3 ? c[3] : 1;                       /* 알파가 있으면 바탕 위에 합성한 색으로 */
+      const l = lum([0, 1, 2].map(k => a * c[k] + (1 - a) * bg[k]));
+      bar.classList.toggle("faint", (Math.max(l, bl) + .05) / (Math.min(l, bl) + .05) < 1.4);
+    });
+  }
+  window.addEventListener("hashchange", markFaintSwatches);   /* 미리보기 셸: #content 를 다시 그린 뒤 */
+
   /* 좌측 메뉴 스크롤 유지 — 정적 사이트는 페이지가 통째로 새로 로드돼 사이드바가 맨 위로 돌아간다.
      위치를 저장했다 복원하고, 저장값이 없으면(직접 링크·새 탭) 활성 항목이 보이도록 맞춘다.
      정적 페이지의 사이드바에는 id 가 없으므로 클래스로 찾는다(미리보기 셸과 공통). */
@@ -321,6 +342,7 @@
     if (saved === null || top < s.scrollTop || top + a.offsetHeight > s.scrollTop + s.clientHeight)
       s.scrollTop = Math.max(0, top - (s.clientHeight - a.offsetHeight) / 2);
   }
+  markFaintSwatches();
   restoreNavScroll();
   /* 저장은 클릭이 아니라 스크롤 시점에 — 메뉴를 내려둔 채 본문 링크로 이동해도 위치가 남는다 */
   const navScrollBox = navBox();

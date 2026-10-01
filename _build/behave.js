@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 70 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 72 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -205,6 +205,14 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.screenshot({ path: SHOT + "/popup.png" });
   await page.keyboard.press("Escape");
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
+
+  // Colors: 바탕과 구분되지 않는 스와치에 라인
+  await go("foundations/colors.html");
+  const faint = (tok) => page.evaluate((t) => document.querySelector('.sem-cell[data-token="' + t + '"] .bar').classList.contains("faint"), tok);
+  ok("white swatch gets an outline, saturated one does not", (await faint("--static-white")) && (await faint("--bg-canvas")) && !(await faint("--accent")) && !(await faint("--static-black")));
+  await page.click("#themeBtn"); await page.waitForTimeout(150);
+  ok("outline follows the theme (dark: black faint, white not)", (await faint("--static-black")) && !(await faint("--static-white")));
+  await page.click("#themeBtn"); await page.waitForTimeout(150);
 
   // Colors: Semantic 스와치 클릭 → 값 팝오버 (딤 없이 바 아래, 토큰 복사)
   await go("foundations/colors.html");
