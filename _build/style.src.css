@@ -292,6 +292,7 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand)}
 .sem-row .bar.line i{inset:auto 0 0 0;height:2px;top:50%;transform:translateY(-50%)}
 .sem-row:not(.checker) .bar.line{background:var(--bg-subtle)}
 .sem-row>*:first-child .bar{border-radius:var(--radius-md) 2px 2px var(--radius-md)}.sem-row>*:last-child .bar{border-radius:2px var(--radius-md) var(--radius-md) 2px}
+.sem-row .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-neutral);border-radius:inherit;pointer-events:none}  /* 바탕과 구분되지 않는 색 — app.js 가 .faint 를 붙인다 */
 .sem-row .name{font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:8px}
 .checker{--checker-bg:repeating-conic-gradient(rgba(112,115,124,.16) 0 25%,transparent 0 50%) 0 0/12px 12px}
 .pal{margin:0 0 var(--space-8)}.pal h3{margin:0 0 8px;font-size:16px}
