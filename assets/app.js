@@ -48,6 +48,11 @@ const ROOT=document.body.dataset.root||'../';
     /* stopPropagation 금지 — 바깥 클릭 닫기가 이 이벤트에 얹혀 있다 */
     accentPop.addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if (b) { applyAccent(b.dataset.accent); closePop(accentBtn, accentPop); accentBtn.focus(); } });
   }
+  /* 팝오버 밖의 [data-accent] 도 같은 동작 — Foundations › Colors 의 "이 컬러로 미리보기" 카드 버튼 */
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-accent]");
+    if (b && !(accentPop && accentPop.contains(b))) applyAccent(b.dataset.accent);
+  });
   let saved = null; try { saved = localStorage.getItem("jsds-accent"); } catch (e) { }
   applyAccent(saved || "");
 

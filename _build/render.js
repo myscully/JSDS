@@ -316,7 +316,6 @@ function render() {
 }
 window.addEventListener("hashchange", render);
 $("#q").addEventListener("input", e => buildNav(e.target.value));
-document.addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if (b && window.applyAccent) window.applyAccent(b.dataset.accent); });
 /* 스타일 텍스트: build.js 는 addInitScript 로 주입, 직접 열었을 때는 fetch(http 서버 필요) */
 if (window.STYLE_TEXT) render();
 else fetch("style.src.css").then(r => r.text()).then(t => { window.STYLE_TEXT = t; render(); }).catch(() => render());
