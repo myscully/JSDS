@@ -1,6 +1,6 @@
 {
   "version": "v0.6",
-  "generatedAt": "2026-10-01T06:52:56.182Z",
+  "generatedAt": "2026-10-01T06:58:34.987Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -295,7 +295,7 @@
     "inbox",
     "layout-grid",
     "moon",
-    "sun",
+    "sun-high",
     "palette",
     "menu-2",
     "arrow-left"

@@ -91,7 +91,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
       </div>
     </div>
     <div class="hmenu">
-      <button class="hbtn" id="themeBtn" type="button" aria-label="테마 전환" title="테마 전환"><span class="i-sun">${I("sun", 20)}</span><span class="i-moon">${I("moon", 20)}</span></button>
+      <button class="hbtn" id="themeBtn" type="button" aria-label="테마 전환" title="테마 전환"><span class="i-sun">${I("sun-high", 20)}</span><span class="i-moon">${I("moon", 20)}</span></button>
     </div>
     <div class="hmenu hmenu-nav">
       <button class="hbtn" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="메뉴" title="메뉴">${I("menu-2", 20)}</button>
