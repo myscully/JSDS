@@ -54,7 +54,17 @@ const ROOT=document.body.dataset.root||'../';
   /* 팝오버 공통 (검색 · Accent) */
   const q = document.getElementById("q"), box = document.getElementById("searchResults");
   const searchBtn = document.getElementById("searchBtn"), searchPop = document.getElementById("searchPop");
-  const POPS = [[searchBtn, searchPop], [accentBtn, accentPop]].filter(x => x[0] && x[1]);
+  const menuBtn = document.getElementById("menuBtn"), menuPop = document.getElementById("menuPop");
+  const POPS = [[searchBtn, searchPop], [accentBtn, accentPop], [menuBtn, menuPop]].filter(x => x[0] && x[1]);
+  /* ☰ 드로어: 1200 미만에서 상단 메뉴 + 현재 섹션 하위 메뉴를 한 패널에 모은다.
+     여는 시점에 현재 DOM 에서 만들어 정적 사이트와 미리보기 셸 양쪽에서 같은 코드로 동작한다. */
+  function buildDrawer() {
+    if (!menuPop) return;
+    const top = [].slice.call(document.querySelectorAll(".topnav a")).map(a =>
+      '<a href="' + a.getAttribute("href") + '"' + (a.classList.contains("active") ? ' class="active"' : "") + ">" + a.innerHTML + "</a>").join("");
+    const sub = document.querySelector(".sidebar .nav");
+    menuPop.innerHTML = (top ? '<div class="d-sec">' + top + "</div>" : "") + (sub ? '<nav class="nav d-sub" aria-label="서브메뉴">' + sub.innerHTML + "</nav>" : "");
+  }
   function closePop(btn, pop) {
     if (pop.hidden) return;
     pop.hidden = true; btn.setAttribute("aria-expanded", "false");
@@ -66,10 +76,17 @@ const ROOT=document.body.dataset.root||'../';
   function openPop(btn, pop) { closeAll(pop); pop.hidden = false; btn.setAttribute("aria-expanded", "true"); }
   POPS.forEach(([btn, pop]) => btn.addEventListener("click", () => {
     if (!pop.hidden) { closePop(btn, pop); return; }
+    if (pop === menuPop) buildDrawer();
     openPop(btn, pop);
-    const f = pop === searchPop ? q : pop.querySelector("button");
+    const f = pop === searchPop ? q : pop.querySelector("a,button,input");
     if (f) { f.focus(); if (f.select) f.select(); }
   }));
+  /* 드로어는 링크를 눌러도 미리보기 셸에서는 페이지가 그대로라 수동으로 닫는다.
+     창이 1200 이상으로 커지면 오버레이가 남지 않게 함께 닫는다. */
+  if (menuBtn && menuPop) {
+    window.addEventListener("hashchange", () => closePop(menuBtn, menuPop));
+    window.addEventListener("resize", () => { if (window.innerWidth >= 1200) closePop(menuBtn, menuPop); });
+  }
   document.addEventListener("click", e => { if (!e.target.closest(".hmenu")) closeAll(); });
   document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu")) closeAll(); });
   document.addEventListener("keydown", e => {
