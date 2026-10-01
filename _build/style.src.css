@@ -40,7 +40,7 @@
   --motion-fast:120ms ease-out;--motion-base:200ms ease-in-out;--motion-slow:320ms cubic-bezier(.2,.8,.2,1);
   --font-sans:"Pretendard",-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"D2Coding",monospace;
-  --header-h:64px;--sidebar-w:232px;--toc-w:200px;
+  --header-h:64px;--sidebar-w:232px;--toc-w:200px;--shell-max:1400px;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
@@ -88,7 +88,7 @@ code{font-size:inherit}
 [hidden]{display:none!important}
 
 /* ---------- Header (브랜드 · 버전 · 상단 메뉴 · 아이콘 버튼) ---------- */
-.header{position:sticky;top:0;z-index:20;height:var(--header-h);display:flex;align-items:stretch;gap:var(--space-3);padding:0 var(--space-6);background:var(--bg-canvas)}
+.header{position:sticky;top:0;z-index:20;height:var(--header-h);display:flex;align-items:stretch;gap:var(--space-3);padding:0 var(--space-6);background:var(--bg-canvas);max-width:var(--shell-max);margin:0 auto}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:18px;letter-spacing:-.01em;white-space:nowrap}
 .ver{display:flex;align-items:center;font-size:12px;color:var(--text-secondary);padding:0 var(--space-3);white-space:nowrap}
 /* 상단 섹션 메뉴: 우측 정렬 */
@@ -131,7 +131,7 @@ code{font-size:inherit}
 .search-results .empty{padding:10px;color:var(--text-tertiary);font-size:12px;display:block}
 
 /* ---------- Shell ---------- */
-.shell{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:calc(100vh - var(--header-h));width:100%}
+.shell{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:calc(100vh - var(--header-h));width:100%;max-width:var(--shell-max);margin:0 auto}
 .shell.full{grid-template-columns:1fr}
 .sidebar{position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h));overflow-y:auto;padding:var(--space-4) var(--space-4) var(--space-10) var(--space-6)}
 .nav h5{margin:var(--space-8) 0 var(--space-2);padding:0 10px;font-size:11px;font-weight:600;line-height:1.4;letter-spacing:.34px;color:var(--text-primary);opacity:.3}
@@ -146,7 +146,7 @@ code{font-size:inherit}
 .sidebar-foot{margin-top:var(--space-10);padding:0 10px;font-size:12px;color:var(--text-tertiary)}
 
 .main{min-width:0;display:flex;justify-content:center}
-.page{width:100%;max-width:1120px;margin:0 auto;padding:var(--space-12) var(--space-16) var(--space-20)}
+.page{width:100%;max-width:968px;margin:0 auto;padding:var(--space-12) var(--space-16) var(--space-20)}
 .shell.full .main{display:block}
 .main>.home{width:100%;min-width:0}
 

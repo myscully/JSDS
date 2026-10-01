@@ -1,6 +1,6 @@
 {
   "version": "v0.6",
-  "generatedAt": "2026-09-30T09:19:16.568Z",
+  "generatedAt": "2026-10-01T01:41:08.486Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -172,7 +172,8 @@
       "--font-mono": "ui-monospace,\"SF Mono\",Menlo,Consolas,\"D2Coding\",monospace",
       "--header-h": "64px",
       "--sidebar-w": "232px",
-      "--toc-w": "200px"
+      "--toc-w": "200px",
+      "--shell-max": "1400px"
     },
     "dark": {
       "--bg-canvas": "var(--gray-950)",
