@@ -218,16 +218,30 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await go("index.html");
   ok("all pages load without JS errors", errors.length === 0, errors.slice(0, 3).join(" | "));
 
-  // 가이드 사이트 최소 폭(1280)에서 전 페이지 가로 넘침 없음
-  await page.setViewportSize({ width: 1280, height: 900 });
-  const wide = [];
-  for (const sec of ["", "home", "foundations", "components", "patterns", "resources"]) for (const f of fs.readdirSync(path.join(SITE, sec))) {
-    if (!f.endsWith(".html") || f.includes("standalone")) continue;
-    await go(path.join(sec, f));
-    const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
-    if (over > 1) wide.push(path.join(sec, f) + " +" + over);
+  // 반응형: 데스크톱~모바일 전 폭에서 가로 넘침 없음
+  for (const w of [1440, 1280, 1024, 768, 390]) {
+    await page.setViewportSize({ width: w, height: 900 });
+    const wide = [];
+    for (const sec of ["", "home", "foundations", "components", "patterns", "resources"]) for (const f of fs.readdirSync(path.join(SITE, sec))) {
+      if (!f.endsWith(".html") || f.includes("standalone")) continue;
+      await go(path.join(sec, f));
+      const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      if (over > 1) wide.push(path.join(sec, f) + " +" + over);
+    }
+    ok("no horizontal overflow at " + w + " on any page", wide.length === 0, wide.slice(0, 5).join(" | "));
   }
-  ok("no horizontal overflow at 1280 on any page", wide.length === 0, wide.slice(0, 5).join(" | "));
+  // ☰ 드로어: 1200 미만에서만 나오고 상단·좌측 메뉴를 담는다
+  await page.setViewportSize({ width: 1100, height: 900 });
+  await go("components/button.html");
+  const hamVisible = await page.evaluate(() => { const b = document.getElementById("menuBtn"); return !!b && b.getBoundingClientRect().width > 0; });
+  await page.click("#menuBtn");
+  const drawer = await page.evaluate(() => { const p = document.getElementById("menuPop"); return { open: !p.hidden, sec: p.querySelectorAll(".d-sec a").length, sub: p.querySelectorAll(".d-sub a").length }; });
+  ok("drawer opens below 1200 with both menus", hamVisible && drawer.open && drawer.sec >= 5 && drawer.sub > 5, JSON.stringify(drawer));
+  await page.keyboard.press("Escape");
+  ok("drawer closes on Escape", await page.evaluate(() => document.getElementById("menuPop").hidden));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await go("components/button.html");
+  ok("hamburger hidden at 1440", await page.evaluate(() => document.getElementById("menuBtn").getBoundingClientRect().width === 0));
 
   await b.close();
   let fail = 0;
