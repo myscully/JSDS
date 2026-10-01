@@ -194,4 +194,29 @@ const ROOT=document.body.dataset.root||'../';
     const mo = new MutationObserver(() => { if (document.getElementById("content")) { mo.disconnect(); buildToc(); } });
     mo.observe(document.body, { childList: true, subtree: true });
   }
+
+  /* 좌측 메뉴 스크롤 유지 — 정적 사이트는 페이지가 통째로 새로 로드돼 사이드바가 맨 위로 돌아간다.
+     위치를 저장했다 복원하고, 저장값이 없으면(직접 링크·새 탭) 활성 항목이 보이도록 맞춘다.
+     정적 페이지의 사이드바에는 id 가 없으므로 클래스로 찾는다(미리보기 셸과 공통). */
+  const NAVPOS = "jsds-nav-scroll";
+  const navBox = () => document.querySelector(".sidebar");
+  function saveNavScroll() { const s = navBox(); if (!s) return; try { sessionStorage.setItem(NAVPOS, String(s.scrollTop)); } catch (e) { } }
+  function restoreNavScroll() {
+    const s = navBox(); if (!s) return;
+    let saved = null;
+    try { const v = sessionStorage.getItem(NAVPOS); if (v !== null) saved = parseFloat(v) || 0; } catch (e) { }
+    if (saved !== null) s.scrollTop = saved;
+    const a = s.querySelector(".nav a.active"); if (!a) return;
+    const top = a.getBoundingClientRect().top - s.getBoundingClientRect().top + s.scrollTop;
+    if (saved === null || top < s.scrollTop || top + a.offsetHeight > s.scrollTop + s.clientHeight)
+      s.scrollTop = Math.max(0, top - (s.clientHeight - a.offsetHeight) / 2);
+  }
+  restoreNavScroll();
+  /* 저장은 클릭이 아니라 스크롤 시점에 — 메뉴를 내려둔 채 본문 링크로 이동해도 위치가 남는다 */
+  const navScrollBox = navBox();
+  if (navScrollBox) {
+    let raf = 0;
+    navScrollBox.addEventListener("scroll", () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; saveNavScroll(); }); }, { passive: true });
+  }
+  window.addEventListener("hashchange", restoreNavScroll); /* 미리보기 셸: buildNav 가 #nav 를 다시 그린 뒤 */
 })();
