@@ -194,6 +194,7 @@ code{font-size:inherit}
 .drawer .d-group:first-child{margin-top:0}
 @media (max-width:1199px){
   .topnav{display:none}
+  .header-right{margin-left:auto}   /* 상단 메뉴가 사라져도 아이콘 그룹은 오른쪽에 붙는다 */
   .sidebar{display:none}
   .shell{grid-template-columns:1fr}
   .hmenu-nav{display:flex}
