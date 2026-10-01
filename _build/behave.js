@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 74 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 78 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -206,9 +206,31 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.keyboard.press("Escape");
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
 
+  // Elevation: Normal/Spread 타일 → 값 팝오버 (None 제외)
+  await go("foundations/elevation.html");
+  const shTile = '.val-cell[data-token="--shadow-md"]';
+  await page.locator(shTile).evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
+  await page.locator(shTile).click();
+  await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
+  const sv = await page.evaluate((sel) => {
+    const t = document.querySelector(sel).getBoundingClientRect(), p = document.getElementById("valPop").getBoundingClientRect();
+    const rows = [...document.querySelectorAll("#valPopRows .val-row")].map((r) => [r.querySelector("b").textContent, r.querySelector("span").textContent]);
+    return { title: valPopTitle.textContent, rows: rows, below: Math.round(p.top - t.bottom) };
+  }, shTile);
+  ok("shadow tile opens the value pop", sv.title === "Normal / Medium" && sv.rows.length === 2 && sv.rows[0][0] === "Value" && sv.rows[0][1].includes("rgba(") && sv.rows[0][1].split("\n").length === 2 && sv.rows[1][1] === "var(--shadow-md)" && sv.below >= 0 && sv.below <= 16, JSON.stringify(sv));
+  await page.screenshot({ path: SHOT + "/val-pop-shadow.png" });
+  await page.keyboard.press("Escape");
+  ok("shadow pop closes on Esc", await page.locator("#valPop").evaluate((e) => e.hidden));
+  await page.locator(".elev-levels > div").first().click();
+  ok("None tile is inert", await page.evaluate(() => document.getElementById("valPop").hidden && !document.querySelector('.elev-levels [data-token="--shadow-none"]')));
+  await page.locator('.doc-tabs [data-doctab="spread"]').click();
+  await page.locator('.val-cell[data-token="--shadow-spread-md"]').click();
+  ok("spread tab tile labels its group", await page.evaluate(() => document.getElementById("valPopTitle").textContent === "Spread / Medium"));
+  await page.keyboard.press("Escape");
+
   // Colors: 바탕과 구분되지 않는 스와치에 라인
   await go("foundations/colors.html");
-  const faint = (tok) => page.evaluate((t) => document.querySelector('.color-cell[data-token="' + t + '"] .bar').classList.contains("faint"), tok);
+  const faint = (tok) => page.evaluate((t) => document.querySelector('.val-cell[data-token="' + t + '"] .bar').classList.contains("faint"), tok);
   ok("white swatch gets an outline, saturated one does not", (await faint("--static-white")) && (await faint("--bg-canvas")) && !(await faint("--accent")) && !(await faint("--static-black")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
   ok("outline follows the theme (dark: black faint, white not)", (await faint("--static-black")) && !(await faint("--static-white")));
@@ -217,48 +239,54 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   // Colors: Atomic 팔레트도 같은 팝오버
   await go("foundations/colors.html");
   await page.locator('.doc-tabs [data-doctab="atomic"]').click();
-  const atom = '.pal .color-cell[data-token="--gray-500"]';
+  const atom = '.pal .val-cell[data-token="--gray-500"]';
   await page.locator(atom).evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
   await page.locator(atom).click();
-  await page.waitForSelector("#colorPop:not([hidden])", { timeout: 2000 });
+  await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
   const av = await page.evaluate((sel) => {
-    const c = document.querySelector(sel).getBoundingClientRect(), p = document.getElementById("colorPop").getBoundingClientRect();
-    return { t: colorPopTitle.textContent, hex: colorPopHex.textContent, tok: colorPopToken.textContent, below: Math.round(p.top - c.bottom), label: document.querySelector(sel).querySelector("i").textContent };
+    const c = document.querySelector(sel).getBoundingClientRect(), p = document.getElementById("valPop").getBoundingClientRect();
+    const row = (k) => [...document.querySelectorAll("#valPopRows .val-row")].filter((r) => r.querySelector("b").textContent === k).map((r) => r.querySelector("span").textContent)[0];
+    return { t: document.getElementById("valPopTitle").textContent, hex: row("Hex"), tok: row("Token"), below: Math.round(p.top - c.bottom), label: document.querySelector(sel).querySelector("i").textContent };
   }, atom);
   ok("atomic swatch opens the same pop", av.t === "Gray / 500" && /^#[0-9A-F]{6}$/.test(av.hex) && av.tok === "var(--gray-500)" && av.below >= 0 && av.below <= 16 && av.label === "500", JSON.stringify(av));
-  await page.screenshot({ path: SHOT + "/color-pop-atomic.png" });
+  await page.screenshot({ path: SHOT + "/val-pop-atomic.png" });
   await page.keyboard.press("Escape");
-  ok("atomic pop closes on Esc", await page.locator("#colorPop").evaluate((e) => e.hidden));
+  ok("atomic pop closes on Esc", await page.locator("#valPop").evaluate((e) => e.hidden));
 
   // Colors: Semantic 스와치 클릭 → 값 팝오버 (딤 없이 바 아래, 토큰 복사)
   await go("foundations/colors.html");
   await page.locator("#primary").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
-  const cellSel = '.color-cell[data-token="--accent"]';
+  const cellSel = '.val-cell[data-token="--accent"]';
   await page.locator(cellSel).click();
-  await page.waitForSelector("#colorPop:not([hidden])", { timeout: 2000 });
-  const cv = await page.evaluate(() => ({
-    title: colorPopTitle.textContent,
-    hex: colorPopHex.textContent,
-    rgba: colorPopRgba.textContent,
-    tok: colorPopToken.textContent,
-    dim: !!document.querySelector(".popup-backdrop,.drawer-dim:not([hidden])"),
-    mono: getComputedStyle(colorPopHex).fontFamily.toLowerCase().includes("mono"),
-  }));
-  ok("color pop shows values, no dimmer, Pretendard", /^#[0-9A-F]{6,8}$/.test(cv.hex) && /^\d+\/\d+\/\d+\/[\d.]+$/.test(cv.rgba) && /^var\(--[\w-]+\)$/.test(cv.tok) && cv.title.includes("/") && !cv.dim && !cv.mono, JSON.stringify(cv));
+  await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
+  const cv = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll("#valPopRows .val-row")];
+    const cell = (k) => rows.filter((r) => r.querySelector("b").textContent === k)[0];
+    return {
+      title: document.getElementById("valPopTitle").textContent,
+      hex: cell("Hex").querySelector("span").textContent,
+      rgba: cell("RGBA").querySelector("span").textContent,
+      tok: cell("Token").querySelector("span").textContent,
+      dot: !!cell("Token").querySelector("i"),
+      dim: !!document.querySelector(".popup-backdrop,.drawer-dim:not([hidden])"),
+      mono: getComputedStyle(cell("Hex").querySelector("span")).fontFamily.toLowerCase().includes("mono"),
+    };
+  });
+  ok("color pop shows values, no dimmer, Pretendard", /^#[0-9A-F]{6,8}$/.test(cv.hex) && /^\d+\/\d+\/\d+\/[\d.]+$/.test(cv.rgba) && /^var\(--[\w-]+\)$/.test(cv.tok) && cv.title.includes("/") && cv.dot && !cv.dim && !cv.mono, JSON.stringify(cv));
   const pos = await page.evaluate((sel) => {
-    const bar = document.querySelector(sel).querySelector(".bar").getBoundingClientRect(), p = document.getElementById("colorPop").getBoundingClientRect();
+    const bar = document.querySelector(sel).querySelector(".bar").getBoundingClientRect(), p = document.getElementById("valPop").getBoundingClientRect();
     return { below: Math.round(p.top - bar.bottom), offCenter: Math.round(Math.abs((p.left + p.width / 2) - (bar.left + bar.width / 2))) };
   }, cellSel);
   ok("color pop sits just below the swatch, centered", pos.below >= 0 && pos.below <= 16 && pos.offCenter <= 2, JSON.stringify(pos));
-  await page.screenshot({ path: SHOT + "/color-pop.png" });
-  await page.locator("#colorPopCopy").click();
-  ok("copy button keeps its icon + marks copied", await page.locator("#colorPopCopy").evaluate((e) => e.classList.contains("copied") && !!e.querySelector("svg")));
+  await page.screenshot({ path: SHOT + "/val-pop.png" });
+  await page.locator("#valPopCopy").click();
+  ok("copy button keeps its icon + marks copied", await page.locator("#valPopCopy").evaluate((e) => e.classList.contains("copied") && !!e.querySelector("svg")));
   await page.locator(cellSel).click();
-  ok("same swatch toggles closed", await page.locator("#colorPop").evaluate((e) => e.hidden));
+  ok("same swatch toggles closed", await page.locator("#valPop").evaluate((e) => e.hidden));
   await page.locator(cellSel).click(); await page.mouse.click(5, 300);
-  ok("outside click closes color pop", await page.locator("#colorPop").evaluate((e) => e.hidden));
+  ok("outside click closes color pop", await page.locator("#valPop").evaluate((e) => e.hidden));
   await page.locator(cellSel).click(); await page.keyboard.press("Escape");
-  ok("Esc closes color pop + restores focus", await page.evaluate((sel) => document.getElementById("colorPop").hidden && document.activeElement === document.querySelector(sel), cellSel));
+  ok("Esc closes color pop + restores focus", await page.evaluate((sel) => document.getElementById("valPop").hidden && document.activeElement === document.querySelector(sel), cellSel));
 
   // app.js doc chrome still works: code tab switch + copy button present
   await go("components/button.html");

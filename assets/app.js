@@ -145,12 +145,12 @@ const ROOT=document.body.dataset.root||'../';
     window.addEventListener("hashchange", () => closePop(menuBtn, menuPop));
     window.addEventListener("resize", () => { if (window.innerWidth >= 1200) closePop(menuBtn, menuPop); });
   }
-  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".color-cell,#colorPop,.copy-helper")) closeColorPop(); });
-  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".color-cell,#colorPop,.copy-helper")) closeColorPop(); });
-  window.addEventListener("hashchange", closeColorPop);
-  window.addEventListener("resize", closeColorPop);
+  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,#valPop,.copy-helper")) closeValPop(); });
+  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,#valPop,.copy-helper")) closeValPop(); });
+  window.addEventListener("hashchange", closeValPop);
+  window.addEventListener("resize", closeValPop);
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape") { const c = colorCell; if (closeColorPop()) { c.focus(); return; } const o = POPS.find(x => !x[1].hidden); if (o) { closePop(o[0], o[1]); o[0].focus(); } return; }
+    if (e.key === "Escape") { const c = valCell; if (closeValPop()) { c.focus(); return; } const o = POPS.find(x => !x[1].hidden); if (o) { closePop(o[0], o[1]); o[0].focus(); } return; }
     if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && searchBtn && searchPop) { e.preventDefault(); openPop(searchBtn, searchPop); if (q) { q.focus(); q.select(); } }
   });
 
@@ -209,8 +209,8 @@ const ROOT=document.body.dataset.root||'../';
     const tile = e.target.closest("#iconGrid .icon-tile");
     if (tile) { openIcon(tile); return; }
     /* Colors: Semantic 스와치 클릭 → 값 모달 */
-    const cell = e.target.closest(".color-cell");
-    if (cell) { openColor(cell); return; }
+    const cell = e.target.closest(".val-cell");
+    if (cell) { openValue(cell); return; }
   });
   function toggle(ex) {
     const code = ex.querySelector(".example-code"), tog = ex.querySelector("[data-toggle]"); if (!code) return;
@@ -243,33 +243,51 @@ const ROOT=document.body.dataset.root||'../';
 
   /* Colors: 스와치 → 값 모달. 값은 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다 —
      현재 테마와 헤더에서 고른 제품 컬러(--accent*)가 모두 반영된 최종 색이어야 하기 때문. */
-  function openColor(cell) {
-    /* Semantic 은 색이 .bar i 에, Atomic 은 버튼 자신에 있다 */
-    const pop = document.getElementById("colorPop"), bar = cell.querySelector(".bar") || cell, i = cell.querySelector(".bar i") || cell;
-    if (!pop) return;
-    if (colorCell === cell && !pop.hidden) { closeColorPop(); return; }          /* 같은 스와치 재클릭 = 토글 */
-    const css = getComputedStyle(i).backgroundColor, p = (css.match(/[\d.]+/g) || []).map(Number);
-    const r = p[0] || 0, g = p[1] || 0, b = p[2] || 0, a = p.length > 3 ? p[3] : 1;
-    const h2 = v => Math.round(v).toString(16).padStart(2, "0").toUpperCase();
-    const hex = "#" + h2(r) + h2(g) + h2(b) + (a < 1 ? h2(a * 255) : "");          /* 알파가 있으면 8자리 */
-    const rgba = [Math.round(r), Math.round(g), Math.round(b), Math.round(a * 100) / 100].join("/");
+  function openValue(cell) {
+    const pop = document.getElementById("valPop"); if (!pop) return;
+    if (valCell === cell && !pop.hidden) { closeValPop(); return; }              /* 같은 칸 재클릭 = 토글 */
+    const esc = t => String(t).replace(/[<>&]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
     const tok = "var(" + (cell.dataset.token || "") + ")";
-    const put = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-    put("colorPopTitle", cell.dataset.label || "Color"); put("colorPopHex", hex); put("colorPopRgba", rgba); put("colorPopToken", tok);
-    document.getElementById("colorPopDot").style.background = css;
-    const btn = document.getElementById("colorPopCopy"); btn.dataset.copyText = tok; btn.classList.remove("copied");
+    const rows = cell.dataset.kind === "shadow" ? [["Value", shadowOf(cell)], ["Token", tok]] : colorRows(cell, tok);
+    document.getElementById("valPopTitle").textContent = cell.dataset.label || "Value";
+    document.getElementById("valPopRows").innerHTML = rows.map(([k, v, dot]) =>
+      '<div class="val-row"><b>' + k + "</b>" + (dot ? '<i style="background:' + esc(dot) + '"></i>' : "") + "<span>" + esc(v) + "</span></div>").join("");
+    const btn = document.getElementById("valPopCopy"); btn.dataset.copyText = tok; btn.classList.remove("copied");
     /* 위치: 숨김을 푼 뒤 같은 태스크에서 재므로 깜빡이지 않는다. offsetParent 기준이라 스크롤을 따라다닌다 */
     pop.hidden = false;
+    const bar = cell.querySelector(".bar") || cell;
     const host = pop.offsetParent || document.body, hr = host.getBoundingClientRect(), br = bar.getBoundingClientRect();
     const w = pop.offsetWidth, max = host.clientWidth - w - 16;
     pop.style.left = Math.max(16, Math.min(br.left - hr.left + br.width / 2 - w / 2, max)) + "px";
     pop.style.top = (br.bottom - hr.top + 8) + "px";
-    colorCell = cell; pop.focus();   /* 버튼이 아니라 다이얼로그에 포커스 — 마우스로 열었을 때 버튼이 눌린 듯 보이지 않게. Tab 하면 복사 버튼 */
+    valCell = cell; pop.focus();   /* 버튼이 아니라 다이얼로그에 포커스 — 마우스로 열었을 때 버튼이 눌린 듯 보이지 않게. Tab 하면 복사 버튼 */
   }
-  let colorCell = null;
-  function closeColorPop() {
-    const pop = document.getElementById("colorPop"); if (!pop || pop.hidden) return false;
-    pop.hidden = true; colorCell = null; return true;
+  /* 색: Semantic 은 .bar i 에, Atomic 은 버튼 자신에 색이 있다 */
+  function colorRows(cell, tok) {
+    const css = getComputedStyle(cell.querySelector(".bar i") || cell).backgroundColor, p = (css.match(/[\d.]+/g) || []).map(Number);
+    const r = p[0] || 0, g = p[1] || 0, b = p[2] || 0, a = p.length > 3 ? p[3] : 1;
+    const h2 = v => Math.round(v).toString(16).padStart(2, "0").toUpperCase();
+    return [["Hex", "#" + h2(r) + h2(g) + h2(b) + (a < 1 ? h2(a * 255) : "")],      /* 알파가 있으면 8자리 */
+      ["RGBA", [Math.round(r), Math.round(g), Math.round(b), Math.round(a * 100) / 100].join("/")],
+      ["Token", tok, css]];
+  }
+  /* 그림자: box-shadow 계산값은 색을 앞으로 옮겨 적으므로, 토큰에 적힌 원문을 그대로 읽는다(아래 Style 표와 같은 표기).
+     겹이 둘이면(Ambient + Key) 줄을 나눈다 — rgba(...) 안의 쉼표는 건너뛰고 최상위 쉼표로만 자른다 */
+  function shadowOf(cell) {
+    const v = getComputedStyle(root).getPropertyValue(cell.dataset.token || "").trim() || getComputedStyle(cell.querySelector("i") || cell).boxShadow;
+    const out = []; let depth = 0, start = 0;
+    for (let i = 0; i < v.length; i++) {
+      const c = v[i];
+      if (c === "(") depth++; else if (c === ")") depth--;
+      else if (c === "," && depth === 0) { out.push(v.slice(start, i).trim()); start = i + 1; }
+    }
+    out.push(v.slice(start).trim());
+    return out.join("\n");
+  }
+  let valCell = null;
+  function closeValPop() {
+    const pop = document.getElementById("valPop"); if (!pop || pop.hidden) return false;
+    pop.hidden = true; valCell = null; return true;
   }
 
   /* 오른쪽 페이지 목차(On this page) — 1600 이상에서만 CSS 로 보인다.
