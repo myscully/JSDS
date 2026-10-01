@@ -117,7 +117,9 @@ ${usageBlock(key, css, label, [...new Set([...(c.react || []), ...uses.flatMap(u
 
 /* ---------- Foundations 공용 ---------- */
 const tokenSection = (id, title, prefixes, note) => `<h3 id="${id}">${title}</h3>${note ? `<p>${note}</p>` : ""}${codeBlock(`tok-${id}`, tokenBlock(prefixes, STYLE()), "css", "CSS 복사")}`;
-const sw = (v, label) => `<div style="background:var(${v})" title="${v} 복사" data-copy-text="var(${v})"><i>${label}</i></div>`;
+/* Atomic 스와치. Semantic 바와 같은 .color-cell 계약 — 누르면 app.js 의 openColor() 가 값 팝오버를 띄운다.
+   data-copy-text 를 두면 복사 위임이 먼저 걸려 팝오버가 열리지 않으므로 붙이지 않는다 */
+const sw = (v, label, group) => { const t = (group ? group + " / " : "") + label; return `<button type="button" class="color-cell" style="background:var(${v})" data-token="${v}" data-label="${t}" aria-haspopup="dialog" title="${t} 값 보기"><i>${label}</i></button>`; };
 
 /* ============ page renderers ============ */
 /* 문서 탭(대상별 안내 등): .doc-tabset — 클릭 전환은 app.src.js 가 처리 */

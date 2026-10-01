@@ -13,16 +13,16 @@ window.FOUNDATION_PAGES = function (H) {
   }
 
   /* ---------- Semantic 스와치 행 ---------- */
-  /* 셀은 버튼이다 — 클릭하면 app.js 의 openColor() 가 바로 아래에 값 팝오버를 띄운다(키보드로도 열림).
+  /* 셀은 버튼이다 — 클릭하면 app.js 의 openColor() 가 바로 아래에 값 팝오버를 띄운다(Atomic 스와치도 같은 .color-cell)(키보드로도 열림).
      data-copy-text 를 두면 복사 위임 핸들러가 먼저 걸려 팝오버가 열리지 않으므로 붙이지 않는다.
      값(Hex·RGBA)은 테마·제품 컬러에 따라 달라지므로 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다. */
   function semRow(items, o = {}) {
     /* "Background - Normal" 섹션의 "Normal" 처럼 섹션 제목이 이미 이름으로 끝나면 되풀이하지 않는다 */
     const label = name => (!o.group ? name : o.group.toLowerCase().endsWith(name.toLowerCase()) ? o.group : o.group + " / " + name);
-    return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<button type="button" class="sem-cell" data-token="${tok}" data-label="${attr(label(name))}" aria-haspopup="dialog" title="${attr(label(name))} 값 보기"><div class="bar${o.line ? " line" : ""}"><i style="background:var(${tok})"></i></div><div class="name">${name}</div></button>`).join("")}</div>`;
+    return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<button type="button" class="color-cell" data-token="${tok}" data-label="${attr(label(name))}" aria-haspopup="dialog" title="${attr(label(name))} 값 보기"><div class="bar${o.line ? " line" : ""}"><i style="background:var(${tok})"></i></div><div class="name">${name}</div></button>`).join("")}</div>`;
   }
   const sem = (id, title, desc, items, o) => `<h2 id="${id}">${title}</h2><p>${desc}</p>${semRow(items, Object.assign({ group: title }, o))}`;
-  const pal = (title, steps, pre, note) => `<div class="pal"><h3>${title}${note ? ` <small style="font-weight:400;color:var(--text-tertiary);font-size:12px">${note}</small>` : ""}</h3><div class="scale" style="grid-template-columns:repeat(${steps.length},1fr)">${steps.map(s => sw(`--${pre}-${s}`, s)).join("")}</div></div>`;
+  const pal = (title, steps, pre, note) => `<div class="pal"><h3>${title}${note ? ` <small style="font-weight:400;color:var(--text-tertiary);font-size:12px">${note}</small>` : ""}</h3><div class="scale" style="grid-template-columns:repeat(${steps.length},1fr)">${steps.map(s => sw(`--${pre}-${s}`, s, title)).join("")}</div></div>`;
   const tabset = (tabs, panes) => `<div class="doc-tabset"><div class="doc-tabs" role="tablist">${tabs.map(([k, t], i) => `<button type="button" role="tab" data-doctab="${k}" class="${i ? "" : "on"}" aria-selected="${i ? "false" : "true"}">${t}</button>`).join("")}</div>${tabs.map(([k], i) => `<div data-docpane="${k}"${i ? " hidden" : ""}>${panes[i]}</div>`).join("")}</div>`;
   const tbl = (head, rows, cls = "") => `<div class="tablewrap"><table class="${cls}"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 

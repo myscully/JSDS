@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 72 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 74 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -208,16 +208,32 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
 
   // Colors: 바탕과 구분되지 않는 스와치에 라인
   await go("foundations/colors.html");
-  const faint = (tok) => page.evaluate((t) => document.querySelector('.sem-cell[data-token="' + t + '"] .bar').classList.contains("faint"), tok);
+  const faint = (tok) => page.evaluate((t) => document.querySelector('.color-cell[data-token="' + t + '"] .bar').classList.contains("faint"), tok);
   ok("white swatch gets an outline, saturated one does not", (await faint("--static-white")) && (await faint("--bg-canvas")) && !(await faint("--accent")) && !(await faint("--static-black")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
   ok("outline follows the theme (dark: black faint, white not)", (await faint("--static-black")) && !(await faint("--static-white")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
 
+  // Colors: Atomic 팔레트도 같은 팝오버
+  await go("foundations/colors.html");
+  await page.locator('.doc-tabs [data-doctab="atomic"]').click();
+  const atom = '.pal .color-cell[data-token="--gray-500"]';
+  await page.locator(atom).evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
+  await page.locator(atom).click();
+  await page.waitForSelector("#colorPop:not([hidden])", { timeout: 2000 });
+  const av = await page.evaluate((sel) => {
+    const c = document.querySelector(sel).getBoundingClientRect(), p = document.getElementById("colorPop").getBoundingClientRect();
+    return { t: colorPopTitle.textContent, hex: colorPopHex.textContent, tok: colorPopToken.textContent, below: Math.round(p.top - c.bottom), label: document.querySelector(sel).querySelector("i").textContent };
+  }, atom);
+  ok("atomic swatch opens the same pop", av.t === "Gray / 500" && /^#[0-9A-F]{6}$/.test(av.hex) && av.tok === "var(--gray-500)" && av.below >= 0 && av.below <= 16 && av.label === "500", JSON.stringify(av));
+  await page.screenshot({ path: SHOT + "/color-pop-atomic.png" });
+  await page.keyboard.press("Escape");
+  ok("atomic pop closes on Esc", await page.locator("#colorPop").evaluate((e) => e.hidden));
+
   // Colors: Semantic 스와치 클릭 → 값 팝오버 (딤 없이 바 아래, 토큰 복사)
   await go("foundations/colors.html");
   await page.locator("#primary").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
-  const cellSel = '.sem-cell[data-token="--accent"]';
+  const cellSel = '.color-cell[data-token="--accent"]';
   await page.locator(cellSel).click();
   await page.waitForSelector("#colorPop:not([hidden])", { timeout: 2000 });
   const cv = await page.evaluate(() => ({

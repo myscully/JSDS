@@ -145,8 +145,8 @@ const ROOT=document.body.dataset.root||'../';
     window.addEventListener("hashchange", () => closePop(menuBtn, menuPop));
     window.addEventListener("resize", () => { if (window.innerWidth >= 1200) closePop(menuBtn, menuPop); });
   }
-  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".sem-cell,#colorPop,.copy-helper")) closeColorPop(); });
-  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".sem-cell,#colorPop,.copy-helper")) closeColorPop(); });
+  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".color-cell,#colorPop,.copy-helper")) closeColorPop(); });
+  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".color-cell,#colorPop,.copy-helper")) closeColorPop(); });
   window.addEventListener("hashchange", closeColorPop);
   window.addEventListener("resize", closeColorPop);
   document.addEventListener("keydown", e => {
@@ -209,7 +209,7 @@ const ROOT=document.body.dataset.root||'../';
     const tile = e.target.closest("#iconGrid .icon-tile");
     if (tile) { openIcon(tile); return; }
     /* Colors: Semantic 스와치 클릭 → 값 모달 */
-    const cell = e.target.closest(".sem-cell");
+    const cell = e.target.closest(".color-cell");
     if (cell) { openColor(cell); return; }
   });
   function toggle(ex) {
@@ -244,8 +244,9 @@ const ROOT=document.body.dataset.root||'../';
   /* Colors: 스와치 → 값 모달. 값은 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다 —
      현재 테마와 헤더에서 고른 제품 컬러(--accent*)가 모두 반영된 최종 색이어야 하기 때문. */
   function openColor(cell) {
-    const pop = document.getElementById("colorPop"), bar = cell.querySelector(".bar"), i = cell.querySelector(".bar i");
-    if (!pop || !bar || !i) return;
+    /* Semantic 은 색이 .bar i 에, Atomic 은 버튼 자신에 있다 */
+    const pop = document.getElementById("colorPop"), bar = cell.querySelector(".bar") || cell, i = cell.querySelector(".bar i") || cell;
+    if (!pop) return;
     if (colorCell === cell && !pop.hidden) { closeColorPop(); return; }          /* 같은 스와치 재클릭 = 토글 */
     const css = getComputedStyle(i).backgroundColor, p = (css.match(/[\d.]+/g) || []).map(Number);
     const r = p[0] || 0, g = p[1] || 0, b = p[2] || 0, a = p.length > 3 ? p[3] : 1;
