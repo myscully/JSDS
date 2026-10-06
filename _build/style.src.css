@@ -280,7 +280,6 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand)}
 .elev-comp .op{color:var(--text-disabled);font-size:20px}
 .space-bars{display:flex;align-items:flex-start;gap:8px;padding:var(--space-8) var(--space-6) var(--space-6);background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);margin:var(--space-4) 0 var(--space-10);overflow-x:auto}
 .space-bars>div{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none}
-.space-bars>div[data-copy-text]{cursor:pointer}   /* 토큰이 없는 막대는 클릭 대상이 아니다 */
 .space-bars>div b{font-size:12px;font-weight:700;color:#fff;background:var(--success);border-radius:999px;padding:2px 8px;min-width:24px;text-align:center}
 .space-bars>div i{display:block;height:220px;background:var(--success-subtle);border-radius:3px}
 .space-bars>div.base b{background:var(--accent)}.space-bars>div.base i{background:var(--accent-subtle)}
