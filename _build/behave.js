@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 92 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 94 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -217,6 +217,22 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
     panes: [...document.querySelector(".example").querySelectorAll("[data-pane]")].map((x) => x.dataset.pane).join(","),
   }));
   ok("component page opens with 1. Default, no Anatomy/Examples heading", cs.first === "1. Default" && cs.tag === "H2" && !cs.anatomy && !cs.examplesH2 && cs.panes === "html,react", JSON.stringify(cs));
+
+  // Patterns: Examples 제목 없음 · 예제가 하나뿐이면 번호 제목도 없음
+  await go("patterns/input-form.html");
+  const pm = await page.evaluate(() => ({
+    examplesH2: !!document.querySelector("#examples"),
+    heads: [...document.querySelectorAll('#content h2[id^="ex-"]')].map((h) => h.textContent).join(" / "),
+    toc: [...document.querySelectorAll("#toc a")].map((a) => a.textContent).join(" / "),
+  }));
+  ok("pattern page matches the component layout", !pm.examplesH2 && pm.heads === "1. 기본 폼 / 2. 오류 상태", JSON.stringify(pm));
+  await go("patterns/dashboard.html");
+  const one = await page.evaluate(() => ({
+    heads: document.querySelectorAll('#content h2[id^="ex-"]').length,
+    examples: document.querySelectorAll(".example").length,
+    toc: [...document.querySelectorAll("#toc a")].map((a) => a.textContent).join(" / "),
+  }));
+  ok("single-example pattern drops the numbered heading", one.heads === 0 && one.examples === 1 && one.toc === "Composition / Usage", JSON.stringify(one));
 
   // Icons: 추린 세트 · 한글 검색 · Filled 필터
   await go("foundations/icons.html");

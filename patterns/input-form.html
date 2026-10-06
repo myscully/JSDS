@@ -42,7 +42,7 @@
     <div class="page"><article id="content">
 <h1>입력 폼</h1><p class="lead">정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses"><a href="../components/text-field.html">Text Field</a><a href="../components/dropdown.html">Dropdown</a><a href="../components/checkbox.html">Checkbox</a><a href="../components/radio-button.html">Radio Button</a><a href="../components/button.html">Button</a></div>
 <div class="kv"><dt>구성</dt><dd>한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열</dd><dt>검증</dt><dd>포커스가 떠날 때 필드 단위로, 제출 시 첫 오류로 스크롤</dd><dt>액션</dt><dd>취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)</dd></div>
-<h2 id="examples">Examples</h2><h3 id="ex-basic">1. 기본 폼</h3><p>섹션 제목(.form-section)으로 그룹을 나누고, 마지막에 .form-actions.</p><section class="example" id="ex-input-form-basic">
+<h2 id="ex-basic">1. 기본 폼</h2><p>섹션 제목(.form-section)으로 그룹을 나누고, 마지막에 .form-actions.</p><section class="example" id="ex-input-form-basic">
 <div class="example-preview panel"><form class="form">
   <div class="form-section">기본 정보</div>
   <div class="field"><label for="pname">정책 이름 <em>*</em></label><input id="pname" placeholder="예: 외부 USB 차단" required=""><span class="help">2~40자</span></div>
@@ -213,7 +213,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-error">2. 오류 상태</h3><p>제출 후 오류. 필드 오류 + 상단 요약 Notice(오류 3개 이상일 때).</p><section class="example" id="ex-input-form-error">
+</section><h2 id="ex-error">2. 오류 상태</h2><p>제출 후 오류. 필드 오류 + 상단 요약 Notice(오류 3개 이상일 때).</p><section class="example" id="ex-input-form-error">
 <div class="example-preview panel"><form class="form" novalidate="">
   <div class="notice danger" role="alert" style="margin-bottom:-4px"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg></span><div><b>입력값 2개를 확인해 주세요</b>정책 이름, 허용 IP</div></div>
   <div class="field error"><label for="e1">정책 이름 <em>*</em></label><input id="e1" aria-invalid="true" aria-describedby="e1h"><span class="help" id="e1h">정책 이름을 입력하세요</span></div>

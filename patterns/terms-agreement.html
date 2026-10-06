@@ -42,7 +42,7 @@
     <div class="page"><article id="content">
 <h1>약관 동의</h1><p class="lead">약관·개인정보 처리 동의 화면입니다. 전체 동의 + 개별 항목, 필수/선택 표시, 전문 보기.</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses"><a href="../components/checkbox.html">Checkbox</a><a href="../components/accordion.html">Accordion</a><a href="../components/button.html">Button</a></div>
 
-<h2 id="examples">Examples</h2><h3 id="ex-basic">1. 전체 동의 + 개별 항목</h3><p>전체 동의는 부분 선택 상태(.mixed)를 표현. 필수 미동의 시 다음 버튼 비활성.</p><section class="example" id="ex-terms-agreement-basic">
+<h2 id="ex-basic">1. 전체 동의 + 개별 항목</h2><p>전체 동의는 부분 선택 상태(.mixed)를 표현. 필수 미동의 시 다음 버튼 비활성.</p><section class="example" id="ex-terms-agreement-basic">
 <div class="example-preview panel"><div class="terms">
   <div class="all"><label class="checkbox"><input type="checkbox" class="mixed" aria-label="전체 동의"><span>전체 동의</span></label></div>
   <div class="item"><label class="checkbox"><input type="checkbox" checked=""><span>서비스 이용약관</span></label><span class="req">필수</span><button type="button" class="view">보기</button></div>
@@ -153,7 +153,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-inline">2. 전문 펼쳐 보기</h3><p>약관 전문은 Accordion 으로 같은 화면에서 펼칩니다.</p><section class="example" id="ex-terms-agreement-inline">
+</section><h2 id="ex-inline">2. 전문 펼쳐 보기</h2><p>약관 전문은 Accordion 으로 같은 화면에서 펼칩니다.</p><section class="example" id="ex-terms-agreement-inline">
 <div class="example-preview panel"><div class="terms">
   <details class="accordion" style="max-width:560px"><summary><label class="checkbox" style="font-weight:600"><input type="checkbox" checked=""><span>서비스 이용약관 <span class="req">필수</span></span></label></summary><div class="body" style="max-height:120px;overflow:auto">제1조(목적) 이 약관은 지란지교시큐리티가 제공하는 서비스의 이용 조건과 절차를 규정합니다. 제2조(정의) … 제3조(약관의 효력) …</div></details>
 </div></div>

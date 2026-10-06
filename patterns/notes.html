@@ -42,7 +42,7 @@
     <div class="page"><article id="content">
 <h1>유의사항</h1><p class="lead">화면 하단이나 폼 옆에 두는 유의사항·안내 문구입니다. 읽지 않아도 진행할 수 있는 정보를 담습니다.</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses"><a href="../components/notification.html">Notification</a><a href="../components/accordion.html">Accordion</a></div>
 
-<h2 id="examples">Examples</h2><h3 id="ex-basic">1. 기본</h3><p>제목 + 불릿 3~5개. 배경 subtle, 보더 없음.</p><section class="example" id="ex-notes-basic">
+<h2 id="ex-basic">1. 기본</h2><p>제목 + 불릿 3~5개. 배경 subtle, 보더 없음.</p><section class="example" id="ex-notes-basic">
 <div class="example-preview panel"><div class="notes" style="max-width:600px">
   <b>유의사항</b>
   <ul>
@@ -122,7 +122,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-warning">2. 주의</h3><p>되돌리기 어려운 영향은 .warning. 즉시 조치가 필요하면 Notification(danger).</p><section class="example" id="ex-notes-warning">
+</section><h2 id="ex-warning">2. 주의</h2><p>되돌리기 어려운 영향은 .warning. 즉시 조치가 필요하면 Notification(danger).</p><section class="example" id="ex-notes-warning">
 <div class="example-preview panel"><div class="notes warning" style="max-width:600px">
   <b>정책 삭제 전 확인</b>
   <ul>
@@ -197,7 +197,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-collapsed">3. 접힌 유의사항</h3><p>길거나 부차적인 안내는 Accordion 으로 접습니다.</p><section class="example" id="ex-notes-collapsed">
+</section><h2 id="ex-collapsed">3. 접힌 유의사항</h2><p>길거나 부차적인 안내는 Accordion 으로 접습니다.</p><section class="example" id="ex-notes-collapsed">
 <div class="example-preview panel"><details class="accordion" style="max-width:600px"><summary><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path><path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path></svg>유의사항 <small>3개</small></summary><div class="body"><ul style="margin:0;padding-left:1.2em"><li>정책은 배포 후 최대 5분 내 적용됩니다.</li><li>격리 파일은 30일 보관됩니다.</li><li>예외는 해시·경로 기준입니다.</li></ul></div></details></div>
 <div class="example-bar"><div class="code-tabs" role="tablist"><button type="button" class="on" data-tab="html" role="tab" aria-selected="true">HTML+CSS</button><button type="button" data-tab="react" role="tab" aria-selected="false">React</button></div><div class="example-actions"><button type="button" data-copy="ex-notes-collapsed-html" data-label="복사">복사</button><button type="button" data-toggle="" aria-expanded="false">코드 보기</button></div></div>
 <div class="example-code" hidden="">
