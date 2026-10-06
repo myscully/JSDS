@@ -98,8 +98,8 @@ function componentPage(key) {
   const c = COMPONENTS[key]; const t = titleOf("components", key);
   if (!c) return `<h1>${t}</h1><p class="lead">${t} 컴포넌트는 아직 작성되지 않았습니다.</p><div class="ph">라이브 프리뷰 · 코드<small>components.data.js 에 항목을 추가하세요</small></div>`;
   const css = cssOf(c); const label = [].concat(c.css || []).join(", ");
-  return `<h1>${t}${nb("components", key)}</h1><p class="lead">${c.desc}</p>${c.anatomy ? `<h2 id="anatomy">Anatomy</h2><div class="panel">${dedent(c.anatomy.demo)}</div><ol class="legend">${c.anatomy.items.map((x, i) => `<li><span class="marker">${i + 1}</span>${x}</li>`).join("")}</ol>` : ""}
-<h2 id="examples">Examples</h2>${(c.examples || []).map((ex, i) => `<h3 id="ex-${ex.id}">${i + 1}. ${ex.title}</h3>${ex.desc ? `<p>${ex.desc}</p>` : ""}${exampleBlock("components", key, ex, css, label)}`).join("")}
+  return `<h1>${t}${nb("components", key)}</h1><p class="lead">${c.desc}</p>
+${(c.examples || []).map((ex, i) => `<h2 id="ex-${ex.id}">${i + 1}. ${ex.title}</h2>${ex.desc ? `<p>${ex.desc}</p>` : ""}${exampleBlock("components", key, ex, css, label)}`).join("")}
 <h2 id="props">Props</h2><p>HTML 에서는 클래스와 속성으로, React(<code>@jiran/ds-react</code>)에서는 같은 이름의 prop(<code>variant</code> · <code>size</code> …)으로 변형·상태를 지정합니다.</p>${propsTable(c.props)}
 ${usageBlock(key, css, label, c.react || [])}`;
 }

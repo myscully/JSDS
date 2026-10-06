@@ -1,6 +1,6 @@
 {
   "version": "v0.6",
-  "generatedAt": "2026-10-06T06:11:27.798Z",
+  "generatedAt": "2026-10-06T06:32:20.791Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -711,6 +711,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "변형·크기를 지정하지 않은 기본 버튼입니다. 화면의 주 행동 하나에만 씁니다.",
+          "html": "<button class=\"btn md primary\">정책 저장</button>",
+          "react": "import { Button } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Button>정책 저장</Button>;\n}"
+        },
+        {
           "id": "variant",
           "title": "Variant",
           "desc": "우선순위에 따라 Primary(화면당 하나) · Secondary · Tertiary · Text · Danger 를 씁니다.",
@@ -1355,6 +1362,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "날짜 하나를 고르는 기본 필드입니다.",
+          "html": "<div class=\"datepicker\"><label>시작일</label><button type=\"button\" class=\"field-btn\" aria-haspopup=\"dialog\" aria-expanded=\"false\"><span class=\"placeholder\">날짜 선택</span><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12\"/><path d=\"M16 3v4\"/><path d=\"M8 3v4\"/><path d=\"M4 11h16\"/><path d=\"M11 15h1\"/><path d=\"M12 15v3\"/></svg></button></div>",
+          "react": "import { DatePicker } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <DatePicker label=\"시작일\" />;\n}"
+        },
+        {
           "id": "field",
           "title": "Field",
           "desc": "닫힌 상태. 값이 없으면 플레이스홀더, 기간은 ~ 구분.",
@@ -1472,6 +1486,13 @@
         ]
       },
       "examples": [
+        {
+          "id": "default",
+          "title": "Default",
+          "desc": "선택하지 않은 기본 상태입니다.",
+          "html": "<label class=\"checkbox\"><input type=\"checkbox\"><span>정책 배포 시 알림</span></label>",
+          "react": "import { Checkbox } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Checkbox>정책 배포 시 알림</Checkbox>;\n}"
+        },
         {
           "id": "state",
           "title": "State",
@@ -1601,6 +1622,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "선택하지 않은 기본 칩입니다.",
+          "html": "<button type=\"button\" class=\"chip\" aria-pressed=\"false\">Critical</button>",
+          "react": "import { Chip } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Chip>Critical</Chip>;\n}"
+        },
+        {
           "id": "filter",
           "title": "Filter Chip",
           "desc": "토글 선택. aria-pressed 가 있는 칩은 체크 아이콘을 항상 두고(비활성 색), 선택되면 .on 으로 색만 바뀌어 폭이 흔들리지 않습니다.",
@@ -1719,6 +1747,13 @@
         ]
       },
       "examples": [
+        {
+          "id": "default",
+          "title": "Default",
+          "desc": "선택하지 않은 기본 상태입니다.",
+          "html": "<label class=\"radio\"><input type=\"radio\" name=\"rd\"><span>표준 모드</span></label>",
+          "react": "import { Radio } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Radio name=\"rd\">표준 모드</Radio>;\n}"
+        },
         {
           "id": "state",
           "title": "State",
@@ -1839,6 +1874,13 @@
         ]
       },
       "examples": [
+        {
+          "id": "default",
+          "title": "Default",
+          "desc": "꺼진 기본 상태입니다.",
+          "html": "<label class=\"switch\"><input type=\"checkbox\" role=\"switch\"><span>실시간 보호</span></label>",
+          "react": "import { Switch } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Switch>실시간 보호</Switch>;\n}"
+        },
         {
           "id": "state",
           "title": "State",
@@ -1975,6 +2017,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "의미 색을 지정하지 않은 중립 태그입니다.",
+          "html": "<span class=\"tag\">Tag</span>",
+          "react": "import { Tag } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Tag>Tag</Tag>;\n}"
+        },
+        {
           "id": "severity",
           "title": "Severity",
           "desc": "위협 심각도 5단계. --sev-* 토큰과 1:1.",
@@ -2104,6 +2153,13 @@
         ]
       },
       "examples": [
+        {
+          "id": "default",
+          "title": "Default",
+          "desc": "닫힌 기본 상태입니다. 누르면 목록이 열립니다.",
+          "html": "<div class=\"dropdown\">\n  <button type=\"button\" class=\"trigger\" aria-haspopup=\"listbox\" aria-expanded=\"false\"><span class=\"placeholder\">그룹 선택</span></button>\n  <ul class=\"menu\" role=\"listbox\" aria-label=\"그룹\">\n    <li class=\"menu-item\" role=\"option\">전체</li>\n    <li class=\"menu-item\" role=\"option\">영업팀</li>\n    <li class=\"menu-item\" role=\"option\">개발팀</li>\n  </ul>\n</div>",
+          "react": "import { Select } from \"@jiran/ds-react\";\n\nconst GROUPS = [\n  { value: \"all\", label: \"전체\" },\n  { value: \"sales\", label: \"영업팀\" },\n  { value: \"dev\", label: \"개발팀\" },\n];\n\nexport default function Example() {\n  return <Select options={GROUPS} placeholder=\"그룹 선택\" label=\"그룹\" keepMounted />;\n}"
+        },
         {
           "id": "select",
           "title": "Select",
@@ -2238,6 +2294,13 @@
         ]
       },
       "examples": [
+        {
+          "id": "default",
+          "title": "Default",
+          "desc": "밑줄 스타일의 기본 탭입니다.",
+          "html": "<div class=\"tabs\" role=\"tablist\">\n  <button type=\"button\" class=\"tab on\" role=\"tab\" aria-selected=\"true\">개요</button>\n  <button type=\"button\" class=\"tab\" role=\"tab\" aria-selected=\"false\">이벤트</button>\n  <button type=\"button\" class=\"tab\" role=\"tab\" aria-selected=\"false\">정책</button>\n</div>",
+          "react": "import { Tab, TabList, Tabs } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <Tabs defaultValue=\"overview\">\n      <TabList>\n        <Tab value=\"overview\">개요</Tab>\n        <Tab value=\"events\">이벤트</Tab>\n        <Tab value=\"policy\">정책</Tab>\n      </TabList>\n    </Tabs>\n  );\n}"
+        },
         {
           "id": "underline",
           "title": "Underline",
@@ -3102,6 +3165,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "제목 · 본문 · 액션으로 이루어진 기본 구성입니다.",
+          "html": "<div class=\"popup\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"d-title\">\n  <h3 class=\"popup-title\" id=\"d-title\">정책을 배포할까요?</h3>\n  <p class=\"popup-body\">변경 사항이 1,284대에 적용됩니다.</p>\n  <div class=\"popup-actions\"><button type=\"button\" class=\"btn md secondary\" data-popup-close>취소</button><button type=\"button\" class=\"btn md primary\">배포</button></div>\n</div>",
+          "react": "import { useState } from \"react\";\nimport { Button, Popup, PopupActions, PopupBody, PopupTitle } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  const [open, setOpen] = useState(false);\n  const close = () => setOpen(false);\n  return (\n    <>\n      <Button onClick={() => setOpen(true)}>배포</Button>\n      <Popup open={open} onClose={close}>\n        <PopupTitle>정책을 배포할까요?</PopupTitle>\n        <PopupBody>변경 사항이 1,284대에 적용됩니다.</PopupBody>\n        <PopupActions>\n          <Button variant=\"secondary\" onClick={close}>취소</Button>\n          <Button onClick={close}>배포</Button>\n        </PopupActions>\n      </Popup>\n    </>\n  );\n}"
+        },
+        {
           "id": "confirm",
           "title": "Confirm",
           "desc": "실제 화면에서는 .popup-backdrop 으로 감쌉니다(코드 참조). 예제는 팝업만 표시.",
@@ -3224,6 +3294,13 @@
         ]
       },
       "examples": [
+        {
+          "id": "default",
+          "title": "Default",
+          "desc": "요소 위쪽에 뜨는 기본 위치입니다.",
+          "html": "<span class=\"tooltip-wrap show\"><button type=\"button\" class=\"btn md secondary\">새로 고침</button><span class=\"tooltip\" role=\"tooltip\">목록을 다시 불러옵니다</span></span>",
+          "react": "import { Button, Tooltip } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <Tooltip content=\"목록을 다시 불러옵니다\" show>\n      <Button variant=\"secondary\">새로 고침</Button>\n    </Tooltip>\n  );\n}"
+        },
         {
           "id": "position",
           "title": "Position",
@@ -3368,6 +3445,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "본문 안에 머무는 기본 인라인 알림입니다.",
+          "html": "<div class=\"notice info\" role=\"status\" style=\"max-width:600px\"><span class=\"ico\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0\"/><path d=\"M12 9h.01\"/><path d=\"M11 12h1v4h1\"/></svg></span><div><b>정책이 아직 배포되지 않았습니다</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>",
+          "react": "import { Notice } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <Notice tone=\"info\" title=\"정책이 아직 배포되지 않았습니다\" style={{ maxWidth: 600 }}>\n      변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.\n    </Notice>\n  );\n}"
+        },
+        {
           "id": "notice",
           "title": "Notice (Inline)",
           "desc": "페이지에 고정. Info · Success · Warning · Danger. role=status(정보) 또는 alert(위험).",
@@ -3503,6 +3587,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "기본 크기(24px) 스피너입니다.",
+          "html": "<span class=\"spinner\" role=\"status\" aria-label=\"불러오는 중\"></span>",
+          "react": "import { Spinner } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Spinner />;\n}"
+        },
+        {
           "id": "spinner",
           "title": "Spinner",
           "desc": "sm 16 · md 24 · lg 40. 버튼 안에서는 Button .loading 을 씁니다.",
@@ -3637,6 +3728,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "상태 점과 라벨을 함께 쓰는 기본 형태입니다.",
+          "html": "<span class=\"indicator ok\">정상</span>",
+          "react": "import { Indicator } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Indicator tone=\"ok\">정상</Indicator>;\n}"
+        },
+        {
           "id": "status",
           "title": "Status Dot",
           "desc": "에이전트·서비스 상태. 라벨 필수. 실시간 위험은 .pulse.",
@@ -3753,6 +3851,13 @@
         ]
       },
       "examples": [
+        {
+          "id": "default",
+          "title": "Default",
+          "desc": "영역을 나누는 기본 가로 구분선입니다.",
+          "html": "<div style=\"width:100%;max-width:480px\">\n  <p class=\"t-body-2\" style=\"margin:0\">기본 설정</p>\n  <hr class=\"divider\">\n  <p class=\"t-body-2\" style=\"margin:0\">고급 설정</p>\n</div>",
+          "react": "import { Divider } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <div style={{ width: \"100%\", maxWidth: 480 }}>\n      <p className=\"t-body-2\" style={{ margin: 0 }}>기본 설정</p>\n      <Divider />\n      <p className=\"t-body-2\" style={{ margin: 0 }}>고급 설정</p>\n    </div>\n  );\n}"
+        },
         {
           "id": "basic",
           "title": "Horizontal",
@@ -4015,6 +4120,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "머리글과 본문만 둔 기본 표입니다.",
+          "html": "<div class=\"tbl-wrap\" style=\"max-width:480px\">\n  <table class=\"tbl\">\n    <thead><tr><th>그룹</th><th class=\"num\">에이전트</th></tr></thead>\n    <tbody>\n      <tr><td>영업팀</td><td class=\"num\">312</td></tr>\n      <tr><td>개발팀</td><td class=\"num\">184</td></tr>\n    </tbody>\n  </table>\n</div>",
+          "react": "import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <Table wrapStyle={{ maxWidth: 480 }}>\n      <TableHead>\n        <TableRow>\n          <TableHeader>그룹</TableHeader>\n          <TableHeader num>에이전트</TableHeader>\n        </TableRow>\n      </TableHead>\n      <TableBody>\n        <TableRow>\n          <TableCell>영업팀</TableCell>\n          <TableCell num>312</TableCell>\n        </TableRow>\n        <TableRow>\n          <TableCell>개발팀</TableCell>\n          <TableCell num>184</TableCell>\n        </TableRow>\n      </TableBody>\n    </Table>\n  );\n}"
+        },
+        {
           "id": "simple",
           "title": "Simple",
           "desc": "",
@@ -4259,6 +4371,13 @@
       },
       "examples": [
         {
+          "id": "default",
+          "title": "Default",
+          "desc": "선택하지 않은 기본 타일입니다.",
+          "html": "<button type=\"button\" class=\"tile\"><span class=\"ico\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3\"/></svg></span><b>USB 제어</b><span>저장장치 차단·읽기 전용</span></button>",
+          "react": "import { Tile } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Tile icon=\"shield\" title=\"USB 제어\" desc=\"저장장치 차단·읽기 전용\" />;\n}"
+        },
+        {
           "id": "grid",
           "title": "Grid",
           "desc": "button.tile 그리드. 선택은 .on + aria-pressed.",
@@ -4392,6 +4511,13 @@
         ]
       },
       "examples": [
+        {
+          "id": "default",
+          "title": "Default",
+          "desc": "값 하나를 보여 주는 기본 KPI 입니다.",
+          "html": "<div class=\"kpi\" style=\"max-width:240px\"><span class=\"label\">연결 에이전트</span><span class=\"value\">1,247</span></div>",
+          "react": "import { Kpi } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return <Kpi label=\"연결 에이전트\" value=\"1,247\" style={{ maxWidth: 240 }} />;\n}"
+        },
         {
           "id": "kpi",
           "title": "KPI",

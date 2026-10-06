@@ -362,13 +362,6 @@ table.type-table td .smp{display:block;color:var(--text-primary)}
 /* Anatomy / demo panel */
 .panel{background:var(--bg-panel);border-radius:var(--radius-lg);padding:var(--space-12) var(--space-10);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:var(--space-6);margin:var(--space-4) 0 var(--space-6);position:relative;min-height:200px}
 .panel.left{justify-content:flex-start}
-.marker{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--text-primary);color:var(--bg-surface);font-size:12px;font-weight:700;line-height:1}
-.anat{position:relative;display:inline-block}
-.anat .marker{position:absolute;z-index:2}
-.anat .menu-item,.anat .trigger{cursor:default}
-.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px 24px;margin:0 0 var(--space-4);padding:0;list-style:none;max-width:none}
-.legend li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
-.legend li .marker{flex:none;margin-top:3px}
 .ph{border:1.5px dashed var(--border-default);border-radius:var(--radius-lg);background:var(--bg-subtle);color:var(--text-tertiary);display:grid;place-items:center;text-align:center;font-size:12px;padding:var(--space-8);min-height:180px;margin:var(--space-4) 0 var(--space-6)}
 .ph small{display:block;margin-top:4px;font-size:12px;opacity:.8}
 .dodont{display:grid;grid-template-columns:1fr 1fr;gap:var(--card-gap);margin:var(--space-4) 0 var(--space-6)}
