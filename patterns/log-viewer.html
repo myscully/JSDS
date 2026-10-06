@@ -42,7 +42,7 @@
     <div class="page"><article id="content">
 <h1>로그 뷰어</h1><p class="lead">대량 로그를 빠르게 훑고 필터링하는 화면입니다. Compact 표 + 모노스페이스 시간/IP + 심각도 태그 + 실시간/일시정지 전환.</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses"><a href="../components/search.html">Search</a><a href="../components/chip.html">Chip</a><a href="../components/select-button.html">Select Button</a><a href="../components/data-table.html">Data Table</a><a href="../components/tag.html">Tag</a><a href="../components/pagination.html">Pagination</a><a href="../components/button.html">Button</a></div>
 <div class="kv"><dt>밀도</dt><dd>.tbl.compact 44px 행, 시간·IP 는 .log-row 모노스페이스</dd><dt>필터</dt><dd>심각도 Chip 다중 선택 + 검색 + 실시간/일시정지</dd><dt>상세</dt><dd>행 클릭 → 우측 패널(표는 그대로)</dd></div>
-<h2 id="examples">Examples</h2><h3 id="ex-viewer">1. 로그 뷰어</h3><section class="example" id="ex-log-viewer-viewer">
+<section class="example" id="ex-log-viewer-viewer">
 <div class="example-preview panel stack"><div class="stack">
   <div class="toolbar">
     <div class="searchbar" role="search" style="min-width:360px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path><path d="M21 21l-6 -6"></path></svg><input type="search" placeholder="메시지 검색 · host:&quot;PC-2041&quot; level:crit" aria-label="로그 검색"></div>

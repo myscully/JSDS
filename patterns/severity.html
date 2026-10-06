@@ -42,7 +42,7 @@
     <div class="page"><article id="content">
 <h1>심각도 표시</h1><p class="lead">위협 심각도 5단계(Critical · High · Medium · Low · Info)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses"><a href="../components/tag.html">Tag</a><a href="../components/indicator.html">Indicator</a><a href="../components/data-visual.html">Data Visual</a><a href="../components/data-table.html">Data Table</a></div>
 <div class="kv"><dt>토큰</dt><dd>--sev-critical(red/700) · --sev-high(red/500) · --sev-medium(amber/500) · --sev-low(sky/500) · --sev-info(gray/500)</dd><dt>표현</dt><dd>표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조</dd><dt>정렬</dt><dd>항상 Critical → Info. 색만이 아니라 라벨을 함께</dd></div>
-<h2 id="examples">Examples</h2><h3 id="ex-scale">1. 5단계 스케일</h3><p>Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.</p><section class="example" id="ex-severity-scale">
+<h2 id="ex-scale">1. 5단계 스케일</h2><p>Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.</p><section class="example" id="ex-severity-scale">
 <div class="example-preview panel left"><div class="stack" style="max-width:640px;gap:20px">
   <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical solid">Critical</span><span class="tag high solid">High</span><span class="tag medium solid">Medium</span><span class="tag low solid">Low</span><span class="tag info solid" style="background:var(--sev-info)">Info</span></div>
@@ -217,7 +217,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-band">2. 분포 밴드</h3><p>전체 대비 비율. flex 값이 비율, 아래 범례로 수치.</p><section class="example" id="ex-severity-band">
+</section><h2 id="ex-band">2. 분포 밴드</h2><p>전체 대비 비율. flex 값이 비율, 아래 범례로 수치.</p><section class="example" id="ex-severity-band">
 <div class="example-preview panel"><div class="stack" style="max-width:640px;gap:10px">
   <div class="sev-band" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>
   <div class="chart-legend"><span><i style="background:var(--sev-critical)"></i>Critical <b>190</b></span><span><i style="background:var(--sev-high)"></i>High <b>285</b></span><span><i style="background:var(--sev-medium)"></i>Medium <b>316</b></span><span><i style="background:var(--sev-low)"></i>Low <b>263</b></span></div>
@@ -384,7 +384,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-table">3. 표 안의 심각도</h3><p>행 좌측 색 막대(.sev-cell) + Tag. 정렬 기본값은 심각도 내림차순.</p><section class="example" id="ex-severity-table">
+</section><h2 id="ex-table">3. 표 안의 심각도</h2><p>행 좌측 색 막대(.sev-cell) + Tag. 정렬 기본값은 심각도 내림차순.</p><section class="example" id="ex-severity-table">
 <div class="example-preview panel"><div class="tbl-wrap" style="max-width:720px">
   <table class="tbl compact">
     <thead><tr><th class="sortable sorted desc" aria-sort="descending">심각도</th><th>이벤트</th><th>대상</th><th class="num">건수</th></tr></thead>
