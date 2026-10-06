@@ -12,10 +12,12 @@ window.FOUNDATION_PAGES = function (H) {
     return { L, D };
   }
 
-  /* ---------- 값 팝오버 (Colors · Elevation 공용) ----------
+  /* ---------- 값 팝오버 (Colors · Elevation · Icons 공용) ----------
+     머리의 테마 아이콘(해/달) · 아이콘 미리보기 · 다운로드는 종류에 따라 하나만 보인다 — #valPop 의 .kind-icon 으로 가린다.
+     해/달을 .val-pop-theme 로 감싼 이유: 다크 규칙이 :root[data-theme="dark"] .val-pop .i-moon 이라 특정도가 높아, 래퍼를 숨기는 편이 깔끔하다.
      줄(Hex/RGBA/Token · Value/Token)은 app.js 가 클릭 시점에 만든다 — 종류와 테마·제품 컬러에 따라 달라지므로 */
   const valPop = () => `<div class="val-pop" id="valPop" hidden tabindex="-1" role="dialog" aria-labelledby="valPopTitle">
-<div class="val-pop-head"><span class="i-sun" title="Light 테마 값">${I("sun-high", 18)}</span><span class="i-moon" title="Dark 테마 값">${I("moon", 18)}</span><span id="valPopTitle">Value</span><button type="button" class="btn sm tertiary icon" id="valPopCopy" data-copy-text="" aria-label="토큰 복사" title="토큰 복사"><span class="i-copy">${I("copy", 18)}</span><span class="i-copied">${I("check", 18)}</span></button></div>
+<div class="val-pop-head"><span class="val-pop-theme"><span class="i-sun" title="Light 테마 값">${I("sun-high", 18)}</span><span class="i-moon" title="Dark 테마 값">${I("moon", 18)}</span></span><span class="val-pop-icon" id="valPopIcon"></span><span class="val-pop-title" id="valPopTitle">Value</span><a class="btn sm tertiary icon val-pop-dl" id="valPopDl" href="#" download aria-label="SVG 다운로드" title="SVG 다운로드">${I("download", 18)}</a><button type="button" class="btn sm tertiary icon" id="valPopCopy" data-copy-text="" aria-label="토큰 복사" title="토큰 복사"><span class="i-copy">${I("copy", 18)}</span><span class="i-copied">${I("check", 18)}</span></button></div>
 <div class="val-rows" id="valPopRows"></div></div>`;
 
   /* ---------- Semantic 스와치 행 ---------- */
@@ -145,22 +147,15 @@ ${codeBlock("grid-css", `.grid{display:grid;grid-template-columns:repeat(12,minm
       const names = Object.keys(ICONS).sort();
       const tile = n => { const m = ICONS[n]; const kw = [n, m.category, ...(m.tags || []), KO[n] || ""].join(" ").toLowerCase(); return `<button type="button" class="icon-tile${m.f ? "" : " no-f"}" data-name="${n}" data-cat="${attr(m.category || "")}" data-tags="${attr((m.tags || []).join("|"))}" data-ko="${attr(KO[n] || "")}" data-kw="${attr(kw)}" data-copy-o="${attr(I(n, 24))}"${m.f ? ` data-copy-f="${attr(I(n, 24, { style: "filled" }))}"` : ""} title="${n}" aria-label="${n} 상세 보기" aria-haspopup="dialog"><span class="o">${I(n, 24)}</span>${m.f ? `<span class="f">${I(n, 24, { style: "filled" })}</span>` : ""}</button>`; };
       return `<h1>Icons${nb("foundations", "icons")}</h1><p class="lead">아이콘은 기능이나 콘텐츠를 시각적으로 표현하는 요소로, 사용자가 인터페이스를 빠르게 탐색할 수 있도록 돕습니다. 24px 그리드 · 스트로크 2px · 라운드 캡의 단순하고 현대적인 형태(Tabler Icons · MIT)를 쓰며, 기본은 Outline 이고 선택·활성 상태 강조에만 Filled 를 씁니다.</p>
-<h2 id="search">Search icons</h2><p>사이트와 컴포넌트가 실제로 사용하는 아이콘입니다(전체 세트 3,000+ 는 <code>assets/icons/</code>). 검색 시 이름뿐 아니라 연상되는 유사한 키워드(한글 포함)를 함께 검색합니다. 아이콘을 클릭하면 이름 · 키워드 · 사용 코드와 함께 SVG 를 복사·다운로드할 수 있습니다.</p>
+<h2 id="search">Search icons</h2><p>사이트와 컴포넌트가 실제로 사용하는 아이콘입니다(전체 세트 3,000+ 는 <code>assets/icons/</code>). 검색 시 이름뿐 아니라 연상되는 유사한 키워드(한글 포함)를 함께 검색합니다. 아이콘을 클릭하면 이름 · 스타일 · 키워드를 보고 SVG 를 복사·다운로드할 수 있습니다. 사용 코드는 아래 Usage 를 참고하세요.</p>
 <div class="icon-tools"><div class="searchbar" role="search">${I("search")}<input type="search" id="iconSearch" placeholder="아이콘을 검색해주세요" aria-label="아이콘 검색"></div><div class="select-btn" role="group" aria-label="아이콘 스타일" id="iconStyle"><button type="button" class="on" aria-pressed="true" data-style="outline">Outline</button><button type="button" aria-pressed="false" data-style="filled">Filled</button></div><span id="iconCount" style="font-size:12px;color:var(--text-tertiary)">${names.length}개</span></div>
 <div class="icon-grid" id="iconGrid">${names.map(tile).join("")}</div><div class="icon-empty" id="iconEmpty" hidden>검색 결과가 없습니다. 세트 밖의 아이콘은 <code>assets/icons/</code> 에서 찾아 <code>_build/icons.js</code> 의 <code>ICON_NAMES</code> 에 추가하세요.</div>
-<div hidden id="iconModalHome"><div class="popup icon-modal" id="iconModal" role="dialog" aria-modal="true" aria-labelledby="iconModalTitle">
-<div class="popup-title"><code id="iconModalTitle">icon</code><span class="tag sm" id="iconModalStyle">Outline</span><span class="tag sm" id="iconModalCat">System</span></div>
-<button type="button" class="btn sm tertiary icon popup-close" data-popup-close aria-label="닫기">${I("x", 18)}</button>
-<div class="icon-preview" id="iconModalPreview"></div>
-<div class="icon-meta"><b>Keyword</b><div class="icon-kws" id="iconModalKw"></div></div>
-<div class="icon-meta"><b>Usage</b><pre class="icon-code"><code id="iconModalCode"></code></pre></div>
-<div class="popup-actions"><a class="btn sm secondary" id="iconModalDl" href="#" download>SVG 다운로드</a><button type="button" class="btn sm secondary" id="iconModalCopyCode" data-copy="iconModalCode" data-label="코드 복사">코드 복사</button><button type="button" class="btn sm primary" id="iconModalCopy" data-copy-text="" data-label="SVG 복사">SVG 복사</button></div>
-</div></div>
 <h2 id="usage">Usage</h2><p>인라인 SVG 가 기본입니다(색 상속 <code>currentColor</code>, 크기 자유). 의미 색은 부모에 토큰(<code>color:var(--danger)</code>)으로 줍니다. 사용 크기: 14 배지 · 16 표/페이지네이션 · 18 버튼/입력 · 20 알림 · 24 빈 화면/타일. 정적 파일이 필요하면 <code>assets/icons/outline/{name}.svg</code> 를 img 로, 배경·가상 요소에는 CSS mask 로 씁니다.</p>
 ${codeBlock("icon-inline", I("search", 18).split("><").join(">\n  <").replace("\n  </svg>", "\n</svg>"), "html")}
 ${codeBlock("icon-react", `// React: @jiran/ds-react 의 Icon (이 페이지의 ${names.length}개, 사이트와 같은 마크업)\nimport { Icon } from "@jiran/ds-react";\n\n<Icon name="search" size={18} />\n<Icon name="shield" size={24} filled />\n<Icon name="alert-triangle" label="경고" />  // role="img" + aria-label\n\n// 세트 밖의 아이콘: 같은 세트의 공식 패키지\n// npm i @tabler/icons-react → import { IconSearch } from "@tabler/icons-react";`, "tsx")}
 ${codeBlock("icon-img", `<!-- 정적 파일 (색 상속 불가, 장식용) -->\n<img src="assets/icons/outline/search.svg" width="18" height="18" alt="">\n\n<!-- CSS mask: currentColor 로 색 상속 -->\n.ico-search{width:18px;height:18px;background:currentColor;-webkit-mask:url("assets/icons/outline/search.svg") center/contain no-repeat;mask:url("assets/icons/outline/search.svg") center/contain no-repeat}`, "html")}
-<div class="kv"><dt>파일 · 이름</dt><dd><code>assets/icons/{outline|filled}/{name}.svg</code> — Tabler 원본 이름 그대로(kebab-case). Figma 는 Tabler Icons 라이브러리, 컴포넌트 이름 = 파일 이름</dd><dt>사이트 소스</dt><dd><code>I("name", size, { style: "filled" })</code> 헬퍼(<code>_build/icons.js</code>). 새 아이콘은 <code>ICON_NAMES</code> 에 추가하면 빌드 시 인라인되고 이 갤러리와 React <code>Icon</code> 에 함께 나타납니다</dd></div>`;
+<div class="kv"><dt>파일 · 이름</dt><dd><code>assets/icons/{outline|filled}/{name}.svg</code> — Tabler 원본 이름 그대로(kebab-case). Figma 는 Tabler Icons 라이브러리, 컴포넌트 이름 = 파일 이름</dd><dt>사이트 소스</dt><dd><code>I("name", size, { style: "filled" })</code> 헬퍼(<code>_build/icons.js</code>). 새 아이콘은 <code>ICON_NAMES</code> 에 추가하면 빌드 시 인라인되고 이 갤러리와 React <code>Icon</code> 에 함께 나타납니다</dd></div>
+${valPop()}`;
     },
 
     /* ================= Typography ================= */

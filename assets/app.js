@@ -145,12 +145,12 @@ const ROOT=document.body.dataset.root||'../';
     window.addEventListener("hashchange", () => closePop(menuBtn, menuPop));
     window.addEventListener("resize", () => { if (window.innerWidth >= 1200) closePop(menuBtn, menuPop); });
   }
-  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,#valPop,.copy-helper")) closeValPop(); });
-  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,#valPop,.copy-helper")) closeValPop(); });
+  document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });
+  document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });
   window.addEventListener("hashchange", closeValPop);
   window.addEventListener("resize", closeValPop);
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape") { const c = valCell; if (closeValPop()) { c.focus(); return; } const o = POPS.find(x => !x[1].hidden); if (o) { closePop(o[0], o[1]); o[0].focus(); } return; }
+    if (e.key === "Escape") { const c = valAnchor; if (closeValPop()) { c.focus(); return; } const o = POPS.find(x => !x[1].hidden); if (o) { closePop(o[0], o[1]); o[0].focus(); } return; }
     if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && searchBtn && searchPop) { e.preventDefault(); openPop(searchBtn, searchPop); if (q) { q.focus(); q.select(); } }
   });
 
@@ -225,42 +225,45 @@ const ROOT=document.body.dataset.root||'../';
   }
   document.addEventListener("input", e => { if (e.target.id === "iconSearch") filterIcons(); });
   function openIcon(tile) {
-    const m = document.getElementById("iconModal"); if (!m) return;
     const grid = tile.closest("#iconGrid"), filled = grid.classList.contains("filled") && !!tile.dataset.copyF, name = tile.dataset.name;
     const style = filled ? "filled" : "outline", svg = filled ? tile.dataset.copyF : tile.dataset.copyO;
-    document.getElementById("iconModalTitle").textContent = name;
-    document.getElementById("iconModalStyle").textContent = filled ? "Filled" : "Outline";
-    document.getElementById("iconModalCat").textContent = tile.dataset.cat || "";
-    document.getElementById("iconModalPreview").innerHTML = svg;
-    const kws = [name, ...(tile.dataset.ko || "").split(/\s+/), ...(tile.dataset.tags || "").split("|"), tile.dataset.cat || ""].map(s => s.trim()).filter((s, i, a) => s && a.indexOf(s) === i);
-    document.getElementById("iconModalKw").innerHTML = kws.map(k => '<span class="tag sm">' + k.replace(/[<>&"]/g, ch => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[ch])) + "</span>").join("");
-    document.getElementById("iconModalCode").textContent = '<!-- HTML: 인라인 SVG (아래 "SVG 복사") · 정적 파일 -->\n<img src="assets/icons/' + style + "/" + name + '.svg" width="24" height="24" alt="">\n\n// React\nimport { Icon } from "@jiran/ds-react";\n<Icon name="' + name + '"' + (filled ? " filled" : "") + " size={24} />\n\n// 사이트 소스\nI(\"" + name + "\"" + (filled ? ', 24, { style: "filled" }' : "") + ")";
-    const dl = document.getElementById("iconModalDl"); dl.href = siteRoot + "assets/icons/" + style + "/" + name + ".svg"; dl.setAttribute("download", name + ".svg");
-    document.getElementById("iconModalCopy").dataset.copyText = svg;
+    const kws = [name, ...(tile.dataset.ko || "").split(/\s+/), ...(tile.dataset.tags || "").split("|"), tile.dataset.cat || ""]
+      .map(t => t.trim()).filter((t, i, a) => t && a.indexOf(t) === i);
+    const rows = [["Style", filled ? "Filled" : "Outline"], ["Category", tile.dataset.cat || "—"], ["Keyword", kws.join(" · ")]];
+    if (!showValPop(tile, name, rows, svg, "icon", "SVG 복사")) return;
+    document.getElementById("valPopIcon").innerHTML = svg;
+    const dl = document.getElementById("valPopDl");
+    dl.href = siteRoot + "assets/icons/" + style + "/" + name + ".svg"; dl.setAttribute("download", name + ".svg");
     grid.querySelectorAll(".icon-tile.on").forEach(t => t.classList.remove("on")); tile.classList.add("on");
-    if (window.DS && window.DS.popup) window.DS.popup.open(m); else m.parentElement.hidden = false;
   }
 
   /* Colors: 스와치 → 값 모달. 값은 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다 —
      현재 테마와 헤더에서 고른 제품 컬러(--accent*)가 모두 반영된 최종 색이어야 하기 때문. */
   function openValue(cell) {
-    const pop = document.getElementById("valPop"); if (!pop) return;
-    if (valCell === cell && !pop.hidden) { closeValPop(); return; }              /* 같은 칸 재클릭 = 토글 */
-    const esc = t => String(t).replace(/[<>&]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
     const tok = "var(" + (cell.dataset.token || "") + ")";
     const rows = cell.dataset.kind === "shadow" ? [["Value", shadowOf(cell)], ["Token", tok]] : colorRows(cell, tok);
-    document.getElementById("valPopTitle").textContent = cell.dataset.label || "Value";
+    showValPop(cell.querySelector(".bar") || cell, cell.dataset.label || "Value", rows, tok, "", "토큰 복사", cell);
+  }
+  /* 값 팝오버 공용 — 채우고, 누른 것 바로 아래에 두고, 연다. anchor 는 위치 기준, key 는 재클릭 토글 기준 */
+  function showValPop(anchor, title, rows, copyText, kind, copyLabel, key) {
+    const pop = document.getElementById("valPop"); if (!pop) return false;
+    if (valAnchor === (key || anchor) && !pop.hidden) { closeValPop(); return false; }   /* 같은 것 재클릭 = 토글 */
+    const esc = t => String(t).replace(/[<>&]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
+    pop.classList.toggle("kind-icon", kind === "icon");
+    document.getElementById("valPopTitle").textContent = title;
     document.getElementById("valPopRows").innerHTML = rows.map(([k, v, dot]) =>
       '<div class="val-row"><b>' + k + "</b>" + (dot ? '<i style="background:' + esc(dot) + '"></i>' : "") + "<span>" + esc(v) + "</span></div>").join("");
-    const btn = document.getElementById("valPopCopy"); btn.dataset.copyText = tok; btn.classList.remove("copied");
+    const btn = document.getElementById("valPopCopy");
+    btn.dataset.copyText = copyText; btn.classList.remove("copied");
+    btn.setAttribute("aria-label", copyLabel); btn.title = copyLabel;
     /* 위치: 숨김을 푼 뒤 같은 태스크에서 재므로 깜빡이지 않는다. offsetParent 기준이라 스크롤을 따라다닌다 */
     pop.hidden = false;
-    const bar = cell.querySelector(".bar") || cell;
-    const host = pop.offsetParent || document.body, hr = host.getBoundingClientRect(), br = bar.getBoundingClientRect();
+    const host = pop.offsetParent || document.body, hr = host.getBoundingClientRect(), br = anchor.getBoundingClientRect();
     const w = pop.offsetWidth, max = host.clientWidth - w - 16;
     pop.style.left = Math.max(16, Math.min(br.left - hr.left + br.width / 2 - w / 2, max)) + "px";
     pop.style.top = (br.bottom - hr.top + 8) + "px";
-    valCell = cell; pop.focus();   /* 버튼이 아니라 다이얼로그에 포커스 — 마우스로 열었을 때 버튼이 눌린 듯 보이지 않게. Tab 하면 복사 버튼 */
+    valAnchor = key || anchor; pop.focus();   /* 버튼이 아니라 다이얼로그에 포커스 — 마우스로 열었을 때 버튼이 눌린 듯 보이지 않게. Tab 하면 복사 버튼 */
+    return true;
   }
   /* 색: Semantic 은 .bar i 에, Atomic 은 버튼 자신에 색이 있다 */
   function colorRows(cell, tok) {
@@ -284,10 +287,12 @@ const ROOT=document.body.dataset.root||'../';
     out.push(v.slice(start).trim());
     return out.join("\n");
   }
-  let valCell = null;
+  let valAnchor = null;
   function closeValPop() {
     const pop = document.getElementById("valPop"); if (!pop || pop.hidden) return false;
-    pop.hidden = true; valCell = null; return true;
+    pop.hidden = true; valAnchor = null;
+    document.querySelectorAll(".icon-tile.on").forEach(t => t.classList.remove("on"));   /* 팝오버가 닫혔는데 타일만 켜져 있으면 헷갈린다 */
+    return true;
   }
 
   /* 오른쪽 페이지 목차(On this page) — 1600 이상에서만 CSS 로 보인다.

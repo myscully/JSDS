@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 84 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 88 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -206,6 +206,36 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.keyboard.press("Escape");
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
 
+  // Icons: 타일 클릭 → 값 팝오버 (딤 없이 타일 아래, SVG 복사·다운로드)
+  await go("foundations/icons.html");
+  const read = () => page.evaluate(() => {
+    const pop = document.getElementById("valPop"), tile = document.querySelector(".icon-tile.on");
+    const tr = tile && tile.getBoundingClientRect(), pr = pop.getBoundingClientRect();
+    return {
+      title: document.getElementById("valPopTitle").textContent,
+      rows: [...pop.querySelectorAll(".val-row")].map((r) => r.querySelector("b").textContent).join(","),
+      style: [...pop.querySelectorAll(".val-row")].filter((r) => r.querySelector("b").textContent === "Style")[0].querySelector("span").textContent,
+      dl: document.getElementById("valPopDl").getAttribute("href").split("/assets/")[1],
+      svg: document.getElementById("valPopCopy").dataset.copyText.slice(0, 4),
+      theme: getComputedStyle(document.querySelector(".val-pop-theme")).display,
+      below: tr ? Math.round(pr.top - tr.bottom) : null,
+      backdrop: !!document.querySelector(".popup-backdrop"),
+    };
+  });
+  await page.locator('.icon-tile[data-name="search"]').evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
+  await page.locator('.icon-tile[data-name="search"]').click();
+  await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
+  const iv = await read();
+  ok("icon pop: no dimmer, below the tile, 3 rows", iv.title === "search" && iv.rows === "Style,Category,Keyword" && iv.style === "Outline" && iv.dl === "icons/outline/search.svg" && iv.svg === "<svg" && iv.theme === "none" && iv.below >= 0 && iv.below <= 16 && !iv.backdrop, JSON.stringify(iv));
+  await page.screenshot({ path: SHOT + "/icon-pop.png" });
+  await page.keyboard.press("Escape");
+  ok("icon pop closes + clears the tile", await page.evaluate(() => document.getElementById("valPop").hidden && !document.querySelector(".icon-tile.on")));
+  await page.locator("#iconStyle [data-style=filled]").click();
+  await page.locator('.icon-tile[data-name="search"]').click();
+  const fv = await read();
+  ok("filled tab switches style + download path", fv.style === "Filled" && fv.dl === "icons/filled/search.svg", JSON.stringify(fv));
+  await page.keyboard.press("Escape");
+
   // Grid: Spacing 눈금 — 4의 배수가 아닌 값은 .off(노랑), 토큰 없는 막대는 복사 대상 아님
   await go("foundations/grid.html");
   const sp = await page.evaluate(() => {
@@ -304,6 +334,7 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
       mono: getComputedStyle(cell("Hex").querySelector("span")).fontFamily.toLowerCase().includes("mono"),
     };
   });
+  ok("value pop hides the icon-only slots", await page.evaluate(() => getComputedStyle(document.getElementById("valPopDl")).display === "none" && getComputedStyle(document.getElementById("valPopIcon")).display === "none" && getComputedStyle(document.querySelector(".val-pop-theme")).display !== "none"));
   ok("color pop shows values, no dimmer, Pretendard", /^#[0-9A-F]{6,8}$/.test(cv.hex) && /^\d+\/\d+\/\d+\/[\d.]+$/.test(cv.rgba) && /^var\(--[\w-]+\)$/.test(cv.tok) && cv.title.includes("/") && cv.dot && !cv.dim && !cv.mono, JSON.stringify(cv));
   const pos = await page.evaluate((sel) => {
     const bar = document.querySelector(sel).querySelector(".bar").getBoundingClientRect(), p = document.getElementById("valPop").getBoundingClientRect();
