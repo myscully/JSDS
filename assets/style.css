@@ -149,7 +149,8 @@ code{font-size:inherit}
 .nav a:hover{background:var(--fill-alternative);color:var(--text-primary)}
 .nav a.active{background:var(--fill-normal);color:var(--text-primary);font-weight:600}
 .nav a.active::after{content:"";width:16px;height:16px;flex:none;margin-left:auto;opacity:.45;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3Cpath d=%22M13 18l6 -6%22 /%3E%3Cpath d=%22M13 6l6 6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3Cpath d=%22M13 18l6 -6%22 /%3E%3Cpath d=%22M13 6l6 6%22 /%3E%3C/svg%3E") center/contain no-repeat}
-.nav a .n{font-size:10px;font-weight:800;line-height:1;padding:3px 4px;border-radius:3px;background:var(--text-primary);color:var(--bg-surface)}
+/* Foundations Overview 목록의 N 배지도 같은 모양 — .base-list a span 규칙에 먹혀 평범한 회색 글씨로 보이던 것 */
+.nav a .n,.base-list a b .n{font-size:10px;font-weight:800;line-height:1;padding:3px 4px;border-radius:3px;background:var(--text-primary);color:var(--bg-surface)}
 .nav .sec-label{margin:var(--space-6) 0 var(--space-2);padding:0 10px;font-size:11px;font-weight:700;letter-spacing:.34px;text-transform:uppercase;color:var(--accent)}
 .nav .sec-label:first-child{margin-top:0}
 .sidebar-foot{margin-top:var(--space-10);padding:0 10px;font-size:12px;color:var(--text-tertiary)}
@@ -214,7 +215,7 @@ ul,ol{padding-left:1.3em;max-width:70ch}li{margin-bottom:6px}
 .fnd-hero>div{width:120px;height:120px;border-radius:var(--radius-xl);display:grid;place-items:center;font-weight:800;color:var(--text-primary)}
 .base-list{border-top:1px solid var(--border-default);margin:var(--space-4) 0 var(--space-10)}
 .base-list a{display:grid;grid-template-columns:160px 1fr auto;gap:var(--space-6);align-items:center;padding:22px 0;border-bottom:1px solid var(--border-default);text-decoration:none;color:inherit}
-.base-list a b{font-size:16px}.base-list a span{font-size:14px;color:var(--text-secondary)}.base-list a svg{color:var(--text-tertiary)}
+.base-list a b{font-size:16px;display:flex;align-items:center;gap:8px}   /* 배지 간격 — h1 · .nav a 와 같은 방식 */.base-list a span{font-size:14px;color:var(--text-secondary)}.base-list a svg{color:var(--text-tertiary)}
 .base-list a:hover b{color:var(--accent)}
 /* Getting Started (Home › 시작하기) — 번호 단계 목록 */
 .guide-steps{list-style:none;padding:0;margin:var(--space-4) 0 var(--space-8);counter-reset:gs;max-width:none}
