@@ -28,7 +28,9 @@ window.FOUNDATION_PAGES = function (H) {
     return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<button type="button" class="val-cell" data-token="${tok}" data-label="${attr(label(name))}" aria-haspopup="dialog" title="${attr(label(name))} 값 보기"><div class="bar${o.line ? " line" : ""}"><i style="background:var(${tok})"></i></div><div class="name">${name}</div></button>`).join("")}</div>`;
   }
   const sem = (id, title, desc, items, o) => `<h2 id="${id}">${title}</h2><p>${desc}</p>${semRow(items, Object.assign({ group: title }, o))}`;
-  const pal = (title, steps, pre, note) => `<div class="pal"><h3>${title}${note ? ` <small style="font-weight:400;color:var(--text-tertiary);font-size:12px">${note}</small>` : ""}</h3><div class="scale" style="grid-template-columns:repeat(${steps.length},1fr)">${steps.map(s => sw(`--${pre}-${s}`, s, title)).join("")}</div></div>`;
+  /* 칸 수는 인라인 style 로 주면 반응형 규칙이 이길 수 없다 → 커스텀 속성으로 넘긴다.
+     repeat() 의 반복 횟수는 정수여야 해 CSS 에서 min() 을 못 쓰므로, 모바일 상한(7·5)도 여기서 계산한다(Common 2칸이 7칸으로 찢어지지 않게) */
+  const pal = (title, steps, pre, note) => `<div class="pal"><h3>${title}${note ? ` <small style="font-weight:400;color:var(--text-tertiary);font-size:12px">${note}</small>` : ""}</h3><div class="scale" style="--cols:${steps.length};--cols-sm:${Math.min(steps.length, 7)};--cols-xs:${Math.min(steps.length, 5)}">${steps.map(s => sw(`--${pre}-${s}`, s, title)).join("")}</div></div>`;
   const tabset = (tabs, panes) => `<div class="doc-tabset"><div class="doc-tabs" role="tablist">${tabs.map(([k, t], i) => `<button type="button" role="tab" data-doctab="${k}" class="${i ? "" : "on"}" aria-selected="${i ? "false" : "true"}">${t}</button>`).join("")}</div>${tabs.map(([k], i) => `<div data-docpane="${k}"${i ? " hidden" : ""}>${panes[i]}</div>`).join("")}</div>`;
   const tbl = (head, rows, cls = "") => `<div class="tablewrap"><table class="${cls}"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 

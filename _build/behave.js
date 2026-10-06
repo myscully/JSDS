@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 78 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 82 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -235,6 +235,21 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.click("#themeBtn"); await page.waitForTimeout(150);
   ok("outline follows the theme (dark: black faint, white not)", (await faint("--static-black")) && !(await faint("--static-white")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
+
+  // Atomic 팔레트 칸 수 + 반응형 블록이 실제로 적용되는지 (한동안 컴포넌트 규칙에 덮여 죽어 있었다)
+  for (const [w, want] of [[1440, [2, 14, 11]], [760, [2, 7, 7]], [390, [2, 5, 5]]]) {
+    await page.setViewportSize({ width: w, height: 900 });
+    await go("foundations/colors.html");
+    await page.locator('.doc-tabs [data-doctab="atomic"]').click();
+    const got = await page.evaluate(() => ["Common", "Gray", "Red"].map((t) => {
+      const h = [...document.querySelectorAll(".pal h3")].find((x) => x.textContent.startsWith(t));
+      return getComputedStyle(h.nextElementSibling).gridTemplateColumns.split(" ").length;
+    }));
+    ok(`atomic palette columns at ${w}`, JSON.stringify(got) === JSON.stringify(want), JSON.stringify(got));
+  }
+  await go("resources/design-token.html");
+  ok("responsive block applies at 390 (kv 1열)", await page.evaluate(() => document.querySelector("div.kv") && getComputedStyle(document.querySelector("div.kv")).gridTemplateColumns.split(" ").length === 1));
+  await page.setViewportSize({ width: 1440, height: 900 });
 
   // Colors: Atomic 팔레트도 같은 팝오버
   await go("foundations/colors.html");

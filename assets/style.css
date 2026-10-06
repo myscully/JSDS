@@ -194,42 +194,6 @@ code{font-size:inherit}
 .drawer .d-item .n{font-size:9px;font-weight:800;line-height:1;padding:2px 4px;border-radius:3px;background:var(--text-primary);color:var(--bg-surface)}
 .drawer .d-group{margin:var(--space-6) 0 var(--space-2);padding:0 10px;font-size:11px;font-weight:600;letter-spacing:.34px;color:var(--text-primary);opacity:.3}
 .drawer .d-group:first-child{margin-top:0}
-@media (max-width:1199px){
-  .topnav{display:none}
-  .header-right{margin-left:auto}   /* 상단 메뉴가 사라져도 아이콘 그룹은 오른쪽에 붙는다 */
-  .sidebar{display:none}
-  .shell{grid-template-columns:1fr}
-  .hmenu-nav{display:flex}
-  .page{padding:var(--space-10) var(--space-8) var(--space-16)}
-  .page table{display:block;max-width:100%;overflow-x:auto}
-  .tablewrap table{display:table}
-}
-@media (max-width:767px){
-  .header{padding:0 var(--space-4);gap:var(--space-2)}
-  .page{padding:var(--space-8) var(--space-5) var(--space-12)}
-  .drawer{padding:var(--space-5) var(--space-5) var(--space-16)}
-  .home-grid{grid-template-columns:1fr;padding:var(--space-8) var(--space-5) var(--space-12)}
-  .hero{padding:var(--space-12) var(--space-5) var(--space-10)}
-  .hero h1{font-size:clamp(28px,7vw,48px)}
-  div.kv{grid-template-columns:minmax(0,1fr);gap:2px 0}
-  div.kv dt{margin-top:var(--space-3)}
-  div.kv dd{min-width:0}
-  .page code,.page dd,.page li{overflow-wrap:anywhere}
-  .page .popup,.page .popup.lg{width:100%;max-width:100%}
-  .base-list a{grid-template-columns:1fr;gap:var(--space-2)}
-  /* 이 블록은 컴포넌트 규칙보다 앞에 있어 같은 특정도면 진다 — .page 를 붙여 올린다(위 div.kv · .page code 와 같은 이유) */
-  .page .dodont,.page .elev-types{grid-template-columns:1fr}
-  .page .elev-levels{grid-template-columns:repeat(3,1fr)}
-  .scale{grid-template-columns:repeat(7,1fr)}
-  .grid-demo .cols{overflow-x:auto}
-  .fnd-hero>div{width:96px;height:96px}
-  .tiles div{width:120px}
-}
-@media (max-width:479px){
-  .ver{display:none}
-  .brand{font-size:16px}
-  .scale{grid-template-columns:repeat(5,1fr)}
-}
 
 /* ---------- Content typography ---------- */
 h1{font-size:28px;line-height:1.2;letter-spacing:-.025em;margin:0 0 var(--space-4);text-wrap:balance;display:flex;align-items:center;gap:12px}
@@ -479,7 +443,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .icon-tile svg{width:24px;height:24px;display:block}
 .icon-tile>span{display:flex}
 /* Color visuals */
-.scale{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin:6px 0 20px}
+.scale{display:grid;grid-template-columns:repeat(var(--cols,12),1fr);gap:6px;margin:6px 0 20px}
 .scale .val-cell{height:56px;border-radius:6px;position:relative;box-shadow:inset 0 0 0 1px var(--line-neutral);display:block;width:100%;margin:0;padding:0;border:0;appearance:none;font:inherit;color:inherit;cursor:pointer}
 .scale .val-cell i{position:absolute;left:8px;bottom:6px;font-style:normal;font-size:12px;font-weight:600;mix-blend-mode:difference;color:#fff}
 .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--card-gap);margin:var(--space-4) 0 var(--space-6)}
@@ -492,6 +456,49 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .tiles{display:flex;flex-wrap:wrap;gap:var(--space-5);margin:var(--space-3) 0 var(--space-6)}
 .tiles div{width:150px;height:96px;background:var(--bg-surface);border-radius:var(--radius-lg);display:grid;place-items:center;font-size:12px;color:var(--text-secondary);text-align:center}
 .tiles.radius div{background:var(--accent-subtle);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent);width:96px}
+
+
+/* ---------- 반응형 (max-width) ----------
+   이 블록은 반드시 문서·컴포넌트 규칙 **뒤**, 샘플 마커 **앞**에 둔다.
+   미디어 쿼리는 특정도를 올리지 않아, 앞에 두면 같은 셀렉터를 쓰는 뒤쪽 규칙에 그냥 진다(한동안 여러 줄이 죽어 있었다).
+   샘플 블록은 @media 금지(sync-css.mjs 가 통째로 복사)이므로 마커 안으로 넘어가면 안 된다. */
+@media (max-width:1199px){
+  .topnav{display:none}
+  .header-right{margin-left:auto}   /* 상단 메뉴가 사라져도 아이콘 그룹은 오른쪽에 붙는다 */
+  .sidebar{display:none}
+  .shell{grid-template-columns:1fr}
+  .hmenu-nav{display:flex}
+  .page{padding:var(--space-10) var(--space-8) var(--space-16)}
+  .page table{display:block;max-width:100%;overflow-x:auto}
+  .tablewrap table{display:table}
+}
+@media (max-width:767px){
+  .header{padding:0 var(--space-4);gap:var(--space-2)}
+  .page{padding:var(--space-8) var(--space-5) var(--space-12)}
+  .drawer{padding:var(--space-5) var(--space-5) var(--space-16)}
+  .home-grid{grid-template-columns:1fr;padding:var(--space-8) var(--space-5) var(--space-12)}
+  .hero{padding:var(--space-12) var(--space-5) var(--space-10)}
+  .hero h1{font-size:clamp(28px,7vw,48px)}
+  div.kv{grid-template-columns:minmax(0,1fr);gap:2px 0}
+  div.kv dt{margin-top:var(--space-3)}
+  div.kv dd{min-width:0}
+  .page code,.page dd,.page li{overflow-wrap:anywhere}
+  .page .popup,.page .popup.lg{width:100%;max-width:100%}
+  .base-list a{grid-template-columns:1fr;gap:var(--space-2)}
+  .dodont,.elev-types{grid-template-columns:1fr}
+  .elev-levels{grid-template-columns:repeat(3,1fr)}
+  /* 칸 수는 팔레트마다 다르다 — pal() 이 --cols* 로 넘기므로 인라인 style 과 달리 여기서 덮을 수 있다 */
+  .scale{grid-template-columns:repeat(var(--cols-sm,7),1fr)}
+  .pal .scale{row-gap:26px}   /* 줄이 접히면 아랫줄 스와치가 윗줄 숫자 라벨(bottom:-18px)을 덮는다 */
+  .grid-demo .cols{overflow-x:auto}
+  .fnd-hero>div{width:96px;height:96px}
+  .tiles div{width:120px}
+}
+@media (max-width:479px){
+  .ver{display:none}
+  .brand{font-size:16px}
+  .scale{grid-template-columns:repeat(var(--cols-xs,5),1fr)}
+}
 
 
 /* ---------- Live component samples ---------- */
