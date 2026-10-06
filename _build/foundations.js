@@ -68,7 +68,7 @@ ${sem("brand", "Brand", "지란지교시큐리티 브랜드 컬러입니다. 이
 ${sem("material", "Material", "팝업처럼 층위가 생길 때 배경과의 구분을 위해 뒤를 어둡게 표시해야 할 때 사용합니다.", [["Dimmer", "--dimmer"]], { alpha: true })}
 `;
       const g = [0, 50, 100, 150, 200, 300, 400, 500, 550, 600, 700, 800, 900, 950], n = [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950, 980], t11 = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
-      const atomic = `<p>Semantic 토큰이 참조하는 원천 값(Primitive)입니다. 컴포넌트에서 직접 쓰지 않고, 새 의미 토큰을 만들 때 여기서 고릅니다. 숫자는 명도 단계(작을수록 밝음)입니다.</p>
+      const atomic = `<p>Semantic 토큰이 참조하는 원천 값(Primitive)입니다. 컴포넌트에서 직접 쓰지 않고, 새 의미 토큰을 만들 때 여기서 고릅니다. 숫자는 명도 단계(작을수록 밝음)입니다. 제품에 적용할 때는 <code>--accent-*</code> 블록만 제품 컬러로 교체하면 되고, HEX 하나로 스케일을 만드는 <code>accentScale()</code> 과 토큰 원본 CSS 는 <a href="#/resources/design-token">Design Token</a> 에 있습니다.</p>
 ${pal("Common", ["white", "black"], "static")}
 ${pal("Gray", g, "gray", "slate · 400 이하는 구조 요소, 500 이상은 텍스트")}
 ${pal("Neutral", n, "neutral", "다크 모드 기준 중립 회색 · 다크의 배경·텍스트·보더가 이 램프를 참조")}
@@ -78,7 +78,7 @@ ${pal("Red", t11, "red", "Negative · Severity Critical/High")}
 ${pal("Amber", t11, "amber", "Cautionary · Severity Medium")}
 ${pal("Emerald", t11, "emerald", "Positive")}
 ${pal("Sky", t11, "sky", "Informative · Severity Low")}
-${tokenSection("primitive-css", "CSS · Primitive 토큰", [/^--(gray|brand|accent|red|amber|emerald|sky)-\d+$/, /^--static-/], "제품 적용 시 <code>--accent-*</code> 블록만 제품 컬러로 교체합니다(HEX 하나로 스케일을 만드는 <code>accentScale()</code> 은 <a href=\"#/resources/design-token\">Design Token</a> 참고).")}`;
+`;
       return `<h1>Colors${nb("foundations", "colors")}</h1><p class="lead">컬러 시스템은 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다. Gray Scale 이 화면의 바탕이고, Primary(제품 메인 컬러)는 핵심 정보를 강조하는 데만 씁니다. 상황에 맞는 색을 이름으로 고를 수 있도록 Semantic 토큰으로 제공하며, 스와치를 클릭하면 Hex · RGBA · 토큰 값을 볼 수 있고, 토큰을 복사할 수 있습니다.</p>
 <h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>제품 Primary</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다. 이 시스템은 관리자 웹 제품 기준이라 Brand 는 제품 UI 의 Accent 가 아닙니다.</p>
 ${tbl(["역할", "쓰는 곳", "쓰지 않는 곳"], [
@@ -114,8 +114,7 @@ ${tabset([["normal", "Normal"], ["spread", "Spread"]], [levels(normal, "Normal")
 <h2 id="composition">Composition</h2><p>더 자연스럽고 현실과 유사한 깊이감을 표현하기 위해 물체 주변으로 은은하게 퍼지는 주변광 그림자(Ambient shadow)와 특정 방향의 조명에 의해 생기는 뚜렷한 직사광 그림자(Key shadow)를 레이어링하여 구성합니다. 값이 두 겹인 이유입니다.</p>
 <div class="elev-comp"><div class="box" style="box-shadow:0 8px 24px 0 rgba(15,23,42,.08)"><small>Ambient</small></div><span class="op">+</span><div class="box" style="box-shadow:0 2px 6px 0 rgba(0,0,0,.05)"><small>Key</small></div><span class="op">${I("chevron-right", 20)}</span><div class="box" style="box-shadow:var(--shadow-lg)"><small>Combined = Large</small></div></div>
 <h2 id="style">Style</h2>${tbl(["레벨", "명칭", "적용"], rows)}
-<p><code>--shadow-1 · 2 · 3</code> 은 각각 Small · Medium · XLarge 의 별칭으로, 기존 컴포넌트 CSS 와 호환됩니다. 배경 음영(Dimmer)은 <a href="#/foundations/colors">Colors › Material</a> 을 참고하세요.</p>
-${tokenSection("shadow-css", "CSS", "shadow")}
+<p><code>--shadow-1 · 2 · 3</code> 은 각각 Small · Medium · XLarge 의 별칭으로, 기존 컴포넌트 CSS 와 호환됩니다. 배경 음영(Dimmer)은 <a href="#/foundations/colors">Colors › Material</a>, 토큰 원본 CSS 는 <a href="#/resources/design-token">Design Token</a> 을 참고하세요.</p>
 ${valPop()}`;
     },
 
@@ -131,9 +130,8 @@ ${tbl(["환경", "너비", "높이", "콘텐츠 최대 너비"], [["Web desktop 
 <h2 id="breakpoint">Breakpoint</h2><p>모바일·태블릿은 대응하지 않는 Desktop 전용 콘솔입니다. 1280 미만에서는 사이드 내비게이션을 접어 콘텐츠 폭을 확보합니다.</p>
 ${tbl(["명칭", "대응 환경", "너비", "레이아웃", "콘텐츠 최대 너비"], [["md", "데스크탑 소형 · 노트북", "1024 – 1279px", "사이드 내비 접힘 64 + 콘텐츠", "100% (Padding 20)"], ["lg", "데스크탑 (기준 1440)", "1280 – 1919px", "사이드 내비 240 + 콘텐츠", "1160px (Padding 24)"], ["xl", "데스크탑 대형", "1920px ~", "사이드 내비 240 + 콘텐츠", "1600px (Padding 24)"]])}
 ${codeBlock("bp-css", `/* Desktop-first */\n.app{display:grid;grid-template-columns:240px minmax(0,1fr)}\n.content{max-width:1160px;margin:0 auto;padding:0 24px}\n@media (max-width:1279px){.app{grid-template-columns:64px minmax(0,1fr)}.content{padding:0 20px}}\n@media (min-width:1920px){.content{max-width:1600px}}`, "css", "CSS 복사")}
-<h2 id="spacing">Spacing</h2><p>예측 가능한 디자인 규칙과 개발자와의 원활한 소통을 위해 <b>4배수 간격</b>으로 구성합니다. 기준은 4px 이며, 시각 보정이 필요할 때는 2px 단위로 움직이고 불가피할 때만 1px 씩 조정합니다. 카드 내부 padding 24, 카드·요소 사이 gap 20, 섹션 사이 48~64 를 기본으로 넉넉히 잡아 답답한 밀도를 피합니다. 노란색은 4px 그리드를 벗어난 값으로, 시각 보정이 꼭 필요할 때만 씁니다.</p>
+<h2 id="spacing">Spacing</h2><p>예측 가능한 디자인 규칙과 개발자와의 원활한 소통을 위해 <b>4배수 간격</b>으로 구성합니다. 기준은 4px 이며, 시각 보정이 필요할 때는 2px 단위로 움직이고 불가피할 때만 1px 씩 조정합니다. 카드 내부 padding 24, 카드·요소 사이 gap 20, 섹션 사이 48~64 를 기본으로 넉넉히 잡아 답답한 밀도를 피합니다. 노란색은 4px 그리드를 벗어난 값으로, 시각 보정이 꼭 필요할 때만 씁니다. 토큰 원본 CSS 는 <a href="#/resources/design-token">Design Token</a> 에 있습니다.</p>
 <div class="space-bars">${spaces.map(v => { const t = tokenOf[v]; const cls = v === 4 ? "base" : v % 4 ? "off" : ""; return `<div class="${cls}"><b>${v}</b><i style="width:${v}px"></i>${t ? `<small>${t}</small>` : ""}</div>`; }).join("")}</div>
-${tokenSection("space-css", "CSS", ["space-", "card-", "row-h"])}
 <h2 id="layout">Layout</h2><p>콘텐츠 영역 안은 24px 의 간격(gutter)을 두는 12단 컬럼 그리드를 사용하며, 화면 너비에 맞게 유연하게 대응합니다. 컬럼은 자유롭게 병합하여 사용합니다(KPI 카드 4단 = 3컬럼씩, 폼 2단 = 6컬럼씩).</p>
 <h3>Desktop</h3><p>사이드 내비게이션 240px 을 제외한 콘텐츠 영역(최대 1160px)에 12단 컬럼, 좌우 여백 24px, 간격 24px.</p>
 <div class="shell-demo"><div class="side">Side nav 240</div><div class="main"><i>Content · max 1160 · padding 24</i></div></div>

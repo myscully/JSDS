@@ -100,7 +100,7 @@ code{font-size:inherit}
 /* 상단 섹션 메뉴: 우측 정렬 */
 .topnav{display:flex;align-items:stretch;margin-left:auto;min-width:0;overflow-x:auto;scrollbar-width:none}
 .topnav::-webkit-scrollbar{display:none}
-.topnav a{display:flex;align-items:center;gap:16px;padding:0 12px;font-size:1rem;font-weight:500;color:var(--text-secondary);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap;transition:color var(--motion-fast)}
+.topnav a{display:flex;align-items:center;gap:8px;padding:0 12px;font-size:1rem;font-weight:500;color:var(--text-secondary);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap;transition:color var(--motion-fast)}
 .topnav a:hover{color:var(--text-primary)}
 .topnav a.active{color:var(--text-primary);font-weight:700;border-bottom-color:var(--text-primary)}
 .topnav a .n{font-size:9px;font-weight:800;line-height:1;padding:2px 4px;border-radius:3px;background:var(--text-primary);color:var(--bg-surface)}
