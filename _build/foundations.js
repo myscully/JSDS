@@ -143,11 +143,93 @@ ${codeBlock("grid-css", `.grid{display:grid;grid-template-columns:repeat(12,minm
 
     /* ================= Icons ================= */
     "foundations/icons": () => {
-      const KO = { search: "검색 찾기", plus: "추가 더하기 새로", download: "다운로드 내려받기 저장", trash: "삭제 쓰레기통 지우기", pencil: "편집 수정 연필", refresh: "새로고침 갱신 동기화", copy: "복사", filter: "필터 거르기", x: "닫기 취소 삭제 엑스", check: "체크 확인 완료", dots: "더보기 점 메뉴", "external-link": "외부 링크 새창", "chevron-left": "이전 왼쪽 화살", "chevron-right": "다음 오른쪽 화살", "chevron-down": "펼치기 아래 화살", "arrow-up": "위 증가 상승", "arrow-down": "아래 감소 하락", "arrows-sort": "정렬", "sort-ascending": "오름차순 정렬", "sort-descending": "내림차순 정렬", "info-circle": "정보 안내", "alert-triangle": "경고 주의 위험", "alert-circle": "경고 오류 알림", "circle-check": "성공 완료 확인", home: "홈 대시보드", list: "목록 리스트", user: "사용자 계정 사람", server: "서버 장비", shield: "보안 방패 보호", bell: "알림 벨", settings: "설정 톱니", "chart-bar": "차트 통계 그래프", calendar: "달력 날짜 일정", inbox: "메일 수신함", "layout-grid": "그리드 레이아웃 격자", moon: "다크모드 밤 달", "sun-high": "라이트모드 낮 해 밝기", palette: "팔레트 컬러 색상 테마", "menu-2": "메뉴 햄버거 목록" };
+      const KO = {
+        /* 액션 */
+        search: "검색 찾기 돋보기", plus: "추가 더하기 새로 생성", minus: "빼기 제거 축소", x: "닫기 취소 삭제 엑스", check: "체크 확인 완료", download: "다운로드 내려받기 저장", upload: "업로드 올리기 등록",
+        trash: "삭제 쓰레기통 지우기", pencil: "편집 수정 연필", edit: "편집 수정 입력", copy: "복사 사본", refresh: "새로고침 갱신 동기화", reload: "다시 불러오기 재시도 갱신", filter: "필터 거르기 조건",
+        "filter-off": "필터 해제 조건 초기화", dots: "더보기 점 메뉴", "dots-vertical": "더보기 세로 점 메뉴", "external-link": "외부 링크 새창", link: "링크 연결 주소", unlink: "연결 해제 링크 끊기",
+        share: "공유 내보내기", printer: "인쇄 프린터 출력", eye: "보기 표시 공개", "eye-off": "숨기기 비공개 가리기", star: "즐겨찾기 별 중요", heart: "좋아요 하트 관심", bookmark: "북마크 책갈피 저장",
+        pin: "고정 핀 꽂기", pinned: "고정됨 핀 상단고정", flag: "깃발 신고 표시", archive: "보관 아카이브 저장", restore: "복원 되돌리기 복구", send: "보내기 전송 제출", history: "기록 이력 히스토리",
+        /* 탐색 · 화살표 */
+        "chevron-left": "이전 왼쪽 화살", "chevron-right": "다음 오른쪽 화살", "chevron-up": "접기 위 화살", "chevron-down": "펼치기 아래 화살", "chevrons-left": "처음으로 맨앞 이중화살",
+        "chevrons-right": "마지막으로 맨뒤 이중화살", "arrow-left": "왼쪽 이전 뒤로", "arrow-right": "오른쪽 다음 앞으로", "arrow-up": "위 증가 상승", "arrow-down": "아래 감소 하락",
+        "arrow-narrow-left": "왼쪽 얇은 화살 이전", "arrow-narrow-right": "오른쪽 얇은 화살 다음", "arrow-up-right": "증가 상승 외부이동", "arrow-down-right": "감소 하락 하위이동",
+        "arrow-back-up": "실행취소 되돌리기", "arrow-forward-up": "다시실행 앞으로", "arrows-sort": "정렬 순서", "sort-ascending": "오름차순 정렬", "sort-descending": "내림차순 정렬",
+        "arrows-maximize": "확대 전체화면 펼침", "arrows-minimize": "축소 전체화면 해제", maximize: "최대화 전체화면", minimize: "최소화 창내리기", "switch-horizontal": "전환 교체 좌우바꿈",
+        /* 상태 · 피드백 */
+        "info-circle": "정보 안내", "info-square": "정보 안내 사각", "alert-triangle": "경고 주의 위험", "alert-circle": "경고 오류 알림", "alert-octagon": "심각 위험 경고",
+        "circle-check": "성공 완료 확인", "circle-x": "실패 오류 취소", "circle-minus": "제외 빼기 비활성", "circle-plus": "추가 포함 생성", "help-circle": "도움말 물음표 안내",
+        "exclamation-circle": "주의 느낌표 경고", ban: "금지 차단 불가", forbid: "차단 금지 제한", progress: "진행 처리중 상태", hourglass: "대기 모래시계 처리중", "loader-2": "로딩 처리중 스피너",
+        rotate: "회전 돌리기", repeat: "반복 되풀이 재시도",
+        /* 사용자 · 권한 */
+        user: "사용자 계정 사람", "user-plus": "사용자 추가 초대", "user-minus": "사용자 제거 해제", "user-check": "사용자 승인 확인", "user-x": "사용자 거부 차단", "user-circle": "프로필 계정 사용자",
+        "user-cog": "사용자 설정 계정관리", "user-shield": "사용자 권한 보안 관리자", "user-edit": "사용자 수정 정보변경", "user-off": "사용자 비활성 탈퇴", users: "사용자 목록 여러명",
+        "users-group": "그룹 조직 부서", id: "신분증 계정 식별", "id-badge": "사원증 명찰 출입증",
+        /* 보안 */
+        shield: "보안 방패 보호", "shield-check": "보안 정상 안전", "shield-lock": "보안 잠금 암호화", "shield-off": "보안 해제 비활성", "shield-x": "보안 위험 차단실패", "shield-half": "부분 보안 일부보호",
+        lock: "잠금 자물쇠 비공개", "lock-open": "잠금해제 열림 공개", key: "키 열쇠 인증키", fingerprint: "지문 생체인증", scan: "스캔 검사 탐지", "face-id": "얼굴인식 생체인증", password: "비밀번호 암호",
+        bug: "버그 결함 취약점", "bug-off": "버그 해결 취약점 조치", certificate: "인증서 자격 증명서",
+        /* 파일 · 문서 */
+        file: "파일 문서", "file-text": "텍스트 파일 문서", "file-plus": "파일 추가 새문서", "file-minus": "파일 제거", "file-check": "파일 확인 검증완료", "file-x": "파일 오류 삭제",
+        "file-search": "파일 검색 문서찾기", "file-export": "파일 내보내기 추출", "file-import": "파일 가져오기 불러오기", "file-code": "코드 파일 스크립트", "file-description": "상세 문서 설명서",
+        "file-zip": "압축파일 집 아카이브", files: "여러 파일 문서들", folder: "폴더 디렉터리", "folder-open": "폴더 열기 탐색", "folder-plus": "폴더 추가 새폴더", "folder-off": "폴더 없음 비활성",
+        clipboard: "클립보드 붙여넣기", "clipboard-list": "작업 목록 점검표", "clipboard-check": "점검 완료 확인목록", report: "보고서 리포트", paperclip: "첨부 클립 파일첨부",
+        /* 데이터 · 목록 */
+        database: "데이터베이스 디비 저장소", "database-export": "디비 내보내기 백업", "database-import": "디비 가져오기 복원", "database-off": "디비 중지 연결끊김", table: "표 테이블 목록",
+        "table-plus": "행 추가 표 추가", "table-export": "표 내보내기 엑셀", columns: "열 컬럼 보기설정", list: "목록 리스트", "list-check": "점검 목록 체크리스트", "list-details": "상세 목록 항목",
+        "list-numbers": "번호 목록 순번", checkbox: "체크박스 선택", stack: "스택 쌓기 계층", box: "박스 상자 패키지", package: "패키지 꾸러미 배포",
+        /* 서버 · 네트워크 */
+        server: "서버 장비 호스트", "server-2": "서버 랙 장비", "server-off": "서버 중지 장애", "server-cog": "서버 설정 관리", cloud: "클라우드 구름", "cloud-upload": "클라우드 업로드 백업",
+        "cloud-download": "클라우드 다운로드 복원", "cloud-off": "클라우드 끊김 오프라인", network: "네트워크 망 연결", wifi: "와이파이 무선 연결", "wifi-off": "와이파이 끊김 무선해제", world: "전체 글로벌 세계",
+        globe: "지구 글로벌 도메인", router: "라우터 공유기 장비", antenna: "안테나 신호 수신", plug: "전원 플러그 연결", "plug-connected": "연결됨 접속 통합", "plug-off": "연결끊김 접속해제",
+        sitemap: "사이트맵 구조 계층", route: "경로 라우팅 흐름",
+        /* 장치 */
+        "device-desktop": "데스크톱 PC 컴퓨터", "device-laptop": "노트북 랩톱", "device-mobile": "모바일 휴대폰 스마트폰", "device-tablet": "태블릿 패드", "device-tv": "티브이 모니터 화면",
+        devices: "기기 단말 장치", cpu: "중앙처리장치 시피유 프로세서", disc: "디스크 저장장치", usb: "유에스비 외장장치", bluetooth: "블루투스 무선", battery: "배터리 전원 잔량", "battery-charging": "충전 배터리 전원",
+        power: "전원 켜기 끄기", mouse: "마우스 포인터 입력",
+        /* 차트 · 분석 */
+        "chart-bar": "막대 차트 통계 그래프", "chart-line": "선 차트 추이 그래프", "chart-pie": "원형 차트 비율", "chart-area": "영역 차트 누적", "chart-donut": "도넛 차트 비율",
+        "chart-dots": "산점도 분포 차트", "chart-histogram": "히스토그램 분포", "chart-infographic": "인포그래픽 지표", presentation: "발표 프레젠테이션 보고",
+        "presentation-analytics": "분석 보고 발표자료", "trending-up": "상승 증가 추이", "trending-down": "하락 감소 추이", gauge: "계기판 지표 측정", activity: "활동 추이 로그",
+        /* 시간 · 일정 */
+        calendar: "달력 날짜 일정", "calendar-event": "일정 이벤트 예약", "calendar-time": "일시 날짜시간 예약", "calendar-stats": "기간 통계 월별", "calendar-off": "일정 없음 휴무", clock: "시계 시간",
+        "clock-hour-4": "시각 시간 설정", alarm: "알람 타이머 경보", timeline: "타임라인 이력 흐름", stopwatch: "스톱워치 소요시간 측정", "hourglass-high": "대기 처리중 모래시계",
+        "history-toggle": "기록 전환 이력보기",
+        /* 알림 · 커뮤니케이션 */
+        bell: "알림 벨 공지", "bell-off": "알림 끄기 무음", "bell-ringing": "알림 발생 울림 긴급", mail: "메일 이메일 편지", "mail-opened": "메일 읽음 열람", "mail-forward": "메일 전달 포워드",
+        message: "메시지 대화", "message-2": "메시지 쪽지 대화", "message-circle": "댓글 대화 문의", messages: "대화 목록 메시지", phone: "전화 통화 연락처", "phone-call": "통화 수신 연결",
+        headset: "헤드셋 상담 지원", speakerphone: "공지 안내 확성기", rss: "구독 피드 알에스에스", broadcast: "방송 송출 전파",
+        /* 레이아웃 · 설정 */
+        layout: "레이아웃 배치 화면", "layout-grid": "그리드 격자 배치", "layout-list": "목록 보기 리스트형", "layout-sidebar": "좌측 사이드바 메뉴", "layout-sidebar-right": "우측 사이드바 패널",
+        "layout-columns": "컬럼 분할 좌우", "layout-rows": "행 분할 상하", "layout-dashboard": "대시보드 요약 화면", "layout-board": "보드 칸반 카드", "menu-2": "메뉴 햄버거 목록",
+        adjustments: "조정 설정 필터", "adjustments-horizontal": "조정 설정 가로 슬라이더", settings: "설정 톱니 환경설정", "settings-2": "설정 옵션 환경", tool: "도구 설정 유지보수", tools: "도구 모음 관리",
+        dashboard: "대시보드 계기 요약", inbox: "수신함 받은편지 메일함",
+        /* 텍스트 · 코드 */
+        typography: "타이포그래피 서체 글꼴", "text-size": "글자 크기 폰트크기", bold: "굵게 볼드 강조", italic: "기울임 이탤릭", "align-left": "왼쪽 정렬", "align-center": "가운데 정렬",
+        "align-right": "오른쪽 정렬", code: "코드 소스 개발", "code-dots": "코드 스니펫 조각", braces: "중괄호 객체 코드", brackets: "대괄호 배열 코드", terminal: "터미널 콘솔 명령어",
+        "terminal-2": "터미널 셸 명령창", json: "제이슨 데이터 형식",
+        /* 지도 · 장소 */
+        map: "지도 맵", "map-pin": "위치 핀 장소", "map-2": "지도 경로 길찾기", location: "위치 좌표 지점", gps: "지피에스 위치추적", "current-location": "현재 위치 내위치", building: "건물 사업장 기관",
+        home: "홈 처음 대시보드", compass: "나침반 방향 탐색", road: "경로 길 도로",
+        /* 미디어 */
+        "player-play": "재생 시작 플레이", "player-pause": "일시정지 멈춤", "player-stop": "정지 중단", "player-skip-back": "이전 트랙 되감기", "player-skip-forward": "다음 트랙 건너뛰기",
+        volume: "소리 음량 볼륨", "volume-off": "음소거 무음", microphone: "마이크 녹음 음성", "microphone-off": "마이크 끔 음소거", camera: "카메라 사진 촬영", video: "영상 비디오 녹화",
+        photo: "사진 이미지 그림", movie: "동영상 영화 미디어", "screen-share": "화면 공유 원격",
+        /* 개발 */
+        "git-branch": "브랜치 분기 깃", "git-commit": "커밋 변경기록 깃", "git-merge": "병합 머지 깃", "git-pull-request": "풀리퀘스트 코드리뷰 깃", "git-fork": "포크 분기 복제",
+        api: "에이피아이 연동 인터페이스", webhook: "웹훅 연동 콜백", bolt: "번개 빠름 즉시 실시간", variable: "변수 파라미터", function: "함수 로직 기능",
+        /* 도형 · 표시 */
+        circle: "원 동그라미", square: "사각형 네모", triangle: "삼각형", hexagon: "육각형", point: "점 지점 표시", asterisk: "별표 필수 와일드카드", at: "골뱅이 이메일 멘션", tag: "태그 라벨 분류",
+        tags: "태그 목록 분류", bookmarks: "북마크 목록 모음", palette: "팔레트 컬러 색상 테마", "color-swatch": "색상 견본 스와치", contrast: "명암 대비 테마", droplet: "물방울 색농도 투명도",
+        /* 사이트 크롬 · 기타 */
+        "sun-high": "라이트모드 낮 해 밝기", moon: "다크모드 밤 달", "device-floppy": "저장 플로피 디스켓", logout: "로그아웃 나가기", login: "로그인 들어가기", "door-exit": "나가기 퇴장 종료",
+        "zoom-in": "확대 줌인", "zoom-out": "축소 줌아웃", lifebuoy: "고객지원 도움 구조", qrcode: "큐알코드 코드스캔", barcode: "바코드 식별코드", news: "공지 소식 뉴스"
+      };
       const names = Object.keys(ICONS).sort();
-      const tile = n => { const m = ICONS[n]; const kw = [n, m.category, ...(m.tags || []), KO[n] || ""].join(" ").toLowerCase(); return `<button type="button" class="icon-tile${m.f ? "" : " no-f"}" data-name="${n}" data-cat="${attr(m.category || "")}" data-tags="${attr((m.tags || []).join("|"))}" data-ko="${attr(KO[n] || "")}" data-kw="${attr(kw)}" data-copy-o="${attr(I(n, 24))}"${m.f ? ` data-copy-f="${attr(I(n, 24, { style: "filled" }))}"` : ""} title="${n}" aria-label="${n} 상세 보기" aria-haspopup="dialog"><span class="o">${I(n, 24)}</span>${m.f ? `<span class="f">${I(n, 24, { style: "filled" })}</span>` : ""}</button>`; };
+      /* 복사할 SVG 는 data 속성에 또 담지 않는다 — app.js 가 화면에 그려진 .o / .f 를 그대로 읽는다(300개면 속성 중복만 280KB) */
+      const tile = n => { const m = ICONS[n]; const kw = [n, m.category, ...(m.tags || []), KO[n] || ""].join(" ").toLowerCase(); return `<button type="button" class="icon-tile${m.f ? "" : " no-f"}" data-name="${n}" data-cat="${attr(m.category || "")}" data-tags="${attr((m.tags || []).join("|"))}" data-ko="${attr(KO[n] || "")}" data-kw="${attr(kw)}" title="${n}" aria-label="${n} 상세 보기" aria-haspopup="dialog"><span class="o">${I(n, 24)}</span>${m.f ? `<span class="f">${I(n, 24, { style: "filled" })}</span>` : ""}</button>`; };
       return `<h1>Icons${nb("foundations", "icons")}</h1><p class="lead">아이콘은 기능이나 콘텐츠를 시각적으로 표현하는 요소로, 사용자가 인터페이스를 빠르게 탐색할 수 있도록 돕습니다. 24px 그리드 · 스트로크 2px · 라운드 캡의 단순하고 현대적인 형태(Tabler Icons · MIT)를 쓰며, 기본은 Outline 이고 선택·활성 상태 강조에만 Filled 를 씁니다.</p>
-<h2 id="search">Search icons</h2><p>사이트와 컴포넌트가 실제로 사용하는 아이콘입니다(전체 세트 3,000+ 는 <code>assets/icons/</code>). 검색 시 이름뿐 아니라 연상되는 유사한 키워드(한글 포함)를 함께 검색합니다. 아이콘을 클릭하면 이름 · 스타일 · 키워드를 보고 SVG 를 복사·다운로드할 수 있습니다. 사용 코드는 아래 Usage 를 참고하세요.</p>
+<h2 id="search">Search icons</h2><p>관리자 콘솔에서 자주 쓰는 아이콘을 추린 세트입니다. 원본 Tabler 세트 5,130개는 <code>assets/icons/</code> 에 그대로 있습니다. 검색 시 이름뿐 아니라 연상되는 유사한 키워드(한글 포함)를 함께 검색합니다. 아이콘을 클릭하면 이름 · 스타일 · 키워드를 보고 SVG 를 복사·다운로드할 수 있습니다. 사용 코드는 아래 Usage 를 참고하세요.</p>
 <div class="icon-tools"><div class="searchbar" role="search">${I("search")}<input type="search" id="iconSearch" placeholder="아이콘을 검색해주세요" aria-label="아이콘 검색"></div><div class="select-btn" role="group" aria-label="아이콘 스타일" id="iconStyle"><button type="button" class="on" aria-pressed="true" data-style="outline">Outline</button><button type="button" aria-pressed="false" data-style="filled">Filled</button></div><span id="iconCount" style="font-size:12px;color:var(--text-tertiary)">${names.length}개</span></div>
 <div class="icon-grid" id="iconGrid">${names.map(tile).join("")}</div><div class="icon-empty" id="iconEmpty" hidden>검색 결과가 없습니다. 세트 밖의 아이콘은 <code>assets/icons/</code> 에서 찾아 <code>_build/icons.js</code> 의 <code>ICON_NAMES</code> 에 추가하세요.</div>
 <h2 id="usage">Usage</h2><p>인라인 SVG 가 기본입니다(색 상속 <code>currentColor</code>, 크기 자유). 의미 색은 부모에 토큰(<code>color:var(--danger)</code>)으로 줍니다. 사용 크기: 14 배지 · 16 표/페이지네이션 · 18 버튼/입력 · 20 알림 · 24 빈 화면/타일. 정적 파일이 필요하면 <code>assets/icons/outline/{name}.svg</code> 를 img 로, 배경·가상 요소에는 CSS mask 로 씁니다.</p>
