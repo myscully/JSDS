@@ -14,8 +14,8 @@ const COMPONENTS = {
     status: "ready", react: ["Button","ButtonGroup"], css: [".btn", ".btn-group"],
     desc: "사용자의 의도를 명확하게 전달하고 행동을 유도합니다. 버튼의 형태와 색은 우선순위를 시각적으로 구분합니다.",
     thumb: `<button class="btn md primary">저장</button><button class="btn md secondary">취소</button>`,
-    anatomy: { demo: `<span class="anat"><button class="btn md primary">${I("plus")}정책 추가</button><span class="marker" style="left:-26px;top:12px">1</span><span class="marker" style="left:14px;top:-26px">2</span><span class="marker" style="right:20px;top:-26px">3</span></span>`, items: ["Container — .btn + size + variant", "Icon (Optional) — 18px, 라벨 앞", "Label — 동사로 시작"] },
     examples: [
+      { id: "default", title: "Default", desc: "변형·크기를 지정하지 않은 기본 버튼입니다. 화면의 주 행동 하나에만 씁니다.", html: `<button class="btn md primary">정책 저장</button>` },
       { id: "variant", title: "Variant", desc: "우선순위에 따라 Primary(화면당 하나) · Secondary · Tertiary · Text · Danger 를 씁니다.", html: `
         <button class="btn md primary">Primary</button>
         <button class="btn md secondary">Secondary</button>
@@ -65,7 +65,6 @@ const COMPONENTS = {
     status: "ready", react: ["Field","TextField","TextArea"], css: [".field"],
     desc: "한 줄 텍스트를 입력합니다. 라벨·도움말·오류 메시지가 하나의 필드 단위로 묶입니다.",
     thumb: `<div class="field" style="min-width:200px"><label>정책 이름</label><input placeholder="예: USB 차단"></div>`,
-    anatomy: { demo: `<span class="anat"><div class="field"><label>정책 이름 <em>*</em></label><input placeholder="예: 외부 USB 차단"><span class="help">2~40자, 한글·영문·숫자</span></div><span class="marker" style="left:-26px;top:0">1</span><span class="marker" style="left:-26px;top:38px">2</span><span class="marker" style="left:-26px;top:84px">3</span></span>`, items: ["Label (필수 표시 em)", "Input Container", "Helper · Error Message"] },
     examples: [
       { id: "basic", title: "Default / Error", desc: "오류 시 .error 를 필드에 붙이고 help 를 오류 메시지로 바꿉니다. 원인과 해결 방법을 함께 씁니다.", html: `
         <div class="field"><label for="ip1">허용 IP</label><input id="ip1" value="10.0.0.12"><span class="help">IPv4 형식</span></div>
@@ -102,7 +101,6 @@ const COMPONENTS = {
     status: "ready", react: ["SearchBar"], css: [".searchbar", ".chip", ".chip-group"],
     desc: "목록·로그를 빠르게 필터링하는 검색 입력입니다. 입력 즉시 결과가 바뀌는 '필터형'과 Enter 로 조회하는 '조회형'을 구분합니다.",
     thumb: `<div class="searchbar" style="min-width:220px">${I("search")}<input placeholder="검색"></div>`,
-    anatomy: { demo: `<span class="anat"><div class="searchbar">${I("search")}<input placeholder="이벤트, 대상, IP 검색"><kbd>/</kbd></div><span class="marker" style="left:-26px;top:10px">1</span><span class="marker" style="left:120px;top:-26px">2</span><span class="marker" style="right:-6px;top:-26px">3</span></span>`, items: ["Search Icon", "Input", "Shortcut / Clear (Optional)"] },
     examples: [
       { id: "basic", title: "Default", desc: "아이콘 + 입력. 플레이스홀더에는 검색 대상을 씁니다.", html: `
         <div class="searchbar" role="search">${I("search")}<input type="search" placeholder="정책 이름 검색" aria-label="정책 검색"></div>` },
@@ -222,6 +220,7 @@ const COMPONENTS = {
     desc: "날짜 또는 기간을 선택합니다. 로그 조회·리포트 기간처럼 '오늘 기준 최근 N일' 프리셋을 함께 제공합니다.",
     thumb: `<div class="datepicker"><button class="field-btn" style="min-width:200px">2026-09-01 <span class="sep">~</span> 2026-09-07 ${I("calendar")}</button></div>`,
     examples: [
+      { id: "default", title: "Default", desc: "날짜 하나를 고르는 기본 필드입니다.", html: `<div class="datepicker"><label>시작일</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>` },
       { id: "field", title: "Field", desc: "닫힌 상태. 값이 없으면 플레이스홀더, 기간은 ~ 구분.", html: `
         <div class="datepicker"><label>시작일</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
         <div class="datepicker"><label>조회 기간</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false">2026-09-01 <span class="sep">~</span> 2026-09-07${I("calendar")}</button></div>`, layout: "top" },
@@ -263,8 +262,8 @@ const COMPONENTS = {
     status: "ready", react: ["Checkbox","CheckboxGroup"], css: [".checkbox", ".checkbox-group"],
     desc: "여러 항목 중 0개 이상을 선택합니다. 네이티브 input 을 그대로 쓰고 외형만 CSS 로 바꿔 키보드·스크린리더가 동작합니다.",
     thumb: `${cb("이메일 알림", "checked")}${cb("SMS 알림")}`,
-    anatomy: { demo: `<span class="anat">${cb("변경 시 관리자에게 알림", "checked", "정책이 배포될 때 메일을 보냅니다")}<span class="marker" style="left:-26px;top:0">1</span><span class="marker" style="left:30px;top:-26px">2</span><span class="marker" style="left:30px;top:26px">3</span></span>`, items: ["Box (input) — 20px", "Label", "Description (Optional)"] },
     examples: [
+      { id: "default", title: "Default", desc: "선택하지 않은 기본 상태입니다.", html: `<label class="checkbox"><input type="checkbox"><span>정책 배포 시 알림</span></label>` },
       { id: "state", title: "State", desc: "Unchecked · Checked · Indeterminate(부분 선택, JS 로 indeterminate=true 또는 .mixed) · Disabled.", html: `
         ${cb("Unchecked")}
         ${cb("Checked", "checked")}
@@ -304,6 +303,7 @@ const COMPONENTS = {
     desc: "필터 조건이나 입력된 값을 작은 캡슐로 보여줍니다. 선택 가능한 Filter Chip 과 삭제 가능한 Input Chip 을 구분합니다. 상태 표시는 Tag 를 씁니다.",
     thumb: `<button class="chip on" aria-pressed="true">Critical</button><button class="chip" aria-pressed="false">High</button><button class="chip" aria-pressed="false">Medium</button>`,
     examples: [
+      { id: "default", title: "Default", desc: "선택하지 않은 기본 칩입니다.", html: `<button type="button" class="chip" aria-pressed="false">Critical</button>` },
       { id: "filter", title: "Filter Chip", desc: "토글 선택. aria-pressed 가 있는 칩은 체크 아이콘을 항상 두고(비활성 색), 선택되면 .on 으로 색만 바뀌어 폭이 흔들리지 않습니다.", html: `
         <div class="chip-group">
           <button type="button" class="chip on" aria-pressed="true">Critical</button>
@@ -348,6 +348,7 @@ const COMPONENTS = {
     desc: "여러 항목 중 정확히 하나를 고릅니다. 옵션이 5개를 넘으면 Dropdown 을 씁니다.",
     thumb: `<label class="radio"><input type="radio" name="t" checked><span>차단</span></label><label class="radio"><input type="radio" name="t"><span>허용</span></label>`,
     examples: [
+      { id: "default", title: "Default", desc: "선택하지 않은 기본 상태입니다.", html: `<label class="radio"><input type="radio" name="rd"><span>표준 모드</span></label>` },
       { id: "state", title: "State", html: `
         <label class="radio"><input type="radio" name="r1"><span>Unchecked</span></label>
         <label class="radio"><input type="radio" name="r1" checked><span>Checked</span></label>
@@ -394,6 +395,7 @@ const COMPONENTS = {
     desc: "설정을 켜고 끕니다. 토글 즉시 적용되며 저장 버튼이 없습니다. 저장이 필요한 폼 안에서는 Checkbox 를 씁니다.",
     thumb: `<label class="switch"><input type="checkbox" role="switch" checked><span>실시간 보호</span></label>`,
     examples: [
+      { id: "default", title: "Default", desc: "꺼진 기본 상태입니다.", html: `<label class="switch"><input type="checkbox" role="switch"><span>실시간 보호</span></label>` },
       { id: "state", title: "State", desc: "input[type=checkbox] 에 role=switch. Off · On · Disabled.", html: `
         <label class="switch"><input type="checkbox" role="switch"><span>Off</span></label>
         <label class="switch"><input type="checkbox" role="switch" checked><span>On</span></label>
@@ -429,8 +431,8 @@ const COMPONENTS = {
     status: "ready", react: ["Tag"], css: [".tag"],
     desc: "상태·분류·심각도를 짧게 표시합니다. 색만이 아니라 라벨 텍스트로도 의미를 전달합니다. 선택·삭제가 필요하면 Chip 을 씁니다.",
     thumb: `<span class="tag critical">Critical</span><span class="tag medium">Medium</span><span class="tag ok">정상</span>`,
-    anatomy: { demo: `<span class="anat"><span class="tag high lg">High</span><span class="marker" style="left:-24px;top:4px">1</span><span class="marker" style="right:-24px;top:4px">2</span></span>`, items: ["Dot (상태 점) — currentColor", "Label"] },
     examples: [
+      { id: "default", title: "Default", desc: "의미 색을 지정하지 않은 중립 태그입니다.", html: `<span class="tag">Tag</span>` },
       { id: "severity", title: "Severity", desc: "위협 심각도 5단계. --sev-* 토큰과 1:1.", html: `
         <span class="tag critical">Critical</span>
         <span class="tag high">High</span>
@@ -466,8 +468,17 @@ const COMPONENTS = {
     status: "ready", react: ["Dropdown","DropdownTrigger","Menu","MenuItem","MenuSep","MenuLabel","Select"], css: [".dropdown", ".menu", ".menu-item", ".menu-sep", ".menu-label"],
     desc: "옵션 목록을 열어 하나를 고르거나(Select) 액션 메뉴를 보여줍니다(Menu). 옵션이 5개 이하이고 항상 보여야 하면 Radio/Select Button 을 씁니다.",
     thumb: `<div class="dropdown"><button class="trigger" style="min-width:160px">전체 그룹</button></div>`,
-    anatomy: { demo: `<span class="anat"><div class="dropdown open" style="margin-bottom:200px"><button class="trigger" aria-expanded="true">영업팀</button><ul class="menu" role="listbox"><li class="menu-item">전체</li><li class="menu-item on" aria-selected="true">영업팀</li><li class="menu-item">개발팀</li><li class="menu-item">인프라팀</li></ul></div><span class="marker" style="left:-26px;top:10px">1</span><span class="marker" style="right:-26px;top:60px">2</span><span class="marker" style="right:-26px;top:110px">3</span></span>`, items: ["Trigger — 현재 값 + 화살표", "Menu — shadow/2, 4px 아래", "Item — 선택 .on, 위험 .danger"] },
     examples: [
+      { id: "default", title: "Default", desc: "닫힌 기본 상태입니다. 누르면 목록이 열립니다.", html: `
+        <div class="dropdown">
+          <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false"><span class="placeholder">그룹 선택</span></button>
+          <ul class="menu" role="listbox" aria-label="그룹">
+            <li class="menu-item" role="option">전체</li>
+            <li class="menu-item" role="option">영업팀</li>
+            <li class="menu-item" role="option">개발팀</li>
+          </ul>
+        </div>
+      ` },
       { id: "select", title: "Select", desc: "값 선택. 닫힘/열림(.open). 열린 메뉴는 role=listbox, 항목 aria-selected.", html: `
         <div class="dropdown">
           <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false"><span class="placeholder">그룹 선택</span></button>
@@ -535,6 +546,13 @@ const COMPONENTS = {
     desc: "같은 맥락의 콘텐츠를 뷰 단위로 전환합니다. 페이지 수준은 Underline, 카드 안의 보조 전환은 Pill.",
     thumb: `<div class="tabs sm" style="width:auto"><button class="tab on">개요</button><button class="tab">이벤트</button><button class="tab">정책</button></div>`,
     examples: [
+      { id: "default", title: "Default", desc: "밑줄 스타일의 기본 탭입니다.", html: `
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab on" role="tab" aria-selected="true">개요</button>
+          <button type="button" class="tab" role="tab" aria-selected="false">이벤트</button>
+          <button type="button" class="tab" role="tab" aria-selected="false">정책</button>
+        </div>
+      ` },
       { id: "underline", title: "Underline", desc: "기본. role=tablist / tab / aria-selected. 활성은 .on.", html: `
         <div style="width:100%;max-width:640px">
           <div class="tabs" role="tablist">
@@ -774,7 +792,6 @@ const COMPONENTS = {
     status: "ready", react: ["Card","CardHead","CardTitle","CardDesc","CardFoot","CardGrid"], css: [".card", ".card-grid"],
     desc: "관련 정보와 액션을 한 덩어리로 묶는 컨테이너입니다. 보더 대신 Surface 배경 + shadow/1 로 구획합니다.",
     thumb: `<div class="card compact" style="min-width:200px"><div class="card-head"><h3 class="title" style="font-size:14px">라이선스</h3><span class="tag ok sm">정상</span></div><p class="desc" style="font-size:12px">2026-12-31 만료</p></div>`,
-    anatomy: { demo: `<span class="anat"><div class="card" style="width:360px"><div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div><p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p><div class="card-foot"><button class="btn sm secondary">상세</button><button class="btn sm primary">갱신</button></div></div><span class="marker" style="left:-26px;top:20px">1</span><span class="marker" style="left:-26px;top:70px">2</span><span class="marker" style="left:-26px;top:126px">3</span></span>`, items: ["Header — 제목 + 상태/액션", "Body — 설명·데이터", "Footer — 액션(우측 정렬)"] },
     examples: [
       { id: "basic", title: "Default", html: `
         <div class="card" style="width:360px">
@@ -808,8 +825,14 @@ const COMPONENTS = {
     status: "ready", react: ["Popup","PopupSurface","PopupTitle","PopupBody","PopupActions","PopupForm"], css: [".popup", ".popup-backdrop"],
     desc: "사용자의 확인이나 짧은 입력이 필요할 때 화면 위에 띄우는 모달입니다. 되돌리기 어려운 동작 앞에 반드시 둡니다.",
     thumb: `<div class="popup" style="width:220px;padding:14px;gap:6px"><h3 class="popup-title" style="font-size:12px">정책 삭제</h3><p class="popup-body" style="font-size:12px">되돌릴 수 없습니다.</p><div class="popup-actions" style="margin-top:4px"><button class="btn sm secondary" style="height:26px;font-size:12px">취소</button><button class="btn sm danger" style="height:26px;font-size:12px">삭제</button></div></div>`,
-    anatomy: { demo: `<span class="anat"><div class="popup" role="dialog" aria-modal="true" aria-labelledby="pt"><h3 class="popup-title" id="pt">정책을 배포할까요?</h3><p class="popup-body">변경 사항이 12개 그룹, 1,284대에 적용됩니다. 에이전트는 다음 체크인에서 정책을 받습니다.</p><div class="popup-actions"><button class="btn md secondary">취소</button><button class="btn md primary">배포</button></div></div><span class="marker" style="left:-26px;top:22px">1</span><span class="marker" style="left:-26px;top:70px">2</span><span class="marker" style="right:-26px;bottom:34px">3</span></span>`, items: ["Title — 질문형, 결과가 드러나게", "Body — 영향 범위·되돌림 가능 여부", "Actions — 취소 왼쪽, 주 액션 오른쪽"] },
     examples: [
+      { id: "default", title: "Default", desc: "제목 · 본문 · 액션으로 이루어진 기본 구성입니다.", html: `
+        <div class="popup" role="dialog" aria-modal="true" aria-labelledby="d-title">
+          <h3 class="popup-title" id="d-title">정책을 배포할까요?</h3>
+          <p class="popup-body">변경 사항이 1,284대에 적용됩니다.</p>
+          <div class="popup-actions"><button type="button" class="btn md secondary" data-popup-close>취소</button><button type="button" class="btn md primary">배포</button></div>
+        </div>
+      ` },
       { id: "confirm", title: "Confirm", desc: "실제 화면에서는 .popup-backdrop 으로 감쌉니다(코드 참조). 예제는 팝업만 표시.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="c-title">
           <h3 class="popup-title" id="c-title">정책을 배포할까요?</h3>
@@ -867,6 +890,7 @@ const COMPONENTS = {
     desc: "아이콘 버튼의 이름이나 짧은 보조 설명을 hover/focus 시 보여줍니다. 필수 정보를 툴팁에만 두지 않습니다.",
     thumb: `<span class="tooltip-wrap show"><button class="btn sm secondary icon" aria-label="새로 고침">${I("refresh")}</button><span class="tooltip" role="tooltip">새로 고침</span></span>`,
     examples: [
+      { id: "default", title: "Default", desc: "요소 위쪽에 뜨는 기본 위치입니다.", html: `<span class="tooltip-wrap show"><button type="button" class="btn md secondary">새로 고침</button><span class="tooltip" role="tooltip">목록을 다시 불러옵니다</span></span>` },
       { id: "position", title: "Position", desc: "기본 위. .bottom / .left / .right. 예제는 .show 로 항상 표시.", html: `
         <span class="tooltip-wrap show"><button type="button" class="btn md secondary">Top</button><span class="tooltip" role="tooltip">위 (기본)</span></span>
         <span class="tooltip-wrap show"><button type="button" class="btn md secondary">Bottom</button><span class="tooltip bottom" role="tooltip">아래</span></span>
@@ -890,8 +914,8 @@ const COMPONENTS = {
     status: "ready", react: ["Notice","Toast","ToastStack","Banner","ToastProvider","useToast"], css: [".notice", ".toast", ".toast-stack", ".banner"],
     desc: "시스템 상태와 결과를 알립니다. 페이지 안에 머무는 Notice, 잠시 떴다 사라지는 Toast, 화면 상단 전체 공지 Banner 를 구분합니다.",
     thumb: `<div class="notice warning" style="max-width:240px;padding:10px 12px;font-size:12px"><span class="ico">${I("alert-triangle",20)}</span><div><b>라이선스 만료 임박</b>3일 후 만료</div></div>`,
-    anatomy: { demo: `<span class="anat"><div class="notice info" style="max-width:520px"><span class="ico">${I("info-circle",20)}</span><div><b>정책이 아직 배포되지 않았습니다</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.<div class="actions"><button class="btn sm primary">지금 배포</button><button class="btn sm text">나중에</button></div></div><button class="close" aria-label="닫기">${I("x",14)}</button></div><span class="marker" style="left:-26px;top:14px">1</span><span class="marker" style="left:40px;top:-26px">2</span><span class="marker" style="left:40px;top:44px">3</span><span class="marker" style="left:40px;bottom:-4px">4</span><span class="marker" style="right:-26px;top:10px">5</span></span>`, items: ["Icon — 톤별 색", "Title", "Description", "Actions (Optional)", "Dismiss (Optional)"] },
     examples: [
+      { id: "default", title: "Default", desc: "본문 안에 머무는 기본 인라인 알림입니다.", html: `<div class="notice info" role="status" style="max-width:600px"><span class="ico">${I("info-circle")}</span><div><b>정책이 아직 배포되지 않았습니다</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>` },
       { id: "notice", title: "Notice (Inline)", desc: "페이지에 고정. Info · Success · Warning · Danger. role=status(정보) 또는 alert(위험).", html: `
         <div class="notice info" role="status" style="max-width:600px"><span class="ico">${I("info-circle",20)}</span><div><b>정책이 아직 배포되지 않았습니다</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div><button type="button" class="close" aria-label="닫기">${I("x",14)}</button></div>
         <div class="notice success" role="status" style="max-width:600px"><span class="ico">${I("circle-check",20)}</span><div><b>배포 완료</b>1,284대 중 1,284대에 적용되었습니다.</div></div>
@@ -917,6 +941,7 @@ const COMPONENTS = {
     desc: "로딩 상태를 알립니다. 1초 미만은 표시하지 않고, 영역 로딩은 Skeleton, 짧은 동작은 Spinner, 진행률을 알면 Progress.",
     thumb: `<span class="spinner"></span><div style="width:120px;display:flex;flex-direction:column;gap:6px"><span class="skeleton title" style="width:60%"></span><span class="skeleton text"></span></div>`,
     examples: [
+      { id: "default", title: "Default", desc: "기본 크기(24px) 스피너입니다.", html: `<span class="spinner" role="status" aria-label="불러오는 중"></span>` },
       { id: "spinner", title: "Spinner", desc: "sm 16 · md 24 · lg 40. 버튼 안에서는 Button .loading 을 씁니다.", html: `
         <span class="spinner sm" role="status" aria-label="불러오는 중"></span>
         <span class="spinner" role="status" aria-label="불러오는 중"></span>
@@ -947,6 +972,7 @@ const COMPONENTS = {
     desc: "상태 점, 건수 배지, 단계 표시처럼 작은 시각 신호입니다. 텍스트 라벨과 함께 써 색만으로 의미를 전달하지 않습니다.",
     thumb: `<span class="indicator ok">정상</span><span class="indicator danger">차단</span><span class="count">3</span>`,
     examples: [
+      { id: "default", title: "Default", desc: "상태 점과 라벨을 함께 쓰는 기본 형태입니다.", html: `<span class="indicator ok">정상</span>` },
       { id: "status", title: "Status Dot", desc: "에이전트·서비스 상태. 라벨 필수. 실시간 위험은 .pulse.", html: `
         <span class="indicator ok">정상</span>
         <span class="indicator warn">주의</span>
@@ -981,6 +1007,13 @@ const COMPONENTS = {
     desc: "콘텐츠 그룹을 나눕니다. 여백과 배경 차이로 구획이 되면 쓰지 않고, 꼭 필요한 곳에만 아주 연하게.",
     thumb: `<div style="width:160px"><hr class="divider" style="margin:6px 0"><hr class="divider label" style="margin:6px 0">또는</hr></div>`,
     examples: [
+      { id: "default", title: "Default", desc: "영역을 나누는 기본 가로 구분선입니다.", html: `
+        <div style="width:100%;max-width:480px">
+          <p class="t-body-2" style="margin:0">기본 설정</p>
+          <hr class="divider">
+          <p class="t-body-2" style="margin:0">고급 설정</p>
+        </div>
+      ` },
       { id: "basic", title: "Horizontal", desc: "hr.divider. 강조는 .strong, 임시 구분은 .dashed.", html: `
         <div style="width:100%;max-width:480px">
           <p class="t-body-2" style="margin:0">기본 설정</p>
@@ -1013,7 +1046,6 @@ const COMPONENTS = {
     status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".tag", ".checkbox", ".indicator"],
     desc: "로그·이벤트·정책 목록처럼 대량의 행 데이터를 다룹니다. 정렬·선택·행 액션을 갖춘 콘솔의 핵심 컴포넌트입니다. 단순 표는 Table 을 씁니다.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><thead><tr><th>시간</th><th>심각도</th></tr></thead><tbody><tr><td>09:41</td><td><span class="tag critical sm">Critical</span></td></tr><tr><td>09:40</td><td><span class="tag medium sm">Medium</span></td></tr></tbody></table></div>`,
-    anatomy: { demo: `<span class="anat" style="width:100%"><div class="tbl-wrap"><table class="tbl"><thead><tr><th class="sortable sorted desc">시간</th><th class="sortable">심각도</th><th>이벤트</th><th>대상</th><th>상태</th><th class="actions"></th></tr></thead><tbody><tr><td>09:41:12</td><td><span class="tag critical">Critical</span></td><td>랜섬웨어 행위 탐지</td><td>PC-2041 · 김민준</td><td><span class="indicator danger">차단</span></td><td class="actions"><button class="btn sm tertiary icon" aria-label="더 보기">${I("dots")}</button></td></tr><tr><td>09:40:58</td><td><span class="tag medium">Medium</span></td><td>미승인 USB 연결</td><td>PC-1187 · 이서연</td><td><span class="indicator warn">검토 필요</span></td><td class="actions"><button class="btn sm tertiary icon" aria-label="더 보기">${I("dots")}</button></td></tr></tbody></table></div><span class="marker" style="left:-26px;top:14px">1</span><span class="marker" style="left:-26px;top:66px">2</span><span class="marker" style="left:200px;top:-26px">3</span><span class="marker" style="right:-26px;top:66px">4</span></span>`, items: ["Header — 정렬 아이콘(.sortable / .sorted)", "Row — hover 배경, 선택 .on", "Cell — 태그·인디케이터·숫자(.num)", "Row Actions — 우측 정렬"] },
     examples: [
       { id: "basic", title: "Default (Sortable)", desc: "헤더 클릭 정렬. 정렬 중인 열은 .sorted(.desc). 숫자 열은 .num.", html: `
         <div class="tbl-wrap">
@@ -1071,6 +1103,17 @@ const COMPONENTS = {
     desc: "정렬·선택이 필요 없는 단순 표입니다. 상세 정보(키-값), 비교표, 요약 통계에 씁니다.",
     thumb: `<div class="tbl-wrap" style="width:220px"><table class="tbl compact kv"><tbody><tr><th style="width:80px">이름</th><td>USB 차단</td></tr><tr><th>상태</th><td>사용</td></tr></tbody></table></div>`,
     examples: [
+      { id: "default", title: "Default", desc: "머리글과 본문만 둔 기본 표입니다.", html: `
+        <div class="tbl-wrap" style="max-width:480px">
+          <table class="tbl">
+            <thead><tr><th>그룹</th><th class="num">에이전트</th></tr></thead>
+            <tbody>
+              <tr><td>영업팀</td><td class="num">312</td></tr>
+              <tr><td>개발팀</td><td class="num">184</td></tr>
+            </tbody>
+          </table>
+        </div>
+      ` },
       { id: "simple", title: "Simple", html: `
         <div class="tbl-wrap" style="max-width:640px">
           <table class="tbl">
@@ -1150,6 +1193,7 @@ const COMPONENTS = {
     desc: "아이콘·제목·설명으로 항목을 카드 형태로 고르는 타일입니다. 정책 템플릿, 연동 모듈, 보고서 유형 선택에 씁니다.",
     thumb: `<div class="tile-grid" style="width:240px;grid-template-columns:1fr 1fr"><button class="tile on"><span class="ico">U</span><b>USB</b></button><button class="tile"><span class="ico">N</span><b>네트워크</b></button></div>`,
     examples: [
+      { id: "default", title: "Default", desc: "선택하지 않은 기본 타일입니다.", html: `<button type="button" class="tile"><span class="ico">${I("shield")}</span><b>USB 제어</b><span>저장장치 차단·읽기 전용</span></button>` },
       { id: "grid", title: "Grid", desc: "button.tile 그리드. 선택은 .on + aria-pressed.", html: `
         <div class="tile-grid" style="max-width:760px">
           <button type="button" class="tile on" aria-pressed="true"><span class="ico">${I("shield")}</span><b>USB 제어</b><span>저장장치 차단·읽기 전용</span></button>
@@ -1180,6 +1224,7 @@ const COMPONENTS = {
     desc: "대시보드의 수치·추이·비율을 보여줍니다. KPI 카드, 가로 막대, 도넛, 스파크라인을 CSS 만으로 구성하며 색은 심각도 토큰을 그대로 씁니다.",
     thumb: `<div class="kpi compact" style="padding:12px 14px;min-width:120px"><span class="label">Critical</span><span class="value" style="font-size:24px;color:var(--sev-critical)">1,284</span></div>`,
     examples: [
+      { id: "default", title: "Default", desc: "값 하나를 보여 주는 기본 KPI 입니다.", html: `<div class="kpi" style="max-width:240px"><span class="label">연결 에이전트</span><span class="value">1,247</span></div>` },
       { id: "kpi", title: "KPI", desc: "라벨 · 값 · 증감. 보안 지표는 증가가 위험(.up 빨강), 감소가 좋음(.down 초록).", html: `
         <div class="kpi-grid" style="max-width:800px">
           <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><span class="delta up">${I("arrow-up",12)} 12% 전주 대비</span></div>

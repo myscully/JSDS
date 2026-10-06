@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 91 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 92 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -205,6 +205,18 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.screenshot({ path: SHOT + "/popup.png" });
   await page.keyboard.press("Escape");
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
+
+  // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
+  await go("components/button.html");
+  const cs = await page.evaluate(() => ({
+    first: document.querySelector('#content h2[id^="ex-"]').textContent,
+    tag: document.querySelector('#content h2[id^="ex-"]').tagName,
+    anatomy: !!document.querySelector('#anatomy, .legend, .marker'),
+    examplesH2: !!document.querySelector('#examples'),
+    toc: [...document.querySelectorAll("#toc a")].map((a) => a.textContent).join(" / "),
+    panes: [...document.querySelector(".example").querySelectorAll("[data-pane]")].map((x) => x.dataset.pane).join(","),
+  }));
+  ok("component page opens with 1. Default, no Anatomy/Examples heading", cs.first === "1. Default" && cs.tag === "H2" && !cs.anatomy && !cs.examplesH2 && cs.panes === "html,react", JSON.stringify(cs));
 
   // Icons: 추린 세트 · 한글 검색 · Filled 필터
   await go("foundations/icons.html");

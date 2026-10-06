@@ -40,8 +40,8 @@
   <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><a href="../components/overview.html">Overview</a><a href="../components/accordion.html">Accordion</a><a href="../components/breadcrumb.html">Breadcrumb</a><a href="../components/button.html">Button</a><a href="../components/card.html">Card</a><a href="../components/data-visual.html">Data Visual</a><a href="../components/date-picker.html">Date Picker</a><a href="../components/divider.html">Divider</a><a href="../components/dropdown.html">Dropdown</a><a href="../components/indicator.html">Indicator</a><a href="../components/item-tile.html">Item Tile</a><a href="../components/list.html">List</a><a href="../components/loading.html">Loading</a><a href="../components/navigation.html">Navigation</a><a href="../components/notification.html">Notification</a><a href="../components/pagination.html">Pagination</a><a href="../components/popup.html">Popup</a><h5>Selection Controls</h5><a href="../components/checkbox.html">Checkbox</a><a href="../components/chip.html">Chip</a><a href="../components/radio-button.html">Radio Button</a><a href="../components/select-button.html">Select Button</a><a href="../components/search.html">Search</a><a href="../components/slider.html">Slider</a><a href="../components/switch.html">Switch</a><a href="../components/tab.html">Tab</a><h5>Table</h5><a href="../components/data-table.html">Data Table</a><a href="../components/table.html">Table</a><a href="../components/tag.html">Tag</a><a href="../components/text-field.html" class="active">Text Field</a><a href="../components/tooltip.html">Tooltip</a><a href="../components/top-navigation.html">Top Navigation</a></nav><div class="sidebar-foot">v0.6 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
   <div class="main">
     <div class="page"><article id="content">
-<h1>Text Field</h1><p class="lead">한 줄 텍스트를 입력합니다. 라벨·도움말·오류 메시지가 하나의 필드 단위로 묶입니다.</p><h2 id="anatomy">Anatomy</h2><div class="panel"><span class="anat"><div class="field"><label>정책 이름 <em>*</em></label><input placeholder="예: 외부 USB 차단"><span class="help">2~40자, 한글·영문·숫자</span></div><span class="marker" style="left:-26px;top:0">1</span><span class="marker" style="left:-26px;top:38px">2</span><span class="marker" style="left:-26px;top:84px">3</span></span></div><ol class="legend"><li><span class="marker">1</span>Label (필수 표시 em)</li><li><span class="marker">2</span>Input Container</li><li><span class="marker">3</span>Helper · Error Message</li></ol>
-<h2 id="examples">Examples</h2><h3 id="ex-basic">1. Default / Error</h3><p>오류 시 .error 를 필드에 붙이고 help 를 오류 메시지로 바꿉니다. 원인과 해결 방법을 함께 씁니다.</p><section class="example" id="ex-text-field-basic">
+<h1>Text Field</h1><p class="lead">한 줄 텍스트를 입력합니다. 라벨·도움말·오류 메시지가 하나의 필드 단위로 묶입니다.</p>
+<h2 id="ex-basic">1. Default / Error</h2><p>오류 시 .error 를 필드에 붙이고 help 를 오류 메시지로 바꿉니다. 원인과 해결 방법을 함께 씁니다.</p><section class="example" id="ex-text-field-basic">
 <div class="example-preview panel"><div class="field"><label for="ip1">허용 IP</label><input id="ip1" value="10.0.0.12"><span class="help">IPv4 형식</span></div>
 <div class="field error"><label for="ip2">허용 IP</label><input id="ip2" value="10.0.0" aria-invalid="true" aria-describedby="ip2-err"><span class="help" id="ip2-err">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div></div>
 <div class="example-bar"><div class="code-tabs" role="tablist"><button type="button" class="on" data-tab="html" role="tab" aria-selected="true">HTML+CSS</button><button type="button" data-tab="react" role="tab" aria-selected="false">React</button></div><div class="example-actions"><button type="button" data-copy="ex-text-field-basic-html" data-label="복사">복사</button><button type="button" data-toggle="" aria-expanded="false">코드 보기</button></div></div>
@@ -82,7 +82,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-size">2. Size</h3><p>sm 36 · md 44 · lg 52. 버튼과 같은 높이로 나란히 배치합니다.</p><section class="example" id="ex-text-field-size">
+</section><h2 id="ex-size">2. Size</h2><p>sm 36 · md 44 · lg 52. 버튼과 같은 높이로 나란히 배치합니다.</p><section class="example" id="ex-text-field-size">
 <div class="example-preview panel top"><div class="field sm"><label>Small</label><input placeholder="36px"></div>
 <div class="field"><label>Medium</label><input placeholder="44px"></div>
 <div class="field lg"><label>Large</label><input placeholder="52px"></div></div>
@@ -126,7 +126,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-affix">3. Prefix / Suffix / Counter</h3><p>단위·접두어는 .affix 컨테이너 안에 span 으로. 글자 수 제한은 .counter.</p><section class="example" id="ex-text-field-affix">
+</section><h2 id="ex-affix">3. Prefix / Suffix / Counter</h2><p>단위·접두어는 .affix 컨테이너 안에 span 으로. 글자 수 제한은 .counter.</p><section class="example" id="ex-text-field-affix">
 <div class="example-preview panel"><div class="field"><label>보관 기간</label><div class="affix"><input value="90"><span>일</span></div></div>
 <div class="field"><label>관리 콘솔 주소</label><div class="affix"><span>https://</span><input placeholder="console.example.com"></div></div>
 <div class="field"><div class="row"><label>설명</label><span class="counter">12 / 80</span></div><input value="외부 저장장치 차단 정책" maxlength="80"></div></div>
@@ -170,7 +170,7 @@
   );
 }</code></pre></div>
 </div>
-</section><h3 id="ex-textarea">4. Textarea</h3><p>여러 줄 입력. 높이는 세로 리사이즈 허용, 최소 96px.</p><section class="example" id="ex-text-field-textarea">
+</section><h2 id="ex-textarea">4. Textarea</h2><p>여러 줄 입력. 높이는 세로 리사이즈 허용, 최소 96px.</p><section class="example" id="ex-text-field-textarea">
 <div class="example-preview panel"><div class="field" style="min-width:420px"><label for="memo">메모</label><textarea id="memo" placeholder="정책 변경 사유를 남겨 주세요"></textarea><span class="help">감사 로그에 기록됩니다</span></div></div>
 <div class="example-bar"><div class="code-tabs" role="tablist"><button type="button" class="on" data-tab="html" role="tab" aria-selected="true">HTML+CSS</button><button type="button" data-tab="react" role="tab" aria-selected="false">React</button></div><div class="example-actions"><button type="button" data-copy="ex-text-field-textarea-html" data-label="복사">복사</button><button type="button" data-toggle="" aria-expanded="false">코드 보기</button></div></div>
 <div class="example-code" hidden="">
@@ -204,7 +204,7 @@
   <span class="tk-kw">return</span> <span class="tk-punc">&lt;</span><span class="tk-tag">TextArea</span> <span class="tk-attr">id</span>=<span class="tk-str">"memo"</span> <span class="tk-attr">label</span>=<span class="tk-str">"메모"</span> <span class="tk-attr">placeholder</span>=<span class="tk-str">"정책 변경 사유를 남겨 주세요"</span> <span class="tk-attr">help</span>=<span class="tk-str">"감사 로그에 기록됩니다"</span> <span class="tk-attr">wrapperStyle</span>={{ minWidth: 420 }} <span class="tk-punc">/&gt;</span>;
 }</code></pre></div>
 </div>
-</section><h3 id="ex-state">5. Disabled / Read-only</h3><p>Disabled 는 값을 바꿀 수도 복사할 수도 없을 때, Read-only 는 참조만 할 때.</p><section class="example" id="ex-text-field-state">
+</section><h2 id="ex-state">5. Disabled / Read-only</h2><p>Disabled 는 값을 바꿀 수도 복사할 수도 없을 때, Read-only 는 참조만 할 때.</p><section class="example" id="ex-text-field-state">
 <div class="example-preview panel"><div class="field"><label>정책 ID</label><input value="POL-2041" readonly=""><span class="help">자동 생성</span></div>
 <div class="field"><label>생성자</label><input value="admin@jiran.com" disabled=""></div></div>
 <div class="example-bar"><div class="code-tabs" role="tablist"><button type="button" class="on" data-tab="html" role="tab" aria-selected="true">HTML+CSS</button><button type="button" data-tab="react" role="tab" aria-selected="false">React</button></div><div class="example-actions"><button type="button" data-copy="ex-text-field-state-html" data-label="복사">복사</button><button type="button" data-toggle="" aria-expanded="false">코드 보기</button></div></div>
