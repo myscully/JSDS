@@ -2,7 +2,7 @@
    render.js — 페이지 렌더러 + 해시 라우터 (브라우저 전용)
    data.js · components.data.js · patterns.data.js · lib.js 가 먼저 로드되어야 합니다.
    ========================================================= */
-const { esc, dedent, cssFor, tokenBlock, htmlToJsx, hl } = LIB;
+const { esc, dedent, cssFor, tokenBlock, parseVars, rootBlock, htmlToJsx, hl } = LIB;
 const $ = s => document.querySelector(s);
 const STYLE = () => window.STYLE_TEXT || "";
 const nb = (sec, key) => NEW.has(`${sec}/${key}`) ? '<span class="n">N</span>' : "";
@@ -121,6 +121,10 @@ ${usageBlock(key, css, label, [...new Set([...(c.react || []), ...uses.flatMap(u
 }
 
 /* ---------- Foundations 공용 ---------- */
+/* Radius 값은 스타일시트에서 끌어온다 — 타일에 숫자를 박아 두면 토큰을 고칠 때마다 따로 손봐야 한다 */
+const RADII = () => Object.entries(parseVars(rootBlock(STYLE(), ":root")))
+  .filter(([k]) => /^--radius-/.test(k)).map(([k, v]) => [k.replace("--radius-", ""), parseInt(v, 10)]);
+const rpx = name => (RADII().find(([n]) => n === name) || [, ""])[1];
 const tokenSection = (id, title, prefixes, note) => `<h3 id="${id}">${title}</h3>${note ? `<p>${note}</p>` : ""}${codeBlock(`tok-${id}`, tokenBlock(prefixes, STYLE()), "css", "CSS 복사")}`;
 /* Atomic 스와치. Semantic 바와 같은 .val-cell 계약 — 누르면 app.js 의 openColor() 가 값 팝오버를 띄운다.
    data-copy-text 를 두면 복사 위임이 먼저 걸려 팝오버가 열리지 않으므로 붙이지 않는다 */
@@ -229,8 +233,8 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
 <h2 id="layers">Token Layers</h2><div class="kv"><dt>Primitive</dt><dd><code>--gray-*</code> <code>--brand-*</code> <code>--accent-*</code> <code>--red-*</code>… 값의 원천. 컴포넌트에서 직접 쓰지 않음 (<a href="#/foundations/colors">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--bg-*</code> <code>--text-*</code> <code>--fill-*</code> <code>--line-*</code> <code>--border-*</code> <code>--accent</code> <code>--danger</code> <code>--sev-*</code>… 컴포넌트는 이것만 참조 (<a href="#/foundations/colors">Colors › Semantic</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--accent-50~900</code>을 생성(명도 전개) → 나머지 토큰은 공통</dd></div>
 <h2 id="css">CSS Variables</h2><p>Light 기본값 + Dark 오버라이드(<code>prefers-color-scheme</code> 및 <code>[data-theme="dark"]</code>)를 포함합니다.</p>${codeBlock("tokencss", root, "css", "CSS 복사")}
 <h2 id="radius">Radius</h2><p>역할별로 반경을 정해 두고, 모든 블록에 같은 반경을 찍지 않습니다. 타일을 클릭하면 토큰이 복사됩니다.</p>
-<div class="tiles radius">${[["xs", 2], ["sm", 4], ["md", 8], ["lg", 12], ["xl", 16], ["full", 999]].map(([n, v]) => `<div style="border-radius:${v}px" data-copy-text="var(--radius-${n})" title="복사">${n} ${v === 999 ? "" : v}</div>`).join("")}</div>
-<div class="kv"><dt>md 8</dt><dd>버튼, 입력 필드, 드롭다운</dd><dt>lg 12</dt><dd>카드, 패널, 테이블 컨테이너, 알림</dd><dt>xl 16</dt><dd>팝업</dd><dt>full</dt><dd>태그, 아바타, 스위치</dd><dt>sm 4</dt><dd>체크박스, 코드 강조</dd></div>
+<div class="tiles radius">${RADII().map(([n, v]) => `<div style="border-radius:${v}px" data-copy-text="var(--radius-${n})" title="복사">${n} ${v === 999 ? "" : v}</div>`).join("")}</div>
+<div class="kv"><dt>md ${rpx("md")}</dt><dd>버튼, 입력 필드, 드롭다운</dd><dt>lg ${rpx("lg")}</dt><dd>카드, 패널, 테이블 컨테이너, 알림</dd><dt>xl ${rpx("xl")}</dt><dd>팝업</dd><dt>full</dt><dd>태그, 아바타, 스위치</dd><dt>sm ${rpx("sm")}</dt><dd>체크박스, 코드 강조</dd></div>
 ${tokenSection("radius-css", "CSS", "radius")}
 <h2 id="motion">Motion</h2><p>전환·피드백 애니메이션의 지속 시간과 이징입니다. 컴포넌트 CSS 는 <code>--motion-*</code> 토큰만 참조하고, <code>prefers-reduced-motion</code> 일 때 모든 전환을 제거합니다.</p>
 <div class="tablewrap"><table><thead><tr><th>토큰</th><th>값</th><th>용도</th></tr></thead><tbody><tr><td><code>--motion-fast</code></td><td>120ms ease-out</td><td>hover, 토글, 체크</td></tr><tr><td><code>--motion-base</code></td><td>200ms ease-in-out</td><td>드롭다운, 툴팁, 프로그레스</td></tr><tr><td><code>--motion-slow</code></td><td>320ms cubic-bezier(.2,.8,.2,1)</td><td>팝업, 드로어</td></tr></tbody></table></div>
@@ -265,7 +269,7 @@ ${codeBlock("react-usage", `import { Button, TextField, Tag, DataTable, useToast
 <h2 id="vars">Variables · Styles</h2><ul><li><b>Primitive</b>: color/{gray·accent·red·amber·emerald·sky}/{step}, color/brand/{step}, space/{n}, radius/{name}, size/{card-padding…}</li><li><b>Semantic</b>(Light/Dark): bg/ text/ border/ primary(=Accent)/ status/ severity/ — CSS 변수 이름과 1:1</li><li><b>Text Styles</b> 14단계 Pretendard(= <code>.t-*</code> 클래스) · <b>Effect Styles</b> Shadow Normal xs~xl · Spread sm/md(= <code>--shadow-*</code>, 1~3 은 별칭)</li></ul>
 <h2 id="rules">작업 규칙</h2><ul><li>색은 Semantic 변수만, 글자는 Text Style만, 그림자는 Effect Style만.</li><li>Variant 속성명은 소문자(variant / size / state). 사이트 Props 표의 클래스 이름과 같게.</li><li>컴포넌트 Description에 용도·사용 규칙과 사이트 페이지 링크 기입.</li></ul>`,
   "resources/tokens": () => `<h1>Token Download</h1><p class="lead">CSS 변수와 JSON 형식으로 토큰을 내려받습니다.</p><p><a href="#/resources/design-token">Design Token</a> 페이지에서 CSS 전체를 복사할 수 있고, 빌드 산출물 <code>_build/components.json</code> 에 토큰(light/dark)과 컴포넌트 스펙·예제 코드가 함께 들어 있습니다. JSON(Style Dictionary) 예시:</p>
-${codeBlock("tok-json", `{\n  "color": { "accent": { "600": { "value": "{product.main}" } }, "brand": { "500": { "value": "#FF7F00" } } },\n  "space": { "4": { "value": "16px" } }, "radius": { "md": { "value": "8px" } }\n}`, "tsx")}<p>Figma Variables → JSON 내보내기 연동은 예정입니다.</p>`,
+${codeBlock("tok-json", `{\n  "color": { "accent": { "600": { "value": "{product.main}" } }, "brand": { "500": { "value": "#FF7F00" } } },\n  "space": { "4": { "value": "16px" } }, "radius": { "md": { "value": "6px" } }\n}`, "tsx")}<p>Figma Variables → JSON 내보내기 연동은 예정입니다.</p>`,
   "resources/changelog": () => `<h1>Changelog</h1><p class="lead">버전별 변경 이력입니다. 가이드와 Figma 파일의 버전을 함께 올립니다.</p>
 <div class="tablewrap"><table><thead><tr><th>버전</th><th>날짜</th><th>내용</th></tr></thead><tbody>${CHANGELOG.map(c => `<tr><td><code>${c[0]}</code></td><td>${c[1]}</td><td>${c[2]}</td></tr>`).join("")}</tbody></table></div>`,
   /* 임시 페이지: v1.0 공개(2026-11-30) 시 제거 — data.js resources.pages.wbs · style.src.css table.wbs 도 함께 */
