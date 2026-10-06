@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 85 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 84 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -221,9 +221,7 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
     };
   });
   ok("spacing scale: 16 bars, off = 비4배수, base = 4", sp.labels === "1,2,4,8,10,12,14,16,20,24,32,40,48,56,64,80" && sp.off === "1,2,10,14" && sp.base === "4" && sp.widths === sp.labels && sp.fits, JSON.stringify(sp));
-  ok("only tokened bars are copyable + labelled", sp.copyable === "4,8,12,16,20,24,32,40,48,64,80" && sp.labelled === sp.copyable, JSON.stringify({ c: sp.copyable, l: sp.labelled }));
-  await page.locator(".space-bars>div[data-copy-text]").first().click();
-  ok("spacing bar copies its token", await page.locator(".space-bars>div[data-copy-text]").first().evaluate((e) => e.classList.contains("copied") && e.dataset.copyText === "var(--space-1)"));
+  ok("spacing bars are a figure, not copy targets", sp.copyable === "" && sp.labelled === "4,8,12,16,20,24,32,40,48,64,80", JSON.stringify({ c: sp.copyable, l: sp.labelled }));
 
   // Elevation: Normal/Spread 타일 → 값 팝오버 (None 제외)
   await go("foundations/elevation.html");
