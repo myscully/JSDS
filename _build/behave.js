@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 88 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 91 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -205,6 +205,24 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.screenshot({ path: SHOT + "/popup.png" });
   await page.keyboard.press("Escape");
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
+
+  // Icons: 추린 세트 · 한글 검색 · Filled 필터
+  await go("foundations/icons.html");
+  const gal = await page.evaluate(() => ({
+    tiles: document.querySelectorAll("#iconGrid .icon-tile").length,
+    count: document.getElementById("iconCount").textContent,
+    noF: document.querySelectorAll("#iconGrid .icon-tile.no-f").length,
+  }));
+  ok("gallery holds the curated set", gal.tiles >= 290 && gal.tiles <= 330 && gal.count === gal.tiles + "개" && gal.noF > 0, JSON.stringify(gal));
+  const find = async (q) => { await page.fill("#iconSearch", q); await page.waitForTimeout(80); return page.evaluate(() => [...document.querySelectorAll("#iconGrid .icon-tile")].filter((t) => !t.hidden).length); };
+  const ko = { 서버: await find("서버"), 잠금: await find("잠금"), 그래프: await find("그래프") };
+  const en = { export: await find("export"), chart: await find("chart") };
+  ok("search works in Korean and English", Object.values(ko).every((n) => n > 0) && Object.values(en).every((n) => n > 0), JSON.stringify({ ko, en }));
+  await page.fill("#iconSearch", "");
+  await page.locator("#iconStyle [data-style=filled]").click(); await page.waitForTimeout(80);
+  const shown = await page.evaluate(() => [...document.querySelectorAll("#iconGrid .icon-tile")].filter((t) => !t.hidden).length);
+  ok("filled tab drops outline-only icons", shown > 0 && shown === gal.tiles - gal.noF, JSON.stringify({ shown, expect: gal.tiles - gal.noF }));
+  await page.locator("#iconStyle [data-style=outline]").click();
 
   // Icons: 타일 클릭 → 값 팝오버 (딤 없이 타일 아래, SVG 복사·다운로드)
   await go("foundations/icons.html");

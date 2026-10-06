@@ -221,8 +221,9 @@
   }
   document.addEventListener("input", e => { if (e.target.id === "iconSearch") filterIcons(); });
   function openIcon(tile) {
-    const grid = tile.closest("#iconGrid"), filled = grid.classList.contains("filled") && !!tile.dataset.copyF, name = tile.dataset.name;
-    const style = filled ? "filled" : "outline", svg = filled ? tile.dataset.copyF : tile.dataset.copyO;
+    const grid = tile.closest("#iconGrid"), name = tile.dataset.name;
+    const f = tile.querySelector(".f"), filled = grid.classList.contains("filled") && !!f;
+    const style = filled ? "filled" : "outline", svg = (filled ? f : tile.querySelector(".o")).innerHTML;   /* 화면에 그려진 바로 그 SVG */
     const kws = [name, ...(tile.dataset.ko || "").split(/\s+/), ...(tile.dataset.tags || "").split("|"), tile.dataset.cat || ""]
       .map(t => t.trim()).filter((t, i, a) => t && a.indexOf(t) === i);
     const rows = [["Style", filled ? "Filled" : "Outline"], ["Category", tile.dataset.cat || "—"], ["Keyword", kws.join(" · ")]];

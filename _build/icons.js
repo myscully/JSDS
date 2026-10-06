@@ -1,6 +1,7 @@
 /* =========================================================
    icons.js — 사이트에서 쓰는 아이콘 (assets/icons/{outline|filled}/*.svg, Tabler Icons · MIT)
-   - ICON_NAMES: 사이트에 실제로 사용되는 아이콘만 등록 (Iconography 페이지 갤러리도 이 목록으로 구성)
+   - ICON_NAMES: 관리자 콘솔에서 자주 쓰는 아이콘을 추린 목록 (Foundations › Icons 갤러리 · React <Icon> 이 이 목록으로 구성)
+   - 원본 세트는 assets/icons 에 5,130개가 그대로 있다. 여기에 이름을 더하면 갤러리와 React 양쪽에 함께 나타난다
    - node: require("./icons.js") → { ICONS, I, generate }   /  브라우저: generate() 가 만든 icons.gen.js 가 전역 ICONS · I 정의
    - I(name, size=18, {style:"outline"|"filled", label}) → 인라인 <svg> 문자열 (currentColor)
    ========================================================= */
@@ -8,15 +9,60 @@ const fs = require("fs"); const path = require("path");
 const DIR = path.resolve(__dirname, "..", "assets", "icons");
 const ICON_NAMES = [
   // 액션
-  "search", "plus", "download", "trash", "pencil", "refresh", "copy", "filter", "x", "check", "dots", "external-link",
-  // 탐색
-  "chevron-left", "chevron-right", "chevron-down", "arrow-up", "arrow-down", "arrows-sort", "sort-ascending", "sort-descending",
+  "search", "plus", "minus", "x", "check", "download", "upload", "trash", "pencil", "edit", "copy", "refresh", "reload", "filter", "filter-off", "dots",
+  "dots-vertical", "external-link", "link", "unlink", "share", "printer", "eye", "eye-off", "star", "heart", "bookmark", "pin", "pinned", "flag",
+  "archive", "restore", "send", "history",
+  // 탐색 · 화살표
+  "chevron-left", "chevron-right", "chevron-up", "chevron-down", "chevrons-left", "chevrons-right", "arrow-left", "arrow-right", "arrow-up",
+  "arrow-down", "arrow-narrow-left", "arrow-narrow-right", "arrow-up-right", "arrow-down-right", "arrow-back-up", "arrow-forward-up", "arrows-sort",
+  "sort-ascending", "sort-descending", "arrows-maximize", "arrows-minimize", "maximize", "minimize", "switch-horizontal",
   // 상태 · 피드백
-  "info-circle", "alert-triangle", "alert-circle", "circle-check",
-  // 도메인 · 내비게이션
-  "home", "list", "user", "server", "shield", "bell", "settings", "chart-bar", "calendar", "inbox", "layout-grid",
-  // 사이트 크롬
-  "moon", "sun-high", "palette", "menu-2", "arrow-left",
+  "info-circle", "info-square", "alert-triangle", "alert-circle", "alert-octagon", "circle-check", "circle-x", "circle-minus", "circle-plus",
+  "help-circle", "exclamation-circle", "ban", "forbid", "progress", "hourglass", "loader-2", "rotate", "repeat",
+  // 사용자 · 권한
+  "user", "user-plus", "user-minus", "user-check", "user-x", "user-circle", "user-cog", "user-shield", "user-edit", "user-off", "users", "users-group",
+  "id", "id-badge",
+  // 보안
+  "shield", "shield-check", "shield-lock", "shield-off", "shield-x", "shield-half", "lock", "lock-open", "key", "fingerprint", "scan", "face-id",
+  "password", "bug", "bug-off", "certificate",
+  // 파일 · 문서
+  "file", "file-text", "file-plus", "file-minus", "file-check", "file-x", "file-search", "file-export", "file-import", "file-code", "file-description",
+  "file-zip", "files", "folder", "folder-open", "folder-plus", "folder-off", "clipboard", "clipboard-list", "clipboard-check", "report", "paperclip",
+  // 데이터 · 목록
+  "database", "database-export", "database-import", "database-off", "table", "table-plus", "table-export", "columns", "list", "list-check",
+  "list-details", "list-numbers", "checkbox", "stack", "box", "package",
+  // 서버 · 네트워크
+  "server", "server-2", "server-off", "server-cog", "cloud", "cloud-upload", "cloud-download", "cloud-off", "network", "wifi", "wifi-off", "world",
+  "globe", "router", "antenna", "plug", "plug-connected", "plug-off", "sitemap", "route",
+  // 장치
+  "device-desktop", "device-laptop", "device-mobile", "device-tablet", "device-tv", "devices", "cpu", "disc", "usb", "bluetooth", "battery",
+  "battery-charging", "power", "mouse",
+  // 차트 · 분석
+  "chart-bar", "chart-line", "chart-pie", "chart-area", "chart-donut", "chart-dots", "chart-histogram", "chart-infographic", "presentation",
+  "presentation-analytics", "trending-up", "trending-down", "gauge", "activity",
+  // 시간 · 일정
+  "calendar", "calendar-event", "calendar-time", "calendar-stats", "calendar-off", "clock", "clock-hour-4", "alarm", "timeline", "stopwatch",
+  "hourglass-high", "history-toggle",
+  // 알림 · 커뮤니케이션
+  "bell", "bell-off", "bell-ringing", "mail", "mail-opened", "mail-forward", "message", "message-2", "message-circle", "messages", "phone",
+  "phone-call", "headset", "speakerphone", "rss", "broadcast",
+  // 레이아웃 · 설정
+  "layout", "layout-grid", "layout-list", "layout-sidebar", "layout-sidebar-right", "layout-columns", "layout-rows", "layout-dashboard", "layout-board",
+  "menu-2", "adjustments", "adjustments-horizontal", "settings", "settings-2", "tool", "tools", "dashboard", "inbox",
+  // 텍스트 · 코드
+  "typography", "text-size", "bold", "italic", "align-left", "align-center", "align-right", "code", "code-dots", "braces", "brackets", "terminal",
+  "terminal-2", "json",
+  // 지도 · 장소
+  "map", "map-pin", "map-2", "location", "gps", "current-location", "building", "home", "compass", "road",
+  // 미디어
+  "player-play", "player-pause", "player-stop", "player-skip-back", "player-skip-forward", "volume", "volume-off", "microphone", "microphone-off",
+  "camera", "video", "photo", "movie", "screen-share",
+  // 개발
+  "git-branch", "git-commit", "git-merge", "git-pull-request", "git-fork", "api", "webhook", "bolt", "variable", "function",
+  // 도형 · 표시
+  "circle", "square", "triangle", "hexagon", "point", "asterisk", "at", "tag", "tags", "bookmarks", "palette", "color-swatch", "contrast", "droplet",
+  // 사이트 크롬 · 기타
+  "sun-high", "moon", "device-floppy", "logout", "login", "door-exit", "zoom-in", "zoom-out", "lifebuoy", "qrcode", "barcode", "news",
 ];
 function parse(file) {
   if (!fs.existsSync(file)) return null;
