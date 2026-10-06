@@ -119,15 +119,18 @@ ${valPop()}`;
 
     /* ================= Grid ================= */
     "foundations/grid": () => {
-      const spaces = [[1, 4], [2, 8], [3, 12], [4, 16], [5, 20], [6, 24], [8, 32], [10, 40], [12, 48], [16, 64], [20, 80]];
+      const spaces = [1, 2, 4, 8, 10, 12, 14, 16, 20, 24, 32, 40, 48, 56, 64, 80];
+      /* px → 토큰명은 스타일시트에서 끌어온다 — 짝꿍 표를 또 두면 토큰이 바뀔 때 눈금만 어긋난다 */
+      const { L } = vars(), tokenOf = {};
+      for (const [k, v] of Object.entries(L)) { const m = /^--space-\d+$/.test(k) && /^(\d+)px$/.exec(v.trim()); if (m) tokenOf[+m[1]] = k.slice(2); }
       return `<h1>Grid</h1><p class="lead">그리드 시스템은 4px 기반의 일관된 간격 체계를 사용하여 모든 화면에서 조화로운 비율과 정렬을 만들어냅니다. Desktop 관리 콘솔을 기준으로 사이드 내비게이션 + 유동 콘텐츠 영역의 레이아웃을 쓰며, 콘텐츠 영역 안은 12단 컬럼 그리드로 배치합니다.</p>
 <h2 id="artboard">Artboard size</h2><p>디자이너는 해상도별 모든 화면을 디자인할 필요 없이 아래 대표 규격만 설계합니다. 기준은 1440 이며, 대형 모니터는 콘텐츠 최대 너비만 넓어집니다.</p>
 ${tbl(["환경", "너비", "높이", "콘텐츠 최대 너비"], [["Web desktop (기준)", "1440px", "960px", "1160px"], ["Web desktop (대형)", "1920px", "1080px", "1600px"]])}
 <h2 id="breakpoint">Breakpoint</h2><p>모바일·태블릿은 대응하지 않는 Desktop 전용 콘솔입니다. 1280 미만에서는 사이드 내비게이션을 접어 콘텐츠 폭을 확보합니다.</p>
 ${tbl(["명칭", "대응 환경", "너비", "레이아웃", "콘텐츠 최대 너비"], [["md", "데스크탑 소형 · 노트북", "1024 – 1279px", "사이드 내비 접힘 64 + 콘텐츠", "100% (Padding 20)"], ["lg", "데스크탑 (기준 1440)", "1280 – 1919px", "사이드 내비 240 + 콘텐츠", "1160px (Padding 24)"], ["xl", "데스크탑 대형", "1920px ~", "사이드 내비 240 + 콘텐츠", "1600px (Padding 24)"]])}
 ${codeBlock("bp-css", `/* Desktop-first */\n.app{display:grid;grid-template-columns:240px minmax(0,1fr)}\n.content{max-width:1160px;margin:0 auto;padding:0 24px}\n@media (max-width:1279px){.app{grid-template-columns:64px minmax(0,1fr)}.content{padding:0 20px}}\n@media (min-width:1920px){.content{max-width:1600px}}`, "css", "CSS 복사")}
-<h2 id="spacing">Spacing</h2><p>예측 가능한 디자인 규칙과 개발자와의 원활한 소통을 위해 <b>4배수 간격</b>으로 구성합니다. 기준은 4px 이며, 시각 보정이 필요할 때는 2px 단위로 움직이고 불가피할 때만 1px 씩 조정합니다. 카드 내부 padding 24, 카드·요소 사이 gap 20, 섹션 사이 48~64 를 기본으로 넉넉히 잡아 답답한 밀도를 피합니다. 막대를 클릭하면 토큰이 복사됩니다.</p>
-<div class="space-bars">${spaces.map(([k, v]) => `<div class="${v === 4 ? "base" : ""}" data-copy-text="var(--space-${k})" title="var(--space-${k}) 복사"><b>${v}</b><i style="width:${v}px"></i><small>space-${k}</small></div>`).join("")}</div>
+<h2 id="spacing">Spacing</h2><p>예측 가능한 디자인 규칙과 개발자와의 원활한 소통을 위해 <b>4배수 간격</b>으로 구성합니다. 기준은 4px 이며, 시각 보정이 필요할 때는 2px 단위로 움직이고 불가피할 때만 1px 씩 조정합니다. 카드 내부 padding 24, 카드·요소 사이 gap 20, 섹션 사이 48~64 를 기본으로 넉넉히 잡아 답답한 밀도를 피합니다. 노란색은 4px 그리드를 벗어난 값으로, 시각 보정이 꼭 필요할 때만 씁니다. 토큰이 있는 막대를 클릭하면 토큰이 복사됩니다.</p>
+<div class="space-bars">${spaces.map(v => { const t = tokenOf[v]; const cls = v === 4 ? "base" : v % 4 ? "off" : ""; return `<div class="${cls}"${t ? ` data-copy-text="var(--${t})" title="var(--${t}) 복사"` : ""}><b>${v}</b><i style="width:${v}px"></i>${t ? `<small>${t}</small>` : ""}</div>`; }).join("")}</div>
 ${tokenSection("space-css", "CSS", ["space-", "card-", "row-h"])}
 <h2 id="layout">Layout</h2><p>콘텐츠 영역 안은 24px 의 간격(gutter)을 두는 12단 컬럼 그리드를 사용하며, 화면 너비에 맞게 유연하게 대응합니다. 컬럼은 자유롭게 병합하여 사용합니다(KPI 카드 4단 = 3컬럼씩, 폼 2단 = 6컬럼씩).</p>
 <h3>Desktop</h3><p>사이드 내비게이션 240px 을 제외한 콘텐츠 영역(최대 1160px)에 12단 컬럼, 좌우 여백 24px, 간격 24px.</p>

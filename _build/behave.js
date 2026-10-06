@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 82 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 85 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -205,6 +205,25 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.screenshot({ path: SHOT + "/popup.png" });
   await page.keyboard.press("Escape");
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
+
+  // Grid: Spacing 눈금 — 4의 배수가 아닌 값은 .off(노랑), 토큰 없는 막대는 복사 대상 아님
+  await go("foundations/grid.html");
+  const sp = await page.evaluate(() => {
+    const d = [...document.querySelectorAll(".space-bars>div")], px = (x) => x.querySelector("b").textContent;
+    return {
+      labels: d.map(px).join(","),
+      off: d.filter((x) => x.classList.contains("off")).map(px).join(","),
+      base: d.filter((x) => x.classList.contains("base")).map(px).join(","),
+      copyable: d.filter((x) => x.dataset.copyText).map(px).join(","),
+      labelled: d.filter((x) => x.querySelector("small")).map(px).join(","),
+      widths: d.map((x) => Math.round(x.querySelector("i").getBoundingClientRect().width)).join(","),
+      fits: document.querySelector(".space-bars").scrollWidth <= document.querySelector(".space-bars").clientWidth,
+    };
+  });
+  ok("spacing scale: 16 bars, off = 비4배수, base = 4", sp.labels === "1,2,4,8,10,12,14,16,20,24,32,40,48,56,64,80" && sp.off === "1,2,10,14" && sp.base === "4" && sp.widths === sp.labels && sp.fits, JSON.stringify(sp));
+  ok("only tokened bars are copyable + labelled", sp.copyable === "4,8,12,16,20,24,32,40,48,64,80" && sp.labelled === sp.copyable, JSON.stringify({ c: sp.copyable, l: sp.labelled }));
+  await page.locator(".space-bars>div[data-copy-text]").first().click();
+  ok("spacing bar copies its token", await page.locator(".space-bars>div[data-copy-text]").first().evaluate((e) => e.classList.contains("copied") && e.dataset.copyText === "var(--space-1)"));
 
   // Elevation: Normal/Spread 타일 → 값 팝오버 (None 제외)
   await go("foundations/elevation.html");

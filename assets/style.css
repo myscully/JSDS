@@ -278,11 +278,13 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand)}
 .elev-comp .box{width:72px;height:72px;border-radius:var(--radius-lg);background:var(--bg-surface);position:relative}
 .elev-comp .box small{position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);font-size:12px;color:var(--text-tertiary);background:var(--bg-panel);padding:2px 8px;border-radius:999px;white-space:nowrap}
 .elev-comp .op{color:var(--text-disabled);font-size:20px}
-.space-bars{display:flex;align-items:flex-start;gap:14px;padding:var(--space-8) var(--space-6) var(--space-6);background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);margin:var(--space-4) 0 var(--space-10);overflow-x:auto}
-.space-bars>div{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;flex:none}
+.space-bars{display:flex;align-items:flex-start;gap:8px;padding:var(--space-8) var(--space-6) var(--space-6);background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);margin:var(--space-4) 0 var(--space-10);overflow-x:auto}
+.space-bars>div{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none}
+.space-bars>div[data-copy-text]{cursor:pointer}   /* 토큰이 없는 막대는 클릭 대상이 아니다 */
 .space-bars>div b{font-size:12px;font-weight:700;color:#fff;background:var(--success);border-radius:999px;padding:2px 8px;min-width:24px;text-align:center}
 .space-bars>div i{display:block;height:220px;background:var(--success-subtle);border-radius:3px}
 .space-bars>div.base b{background:var(--accent)}.space-bars>div.base i{background:var(--accent-subtle)}
+.space-bars>div.off b{background:var(--warning)}.space-bars>div.off i{background:var(--warning-subtle)}   /* 4의 배수가 아닌 값 = 그리드 밖 */
 .space-bars>div small{font-size:10px;color:var(--text-tertiary)}
 .grid-demo{background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8) 40px;margin:var(--space-4) 0 var(--space-6)}
 .grid-demo .cols{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;height:200px}
