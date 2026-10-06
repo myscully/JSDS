@@ -98,21 +98,20 @@ ${valPop()}`;
 
     /* ================= Elevation ================= */
     "foundations/elevation": () => {
-      const { L } = vars();
       const normal = [["None", "none"], ["XSmall", "xs"], ["Small", "sm"], ["Medium", "md"], ["Large", "lg"], ["XLarge", "xl"]];
       const spread = [["Small", "spread-sm"], ["Medium", "spread-md"]];
       /* None 은 보여 줄 값이 없어 비활성 — 나머지는 누르면 값 팝오버(app.js 의 openValue) */
       const levels = (list, group) => `<div class="elev-levels">${list.map(([n, k]) => k === "none"
         ? `<div><i style="box-shadow:var(--shadow-none)"></i><small>${n}</small></div>`
         : `<button type="button" class="val-cell" data-kind="shadow" data-token="--shadow-${k}" data-label="${attr(group + " / " + n)}" aria-haspopup="dialog" title="${attr(group + " / " + n)} 값 보기"><i style="box-shadow:var(--shadow-${k})"></i><small>${n}</small></button>`).join("")}</div>`;
-      const rows = [["1", "Shadow Normal XSmall", "--shadow-xs", "평면에 가깝지만 미세한 구분이 필요한 경우 (테이블 컨테이너, 입력 필드 hover)"], ["2", "Shadow Normal Small", "--shadow-sm", "페이지 위에 떠 있는 경우 (카드 · 패널 기본 구획 = <code>--shadow-1</code>)"], ["3", "Shadow Normal Medium", "--shadow-md", "상호작용 상태에서 강조가 필요한 경우 (카드 hover · 드롭다운 · 팝오버 = <code>--shadow-2</code>)"], ["4", "Shadow Normal Large", "--shadow-lg", "일시적으로 주요한 정보를 표시하는 더 높은 레이어 (토스트 · 드로어)"], ["5", "Shadow Normal XLarge", "--shadow-xl", "사용자의 시선을 완전히 집중시켜야 하는 주요 오버레이 (팝업 = <code>--shadow-3</code>)"], ["1", "Shadow Spread Small", "--shadow-spread-sm", "배경과 콘텐츠의 경계 사방에 구분이 필요한 경우 (화면 중앙 카드)"], ["2", "Shadow Spread Medium", "--shadow-spread-md", "경계 분리와 함께 보다 강조가 필요한 경우 (중앙 정렬 다이얼로그)"]];
+      const rows = [["1", "Shadow Normal XSmall", "평면에 가깝지만 미세한 구분이 필요한 경우 (테이블 컨테이너, 입력 필드 hover)"], ["2", "Shadow Normal Small", "페이지 위에 떠 있는 경우 (카드 · 패널 기본 구획 = <code>--shadow-1</code>)"], ["3", "Shadow Normal Medium", "상호작용 상태에서 강조가 필요한 경우 (카드 hover · 드롭다운 · 팝오버 = <code>--shadow-2</code>)"], ["4", "Shadow Normal Large", "일시적으로 주요한 정보를 표시하는 더 높은 레이어 (토스트 · 드로어)"], ["5", "Shadow Normal XLarge", "사용자의 시선을 완전히 집중시켜야 하는 주요 오버레이 (팝업 = <code>--shadow-3</code>)"], ["1", "Shadow Spread Small", "배경과 콘텐츠의 경계 사방에 구분이 필요한 경우 (화면 중앙 카드)"], ["2", "Shadow Spread Medium", "경계 분리와 함께 보다 강조가 필요한 경우 (중앙 정렬 다이얼로그)"]];
       return `<h1>Elevation</h1><p class="lead">Elevation 은 Z축을 기준으로 두 표면 사이의 거리를 나타내는 시각적 체계입니다. 그림자와 배경 명도 차이를 조합하여 UI 컴포넌트 간의 깊이감과 시각적 계층을 만듭니다. 구획은 1px 보더를 겹치는 대신 배경 차이와 아주 부드러운 그림자로 만들어, 밀도가 높은 콘솔 화면에서도 정돈된 구조를 전달합니다.</p>
 <h2 id="type">Shadow type</h2>
 <div class="elev-types"><div><div class="demo"><i style="box-shadow:var(--shadow-lg)"></i></div><b>Normal</b><span>빛의 위치에 따라 아래쪽으로 그림자가 생기는 일반적인 경우 사용합니다. 카드 · 드롭다운 · 팝업.</span></div><div><div class="demo"><i style="box-shadow:var(--shadow-spread-md)"></i></div><b>Spread</b><span>Dialog 처럼 그림자가 사방으로 고르게 퍼져야 하는 경우 사용합니다. 화면 중앙에 홀로 놓이는 표면.</span></div></div>
 ${tabset([["normal", "Normal"], ["spread", "Spread"]], [levels(normal, "Normal"), levels(spread, "Spread")])}
 <h2 id="composition">Composition</h2><p>더 자연스럽고 현실과 유사한 깊이감을 표현하기 위해 물체 주변으로 은은하게 퍼지는 주변광 그림자(Ambient shadow)와 특정 방향의 조명에 의해 생기는 뚜렷한 직사광 그림자(Key shadow)를 레이어링하여 구성합니다. 값이 두 겹인 이유입니다.</p>
 <div class="elev-comp"><div class="box" style="box-shadow:0 8px 24px 0 rgba(15,23,42,.08)"><small>Ambient</small></div><span class="op">+</span><div class="box" style="box-shadow:0 2px 6px 0 rgba(0,0,0,.05)"><small>Key</small></div><span class="op">${I("chevron-right", 20)}</span><div class="box" style="box-shadow:var(--shadow-lg)"><small>Combined = Large</small></div></div>
-<h2 id="style">Style</h2>${tbl(["레벨", "명칭", "토큰", "값 (Light)", "적용"], rows.map(([l, n, t, u]) => [l, n, `<code data-copy-text="var(${t})" title="복사" style="cursor:pointer">${t}</code>`, `<code style="white-space:pre-wrap">${L[t] || ""}</code>`, u]))}
+<h2 id="style">Style</h2>${tbl(["레벨", "명칭", "적용"], rows)}
 <p><code>--shadow-1 · 2 · 3</code> 은 각각 Small · Medium · XLarge 의 별칭으로, 기존 컴포넌트 CSS 와 호환됩니다. 배경 음영(Dimmer)은 <a href="#/foundations/colors">Colors › Material</a> 을 참고하세요.</p>
 ${tokenSection("shadow-css", "CSS", "shadow")}
 ${valPop()}`;
