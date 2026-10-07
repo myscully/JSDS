@@ -768,6 +768,11 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .breadcrumb .more{padding:0 4px;color:var(--text-tertiary);cursor:pointer;border:0;background:none;font:inherit}
 .breadcrumb .more:hover{color:var(--text-primary)}
 .breadcrumb .more svg{width:14px;height:14px;display:block}
+/* 라벨이 길면 220 에서 말줄임. 현재 항목의 라벨은 span 으로 감싼다 — li 가 flex 라 맨 텍스트(익명 flex 항목)에는 ellipsis 가 적용되지 않는다 */
+.breadcrumb li>a:not(.icon),.breadcrumb li>span{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 아이콘만 있는 링크와 … 버튼은 클릭 영역을 24x24 로(WCAG 2.5.8). 보이는 모양과 행 높이는 그대로 — 말줄임 쪽에 overflow:hidden 이 있어 같은 요소에 겹치면 안 된다 */
+.breadcrumb li>a.icon,.breadcrumb .more{position:relative}
+.breadcrumb li>a.icon::after,.breadcrumb .more::after{content:"";position:absolute;top:50%;left:50%;width:100%;height:24px;min-width:24px;transform:translate(-50%,-50%)}
 
 /* Pagination */
 .pagination{display:inline-flex;align-items:center;gap:4px}

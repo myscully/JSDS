@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 112 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 116 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -280,6 +280,31 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   const bc = page.locator("#ex-breadcrumb-collapsed .example-preview .breadcrumb");
   const liBefore = await bc.locator("li").count(); await bc.locator(".more").click();
   ok("breadcrumb more expands", (await bc.locator("li").count()) === liBefore + 1 && (await bc.locator(".more").count()) === 0 && (await bc.locator("li a").nth(1).textContent()) === "정책");
+  // 펼치면 버튼이 DOM 에서 사라진다 — 포커스를 옮기지 않으면 body 로 떨어진다
+  ok("breadcrumb moves focus to the first revealed link", await page.evaluate(() => {
+    const a = document.activeElement;
+    return !!a && a.tagName === "A" && a.textContent.trim() === "정책";
+  }));
+  await go("components/breadcrumb.html");
+  const bcA11y = await page.evaluate(() => {
+    const home = document.querySelector("#ex-breadcrumb-collapsed .breadcrumb a.icon");
+    const more = document.querySelector("#ex-breadcrumb-collapsed .more");
+    const hit = (e) => { const c = getComputedStyle(e, "::after"); return c.width + "×" + c.height; };
+    return { homeLabel: home && home.getAttribute("aria-label"), homeHit: home && hit(home), moreHit: more && hit(more) };
+  });
+  // 아이콘만 있는 링크는 이름이 없으면 스크린리더가 "링크" 로만 읽는다
+  ok("breadcrumb icon link is named", bcA11y.homeLabel === "홈", JSON.stringify(bcA11y));
+  ok("breadcrumb icon targets are 24x24", bcA11y.homeHit === "24px×24px" && bcA11y.moreHit === "24px×24px", JSON.stringify(bcA11y));
+  const bcCut = await page.evaluate(() => {
+    const ol = document.querySelector("#ex-breadcrumb-basic .breadcrumb");
+    const a = ol.querySelector("li>a"), sp = ol.querySelector("[aria-current]>span");
+    const short = Math.round(a.getBoundingClientRect().width);
+    a.textContent = "외부 저장장치 차단 정책 본사 영업부 전체 적용 규칙 2026 그리고 더 길게";
+    sp.textContent = "현재 페이지 이름도 아주 길어질 수 있습니다 예를 들면 이렇게요 정말로";
+    const w = (e) => Math.round(e.getBoundingClientRect().width);
+    return { short, longLink: w(a), longCurrent: w(sp), clipped: a.scrollWidth > a.clientWidth, row: Math.round(ol.getBoundingClientRect().height) };
+  });
+  ok("breadcrumb truncates long labels at 220", bcCut.longLink === 220 && bcCut.longCurrent === 220 && bcCut.clipped && bcCut.short < 220 && bcCut.row === 22, JSON.stringify(bcCut));
   await go("patterns/onboarding.html");
   const ob = page.locator("#ex-onboarding-step .example-preview .onboard");
   await ob.locator('[data-step="next"]').click();
