@@ -503,15 +503,24 @@ const COMPONENTS = {
     desc: "옵션 목록을 열어 <b>하나를 고릅니다</b>. 옵션이 5개 이하이고 항상 보여야 하면 Radio · Select Button, 고르는 것이 아니라 실행이면 <a href=\"#/components/dropdown\">Dropdown</a> 을 씁니다.",
     thumb: `<div class="dropdown"><button class="trigger" style="min-width:160px">전체 그룹</button></div>`,
     examples: [
-      { id: "default", title: "Default", desc: "닫힌 기본 상태입니다. 고른 값이 없으면 트리거에 placeholder 를 둡니다.", html: `
+      { id: "default", title: "Default", desc: "닫힌 기본 상태입니다. 고른 값이 없으면 트리거에 placeholder 를 둡니다. 눌러서 열면 항목이 8개를 넘는 목록은 메뉴 안에서 스크롤됩니다(최대 높이 320).", html: `
         <div class="dropdown">
           <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false"><span class="placeholder">그룹 선택</span></button>
           <ul class="menu" role="listbox" aria-label="그룹">
             <li class="menu-item" role="option">전체</li>
             <li class="menu-item" role="option">영업팀</li>
             <li class="menu-item" role="option">개발팀</li>
+            <li class="menu-item" role="option">인프라팀</li>
+            <li class="menu-item" role="option">보안팀</li>
+            <li class="menu-item" role="option">기획팀</li>
+            <li class="menu-item" role="option">디자인팀</li>
+            <li class="menu-item" role="option">QA팀</li>
+            <li class="menu-item" role="option">고객지원팀</li>
+            <li class="menu-item" role="option">재무팀</li>
+            <li class="menu-item" role="option">인사팀</li>
+            <li class="menu-item" role="option">법무팀</li>
           </ul>
-        </div>` },
+        </div>`, layout: "tall top" },
       { id: "open", title: "Open / Selected", desc: "닫힘과 열림을 나란히 둔 모습입니다. 열린 메뉴는 role=listbox, 고른 항목은 .on + aria-selected.", html: `
         <div class="dropdown">
           <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false"><span class="placeholder">그룹 선택</span></button>
@@ -531,24 +540,6 @@ const COMPONENTS = {
             <li class="menu-item" role="option">개발팀</li>
             <li class="menu-item" role="option">인프라팀</li>
             <li class="menu-item" role="option" aria-disabled="true">외주(권한 없음)</li>
-          </ul>
-        </div>`, layout: "tall top" },
-      { id: "long", title: "긴 목록", desc: "항목이 8개를 넘으면 메뉴 안에서 스크롤됩니다(최대 높이 320). 더 길어지거나 이름을 알고 찾는 목록이면 검색이 있는 목록을 검토하세요.", html: `
-        <div class="dropdown open">
-          <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="true">보안팀</button>
-          <ul class="menu" role="listbox" aria-label="그룹">
-            <li class="menu-item" role="option">전체</li>
-            <li class="menu-item" role="option">영업팀</li>
-            <li class="menu-item" role="option">개발팀</li>
-            <li class="menu-item" role="option">인프라팀</li>
-            <li class="menu-item on" role="option" aria-selected="true">보안팀</li>
-            <li class="menu-item" role="option">기획팀</li>
-            <li class="menu-item" role="option">디자인팀</li>
-            <li class="menu-item" role="option">QA팀</li>
-            <li class="menu-item" role="option">고객지원팀</li>
-            <li class="menu-item" role="option">재무팀</li>
-            <li class="menu-item" role="option">인사팀</li>
-            <li class="menu-item" role="option">법무팀</li>
           </ul>
         </div>`, layout: "tall top" },
       { id: "disabled", title: "Disabled", desc: "권한이 없거나 선택할 값이 없는 상태입니다.", html: `
