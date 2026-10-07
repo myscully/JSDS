@@ -6,7 +6,9 @@ import {
   isValidElement,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
+  useState,
   type ButtonHTMLAttributes,
   type CSSProperties,
   type HTMLAttributes,
@@ -62,6 +64,8 @@ export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropd
 ) {
   const [isOpen, setOpen] = useControllable<boolean>({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
   const rootRef = useRef<HTMLDivElement>(null);
+  /* 트리거 아래에 자리가 없고 위가 더 넓으면 위로 뒤집어 연다(사이트의 ds.js placeMenu 와 같은 규칙) */
+  const [up, setUp] = useState(false);
   const menuId = useId(undefined, "menu");
   useOutsideClick([rootRef], () => setOpen(false), isOpen);
   useEscape(() => {
@@ -76,6 +80,16 @@ export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropd
       (sel ?? items[0])?.focus();
     }, 0);
     return () => window.clearTimeout(t);
+  }, [isOpen]);
+  useLayoutEffect(() => {
+    if (!isOpen) { setUp(false); return; }
+    const root = rootRef.current;
+    const menu = root?.querySelector<HTMLElement>(".menu");
+    const trigger = root?.querySelector<HTMLElement>("[aria-haspopup]");
+    if (!menu || !trigger) return;
+    const r = trigger.getBoundingClientRect(), gap = 4;
+    const below = window.innerHeight - r.bottom - gap, above = r.top - gap;
+    setUp(below < menu.offsetHeight && above > below);
   }, [isOpen]);
   const keyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(e);
@@ -97,7 +111,7 @@ export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropd
   };
   return (
     <Ctx.Provider value={{ open: isOpen, setOpen, kind, menuId, align, disabled, keepMounted, rootRef }}>
-      <div ref={mergeRefs(rootRef, ref)} className={cx("dropdown", isOpen && "open", className)} onKeyDown={keyDown} {...rest}>
+      <div ref={mergeRefs(rootRef, ref)} className={cx("dropdown", isOpen && "open", up && "up", className)} onKeyDown={keyDown} {...rest}>
         {children}
       </div>
     </Ctx.Provider>

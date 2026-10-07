@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 96 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 98 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -46,6 +46,25 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   const last = await longMenu.evaluate((m) => { m.scrollTop = m.scrollHeight; const li = m.lastElementChild.getBoundingClientRect(), r = m.getBoundingClientRect(); return li.bottom <= r.bottom + 1 && li.top >= r.top - 1; });
   ok("scrolling the menu reaches the last option", last);
   await page.keyboard.press("Escape");
+
+  // Select: 아래 공간이 모자라면 위로 뒤집어 연다 (.up)
+  const flip = async (y) => {
+    const d = page.locator(`${ex("select", "long")} .dropdown`);
+    await d.evaluate((e) => { if (e.classList.contains("open")) e.querySelector(".trigger").click(); });
+    await d.evaluate((e, top) => { const r = e.querySelector(".trigger").getBoundingClientRect(); window.scrollTo({ top: window.scrollY + r.top - top, behavior: "instant" }); }, y);
+    await page.waitForTimeout(120);
+    await d.evaluate((e) => e.querySelector(".trigger").click());
+    await page.waitForTimeout(120);
+    return d.evaluate((e) => {
+      const m = e.querySelector(".menu").getBoundingClientRect(), tr = e.querySelector(".trigger").getBoundingClientRect();
+      return { up: e.classList.contains("up"), room: Math.round(window.innerHeight - tr.bottom), above: m.bottom <= tr.top, inside: m.top >= -1 && m.bottom <= window.innerHeight + 1 };
+    });
+  };
+  const down = await flip(160), upd = await flip(700);
+  ok("menu opens down when there is room", !down.up && !down.above && down.inside, JSON.stringify(down));
+  ok("menu flips up when there is not", upd.up && upd.above && upd.inside, JSON.stringify(upd));
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
 
   // Dropdown (액션 메뉴)
   await go("components/dropdown.html");

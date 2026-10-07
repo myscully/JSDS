@@ -717,6 +717,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .dropdown .trigger[disabled]{opacity:.4;cursor:not-allowed}
 .dropdown .menu{position:absolute;top:calc(100% + 4px);left:0;display:none;z-index:5;min-width:100%}
 .dropdown.open .menu{display:block}
+.dropdown.up .menu{top:auto;bottom:calc(100% + 4px)}   /* 아래 공간이 모자라면 위로 뒤집어 연다(ds.js 가 열 때 계산) */
 .menu{min-width:200px;padding:6px;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);box-shadow:var(--shadow-2);list-style:none;margin:0;max-height:min(320px,60vh);overflow-y:auto;overscroll-behavior:contain}   /* 항목 약 8개까지 보이고 그 뒤로는 메뉴 안에서 스크롤 */
 .menu-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:14px;cursor:pointer;color:var(--text-primary);white-space:nowrap}
 .menu-item:hover{background:var(--bg-subtle)}
