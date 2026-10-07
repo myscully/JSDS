@@ -761,7 +761,7 @@ const COMPONENTS = {
           <summary>고급 탐지 옵션 <small>3개 설정</small></summary>
           <div class="body">휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.</div>
         </details>` },
-      { id: "group", title: "Group", desc: "여러 항목. 하나만 펼치려면 같은 name 을 줍니다(브라우저 지원 시).", html: `
+      { id: "group", title: "Group", desc: "여러 항목. 하나만 펼치려면 같은 name 을 줍니다(브라우저 지원 시).", layout: "top", html: `
         <div class="accordion-group" style="max-width:560px">
           <details class="accordion" name="faq" open><summary>정책은 언제 적용되나요?</summary><div class="body">배포 버튼을 누른 뒤 에이전트가 다음 체크인(최대 5분)에서 받아 적용합니다.</div></details>
           <details class="accordion" name="faq"><summary>차단된 파일은 어디에 보관되나요?</summary><div class="body">격리 저장소에 30일 보관 후 자동 삭제됩니다.</div></details>
