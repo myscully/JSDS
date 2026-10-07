@@ -2,7 +2,7 @@ import { Avatar, Button, Count, Divider, Icon, TopBar, TopBarLogo, TopBarNav, To
 
 export default function Example() {
   return (
-    <TopBar style={{ borderRadius: 12, border: "1px solid var(--border-default)" }}>
+    <TopBar style={{ borderRadius: "var(--radius-lg)", border: "1px solid var(--border-default)" }}>
       <TopBarLogo href="#" name="Security Console" version="v2.4" />
       <TopBarNav>
         <TopBarNavItem href="#" active>대시보드</TopBarNavItem>

@@ -691,7 +691,7 @@ const COMPONENTS = {
     thumb: `<div class="sidenav" style="width:180px;min-height:0;border:1px solid var(--border-default);border-radius:8px"><a href="#" class="on" aria-current="page">${I("home")}<span>대시보드</span></a><a href="#">${I("list")}<span>이벤트</span></a><a href="#">${I("shield")}<span>정책</span></a></div>`,
     examples: [
       { id: "basic", title: "Default", desc: "그룹 라벨(.group) + 링크. 아이콘 18px, 건수는 .count. 하위 항목은 .sub.", html: `
-        <nav class="sidenav" aria-label="주 메뉴" style="border:1px solid var(--border-default);border-radius:12px">
+        <nav class="sidenav" aria-label="주 메뉴" style="border:1px solid var(--border-default);border-radius:var(--radius-lg)">
           <a href="#" class="on" aria-current="page">${I("home")}<span>대시보드</span></a>
           <a href="#">${I("list")}<span>이벤트</span><span class="count">12</span></a>
           <div class="group">보호</div>
@@ -705,7 +705,7 @@ const COMPONENTS = {
           <div class="foot">v2.4.1 · 라이선스 정상</div>
         </nav>`, layout: "left" },
       { id: "collapsed", title: "Collapsed", desc: "1280 이하 또는 사용자가 접었을 때. 아이콘만, 라벨은 툴팁으로.", html: `
-        <nav class="sidenav collapsed" aria-label="주 메뉴" style="border:1px solid var(--border-default);border-radius:12px">
+        <nav class="sidenav collapsed" aria-label="주 메뉴" style="border:1px solid var(--border-default);border-radius:var(--radius-lg)">
           <a href="#" class="on" aria-current="page" title="대시보드">${I("home")}<span>대시보드</span></a>
           <a href="#" title="이벤트">${I("list")}<span>이벤트</span></a>
           <a href="#" title="정책">${I("shield")}<span>정책</span></a>
@@ -725,7 +725,7 @@ const COMPONENTS = {
     thumb: `<div class="topbar" style="height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--border-default);width:260px"><span class="logo"><i></i>Console</span><span class="right"><span class="avatar sm">JH</span></span></div>`,
     examples: [
       { id: "basic", title: "Default", desc: "로고 + 메뉴 + 우측 액션. 현재 메뉴는 .on.", html: `
-        <header class="topbar" style="border-radius:12px;border:1px solid var(--border-default)">
+        <header class="topbar" style="border-radius:var(--radius-lg);border:1px solid var(--border-default)">
           <a href="#" class="logo"><i></i>Security Console <small>v2.4</small></a>
           <nav aria-label="주 메뉴"><a href="#" class="on" aria-current="page">대시보드</a><a href="#">이벤트</a><a href="#">정책</a><a href="#">에이전트</a></nav>
           <div class="right">
@@ -736,7 +736,7 @@ const COMPONENTS = {
           </div>
         </header>` },
       { id: "search", title: "With Search", desc: "사이드 내비가 있는 제품은 상단 메뉴 대신 전역 검색을 둡니다.", html: `
-        <header class="topbar" style="border-radius:12px;border:1px solid var(--border-default)">
+        <header class="topbar" style="border-radius:var(--radius-lg);border:1px solid var(--border-default)">
           <a href="#" class="logo"><i></i>Security Console</a>
           <div class="searchbar" role="search" style="margin-left:16px">${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="전역 검색"><kbd>/</kbd></div>
           <div class="right">
@@ -753,30 +753,47 @@ const COMPONENTS = {
   /* ------------------------------------------------ Accordion */
   "accordion": {
     status: "ready", react: ["Accordion","AccordionGroup"], css: [".accordion", ".accordion-group"],
-    desc: "긴 설명이나 고급 설정을 접어 두고 필요할 때 펼칩니다. 네이티브 <code>details/summary</code> 를 써 JS 없이 동작하며, 펼침 상태 전달과 키보드 조작(Tab · Enter · Space)도 브라우저 기본 동작이라 별도 ARIA 가 필요 없습니다.",
+    desc: "긴 설명이나 고급 설정을 접어 두고 필요할 때 펼칩니다. 네이티브 <code>details/summary</code> 를 써 JS 없이 동작하며, 펼침 상태 전달과 키보드 조작(Tab · Enter · Space)도 브라우저 기본 동작이라 기본·그룹에는 별도 ARIA 가 필요 없습니다. 예외는 비활성뿐입니다 — <code>pointer-events</code> 와 <code>tabindex=\"-1\"</code> 은 마우스·키보드만 막고 스크린리더에는 아무것도 알리지 않으므로 <code>aria-disabled=\"true\"</code> 를 함께 둡니다.",
     thumb: `<details class="accordion" open style="min-width:200px"><summary style="padding:10px 14px;font-size:12px">고급 설정</summary><div class="body" style="padding:0 14px 10px;font-size:12px">내용</div></details>`,
     examples: [
-      { id: "basic", title: "Default", desc: "details.accordion > summary + .body. open 속성으로 초기 펼침.", html: `
-        <details class="accordion" open style="max-width:560px">
-          <summary>고급 탐지 옵션 <small>3개 설정</small></summary>
-          <div class="body">휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.</div>
-        </details>` },
+      { id: "basic", title: "Default", desc: "details.accordion > summary + .body. open 속성으로 초기 펼침. 표 안이나 좁은 패널에서는 헤더가 44 인 .sm 을 씁니다.", html: `
+        <div style="display:flex;flex-direction:column;gap:12px;max-width:560px">
+          <details class="accordion" open>
+            <summary>고급 탐지 옵션 <small>3개 설정</small></summary>
+            <div class="body">휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.</div>
+          </details>
+          <details class="accordion sm">
+            <summary>고급 탐지 옵션 <small>sm · 헤더 44</small></summary>
+            <div class="body">같은 내용을 좁은 밀도로 보여 줍니다. 타이포는 그대로고 여백만 줄어듭니다.</div>
+          </details>
+        </div>` },
       { id: "group", title: "Group", desc: "여러 항목. 하나만 펼치려면 같은 name 을 줍니다(브라우저 지원 시).", html: `
         <div class="accordion-group" style="max-width:560px">
           <details class="accordion" name="faq" open><summary>정책은 언제 적용되나요?</summary><div class="body">배포 버튼을 누른 뒤 에이전트가 다음 체크인(최대 5분)에서 받아 적용합니다.</div></details>
           <details class="accordion" name="faq"><summary>차단된 파일은 어디에 보관되나요?</summary><div class="body">격리 저장소에 30일 보관 후 자동 삭제됩니다.</div></details>
           <details class="accordion" name="faq"><summary>예외 처리는 어떻게 하나요?</summary><div class="body">정책 › 예외 목록에서 해시 또는 경로를 등록합니다.</div></details>
         </div>` },
-      { id: "flat", title: "Flat / Disabled", desc: "카드 안에서는 보더 없는 .flat. 권한이 없으면 .disabled.", html: `
-        <div class="accordion-group flat" style="max-width:560px;background:var(--bg-surface);padding:0 20px;border-radius:12px">
+      { id: "flat", title: "Flat / Disabled", desc: "카드 안에서는 보더 없는 .flat — 배경·여백·radius 는 .accordion-group.flat 이 그립니다. 권한이 없으면 .disabled.", html: `
+        <div class="accordion-group flat" style="max-width:560px">
           <details class="accordion flat" open><summary>일반</summary><div class="body">정책 이름, 설명, 적용 그룹</div></details>
           <details class="accordion flat"><summary>스케줄</summary><div class="body">적용 요일과 시간대</div></details>
-          <details class="accordion flat disabled"><summary tabindex="-1">감사 로그 <small>권한 필요</small></summary><div class="body"></div></details>
+          <details class="accordion flat disabled"><summary tabindex="-1" aria-disabled="true">감사 로그 <small>권한 필요</small></summary><div class="body">관리자 권한이 있어야 열람할 수 있습니다.</div></details>
         </div>` },
     ],
-    props: [["details.accordion", "container", "—", "summary + .body"], ["open", "attribute", "—", "펼침 상태"], ["name", "attribute", "—", "같은 name 은 하나만 펼침"], [".flat", "boolean", "false", "보더 없는 구분선형"], [".disabled", "boolean", "false", "펼칠 수 없음 — summary 에 <code>tabindex=\"-1\"</code> 을 함께 둡니다(키보드로도 열리지 않게)"], ["summary small", "element", "—", "우측 보조 정보"]],
-    spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문은 즉시 열리고 닫히며(높이 애니메이션 없음) 셰브론만 --motion-fast 로 회전"]],
-    figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--border-default" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
+    props: [
+      ["details.accordion", "container", "—", "summary + .body. 제목은 React <code>title</code>"],
+      ["open", "attribute", "—", "펼침 상태. React 는 <code>open</code>(제어) 또는 <code>defaultOpen</code> + <code>onOpenChange</code>"],
+      ["name", "attribute", "—", "같은 name 은 하나만 펼침(브라우저 지원 시)"],
+      [".sm", "boolean", "false", "compact — 헤더 44. 표 안·좁은 사이드 패널"],
+      [".flat", "boolean", "false", "보더 없는 구분선형. 마지막 항목은 아래 선을 지웁니다"],
+      [".disabled", "boolean", "false", "펼칠 수 없음 — summary 에 <code>tabindex=\"-1\"</code> 과 <code>aria-disabled=\"true\"</code> 를 함께 둡니다(React <code>disabled</code> 가 둘 다 넣습니다)"],
+      ["summary small", "element", "—", "우측 보조 정보(React <code>extra</code>). 제목 앞 아이콘은 <code>summary &gt; svg</code> 로 두면 16~18 로 고정됩니다"],
+      [".body", "element", "—", "본문. 높이를 제한하려면 <code>max-height</code> + <code>overflow</code>(React <code>bodyStyle</code>)"],
+      [".accordion-group", "container", "—", "여러 항목 묶음(8px 간격). React <code>AccordionGroup</code>"],
+      [".accordion-group.flat", "boolean", "false", "카드형 묶음 — 간격 0 에 Surface 배경 · 좌우 20 · radius/lg. 항목에는 <code>.flat</code> 을 함께"],
+    ],
+    spec: [["Size", "헤더 높이 52 · sm 44 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전"]],
+    figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 }, sm: { h: 44 } }, variants: { default: { stroke: "--border-default" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
   },
 
   /* ------------------------------------------------ Card */
