@@ -121,7 +121,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
   const pageMeta = (sec, key) => { const pg = LIB.allPages(SITE, sec).find(p => p.key === key) || {}; return { title: pg.title || key, group: pg.group || "" }; };
   const pack = (sec, key, c) => ({ key, ...pageMeta(sec, key), status: c.status, desc: c.desc, uses: c.uses || [], cssPrefixes: [].concat(c.css || []),
     css: typeof c.css === "string" ? c.css : LIB.cssFor([...new Set([...(c.uses || []).flatMap(u => [].concat((COMPONENTS[u] || {}).css || [])), ...[].concat(c.css || [])])], cssSrc, VERSION),
-    props: c.props || [], spec: c.spec || [], figma: c.figma || {}, guideline: c.guideline || {},
+    props: c.props || [], spec: c.spec || [], figma: c.figma || {},
     examples: (c.examples || []).map(e => ({ id: e.id, title: e.title, desc: e.desc || "", html: LIB.dedent(e.html), react: REACT_EXAMPLES[`${sec}/${key}/${e.id}`] ?? (e.react ? LIB.dedent(e.react) : LIB.htmlToJsx(e.html, e.name)) })), reactExports: c.react || [] });
   fs.writeFileSync(path.join(__dirname, "components.json"), JSON.stringify({ version: VERSION, generatedAt: new Date().toISOString(), figma: DATA.FIGMA, tokens: { light, dark }, icons: ICONS_MOD.ICON_NAMES,
     components: Object.entries(COMPONENTS).map(([k, c]) => pack("components", k, c)), patterns: Object.entries(PATTERNS).map(([k, c]) => pack("patterns", k, c)) }, null, 2));

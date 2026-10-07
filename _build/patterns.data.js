@@ -1,6 +1,6 @@
 /* =========================================================
    patterns.data.js — 패턴 11개. 컴포넌트를 조합한 화면 단위 예시
-   shape: { status, desc, uses:[컴포넌트 key…], css:[패턴 전용 접두어…], thumb, principles:[[k,v]], examples:[…], guideline }
+   shape: { status, desc, uses:[컴포넌트 key…], css:[패턴 전용 접두어…], thumb, principles:[[k,v]], examples:[…] }
    코드 패널의 CSS 는 uses 컴포넌트의 CSS + css 접두어의 합집합으로 추출됩니다.
    ========================================================= */
 /* 아이콘: icons.gen.js 의 I(name, size) 사용 */
@@ -56,7 +56,6 @@ const PATTERNS = {
           <div class="form-actions"><button type="button" class="btn md danger secondary left">삭제</button><button type="button" class="btn md text">취소</button><button type="submit" class="btn md primary">정책 저장</button></div>
         </form>` },
     ],
-    guideline: { do: ["필드 순서는 사용자가 아는 정보 → 결정해야 하는 정보.", "저장 후에는 Toast 로 결과를 알리고 목록으로 돌아갑니다."], dont: ["3열 이상 배치하지 않습니다.", "필수 표시 없이 제출 시점에만 오류를 보여주지 않습니다."] },
   },
 
   "terms-agreement": {
@@ -77,7 +76,6 @@ const PATTERNS = {
           <details class="accordion" style="max-width:560px"><summary><label class="checkbox" style="font-weight:600"><input type="checkbox" checked><span>서비스 이용약관 <span class="req">필수</span></span></label></summary><div class="body" style="max-height:120px;overflow:auto">제1조(목적) 이 약관은 지란지교시큐리티가 제공하는 서비스의 이용 조건과 절차를 규정합니다. 제2조(정의) … 제3조(약관의 효력) …</div></details>
         </div>` },
     ],
-    guideline: { do: ["필수·선택을 텍스트로 명시합니다.", "전문은 새 창 대신 같은 화면에서 펼칩니다."], dont: ["선택 항목을 기본 체크해 두지 않습니다."] },
   },
 
   "empty-state": {
@@ -103,7 +101,6 @@ const PATTERNS = {
       { id: "compact", title: "패널 안 빈 상태", desc: "카드·사이드 패널처럼 좁은 영역은 .compact.", html: `
         <div class="empty compact" style="max-width:480px"><span class="ico">${I("inbox")}</span><div><b style="font-size:14px">연결된 알림 채널이 없습니다</b><span style="display:block">Slack 또는 이메일을 연결하세요.</span></div><button type="button" class="btn sm secondary" style="margin:0 0 0 auto">연결</button></div>` },
     ],
-    guideline: { do: ["제목은 상태를, 본문은 다음 행동을 씁니다.", "액션은 최대 2개."], dont: ["빈 화면을 로딩 중에 잠깐 보여주지 않습니다(Skeleton 사용)."] },
   },
 
   "notes": {
@@ -131,7 +128,6 @@ const PATTERNS = {
       { id: "collapsed", title: "접힌 유의사항", desc: "길거나 부차적인 안내는 Accordion 으로 접습니다.", html: `
         <details class="accordion" style="max-width:600px"><summary>${I("info-circle")}유의사항 <small>3개</small></summary><div class="body"><ul style="margin:0;padding-left:1.2em"><li>정책은 배포 후 최대 5분 내 적용됩니다.</li><li>격리 파일은 30일 보관됩니다.</li><li>예외는 해시·경로 기준입니다.</li></ul></div></details>` },
     ],
-    guideline: { do: ["한 항목에 한 문장.", "숫자(5분, 30일)는 구체적으로."], dont: ["필수 확인 사항을 유의사항에 숨기지 않습니다(그때는 Notice 또는 확인 팝업)."] },
   },
 
   /* ------------------------------------------------ Service Pattern */
@@ -163,7 +159,6 @@ const PATTERNS = {
           </div>
         </div>` },
     ],
-    guideline: { do: ["단계는 3~5개, 각 단계는 결정 하나.", "언제든 건너뛰고 나중에 설정할 수 있게."], dont: ["온보딩에서 약관 동의를 다시 받지 않습니다."] },
   },
 
   "search": {
@@ -200,7 +195,6 @@ const PATTERNS = {
           <div class="pagination-bar"><span>총 <b>128</b>건 · 1–50</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
         </div>`, layout: "stack" },
     ],
-    guideline: { do: ["입력 즉시 필터되면 결과 수를 실시간 갱신.", "필터 조합은 URL 에 반영해 공유 가능하게."], dont: ["'검색' 버튼을 눌러야만 반영되는 필터와 즉시 필터를 섞지 않습니다."] },
   },
 
   "system-status": {
@@ -226,7 +220,6 @@ const PATTERNS = {
           <div class="card"><div class="card-head"><h3 class="title">진행 중 작업</h3><span class="spinner sm" role="status" aria-label="진행 중"></span></div><div class="progress-row"><div class="row"><span>정책 rev 2041 배포</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66"><i style="width:66%"></i></div></div><p class="desc">842 / 1,284대 완료 · 예상 3분</p></div>
         </div>` },
     ],
-    guideline: { do: ["이상 상태는 상단 Notice 로 먼저, 목록에서는 색+라벨.", "마지막 갱신 시각을 표시합니다."], dont: ["정상 상태를 초록 배경으로 크게 강조하지 않습니다."] },
   },
 
   /* ------------------------------------------------ Security Console */
@@ -264,7 +257,6 @@ const PATTERNS = {
           </div>
         </div>`, layout: "stack" },
     ],
-    guideline: { do: ["KPI 는 4개 이내, 첫 번째가 가장 중요한 위험 지표.", "모든 숫자는 클릭하면 해당 필터가 적용된 목록으로."], dont: ["장식용 차트(3D, 게이지)를 쓰지 않습니다.", "카드 안에 스크롤을 만들지 않습니다."] },
   },
 
   "log-viewer": {
@@ -286,7 +278,6 @@ const PATTERNS = {
           <div class="pagination-bar"><span>총 <b>48,213</b>건 · 최신 100건 표시</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><span class="gap">…</span><button type="button">483</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
         </div>`, layout: "stack" },
     ],
-    guideline: { do: ["새 로그는 위에 추가, 스크롤 중이면 '새 로그 N건' 버튼으로 알림.", "타임스탬프는 ms 까지, 타임존 표기."], dont: ["로그 메시지를 줄바꿈하지 않습니다(말줄임 + 상세 패널)."] },
   },
 
   "policy-settings": {
@@ -312,7 +303,6 @@ const PATTERNS = {
           </div>
         </div>`, layout: "stack" },
     ],
-    guideline: { do: ["즉시 적용되는 항목(Switch)과 저장이 필요한 입력을 섹션으로 나눕니다.", "미배포 변경은 상단 Notice 로 알립니다."], dont: ["설정 하나마다 저장 버튼을 두지 않습니다."] },
   },
 
   "severity": {
@@ -346,7 +336,6 @@ const PATTERNS = {
           </table>
         </div>` },
     ],
-    guideline: { do: ["심각도 색은 --sev-* 토큰만 사용하고 다른 의미(상태·브랜드)에 재사용하지 않습니다.", "Info 는 회색으로 두어 위험 단계와 구분합니다."], dont: ["심각도를 색만으로 표현하지 않습니다(라벨 필수).", "Critical 과 High 에 서로 다른 계열 색을 쓰지 않습니다(같은 red 계열, 명도 차이)."] },
   },
 };
 
