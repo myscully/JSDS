@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 94 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 96 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -32,6 +32,21 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   ok("keyboard nav selects next item", await dd2.evaluate((e) => e.querySelector(".menu-item.on").textContent === "인프라팀"));
   await dd2.locator(".trigger").click(); await page.keyboard.press("Escape");
   ok("Esc closes dropdown", await dd2.evaluate((e) => !e.classList.contains("open")));
+  // Select: 긴 목록은 메뉴 안에서 스크롤 (뒤 페이지는 따라 움직이지 않는다)
+  const longMenu = page.locator(`${ex("select", "long")} .menu`);
+  const sc = await longMenu.evaluate((m) => ({
+    maxH: Math.round(parseFloat(getComputedStyle(m).maxHeight)),
+    overflow: getComputedStyle(m).overflowY,
+    overscroll: getComputedStyle(m).overscrollBehaviorY,
+    h: Math.round(m.getBoundingClientRect().height),
+    scrollable: m.scrollHeight > m.clientHeight,
+    items: m.querySelectorAll(".menu-item").length,
+  }));
+  ok("long select list scrolls inside the menu", sc.items >= 10 && sc.scrollable && sc.h <= 320 && sc.overflow === "auto" && sc.overscroll === "contain", JSON.stringify(sc));
+  const last = await longMenu.evaluate((m) => { m.scrollTop = m.scrollHeight; const li = m.lastElementChild.getBoundingClientRect(), r = m.getBoundingClientRect(); return li.bottom <= r.bottom + 1 && li.top >= r.top - 1; });
+  ok("scrolling the menu reaches the last option", last);
+  await page.keyboard.press("Escape");
+
   // Dropdown (액션 메뉴)
   await go("components/dropdown.html");
   const menuDd = page.locator(`#ex-dropdown-menu .example-preview .dropdown`).first();

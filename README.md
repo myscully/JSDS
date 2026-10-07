@@ -36,7 +36,7 @@
 | `foundations.js` | Foundations 페이지(Overview · Base material: Colors · Elevation · Grid · Icons · Typography, Web Desktop) |
 | `app.src.js` | 런타임 원본 → `assets/app.js` |
 | `ds.src.js` | 컴포넌트 동작 스크립트 원본 → `assets/ds.js` (`DS.toast()` · `DS.popup.open()` · `DS.init(root)` · `ds:*` 커스텀 이벤트) |
-| `behave.js` | 동작 검증(playwright): 빌드 후 `node behave.js` — 프리뷰를 실제 클릭해 94 케이스 확인, 스크린샷 `.behave/` |
+| `behave.js` | 동작 검증(playwright): 빌드 후 `node behave.js` — 프리뷰를 실제 클릭해 96 케이스 확인, 스크린샷 `.behave/` |
 | `jiran-design-system-guide.standalone.html` | 위 파일을 로드하는 미리보기 셸. `_build` 에서 `python3 -m http.server 8090` 후 열기 |
 | `components.json` | 빌드 산출물. Figma 동기화 등 외부 도구용(토큰 · 컴포넌트 스펙 · 예제 코드) |
 | `verify.js` | 생성물 검증(플레이스홀더 0, 코드 패널 존재, 링크 변환, React 탭 패키지 코드 여부 등) |
