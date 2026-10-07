@@ -1,6 +1,6 @@
 {
   "version": "v0.6",
-  "generatedAt": "2026-10-07T09:18:11.270Z",
+  "generatedAt": "2026-10-07T09:37:10.555Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -2910,8 +2910,8 @@
           "id": "basic",
           "title": "Default",
           "desc": "details.accordion > summary + .body. open 속성으로 초기 펼침. 표 안이나 좁은 패널에서는 헤더가 44 인 .sm 을 씁니다.",
-          "html": "<div style=\"display:flex;flex-direction:column;gap:12px;max-width:560px\">\n  <details class=\"accordion\" open>\n    <summary>고급 탐지 옵션 <small>3개 설정</small></summary>\n    <div class=\"body\">휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.</div>\n  </details>\n  <details class=\"accordion sm\">\n    <summary>고급 탐지 옵션 <small>sm · 헤더 44</small></summary>\n    <div class=\"body\">같은 내용을 좁은 밀도로 보여 줍니다. 타이포는 그대로고 여백만 줄어듭니다.</div>\n  </details>\n</div>",
-          "react": "import { Accordion } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <div style={{ display: \"flex\", flexDirection: \"column\", gap: 12, maxWidth: 560 }}>\n      <Accordion title=\"고급 탐지 옵션\" extra=\"3개 설정\" defaultOpen>\n        휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.\n      </Accordion>\n      <Accordion sm title=\"고급 탐지 옵션\" extra=\"sm · 헤더 44\">\n        같은 내용을 좁은 밀도로 보여 줍니다. 타이포는 그대로고 여백만 줄어듭니다.\n      </Accordion>\n    </div>\n  );\n}"
+          "html": "<details class=\"accordion\" open style=\"max-width:560px\">\n  <summary>고급 탐지 옵션 <small>3개 설정</small></summary>\n  <div class=\"body\">휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.</div>\n</details>\n<details class=\"accordion sm\" style=\"max-width:560px\">\n  <summary>고급 탐지 옵션 <small>sm · 헤더 44</small></summary>\n  <div class=\"body\">같은 내용을 좁은 밀도로 보여 줍니다. 타이포는 그대로고 여백만 줄어듭니다.</div>\n</details>",
+          "react": "import { Accordion } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <>\n      <Accordion title=\"고급 탐지 옵션\" extra=\"3개 설정\" defaultOpen style={{ maxWidth: 560 }}>\n        휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.\n      </Accordion>\n      <Accordion sm title=\"고급 탐지 옵션\" extra=\"sm · 헤더 44\" style={{ maxWidth: 560 }}>\n        같은 내용을 좁은 밀도로 보여 줍니다. 타이포는 그대로고 여백만 줄어듭니다.\n      </Accordion>\n    </>\n  );\n}"
         },
         {
           "id": "group",
