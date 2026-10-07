@@ -313,6 +313,12 @@
     $$(".datepicker.open[data-ds-opened='1']").forEach(function (dp) { if (!dp.contains(e.target)) { dp.classList.remove("open"); var b = $(".field-btn", dp); b && b.setAttribute("aria-expanded", "false"); dp.dataset.dsOpened = ""; } });
   }, true);
 
+  /* Loading 버튼: pointer-events:none 는 마우스만 막고 키보드 Enter/Space 는 그대로 click 을 쏜다.
+     버튼 자신에 달린 핸들러가 타깃 단계에서 먼저 실행되므로 버블이 아니라 캡처 단계에서 막아야 한다. */
+  doc.addEventListener("click", function (e) {
+    if (closest(e.target, ".btn.loading")) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+
   doc.addEventListener("keydown", function (e) {
     var dd = closest(e.target, ".dropdown.open");
     if (e.key === "Escape") { $$(".dropdown.open[data-ds-opened]").forEach(function (d) { setOpen(d, false); var tr = $("[aria-haspopup]", d); tr && tr.focus(); }); $$(".datepicker.open[data-ds-opened='1']").forEach(function (dp) { dp.classList.remove("open"); }); if ($(".popup-backdrop[data-ds-popup]")) popup.close(); return; }

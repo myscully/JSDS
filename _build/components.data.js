@@ -33,11 +33,11 @@ const COMPONENTS = {
         <button class="btn md secondary icon" aria-label="더 보기">${I("dots")}</button>
         <button class="btn md tertiary icon" aria-label="새로 고침">${I("refresh")}</button>
         <button class="btn md danger secondary icon" aria-label="삭제">${I("trash")}</button>` },
-      { id: "state", title: "State", desc: "Hover/Pressed 는 CSS 가 처리합니다. Disabled 는 disabled 속성, Loading 은 .loading 클래스(라벨은 유지해 폭이 흔들리지 않게).", html: `
+      { id: "state", title: "State", desc: "Hover/Pressed 는 CSS 가 처리합니다. Disabled 는 disabled 속성(포커스도 받지 않음), Loading 은 .loading 클래스 — 라벨은 자리만 지키고 보이지 않아 폭이 흔들리지 않으며, 클릭은 마우스·키보드 모두 막힙니다.", html: `
         <button class="btn md primary">Default</button>
         <button class="btn md primary" disabled>Disabled</button>
-        <button class="btn md primary loading">저장 중</button>
-        <button class="btn md secondary loading">불러오는 중</button>` },
+        <button class="btn md primary loading" aria-busy="true">저장 중</button>
+        <button class="btn md secondary loading" aria-busy="true">불러오는 중</button>` },
       { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(8px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
         <div class="btn-group">
           <button class="btn md text">초기화</button>
@@ -51,12 +51,12 @@ const COMPONENTS = {
       ["size", "sm | md | lg", "md", "높이 36 / 44 / 52"],
       [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
       [".block", "boolean", "false", "전체 폭"],
-      [".loading", "boolean", "false", "스피너 표시, 클릭 차단. 라벨은 유지"],
+      [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(8px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
       ["disabled", "attribute", "—", "비활성. 40% 불투명"],
       ["type", "button | submit", "button", "폼 안에서는 명시"],
     ],
-    spec: [["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26"], ["Label", "Label/1 15 Semibold · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
-    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 13 }, md: { h: 44, px: 20, fs: 15 }, lg: { h: 52, px: 26, fs: 16 } }, variants: { primary: { bg: "--accent", fg: "--accent-on" }, secondary: { bg: "--bg-surface", fg: "--text-primary", stroke: "--border-strong" }, tertiary: { bg: "--bg-panel", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent" }, danger: { bg: "--danger", fg: "#FFFFFF" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"] },
+    spec: [["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"], ["Label", "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
+    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, variants: { primary: { bg: "--accent", fg: "--accent-on" }, secondary: { bg: "--bg-surface", fg: "--text-primary", stroke: "--border-strong" }, tertiary: { bg: "--bg-panel", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent" }, danger: { bg: "--danger", fg: "#FFFFFF" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"] },
   },
 
   /* ------------------------------------------------ Text Field */
