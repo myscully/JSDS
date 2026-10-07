@@ -609,7 +609,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".tabs", "container", "—", "role=tablist. 기본 Underline, 전체 폭"], [".tab", "button", "—", "role=tab, aria-selected. 활성 .on"], [".pill", "boolean", "false", "캡슐형(보조 전환)"], [".sm / .accent", "boolean", "false", "작은 크기 / 활성 색 accent"], [".count", "element", "—", "건수 배지"], ["disabled", "attribute", "—", "비활성 탭"]],
-    spec: [["Size", "높이 44 (sm 38) · 탭 간격 24"], ["Container", "하단 1px border/default · 활성 2px"], ["Label", "Title/1 15 Medium · 활성 Bold"], ["Placement", "페이지 헤더 아래, 카드 헤더 우측(pill)"]],
+    spec: [["Size", "높이 44 (sm 38) · 탭 간격 24"], ["Container", "하단 1px border/default · 활성 2px"], ["Label", "Title/2 14 Bold"], ["Placement", "페이지 헤더 아래, 카드 헤더 우측(pill)"]],
     figma: { frame: "Tab", sizes: { md: { h: 44 }, sm: { h: 38 } }, variants: { underline: {}, pill: { bg: "--bg-panel" } }, states: ["default", "active", "hover", "disabled"] },
     guideline: { do: ["탭 라벨은 명사 한두 단어.", "탭 전환 시 URL 해시 등으로 상태를 유지합니다."], dont: ["탭을 페이지 이동(내비게이션) 대신 쓰지 않습니다.", "탭 7개 이상이면 구조를 나눕니다."] },
   },
@@ -771,7 +771,7 @@ const COMPONENTS = {
   /* ------------------------------------------------ Accordion */
   "accordion": {
     status: "ready", react: ["Accordion","AccordionGroup"], css: [".accordion", ".accordion-group"],
-    desc: "긴 설명이나 고급 설정을 접어 두고 필요할 때 펼칩니다. 네이티브 details/summary 를 써 JS 없이 동작합니다.",
+    desc: "긴 설명이나 고급 설정을 접어 두고 필요할 때 펼칩니다. 네이티브 <code>details/summary</code> 를 써 JS 없이 동작하며, 펼침 상태 전달과 키보드 조작(Tab · Enter · Space)도 브라우저 기본 동작이라 별도 ARIA 가 필요 없습니다.",
     thumb: `<details class="accordion" open style="min-width:200px"><summary style="padding:10px 14px;font-size:12px">고급 설정</summary><div class="body" style="padding:0 14px 10px;font-size:12px">내용</div></details>`,
     examples: [
       { id: "basic", title: "Default", desc: "details.accordion > summary + .body. open 속성으로 초기 펼침.", html: `
@@ -789,11 +789,11 @@ const COMPONENTS = {
         <div class="accordion-group flat" style="max-width:560px;background:var(--bg-surface);padding:0 20px;border-radius:12px">
           <details class="accordion flat" open><summary>일반</summary><div class="body">정책 이름, 설명, 적용 그룹</div></details>
           <details class="accordion flat"><summary>스케줄</summary><div class="body">적용 요일과 시간대</div></details>
-          <details class="accordion flat disabled"><summary>감사 로그 <small>권한 필요</small></summary><div class="body"></div></details>
+          <details class="accordion flat disabled"><summary tabindex="-1">감사 로그 <small>권한 필요</small></summary><div class="body"></div></details>
         </div>` },
     ],
-    props: [["details.accordion", "container", "—", "summary + .body"], ["open", "attribute", "—", "펼침 상태"], ["name", "attribute", "—", "같은 name 은 하나만 펼침"], [".flat", "boolean", "false", "보더 없는 구분선형"], [".disabled", "boolean", "false", "펼칠 수 없음"], ["summary small", "element", "—", "우측 보조 정보"]],
-    spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 15 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"]],
+    props: [["details.accordion", "container", "—", "summary + .body"], ["open", "attribute", "—", "펼침 상태"], ["name", "attribute", "—", "같은 name 은 하나만 펼침"], [".flat", "boolean", "false", "보더 없는 구분선형"], [".disabled", "boolean", "false", "펼칠 수 없음 — summary 에 <code>tabindex=\"-1\"</code> 을 함께 둡니다(키보드로도 열리지 않게)"], ["summary small", "element", "—", "우측 보조 정보"]],
+    spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문은 즉시 열리고 닫히며(높이 애니메이션 없음) 셰브론만 --motion-fast 로 회전"]],
     figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--border-default" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
     guideline: { do: ["기본 설정은 펼쳐 두고 고급 설정만 접습니다."], dont: ["필수 입력 항목을 접어 두지 않습니다."] },
   },
