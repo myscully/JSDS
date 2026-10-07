@@ -1,6 +1,6 @@
 {
   "version": "v0.6",
-  "generatedAt": "2026-10-07T06:42:28.190Z",
+  "generatedAt": "2026-10-07T06:51:25.674Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -614,7 +614,13 @@
           ".loading",
           "boolean",
           "false",
-          "스피너 표시, 클릭 차단. 라벨은 유지"
+          "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"
+        ],
+        [
+          ".btn-group",
+          "container",
+          "—",
+          "버튼 묶음(8px 간격). 폼 하단 우측 정렬은 <code>.end</code>"
         ],
         [
           "disabled",
@@ -636,11 +642,11 @@
         ],
         [
           "Container",
-          "radius/md 6 · 좌우 padding 14 / 20 / 26"
+          "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"
         ],
         [
           "Label",
-          "Label/1 15 Semibold · 동사로 시작"
+          "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"
         ],
         [
           "Placement",
@@ -654,12 +660,12 @@
           "sm": {
             "h": 36,
             "px": 14,
-            "fs": 13
+            "fs": 12
           },
           "md": {
             "h": 44,
             "px": 20,
-            "fs": 15
+            "fs": 14
           },
           "lg": {
             "h": 52,
@@ -731,8 +737,8 @@
         {
           "id": "state",
           "title": "State",
-          "desc": "Hover/Pressed 는 CSS 가 처리합니다. Disabled 는 disabled 속성, Loading 은 .loading 클래스(라벨은 유지해 폭이 흔들리지 않게).",
-          "html": "<button class=\"btn md primary\">Default</button>\n<button class=\"btn md primary\" disabled>Disabled</button>\n<button class=\"btn md primary loading\">저장 중</button>\n<button class=\"btn md secondary loading\">불러오는 중</button>",
+          "desc": "Hover/Pressed 는 CSS 가 처리합니다. Disabled 는 disabled 속성(포커스도 받지 않음), Loading 은 .loading 클래스 — 라벨은 자리만 지키고 보이지 않아 폭이 흔들리지 않으며, 클릭은 마우스·키보드 모두 막힙니다.",
+          "html": "<button class=\"btn md primary\">Default</button>\n<button class=\"btn md primary\" disabled>Disabled</button>\n<button class=\"btn md primary loading\" aria-busy=\"true\">저장 중</button>\n<button class=\"btn md secondary loading\" aria-busy=\"true\">불러오는 중</button>",
           "react": "import { Button } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <>\n      <Button>Default</Button>\n      <Button disabled>Disabled</Button>\n      <Button loading>저장 중</Button>\n      <Button variant=\"secondary\" loading>불러오는 중</Button>\n    </>\n  );\n}"
         },
         {

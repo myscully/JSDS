@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 98 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 101 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -85,6 +85,20 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   ok("tab switches", await tabs.evaluate((e) => { const on = e.querySelectorAll(".tab.on"); return on.length === 1 && on[0] === e.querySelectorAll(".tab")[1] && on[0].getAttribute("aria-selected") === "true"; }));
   await page.keyboard.press("ArrowRight");
   ok("tab arrow key", await tabs.evaluate((e) => e.querySelectorAll(".tab")[2].classList.contains("on")));
+
+  // Button: loading 은 마우스·키보드 클릭을 모두 막는다 (pointer-events:none 만으로는 Enter 가 통과했다)
+  await go("components/button.html");
+  await page.evaluate(() => { window.__hit = 0; document.querySelectorAll("#ex-button-state .btn").forEach((b) => b.addEventListener("click", () => window.__hit++)); });
+  const loadBtn = page.locator("#ex-button-state .btn.loading").first();
+  ok("loading button carries aria-busy", (await loadBtn.getAttribute("aria-busy")) === "true");
+  await loadBtn.evaluate((e) => e.focus());
+  await page.keyboard.press("Enter"); await page.keyboard.press("Space");
+  await loadBtn.evaluate((e) => e.click());
+  await page.waitForTimeout(80);
+  ok("loading blocks click from mouse and keyboard", (await page.evaluate(() => window.__hit)) === 0);
+  await page.locator("#ex-button-state .btn").first().evaluate((e) => e.click());
+  await page.waitForTimeout(60);
+  ok("a normal button still fires", (await page.evaluate(() => window.__hit)) === 1);
 
   // Select button, chip, tile
   await go("components/select-button.html");
