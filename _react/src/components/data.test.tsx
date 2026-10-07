@@ -49,10 +49,10 @@ describe("Accordion", () => {
     expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
-  it("flat · sm 은 details 와 그룹에 클래스로", () => {
-    render(<AccordionGroup flat data-testid="g"><Accordion flat sm title="제목">내용</Accordion></AccordionGroup>);
+  it("flat 은 details 와 그룹에 클래스로", () => {
+    render(<AccordionGroup flat data-testid="g"><Accordion flat title="제목">내용</Accordion></AccordionGroup>);
     expect(screen.getByTestId("g").className).toBe("accordion-group flat");
-    expect(document.querySelector("details")!.className).toBe("accordion sm flat");
+    expect(document.querySelector("details")!.className).toBe("accordion flat");
   });
 
   it("disabled 는 tabIndex -1 과 aria-disabled 를 함께 단다", () => {

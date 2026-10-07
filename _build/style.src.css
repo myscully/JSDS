@@ -827,11 +827,6 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .accordion.flat summary{padding:14px 4px}
 .accordion.flat .body{padding:0 4px 16px}
 .accordion.flat:last-child{border-bottom:0}   /* 카드 바닥에 선이 매달리지 않게 */
-/* compact — 표 안이나 좁은 사이드 패널용. 헤더 44(=24 line-height + 10·2), 타이포는 그대로 두고 밀도만 줄인다 */
-.accordion.sm summary{padding:10px 20px}
-.accordion.sm .body{padding:0 20px 14px}
-.accordion.sm.flat summary{padding:10px 4px}
-.accordion.sm.flat .body{padding:0 4px 14px}
 .accordion-group{display:flex;flex-direction:column;gap:8px;width:100%}
 .accordion-group.flat{gap:0;background:var(--bg-surface);padding:0 20px;border-radius:var(--radius-lg)}
 /* 열고 닫을 때 높이 보간. @supports 를 쓰지 않는다 — 코드 패널 추출기가 평면 규칙만 읽고,

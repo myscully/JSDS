@@ -756,14 +756,10 @@ const COMPONENTS = {
     desc: "긴 설명이나 고급 설정을 접어 두고 필요할 때 펼칩니다. 네이티브 <code>details/summary</code> 를 써 JS 없이 동작하며, 펼침 상태 전달과 키보드 조작(Tab · Enter · Space)도 브라우저 기본 동작이라 기본·그룹에는 별도 ARIA 가 필요 없습니다. 예외는 비활성뿐입니다 — <code>pointer-events</code> 와 <code>tabindex=\"-1\"</code> 은 마우스·키보드만 막고 스크린리더에는 아무것도 알리지 않으므로 <code>aria-disabled=\"true\"</code> 를 함께 둡니다.",
     thumb: `<details class="accordion" open style="min-width:200px"><summary style="padding:10px 14px;font-size:12px">고급 설정</summary><div class="body" style="padding:0 14px 10px;font-size:12px">내용</div></details>`,
     examples: [
-      { id: "basic", title: "Default", desc: "details.accordion > summary + .body. open 속성으로 초기 펼침. 표 안이나 좁은 패널에서는 헤더가 44 인 .sm 을 씁니다.", layout: "stack center", html: `
+      { id: "basic", title: "Default", desc: "details.accordion > summary + .body. open 속성으로 초기 펼침.", html: `
         <details class="accordion" open style="max-width:560px">
           <summary>고급 탐지 옵션 <small>3개 설정</small></summary>
           <div class="body">휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.</div>
-        </details>
-        <details class="accordion sm" style="max-width:560px">
-          <summary>고급 탐지 옵션 <small>sm · 헤더 44</small></summary>
-          <div class="body">같은 내용을 좁은 밀도로 보여 줍니다. 타이포는 그대로고 여백만 줄어듭니다.</div>
         </details>` },
       { id: "group", title: "Group", desc: "여러 항목. 하나만 펼치려면 같은 name 을 줍니다(브라우저 지원 시).", html: `
         <div class="accordion-group" style="max-width:560px">
@@ -782,7 +778,6 @@ const COMPONENTS = {
       ["details.accordion", "container", "—", "summary + .body. 제목은 React <code>title</code>"],
       ["open", "attribute", "—", "펼침 상태. React 는 <code>open</code>(제어) 또는 <code>defaultOpen</code> + <code>onOpenChange</code>"],
       ["name", "attribute", "—", "같은 name 은 하나만 펼침(브라우저 지원 시)"],
-      [".sm", "boolean", "false", "compact — 헤더 44. 표 안·좁은 사이드 패널"],
       [".flat", "boolean", "false", "보더 없는 구분선형. 마지막 항목은 아래 선을 지웁니다"],
       [".disabled", "boolean", "false", "펼칠 수 없음 — summary 에 <code>tabindex=\"-1\"</code> 과 <code>aria-disabled=\"true\"</code> 를 함께 둡니다(React <code>disabled</code> 가 둘 다 넣습니다)"],
       ["summary small", "element", "—", "우측 보조 정보(React <code>extra</code>). 제목 앞 아이콘은 <code>summary &gt; svg</code> 로 두면 16~18 로 고정됩니다"],
@@ -790,8 +785,8 @@ const COMPONENTS = {
       [".accordion-group", "container", "—", "여러 항목 묶음(8px 간격). React <code>AccordionGroup</code>"],
       [".accordion-group.flat", "boolean", "false", "카드형 묶음 — 간격 0 에 Surface 배경 · 좌우 20 · radius/lg. 항목에는 <code>.flat</code> 을 함께"],
     ],
-    spec: [["Size", "헤더 높이 52 · sm 44 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전"]],
-    figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 }, sm: { h: 44 } }, variants: { default: { stroke: "--border-default" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
+    spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전"]],
+    figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--border-default" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
   },
 
   /* ------------------------------------------------ Card */
