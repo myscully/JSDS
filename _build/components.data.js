@@ -1,7 +1,7 @@
 /* =========================================================
    components.data.js — 컴포넌트 30개 상세
    shape: { status, desc, css:[접두어…], thumb, anatomy:{demo,items}, examples:[{id,title,desc,html,react?,layout?,style?}],
-            props:[[name, type, default, desc]], spec:[[k,v]], figma:{…}, guideline:{do,dont} }
+            props:[[name, type, default, desc]], spec:[[k,v]], figma:{…} }
    - html 은 라이브 프리뷰와 "HTML+CSS" 탭에 그대로 쓰이고, react 가 없으면 htmlToJsx 로 자동 변환됩니다.
    - 규칙: onclick 등 인라인 핸들러 · <script> · href="#/…" 금지(링크는 href="#"). 색은 var(--*) 토큰만.
    ========================================================= */
@@ -57,7 +57,6 @@ const COMPONENTS = {
     ],
     spec: [["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26"], ["Label", "Label/1 15 Semibold · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
     figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 13 }, md: { h: 44, px: 20, fs: 15 }, lg: { h: 52, px: 26, fs: 16 } }, variants: { primary: { bg: "--accent", fg: "--accent-on" }, secondary: { bg: "--bg-surface", fg: "--text-primary", stroke: "--border-strong" }, tertiary: { bg: "--bg-panel", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent" }, danger: { bg: "--danger", fg: "#FFFFFF" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"] },
-    guideline: { do: ["라벨은 결과가 예측되는 동사로 씁니다 (\"정책 저장\", \"차단 해제\").", "위험 작업은 Danger + 확인 팝업을 함께 사용합니다."], dont: ["한 영역에 Primary 버튼을 두 개 이상 두지 않습니다.", "\"확인\", \"예\"처럼 결과를 알 수 없는 라벨을 쓰지 않습니다."] },
   },
 
   /* ------------------------------------------------ Text Field */
@@ -93,7 +92,6 @@ const COMPONENTS = {
     ],
     spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · border/strong 1px · focus ring 2px 30%"], ["Label", "Label/1 14 Semibold · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
     figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--bg-surface", stroke: "--border-strong" }, error: { stroke: "--danger" } }, states: ["default", "hover", "focused", "error", "disabled", "readonly"] },
-    guideline: { do: ["오류 메시지는 원인과 해결 방법을 씁니다.", "플레이스홀더에는 예시를, 라벨에는 항목명을 씁니다."], dont: ["플레이스홀더를 라벨 대신 쓰지 않습니다.", "필수 표시(*) 없이 제출 시점에만 오류를 보여주지 않습니다."] },
   },
 
   /* ------------------------------------------------ Search */
@@ -130,7 +128,6 @@ const COMPONENTS = {
     ],
     spec: [["Size", "높이 40 (lg 48) · 최소 폭 280"], ["Container", "radius/md 6 · border/strong · focus ring"], ["Label", "Body/2 14 · 플레이스홀더 text/disabled"], ["Placement", "테이블 툴바 좌측, 전역 검색은 헤더 우측"]],
     figma: { frame: "Search", radius: "radius/md", sizes: { md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--bg-surface", stroke: "--border-strong" } }, states: ["default", "focused", "filled"] },
-    guideline: { do: ["입력 즉시 필터되는 목록은 결과 수를 함께 보여줍니다.", "검색 결과가 없으면 빈 화면 패턴으로 대안을 제시합니다."], dont: ["검색과 필터를 서로 다른 행에 멀리 떨어뜨리지 않습니다."] },
   },
 
   /* ------------------------------------------------ Select Button */
@@ -172,7 +169,6 @@ const COMPONENTS = {
     props: [[".select-btn", "container", "—", "role=group. 버튼 2~5개"], [".outline", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-pressed=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
     spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 36"], ["Container", "radius/md 6 · bg/panel"], ["Label", "Label/1 13.5 Medium · 선택 Semibold"], ["Placement", "카드 헤더 우측, 툴바"]],
     figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--bg-panel" }, outline: { stroke: "--border-strong" } }, states: ["default", "selected", "disabled"] },
-    guideline: { do: ["옵션은 한 단어 내외, 폭이 비슷하게.", "선택 즉시 결과가 바뀌는 경우에만 씁니다(저장 버튼 없음)."], dont: ["6개 이상이면 Dropdown 또는 Tab 을 씁니다.", "여러 개를 동시에 고르는 용도로 쓰지 않습니다(그때는 Chip)."] },
   },
 
   /* ------------------------------------------------ Slider */
@@ -211,7 +207,6 @@ const COMPONENTS = {
     props: [[".slider", "container", "—", ".row(라벨·값) + input[type=range](+ .ticks)"], ["--p", "css var (%)", "50%", "채워진 트랙 비율. value 와 동기화"], ["min / max / step", "attribute", "0 / 100 / 1", "네이티브 속성"], ["disabled", "attribute", "—", "비활성"]],
     spec: [["Size", "트랙 6 · 썸 20 · 최소 폭 280"], ["Container", "트랙 radius/full · 썸 border 2px accent"], ["Label", "Label/2 13 · 현재 값 Semibold"], ["Placement", "정책 설정의 수치 항목. 정확 입력이 필요하면 Text Field 병행"]],
     figma: { frame: "Slider", sizes: { md: { track: 6, thumb: 20 } }, variants: { default: { fill: "--accent", track: "--bg-panel" } }, states: ["default", "hover", "focused", "disabled"] },
-    guideline: { do: ["현재 값을 항상 텍스트로 함께 표시합니다."], dont: ["정확한 숫자 입력이 필요한 곳에 슬라이더만 두지 않습니다."] },
   },
 
   /* ------------------------------------------------ Date Picker */
@@ -254,7 +249,6 @@ const COMPONENTS = {
     props: [[".datepicker", "container", "—", "label + .field-btn(+ .calendar). 열림은 .open"], [".field-btn", "button", "—", "값 표시 트리거. 기간은 .sep 로 구분"], [".calendar", "popover", "—", ".cal-head + .cal-grid(.dow ×7, .day ×42) + .cal-foot"], [".day.on / .in-range / .today / .muted", "state", "—", "선택 / 기간 사이 / 오늘 / 다른 달"], ["disabled", "attribute", "—", "선택 불가 날짜"]],
     spec: [["Size", "필드 44 · 달력 폭 296 · 날짜 셀 34"], ["Container", "달력 radius/lg 8 · shadow/2"], ["Label", "요일 Caption 11 · 날짜 Body/2 13"], ["Placement", "필드 아래 4px. 화면 하단이면 위로"]],
     figma: { frame: "Date Picker", radius: "radius/lg", sizes: { field: { h: 44 }, calendar: { w: 296 }, day: { h: 34 } }, variants: { single: {}, range: {} }, states: ["closed", "open", "selected", "range"] },
-    guideline: { do: ["날짜 형식은 YYYY-MM-DD 로 고정합니다.", "기간 선택에는 최근 7일/30일 프리셋을 둡니다."], dont: ["미래 날짜처럼 선택 불가한 날은 숨기지 말고 disabled 로 보여줍니다."] },
   },
 
   /* ------------------------------------------------ Checkbox */
@@ -294,7 +288,6 @@ const COMPONENTS = {
     props: [[".checkbox", "label wrapper", "—", "input[type=checkbox] + span(라벨, small 설명)"], ["checked / disabled", "attribute", "—", "네이티브 상태"], [".mixed", "boolean", "false", "부분 선택 외형(JS indeterminate 대체)"], [".checkbox-group", "container", "—", "세로 12px 간격. .row 로 가로 24px"]],
     spec: [["Size", "박스 16 · 라벨 Body/2 14 · 클릭 영역 라벨 포함"], ["Container", "radius/sm 4 · border/strong 1.5px · 선택 accent"], ["Label", "Body/2 14 · 설명 Caption 12.5 tertiary"], ["Placement", "폼 옵션, 테이블 행 선택(.tbl .check)"]],
     figma: { frame: "Checkbox", radius: "radius/sm", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--border-strong" }, checked: { bg: "--accent" } }, states: ["unchecked", "checked", "indeterminate", "disabled", "focused"] },
-    guideline: { do: ["라벨을 클릭해도 토글되도록 label 로 감쌉니다.", "목록 전체 선택은 부분 선택 상태를 표현합니다."], dont: ["하나만 고르는 옵션에 체크박스를 쓰지 않습니다(그때는 Radio)."] },
   },
 
   /* ------------------------------------------------ Chip */
@@ -339,7 +332,6 @@ const COMPONENTS = {
     props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(accent subtle + 체크)"], [".x", "element", "—", "삭제 아이콘(Input Chip)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성"]],
     spec: [["Size", "높이 32 (sm 26) · padding 0 12"], ["Container", "radius/full · border/strong · 선택 accent-subtle"], ["Label", "Label/1 13 Medium"], ["Placement", "검색 아래 필터 행, 입력 필드 안 값 목록"]],
     figma: { frame: "Chip", radius: "radius/full", sizes: { md: { h: 32 }, sm: { h: 26 } }, variants: { filter: { stroke: "--border-strong" }, selected: { bg: "--accent-subtle", stroke: "--accent", fg: "--accent" }, input: {} }, states: ["default", "selected", "hover", "disabled"] },
-    guideline: { do: ["여러 개 동시 선택 필터에 씁니다.", "삭제 가능한 값은 Chip, 읽기 전용 상태는 Tag."], dont: ["Chip 을 버튼 대신 주요 액션에 쓰지 않습니다."] },
   },
 
   /* ------------------------------------------------ Radio Button */
@@ -386,7 +378,6 @@ const COMPONENTS = {
     props: [[".radio", "label wrapper", "—", "input[type=radio] + span(라벨, small)"], ["name", "attribute", "—", "같은 그룹은 같은 name"], [".card", "boolean", "false", "카드형(보더 + 선택 시 accent)"], [".radio-group", "container", "—", "세로 12px. .row 로 가로"]],
     spec: [["Size", "원 16 · 선택 내부 점 8"], ["Container", "radius/full · border/strong 1.5px"], ["Label", "Body/2 14 · 설명 Caption 12.5"], ["Placement", "폼의 배타 옵션, 설정의 동작 선택"]],
     figma: { frame: "Radio Button", radius: "radius/full", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--border-strong" }, checked: { stroke: "--accent" }, card: { stroke: "--border-default" } }, states: ["unchecked", "checked", "disabled", "focused"] },
-    guideline: { do: ["기본값을 하나 선택해 둡니다.", "옵션은 2~5개."], dont: ["선택 해제가 필요한 경우 라디오를 쓰지 않습니다(Checkbox 또는 Switch)."] },
   },
 
   /* ------------------------------------------------ Switch */
@@ -423,7 +414,6 @@ const COMPONENTS = {
     props: [[".switch", "label wrapper", "—", "input[type=checkbox][role=switch] + span"], ["checked / disabled", "attribute", "—", "네이티브 상태"], ["size", "(md) | sm", "md", "44×24 / 36×20"], [".label-left", "boolean", "false", "라벨을 왼쪽에"]],
     spec: [["Size", "트랙 44×24 (sm 36×20) · 노브 20"], ["Container", "radius/full · off border/strong · on accent"], ["Label", "Body/2 14"], ["Placement", "설정 행 우측 끝, 테이블 '사용' 열"]],
     figma: { frame: "Switch", radius: "radius/full", sizes: { md: { w: 44, h: 24 }, sm: { w: 36, h: 20 } }, variants: { off: { bg: "--border-strong" }, on: { bg: "--accent" } }, states: ["off", "on", "disabled", "focused"] },
-    guideline: { do: ["토글 결과가 즉시 반영될 때만 씁니다.", "라벨은 켜진 상태를 설명합니다(\"실시간 보호\")."], dont: ["\"예/아니오\" 질문형 라벨을 쓰지 않습니다."] },
   },
 
   /* ------------------------------------------------ Tag */
@@ -460,7 +450,6 @@ const COMPONENTS = {
     props: [["tone", "critical | high | medium | low | info | ok | accent | (neutral)", "neutral", "의미별 색. severity 는 --sev-*, status 는 feedback 토큰"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트 11 / 12 / 13"]],
     spec: [["Size", "높이 24 (sm 20 · lg 28) · padding 3/10"], ["Container", "radius/full · subtle 배경"], ["Label", "Label/2 12 Semibold"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
     figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 20 }, md: { h: 24 }, lg: { h: 28 } }, variants: { critical: { bg: "--danger-subtle", fg: "--sev-critical" }, high: { bg: "--danger-subtle", fg: "--sev-high" }, medium: { bg: "--warning-subtle", fg: "--sev-medium" }, low: { bg: "--info-subtle", fg: "--sev-low" }, info: { bg: "--bg-panel", fg: "--sev-info" }, ok: { bg: "--success-subtle", fg: "--success" }, neutral: { bg: "--bg-panel", fg: "--text-secondary" } }, states: ["subtle", "outline", "solid"] },
-    guideline: { do: ["테이블·로그에서 동일한 순서(Critical→Info)로 정렬합니다."], dont: ["Status와 Severity를 같은 열에 섞지 않습니다.", "장식 목적으로 색을 바꾸지 않습니다."] },
   },
 
   /* ------------------------------------------------ Dropdown (액션 메뉴) · Select (값 선택) — 같은 .dropdown CSS 를 쓰지만 용도가 달라 페이지를 나눈다 */
@@ -494,7 +483,6 @@ const COMPONENTS = {
     props: [[".dropdown", "container", "—", "position:relative. 열림은 .open"], [".menu", "ul", "—", "role=menu. 우측 정렬은 left:auto;right:0"], [".menu-item", "li", "—", "role=menuitem. .danger 위험, aria-disabled 비활성, .hint 단축키"], [".menu-sep / .menu-label", "li", "—", "구분선 / 그룹 라벨"]],
     spec: [["Size", "항목 높이 36 · 메뉴 최소 폭 200"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · 그룹 라벨 Caption 11 uppercase"], ["Placement", "테이블 행 액션·카드 헤더(우측 정렬 메뉴) · 아래 공간이 모자라면 위로 뒤집어 연다(.up)"]],
     figma: { frame: "Dropdown", radius: "radius/md", sizes: { item: { h: 36 } }, variants: { menu: {} }, states: ["closed", "open", "disabled"] },
-    guideline: { do: ["위험 액션은 구분선 아래 마지막에 둡니다.", "항목이 3개를 넘으면 그룹 라벨로 묶습니다."], dont: ["값을 고르는 용도로 쓰지 않습니다 — 그때는 Select 입니다."] },
   },
 
   /* ------------------------------------------------ Select */
@@ -548,7 +536,6 @@ const COMPONENTS = {
     props: [[".dropdown", "container", "—", "position:relative. 열림은 .open"], [".trigger", "button", "—", "고른 값을 표시. 값이 없으면 안에 .placeholder"], [".menu", "ul", "—", "role=listbox · aria-label 필수"], [".menu-item", "li", "—", "role=option. 고른 항목 .on + aria-selected, 비활성 aria-disabled"]],
     spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200 · 메뉴 최대 높이 320(약 8개, 넘으면 스크롤)"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · placeholder text/tertiary"], ["Placement", "필터 툴바, 폼 안의 선택 필드 · 아래 공간이 모자라면 위로 뒤집어 연다(.up)"]],
     figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {} }, states: ["closed", "open", "selected", "disabled"] },
-    guideline: { do: ["고른 값을 트리거에 항상 표시합니다.", "옵션이 10개를 넘으면 검색이 있는 목록을 함께 검토합니다."], dont: ["옵션이 2~3개인데 드롭다운으로 숨기지 않습니다.", "실행 액션을 옵션으로 섞지 않습니다."] },
   },
 
   /* ------------------------------------------------ Tab */
@@ -611,7 +598,6 @@ const COMPONENTS = {
     props: [[".tabs", "container", "—", "role=tablist. 기본 Underline, 전체 폭"], [".tab", "button", "—", "role=tab, aria-selected. 활성 .on"], [".pill", "boolean", "false", "캡슐형(보조 전환)"], [".sm / .accent", "boolean", "false", "작은 크기 / 활성 색 accent"], [".count", "element", "—", "건수 배지"], ["disabled", "attribute", "—", "비활성 탭"]],
     spec: [["Size", "높이 44 (sm 38) · 탭 간격 24"], ["Container", "하단 1px border/default · 활성 2px"], ["Label", "Title/2 14 Bold"], ["Placement", "페이지 헤더 아래, 카드 헤더 우측(pill)"]],
     figma: { frame: "Tab", sizes: { md: { h: 44 }, sm: { h: 38 } }, variants: { underline: {}, pill: { bg: "--bg-panel" } }, states: ["default", "active", "hover", "disabled"] },
-    guideline: { do: ["탭 라벨은 명사 한두 단어.", "탭 전환 시 URL 해시 등으로 상태를 유지합니다."], dont: ["탭을 페이지 이동(내비게이션) 대신 쓰지 않습니다.", "탭 7개 이상이면 구조를 나눕니다."] },
   },
 
   /* ------------------------------------------------ Breadcrumb */
@@ -641,7 +627,6 @@ const COMPONENTS = {
     props: [[".breadcrumb", "ol", "—", "nav[aria-label] 안의 ol"], ["li a", "link", "—", "상위 경로 링크"], ["li[aria-current=page]", "current", "—", "현재 페이지. 링크 없음, Semibold"], [".more", "button", "—", "접힌 경로 펼치기"], [".more[data-items]", "attribute", "—", "접은 경로를 <code>|</code> 로 이어 둡니다(<code>\"정책|USB 제어\"</code>). 누르면 그 자리에 링크로 펼칩니다 — ds.js 담당. React 는 <code>BreadcrumbMore</code> 의 onClick 으로 직접 처리"], [".breadcrumb li a svg", "element", "—", "첫 항목의 홈 아이콘처럼 링크 앞에 둘 수 있습니다(14px)"]],
     spec: [["Size", "높이 22 · 항목 간격 6"], ["Container", "없음(텍스트 행)"], ["Label", "Body/2 14 tertiary · 현재 primary Semibold"], ["Placement", "페이지 타이틀 위 8px"]],
     figma: { frame: "Breadcrumb", sizes: { md: { h: 22 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover"] },
-    guideline: { do: ["사이드 내비게이션 구조와 같은 이름을 씁니다."], dont: ["1~2단계 화면에는 쓰지 않습니다.", "현재 페이지를 링크로 만들지 않습니다.", "가운데가 1개뿐인데 접지 않습니다 — … 버튼이 그 자리를 그대로 차지합니다."] },
   },
 
   /* ------------------------------------------------ Pagination */
@@ -697,7 +682,6 @@ const COMPONENTS = {
     props: [[".pagination", "nav", "—", "aria-label=페이지. 버튼 36 (compact 32)"], ["button.on", "current", "—", "현재 페이지 + aria-current=page"], [".gap", "span", "—", "생략(…)"], [".compact / .outline", "boolean", "false", "작은 크기 / 보더형"], [".pagination-bar", "container", "—", "총 건수 + 페이지 크기 + 페이지네이션"]],
     spec: [["Size", "버튼 36 (compact 32) · 간격 4"], ["Container", "radius/md · 현재 accent"], ["Label", "Body/2 14 · 현재 Semibold"], ["Placement", "테이블 하단 우측, 총 건수는 좌측"]],
     figma: { frame: "Pagination", radius: "radius/md", sizes: { md: { h: 36 }, compact: { h: 32 } }, variants: { default: {}, outline: { stroke: "--border-default" } }, states: ["default", "current", "hover", "disabled"] },
-    guideline: { do: ["총 건수와 현재 범위(1–50)를 함께 표시합니다.", "페이지 크기 기본값은 50."], dont: ["무한 스크롤과 페이지네이션을 한 목록에 함께 쓰지 않습니다."] },
   },
 
   /* ------------------------------------------------ Navigation */
@@ -732,7 +716,6 @@ const COMPONENTS = {
     props: [[".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(accent subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기)"], [".collapsed", "boolean", "false", "폭 64, 아이콘만"], [".count", "element", "—", "미확인 건수"]],
     spec: [["Size", "폭 240 (접힘 64) · 항목 높이 40"], ["Container", "bg/surface · 우측 1px border"], ["Label", "Body/2 14 · 그룹 Caption 11 uppercase"], ["Placement", "헤더 아래 좌측 고정, 전체 높이"]],
     figma: { frame: "Navigation", radius: "radius/md", sizes: { expanded: { w: 240 }, collapsed: { w: 64 }, item: { h: 40 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover", "active"] },
-    guideline: { do: ["1차 메뉴는 7개 이내, 그룹으로 묶습니다.", "현재 위치는 항상 하나만 강조합니다."], dont: ["3단계 이상 중첩하지 않습니다(그 이상은 페이지 안 Tab)."] },
   },
 
   /* ------------------------------------------------ Top Navigation */
@@ -765,7 +748,6 @@ const COMPONENTS = {
     props: [[".topbar", "header", "—", "높이 56, 하단 1px"], [".logo", "a", "—", "제품 마크(i) + 이름 + small 버전"], ["nav a.on", "current", "—", "현재 1차 메뉴"], [".right", "container", "—", "우측 액션(알림·설정·아바타)"], [".avatar", "span", "—", "이니셜 32 (sm 24)"]],
     spec: [["Size", "높이 56 · 좌우 padding 20"], ["Container", "bg/surface · 하단 border/default"], ["Label", "메뉴 Body/2 14 Medium · 로고 Bold"], ["Placement", "최상단 고정(sticky)"]],
     figma: { frame: "Top Navigation", sizes: { md: { h: 56 } }, variants: { menu: {}, search: {} }, states: ["default", "active"] },
-    guideline: { do: ["제품 마크는 제품 메인 컬러(accent), 회사 브랜드는 푸터·로그인에.", "알림은 미확인 건수만 표시합니다."], dont: ["상단 메뉴와 사이드 내비게이션에 같은 메뉴를 중복하지 않습니다."] },
   },
 
   /* ------------------------------------------------ Accordion */
@@ -795,7 +777,6 @@ const COMPONENTS = {
     props: [["details.accordion", "container", "—", "summary + .body"], ["open", "attribute", "—", "펼침 상태"], ["name", "attribute", "—", "같은 name 은 하나만 펼침"], [".flat", "boolean", "false", "보더 없는 구분선형"], [".disabled", "boolean", "false", "펼칠 수 없음 — summary 에 <code>tabindex=\"-1\"</code> 을 함께 둡니다(키보드로도 열리지 않게)"], ["summary small", "element", "—", "우측 보조 정보"]],
     spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문은 즉시 열리고 닫히며(높이 애니메이션 없음) 셰브론만 --motion-fast 로 회전"]],
     figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--border-default" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
-    guideline: { do: ["기본 설정은 펼쳐 두고 고급 설정만 접습니다."], dont: ["필수 입력 항목을 접어 두지 않습니다."] },
   },
 
   /* ------------------------------------------------ Card */
@@ -828,7 +809,6 @@ const COMPONENTS = {
     props: [[".card", "container", "—", "flex column, gap 12, padding 24"], [".card-head / .title / .desc / .card-foot", "elements", "—", "헤더 / 제목 16 / 설명 14 / 푸터 우측 정렬"], [".bordered", "boolean", "false", "shadow 대신 1px 보더"], [".compact", "boolean", "false", "padding 16"], [".clickable / .on", "boolean", "false", "hover shadow/2 / 선택 outline accent"], [".card-grid", "container", "—", "auto-fill 260px 그리드"]],
     spec: [["Size", "최소 폭 260 · padding 24 (compact 16)"], ["Container", "radius/lg 8 · shadow/1 · bg/surface"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"]],
     figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 } }, variants: { default: { bg: "--bg-surface", shadow: "--shadow-1" }, bordered: { stroke: "--border-default" } }, states: ["default", "hover", "selected"] },
-    guideline: { do: ["카드 = Surface 배경 + shadow/1. 카드 사이 gap 20."], dont: ["카드 안에 카드를 겹치지 않습니다(필요하면 .bordered 또는 구분선).", "카드마다 다른 반경·그림자를 쓰지 않습니다."] },
   },
 
   /* ------------------------------------------------ Popup */
@@ -892,7 +872,6 @@ const COMPONENTS = {
     props: [[".popup-backdrop", "overlay", "—", "fixed, rgba(15,23,42,.65), 중앙 정렬"], [".popup", "dialog", "—", "role=dialog aria-modal aria-labelledby. 폭 440 (lg 640)"], [".popup-title / .popup-body / .popup-actions", "elements", "—", "제목 18 / 본문 14 / 액션 우측"], [".danger", "boolean", "false", "제목 danger 색"], [".popup-form", "container", "—", "필드 세로 16px 간격"]],
     spec: [["Size", "폭 440 (lg 640) · padding 24"], ["Container", "radius/xl 10 · shadow/3 · 배경 음영 65%"], ["Label", "제목 Heading/4 18 Bold · 본문 Body/2 14"], ["Placement", "화면 중앙. 열릴 때 포커스 이동, ESC 로 닫힘"]],
     figma: { frame: "Popup", radius: "radius/xl", sizes: { md: { w: 440 }, lg: { w: 640 } }, variants: { confirm: {}, danger: {}, form: {} }, states: ["default"] },
-    guideline: { do: ["제목은 질문형, 버튼 라벨은 동사(배포·삭제).", "위험 동작은 Danger 버튼 + 필요 시 확인 입력."], dont: ["팝업 위에 팝업을 띄우지 않습니다.", "단순 안내를 팝업으로 막지 않습니다(Notification)."] },
   },
 
   /* ------------------------------------------------ Tooltip */
@@ -917,7 +896,6 @@ const COMPONENTS = {
     props: [[".tooltip-wrap", "container", "—", "position:relative 트리거 래퍼"], [".tooltip", "span", "—", "role=tooltip. 기본 위치 위"], ["position", ".bottom | .left | .right", "top", "위치"], [".show", "boolean", "false", "강제 표시(문서·디버그)"], [".multi", "boolean", "false", "여러 줄, 폭 220"]],
     spec: [["Size", "높이 28 · padding 6 10 · 트리거와 8px"], ["Container", "radius 6 · bg/inverse · shadow/2 · 화살표 5px"], ["Label", "Caption 12.5 Medium inverse"], ["Placement", "아이콘 전용 버튼 필수, 잘린 텍스트, 차트 값"]],
     figma: { frame: "Tooltip", radius: 6, sizes: { md: { h: 28 } }, variants: { top: {}, bottom: {}, left: {}, right: {} }, states: ["default", "multiline"] },
-    guideline: { do: ["아이콘 전용 버튼에는 항상 툴팁(=aria-label)을 둡니다.", "지연 없이 표시, 120ms 페이드."], dont: ["툴팁 안에 링크·버튼을 넣지 않습니다.", "클릭해야 보이는 정보를 툴팁으로 만들지 않습니다."] },
   },
 
   /* ------------------------------------------------ Notification */
@@ -943,7 +921,6 @@ const COMPONENTS = {
     props: [[".notice", "div", "—", "role=status | alert. .ico + div(b 제목 + 본문 + .actions) + .close"], ["tone", "info | success | warning | danger", "neutral", "톤별 subtle 배경 + 30% 보더"], [".toast", "div", "—", "폭 360, 어두운 배경. .action 하나"], [".toast-stack", "container", "—", "aria-live=polite, 우측 하단 고정"], [".banner", "div", "—", "전체 폭. accent / .warning / .danger"]],
     spec: [["Size", "Notice 최소 높이 56 · Toast 폭 360 · Banner 높이 44"], ["Container", "Notice radius/lg 8 · tone subtle + 30% 보더 · Toast bg/inverse"], ["Label", "Title Semibold 14 · Body 14"], ["Placement", "Notice 는 페이지 헤더 아래, Toast 우측 하단, Banner 헤더 위"]],
     figma: { frame: "Notification", radius: "radius/lg", sizes: { notice: { minH: 56 }, toast: { w: 360 }, banner: { h: 44 } }, variants: { info: { bg: "--info-subtle", fg: "--info" }, success: { bg: "--success-subtle", fg: "--success" }, warning: { bg: "--warning-subtle", fg: "--warning" }, danger: { bg: "--danger-subtle", fg: "--danger" }, toast: { bg: "--bg-inverse", fg: "--text-inverse" } }, states: ["default", "with-action", "dismissible"] },
-    guideline: { do: ["무엇이 일어났고 무엇을 하면 되는지 한 문장씩 씁니다.", "되돌릴 수 있는 동작의 Toast 에는 실행 취소를 둡니다."], dont: ["일시적 결과 알림을 Notice 로 남겨 두지 않습니다.", "Toast 를 3개 이상 동시에 쌓지 않습니다."] },
   },
 
   /* ------------------------------------------------ Loading */
@@ -974,7 +951,6 @@ const COMPONENTS = {
     props: [[".spinner", "span", "—", "role=status aria-label. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"]],
     spec: [["Size", "Spinner 16/24/40 · Skeleton 행 14 · Progress 8 (sm 4)"], ["Container", "Skeleton radius 6 · Progress radius/full"], ["Label", "Caption 13 tertiary"], ["Placement", "Skeleton 은 콘텐츠 자리 그대로, Spinner 는 영역 중앙"]],
     figma: { frame: "Loading", sizes: { spinner: { sm: 16, md: 24, lg: 40 }, progress: { h: 8 } }, variants: { spinner: {}, skeleton: { bg: "--bg-panel" }, progress: { fill: "--accent", track: "--bg-panel" } }, states: ["default", "success", "danger"] },
-    guideline: { do: ["1초 이상 걸릴 때만 표시합니다.", "진행률을 알 수 있으면 Progress 와 수치를 함께."], dont: ["전체 화면을 스피너로 가리지 않습니다(영역 단위로)."] },
   },
 
   /* ------------------------------------------------ Indicator */
@@ -1009,7 +985,6 @@ const COMPONENTS = {
     props: [[".indicator", "span", "—", "점 + 라벨. ok | warn | danger | info | accent | (neutral)"], [".pulse", "boolean", "false", "깜빡임(위험 실시간)"], [".count", "span", "—", "건수. .accent / .neutral / .dot(점만)"], [".with-count", "wrapper", "—", "아이콘 우상단에 count 배치"], [".steps li", "li", "—", ".done 완료, .on 현재. .vertical 세로"]],
     spec: [["Size", "점 8 · count 높이 20 · step 원 24"], ["Container", "radius/full"], ["Label", "Body/2 14 · count 11 Bold · steps 13"], ["Placement", "테이블 상태 열, 내비 건수, 마법사 상단"]],
     figma: { frame: "Indicator", radius: "radius/full", sizes: { dot: 8, count: { h: 20 }, step: 24 }, variants: { ok: { fg: "--success" }, warn: { fg: "--warning" }, danger: { fg: "--danger" }, info: { fg: "--info" }, neutral: { fg: "--gray-400" } }, states: ["default", "pulse"] },
-    guideline: { do: ["점 색과 라벨 텍스트를 항상 함께 씁니다."], dont: ["건수 0 을 배지로 보여주지 않습니다(숨김)."] },
   },
 
   /* ------------------------------------------------ Divider */
@@ -1049,7 +1024,6 @@ const COMPONENTS = {
     props: [[".divider", "hr | div", "—", "가로 1px border/default, margin 16 0"], [".strong / .dashed", "boolean", "false", "border/strong / 점선"], [".label", "div", "—", "가운데 라벨 텍스트"], [".vertical", "span", "—", "세로 1×24, 좌우 12"]],
     spec: [["Size", "1px · 세로 24"], ["Container", "border/default (strong 시 border/strong)"], ["Label", "Caption 12 tertiary"], ["Placement", "설정 섹션 사이, 툴바 버튼 그룹 사이"]],
     figma: { frame: "Divider", sizes: { horizontal: { h: 1 }, vertical: { w: 1, h: 24 } }, variants: { default: { stroke: "--border-default" }, strong: { stroke: "--border-strong" }, label: {} }, states: ["default"] },
-    guideline: { do: ["여백(24~48)으로 나눌 수 있으면 여백을 먼저 씁니다."], dont: ["카드 보더·테이블 행선과 겹쳐 두 겹으로 그리지 않습니다."] },
   },
 
   /* ------------------------------------------------ Data Table */
@@ -1105,7 +1079,6 @@ const COMPONENTS = {
     props: [[".tbl-wrap", "container", "—", "보더 + radius/lg + 가로 스크롤. 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 52. .compact 44 · .zebra 줄무늬"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["tr.on / .disabled", "row", "—", "선택 / 비활성"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션"]],
     spec: [["Size", "행 높이 52 (compact 44) · 헤더 44"], ["Container", "radius/lg 8 · border/default 1px · 셀 격자선 없음"], ["Label", "헤더 Label/2 12.5 Semibold tertiary · 셀 Body/2 14 · 숫자 tabular"], ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래 · 10열 이하 기본 노출"]],
     figma: { frame: "Data Table", radius: "radius/lg", sizes: { row: { h: 52 }, compact: { h: 44 }, header: { h: 44 } }, variants: { default: {}, selectable: {}, compact: {} }, states: ["default", "hover", "selected", "sorted", "empty"] },
-    guideline: { do: ["시간·수치 열은 tabular-nums 로 자릿수를 맞춥니다.", "행 클릭은 상세 패널을 열고, 편집은 인라인 액션으로 분리합니다."], dont: ["셀마다 격자선을 그리지 않습니다. 가로 구분선만, 아주 연하게.", "한 화면에 12열 이상 기본 노출하지 않습니다(열 설정 제공)."] },
   },
 
   /* ------------------------------------------------ Table */
@@ -1165,7 +1138,6 @@ const COMPONENTS = {
     props: [[".tbl-wrap", "container", "—", "보더 + radius + 스크롤"], [".tbl", "table", "—", "기본 표"], [".kv", "boolean", "false", "키-값 표(th 폭 200, 우측 보더)"], [".zebra / .compact", "boolean", "false", "줄무늬 / 행 44"], ["td.num", "cell", "—", "숫자 우측 정렬"]],
     spec: [["Size", "행 52 (compact 44) · kv th 폭 200"], ["Container", "radius/lg 8 · border/default"], ["Label", "헤더 Label/2 12.5 · 셀 Body/2 14"], ["Placement", "상세 패널, 리포트 요약"]],
     figma: { frame: "Table", radius: "radius/lg", sizes: { row: { h: 52 }, compact: { h: 44 } }, variants: { simple: {}, kv: {}, zebra: {} }, states: ["default"] },
-    guideline: { do: ["5행 이하 단순 정보는 표 대신 .kv(정의 목록)도 고려합니다."], dont: ["정렬·필터가 필요해지면 Data Table 로 바꿉니다."] },
   },
 
   /* ------------------------------------------------ List */
@@ -1195,7 +1167,6 @@ const COMPONENTS = {
     props: [[".list", "ul", "—", "보더 + radius/lg. li 는 flex row"], [".primary / .meta / .end", "elements", "—", "제목 / 부제 / 우측 영역"], [".hover / li.on", "boolean", "false", "행 hover 배경 / 선택"], [".dense / .plain", "boolean", "false", "행 40 / 보더 없음"]],
     spec: [["Size", "행 최소 56 (dense 40)"], ["Container", "radius/lg · border/default · 행 사이 1px"], ["Label", "제목 Body/2 14 Medium · 부제 Caption 12.5"], ["Placement", "상세 패널 목록, 설정의 항목 목록"]],
     figma: { frame: "List", radius: "radius/lg", sizes: { md: { h: 56 }, dense: { h: 40 } }, variants: { default: {}, media: {}, selectable: {} }, states: ["default", "hover", "selected"] },
-    guideline: { do: ["항목마다 같은 구성(제목·부제·액션)을 유지합니다."], dont: ["열이 4개 이상 필요하면 Table 을 씁니다."] },
   },
 
   /* ------------------------------------------------ Item Tile */
@@ -1226,7 +1197,6 @@ const COMPONENTS = {
     props: [[".tile", "button", "—", ".ico + b(제목) + span(설명). aria-pressed"], [".on", "boolean", "false", "선택(accent 보더·배경)"], [".horizontal", "boolean", "false", "가로 배치"], ["disabled", "attribute", "—", "선택 불가"], [".tile-grid", "container", "—", "auto-fill 180px 그리드"]],
     spec: [["Size", "최소 폭 180 · padding 16 · 아이콘 36"], ["Container", "radius/lg 8 · border/default · 선택 accent"], ["Label", "제목 Body/2 14 Semibold · 설명 Caption 12.5"], ["Placement", "마법사의 유형 선택, 연동 목록"]],
     figma: { frame: "Item Tile", radius: "radius/lg", sizes: { md: { minW: 180, pad: 16 } }, variants: { default: { stroke: "--border-default" }, selected: { stroke: "--accent", bg: "--accent-subtle" } }, states: ["default", "hover", "selected", "disabled"] },
-    guideline: { do: ["타일마다 아이콘·제목·한 줄 설명을 같은 구성으로."], dont: ["타일 안에 다른 버튼을 넣지 않습니다(타일 전체가 버튼)."] },
   },
 
   /* ------------------------------------------------ Data Visual */
@@ -1272,7 +1242,6 @@ const COMPONENTS = {
     props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".sparkline", "div", "—", "i height% 막대, .hi 강조"]],
     spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120"], ["Container", "chart-card = Card 규격"], ["Label", "Caption 12.5 tertiary · 값 tabular"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열"]],
     figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, bar: {}, donut: {}, sparkline: {} }, states: ["default"] },
-    guideline: { do: ["심각도 색은 Tag 와 동일한 토큰을 씁니다.", "값에는 단위와 기준 기간을 함께."], dont: ["3D·그라데이션·장식 색을 쓰지 않습니다.", "한 카드에 두 종류 차트를 섞지 않습니다."] },
   },
 };
 

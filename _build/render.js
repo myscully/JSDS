@@ -46,7 +46,7 @@ function overviewPage(sec) {
 function templatePage(sec, key) {
   const d = SITE[sec]; const t = titleOf(sec, key);
   return `<h1>${t}${nb(sec, key)}</h1><p class="lead">${t}의 정의와 사용 기준을 씁니다. (${d.title}, 아직 틀 상태입니다)</p>  <h2 id="usage">Usage</h2><div class="ph">사용 예시 · 원칙<small>작성 예정</small></div>
-  <h2 id="guideline">Guideline</h2><div class="dodont"><div class="do"><div class="body"><p>권장 사용 예를 씁니다.</p></div></div><div class="dont"><div class="body"><p>피해야 할 사용 예를 씁니다.</p></div></div></div>`;
+`;
 }
 
 /* ---------- 코드 블록 / 예제 블록 ---------- */
@@ -92,7 +92,6 @@ function usageBlock(key, css, label, names = []) {
 }
 const cssOf = c => typeof c.css === "string" ? c.css : cssFor([].concat(c.css || []), STYLE(), VERSION);
 const specGrid = spec => spec && spec.length ? `<h2 id="spec">Spec</h2><div class="spec">${spec.map((x, i) => `<div><b>${i + 1}. ${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>` : "";
-const dodont = g => g ? `<h2 id="guideline">Guideline</h2><div class="dodont"><div class="do"><div class="body">${(g.do || []).map(x => `<p>${x}</p>`).join("")}</div></div><div class="dont"><div class="body">${(g.dont || []).map(x => `<p>${x}</p>`).join("")}</div></div></div>` : "";
 
 /* 예제 목록(컴포넌트 · 패턴 공용). 예제가 하나뿐이면 번호 제목을 두지 않는다 —
    나눠 가리킬 것이 없고 "대시보드" 아래 "1. 대시보드" 처럼 페이지 제목과 겹친다 */
