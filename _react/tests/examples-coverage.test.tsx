@@ -19,6 +19,6 @@ describe("예제 커버리지", () => {
   it("모든 사이트 예제에 React 예제가 있다", () => {
     const missing = expected.filter((k) => !files.includes(k));
     expect(missing, `누락 ${missing.length}/${expected.length}`).toEqual([]);
-    expect(expected.length).toBe(136); // components 115 + patterns 21
+    expect(expected.length).toBe(138); // components 117 + patterns 21
   });
 });

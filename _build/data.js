@@ -5,14 +5,14 @@
 const FIGMA = "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV";
 const VERSION = "v0.6";
 /* 사이드바·헤더에 N 배지를 붙일 페이지 */
-const NEW = new Set(["home/getting-started", "foundations/colors", "foundations/icons", "resources/design-token"]);
+const NEW = new Set(["home/getting-started", "foundations/colors", "foundations/icons", "resources/design-token", "components/select"]);
 const SITE = {
   home: { title: "Home", desc: "지란지교시큐리티 디자인 시스템 소개", pages: { overview: "Overview", "getting-started": "Getting started", about: "About", principles: "UX Principles" } },
   foundations: { title: "Foundations", desc: "모든 디자인 요소의 기반이 되는 가장 원자적인 단위", pages: { overview: "Overview" }, groups: [["Base material", [["colors", "Colors"], ["elevation", "Elevation"], ["grid", "Grid"], ["icons", "Icons"], ["typography", "Typography"]]]] },
   components: { title: "Components", desc: "사용자 인터페이스를 구성하는 재사용 가능한 요소", isNew: true, pages: { overview: "Overview" }, groups: [
     ["", [["accordion", "Accordion"], ["breadcrumb", "Breadcrumb"], ["button", "Button"], ["card", "Card"], ["data-visual", "Data Visual"], ["date-picker", "Date Picker"], ["divider", "Divider"], ["dropdown", "Dropdown"], ["indicator", "Indicator"], ["item-tile", "Item Tile"], ["list", "List"], ["loading", "Loading"], ["navigation", "Navigation"], ["notification", "Notification"], ["pagination", "Pagination"], ["popup", "Popup"]]],
     ["Selection Controls", [["checkbox", "Checkbox"], ["chip", "Chip"], ["radio-button", "Radio Button"], ["select-button", "Select Button"]]],
-    ["", [["search", "Search"], ["slider", "Slider"], ["switch", "Switch"], ["tab", "Tab"]]],
+    ["", [["search", "Search"], ["select", "Select"], ["slider", "Slider"], ["switch", "Switch"], ["tab", "Tab"]]],
     ["Table", [["data-table", "Data Table"], ["table", "Table"]]],
     ["", [["tag", "Tag"], ["text-field", "Text Field"], ["tooltip", "Tooltip"], ["top-navigation", "Top Navigation"]]],
   ] },
