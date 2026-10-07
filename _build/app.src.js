@@ -11,11 +11,20 @@
   function hslToHex(h, s, l) { s /= 100; l /= 100; const k = n => (n + h / 30) % 12; const a = s * Math.min(l, 1 - l); const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return "#" + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, "0")).join("").toUpperCase(); }
   function accentScale(hex) { const [h, s, l6] = hexToHsl(hex); const up = t => l6 + (88 - l6) * t, dn = t => l6 * t; const L = { 50: 96, 100: 90, 200: 80, 300: up(.55), 400: up(.32), 500: up(.13), 700: dn(.78), 800: dn(.58), 900: dn(.38) }; const S = { 50: .7, 100: .7, 200: .7, 300: .8, 400: .85, 500: .9 }; const out = {}; for (const [k, l] of Object.entries(L)) out[k] = hslToHex(h, Math.min(100, s * (S[k] || 1)), Math.max(0, Math.min(100, l))); out[600] = hex.toUpperCase(); return out; }
   const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+  /* 제품 메인 컬러가 상태색과 헷갈리는지 — 색상환에서 danger 0 · warning 38 · success 160 · info 199 와 15도 미만이면 참.
+     채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다. 겹치면 버튼 Primary 만 중립으로 내려간다(--action, style.src.css) */
+  const STATUS_HUES = [0, 38, 160, 199];
+  function clashesWithStatus(hex) {
+    const [h, sat] = hexToHsl(hex);
+    if (sat < 20) return false;
+    return STATUS_HUES.some(t => { const d = Math.abs(h - t) % 360; return Math.min(d, 360 - d) < 15; });
+  }
   function applyAccent(key) {
     const p = products.find(x => x.key === key);
-    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--accent-" + k); delete root.dataset.accent; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
+    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--accent-" + k); delete root.dataset.accent; delete root.dataset.accentNeutral; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
     const sc = accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--accent-" + k, v);
-    root.dataset.accent = p.key; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
+    root.dataset.accent = p.key;
+    if (clashesWithStatus(p.hex)) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
     paintAccent();
   }
   window.applyAccent = applyAccent;

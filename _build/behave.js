@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 101 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 105 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -85,6 +85,27 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   ok("tab switches", await tabs.evaluate((e) => { const on = e.querySelectorAll(".tab.on"); return on.length === 1 && on[0] === e.querySelectorAll(".tab")[1] && on[0].getAttribute("aria-selected") === "true"; }));
   await page.keyboard.press("ArrowRight");
   ok("tab arrow key", await tabs.evaluate((e) => e.querySelectorAll(".tab")[2].classList.contains("on")));
+
+  // Button: 제품 메인 컬러가 상태색과 겹치면 Primary 만 중립으로 (--action)
+  await go("components/button.html");
+  const accent = async (key) => {
+    await page.click("#accentBtn"); await page.waitForTimeout(80);
+    await page.locator(`#accentPop [data-accent="${key}"]`).click(); await page.waitForTimeout(150);
+    return page.evaluate(() => {
+      const btn = document.querySelector("#ex-button-variant .btn.primary"), txt = document.querySelector("#ex-button-variant .btn.text");
+      const r = getComputedStyle(document.documentElement);
+      return { neutral: document.documentElement.hasAttribute("data-accent-neutral"), bg: getComputedStyle(btn).backgroundColor, text: getComputedStyle(txt).color, accent: r.getPropertyValue("--accent").trim() };
+    });
+  };
+  const teal = await accent("product-a"), red = await accent("product-b");
+  ok("teal product keeps its main colour", !teal.neutral && teal.bg === "rgb(0, 170, 182)", JSON.stringify(teal));
+  ok("red product drops Primary to neutral, accent untouched", red.neutral && red.bg === "rgb(15, 23, 42)" && red.text === "rgb(195, 13, 42)" && red.accent === "#C30D2A", JSON.stringify(red));
+  await page.click("#themeBtn"); await page.waitForTimeout(200);
+  const dark = await page.evaluate(() => { const b = document.querySelector("#ex-button-variant .btn.primary"); const c = getComputedStyle(b); return { bg: c.backgroundColor, fg: c.color }; });
+  ok("dark neutral Primary flips light", dark.bg === "rgb(247, 247, 248)" && dark.fg === "rgb(27, 28, 30)", JSON.stringify(dark));
+  await page.click("#themeBtn"); await page.waitForTimeout(150);
+  const base = await accent("");
+  ok("back to token accent clears the flag", !base.neutral, JSON.stringify(base));
 
   // Button: loading 은 마우스·키보드 클릭을 모두 막는다 (pointer-events:none 만으로는 Enter 가 통과했다)
   await go("components/button.html");
