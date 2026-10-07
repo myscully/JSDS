@@ -36,11 +36,20 @@
   }
 
   /* ---------- Dropdown ---------- */
+  /* 트리거 아래에 메뉴가 들어갈 자리가 없고 위가 더 넓으면 위로 뒤집는다(.up). 메뉴를 보이게 한 뒤에 재야 높이가 나온다 */
+  function placeMenu(dd) {
+    var menu = $(".menu", dd), t = $("[aria-haspopup]", dd);
+    dd.classList.remove("up");
+    if (!menu || !t) return;
+    var r = t.getBoundingClientRect(), h = menu.offsetHeight, gap = 4;
+    var below = window.innerHeight - r.bottom - gap, above = r.top - gap;
+    if (below < h && above > below) dd.classList.add("up");
+  }
   function setOpen(dd, open) {
     dd.classList.toggle("open", open);
     var t = $("[aria-haspopup]", dd); if (t) t.setAttribute("aria-expanded", String(open));
-    if (open) { dd.dataset.dsOpened = "1"; var items = itemsOf(dd); var sel = items.filter(function (i) { return i.classList.contains("on"); })[0]; var f = sel || items[0]; if (f) f.focus(); }
-    else delete dd.dataset.dsOpened;
+    if (open) { dd.dataset.dsOpened = "1"; placeMenu(dd); var items = itemsOf(dd); var sel = items.filter(function (i) { return i.classList.contains("on"); })[0]; var f = sel || items[0]; if (f) f.focus(); }
+    else { delete dd.dataset.dsOpened; dd.classList.remove("up"); }
   }
   function itemsOf(dd) { return $$(".menu-item:not([aria-disabled=true])", dd).map(function (i) { if (!i.hasAttribute("tabindex")) i.tabIndex = -1; return i; }); }
   function selectItem(item) {
