@@ -15,15 +15,15 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   const go = async (p) => { await page.goto("file://" + path.join(SITE, p)); await page.waitForTimeout(150); };
   const ex = (pg, id) => `#ex-${pg}-${id} .example-preview`;
 
-  // Dropdown
-  await go("components/dropdown.html");
-  const dd = page.locator(`${ex("dropdown", "select")} .dropdown`).first();
+  // Select (값 선택) — 열기 · 바깥 클릭 · 선택 · 키보드
+  await go("components/select.html");
+  const dd = page.locator(`${ex("select", "open")} .dropdown`).first();
   await dd.locator(".trigger").click();
   ok("dropdown open on click", await dd.evaluate((e) => e.classList.contains("open") && e.querySelector(".trigger").getAttribute("aria-expanded") === "true"));
   ok("dropdown shows its own menu when opened", await dd.evaluate((e) => { const m = e.querySelector(".menu"); return !!m && getComputedStyle(m).display !== "none"; }));
   await page.mouse.click(5, 5);
   ok("dropdown closes on outside click", await dd.evaluate((e) => !e.classList.contains("open")));
-  const dd2 = page.locator(`${ex("dropdown", "select")} .dropdown`).nth(1);
+  const dd2 = page.locator(`${ex("select", "open")} .dropdown`).nth(1);
   ok("static open dropdown stays open after outside click", await dd2.evaluate((e) => e.classList.contains("open")));
   await dd2.locator(".menu-item").nth(2).click();
   ok("select item updates trigger + closes", await dd2.evaluate((e) => !e.classList.contains("open") && e.querySelector(".trigger").textContent.trim() === "개발팀" && e.querySelector(".menu-item.on").textContent === "개발팀"));
@@ -32,6 +32,8 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   ok("keyboard nav selects next item", await dd2.evaluate((e) => e.querySelector(".menu-item.on").textContent === "인프라팀"));
   await dd2.locator(".trigger").click(); await page.keyboard.press("Escape");
   ok("Esc closes dropdown", await dd2.evaluate((e) => !e.classList.contains("open")));
+  // Dropdown (액션 메뉴)
+  await go("components/dropdown.html");
   const menuDd = page.locator(`#ex-dropdown-menu .example-preview .dropdown`).first();
   await menuDd.locator("[aria-haspopup]").click();
   ok("static open menu closes on trigger click", await menuDd.evaluate((e) => !e.classList.contains("open")));

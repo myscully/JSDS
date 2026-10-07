@@ -463,13 +463,47 @@ const COMPONENTS = {
     guideline: { do: ["테이블·로그에서 동일한 순서(Critical→Info)로 정렬합니다."], dont: ["Status와 Severity를 같은 열에 섞지 않습니다.", "장식 목적으로 색을 바꾸지 않습니다."] },
   },
 
-  /* ------------------------------------------------ Dropdown */
+  /* ------------------------------------------------ Dropdown (액션 메뉴) · Select (값 선택) — 같은 .dropdown CSS 를 쓰지만 용도가 달라 페이지를 나눈다 */
   "dropdown": {
-    status: "ready", react: ["Dropdown","DropdownTrigger","Menu","MenuItem","MenuSep","MenuLabel","Select"], css: [".dropdown", ".menu", ".menu-item", ".menu-sep", ".menu-label"],
-    desc: "옵션 목록을 열어 하나를 고르거나(Select) 액션 메뉴를 보여줍니다(Menu). 옵션이 5개 이하이고 항상 보여야 하면 Radio/Select Button 을 씁니다.",
+    status: "ready", react: ["Dropdown","DropdownTrigger","Menu","MenuItem","MenuSep","MenuLabel"], css: [".dropdown", ".menu", ".menu-item", ".menu-sep", ".menu-label"],
+    desc: "더 보기(⋯) 같은 트리거에서 <b>실행할 액션</b>을 모아 보여줍니다. 값을 고르는 경우에는 <a href=\"#/components/select\">Select</a>, 옵션이 5개 이하이고 항상 보여야 하면 Select Button 을 씁니다.",
+    thumb: `<div class="dropdown open" style="height:60px"><ul class="menu" style="position:static;min-width:120px"><li class="menu-item">편집</li><li class="menu-item danger">삭제</li></ul></div>`,
+    examples: [
+      { id: "default", title: "Default", desc: "닫힌 기본 상태입니다. 더 보기 버튼을 누르면 액션 목록이 열립니다.", html: `
+        <div class="dropdown">
+          <button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button>
+          <ul class="menu" role="menu" style="left:auto;right:0">
+            <li class="menu-item" role="menuitem">${I("pencil")}편집</li>
+            <li class="menu-item" role="menuitem">${I("download")}내보내기</li>
+          </ul>
+        </div>` },
+      { id: "menu", title: "Action Menu", desc: "더 보기(⋯) 버튼에서 여는 액션 목록. 그룹 라벨·구분선·위험 액션.", html: `
+        <div class="dropdown open">
+          <button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button>
+          <ul class="menu" role="menu" style="left:auto;right:0">
+            <li class="menu-label">정책</li>
+            <li class="menu-item" role="menuitem">${I("pencil")}편집</li>
+            <li class="menu-item" role="menuitem">${I("download")}내보내기</li>
+            <li class="menu-sep" role="separator"></li>
+            <li class="menu-item danger" role="menuitem">${I("trash")}삭제</li>
+          </ul>
+        </div>`, layout: "tall", style: "justify-content:flex-end;padding-right:120px" },
+      { id: "disabled", title: "Disabled", desc: "권한이 없어 열 수 없는 상태입니다.", html: `
+        <div class="dropdown"><button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false" disabled>${I("dots")}</button></div>` },
+    ],
+    props: [[".dropdown", "container", "—", "position:relative. 열림은 .open"], [".menu", "ul", "—", "role=menu. 우측 정렬은 left:auto;right:0"], [".menu-item", "li", "—", "role=menuitem. .danger 위험, aria-disabled 비활성, .hint 단축키"], [".menu-sep / .menu-label", "li", "—", "구분선 / 그룹 라벨"]],
+    spec: [["Size", "항목 높이 36 · 메뉴 최소 폭 200"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · 그룹 라벨 Caption 11 uppercase"], ["Placement", "테이블 행 액션·카드 헤더(우측 정렬 메뉴)"]],
+    figma: { frame: "Dropdown", radius: "radius/md", sizes: { item: { h: 36 } }, variants: { menu: {} }, states: ["closed", "open", "disabled"] },
+    guideline: { do: ["위험 액션은 구분선 아래 마지막에 둡니다.", "항목이 3개를 넘으면 그룹 라벨로 묶습니다."], dont: ["값을 고르는 용도로 쓰지 않습니다 — 그때는 Select 입니다."] },
+  },
+
+  /* ------------------------------------------------ Select */
+  "select": {
+    status: "ready", react: ["Select"], css: [".dropdown", ".menu", ".menu-item"],
+    desc: "옵션 목록을 열어 <b>하나를 고릅니다</b>. 옵션이 5개 이하이고 항상 보여야 하면 Radio · Select Button, 고르는 것이 아니라 실행이면 <a href=\"#/components/dropdown\">Dropdown</a> 을 씁니다.",
     thumb: `<div class="dropdown"><button class="trigger" style="min-width:160px">전체 그룹</button></div>`,
     examples: [
-      { id: "default", title: "Default", desc: "닫힌 기본 상태입니다. 누르면 목록이 열립니다.", html: `
+      { id: "default", title: "Default", desc: "닫힌 기본 상태입니다. 고른 값이 없으면 트리거에 placeholder 를 둡니다.", html: `
         <div class="dropdown">
           <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false"><span class="placeholder">그룹 선택</span></button>
           <ul class="menu" role="listbox" aria-label="그룹">
@@ -477,9 +511,8 @@ const COMPONENTS = {
             <li class="menu-item" role="option">영업팀</li>
             <li class="menu-item" role="option">개발팀</li>
           </ul>
-        </div>
-      ` },
-      { id: "select", title: "Select", desc: "값 선택. 닫힘/열림(.open). 열린 메뉴는 role=listbox, 항목 aria-selected.", html: `
+        </div>` },
+      { id: "open", title: "Open / Selected", desc: "닫힘과 열림을 나란히 둔 모습입니다. 열린 메뉴는 role=listbox, 고른 항목은 .on + aria-selected.", html: `
         <div class="dropdown">
           <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false"><span class="placeholder">그룹 선택</span></button>
           <ul class="menu" role="listbox" aria-label="그룹">
@@ -499,45 +532,14 @@ const COMPONENTS = {
             <li class="menu-item" role="option">인프라팀</li>
             <li class="menu-item" role="option" aria-disabled="true">외주(권한 없음)</li>
           </ul>
-        </div>`, layout: "tall top", react: `
-        import { useState } from "react";
-        const GROUPS = ["전체", "영업팀", "개발팀", "인프라팀"];
-        export function GroupSelect() {
-          const [open, setOpen] = useState(false);
-          const [value, setValue] = useState<string | null>(null);
-          return (
-            <div className={"dropdown" + (open ? " open" : "")}>
-              <button type="button" className="trigger" aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(o => !o)}>
-                {value ?? <span className="placeholder">그룹 선택</span>}
-              </button>
-              {open && (
-                <ul className="menu" role="listbox" aria-label="그룹">
-                  {GROUPS.map(g => (
-                    <li key={g} role="option" aria-selected={g === value} className={"menu-item" + (g === value ? " on" : "")} onClick={() => { setValue(g); setOpen(false); }}>{g}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          );
-        }` },
-      { id: "menu", title: "Action Menu", desc: "더 보기(⋯) 버튼에서 여는 액션 목록. 그룹 라벨·구분선·위험 액션.", html: `
-        <div class="dropdown open">
-          <button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button>
-          <ul class="menu" role="menu" style="left:auto;right:0">
-            <li class="menu-label">정책</li>
-            <li class="menu-item" role="menuitem">${I("pencil")}편집</li>
-            <li class="menu-item" role="menuitem">${I("download")}내보내기</li>
-            <li class="menu-sep" role="separator"></li>
-            <li class="menu-item danger" role="menuitem">${I("trash")}삭제</li>
-          </ul>
-        </div>`, layout: "tall", style: "justify-content:flex-end;padding-right:120px" },
-      { id: "disabled", title: "Disabled", html: `
-        <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" disabled>권한 없음</button></div>` },
+        </div>`, layout: "tall top" },
+      { id: "disabled", title: "Disabled", desc: "권한이 없거나 선택할 값이 없는 상태입니다.", html: `
+        <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" disabled><span class="placeholder">권한 없음</span></button></div>` },
     ],
-    props: [[".dropdown", "container", "—", "position:relative. 열림은 .open"], [".trigger", "button", "—", "현재 값 표시. 값 없으면 .placeholder"], [".menu", "ul", "—", "role=listbox(선택) 또는 menu(액션)"], [".menu-item", "li", "—", ".on 선택, .danger 위험, aria-disabled 비활성, .hint 단축키"], [".menu-sep / .menu-label", "li", "—", "구분선 / 그룹 라벨"]],
-    spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · 라벨 Caption 11 uppercase"], ["Placement", "필터 툴바, 테이블 행 액션(우측 정렬 메뉴)"]],
-    figma: { frame: "Dropdown", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {}, menu: {} }, states: ["closed", "open", "selected", "disabled"] },
-    guideline: { do: ["현재 선택 값을 트리거에 항상 표시합니다.", "위험 액션은 구분선 아래 마지막에 둡니다."], dont: ["옵션이 2~3개인데 드롭다운으로 숨기지 않습니다."] },
+    props: [[".dropdown", "container", "—", "position:relative. 열림은 .open"], [".trigger", "button", "—", "고른 값을 표시. 값이 없으면 안에 .placeholder"], [".menu", "ul", "—", "role=listbox · aria-label 필수"], [".menu-item", "li", "—", "role=option. 고른 항목 .on + aria-selected, 비활성 aria-disabled"]],
+    spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · placeholder text/tertiary"], ["Placement", "필터 툴바, 폼 안의 선택 필드"]],
+    figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {} }, states: ["closed", "open", "selected", "disabled"] },
+    guideline: { do: ["고른 값을 트리거에 항상 표시합니다.", "옵션이 10개를 넘으면 검색이 있는 목록을 함께 검토합니다."], dont: ["옵션이 2~3개인데 드롭다운으로 숨기지 않습니다.", "실행 액션을 옵션으로 섞지 않습니다."] },
   },
 
   /* ------------------------------------------------ Tab */

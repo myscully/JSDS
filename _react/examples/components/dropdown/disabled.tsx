@@ -1,9 +1,11 @@
-import { Dropdown, DropdownTrigger } from "@jiran/ds-react";
+import { Button, Dropdown, DropdownTrigger, Icon } from "@jiran/ds-react";
 
 export default function Example() {
   return (
-    <Dropdown disabled>
-      <DropdownTrigger>권한 없음</DropdownTrigger>
+    <Dropdown kind="menu" disabled>
+      <DropdownTrigger asChild>
+        <Button variant="secondary" icon aria-label="더 보기" disabled><Icon name="dots" /></Button>
+      </DropdownTrigger>
     </Dropdown>
   );
 }

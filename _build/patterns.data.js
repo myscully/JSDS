@@ -26,7 +26,7 @@ const logTable = (rows) => `
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
-    status: "ready", react: ["Form","FormSection","FormRow","FormActions"], uses: ["text-field", "dropdown", "checkbox", "radio-button", "button"], css: [".form"],
+    status: "ready", react: ["Form","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button"], css: [".form"],
     desc: "정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.",
     thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm primary">저장</button></div></div>`,
     principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "포커스가 떠날 때 필드 단위로, 제출 시 첫 오류로 스크롤"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
@@ -167,7 +167,7 @@ const PATTERNS = {
   },
 
   "search": {
-    status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "chip", "dropdown", "date-picker", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack"],
+    status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "chip", "select", "date-picker", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack"],
     desc: "검색 + 필터 + 결과 목록의 조회 화면 패턴입니다. 조건은 항상 보이고, 결과 수와 적용 중인 필터를 함께 보여줍니다.",
     thumb: `<div class="toolbar" style="width:240px"><div class="searchbar" style="min-width:0;flex:1;height:32px">${I("search")}<input placeholder="검색"></div><button class="chip sm on">Critical</button></div>`,
     principles: [["툴바", "검색(좌) · 필터 드롭다운 · 기간 · 여백 · 액션(우)"], ["필터 표시", "적용 중인 필터는 Chip 으로, 결과 수는 툴바 아래"], ["빈 결과", "빈 화면 패턴 + 필터 초기화"]],
@@ -290,7 +290,7 @@ const PATTERNS = {
   },
 
   "policy-settings": {
-    status: "ready", react: ["SettingsSection","Setting","PageHead"], uses: ["switch", "dropdown", "slider", "text-field", "radio-button", "notification", "button"], css: [".settings-section", ".setting", ".page-head", ".stack"],
+    status: "ready", react: ["SettingsSection","Setting","PageHead"], uses: ["switch", "select", "slider", "text-field", "radio-button", "notification", "button"], css: [".settings-section", ".setting", ".page-head", ".stack"],
     desc: "정책·시스템 설정 화면입니다. 섹션별 카드에 '라벨+설명 | 컨트롤' 행을 쌓고, 즉시 적용(Switch)과 저장 필요(폼)를 구분합니다.",
     thumb: `<div class="settings-section" style="padding:4px 12px;width:220px"><div class="setting" style="padding:8px 0"><div class="info"><b style="font-size:12px">실시간 보호</b></div><label class="switch sm"><input type="checkbox" checked></label></div><div class="setting" style="padding:8px 0"><div class="info"><b style="font-size:12px">USB 검사</b></div><label class="switch sm"><input type="checkbox"></label></div></div>`,
     examples: [
