@@ -12,8 +12,11 @@
   function accentScale(hex) { const [h, s, l6] = hexToHsl(hex); const up = t => l6 + (88 - l6) * t, dn = t => l6 * t; const L = { 50: 96, 100: 90, 200: 80, 300: up(.55), 400: up(.32), 500: up(.13), 700: dn(.78), 800: dn(.58), 900: dn(.38) }; const S = { 50: .7, 100: .7, 200: .7, 300: .8, 400: .85, 500: .9 }; const out = {}; for (const [k, l] of Object.entries(L)) out[k] = hslToHex(h, Math.min(100, s * (S[k] || 1)), Math.max(0, Math.min(100, l))); out[600] = hex.toUpperCase(); return out; }
   const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   /* 제품 메인 컬러가 상태색과 헷갈리는지 — 색상환에서 danger 0 · warning 38 · success 160 · info 199 와 15도 미만이면 참.
-     채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다. 겹치면 버튼 Primary 만 중립으로 내려간다(--action, style.src.css) */
+     채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다. 겹치면 램프 자체를 NEUTRAL_RAMP 로 갈아끼워,
+     --accent-* 를 참조하는 모든 것(버튼·링크·탭·체크박스·포커스 링·Atomic 램프)이 함께 중립으로 간다 */
   const STATUS_HUES = [0, 38, 160, 199];
+  /* 중립 램프 — gray-* 와 같은 단계. accentScale("#0F172A") 로 만들면 중간 단계에 푸른 기가 남아 쓸 수 없다 */
+  const NEUTRAL_RAMP = { 50: "#F8FAFC", 100: "#F1F5F9", 200: "#E2E8F0", 300: "#CBD5E1", 400: "#94A3B8", 500: "#64748B", 600: "#475569", 700: "#334155", 800: "#1E293B", 900: "#0F172A" };
   function clashesWithStatus(hex) {
     const [h, sat] = hexToHsl(hex);
     if (sat < 20) return false;
@@ -22,9 +25,10 @@
   function applyAccent(key) {
     const p = products.find(x => x.key === key);
     if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--accent-" + k); delete root.dataset.accent; delete root.dataset.accentNeutral; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
-    const sc = accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--accent-" + k, v);
+    const neutral = clashesWithStatus(p.hex);
+    const sc = neutral ? NEUTRAL_RAMP : accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--accent-" + k, v);
     root.dataset.accent = p.key;
-    if (clashesWithStatus(p.hex)) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
+    if (neutral) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
     paintAccent();
   }
   window.applyAccent = applyAccent;

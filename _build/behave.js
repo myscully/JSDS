@@ -86,24 +86,45 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.keyboard.press("ArrowRight");
   ok("tab arrow key", await tabs.evaluate((e) => e.querySelectorAll(".tab")[2].classList.contains("on")));
 
-  // Button: 제품 메인 컬러가 상태색과 겹치면 Primary 만 중립으로 (--action)
+  // 제품 메인 컬러가 상태색과 겹치면 램프 자체가 무채색으로 바뀐다 — 버튼·텍스트·포커스 링·Atomic 램프가 함께 내려간다
   await go("components/button.html");
   const accent = async (key) => {
     await page.click("#accentBtn"); await page.waitForTimeout(80);
     await page.locator(`#accentPop [data-accent="${key}"]`).click(); await page.waitForTimeout(150);
     return page.evaluate(() => {
+      /* 마지막 호출은 Colors 페이지에서 일어나 버튼이 없다 — 그때는 플래그만 본다 */
       const btn = document.querySelector("#ex-button-variant .btn.primary"), txt = document.querySelector("#ex-button-variant .btn.text");
       const r = getComputedStyle(document.documentElement);
-      return { neutral: document.documentElement.hasAttribute("data-accent-neutral"), bg: getComputedStyle(btn).backgroundColor, text: getComputedStyle(txt).color, accent: r.getPropertyValue("--accent").trim() };
+      const g = (n) => r.getPropertyValue(n).trim();
+      return {
+        neutral: document.documentElement.hasAttribute("data-accent-neutral"),
+        bg: btn ? getComputedStyle(btn).backgroundColor : "", text: txt ? getComputedStyle(txt).color : "",
+        accent: g("--accent"), focus: g("--border-focus"), subtle: g("--accent-subtle"),
+        ramp: [600, 300, 100].map((k) => g("--accent-" + k)).join(" "),
+      };
     });
   };
   const teal = await accent("product-a"), red = await accent("product-b");
-  ok("teal product keeps its main colour", !teal.neutral && teal.bg === "rgb(0, 170, 182)", JSON.stringify(teal));
-  ok("red product drops Primary to neutral, accent untouched", red.neutral && red.bg === "rgb(15, 23, 42)" && red.text === "rgb(195, 13, 42)" && red.accent === "#C30D2A", JSON.stringify(red));
+  ok("teal product keeps its main colour", !teal.neutral && teal.bg === "rgb(0, 170, 182)" && teal.text === "rgb(0, 170, 182)" && teal.accent === "#00AAB6", JSON.stringify(teal));
+  ok("red product turns the whole accent ramp neutral",
+    red.neutral && red.bg === "rgb(15, 23, 42)" && red.text === "rgb(15, 23, 42)"
+    && red.accent === "#0F172A" && red.focus === "#64748B" && red.subtle === "#F1F5F9"
+    && red.ramp === "#475569 #CBD5E1 #F1F5F9", JSON.stringify(red));
   await page.click("#themeBtn"); await page.waitForTimeout(200);
-  const dark = await page.evaluate(() => { const b = document.querySelector("#ex-button-variant .btn.primary"); const c = getComputedStyle(b); return { bg: c.backgroundColor, fg: c.color }; });
-  ok("dark neutral Primary flips light", dark.bg === "rgb(247, 247, 248)" && dark.fg === "rgb(27, 28, 30)", JSON.stringify(dark));
+  const dark = await page.evaluate(() => {
+    const c = getComputedStyle(document.querySelector("#ex-button-variant .btn.primary"));
+    return { bg: c.backgroundColor, fg: c.color, accent: getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() };
+  });
+  ok("dark neutral Primary flips to light grey", dark.bg === "rgb(148, 163, 184)" && dark.fg === "rgb(23, 23, 25)" && dark.accent === "#94A3B8", JSON.stringify(dark));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
+
+  // Atomic 의 Accent 램프도 함께 회색 — 제품 컬러에서 파생되는 것은 전부 따라온다
+  await go("foundations/colors.html");
+  const ramp = await page.evaluate(() => {
+    const at = document.querySelectorAll('[data-token="--accent-600"]');
+    return { n: at.length, bg: at.length ? getComputedStyle(at[0]).backgroundColor : "" };
+  });
+  ok("Atomic Accent ramp follows the neutral switch", ramp.n === 1 && ramp.bg === "rgb(71, 85, 105)", JSON.stringify(ramp));
   const base = await accent("");
   ok("back to token accent clears the flag", !base.neutral, JSON.stringify(base));
 
