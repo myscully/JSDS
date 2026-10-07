@@ -28,6 +28,8 @@
   --border-default:var(--gray-200);--border-strong:var(--gray-300);--border-subtle:var(--gray-100);--border-focus:var(--accent-500);
   --interaction-inactive:var(--gray-400);--interaction-disable:var(--gray-200);--dimmer:rgba(15,23,42,.65);
   --accent:var(--accent-600);--accent-hover:var(--accent-700);--accent-pressed:var(--accent-800);--accent-subtle:var(--accent-50);--accent-on:var(--gray-0);--accent-inverse:var(--accent-300);
+  /* 행동(버튼 Primary)에 쓰는 색. 기본은 제품 메인 컬러 그대로, 상태색과 겹치면 아래 [data-accent-neutral] 이 중립으로 내린다 */
+  --action:var(--accent);--action-hover:var(--accent-hover);--action-pressed:var(--accent-pressed);--action-on:var(--accent-on);
   --brand:var(--brand-500);--brand-subtle:var(--brand-50);
   --danger:var(--red-500);--danger-hover:var(--red-600);--danger-pressed:var(--red-700);--danger-subtle:var(--red-50);--warning:var(--amber-500);--warning-subtle:var(--amber-50);--success:var(--emerald-500);--success-subtle:var(--emerald-50);--info:var(--sky-500);--info-subtle:var(--sky-50);
   --sev-critical:var(--red-700);--sev-high:var(--red-500);--sev-medium:var(--amber-500);--sev-low:var(--sky-500);--sev-info:var(--gray-500);
@@ -79,6 +81,14 @@
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
   color-scheme:dark;
 }
+
+/* 제품 메인 컬러가 상태색(danger·warning·success·info)과 색상환 15도 미만으로 가까우면 버튼 Primary 만 중립으로 내린다.
+   판정은 app.js 의 applyAccent() 가 하고, 제품은 <html data-accent-neutral> 로 직접 켜거나 --action 을 재정의해 끌 수 있다.
+   라이트의 gray/900 을 다크에 그대로 쓰면 배경에 묻히므로 다크는 밝은 중립으로 뒤집는다(아래 두 벌은 글자까지 같아야 한다). */
+:root[data-accent-neutral]{--action:var(--gray-900);--action-hover:var(--gray-800);--action-pressed:var(--gray-950);--action-on:var(--static-white)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]{--action:var(--neutral-50);--action-hover:var(--neutral-0);--action-pressed:var(--neutral-100);--action-on:var(--neutral-900)}}
+:root[data-theme="dark"][data-accent-neutral]{--action:var(--neutral-50);--action-hover:var(--neutral-0);--action-pressed:var(--neutral-100);--action-on:var(--neutral-900)}
+
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
@@ -519,9 +529,9 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .btn.sm{height:36px;padding:0 14px;font-size:12px}
 .btn.md{height:44px;padding:0 20px;font-size:14px}
 .btn.lg{height:52px;padding:0 26px;font-size:16px}
-.btn.primary{background:var(--accent);color:var(--accent-on)}
-.btn.primary:hover{background:var(--accent-hover)}
-.btn.primary:active{background:var(--accent-pressed)}
+.btn.primary{background:var(--action);color:var(--action-on)}
+.btn.primary:hover{background:var(--action-hover)}
+.btn.primary:active{background:var(--action-pressed)}
 .btn.secondary{background:var(--bg-surface);border-color:var(--border-strong);color:var(--text-primary)}
 .btn.secondary:hover{background:var(--bg-subtle)}
 .btn.secondary:active{background:var(--fill-strong)}

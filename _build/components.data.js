@@ -16,7 +16,7 @@ const COMPONENTS = {
     thumb: `<button type="button" class="btn md primary">저장</button><button type="button" class="btn md secondary">취소</button>`,
     examples: [
       { id: "default", title: "Default", desc: "변형·크기를 지정하지 않은 기본 버튼입니다. 화면의 주 행동 하나에만 씁니다.", html: `<button type="button" class="btn md primary">정책 저장</button>` },
-      { id: "variant", title: "Variant", desc: "우선순위에 따라 Primary(화면당 하나) · Secondary · Tertiary · Text · Danger 를 씁니다.", html: `
+      { id: "variant", title: "Variant", desc: "우선순위에 따라 Primary(화면당 하나) · Secondary · Tertiary · Text · Danger 를 씁니다. 제품 메인 컬러가 상태색과 겹치면 Primary 만 중립색으로 내려갑니다(<a href=\"#/foundations/colors#action\">Colors › Action</a>).", html: `
         <button type="button" class="btn md primary">Primary</button>
         <button type="button" class="btn md secondary">Secondary</button>
         <button type="button" class="btn md tertiary">Tertiary</button>
@@ -47,7 +47,7 @@ const COMPONENTS = {
         <button type="button" class="btn lg primary block" style="max-width:320px">시작하기</button>`, layout: "stack center" },
     ],
     props: [
-      ["variant", "primary | secondary | tertiary | text | danger", "—", "우선순위. danger 는 secondary 와 조합하면 아웃라인"],
+      ["variant", "primary | secondary | tertiary | text | danger", "—", "우선순위. danger 는 secondary 와 조합하면 아웃라인"], ["--action", "token", "var(--accent)", "Primary 배경. 제품 메인 컬러가 상태색과 15도 미만이면 중립(라이트 gray/900 · 다크 밝은 중립)으로 내려갑니다"],
       ["size", "sm | md | lg", "md", "높이 36 / 44 / 52"],
       [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
       [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>"],
