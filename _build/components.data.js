@@ -533,11 +533,29 @@ const COMPONENTS = {
             <li class="menu-item" role="option" aria-disabled="true">외주(권한 없음)</li>
           </ul>
         </div>`, layout: "tall top" },
+      { id: "long", title: "긴 목록", desc: "항목이 8개를 넘으면 메뉴 안에서 스크롤됩니다(최대 높이 320). 더 길어지거나 이름을 알고 찾는 목록이면 검색이 있는 목록을 검토하세요.", html: `
+        <div class="dropdown open">
+          <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="true">보안팀</button>
+          <ul class="menu" role="listbox" aria-label="그룹">
+            <li class="menu-item" role="option">전체</li>
+            <li class="menu-item" role="option">영업팀</li>
+            <li class="menu-item" role="option">개발팀</li>
+            <li class="menu-item" role="option">인프라팀</li>
+            <li class="menu-item on" role="option" aria-selected="true">보안팀</li>
+            <li class="menu-item" role="option">기획팀</li>
+            <li class="menu-item" role="option">디자인팀</li>
+            <li class="menu-item" role="option">QA팀</li>
+            <li class="menu-item" role="option">고객지원팀</li>
+            <li class="menu-item" role="option">재무팀</li>
+            <li class="menu-item" role="option">인사팀</li>
+            <li class="menu-item" role="option">법무팀</li>
+          </ul>
+        </div>`, layout: "tall top" },
       { id: "disabled", title: "Disabled", desc: "권한이 없거나 선택할 값이 없는 상태입니다.", html: `
         <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" disabled><span class="placeholder">권한 없음</span></button></div>` },
     ],
     props: [[".dropdown", "container", "—", "position:relative. 열림은 .open"], [".trigger", "button", "—", "고른 값을 표시. 값이 없으면 안에 .placeholder"], [".menu", "ul", "—", "role=listbox · aria-label 필수"], [".menu-item", "li", "—", "role=option. 고른 항목 .on + aria-selected, 비활성 aria-disabled"]],
-    spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · placeholder text/tertiary"], ["Placement", "필터 툴바, 폼 안의 선택 필드"]],
+    spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200 · 메뉴 최대 높이 320(약 8개, 넘으면 스크롤)"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · placeholder text/tertiary"], ["Placement", "필터 툴바, 폼 안의 선택 필드"]],
     figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {} }, states: ["closed", "open", "selected", "disabled"] },
     guideline: { do: ["고른 값을 트리거에 항상 표시합니다.", "옵션이 10개를 넘으면 검색이 있는 목록을 함께 검토합니다."], dont: ["옵션이 2~3개인데 드롭다운으로 숨기지 않습니다.", "실행 액션을 옵션으로 섞지 않습니다."] },
   },

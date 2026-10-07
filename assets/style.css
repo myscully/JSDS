@@ -399,7 +399,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .example:has(.datepicker.open[data-ds-opened="1"],.dropdown.open[data-ds-opened="1"]) .example-preview{overflow:visible;border-radius:var(--radius-lg) var(--radius-lg) 0 0;z-index:1}
 .example-preview.left{justify-content:flex-start}
 .example-preview.top{align-items:flex-start}
-.example-preview.stack{flex-direction:column;align-items:stretch;justify-content:flex-start}
+.example-preview.stack{flex-direction:column;align-items:stretch;}
 .example-preview.stack.center{align-items:center}
 .example-preview.tall{min-height:340px;align-items:flex-start}
 .example-preview.white{background:var(--bg-surface)}
@@ -717,7 +717,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .dropdown .trigger[disabled]{opacity:.4;cursor:not-allowed}
 .dropdown .menu{position:absolute;top:calc(100% + 4px);left:0;display:none;z-index:5;min-width:100%}
 .dropdown.open .menu{display:block}
-.menu{min-width:200px;padding:6px;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);box-shadow:var(--shadow-2);list-style:none;margin:0}
+.menu{min-width:200px;padding:6px;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);box-shadow:var(--shadow-2);list-style:none;margin:0;max-height:min(320px,60vh);overflow-y:auto;overscroll-behavior:contain}   /* 항목 약 8개까지 보이고 그 뒤로는 메뉴 안에서 스크롤 */
 .menu-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:14px;cursor:pointer;color:var(--text-primary);white-space:nowrap}
 .menu-item:hover{background:var(--bg-subtle)}
 .menu-item.on{background:var(--accent-subtle);color:var(--accent);font-weight:600}
@@ -730,7 +730,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 
 /* Tab */
 .tabs{display:flex;gap:24px;border-bottom:1px solid var(--border-default);width:100%}
-.tabs .tab{display:inline-flex;align-items:center;gap:6px;padding:10px 2px;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;font:inherit;font-size:14px;font-weight:500;color:var(--text-tertiary);cursor:pointer;white-space:nowrap;transition:color var(--motion-fast)}
+.tabs .tab{display:inline-flex;align-items:center;padding:10px 2px;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;font:inherit;font-size:14px;font-weight:500;color:var(--text-tertiary);cursor:pointer;white-space:nowrap;transition:color var(--motion-fast)}
 .tabs .tab:hover{color:var(--text-primary)}
 .tabs .tab.on{color:var(--text-primary);font-weight:700;border-bottom-color:var(--text-primary)}
 .tabs .tab[disabled]{opacity:.4;cursor:not-allowed}
