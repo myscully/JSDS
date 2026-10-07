@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 105 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 112 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -141,6 +141,34 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.locator("#ex-button-state .btn").first().evaluate((e) => e.click());
   await page.waitForTimeout(60);
   ok("a normal button still fires", (await page.evaluate(() => window.__hit)) === 1);
+
+  // Accordion: disabled 는 마우스·키보드 양쪽을 막고 보조기기에도 알려야 한다 + name 그룹 단일 개방 + flat 마지막 줄
+  await go("components/accordion.html");
+  const accDis = page.locator("#ex-accordion-flat .accordion.disabled");
+  ok("disabled accordion carries aria-disabled", (await accDis.locator("summary").getAttribute("aria-disabled")) === "true");
+  // pointer-events:none 이라 Playwright 의 click() 은 actionability 에서 멈춘다 — 요소에게 직접 클릭을 보낸다
+  await accDis.locator("summary").evaluate((e) => e.click());
+  await page.waitForTimeout(120);
+  ok("disabled accordion ignores a mouse click", (await accDis.evaluate((e) => e.open)) === false);
+  await accDis.locator("summary").evaluate((e) => e.focus());
+  await page.keyboard.press("Enter"); await page.keyboard.press("Space");
+  await page.waitForTimeout(120);
+  ok("disabled accordion ignores Enter and Space", (await accDis.evaluate((e) => e.open)) === false);
+  await page.locator("#ex-accordion-group .accordion").nth(1).locator("summary").evaluate((e) => e.click());
+  await page.waitForTimeout(350);
+  const accGrp = await page.evaluate(() => [...document.querySelectorAll("#ex-accordion-group .accordion")].map((d) => d.open));
+  ok("name group keeps only one panel open", JSON.stringify(accGrp) === "[false,true,false]", JSON.stringify(accGrp));
+  const accFlat = await page.evaluate(() => {
+    const it = [...document.querySelectorAll("#ex-accordion-flat .accordion.flat")];
+    return { last: getComputedStyle(it[it.length - 1]).borderBottomWidth, first: getComputedStyle(it[0]).borderBottomWidth };
+  });
+  ok("last flat row drops its bottom border", accFlat.last === "0px" && accFlat.first === "1px", JSON.stringify(accFlat));
+  // 보간 중간값을 재면 경쟁 조건이 되므로 전환 선언 자체를 본다
+  const accMotion = await page.evaluate(() => {
+    const d = document.querySelector("#ex-accordion-basic .accordion");
+    return { prop: getComputedStyle(d, "::details-content").transitionProperty, size: getComputedStyle(d).interpolateSize };
+  });
+  ok("accordion body height is transitioned", /height/.test(accMotion.prop) && accMotion.size === "allow-keywords", JSON.stringify(accMotion));
 
   // Select button, chip, tile
   await go("components/select-button.html");

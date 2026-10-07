@@ -1,7 +1,7 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DataTable } from "./data-table/DataTable";
-import { Accordion } from "./accordion/Accordion";
+import { Accordion, AccordionGroup } from "./accordion/Accordion";
 import { Donut } from "./data-visual/DataVisual";
 
 type R = { id: string; name: string; n: number };
@@ -44,9 +44,44 @@ describe("Accordion", () => {
     const onOpenChange = vi.fn();
     render(<Accordion title="제목" onOpenChange={onOpenChange}>내용</Accordion>);
     const d = document.querySelector("details")!;
-    // jsdom 은 summary 클릭 시 toggle 이벤트를 발생시키지 않을 수 있어 직접 토글
-    d.open = true; d.dispatchEvent(new Event("toggle"));
+    // jsdom 은 summary 클릭 시 toggle 이벤트를 발생시키지 않을 수 있어 직접 토글(상태가 바뀌므로 act 로 감싼다)
+    act(() => { d.open = true; d.dispatchEvent(new Event("toggle")); });
     expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it("flat · sm 은 details 와 그룹에 클래스로", () => {
+    render(<AccordionGroup flat data-testid="g"><Accordion flat sm title="제목">내용</Accordion></AccordionGroup>);
+    expect(screen.getByTestId("g").className).toBe("accordion-group flat");
+    expect(document.querySelector("details")!.className).toBe("accordion sm flat");
+  });
+
+  it("disabled 는 tabIndex -1 과 aria-disabled 를 함께 단다", () => {
+    render(<Accordion disabled title="제목">내용</Accordion>);
+    const sm = document.querySelector("summary")!;
+    expect(sm.tabIndex).toBe(-1);
+    expect(sm.getAttribute("aria-disabled")).toBe("true");
+  });
+
+  /* aria-disabled 는 skeleton 의 STATE_ATTRS 라, 비활성이 아닐 때 "false" 로 남으면 HTML 예제와 골격이 어긋난다 */
+  it("비활성이 아니면 aria-disabled 속성 자체가 없다", () => {
+    render(<Accordion title="제목">내용</Accordion>);
+    const sm = document.querySelector("summary")!;
+    expect(sm.hasAttribute("aria-disabled")).toBe(false);
+    expect(sm.hasAttribute("tabindex")).toBe(false);
+  });
+
+  it("disabled 는 클릭을 삼킨다", async () => {
+    const onOpenChange = vi.fn();
+    render(<Accordion disabled title="제목" onOpenChange={onOpenChange}>내용</Accordion>);
+    await userEvent.click(document.querySelector("summary")!, { pointerEventsCheck: 0 });
+    expect(document.querySelector("details")!.open).toBe(false);
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it("extra 는 summary small · name 은 details 속성", () => {
+    render(<Accordion name="faq" title="제목" extra="3개 설정">내용</Accordion>);
+    expect(document.querySelector("summary small")!.textContent).toBe("3개 설정");
+    expect(document.querySelector("details")!.getAttribute("name")).toBe("faq");
   });
 });
 

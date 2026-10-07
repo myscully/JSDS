@@ -89,7 +89,8 @@
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+/* * 는 가상 요소를 고르지 않는다 — Accordion 의 ::details-content 높이 전환을 따로 꺼야 한다 */
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::details-content{transition:none!important;animation:none!important}}
 html{height:100%}
 body{min-height:100%}
 body{margin:0;background:var(--bg-canvas);color:var(--text-primary);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -813,19 +814,30 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .avatar.sm{width:24px;height:24px;font-size:10px}
 
 /* Accordion */
-.accordion{border:1px solid var(--border-default);border-radius:var(--radius-lg);background:var(--bg-surface);width:100%}
+.accordion{border:1px solid var(--border-default);border-radius:var(--radius-lg);background:var(--bg-surface);width:100%;interpolate-size:allow-keywords}
 .accordion summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;font-weight:600;font-size:16px;line-height:24px;cursor:pointer}   /* Title/1 의 line-height — 빠지면 본문 1.6 을 상속해 헤더가 54 가 된다(스펙 52) */
 .accordion summary::-webkit-details-marker{display:none}
 .accordion summary::after{content:"";width:16px;height:16px;flex:none;background:var(--text-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
 .accordion[open] summary::after{transform:rotate(180deg)}
 .accordion summary small{font-weight:400;color:var(--text-tertiary);margin-left:auto;font-size:12px}
+.accordion summary>svg{flex:none}   /* 제목이 길어도 찌그러지지 않게 — 셰브론(::after)과 같은 보호 */
 .accordion .body{padding:0 20px 16px;font-size:14px;color:var(--text-secondary);line-height:1.6}
 .accordion.disabled{opacity:.5;pointer-events:none}
 .accordion.flat{border:0;border-radius:0;border-bottom:1px solid var(--border-default)}
 .accordion.flat summary{padding:14px 4px}
 .accordion.flat .body{padding:0 4px 16px}
+.accordion.flat:last-child{border-bottom:0}   /* 카드 바닥에 선이 매달리지 않게 */
+/* compact — 표 안이나 좁은 사이드 패널용. 헤더 44(=24 line-height + 10·2), 타이포는 그대로 두고 밀도만 줄인다 */
+.accordion.sm summary{padding:10px 20px}
+.accordion.sm .body{padding:0 20px 14px}
+.accordion.sm.flat summary{padding:10px 4px}
+.accordion.sm.flat .body{padding:0 4px 14px}
 .accordion-group{display:flex;flex-direction:column;gap:8px;width:100%}
-.accordion-group.flat{gap:0}
+.accordion-group.flat{gap:0;background:var(--bg-surface);padding:0 20px;border-radius:var(--radius-lg)}
+/* 열고 닫을 때 높이 보간. @supports 를 쓰지 않는다 — 코드 패널 추출기가 평면 규칙만 읽고,
+   ::details-content 를 모르는 브라우저는 셀렉터 자체가 무효가 되어 규칙이 버려지고 즉시 열린다(= 종전 동작). */
+.accordion::details-content{height:0;overflow:hidden;transition:height var(--motion-base),content-visibility var(--motion-base);transition-behavior:allow-discrete}
+.accordion[open]::details-content{height:auto}
 
 /* Card */
 .card{background:var(--bg-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);padding:var(--card-pad);display:flex;flex-direction:column;gap:12px;min-width:260px;position:relative}

@@ -1,4 +1,4 @@
-import { forwardRef, type CSSProperties, type DetailsHTMLAttributes, type HTMLAttributes, type ReactNode, type SyntheticEvent } from "react";
+import { forwardRef, type CSSProperties, type DetailsHTMLAttributes, type HTMLAttributes, type MouseEvent, type ReactNode, type SyntheticEvent } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 
@@ -14,6 +14,8 @@ export interface AccordionProps extends Omit<DetailsHTMLAttributes<HTMLDetailsEl
   name?: string;
   /** 보더 없는 구분선형 (카드 안) */
   flat?: boolean;
+  /** compact — 헤더 44 */
+  sm?: boolean;
   disabled?: boolean;
   /** .body 스타일 (예: max-height + overflow) */
   bodyStyle?: CSSProperties;
@@ -21,7 +23,7 @@ export interface AccordionProps extends Omit<DetailsHTMLAttributes<HTMLDetailsEl
 
 /** 네이티브 details/summary 기반 아코디언 — JS 없이 동작, React 는 상태만 동기화 */
 export const Accordion = forwardRef<HTMLDetailsElement, AccordionProps>(function Accordion(
-  { title, extra, open, defaultOpen = false, onOpenChange, name, flat, disabled, bodyStyle, className, children, onToggle, ...rest },
+  { title, extra, open, defaultOpen = false, onOpenChange, name, flat, sm, disabled, bodyStyle, className, children, onToggle, ...rest },
   ref,
 ) {
   const [isOpen, set] = useControllable<boolean>({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
@@ -30,9 +32,12 @@ export const Accordion = forwardRef<HTMLDetailsElement, AccordionProps>(function
     set(e.currentTarget.open);
   };
   const extraProps = name ? ({ name } as Record<string, string>) : {};
+  /* disabled 는 summary 클릭을 삼켜 막는다 — CSS 의 pointer-events 는 마우스만 막고,
+     포커스를 강제로 받은 summary 는 Enter 로 열렸다(정적 HTML 은 ds.js 가드가 같은 일을 한다) */
+  const swallow = disabled ? (e: MouseEvent<HTMLElement>) => { e.preventDefault(); e.stopPropagation(); } : undefined;
   return (
-    <details ref={ref} className={cx("accordion", { flat, disabled }, className)} open={isOpen} onToggle={toggle} {...extraProps} {...rest}>
-      <summary tabIndex={disabled ? -1 : undefined}>
+    <details ref={ref} className={cx("accordion", { sm, flat, disabled }, className)} open={isOpen} onToggle={toggle} {...extraProps} {...rest}>
+      <summary tabIndex={disabled ? -1 : undefined} aria-disabled={disabled || undefined} onClickCapture={swallow}>
         {title}
         {extra !== undefined && <> <small>{extra}</small></>}
       </summary>

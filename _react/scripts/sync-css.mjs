@@ -21,7 +21,7 @@ const samples = src.slice(a, b + LIB.SAMPLES_END.length);
 
 const base = `/* ---------- Base (패키지용 최소 규칙) ---------- */
 *{box-sizing:border-box}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion:reduce){*,*::details-content{transition:none!important;animation:none!important}}
 :focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}
 [hidden]{display:none!important}
 /* 앱 루트(또는 body)에 .ds-root 를 붙이면 서체·색·배경 토큰이 적용됩니다 */
