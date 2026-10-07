@@ -32,8 +32,10 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   ok("keyboard nav selects next item", await dd2.evaluate((e) => e.querySelector(".menu-item.on").textContent === "인프라팀"));
   await dd2.locator(".trigger").click(); await page.keyboard.press("Escape");
   ok("Esc closes dropdown", await dd2.evaluate((e) => !e.classList.contains("open")));
-  // Select: 긴 목록은 메뉴 안에서 스크롤 (뒤 페이지는 따라 움직이지 않는다)
-  const longMenu = page.locator(`${ex("select", "long")} .menu`);
+  // Select: 긴 목록(Default)은 메뉴 안에서 스크롤 (뒤 페이지는 따라 움직이지 않는다)
+  const longMenu = page.locator(`${ex("select", "default")} .menu`);
+  await page.locator(`${ex("select", "default")} .trigger`).click();
+  await page.waitForTimeout(120);
   const sc = await longMenu.evaluate((m) => ({
     maxH: Math.round(parseFloat(getComputedStyle(m).maxHeight)),
     overflow: getComputedStyle(m).overflowY,
@@ -48,11 +50,12 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.keyboard.press("Escape");
 
   // Select: 아래 공간이 모자라면 위로 뒤집어 연다 (.up)
-  const flip = async (y) => {
-    const d = page.locator(`${ex("select", "long")} .dropdown`);
-    await d.evaluate((e) => { if (e.classList.contains("open")) e.querySelector(".trigger").click(); });
-    await d.evaluate((e, top) => { const r = e.querySelector(".trigger").getBoundingClientRect(); window.scrollTo({ top: window.scrollY + r.top - top, behavior: "instant" }); }, y);
+  /* 트리거를 뷰포트 아래쪽으로 "스크롤"할 수는 없으므로(예제가 페이지 위쪽에 있다) 뷰포트 높이로 여유를 만든다 */
+  const flip = async (h) => {
+    await page.setViewportSize({ width: 1440, height: h });
     await page.waitForTimeout(120);
+    const d = page.locator(`${ex("select", "default")} .dropdown`);
+    await d.evaluate((e) => { if (e.classList.contains("open")) e.querySelector(".trigger").click(); });
     await d.evaluate((e) => e.querySelector(".trigger").click());
     await page.waitForTimeout(120);
     return d.evaluate((e) => {
@@ -60,11 +63,11 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
       return { up: e.classList.contains("up"), room: Math.round(window.innerHeight - tr.bottom), above: m.bottom <= tr.top, inside: m.top >= -1 && m.bottom <= window.innerHeight + 1 };
     });
   };
-  const down = await flip(160), upd = await flip(700);
+  const down = await flip(1000), upd = await flip(560);
   ok("menu opens down when there is room", !down.up && !down.above && down.inside, JSON.stringify(down));
   ok("menu flips up when there is not", upd.up && upd.above && upd.inside, JSON.stringify(upd));
   await page.keyboard.press("Escape");
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await page.setViewportSize({ width: 1440, height: 900 });
 
   // Dropdown (액션 메뉴)
   await go("components/dropdown.html");
