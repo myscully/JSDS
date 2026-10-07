@@ -756,7 +756,7 @@ const COMPONENTS = {
     desc: "긴 설명이나 고급 설정을 접어 두고 필요할 때 펼칩니다. 네이티브 <code>details/summary</code> 를 써 JS 없이 동작하며, 펼침 상태 전달과 키보드 조작(Tab · Enter · Space)도 브라우저 기본 동작이라 기본·그룹에는 별도 ARIA 가 필요 없습니다. 예외는 비활성뿐입니다 — <code>pointer-events</code> 와 <code>tabindex=\"-1\"</code> 은 마우스·키보드만 막고 스크린리더에는 아무것도 알리지 않으므로 <code>aria-disabled=\"true\"</code> 를 함께 둡니다.",
     thumb: `<details class="accordion" open style="min-width:200px"><summary style="padding:10px 14px;font-size:12px">고급 설정</summary><div class="body" style="padding:0 14px 10px;font-size:12px">내용</div></details>`,
     examples: [
-      { id: "basic", title: "Default", desc: "details.accordion > summary + .body. open 속성으로 초기 펼침.", html: `
+      { id: "basic", title: "Default", desc: "details.accordion > summary + .body. open 속성으로 초기 펼침.", layout: "top", html: `
         <details class="accordion" open style="max-width:560px">
           <summary>고급 탐지 옵션 <small>3개 설정</small></summary>
           <div class="body">휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.</div>
