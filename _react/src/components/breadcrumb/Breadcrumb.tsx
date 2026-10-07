@@ -32,7 +32,8 @@ export const BreadcrumbItem = forwardRef<HTMLLIElement, BreadcrumbItemProps>(fun
   const Link: ElementType = as ?? "a";
   return (
     <li ref={ref} aria-current={current ? "page" : undefined} {...rest}>
-      {current ? children : <Link href={href} {...linkProps}>{children}</Link>}
+      {/* 현재 항목도 span 으로 — li 가 flex 라 맨 텍스트에는 말줄임(text-overflow)이 걸리지 않는다 */}
+      {current ? <span>{children}</span> : <Link href={href} {...linkProps}>{children}</Link>}
     </li>
   );
 });

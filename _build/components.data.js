@@ -604,29 +604,37 @@ const COMPONENTS = {
   "breadcrumb": {
     status: "ready", react: ["Breadcrumb","BreadcrumbItem","BreadcrumbMore"], css: [".breadcrumb"],
     desc: "현재 위치의 계층 경로를 보여주고 상위로 돌아가게 합니다. 3단계 이상 깊은 상세 화면에 씁니다.",
-    thumb: `<ol class="breadcrumb"><li><a href="#">정책</a></li><li><a href="#">USB 제어</a></li><li aria-current="page">외부 저장장치 차단</li></ol>`,
+    thumb: `<ol class="breadcrumb"><li><a href="#">정책</a></li><li><a href="#">USB 제어</a></li><li aria-current="page"><span>외부 저장장치 차단</span></li></ol>`,
     examples: [
-      { id: "basic", title: "Default", desc: "nav > ol. 마지막 항목은 링크 없이 aria-current=page.", html: `
+      { id: "basic", title: "Default", desc: "nav > ol. 마지막 항목은 링크 없이 aria-current=page 이고, 라벨은 span 으로 감쌉니다 — 220px 를 넘으면 말줄임.", html: `
         <nav aria-label="현재 위치">
           <ol class="breadcrumb">
             <li><a href="#">정책</a></li>
             <li><a href="#">USB 제어</a></li>
-            <li aria-current="page">외부 저장장치 차단</li>
+            <li aria-current="page"><span>외부 저장장치 차단</span></li>
           </ol>
         </nav>` },
       { id: "collapsed", title: "Collapsed", desc: "가운데가 2개 이상일 때(5단계 이상) 접습니다. 첫 항목과 끝 2개는 남기고 가운데만 … 로 묶으며, 누르면 펼쳐집니다.", html: `
         <nav aria-label="현재 위치">
           <ol class="breadcrumb">
-            <li><a href="#">${I("home")}</a></li>
+            <li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li>
             <li><button type="button" class="more" aria-label="상위 경로 펼치기" data-items="정책|USB 제어">${I("dots",14)}</button></li>
             <li><a href="#">PC-2041</a></li>
-            <li aria-current="page">이벤트 #48213</li>
+            <li aria-current="page"><span>이벤트 #48213</span></li>
           </ol>
         </nav>` },
     ],
-    props: [[".breadcrumb", "ol", "—", "nav[aria-label] 안의 ol"], ["li a", "link", "—", "상위 경로 링크"], ["li[aria-current=page]", "current", "—", "현재 페이지. 링크 없음, Semibold"], [".more", "button", "—", "접힌 경로 펼치기"], [".more[data-items]", "attribute", "—", "접은 경로를 <code>|</code> 로 이어 둡니다(<code>\"정책|USB 제어\"</code>). 누르면 그 자리에 링크로 펼칩니다 — ds.js 담당. React 는 <code>BreadcrumbMore</code> 의 onClick 으로 직접 처리"], [".breadcrumb li a svg", "element", "—", "첫 항목의 홈 아이콘처럼 링크 앞에 둘 수 있습니다(14px)"]],
-    spec: [["Size", "높이 22 · 항목 간격 6"], ["Container", "없음(텍스트 행)"], ["Label", "Body/2 14 tertiary · 현재 primary Semibold"], ["Placement", "페이지 타이틀 위 8px"]],
-    figma: { frame: "Breadcrumb", sizes: { md: { h: 22 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover"] },
+    props: [
+      [".breadcrumb", "ol", "—", "<code>nav[aria-label]</code> 안의 ol. React <code>Breadcrumb</code> 의 <code>label</code> 이 그 aria-label"],
+      ["li a", "link", "—", "상위 경로 링크(React <code>BreadcrumbItem href</code>). 220px 를 넘으면 말줄임 — 전체 문구는 <code>title</code> 로 함께"],
+      ["li[aria-current=page] > span", "current", "—", "현재 페이지. 링크 없이 Semibold. 라벨을 <code>span</code> 으로 감싸야 말줄임이 걸립니다(li 가 flex) — React <code>current</code> 가 자동으로 감쌉니다"],
+      ["a.icon", "boolean", "false", "홈 아이콘처럼 아이콘만 있는 링크. <code>aria-label</code> 필수 — 없으면 이름 없는 링크로 읽힙니다. 클릭 영역은 24×24"],
+      [".more", "button", "—", "접힌 경로 펼치기(React <code>BreadcrumbMore</code>). 클릭 영역 24×24"],
+      [".more[data-items]", "attribute", "—", "<b>필수</b> — 접은 경로를 <code>|</code> 로 이어 둡니다(<code>\"정책|USB 제어\"</code>). 누르면 그 자리에 링크로 펼치고 첫 링크로 포커스를 옮기며 <code>ds:expand</code> 를 발행합니다. 비어 있으면 아무 일도 하지 않습니다 — ds.js 담당. React 는 <code>BreadcrumbMore</code> 의 onClick 으로 직접 처리"],
+      [".breadcrumb li a svg", "element", "—", "링크 앞 아이콘. 홈 아이콘 18 · <code>.more</code> 아이콘 14"],
+    ],
+    spec: [["Size", "높이 22(텍스트 행) · 아이콘이 들어간 행은 24 · 항목 간격 6"], ["Container", "없음(텍스트 행)"], ["Label", "Body/2 14 tertiary · 현재 primary Semibold"], ["Placement", "페이지 타이틀 위 8px"]],
+    figma: { frame: "Breadcrumb", sizes: { md: { h: 22 }, icon: { h: 24 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover", "focus"] },
   },
 
   /* ------------------------------------------------ Pagination */

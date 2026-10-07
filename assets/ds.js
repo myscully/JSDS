@@ -269,7 +269,7 @@
     // Tabs
     if ((el = closest(t, ".tabs .tab")) && !el.disabled) { var tabs = closest(el, ".tabs"); activate(tabs, ".tab", el, "aria-selected"); var pn = tabs.nextElementSibling; if (pn && pn.classList.contains("tab-panel") && !pn.hasAttribute("data-static")) pn.textContent = el.textContent.trim().replace(/\s*\d+$/, "") + " 탭의 내용이 여기에 표시됩니다."; fire(el, "ds:tab"); return; }
     // Breadcrumb 펼치기
-    if ((el = closest(t, ".breadcrumb .more"))) { var li = closest(el, "li"), items = (el.dataset.items || "").split("|").map(function (s) { return s.trim(); }).filter(Boolean); if (li && items.length) { items.forEach(function (s) { var n = doc.createElement("li"); var a2 = doc.createElement("a"); a2.href = "#"; a2.textContent = s; n.appendChild(a2); li.parentNode.insertBefore(n, li); }); li.remove(); } return; }
+    if ((el = closest(t, ".breadcrumb .more"))) { var li = closest(el, "li"), items = (el.dataset.items || "").split("|").map(function (s) { return s.trim(); }).filter(Boolean); if (li && items.length) { var first = null; items.forEach(function (s) { var n = doc.createElement("li"); var a2 = doc.createElement("a"); a2.href = "#"; a2.textContent = s; n.appendChild(a2); li.parentNode.insertBefore(n, li); if (!first) first = a2; }); var ol = li.parentNode; li.remove(); /* 버튼이 사라지니 포커스를 펼친 첫 링크로 — 안 옮기면 body 로 떨어진다 */ if (first) first.focus(); fire(ol, "ds:expand", { items: items }); } return; }
     // Onboard 단계
     if ((el = closest(t, ".onboard [data-step]")) && !el.disabled) { stepTo(closest(el, ".onboard"), el.dataset.step === "prev" ? -1 : 1); return; }
     // 선택형 카드 (데모 링크)
