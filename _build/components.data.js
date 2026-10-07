@@ -628,7 +628,7 @@ const COMPONENTS = {
             <li aria-current="page">외부 저장장치 차단</li>
           </ol>
         </nav>` },
-      { id: "collapsed", title: "Collapsed", desc: "4단계 이상은 중간을 … 로 접습니다(클릭하면 펼침).", html: `
+      { id: "collapsed", title: "Collapsed", desc: "가운데가 2개 이상일 때(5단계 이상) 접습니다. 첫 항목과 끝 2개는 남기고 가운데만 … 로 묶으며, 누르면 펼쳐집니다.", html: `
         <nav aria-label="현재 위치">
           <ol class="breadcrumb">
             <li><a href="#">${I("home")}</a></li>
@@ -638,10 +638,10 @@ const COMPONENTS = {
           </ol>
         </nav>` },
     ],
-    props: [[".breadcrumb", "ol", "—", "nav[aria-label] 안의 ol"], ["li a", "link", "—", "상위 경로 링크"], ["li[aria-current=page]", "current", "—", "현재 페이지. 링크 없음, Semibold"], [".more", "button", "—", "접힌 경로 펼치기"]],
-    spec: [["Size", "높이 20 · 항목 간격 6"], ["Container", "없음(텍스트 행)"], ["Label", "Body/2 13.5 tertiary · 현재 primary Semibold"], ["Placement", "페이지 타이틀 위 8px"]],
-    figma: { frame: "Breadcrumb", sizes: { md: { h: 20 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover"] },
-    guideline: { do: ["사이드 내비게이션 구조와 같은 이름을 씁니다."], dont: ["1~2단계 화면에는 쓰지 않습니다.", "현재 페이지를 링크로 만들지 않습니다."] },
+    props: [[".breadcrumb", "ol", "—", "nav[aria-label] 안의 ol"], ["li a", "link", "—", "상위 경로 링크"], ["li[aria-current=page]", "current", "—", "현재 페이지. 링크 없음, Semibold"], [".more", "button", "—", "접힌 경로 펼치기"], [".more[data-items]", "attribute", "—", "접은 경로를 <code>|</code> 로 이어 둡니다(<code>\"정책|USB 제어\"</code>). 누르면 그 자리에 링크로 펼칩니다 — ds.js 담당. React 는 <code>BreadcrumbMore</code> 의 onClick 으로 직접 처리"], [".breadcrumb li a svg", "element", "—", "첫 항목의 홈 아이콘처럼 링크 앞에 둘 수 있습니다(14px)"]],
+    spec: [["Size", "높이 22 · 항목 간격 6"], ["Container", "없음(텍스트 행)"], ["Label", "Body/2 14 tertiary · 현재 primary Semibold"], ["Placement", "페이지 타이틀 위 8px"]],
+    figma: { frame: "Breadcrumb", sizes: { md: { h: 22 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover"] },
+    guideline: { do: ["사이드 내비게이션 구조와 같은 이름을 씁니다."], dont: ["1~2단계 화면에는 쓰지 않습니다.", "현재 페이지를 링크로 만들지 않습니다.", "가운데가 1개뿐인데 접지 않습니다 — … 버튼이 그 자리를 그대로 차지합니다."] },
   },
 
   /* ------------------------------------------------ Pagination */
