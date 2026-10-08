@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 138 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 142 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -236,6 +236,37 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
     return { 버튼: Math.round(r.width) + "x" + Math.round(r.height), 아이콘: Math.round(svg.width) };
   });
   ok("lg icon button renders at 52 with a 20px icon", lgIcon.버튼 === "52x52" && lgIcon.아이콘 === 20, JSON.stringify(lgIcon));
+  // 링크는 disabled 속성을 못 가진다 — React as="a" + disabled 는 aria-disabled 로만 나왔고 CSS·JS 가 그걸 몰랐다
+  await page.evaluate(() => {
+    const prev = document.querySelector("#ex-button-state .example-preview");
+    prev.insertAdjacentHTML("beforeend", '<a href="#dead" id="dis-link" class="btn md primary" aria-disabled="true">비활성 링크</a>');
+    window.__navHit = 0;
+    document.getElementById("dis-link").addEventListener("click", () => window.__navHit++);
+  });
+  const disLink = await page.evaluate(() => {
+    const e = document.getElementById("dis-link"); const c = getComputedStyle(e);
+    return { opacity: c.opacity, pointerEvents: c.pointerEvents, focusable: e.tabIndex >= 0 };
+  });
+  ok("disabled link button looks disabled", disLink.opacity === "0.4" && disLink.pointerEvents === "none" && disLink.focusable, JSON.stringify(disLink));
+  await page.locator("#dis-link").evaluate((e) => e.click());
+  await page.waitForTimeout(120);
+  ok("disabled link button ignores a mouse click", (await page.evaluate(() => location.hash)) !== "#dead");
+  // pointer-events:none 는 마우스만 막는다 — 이 케이스가 ds.js 캡처 가드를 밟는 유일한 경로
+  await page.locator("#dis-link").evaluate((e) => e.focus());
+  await page.keyboard.press("Enter"); await page.waitForTimeout(150);
+  ok("disabled link button ignores Enter", (await page.evaluate(() => location.hash)) !== "#dead", await page.evaluate(() => location.hash || "(없음)"));
+  // text 변형은 다크 패널 위에서 4.08 이었다 — --accent-text 가 한 단계 밝게 잡는다
+  await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+  await page.waitForTimeout(250);
+  const textDark = await page.evaluate(() => {
+    const e = document.querySelector("#ex-button-variant .btn.text");
+    const res = (tok) => { const d = document.createElement("div"); d.style.color = tok; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
+    return { fg: getComputedStyle(e).color, panel: res("var(--bg-panel)"), canvas: res("var(--bg-canvas)") };
+  });
+  ok("text button meets AA on a dark panel", ratio(textDark.fg, textDark.panel) >= 4.5 && ratio(textDark.fg, textDark.canvas) >= 4.5,
+    `panel ${ratio(textDark.fg, textDark.panel)} · canvas ${ratio(textDark.fg, textDark.canvas)}`);
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+  await page.waitForTimeout(200);
 
   // Accordion: disabled 는 마우스·키보드 양쪽을 막고 보조기기에도 알려야 한다 + name 그룹 단일 개방 + flat 마지막 줄
   await go("components/accordion.html");

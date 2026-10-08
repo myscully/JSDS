@@ -27,8 +27,13 @@ describe("Button", () => {
     expect(b).toBeDisabled();
     await userEvent.click(b, { pointerEventsCheck: 0 });
     expect(onClick).not.toHaveBeenCalled();
-    render(<Button as="a" href="#x" disabled>링크 비활성</Button>);
-    expect(screen.getByRole("link", { name: "링크 비활성" })).toHaveAttribute("aria-disabled", "true");
+    /* 링크는 disabled 속성을 못 가진다 — aria-disabled 만 내보내고 클릭은 막지 않고 있었다 */
+    const onLink = vi.fn();
+    render(<Button as="a" href="#x" disabled onClick={onLink}>링크 비활성</Button>);
+    const link = screen.getByRole("link", { name: "링크 비활성" });
+    expect(link).toHaveAttribute("aria-disabled", "true");
+    await userEvent.click(link, { pointerEventsCheck: 0 });
+    expect(onLink).not.toHaveBeenCalled();
   });
 
   it("block · leading/trailing", () => {
