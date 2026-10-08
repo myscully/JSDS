@@ -51,7 +51,7 @@ const COMPONENTS = {
       ["variant", "primary | secondary | tertiary | text | danger", "—", "우선순위. danger 는 secondary 와 조합하면 아웃라인"],
       ["size", "sm | md | lg", "md", "높이 36 / 44 / 52"],
       [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
-      [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>"],
+      [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
       [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(8px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
       ["disabled", "attribute", "—", "비활성. 40% 불투명"],
       ["type", "button | submit | reset", "button", "폼 안에서는 명시"],
@@ -123,7 +123,6 @@ const COMPONENTS = {
     props: [
       [".searchbar", "container", "—", "svg + input(+ kbd / .clear). role=search"],
       ["size", "(md) | lg", "md", "높이 40 / 48"],
-      [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>"],
       ["kbd", "element", "—", "단축키 표시(전역 검색)"],
       [".clear", "button", "—", "값 지우기. 값이 있을 때만 렌더"],
     ],

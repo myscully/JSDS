@@ -27,7 +27,7 @@
   --line-normal:rgba(15,23,42,.12);--line-neutral:rgba(15,23,42,.08);--line-alternative:rgba(15,23,42,.05);
   --border-default:var(--gray-200);--border-strong:var(--gray-300);--border-subtle:var(--gray-100);--border-focus:var(--accent-500);
   --interaction-inactive:var(--gray-400);--interaction-disable:var(--gray-200);--dimmer:rgba(15,23,42,.65);
-  --accent:var(--accent-600);--accent-hover:var(--accent-700);--accent-pressed:var(--accent-800);--accent-subtle:var(--accent-50);--accent-on:var(--gray-0);--accent-inverse:var(--accent-300);
+  --accent:var(--accent-600);--accent-hover:var(--accent-700);--accent-pressed:var(--accent-800);--accent-subtle:var(--accent-50);--accent-on:var(--gray-0);--accent-text:var(--accent-600);--accent-inverse:var(--accent-300);
   --brand:var(--brand-500);--brand-subtle:var(--brand-50);
   --danger:var(--red-600);--danger-hover:var(--red-700);--danger-pressed:var(--red-800);--danger-subtle:var(--red-50);--danger-on:var(--gray-0);--warning:var(--amber-500);--warning-subtle:var(--amber-50);--success:var(--emerald-500);--success-subtle:var(--emerald-50);--info:var(--sky-500);--info-subtle:var(--sky-50);
   --sev-critical:var(--red-700);--sev-high:var(--red-500);--sev-medium:var(--amber-500);--sev-low:var(--sky-500);--sev-info:var(--gray-500);
@@ -51,7 +51,7 @@
    램프 기본 매핑은 --accent → 600 이라 라이트에서는 너무 옅다 → 끝(900)으로 당기고, 진한 바탕이므로 hover·pressed 는 밝아지는 쪽으로.
    subtle 도 한 단계(50 → 100) 올린다 — 회색 50 은 흰 캔버스에서 선택 행 배경으로 보이지 않는다.
    다크 블록이 뒤에서 같은 특정도로 다시 덮으므로 이 규칙은 라이트에만 걸린다 — 순서를 바꾸면 다크에서 버튼이 캔버스에 묻힌다. */
-:root[data-accent-neutral]{--accent:var(--accent-900);--accent-hover:var(--accent-800);--accent-pressed:var(--accent-700);--accent-subtle:var(--accent-100)}
+:root[data-accent-neutral]{--accent:var(--accent-900);--accent-hover:var(--accent-800);--accent-pressed:var(--accent-700);--accent-subtle:var(--accent-100);--accent-text:var(--accent-900)}
 
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg-canvas:var(--neutral-900);--bg-surface:var(--neutral-850);--bg-subtle:var(--neutral-800);--bg-panel:var(--neutral-800);--bg-inverse:var(--neutral-50);
@@ -60,7 +60,7 @@
   --line-normal:rgba(112,115,124,.32);--line-neutral:rgba(112,115,124,.28);--line-alternative:rgba(112,115,124,.22);
   --border-default:var(--neutral-700);--border-strong:var(--neutral-600);--border-subtle:var(--neutral-800);--border-focus:var(--accent-400);
   --interaction-inactive:var(--neutral-600);--interaction-disable:var(--neutral-800);--dimmer:rgba(23,23,25,.74);
-  --accent:var(--accent-400);--accent-hover:var(--accent-300);--accent-pressed:var(--accent-200);--accent-subtle:var(--accent-900);--accent-on:var(--neutral-950);--accent-inverse:var(--accent-600);
+  --accent:var(--accent-400);--accent-hover:var(--accent-300);--accent-pressed:var(--accent-200);--accent-subtle:var(--accent-900);--accent-on:var(--neutral-950);--accent-text:var(--accent-300);--accent-inverse:var(--accent-600);
   --brand-subtle:#3A2410;
   --danger:var(--red-400);--danger-hover:var(--red-300);--danger-pressed:var(--red-200);--danger-subtle:rgba(248,113,113,.12);--danger-on:var(--neutral-950);--warning:var(--amber-400);--warning-subtle:rgba(251,191,36,.12);--success:var(--emerald-400);--success-subtle:rgba(52,211,153,.12);--info:var(--sky-400);--info-subtle:rgba(56,189,248,.12);
   --sev-critical:var(--red-400);--sev-high:var(--red-400);--sev-medium:var(--amber-400);--sev-low:var(--sky-400);--sev-info:var(--neutral-300);
@@ -76,7 +76,7 @@
   --line-normal:rgba(112,115,124,.32);--line-neutral:rgba(112,115,124,.28);--line-alternative:rgba(112,115,124,.22);
   --border-default:var(--neutral-700);--border-strong:var(--neutral-600);--border-subtle:var(--neutral-800);--border-focus:var(--accent-400);
   --interaction-inactive:var(--neutral-600);--interaction-disable:var(--neutral-800);--dimmer:rgba(23,23,25,.74);
-  --accent:var(--accent-400);--accent-hover:var(--accent-300);--accent-pressed:var(--accent-200);--accent-subtle:var(--accent-900);--accent-on:var(--neutral-950);--accent-inverse:var(--accent-600);
+  --accent:var(--accent-400);--accent-hover:var(--accent-300);--accent-pressed:var(--accent-200);--accent-subtle:var(--accent-900);--accent-on:var(--neutral-950);--accent-text:var(--accent-300);--accent-inverse:var(--accent-600);
   --brand-subtle:#3A2410;
   --danger:var(--red-400);--danger-hover:var(--red-300);--danger-pressed:var(--red-200);--danger-subtle:rgba(248,113,113,.12);--danger-on:var(--neutral-950);--warning:var(--amber-400);--warning-subtle:rgba(251,191,36,.12);--success:var(--emerald-400);--success-subtle:rgba(52,211,153,.12);--info:var(--sky-400);--info-subtle:rgba(56,189,248,.12);
   --sev-critical:var(--red-400);--sev-high:var(--red-400);--sev-medium:var(--amber-400);--sev-low:var(--sky-400);--sev-info:var(--neutral-300);
@@ -537,7 +537,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .btn.tertiary{background:var(--bg-panel);color:var(--text-primary)}
 .btn.tertiary:hover{background:var(--fill-normal)}
 .btn.tertiary:active{background:var(--fill-strong)}
-.btn.text{background:transparent;color:var(--accent);padding-left:8px;padding-right:8px}
+.btn.text{background:transparent;color:var(--accent-text);padding-left:8px;padding-right:8px}
 .btn.text:hover{background:var(--accent-subtle)}
 .btn.text:active{background:var(--fill-strong)}   /* --accent-100 은 프리미티브이고 다크에 오버라이드가 없다. 중립 모드에선 hover 와 같은 색이 됐다 */
 .btn.danger{background:var(--danger);color:var(--danger-on)}
@@ -553,10 +553,11 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .btn.sm svg{width:16px;height:16px}
 .btn.lg svg{width:20px;height:20px}
 .btn.block{width:100%}
-.btn[disabled]{opacity:.4;cursor:not-allowed;pointer-events:none}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.4;cursor:not-allowed;pointer-events:none}   /* 링크는 disabled 속성을 못 가진다 — React as="a" + disabled 는 aria-disabled 로 나온다 */
 .btn.loading{position:relative;color:transparent;pointer-events:none}
 .btn.loading::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--fill-strong);border-top-color:var(--accent-on);border-radius:50%;animation:spin .8s linear infinite}
-.btn.secondary.loading::after,.btn.tertiary.loading::after,.btn.text.loading::after{border-top-color:var(--accent)}
+.btn.secondary.loading::after,.btn.tertiary.loading::after{border-top-color:var(--accent)}
+.btn.text.loading::after{border-top-color:var(--accent-text)}
 .btn.danger.loading::after{border-top-color:var(--danger-on)}
 .btn.danger.secondary.loading::after{border-top-color:var(--danger)}
 .btn-group{display:inline-flex;gap:8px;align-items:center}

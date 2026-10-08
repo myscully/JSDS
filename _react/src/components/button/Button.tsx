@@ -46,8 +46,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   }
   const cls = cx("btn", size, VARIANT_CLASS[variant], { icon, block, loading }, className);
   const extra = Comp === "button" ? { type: type ?? "button", disabled } : { "aria-disabled": disabled || undefined };
-  /* loading 중에는 클릭을 삼킨다. disabled 를 걸지 않는 이유는 포커스를 유지해야 스크린리더가 aria-busy 변화를 읽기 때문 */
-  const swallow = loading ? (e: MouseEvent<HTMLElement>) => { e.preventDefault(); e.stopPropagation(); } : undefined;
+  /* loading 중에는 클릭을 삼킨다. disabled 를 걸지 않는 이유는 포커스를 유지해야 스크린리더가 aria-busy 변화를 읽기 때문.
+     as="a" 처럼 button 이 아닐 때는 disabled 속성이 먹지 않아 aria-disabled 만 나가므로 클릭도 여기서 막는다 */
+  const inert = loading || (Comp !== "button" && disabled);
+  const swallow = inert ? (e: MouseEvent<HTMLElement>) => { e.preventDefault(); e.stopPropagation(); } : undefined;
   return (
     <Comp ref={ref} className={cls} aria-busy={loading || undefined} onClickCapture={swallow} {...extra} {...rest}>
       {leading}
