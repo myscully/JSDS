@@ -91,7 +91,6 @@ function usageBlock(key, css, label, names = []) {
 <h3>Component CSS <small style="font-weight:400;color:var(--text-tertiary);font-size:12px">${esc(label)}</small></h3>${codeBlock(`css-${key}`, css, "css", "CSS 복사")}`;
 }
 const cssOf = c => typeof c.css === "string" ? c.css : cssFor([].concat(c.css || []), STYLE(), VERSION);
-const specGrid = spec => spec && spec.length ? `<h2 id="spec">Spec</h2><div class="spec">${spec.map((x, i) => `<div><b>${i + 1}. ${x[0]}</b><span>${x[1]}</span></div>`).join("")}</div>` : "";
 
 /* 예제 목록(컴포넌트 · 패턴 공용). 예제가 하나뿐이면 번호 제목을 두지 않는다 —
    나눠 가리킬 것이 없고 "대시보드" 아래 "1. 대시보드" 처럼 페이지 제목과 겹친다 */
