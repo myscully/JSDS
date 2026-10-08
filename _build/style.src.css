@@ -566,7 +566,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .field textarea{height:auto;min-height:96px;padding:10px 14px;resize:vertical;line-height:1.5}
 .field input::placeholder,.field textarea::placeholder{color:var(--text-disabled)}
 .field input:hover,.field textarea:hover{border-color:var(--border-strong)}
-.field input:focus,.field textarea:focus-within{border-color:var(--border-focus);outline:2px solid color-mix(in srgb,var(--border-focus) 30%,transparent)}
+.field input:focus,.field textarea:focus-within{border-color:var(--border-focus);outline:4px solid color-mix(in srgb,var(--border-focus) 10%,transparent)}
 .field input:disabled,.field textarea:disabled{background:var(--bg-panel);color:var(--text-disabled);cursor:not-allowed}
 .field input:read-only{background:var(--bg-subtle)}
 .field .help{color:var(--text-tertiary);font-size:12px}
@@ -576,7 +576,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .field.lg input{height:52px;font-size:16px;padding:0 16px}
 .field .affix{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--bg-surface)}
 .field .affix input{border:0;height:auto;padding:0;flex:1;background:transparent;outline:0;min-width:0}
-.field .affix:focus-within{border-color:var(--border-focus);outline:2px solid color-mix(in srgb,var(--border-focus) 30%,transparent)}
+.field .affix:focus-within{border-color:var(--border-focus);outline:4px solid color-mix(in srgb,var(--border-focus) 10%,transparent)}
 .field .affix span{color:var(--text-tertiary);font-size:12px;white-space:nowrap}
 .field .counter{margin-left:auto;font-size:12px;color:var(--text-tertiary)}
 .field .row{display:flex;justify-content:space-between;align-items:baseline}
@@ -586,7 +586,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .searchbar svg{width:18px;height:18px;color:var(--text-tertiary);flex:none}
 .searchbar input{flex:1;border:0;background:transparent;font:inherit;font-size:14px;color:var(--text-primary);outline:0;min-width:0}
 .searchbar input::placeholder{color:var(--text-disabled)}
-.searchbar:focus-within{border-color:var(--border-focus);outline:2px solid color-mix(in srgb,var(--border-focus) 30%,transparent)}
+.searchbar:focus-within{border-color:var(--border-focus);outline:4px solid color-mix(in srgb,var(--border-focus) 10%,transparent)}
 .searchbar .clear{border:0;padding:0;background:var(--bg-panel);color:var(--text-secondary);width:20px;height:20px;border-radius:50%;font:inherit;font-size:12px;line-height:0;cursor:pointer;display:grid;place-items:center;flex:none}
 .searchbar .clear svg{display:block;width:12px;height:12px}
 .searchbar kbd{font-size:12px;color:var(--text-tertiary);border:1px solid var(--border-default);border-radius:4px;padding:1px 5px;background:var(--bg-subtle)}
@@ -840,18 +840,20 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .accordion[open]::details-content{height:auto}
 
 /* Card — .card 는 이름을 공유한다: .radio.card(Radio) · .chart-card(Data Visual) · .ov-card/.home-card(크롬).
-   아래에 선언을 추가하면 label.radio.card 가 함께 받으므로 Radio Button 페이지를 확인할 것 */
+   아래에 선언을 추가하면 label.radio.card 가 함께 받으므로 Radio Button 페이지를 확인할 것.
+   .card .title 은 .skeleton.title 과도 겹친다(loading 예제) — 뒤에 오는 .skeleton.title 이 height·width 를 이겨 지금은 무해 */
 .card{background:var(--bg-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);padding:var(--card-pad);display:flex;flex-direction:column;gap:12px;min-width:260px;position:relative}
 .card .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .card .title{font-size:16px;line-height:24px;font-weight:600;margin:0}   /* Title/1 의 line-height — 빠지면 문맥에 따라 25.6(문서)·28(패턴)·26.4(패키지)로 흔들린다 */
 .card .desc{font-size:14px;color:var(--text-secondary);margin:0;line-height:1.6}
-.card .card-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:auto;padding-top:4px}
+.card .card-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:auto;padding-top:4px}   /* wrap 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿지 않는다 */
 /* button.card 는 UA 기본값(Arial·가운데 정렬·outset 보더)이 새므로 리셋한다. .bordered 보다 앞 — 같은 특정도라 뒤에 두면 border:0 이 보더를 지운다 */
 .card.clickable{appearance:none;border:0;font:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer;transition:box-shadow var(--motion-fast)}
 .card.bordered{box-shadow:none;border:1px solid var(--border-default)}
 .card.clickable:hover{box-shadow:var(--shadow-2)}
 .card.on{box-shadow:inset 0 0 0 2px var(--accent),var(--shadow-1);background:var(--accent-subtle)}
 .card.clickable.on:hover{box-shadow:inset 0 0 0 2px var(--accent),var(--shadow-2)}
+.card.bordered.on{box-shadow:inset 0 0 0 2px var(--accent)}   /* 보더형은 링만 — 위 .on 이 뒤라 shadow/1 을 되찾는다 */
 .card.compact{padding:16px;gap:8px}
 .card.compact .title{font-size:14px;line-height:20px}
 /* 표·목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖는다 */

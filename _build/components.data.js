@@ -823,6 +823,12 @@ const COMPONENTS = {
           <button type="button" class="card clickable" aria-pressed="false"><h3 class="title">USB 제어</h3><p class="desc">정책 12개</p></button>
           <button type="button" class="card clickable on" aria-pressed="true"><h3 class="title">네트워크</h3><p class="desc">정책 8개 · 선택됨</p></button>
         </div>` },
+      { id: "loading", title: "Loading", desc: "데이터를 기다리는 동안 내용 자리에 Skeleton 을 넣고 컨테이너에 aria-busy 를 둡니다. 로드되면 같은 자리를 실제 내용으로 바꿥니다.", html: `
+        <div class="card" style="width:360px" aria-busy="true">
+          <span class="skeleton title"></span>
+          <span class="skeleton text"></span>
+          <span class="skeleton text short"></span>
+        </div>` },
     ],
     props: [
       [".card", "container", "—", "flex column · gap 12 · padding 24 · 최소 폭 260. React <code>Card</code>"],
@@ -833,10 +839,11 @@ const COMPONENTS = {
       [".clickable", "boolean", "false", "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. React <code>clickable</code> + <code>as</code>"],
       [".card-grid .card.clickable", "behavior", "—", "ds.js 가 단일 선택으로 묶어 <code>.on</code> 과 <code>aria-pressed</code> 를 함께 갱신하고 <code>ds:select</code> 를 발행합니다"],
       [".on", "boolean", "false", "선택됨 — 안쪽 2px accent 링 + <code>--accent-subtle</code> 배경. 포커스 링(outline)과 겹치지 않아 둘이 동시에 보입니다. React <code>selected</code>"],
+      ["aria-busy", "attribute", "—", "불러오는 중 — 내용 대신 <code>.skeleton</code> 을 넣고 컨테이너에 둡니다. React <code>loading</code> 이 둘을 함께 처리합니다"],
       [".card-grid", "container", "—", "auto-fill minmax(260px,1fr) 그리드 · gap 20. React <code>CardGrid</code>"],
     ],
     spec: [["Size", "최소 폭 260 · padding 24 (compact 16 · flush 0)"], ["Container", "radius/lg 8 · shadow/1 · bg/surface"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"], ["Motion", "clickable 은 --motion-fast 로 shadow/1 → shadow/2"]],
-    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--bg-surface", shadow: "--shadow-1" }, bordered: { stroke: "--border-default" } }, states: ["default", "hover", "selected", "focused"] },
+    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--bg-surface", shadow: "--shadow-1" }, bordered: { stroke: "--border-default" } }, states: ["default", "hover", "selected", "focused", "loading"] },
   },
 
   /* ------------------------------------------------ Popup */

@@ -134,6 +134,23 @@ describe("Card", () => {
     expect(container.querySelector("h2.title")!.textContent).toBe("둘");
   });
 
+  /* Ant 의 loading 에 대응 — 내용 자리를 Skeleton 으로 바꾸고 aria-busy 를 켠다 */
+  it("loading 이면 children 대신 Skeleton 과 aria-busy", () => {
+    const { container } = render(<Card loading>안 보여야 하는 내용</Card>);
+    const el = container.firstElementChild!;
+    expect(el.getAttribute("aria-busy")).toBe("true");
+    expect(el.textContent).toBe("");
+    expect([...el.querySelectorAll(".skeleton")].map((s) => s.className)).toEqual(["skeleton title", "skeleton text", "skeleton text short"]);
+  });
+
+  it("loading 이 아니면 children 그대로, aria-busy 없음", () => {
+    const { container } = render(<Card>내용</Card>);
+    const el = container.firstElementChild!;
+    expect(el.textContent).toBe("내용");
+    expect(el.hasAttribute("aria-busy")).toBe(false);
+    expect(el.querySelector(".skeleton")).toBeNull();
+  });
+
   it("CardGrid 는 .card-grid", () => {
     const { container } = render(<CardGrid><Card>a</Card></CardGrid>);
     expect(container.firstElementChild!.className).toBe("card-grid");

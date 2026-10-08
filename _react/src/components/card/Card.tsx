@@ -8,6 +8,8 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   compact?: boolean;
   /** padding·gap 0 — 표나 목록을 카드 폭까지 채울 때 */
   flush?: boolean;
+  /** 불러오는 중 — children 대신 Skeleton 을 보여주고 aria-busy 를 켭니다 */
+  loading?: boolean;
   /** hover shadow/2 + cursor */
   clickable?: boolean;
   /** 선택됨 (.on). as="button" 과 함께 쓰면 aria-pressed 도 따라갑니다 */
@@ -20,11 +22,23 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   type?: "button" | "submit";
 }
 /** 관련 정보와 액션을 묶는 컨테이너. Surface + shadow/1, radius/lg */
-export const Card = forwardRef<HTMLElement, CardProps>(function Card({ bordered, compact, flush, clickable, selected, as, className, ...rest }, ref) {
+export const Card = forwardRef<HTMLElement, CardProps>(function Card({ bordered, compact, flush, clickable, selected, loading, as, className, children, ...rest }, ref) {
   const Comp: ElementType = as ?? "div";
   /* 선택 카드는 button 이어야 Space 로도 눌리고 상태가 읽힌다 — .on 만으로는 보조기기에 전해지지 않는다 */
   const pressed = as === "button" && selected !== undefined ? selected : undefined;
-  return <Comp ref={ref} className={cx("card", { bordered, compact, flush, clickable, on: selected }, className)} aria-pressed={pressed} {...rest} />;
+  /* loading 은 내용 자리를 Skeleton 으로 바꾼다 — 사이트 HTML 예제와 같은 마크업이어야 골격 비교가 통과한다 */
+  const body = loading ? (
+    <>
+      <span className="skeleton title" />
+      <span className="skeleton text" />
+      <span className="skeleton text short" />
+    </>
+  ) : children;
+  return (
+    <Comp ref={ref} className={cx("card", { bordered, compact, flush, clickable, on: selected }, className)} aria-pressed={pressed} aria-busy={loading || undefined} {...rest}>
+      {body}
+    </Comp>
+  );
 });
 
 export const CardHead = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function CardHead({ className, ...rest }, ref) {
