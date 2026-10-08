@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 123 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 127 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -374,6 +374,38 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
     return { padding: getComputedStyle(c).padding, headPadding: getComputedStyle(c.querySelector(".card-head")).padding, inline: c.getAttribute("style") };
   });
   ok("flush card has no padding but its head does", fl.padding === "0px" && fl.headPadding === "16px 24px" && !fl.inline, JSON.stringify(fl));
+  await go("components/card.html");
+  // wrap 이 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿을 수 없다
+  const footFit = async () => page.evaluate(() => {
+    const f = document.querySelector("#ex-card-basic .card-foot");
+    f.innerHTML = ["정책 상세 보기", "라이선스 갱신 요청", "담당자에게 문의"].map((t) => `<button type="button" class="btn sm secondary">${t}</button>`).join("");
+    const card = f.closest(".card"), cr = card.getBoundingClientRect();
+    const pad = parseFloat(getComputedStyle(card).paddingLeft);
+    const left = Math.min(...[...f.children].map((c) => c.getBoundingClientRect().left - cr.left));
+    return { 바깥으로: Math.round(pad - left), 줄수: new Set([...f.children].map((c) => Math.round(c.getBoundingClientRect().top))).size, wrap: getComputedStyle(f).flexWrap };
+  });
+  const foot1440 = await footFit();
+  ok("card foot wraps instead of spilling left", foot1440.바깥으로 <= 0 && foot1440.wrap === "wrap" && foot1440.줄수 === 2, JSON.stringify(foot1440));
+  await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(350);
+  const foot390 = await footFit();
+  ok("card foot stays inside at 390", foot390.바깥으로 <= 0, JSON.stringify(foot390));
+  await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
+  // .bordered 는 "shadow 대신 보더" 이므로 선택돼도 shadow/1 이 돌아오면 안 된다
+  const bOn = await page.evaluate(() => {
+    const prev = document.querySelector("#ex-card-variant .example-preview");
+    const mk = (cls) => { const c = prev.querySelector(".card.bordered").cloneNode(true); c.className = cls; prev.append(c); const st = getComputedStyle(c); return { shadow: st.boxShadow, border: st.borderWidth, bg: st.backgroundColor }; };
+    return { on: mk("card bordered on"), plain: mk("card on") };
+  });
+  ok("bordered+selected keeps the ring only", bOn.on.shadow.includes("inset") && !/1px 3px/.test(bOn.on.shadow) && bOn.on.border === "1px" && /1px 3px/.test(bOn.plain.shadow), JSON.stringify(bOn));
+  // loading 예제
+  const ld = await page.evaluate(() => {
+    const c = document.querySelector("#ex-card-loading .card");
+    const loaded = document.querySelector("#ex-card-basic .card");
+    return { busy: c.getAttribute("aria-busy"), 스켈레톤: c.querySelectorAll(".skeleton").length,
+      애니메이션: getComputedStyle(c.querySelector(".skeleton")).animationName,
+      높이: Math.round(c.getBoundingClientRect().height), 로드된높이: Math.round(loaded.getBoundingClientRect().height) };
+  });
+  ok("loading card is busy and shows skeletons", ld.busy === "true" && ld.스켈레톤 === 3 && ld.애니메이션 === "shimmer" && ld.높이 < ld.로드된높이, JSON.stringify(ld));
 
   // Nav
   await go("components/navigation.html");
