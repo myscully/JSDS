@@ -27,12 +27,13 @@ const COMPONENTS = {
         <button type="button" class="btn sm primary">Small</button>
         <button type="button" class="btn md primary">Medium</button>
         <button type="button" class="btn lg primary">Large</button>` },
-      { id: "icon", title: "Icon", desc: "아이콘은 라벨 앞뒤 중 한쪽에 하나만 둡니다(양쪽 동시 금지). 아이콘 전용 버튼은 .icon 과 aria-label 을 함께 씁니다.", html: `
+      { id: "icon", title: "Icon", desc: "아이콘은 라벨 앞뒤 중 한쪽에 하나만 둡니다(양쪽 동시 금지). 아이콘 전용 버튼은 .icon 과 aria-label 을 함께 씁니다. 아이콘 크기는 버튼 크기를 따릅니다 — sm 16 · md 18 · lg 20.", html: `
         <button type="button" class="btn md primary">${I("plus")}정책 추가</button>
         <button type="button" class="btn md secondary">${I("download")}내보내기</button>
         <button type="button" class="btn md secondary icon" aria-label="더 보기">${I("dots")}</button>
         <button type="button" class="btn md tertiary icon" aria-label="새로 고침">${I("refresh")}</button>
-        <button type="button" class="btn md danger secondary icon" aria-label="삭제">${I("trash")}</button>` },
+        <button type="button" class="btn md danger secondary icon" aria-label="삭제">${I("trash")}</button>
+        <button type="button" class="btn lg secondary icon" aria-label="설정">${I("settings")}</button>` },
       { id: "state", title: "State", desc: "Hover/Pressed 는 CSS 가 처리합니다. Disabled 는 disabled 속성(포커스도 받지 않음), Loading 은 .loading 클래스 — 라벨은 자리만 지키고 보이지 않아 폭이 흔들리지 않으며, 클릭은 마우스·키보드 모두 막힙니다.", html: `
         <button type="button" class="btn md primary">Default</button>
         <button type="button" class="btn md primary" disabled>Disabled</button>
@@ -53,10 +54,10 @@ const COMPONENTS = {
       [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>"],
       [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(8px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
       ["disabled", "attribute", "—", "비활성. 40% 불투명"],
-      ["type", "button | submit", "button", "폼 안에서는 명시"],
+      ["type", "button | submit | reset", "button", "폼 안에서는 명시"],
     ],
     spec: [["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"], ["Label", "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
-    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--accent", fg: "--accent-on" }, secondary: { bg: "--bg-surface", fg: "--text-primary", stroke: "--border-strong" }, tertiary: { bg: "--bg-panel", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent" }, danger: { bg: "--danger", fg: "#FFFFFF" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"] },
+    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--accent", fg: "--accent-on" }, secondary: { bg: "--bg-surface", fg: "--text-primary", stroke: "--border-strong" }, tertiary: { bg: "--bg-panel", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent" }, danger: { bg: "--danger", fg: "--danger-on" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"] },
   },
 
   /* ------------------------------------------------ Text Field */
