@@ -8,6 +8,7 @@ export default function Example() {
       <Button variant="secondary" icon aria-label="더 보기"><Icon name="dots" /></Button>
       <Button variant="tertiary" icon aria-label="새로 고침"><Icon name="refresh" /></Button>
       <Button variant="danger-secondary" icon aria-label="삭제"><Icon name="trash" /></Button>
+      <Button variant="secondary" size="lg" icon aria-label="설정"><Icon name="settings" /></Button>
     </>
   );
 }

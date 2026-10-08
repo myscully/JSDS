@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 127 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 138 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -141,6 +141,101 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.locator("#ex-button-state .btn").first().evaluate((e) => e.click());
   await page.waitForTimeout(60);
   ok("a normal button still fires", (await page.evaluate(() => window.__hit)) === 1);
+  // danger 는 color:#fff 가 하드코딩이라 다크에서 바탕이 밝아지며 2.77:1 까지 떨어졌다.
+  // 대비는 Node 에서 계산한다 — 템플릿 리터럴 안의 \\d 는 d 로 죽어 정규식이 깨진다
+  const lum = (v) => { const [r, g, b2] = v.map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b2; };
+  const toRgb = (s2) => s2.match(/[0-9.]+/g).map(Number).slice(0, 3);
+  const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)) + 0.05]; return +(Math.max(x, y) / Math.min(x, y)).toFixed(2); };
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
+    await page.waitForTimeout(250);
+    const col = await page.evaluate(() => {
+      const solid = document.querySelector("#ex-button-variant .btn.danger:not(.secondary)");
+      const outline = document.querySelector("#ex-button-variant .btn.danger.secondary");
+      const cs = getComputedStyle(solid), co = getComputedStyle(outline);
+      return { sf: cs.color, sb: cs.backgroundColor, of: co.color, ob: co.backgroundColor };
+    });
+    const dc = { solid: ratio(col.sf, col.sb), outline: ratio(col.of, col.ob) };
+    ok(`danger button label meets AA (${theme})`, dc.solid >= 4.5 && dc.outline >= 4.5, JSON.stringify(dc));
+  }
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+  await page.waitForTimeout(200);
+  // 아웃라인 danger 는 .danger.secondary 가 :hover 를 덮어 아무 반응이 없었다
+  const od = page.locator("#ex-button-variant .btn.danger.secondary");
+  const odBase = await od.evaluate((e) => getComputedStyle(e).backgroundColor);
+  await od.hover(); await page.waitForTimeout(200);
+  const odHover = await od.evaluate((e) => getComputedStyle(e).backgroundColor);
+  await page.mouse.move(0, 0); await page.waitForTimeout(150);
+  ok("outline danger reacts to hover", odBase !== odHover, odBase + " → " + odHover);
+  // .btn.text 의 pressed — 기본·다크·중립 셋 다 hover 와 달라야 한다(--accent-100 은 중립에서 hover 와 같아졌다)
+  const textPress = async (label) => {
+    const t = page.locator("#ex-button-variant .btn.text");
+    await t.hover(); await page.waitForTimeout(180);
+    const h = await t.evaluate((e) => getComputedStyle(e).backgroundColor);
+    await page.mouse.down(); await page.waitForTimeout(180);
+    const a = await t.evaluate((e) => getComputedStyle(e).backgroundColor);
+    await page.mouse.up(); await page.mouse.move(0, 0); await page.waitForTimeout(120);
+    ok(`text button pressed differs from hover (${label})`, h !== a, h + " → " + a);
+  };
+  await textPress("light");
+  await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(250);
+  await textPress("dark");
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(200);
+  // 스피너 상단색이 변형별로 달라야 한다(text 는 흰 스피너가 투명 바탕에 묻혔다)
+  const spin = await page.evaluate(() => {
+    const prev = document.querySelector("#ex-button-state .example-preview");
+    const out = {};
+    for (const v of ["primary", "secondary", "text", "danger"]) {
+      const b2 = document.createElement("button");
+      b2.type = "button"; b2.className = "btn md " + v + " loading"; b2.textContent = "저장";
+      prev.append(b2);
+      out[v] = getComputedStyle(b2, "::after").borderTopColor;
+      b2.remove();
+    }
+    return out;
+  });
+  // text 는 흰 스피너가 투명 바탕에 묻혔다(1.10:1). 라이트에서 primary·danger 가 둘 다 흰 것은 --accent-on·--danger-on 이 같아서 정상
+  ok("loading spinner follows the variant", spin.text !== spin.primary && spin.text === spin.secondary, JSON.stringify(spin));
+  await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+  await page.waitForTimeout(250);
+  const spinDark = await page.evaluate(() => {
+    const prev = document.querySelector("#ex-button-state .example-preview");
+    const out = {};
+    for (const v of ["primary", "danger"]) {
+      const b2 = document.createElement("button");
+      b2.type = "button"; b2.className = "btn md " + v + " loading"; b2.textContent = "저장";
+      prev.append(b2);
+      out[v] = getComputedStyle(b2, "::after").borderTopColor;
+      b2.remove();
+    }
+    return out;
+  });
+  // 다크에선 바탕이 밝아지므로 흰 스피너가 묻힌다 — --accent-on·--danger-on 이 어두운 쪽으로 뒤집혀야 한다
+  ok("dark loading spinner is not white", spinDark.primary !== "rgb(255, 255, 255)" && spinDark.danger !== "rgb(255, 255, 255)", JSON.stringify(spinDark));
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+  await page.waitForTimeout(200);
+  // 입력과 버튼이 같은 포커스 링을 쓰는지 — 입력만 4px 10% 헤일로였다
+  const ringOf = async (url, sel) => {
+    await go(url);
+    await page.locator(sel).first().evaluate((e) => e.focus());
+    await page.keyboard.press("Tab"); await page.keyboard.press("Shift+Tab"); await page.waitForTimeout(200);
+    return page.locator(sel).first().evaluate((e) => { const c = getComputedStyle(e); return c.outlineWidth + " " + c.outlineStyle + " " + c.outlineColor; });
+  };
+  const ringBtn = await ringOf("components/button.html", "#ex-button-variant .btn.primary");
+  const ringInput = await ringOf("components/text-field.html", "#ex-text-field-basic input");
+  ok("input and button share one focus ring", ringBtn === ringInput && /2px solid/.test(ringBtn), ringBtn + " vs " + ringInput);
+  // 입력은 마우스 클릭에도 링이 떠야 한다(버튼은 아니어야 한다)
+  await page.locator("#ex-text-field-basic input").first().click(); await page.waitForTimeout(200);
+  const clickRing = await page.evaluate(() => { const i = document.querySelector("#ex-text-field-basic input"); return { fv: i.matches(":focus-visible"), outline: getComputedStyle(i).outlineStyle }; });
+  ok("input keeps its ring on mouse click", clickRing.fv && clickRing.outline === "solid", JSON.stringify(clickRing));
+  await go("components/button.html");
+  const lgIcon = await page.evaluate(() => {
+    const b2 = document.querySelector("#ex-button-icon .btn.icon.lg");
+    if (!b2) return { 없음: true };
+    const r = b2.getBoundingClientRect(), svg = b2.querySelector("svg").getBoundingClientRect();
+    return { 버튼: Math.round(r.width) + "x" + Math.round(r.height), 아이콘: Math.round(svg.width) };
+  });
+  ok("lg icon button renders at 52 with a 20px icon", lgIcon.버튼 === "52x52" && lgIcon.아이콘 === 20, JSON.stringify(lgIcon));
 
   // Accordion: disabled 는 마우스·키보드 양쪽을 막고 보조기기에도 알려야 한다 + name 그룹 단일 개방 + flat 마지막 줄
   await go("components/accordion.html");
