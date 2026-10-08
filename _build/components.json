@@ -1,6 +1,6 @@
 {
   "version": "v0.6",
-  "generatedAt": "2026-10-08T02:32:54.295Z",
+  "generatedAt": "2026-10-08T02:46:35.061Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -2981,7 +2981,13 @@
           ".clickable",
           "boolean",
           "false",
-          "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. <code>.card-grid</code> 안에서는 ds.js 가 단일 선택으로 묶어 <code>.on</code> 과 <code>aria-pressed</code> 를 함께 갱신하고 <code>ds:select</code> 를 발행합니다. React <code>clickable</code> + <code>as</code>"
+          "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. React <code>clickable</code> + <code>as</code>"
+        ],
+        [
+          ".card-grid .card.clickable",
+          "behavior",
+          "—",
+          "ds.js 가 단일 선택으로 묶어 <code>.on</code> 과 <code>aria-pressed</code> 를 함께 갱신하고 <code>ds:select</code> 를 발행합니다"
         ],
         [
           ".on",
