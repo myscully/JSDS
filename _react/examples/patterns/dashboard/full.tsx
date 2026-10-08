@@ -42,8 +42,8 @@ export default function Example() {
           </DonutRow>
         </ChartCard>
       </Row3>
-      <Card style={{ padding: 0, gap: 0, overflow: "hidden" }}>
-        <CardHead style={{ padding: "16px 24px" }}>
+      <Card flush>
+        <CardHead>
           <CardTitle>최근 Critical 이벤트</CardTitle>
           <Button as="a" href="#" size="sm" variant="text">전체 보기 →</Button>
         </CardHead>

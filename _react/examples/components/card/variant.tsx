@@ -8,8 +8,8 @@ export default function Example() {
         <CardDesc>그림자 대신 1px 보더</CardDesc>
       </Card>
       <Card compact style={{ width: 280 }}>
-        <CardTitle style={{ fontSize: 14 }}>Compact</CardTitle>
-        <CardDesc>padding 16</CardDesc>
+        <CardTitle>Compact</CardTitle>
+        <CardDesc>padding 16 · 제목 14</CardDesc>
       </Card>
     </>
   );

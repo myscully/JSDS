@@ -670,7 +670,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .radio small{display:block;color:var(--text-tertiary);font-size:12px;font-weight:400}
 .radio-group{display:flex;flex-direction:column;gap:12px}
 .radio-group.row{flex-direction:row;gap:24px}
-.radio.card{padding:14px 16px;border:1px solid var(--border-default);border-radius:var(--radius-md);background:var(--bg-surface);min-width:220px}
+.radio.card{padding:14px 16px;border:1px solid var(--border-default);border-radius:var(--radius-md);background:var(--bg-surface);min-width:220px;flex-direction:row;gap:8px;box-shadow:none;position:static}   /* 뒤의 .card 규칙이 column·그림자를 흘려보내므로 되돌린다 */
 .radio.card:has(input:checked){border-color:var(--accent);background:var(--accent-subtle)}
 
 /* Switch */
@@ -839,17 +839,24 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .accordion::details-content{height:0;overflow:hidden;transition:height var(--motion-base),content-visibility var(--motion-base);transition-behavior:allow-discrete}
 .accordion[open]::details-content{height:auto}
 
-/* Card */
+/* Card — .card 는 이름을 공유한다: .radio.card(Radio) · .chart-card(Data Visual) · .ov-card/.home-card(크롬).
+   아래에 선언을 추가하면 label.radio.card 가 함께 받으므로 Radio Button 페이지를 확인할 것 */
 .card{background:var(--bg-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);padding:var(--card-pad);display:flex;flex-direction:column;gap:12px;min-width:260px;position:relative}
 .card .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.card .title{font-size:16px;font-weight:600;margin:0}
+.card .title{font-size:16px;line-height:24px;font-weight:600;margin:0}   /* Title/1 의 line-height — 빠지면 문맥에 따라 25.6(문서)·28(패턴)·26.4(패키지)로 흔들린다 */
 .card .desc{font-size:14px;color:var(--text-secondary);margin:0;line-height:1.6}
 .card .card-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:auto;padding-top:4px}
+/* button.card 는 UA 기본값(Arial·가운데 정렬·outset 보더)이 새므로 리셋한다. .bordered 보다 앞 — 같은 특정도라 뒤에 두면 border:0 이 보더를 지운다 */
+.card.clickable{appearance:none;border:0;font:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer;transition:box-shadow var(--motion-fast)}
 .card.bordered{box-shadow:none;border:1px solid var(--border-default)}
-.card.clickable{cursor:pointer;transition:box-shadow var(--motion-fast)}
 .card.clickable:hover{box-shadow:var(--shadow-2)}
-.card.on{outline:2px solid var(--accent)}
+.card.on{box-shadow:inset 0 0 0 2px var(--accent),var(--shadow-1);background:var(--accent-subtle)}
+.card.clickable.on:hover{box-shadow:inset 0 0 0 2px var(--accent),var(--shadow-2)}
 .card.compact{padding:16px;gap:8px}
+.card.compact .title{font-size:14px;line-height:20px}
+/* 표·목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖는다 */
+.card.flush{padding:0;gap:0;overflow:hidden}
+.card.flush .card-head{padding:16px var(--card-pad)}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--card-gap);width:100%}
 
 /* Popup */

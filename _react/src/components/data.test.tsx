@@ -2,6 +2,7 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DataTable } from "./data-table/DataTable";
 import { Accordion, AccordionGroup } from "./accordion/Accordion";
+import { Card, CardGrid, CardTitle } from "./card/Card";
 import { Donut } from "./data-visual/DataVisual";
 
 type R = { id: string; name: string; n: number };
@@ -91,5 +92,50 @@ describe("Donut", () => {
     const d = container.firstElementChild as HTMLElement;
     expect(d).toHaveAttribute("aria-label", "A 25%, B 75%");
     expect(d.style.background).toContain("conic-gradient");
+  });
+});
+
+describe("Card", () => {
+  it("변형이 클래스로 붙는다", () => {
+    const { container } = render(<Card bordered compact flush clickable selected>내용</Card>);
+    expect(container.firstElementChild!.className).toBe("card bordered compact flush clickable on");
+  });
+
+  it("기본은 div 에 .card 만", () => {
+    const { container } = render(<Card>내용</Card>);
+    const el = container.firstElementChild!;
+    expect(el.tagName).toBe("DIV");
+    expect(el.className).toBe("card");
+    expect(el.hasAttribute("aria-pressed")).toBe(false);
+  });
+
+  /* .on 만으로는 선택이 보조기기에 전해지지 않는다 — button 루트일 때 aria-pressed 가 따라가야 한다 */
+  it("as=button + selected 면 aria-pressed 를 함께 낸다", () => {
+    const { container } = render(<Card as="button" type="button" clickable selected>선택됨</Card>);
+    const btn = container.querySelector("button")!;
+    expect(btn.getAttribute("aria-pressed")).toBe("true");
+    expect(btn.getAttribute("type")).toBe("button");
+    expect(btn.className).toBe("card clickable on");
+  });
+
+  it("selected={false} 면 aria-pressed=false", () => {
+    const { container } = render(<Card as="button" clickable selected={false}>안 선택</Card>);
+    expect(container.querySelector("button")!.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("div 루트에는 aria-pressed 를 붙이지 않는다", () => {
+    const { container } = render(<Card selected>내용</Card>);
+    expect(container.firstElementChild!.hasAttribute("aria-pressed")).toBe(false);
+  });
+
+  it("CardTitle 은 기본 h3, as 로 바꿀 수 있다", () => {
+    const { container } = render(<><CardTitle>기본</CardTitle><CardTitle as="h2">둘</CardTitle></>);
+    expect(container.querySelector("h3.title")!.textContent).toBe("기본");
+    expect(container.querySelector("h2.title")!.textContent).toBe("둘");
+  });
+
+  it("CardGrid 는 .card-grid", () => {
+    const { container } = render(<CardGrid><Card>a</Card></CardGrid>);
+    expect(container.firstElementChild!.className).toBe("card-grid");
   });
 });
