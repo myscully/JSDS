@@ -4,20 +4,27 @@ import { cx } from "../../utils/cx";
 export interface CardProps extends HTMLAttributes<HTMLElement> {
   /** shadow 대신 1px 보더 (카드 위 카드) */
   bordered?: boolean;
-  /** padding 16 */
+  /** padding 16 · 제목 14 */
   compact?: boolean;
+  /** padding·gap 0 — 표나 목록을 카드 폭까지 채울 때 */
+  flush?: boolean;
   /** hover shadow/2 + cursor */
   clickable?: boolean;
-  /** 선택됨 (.on) */
+  /** 선택됨 (.on). as="button" 과 함께 쓰면 aria-pressed 도 따라갑니다 */
   selected?: boolean;
   /** 루트 요소 (a, button, Link …) */
   as?: ElementType;
+  /** as="a" 일 때 */
   href?: string;
+  /** as="button" 일 때 — 폼 안에서는 명시 */
+  type?: "button" | "submit";
 }
 /** 관련 정보와 액션을 묶는 컨테이너. Surface + shadow/1, radius/lg */
-export const Card = forwardRef<HTMLElement, CardProps>(function Card({ bordered, compact, clickable, selected, as, className, ...rest }, ref) {
+export const Card = forwardRef<HTMLElement, CardProps>(function Card({ bordered, compact, flush, clickable, selected, as, className, ...rest }, ref) {
   const Comp: ElementType = as ?? "div";
-  return <Comp ref={ref} className={cx("card", { bordered, compact, clickable, on: selected }, className)} {...rest} />;
+  /* 선택 카드는 button 이어야 Space 로도 눌리고 상태가 읽힌다 — .on 만으로는 보조기기에 전해지지 않는다 */
+  const pressed = as === "button" && selected !== undefined ? selected : undefined;
+  return <Comp ref={ref} className={cx("card", { bordered, compact, flush, clickable, on: selected }, className)} aria-pressed={pressed} {...rest} />;
 });
 
 export const CardHead = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function CardHead({ className, ...rest }, ref) {

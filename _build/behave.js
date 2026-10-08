@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 116 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 123 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -325,6 +325,55 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   const cg = page.locator("#ex-card-clickable .example-preview .card-grid");
   await cg.locator(".card.clickable").first().click();
   ok("clickable card single select", await cg.evaluate((e) => e.querySelectorAll(".card.on").length === 1 && e.querySelectorAll(".card")[0].classList.contains("on")));
+  // .on 만으로는 선택이 보조기기에 전해지지 않는다 — aria-pressed 를 함께 갱신해야 한다
+  ok("clickable card updates aria-pressed", await cg.evaluate((e) => {
+    const c = [...e.querySelectorAll(".card.clickable")];
+    return c[0].getAttribute("aria-pressed") === "true" && c[1].getAttribute("aria-pressed") === "false" && c.every((x) => x.tagName === "BUTTON");
+  }));
+  // 링크였을 때는 Space 로 선택되지 않았다
+  await cg.locator(".card.clickable").nth(1).focus();
+  await page.keyboard.press("Space"); await page.waitForTimeout(150);
+  ok("clickable card selects with Space", await cg.evaluate((e) => {
+    const c = [...e.querySelectorAll(".card.clickable")];
+    return c[1].classList.contains("on") && c[1].getAttribute("aria-pressed") === "true" && !c[0].classList.contains("on");
+  }));
+  // 선택 표시(inset)와 포커스 링(outline)은 둘 다 보여야 한다 — 같은 outline 을 쓰면 서로 덮는다
+  ok("card selection ring and focus ring coexist", await cg.evaluate((e) => {
+    const on = e.querySelector(".card.on"); const c = getComputedStyle(on);
+    return on.matches(":focus-visible") && c.boxShadow.includes("inset") && c.outlineStyle !== "none";
+  }));
+  const cardType = await page.evaluate(() => {
+    const t = getComputedStyle(document.querySelector("#ex-card-basic .card .title"));
+    const ct = getComputedStyle(document.querySelector("#ex-card-variant .card.compact .title"));
+    return { title: t.fontSize + "/" + t.lineHeight, compact: ct.fontSize + "/" + ct.lineHeight, inline: document.querySelector("#ex-card-variant .card.compact .title").getAttribute("style") };
+  });
+  // 제목에 line-height 가 없으면 문맥에 따라 25.6·28·26.4 로 흔들렸다
+  ok("card title uses Title/1 and compact Title/2", cardType.title === "16px/24px" && cardType.compact === "14px/20px" && !cardType.inline, JSON.stringify(cardType));
+  // Radio Button 회귀 — label.radio.card 가 .card 의 column·그림자를 받으면 점이 라벨 위로 간다
+  await go("components/radio-button.html");
+  const radioCard = await page.evaluate(() => {
+    const lbl = document.querySelector(".radio.card");
+    const i = lbl.querySelector("input").getBoundingClientRect(), sp = lbl.querySelector("span").getBoundingClientRect();
+    return { 세로차: Math.round(Math.abs(sp.top - i.top)), shadow: getComputedStyle(lbl).boxShadow, dir: getComputedStyle(lbl).flexDirection };
+  });
+  ok("radio card stays a row without card shadow", radioCard.세로차 < 6 && radioCard.shadow === "none" && radioCard.dir === "row", JSON.stringify(radioCard));
+  // 카드 안 기간 선택은 패널 없는 tablist 가 아니라 role=group + aria-pressed
+  await go("components/card.html");
+  const cardSb = page.locator("#ex-card-header .select-btn");
+  ok("card header uses a select button group", await cardSb.evaluate((e) => e.getAttribute("role") === "group" && !!e.getAttribute("aria-label") && !e.closest(".card").querySelector("[role=tablist]")));
+  await cardSb.locator("button").nth(1).click(); await page.waitForTimeout(150);
+  ok("card header select button toggles", await cardSb.evaluate((e) => {
+    const b2 = [...e.querySelectorAll("button")];
+    return b2[1].getAttribute("aria-pressed") === "true" && b2[0].getAttribute("aria-pressed") === "false";
+  }));
+  // .flush — 표를 카드 폭까지 채우는 관용구를 변형으로
+  await go("patterns/dashboard.html");
+  const fl = await page.evaluate(() => {
+    const c = document.querySelector(".card.flush");
+    if (!c) return { 없음: true };
+    return { padding: getComputedStyle(c).padding, headPadding: getComputedStyle(c.querySelector(".card-head")).padding, inline: c.getAttribute("style") };
+  });
+  ok("flush card has no padding but its head does", fl.padding === "0px" && fl.headPadding === "16px 24px" && !fl.inline, JSON.stringify(fl));
 
   // Nav
   await go("components/navigation.html");

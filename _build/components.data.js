@@ -803,30 +803,39 @@ const COMPONENTS = {
     desc: "관련 정보와 액션을 한 덩어리로 묶는 컨테이너입니다. 보더 대신 Surface 배경 + shadow/1 로 구획합니다.",
     thumb: `<div class="card compact" style="min-width:200px"><div class="card-head"><h3 class="title" style="font-size:14px">라이선스</h3><span class="tag ok sm">정상</span></div><p class="desc" style="font-size:12px">2026-12-31 만료</p></div>`,
     examples: [
-      { id: "basic", title: "Default", html: `
+      { id: "basic", title: "Default", desc: "head(제목 + 상태) · desc · foot(액션 우측). 보더 없이 Surface 배경과 shadow/1 로 구획합니다.", html: `
         <div class="card" style="width:360px">
           <div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div>
           <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
           <div class="card-foot"><button type="button" class="btn sm secondary">상세</button><button type="button" class="btn sm primary">갱신</button></div>
         </div>` },
-      { id: "header", title: "Header Actions", desc: "헤더 우측에 더 보기 메뉴 또는 기간 선택(Select Button).", html: `
+      { id: "header", title: "Header Actions", desc: "헤더 우측에 기간 선택(Select Button) 또는 더 보기 메뉴. 패널이 없으니 탭이 아니라 role=group + aria-pressed 를 씁니다.", html: `
         <div class="card" style="width:480px">
-          <div class="card-head"><h3 class="title">주간 탐지 추이</h3><div class="tabs pill sm" role="tablist"><button type="button" class="tab on" role="tab" aria-selected="true">7일</button><button type="button" class="tab" role="tab" aria-selected="false">30일</button></div></div>
+          <div class="card-head"><h3 class="title">주간 탐지 추이</h3><div class="select-btn" role="group" aria-label="기간"><button type="button" class="on" aria-pressed="true">7일</button><button type="button" aria-pressed="false">30일</button></div></div>
           <div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div>
           <p class="desc">이번 주 탐지 <b>412</b>건, 지난주보다 18% 증가</p>
         </div>` },
       { id: "variant", title: "Bordered / Compact", desc: "카드 위에 카드를 겹칠 때는 .bordered, 밀도 높은 그리드는 .compact.", html: `
         <div class="card bordered" style="width:280px"><h3 class="title">Bordered</h3><p class="desc">그림자 대신 1px 보더</p></div>
-        <div class="card compact" style="width:280px"><h3 class="title" style="font-size:14px">Compact</h3><p class="desc">padding 16</p></div>` },
-      { id: "clickable", title: "Clickable / Selected", desc: "카드 전체가 링크·선택 대상이면 .clickable, 선택은 .on.", html: `
+        <div class="card compact" style="width:280px"><h3 class="title">Compact</h3><p class="desc">padding 16 · 제목 14</p></div>` },
+      { id: "clickable", title: "Clickable / Selected", desc: "카드 전체가 눌리면 .clickable. 이동이면 a, 선택이면 button + aria-pressed 로 두고 선택된 것에 .on 을 줍니다.", html: `
         <div class="card-grid" style="max-width:600px">
-          <a href="#" class="card clickable" style="text-decoration:none;min-width:0"><h3 class="title">USB 제어</h3><p class="desc">정책 12개</p></a>
-          <a href="#" class="card clickable on" style="text-decoration:none;min-width:0"><h3 class="title">네트워크</h3><p class="desc">정책 8개 · 선택됨</p></a>
+          <button type="button" class="card clickable" aria-pressed="false"><h3 class="title">USB 제어</h3><p class="desc">정책 12개</p></button>
+          <button type="button" class="card clickable on" aria-pressed="true"><h3 class="title">네트워크</h3><p class="desc">정책 8개 · 선택됨</p></button>
         </div>` },
     ],
-    props: [[".card", "container", "—", "flex column, gap 12, padding 24"], [".card-head / .title / .desc / .card-foot", "elements", "—", "헤더 / 제목 16 / 설명 14 / 푸터 우측 정렬"], [".bordered", "boolean", "false", "shadow 대신 1px 보더"], [".compact", "boolean", "false", "padding 16"], [".clickable / .on", "boolean", "false", "hover shadow/2 / 선택 outline accent"], [".card-grid", "container", "—", "auto-fill 260px 그리드"]],
-    spec: [["Size", "최소 폭 260 · padding 24 (compact 16)"], ["Container", "radius/lg 8 · shadow/1 · bg/surface"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"]],
-    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 } }, variants: { default: { bg: "--bg-surface", shadow: "--shadow-1" }, bordered: { stroke: "--border-default" } }, states: ["default", "hover", "selected"] },
+    props: [
+      [".card", "container", "—", "flex column · gap 12 · padding 24 · 최소 폭 260. React <code>Card</code>"],
+      [".card-head / .title / .desc / .card-foot", "elements", "—", "헤더(양끝 정렬) / 제목 Title/1 16·24 / 설명 Body/2 14 / 푸터 우측 정렬 — React <code>CardHead</code>·<code>CardTitle</code>·<code>CardDesc</code>·<code>CardFoot</code>"],
+      [".bordered", "boolean", "false", "shadow 대신 1px 보더. 카드 위에 카드를 겹칠 때"],
+      [".compact", "boolean", "false", "padding 16 · gap 8 · 제목 14(Title/2)"],
+      [".flush", "boolean", "false", "padding·gap 0 — 표나 목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖습니다"],
+      [".clickable", "boolean", "false", "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. <code>.card-grid</code> 안에서는 ds.js 가 단일 선택으로 묶어 <code>.on</code> 과 <code>aria-pressed</code> 를 함께 갱신하고 <code>ds:select</code> 를 발행합니다. React <code>clickable</code> + <code>as</code>"],
+      [".on", "boolean", "false", "선택됨 — 안쪽 2px accent 링 + <code>--accent-subtle</code> 배경. 포커스 링(outline)과 겹치지 않아 둘이 동시에 보입니다. React <code>selected</code>"],
+      [".card-grid", "container", "—", "auto-fill minmax(260px,1fr) 그리드 · gap 20. React <code>CardGrid</code>"],
+    ],
+    spec: [["Size", "최소 폭 260 · padding 24 (compact 16 · flush 0)"], ["Container", "radius/lg 8 · shadow/1 · bg/surface"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"], ["Motion", "clickable 은 --motion-fast 로 shadow/1 → shadow/2"]],
+    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--bg-surface", shadow: "--shadow-1" }, bordered: { stroke: "--border-default" } }, states: ["default", "hover", "selected", "focused"] },
   },
 
   /* ------------------------------------------------ Popup */
@@ -1257,8 +1266,8 @@ const COMPONENTS = {
       { id: "spark", title: "Sparkline", desc: "카드 안 소형 추이. 강조 막대는 .hi.", html: `
         <div class="kpi" style="min-width:260px"><span class="label">일별 탐지</span><span class="value">412</span><div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div></div>` },
     ],
-    props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".sparkline", "div", "—", "i height% 막대, .hi 강조"]],
-    spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120"], ["Container", "chart-card = Card 규격"], ["Label", "Caption 12.5 tertiary · 값 tabular"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열"]],
+    props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".chart-card", "container", "—", "차트를 담는 카드. Card 와 같은 Surface·radius/lg·shadow/1 이고 padding 20 24 · gap 16 입니다. React <code>ChartCard</code>"], [".sparkline", "div", "—", "i height% 막대, .hi 강조"]],
+    spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·shadow/1, 다만 padding 20 24 · gap 16"], ["Label", "Caption 12.5 tertiary · 값 tabular"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열"]],
     figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, bar: {}, donut: {}, sparkline: {} }, states: ["default"] },
   },
 };

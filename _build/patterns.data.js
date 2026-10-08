@@ -140,7 +140,7 @@ const PATTERNS = {
         <div class="onboard">
           <ol class="steps"><li class="done"><i>${I("check",12)}</i>조직 정보</li><li class="on" aria-current="step"><i>2</i>보호 수준</li><li><i>3</i>에이전트 배포</li><li><i>4</i>완료</li></ol>
           <div class="card">
-            <h3 class="title t-heading-3">보호 수준을 선택하세요</h3>
+            <h3 class="title">보호 수준을 선택하세요</h3>
             <p class="desc">나중에 정책 › 기본 정책에서 바꿀 수 있습니다.</p>
             <div class="tile-grid" data-single style="grid-template-columns:1fr 1fr">
               <button type="button" class="tile on" aria-pressed="true"><span class="ico">S</span><b>표준</b><span>알려진 위협 차단. 권장</span></button>
@@ -247,8 +247,8 @@ const PATTERNS = {
             </div></div>
             <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="심각도 분포" data-label="1,054"></div><div class="chart-legend" style="flex-direction:column"><span><i style="background:var(--sev-critical)"></i>Critical <b>190</b></span><span><i style="background:var(--sev-high)"></i>High <b>285</b></span><span><i style="background:var(--sev-medium)"></i>Medium <b>316</b></span><span><i style="background:var(--sev-low)"></i>Low <b>263</b></span></div></div></div>
           </div>
-          <div class="card" style="padding:0;gap:0;overflow:hidden">
-            <div class="card-head" style="padding:16px 24px"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text">전체 보기 →</a></div>
+          <div class="card flush">
+            <div class="card-head"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text">전체 보기 →</a></div>
             <table class="tbl"><thead><tr><th>시간</th><th>이벤트</th><th>대상</th><th>상태</th></tr></thead><tbody>
               <tr><td>09:41:12</td><td>랜섬웨어 행위 탐지</td><td>PC-2041 · 김민준</td><td><span class="indicator danger">차단</span></td></tr>
               <tr><td>09:36:47</td><td>알려진 악성코드 차단</td><td>PC-0932 · 박지훈</td><td><span class="indicator danger">차단</span></td></tr>
