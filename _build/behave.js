@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 161 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 185 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -114,52 +114,66 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     red.neutral && red.bg === "rgb(15, 23, 42)" && red.text === "rgb(15, 23, 42)"
     && red.accent === "#0F172A" && red.focus === "#64748B" && red.subtle === "#F1F5F9"
     && red.ramp === "#475569 #CBD5E1 #F1F5F9", JSON.stringify(red));
-  // 다크는 배경 계열만 중립이고 Primary 신호는 제품 컬러다 — 램프 덮기가 없으므로 주입값(--prod-*)이 다크에도 닿는다
-  const darkTokens = async () => {
-    await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
-    await page.waitForTimeout(250);
-    return page.evaluate(() => {
-      const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
-      const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
-      const c = getComputedStyle(document.querySelector("#ex-button-variant .btn.primary"));
-      return {
-        accent: g("--accent"), text: g("--accent-text"), subtle: g("--accent-subtle"), focus: g("--border-focus"), prod600: g("--prod-600"),
-        bg: c.backgroundColor, fg: c.color, canvas: res("var(--bg-canvas)"), panel: res("var(--bg-panel)"),
-        subtleRgb: res("var(--accent-subtle)"), textRgb: res("var(--accent-text)"),
-        inverse: res("var(--accent-inverse)"), bgInverse: res("var(--bg-inverse)"), raw300: res("var(--accent-300)"),
-      };
-    });
-  };
+  // 다크는 메인·hover·pressed·글자색을 라이트와 그대로 공유한다(같은 600 단계) — 다른 것은 텍스트·선택 배경·지표·반전·포커스뿐이다
+  const readTokens = () => page.evaluate(() => {
+    const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
+    const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
+    const pb = document.querySelector("#ex-button-variant .btn.primary"); const c = pb ? getComputedStyle(pb) : null;
+    return {
+      accent: g("--accent"), hover: g("--accent-hover"), pressed: g("--accent-pressed"), on: g("--accent-on"),
+      text: g("--accent-text"), subtle: g("--accent-subtle"), graphic: g("--accent-graphic"), focus: g("--border-focus"), prod600: g("--prod-600"),
+      light: document.documentElement.hasAttribute("data-accent-light"), neutral: document.documentElement.hasAttribute("data-accent-neutral"),
+      bg: c ? c.backgroundColor : "", fg: c ? c.color : "",
+      accentRgb: res("var(--accent)"), hoverRgb: res("var(--accent-hover)"), pressedRgb: res("var(--accent-pressed)"), onRgb: res("var(--accent-on)"),
+      textRgb: res("var(--accent-text)"), subtleRgb: res("var(--accent-subtle)"), graphicRgb: res("var(--accent-graphic)"),
+      focusRgb: res("var(--border-focus)"), invRgb: res("var(--accent-inverse)"), bgInverse: res("var(--bg-inverse)"),
+      canvas: res("var(--bg-canvas)"), surface: res("var(--bg-surface)"), panel: res("var(--bg-panel)"),
+      ramp: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((k) => g("--accent-" + k)).join(" "),
+      neuRamp: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((k) => g("--neutral-" + k)).join(" "),
+    };
+  });
+  const goDark = async () => { await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(250); return readTokens(); };
   const unDark = async () => { await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(150); };
-  const NEUTRAL_SUBTLE = "#37383C";
-  // 제품 B 상태 — 램프 자체가 무채색이라 다크도 회색이다(다크 블록이 덮어서가 아니다. 중립 전환은 양 테마에 걸린다)
-  const darkRed = await darkTokens();
-  ok("a clashing product is grey in dark because its own ramp is neutral",
-    darkRed.accent === "#94A3B8" && darkRed.text === "#CBD5E1" && darkRed.focus === "#94A3B8", JSON.stringify(darkRed));
-  await unDark();
-  // 청록 제품은 다크에서도 제품 컬러를 유지한다 — 종전에는 램프를 덮어 #989BA2 회색이 나왔다
-  await accent("product-a");
-  const darkTeal = await darkTokens();
-  ok("dark keeps the product colour",
-    darkTeal.accent === "#1FDFED" && darkTeal.text === "#5CE3ED" && darkTeal.focus === "#1FDFED" && darkTeal.prod600 === "#00AAB6", JSON.stringify(darkTeal));
-  ok("raw accent-300 follows the product in dark", darkTeal.raw300 === "rgb(92, 227, 237)", darkTeal.raw300);
-  await unDark();
-  // 제품 미선택(토큰 기본 파랑)이 다크 대비의 최저선이다 — 이관 전 패널 위 생 accent 가 4.08 이었다
-  await accent("");
-  const darkBase = await darkTokens();
-  ok("dark base token keeps the blue ramp", darkBase.accent === "#648CE4" && darkBase.text === "#8AA7E7" && darkBase.prod600 === "", JSON.stringify(darkBase));
-  for (const [n, d] of [["clashing", darkRed], ["product", darkTeal], ["base", darkBase]]) {
-    // Primary 는 어두운 글자(--accent-on)와 짝이다. 제품색이 돌아와도 AA 를 지켜야 한다
-    ok(`dark Primary clears AA for the ${n} colour`, ratio(d.bg, d.fg) >= 4.5, `${ratio(d.bg, d.fg)} · ${d.bg} / ${d.fg}`);
-    // 패널 위 텍스트는 --accent-text(300). 생 --accent(400)로 두면 기본 파랑이 4.08 이다
-    ok(`dark accent text clears AA on the panel for the ${n} colour`, ratio(d.textRgb, d.panel) >= 4.5, `${ratio(d.textRgb, d.panel)} · ${d.textRgb} / ${d.panel}`);
-    // 선택 배경은 '배경'이라 제품과 무관하게 중립 — 제품 램프 900 을 쓰면 캔버스와 1.05~1.16 로 사라진다
-    ok(`dark selected background stays neutral for the ${n} colour`, d.subtle === NEUTRAL_SUBTLE, d.subtle);
-    ok(`dark selected background is distinguishable for the ${n} colour`, ratio(d.subtleRgb, d.canvas) >= 1.4, `${ratio(d.subtleRgb, d.canvas)} · ${d.subtleRgb} / ${d.canvas}`);
-    // 다크의 반전 표면(--bg-inverse)은 밝다 — 토스트 액션이 300 단계면 1.44~2.03 으로 묻힌다. --accent-inverse 는 800
-    ok(`dark inverse-surface Primary clears AA for the ${n} colour`, ratio(d.inverse, d.bgInverse) >= 4.5, `${ratio(d.inverse, d.bgInverse)} · ${d.inverse} / ${d.bgInverse}`);
+  const cases = [];
+  for (const [name, key] of [["base", ""], ["product", "product-a"], ["clashing", "product-b"]]) {
+    await unDark(); await accent(key);
+    const L = await readTokens(); const D = await goDark(); await unDark();
+    cases.push([name, L, D]);
   }
-  await unDark();
+  for (const [n, L, D] of cases) {
+    if (n === "clashing") {
+      // 중립 전환만 테마별로 갈린다 — 라이트는 짙은 쪽(900), 다크는 밝은 쪽(100). 중립 600 은 다크 캔버스 위에서 2.0 이라 주인공이 될 수 없다
+      ok("dark neutral switch flips to the light end of the ramp",
+        D.accent === "#EAEBEC" && D.hover === "#C2C4C8" && D.pressed === "#AEB0B6" && L.accent === "#0F172A", JSON.stringify([L.accent, D.accent, D.hover, D.pressed]));
+      // 램프가 slate 하드코딩이 아니라 다크 바탕과 같은 계열이어야 한다 — 종전에는 #94A3B8 가 주변 #989BA2 와 어긋났다
+      ok("dark neutral switch uses the product neutral ramp, not slate", D.ramp === D.neuRamp, `${D.ramp} | ${D.neuRamp}`);
+    } else {
+      ok(`dark shares the light triad for the ${n} colour`,
+        D.accent === L.accent && D.hover === L.hover && D.pressed === L.pressed && D.on === L.on,
+        JSON.stringify({ light: [L.accent, L.hover, L.pressed, L.on], dark: [D.accent, D.hover, D.pressed, D.on] }));
+    }
+    // 밝은 제품은 글자가 어둡고 상태가 밝은 쪽으로 간다 — 짙어지는 쪽으로 보내면 4.05·2.55 로 깨진다
+    ok(`the ${n} colour sets data-accent-light correctly`, L.light === (n === "product") && D.light === (n === "product"), `${L.light} · ${D.light}`);
+    for (const [theme, t] of [["light", L], ["dark", D]]) {
+      for (const [st, fill] of [["rest", t.accentRgb], ["hover", t.hoverRgb], ["pressed", t.pressedRgb]])
+        ok(`${theme} ${n} Primary ${st} clears AA`, ratio(fill, t.onRgb) >= 4.5, `${ratio(fill, t.onRgb)} · ${fill} / ${t.onRgb}`);
+    }
+    // 글자로 보정할 수 없는 자리 — 지표·포커스 링은 3:1, 패널 위 텍스트는 4.5
+    ok(`dark ${n} graphic clears 3:1 on every surface`,
+      Math.min(ratio(D.graphicRgb, D.canvas), ratio(D.graphicRgb, D.surface), ratio(D.graphicRgb, D.panel)) >= 3,
+      `${ratio(D.graphicRgb, D.canvas)} · ${ratio(D.graphicRgb, D.surface)} · ${ratio(D.graphicRgb, D.panel)}`);
+    ok(`dark ${n} focus ring clears 3:1`, ratio(D.focusRgb, D.canvas) >= 3, `${ratio(D.focusRgb, D.canvas)}`);
+    ok(`dark ${n} accent text clears AA on the panel`, ratio(D.textRgb, D.panel) >= 4.5, `${ratio(D.textRgb, D.panel)}`);
+    // 선택 배경은 제품과 무관한 중립 — 제품 램프 900 이면 캔버스와 1.05~1.16 로 사라진다
+    ok(`dark ${n} selected background stays neutral and visible`,
+      D.subtle === "#37383C" && ratio(D.subtleRgb, D.canvas) >= 1.4, `${D.subtle} · ${ratio(D.subtleRgb, D.canvas)}`);
+    // 다크의 반전 표면은 밝다 — 그 위의 Primary 는 800 단계여야 묻히지 않는다
+    ok(`dark ${n} inverse-surface Primary clears AA`, ratio(D.invRgb, D.bgInverse) >= 4.5, `${ratio(D.invRgb, D.bgInverse)} · ${D.invRgb} / ${D.bgInverse}`);
+  }
+  // 라이트는 기본·중립 전환이 그대로여야 한다(제품 A·C 만 글자색이 어두운 쪽으로 바뀐다)
+  ok("light base and clashing keep a white accent-on",
+    cases[0][1].onRgb === "rgb(255, 255, 255)" && cases[2][1].onRgb === "rgb(255, 255, 255)", `${cases[0][1].onRgb} · ${cases[2][1].onRgb}`);
+  ok("light bright product takes a dark accent-on", cases[1][1].onRgb === "rgb(23, 23, 25)", cases[1][1].onRgb);
   await accent("product-a");
   // 라이트로 돌아오면 제품색이 살아 있어야 한다
   const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
@@ -249,13 +263,14 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       const b2 = document.createElement("button");
       b2.type = "button"; b2.className = "btn md " + v + " loading"; b2.textContent = "저장";
       prev.append(b2);
-      out[v] = getComputedStyle(b2, "::after").borderTopColor;
+      out[v] = { arc: getComputedStyle(b2, "::after").borderTopColor, fill: getComputedStyle(b2).backgroundColor };
       b2.remove();
     }
     return out;
   });
-  // 다크에선 바탕이 밝아지므로 흰 스피너가 묻힌다 — --accent-on·--danger-on 이 어두운 쪽으로 뒤집혀야 한다
-  ok("dark loading spinner is not white", spinDark.primary !== "rgb(255, 255, 255)" && spinDark.danger !== "rgb(255, 255, 255)", JSON.stringify(spinDark));
+  // 스피너는 자기 버튼 바탕 위에 있다 — 글자색(--accent-on·--danger-on)이 제품 밝기에 따라 흰/어두움으로 뒤집히므로 색을 박지 않고 대비로 본다
+  for (const v of ["primary", "danger"])
+    ok(`dark ${v} loading spinner stands out on its own fill`, ratio(spinDark[v].arc, spinDark[v].fill) >= 3, `${ratio(spinDark[v].arc, spinDark[v].fill)} · ${JSON.stringify(spinDark[v])}`);
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
   // 입력과 버튼이 같은 포커스 링을 쓰는지 — 입력만 4px 10% 헤일로였다

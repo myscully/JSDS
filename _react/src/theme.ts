@@ -40,6 +40,20 @@ export function accentScale(hex: string): AccentScale {
   return out;
 }
 
+function relLum(hex: string): number {
+  const c = [0, 1, 2].map((i) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255)
+    .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function ratio(a: string, b: string): number {
+  const [x, y] = [relLum(a) + 0.05, relLum(b) + 0.05];
+  return Math.max(x, y) / Math.min(x, y);
+}
+/** 메인 컬러 위에 흰 글자가 뜨는지 — 어두운 글자(#171719 = --neutral-950)가 더 대비가 높으면 '밝은 제품' */
+export function isLightAccent(hex: string): boolean {
+  return ratio(hex, "#FFFFFF") < ratio(hex, "#171719");
+}
+
 /** :root 에 제품 램프를 --prod-* 로 주입. 앱 시작 시 한 번 호출.
  *  --accent-* 가 아니라 --prod-* 인 이유: --prod-* 는 '제품이 넣는 입력'이고 --accent-* 는 '테마가 해석한 결과'다.
  *  :root 가 var(--prod-N, 기본값) 으로 받아, 라이트는 600 · 다크는 400 단계를 집는다.
@@ -48,6 +62,9 @@ export function applyAccent(hex: string, root: HTMLElement = document.documentEl
   const sc = accentScale(hex);
   for (const [k, v] of Object.entries(sc)) root.style.setProperty(`--prod-${k}`, v);
   root.dataset.accent = hex.toUpperCase();
+  /* 메인 컬러가 밝으면 그 위의 흰 글자가 뜬다 — 글자를 어둡게, 상태는 밝은 쪽으로 보내는 CSS 규칙을 켠다 */
+  if (isLightAccent(sc[600])) root.dataset.accentLight = "";
+  else delete root.dataset.accentLight;
   return sc;
 }
 

@@ -15,10 +15,16 @@
      채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다. 겹치면 램프 자체를 NEUTRAL_RAMP 로 갈아끼워,
      --accent-* 를 참조하는 모든 것(버튼·링크·탭·체크박스·포커스 링·Atomic 램프)이 함께 중립으로 간다.
      주입 이름이 --prod-* 인 이유: --prod-* 는 '제품이 넣는 입력'이고 --accent-* 는 '테마가 해석한 결과'다.
-     라이트는 600, 다크는 400 단계를 집고, 다크의 --accent-subtle 만 제품과 무관한 중립으로 남는다 — 그 판단은 CSS 토큰 블록에 있다 */
+     라이트와 다크가 같은 600 단계를 집고(톤 유지), 다크에서 다른 것은 텍스트·선택 배경·지표·반전뿐이다 — 그 판단은 전부 CSS 토큰 블록에 있다 */
   const STATUS_HUES = [0, 38, 160, 199];
   /* 중립 램프 — gray-* 와 같은 단계. accentScale("#0F172A") 로 만들면 중간 단계에 푸른 기가 남아 쓸 수 없다 */
   const NEUTRAL_RAMP = { 50: "#F8FAFC", 100: "#F1F5F9", 200: "#E2E8F0", 300: "#CBD5E1", 400: "#94A3B8", 500: "#64748B", 600: "#475569", 700: "#334155", 800: "#1E293B", 900: "#0F172A" };
+  /* 메인 컬러 위에 흰 글자가 뜨는지 — 어두운 글자가 더 대비가 높으면 '밝은 제품'이다.
+     글자색만이 아니라 hover·pressed 방향까지 뒤집힌다(CSS 의 :root[data-accent-light]) — 짙어지는 쪽으로 가면 어두운 글자가 깨진다.
+     #171719 는 --neutral-950. NEUTRAL_RAMP 와 같은 방식의 하드코딩이다 */
+  function relLum(hex) { const c = [0, 1, 2].map(i => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4)); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
+  function ratio(a, b) { const [x, y] = [relLum(a) + .05, relLum(b) + .05]; return Math.max(x, y) / Math.min(x, y); }
+  function isLightAccent(hex) { return ratio(hex, "#FFFFFF") < ratio(hex, "#171719"); }
   function clashesWithStatus(hex) {
     const [h, sat] = hexToHsl(hex);
     if (sat < 20) return false;
@@ -26,11 +32,12 @@
   }
   function applyAccent(key) {
     const p = products.find(x => x.key === key);
-    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--prod-" + k); delete root.dataset.accent; delete root.dataset.accentNeutral; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
+    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--prod-" + k); delete root.dataset.accent; delete root.dataset.accentNeutral; delete root.dataset.accentLight; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
     const neutral = clashesWithStatus(p.hex);
     const sc = neutral ? NEUTRAL_RAMP : accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--prod-" + k, v);
     root.dataset.accent = p.key;
-    if (neutral) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
+    if (neutral) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral;
+    if (!neutral && isLightAccent(sc[600])) root.dataset.accentLight = ""; else delete root.dataset.accentLight; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
     paintAccent();
   }
   window.applyAccent = applyAccent;
