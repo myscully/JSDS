@@ -1,4 +1,4 @@
-import { applyAccent, accentScale, setTheme, getTheme } from "./theme";
+import { applyAccent, accentScale, isLightAccent, setTheme, getTheme } from "./theme";
 
 describe("applyAccent", () => {
   beforeEach(() => {
@@ -25,6 +25,16 @@ describe("applyAccent", () => {
     expect(Object.keys(sc).map(Number).sort((a, b) => a - b)).toEqual([50, 100, 200, 300, 400, 500, 600, 700, 800, 900]);
     expect(sc[600]).toBe("#00AAB6");
     expect(document.documentElement.dataset.accent).toBe("#00AAB6");
+  });
+
+  /* 밝은 메인 컬러는 흰 글자가 뜬다 — 글자색과 hover·pressed 방향을 뒤집는 CSS 규칙의 스위치다 */
+  it("밝은 메인 컬러에만 data-accent-light 를 켠다", () => {
+    applyAccent("#00AAB6");
+    expect(document.documentElement.hasAttribute("data-accent-light")).toBe(true);
+    expect(isLightAccent("#00AAB6")).toBe(true);
+    applyAccent("#2563EB");
+    expect(document.documentElement.hasAttribute("data-accent-light")).toBe(false);
+    expect(isLightAccent("#2563EB")).toBe(false);
   });
 
   it("accentScale 은 600 에 입력 HEX 를 그대로 둔다", () => {
