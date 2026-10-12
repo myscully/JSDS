@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 142 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 147 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -6,6 +6,10 @@ const SHOT = path.join(__dirname, ".behave");
 require("fs").mkdirSync(SHOT, { recursive: true });
 const results = [];
 const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", name, extra]);
+/* 대비는 Node 에서 계산한다 — 템플릿 리터럴 안의 \\d 는 d 로 죽어 정규식이 깨진다 */
+const lum = (v) => { const [r, g, b2] = v.map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b2; };
+const toRgb = (s2) => s2.match(/[0-9.]+/g).map(Number).slice(0, 3);
+const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)) + 0.05]; return +(Math.max(x, y) / Math.min(x, y)).toFixed(2); };
 
 (async () => {
   const b = await chromium.launch();
@@ -110,13 +114,43 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
     red.neutral && red.bg === "rgb(15, 23, 42)" && red.text === "rgb(15, 23, 42)"
     && red.accent === "#0F172A" && red.focus === "#64748B" && red.subtle === "#F1F5F9"
     && red.ramp === "#475569 #CBD5E1 #F1F5F9", JSON.stringify(red));
-  await page.click("#themeBtn"); await page.waitForTimeout(200);
-  const dark = await page.evaluate(() => {
-    const c = getComputedStyle(document.querySelector("#ex-button-variant .btn.primary"));
-    return { bg: c.backgroundColor, fg: c.color, accent: getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() };
+  // 다크는 제품 컬러와 무관하게 늘 중립 — 램프 자체가 --neutral-* 로 덮이므로 주입값(--prod-*)이 닿지 않는다
+  const darkTokens = async () => {
+    await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
+    await page.waitForTimeout(250);
+    return page.evaluate(() => {
+      const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
+      const c = getComputedStyle(document.querySelector("#ex-button-variant .btn.primary"));
+      return { accent: g("--accent"), text: g("--accent-text"), subtle: g("--accent-subtle"), focus: g("--border-focus"),
+        prod600: g("--prod-600"), bg: c.backgroundColor, fg: c.color };
+    });
+  };
+  const NEUTRAL_DARK = { accent: "#989BA2", text: "#AEB0B6", subtle: "#37383C", focus: "#989BA2" };
+  const sameDark = (d) => d.accent === NEUTRAL_DARK.accent && d.text === NEUTRAL_DARK.text && d.subtle === NEUTRAL_DARK.subtle && d.focus === NEUTRAL_DARK.focus;
+  const darkRed = await darkTokens();   // 제품 B(중립 전환) 상태에서
+  ok("dark is neutral for a clashing product", sameDark(darkRed) && darkRed.fg === "rgb(23, 23, 25)", JSON.stringify(darkRed));
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(150);
+  // 청록 제품으로 바꿔도 다크는 같은 값이어야 한다 — 종전에는 #1FDFED 밝은 청록이 남았다
+  await accent("product-a");
+  const darkTeal = await darkTokens();
+  ok("dark ignores the product ramp entirely", sameDark(darkTeal) && darkTeal.prod600 === "#00AAB6", JSON.stringify(darkTeal));
+  // 다크 선택 배경이 캔버스와 구분돼야 한다 — 단계를 기계적으로 매핑하면 neutral-900 이 되어 대비 1.00
+  const subtleGap = await page.evaluate(() => {
+    const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
+    return { subtle: res("var(--accent-subtle)"), canvas: res("var(--bg-canvas)") };
   });
-  ok("dark neutral Primary flips to light grey", dark.bg === "rgb(148, 163, 184)" && dark.fg === "rgb(23, 23, 25)" && dark.accent === "#94A3B8", JSON.stringify(dark));
-  await page.click("#themeBtn"); await page.waitForTimeout(150);
+  ok("dark selected background is distinguishable", ratio(subtleGap.subtle, subtleGap.canvas) >= 1.4, `${ratio(subtleGap.subtle, subtleGap.canvas)} · ${JSON.stringify(subtleGap)}`);
+  // 생 --accent-300 을 쓰는 두 곳도 램프 교체로 함께 중립이 된다
+  const raw300 = await page.evaluate(() => {
+    const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
+    return res("var(--accent-300)");
+  });
+  ok("raw accent-300 consumers go neutral in dark", raw300 === "rgb(174, 176, 182)", raw300);
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(150);
+  // 라이트로 돌아오면 제품색이 살아 있어야 한다
+  const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
+  ok("light keeps the product colour", backLight === "#00AAB6", backLight);
+  await accent("product-b");   // 뒤 케이스(Atomic 램프)가 중립 전환 상태를 전제한다 — 원복해 둔다
 
   // Atomic 의 Accent 램프도 함께 회색 — 제품 컬러에서 파생되는 것은 전부 따라온다
   await go("foundations/colors.html");
@@ -142,10 +176,6 @@ const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", nam
   await page.waitForTimeout(60);
   ok("a normal button still fires", (await page.evaluate(() => window.__hit)) === 1);
   // danger 는 color:#fff 가 하드코딩이라 다크에서 바탕이 밝아지며 2.77:1 까지 떨어졌다.
-  // 대비는 Node 에서 계산한다 — 템플릿 리터럴 안의 \\d 는 d 로 죽어 정규식이 깨진다
-  const lum = (v) => { const [r, g, b2] = v.map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b2; };
-  const toRgb = (s2) => s2.match(/[0-9.]+/g).map(Number).slice(0, 3);
-  const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)) + 0.05]; return +(Math.max(x, y) / Math.min(x, y)).toFixed(2); };
   for (const theme of ["light", "dark"]) {
     await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
     await page.waitForTimeout(250);

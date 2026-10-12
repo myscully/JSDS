@@ -17,7 +17,8 @@ const ROOT=document.body.dataset.root||'../';
   const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
   /* 제품 메인 컬러가 상태색과 헷갈리는지 — 색상환에서 danger 0 · warning 38 · success 160 · info 199 와 15도 미만이면 참.
      채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다. 겹치면 램프 자체를 NEUTRAL_RAMP 로 갈아끼워,
-     --accent-* 를 참조하는 모든 것(버튼·링크·탭·체크박스·포커스 링·Atomic 램프)이 함께 중립으로 간다 */
+     --accent-* 를 참조하는 모든 것(버튼·링크·탭·체크박스·포커스 링·Atomic 램프)이 함께 중립으로 간다.
+     주입은 --prod-* 로 한다 — 인라인은 스타일시트를 이기므로 --accent-* 로 쓰면 다크 블록의 중립 덮기가 무력해진다 */
   const STATUS_HUES = [0, 38, 160, 199];
   /* 중립 램프 — gray-* 와 같은 단계. accentScale("#0F172A") 로 만들면 중간 단계에 푸른 기가 남아 쓸 수 없다 */
   const NEUTRAL_RAMP = { 50: "#F8FAFC", 100: "#F1F5F9", 200: "#E2E8F0", 300: "#CBD5E1", 400: "#94A3B8", 500: "#64748B", 600: "#475569", 700: "#334155", 800: "#1E293B", 900: "#0F172A" };
@@ -28,9 +29,9 @@ const ROOT=document.body.dataset.root||'../';
   }
   function applyAccent(key) {
     const p = products.find(x => x.key === key);
-    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--accent-" + k); delete root.dataset.accent; delete root.dataset.accentNeutral; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
+    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--prod-" + k); delete root.dataset.accent; delete root.dataset.accentNeutral; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
     const neutral = clashesWithStatus(p.hex);
-    const sc = neutral ? NEUTRAL_RAMP : accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--accent-" + k, v);
+    const sc = neutral ? NEUTRAL_RAMP : accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--prod-" + k, v);
     root.dataset.accent = p.key;
     if (neutral) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
     paintAccent();

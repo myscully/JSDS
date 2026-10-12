@@ -40,10 +40,13 @@ export function accentScale(hex: string): AccentScale {
   return out;
 }
 
-/** :root 에 --accent-* 를 주입. 앱 시작 시 한 번 호출 */
+/** :root 에 제품 램프를 --prod-* 로 주입. 앱 시작 시 한 번 호출.
+ *  --accent-* 가 아니라 --prod-* 인 이유: 인라인 스타일은 모든 스타일시트 규칙을 이기므로
+ *  --accent-* 로 쓰면 다크 블록이 램프를 중립으로 덮는 것이 무력해진다(다크에 제품색이 남는다).
+ *  라이트는 :root 가 var(--prod-N, 기본값) 으로 받고, 다크는 --neutral-* 를 쓴다. */
 export function applyAccent(hex: string, root: HTMLElement = document.documentElement): AccentScale {
   const sc = accentScale(hex);
-  for (const [k, v] of Object.entries(sc)) root.style.setProperty(`--accent-${k}`, v);
+  for (const [k, v] of Object.entries(sc)) root.style.setProperty(`--prod-${k}`, v);
   root.dataset.accent = hex.toUpperCase();
   return sc;
 }
