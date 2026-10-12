@@ -40,7 +40,12 @@
   --warning:var(--amber-600);--warning-hover:var(--amber-500);--warning-pressed:var(--amber-400);--warning-subtle:var(--amber-50);--warning-on:var(--gray-900);--warning-text:var(--amber-700);
   --success:var(--emerald-600);--success-hover:var(--emerald-500);--success-pressed:var(--emerald-400);--success-subtle:var(--emerald-50);--success-on:var(--gray-900);--success-text:var(--emerald-700);
   --info:var(--sky-600);--info-hover:var(--sky-700);--info-pressed:var(--sky-800);--info-subtle:var(--sky-50);--info-text:var(--sky-700);
+  /* 심각도 — 상태색과 같은 3층이다: 면(--sev-*) · 면 위 글자(-on) · 옅은 바탕 위 글자(-text).
+     면은 태그 solid · 바 · 점 · 밴드에, -text 는 기본형 태그와 KPI 숫자처럼 글자에 쓴다.
+     -on 이 가족마다 갈리는 이유 — amber-500 위의 흰 글자는 2.15, sky-500 은 2.77 로 떠서 어두운 글자를 쓴다 */
   --sev-critical:var(--red-700);--sev-high:var(--red-500);--sev-medium:var(--amber-500);--sev-low:var(--sky-500);--sev-info:var(--gray-500);
+  --sev-critical-on:var(--gray-0);--sev-high-on:var(--gray-900);--sev-medium-on:var(--gray-900);--sev-low-on:var(--gray-900);--sev-info-on:var(--gray-0);
+  --sev-critical-text:var(--red-800);--sev-high-text:var(--red-700);--sev-medium-text:var(--amber-700);--sev-low-text:var(--sky-700);--sev-info-text:var(--gray-600);
   --sev-critical-bg:var(--red-100);--sev-high-bg:var(--red-50);--sev-medium-bg:var(--amber-50);--sev-low-bg:var(--sky-50);--sev-info-bg:var(--gray-100);
   /* Spacing / Radius / Elevation / Motion */
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;--space-20:80px;
@@ -89,7 +94,13 @@
   --warning:var(--amber-500);--warning-hover:var(--amber-400);--warning-pressed:var(--amber-300);--warning-subtle:rgba(251,191,36,.12);--warning-on:var(--neutral-950);--warning-text:var(--amber-400);
   --success:var(--emerald-500);--success-hover:var(--emerald-400);--success-pressed:var(--emerald-300);--success-subtle:rgba(52,211,153,.12);--success-on:var(--neutral-950);--success-text:var(--emerald-400);
   --info:var(--sky-500);--info-hover:var(--sky-400);--info-pressed:var(--sky-300);--info-subtle:rgba(56,189,248,.12);--info-text:var(--sky-400);
-  --sev-critical:var(--red-400);--sev-high:var(--red-400);--sev-medium:var(--amber-400);--sev-low:var(--sky-400);--sev-info:var(--neutral-300);
+  /* 다크 심각도 — critical 과 high 가 둘 다 red-400 이라 대비 1.00 으로 같은 색이었다(5단계가 4단계로 읽혔다).
+     라이트의 관계를 뒤집어 유지한다 — 어느 테마에서든 critical 이 배경과 대비가 더 크다(다크 8.98 vs 4.53). 분리 1.98(라이트는 1.72).
+     다크 면은 다섯 다 밝아서 -on 은 전부 어두운 글자다. -text 는 면보다 한두 단계 밝다 — 태그가 패널 위에 놓이면 반투명 -bg 합성 바탕이 밝아져,
+     red-300 은 critical 바탕에서 5.54 로 되지만 high 바탕에서 red-400 은 4.06 으로 미달이다(캔버스 기준으로만 재면 5.18 로 통과해 보인다) */
+  --sev-critical:var(--red-300);--sev-high:var(--red-500);--sev-medium:var(--amber-400);--sev-low:var(--sky-400);--sev-info:var(--neutral-300);
+  --sev-critical-on:var(--neutral-950);--sev-high-on:var(--neutral-950);--sev-medium-on:var(--neutral-950);--sev-low-on:var(--neutral-950);--sev-info-on:var(--neutral-950);
+  --sev-critical-text:var(--red-200);--sev-high-text:var(--red-300);--sev-medium-text:var(--amber-400);--sev-low-text:var(--sky-400);--sev-info-text:var(--neutral-300);
   --sev-critical-bg:rgba(248,113,113,.16);--sev-high-bg:rgba(248,113,113,.12);--sev-medium-bg:rgba(251,191,36,.12);--sev-low-bg:rgba(56,189,248,.12);--sev-info-bg:rgba(112,115,124,.16);
   --code-bg:var(--neutral-950);--code-chip:var(--neutral-800);--code-chip-border:var(--neutral-700);--code-chip-fg:var(--neutral-200);--code-head-fg:var(--neutral-300);
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
@@ -116,7 +127,13 @@
   --warning:var(--amber-500);--warning-hover:var(--amber-400);--warning-pressed:var(--amber-300);--warning-subtle:rgba(251,191,36,.12);--warning-on:var(--neutral-950);--warning-text:var(--amber-400);
   --success:var(--emerald-500);--success-hover:var(--emerald-400);--success-pressed:var(--emerald-300);--success-subtle:rgba(52,211,153,.12);--success-on:var(--neutral-950);--success-text:var(--emerald-400);
   --info:var(--sky-500);--info-hover:var(--sky-400);--info-pressed:var(--sky-300);--info-subtle:rgba(56,189,248,.12);--info-text:var(--sky-400);
-  --sev-critical:var(--red-400);--sev-high:var(--red-400);--sev-medium:var(--amber-400);--sev-low:var(--sky-400);--sev-info:var(--neutral-300);
+  /* 다크 심각도 — critical 과 high 가 둘 다 red-400 이라 대비 1.00 으로 같은 색이었다(5단계가 4단계로 읽혔다).
+     라이트의 관계를 뒤집어 유지한다 — 어느 테마에서든 critical 이 배경과 대비가 더 크다(다크 8.98 vs 4.53). 분리 1.98(라이트는 1.72).
+     다크 면은 다섯 다 밝아서 -on 은 전부 어두운 글자다. -text 는 면보다 한두 단계 밝다 — 태그가 패널 위에 놓이면 반투명 -bg 합성 바탕이 밝아져,
+     red-300 은 critical 바탕에서 5.54 로 되지만 high 바탕에서 red-400 은 4.06 으로 미달이다(캔버스 기준으로만 재면 5.18 로 통과해 보인다) */
+  --sev-critical:var(--red-300);--sev-high:var(--red-500);--sev-medium:var(--amber-400);--sev-low:var(--sky-400);--sev-info:var(--neutral-300);
+  --sev-critical-on:var(--neutral-950);--sev-high-on:var(--neutral-950);--sev-medium-on:var(--neutral-950);--sev-low-on:var(--neutral-950);--sev-info-on:var(--neutral-950);
+  --sev-critical-text:var(--red-200);--sev-high-text:var(--red-300);--sev-medium-text:var(--amber-400);--sev-low-text:var(--sky-400);--sev-info-text:var(--neutral-300);
   --sev-critical-bg:rgba(248,113,113,.16);--sev-high-bg:rgba(248,113,113,.12);--sev-medium-bg:rgba(251,191,36,.12);--sev-low-bg:rgba(56,189,248,.12);--sev-info-bg:rgba(112,115,124,.16);
   --code-bg:var(--neutral-950);--code-chip:var(--neutral-800);--code-chip-border:var(--neutral-700);--code-chip-fg:var(--neutral-200);--code-head-fg:var(--neutral-300);
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
@@ -776,23 +793,30 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 /* Tag */
 .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--radius-full);line-height:1.6;background:var(--bg-panel);color:var(--text-secondary);white-space:nowrap}
 .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
-.tag.critical{background:var(--danger-subtle);color:var(--sev-critical)}
-.tag.high{background:var(--danger-subtle);color:var(--sev-high)}
-.tag.medium{background:var(--warning-subtle);color:var(--sev-medium)}
-.tag.low{background:var(--info-subtle);color:var(--sev-low)}
-.tag.info{background:var(--bg-panel);color:var(--sev-info)}
+/* 기본형(서브틀)은 자기 가족의 옅은 바탕(-bg) + 글자용 단계(-text)를 쓴다.
+   종전에는 바탕이 --danger-subtle/--warning-subtle/--info-subtle 이고 글자가 면 토큰이어서,
+   라이트에서 medium 2.07 · low 2.60 · high 3.44 · info 4.34 로 다섯 중 넷이 AA 미달이었다.
+   critical 과 high 이 같은 --danger-subtle 을 쓰던 것도 -bg 로 갈려(red-100 vs red-50) 단계 구분이 생긴다 */
+.tag.critical{background:var(--sev-critical-bg);color:var(--sev-critical-text)}
+.tag.high{background:var(--sev-high-bg);color:var(--sev-high-text)}
+.tag.medium{background:var(--sev-medium-bg);color:var(--sev-medium-text)}
+.tag.low{background:var(--sev-low-bg);color:var(--sev-low-text)}
+.tag.info{background:var(--sev-info-bg);color:var(--sev-info-text)}
 .tag.ok{background:var(--success-subtle);color:var(--success-text)}
 .tag.accent{background:var(--accent-subtle);color:var(--accent-text)}
 .tag.sm{font-size:12px;padding:1px 8px}
 .tag.lg{font-size:12px;padding:5px 12px}
 .tag.plain::before{display:none}
 .tag.outline{background:transparent;box-shadow:inset 0 0 0 1px currentColor}
-.tag.solid{color:#fff}
-.tag.solid.critical{background:var(--sev-critical)}
-.tag.solid.high{background:var(--sev-high)}
-.tag.solid.medium{background:var(--sev-medium)}
-.tag.solid.low{background:var(--sev-low)}
+/* solid 는 면마다 글자색이 다르다 — 종전의 color:#fff 한 줄이 다섯 색을 덮어 10 조합 중 8이 AA 미달이었다
+   (라이트 high 3.76 · medium 2.15 · low 2.77, 다크는 다섯 전부 1.67~2.77). 톤이 없는 .tag.solid 는 기본 회색 바탕을 그대로 쓴다 */
+.tag.solid.critical{background:var(--sev-critical);color:var(--sev-critical-on)}
+.tag.solid.high{background:var(--sev-high);color:var(--sev-high-on)}
+.tag.solid.medium{background:var(--sev-medium);color:var(--sev-medium-on)}
+.tag.solid.low{background:var(--sev-low);color:var(--sev-low-on)}
+.tag.solid.info{background:var(--sev-info);color:var(--sev-info-on)}   /* 규칙이 없어 .tag.info 의 회색 바탕에 흰 글자가 얹혀 라이트에서 1.1 이었다 — 예제 두 곳이 인라인으로 우회하고 있었다 */
 .tag.solid.ok{background:var(--success);color:var(--success-on)}
+.tag.solid.accent{background:var(--accent);color:var(--accent-on)}   /* React Tone 이 accent+solid 를 허용하는데 규칙이 없었다 */
 
 /* Dropdown */
 .dropdown{position:relative;display:inline-block}
@@ -1117,8 +1141,8 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .kpi .delta svg{width:12px;height:12px;vertical-align:-1px}
 .kpi .delta.up{color:var(--danger-text)}
 .kpi .delta.down{color:var(--success-text)}
-.kpi.critical .value{color:var(--sev-critical)}
-.kpi.high .value{color:var(--sev-high)}
+.kpi.critical .value{color:var(--sev-critical-text)}
+.kpi.high .value{color:var(--sev-high-text)}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;width:100%}
 .chart{display:flex;flex-direction:column;gap:10px;width:100%;font-size:12px}
 .chart .row{display:grid;grid-template-columns:120px 1fr 56px;align-items:center;gap:12px}

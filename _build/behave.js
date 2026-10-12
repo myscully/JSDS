@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 227 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 271 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -455,6 +455,65 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       await page.evaluate(() => document.getElementById("hv-probe").remove());
       ok(`${theme} ${n} shows three distinct state fills`, new Set([rest, hover, active]).size === 3, `${rest} → ${hover} → ${active}`);
     }
+  }
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+  await page.waitForTimeout(200);
+
+  // 심각도 — 면/글자/면 위 글자가 나뉘어 있어야 한다. 종전에는 .tag.solid{color:#fff} 한 줄이 다섯 색을 덮어 10 조합 중 8이 미달이었고,
+  // 기본형 태그는 글자를 면 토큰으로 써서 라이트에서 다섯 중 넷이 미달이었다. 이 축에는 테스트가 아예 없었다
+  await go("components/tag.html");
+  const LVL = ["critical", "high", "medium", "low", "info"];
+  const tagSet = () => page.evaluate((lvl) => {
+    const prev = document.querySelector("#ex-tag-severity .example-preview");
+    const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
+    const out = { v: {}, tok: {} };
+    for (const l of lvl) {
+      /* 다크의 -bg 는 rgba 리터럴이다 — 그대로 재면 알파가 무시되고 자기 자신과 비교돼 1.00 이 나온다.
+         뒤의 불투명 바탕까지 쌓아 합성한 실제 색을 따로 구한다 */
+      const parse = (c) => { const v = c.match(/[0-9.]+/g).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; };
+      const eff = (el) => {
+        const stack = [];
+        for (let e = el; e; e = e.parentElement) {
+          const c = parse(getComputedStyle(e).backgroundColor);
+          if (c.a > 0) stack.push(c);
+          if (c.a === 1) break;
+        }
+        if (!stack.length || stack[stack.length - 1].a !== 1) stack.push({ r: 255, g: 255, b: 255, a: 1 });
+        let out = stack.pop();
+        while (stack.length) { const t = stack.pop(); out = { r: t.r * t.a + out.r * (1 - t.a), g: t.g * t.a + out.g * (1 - t.a), b: t.b * t.a + out.b * (1 - t.a), a: 1 }; }
+        return "rgb(" + Math.round(out.r) + ", " + Math.round(out.g) + ", " + Math.round(out.b) + ")";
+      };
+      const mk = (cls) => { const e = document.createElement("span"); e.className = cls; e.textContent = "x"; prev.append(e); const c = getComputedStyle(e); const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color }; e.remove(); return r; };
+      out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid") };
+      out.tok[l] = { fill: res("var(--sev-" + l + ")"), text: res("var(--sev-" + l + "-text)"), on: res("var(--sev-" + l + "-on)"), bg: res("var(--sev-" + l + "-bg)") };
+    }
+    out.panel = res("var(--bg-panel)"); out.canvas = res("var(--bg-canvas)"); out.surface = res("var(--bg-surface)");
+    return out;
+  }, LVL);
+  for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
+    await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
+    await page.waitForTimeout(250);
+    const t = await tagSet();
+    for (const l of LVL) {
+      // 기본형 태그 — 옅은 바탕 위의 글자
+      ok(`${theme} ${l} tag label clears AA on its own background`, ratio(t.v[l].subtle.fg, t.v[l].subtle.bgEff) >= 4.5,
+        `${ratio(t.v[l].subtle.fg, t.v[l].subtle.bgEff)} · ${t.v[l].subtle.fg} / ${t.v[l].subtle.bgEff}(합성)`);
+      // 채운 태그 — 면 위의 글자. info 를 포함해야 '규칙 누락'이 재발하지 않는다(종전엔 회색 패널에 흰 글자로 1.1 이었다)
+      ok(`${theme} ${l} solid tag label clears AA on its fill`, ratio(t.v[l].solid.fg, t.v[l].solid.bgEff) >= 4.5,
+        `${ratio(t.v[l].solid.fg, t.v[l].solid.bgEff)} · ${t.v[l].solid.fg} / ${t.v[l].solid.bgEff}`);
+      // 채운 태그의 면이 자기 면 토큰이어야 한다 — .tag.solid.info 가 없어 --bg-panel 로 떨어지던 것을 잡는다
+      ok(`${theme} ${l} solid tag uses its own fill token`, t.v[l].solid.bg === t.tok[l].fill && t.v[l].solid.bg !== t.panel,
+        `${t.v[l].solid.bg} · fill ${t.tok[l].fill} · panel ${t.panel}`);
+      // -text 는 글자용이라 캔버스·서피스·패널 위에서도 4.5 를 넘어야 한다
+      const low = Math.min(ratio(t.tok[l].text, t.canvas), ratio(t.tok[l].text, t.surface), ratio(t.tok[l].text, t.panel));
+      ok(`${theme} ${l}-text clears AA on every surface`, low >= 4.5, `${low} · ${t.tok[l].text}`);
+    }
+    // 다섯 단계가 서로 구분돼야 한다 — 다크에서 critical 과 high 가 둘 다 red-400 이라 대비 1.00 이었다
+    ok(`${theme} critical and high are distinguishable`, t.tok.critical.fill !== t.tok.high.fill && ratio(t.tok.critical.fill, t.tok.high.fill) >= 1.5,
+      `${ratio(t.tok.critical.fill, t.tok.high.fill)} · ${t.tok.critical.fill} vs ${t.tok.high.fill}`);
+    ok(`${theme} critical and high differ in background and label too`,
+      t.tok.critical.bg !== t.tok.high.bg && t.tok.critical.text !== t.tok.high.text,
+      `bg ${t.tok.critical.bg} vs ${t.tok.high.bg} · text ${t.tok.critical.text} vs ${t.tok.high.text}`);
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);

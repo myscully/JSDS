@@ -9,7 +9,7 @@ export default function Example() {
         {LEVELS.map(([t, l]) => <Tag key={t} tone={t}>{l}</Tag>)}
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {LEVELS.map(([t, l]) => <Tag key={t} tone={t} variant="solid" style={t === "info" ? { background: "var(--sev-info)" } : undefined}>{l}</Tag>)}
+        {LEVELS.map(([t, l]) => <Tag key={t} tone={t} variant="solid">{l}</Tag>)}
       </div>
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
         <SevCell tone="critical">Critical</SevCell>
