@@ -140,7 +140,7 @@ const REACT_INSTALL = `npm i @jiran/ds-react
 import "@jiran/ds-react/style.css";   // 토큰 + 컴포넌트 CSS (사이트 크롬 제외)
 import { ToastProvider, applyAccent } from "@jiran/ds-react";
 
-applyAccent("#2563EB");               // 제품 메인 컬러 → --accent-50~900 생성
+applyAccent("#1D4ED8");               // 제품 메인 컬러 → --accent-50~900 생성
 
 createRoot(document.getElementById("root")!).render(
   <ToastProvider>
@@ -169,8 +169,8 @@ const GS_HTML_USE = `<!-- 컴포넌트 페이지 HTML+CSS 탭에서 복사한 �
 </script>`;
 const GS_ACCENT_CSS = `/* 제품 메인 컬러 하나로 생성한 10단계를 :root 에 덮어씁니다 (생성 함수는 Design Token › Accent 스케일 생성) */
 :root{
-  --accent-50:#EFF3FB; --accent-100:#D7E0F4; --accent-200:#AEC1EA; --accent-300:#8AA7E7; --accent-400:#648CE4;
-  --accent-500:#4375E4; --accent-600:#2563EB; --accent-700:#1249C2; --accent-800:#0D3691; --accent-900:#09245F;
+  --accent-50:#EFF2FA; --accent-100:#D8DFF3; --accent-200:#B1BFE7; --accent-300:#849CE1; --accent-400:#5A7CDC;
+  --accent-500:#3661DA; --accent-600:#1D4ED8; --accent-700:#173DA8; --accent-800:#112D7D; --accent-900:#0B1E52;
 }`;
 const PAGES = {
   "home/getting-started": () => {

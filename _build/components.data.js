@@ -34,11 +34,22 @@ const COMPONENTS = {
         <button type="button" class="btn md tertiary icon" aria-label="새로 고침">${I("refresh")}</button>
         <button type="button" class="btn md danger secondary icon" aria-label="삭제">${I("trash")}</button>
         <button type="button" class="btn lg secondary icon" aria-label="설정">${I("settings")}</button>` },
-      { id: "state", title: "State", desc: "Hover/Pressed 는 CSS 가 처리합니다. Disabled 는 disabled 속성(포커스도 받지 않음), Loading 은 .loading 클래스 — 라벨은 자리만 지키고 보이지 않아 폭이 흔들리지 않으며, 클릭은 마우스·키보드 모두 막힙니다.", html: `
+      { id: "state", title: "State", desc: "Hover 와 Pressed 는 CSS 가 처리합니다 — 면은 기준 단계에서 <b>글자색 반대 방향</b>으로 한 단계·두 단계 갑니다. Loading 은 .loading 클래스로, 라벨은 자리만 지키고 보이지 않아 폭이 흔들리지 않으며 클릭은 마우스·키보드 모두 막힙니다. 비활성은 아래 Disabled 에서 따로 다룹니다.", html: `
         <button type="button" class="btn md primary">Default</button>
-        <button type="button" class="btn md primary" disabled>Disabled</button>
+        <button type="button" class="btn md secondary">Default</button>
         <button type="button" class="btn md primary loading" aria-busy="true">저장 중</button>
         <button type="button" class="btn md secondary loading" aria-busy="true">불러오는 중</button>` },
+      { id: "disabled", title: "Disabled", desc: "비활성은 투명도를 덮지 않고 <b>전용 토큰</b>을 씁니다 — fill 은 회색 면(<code>--interaction-disable</code>) + 회색 라벨(<code>--text-disabled</code>), outline 은 면을 비우고 보더만 회색으로 바뀝니다. 그래서 어떤 변형이든 비활성은 한 가지 회색으로 읽힙니다. 비활성 요소는 탭 순서에서 빠지므로, 막는 대신 <b>왜 누를 수 없는지 알려주는 쪽</b>을 먼저 검토하세요. 링크는 <code>disabled</code> 를 가질 수 없어 <code>aria-disabled=\"true\"</code> 를 씁니다.", html: `
+        <div class="btn-group">
+          <button type="button" class="btn md primary" disabled>Primary</button>
+          <button type="button" class="btn md tertiary" disabled>Tertiary</button>
+          <button type="button" class="btn md danger" disabled>Danger</button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn md secondary" disabled>Secondary</button>
+          <button type="button" class="btn md danger secondary" disabled>Danger outline</button>
+          <button type="button" class="btn md text" disabled>Text</button>
+        </div>` , layout: "stack" },
       { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(8px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
         <div class="btn-group">
           <button type="button" class="btn md text">초기화</button>
@@ -48,16 +59,16 @@ const COMPONENTS = {
         <button type="button" class="btn lg primary block" style="max-width:320px">시작하기</button>`, layout: "stack center" },
     ],
     props: [
-      ["variant", "primary | secondary | tertiary | text | danger", "—", "우선순위. danger 는 secondary 와 조합하면 아웃라인"],
+      ["variant", "primary | secondary | tertiary | text | danger | danger secondary", "—", "우선순위. <code>danger secondary</code> 는 danger 아웃라인(React 는 <code>danger-secondary</code>). fill 은 primary · tertiary · danger, outline 은 secondary · danger secondary"],
       ["size", "sm | md | lg", "md", "높이 36 / 44 / 52"],
       [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
       [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
       [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(8px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
-      ["disabled", "attribute", "—", "비활성. 40% 불투명"],
+      ["disabled", "attribute", "—", "비활성. 전용 토큰 — fill 은 <code>--interaction-disable</code> 면 + <code>--text-disabled</code> 라벨, outline 은 면을 비우고 보더만 회색. 투명도를 덮지 않아 변형마다 다른 색이 남지 않습니다"],
       ["type", "button | submit | reset", "button", "폼 안에서는 명시"],
     ],
-    spec: [["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"], ["Label", "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
-    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--accent", fg: "--accent-on" }, secondary: { bg: "--bg-surface", fg: "--text-primary", stroke: "--border-strong" }, tertiary: { bg: "--bg-panel", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent" }, danger: { bg: "--danger", fg: "--danger-on" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"] },
+    spec: [["State", "면은 기준 단계에서 <b>글자색 반대 방향</b>으로. fill: primary <code>--accent</code> → <code>-hover</code> → <code>-pressed</code> / danger 동일. outline·tertiary: 반투명 <code>--fill-alternative</code> .03 → <code>--fill-normal</code> .05 → <code>--fill-strong</code> .10. text: 라벨 <code>--accent-text</code>, hover <code>--accent-subtle</code>, pressed <code>--fill-strong</code>. 비활성은 전용 토큰, 포커스는 전 변형 공통 <code>--border-focus</code> 2px"], ["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"], ["Label", "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
+    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--accent", fg: "--accent-on" }, secondary: { bg: "transparent", fg: "--text-primary", stroke: "--border-strong" }, tertiary: { bg: "--fill-alternative", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent-text" }, danger: { bg: "--danger", fg: "--danger-on" }, "danger secondary": { bg: "transparent", fg: "--danger-text", stroke: "--danger" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"], disabled: { bg: "--interaction-disable", fg: "--text-disabled", outlineBg: "transparent", outlineStroke: "--interaction-disable" } },
   },
 
   /* ------------------------------------------------ Text Field */

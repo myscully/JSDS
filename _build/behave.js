@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 185 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 227 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -103,13 +103,16 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       return {
         neutral: document.documentElement.hasAttribute("data-accent-neutral"),
         bg: btn ? getComputedStyle(btn).backgroundColor : "", text: txt ? getComputedStyle(txt).color : "",
-        accent: g("--accent"), focus: g("--border-focus"), subtle: g("--accent-subtle"),
+        accent: g("--accent"), accentText: g("--accent-text"), focus: g("--border-focus"), subtle: g("--accent-subtle"),
         ramp: [600, 300, 100].map((k) => g("--accent-" + k)).join(" "),
       };
     });
   };
   const teal = await accent("product-a"), red = await accent("product-b");
-  ok("teal product keeps its main colour", !teal.neutral && teal.bg === "rgb(0, 170, 182)" && teal.text === "rgb(0, 170, 182)" && teal.accent === "#00AAB6", JSON.stringify(teal));
+  // 면은 제품 메인 컬러 그대로지만, text 변형의 라벨은 --accent-text 를 따른다 —
+  // 청록은 '밝은 제품'이라 라이트에서 800 단계(#00636A)로 내려간다. 600 으로 쓰면 패널 위에서 2.58 이었다
+  ok("teal product keeps its main colour", !teal.neutral && teal.bg === "rgb(0, 170, 182)" && teal.accent === "#00AAB6"
+    && teal.accentText === "#00636A" && teal.text === "rgb(0, 99, 106)", JSON.stringify(teal));
   ok("red product turns the whole accent ramp neutral",
     red.neutral && red.bg === "rgb(15, 23, 42)" && red.text === "rgb(15, 23, 42)"
     && red.accent === "#0F172A" && red.focus === "#64748B" && red.subtle === "#F1F5F9"
@@ -148,9 +151,18 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       // 램프가 slate 하드코딩이 아니라 다크 바탕과 같은 계열이어야 한다 — 종전에는 #94A3B8 가 주변 #989BA2 와 어긋났다
       ok("dark neutral switch uses the product neutral ramp, not slate", D.ramp === D.neuRamp, `${D.ramp} | ${D.neuRamp}`);
     } else {
-      ok(`dark shares the light triad for the ${n} colour`,
-        D.accent === L.accent && D.hover === L.hover && D.pressed === L.pressed && D.on === L.on,
-        JSON.stringify({ light: [L.accent, L.hover, L.pressed, L.on], dark: [D.accent, D.hover, D.pressed, D.on] }));
+      /* 기준 단계만 한 단계 다르다 — 라이트 600 · 다크 500. hover·pressed 는 기준에서 글자색 반대 방향으로 간다:
+         흰 글자(기본)는 짙은 쪽, 어두운 글자(밝은 제품)는 밝은 쪽. 램프 인덱스로 보면 0=50 … 5=500, 6=600, 7=700 */
+      const step = (t, i) => t.ramp.split(" ")[i];
+      const bright = n === "product";
+      const want = {
+        light: [step(L, 6), step(L, bright ? 5 : 7), step(L, bright ? 4 : 8)],
+        dark: [step(D, 5), step(D, bright ? 4 : 6), step(D, bright ? 3 : 7)],
+      };
+      ok(`the ${n} colour follows the base-step rule in both themes`,
+        L.accent === want.light[0] && L.hover === want.light[1] && L.pressed === want.light[2]
+        && D.accent === want.dark[0] && D.hover === want.dark[1] && D.pressed === want.dark[2] && D.on === L.on,
+        JSON.stringify({ light: [L.accent, L.hover, L.pressed], dark: [D.accent, D.hover, D.pressed], want }));
     }
     // 밝은 제품은 글자가 어둡고 상태가 밝은 쪽으로 간다 — 짙어지는 쪽으로 보내면 4.05·2.55 로 깨진다
     ok(`the ${n} colour sets data-accent-light correctly`, L.light === (n === "product") && D.light === (n === "product"), `${L.light} · ${D.light}`);
@@ -208,10 +220,18 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
     await page.waitForTimeout(250);
     const col = await page.evaluate(() => {
+      /* 아웃라인은 면이 투명하다 — 뒤에 있는 첫 불투명 조상을 찾아야 한다. 투명값을 그대로 재면 검은색과 비교된다 */
+      const backdrop = (el) => {
+        for (let e = el; e; e = e.parentElement) {
+          const b = getComputedStyle(e).backgroundColor;
+          if (b && !/rgba\(0, 0, 0, 0\)|transparent/.test(b)) return b;
+        }
+        return "rgb(255, 255, 255)";
+      };
       const solid = document.querySelector("#ex-button-variant .btn.danger:not(.secondary)");
       const outline = document.querySelector("#ex-button-variant .btn.danger.secondary");
       const cs = getComputedStyle(solid), co = getComputedStyle(outline);
-      return { sf: cs.color, sb: cs.backgroundColor, of: co.color, ob: co.backgroundColor };
+      return { sf: cs.color, sb: cs.backgroundColor, of: co.color, ob: backdrop(outline) };
     });
     const dc = { solid: ratio(col.sf, col.sb), outline: ratio(col.of, col.ob) };
     ok(`danger button label meets AA (${theme})`, dc.solid >= 4.5 && dc.outline >= 4.5, JSON.stringify(dc));
@@ -304,9 +324,12 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   });
   const disLink = await page.evaluate(() => {
     const e = document.getElementById("dis-link"); const c = getComputedStyle(e);
-    return { opacity: c.opacity, pointerEvents: c.pointerEvents, focusable: e.tabIndex >= 0 };
+    const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
+    return { opacity: c.opacity, pointerEvents: c.pointerEvents, focusable: e.tabIndex >= 0,
+      bg: c.backgroundColor, fg: c.color, wantBg: res("var(--interaction-disable)"), wantFg: res("var(--text-disabled)") };
   });
-  ok("disabled link button looks disabled", disLink.opacity === "0.4" && disLink.pointerEvents === "none" && disLink.focusable, JSON.stringify(disLink));
+  // 비활성은 더 이상 opacity 를 쓰지 않는다 — 전용 토큰이라 opacity 는 1 이고 면·라벨이 회색으로 바뀐다
+  ok("disabled link button looks disabled", disLink.opacity === "1" && disLink.bg === disLink.wantBg && disLink.fg === disLink.wantFg && disLink.pointerEvents === "none" && disLink.focusable, JSON.stringify(disLink));
   await page.locator("#dis-link").evaluate((e) => e.click());
   await page.waitForTimeout(120);
   ok("disabled link button ignores a mouse click", (await page.evaluate(() => location.hash)) !== "#dead");
@@ -324,6 +347,115 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   });
   ok("text button meets AA on a dark panel", ratio(textDark.fg, textDark.panel) >= 4.5 && ratio(textDark.fg, textDark.canvas) >= 4.5,
     `panel ${ratio(textDark.fg, textDark.panel)} · canvas ${ratio(textDark.fg, textDark.canvas)}`);
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+  await page.waitForTimeout(200);
+
+  // --accent-text 는 두 테마 모두 봐야 한다 — 밝은 제품은 라이트에서 600 으로 쓰면 패널 위 2.58 이었다
+  for (const key of ["", "product-a", "product-b"]) {
+    await accent(key);
+    for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
+      await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
+      await page.waitForTimeout(250);
+      const at = await page.evaluate(() => {
+        const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
+        return { fg: res("var(--accent-text)"), cv: res("var(--bg-canvas)"), sf: res("var(--bg-surface)"), pn: res("var(--bg-panel)") };
+      });
+      const low = Math.min(ratio(at.fg, at.cv), ratio(at.fg, at.sf), ratio(at.fg, at.pn));
+      ok(`${theme} accent-text clears AA on every surface (${key || "base"})`, low >= 4.5, `${low} · ${at.fg}`);
+    }
+    await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+    await page.waitForTimeout(150);
+  }
+  await accent("");
+
+  // 상태색 네 가족 — 기준은 라이트 600 · 다크 500, 상태는 글자색 반대 방향, 글자는 -text(700/400)
+  const FAM = ["danger", "warning", "success", "info"];
+  const statusTokens = () => page.evaluate((fam) => {
+    const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
+    const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
+    const out = { canvas: res("var(--bg-canvas)"), surface: res("var(--bg-surface)"), panel: res("var(--bg-panel)") };
+    for (const f of fam) out[f] = {
+      base: g("--" + f), hover: g("--" + f + "-hover"), pressed: g("--" + f + "-pressed"), text: g("--" + f + "-text"), on: g("--" + f + "-on"),
+      baseRgb: res("var(--" + f + ")"), textRgb: res("var(--" + f + "-text)"), onRgb: g("--" + f + "-on") ? res("var(--" + f + "-on)") : "",
+      hoverRgb: res("var(--" + f + "-hover)"), pressedRgb: res("var(--" + f + "-pressed)"),
+    };
+    return out;
+  }, FAM);
+  for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
+    await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
+    await page.waitForTimeout(250);
+    const st = await statusTokens();
+    for (const f of FAM) {
+      const t = st[f];
+      // 기준·hover·pressed 가 모두 채워져 있고 세 값이 서로 달라야 한다
+      ok(`${theme} ${f} has a full base/hover/pressed set`, t.base && t.hover && t.pressed && new Set([t.base, t.hover, t.pressed]).size === 3,
+        JSON.stringify([t.base, t.hover, t.pressed]));
+      // -text 는 글자용이라 캔버스·서피스·패널 모두 4.5 를 넘어야 한다. 기준 단계로는 못 넘는 자리다
+      const low = Math.min(ratio(t.textRgb, st.canvas), ratio(t.textRgb, st.surface), ratio(t.textRgb, st.panel));
+      ok(`${theme} ${f}-text clears AA on every surface`, low >= 4.5,
+        `${low} · base 로는 ${Math.min(ratio(t.baseRgb, st.canvas), ratio(t.baseRgb, st.surface), ratio(t.baseRgb, st.panel))}`);
+      // -on 이 있는 가족은 자기 면 위에서 4.5 를 넘어야 한다 (--info-on 은 양쪽 다 미달이라 두지 않았다)
+      if (f === "info") ok(`${theme} info has no -on token`, t.on === "", t.on);
+      else {
+        // 세 상태 모두 봐야 한다 — warning·success 는 어두운 글자를 쓰므로 상태가 밝은 쪽으로 가야 하고, 짙은 쪽으로 두면 hover 부터 깨졌다
+        const st = [["rest", t.baseRgb], ["hover", t.hoverRgb], ["pressed", t.pressedRgb]];
+        const low = Math.min(...st.map(([, c]) => ratio(t.onRgb, c)));
+        ok(`${theme} ${f}-on clears AA in all three states`, low >= 4.5,
+          `${st.map(([k, c]) => k + " " + ratio(t.onRgb, c)).join(" · ")} / ${t.onRgb}`);
+      }
+    }
+  }
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+  await page.waitForTimeout(200);
+
+  // 비활성은 변형과 무관하게 한 가지 회색으로 수렴한다 — fill 은 회색 면, outline 은 면을 비우고 보더만 회색
+  const disabledSet = () => page.evaluate(() => {
+    const prev = document.querySelector("#ex-button-disabled .example-preview") || document.querySelector("#ex-button-state .example-preview");
+    const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
+    const want = { fill: res("var(--interaction-disable)"), fg: res("var(--text-disabled)") };
+    const out = { want, v: {} };
+    for (const [n, cls] of [["primary", "primary"], ["tertiary", "tertiary"], ["danger", "danger"], ["secondary", "secondary"], ["danger-outline", "danger secondary"], ["text", "text"]]) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn md " + cls; b.disabled = true; b.textContent = "x";
+      prev.append(b); const c = getComputedStyle(b);
+      out.v[n] = { bg: c.backgroundColor, fg: c.color, border: c.borderTopColor, opacity: c.opacity };
+      b.remove();
+    }
+    return out;
+  });
+  for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
+    await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
+    await page.waitForTimeout(250);
+    const d = await disabledSet();
+    const TRANSPARENT = "rgba(0, 0, 0, 0)";
+    ok(`${theme} disabled fill uses the disabled tokens`,
+      ["primary", "tertiary", "danger"].every((n) => d.v[n].bg === d.want.fill && d.v[n].fg === d.want.fg && d.v[n].opacity === "1"), JSON.stringify(d));
+    ok(`${theme} disabled outline empties the fill and greys the border`,
+      ["secondary", "danger-outline"].every((n) => d.v[n].bg === TRANSPARENT && d.v[n].border === d.want.fill && d.v[n].fg === d.want.fg), JSON.stringify(d.v));
+    ok(`${theme} disabled text stays transparent`, d.v.text.bg === TRANSPARENT && d.v.text.fg === d.want.fg, JSON.stringify(d.v.text));
+  }
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+  await page.waitForTimeout(200);
+
+  // 중립 버튼의 rest·hover·pressed 가 실제로 서로 다른 색이어야 한다 — 라이트 tertiary 는 불투명 면 때문에 hover 가 보이지 않았다
+  for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
+    await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
+    await page.waitForTimeout(250);
+    for (const [n, cls] of [["secondary", "secondary"], ["tertiary", "tertiary"], ["text", "text"]]) {
+      await page.evaluate((c) => {
+        const prev = document.querySelector("#ex-button-variant .example-preview");
+        const b = document.createElement("button"); b.type = "button"; b.id = "hv-probe"; b.className = "btn md " + c; b.textContent = "probe";
+        prev.append(b);
+      }, cls);
+      const rest = await page.evaluate(() => getComputedStyle(document.getElementById("hv-probe")).backgroundColor);
+      await page.locator("#hv-probe").hover(); await page.waitForTimeout(160);
+      const hover = await page.evaluate(() => getComputedStyle(document.getElementById("hv-probe")).backgroundColor);
+      await page.mouse.down(); await page.waitForTimeout(160);
+      const active = await page.evaluate(() => getComputedStyle(document.getElementById("hv-probe")).backgroundColor);
+      await page.mouse.up();
+      await page.evaluate(() => document.getElementById("hv-probe").remove());
+      ok(`${theme} ${n} shows three distinct state fills`, new Set([rest, hover, active]).size === 3, `${rest} → ${hover} → ${active}`);
+    }
+  }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
 
