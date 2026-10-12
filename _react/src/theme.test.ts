@@ -6,9 +6,9 @@ describe("applyAccent", () => {
     document.documentElement.removeAttribute("data-theme");
   });
 
-  /* --accent-* 가 아니라 --prod-* 여야 한다. 인라인 스타일은 모든 스타일시트 규칙을 이기므로,
-     --accent-* 로 주입하면 다크 블록이 램프를 중립으로 덮는 것이 무력해지고 다크에 제품색이 남는다.
-     이 테스트가 패키지의 다크 보장을 지키는 유일한 방어선이다 */
+  /* --accent-* 가 아니라 --prod-* 여야 한다. --prod-* 는 제품이 넣는 입력이고 --accent-* 는 테마가 해석한 결과라,
+     :root 가 var(--prod-N, 기본값) 으로 받아 라이트는 600 · 다크는 400 단계를 집는다.
+     --accent-* 로 직접 주입하면 인라인이 스타일시트를 이겨 그 테마별 해석이 통째로 무력해진다 */
   it("제품 램프를 --prod-* 로 주입하고 --accent-* 는 건드리지 않는다", () => {
     applyAccent("#00AAB6");
     const st = document.documentElement.style;
