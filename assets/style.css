@@ -12,8 +12,10 @@
   --neutral-0:#FFFFFF;--neutral-50:#F7F7F8;--neutral-100:#EAEBEC;--neutral-200:#C2C4C8;--neutral-300:#AEB0B6;--neutral-400:#989BA2;--neutral-500:#70737C;--neutral-600:#5A5C63;--neutral-700:#37383C;--neutral-800:#2E2F33;--neutral-850:#212225;--neutral-900:#1B1C1E;--neutral-950:#171719;--neutral-980:#0F0F10;
   /* Brand: 지란지교시큐리티 */
   --brand-50:#FFF4E8;--brand-100:#FFE4C7;--brand-200:#FFD1A3;--brand-300:#FFB870;--brand-400:#FF9C33;--brand-500:#FF7F00;--brand-600:#E06F00;--brand-700:#B85A00;--brand-800:#8A4300;--brand-900:#5C2D00;
-  /* Accent: 제품 메인 컬러 슬롯 (기본값은 예시. 제품별로 교체) */
-  --accent-50:var(--prod-50,#EFF3FB);--accent-100:var(--prod-100,#D7E0F4);--accent-200:var(--prod-200,#AEC1EA);--accent-300:var(--prod-300,#8AA7E7);--accent-400:var(--prod-400,#648CE4);--accent-500:var(--prod-500,#4375E4);--accent-600:var(--prod-600,#2563EB);--accent-700:var(--prod-700,#1249C2);--accent-800:var(--prod-800,#0D3691);--accent-900:var(--prod-900,#09245F);
+  /* Accent: 제품 메인 컬러 슬롯 (기본값은 예시. 제품별로 교체)
+     기본값 #1D4ED8 — 제품 색 요건은 '다크 기준 단계(500)에서 면 위 글자와 4.5 이상'이다.
+     한 단계 밝은 #2563EB 는 500 단계가 흰 글자 4.28 · 어두운 글자 4.18 로 양쪽 다 미달이었다 */
+  --accent-50:var(--prod-50,#EFF2FA);--accent-100:var(--prod-100,#D8DFF3);--accent-200:var(--prod-200,#B1BFE7);--accent-300:var(--prod-300,#849CE1);--accent-400:var(--prod-400,#5A7CDC);--accent-500:var(--prod-500,#3661DA);--accent-600:var(--prod-600,#1D4ED8);--accent-700:var(--prod-700,#173DA8);--accent-800:var(--prod-800,#112D7D);--accent-900:var(--prod-900,#0B1E52);
   /* Feedback */
   --red-50:#FEF2F2;--red-100:#FEE2E2;--red-200:#FECACA;--red-300:#FCA5A5;--red-400:#F87171;--red-500:#EF4444;--red-600:#DC2626;--red-700:#B91C1C;--red-800:#991B1B;--red-900:#7F1D1D;--red-950:#450A0A;
   --amber-50:#FFFBEB;--amber-100:#FEF3C7;--amber-200:#FDE68A;--amber-300:#FCD34D;--amber-400:#FBBF24;--amber-500:#F59E0B;--amber-600:#D97706;--amber-700:#B45309;--amber-800:#92400E;--amber-900:#78350F;--amber-950:#451A03;
@@ -29,7 +31,15 @@
   --interaction-inactive:var(--gray-400);--interaction-disable:var(--gray-200);--dimmer:rgba(15,23,42,.65);
   --accent:var(--accent-600);--accent-hover:var(--accent-700);--accent-pressed:var(--accent-800);--accent-subtle:var(--accent-50);--accent-on:var(--gray-0);--accent-text:var(--accent-600);--accent-inverse:var(--accent-300);--accent-graphic:var(--accent-600);
   --brand:var(--brand-500);--brand-subtle:var(--brand-50);
-  --danger:var(--red-600);--danger-hover:var(--red-700);--danger-pressed:var(--red-800);--danger-subtle:var(--red-50);--danger-on:var(--gray-0);--warning:var(--amber-500);--warning-subtle:var(--amber-50);--success:var(--emerald-500);--success-subtle:var(--emerald-50);--info:var(--sky-500);--info-subtle:var(--sky-50);
+  /* 상태색 — 기준(base)은 라이트 600 · 다크 500. hover·pressed 는 기준에서 '면 위 글자색 반대 방향'으로 한 단계·두 단계 간다.
+     -text 는 글자·아이콘 전용으로 한 단계 더 짙게(라이트 700 · 다크 400) — 600 으로는 success 3.77 · warning 3.19 · info 4.10 으로 AA 미달이다.
+     -on 은 면 위 글자. warning·success 는 600 위에서 흰 글자가 3.19 · 3.77 로 떠서 어두운 글자를 쓰고,
+     그래서 두 가족만 라이트에서도 상태가 밝은 쪽(500·400)으로 간다 — 짙은 쪽이면 어두운 글자가 3.56 · 3.26 으로 깨진다.
+     --info-on 은 두지 않는다 — sky-600 은 흰 4.10 · 어두운 3.82 로 양쪽 미달이라, --info 는 점·아이콘·보더 전용이다 */
+  --danger:var(--red-600);--danger-hover:var(--red-700);--danger-pressed:var(--red-800);--danger-subtle:var(--red-50);--danger-on:var(--gray-0);--danger-text:var(--red-700);
+  --warning:var(--amber-600);--warning-hover:var(--amber-500);--warning-pressed:var(--amber-400);--warning-subtle:var(--amber-50);--warning-on:var(--gray-900);--warning-text:var(--amber-700);
+  --success:var(--emerald-600);--success-hover:var(--emerald-500);--success-pressed:var(--emerald-400);--success-subtle:var(--emerald-50);--success-on:var(--gray-900);--success-text:var(--emerald-700);
+  --info:var(--sky-600);--info-hover:var(--sky-700);--info-pressed:var(--sky-800);--info-subtle:var(--sky-50);--info-text:var(--sky-700);
   --sev-critical:var(--red-700);--sev-high:var(--red-500);--sev-medium:var(--amber-500);--sev-low:var(--sky-500);--sev-info:var(--gray-500);
   --sev-critical-bg:var(--red-100);--sev-high-bg:var(--red-50);--sev-medium-bg:var(--amber-50);--sev-low-bg:var(--sky-50);--sev-info-bg:var(--gray-100);
   /* Spacing / Radius / Elevation / Motion */
@@ -54,8 +64,9 @@
 :root[data-accent-neutral]{--accent:var(--accent-900);--accent-hover:var(--accent-800);--accent-pressed:var(--accent-700);--accent-subtle:var(--accent-100);--accent-text:var(--accent-900)}
 /* 메인 컬러가 밝으면 그 위의 흰 글자가 뜬다(제품A #00AAB6 에서 2.83) — 글자를 어둡게 쓰고, 상태는 글자 반대쪽(밝은 쪽)으로 간다.
    짙어지는 방향(700·800)으로 보내면 어두운 글자가 4.05 · 2.55 로 깨진다. 판정은 applyAccent 가 하고 data-accent-light 로 켠다.
+   --accent-text 도 함께 내린다 — 밝은 제품은 600 으로 글자를 쓰면 패널 위에서 2.58 이고, 800 이면 6.4 다(다크는 램프가 밝은 쪽이라 300 그대로).
    상태색과 겹치는 제품은 무채색 램프라 늘 흰 글자여서, data-accent-neutral 과는 함께 켜지지 않는다 */
-:root[data-accent-light]{--accent-on:var(--neutral-950);--accent-hover:var(--accent-500);--accent-pressed:var(--accent-400)}
+:root[data-accent-light]{--accent-on:var(--neutral-950);--accent-hover:var(--accent-500);--accent-pressed:var(--accent-400);--accent-text:var(--accent-800)}   /* 라이트 기준 600 에서 나온 단계 — 다크(기준 500)는 아래 전용 블록이 다시 덮는다 */
 
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg-canvas:var(--neutral-900);--bg-surface:var(--neutral-850);--bg-subtle:var(--neutral-800);--bg-panel:var(--neutral-800);--bg-inverse:var(--neutral-50);
@@ -64,12 +75,20 @@
   --line-normal:rgba(112,115,124,.32);--line-neutral:rgba(112,115,124,.28);--line-alternative:rgba(112,115,124,.22);
   --border-default:var(--neutral-700);--border-strong:var(--neutral-600);--border-subtle:var(--neutral-800);--border-focus:var(--accent-400);
   --interaction-inactive:var(--neutral-600);--interaction-disable:var(--neutral-800);--dimmer:rgba(23,23,25,.74);
-  /* 다크는 메인·hover·pressed·글자색을 라이트와 그대로 공유한다(600·700·800, 밝은 제품은 500·400) — 같은 톤을 유지하기 위해 선언을 두지 않는다.
-     다른 것은 넷뿐이다 — 텍스트 300(600 은 패널 위 2.59), 선택 배경은 제품과 무관한 중립 700(제품 램프 900 은 캔버스와 1.05~1.16),
-     글자가 없는 지표 400(600 이면 패널 위 2.59 로 3:1 미달), 반전 표면 위 Primary 800(--bg-inverse 가 다크에서는 밝다). 포커스 링도 400(위 줄) */
+  /* 다크 accent — 기준만 한 단계 다르다(라이트 600 · 다크 500). 글자색(--accent-on)과 밝은 제품 판정은 라이트와 공유한다.
+     흰 글자 제품은 상태가 짙은 쪽(600·700), 밝은 제품은 밝은 쪽 — 그쪽은 아래 [data-accent-light] 다크 블록이 덮는다.
+     텍스트는 300(400 은 파랑 계열에서 패널 위 4.08 로 미달. 상태색 400 은 이미 밝아 통과한다),
+     선택 배경은 제품과 무관한 중립 700(제품 램프 900 은 캔버스와 1.05~1.16),
+     글자 없는 지표는 400(기준 500 이면 패널 위 2.47 로 3:1 미달), 반전 표면 위 Primary 는 800(--bg-inverse 가 다크에서는 밝다). 포커스 링도 400(위 줄) */
+  --accent:var(--accent-500);--accent-hover:var(--accent-600);--accent-pressed:var(--accent-700);
   --accent-subtle:var(--neutral-700);--accent-text:var(--accent-300);--accent-inverse:var(--accent-800);--accent-graphic:var(--accent-400);
   --brand-subtle:#3A2410;
-  --danger:var(--red-400);--danger-hover:var(--red-300);--danger-pressed:var(--red-200);--danger-subtle:rgba(248,113,113,.12);--danger-on:var(--neutral-950);--warning:var(--amber-400);--warning-subtle:rgba(251,191,36,.12);--success:var(--emerald-400);--success-subtle:rgba(52,211,153,.12);--info:var(--sky-400);--info-subtle:rgba(56,189,248,.12);
+  /* 다크 상태색 — 기준 500. 다크에서는 네 가족 모두 면 위에 어두운 글자를 쓰므로 hover·pressed 가 밝은 쪽(400·300)이다.
+     짙은 쪽으로 보내면 red-600 위의 어두운 글자가 3.71 로 깨진다. -text 는 400(캔버스 6.16~10.22) */
+  --danger:var(--red-500);--danger-hover:var(--red-400);--danger-pressed:var(--red-300);--danger-subtle:rgba(248,113,113,.12);--danger-on:var(--neutral-950);--danger-text:var(--red-400);
+  --warning:var(--amber-500);--warning-hover:var(--amber-400);--warning-pressed:var(--amber-300);--warning-subtle:rgba(251,191,36,.12);--warning-on:var(--neutral-950);--warning-text:var(--amber-400);
+  --success:var(--emerald-500);--success-hover:var(--emerald-400);--success-pressed:var(--emerald-300);--success-subtle:rgba(52,211,153,.12);--success-on:var(--neutral-950);--success-text:var(--emerald-400);
+  --info:var(--sky-500);--info-hover:var(--sky-400);--info-pressed:var(--sky-300);--info-subtle:rgba(56,189,248,.12);--info-text:var(--sky-400);
   --sev-critical:var(--red-400);--sev-high:var(--red-400);--sev-medium:var(--amber-400);--sev-low:var(--sky-400);--sev-info:var(--neutral-300);
   --sev-critical-bg:rgba(248,113,113,.16);--sev-high-bg:rgba(248,113,113,.12);--sev-medium-bg:rgba(251,191,36,.12);--sev-low-bg:rgba(56,189,248,.12);--sev-info-bg:rgba(112,115,124,.16);
   --code-bg:var(--neutral-950);--code-chip:var(--neutral-800);--code-chip-border:var(--neutral-700);--code-chip-fg:var(--neutral-200);--code-head-fg:var(--neutral-300);
@@ -83,12 +102,20 @@
   --line-normal:rgba(112,115,124,.32);--line-neutral:rgba(112,115,124,.28);--line-alternative:rgba(112,115,124,.22);
   --border-default:var(--neutral-700);--border-strong:var(--neutral-600);--border-subtle:var(--neutral-800);--border-focus:var(--accent-400);
   --interaction-inactive:var(--neutral-600);--interaction-disable:var(--neutral-800);--dimmer:rgba(23,23,25,.74);
-  /* 다크는 메인·hover·pressed·글자색을 라이트와 그대로 공유한다(600·700·800, 밝은 제품은 500·400) — 같은 톤을 유지하기 위해 선언을 두지 않는다.
-     다른 것은 넷뿐이다 — 텍스트 300(600 은 패널 위 2.59), 선택 배경은 제품과 무관한 중립 700(제품 램프 900 은 캔버스와 1.05~1.16),
-     글자가 없는 지표 400(600 이면 패널 위 2.59 로 3:1 미달), 반전 표면 위 Primary 800(--bg-inverse 가 다크에서는 밝다). 포커스 링도 400(위 줄) */
+  /* 다크 accent — 기준만 한 단계 다르다(라이트 600 · 다크 500). 글자색(--accent-on)과 밝은 제품 판정은 라이트와 공유한다.
+     흰 글자 제품은 상태가 짙은 쪽(600·700), 밝은 제품은 밝은 쪽 — 그쪽은 아래 [data-accent-light] 다크 블록이 덮는다.
+     텍스트는 300(400 은 파랑 계열에서 패널 위 4.08 로 미달. 상태색 400 은 이미 밝아 통과한다),
+     선택 배경은 제품과 무관한 중립 700(제품 램프 900 은 캔버스와 1.05~1.16),
+     글자 없는 지표는 400(기준 500 이면 패널 위 2.47 로 3:1 미달), 반전 표면 위 Primary 는 800(--bg-inverse 가 다크에서는 밝다). 포커스 링도 400(위 줄) */
+  --accent:var(--accent-500);--accent-hover:var(--accent-600);--accent-pressed:var(--accent-700);
   --accent-subtle:var(--neutral-700);--accent-text:var(--accent-300);--accent-inverse:var(--accent-800);--accent-graphic:var(--accent-400);
   --brand-subtle:#3A2410;
-  --danger:var(--red-400);--danger-hover:var(--red-300);--danger-pressed:var(--red-200);--danger-subtle:rgba(248,113,113,.12);--danger-on:var(--neutral-950);--warning:var(--amber-400);--warning-subtle:rgba(251,191,36,.12);--success:var(--emerald-400);--success-subtle:rgba(52,211,153,.12);--info:var(--sky-400);--info-subtle:rgba(56,189,248,.12);
+  /* 다크 상태색 — 기준 500. 다크에서는 네 가족 모두 면 위에 어두운 글자를 쓰므로 hover·pressed 가 밝은 쪽(400·300)이다.
+     짙은 쪽으로 보내면 red-600 위의 어두운 글자가 3.71 로 깨진다. -text 는 400(캔버스 6.16~10.22) */
+  --danger:var(--red-500);--danger-hover:var(--red-400);--danger-pressed:var(--red-300);--danger-subtle:rgba(248,113,113,.12);--danger-on:var(--neutral-950);--danger-text:var(--red-400);
+  --warning:var(--amber-500);--warning-hover:var(--amber-400);--warning-pressed:var(--amber-300);--warning-subtle:rgba(251,191,36,.12);--warning-on:var(--neutral-950);--warning-text:var(--amber-400);
+  --success:var(--emerald-500);--success-hover:var(--emerald-400);--success-pressed:var(--emerald-300);--success-subtle:rgba(52,211,153,.12);--success-on:var(--neutral-950);--success-text:var(--emerald-400);
+  --info:var(--sky-500);--info-hover:var(--sky-400);--info-pressed:var(--sky-300);--info-subtle:rgba(56,189,248,.12);--info-text:var(--sky-400);
   --sev-critical:var(--red-400);--sev-high:var(--red-400);--sev-medium:var(--amber-400);--sev-low:var(--sky-400);--sev-info:var(--neutral-300);
   --sev-critical-bg:rgba(248,113,113,.16);--sev-high-bg:rgba(248,113,113,.12);--sev-medium-bg:rgba(251,191,36,.12);--sev-low-bg:rgba(56,189,248,.12);--sev-info-bg:rgba(112,115,124,.16);
   --code-bg:var(--neutral-950);--code-chip:var(--neutral-800);--code-chip-border:var(--neutral-700);--code-chip-fg:var(--neutral-200);--code-head-fg:var(--neutral-300);
@@ -108,6 +135,15 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]{
   --accent-50:var(--neutral-50);--accent-100:var(--neutral-100);--accent-200:var(--neutral-200);--accent-300:var(--neutral-300);--accent-400:var(--neutral-400);--accent-500:var(--neutral-500);--accent-600:var(--neutral-600);--accent-700:var(--neutral-700);--accent-800:var(--neutral-800);--accent-900:var(--neutral-900);
   --accent:var(--accent-100);--accent-hover:var(--accent-200);--accent-pressed:var(--accent-300);--accent-on:var(--neutral-950);--accent-text:var(--accent-100);
+}}
+
+/* 다크 + 밝은 제품 — 기준 500 위에 어두운 글자를 쓰므로 상태는 밝은 쪽으로 간다(제품A 8.13 → 10.94 → 11.65).
+   라이트의 500·400 은 기준 600 에서 나온 값이라 그대로 쓸 수 없다. 특정도 (0,3,0) 으로 다크 블록을 이긴다 */
+:root[data-theme="dark"][data-accent-light]{
+  --accent-hover:var(--accent-400);--accent-pressed:var(--accent-300);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-light]{
+  --accent-hover:var(--accent-400);--accent-pressed:var(--accent-300);
 }}
 
 *{box-sizing:border-box}
@@ -312,15 +348,15 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand)}
 .elev-comp .op{color:var(--text-disabled);font-size:20px}
 .space-bars{display:flex;align-items:flex-start;gap:8px;padding:var(--space-8) var(--space-6) var(--space-6);background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);margin:var(--space-4) 0 var(--space-10);overflow-x:auto}
 .space-bars>div{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none}
-.space-bars>div b{font-size:12px;font-weight:700;color:#fff;background:var(--success);border-radius:var(--radius-full);padding:2px 8px;min-width:24px;text-align:center}
+.space-bars>div b{font-size:12px;font-weight:700;color:var(--success-on);background:var(--success);border-radius:var(--radius-full);padding:2px 8px;min-width:24px;text-align:center}
 .space-bars>div i{display:block;height:220px;background:var(--success-subtle);border-radius:3px}
 .space-bars>div.base b{background:var(--accent-graphic)}.space-bars>div.base i{background:var(--accent-subtle)}
-.space-bars>div.off b{background:var(--warning)}.space-bars>div.off i{background:var(--warning-subtle)}   /* 4의 배수가 아닌 값 = 그리드 밖 */
+.space-bars>div.off b{background:var(--warning);color:var(--warning-on)}.space-bars>div.off i{background:var(--warning-subtle)}   /* 4의 배수가 아닌 값 = 그리드 밖 */
 .space-bars>div small{font-size:10px;color:var(--text-tertiary)}
 .grid-demo{background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:var(--space-8) 40px;margin:var(--space-4) 0 var(--space-6)}
 .grid-demo .cols{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;height:200px}
 .grid-demo .cols i{display:block;background:var(--danger-subtle);border-radius:2px;position:relative}
-.grid-demo .cols i::after{content:attr(data-n);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:var(--danger);font-style:normal}
+.grid-demo .cols i::after{content:attr(data-n);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:var(--danger-text);font-style:normal}
 .grid-demo .meta-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-tertiary);margin-top:10px}
 .shell-demo{display:grid;grid-template-columns:120px 1fr;height:180px;background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--radius-xl);overflow:hidden;margin:var(--space-4) 0 var(--space-6);font-size:12px;color:var(--text-tertiary);}
 .shell-demo>div{display:grid;place-items:center}.shell-demo .side{background:var(--bg-panel);border-right:1px solid var(--border-default)}
@@ -400,7 +436,7 @@ table.type-table td .smp{display:block;color:var(--text-primary)}
 .dodont>div{border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-surface);border:1px solid var(--border-default)}
 .dodont>div .body{padding:var(--card-pad)}
 .dodont>div .body::before{display:block;font-size:16px;font-weight:800;letter-spacing:.04em;margin-bottom:10px}
-.dodont .do .body::before{content:"DO";color:var(--success)}.dodont .dont .body::before{content:"DON'T";color:var(--danger)}
+.dodont .do .body::before{content:"DO";color:var(--success-text)}.dodont .dont .body::before{content:"DON'T";color:var(--danger-text)}
 .dodont p{font-size:14px;margin:0}
 /* Colors › 브랜드 역할 맵 표: 역할 열은 내용 폭(정렬은 다른 표와 같은 좌측) */
 table.roles th:first-child,table.roles td:first-child{white-space:nowrap;width:240px}
@@ -554,10 +590,13 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .btn.primary{background:var(--accent);color:var(--accent-on)}
 .btn.primary:hover{background:var(--accent-hover)}
 .btn.primary:active{background:var(--accent-pressed)}
-.btn.secondary{background:var(--bg-surface);border-color:var(--border-strong);color:var(--text-primary)}
-.btn.secondary:hover{background:var(--bg-subtle)}
+/* 중립 버튼의 면은 반투명 3단(fill alternative .03 → normal .05 → strong .10)이다 — 바탕이 무엇이든 같은 간격으로 어두워진다.
+   종전에는 tertiary 의 rest 가 불투명 --bg-panel 이고 hover 가 --fill-normal 이어서, 흰 바탕에서 합성하면 두 색이 사실상 같아 hover 가 보이지 않았다.
+   secondary·danger outline 은 면을 비워 아웃라인으로 둔다 — 패널·카드 위에서 흰 칩처럼 떠 보이지 않는다 */
+.btn.secondary{background:transparent;border-color:var(--border-strong);color:var(--text-primary)}
+.btn.secondary:hover{background:var(--fill-normal)}
 .btn.secondary:active{background:var(--fill-strong)}
-.btn.tertiary{background:var(--bg-panel);color:var(--text-primary)}
+.btn.tertiary{background:var(--fill-alternative);color:var(--text-primary)}
 .btn.tertiary:hover{background:var(--fill-normal)}
 .btn.tertiary:active{background:var(--fill-strong)}
 .btn.text{background:transparent;color:var(--accent-text);padding-left:8px;padding-right:8px}
@@ -566,7 +605,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .btn.danger{background:var(--danger);color:var(--danger-on)}
 .btn.danger:hover{background:var(--danger-hover)}
 .btn.danger:active{background:var(--danger-pressed)}
-.btn.danger.secondary{background:var(--bg-surface);color:var(--danger);border-color:var(--danger)}
+.btn.danger.secondary{background:transparent;color:var(--danger-text);border-color:var(--danger)}
 .btn.danger.secondary:hover{background:var(--danger-subtle)}
 .btn.danger.secondary:active{background:var(--fill-strong)}   /* 위 .danger.secondary 가 :hover·:active 를 덮으므로 뒤에 둔다 */
 .btn.icon{width:44px;padding:0}
@@ -576,7 +615,14 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .btn.sm svg{width:16px;height:16px}
 .btn.lg svg{width:20px;height:20px}
 .btn.block{width:100%}
-.btn[disabled],.btn[aria-disabled="true"]{opacity:.4;cursor:not-allowed;pointer-events:none}   /* 링크는 disabled 속성을 못 가진다 — React as="a" + disabled 는 aria-disabled 로 나온다 */
+/* 비활성은 opacity 가 아니라 전용 토큰이다 — opacity .4 로 덮으면 비활성 danger 에 붉은 기가, 비활성 outline 에 제품색 보더가 남아 변형마다 다른 색으로 읽혔다.
+   fill 은 회색 면 + 회색 라벨, outline 은 면을 비우고 보더만 회색으로. 비활성 텍스트는 WCAG 1.4.3 적용 제외다(라이트 2.08 · 다크 4.80).
+   .btn.danger.secondary 가 (0,3,0) 이라 전용 규칙을 (0,4,0) 으로 둬야 이긴다 — 순서만으로는 안 된다.
+   링크는 disabled 속성을 못 가진다 — React as="a" + disabled 는 aria-disabled 를 낸다 */
+.btn[disabled],.btn[aria-disabled="true"]{background:var(--interaction-disable);border-color:transparent;color:var(--text-disabled);cursor:not-allowed;pointer-events:none}
+.btn.secondary[disabled],.btn.secondary[aria-disabled="true"]{background:transparent;border-color:var(--interaction-disable)}
+.btn.danger.secondary[disabled],.btn.danger.secondary[aria-disabled="true"]{background:transparent;border-color:var(--interaction-disable);color:var(--text-disabled)}   /* 변형이 color 를 (0,3,0) 으로 쥐고 있어 여기서 다시 회색으로 돌려야 한다 */
+.btn.text[disabled],.btn.text[aria-disabled="true"]{background:transparent}
 .btn.loading{position:relative;color:transparent;pointer-events:none}
 .btn.loading::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--fill-strong);border-top-color:var(--accent-on);border-radius:50%;animation:spin .8s linear infinite}
 .btn.secondary.loading::after,.btn.tertiary.loading::after{border-top-color:var(--accent)}
@@ -589,7 +635,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 /* Text Field */
 .field{display:flex;flex-direction:column;gap:6px;min-width:260px;font-size:14px}
 .field label{font-weight:600}
-.field label em{color:var(--danger);font-style:normal;margin-left:2px}
+.field label em{color:var(--danger-text);font-style:normal;margin-left:2px}
 .field input,.field textarea{height:44px;border:1px solid var(--border-strong);border-radius:var(--radius-md);padding:0 14px;font:inherit;font-size:14px;background:var(--bg-surface);color:var(--text-primary);width:100%;transition:border-color var(--motion-fast)}
 .field textarea{height:auto;min-height:96px;padding:10px 14px;resize:vertical;line-height:1.5}
 .field input::placeholder,.field textarea::placeholder{color:var(--text-disabled)}
@@ -599,7 +645,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .field input:read-only{background:var(--bg-subtle)}
 .field .help{color:var(--text-tertiary);font-size:12px}
 .field.error input,.field.error textarea,.field.error .affix{border-color:var(--danger)}
-.field.error .help{color:var(--danger)}
+.field.error .help{color:var(--danger-text)}
 .field.sm input{height:36px;font-size:12px;padding:0 12px}
 .field.lg input{height:52px;font-size:16px;padding:0 16px}
 .field .affix{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:var(--radius-md);background:var(--bg-surface)}
@@ -735,7 +781,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .tag.medium{background:var(--warning-subtle);color:var(--sev-medium)}
 .tag.low{background:var(--info-subtle);color:var(--sev-low)}
 .tag.info{background:var(--bg-panel);color:var(--sev-info)}
-.tag.ok{background:var(--success-subtle);color:var(--success)}
+.tag.ok{background:var(--success-subtle);color:var(--success-text)}
 .tag.accent{background:var(--accent-subtle);color:var(--accent-text)}
 .tag.sm{font-size:12px;padding:1px 8px}
 .tag.lg{font-size:12px;padding:5px 12px}
@@ -746,7 +792,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .tag.solid.high{background:var(--sev-high)}
 .tag.solid.medium{background:var(--sev-medium)}
 .tag.solid.low{background:var(--sev-low)}
-.tag.solid.ok{background:var(--success)}
+.tag.solid.ok{background:var(--success);color:var(--success-on)}
 
 /* Dropdown */
 .dropdown{position:relative;display:inline-block}
@@ -764,7 +810,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .menu-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:14px;cursor:pointer;color:var(--text-primary);white-space:nowrap}
 .menu-item:hover{background:var(--bg-subtle)}
 .menu-item.on{background:var(--accent-subtle);color:var(--accent-text);font-weight:600}
-.menu-item.danger{color:var(--danger)}
+.menu-item.danger{color:var(--danger-text)}
 .menu-item[aria-disabled="true"]{opacity:.4;cursor:not-allowed;pointer-events:none}
 .menu-item .hint{margin-left:auto;font-size:12px;color:var(--text-tertiary)}
 .menu-item svg{width:16px;height:16px;flex:none;color:var(--text-tertiary)}
@@ -897,7 +943,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .popup .popup-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 .popup .popup-close{position:absolute;top:16px;right:16px}
 .popup.lg{width:640px}
-.popup.danger .popup-title{color:var(--danger)}
+.popup.danger .popup-title{color:var(--danger-text)}
 .popup .popup-form{display:flex;flex-direction:column;gap:16px;margin-top:4px}
 
 /* Tooltip */
@@ -916,7 +962,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 /* Notification */
 .notice{display:flex;gap:12px;align-items:flex-start;border-radius:var(--radius-lg);padding:14px 18px;font-size:14px;border:1px solid var(--border-default);width:100%;background:var(--bg-surface);line-height:1.55}
 .notice b{display:block;margin-bottom:2px}
-.notice .ico{flex:none;width:20px;height:20px;display:grid;place-items:center;color:var(--info);margin-top:1px}
+.notice .ico{flex:none;width:20px;height:20px;display:grid;place-items:center;color:var(--info-text);margin-top:1px}
 .notice .ico svg{width:20px;height:20px}
 .notice .close{margin-left:auto;flex:none;border:0;background:transparent;color:var(--text-tertiary);font:inherit;line-height:1;cursor:pointer;padding:2px;display:grid;place-items:center}
 .notice .close svg{width:14px;height:14px}
@@ -924,12 +970,13 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .notice .actions{display:flex;gap:8px;margin-top:8px}
 .notice.info{background:var(--info-subtle);border-color:color-mix(in srgb,var(--info) 30%,transparent)}
 .notice.success{background:var(--success-subtle);border-color:color-mix(in srgb,var(--success) 30%,transparent)}
-.notice.success .ico{color:var(--success)}
+.notice.success .ico{color:var(--success-text)}
 .notice.warning{background:var(--warning-subtle);border-color:color-mix(in srgb,var(--warning) 30%,transparent)}
-.notice.warning .ico{color:var(--warning)}
+.notice.warning .ico{color:var(--warning-text)}
 .notice.danger{background:var(--danger-subtle);border-color:color-mix(in srgb,var(--danger) 30%,transparent)}
-.notice.danger .ico{color:var(--danger)}
+.notice.danger .ico{color:var(--danger-text)}
 .toast{display:inline-flex;align-items:center;gap:12px;width:360px;max-width:100%;padding:12px 16px;border-radius:var(--radius-lg);background:var(--bg-inverse);color:var(--text-inverse);font-size:14px;box-shadow:var(--shadow-3)}
+/* 반전 표면(--bg-inverse) 위라 -text 를 쓰면 더 나빠진다 — 기준 단계를 그대로 쓴다(라이트 4.74 · 다크 2.37) */
 .toast .ico{flex:none;width:20px;height:20px;display:grid;place-items:center;color:var(--success)}
 .toast .ico svg{width:20px;height:20px}
 .toast.danger .ico{color:var(--danger)}
@@ -939,7 +986,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .toast-stack.fixed{position:fixed;right:24px;bottom:24px;z-index:110}
 .banner{display:flex;align-items:center;gap:12px;width:100%;padding:10px 20px;background:var(--accent);color:var(--accent-on);font-size:14px;font-weight:500}
 .banner .btn{margin-left:auto}
-.banner.warning{background:var(--warning);color:var(--gray-900)}
+.banner.warning{background:var(--warning);color:var(--warning-on)}
 .banner.danger{background:var(--danger);color:var(--danger-on)}
 
 /* Loading */
@@ -985,7 +1032,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .steps li{display:flex;align-items:center;gap:8px;color:var(--text-tertiary);margin:0;white-space:nowrap}
 .steps li i{width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;font-style:normal;font-size:12px;font-weight:700;background:var(--fill-strong);color:var(--text-secondary);flex:none}
 .steps li i svg{width:12px;height:12px;stroke-width:3}
-.steps li.done i{background:var(--success);color:#fff}
+.steps li.done i{background:var(--success);color:var(--success-on)}
 .steps li.on{color:var(--text-primary);font-weight:600}
 .steps li.on i{background:var(--accent);color:var(--accent-on)}
 .steps li+li::before{content:"";width:32px;height:1px;background:var(--border-strong)}
@@ -1068,8 +1115,8 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .kpi .value small{font-size:16px;font-weight:500;color:var(--text-tertiary);margin-left:2px}
 .kpi .delta{font-size:12px;font-weight:600;color:var(--text-secondary)}
 .kpi .delta svg{width:12px;height:12px;vertical-align:-1px}
-.kpi .delta.up{color:var(--danger)}
-.kpi .delta.down{color:var(--success)}
+.kpi .delta.up{color:var(--danger-text)}
+.kpi .delta.down{color:var(--success-text)}
 .kpi.critical .value{color:var(--sev-critical)}
 .kpi.high .value{color:var(--sev-high)}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;width:100%}
