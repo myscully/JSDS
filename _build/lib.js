@@ -55,7 +55,7 @@
     block.replace(/\/\*[\s\S]*?\*\//g, "").split(";").map(s => s.trim()).filter(s => s.startsWith("--")).forEach(d => { const k = d.indexOf(":"); out[d.slice(0, k).trim()] = d.slice(k + 1).trim(); });
     return out;
   }
-  /* prefixes: "gray" | ["bg-","text-"] → ":root{ --gray-0:...; }" 텍스트 */
+  /* prefixes: "neutral" | ["bg-","text-"] → ":root{ --neutral-0:...; }" 텍스트 */
   function tokenBlock(prefixes, css) {
     const ps = [].concat(prefixes);
     const hit = k => ps.some(p => p instanceof RegExp ? p.test(k) : (k === "--" + p || k.startsWith("--" + p.replace(/-$/, "") + "-")));
