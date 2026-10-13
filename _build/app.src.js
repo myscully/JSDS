@@ -267,6 +267,8 @@
   function showValPop(anchor, title, rows, copyText, kind, copyLabel, key) {
     const pop = document.getElementById("valPop"); if (!pop) return false;
     if (valAnchor === (key || anchor) && !pop.hidden) { closeValPop(); return false; }   /* 같은 것 재클릭 = 토글 */
+    document.querySelectorAll('.val-cell[aria-expanded="true"]').forEach(c => c.setAttribute("aria-expanded", "false"));
+    if (key && key.classList && key.classList.contains("val-cell")) key.setAttribute("aria-expanded", "true");
     const esc = t => String(t).replace(/[<>&]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c]));
     pop.classList.toggle("kind-icon", kind === "icon");
     document.getElementById("valPopTitle").textContent = title;
@@ -311,6 +313,8 @@
     const pop = document.getElementById("valPop"); if (!pop || pop.hidden) return false;
     pop.hidden = true; valAnchor = null;
     document.querySelectorAll(".icon-tile.on").forEach(t => t.classList.remove("on"));   /* 팝오버가 닫혔는데 타일만 켜져 있으면 헷갈린다 */
+    /* 열린 스와치는 바가 커진 상태로 남는다 — aria-haspopup="dialog" 만 있고 열림 상태를 알릴 방법이 없던 공백도 메운다 */
+    document.querySelectorAll('.val-cell[aria-expanded="true"]').forEach(c => c.setAttribute("aria-expanded", "false"));
     return true;
   }
 
