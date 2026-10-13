@@ -336,19 +336,22 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand)}
 .wbs-legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--text-tertiary);margin:var(--space-3) 0 var(--space-8)}
 .wbs-legend i{display:inline-block;width:14px;height:10px;border-radius:2px;background:var(--accent-graphic);vertical-align:-1px;margin-right:6px}
 .wbs-legend i.sub{background:var(--accent-300)}.wbs-legend i.final{background:var(--brand)}.wbs-legend i.hol{background:var(--bg-subtle);border:1px solid var(--border-default)}.wbs-legend i.ms{width:3px;border-radius:0;background:var(--brand)}
-.sem-row{display:flex;gap:2px;margin:var(--space-3) 0 var(--space-10)}
+/* 컬러바 — 참고 시스템과 같은 형태: 높이 32, 가로 간격 0(바가 붙어 한 줄), 직각 + 위아래 1px hairline, 라벨은 8px 아래 가운데.
+   hover·팝오버 열림에서는 색을 그리는 i 만 bottom 고정으로 8px 위로 자란다 — 라벨은 움직이지 않는다 */
+.sem-row{display:flex;gap:0;margin:var(--space-3) 0 var(--space-10)}
 .sem-row>.val-cell{flex:1;min-width:0;cursor:pointer;display:block;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:left}
-.sem-row .bar{height:40px;background:var(--checker-bg,transparent);position:relative;border-radius:2px;overflow:hidden}
-.sem-row .bar i{position:absolute;inset:0;display:block}
+.sem-row .bar{height:32px;background:var(--checker-bg,transparent);position:relative;border-radius:0;overflow:visible;box-shadow:inset 0 1px 0 var(--line-neutral),inset 0 -1px 0 var(--line-neutral)}
+.sem-row .bar i{position:absolute;inset:auto 0 0 0;height:100%;display:block;transition:height var(--motion-slow) ease}
 .sem-row .bar.line i{inset:auto 0 0 0;height:2px;top:50%;transform:translateY(-50%)}
 .sem-row:not(.checker) .bar.line{background:var(--bg-subtle)}
-.sem-row>*:first-child .bar{border-radius:var(--radius-md) 2px 2px var(--radius-md)}.sem-row>*:last-child .bar{border-radius:2px var(--radius-md) var(--radius-md) 2px}
+.sem-row>.val-cell:hover .bar:not(.line) i,.sem-row>.val-cell[aria-expanded="true"] .bar:not(.line) i{height:calc(100% + 8px)}
 .sem-row .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-neutral);border-radius:inherit;pointer-events:none}  /* 바탕과 구분되지 않는 색 — app.js 가 .faint 를 붙인다 */
-.sem-row .name{font-size:12px;font-weight:600;color:var(--text-secondary);margin-top:8px}
+.sem-row .name{font-size:12px;font-weight:700;color:var(--text-primary);margin-top:8px;text-align:center}
 .checker{--checker-bg:repeating-conic-gradient(rgba(112,115,124,.16) 0 25%,transparent 0 50%) 0 0/12px 12px}
 .pal{margin:0 0 var(--space-8)}.pal h3{margin:0 0 8px;font-size:16px}
-.pal .scale{margin:0}.pal .scale .val-cell{height:44px;border-radius:3px}.pal .scale .val-cell i{font-size:10px;left:0;right:0;bottom:-18px;text-align:center;mix-blend-mode:normal;color:var(--text-secondary);font-weight:500}
-.pal .scale{margin-bottom:22px;gap:2px}
+.pal .scale{margin:0;align-items:end;grid-auto-rows:32px}.pal .scale .val-cell{height:32px;border-radius:0;transition:height var(--motion-slow) ease;box-shadow:inset 0 1px 0 var(--line-neutral),inset 0 -1px 0 var(--line-neutral)}
+.pal .scale .val-cell:hover,.pal .scale .val-cell[aria-expanded="true"]{height:40px}   /* 바닥이 고정이라 위로 자라고 숫자 라벨은 버튼 하단 기준이라 제자리 */.pal .scale .val-cell i{font-size:10px;line-height:1;left:0;right:0;bottom:-18px;text-align:center;mix-blend-mode:normal;color:var(--text-primary);font-weight:700}
+.pal .scale{margin-bottom:22px;gap:0;row-gap:24px}
 .elev-types{display:grid;grid-template-columns:1fr 1fr;gap:var(--card-gap);margin:var(--space-4) 0 var(--space-10)}
 .elev-types .demo{height:176px;background:var(--bg-subtle);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);display:grid;place-items:center}
 .elev-types .demo i{display:block;width:88px;height:88px;border-radius:var(--radius-lg);background:var(--bg-surface)}

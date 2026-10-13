@@ -46,8 +46,8 @@ else { const gs = article(read("home/getting-started.html")); for (const m of gs
 if (!/href="home\/getting-started\.html"/.test(read("index.html"))) fails.push("index.html: Getting started 링크 없음");
 // Foundations: Montage 구성(Overview + Base material 5) 그대로, 옛 페이지 없음
 const fnd = fs.readdirSync(path.join(OUT, "foundations")).filter(f => f.endsWith(".html")).sort().join(",");
-if (fnd !== "colors.html,elevation.html,grid.html,icons.html,index.html,overview.html,typography.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);
-for (const f of ["colors", "elevation", "grid", "icons", "typography"]) { const b = article(read(`foundations/${f}.html`)); if (!/<h2 /.test(b)) fails.push(`foundations/${f}.html: 섹션(h2) 없음`); if (/href="#\//.test(b)) fails.push(`foundations/${f}.html: 변환되지 않은 href="#/"`); }
+if (fnd !== "brand-role-map.html,colors.html,elevation.html,grid.html,icons.html,index.html,overview.html,typography.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);
+for (const f of ["brand-role-map", "colors", "elevation", "grid", "icons", "typography"]) { const b = article(read(`foundations/${f}.html`)); if (!/<h2 /.test(b)) fails.push(`foundations/${f}.html: 섹션(h2) 없음`); if (/href="#\//.test(b)) fails.push(`foundations/${f}.html: 변환되지 않은 href="#/"`); }
 if (!/data-doctab="atomic"/.test(read("foundations/colors.html"))) fails.push("foundations/colors.html: Semantic/Atomic 탭 없음");
 if (!fs.existsSync(path.join(OUT, "resources/design-token.html"))) fails.push("resources/design-token.html 없음");
 if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overview.html 이 생성됨(첫 화면은 루트 index.html 만)");

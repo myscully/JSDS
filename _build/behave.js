@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 271 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 281 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -933,6 +933,67 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   await page.click("#themeBtn"); await page.waitForTimeout(150);
   ok("outline follows the theme (dark: black faint, white not)", (await faint("--static-black")) && !(await faint("--static-white")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
+
+  // 컬러바 형태 — 참고 시스템과 같게: 높이 32 · 가로 간격 0 · 직각 · 라벨은 8px 아래 가운데
+  const barGeo = await page.evaluate(() => {
+    const row = document.querySelector(".sem-row"), cells = [...row.querySelectorAll(".val-cell")];
+    const a = cells[0].querySelector(".bar").getBoundingClientRect(), b = cells[1].querySelector(".bar").getBoundingClientRect();
+    const n = cells[0].querySelector(".name"), ns = getComputedStyle(n);
+    return { h: Math.round(a.height), gap: Math.round(b.left - a.right), radius: getComputedStyle(cells[0].querySelector(".bar")).borderRadius,
+      labelGap: Math.round(n.getBoundingClientRect().top - a.bottom), align: ns.textAlign };
+  });
+  ok("semantic colour bars are 32 tall, flush, square", barGeo.h === 32 && barGeo.gap === 0 && barGeo.radius === "0px", JSON.stringify(barGeo));
+  ok("semantic bar label sits 8px below, centered", barGeo.labelGap === 8 && barGeo.align === "center", JSON.stringify(barGeo));
+  // hover 하면 색 레이어만 위로 8px 자란다 — 라벨은 움직이지 않아야 한다(bottom 고정이 이걸 보장한다)
+  const barSel = '.sem-row .val-cell[data-token="--accent"]';
+  const grow = async (sel) => page.evaluate((s2) => {
+    const c = document.querySelector(s2), i = c.querySelector(".bar i"), n = c.querySelector(".name");
+    return { h: Math.round(i.getBoundingClientRect().height), top: Math.round(i.getBoundingClientRect().top),
+      label: Math.round(n.getBoundingClientRect().top), exp: c.getAttribute("aria-expanded") };
+  }, sel);
+  const g0 = await grow(barSel);
+  await page.locator(barSel).hover(); await page.waitForTimeout(450);
+  const g1 = await grow(barSel);
+  ok("colour bar grows 8px upward on hover", g1.h - g0.h === 8 && g0.top - g1.top === 8, `${g0.h}→${g1.h} · top ${g0.top}→${g1.top}`);
+  ok("the label does not move while the bar grows", g0.label === g1.label, `${g0.label} → ${g1.label}`);
+  // 팝오버가 열린 스와치는 커진 채로 남는다 + aria-expanded 로 열림을 알린다(종전에는 aria-haspopup 만 있었다)
+  await page.locator(barSel).click(); await page.waitForTimeout(400);
+  await page.mouse.move(5, 5); await page.waitForTimeout(400);
+  const g2 = await grow(barSel);
+  ok("an open swatch stays grown and reports aria-expanded", g2.exp === "true" && g2.h - g0.h === 8, JSON.stringify(g2));
+  await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+  const g3 = await grow(barSel);
+  ok("Esc clears aria-expanded and the growth", g3.exp === "false" && g3.h === g0.h, JSON.stringify(g3));
+  // Atomic 스와치도 같은 형태·같은 성장. 그리드 트랙을 32 로 고정해야 바닥이 움직이지 않는다
+  await page.click('.doc-tabs [data-doctab="atomic"]'); await page.waitForTimeout(250);
+  const atomSel = '.pal .val-cell[data-token="--gray-500"]';
+  const aGeo = async () => page.evaluate((s2) => {
+    const c = document.querySelector(s2), r = c.getBoundingClientRect(), lab = c.querySelector("i").getBoundingClientRect();
+    const sib = [...document.querySelectorAll(".pal .scale .val-cell")];
+    const a = sib[0].getBoundingClientRect(), b = sib[1].getBoundingClientRect();
+    return { h: Math.round(r.height), bottom: Math.round(r.bottom), labelTop: Math.round(lab.top),
+      gap: Math.round(b.left - a.right), radius: getComputedStyle(c).borderRadius, labelGap: Math.round(lab.top - r.bottom) };
+  }, atomSel);
+  const a0 = await aGeo();
+  ok("atomic swatches match the bar shape", a0.h === 32 && a0.gap === 0 && a0.radius === "0px" && a0.labelGap === 8, JSON.stringify(a0));
+  await page.locator(atomSel).hover(); await page.waitForTimeout(450);
+  const a1 = await aGeo();
+  ok("atomic swatch grows upward with its floor pinned", a1.h - a0.h === 8 && a1.bottom === a0.bottom && a1.labelTop === a0.labelTop,
+    `${a0.h}→${a1.h} · bottom ${a0.bottom}→${a1.bottom} · label ${a0.labelTop}→${a1.labelTop}`);
+  await page.mouse.move(5, 5); await page.waitForTimeout(300);
+
+  // 브랜드 역할 맵이 Colors 에서 떨어져 나와 제 페이지를 가진다
+  await go("foundations/brand-role-map.html");
+  const brm = await page.evaluate(() => ({
+    h1: (document.querySelector("article h1") || {}).textContent || "",
+    roles: document.querySelectorAll("table.roles tbody tr").length,
+    dodont: document.querySelectorAll(".dodont>div").length,
+    side: [...document.querySelectorAll(".sidebar a")].some(a => /brand-role-map/.test(a.getAttribute("href") || "")),
+  }));
+  ok("brand role map has its own page with the table and both pairs", /Brand role map/.test(brm.h1) && brm.roles === 5 && brm.dodont === 4 && brm.side, JSON.stringify(brm));
+  await go("foundations/colors.html");
+  const left = await page.evaluate(() => ({ roles: document.querySelectorAll("table.roles").length, link: !!document.querySelector('article a[href*="brand-role-map"]') }));
+  ok("colors drops the role map and links to it instead", left.roles === 0 && left.link, JSON.stringify(left));
 
   // Atomic 팔레트 칸 수 + 반응형 블록이 실제로 적용되는지 (한동안 컴포넌트 규칙에 덮여 죽어 있었다)
   for (const [w, want] of [[1440, [2, 14, 11]], [760, [2, 7, 7]], [390, [2, 5, 5]]]) {

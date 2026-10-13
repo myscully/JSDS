@@ -42,7 +42,24 @@ window.FOUNDATION_PAGES = function (H) {
 <div class="fnd-hero" aria-hidden="true"><div style="background:conic-gradient(var(--accent) 0 25%,var(--brand) 0 50%,var(--success) 0 75%,var(--gray-300) 0)"></div><div style="background:var(--bg-surface);box-shadow:var(--shadow-md);font-size:44px;letter-spacing:-.03em">Aa</div><div style="background:repeating-linear-gradient(90deg,var(--accent-subtle) 0 12px,transparent 12px 22px);border:1px solid var(--border-subtle)"></div><div style="background:var(--bg-surface);border:1px solid var(--border-subtle);color:var(--accent)">${I("shield", 48)}</div><div style="background:var(--bg-surface);box-shadow:var(--shadow-xl)"><i style="display:block;width:48px;height:48px;border-radius:var(--radius-lg);background:var(--bg-surface);box-shadow:var(--shadow-md)"></i></div></div>
 <h2 id="base">Base material</h2>
 <div class="base-list">${[["colors", "Colors", "색상의 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다."], ["typography", "Typography", "화면의 텍스트를 읽기 쉽고 아름답게 표현하도록 돕습니다."], ["grid", "Grid", "일관된 간격 체계를 사용하여 조화로운 비율과 정렬을 만들어냅니다."], ["icons", "Icons", "아이콘을 사용하여 인터페이스를 빠르게 이해하고 탐색할 수 있도록 돕습니다."], ["elevation", "Elevation", "컴포넌트 간의 명확한 깊이감과 시각적 계층을 만들어냅니다."]].map(([k, t, d]) => `<a href="#/foundations/${k}"><b>${t}${nb("foundations", k)}</b><span>${d}</span>${I("chevron-right", 18)}</a>`).join("")}</div>
-<p>토큰 원본(CSS 변수 전체 · Radius · Motion · Accessibility)은 <a href="#/resources/design-token">Resources › Design Token</a> 에 있습니다.</p>`,
+<p>색을 어느 축에 쓰는지는 <a href="#/foundations/brand-role-map">Brand role map</a>, 토큰 원본(CSS 변수 전체 · Radius · Motion · Accessibility)은 <a href="#/resources/design-token">Resources › Design Token</a> 에 있습니다.</p>`,
+
+    /* ================= Brand role map ================= */
+    "foundations/brand-role-map": () => `<h1>Brand role map</h1><p class="lead">색은 네 축으로만 씁니다. 어느 축을 어디에 쓰고 어디에 쓰지 않는지를 한 장으로 정리했습니다. 단계 값과 토큰 이름은 <a href="#/foundations/colors">Colors</a> 에 있습니다.</p>
+<h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>제품 Primary</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다. 이 시스템은 관리자 웹 제품 기준이라 Brand 는 제품 UI 의 Accent 가 아닙니다.</p>
+${tbl(["역할", "쓰는 곳", "쓰지 않는 곳"], [
+  ["<b>제품 Primary</b>", "주요 행동 버튼(화면당 하나), 링크, 활성·선택 상태(탭 · 내비게이션 · 체크 · 스위치), 포커스 링", "위험도나 처리 결과 표현, 넓은 면의 장식 배경, 로고"],
+  ["<b>Status</b>", "성공·실패·검토 대기 알림(토스트 · 배너 · 인라인 메시지), 입력 검증 오류, 파괴적 행동 버튼(<code>danger</code>)", "위협 등급(심각도) 표현, 탐색·선택 상태, 브랜드 강조"],
+  ["<b>Severity</b>", "위협·이벤트 등급 태그, 점·밴드, 표 행 강조, 대시보드 KPI. <b>항상 라벨(Critical 등)을 병기</b>", "버튼·링크, 일반 처리 결과(성공/실패), 색만 있는 점·배경"],
+  ["<b>Brand</b>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "제품 UI 의 Accent · CTA · 위험도 · 상태. 헤더 Accent 선택지에 없음 — 브랜드 디자인 시스템은 별도 제작"],
+  ["<b>Gray</b>", "화면 바탕, 텍스트, 구분선, 비활성 상태. 정보 밀도가 높은 콘솔의 기본 색", "강조. 회색 톤 차이만으로 상태나 등급을 표현"]
+], "roles")}
+<div class="dodont">
+  <div class="do"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn md primary">정책 저장</button><button type="button" class="btn md secondary">취소</button><span style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><i style="width:18px;height:18px;border-radius:50%;background:var(--brand);display:inline-block"></i>JS Console</span></div><div class="body"><p>주요 행동은 제품 Primary, 회사 정체성은 헤더 마크에만. 두 색이 같은 화면에 있어도 역할이 겹치지 않습니다.</p></div></div>
+  <div class="dont"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn md primary" style="background:var(--brand)">정책 저장</button><button type="button" class="btn md secondary" style="color:var(--brand);border-color:var(--brand)">취소</button></div><div class="body"><p>브랜드 색을 CTA 나 보조 버튼에 쓰지 않습니다. 제품 컬러가 바뀌어도 브랜드 색은 그대로라 제품 간 구분이 사라지고, 강조 위계도 깨집니다.</p></div></div>
+  <div class="do"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div><div class="body"><p>심각도는 Severity 색 + 라벨을 함께 씁니다. 색을 구분하지 못해도 등급을 읽을 수 있고, 다크 테마에서도 의미가 같습니다.</p></div></div>
+  <div class="dont"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-critical);display:inline-block"></i><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-high);display:inline-block"></i><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-medium);display:inline-block"></i><button type="button" class="btn md primary" style="background:var(--sev-critical)">차단</button></div><div class="body"><p>색만 있는 점으로 등급을 전달하거나, 심각도 색을 버튼에 쓰지 않습니다. 파괴적 행동은 Status 의 <code>danger</code> 버튼입니다.</p></div></div>
+</div>`,
 
     /* ================= Colors ================= */
     "foundations/colors": () => {
@@ -82,21 +99,7 @@ ${pal("Amber", t11, "amber", "Cautionary · Severity Medium")}
 ${pal("Emerald", t11, "emerald", "Positive")}
 ${pal("Sky", t11, "sky", "Informative · Severity Low")}
 `;
-      return `<h1>Colors${nb("foundations", "colors")}</h1><p class="lead">컬러 시스템은 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다. Gray Scale 이 화면의 바탕이고, Primary(제품 메인 컬러)는 핵심 정보를 강조하는 데만 씁니다. 상황에 맞는 색을 이름으로 고를 수 있도록 Semantic 토큰으로 제공하며, 스와치를 클릭하면 Hex · RGBA · 토큰 값을 볼 수 있고, 토큰을 복사할 수 있습니다.</p>
-<h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>제품 Primary</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다. 이 시스템은 관리자 웹 제품 기준이라 Brand 는 제품 UI 의 Accent 가 아닙니다.</p>
-${tbl(["역할", "쓰는 곳", "쓰지 않는 곳"], [
-  ["<b>제품 Primary</b>", "주요 행동 버튼(화면당 하나), 링크, 활성·선택 상태(탭 · 내비게이션 · 체크 · 스위치), 포커스 링", "위험도나 처리 결과 표현, 넓은 면의 장식 배경, 로고"],
-  ["<b>Status</b>", "성공·실패·검토 대기 알림(토스트 · 배너 · 인라인 메시지), 입력 검증 오류, 파괴적 행동 버튼(<code>danger</code>)", "위협 등급(심각도) 표현, 탐색·선택 상태, 브랜드 강조"],
-  ["<b>Severity</b>", "위협·이벤트 등급 태그, 점·밴드, 표 행 강조, 대시보드 KPI. <b>항상 라벨(Critical 등)을 병기</b>", "버튼·링크, 일반 처리 결과(성공/실패), 색만 있는 점·배경"],
-  ["<b>Brand</b>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "제품 UI 의 Accent · CTA · 위험도 · 상태. 헤더 Accent 선택지에 없음 — 브랜드 디자인 시스템은 별도 제작"],
-  ["<b>Gray</b>", "화면 바탕, 텍스트, 구분선, 비활성 상태. 정보 밀도가 높은 콘솔의 기본 색", "강조. 회색 톤 차이만으로 상태나 등급을 표현"]
-], "roles")}
-<div class="dodont">
-  <div class="do"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn md primary">정책 저장</button><button type="button" class="btn md secondary">취소</button><span style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><i style="width:18px;height:18px;border-radius:50%;background:var(--brand);display:inline-block"></i>JS Console</span></div><div class="body"><p>주요 행동은 제품 Primary, 회사 정체성은 헤더 마크에만. 두 색이 같은 화면에 있어도 역할이 겹치지 않습니다.</p></div></div>
-  <div class="dont"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn md primary" style="background:var(--brand)">정책 저장</button><button type="button" class="btn md secondary" style="color:var(--brand);border-color:var(--brand)">취소</button></div><div class="body"><p>브랜드 색을 CTA 나 보조 버튼에 쓰지 않습니다. 제품 컬러가 바뀌어도 브랜드 색은 그대로라 제품 간 구분이 사라지고, 강조 위계도 깨집니다.</p></div></div>
-  <div class="do"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div><div class="body"><p>심각도는 Severity 색 + 라벨을 함께 씁니다. 색을 구분하지 못해도 등급을 읽을 수 있고, 다크 테마에서도 의미가 같습니다.</p></div></div>
-  <div class="dont"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-critical);display:inline-block"></i><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-high);display:inline-block"></i><i style="width:12px;height:12px;border-radius:50%;background:var(--sev-medium);display:inline-block"></i><button type="button" class="btn md primary" style="background:var(--sev-critical)">차단</button></div><div class="body"><p>색만 있는 점으로 등급을 전달하거나, 심각도 색을 버튼에 쓰지 않습니다. 파괴적 행동은 Status 의 <code>danger</code> 버튼입니다.</p></div></div>
-</div>
+      return `<h1>Colors${nb("foundations", "colors")}</h1><p class="lead">컬러 시스템은 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다. Gray Scale 이 화면의 바탕이고, Primary(제품 메인 컬러)는 핵심 정보를 강조하는 데만 씁니다. 상황에 맞는 색을 이름으로 고를 수 있도록 Semantic 토큰으로 제공하며, 스와치를 클릭하면 Hex · RGBA · 토큰 값을 볼 수 있고, 토큰을 복사할 수 있습니다. 어느 색을 어디에 쓰는지는 <a href="#/foundations/brand-role-map">Brand role map</a> 에 있습니다.</p>
 ${tabset([["semantic", "Semantic"], ["atomic", "Atomic"]], [semantic, atomic])}
 ${valPop()}`;
     },
