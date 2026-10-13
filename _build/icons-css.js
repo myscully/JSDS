@@ -17,7 +17,7 @@ const mask = (name, style, opt = {}) => { const u = `url("${dataUri(name, style,
 const RULES = [
   [".checkbox input:checked::after", `content:"";width:12px;height:12px;background:var(--accent-on);${mask("check", "outline", { strokeWidth: 3.5 })}`],
   [".radio input:checked", "border-color:var(--accent);background:var(--accent)"],
-  [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;${mask("circle", "filled", { size: "120%" })};transition:left var(--motion-fast)`],
+  [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;background:var(--static-white);${mask("circle", "filled", { size: "120%" })};transition:left var(--motion-fast)`],
   [".switch input:checked::after", "left:22px"],
   [".switch.sm input::after", "width:16px;height:16px"],
   [".switch.sm input:checked::after", "left:18px"],

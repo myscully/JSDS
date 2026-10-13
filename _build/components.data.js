@@ -1030,7 +1030,7 @@ const COMPONENTS = {
     ],
     props: [[".indicator", "span", "—", "점 + 라벨. ok | warn | danger | info | accent | (neutral)"], [".pulse", "boolean", "false", "깜빡임(위험 실시간)"], [".count", "span", "—", "건수. .accent / .neutral / .dot(점만)"], [".with-count", "wrapper", "—", "아이콘 우상단에 count 배치"], [".steps li", "li", "—", ".done 완료, .on 현재. .vertical 세로"]],
     spec: [["Size", "점 8 · count 높이 20 · step 원 24"], ["Container", "radius/full"], ["Label", "Body/2 14 · count 11 Bold · steps 13"], ["Placement", "테이블 상태 열, 내비 건수, 마법사 상단"]],
-    figma: { frame: "Indicator", radius: "radius/full", sizes: { dot: 8, count: { h: 20 }, step: 24 }, variants: { ok: { fg: "--success" }, warn: { fg: "--warning" }, danger: { fg: "--danger" }, info: { fg: "--info" }, neutral: { fg: "--gray-400" } }, states: ["default", "pulse"] },
+    figma: { frame: "Indicator", radius: "radius/full", sizes: { dot: 8, count: { h: 20 }, step: 24 }, variants: { ok: { fg: "--success" }, warn: { fg: "--warning" }, danger: { fg: "--danger" }, info: { fg: "--info" }, neutral: { fg: "--interaction-inactive" } }, states: ["default", "pulse"] },
   },
 
   /* ------------------------------------------------ Divider */

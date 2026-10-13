@@ -114,9 +114,9 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   ok("teal product keeps its main colour", !teal.neutral && teal.bg === "rgb(0, 170, 182)" && teal.accent === "#00AAB6"
     && teal.accentText === "#00636A" && teal.text === "rgb(0, 99, 106)", JSON.stringify(teal));
   ok("red product turns the whole accent ramp neutral",
-    red.neutral && red.bg === "rgb(15, 23, 42)" && red.text === "rgb(15, 23, 42)"
-    && red.accent === "#0F172A" && red.focus === "#64748B" && red.subtle === "#F1F5F9"
-    && red.ramp === "#475569 #CBD5E1 #F1F5F9", JSON.stringify(red));
+    red.neutral && red.bg === "rgb(27, 28, 30)" && red.text === "rgb(27, 28, 30)"
+    && red.accent === "#1B1C1E" && red.focus === "#70737C" && red.subtle === "#EAEBEC"
+    && red.ramp === "#5A5C63 #AEB0B6 #EAEBEC", JSON.stringify(red));   /* NEUTRAL_RAMP 가 slate 에서 --neutral-* 값으로 바뀌었다 */
   // 다크는 메인·hover·pressed·글자색을 라이트와 그대로 공유한다(같은 600 단계) — 다른 것은 텍스트·선택 배경·지표·반전·포커스뿐이다
   const readTokens = () => page.evaluate(() => {
     const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
@@ -147,7 +147,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     if (n === "clashing") {
       // 중립 전환만 테마별로 갈린다 — 라이트는 짙은 쪽(900), 다크는 밝은 쪽(100). 중립 600 은 다크 캔버스 위에서 2.0 이라 주인공이 될 수 없다
       ok("dark neutral switch flips to the light end of the ramp",
-        D.accent === "#EAEBEC" && D.hover === "#C2C4C8" && D.pressed === "#AEB0B6" && L.accent === "#0F172A", JSON.stringify([L.accent, D.accent, D.hover, D.pressed]));
+        D.accent === "#EAEBEC" && D.hover === "#C2C4C8" && D.pressed === "#AEB0B6" && L.accent === "#1B1C1E", JSON.stringify([L.accent, D.accent, D.hover, D.pressed]));
       // 램프가 slate 하드코딩이 아니라 다크 바탕과 같은 계열이어야 한다 — 종전에는 #94A3B8 가 주변 #989BA2 와 어긋났다
       ok("dark neutral switch uses the product neutral ramp, not slate", D.ramp === D.neuRamp, `${D.ramp} | ${D.neuRamp}`);
     } else {
@@ -198,7 +198,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     const at = document.querySelectorAll('[data-token="--accent-600"]');
     return { n: at.length, bg: at.length ? getComputedStyle(at[0]).backgroundColor : "" };
   });
-  ok("Atomic Accent ramp follows the neutral switch", ramp.n === 1 && ramp.bg === "rgb(71, 85, 105)", JSON.stringify(ramp));
+  ok("Atomic Accent ramp follows the neutral switch", ramp.n === 1 && ramp.bg === "rgb(90, 92, 99)", JSON.stringify(ramp));
   const base = await accent("");
   ok("back to token accent clears the flag", !base.neutral, JSON.stringify(base));
 
@@ -966,7 +966,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   ok("Esc clears aria-expanded and the growth", g3.exp === "false" && g3.h === g0.h, JSON.stringify(g3));
   // Atomic 스와치도 같은 형태·같은 성장. 그리드 트랙을 32 로 고정해야 바닥이 움직이지 않는다
   await page.click('.doc-tabs [data-doctab="atomic"]'); await page.waitForTimeout(250);
-  const atomSel = '.pal .val-cell[data-token="--gray-500"]';
+  const atomSel = '.pal .val-cell[data-token="--neutral-500"]';
   const aGeo = async () => page.evaluate((s2) => {
     const c = document.querySelector(s2), r = c.getBoundingClientRect(), lab = c.querySelector("i").getBoundingClientRect();
     const sib = [...document.querySelectorAll(".pal .scale .val-cell")];
@@ -1000,7 +1000,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     await page.setViewportSize({ width: w, height: 900 });
     await go("foundations/colors.html");
     await page.locator('.doc-tabs [data-doctab="atomic"]').click();
-    const got = await page.evaluate(() => ["Common", "Gray", "Red"].map((t) => {
+    const got = await page.evaluate(() => ["Common", "Neutral", "Red"].map((t) => {
       const h = [...document.querySelectorAll(".pal h3")].find((x) => x.textContent.startsWith(t));
       return getComputedStyle(h.nextElementSibling).gridTemplateColumns.split(" ").length;
     }));
@@ -1013,7 +1013,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   // Colors: Atomic 팔레트도 같은 팝오버
   await go("foundations/colors.html");
   await page.locator('.doc-tabs [data-doctab="atomic"]').click();
-  const atom = '.pal .val-cell[data-token="--gray-500"]';
+  const atom = '.pal .val-cell[data-token="--neutral-500"]';
   await page.locator(atom).evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
   await page.locator(atom).click();
   await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
@@ -1022,7 +1022,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     const row = (k) => [...document.querySelectorAll("#valPopRows .val-row")].filter((r) => r.querySelector("b").textContent === k).map((r) => r.querySelector("span").textContent)[0];
     return { t: document.getElementById("valPopTitle").textContent, hex: row("Hex"), tok: row("Token"), below: Math.round(p.top - c.bottom), label: document.querySelector(sel).querySelector("i").textContent };
   }, atom);
-  ok("atomic swatch opens the same pop", av.t === "Gray / 500" && /^#[0-9A-F]{6}$/.test(av.hex) && av.tok === "var(--gray-500)" && av.below >= 0 && av.below <= 16 && av.label === "500", JSON.stringify(av));
+  ok("atomic swatch opens the same pop", av.t === "Neutral / 500" && /^#[0-9A-F]{6}$/.test(av.hex) && av.tok === "var(--neutral-500)" && av.below >= 0 && av.below <= 16 && av.label === "500", JSON.stringify(av));
   await page.screenshot({ path: SHOT + "/val-pop-atomic.png" });
   await page.keyboard.press("Escape");
   ok("atomic pop closes on Esc", await page.locator("#valPop").evaluate((e) => e.hidden));
