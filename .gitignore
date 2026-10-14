@@ -6,3 +6,4 @@ _build/_edit.tmp.js
 _react/.visual/
 _react/dist/
 _react/demo/dist/
+_build/contrast.json

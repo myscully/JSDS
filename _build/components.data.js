@@ -39,7 +39,7 @@ const COMPONENTS = {
         <button type="button" class="btn md secondary">Default</button>
         <button type="button" class="btn md primary loading" aria-busy="true">저장 중</button>
         <button type="button" class="btn md secondary loading" aria-busy="true">불러오는 중</button>` },
-      { id: "disabled", title: "Disabled", desc: "비활성은 투명도를 덮지 않고 <b>전용 토큰</b>을 씁니다 — fill 은 회색 면(<code>--interaction-disable</code>) + 회색 라벨(<code>--text-disabled</code>), outline 은 면을 비우고 보더만 회색으로 바뀝니다. 그래서 어떤 변형이든 비활성은 한 가지 회색으로 읽힙니다. 비활성 요소는 탭 순서에서 빠지므로, 막는 대신 <b>왜 누를 수 없는지 알려주는 쪽</b>을 먼저 검토하세요. 링크는 <code>disabled</code> 를 가질 수 없어 <code>aria-disabled=\"true\"</code> 를 씁니다.", html: `
+      { id: "disabled", title: "Disabled", desc: "비활성은 투명도를 덮지 않고 <b>전용 토큰</b>을 씁니다 — fill 은 회색 면(<code>--fill-disabled</code>) + 회색 라벨(<code>--text-disabled</code>), outline 은 면을 비우고 보더만 회색으로 바뀝니다. 그래서 어떤 변형이든 비활성은 한 가지 회색으로 읽힙니다. 비활성 요소는 탭 순서에서 빠지므로, 막는 대신 <b>왜 누를 수 없는지 알려주는 쪽</b>을 먼저 검토하세요. 링크는 <code>disabled</code> 를 가질 수 없어 <code>aria-disabled=\"true\"</code> 를 씁니다.", html: `
         <div class="btn-group">
           <button type="button" class="btn md primary" disabled>Primary</button>
           <button type="button" class="btn md tertiary" disabled>Tertiary</button>
@@ -64,11 +64,11 @@ const COMPONENTS = {
       [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
       [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
       [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(8px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
-      ["disabled", "attribute", "—", "비활성. 전용 토큰 — fill 은 <code>--interaction-disable</code> 면 + <code>--text-disabled</code> 라벨, outline 은 면을 비우고 보더만 회색. 투명도를 덮지 않아 변형마다 다른 색이 남지 않습니다"],
+      ["disabled", "attribute", "—", "비활성. 전용 토큰 — fill 은 <code>--fill-disabled</code> 면 + <code>--text-disabled</code> 라벨, outline 은 면을 비우고 보더만 회색. 투명도를 덮지 않아 변형마다 다른 색이 남지 않습니다"],
       ["type", "button | submit | reset", "button", "폼 안에서는 명시"],
     ],
-    spec: [["State", "면은 기준 단계에서 <b>글자색 반대 방향</b>으로. fill: primary <code>--accent</code> → <code>-hover</code> → <code>-pressed</code> / danger 동일. outline·tertiary: 반투명 <code>--fill-alternative</code> .03 → <code>--fill-normal</code> .05 → <code>--fill-strong</code> .10. text: 라벨 <code>--accent-text</code>, hover <code>--accent-subtle</code>, pressed <code>--fill-strong</code>. 비활성은 전용 토큰, 포커스는 전 변형 공통 <code>--border-focus</code> 2px"], ["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"], ["Label", "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
-    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--accent", fg: "--accent-on" }, secondary: { bg: "transparent", fg: "--text-primary", stroke: "--border-strong" }, tertiary: { bg: "--fill-alternative", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent-text" }, danger: { bg: "--danger", fg: "--danger-on" }, "danger secondary": { bg: "transparent", fg: "--danger-text", stroke: "--danger" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"], disabled: { bg: "--interaction-disable", fg: "--text-disabled", outlineBg: "transparent", outlineStroke: "--interaction-disable" } },
+    spec: [["State", "면은 기준 단계에서 <b>글자색 반대 방향</b>으로. fill: primary <code>--accent-surface</code> → <code>-hover</code> → <code>-pressed</code> / danger 동일. outline·tertiary: 반투명 <code>--fill-weak</code> .03 → <code>--fill-base</code> .05 → <code>--fill-strong</code> .10. text: 라벨 <code>--accent-text</code>, hover <code>--accent-fill</code>, pressed <code>--fill-strong</code>. 비활성은 전용 토큰, 포커스는 전 변형 공통 <code>--focus-ring</code> 2px"], ["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"], ["Label", "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
+    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--accent-surface", fg: "--accent-on" }, secondary: { bg: "transparent", fg: "--text-primary", stroke: "--line-strong" }, tertiary: { bg: "--fill-weak", fg: "--text-primary" }, text: { bg: "transparent", fg: "--accent-text" }, danger: { bg: "--danger-surface", fg: "--danger-on" }, "danger secondary": { bg: "transparent", fg: "--danger-text", stroke: "--danger-surface" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"], disabled: { bg: "--fill-disabled", fg: "--text-disabled", outlineBg: "transparent", outlineStroke: "--fill-disabled" } },
   },
 
   /* ------------------------------------------------ Text Field */
@@ -103,7 +103,7 @@ const COMPONENTS = {
       ["disabled / readonly", "attribute", "—", "비활성 / 읽기 전용(배경 subtle)"],
     ],
     spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · border/strong 1px · focus ring 2px 30%"], ["Label", "Label/1 14 Semibold · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
-    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--bg-surface", stroke: "--border-strong" }, error: { stroke: "--danger" } }, states: ["default", "hover", "focused", "error", "disabled", "readonly"] },
+    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-raised", stroke: "--line-strong" }, error: { stroke: "--danger-surface" } }, states: ["default", "hover", "focused", "error", "disabled", "readonly"] },
   },
 
   /* ------------------------------------------------ Search */
@@ -138,7 +138,7 @@ const COMPONENTS = {
       [".clear", "button", "—", "값 지우기. 값이 있을 때만 렌더"],
     ],
     spec: [["Size", "높이 40 (lg 48) · 최소 폭 280"], ["Container", "radius/md 6 · border/strong · focus ring"], ["Label", "Body/2 14 · 플레이스홀더 text/disabled"], ["Placement", "테이블 툴바 좌측, 전역 검색은 헤더 우측"]],
-    figma: { frame: "Search", radius: "radius/md", sizes: { md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--bg-surface", stroke: "--border-strong" } }, states: ["default", "focused", "filled"] },
+    figma: { frame: "Search", radius: "radius/md", sizes: { md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--surface-raised", stroke: "--line-strong" } }, states: ["default", "focused", "filled"] },
   },
 
   /* ------------------------------------------------ Select Button */
@@ -179,7 +179,7 @@ const COMPONENTS = {
     ],
     props: [[".select-btn", "container", "—", "role=group. 버튼 2~5개"], [".outline", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-pressed=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
     spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 36"], ["Container", "radius/md 6 · bg/panel"], ["Label", "Label/1 13.5 Medium · 선택 Semibold"], ["Placement", "카드 헤더 우측, 툴바"]],
-    figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--bg-panel" }, outline: { stroke: "--border-strong" } }, states: ["default", "selected", "disabled"] },
+    figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--fill-strong" }, outline: { stroke: "--line-strong" } }, states: ["default", "selected", "disabled"] },
   },
 
   /* ------------------------------------------------ Slider */
@@ -217,7 +217,7 @@ const COMPONENTS = {
     ],
     props: [[".slider", "container", "—", ".row(라벨·값) + input[type=range](+ .ticks)"], ["--p", "css var (%)", "50%", "채워진 트랙 비율. value 와 동기화"], ["min / max / step", "attribute", "0 / 100 / 1", "네이티브 속성"], ["disabled", "attribute", "—", "비활성"]],
     spec: [["Size", "트랙 6 · 썸 20 · 최소 폭 280"], ["Container", "트랙 radius/full · 썸 border 2px accent"], ["Label", "Label/2 13 · 현재 값 Semibold"], ["Placement", "정책 설정의 수치 항목. 정확 입력이 필요하면 Text Field 병행"]],
-    figma: { frame: "Slider", sizes: { md: { track: 6, thumb: 20 } }, variants: { default: { fill: "--accent", track: "--bg-panel" } }, states: ["default", "hover", "focused", "disabled"] },
+    figma: { frame: "Slider", sizes: { md: { track: 6, thumb: 20 } }, variants: { default: { fill: "--accent-surface", track: "--fill-strong" } }, states: ["default", "hover", "focused", "disabled"] },
   },
 
   /* ------------------------------------------------ Date Picker */
@@ -298,7 +298,7 @@ const COMPONENTS = {
     ],
     props: [[".checkbox", "label wrapper", "—", "input[type=checkbox] + span(라벨, small 설명)"], ["checked / disabled", "attribute", "—", "네이티브 상태"], [".mixed", "boolean", "false", "부분 선택 외형(JS indeterminate 대체)"], [".checkbox-group", "container", "—", "세로 12px 간격. .row 로 가로 24px"]],
     spec: [["Size", "박스 16 · 라벨 Body/2 14 · 클릭 영역 라벨 포함"], ["Container", "radius/sm 4 · border/strong 1.5px · 선택 accent"], ["Label", "Body/2 14 · 설명 Caption 12.5 tertiary"], ["Placement", "폼 옵션, 테이블 행 선택(.tbl .check)"]],
-    figma: { frame: "Checkbox", radius: "radius/sm", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--border-strong" }, checked: { bg: "--accent" } }, states: ["unchecked", "checked", "indeterminate", "disabled", "focused"] },
+    figma: { frame: "Checkbox", radius: "radius/sm", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--line-strong" }, checked: { bg: "--accent-surface" } }, states: ["unchecked", "checked", "indeterminate", "disabled", "focused"] },
   },
 
   /* ------------------------------------------------ Chip */
@@ -342,7 +342,7 @@ const COMPONENTS = {
     ],
     props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(accent subtle + 체크)"], [".x", "element", "—", "삭제 아이콘(Input Chip)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성"]],
     spec: [["Size", "높이 32 (sm 26) · padding 0 12"], ["Container", "radius/full · border/strong · 선택 accent-subtle"], ["Label", "Label/1 13 Medium"], ["Placement", "검색 아래 필터 행, 입력 필드 안 값 목록"]],
-    figma: { frame: "Chip", radius: "radius/full", sizes: { md: { h: 32 }, sm: { h: 26 } }, variants: { filter: { stroke: "--border-strong" }, selected: { bg: "--accent-subtle", stroke: "--accent", fg: "--accent" }, input: {} }, states: ["default", "selected", "hover", "disabled"] },
+    figma: { frame: "Chip", radius: "radius/full", sizes: { md: { h: 32 }, sm: { h: 26 } }, variants: { filter: { stroke: "--line-strong" }, selected: { bg: "--accent-fill", stroke: "--accent-surface", fg: "--accent-surface" }, input: {} }, states: ["default", "selected", "hover", "disabled"] },
   },
 
   /* ------------------------------------------------ Radio Button */
@@ -388,7 +388,7 @@ const COMPONENTS = {
     ],
     props: [[".radio", "label wrapper", "—", "input[type=radio] + span(라벨, small)"], ["name", "attribute", "—", "같은 그룹은 같은 name"], [".card", "boolean", "false", "카드형(보더 + 선택 시 accent)"], [".radio-group", "container", "—", "세로 12px. .row 로 가로"]],
     spec: [["Size", "원 16 · 선택 내부 점 8"], ["Container", "radius/full · border/strong 1.5px"], ["Label", "Body/2 14 · 설명 Caption 12.5"], ["Placement", "폼의 배타 옵션, 설정의 동작 선택"]],
-    figma: { frame: "Radio Button", radius: "radius/full", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--border-strong" }, checked: { stroke: "--accent" }, card: { stroke: "--border-default" } }, states: ["unchecked", "checked", "disabled", "focused"] },
+    figma: { frame: "Radio Button", radius: "radius/full", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--line-strong" }, checked: { stroke: "--accent-surface" }, card: { stroke: "--line-default" } }, states: ["unchecked", "checked", "disabled", "focused"] },
   },
 
   /* ------------------------------------------------ Switch */
@@ -424,7 +424,7 @@ const COMPONENTS = {
     ],
     props: [[".switch", "label wrapper", "—", "input[type=checkbox][role=switch] + span"], ["checked / disabled", "attribute", "—", "네이티브 상태"], ["size", "(md) | sm", "md", "44×24 / 36×20"], [".label-left", "boolean", "false", "라벨을 왼쪽에"]],
     spec: [["Size", "트랙 44×24 (sm 36×20) · 노브 20"], ["Container", "radius/full · off border/strong · on accent"], ["Label", "Body/2 14"], ["Placement", "설정 행 우측 끝, 테이블 '사용' 열"]],
-    figma: { frame: "Switch", radius: "radius/full", sizes: { md: { w: 44, h: 24 }, sm: { w: 36, h: 20 } }, variants: { off: { bg: "--border-strong" }, on: { bg: "--accent" } }, states: ["off", "on", "disabled", "focused"] },
+    figma: { frame: "Switch", radius: "radius/full", sizes: { md: { w: 44, h: 24 }, sm: { w: 36, h: 20 } }, variants: { off: { bg: "--line-strong" }, on: { bg: "--accent-surface" } }, states: ["off", "on", "disabled", "focused"] },
   },
 
   /* ------------------------------------------------ Tag */
@@ -460,7 +460,7 @@ const COMPONENTS = {
     ],
     props: [["tone", "critical | high | medium | low | info | ok | accent | (neutral)", "neutral", "의미별 색. 기본형은 <code>--sev-*-bg</code> + <code>--sev-*-text</code>, <code>.solid</code> 는 <code>--sev-*</code> + <code>--sev-*-on</code> 을 씁니다 — 면마다 글자색이 달라서 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
     spec: [["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--sev-*-bg</code>, <code>.solid</code> 는 <code>--sev-*</code>"], ["Label", "Label/2 12 Semibold (세 사이즈 공통)"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
-    figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--sev-critical-bg", fg: "--sev-critical-text", solidBg: "--sev-critical", solidFg: "--sev-critical-on" }, high: { bg: "--sev-high-bg", fg: "--sev-high-text", solidBg: "--sev-high", solidFg: "--sev-high-on" }, medium: { bg: "--sev-medium-bg", fg: "--sev-medium-text", solidBg: "--sev-medium", solidFg: "--sev-medium-on" }, low: { bg: "--sev-low-bg", fg: "--sev-low-text", solidBg: "--sev-low", solidFg: "--sev-low-on" }, info: { bg: "--sev-info-bg", fg: "--sev-info-text", solidBg: "--sev-info", solidFg: "--sev-info-on" }, ok: { bg: "--success-subtle", fg: "--success-text", solidBg: "--success", solidFg: "--success-on" }, accent: { bg: "--accent-subtle", fg: "--accent-text", solidBg: "--accent", solidFg: "--accent-on" }, neutral: { bg: "--bg-panel", fg: "--text-secondary" } }, states: ["subtle", "outline", "solid"] },
+    figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--sev-critical-bg", fg: "--sev-critical-text", solidBg: "--sev-critical", solidFg: "--sev-critical-on" }, high: { bg: "--sev-high-bg", fg: "--sev-high-text", solidBg: "--sev-high", solidFg: "--sev-high-on" }, medium: { bg: "--sev-medium-bg", fg: "--sev-medium-text", solidBg: "--sev-medium", solidFg: "--sev-medium-on" }, low: { bg: "--sev-low-bg", fg: "--sev-low-text", solidBg: "--sev-low", solidFg: "--sev-low-on" }, info: { bg: "--sev-info-bg", fg: "--sev-info-text", solidBg: "--sev-info", solidFg: "--sev-info-on" }, ok: { bg: "--success-fill", fg: "--success-text", solidBg: "--success-surface", solidFg: "--success-on" }, accent: { bg: "--accent-fill", fg: "--accent-text", solidBg: "--accent-surface", solidFg: "--accent-on" }, neutral: { bg: "--fill-strong", fg: "--text-secondary" } }, states: ["subtle", "outline", "solid"] },
   },
 
   /* ------------------------------------------------ Dropdown (액션 메뉴) · Select (값 선택) — 같은 .dropdown CSS 를 쓰지만 용도가 달라 페이지를 나눈다 */
@@ -608,7 +608,7 @@ const COMPONENTS = {
     ],
     props: [[".tabs", "container", "—", "role=tablist. 기본 Underline, 전체 폭"], [".tab", "button", "—", "role=tab, aria-selected. 활성 .on"], [".pill", "boolean", "false", "캡슐형(보조 전환)"], [".sm / .accent", "boolean", "false", "작은 크기 / 활성 색 accent"], [".count", "element", "—", "건수 배지"], ["disabled", "attribute", "—", "비활성 탭"]],
     spec: [["Size", "높이 44 (sm 38) · 탭 간격 24"], ["Container", "하단 1px border/default · 활성 2px"], ["Label", "Title/2 14 Bold"], ["Placement", "페이지 헤더 아래, 카드 헤더 우측(pill)"]],
-    figma: { frame: "Tab", sizes: { md: { h: 44 }, sm: { h: 38 } }, variants: { underline: {}, pill: { bg: "--bg-panel" } }, states: ["default", "active", "hover", "disabled"] },
+    figma: { frame: "Tab", sizes: { md: { h: 44 }, sm: { h: 38 } }, variants: { underline: {}, pill: { bg: "--fill-strong" } }, states: ["default", "active", "hover", "disabled"] },
   },
 
   /* ------------------------------------------------ Breadcrumb */
@@ -700,17 +700,17 @@ const COMPONENTS = {
     ],
     props: [[".pagination", "nav", "—", "aria-label=페이지. 버튼 36 (compact 32)"], ["button.on", "current", "—", "현재 페이지 + aria-current=page"], [".gap", "span", "—", "생략(…)"], [".compact / .outline", "boolean", "false", "작은 크기 / 보더형"], [".pagination-bar", "container", "—", "총 건수 + 페이지 크기 + 페이지네이션"]],
     spec: [["Size", "버튼 36 (compact 32) · 간격 4"], ["Container", "radius/md · 현재 accent"], ["Label", "Body/2 14 · 현재 Semibold"], ["Placement", "테이블 하단 우측, 총 건수는 좌측"]],
-    figma: { frame: "Pagination", radius: "radius/md", sizes: { md: { h: 36 }, compact: { h: 32 } }, variants: { default: {}, outline: { stroke: "--border-default" } }, states: ["default", "current", "hover", "disabled"] },
+    figma: { frame: "Pagination", radius: "radius/md", sizes: { md: { h: 36 }, compact: { h: 32 } }, variants: { default: {}, outline: { stroke: "--line-default" } }, states: ["default", "current", "hover", "disabled"] },
   },
 
   /* ------------------------------------------------ Navigation */
   "navigation": {
     status: "ready", react: ["SideNav","SideNavGroup","SideNavItem"], css: [".sidenav", ".count"],
     desc: "콘솔 좌측의 1차 내비게이션입니다. 그룹 라벨로 메뉴를 묶고 현재 위치를 .on 으로 표시합니다. 폭 240, 접으면 64.",
-    thumb: `<div class="sidenav" style="width:180px;min-height:0;border:1px solid var(--border-default);border-radius:8px"><a href="#" class="on" aria-current="page">${I("home")}<span>대시보드</span></a><a href="#">${I("list")}<span>이벤트</span></a><a href="#">${I("shield")}<span>정책</span></a></div>`,
+    thumb: `<div class="sidenav" style="width:180px;min-height:0;border:1px solid var(--line-default);border-radius:8px"><a href="#" class="on" aria-current="page">${I("home")}<span>대시보드</span></a><a href="#">${I("list")}<span>이벤트</span></a><a href="#">${I("shield")}<span>정책</span></a></div>`,
     examples: [
       { id: "basic", title: "Default", desc: "그룹 라벨(.group) + 링크. 아이콘 18px, 건수는 .count. 하위 항목은 .sub.", html: `
-        <nav class="sidenav" aria-label="주 메뉴" style="border:1px solid var(--border-default);border-radius:var(--radius-lg)">
+        <nav class="sidenav" aria-label="주 메뉴" style="border:1px solid var(--line-default);border-radius:var(--radius-lg)">
           <a href="#" class="on" aria-current="page">${I("home")}<span>대시보드</span></a>
           <a href="#">${I("list")}<span>이벤트</span><span class="count">12</span></a>
           <div class="group">보호</div>
@@ -724,7 +724,7 @@ const COMPONENTS = {
           <div class="foot">v2.4.1 · 라이선스 정상</div>
         </nav>`, layout: "left" },
       { id: "collapsed", title: "Collapsed", desc: "1280 이하 또는 사용자가 접었을 때. 아이콘만, 라벨은 툴팁으로.", html: `
-        <nav class="sidenav collapsed" aria-label="주 메뉴" style="border:1px solid var(--border-default);border-radius:var(--radius-lg)">
+        <nav class="sidenav collapsed" aria-label="주 메뉴" style="border:1px solid var(--line-default);border-radius:var(--radius-lg)">
           <a href="#" class="on" aria-current="page" title="대시보드">${I("home")}<span>대시보드</span></a>
           <a href="#" title="이벤트">${I("list")}<span>이벤트</span></a>
           <a href="#" title="정책">${I("shield")}<span>정책</span></a>
@@ -741,10 +741,10 @@ const COMPONENTS = {
   "top-navigation": {
     status: "ready", react: ["TopBar","TopBarLogo","TopBarNav","TopBarNavItem","TopBarRight","Avatar"], css: [".topbar", ".avatar", ".searchbar", ".divider", ".count", ".with-count"],
     desc: "제품 상단 바입니다. 제품 로고 · 1차 메뉴(사이드 내비가 없는 제품) · 전역 검색 · 알림 · 사용자 메뉴로 구성합니다.",
-    thumb: `<div class="topbar" style="height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--border-default);width:260px"><span class="logo"><i></i>Console</span><span class="right"><span class="avatar sm">JH</span></span></div>`,
+    thumb: `<div class="topbar" style="height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--line-default);width:260px"><span class="logo"><i></i>Console</span><span class="right"><span class="avatar sm">JH</span></span></div>`,
     examples: [
       { id: "basic", title: "Default", desc: "로고 + 메뉴 + 우측 액션. 현재 메뉴는 .on.", html: `
-        <header class="topbar" style="border-radius:var(--radius-lg);border:1px solid var(--border-default)">
+        <header class="topbar" style="border-radius:var(--radius-lg);border:1px solid var(--line-default)">
           <a href="#" class="logo"><i></i>Security Console <small>v2.4</small></a>
           <nav aria-label="주 메뉴"><a href="#" class="on" aria-current="page">대시보드</a><a href="#">이벤트</a><a href="#">정책</a><a href="#">에이전트</a></nav>
           <div class="right">
@@ -755,7 +755,7 @@ const COMPONENTS = {
           </div>
         </header>` },
       { id: "search", title: "With Search", desc: "사이드 내비가 있는 제품은 상단 메뉴 대신 전역 검색을 둡니다.", html: `
-        <header class="topbar" style="border-radius:var(--radius-lg);border:1px solid var(--border-default)">
+        <header class="topbar" style="border-radius:var(--radius-lg);border:1px solid var(--line-default)">
           <a href="#" class="logo"><i></i>Security Console</a>
           <div class="searchbar" role="search" style="margin-left:16px">${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="전역 검색"><kbd>/</kbd></div>
           <div class="right">
@@ -805,7 +805,7 @@ const COMPONENTS = {
       [".accordion-group.flat", "boolean", "false", "카드형 묶음 — 간격 0 에 Surface 배경 · 좌우 20 · radius/lg. 항목에는 <code>.flat</code> 을 함께"],
     ],
     spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전"]],
-    figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--border-default" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
+    figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--line-default" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
   },
 
   /* ------------------------------------------------ Card */
@@ -849,12 +849,12 @@ const COMPONENTS = {
       [".flush", "boolean", "false", "padding·gap 0 — 표나 목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖습니다"],
       [".clickable", "boolean", "false", "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. React <code>clickable</code> + <code>as</code>"],
       [".card-grid .card.clickable", "behavior", "—", "ds.js 가 단일 선택으로 묶어 <code>.on</code> 과 <code>aria-pressed</code> 를 함께 갱신하고 <code>ds:select</code> 를 발행합니다"],
-      [".on", "boolean", "false", "선택됨 — 안쪽 2px accent 링 + <code>--accent-subtle</code> 배경. 포커스 링(outline)과 겹치지 않아 둘이 동시에 보입니다. React <code>selected</code>"],
+      [".on", "boolean", "false", "선택됨 — 안쪽 2px accent 링 + <code>--accent-fill</code> 배경. 포커스 링(outline)과 겹치지 않아 둘이 동시에 보입니다. React <code>selected</code>"],
       ["aria-busy", "attribute", "—", "불러오는 중 — 내용 대신 <code>.skeleton</code> 을 넣고 컨테이너에 둡니다. React <code>loading</code> 이 둘을 함께 처리합니다"],
       [".card-grid", "container", "—", "auto-fill minmax(260px,1fr) 그리드 · gap 20. React <code>CardGrid</code>"],
     ],
     spec: [["Size", "최소 폭 260 · padding 24 (compact 16 · flush 0)"], ["Container", "radius/lg 8 · shadow/1 · bg/surface"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"], ["Motion", "clickable 은 --motion-fast 로 shadow/1 → shadow/2"]],
-    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--bg-surface", shadow: "--shadow-1" }, bordered: { stroke: "--border-default" } }, states: ["default", "hover", "selected", "focused", "loading"] },
+    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-raised", shadow: "--shadow-1" }, bordered: { stroke: "--line-default" } }, states: ["default", "hover", "selected", "focused", "loading"] },
   },
 
   /* ------------------------------------------------ Popup */
@@ -966,7 +966,7 @@ const COMPONENTS = {
     ],
     props: [[".notice", "div", "—", "role=status | alert. .ico + div(b 제목 + 본문 + .actions) + .close"], ["tone", "info | success | warning | danger", "neutral", "톤별 subtle 배경 + 30% 보더"], [".toast", "div", "—", "폭 360, 어두운 배경. .action 하나"], [".toast-stack", "container", "—", "aria-live=polite, 우측 하단 고정"], [".banner", "div", "—", "전체 폭. accent / .warning / .danger"]],
     spec: [["Size", "Notice 최소 높이 56 · Toast 폭 360 · Banner 높이 44"], ["Container", "Notice radius/lg 8 · tone subtle + 30% 보더 · Toast bg/inverse"], ["Label", "Title Semibold 14 · Body 14"], ["Placement", "Notice 는 페이지 헤더 아래, Toast 우측 하단, Banner 헤더 위"]],
-    figma: { frame: "Notification", radius: "radius/lg", sizes: { notice: { minH: 56 }, toast: { w: 360 }, banner: { h: 44 } }, variants: { info: { bg: "--info-subtle", fg: "--info" }, success: { bg: "--success-subtle", fg: "--success" }, warning: { bg: "--warning-subtle", fg: "--warning" }, danger: { bg: "--danger-subtle", fg: "--danger" }, toast: { bg: "--bg-inverse", fg: "--text-inverse" } }, states: ["default", "with-action", "dismissible"] },
+    figma: { frame: "Notification", radius: "radius/lg", sizes: { notice: { minH: 56 }, toast: { w: 360 }, banner: { h: 44 } }, variants: { info: { bg: "--info-fill", fg: "--info-surface" }, success: { bg: "--success-fill", fg: "--success-surface" }, warning: { bg: "--warning-fill", fg: "--warning-surface" }, danger: { bg: "--danger-fill", fg: "--danger-surface" }, toast: { bg: "--surface-inverse", fg: "--text-inverse" } }, states: ["default", "with-action", "dismissible"] },
   },
 
   /* ------------------------------------------------ Loading */
@@ -996,7 +996,7 @@ const COMPONENTS = {
     ],
     props: [[".spinner", "span", "—", "role=status aria-label. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"]],
     spec: [["Size", "Spinner 16/24/40 · Skeleton 행 14 · Progress 8 (sm 4)"], ["Container", "Skeleton radius 6 · Progress radius/full"], ["Label", "Caption 13 tertiary"], ["Placement", "Skeleton 은 콘텐츠 자리 그대로, Spinner 는 영역 중앙"]],
-    figma: { frame: "Loading", sizes: { spinner: { sm: 16, md: 24, lg: 40 }, progress: { h: 8 } }, variants: { spinner: {}, skeleton: { bg: "--bg-panel" }, progress: { fill: "--accent", track: "--bg-panel" } }, states: ["default", "success", "danger"] },
+    figma: { frame: "Loading", sizes: { spinner: { sm: 16, md: 24, lg: 40 }, progress: { h: 8 } }, variants: { spinner: {}, skeleton: { bg: "--fill-strong" }, progress: { fill: "--accent-surface", track: "--fill-strong" } }, states: ["default", "success", "danger"] },
   },
 
   /* ------------------------------------------------ Indicator */
@@ -1030,7 +1030,7 @@ const COMPONENTS = {
     ],
     props: [[".indicator", "span", "—", "점 + 라벨. ok | warn | danger | info | accent | (neutral)"], [".pulse", "boolean", "false", "깜빡임(위험 실시간)"], [".count", "span", "—", "건수. .accent / .neutral / .dot(점만)"], [".with-count", "wrapper", "—", "아이콘 우상단에 count 배치"], [".steps li", "li", "—", ".done 완료, .on 현재. .vertical 세로"]],
     spec: [["Size", "점 8 · count 높이 20 · step 원 24"], ["Container", "radius/full"], ["Label", "Body/2 14 · count 11 Bold · steps 13"], ["Placement", "테이블 상태 열, 내비 건수, 마법사 상단"]],
-    figma: { frame: "Indicator", radius: "radius/full", sizes: { dot: 8, count: { h: 20 }, step: 24 }, variants: { ok: { fg: "--success" }, warn: { fg: "--warning" }, danger: { fg: "--danger" }, info: { fg: "--info" }, neutral: { fg: "--interaction-inactive" } }, states: ["default", "pulse"] },
+    figma: { frame: "Indicator", radius: "radius/full", sizes: { dot: 8, count: { h: 20 }, step: 24 }, variants: { ok: { fg: "--success-surface" }, warn: { fg: "--warning-surface" }, danger: { fg: "--danger-surface" }, info: { fg: "--info-surface" }, neutral: { fg: "--graphic-muted" } }, states: ["default", "pulse"] },
   },
 
   /* ------------------------------------------------ Divider */
@@ -1069,7 +1069,7 @@ const COMPONENTS = {
     ],
     props: [[".divider", "hr | div", "—", "가로 1px border/default, margin 16 0"], [".strong / .dashed", "boolean", "false", "border/strong / 점선"], [".label", "div", "—", "가운데 라벨 텍스트"], [".vertical", "span", "—", "세로 1×24, 좌우 12"]],
     spec: [["Size", "1px · 세로 24"], ["Container", "border/default (strong 시 border/strong)"], ["Label", "Caption 12 tertiary"], ["Placement", "설정 섹션 사이, 툴바 버튼 그룹 사이"]],
-    figma: { frame: "Divider", sizes: { horizontal: { h: 1 }, vertical: { w: 1, h: 24 } }, variants: { default: { stroke: "--border-default" }, strong: { stroke: "--border-strong" }, label: {} }, states: ["default"] },
+    figma: { frame: "Divider", sizes: { horizontal: { h: 1 }, vertical: { w: 1, h: 24 } }, variants: { default: { stroke: "--line-default" }, strong: { stroke: "--line-strong" }, label: {} }, states: ["default"] },
   },
 
   /* ------------------------------------------------ Data Table */
@@ -1242,7 +1242,7 @@ const COMPONENTS = {
     ],
     props: [[".tile", "button", "—", ".ico + b(제목) + span(설명). aria-pressed"], [".on", "boolean", "false", "선택(accent 보더·배경)"], [".horizontal", "boolean", "false", "가로 배치"], ["disabled", "attribute", "—", "선택 불가"], [".tile-grid", "container", "—", "auto-fill 180px 그리드"]],
     spec: [["Size", "최소 폭 180 · padding 16 · 아이콘 36"], ["Container", "radius/lg 8 · border/default · 선택 accent"], ["Label", "제목 Body/2 14 Semibold · 설명 Caption 12.5"], ["Placement", "마법사의 유형 선택, 연동 목록"]],
-    figma: { frame: "Item Tile", radius: "radius/lg", sizes: { md: { minW: 180, pad: 16 } }, variants: { default: { stroke: "--border-default" }, selected: { stroke: "--accent", bg: "--accent-subtle" } }, states: ["default", "hover", "selected", "disabled"] },
+    figma: { frame: "Item Tile", radius: "radius/lg", sizes: { md: { minW: 180, pad: 16 } }, variants: { default: { stroke: "--line-default" }, selected: { stroke: "--accent-surface", bg: "--accent-fill" } }, states: ["default", "hover", "selected", "disabled"] },
   },
 
   /* ------------------------------------------------ Data Visual */

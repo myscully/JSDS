@@ -258,7 +258,7 @@
   }
 
   /* Colors: 스와치 → 값 모달. 값은 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다 —
-     현재 테마와 헤더에서 고른 제품 컬러(--accent*)가 모두 반영된 최종 색이어야 하기 때문. */
+     현재 테마와 헤더에서 고른 제품 컬러(--accent-surface*)가 모두 반영된 최종 색이어야 하기 때문. */
   function openValue(cell) {
     const tok = "var(" + (cell.dataset.token || "") + ")";
     const rows = cell.dataset.kind === "shadow" ? [["Value", shadowOf(cell)], ["Token", tok]] : colorRows(cell, tok);
@@ -287,10 +287,18 @@
     valAnchor = key || anchor; pop.focus();   /* 버튼이 아니라 다이얼로그에 포커스 — 마우스로 열었을 때 버튼이 눌린 듯 보이지 않게. Tab 하면 복사 버튼 */
     return true;
   }
+  /* 계산된 색을 0~255 + 알파로 읽는다. color-mix 토큰은 브라우저가 color(srgb r g b / a) 로 직렬화하는데
+     그 값은 0~1 이라, 숫자만 긁어 쓰면 스와치 HEX 가 검정으로 나온다 */
+  function parseColor(css) {
+    const srgb = css.indexOf("color(srgb") === 0;
+    const p = (css.match(/[\d.]+/g) || []).map(Number);
+    const k = srgb ? 255 : 1;
+    return { r: (p[0] || 0) * k, g: (p[1] || 0) * k, b: (p[2] || 0) * k, a: p.length > 3 ? p[3] : 1 };
+  }
   /* 색: Semantic 은 .bar i 에, Atomic 은 버튼 자신에 색이 있다 */
   function colorRows(cell, tok) {
-    const css = getComputedStyle(cell.querySelector(".bar i") || cell).backgroundColor, p = (css.match(/[\d.]+/g) || []).map(Number);
-    const r = p[0] || 0, g = p[1] || 0, b = p[2] || 0, a = p.length > 3 ? p[3] : 1;
+    const css = getComputedStyle(cell.querySelector(".bar i") || cell).backgroundColor;
+    const { r, g, b, a } = parseColor(css);
     const h2 = v => Math.round(v).toString(16).padStart(2, "0").toUpperCase();
     return [["Hex", "#" + h2(r) + h2(g) + h2(b) + (a < 1 ? h2(a * 255) : "")],      /* 알파가 있으면 8자리 */
       ["RGBA", [Math.round(r), Math.round(g), Math.round(b), Math.round(a * 100) / 100].join("/")],
@@ -367,11 +375,11 @@
     if (!bars.length) return;
     const lin = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
     const lum = c => .2126 * lin(c[0]) + .7152 * lin(c[1]) + .0722 * lin(c[2]);
-    const rgb = el => (getComputedStyle(el).backgroundColor.match(/[\d.]+/g) || []).map(Number);
+    const rgb = el => { const c = parseColor(getComputedStyle(el).backgroundColor); return [c.r, c.g, c.b, c.a]; };
     const bg = rgb(document.body), bl = lum(bg);
     bars.forEach(bar => {
       const i = bar.querySelector("i"); if (!i) return;
-      const c = rgb(i), a = c.length > 3 ? c[3] : 1;                       /* 알파가 있으면 바탕 위에 합성한 색으로 */
+      const c = rgb(i), a = c[3];                                          /* 알파가 있으면 바탕 위에 합성한 색으로 */
       const l = lum([0, 1, 2].map(k => a * c[k] + (1 - a) * bg[k]));
       bar.classList.toggle("faint", (Math.max(l, bl) + .05) / (Math.min(l, bl) + .05) < 1.4);
     });

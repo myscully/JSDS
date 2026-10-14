@@ -1,7 +1,7 @@
 // 제품가이드 정적 사이트 빌드 스크립트 (v0.4)
 //   cd _build && node build.js
 // 소스: jiran-design-system-guide.standalone.html(셸) + data.js / components.data.js / patterns.data.js / lib.js / foundations.js / render.js / app.src.js / ds.src.js / style.src.css
-// 출력: ../ (index.html · 섹션 폴더 · assets/) + components.json (Figma 동기화용). 끝에 verify.js 실행.
+// 출력: ../ (index.html · 섹션 폴더 · assets/) + components.json (Figma 동기화용). 끝에 verify.js · contrast.js(대비 게이트) 실행.
 const { chromium } = require("playwright");
 const fs = require("fs"); const path = require("path");
 const LIB = require("./lib.js");
@@ -168,6 +168,8 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 | \`jiran-design-system-guide.standalone.html\` | 위 파일을 로드하는 미리보기 셸. \`_build\` 에서 \`python3 -m http.server 8090\` 후 열기 |
 | \`components.json\` | 빌드 산출물. Figma 동기화 등 외부 도구용(토큰 · 컴포넌트 스펙 · 예제 코드) |
 | \`verify.js\` | 생성물 검증(플레이스홀더 0, 코드 패널 존재, 링크 변환, React 탭 패키지 코드 여부 등) |
+| \`contrast.pairs.js\` | **대비 계약** — 한 화면에서 만날 수 있는 토큰 쌍과 최소 대비를 선언. 숫자는 사람이 적지 않는다 |
+| \`contrast.js\` | 그 선언을 생성 사이트에서 전수 측정(라이트·다크 × 제품 세 경우). 미달이면 빌드 실패 · 샘플 블록의 프리미티브 직접 참조 금지 · 소비자 0 토큰 경고 |
 
 ## React 패키지 (\`_react/\`)
 \`@jiran/ds-react\` — 30개 컴포넌트 + 패턴 래퍼를 실제 React 컴포넌트로 구현. 같은 클래스 마크업을 렌더링하므로 \`dist/style.css\`(토큰 + 컴포넌트 CSS 만 합성) 하나로 동작합니다.
@@ -193,4 +195,12 @@ git config core.hooksPath _build/git-hooks   # 최초 1회 (클론마다)
 `);
   console.log("pages:", count, "react examples:", Object.keys(REACT_EXAMPLES).length, "out:", OUT);
   require("./verify.js");
+  /* 대비 게이트 — contrast.pairs.js 의 선언을 생성물에서 전수 측정한다(라이트·다크 × 제품 세 경우).
+     사람이 숫자를 적지 않는다: 기준 미달이면 화면이 아니라 빌드가 먼저 알려 준다.
+     verify 뒤에 두는 이유는 측정이 생성된 페이지를 열기 때문이다 */
+  const { fails, warns, table } = await require("./contrast.js").run();
+  for (const w of warns) console.log("WARN  " + w);
+  for (const f of fails) console.log("FAIL  " + f);
+  console.log(`contrast: 쌍 ${table.length}건 측정 · 실패 ${fails.length} · 경고 ${warns.length}`);
+  if (fails.length) process.exit(1);
 })().catch(e => { console.error(e); process.exit(1); });
