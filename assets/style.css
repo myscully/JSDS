@@ -9,8 +9,10 @@
   /* ── Primitive ────────────────────────────────────────────────
      의미 토큰만 참조한다. 컴포넌트가 이 이름을 직접 쓰면 verify 가 실패시킨다.
      Neutral — 라이트·다크 공통 중립 램프(참고 시스템 Cool Neutral 계열).
-     650 은 종전 --text-secondary 의 88% 알파가 흰 바탕에서 합성되던 값이다 — 알파를 걷어내면서 솔리드 정지점이 필요해 추가했다 */
-  --neutral-0:#FFFFFF;--neutral-50:#F7F7F8;--neutral-100:#EAEBEC;--neutral-200:#C2C4C8;--neutral-300:#AEB0B6;--neutral-400:#989BA2;--neutral-500:#70737C;--neutral-600:#5A5C63;--neutral-650:#47484B;--neutral-700:#37383C;--neutral-800:#2E2F33;--neutral-850:#212225;--neutral-900:#1B1C1E;--neutral-950:#171719;--neutral-980:#0F0F10;
+     150·650 은 램프의 빈 구간을 메운 단계다 — 인접 ΔL* 가 100↔200 에서 13.9, 600↔700 에서 15.5 로
+     이웃(2.4~9.3)의 두 배 넘게 벌어져 있어, 그 사이에 설 자리가 없으면 글자 사다리가 고르게 서지 못한다.
+     150(#D6D7DA, L* 86.0)은 100 과 200 의 L* 정확한 중점이고 다크 --text-secondary 가 쓴다 */
+  --neutral-0:#FFFFFF;--neutral-50:#F7F7F8;--neutral-100:#EAEBEC;--neutral-150:#D6D7DA;--neutral-200:#C2C4C8;--neutral-300:#AEB0B6;--neutral-400:#989BA2;--neutral-500:#70737C;--neutral-600:#5A5C63;--neutral-650:#47484B;--neutral-700:#37383C;--neutral-800:#2E2F33;--neutral-850:#212225;--neutral-900:#1B1C1E;--neutral-950:#171719;--neutral-980:#0F0F10;
   /* 회사 브랜드: 지란지교시큐리티 — 로고·마크 전용이다. 제품 Accent 와 역할이 다르다 */
   --brand-50:#FFF4E8;--brand-100:#FFE4C7;--brand-200:#FFD1A3;--brand-300:#FFB870;--brand-400:#FF9C33;--brand-500:#FF7F00;--brand-600:#E06F00;--brand-700:#B85A00;--brand-800:#8A4300;--brand-900:#5C2D00;
   /* 제품 메인 컬러 슬롯 — applyAccent 가 --prod-* 를 인라인으로 주입하면 램프 전체가 갈린다.
@@ -30,9 +32,11 @@
      on · text · surface · graphic 에 알파가 들어가면 바탕마다 다르게 측정돼 한 토큰이 어떤 바탕에서는 AA 를 못 넘긴다 */
   /* 표면 — 솔리드. base 는 페이지, raised 는 카드·팝오버·모달, sunken 은 들어간 영역, inverse 는 툴팁·토스트 */
   --surface-base:var(--neutral-0);--surface-raised:var(--neutral-0);--surface-sunken:var(--neutral-50);--surface-inverse:var(--neutral-900);
-  /* 글자 — 솔리드. primary 17.4 → secondary 9.0 → tertiary 6.7 (흰 바탕)로 단계가 벌어진다.
+  /* 글자 — 솔리드. L* 7.8 → 23.6 → 39.1 로 낙폭이 15.7 · 15.6 이다(균형 1.01).
+     종전 secondary(650)는 낙폭이 22.8 · 8.5 라 Secondary 와 Tertiary 가 거의 같은 톤이었다 —
+     대비는 셋 다 AA 를 넘겼으므로 쌍 대비 게이트가 잡지 못했고, 명도 사다리 검사가 잡았다.
      tertiary 를 중립 500 으로 내리면 sunken 위에서 4.43 으로 떨어져 600 에 둔다. disabled 는 1.4.3 면제 대상이다 */
-  --text-primary:var(--neutral-950);--text-secondary:var(--neutral-650);--text-tertiary:var(--neutral-600);--text-disabled:var(--neutral-400);--text-inverse:var(--neutral-0);
+  --text-primary:var(--neutral-950);--text-secondary:var(--neutral-700);--text-tertiary:var(--neutral-600);--text-disabled:var(--neutral-400);--text-inverse:var(--neutral-0);
   /* 선 — 솔리드 중립 단계. 컴포넌트 경계는 strong, 구분선은 default, 장식은 subtle */
   --line-strong:var(--neutral-200);--line-default:var(--neutral-100);--line-subtle:var(--neutral-50);
   /* 옅은 면 — 중립 500 베이스 알파. weak 5% · base 8% · strong 16% · disabled 16%.
@@ -99,7 +103,11 @@
   /* ── Semantic · Dark ──────────────────────────────────────────
      이 블록은 아래 두 선택자에 같은 문자열로 들어간다 — 한쪽만 고치면 OS 다크와 수동 다크가 갈린다 */
   --surface-base:var(--neutral-900);--surface-raised:var(--neutral-850);--surface-sunken:var(--neutral-800);--surface-inverse:var(--neutral-50);
-  --text-primary:var(--neutral-50);--text-secondary:var(--neutral-200);--text-tertiary:var(--neutral-300);--text-disabled:var(--neutral-400);--text-inverse:var(--neutral-950);
+  --text-primary:var(--neutral-50);--text-secondary:var(--neutral-150);--text-tertiary:var(--neutral-300);--text-disabled:var(--neutral-500);--text-inverse:var(--neutral-950);
+  /* 글자 — L* 97.3 → 86.0 → 71.8 로 낙폭 11.3 · 14.1(균형 1.25). 종전 secondary(200)는 18.1 · 7.3 이었다.
+     tertiary 를 400 으로 내리면 균형이 더 좋지만(1.20) 중립 태그 바탕(--fill-strong) 위에서 3.60 으로 AA 미달이다 —
+     그래서 tertiary 를 고정하고 secondary 를 움직였다. 제약이 해를 결정한 경우다.
+     disabled 는 500 이다. 400 이면 캔버스 위 6.13 으로 tertiary(7.86)와 거의 같아 다크에서 비활성이 비활성으로 보이지 않았다 */
   --line-strong:var(--neutral-600);--line-default:var(--neutral-700);--line-subtle:var(--neutral-800);
   --fill-weak:rgba(112,115,124,.12);--fill-base:rgba(112,115,124,.22);--fill-strong:rgba(112,115,124,.28);--fill-disabled:rgba(112,115,124,.16);
   /* 종전 중립 600 은 캔버스 2.58 · sunken 2.82 로 3:1 미달이었다 */
@@ -139,7 +147,11 @@
   /* ── Semantic · Dark ──────────────────────────────────────────
      이 블록은 아래 두 선택자에 같은 문자열로 들어간다 — 한쪽만 고치면 OS 다크와 수동 다크가 갈린다 */
   --surface-base:var(--neutral-900);--surface-raised:var(--neutral-850);--surface-sunken:var(--neutral-800);--surface-inverse:var(--neutral-50);
-  --text-primary:var(--neutral-50);--text-secondary:var(--neutral-200);--text-tertiary:var(--neutral-300);--text-disabled:var(--neutral-400);--text-inverse:var(--neutral-950);
+  --text-primary:var(--neutral-50);--text-secondary:var(--neutral-150);--text-tertiary:var(--neutral-300);--text-disabled:var(--neutral-500);--text-inverse:var(--neutral-950);
+  /* 글자 — L* 97.3 → 86.0 → 71.8 로 낙폭 11.3 · 14.1(균형 1.25). 종전 secondary(200)는 18.1 · 7.3 이었다.
+     tertiary 를 400 으로 내리면 균형이 더 좋지만(1.20) 중립 태그 바탕(--fill-strong) 위에서 3.60 으로 AA 미달이다 —
+     그래서 tertiary 를 고정하고 secondary 를 움직였다. 제약이 해를 결정한 경우다.
+     disabled 는 500 이다. 400 이면 캔버스 위 6.13 으로 tertiary(7.86)와 거의 같아 다크에서 비활성이 비활성으로 보이지 않았다 */
   --line-strong:var(--neutral-600);--line-default:var(--neutral-700);--line-subtle:var(--neutral-800);
   --fill-weak:rgba(112,115,124,.12);--fill-base:rgba(112,115,124,.22);--fill-strong:rgba(112,115,124,.28);--fill-disabled:rgba(112,115,124,.16);
   /* 종전 중립 600 은 캔버스 2.58 · sunken 2.82 로 3:1 미달이었다 */

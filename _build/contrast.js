@@ -214,18 +214,18 @@ async function run() {
          의도된 선택일 수 있으므로 게이트가 판정하지 않고 최소 낙폭 경고로 보고한다 */
       const reversed = dir[0] !== 0 && dir[1] !== 0 && dir[0] !== dir[1];
       const minStep = Math.min(...steps);
-      const balance = minStep > 0 ? +(Math.max(...steps) / minStep).toFixed(2) : null;
-      ladders.push({ ctx: ctx.label, theme: ctx.theme, name, toks, sim: !!(o && o.sim),
+      const balanceRatio = minStep > 0 ? +(Math.max(...steps) / minStep).toFixed(2) : null;
+      ladders.push({ ctx: ctx.label, theme: ctx.theme, name, toks, balance: !!(o && o.balance),
         hex: eff.map(hex), lstar: ls.map((v) => +v.toFixed(1)), steps: steps.map((v) => +v.toFixed(1)),
-        balance, reversed, minStep: +minStep.toFixed(1),
-        balanceMax: (o && o.sim) ? P.LADDER_BALANCE_MAX : null });
+        ratio: balanceRatio, reversed, minStep: +minStep.toFixed(1),
+        balanceMax: (o && o.balance) ? P.LADDER_BALANCE_MAX : null });
       if (reversed) { fails.push(`${ctx.label}: 사다리 ${name} 의 방향이 뒤집혔다 — L* ${ls.map((v) => v.toFixed(1)).join(" → ")}`); continue; }
       /* 낙폭과 균형은 advisory — 지금 여럿이 못 넘기고 교정을 보류했다. 숫자를 숨기지 않고 매 빌드 보고한다 */
       if (minStep < P.LADDER_MIN_STEP)
         warns.push(`${ctx.label}: 사다리 ${name} 의 한 단계가 보이지 않는다 — ΔL* ${minStep.toFixed(1)} < ${P.LADDER_MIN_STEP} (${toks.join(" → ")})`);
-      /* 균형은 '한 화면에 함께 보이는' 사다리에만 — 상태 셋은 동시에 보이지 않는다 */
-      if (o && o.sim && balance !== null && balance > P.LADDER_BALANCE_MAX)
-        warns.push(`${ctx.label}: 사다리 ${name} 이 치우쳤다 — 낙폭 ${steps.map((v) => v.toFixed(1)).join(" · ")} = ${balance}x > ${P.LADDER_BALANCE_MAX}`);
+      /* 균형은 낙폭이 균등해야 하는 사다리에만 — 상태 셋은 동시에 보이지 않고, surface 는 깊이 모델이다 */
+      if (o && o.balance && balanceRatio !== null && balanceRatio > P.LADDER_BALANCE_MAX)
+        warns.push(`${ctx.label}: 사다리 ${name} 이 치우쳤다 — 낙폭 ${steps.map((v) => v.toFixed(1)).join(" · ")} = ${balanceRatio}x > ${P.LADDER_BALANCE_MAX}`);
     }
 
     /* 심각도 — 같은 색조 이웃은 휘도로 갈려야 한다(빨강 둘은 휘도가 유일한 단서다) */

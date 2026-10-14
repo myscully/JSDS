@@ -1102,7 +1102,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("colors drops the role map and links to it instead", left.roles === 0 && left.link, JSON.stringify(left));
 
   // Atomic 팔레트 칸 수 + 반응형 블록이 실제로 적용되는지 (한동안 컴포넌트 규칙에 덮여 죽어 있었다)
-  for (const [w, want] of [[1440, [2, 15, 11]], [760, [2, 7, 7]], [390, [2, 5, 5]]]) {
+  for (const [w, want] of [[1440, [2, 16, 11]], [760, [2, 7, 7]], [390, [2, 5, 5]]]) {   /* Neutral 램프 16단계 — 150·650 이 램프의 빈 구간을 메운다 */
     await page.setViewportSize({ width: w, height: 900 });
     await go("foundations/colors.html");
     await page.locator('.doc-tabs [data-doctab="atomic"]').click();

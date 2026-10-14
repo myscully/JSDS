@@ -89,19 +89,25 @@ const severityFillSplit = [["--danger-strong-fill", "--danger-fill", { light: 1.
    (라이트 낙폭 22.8 · 8.5 로 Secondary 와 Tertiary 가 붙어 있다).
    CIE L* 로 잰다: 대비 비율은 중간 밝기끼리의 거리를 과소평가해서 '낙폭'의 축으로는 맞지 않는다.
 
-   sim(동시) 플래그가 핵심이다 — 단계들이 **한 화면에 함께 보이는** 사다리만 균형을 요구한다.
-   본문·보조·설명은 같은 단락에 나란히 서지만, rest → hover → pressed 는 셋이 동시에 보이는 일이 없다.
-   상태 사다리에는 "변화가 느껴지는가"(최소 낙폭)만 묻는다. */
+   balance 플래그가 핵심이다 — **낙폭이 균등해야 하는 사다리**에만 균형을 요구한다.
+   본문·보조·설명은 같은 단락에 나란히 서므로 균등해야 하지만,
+   - rest → hover → pressed 는 셋이 동시에 보이는 일이 없고,
+   - surface(base·raised·sunken)는 강조 사다리가 아니라 **깊이 모델**이다.
+     실측이 그걸 보여 준다: 라이트는 100.0 → 100.0 → 97.3(평탄 후 하강)인데
+     다크는 10.2 → 13.2 → 19.4 로 계속 올라가 '가라앉은' 면이 가장 밝다.
+     어두운 테마가 함몰을 더 밝게 그리는 관례 때문이고, 두 모드의 모양이 애초에 다르다.
+     그런 축에 균등한 낙폭을 요구할 이유가 없다 — "서로 구분되는가"만 물으면 된다.
+   균형을 빼도 최소 낙폭 검사는 모두에게 남는다(그 단계가 존재하는가). */
 const ladders = [
-  ["text", ["--text-primary", "--text-secondary", "--text-tertiary"], { sim: true }],
-  ["surface", ["--surface-base", "--surface-raised", "--surface-sunken"], { sim: true }],
-  ["line", ["--line-strong", "--line-default", "--line-subtle"], { sim: true }],
-  ["fill", ["--fill-strong", "--fill-base", "--fill-weak"], { sim: true }],
-  ...INTENTS.map((i) => [`${i} 면`, [`--${i}-surface`, `--${i}-surface-hover`, `--${i}-surface-pressed`], { sim: false }]),
+  ["text", ["--text-primary", "--text-secondary", "--text-tertiary"], { balance: true }],
+  ["surface", ["--surface-base", "--surface-raised", "--surface-sunken"], { balance: false }],
+  ["line", ["--line-strong", "--line-default", "--line-subtle"], { balance: true }],
+  ["fill", ["--fill-strong", "--fill-base", "--fill-weak"], { balance: true }],
+  ...INTENTS.map((i) => [`${i} 면`, [`--${i}-surface`, `--${i}-surface-hover`, `--${i}-surface-pressed`], { balance: false }]),
 ];
 /* 넓은 면에서 눈에 띄는 최소 ΔL*. 이보다 작으면 그 단계는 사실상 없는 것이다 */
 const LADDER_MIN_STEP = 2;
-/* max(낙폭)/min(낙폭) — 동시에 보이는 사다리에만 건다.
+/* max(낙폭)/min(낙폭) — 균등해야 하는 사다리에만 건다.
    이 값은 측정에서 유도한 것이 아니라 **적어 두는 판단**이다: 한 낙폭이 다른 낙폭의 두 배를 넘으면
    세 단계가 아니라 "두 단계 + 하나"로 읽힌다.
    (파생 규칙이 만드는 상태 사다리는 라이트 1.04~2.52 · 다크 1.11~1.66 로 흩어진다 —

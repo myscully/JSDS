@@ -53,13 +53,13 @@ window.FOUNDATION_PAGES = function (H) {
       const bad = [];
       if (l.reversed) bad.push("방향 뒤집힘");
       if (l.minStep < 2) bad.push(`한 단계 안 보임 ΔL* ${l.minStep}`);
-      if (l.sim && l.balance !== null && l.balance > l.balanceMax) bad.push(`치우침 ${l.balance}x`);
+      if (l.balance && l.ratio !== null && l.ratio > l.balanceMax) bad.push(`치우침 ${l.ratio}x`);
       return `<div class="lad-col"><div class="lad-head">${l.theme === "light" ? "라이트" : "다크"}${bad.length ? `<em>${bad.join(" · ")}</em>` : "<span>고름</span>"}</div>${rows}</div>`;
     };
     return names.map((n) => {
       const L2 = all.find((x) => x.name === n && x.theme === "light"), D = all.find((x) => x.name === n && x.theme === "dark");
-      const sim = (L2 || D).sim;
-      return `<div class="lad"><div class="lad-name"><b>${n}</b><span>${sim ? "한 화면에 함께 보임 — 균형 요구" : "상태 — 동시에 보이지 않음"}</span></div>${col(L2)}${col(D)}</div>`;
+      const needsBalance = (L2 || D).balance;
+      return `<div class="lad"><div class="lad-name"><b>${n}</b><span>${needsBalance ? "낙폭이 균등해야 함" : "균형 면제 — 깊이 모델이거나 동시에 보이지 않음"}</span></div>${col(L2)}${col(D)}</div>`;
     }).join("");
   };
 
@@ -143,7 +143,7 @@ ${codeBlock("role-tsx", '// 같은 토큰을 같은 규칙으로 씁니다. 클�
 <p>층은 셋이고 <b>참조 방향이 한쪽</b>입니다 — <b>Primitive</b>(램프) ← <b>Semantic</b>(이 페이지) ← <b>Component</b>. 컴포넌트가 램프를 직접 참조하면 빌드가 실패합니다. 새 색이 필요하면 램프에서 골라 <b>의미 토큰을 하나 늘립니다</b>.</p>
 <h2 id="theme">Theme — 의도 없는 색</h2><p>테마 자체를 이루는 색입니다. 의도 접두어가 없습니다 — 제품이 바뀌어도, 상태가 무엇이어도 같습니다. 전부 중립 램프를 참조합니다.</p>
 ${sem("surface", "Surface", "표면 네 단계입니다. <b>base</b> 는 페이지, <b>raised</b> 는 카드·팝오버·모달, <b>sunken</b> 은 들어간 영역(예제 캔버스·패널), <b>inverse</b> 는 툴팁·토스트입니다. 넷 다 솔리드입니다 — 표면이 반투명하면 그 위의 글자 대비를 한 값으로 보장할 수 없습니다.", [["Base", "--surface-base"], ["Raised", "--surface-raised"], ["Sunken", "--surface-sunken"], ["Inverse", "--surface-inverse"]], { h3: true })}
-${sem("text", "Text", "글자와 아이콘입니다. 흰 바탕에서 primary 17.4 → secondary 9.0 → tertiary 6.7 로 단계가 벌어집니다. tertiary 를 중립 500 으로 내리면 sunken 위에서 4.43 으로 떨어져 600 에 둡니다. disabled 는 1.4.3 면제 대상이라 2.33 입니다.", [["Primary", "--text-primary"], ["Secondary", "--text-secondary"], ["Tertiary", "--text-tertiary"], ["Disabled", "--text-disabled"], ["Inverse", "--text-inverse"]], { h3: true })}
+${sem("text", "Text", "글자와 아이콘입니다. 단계가 <b>명도로 고르게</b> 벌어져야 합니다 — 흰 바탕 L* 7.8 → 23.6 → 39.1 로 낙폭이 15.7 · 15.6 입니다(균형 1.01). 다크는 97.3 → 86.0 → 71.8 로 11.3 · 14.1(1.25)입니다. 대비로만 보면 17.9 / 11.7 / 6.7 인데, <b>대비 비율은 중간 밝기끼리의 거리를 과소평가해서</b> 사다리의 축으로는 맞지 않습니다 — 종전 secondary 는 세 단계가 모두 AA 를 넘기면서도 낙폭이 22.8 · 8.5 라 Secondary 와 Tertiary 가 거의 같은 톤이었고, 쌍 대비 게이트가 그걸 잡지 못했습니다(아래 <a href=\"#/foundations/colors#ladder\">명도 사다리</a>). tertiary 를 중립 500 으로 내리면 sunken 위에서 4.43 으로 떨어져 600 에 둡니다. 다크 tertiary 를 400 으로 내리면 균형은 더 좋지만 중립 태그 바탕 위에서 3.60 으로 AA 미달이라, <b>tertiary 를 고정하고 secondary 를 움직였습니다</b>. disabled 는 1.4.3 면제 대상이고 두 모드가 각각 2.78 · 3.60 으로 짝이 맞습니다 — 한 값을 공유하던 종전에는 다크에서 6.13 이라 비활성으로 보이지 않았습니다.", [["Primary", "--text-primary"], ["Secondary", "--text-secondary"], ["Tertiary", "--text-tertiary"], ["Disabled", "--text-disabled"], ["Inverse", "--text-inverse"]], { h3: true })}
 ${ctRows(["--text-primary", "--text-secondary", "--text-tertiary", "--text-inverse"])}
 ${sem("line", "Line", "보더와 구분선입니다. 솔리드 중립 단계입니다 — 종전에는 솔리드 <code>--border-*</code> 와 알파 <code>--line-*</code> 두 체계가 병존했고 값이 거의 같아 구분이 없었습니다. 컴포넌트 경계는 <b>strong</b>, 구분선은 <b>default</b>, 장식은 <b>subtle</b> 입니다.", [["Strong", "--line-strong"], ["Default", "--line-default"], ["Subtle", "--line-subtle"]], { line: true, h3: true })}
 ${ctRows(["--line-strong"])}
@@ -171,7 +171,7 @@ ${sem("brand", "Brand", "지란지교시큐리티 브랜드 컬러입니다. 이
 ${ctAll()}
 ${sem("code", "Code panel", "이 사이트의 코드 패널에 쓰는 색입니다. 라이트·다크 모두 어두운 배경이라 한 벌입니다. 구문 강조 네 색(tag · attr · str · kw)을 의미 토큰으로 올린 덕에 소비자 없는 예비 hue 램프 네 개를 전부 지울 수 있었습니다 — 컴포넌트가 램프를 직접 참조하지 않는다는 규칙을 이 자리가 지키고 있습니다.", [["Bg", "--code-bg"], ["Chip", "--code-chip"], ["Chip border", "--code-chip-border"], ["Chip fg", "--code-chip-fg"], ["Head fg", "--code-head-fg"], ["Tag", "--code-tag"], ["Attr", "--code-attr"], ["Str", "--code-str"], ["Kw", "--code-kw"]])}
 `;
-      const n = [0, 50, 100, 200, 300, 400, 500, 600, 650, 700, 800, 850, 900, 950, 980], t11 = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+      const n = [0, 50, 100, 150, 200, 300, 400, 500, 600, 650, 700, 800, 850, 900, 950, 980], t11 = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
       const atomic = `<p>Semantic 토큰이 참조하는 원천 값(Primitive)입니다. 중립과 hue 램프는 참고 시스템(Montage)의 Atomic 값을 쓰고, 단계 번호만 우리 체계(50 밝음 → 950 어두움)로 환산했습니다 — 우리 <code>600</code> 이 그쪽 <code>40</code> 입니다. Pink 와 소비자 없는 예비 램프(Blue·Lime·Violet·Purple)는 싣지 않았습니다 — 구문 강조 네 색은 <code>--code-*</code> 의미 토큰으로 올렸습니다. <b>컴포넌트에서 직접 쓸 수 없습니다</b>(빌드가 샘플 블록의 프리미티브 참조를 실패시킵니다). 새 의미 토큰을 만들 때 여기서 고릅니다. 숫자는 명도 단계(작을수록 밝음)입니다. 제품에 적용할 때는 <code>--accent-*</code> 블록만 제품 컬러로 교체하면 되고, HEX 하나로 스케일을 만드는 <code>accentScale()</code> 과 토큰 원본 CSS 는 <a href="#/resources/design-token">Design Token</a> 에 있습니다.</p>
 ${pal("Common", ["white", "black"], "static")}
 ${pal("Neutral", n, "neutral", "라이트·다크 공통 중립 램프 · 표면·텍스트·라인·Fill 이 전부 이 램프를 참조 · 650 은 종전 --text-secondary 의 88% 알파가 합성되던 솔리드 정지점")}
