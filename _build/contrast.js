@@ -113,17 +113,31 @@ async function run() {
   P.SOLID_ONLY.forEach((t) => need.add(t));
   const toks = [...need];
 
+  /* 전용 푸트페이지에서 잰다 — 빌드가 섹션 폴더를 먼저 지우므로 생성 페이지에 의존할 수 없고,
+     무엇보다 이 게이트가 페이지 렌더보다 앞서야 Colors 페이지가 측정 결과를 표로 쓸 수 있다.
+     제품 전환은 실제 경로를 쓴다: app.js 가 window.applyAccent 를 노출하고 램프 생성·밝은 제품 판정이
+     모두 그 안에 있다 — 여기서 다시 구현하면 검증 가치가 사라진다.
+     page.setContent 로는 외부 스크립트가 로드되지 않아 파일로 쓴다 */
+  const probe = path.join(__dirname, ".contrast-probe.html");
+  fs.writeFileSync(probe, `<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>contrast probe</title>
+<link rel="stylesheet" href="../assets/style.css"></head>
+<body data-root="../"><script src="../assets/app.js"></script></body></html>
+`);
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await page.goto("file://" + path.join(SITE, "foundations", "colors.html"));
+  const probeErrors = [];
+  page.on("pageerror", (e) => probeErrors.push(e.message));
+  await page.goto("file://" + probe);
   await page.waitForTimeout(200);
+  if (!(await page.evaluate(() => typeof window.applyAccent === "function")))
+    fails.push("푸트페이지에서 applyAccent 를 찾을 수 없다 — app.js 가 완주하지 못했다" + (probeErrors.length ? ` (${probeErrors[0]})` : ""));
 
   const table = [];      // Colors 페이지 표의 재료
   for (const ctx of CONTEXTS) {
     await page.evaluate((th) => document.documentElement.setAttribute("data-theme", th), ctx.theme);
     if (ctx.accent) {
-      await page.locator("#accentBtn").click().catch(() => {});
-      await page.locator(`#accentPop [data-accent="${ctx.accent}"]`).click();
+      await page.evaluate((k) => window.applyAccent(k), ctx.accent);
     } else {
       await page.evaluate(() => { const r = document.documentElement; for (let i of [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]) r.style.removeProperty("--prod-" + i); r.removeAttribute("data-accent-light"); r.removeAttribute("data-accent-neutral"); });
     }
