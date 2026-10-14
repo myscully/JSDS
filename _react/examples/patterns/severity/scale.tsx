@@ -1,6 +1,6 @@
 import { SevCell, Stack, Tag } from "@jiran/ds-react";
 
-const LEVELS = [["critical", "Critical"], ["high", "High"], ["medium", "Medium"], ["low", "Low"], ["info", "Info"]] as const;
+const LEVELS = [["critical", "Critical"], ["high", "High"], ["medium", "Medium"], ["low", "Low"]] as const;
 
 export default function Example() {
   return (
@@ -16,7 +16,6 @@ export default function Example() {
         <SevCell tone="high">High</SevCell>
         <SevCell tone="medium">Medium</SevCell>
         <SevCell tone="low">Low</SevCell>
-        <SevCell>Info</SevCell>
       </div>
     </Stack>
   );

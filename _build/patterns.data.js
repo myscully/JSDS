@@ -8,10 +8,10 @@
 const LOG_ROWS = [
   ["09:41:12.031", "critical", "CRIT", "10.0.4.21", "PC-2041", "process.create blocked: rundll32.exe → cryptor.dll"],
   ["09:41:11.870", "medium", "WARN", "10.0.4.21", "PC-2041", "usb.attach vendor=0x0781 product=0x5583 (unapproved)"],
-  ["09:41:09.114", "info", "INFO", "10.0.0.3", "Server-03", "policy.sync ok (rev 2041)"],
+  ["09:41:09.114", "low", "INFO", "10.0.0.3", "Server-03", "policy.sync ok (rev 2041)"],
   ["09:40:58.552", "high", "HIGH", "10.0.4.33", "PC-1187", "malware.known blocked sha256=9f3a…c21e"],
   ["09:40:41.207", "low", "LOW", "10.0.0.3", "Server-03", "agent.checkin 1284/1284"],
-  ["09:39:57.980", "info", "INFO", "10.0.7.10", "PC-0932", "scan.scheduled completed files=48213 threats=0"],
+  ["09:39:57.980", "low", "INFO", "10.0.7.10", "PC-0932", "scan.scheduled completed files=48213 threats=0"],
 ];
 const logTable = (rows) => `
         <div class="tbl-wrap">
@@ -307,15 +307,15 @@ const PATTERNS = {
 
   "severity": {
     status: "ready", react: ["SevBand","SevCell"], uses: ["tag", "indicator", "data-visual", "data-table"], css: [".sev-band", ".sev-cell", ".stack"],
-    desc: "위협 심각도 5단계(Critical · High · Medium · Low · Info)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
+    desc: "위협 심각도 4단계(Critical · High · Medium · Low)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
     thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>`,
-    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태색 의도 매핑</b>입니다 — Critical=<code>danger-strong</code> · High=<code>danger</code> · Medium=<code>warning</code> · Low=<code>info</code> · Info=중립. 역할(<code>-surface</code> · <code>-fill</code> · <code>-on</code> · <code>-text</code> · <code>-graphic</code>)로 골라 쓰고, 매핑표는 <a href=\"#/foundations/colors#sev-layers\">Colors › 심각도</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조"], ["정렬", "항상 Critical → Info. 색만이 아니라 라벨을 함께"]],
+    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태색 의도 매핑</b>입니다 — Critical=<code>danger</code> · High=<code>warning</code> · Medium=<code>info</code> · Low=중립(<code>muted</code>). 역할(<code>-surface</code> · <code>-fill</code> · <code>-on</code> · <code>-text</code> · <code>-graphic</code>)로 골라 쓰고, 매핑표는 <a href=\"#/foundations/colors#sev-layers\">Colors › 심각도</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조"], ["정렬", "항상 Critical → Low. 네 등급은 램프를 명도 정렬한 뒤로 <b>밝기가 같아</b> 색조만이 단서입니다 — 라벨을 반드시 함께"]],
     examples: [
-      { id: "scale", title: "5단계 스케일", desc: "Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.", html: `
+      { id: "scale", title: "4단계 스케일", desc: "Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.", html: `
         <div class="stack" style="max-width:640px;gap:20px">
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical solid">Critical</span><span class="tag high solid">High</span><span class="tag medium solid">Medium</span><span class="tag low solid">Low</span><span class="tag info solid">Info</span></div>
-          <div style="display:flex;gap:16px;flex-wrap:wrap"><span class="sev-cell"><i class="critical"></i>Critical</span><span class="sev-cell"><i class="high"></i>High</span><span class="sev-cell"><i class="medium"></i>Medium</span><span class="sev-cell"><i class="low"></i>Low</span><span class="sev-cell"><i></i>Info</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical solid">Critical</span><span class="tag high solid">High</span><span class="tag medium solid">Medium</span><span class="tag low solid">Low</span></div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap"><span class="sev-cell"><i class="critical"></i>Critical</span><span class="sev-cell"><i class="high"></i>High</span><span class="sev-cell"><i class="medium"></i>Medium</span><span class="sev-cell"><i class="low"></i>Low</span></div>
         </div>`, layout: "left" },
       { id: "band", title: "분포 밴드", desc: "전체 대비 비율. flex 값이 비율, 아래 범례로 수치.", html: `
         <div class="stack" style="max-width:640px;gap:10px">
@@ -331,7 +331,7 @@ const PATTERNS = {
               <tr><td><span class="sev-cell"><i class="high"></i><span class="tag high sm">High</span></span></td><td>알려진 악성코드 차단</td><td>PC-0932</td><td class="num">2</td></tr>
               <tr><td><span class="sev-cell"><i class="medium"></i><span class="tag medium sm">Medium</span></span></td><td>미승인 USB 연결</td><td>PC-1187</td><td class="num">1</td></tr>
               <tr><td><span class="sev-cell"><i class="low"></i><span class="tag low sm">Low</span></span></td><td>정책 동기화 지연</td><td>Server-03</td><td class="num">12</td></tr>
-              <tr><td><span class="sev-cell"><i></i><span class="tag info sm">Info</span></span></td><td>스케줄 검사 완료</td><td>PC-0411</td><td class="num">48</td></tr>
+              <tr><td><span class="sev-cell"><i class="low"></i><span class="tag low sm">Low</span></span></td><td>스케줄 검사 완료</td><td>PC-0411</td><td class="num">48</td></tr>
             </tbody>
           </table>
         </div>` },

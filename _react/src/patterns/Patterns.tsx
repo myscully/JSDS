@@ -146,7 +146,7 @@ export const SevBand = forwardRef<HTMLDivElement, SevBandProps>(function SevBand
 
 export interface SevCellProps extends HTMLAttributes<HTMLSpanElement> {
   /** 없으면 Info(회색) */
-  tone?: Exclude<Tone, "ok" | "accent" | "info">;
+  tone?: Exclude<Tone, "ok" | "accent">;
 }
 /** 좌측 색 막대 + 내용 (표 셀) */
 export const SevCell = forwardRef<HTMLSpanElement, SevCellProps>(function SevCell({ tone, className, children, ...rest }, ref) {

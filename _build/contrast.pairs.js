@@ -3,7 +3,7 @@
    측정은 실제 생성 사이트에서 라이트·다크 × 제품 세 경우(기본 · 밝은 제품 · 상태색과 겹치는 제품)로 전수 수행한다. */
 
 const SURFACES = ["--surface-base", "--surface-raised", "--surface-sunken"];
-const INTENTS = ["accent", "danger", "danger-strong", "warning", "success", "info"];
+const INTENTS = ["accent", "danger", "warning", "success", "info"];
 /* muted(중립 의도)는 INTENTS 에 넣지 않는다 — 이 배열은 '기준 단계 라이트 600 · 다크 500' 규칙의 대상이고,
    아래 flatMap 이 8역할 전부를 쌍으로 펼치기 때문이다. muted 는 surface·on·graphic 셋만 있으므로
    넣으면 없는 토큰(fill·line·hover·pressed)을 재려다 미정의 가드에 걸린다. 쌍은 아래에 따로 적는다 */
@@ -73,8 +73,12 @@ const separation = [
    Medium(주황 #FF9200)과 Low(청록 #00BDDE)는 휘도가 같아 비율이 1.00 이지만 눈으로는 다른 색이다.
    그래서 휘도 분리는 '같은 색조 이웃'에만 요구하고(Critical·High 는 둘 다 빨강이라 휘도가 유일한 단서다),
    나머지는 '값이 서로 다르다'만 본다. 색만으로 의미를 전달하지 않는다는 규칙은 라벨 병기가 담당한다. */
-const severityRanks = ["--danger-strong-graphic", "--danger-graphic", "--warning-graphic", "--info-graphic", "--muted-graphic"];
-const severitySameHue = [["--danger-strong-graphic", "--danger-graphic"]];
+/* 심각도 네 등급 — 램프를 명도 정렬한 뒤로 넷이 **같은 L\* (48.5)** 라 휘도로는 전혀 구분되지 않는다.
+   같은 색조 이웃이 하나도 없으므로 severitySameHue 는 빈 배열이고 SAME_HUE_LSTAR_MIN 은 발동하지 않는다 —
+   그 사실을 숨기지 않고 적어 둔다. 남는 검사는 "넷이 서로 다른 값인가" 뿐이고,
+   색만으로 의미를 전달하지 않는다(1.4.1)는 전적으로 라벨 병기와 구분선에 의존한다(verify 가 검사한다). */
+const severityRanks = ["--danger-graphic", "--warning-graphic", "--info-graphic", "--muted-graphic"];
+const severitySameHue = [];
 const SEVERITY_ADJACENT_MIN = 1.5;
 
 /* 색조 계열 표 — 등급 구분을 열 쌍 전수로 검사하기 위한 것이다.
@@ -84,8 +88,8 @@ const SEVERITY_ADJACENT_MIN = 1.5;
    그리고 이 다섯 색 세트는 회색조로는 분리 불가능합니다(상태색 램프를 공유하는 한 만들 수도 없습니다) —
    1.4.1 준수는 전적으로 라벨 병기에 의존하고, verify 가 그 라벨을 검사합니다. */
 const HUE_FAMILY = {
-  "--danger-strong-graphic": "red", "--danger-graphic": "red",
-  "--warning-graphic": "orange", "--info-graphic": "cyan", "--muted-graphic": "neutral",
+  "--danger-graphic": "red", "--warning-graphic": "orange",
+  "--info-graphic": "cyan", "--muted-graphic": "neutral",
 };
 const hueFamilyOf = (t) => HUE_FAMILY[t] || "unknown";
 const SAME_HUE_LSTAR_MIN = 8;
@@ -93,7 +97,8 @@ const SAME_HUE_LSTAR_MIN = 8;
 /* 등급 간 옅은 바탕 분리 — Critical 과 High 는 같은 빨강이라 바탕의 짙기가 유일한 단서다.
    같은 알파로 접으면 라이트 1.04 · 다크 1.09 로 '지각 가능' 바닥(1.1)에도 못 미친다.
    바닥을 1.15 로 두는 이유: 오늘 값이 라이트 1.17 · 다크 1.11 이라 1.1 로는 다크의 퇴행을 잡지 못한다 */
-const severityFillSplit = [["--danger-strong-fill", "--danger-fill", { light: 1.15, dark: 1.15 }]];
+/* 등급 간 옅은 바탕 분리 — 네 등급이 서로 다른 색조라 같은 색조 쌍이 없다. 빈 배열이다 */
+const severityFillSplit = [];
 
 /* ── 명도 사다리 ───────────────────────────────────────────────
    "읽히는가"(쌍 대비)와 "고르게 벌어졌는가"(사다리 균형)는 다른 질문이다.
@@ -130,9 +135,7 @@ const LADDER_BALANCE_MAX = 2.0;
 /* 소비자가 없어도 허용하는 토큰 — 역할 문법의 완결성 때문에 선언만 해 둔 것들.
    여기 적지 않은 채 소비자가 0 이면 빌드가 경고한다(= 군살이 쌓이지 않는다). */
 const grammarOnly = [
-  /* danger-strong 의 surface·fill·on·text·graphic 은 Critical 등급이 쓴다 — 더 이상 면제가 아니다.
-     hover·pressed 는 Critical 버튼 변형이 없어 소비자가 없다. line 은 2차 이후 알림 배너 경계에 쓸 자리가 생긴다 */
-  "--danger-strong-surface-hover", "--danger-strong-surface-pressed", "--danger-strong-line",
+  "--danger-surface-hover", "--danger-surface-pressed",
   /* 상태색 버튼 변형이 없어 소비자가 없다. 지우면 '상태는 surface 에만 붙는다'는 문법에 구멍이 생긴다 */
   "--warning-surface-hover", "--warning-surface-pressed",
   "--success-surface-hover", "--success-surface-pressed",

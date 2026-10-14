@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Button, Chip, ChipGroup, DataTable, Icon, Indicator, Pagination, PaginationBar, SearchBar, SelectButton, Spacer, Stack, Tag, Toolbar, type DataTableColumn } from "@jiran/ds-react";
 
-type Log = { id: number; time: string; level: "critical" | "medium" | "info" | "high" | "low"; lv: string; ip: string; host: string; msg: string };
+type Log = { id: number; time: string; level: "critical" | "medium" | "high" | "low"; lv: string; ip: string; host: string; msg: string };
 const ROWS: Log[] = [
   { id: 1, time: "2026-09-07 09:41:12.031", level: "critical", lv: "CRIT", ip: "10.0.4.21", host: "PC-2041", msg: "process.create blocked: rundll32.exe → cryptor.dll" },
   { id: 2, time: "2026-09-07 09:41:11.870", level: "medium", lv: "WARN", ip: "10.0.4.21", host: "PC-2041", msg: "usb.attach vendor=0x0781 product=0x5583 (unapproved)" },
-  { id: 3, time: "2026-09-07 09:41:09.114", level: "info", lv: "INFO", ip: "10.0.0.3", host: "Server-03", msg: "policy.sync ok (rev 2041)" },
+  { id: 3, time: "2026-09-07 09:41:09.114", level: "low", lv: "INFO", ip: "10.0.0.3", host: "Server-03", msg: "policy.sync ok (rev 2041)" },
   { id: 4, time: "2026-09-07 09:40:58.552", level: "high", lv: "HIGH", ip: "10.0.4.33", host: "PC-1187", msg: "malware.known blocked sha256=9f3a…c21e" },
   { id: 5, time: "2026-09-07 09:40:41.207", level: "low", lv: "LOW", ip: "10.0.0.3", host: "Server-03", msg: "agent.checkin 1284/1284" },
-  { id: 6, time: "2026-09-07 09:39:57.980", level: "info", lv: "INFO", ip: "10.0.7.10", host: "PC-0932", msg: "scan.scheduled completed files=48213 threats=0" },
+  { id: 6, time: "2026-09-07 09:39:57.980", level: "low", lv: "INFO", ip: "10.0.7.10", host: "PC-0932", msg: "scan.scheduled completed files=48213 threats=0" },
 ];
 const COLUMNS: DataTableColumn<Log>[] = [
   { key: "time", header: "시간", sortable: true },
