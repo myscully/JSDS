@@ -110,6 +110,7 @@ async function run() {
   for (const [fill, bgs] of P.separation) { need.add(fill); bgs.forEach((b) => need.add(b)); }
   P.severityRanks.forEach((t) => need.add(t));
   P.severityFillSplit.forEach(([a2, b2]) => { need.add(a2); need.add(b2); });
+  P.ladders.forEach(([, toks]) => toks.forEach((t) => need.add(t)));
   P.SOLID_ONLY.forEach((t) => need.add(t));
   const toks = [...need];
 
@@ -134,6 +135,7 @@ async function run() {
     fails.push("푸트페이지에서 applyAccent 를 찾을 수 없다 — app.js 가 완주하지 못했다" + (probeErrors.length ? ` (${probeErrors[0]})` : ""));
 
   const table = [];      // Colors 페이지 표의 재료
+  const ladders = [];    // 명도 사다리 — 두 모드를 한 화면에 나란히 보여 주는 재료
   for (const ctx of CONTEXTS) {
     await page.evaluate((th) => document.documentElement.setAttribute("data-theme", th), ctx.theme);
     if (ctx.accent) {
@@ -198,6 +200,34 @@ async function run() {
       }
     }
 
+    /* 명도 사다리 — 세 단계가 '고르게' 벌어졌는가. 쌍 대비가 보지 못하는 질문이다.
+       제품 기본 맥락에서만 잰다: 사다리는 테마의 성질이고, 제품을 타는 의도 면 사다리는
+       이미 위의 -on 쌍 검사가 세 경우를 전부 본다 */
+    if (!ctx.accent) for (const [name, toks, o] of P.ladders) {
+      /* 알파(fill·line)는 기준 표면 위에 합성한 뒤 잰다 — 합성하지 않으면 낙폭이 뜻 없는 값이 된다 */
+      const eff = toks.map((t) => (C[t].a < 0.999 ? over(C[t], C["--surface-base"]) : C[t]));
+      const ls = eff.map(lstar);
+      const steps = [Math.abs(ls[1] - ls[0]), Math.abs(ls[2] - ls[1])];
+      const dir = [Math.sign(ls[1] - ls[0]), Math.sign(ls[2] - ls[1])];
+      /* 역전과 평탄은 다르다 — 방향이 서로 반대인 것만 역전이고, 한 단계가 0 인 것은 '그 단계가 없는' 것이다.
+         라이트 surface 는 base 와 raised 가 둘 다 흰색이라 평탄하다(경계를 보더·그림자가 전담한다).
+         의도된 선택일 수 있으므로 게이트가 판정하지 않고 최소 낙폭 경고로 보고한다 */
+      const reversed = dir[0] !== 0 && dir[1] !== 0 && dir[0] !== dir[1];
+      const minStep = Math.min(...steps);
+      const balance = minStep > 0 ? +(Math.max(...steps) / minStep).toFixed(2) : null;
+      ladders.push({ ctx: ctx.label, theme: ctx.theme, name, toks, sim: !!(o && o.sim),
+        hex: eff.map(hex), lstar: ls.map((v) => +v.toFixed(1)), steps: steps.map((v) => +v.toFixed(1)),
+        balance, reversed, minStep: +minStep.toFixed(1),
+        balanceMax: (o && o.sim) ? P.LADDER_BALANCE_MAX : null });
+      if (reversed) { fails.push(`${ctx.label}: 사다리 ${name} 의 방향이 뒤집혔다 — L* ${ls.map((v) => v.toFixed(1)).join(" → ")}`); continue; }
+      /* 낙폭과 균형은 advisory — 지금 여럿이 못 넘기고 교정을 보류했다. 숫자를 숨기지 않고 매 빌드 보고한다 */
+      if (minStep < P.LADDER_MIN_STEP)
+        warns.push(`${ctx.label}: 사다리 ${name} 의 한 단계가 보이지 않는다 — ΔL* ${minStep.toFixed(1)} < ${P.LADDER_MIN_STEP} (${toks.join(" → ")})`);
+      /* 균형은 '한 화면에 함께 보이는' 사다리에만 — 상태 셋은 동시에 보이지 않는다 */
+      if (o && o.sim && balance !== null && balance > P.LADDER_BALANCE_MAX)
+        warns.push(`${ctx.label}: 사다리 ${name} 이 치우쳤다 — 낙폭 ${steps.map((v) => v.toFixed(1)).join(" · ")} = ${balance}x > ${P.LADDER_BALANCE_MAX}`);
+    }
+
     /* 심각도 — 같은 색조 이웃은 휘도로 갈려야 한다(빨강 둘은 휘도가 유일한 단서다) */
     for (const [a, b] of P.severitySameHue) {
       const r = ratio(over(C[a], C["--surface-raised"]), over(C[b], C["--surface-raised"]));
@@ -220,15 +250,15 @@ async function run() {
   }
   await browser.close();
 
-  fs.writeFileSync(path.join(__dirname, "contrast.json"), JSON.stringify({ generatedAt: new Date().toISOString(), table }, null, 0));
-  return { fails, warns, table };
+  fs.writeFileSync(path.join(__dirname, "contrast.json"), JSON.stringify({ generatedAt: new Date().toISOString(), table, ladders }, null, 0));
+  return { fails, warns, table, ladders };
 }
 
 if (require.main === module) {
-  run().then(({ fails, warns, table }) => {
+  run().then(({ fails, warns, table, ladders }) => {
     for (const w of warns) console.log("WARN  " + w);
     for (const f of fails) console.log("FAIL  " + f);
-    console.log(`contrast: 쌍 ${table.length}건 측정 · 실패 ${fails.length} · 경고 ${warns.length}`);
+    console.log(`contrast: 쌍 ${table.length}건 · 사다리 ${table.length && ladders.length}건 측정 · 실패 ${fails.length} · 경고 ${warns.length}`);
     process.exitCode = fails.length ? 1 : 0;
   });
 }

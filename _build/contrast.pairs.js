@@ -83,6 +83,32 @@ const SAME_HUE_LSTAR_MIN = 8;
    바닥을 1.15 로 두는 이유: 오늘 값이 라이트 1.17 · 다크 1.11 이라 1.1 로는 다크의 퇴행을 잡지 못한다 */
 const severityFillSplit = [["--danger-strong-fill", "--danger-fill", { light: 1.15, dark: 1.15 }]];
 
+/* ── 명도 사다리 ───────────────────────────────────────────────
+   "읽히는가"(쌍 대비)와 "고르게 벌어졌는가"(사다리 균형)는 다른 질문이다.
+   모든 단계가 AA 를 넘기면서도 두 단계가 거의 같은 톤일 수 있다 — 지금 text 가 그렇다
+   (라이트 낙폭 22.8 · 8.5 로 Secondary 와 Tertiary 가 붙어 있다).
+   CIE L* 로 잰다: 대비 비율은 중간 밝기끼리의 거리를 과소평가해서 '낙폭'의 축으로는 맞지 않는다.
+
+   sim(동시) 플래그가 핵심이다 — 단계들이 **한 화면에 함께 보이는** 사다리만 균형을 요구한다.
+   본문·보조·설명은 같은 단락에 나란히 서지만, rest → hover → pressed 는 셋이 동시에 보이는 일이 없다.
+   상태 사다리에는 "변화가 느껴지는가"(최소 낙폭)만 묻는다. */
+const ladders = [
+  ["text", ["--text-primary", "--text-secondary", "--text-tertiary"], { sim: true }],
+  ["surface", ["--surface-base", "--surface-raised", "--surface-sunken"], { sim: true }],
+  ["line", ["--line-strong", "--line-default", "--line-subtle"], { sim: true }],
+  ["fill", ["--fill-strong", "--fill-base", "--fill-weak"], { sim: true }],
+  ...INTENTS.map((i) => [`${i} 면`, [`--${i}-surface`, `--${i}-surface-hover`, `--${i}-surface-pressed`], { sim: false }]),
+];
+/* 넓은 면에서 눈에 띄는 최소 ΔL*. 이보다 작으면 그 단계는 사실상 없는 것이다 */
+const LADDER_MIN_STEP = 2;
+/* max(낙폭)/min(낙폭) — 동시에 보이는 사다리에만 건다.
+   이 값은 측정에서 유도한 것이 아니라 **적어 두는 판단**이다: 한 낙폭이 다른 낙폭의 두 배를 넘으면
+   세 단계가 아니라 "두 단계 + 하나"로 읽힌다.
+   (파생 규칙이 만드는 상태 사다리는 라이트 1.04~2.52 · 다크 1.11~1.66 로 흩어진다 —
+    기준 ±1·±2 단계가 같은 L* 간격을 뜻하지 않기 때문이다. 램프 자체가 지각 균등하지 않다.
+    그래서 "규칙이 만드는 만큼"을 기준으로 삼을 수 없고, 기준은 사람이 정해 적어 두어야 한다.) */
+const LADDER_BALANCE_MAX = 2.0;
+
 /* 소비자가 없어도 허용하는 토큰 — 역할 문법의 완결성 때문에 선언만 해 둔 것들.
    여기 적지 않은 채 소비자가 0 이면 빌드가 경고한다(= 군살이 쌓이지 않는다). */
 const grammarOnly = [
@@ -98,4 +124,4 @@ const grammarOnly = [
   /* 램프는 의미 토큰이 고르는 재료라 단계별 소비자를 요구하지 않는다 */
 ];
 
-module.exports = { SURFACES, INTENTS, SOLID_ONLY, pairs, separation, severityRanks, severitySameHue, SEVERITY_ADJACENT_MIN, severityFillSplit, hueFamilyOf, SAME_HUE_LSTAR_MIN, grammarOnly };
+module.exports = { SURFACES, INTENTS, SOLID_ONLY, pairs, separation, severityRanks, severitySameHue, SEVERITY_ADJACENT_MIN, severityFillSplit, hueFamilyOf, SAME_HUE_LSTAR_MIN, ladders, LADDER_MIN_STEP, LADDER_BALANCE_MAX, grammarOnly };
