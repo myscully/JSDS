@@ -25,10 +25,16 @@ const over = (a, b) => a.a >= 0.999 ? a : ({
 const hex = ({ r, g, b }) => "#" + [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, "0").toUpperCase()).join("");
 
 /* 브라우저에서 토큰을 계산값으로 받아 온다. color-mix 는 Chromium 이 color(srgb …) 로 직렬화하므로 둘 다 읽는다 */
-const RESOLVE = (toks) => {
+const SENTINEL = "rgb(7, 11, 13)";   /* 어떤 토큰도 이 값이 아니다 — 상속으로 떨어진 것을 가려내는 표식 */
+const RESOLVE = ({ toks, sentinel }) => {
+  const wrap = document.createElement("div");
+  /* 토큰 값이 쓰레기면(예: var() 안의 이름 오타) computed 시점에 무효가 되어 '상속색'이 된다.
+     부모에 아무도 쓰지 않는 색을 깔아 두면, 그 색으로 떨어진 토큰이 곧 깨진 토큰이다.
+     선언이 아예 없는 경우는 폴백 둘을 비교해 따로 가려낸다 */
+  wrap.style.cssText = "position:fixed;left:-9999px;color:" + sentinel;
+  document.body.append(wrap);
   const d = document.createElement("div");
-  d.style.cssText = "position:fixed;left:-9999px";
-  document.body.append(d);
+  wrap.append(d);
   const read = (v) => { d.style.color = ""; d.style.color = v; return getComputedStyle(d).color; };
   const out = {};
   for (const t of toks) {
@@ -37,9 +43,9 @@ const RESOLVE = (toks) => {
        서로 다른 폴백 둘로 읽어, 값이 갈리면 선언이 없는 것이다 */
     const a = read("var(" + t + ", rgb(1, 2, 3))");
     const b = read("var(" + t + ", rgb(4, 5, 6))");
-    out[t] = a === b ? a : null;
+    out[t] = a !== b ? null : (a === sentinel ? false : a);   /* null = 선언 없음 · false = 값이 깨짐 */
   }
-  d.remove();
+  wrap.remove();
   return out;
 };
 
@@ -93,6 +99,12 @@ async function run() {
   for (const t of primitiveAudit(css)) fails.push(`샘플 블록이 프리미티브를 직접 참조: ${t}`);
   for (const t of consumerAudit(css)) warns.push(`소비자 0: ${t}`);
 
+  /* 소스에 선언한 토큰이 전부 실제로 루트에 남아 있는지 — 색이든 아니든.
+     파스 오류는 '다음 세미콜론까지'를 통째로 버리므로 선언 하나가 조용히 사라진다(3차에서 다크 --shadow-xs 가 그랬다).
+     색 토큰은 아래 센티넬 가드가 값까지 보고, 이 검사는 존재만 본다 — 그림자·간격·폰트까지 덮는다 */
+  const declared = [...new Set([...css.slice(0, css.indexOf("*{box-sizing")).matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]))]
+    .filter((t) => !/^--prod-/.test(t));
+
   const need = new Set();
   for (const [fg, bgs] of P.pairs) { need.add(fg); bgs.forEach((b) => need.add(b)); }
   for (const [fill, bgs] of P.separation) { need.add(fill); bgs.forEach((b) => need.add(b)); }
@@ -116,10 +128,18 @@ async function run() {
       await page.evaluate(() => { const r = document.documentElement; for (let i of [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]) r.style.removeProperty("--prod-" + i); r.removeAttribute("data-accent-light"); r.removeAttribute("data-accent-neutral"); });
     }
     await page.waitForTimeout(120);
-    const raw = await page.evaluate(RESOLVE, toks);
+    /* 선언 존재 검사 — 비어 있으면 그 선언이 파서에게 버려졌다 */
+    for (const [t, v] of Object.entries(await page.evaluate((ts) => {
+      const r = getComputedStyle(document.documentElement); const o = {};
+      for (const t2 of ts) o[t2] = r.getPropertyValue(t2).trim();
+      return o;
+    }, declared))) if (!v) fails.push(`${ctx.label}: ${t} 선언이 루트에 없다 — 파스 오류로 버려졌을 수 있다`);
+
+    const raw = await page.evaluate(RESOLVE, { toks, sentinel: SENTINEL });
     const C = {};
     for (const t of toks) {
       if (raw[t] === null) { fails.push(`${ctx.label}: ${t} 가 선언되지 않았다 — 쌍에만 적고 CSS 에 쓰지 않았거나 이름이 틀렸다`); C[t] = null; continue; }
+      if (raw[t] === false) { fails.push(`${ctx.label}: ${t} 의 값이 색으로 해소되지 않는다 — var() 안의 이름 오타이거나 값이 깨졌다`); C[t] = null; continue; }
       const v = parse((raw[t] || "").trim());
       if (!v) fails.push(`${ctx.label}: ${t} 를 색으로 읽을 수 없다 — "${raw[t]}"`);
       C[t] = v;

@@ -34,6 +34,21 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) { const n = count(fs
 if (phPages.length) warns.push(`플레이스홀더 남은 페이지: ${phPages.join(", ")}`);
 for (const n of ICONS_MOD.ICON_NAMES) if (!fs.existsSync(path.join(OUT, "assets/icons/outline", n + ".svg"))) fails.push(`assets/icons/outline/${n}.svg 없음`);
 if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.js 없음");
+/* 주석 열림·닫힘이 짝인지 — 선언을 지울 때 여러 줄 주석의 한쪽만 남기기 쉽고,
+   열림 없는 닫힘 표시는 파서가 '다음 세미콜론까지'를 통째로 버려서 바로 뒤의 선언 하나가 조용히 사라진다.
+   3차에서 다크 --shadow-xs 가 이렇게 유실됐고, 다크 블록 두 벌에 같은 고아가 있었던 탓에
+   MD5 쌍 검사까지 통과했다 — 바이트 일치는 유효성이 아니다 */
+for (const f of ["assets/style.css"]) {
+  const t = read(f);
+  let depth = 0, i = 0;
+  while (i < t.length - 1) {
+    if (t[i] === "/" && t[i + 1] === "*") { depth++; i += 2; continue; }
+    if (t[i] === "*" && t[i + 1] === "/") { depth--; if (depth < 0) { fails.push(`${f}: 열림 없는 주석 닫힘 (문자 ${i}) — 바로 뒤 선언이 파서에게 버려진다`); break; } i += 2; continue; }
+    i++;
+  }
+  if (depth > 0) fails.push(`${f}: 닫히지 않은 주석 ${depth}개`);
+}
+
 const css = read("assets/style.css"); if (/data:font\/woff2/.test(css)) fails.push("style.css 에 base64 폰트 포함"); if (!/fonts\/PretendardVariable\.woff2/.test(css)) fails.push("style.css 폰트 경로 오류");
 if (!fs.existsSync(path.join(OUT, "assets/ds.js"))) fails.push("assets/ds.js 없음");
 for (const f of ["components/button.html", "index.html"]) if (fs.existsSync(path.join(OUT, f)) && !/assets\/ds\.js/.test(read(f))) fails.push(`${f}: ds.js 스크립트 태그 없음`);
