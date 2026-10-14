@@ -989,17 +989,52 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("semantic colour bars are 32 tall, flush, square", barGeo.h === 32 && barGeo.gap === 0 && barGeo.radius === "0px", JSON.stringify(barGeo));
   ok("semantic bar label sits 8px below, centered", barGeo.labelGap === 8 && barGeo.align === "center", JSON.stringify(barGeo));
   // hover 하면 색 레이어만 위로 8px 자란다 — 라벨은 움직이지 않아야 한다(bottom 고정이 이걸 보장한다)
-  const barSel = '.sem-row .val-cell[data-token="--accent-surface"]';
+  /* --accent-surface 는 의도 행렬로 옮겨갔다 — .sem-row 의 기하는 테마 절(Surface)에서 본다 */
+  const barSel = '.sem-row .val-cell[data-token="--surface-base"]';
   const grow = async (sel) => page.evaluate((s2) => {
     const c = document.querySelector(s2), i = c.querySelector(".bar i"), n = c.querySelector(".name");
     return { h: Math.round(i.getBoundingClientRect().height), top: Math.round(i.getBoundingClientRect().top),
       label: Math.round(n.getBoundingClientRect().top), exp: c.getAttribute("aria-expanded") };
   }, sel);
+  /* hover() 가 스크롤을 일으키면 top 비교가 무의미해진다 — 먼저 뷰 가운데로 가져온다 */
+  await page.locator(barSel).evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
+  await page.waitForTimeout(150);
   const g0 = await grow(barSel);
   await page.locator(barSel).hover(); await page.waitForTimeout(450);
   const g1 = await grow(barSel);
   ok("colour bar grows 8px upward on hover", g1.h - g0.h === 8 && g0.top - g1.top === 8, `${g0.h}→${g1.h} · top ${g0.top}→${g1.top}`);
   ok("the label does not move while the bar grows", g0.label === g1.label, `${g0.label} → ${g1.label}`);
+  /* 의도 행렬 — 의도 6 × 역할 8. 같은 역할이 의도를 가로질러 같은 열에 서야 '역할이 1급'이라는 설계가 눈으로 확인된다.
+     빈 칸이 생기면(토큰 이름 오타·미선언) 색이 없는 칩이 되므로 배경이 전부 칠해졌는지 함께 본다 */
+  const mx = await page.evaluate(() => {
+    const m = document.querySelector(".sem-matrix");
+    if (!m) return null;
+    const cells = [...m.querySelectorAll(".val-cell")];
+    const cols = m.querySelectorAll(".sm-head>span").length - 1, rows = m.querySelectorAll(".sm-row").length;
+    const blank = cells.filter((c) => { const b2 = getComputedStyle(c.querySelector(".bar i")).backgroundColor; return !b2 || b2 === "rgba(0, 0, 0, 0)"; });
+    /* 같은 열의 칸들이 같은 x 좌표에 서야 역할 대조가 가능하다 */
+    const firstRow = [...m.querySelectorAll(".sm-row")[0].querySelectorAll(".val-cell")].map((c) => Math.round(c.getBoundingClientRect().left));
+    const lastRow = [...m.querySelectorAll(".sm-row")[rows - 1].querySelectorAll(".val-cell")].map((c) => Math.round(c.getBoundingClientRect().left));
+    return { cols, rows, cells: cells.length, blank: blank.map((c) => c.dataset.token), checker: cells.filter((c) => c.classList.contains("checker")).length,
+      aligned: JSON.stringify(firstRow) === JSON.stringify(lastRow) };
+  });
+  ok("intent matrix is 6 intents × 8 roles with every cell filled", mx && mx.cols === 8 && mx.rows === 6 && mx.cells === 48 && mx.blank.length === 0,
+    JSON.stringify(mx));
+  ok("matrix columns line up across intents", mx && mx.aligned, mx ? String(mx.aligned) : "없음");
+  /* 알파인 역할(fill·line)만 체커 바탕 — 솔리드 역할에 체커가 깔리면 반투명으로 오독된다 */
+  ok("only the alpha roles are checkered", mx && mx.checker === 12, mx ? String(mx.checker) : "없음");
+  /* 행렬 칸도 같은 .val-cell 이라 값 팝오버가 그대로 열려야 한다 — 알파 칸은 8자리 Hex */
+  const mxPop = await (async () => {
+    await page.locator('.sem-matrix .val-cell[data-token="--danger-fill"]').click(); await page.waitForTimeout(250);
+    const r = await page.evaluate(() => ({ open: !document.getElementById("valPop").hidden,
+      title: (document.getElementById("valPopTitle") || {}).textContent || "",
+      hex: (document.querySelector("#valPopRows") || {}).textContent || "" }));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(150);
+    return r;
+  })();
+  ok("matrix cell opens the value popover with an 8-digit hex for alpha", mxPop.open && /Danger \/ fill/.test(mxPop.title) && /#[0-9A-F]{8}/.test(mxPop.hex),
+    JSON.stringify(mxPop));
+
   // 팝오버가 열린 스와치는 커진 채로 남는다 + aria-expanded 로 열림을 알린다(종전에는 aria-haspopup 만 있었다)
   await page.locator(barSel).click(); await page.waitForTimeout(400);
   await page.mouse.move(5, 5); await page.waitForTimeout(400);
@@ -1074,7 +1109,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   // Colors: Semantic 스와치 클릭 → 값 팝오버 (딤 없이 바 아래, 토큰 복사)
   await go("foundations/colors.html");
-  await page.locator("#primary").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
+  await page.locator("#intent").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));   /* 제품 Primary 는 의도 행렬 안에 있다 */
   const cellSel = '.val-cell[data-token="--accent-surface"]';
   await page.locator(cellSel).click();
   await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
