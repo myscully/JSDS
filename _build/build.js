@@ -47,9 +47,17 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   fs.writeFileSync(path.join(OUT, "assets", "app.js"),
     `// 공용 스크립트(생성됨): 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭. 원본은 _build/app.src.js\nconst SEARCH_INDEX=${JSON.stringify(index)};\nconst PRODUCTS=${JSON.stringify(PRODUCTS)};\nconst ROOT=document.body.dataset.root||'../';\n` + fs.readFileSync(path.join(__dirname, "app.src.js"), "utf8"));
 
+  /* 대비 게이트를 페이지 렌더보다 먼저 돌린다 — 그래야 Colors 페이지가 측정 결과를 표로 쓸 수 있다.
+     사람이 숫자를 적으면 또 낡는다(종전에 네 번 낡았다). 게이트는 전용 푸트페이지에서 재므로 생성 페이지가 없어도 된다 */
+  const CT = await require("./contrast.js").run();
+  for (const w of CT.warns) console.log("WARN  " + w);
+  for (const f of CT.fails) console.log("FAIL  " + f);
+  console.log(`contrast: 쌍 ${CT.table.length}건 측정 · 실패 ${CT.fails.length} · 경고 ${CT.warns.length}`);
+  if (CT.fails.length) process.exit(1);
+
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
   p.on("pageerror", e => { console.error("page error:", e.message); process.exitCode = 1; });
-  await p.addInitScript(`window.STYLE_TEXT = ${JSON.stringify(cssSrc)}; window.REACT_EXAMPLES = ${JSON.stringify(REACT_EXAMPLES)};`);
+  await p.addInitScript(`window.CONTRAST = ${JSON.stringify(CT.table)}; window.STYLE_TEXT = ${JSON.stringify(cssSrc)}; window.REACT_EXAMPLES = ${JSON.stringify(REACT_EXAMPLES)};`);
   await p.goto("file://" + SRC + "#/home/overview");
   await p.waitForFunction(() => document.body.dataset.route === "home/overview");
 
@@ -195,12 +203,4 @@ git config core.hooksPath _build/git-hooks   # 최초 1회 (클론마다)
 `);
   console.log("pages:", count, "react examples:", Object.keys(REACT_EXAMPLES).length, "out:", OUT);
   require("./verify.js");
-  /* 대비 게이트 — contrast.pairs.js 의 선언을 생성물에서 전수 측정한다(라이트·다크 × 제품 세 경우).
-     사람이 숫자를 적지 않는다: 기준 미달이면 화면이 아니라 빌드가 먼저 알려 준다.
-     verify 뒤에 두는 이유는 측정이 생성된 페이지를 열기 때문이다 */
-  const { fails, warns, table } = await require("./contrast.js").run();
-  for (const w of warns) console.log("WARN  " + w);
-  for (const f of fails) console.log("FAIL  " + f);
-  console.log(`contrast: 쌍 ${table.length}건 측정 · 실패 ${fails.length} · 경고 ${warns.length}`);
-  if (fails.length) process.exit(1);
 })().catch(e => { console.error(e); process.exit(1); });

@@ -382,6 +382,18 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand-surface)}
 .sem-row .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-default);border-radius:inherit;pointer-events:none}  /* 바탕과 구분되지 않는 색 — app.js 가 .faint 를 붙인다 */
 .sem-row .name{font-size:12px;font-weight:700;color:var(--text-primary);margin-top:8px;text-align:center}
 .checker{--checker-bg:repeating-conic-gradient(rgba(112,115,124,.16) 0 25%,transparent 0 50%) 0 0/12px 12px}
+/* 대비표 — 게이트 산출물. 접어 두는 이유는 594행을 펼치면 페이지를 훑을 수 없기 때문이다.
+   advisory(기준 미달이나 빌드를 막지 않음)는 색으로 드러낸다 — 숫자를 숨기면 또 낡는다 */
+details.ct{margin:calc(var(--space-3) * -1) 0 var(--space-8);border:1px solid var(--line-default);border-radius:var(--radius-md);background:var(--surface-sunken)}
+details.ct>summary{cursor:pointer;padding:8px 12px;font-size:12px;font-weight:600;color:var(--text-secondary);list-style:none}
+details.ct>summary::-webkit-details-marker{display:none}
+details.ct>summary::before{content:"▸";display:inline-block;width:14px;color:var(--text-tertiary)}
+details.ct[open]>summary::before{content:"▾"}
+details.ct>summary:hover{color:var(--text-primary)}
+details.ct .tablewrap{margin:0;padding:0 12px 12px}
+details.ct table{font-variant-numeric:tabular-nums}
+.ct-ok{color:var(--success-text)}
+.ct-no{color:var(--warning-text)}
 /* 의도 × 역할 행렬 — 같은 역할이 의도를 가로질러 같은 열에 서야 '역할이 1급'이라는 것이 한눈에 보인다.
    칸은 .sem-row 와 같은 .val-cell 버튼이라 값 팝오버(app.js 의 openColor)가 그대로 동작한다.
    알파인 열(fill·line)만 .checker 를 걸어 투명도가 보이게 한다 */
@@ -398,6 +410,7 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand-surface)}
 .sem-matrix .val-cell{cursor:pointer;display:block;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit}
 .sem-matrix .bar{height:28px;background:var(--checker-bg,transparent);position:relative;overflow:visible;box-shadow:inset 0 1px 0 var(--line-default),inset 0 -1px 0 var(--line-default)}
 .sem-matrix .bar i{position:absolute;inset:auto 0 0 0;height:100%;display:block;transition:height var(--motion-slow) ease}
+.sem-matrix .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-default);pointer-events:none}   /* 바탕과 구분되지 않는 색 — app.js 가 붙인다 */
 .sem-matrix .val-cell:hover,.sem-matrix .val-cell[aria-expanded="true"]{position:relative;z-index:2}
 .sem-matrix .val-cell:hover .bar i,.sem-matrix .val-cell[aria-expanded="true"] .bar i{height:calc(100% + 6px)}
 @media (max-width:760px){.sem-matrix .sm-head,.sem-matrix .sm-row{grid-template-columns:96px repeat(var(--cols),minmax(40px,1fr))}}
