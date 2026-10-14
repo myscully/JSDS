@@ -3,7 +3,14 @@ import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import type { Tone } from "../../types";
 
-const toneVar = (t?: Tone | string) => (t ? (["critical", "high", "medium", "low", "info"].includes(t) ? `var(--sev-${t})` : t === "ok" ? "var(--success-surface)" : t === "accent" ? "var(--accent-surface)" : t) : "var(--accent-surface)");
+/* 심각도 등급 → 상태색 의도. 문자열 조립(`var(--sev-${t})`)을 쓰지 않는다 —
+   토큰 이름이 코드에 드러나야 개명이 타입·검색에 걸린다.
+   도넛 조각·범례 칩·바는 글자가 올라가지 않으므로 전부 graphic 역할이다 */
+const TONE_VAR: Record<string, string> = {
+  critical: "--danger-strong-graphic", high: "--danger-graphic", medium: "--warning-graphic",
+  low: "--info-graphic", info: "--muted-graphic", ok: "--success-graphic", accent: "--accent-graphic",
+};
+const toneVar = (t?: Tone | string) => (t ? (TONE_VAR[t] ? `var(${TONE_VAR[t]})` : t) : "var(--accent-graphic)");
 
 export interface KpiProps extends HTMLAttributes<HTMLDivElement> {
   label: ReactNode;
@@ -113,7 +120,10 @@ export const ChartLegend = forwardRef<HTMLDivElement, ChartLegendProps>(function
     <div ref={ref} className={cx("chart-legend", className)} style={column ? { flexDirection: "column", ...style } : style} {...rest}>
       {items.map((it, i) => (
         <span key={i}>
-          <i style={{ background: it.color ?? toneVar(it.tone) }} />
+          {/* 톤은 클래스로 넘긴다 — 사이트 HTML 과 같은 마크업이어야 하고(site-consistency),
+              인라인 style 로 토큰을 참조하면 소비자 0 검사가 그 참조를 세지 못한다.
+              color 를 직접 준 경우에만 인라인으로 떨어진다 */}
+          <i className={it.color ? undefined : it.tone} style={it.color ? { background: it.color } : undefined} />
           {it.label}
           {it.value !== undefined && <> <b>{it.value}</b></>}
         </span>

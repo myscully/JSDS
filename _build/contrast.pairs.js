@@ -4,12 +4,15 @@
 
 const SURFACES = ["--surface-base", "--surface-raised", "--surface-sunken"];
 const INTENTS = ["accent", "danger", "danger-strong", "warning", "success", "info"];
+/* muted(중립 의도)는 INTENTS 에 넣지 않는다 — 이 배열은 '기준 단계 라이트 600 · 다크 500' 규칙의 대상이고,
+   아래 flatMap 이 8역할 전부를 쌍으로 펼치기 때문이다. muted 는 surface·on·graphic 셋만 있으므로
+   넣으면 없는 토큰(fill·line·hover·pressed)을 재려다 미정의 가드에 걸린다. 쌍은 아래에 따로 적는다 */
 
 /* 글자·지표는 솔리드여야 한다(알파가 들어가면 바탕마다 다르게 측정된다) — 이 목록이 그 규칙의 검사 대상이다 */
 const SOLID_ONLY = [
   ...SURFACES, "--surface-inverse",
   "--text-primary", "--text-secondary", "--text-tertiary", "--text-disabled", "--text-inverse",
-  "--graphic-muted", "--focus-ring",
+  "--muted-surface", "--muted-on", "--muted-graphic", "--focus-ring",
   ...INTENTS.flatMap((i) => [`--${i}-surface`, `--${i}-surface-hover`, `--${i}-surface-pressed`, `--${i}-on`, `--${i}-text`, `--${i}-graphic`]),
   "--accent-text-inverse",
 ];
@@ -22,7 +25,9 @@ const pairs = [
   ["--text-secondary", ["--fill-strong"], 4.5, "중립 칩 라벨"],
   ["--text-tertiary", [...SURFACES, "--fill-strong"], 4.5, "설명·캡션 · 중립 태그 라벨"],
   ["--text-inverse", ["--surface-inverse"], 4.5, "툴팁·토스트 글자"],
-  ["--graphic-muted", SURFACES, 3, "비활성 점·범례 칩"],
+  /* 중립 의도 muted — 심각도 Info 등급과 비활성 지표. 역할 셋만 있어 INTENTS 전개에 넣지 않고 따로 적는다 */
+  ["--muted-on", ["--muted-surface"], 4.5, "중립 면 위 글자(채운 Info 태그)"],
+  ["--muted-graphic", SURFACES, 3, "비활성 점·범례 칩·Info 등급 지표"],
   ["--focus-ring", SURFACES, 3, "포커스 링"],
   /* advisory — 측정값이 기준에 못 미쳐도 빌드를 막지 않고 매 빌드 경고로 남긴다.
      중립 200(#C2C4C8)은 흰 바탕에서 1.75 다. 3:1 을 맞추려면 중립 500(4.73)까지 가야 하고
@@ -56,8 +61,8 @@ const separation = [
    Medium(주황 #FF9200)과 Low(청록 #00BDDE)는 휘도가 같아 비율이 1.00 이지만 눈으로는 다른 색이다.
    그래서 휘도 분리는 '같은 색조 이웃'에만 요구하고(Critical·High 는 둘 다 빨강이라 휘도가 유일한 단서다),
    나머지는 '값이 서로 다르다'만 본다. 색만으로 의미를 전달하지 않는다는 규칙은 라벨 병기가 담당한다. */
-const severityRanks = ["--sev-critical", "--sev-high", "--sev-medium", "--sev-low", "--sev-info"];
-const severitySameHue = [["--sev-critical", "--sev-high"]];
+const severityRanks = ["--danger-strong-graphic", "--danger-graphic", "--warning-graphic", "--info-graphic", "--muted-graphic"];
+const severitySameHue = [["--danger-strong-graphic", "--danger-graphic"]];
 const SEVERITY_ADJACENT_MIN = 1.5;
 
 /* 색조 계열 표 — 등급 구분을 열 쌍 전수로 검사하기 위한 것이다.
@@ -67,7 +72,6 @@ const SEVERITY_ADJACENT_MIN = 1.5;
    그리고 이 다섯 색 세트는 회색조로는 분리 불가능합니다(상태색 램프를 공유하는 한 만들 수도 없습니다) —
    1.4.1 준수는 전적으로 라벨 병기에 의존하고, verify 가 그 라벨을 검사합니다. */
 const HUE_FAMILY = {
-  "--sev-critical": "red", "--sev-high": "red", "--sev-medium": "orange", "--sev-low": "cyan", "--sev-info": "neutral",
   "--danger-strong-graphic": "red", "--danger-graphic": "red",
   "--warning-graphic": "orange", "--info-graphic": "cyan", "--muted-graphic": "neutral",
 };
@@ -77,22 +81,20 @@ const SAME_HUE_LSTAR_MIN = 8;
 /* 등급 간 옅은 바탕 분리 — Critical 과 High 는 같은 빨강이라 바탕의 짙기가 유일한 단서다.
    같은 알파로 접으면 라이트 1.04 · 다크 1.09 로 '지각 가능' 바닥(1.1)에도 못 미친다.
    바닥을 1.15 로 두는 이유: 오늘 값이 라이트 1.17 · 다크 1.11 이라 1.1 로는 다크의 퇴행을 잡지 못한다 */
-const severityFillSplit = [["--sev-critical-bg", "--sev-high-bg", { light: 1.15, dark: 1.10 }]];
+const severityFillSplit = [["--danger-strong-fill", "--danger-fill", { light: 1.15, dark: 1.15 }]];
 
 /* 소비자가 없어도 허용하는 토큰 — 역할 문법의 완결성 때문에 선언만 해 둔 것들.
    여기 적지 않은 채 소비자가 0 이면 빌드가 경고한다(= 군살이 쌓이지 않는다). */
 const grammarOnly = [
-  /* 3차에서 --sev-* 20개를 대체한다 */
-  "--danger-strong-surface", "--danger-strong-surface-hover", "--danger-strong-surface-pressed",
-  "--danger-strong-fill", "--danger-strong-line", "--danger-strong-on", "--danger-strong-text", "--danger-strong-graphic",
+  /* danger-strong 의 surface·fill·on·text·graphic 은 Critical 등급이 쓴다 — 더 이상 면제가 아니다.
+     hover·pressed 는 Critical 버튼 변형이 없어 소비자가 없다. line 은 2차 이후 알림 배너 경계에 쓸 자리가 생긴다 */
+  "--danger-strong-surface-hover", "--danger-strong-surface-pressed", "--danger-strong-line",
   /* 상태색 버튼 변형이 없어 소비자가 없다. 지우면 '상태는 surface 에만 붙는다'는 문법에 구멍이 생긴다 */
   "--warning-surface-hover", "--warning-surface-pressed",
   "--success-surface-hover", "--success-surface-pressed",
   "--info-surface-hover", "--info-surface-pressed",
   /* 보더용 알파 — 알림 배너·카드 경계에 쓸 자리가 2차 이후 생긴다 */
   "--accent-line",
-  /* 상태색 면을 점·바에서만 쓰게 역할을 가르고 나니 채운 면이 남지 않았다 — 문법상 기준 단계라 선언은 남긴다 */
-  "--info-surface", "--info-on",
   /* 램프는 의미 토큰이 고르는 재료라 단계별 소비자를 요구하지 않는다 */
 ];
 

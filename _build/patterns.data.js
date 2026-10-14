@@ -245,7 +245,7 @@ const PATTERNS = {
               <div class="row"><span class="lbl">USB 위반</span><div class="bar medium"><i style="width:44%"></i></div><span class="num">221</span></div>
               <div class="row"><span class="lbl">정책 위반</span><div class="bar low"><i style="width:23%"></i></div><span class="num">115</span></div>
             </div></div>
-            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="심각도 분포" data-label="1,054"></div><div class="chart-legend" style="flex-direction:column"><span><i style="background:var(--sev-critical)"></i>Critical <b>190</b></span><span><i style="background:var(--sev-high)"></i>High <b>285</b></span><span><i style="background:var(--sev-medium)"></i>Medium <b>316</b></span><span><i style="background:var(--sev-low)"></i>Low <b>263</b></span></div></div></div>
+            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="심각도 분포" data-label="1,054"></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div></div></div>
           </div>
           <div class="card flush">
             <div class="card-head"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text">전체 보기 →</a></div>
@@ -309,7 +309,7 @@ const PATTERNS = {
     status: "ready", react: ["SevBand","SevCell"], uses: ["tag", "indicator", "data-visual", "data-table"], css: [".sev-band", ".sev-cell", ".stack"],
     desc: "위협 심각도 5단계(Critical · High · Medium · Low · Info)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
     thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>`,
-    principles: [["토큰", "3층으로 씁니다 — 면 <code>--sev-*</code>(채운 태그·바·밴드) · 글자 <code>--sev-*-text</code>(기본형 태그·KPI) · 면 위 글자 <code>--sev-*-on</code>. 단계 값과 테마별 차이는 <a href=\"#/foundations/colors#sev-layers\">Colors › 심각도의 3층</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조"], ["정렬", "항상 Critical → Info. 색만이 아니라 라벨을 함께"]],
+    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태색 의도 매핑</b>입니다 — Critical=<code>danger-strong</code> · High=<code>danger</code> · Medium=<code>warning</code> · Low=<code>info</code> · Info=중립. 역할(<code>-surface</code> · <code>-fill</code> · <code>-on</code> · <code>-text</code> · <code>-graphic</code>)로 골라 쓰고, 매핑표는 <a href=\"#/foundations/colors#sev-layers\">Colors › 심각도</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조"], ["정렬", "항상 Critical → Info. 색만이 아니라 라벨을 함께"]],
     examples: [
       { id: "scale", title: "5단계 스케일", desc: "Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.", html: `
         <div class="stack" style="max-width:640px;gap:20px">
@@ -320,7 +320,7 @@ const PATTERNS = {
       { id: "band", title: "분포 밴드", desc: "전체 대비 비율. flex 값이 비율, 아래 범례로 수치.", html: `
         <div class="stack" style="max-width:640px;gap:10px">
           <div class="sev-band" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>
-          <div class="chart-legend"><span><i style="background:var(--sev-critical)"></i>Critical <b>190</b></span><span><i style="background:var(--sev-high)"></i>High <b>285</b></span><span><i style="background:var(--sev-medium)"></i>Medium <b>316</b></span><span><i style="background:var(--sev-low)"></i>Low <b>263</b></span></div>
+          <div class="chart-legend"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div>
         </div>` },
       { id: "table", title: "표 안의 심각도", desc: "행 좌측 색 막대(.sev-cell) + Tag. 정렬 기본값은 심각도 내림차순.", html: `
         <div class="tbl-wrap" style="max-width:720px">
