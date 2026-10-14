@@ -491,7 +491,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   // 심각도 — 면/글자/면 위 글자가 나뉘어 있어야 한다. 종전에는 .tag.solid{color:#fff} 한 줄이 다섯 색을 덮어 10 조합 중 8이 미달이었고,
   // 기본형 태그는 글자를 면 토큰으로 써서 라이트에서 다섯 중 넷이 미달이었다. 이 축에는 테스트가 아예 없었다
   await go("components/tag.html");
-  const LVL = ["critical", "high", "medium", "low", "info"];
+  const LVL = ["critical", "high", "medium", "low"];
   const tagSet = () => page.evaluate((lvl) => {
     const prev = document.querySelector("#ex-tag-severity .example-preview");
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
@@ -518,9 +518,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       };
       const mk = (cls) => { const e = document.createElement("span"); e.className = cls; e.textContent = "x"; prev.append(e); const c = getComputedStyle(e); const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color }; e.remove(); return r; };
       out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid") };
-      /* 심각도는 독립 축이 아니라 상태색 의도 매핑이다 — Critical=danger-strong · High=danger · Medium=warning · Low=info · Info=중립.
-         Info 는 중립이라 fill·text 를 테마 토큰에서 받는다(채운 태그만 --muted-* 를 쓴다) */
-      const M = { critical: "danger-strong", high: "danger", medium: "warning", low: "info", info: null }[l];
+      /* 심각도는 독립 축이 아니라 상태색 의도 매핑이다 — Critical=danger · High=warning · Medium=info · Low=중립.
+         Low 는 중립이라 fill·text 를 테마 토큰에서 받는다(채운 태그만 --muted-* 를 쓴다) */
+      const M = { critical: "danger", high: "warning", medium: "info", low: null }[l];
       out.tok[l] = M
         ? { fill: res("var(--" + M + "-graphic)"), text: res("var(--" + M + "-text)"), on: res("var(--" + M + "-on)"), bg: res("var(--" + M + "-fill)"), surface: res("var(--" + M + "-surface)") }
         : { fill: res("var(--muted-graphic)"), text: res("var(--text-tertiary)"), on: res("var(--muted-on)"), bg: res("var(--fill-strong)"), surface: res("var(--muted-surface)") };
@@ -546,18 +546,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const low = Math.min(ratio(t.tok[l].text, t.canvas), ratio(t.tok[l].text, t.surface), ratio(t.tok[l].text, t.panel));
       ok(`${theme} ${l}-text clears AA on every surface`, low >= 4.5, `${low} · ${t.tok[l].text}`);
     }
-    /* Critical 과 High 는 같은 빨강이라 휘도가 유일한 단서다 — 지표에서 ≥1.5.
-       다크에서 둘 다 red-400 이라 1.00 이었던 적이 있고, 매핑으로 접을 때도 danger-strong 의 graphic 이
-       ±1(red-300)에 머물면 1.30 으로 떨어진다. ±2(red-200)여야 1.74 가 된다 */
-    ok(`${theme} critical and high are distinguishable`, t.tok.critical.fill !== t.tok.high.fill && ratio(t.tok.critical.fill, t.tok.high.fill) >= 1.5,
-      `${ratio(t.tok.critical.fill, t.tok.high.fill)} · ${t.tok.critical.fill} vs ${t.tok.high.fill}`);
-    /* 옅은 태그도 갈려야 한다 — 로그 표를 색으로 훑는 것이 핵심 사용 사례다.
-       같은 알파로 접으면 1.04·1.09 로 '지각 가능' 바닥에도 못 미친다 */
-    ok(`${theme} critical and high subtle tags differ in background`,
-      t.v.critical.subtle.bgEff !== t.v.high.subtle.bgEff && ratio(t.v.critical.subtle.bgEff, t.v.high.subtle.bgEff) >= 1.15,
-      `${ratio(t.v.critical.subtle.bgEff, t.v.high.subtle.bgEff)} · ${t.v.critical.subtle.bgEff} vs ${t.v.high.subtle.bgEff}`);
-    ok(`${theme} critical and high differ in label too`, t.tok.critical.text !== t.tok.high.text,
-      `${t.tok.critical.text} vs ${t.tok.high.text}`);
+    /* 램프를 명도 정렬한 뒤로 네 등급은 **같은 밝기**(L* 48.5)다 — 휘도로는 구분되지 않고 색조만이 단서다.
+       그래서 "휘도로 갈리는가" 를 묻는 대신 "서로 다른 색인가" 와 "색 말고 다른 단서가 있는가" 를 묻는다 */
+    {
+      const hexes = LVL.map((l) => t.tok[l].fill);
+      ok(`${theme} four severity ranks are four distinct colours`, new Set(hexes).size === 4, hexes.join(" · "));
+      /* 라벨이 유일한 방어선이다 — 등급마다 글자색도 달라야 라벨이 색과 함께 읽힌다 */
+      const texts = LVL.map((l) => t.tok[l].text);
+      ok(`${theme} each rank has its own label colour`, new Set(texts).size === 4, texts.join(" · "));
+    }
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
@@ -1018,11 +1015,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { cols, rows, cells: cells.length, blank: blank.map((c) => c.dataset.token), checker: cells.filter((c) => c.classList.contains("checker")).length,
       aligned: JSON.stringify(firstRow) === JSON.stringify(lastRow) };
   });
-  ok("intent matrix is 6 intents × 8 roles with every cell filled", mx && mx.cols === 8 && mx.rows === 6 && mx.cells === 48 && mx.blank.length === 0,
+  ok("intent matrix is 5 intents × 8 roles with every cell filled", mx && mx.cols === 8 && mx.rows === 5 && mx.cells === 40 && mx.blank.length === 0,
     JSON.stringify(mx));
   ok("matrix columns line up across intents", mx && mx.aligned, mx ? String(mx.aligned) : "없음");
   /* 알파인 역할(fill·line)만 체커 바탕 — 솔리드 역할에 체커가 깔리면 반투명으로 오독된다 */
-  ok("only the alpha roles are checkered", mx && mx.checker === 12, mx ? String(mx.checker) : "없음");
+  ok("only the alpha roles are checkered", mx && mx.checker === 10, mx ? String(mx.checker) : "없음");
   /* 행렬 칸도 같은 .val-cell 이라 값 팝오버가 그대로 열려야 한다 — 알파 칸은 8자리 Hex */
   const mxPop = await (async () => {
     await page.locator('.sem-matrix .val-cell[data-token="--danger-fill"]').click(); await page.waitForTimeout(250);
@@ -1055,7 +1052,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { rows: rows.length, chips: document.querySelectorAll(".lad-chip").length, lightTop, darkTop, mono,
       theme: document.documentElement.dataset.theme || "(os)" };
   });
-  ok("lightness ladders show both themes side by side", lad && lad.rows === 10 && lad.chips === 60, JSON.stringify(lad));
+  ok("lightness ladders show both themes side by side", lad && lad.rows === 9 && lad.chips === 54, JSON.stringify(lad));
   /* 라이트 text-primary 는 거의 검정 · 다크 text-primary 는 거의 흰색. 두 열이 같으면 한 모드만 그린 것이다 */
   ok("the dark column really shows dark-theme values on a light page", lad && lad.lightTop < 60 && lad.darkTop > 200,
     lad ? `라이트 ${Math.round(lad.lightTop)} · 다크 ${Math.round(lad.darkTop)}` : "없음");
