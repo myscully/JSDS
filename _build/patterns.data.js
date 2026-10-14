@@ -308,7 +308,7 @@ const PATTERNS = {
   "severity": {
     status: "ready", react: ["SevBand","SevCell"], uses: ["tag", "indicator", "data-visual", "data-table"], css: [".sev-band", ".sev-cell", ".stack"],
     desc: "위협 심각도 5단계(Critical · High · Medium · Low · Info)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
-    thumb: `<div class="sev-band" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>`,
+    thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>`,
     principles: [["토큰", "3층으로 씁니다 — 면 <code>--sev-*</code>(채운 태그·바·밴드) · 글자 <code>--sev-*-text</code>(기본형 태그·KPI) · 면 위 글자 <code>--sev-*-on</code>. 단계 값과 테마별 차이는 <a href=\"#/foundations/colors#sev-layers\">Colors › 심각도의 3층</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조"], ["정렬", "항상 Critical → Info. 색만이 아니라 라벨을 함께"]],
     examples: [
       { id: "scale", title: "5단계 스케일", desc: "Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.", html: `
