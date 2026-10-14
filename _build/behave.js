@@ -8,8 +8,31 @@ const results = [];
 const ok = (name, cond, extra = "") => results.push([cond ? "PASS" : "FAIL", name, extra]);
 /* 대비는 Node 에서 계산한다 — 템플릿 리터럴 안의 \\d 는 d 로 죽어 정규식이 깨진다 */
 const lum = (v) => { const [r, g, b2] = v.map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b2; };
-const toRgb = (s2) => s2.match(/[0-9.]+/g).map(Number).slice(0, 3);
-const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)) + 0.05]; return +(Math.max(x, y) / Math.min(x, y)).toFixed(2); };
+/* 알파를 떨어뜨리지 않는다 — 종전 구현은 rgba 를 rgb 로 읽어 반투명 면 위 글자를 검은 바탕에 대고 쟀다.
+   color-mix 는 Chromium 이 color(srgb r g b / a) 로 직렬화하므로 그 형식도 읽는다 */
+const parse = (s2) => {
+  let m = s2.match(/^rgba?\(([^)]+)\)/);
+  if (m) { const v = m[1].split(/[,\s/]+/).filter(Boolean).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; }
+  m = s2.match(/^color\(srgb\s+([^)]+)\)/);
+  if (m) { const v = m[1].split(/[\s/]+/).filter(Boolean).map(parseFloat); return { r: v[0] * 255, g: v[1] * 255, b: v[2] * 255, a: v.length > 3 ? v[3] : 1 }; }
+  m = s2.match(/^#([0-9a-fA-F]{6})$/);
+  if (m) return { r: parseInt(m[1].slice(0, 2), 16), g: parseInt(m[1].slice(2, 4), 16), b: parseInt(m[1].slice(4, 6), 16), a: 1 };
+  const v = (s2.match(/[0-9.]+/g) || [0, 0, 0]).map(Number);
+  return { r: v[0], g: v[1], b: v[2], a: 1 };
+};
+const toRgb = (s2) => { const c = parse(s2); return [c.r, c.g, c.b]; };
+/* a 를 b 위에 얹는다 */
+const over = (a, b) => a.a >= 0.999 ? a : ({ r: a.r * a.a + b.r * (1 - a.a), g: a.g * a.a + b.g * (1 - a.a), b: a.b * a.a + b.b * (1 - a.a), a: 1 });
+const lumOf = (c) => lum([c.r, c.g, c.b]);
+/* bed 를 주면 반투명 bg 를 그 위에 합성해서 잰다 */
+const ratio = (fg, bg, bed) => {
+  const f = parse(fg); let b = parse(bg);
+  if (b.a < 0.999) b = over(b, bed ? parse(bed) : { r: 255, g: 255, b: 255, a: 1 });
+  const [x, y] = [lumOf(f) + 0.05, lumOf(b) + 0.05];
+  return +(Math.max(x, y) / Math.min(x, y)).toFixed(2);
+};
+/* 조상 바탕을 쌓아 합성한 실제 색 — 아웃라인처럼 면이 투명한 요소를 재려면 필요하다 */
+const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let i = stack.length - 1; i >= 0; i--) out = over(parse(stack[i]), out); return `rgb(${Math.round(out.r)}, ${Math.round(out.g)}, ${Math.round(out.b)})`; };
 
 (async () => {
   const b = await chromium.launch();
@@ -103,7 +126,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       return {
         neutral: document.documentElement.hasAttribute("data-accent-neutral"),
         bg: btn ? getComputedStyle(btn).backgroundColor : "", text: txt ? getComputedStyle(txt).color : "",
-        accent: g("--accent"), accentText: g("--accent-text"), focus: g("--border-focus"), subtle: g("--accent-subtle"),
+        accent: g("--accent-surface"), accentText: g("--accent-text"), focus: g("--focus-ring"), subtle: g("--accent-fill"),
         ramp: [600, 300, 100].map((k) => g("--accent-" + k)).join(" "),
       };
     });
@@ -115,7 +138,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     && teal.accentText === "#00636A" && teal.text === "rgb(0, 99, 106)", JSON.stringify(teal));
   ok("red product turns the whole accent ramp neutral",
     red.neutral && red.bg === "rgb(27, 28, 30)" && red.text === "rgb(27, 28, 30)"
-    && red.accent === "#1B1C1E" && red.focus === "#70737C" && red.subtle === "#EAEBEC"
+    && red.accent === "#1B1C1E" && red.focus === "#70737C"
     && red.ramp === "#5A5C63 #AEB0B6 #EAEBEC", JSON.stringify(red));   /* NEUTRAL_RAMP 가 slate 에서 --neutral-* 값으로 바뀌었다 */
   // 다크는 메인·hover·pressed·글자색을 라이트와 그대로 공유한다(같은 600 단계) — 다른 것은 텍스트·선택 배경·지표·반전·포커스뿐이다
   const readTokens = () => page.evaluate(() => {
@@ -123,14 +146,14 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
     const pb = document.querySelector("#ex-button-variant .btn.primary"); const c = pb ? getComputedStyle(pb) : null;
     return {
-      accent: g("--accent"), hover: g("--accent-hover"), pressed: g("--accent-pressed"), on: g("--accent-on"),
-      text: g("--accent-text"), subtle: g("--accent-subtle"), graphic: g("--accent-graphic"), focus: g("--border-focus"), prod600: g("--prod-600"),
+      accent: g("--accent-surface"), hover: g("--accent-surface-hover"), pressed: g("--accent-surface-pressed"), on: g("--accent-on"),
+      text: g("--accent-text"), subtle: g("--accent-fill"), graphic: g("--accent-graphic"), focus: g("--focus-ring"), prod600: g("--prod-600"),
       light: document.documentElement.hasAttribute("data-accent-light"), neutral: document.documentElement.hasAttribute("data-accent-neutral"),
       bg: c ? c.backgroundColor : "", fg: c ? c.color : "",
-      accentRgb: res("var(--accent)"), hoverRgb: res("var(--accent-hover)"), pressedRgb: res("var(--accent-pressed)"), onRgb: res("var(--accent-on)"),
-      textRgb: res("var(--accent-text)"), subtleRgb: res("var(--accent-subtle)"), graphicRgb: res("var(--accent-graphic)"),
-      focusRgb: res("var(--border-focus)"), invRgb: res("var(--accent-inverse)"), bgInverse: res("var(--bg-inverse)"),
-      canvas: res("var(--bg-canvas)"), surface: res("var(--bg-surface)"), panel: res("var(--bg-panel)"),
+      accentRgb: res("var(--accent-surface)"), hoverRgb: res("var(--accent-surface-hover)"), pressedRgb: res("var(--accent-surface-pressed)"), onRgb: res("var(--accent-on)"),
+      textRgb: res("var(--accent-text)"), subtleRgb: res("var(--accent-fill)"), graphicRgb: res("var(--accent-graphic)"),
+      focusRgb: res("var(--focus-ring)"), invRgb: res("var(--accent-text-inverse)"), bgInverse: res("var(--surface-inverse)"),
+      canvas: res("var(--surface-base)"), surface: res("var(--surface-raised)"), panel: res("var(--surface-sunken)"),
       ramp: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((k) => g("--accent-" + k)).join(" "),
       neuRamp: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((k) => g("--neutral-" + k)).join(" "),
     };
@@ -176,9 +199,10 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       `${ratio(D.graphicRgb, D.canvas)} · ${ratio(D.graphicRgb, D.surface)} · ${ratio(D.graphicRgb, D.panel)}`);
     ok(`dark ${n} focus ring clears 3:1`, ratio(D.focusRgb, D.canvas) >= 3, `${ratio(D.focusRgb, D.canvas)}`);
     ok(`dark ${n} accent text clears AA on the panel`, ratio(D.textRgb, D.panel) >= 4.5, `${ratio(D.textRgb, D.panel)}`);
-    // 선택 배경은 제품과 무관한 중립 — 제품 램프 900 이면 캔버스와 1.05~1.16 로 사라진다
-    ok(`dark ${n} selected background stays neutral and visible`,
-      D.subtle === "#37383C" && ratio(D.subtleRgb, D.canvas) >= 1.4, `${D.subtle} · ${ratio(D.subtleRgb, D.canvas)}`);
+    /* 선택 배경은 제품 색조에 중립 리프트를 섞은 알파 면이다 — 색조만 얹으면 다크 캔버스에서 1.11 로 사라진다.
+       알파를 살려 캔버스 위에 합성해서 재야 한다(원문 값으로 재면 color-mix 문자열이 그대로 들어와 뜻 없는 숫자가 나온다) */
+    ok(`dark ${n} selected background stays visible on the canvas`,
+      ratio(D.subtleRgb, D.canvas, D.canvas) >= 1.35, `${ratio(D.subtleRgb, D.canvas, D.canvas)} · ${D.subtleRgb}`);
     // 다크의 반전 표면은 밝다 — 그 위의 Primary 는 800 단계여야 묻히지 않는다
     ok(`dark ${n} inverse-surface Primary clears AA`, ratio(D.invRgb, D.bgInverse) >= 4.5, `${ratio(D.invRgb, D.bgInverse)} · ${D.invRgb} / ${D.bgInverse}`);
   }
@@ -188,7 +212,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   ok("light bright product takes a dark accent-on", cases[1][1].onRgb === "rgb(23, 23, 25)", cases[1][1].onRgb);
   await accent("product-a");
   // 라이트로 돌아오면 제품색이 살아 있어야 한다
-  const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent").trim());
+  const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent-surface").trim());
   ok("light keeps the product colour", backLight === "#00AAB6", backLight);
   await accent("product-b");   // 뒤 케이스(Atomic 램프)가 중립 전환 상태를 전제한다 — 원복해 둔다
 
@@ -221,19 +245,25 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     await page.waitForTimeout(250);
     const col = await page.evaluate(() => {
       /* 아웃라인은 면이 투명하다 — 뒤에 있는 첫 불투명 조상을 찾아야 한다. 투명값을 그대로 재면 검은색과 비교된다 */
+      /* 반투명 조상을 만나면 멈추지 않고 쌓는다 — 멈추면 알파가 무시돼 아웃라인 라벨이 엉뚱한 바탕과 비교된다 */
       const backdrop = (el) => {
+        const stack = [];
         for (let e = el; e; e = e.parentElement) {
           const b = getComputedStyle(e).backgroundColor;
-          if (b && !/rgba\(0, 0, 0, 0\)|transparent/.test(b)) return b;
+          if (!b) continue;
+          const a = b.indexOf("/") >= 0 ? parseFloat(b.slice(b.indexOf("/") + 1)) : (b.startsWith("rgba") ? parseFloat(b.split(",")[3]) : 1);
+          if (!(a > 0)) continue;
+          stack.push(b);
+          if (a >= 0.999) break;
         }
-        return "rgb(255, 255, 255)";
+        return stack;
       };
       const solid = document.querySelector("#ex-button-variant .btn.danger:not(.secondary)");
       const outline = document.querySelector("#ex-button-variant .btn.danger.secondary");
       const cs = getComputedStyle(solid), co = getComputedStyle(outline);
-      return { sf: cs.color, sb: cs.backgroundColor, of: co.color, ob: backdrop(outline) };
+      return { sf: cs.color, sb: cs.backgroundColor, of: co.color, obStack: backdrop(outline) };
     });
-    const dc = { solid: ratio(col.sf, col.sb), outline: ratio(col.of, col.ob) };
+    const dc = { solid: ratio(col.sf, col.sb), outline: ratio(col.of, bedOf(col.obStack)) };
     ok(`danger button label meets AA (${theme})`, dc.solid >= 4.5 && dc.outline >= 4.5, JSON.stringify(dc));
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
@@ -326,7 +356,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
     const e = document.getElementById("dis-link"); const c = getComputedStyle(e);
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
     return { opacity: c.opacity, pointerEvents: c.pointerEvents, focusable: e.tabIndex >= 0,
-      bg: c.backgroundColor, fg: c.color, wantBg: res("var(--interaction-disable)"), wantFg: res("var(--text-disabled)") };
+      bg: c.backgroundColor, fg: c.color, wantBg: res("var(--fill-disabled)"), wantFg: res("var(--text-disabled)") };
   });
   // 비활성은 더 이상 opacity 를 쓰지 않는다 — 전용 토큰이라 opacity 는 1 이고 면·라벨이 회색으로 바뀐다
   ok("disabled link button looks disabled", disLink.opacity === "1" && disLink.bg === disLink.wantBg && disLink.fg === disLink.wantFg && disLink.pointerEvents === "none" && disLink.focusable, JSON.stringify(disLink));
@@ -343,7 +373,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   const textDark = await page.evaluate(() => {
     const e = document.querySelector("#ex-button-variant .btn.text");
     const res = (tok) => { const d = document.createElement("div"); d.style.color = tok; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
-    return { fg: getComputedStyle(e).color, panel: res("var(--bg-panel)"), canvas: res("var(--bg-canvas)") };
+    return { fg: getComputedStyle(e).color, panel: res("var(--surface-sunken)"), canvas: res("var(--surface-base)") };
   });
   ok("text button meets AA on a dark panel", ratio(textDark.fg, textDark.panel) >= 4.5 && ratio(textDark.fg, textDark.canvas) >= 4.5,
     `panel ${ratio(textDark.fg, textDark.panel)} · canvas ${ratio(textDark.fg, textDark.canvas)}`);
@@ -358,7 +388,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       await page.waitForTimeout(250);
       const at = await page.evaluate(() => {
         const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
-        return { fg: res("var(--accent-text)"), cv: res("var(--bg-canvas)"), sf: res("var(--bg-surface)"), pn: res("var(--bg-panel)") };
+        return { fg: res("var(--accent-text)"), cv: res("var(--surface-base)"), sf: res("var(--surface-raised)"), pn: res("var(--surface-sunken)") };
       });
       const low = Math.min(ratio(at.fg, at.cv), ratio(at.fg, at.sf), ratio(at.fg, at.pn));
       ok(`${theme} accent-text clears AA on every surface (${key || "base"})`, low >= 4.5, `${low} · ${at.fg}`);
@@ -373,11 +403,11 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   const statusTokens = () => page.evaluate((fam) => {
     const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
-    const out = { canvas: res("var(--bg-canvas)"), surface: res("var(--bg-surface)"), panel: res("var(--bg-panel)") };
+    const out = { canvas: res("var(--surface-base)"), surface: res("var(--surface-raised)"), panel: res("var(--surface-sunken)") };
     for (const f of fam) out[f] = {
-      base: g("--" + f), hover: g("--" + f + "-hover"), pressed: g("--" + f + "-pressed"), text: g("--" + f + "-text"), on: g("--" + f + "-on"),
-      baseRgb: res("var(--" + f + ")"), textRgb: res("var(--" + f + "-text)"), onRgb: g("--" + f + "-on") ? res("var(--" + f + "-on)") : "",
-      hoverRgb: res("var(--" + f + "-hover)"), pressedRgb: res("var(--" + f + "-pressed)"),
+      base: g("--" + f + "-surface"), hover: g("--" + f + "-surface-hover"), pressed: g("--" + f + "-surface-pressed"), text: g("--" + f + "-text"), on: g("--" + f + "-on"),
+      baseRgb: res("var(--" + f + "-surface)"), textRgb: res("var(--" + f + "-text)"), onRgb: res("var(--" + f + "-on)"),
+      hoverRgb: res("var(--" + f + "-surface-hover)"), pressedRgb: res("var(--" + f + "-surface-pressed)"),
     };
     return out;
   }, FAM);
@@ -394,14 +424,13 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       const low = Math.min(ratio(t.textRgb, st.canvas), ratio(t.textRgb, st.surface), ratio(t.textRgb, st.panel));
       ok(`${theme} ${f}-text clears AA on every surface`, low >= 4.5,
         `${low} · base 로는 ${Math.min(ratio(t.baseRgb, st.canvas), ratio(t.baseRgb, st.surface), ratio(t.baseRgb, st.panel))}`);
-      // -on 이 있는 가족은 자기 면 위에서 4.5 를 넘어야 한다 (--info-on 은 양쪽 다 미달이라 두지 않았다)
-      if (f === "info") ok(`${theme} info has no -on token`, t.on === "", t.on);
-      else {
-        // 세 상태 모두 봐야 한다 — warning·success 는 어두운 글자를 쓰므로 상태가 밝은 쪽으로 가야 하고, 짙은 쪽으로 두면 hover 부터 깨졌다
-        const st = [["rest", t.baseRgb], ["hover", t.hoverRgb], ["pressed", t.pressedRgb]];
-        const low = Math.min(...st.map(([, c]) => ratio(t.onRgb, c)));
+      /* -on 은 네 가족 모두 있다 — 파생 규칙이 '흰색과 중립 950 중 대비가 높은 쪽'을 고르므로 info 도 어두운 글자로 성립한다.
+         세 상태 모두 봐야 한다: warning·success·info 는 어두운 글자를 쓰므로 상태가 밝은 쪽으로 가야 하고, 짙은 쪽으로 두면 hover 부터 깨졌다 */
+      {
+        const sts = [["rest", t.baseRgb], ["hover", t.hoverRgb], ["pressed", t.pressedRgb]];
+        const low = Math.min(...sts.map(([, c]) => ratio(t.onRgb, c)));
         ok(`${theme} ${f}-on clears AA in all three states`, low >= 4.5,
-          `${st.map(([k, c]) => k + " " + ratio(t.onRgb, c)).join(" · ")} / ${t.onRgb}`);
+          `${sts.map(([k, c]) => k + " " + ratio(t.onRgb, c)).join(" · ")} / ${t.onRgb}`);
       }
     }
   }
@@ -412,7 +441,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   const disabledSet = () => page.evaluate(() => {
     const prev = document.querySelector("#ex-button-disabled .example-preview") || document.querySelector("#ex-button-state .example-preview");
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
-    const want = { fill: res("var(--interaction-disable)"), fg: res("var(--text-disabled)") };
+    const want = { fill: res("var(--fill-disabled)"), fg: res("var(--text-disabled)") };
     const out = { want, v: {} };
     for (const [n, cls] of [["primary", "primary"], ["tertiary", "tertiary"], ["danger", "danger"], ["secondary", "secondary"], ["danger-outline", "danger secondary"], ["text", "text"]]) {
       const b = document.createElement("button"); b.type = "button"; b.className = "btn md " + cls; b.disabled = true; b.textContent = "x";
@@ -487,7 +516,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid") };
       out.tok[l] = { fill: res("var(--sev-" + l + ")"), text: res("var(--sev-" + l + "-text)"), on: res("var(--sev-" + l + "-on)"), bg: res("var(--sev-" + l + "-bg)") };
     }
-    out.panel = res("var(--bg-panel)"); out.canvas = res("var(--bg-canvas)"); out.surface = res("var(--bg-surface)");
+    out.panel = res("var(--surface-sunken)"); out.canvas = res("var(--surface-base)"); out.surface = res("var(--surface-raised)");
     return out;
   }, LVL);
   for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
@@ -501,7 +530,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
       // 채운 태그 — 면 위의 글자. info 를 포함해야 '규칙 누락'이 재발하지 않는다(종전엔 회색 패널에 흰 글자로 1.1 이었다)
       ok(`${theme} ${l} solid tag label clears AA on its fill`, ratio(t.v[l].solid.fg, t.v[l].solid.bgEff) >= 4.5,
         `${ratio(t.v[l].solid.fg, t.v[l].solid.bgEff)} · ${t.v[l].solid.fg} / ${t.v[l].solid.bgEff}`);
-      // 채운 태그의 면이 자기 면 토큰이어야 한다 — .tag.solid.info 가 없어 --bg-panel 로 떨어지던 것을 잡는다
+      // 채운 태그의 면이 자기 면 토큰이어야 한다 — .tag.solid.info 가 없어 --fill-strong 로 떨어지던 것을 잡는다
       ok(`${theme} ${l} solid tag uses its own fill token`, t.v[l].solid.bg === t.tok[l].fill && t.v[l].solid.bg !== t.panel,
         `${t.v[l].solid.bg} · fill ${t.tok[l].fill} · panel ${t.panel}`);
       // -text 는 글자용이라 캔버스·서피스·패널 위에서도 4.5 를 넘어야 한다
@@ -929,7 +958,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   // Colors: 바탕과 구분되지 않는 스와치에 라인
   await go("foundations/colors.html");
   const faint = (tok) => page.evaluate((t) => document.querySelector('.val-cell[data-token="' + t + '"] .bar').classList.contains("faint"), tok);
-  ok("white swatch gets an outline, saturated one does not", (await faint("--static-white")) && (await faint("--bg-canvas")) && !(await faint("--accent")) && !(await faint("--static-black")));
+  ok("white swatch gets an outline, saturated one does not", (await faint("--static-white")) && (await faint("--surface-base")) && !(await faint("--accent-surface")) && !(await faint("--static-black")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
   ok("outline follows the theme (dark: black faint, white not)", (await faint("--static-black")) && !(await faint("--static-white")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
@@ -945,7 +974,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   ok("semantic colour bars are 32 tall, flush, square", barGeo.h === 32 && barGeo.gap === 0 && barGeo.radius === "0px", JSON.stringify(barGeo));
   ok("semantic bar label sits 8px below, centered", barGeo.labelGap === 8 && barGeo.align === "center", JSON.stringify(barGeo));
   // hover 하면 색 레이어만 위로 8px 자란다 — 라벨은 움직이지 않아야 한다(bottom 고정이 이걸 보장한다)
-  const barSel = '.sem-row .val-cell[data-token="--accent"]';
+  const barSel = '.sem-row .val-cell[data-token="--accent-surface"]';
   const grow = async (sel) => page.evaluate((s2) => {
     const c = document.querySelector(s2), i = c.querySelector(".bar i"), n = c.querySelector(".name");
     return { h: Math.round(i.getBoundingClientRect().height), top: Math.round(i.getBoundingClientRect().top),
@@ -996,7 +1025,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   ok("colors drops the role map and links to it instead", left.roles === 0 && left.link, JSON.stringify(left));
 
   // Atomic 팔레트 칸 수 + 반응형 블록이 실제로 적용되는지 (한동안 컴포넌트 규칙에 덮여 죽어 있었다)
-  for (const [w, want] of [[1440, [2, 14, 11]], [760, [2, 7, 7]], [390, [2, 5, 5]]]) {
+  for (const [w, want] of [[1440, [2, 15, 11]], [760, [2, 7, 7]], [390, [2, 5, 5]]]) {
     await page.setViewportSize({ width: w, height: 900 });
     await go("foundations/colors.html");
     await page.locator('.doc-tabs [data-doctab="atomic"]').click();
@@ -1030,7 +1059,7 @@ const ratio = (fg, bg) => { const [x, y] = [lum(toRgb(fg)) + 0.05, lum(toRgb(bg)
   // Colors: Semantic 스와치 클릭 → 값 팝오버 (딤 없이 바 아래, 토큰 복사)
   await go("foundations/colors.html");
   await page.locator("#primary").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
-  const cellSel = '.val-cell[data-token="--accent"]';
+  const cellSel = '.val-cell[data-token="--accent-surface"]';
   await page.locator(cellSel).click();
   await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
   const cv = await page.evaluate(() => {

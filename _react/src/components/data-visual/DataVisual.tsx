@@ -3,7 +3,7 @@ import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import type { Tone } from "../../types";
 
-const toneVar = (t?: Tone | string) => (t ? (["critical", "high", "medium", "low", "info"].includes(t) ? `var(--sev-${t})` : t === "ok" ? "var(--success)" : t === "accent" ? "var(--accent)" : t) : "var(--accent)");
+const toneVar = (t?: Tone | string) => (t ? (["critical", "high", "medium", "low", "info"].includes(t) ? `var(--sev-${t})` : t === "ok" ? "var(--success-surface)" : t === "accent" ? "var(--accent-surface)" : t) : "var(--accent-surface)");
 
 export interface KpiProps extends HTMLAttributes<HTMLDivElement> {
   label: ReactNode;

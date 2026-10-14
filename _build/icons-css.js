@@ -16,7 +16,7 @@ const mask = (name, style, opt = {}) => { const u = `url("${dataUri(name, style,
    라디오 점은 글리프가 아니라 단순 원이므로 마스크를 쓰지 않는다 — style.src.css 의 .radio input:checked::after 에 직접 둔다(마스크로 그리면 Safari 에서 0.4~0.75px 어긋남). */
 const RULES = [
   [".checkbox input:checked::after", `content:"";width:12px;height:12px;background:var(--accent-on);${mask("check", "outline", { strokeWidth: 3.5 })}`],
-  [".radio input:checked", "border-color:var(--accent);background:var(--accent)"],
+  [".radio input:checked", "border-color:var(--accent-surface);background:var(--accent-surface)"],
   [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;background:var(--static-white);${mask("circle", "filled", { size: "120%" })};transition:left var(--motion-fast)`],
   [".switch input:checked::after", "left:22px"],
   [".switch.sm input::after", "width:16px;height:16px"],

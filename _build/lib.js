@@ -46,9 +46,18 @@
     const head = `/* JS Design System ${version || ""} · ${prefixes.join(", ")} · 토큰(var(--*))은 assets/style.css :root 참고 */`;
     return head + "\n" + out.join("\n");
   }
+  /* 블록 끝은 괄호 짝으로 찾는다 — 주석 안의 중괄호(역할 문법 --{intent}-{role} 같은 표기)는 세지 않는다.
+     첫 '}' 까지 자르던 종전 구현은 그 주석 한 줄에 :root 블록이 중간에서 끊겨 --space-* 가 사라졌다 */
   function rootBlock(css, selector) {
     const i = css.indexOf(selector + "{"); if (i < 0) return "";
-    const j = css.indexOf("}", i); return css.slice(i + selector.length + 1, j);
+    const start = i + selector.length + 1;
+    let depth = 1, j = start;
+    while (j < css.length && depth > 0) {
+      if (css[j] === "/" && css[j + 1] === "*") { const e = css.indexOf("*/", j + 2); j = e < 0 ? css.length : e + 2; continue; }
+      if (css[j] === "{") depth++; else if (css[j] === "}") depth--;
+      j++;
+    }
+    return css.slice(start, j - 1);
   }
   function parseVars(block) {
     const out = {};

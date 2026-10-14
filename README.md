@@ -40,6 +40,8 @@
 | `jiran-design-system-guide.standalone.html` | 위 파일을 로드하는 미리보기 셸. `_build` 에서 `python3 -m http.server 8090` 후 열기 |
 | `components.json` | 빌드 산출물. Figma 동기화 등 외부 도구용(토큰 · 컴포넌트 스펙 · 예제 코드) |
 | `verify.js` | 생성물 검증(플레이스홀더 0, 코드 패널 존재, 링크 변환, React 탭 패키지 코드 여부 등) |
+| `contrast.pairs.js` | **대비 계약** — 한 화면에서 만날 수 있는 토큰 쌍과 최소 대비를 선언. 숫자는 사람이 적지 않는다 |
+| `contrast.js` | 그 선언을 생성 사이트에서 전수 측정(라이트·다크 × 제품 세 경우). 미달이면 빌드 실패 · 샘플 블록의 프리미티브 직접 참조 금지 · 소비자 0 토큰 경고 |
 
 ## React 패키지 (`_react/`)
 `@jiran/ds-react` — 30개 컴포넌트 + 패턴 래퍼를 실제 React 컴포넌트로 구현. 같은 클래스 마크업을 렌더링하므로 `dist/style.css`(토큰 + 컴포넌트 CSS 만 합성) 하나로 동작합니다.
