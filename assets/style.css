@@ -132,7 +132,6 @@
   --info-surface:var(--cyan-500);--info-surface-hover:var(--cyan-400);--info-surface-pressed:var(--cyan-300);
   --info-fill:color-mix(in srgb,var(--cyan-500) 12%,transparent);--info-line:rgba(0,189,222,.22);
   --info-on:var(--neutral-950);--info-text:var(--cyan-300);--info-graphic:var(--cyan-400);
-     라이트의 관계를 뒤집어 유지한다 — 어느 테마에서든 critical 이 배경과 대비가 더 크다(다크 8.98 vs 4.53) */
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
   color-scheme:dark;
 }}
@@ -173,7 +172,6 @@
   --info-surface:var(--cyan-500);--info-surface-hover:var(--cyan-400);--info-surface-pressed:var(--cyan-300);
   --info-fill:color-mix(in srgb,var(--cyan-500) 12%,transparent);--info-line:rgba(0,189,222,.22);
   --info-on:var(--neutral-950);--info-text:var(--cyan-300);--info-graphic:var(--cyan-400);
-     라이트의 관계를 뒤집어 유지한다 — 어느 테마에서든 critical 이 배경과 대비가 더 크다(다크 8.98 vs 4.53) */
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
   color-scheme:dark;
 }
