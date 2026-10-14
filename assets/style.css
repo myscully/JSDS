@@ -19,12 +19,18 @@
      기본값 #1D4ED8 — 제품 색 요건은 '다크 기준 단계(500)에서 면 위 글자와 4.5 이상'이다.
      한 단계 밝은 #2563EB 는 500 단계가 흰 글자 4.28 · 어두운 글자 4.18 로 양쪽 다 미달이었다 */
   --accent-50:var(--prod-50,#EFF2FA);--accent-100:var(--prod-100,#D8DFF3);--accent-200:var(--prod-200,#B1BFE7);--accent-300:var(--prod-300,#849CE1);--accent-400:var(--prod-400,#5A7CDC);--accent-500:var(--prod-500,#3661DA);--accent-600:var(--prod-600,#1D4ED8);--accent-700:var(--prod-700,#173DA8);--accent-800:var(--prod-800,#112D7D);--accent-900:var(--prod-900,#0B1E52);
-  /* 상태 hue 램프 — 참고 시스템 Atomic 값. 단계 번호는 우리 체계(50 밝음 → 950 어두움)를 유지하고 매핑은 우리 600 ← 그쪽 40 에 맞췄다.
+  /* 상태 hue 램프 — **명도 정렬**. 같은 단계 번호가 네 가족에서 같은 L* 를 뜻한다(중립 램프의 L* 를 목표로 삼았다).
+     참고 시스템(Montage) Atomic 값에서 출발했지만 그 램프는 색상별로 보기 좋게 조정된 것이지 명도로 정렬된 것이 아니었다 —
+     500 단계의 L* 가 danger 57.6 · warning 70.7 · success 67.7 · info 70.6 으로 격차가 13.1 이었고,
+     그래서 면 위 글자가 가족마다 흰/검으로 갈리고 상태 방향까지 따라 갈렸다.
+     정렬 대상은 소비자가 있는 200~700 여섯 단계뿐이다 — 50·100·800·900·950 은 참조하는 의미 토큰이 없다.
+     생성: OKLCh 로 색조·채도를 유지한 채 L 을 이분 탐색하고, 매 반복 안에서 채도를 sRGB 게멋으로 클램프했다
+     (한 번만 클램프하면 채도를 깎을 때 휘도가 변해 목표 L* 를 벗어난다).
      네 가족만 싣는다 — 소비자 없는 예비 램프(blue·lime·violet·purple)는 제거했고 구문 강조 네 색은 --code-* 로 올렸다 */
-  --red-50:#FEECEC;--red-100:#FED5D5;--red-200:#FFB5B5;--red-300:#FF8C8C;--red-400:#FF6363;--red-500:#FF4242;--red-600:#E52222;--red-700:#B00C0C;--red-800:#730303;--red-900:#3B0101;--red-950:#200101;
-  --orange-50:#FEF4E6;--orange-100:#FEE6C6;--orange-200:#FFD49C;--orange-300:#FFC06E;--orange-400:#FFA938;--orange-500:#FF9200;--orange-600:#D47800;--orange-700:#9C5800;--orange-800:#663A00;--orange-900:#361E00;--orange-950:#1E1000;
-  --green-50:#D9FFE6;--green-100:#ACFCC7;--green-200:#7DF5A5;--green-300:#49E57D;--green-400:#1ED45A;--green-500:#00BF40;--green-600:#009632;--green-700:#006E25;--green-800:#004517;--green-900:#00240C;--green-950:#001407;
-  --cyan-50:#DEFAFF;--cyan-100:#B5F4FF;--cyan-200:#8AEDFF;--cyan-300:#57DFF7;--cyan-400:#28D0ED;--cyan-500:#00BDDE;--cyan-600:#0098B2;--cyan-700:#006F82;--cyan-800:#004854;--cyan-900:#00252B;--cyan-950:#001418;
+  --red-50:#FEECEC;--red-100:#FED5D5;--red-200:#FBB1B1;--red-300:#FF9190;--red-400:#FF6B69;--red-500:#E21C29;--red-600:#BC000D;--red-700:#780002;--red-800:#730303;--red-900:#3B0101;--red-950:#200101;
+  --orange-50:#FEF4E6;--orange-100:#FEE6C6;--orange-200:#E7BD86;--orange-300:#E2A452;--orange-400:#DA8900;--orange-500:#AC6000;--orange-600:#8B4D00;--orange-700:#572E00;--orange-800:#663A00;--orange-900:#361E00;--orange-950:#1E1000;
+  --green-50:#D9FFE6;--green-100:#ACFCC7;--green-200:#62DB8D;--green-300:#1DCA64;--green-400:#00B347;--green-500:#00862A;--green-600:#006B21;--green-700:#004213;--green-800:#004517;--green-900:#00240C;--green-950:#001407;
+  --cyan-50:#DEFAFF;--cyan-100:#B5F4FF;--cyan-200:#6FD2E4;--cyan-300:#2DC0D8;--cyan-400:#00AAC3;--cyan-500:#007E95;--cyan-600:#006578;--cyan-700:#003E4A;--cyan-800:#004854;--cyan-900:#00252B;--cyan-950:#001418;
   --static-white:#FFFFFF;--static-black:#000000;
   /* ── Semantic · Light ─────────────────────────────────────────
      역할 문법은 --{intent}-{role}[-{state}] 이다. role ∈ surface · fill · on · text · line · graphic.
@@ -56,24 +62,24 @@
   --brand-surface:var(--brand-500);--brand-fill:var(--brand-50);
   /* 상태색 — 기준은 라이트 600. -on 은 흰색과 중립 950 중 대비가 높은 쪽이고, 상태는 그 -on 의 반대 방향이다.
      warning·success·info 는 600 위에서 흰 글자가 3.19 · 3.77 · 3.42 로 떠서 어두운 글자를 쓰고, 그래서 상태가 밝은 쪽(500·400)으로 간다 */
-  --danger-surface:var(--red-600);--danger-surface-hover:var(--red-700);--danger-surface-pressed:var(--red-800);
-  --danger-fill:rgba(229,34,34,.08);--danger-line:rgba(229,34,34,.22);
-  --danger-on:var(--static-white);--danger-text:var(--red-700);--danger-graphic:var(--red-600);
+  --danger-surface:var(--red-500);--danger-surface-hover:var(--red-600);--danger-surface-pressed:var(--red-700);
+  --danger-fill:rgba(226,28,41,.08);--danger-line:rgba(226,28,41,.22);
+  --danger-on:var(--static-white);--danger-text:var(--red-600);--danger-graphic:var(--red-500);
   /* danger-strong — 심각도 Critical 등급이다. 기준에서 ±2단계(라이트 600→800 · 다크 500→300).
      graphic 도 ±2 여야 한다 — 다크를 300 으로 두면 --danger-graphic(400)과 분리가 1.30 으로 Critical·High 가 한 색으로 읽힌다.
      fill 은 알파도 강한 쪽이다(라이트 16% · 다크 20%) — 같은 알파면 두 등급 바탕이 1.04·1.09 로 갈리지 않는다 */
   --danger-strong-surface:var(--red-800);--danger-strong-surface-hover:var(--red-900);--danger-strong-surface-pressed:var(--red-950);
   --danger-strong-fill:rgba(115,3,3,.16);--danger-strong-line:rgba(115,3,3,.22);
   --danger-strong-on:var(--static-white);--danger-strong-text:var(--red-800);--danger-strong-graphic:var(--red-800);
-  --warning-surface:var(--orange-600);--warning-surface-hover:var(--orange-500);--warning-surface-pressed:var(--orange-400);
-  --warning-fill:rgba(212,120,0,.08);--warning-line:rgba(212,120,0,.22);
-  --warning-on:var(--neutral-950);--warning-text:var(--orange-700);--warning-graphic:var(--orange-600);
-  --success-surface:var(--green-600);--success-surface-hover:var(--green-500);--success-surface-pressed:var(--green-400);
-  --success-fill:rgba(0,150,50,.08);--success-line:rgba(0,150,50,.22);
-  --success-on:var(--neutral-950);--success-text:var(--green-700);--success-graphic:var(--green-600);
-  --info-surface:var(--cyan-600);--info-surface-hover:var(--cyan-500);--info-surface-pressed:var(--cyan-400);
-  --info-fill:rgba(0,152,178,.08);--info-line:rgba(0,152,178,.22);
-  --info-on:var(--neutral-950);--info-text:var(--cyan-700);--info-graphic:var(--cyan-600);
+  --warning-surface:var(--orange-500);--warning-surface-hover:var(--orange-600);--warning-surface-pressed:var(--orange-700);
+  --warning-fill:rgba(172,96,0,.08);--warning-line:rgba(172,96,0,.22);
+  --warning-on:var(--static-white);--warning-text:var(--orange-600);--warning-graphic:var(--orange-500);
+  --success-surface:var(--green-500);--success-surface-hover:var(--green-600);--success-surface-pressed:var(--green-700);
+  --success-fill:rgba(0,134,42,.08);--success-line:rgba(0,134,42,.22);
+  --success-on:var(--static-white);--success-text:var(--green-600);--success-graphic:var(--green-500);
+  --info-surface:var(--cyan-500);--info-surface-hover:var(--cyan-600);--info-surface-pressed:var(--cyan-700);
+  --info-fill:rgba(0,126,149,.08);--info-line:rgba(0,126,149,.22);
+  --info-on:var(--static-white);--info-text:var(--cyan-600);--info-graphic:var(--cyan-500);
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;--space-20:80px;
   --card-pad:24px;--card-gap:20px;--row-h:52px;
   --radius-xs:2px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--radius-xl:10px;--radius-full:999px;
@@ -125,20 +131,20 @@
   --brand-fill:#3A2410;
   /* 다크 상태색 — 기준 500. 네 가족 모두 면 위에 어두운 글자를 쓰므로 상태가 밝은 쪽(400·300)이다.
      짙은 쪽으로 보내면 red-600 위의 어두운 글자가 3.71 로 깨진다 */
-  --danger-surface:var(--red-500);--danger-surface-hover:var(--red-400);--danger-surface-pressed:var(--red-300);
-  --danger-fill:color-mix(in srgb,var(--red-500) 12%,transparent);--danger-line:rgba(255,66,66,.22);
+  --danger-surface:var(--red-400);--danger-surface-hover:var(--red-300);--danger-surface-pressed:var(--red-200);
+  --danger-fill:color-mix(in srgb,var(--red-400) 12%,transparent);--danger-line:rgba(255,107,105,.22);
   --danger-on:var(--neutral-950);--danger-text:var(--red-300);--danger-graphic:var(--red-400);
   --danger-strong-surface:var(--red-300);--danger-strong-surface-hover:var(--red-200);--danger-strong-surface-pressed:var(--red-100);
   --danger-strong-fill:color-mix(in srgb,var(--red-300) 20%,transparent);--danger-strong-line:rgba(255,140,140,.22);
   --danger-strong-on:var(--neutral-950);--danger-strong-text:var(--red-200);--danger-strong-graphic:var(--red-200);
-  --warning-surface:var(--orange-500);--warning-surface-hover:var(--orange-400);--warning-surface-pressed:var(--orange-300);
-  --warning-fill:color-mix(in srgb,var(--orange-500) 12%,transparent);--warning-line:rgba(255,146,0,.22);
+  --warning-surface:var(--orange-400);--warning-surface-hover:var(--orange-300);--warning-surface-pressed:var(--orange-200);
+  --warning-fill:color-mix(in srgb,var(--orange-400) 12%,transparent);--warning-line:rgba(218,137,0,.22);
   --warning-on:var(--neutral-950);--warning-text:var(--orange-300);--warning-graphic:var(--orange-400);
-  --success-surface:var(--green-500);--success-surface-hover:var(--green-400);--success-surface-pressed:var(--green-300);
-  --success-fill:color-mix(in srgb,var(--green-500) 12%,transparent);--success-line:rgba(0,191,64,.22);
+  --success-surface:var(--green-400);--success-surface-hover:var(--green-300);--success-surface-pressed:var(--green-200);
+  --success-fill:color-mix(in srgb,var(--green-400) 12%,transparent);--success-line:rgba(0,179,71,.22);
   --success-on:var(--neutral-950);--success-text:var(--green-300);--success-graphic:var(--green-400);
-  --info-surface:var(--cyan-500);--info-surface-hover:var(--cyan-400);--info-surface-pressed:var(--cyan-300);
-  --info-fill:color-mix(in srgb,var(--cyan-500) 12%,transparent);--info-line:rgba(0,189,222,.22);
+  --info-surface:var(--cyan-400);--info-surface-hover:var(--cyan-300);--info-surface-pressed:var(--cyan-200);
+  --info-fill:color-mix(in srgb,var(--cyan-400) 12%,transparent);--info-line:rgba(0,170,195,.22);
   --info-on:var(--neutral-950);--info-text:var(--cyan-300);--info-graphic:var(--cyan-400);
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
   color-scheme:dark;
@@ -169,20 +175,20 @@
   --brand-fill:#3A2410;
   /* 다크 상태색 — 기준 500. 네 가족 모두 면 위에 어두운 글자를 쓰므로 상태가 밝은 쪽(400·300)이다.
      짙은 쪽으로 보내면 red-600 위의 어두운 글자가 3.71 로 깨진다 */
-  --danger-surface:var(--red-500);--danger-surface-hover:var(--red-400);--danger-surface-pressed:var(--red-300);
-  --danger-fill:color-mix(in srgb,var(--red-500) 12%,transparent);--danger-line:rgba(255,66,66,.22);
+  --danger-surface:var(--red-400);--danger-surface-hover:var(--red-300);--danger-surface-pressed:var(--red-200);
+  --danger-fill:color-mix(in srgb,var(--red-400) 12%,transparent);--danger-line:rgba(255,107,105,.22);
   --danger-on:var(--neutral-950);--danger-text:var(--red-300);--danger-graphic:var(--red-400);
   --danger-strong-surface:var(--red-300);--danger-strong-surface-hover:var(--red-200);--danger-strong-surface-pressed:var(--red-100);
   --danger-strong-fill:color-mix(in srgb,var(--red-300) 20%,transparent);--danger-strong-line:rgba(255,140,140,.22);
   --danger-strong-on:var(--neutral-950);--danger-strong-text:var(--red-200);--danger-strong-graphic:var(--red-200);
-  --warning-surface:var(--orange-500);--warning-surface-hover:var(--orange-400);--warning-surface-pressed:var(--orange-300);
-  --warning-fill:color-mix(in srgb,var(--orange-500) 12%,transparent);--warning-line:rgba(255,146,0,.22);
+  --warning-surface:var(--orange-400);--warning-surface-hover:var(--orange-300);--warning-surface-pressed:var(--orange-200);
+  --warning-fill:color-mix(in srgb,var(--orange-400) 12%,transparent);--warning-line:rgba(218,137,0,.22);
   --warning-on:var(--neutral-950);--warning-text:var(--orange-300);--warning-graphic:var(--orange-400);
-  --success-surface:var(--green-500);--success-surface-hover:var(--green-400);--success-surface-pressed:var(--green-300);
-  --success-fill:color-mix(in srgb,var(--green-500) 12%,transparent);--success-line:rgba(0,191,64,.22);
+  --success-surface:var(--green-400);--success-surface-hover:var(--green-300);--success-surface-pressed:var(--green-200);
+  --success-fill:color-mix(in srgb,var(--green-400) 12%,transparent);--success-line:rgba(0,179,71,.22);
   --success-on:var(--neutral-950);--success-text:var(--green-300);--success-graphic:var(--green-400);
-  --info-surface:var(--cyan-500);--info-surface-hover:var(--cyan-400);--info-surface-pressed:var(--cyan-300);
-  --info-fill:color-mix(in srgb,var(--cyan-500) 12%,transparent);--info-line:rgba(0,189,222,.22);
+  --info-surface:var(--cyan-400);--info-surface-hover:var(--cyan-300);--info-surface-pressed:var(--cyan-200);
+  --info-fill:color-mix(in srgb,var(--cyan-400) 12%,transparent);--info-line:rgba(0,170,195,.22);
   --info-on:var(--neutral-950);--info-text:var(--cyan-300);--info-graphic:var(--cyan-400);
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
   color-scheme:dark;

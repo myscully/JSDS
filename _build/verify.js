@@ -34,6 +34,35 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) { const n = count(fs
 if (phPages.length) warns.push(`플레이스홀더 남은 페이지: ${phPages.join(", ")}`);
 for (const n of ICONS_MOD.ICON_NAMES) if (!fs.existsSync(path.join(OUT, "assets/icons/outline", n + ".svg"))) fails.push(`assets/icons/outline/${n}.svg 없음`);
 if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.js 없음");
+/* 다크 토큰은 @media (prefers-color-scheme:dark) 와 :root[data-theme="dark"] 에 **같은 내용이 두 번** 들어간다.
+   한쪽만 고치면 OS 다크와 수동 다크가 갈리는데, 그걸 검사하는 것이 지금까지 없었다 —
+   contrast.js 는 data-theme 속성만 세팅해 재므로 @media 쪽은 측정조차 되지 않는다.
+   파일 주석이 경고만 하고 있던 것을 검사로 올린다. */
+{
+  const src = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8");
+  const body = (sel) => {
+    const i = src.indexOf(sel + "{");
+    if (i < 0) return null;
+    let d = 1, j = i + sel.length + 1;
+    const start = j;
+    while (j < src.length && d > 0) {
+      if (src[j] === "/" && src[j + 1] === "*") { const e = src.indexOf("*/", j + 2); j = e < 0 ? src.length : e + 2; continue; }
+      if (src[j] === "{") d++; else if (src[j] === "}") d--;
+      j++;
+    }
+    return src.slice(start, j - 1);
+  };
+  for (const [media, direct] of [
+    ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])', ':root[data-theme="dark"]'],
+    ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]', ':root[data-theme="dark"][data-accent-neutral]'],
+    ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-light]', ':root[data-theme="dark"][data-accent-light]'],
+  ]) {
+    const a2 = body(media), b2 = body(direct);
+    if (a2 === null || b2 === null) fails.push(`style.src.css: 다크 블록 쌍을 찾지 못했다 — ${direct}`);
+    else if (a2 !== b2) fails.push(`style.src.css: 다크 블록 쌍이 다르다 — ${direct} 와 @media 판이 갈렸다(OS 다크와 수동 다크가 다른 색이 된다)`);
+  }
+}
+
 /* 주석 열림·닫힘이 짝인지 — 선언을 지울 때 여러 줄 주석의 한쪽만 남기기 쉽고,
    열림 없는 닫힘 표시는 파서가 '다음 세미콜론까지'를 통째로 버려서 바로 뒤의 선언 하나가 조용히 사라진다.
    3차에서 다크 --shadow-xs 가 이렇게 유실됐고, 다크 블록 두 벌에 같은 고아가 있었던 탓에
