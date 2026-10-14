@@ -85,6 +85,30 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
     if (!/[가-힣A-Za-z0-9]/.test(m[3].replace(/<[^>]*>/g, ""))) fails.push(`${rel}: .sev-cell 에 라벨 글자가 없다 — 3px 막대 색만 남는다`);
 }
 
+/* 생성물이 가리키는 토큰이 전부 선언돼 있는지 — data-token 은 HTML 속성이라
+   CSS 를 보는 가드 셋(주석 짝 · 선언 존재 · 센티넬)이 전부 놓칩니다.
+   3차에서 --graphic-muted → --muted-graphic 개명이 foundations.js 의 sem() 맨 문자열에
+   닿지 않아 빈 칩이 하나 남았고, 빌드는 녹색이었습니다 */
+{
+  const blocks = [":root", ':root[data-theme="dark"]', ":root[data-accent-neutral]", ":root[data-accent-light]"];
+  const declared = new Set();
+  for (const sel of blocks) for (const k of Object.keys(LIB.parseVars(LIB.rootBlock(css, sel)))) declared.add(k);
+  const pointed = new Set();
+  for (const f of walk(OUT).filter(x => x.endsWith(".html"))) {
+    const rel = path.relative(OUT, f);
+    for (const t of new Set([...read(rel).matchAll(/data-token="(--[a-z0-9-]+)"/g)].map(m => m[1]))) {
+      pointed.add(t);
+      if (!declared.has(t)) fails.push(`${rel}: data-token="${t}" 이 선언되지 않은 토큰 — 스와치가 빈 칩으로 나옵니다`);
+    }
+  }
+  /* 반대 방향 — 의미 토큰 전수가 Colors 페이지에 스와치로 나와야 한다.
+     4차에서 절을 채워 가며 0 으로 만든다. 그때 fails 로 승격한다 */
+  const isPrim = (k) => /^--(neutral|brand|accent|red|orange|green|cyan)-\d+$/.test(k);
+  const isScalar = (k) => /^--(space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row)-/.test(k) || /^--static-/.test(k);
+  const orphan = [...declared].filter((t) => !isPrim(t) && !isScalar(t) && !pointed.has(t)).sort();
+  if (orphan.length) warns.push(`Colors 페이지에 스와치가 없는 의미 토큰 ${orphan.length}개 — ${orphan.slice(0, 6).join(" ")}${orphan.length > 6 ? " …" : ""}`);
+}
+
 console.log(`verify: 실패 ${fails.length} · 경고 ${warns.length} · 남은 .ph ${phTotal}개(${phPages.join(", ") || "없음"})`);
 fails.forEach(f => console.log("  ✗ " + f)); warns.forEach(w => console.log("  ! " + w));
 if (fails.length) process.exit(1);
