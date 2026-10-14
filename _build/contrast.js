@@ -15,6 +15,9 @@ const lum = ({ r, g, b }) => {
   return 0.2126 * x + 0.7152 * y + 0.0722 * z;
 };
 const ratio = (a, b) => { const [x, y] = [lum(a) + 0.05, lum(b) + 0.05]; return +(Math.max(x, y) / Math.min(x, y)).toFixed(2); };
+/* CIE L* — 대비 비율은 두 색의 '밝기 차'를 비율로만 말해서 중간 밝기끼리의 거리를 과소평가한다.
+   등급 구분에는 지각 균등한 축이 맞다 */
+const lstar = (c) => { const Y = lum(c); return Y > 0.008856 ? 116 * Math.cbrt(Y) - 16 : 903.3 * Y; };
 /* a 를 b 위에 얹는다 */
 const over = (a, b) => a.a >= 0.999 ? a : ({
   r: a.r * a.a + b.r * (1 - a.a), g: a.g * a.a + b.g * (1 - a.a), b: a.b * a.a + b.b * (1 - a.a), a: 1,
@@ -26,11 +29,15 @@ const RESOLVE = (toks) => {
   const d = document.createElement("div");
   d.style.cssText = "position:fixed;left:-9999px";
   document.body.append(d);
+  const read = (v) => { d.style.color = ""; d.style.color = v; return getComputedStyle(d).color; };
   const out = {};
   for (const t of toks) {
-    d.style.color = "";
-    d.style.color = "var(" + t + ")";
-    out[t] = getComputedStyle(d).color;
+    /* 선언되지 않은 토큰은 var() 가 무효가 되어 '상속색'으로 계산된다 — 그걸 정상 색으로 받으면
+       선언만 해 두고 CSS 에 쓰지 않은 토큰을 게이트가 조용히 통과시킨다.
+       서로 다른 폴백 둘로 읽어, 값이 갈리면 선언이 없는 것이다 */
+    const a = read("var(" + t + ", rgb(1, 2, 3))");
+    const b = read("var(" + t + ", rgb(4, 5, 6))");
+    out[t] = a === b ? a : null;
   }
   d.remove();
   return out;
@@ -65,7 +72,7 @@ function consumerAudit(css) {
   /* 의미 토큰이 다른 의미 토큰을 참조하는 것도 소비로 센다(예: --shadow-1 → --shadow-sm) */
   for (const m of css.slice(0, cut).matchAll(/var\((--[a-z0-9-]+)/g)) used.add(m[1]);
   const skip = (t) => /^--(neutral|brand|accent|red|orange|green|cyan|prod|space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row)-/.test(t)
-    || /^--(static|sev)-/.test(t) || P.grammarOnly.includes(t);
+    || /^--static-/.test(t) || P.grammarOnly.includes(t);
   return [...declared].filter((t) => !used.has(t) && !skip(t)).sort();
 }
 
@@ -90,6 +97,7 @@ async function run() {
   for (const [fg, bgs] of P.pairs) { need.add(fg); bgs.forEach((b) => need.add(b)); }
   for (const [fill, bgs] of P.separation) { need.add(fill); bgs.forEach((b) => need.add(b)); }
   P.severityRanks.forEach((t) => need.add(t));
+  P.severityFillSplit.forEach(([a2, b2]) => { need.add(a2); need.add(b2); });
   P.SOLID_ONLY.forEach((t) => need.add(t));
   const toks = [...need];
 
@@ -111,6 +119,7 @@ async function run() {
     const raw = await page.evaluate(RESOLVE, toks);
     const C = {};
     for (const t of toks) {
+      if (raw[t] === null) { fails.push(`${ctx.label}: ${t} 가 선언되지 않았다 — 쌍에만 적고 CSS 에 쓰지 않았거나 이름이 틀렸다`); C[t] = null; continue; }
       const v = parse((raw[t] || "").trim());
       if (!v) fails.push(`${ctx.label}: ${t} 를 색으로 읽을 수 없다 — "${raw[t]}"`);
       C[t] = v;
@@ -145,18 +154,33 @@ async function run() {
       }
     }
 
+    /* 등급 간 옅은 바탕 — 같은 색조 등급(Critical·High)은 바탕의 짙기가 유일한 단서다.
+       같은 알파로 접으면 라이트 1.04 · 다크 1.09 로 '지각 가능' 바닥에도 못 미친다 */
+    for (const [a, b, floor] of P.severityFillSplit) {
+      const min = typeof floor === "number" ? floor : floor[ctx.theme];
+      for (const bed of P.SURFACES) {
+        const r = ratio(over(C[a], C[bed]), over(C[b], C[bed]));
+        if (r < min) fails.push(`${ctx.label}: 등급 바탕 ${a} ↔ ${b} 가 ${bed} 위에서 갈리지 않는다 — ${r} < ${min}`);
+      }
+    }
+
     /* 심각도 — 같은 색조 이웃은 휘도로 갈려야 한다(빨강 둘은 휘도가 유일한 단서다) */
     for (const [a, b] of P.severitySameHue) {
       const r = ratio(over(C[a], C["--surface-raised"]), over(C[b], C["--surface-raised"]));
       if (r < P.SEVERITY_ADJACENT_MIN) fails.push(`${ctx.label}: 심각도 ${a} ↔ ${b} 는 같은 색조라 휘도로 갈려야 한다 — ${r} < ${P.SEVERITY_ADJACENT_MIN}`);
     }
-    /* 그리고 다섯 등급이 서로 다른 값이어야 한다 — 색조가 달라 대비로는 잡히지 않는 중복을 잡는다 */
-    {
-      const seen = new Map();
-      for (const t of P.severityRanks) {
-        const h = hex(over(C[t], C["--surface-raised"]));
-        if (seen.has(h)) fails.push(`${ctx.label}: 심각도 ${seen.get(h)} 와 ${t} 가 같은 색이다(${h})`);
-        seen.set(h, t);
+    /* 다섯 등급 전수(10쌍) — 같은 색조 계열이면 휘도로 갈려야 하고(ΔL* ≥ 8),
+       계열이 다르면 색조가 단서이므로 '값이 다르다'만 본다. 어느 쪽도 못 지키면 다섯 단계가 네 단계로 읽힌다.
+       계열 표를 코드에 적어 두는 이유: red-600 과 neutral-500 은 ΔL* 0.9 로 휘도가 거의 같은데,
+       그게 통과하는 까닭이 '계열이 달라서'라는 사실이 드러나야 한다 */
+    for (let i = 0; i < P.severityRanks.length; i++) {
+      for (let j = i + 1; j < P.severityRanks.length; j++) {
+        const [a, b] = [P.severityRanks[i], P.severityRanks[j]];
+        const [ea, eb] = [over(C[a], C["--surface-raised"]), over(C[b], C["--surface-raised"])];
+        if (hex(ea) === hex(eb)) { fails.push(`${ctx.label}: 심각도 ${a} 와 ${b} 가 같은 색이다(${hex(ea)})`); continue; }
+        const sameHue = P.hueFamilyOf(a) === P.hueFamilyOf(b);
+        if (sameHue && Math.abs(lstar(ea) - lstar(eb)) < P.SAME_HUE_LSTAR_MIN)
+          fails.push(`${ctx.label}: 심각도 ${a} ↔ ${b} 는 같은 ${P.hueFamilyOf(a)} 계열인데 ΔL* ${Math.abs(lstar(ea) - lstar(eb)).toFixed(1)} < ${P.SAME_HUE_LSTAR_MIN}`);
       }
     }
   }

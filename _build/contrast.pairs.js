@@ -18,7 +18,9 @@ const SOLID_ONLY = [
 const pairs = [
   ["--text-primary", SURFACES, 4.5, "본문"],
   ["--text-secondary", SURFACES, 4.5, "보조 본문"],
-  ["--text-tertiary", SURFACES, 4.5, "설명·캡션"],
+  /* 중립 태그·칩·개수 배지의 라벨이 --fill-strong 위에 올라앉는데 그 쌍을 재지 않고 있었다 */
+  ["--text-secondary", ["--fill-strong"], 4.5, "중립 칩 라벨"],
+  ["--text-tertiary", [...SURFACES, "--fill-strong"], 4.5, "설명·캡션 · 중립 태그 라벨"],
   ["--text-inverse", ["--surface-inverse"], 4.5, "툴팁·토스트 글자"],
   ["--graphic-muted", SURFACES, 3, "비활성 점·범례 칩"],
   ["--focus-ring", SURFACES, 3, "포커스 링"],
@@ -58,6 +60,25 @@ const severityRanks = ["--sev-critical", "--sev-high", "--sev-medium", "--sev-lo
 const severitySameHue = [["--sev-critical", "--sev-high"]];
 const SEVERITY_ADJACENT_MIN = 1.5;
 
+/* 색조 계열 표 — 등급 구분을 열 쌍 전수로 검사하기 위한 것이다.
+   같은 계열이면 휘도가 유일한 단서이므로 ΔL* 를 요구하고, 계열이 다르면 색조가 단서이므로 값이 다르면 된다.
+   이 표가 필요한 이유: red-600 과 neutral-500 은 ΔL* 0.9 로 휘도가 거의 같은데(대비 1.03),
+   그게 통과하는 까닭이 '계열이 달라서'라는 사실이 코드에 남아야 합니다 — 검사를 안 하는 것과는 다릅니다.
+   그리고 이 다섯 색 세트는 회색조로는 분리 불가능합니다(상태색 램프를 공유하는 한 만들 수도 없습니다) —
+   1.4.1 준수는 전적으로 라벨 병기에 의존하고, verify 가 그 라벨을 검사합니다. */
+const HUE_FAMILY = {
+  "--sev-critical": "red", "--sev-high": "red", "--sev-medium": "orange", "--sev-low": "cyan", "--sev-info": "neutral",
+  "--danger-strong-graphic": "red", "--danger-graphic": "red",
+  "--warning-graphic": "orange", "--info-graphic": "cyan", "--muted-graphic": "neutral",
+};
+const hueFamilyOf = (t) => HUE_FAMILY[t] || "unknown";
+const SAME_HUE_LSTAR_MIN = 8;
+
+/* 등급 간 옅은 바탕 분리 — Critical 과 High 는 같은 빨강이라 바탕의 짙기가 유일한 단서다.
+   같은 알파로 접으면 라이트 1.04 · 다크 1.09 로 '지각 가능' 바닥(1.1)에도 못 미친다.
+   바닥을 1.15 로 두는 이유: 오늘 값이 라이트 1.17 · 다크 1.11 이라 1.1 로는 다크의 퇴행을 잡지 못한다 */
+const severityFillSplit = [["--sev-critical-bg", "--sev-high-bg", { light: 1.15, dark: 1.10 }]];
+
 /* 소비자가 없어도 허용하는 토큰 — 역할 문법의 완결성 때문에 선언만 해 둔 것들.
    여기 적지 않은 채 소비자가 0 이면 빌드가 경고한다(= 군살이 쌓이지 않는다). */
 const grammarOnly = [
@@ -75,4 +96,4 @@ const grammarOnly = [
   /* 램프는 의미 토큰이 고르는 재료라 단계별 소비자를 요구하지 않는다 */
 ];
 
-module.exports = { SURFACES, INTENTS, SOLID_ONLY, pairs, separation, severityRanks, severitySameHue, SEVERITY_ADJACENT_MIN, grammarOnly };
+module.exports = { SURFACES, INTENTS, SOLID_ONLY, pairs, separation, severityRanks, severitySameHue, SEVERITY_ADJACENT_MIN, severityFillSplit, hueFamilyOf, SAME_HUE_LSTAR_MIN, grammarOnly };

@@ -58,6 +58,18 @@ if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 11) fails.push(`components.json 패턴 ${j.patterns.length}개(11 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }
+/* 색만으로 의미를 전달하지 않는다 — 심각도 다섯 색은 회색조로 분리할 수 없으므로(상태색 램프를 공유하는 한
+   만들 수도 없습니다) 1.4.1 준수는 전적으로 라벨 병기에 의존합니다. 그 라벨을 검사하는 것이 지금까지 없었습니다.
+   도넛·밴드는 그래픽이라 접근 이름이 있어야 하고, 표의 좌측 막대(.sev-cell)는 같은 칸 안에 글자가 있어야 합니다. */
+for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
+  const rel = path.relative(OUT, f), html = article(read(rel));
+  for (const [sel, re] of [[".donut", /<div class="donut"[^>]*>/g], [".sev-band", /<div class="sev-band"[^>]*>/g]])
+    for (const m of html.match(re) || []) if (!/aria-label=|aria-hidden="true"/.test(m)) fails.push(`${rel}: ${sel} 에 접근 이름도 aria-hidden 도 없다 — 색만으로 심각도를 전달한다`);
+  /* .sev-cell 은 여는 태그부터 닫는 </td>/</div> 까지에 글자가 있어야 한다 */
+  for (const m of html.matchAll(/<(td|div)([^>]*class="[^"]*sev-cell[^"]*"[^>]*)>([\s\S]*?)<\/\1>/g))
+    if (!/[가-힣A-Za-z0-9]/.test(m[3].replace(/<[^>]*>/g, ""))) fails.push(`${rel}: .sev-cell 에 라벨 글자가 없다 — 3px 막대 색만 남는다`);
+}
+
 console.log(`verify: 실패 ${fails.length} · 경고 ${warns.length} · 남은 .ph ${phTotal}개(${phPages.join(", ") || "없음"})`);
 fails.forEach(f => console.log("  ✗ " + f)); warns.forEach(w => console.log("  ! " + w));
 if (fails.length) process.exit(1);
