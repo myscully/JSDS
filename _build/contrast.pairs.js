@@ -35,7 +35,10 @@ const pairs = [
      값을 올릴지는 화면을 보고 결정할 문제라, 숫자를 숨기지 않고 계속 보고하게 둔다. */
   ["--line-strong", SURFACES, 3, "컴포넌트 경계", { advisory: true }],
   ...INTENTS.flatMap((i) => [
-    [`--${i}-on`, [`--${i}-surface`, `--${i}-surface-hover`, `--${i}-surface-pressed`], 4.5, "면 위 글자 — 세 상태 전부"],
+    /* 4.5 가 아니라 4.6 인 이유 — 램프를 명도 정렬하면 500 단계(L* 48.5)에서 흰 글자가 4.74 · 어두운 글자가 4.44 다.
+       즉 '흰 글자만 되는' 좁은 창에 있고, 1 L* 만 밝아지면 양쪽 다 미달이 된다.
+       색을 더 어둡게 하는 대신 게이트가 그 표류를 먼저 잡게 한다(지금 최악 4.73) */
+    [`--${i}-on`, [`--${i}-surface`, `--${i}-surface-hover`, `--${i}-surface-pressed`], 4.6, "면 위 글자 — 세 상태 전부"],
     [`--${i}-text`, [...SURFACES, `--${i}-fill`], 4.5, "옅은 바탕 위 글자"],
     [`--${i}-graphic`, SURFACES, 3, "글자 없는 지표"],
   ]),
@@ -55,6 +58,15 @@ const separation = [
      색조만으로 충분하다 — 상태색에 휘도까지 요구하면 바탕이 밝아져 자기 -text 가 AA 아래로 떨어진다 */
   ["--accent-fill", SURFACES, { light: 1.06, dark: 1.35 }],
   ...INTENTS.filter((i) => i !== "accent").map((i) => [`--${i}-fill`, SURFACES, { light: 1.06, dark: 1.1 }]),
+  /* 채운 면 자체가 페이지에서 보이는지 — 지금까지 이 쌍이 없어서 '면이 배경에 녹는' 경우를 아무도 재지 않았다.
+     다크를 500/600/700 으로 두면 눌린 버튼이 패널 위에서 1.15 가 되는데 게이트가 조용히 통과시켰다.
+     accent 만 advisory 다 — 제품 슬롯이라 램프가 명도 정렬되지 않고(accentScale 은 HSL 기반이다),
+     다크 pressed 가 패널 위 1.44 인 것은 이번 변경 이전부터 있던 결함이다. 숫자를 숨기지 않고 보고만 한다 */
+  ...INTENTS.filter((i) => i !== "accent")
+    .flatMap((i) => [`--${i}-surface`, `--${i}-surface-hover`, `--${i}-surface-pressed`])
+    .map((t) => [t, SURFACES, { light: 1.5, dark: 1.5 }]),
+  ...["--accent-surface", "--accent-surface-hover", "--accent-surface-pressed"]
+    .map((t) => [t, SURFACES, { light: 1.5, dark: 1.5 }, { advisory: true }]),
 ];
 
 /* 심각도 다섯 등급은 서로 구분돼야 한다. 다만 대비 비율은 휘도만 보므로 색조 차이를 잡지 못한다 —

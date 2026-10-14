@@ -181,12 +181,12 @@ async function run() {
     }
 
     /* 옅은 면이 자기 바탕과 구분되는지 */
-    for (const [fill, bgs, floor] of P.separation) {
+    for (const [fill, bgs, floor, opt] of P.separation) {
       const min = typeof floor === "number" ? floor : floor[ctx.theme];
       for (const bg of bgs) {
         const eff = over(C[fill], C[bg]);
         const r = ratio(eff, C[bg]);
-        if (r < min) fails.push(`${ctx.label}: ${fill} 이 ${bg} 와 구분되지 않는다 — ${r} < ${min}`);
+        if (r < min) (opt && opt.advisory ? warns : fails).push(`${ctx.label}: ${fill} 이 ${bg} 와 구분되지 않는다 — ${r} < ${min}`);
       }
     }
 
