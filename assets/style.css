@@ -382,6 +382,23 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand-surface)}
 .sem-row .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-default);border-radius:inherit;pointer-events:none}  /* 바탕과 구분되지 않는 색 — app.js 가 .faint 를 붙인다 */
 .sem-row .name{font-size:12px;font-weight:700;color:var(--text-primary);margin-top:8px;text-align:center}
 .checker{--checker-bg:repeating-conic-gradient(rgba(112,115,124,.16) 0 25%,transparent 0 50%) 0 0/12px 12px}
+/* 명도 사다리 — 두 모드를 나란히. 칩 색은 측정값 HEX 를 인라인으로 받으므로 현재 테마와 무관하다 */
+.lad{display:grid;grid-template-columns:170px 1fr 1fr;gap:var(--space-5);align-items:start;padding:var(--space-4) 0;border-top:1px solid var(--line-default)}
+.lad:first-of-type{border-top:0}
+.lad-name{font-size:13px;padding-top:2px}
+.lad-name b{display:block;font-weight:700;color:var(--text-primary)}
+.lad-name span{display:block;font-size:11px;color:var(--text-tertiary);margin-top:2px;line-height:1.4}
+.lad-head{font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.lad-head em{font-style:normal;font-weight:600;color:var(--warning-text)}
+.lad-head span{font-weight:600;color:var(--text-tertiary)}
+.lad-chip{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.3}
+.lad-chip i{width:36px;height:22px;flex:none;border-radius:var(--radius-xs);box-shadow:inset 0 0 0 1px var(--line-default)}
+.lad-chip b{font-weight:600;color:var(--text-secondary);font-family:var(--font-mono);font-size:10px}
+.lad-chip span{margin-left:auto;color:var(--text-tertiary);font-variant-numeric:tabular-nums}
+.lad-step{height:16px;margin-left:17px;border-left:1px solid var(--line-strong);display:flex;align-items:center}
+.lad-step span{font-size:10px;color:var(--text-tertiary);padding-left:8px;font-variant-numeric:tabular-nums}
+@media (max-width:760px){.lad{grid-template-columns:1fr;gap:var(--space-3)}}
+
 /* 대비표 — 게이트 산출물. 접어 두는 이유는 594행을 펼치면 페이지를 훑을 수 없기 때문이다.
    advisory(기준 미달이나 빌드를 막지 않음)는 색으로 드러낸다 — 숫자를 숨기면 또 낡는다 */
 details.ct{margin:calc(var(--space-3) * -1) 0 var(--space-8);border:1px solid var(--line-default);border-radius:var(--radius-md);background:var(--surface-sunken)}

@@ -57,7 +57,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
   p.on("pageerror", e => { console.error("page error:", e.message); process.exitCode = 1; });
-  await p.addInitScript(`window.CONTRAST = ${JSON.stringify(CT.table)}; window.STYLE_TEXT = ${JSON.stringify(cssSrc)}; window.REACT_EXAMPLES = ${JSON.stringify(REACT_EXAMPLES)};`);
+  await p.addInitScript(`window.CONTRAST = ${JSON.stringify(CT.table)}; window.LADDERS = ${JSON.stringify(CT.ladders)}; window.STYLE_TEXT = ${JSON.stringify(cssSrc)}; window.REACT_EXAMPLES = ${JSON.stringify(REACT_EXAMPLES)};`);
   await p.goto("file://" + SRC + "#/home/overview");
   await p.waitForFunction(() => document.body.dataset.route === "home/overview");
 

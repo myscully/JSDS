@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 281 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 290 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -1034,6 +1034,32 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   })();
   ok("matrix cell opens the value popover with an 8-digit hex for alpha", mxPop.open && /Danger \/ fill/.test(mxPop.title) && /#[0-9A-F]{8}/.test(mxPop.hex),
     JSON.stringify(mxPop));
+
+  /* 명도 사다리 — 두 모드가 **한 화면에** 보여야 비교가 된다.
+     현재 테마와 무관하게 측정값 HEX 를 인라인으로 칠하므로, 라이트 페이지에서도 다크 칩이 밝아야 한다.
+     중첩 data-theme 으로 만들었다면 여기서 두 열이 같은 색으로 나온다 */
+  const lad = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll(".lad")];
+    if (!rows.length) return null;
+    const lum = (s2) => { const v = (s2.match(/[0-9.]+/g) || []).map(Number); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+    const first = rows[0], cols = first.querySelectorAll(".lad-col");
+    const chipLum = (c) => [...c.querySelectorAll(".lad-chip i")].map((i) => lum(getComputedStyle(i).backgroundColor));
+    const lightTop = chipLum(cols[0])[0], darkTop = chipLum(cols[1])[0];
+    /* 사다리마다 L* 가 한 방향으로 가는지 — 역전이면 게이트가 막았어야 한다 */
+    const mono = rows.every((r) => [...r.querySelectorAll(".lad-col")].every((c) => {
+      const ls = [...c.querySelectorAll(".lad-chip span")].map((e) => parseFloat(e.textContent.replace(/[^0-9.]/g, "")));
+      if (ls.length !== 3) return true;
+      const d = [Math.sign(ls[1] - ls[0]), Math.sign(ls[2] - ls[1])];
+      return !(d[0] !== 0 && d[1] !== 0 && d[0] !== d[1]);
+    }));
+    return { rows: rows.length, chips: document.querySelectorAll(".lad-chip").length, lightTop, darkTop, mono,
+      theme: document.documentElement.dataset.theme || "(os)" };
+  });
+  ok("lightness ladders show both themes side by side", lad && lad.rows === 10 && lad.chips === 60, JSON.stringify(lad));
+  /* 라이트 text-primary 는 거의 검정 · 다크 text-primary 는 거의 흰색. 두 열이 같으면 한 모드만 그린 것이다 */
+  ok("the dark column really shows dark-theme values on a light page", lad && lad.lightTop < 60 && lad.darkTop > 200,
+    lad ? `라이트 ${Math.round(lad.lightTop)} · 다크 ${Math.round(lad.darkTop)}` : "없음");
+  ok("every ladder runs in one direction", lad && lad.mono, lad ? String(lad.mono) : "없음");
 
   // 팝오버가 열린 스와치는 커진 채로 남는다 + aria-expanded 로 열림을 알린다(종전에는 aria-haspopup 만 있었다)
   await page.locator(barSel).click(); await page.waitForTimeout(400);

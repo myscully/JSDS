@@ -8,6 +8,8 @@ const STYLE = () => window.STYLE_TEXT || "";
 /* 대비 게이트의 산출물 — build.js 가 렌더 전에 재서 주입한다. 사람이 숫자를 적지 않는다.
    standalone 프리뷰처럼 주입이 없을 때는 빈 배열이고, Colors 페이지가 안내 문구로 대체한다 */
 const CONTRAST = () => window.CONTRAST || [];
+/* 명도 사다리 — 같은 경로로 주입된다. 두 모드를 한 화면에 나란히 놓으려면 측정값이 필요하다 */
+const LADDERS = () => window.LADDERS || [];
 const nb = (sec, key) => NEW.has(`${sec}/${key}`) ? '<span class="n">N</span>' : "";
 const allPages = sec => LIB.allPages(SITE, sec);
 const firstPage = sec => `#/${sec}/${allPages(sec)[0].key}`;
@@ -308,7 +310,7 @@ ${codeBlock("tok-json", `{\n  "color": { "accent": { "600": { "value": "{product
   "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><p>이 문서는 아직 작업 중입니다. 아래 절차는 큰 흐름이며, 각 단계의 서식과 기준이 확정되면 이 페이지를 갱신합니다.</p><ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인파트 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
 };
 
-Object.assign(PAGES, window.FOUNDATION_PAGES({ codeBlock, tokenSection, sw, nb, STYLE, CONTRAST, VERSION, PRODUCTS, ICONS, I, LIB, dedent }));
+Object.assign(PAGES, window.FOUNDATION_PAGES({ codeBlock, tokenSection, sw, nb, STYLE, CONTRAST, LADDERS, VERSION, PRODUCTS, ICONS, I, LIB, dedent }));
 
 /* ============ router ============ */
 function render() {

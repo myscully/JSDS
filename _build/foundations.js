@@ -3,7 +3,7 @@
    render.js 가 PAGES 에 병합한다: Object.assign(PAGES, FOUNDATION_PAGES(helpers))
    ========================================================= */
 window.FOUNDATION_PAGES = function (H) {
-  const { codeBlock, tokenSection, sw, nb, STYLE, CONTRAST, VERSION, PRODUCTS, ICONS, I, LIB, dedent } = H;
+  const { codeBlock, tokenSection, sw, nb, STYLE, CONTRAST, LADDERS, VERSION, PRODUCTS, ICONS, I, LIB, dedent } = H;
   const attr = s => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 
   /* ---------- 토큰 값 해석 (Light / Dark) ---------- */
@@ -35,6 +35,34 @@ window.FOUNDATION_PAGES = function (H) {
      같은 역할이 의도를 가로질러 같은 자리에 오므로 "역할이 1급"이라는 설계가 눈으로 확인된다.
      칸은 .sem-row 와 같은 .val-cell 버튼이라 값 팝오버가 그대로 동작한다.
      cols = [[역할 접미사, 표시 이름, 대비 기준, 알파여부], …] · rows = [[의도 표시 이름, 토큰 접두사, 메모], …] */
+  /* ── 명도 사다리 — 게이트가 잰 L* 를 두 모드 나란히 보여 준다.
+     현재 테마와 무관하게 **측정값의 HEX 를 인라인으로** 칠한다: 페이지가 라이트일 때도 다크 사다리가 보여야
+     두 모드를 비교할 수 있다. 중첩 data-theme 으로는 안 된다 — 다크 블록 선택자가 :root[data-theme="dark"] 라
+     루트에만 걸리기 때문이다. */
+  const ladderView = () => {
+    const all = LADDERS();
+    if (!all.length) return `<p class="note">명도 사다리는 빌드가 측정해 주입합니다 — <code>node build.js</code> 로 생성한 페이지에서만 보입니다.</p>`;
+    const names = [...new Set(all.map((l) => l.name))];
+    const col = (l) => {
+      if (!l) return `<div class="lad-col"></div>`;
+      const rows = l.hex.map((h, i) => {
+        const step = i === 0 ? "" : `<div class="lad-step"><span>↓ ${l.steps[i - 1]}</span></div>`;
+        const tok = l.toks[i].replace(/^--/, "");
+        return `${step}<div class="lad-chip"><i style="background:${h}"></i><b>${tok}</b><span>L* ${l.lstar[i]}</span></div>`;
+      }).join("");
+      const bad = [];
+      if (l.reversed) bad.push("방향 뒤집힘");
+      if (l.minStep < 2) bad.push(`한 단계 안 보임 ΔL* ${l.minStep}`);
+      if (l.sim && l.balance !== null && l.balance > l.balanceMax) bad.push(`치우침 ${l.balance}x`);
+      return `<div class="lad-col"><div class="lad-head">${l.theme === "light" ? "라이트" : "다크"}${bad.length ? `<em>${bad.join(" · ")}</em>` : "<span>고름</span>"}</div>${rows}</div>`;
+    };
+    return names.map((n) => {
+      const L2 = all.find((x) => x.name === n && x.theme === "light"), D = all.find((x) => x.name === n && x.theme === "dark");
+      const sim = (L2 || D).sim;
+      return `<div class="lad"><div class="lad-name"><b>${n}</b><span>${sim ? "한 화면에 함께 보임 — 균형 요구" : "상태 — 동시에 보이지 않음"}</span></div>${col(L2)}${col(D)}</div>`;
+    }).join("");
+  };
+
   /* ── 대비표 — 게이트(contrast.js)가 잰 값을 그대로 쓴다. 사람이 숫자를 적지 않는다.
      같은 전경 토큰이 여섯 맥락(라이트·다크 × 제품 세 경우) × 여러 바탕에서 재어지므로,
      절별 요약은 "가장 나쁜 값"만 보여 준다 — 어떤 조합에서든 기준을 넘긴다는 것이 보장이기 때문이다.
@@ -138,6 +166,7 @@ ${codeBlock("prod-html", '<!-- 패키지 없이 쓸 때는 램프를 직접 넣�
 <h3 id="sev-layers">심각도 — 독립 축이 아니라 상태색 + 등급</h3><p>보안 도메인의 위협 심각도 5단계는 <b>Status 와 다른 축</b>이지만, <b>색은 따로 두지 않습니다</b>. 종전에는 <code>--sev-*</code> 20개가 독립 축이었는데 한 토큰이 면·글자·면 위 글자를 겸해 <b>10 조합 중 8이 AA 미달</b>이었고, 그 20개의 대비 수치는 빌드가 검증하지 않아 계속 낡았습니다. 지금은 등급을 상태색 의도로 매핑하고, 매핑된 토큰은 다른 의미 토큰과 똑같이 게이트가 잽니다.</p>${tbl(["등급","의도","옅은 태그","채운 태그","지표(바·밴드·도넛)"], [["Critical", "<code>danger-strong</code>", "<code>-fill</code> + <code>-text</code>", "<code>-surface</code> + <code>-on</code>", "<code>-graphic</code>"], ["High", "<code>danger</code>", "<code>-fill</code> + <code>-text</code>", "<code>-surface</code> + <code>-on</code>", "<code>-graphic</code>"], ["Medium", "<code>warning</code>", "<code>-fill</code> + <code>-text</code>", "<code>-surface</code> + <code>-on</code>", "<code>-graphic</code>"], ["Low", "<code>info</code>", "<code>-fill</code> + <code>-text</code>", "<code>-surface</code> + <code>-on</code>", "<code>-graphic</code>"], ["Info", "중립 <code>muted</code>", "<code>--fill-strong</code> + <code>--text-tertiary</code>", "<code>--muted-surface</code> + <code>--muted-on</code>", "<code>--muted-graphic</code>"]])}<p><b>마크업은 바뀌지 않습니다</b> — <code>class="tag critical"</code> 과 React <code>tone="critical"</code> 그대로입니다. 매핑은 컴포넌트 CSS 안에 있습니다.</p><p><b>이름이 교차하는 지점에 주의하세요.</b> 심각도 <b>Low</b> 가 <code>info</code> 의도를 쓰고, 심각도 <b>Info</b> 는 중립(<code>muted</code>)입니다. 그래서 <code>.indicator.info</code>(상태 Informative · 청록)와 <code>.tag.info</code>(심각도 Info · 중립)는 같은 클래스 이름으로 다른 색입니다.</p><p><b>이 선택의 비용 둘.</b> 하나 — 상태색과 심각도가 같은 토큰을 쓰므로 <b>두 축이 한 화면에서 구분되지 않습니다</b>("처리 실패"와 "High"가 같은 빨강). 그래서 <a href="#/foundations/brand-role-map">Brand role map</a> 의 "한 요소에 두 축을 겹치지 않는다 · 심각도는 항상 라벨 병기"가 권고가 아니라 <b>제약</b>입니다. 둘 — Critical 과 High 가 같은 빨강이라 옅은 태그에서는 바탕의 짙기가 유일한 단서입니다. 같은 알파로 두면 분리가 라이트 <b>1.04</b> · 다크 <b>1.09</b> 로 지각 가능 바닥(1.1)에도 못 미쳐, <code>danger-strong</code> 은 fill 알파도 강한 쪽(라이트 16% · 다크 20%)으로 잡았습니다 — 라이트 1.23 으로 갈립니다.</p><p><b>다섯 등급이 구분되는지는 빌드가 검사합니다.</b> 대비 비율은 휘도만 보므로 색조 차이를 잡지 못합니다 — Medium(주황 <code>#FF9200</code>)과 Low(청록 <code>#00BDDE</code>)는 휘도가 <b>1.00 으로 같습니다</b>. 그래서 색조 계열표(red · orange · cyan · neutral)를 <code>contrast.pairs.js</code> 에 선언하고, <b>같은 계열이면 ΔL* ≥ 8</b>, 계열이 다르면 값 상이를 요구합니다. Critical↔High 는 라이트 ΔL* 26.7 · 다크 18.0 입니다. 다만 <b>이 다섯 색은 회색조로는 분리할 수 없습니다</b> — 상태색 램프를 공유하는 한 만들 수도 없습니다. 색만으로 의미를 전달하지 않는다(1.4.1)는 전적으로 <b>라벨 병기</b>에 의존하고, 그 라벨이 있는지는 <code>verify.js</code> 가 검사합니다(도넛·밴드의 접근 이름, <code>.sev-cell</code> 의 같은 칸 글자).</p>
 <div class="panel left" style="min-height:0;padding:var(--space-6)"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div>
 ${sem("brand", "Brand", "지란지교시큐리티 브랜드 컬러입니다. 이 시스템은 관리자 웹 제품 기준이라 제품 UI 의 Accent 로 쓰지 않으며, 헤더의 Accent 선택지에도 넣지 않습니다. 로고·헤더 마크 같은 회사 정체성 표기에만 씁니다 — 어느 축에 무엇을 쓰는지는 <a href=\"#/foundations/brand-role-map\">Brand role map</a> 에 있습니다.", [["Surface", "--brand-surface"], ["Fill", "--brand-fill"]])}
+<h2 id="ladder">명도 사다리 — 단계가 고르게 벌어졌는가</h2><p>대비 게이트는 <b>"글자가 바탕에서 읽히는가"</b>만 봅니다. 그것과 <b>"단계들이 서로 고르게 벌어졌는가"</b>는 다른 질문입니다 — 세 단계가 모두 AA 를 넘기면서도 둘이 거의 같은 톤일 수 있습니다. 아래는 빌드가 잰 <b>CIE L\*</b> 입니다(대비 비율은 중간 밝기끼리의 거리를 과소평가해서 \u0027낙폭\u0027의 축으로는 맞지 않습니다).</p><p><b>균형은 단계들이 한 화면에 함께 보이는 사다리에만 요구합니다.</b> 본문·보조·설명은 같은 단락에 나란히 서지만, rest → hover → pressed 는 셋이 동시에 보이는 일이 없습니다. 상태 사다리에는 "변화가 느껴지는가"(최소 낙폭)만 묻습니다.</p><p>지금 <b>동시에 보이는 사다리 넷이 모두 기준을 못 넘깁니다</b> — <code>text</code> 는 두 모드 모두 첫 낙폭이 둘째의 2.5배라 Secondary 와 Tertiary 가 거의 같은 톤이고, <code>line</code> 은 3.3~3.8배입니다. 라이트 <code>surface</code> 는 base 와 raised 가 둘 다 흰색이라 명도 분리가 0 이고 경계를 보더·그림자가 전담합니다. 교정은 보고 결정하기로 했으므로 <b>빌드를 막지 않고 매 빌드 보고</b>합니다 — 방향이 뒤집힌 경우만 실패입니다.</p>${ladderView()}
 <h2 id="contrast">대비 계약 — 빌드가 재고 빌드가 막는다</h2>
 ${ctAll()}
 ${sem("code", "Code panel", "이 사이트의 코드 패널에 쓰는 색입니다. 라이트·다크 모두 어두운 배경이라 한 벌입니다. 구문 강조 네 색(tag · attr · str · kw)을 의미 토큰으로 올린 덕에 소비자 없는 예비 hue 램프 네 개를 전부 지울 수 있었습니다 — 컴포넌트가 램프를 직접 참조하지 않는다는 규칙을 이 자리가 지키고 있습니다.", [["Bg", "--code-bg"], ["Chip", "--code-chip"], ["Chip border", "--code-chip-border"], ["Chip fg", "--code-chip-fg"], ["Head fg", "--code-head-fg"], ["Tag", "--code-tag"], ["Attr", "--code-attr"], ["Str", "--code-str"], ["Kw", "--code-kw"]])}
