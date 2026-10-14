@@ -499,7 +499,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     for (const l of lvl) {
       /* 다크의 -bg 는 rgba 리터럴이다 — 그대로 재면 알파가 무시되고 자기 자신과 비교돼 1.00 이 나온다.
          뒤의 불투명 바탕까지 쌓아 합성한 실제 색을 따로 구한다 */
-      const parse = (c) => { const v = c.match(/[0-9.]+/g).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; };
+      /* color-mix 토큰은 Chromium 이 color(srgb r g b / a) 로 직렬화하고 그 값은 0~1 이다 —
+         숫자만 긁어 쓰면 거의 검정으로 읽혀 합성 바탕이 엉뚱해진다(다크 fill 이 전부 color-mix 다) */
+      const parse = (c) => { const srgb = c.indexOf("color(srgb") === 0; const k = srgb ? 255 : 1;
+        const v = c.match(/[0-9.]+/g).map(Number);
+        return { r: v[0] * k, g: v[1] * k, b: v[2] * k, a: v.length > 3 ? v[3] : 1 }; };
       const eff = (el) => {
         const stack = [];
         for (let e = el; e; e = e.parentElement) {
@@ -514,7 +518,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       };
       const mk = (cls) => { const e = document.createElement("span"); e.className = cls; e.textContent = "x"; prev.append(e); const c = getComputedStyle(e); const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color }; e.remove(); return r; };
       out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid") };
-      out.tok[l] = { fill: res("var(--sev-" + l + ")"), text: res("var(--sev-" + l + "-text)"), on: res("var(--sev-" + l + "-on)"), bg: res("var(--sev-" + l + "-bg)") };
+      /* 심각도는 독립 축이 아니라 상태색 의도 매핑이다 — Critical=danger-strong · High=danger · Medium=warning · Low=info · Info=중립.
+         Info 는 중립이라 fill·text 를 테마 토큰에서 받는다(채운 태그만 --muted-* 를 쓴다) */
+      const M = { critical: "danger-strong", high: "danger", medium: "warning", low: "info", info: null }[l];
+      out.tok[l] = M
+        ? { fill: res("var(--" + M + "-graphic)"), text: res("var(--" + M + "-text)"), on: res("var(--" + M + "-on)"), bg: res("var(--" + M + "-fill)"), surface: res("var(--" + M + "-surface)") }
+        : { fill: res("var(--muted-graphic)"), text: res("var(--text-tertiary)"), on: res("var(--muted-on)"), bg: res("var(--fill-strong)"), surface: res("var(--muted-surface)") };
     }
     out.panel = res("var(--surface-sunken)"); out.canvas = res("var(--surface-base)"); out.surface = res("var(--surface-raised)");
     return out;
@@ -531,18 +540,24 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       ok(`${theme} ${l} solid tag label clears AA on its fill`, ratio(t.v[l].solid.fg, t.v[l].solid.bgEff) >= 4.5,
         `${ratio(t.v[l].solid.fg, t.v[l].solid.bgEff)} · ${t.v[l].solid.fg} / ${t.v[l].solid.bgEff}`);
       // 채운 태그의 면이 자기 면 토큰이어야 한다 — .tag.solid.info 가 없어 --fill-strong 로 떨어지던 것을 잡는다
-      ok(`${theme} ${l} solid tag uses its own fill token`, t.v[l].solid.bg === t.tok[l].fill && t.v[l].solid.bg !== t.panel,
-        `${t.v[l].solid.bg} · fill ${t.tok[l].fill} · panel ${t.panel}`);
+      ok(`${theme} ${l} solid tag uses its own surface token`, t.v[l].solid.bg === t.tok[l].surface && t.v[l].solid.bg !== t.panel,
+        `${t.v[l].solid.bg} · surface ${t.tok[l].surface} · panel ${t.panel}`);
       // -text 는 글자용이라 캔버스·서피스·패널 위에서도 4.5 를 넘어야 한다
       const low = Math.min(ratio(t.tok[l].text, t.canvas), ratio(t.tok[l].text, t.surface), ratio(t.tok[l].text, t.panel));
       ok(`${theme} ${l}-text clears AA on every surface`, low >= 4.5, `${low} · ${t.tok[l].text}`);
     }
-    // 다섯 단계가 서로 구분돼야 한다 — 다크에서 critical 과 high 가 둘 다 red-400 이라 대비 1.00 이었다
+    /* Critical 과 High 는 같은 빨강이라 휘도가 유일한 단서다 — 지표에서 ≥1.5.
+       다크에서 둘 다 red-400 이라 1.00 이었던 적이 있고, 매핑으로 접을 때도 danger-strong 의 graphic 이
+       ±1(red-300)에 머물면 1.30 으로 떨어진다. ±2(red-200)여야 1.74 가 된다 */
     ok(`${theme} critical and high are distinguishable`, t.tok.critical.fill !== t.tok.high.fill && ratio(t.tok.critical.fill, t.tok.high.fill) >= 1.5,
       `${ratio(t.tok.critical.fill, t.tok.high.fill)} · ${t.tok.critical.fill} vs ${t.tok.high.fill}`);
-    ok(`${theme} critical and high differ in background and label too`,
-      t.tok.critical.bg !== t.tok.high.bg && t.tok.critical.text !== t.tok.high.text,
-      `bg ${t.tok.critical.bg} vs ${t.tok.high.bg} · text ${t.tok.critical.text} vs ${t.tok.high.text}`);
+    /* 옅은 태그도 갈려야 한다 — 로그 표를 색으로 훑는 것이 핵심 사용 사례다.
+       같은 알파로 접으면 1.04·1.09 로 '지각 가능' 바닥에도 못 미친다 */
+    ok(`${theme} critical and high subtle tags differ in background`,
+      t.v.critical.subtle.bgEff !== t.v.high.subtle.bgEff && ratio(t.v.critical.subtle.bgEff, t.v.high.subtle.bgEff) >= 1.15,
+      `${ratio(t.v.critical.subtle.bgEff, t.v.high.subtle.bgEff)} · ${t.v.critical.subtle.bgEff} vs ${t.v.high.subtle.bgEff}`);
+    ok(`${theme} critical and high differ in label too`, t.tok.critical.text !== t.tok.high.text,
+      `${t.tok.critical.text} vs ${t.tok.high.text}`);
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
@@ -1019,7 +1034,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     dodont: document.querySelectorAll(".dodont>div").length,
     side: [...document.querySelectorAll(".sidebar a")].some(a => /brand-role-map/.test(a.getAttribute("href") || "")),
   }));
-  ok("brand role map has its own page with the table and both pairs", /Brand role map/.test(brm.h1) && brm.roles === 5 && brm.dodont === 4 && brm.side, JSON.stringify(brm));
+  /* 세 쌍이다 — 브랜드색 오용 · 심각도 라벨 병기 · 두 축 겹침. 마지막 쌍은 심각도 색을 상태색에 접은 대가를 보여 준다 */
+  ok("brand role map has its own page with the table and all three pairs", /Brand role map/.test(brm.h1) && brm.roles === 5 && brm.dodont === 6 && brm.side, JSON.stringify(brm));
   await go("foundations/colors.html");
   const left = await page.evaluate(() => ({ roles: document.querySelectorAll("table.roles").length, link: !!document.querySelector('article a[href*="brand-role-map"]') }));
   ok("colors drops the role map and links to it instead", left.roles === 0 && left.link, JSON.stringify(left));

@@ -38,8 +38,11 @@
   /* 옅은 면 — 중립 500 베이스 알파. weak 5% · base 8% · strong 16% · disabled 16%.
      disabled 를 솔리드 단계로 두면 다크에서 --surface-sunken 과 같은 값이 돼 비활성 컨트롤이 패널에 묻힌다(구분 1.00) */
   --fill-weak:rgba(112,115,124,.05);--fill-base:rgba(112,115,124,.08);--fill-strong:rgba(112,115,124,.16);--fill-disabled:rgba(112,115,124,.16);
-  /* 글자 없는 중립 지표(점·범례 칩) — 3:1 이 필요하다. 종전 중립 400 은 흰 바탕 2.73 으로 미달이었다 */
-  --graphic-muted:var(--neutral-500);
+  /* 중립 의도 muted — 심각도 Info 등급과 비활성 지표가 쓴다.
+     surface·on 만 새로 둔다: fill 은 --fill-strong, text 는 --text-tertiary 와 값이 같아 선언하면 중복이다
+     (중립 500 의 8% 알파 = --fill-base, --sev-info-text 와 --text-tertiary 는 글자 그대로 같은 단계였다).
+     graphic 은 3:1 이 필요하다 — 종전 중립 400 은 흰 바탕 2.73 으로 미달이었다 */
+  --muted-surface:var(--neutral-500);--muted-on:var(--static-white);--muted-graphic:var(--neutral-500);
   --focus-ring:var(--accent-500);--dimmer:rgba(23,23,25,.52);
   /* 제품 Accent — 기준 단계는 라이트 600. 상태는 면 위 글자(--accent-on)의 반대 방향으로 한 단계·두 단계 간다 */
   --accent-surface:var(--accent-600);--accent-surface-hover:var(--accent-700);--accent-surface-pressed:var(--accent-800);
@@ -52,9 +55,11 @@
   --danger-surface:var(--red-600);--danger-surface-hover:var(--red-700);--danger-surface-pressed:var(--red-800);
   --danger-fill:rgba(229,34,34,.08);--danger-line:rgba(229,34,34,.22);
   --danger-on:var(--static-white);--danger-text:var(--red-700);--danger-graphic:var(--red-600);
-  /* danger-strong — 심각도 Critical 전용 등급이다(기준 ±2단계). 3차에서 --sev-* 를 대체한다 */
+  /* danger-strong — 심각도 Critical 등급이다. 기준에서 ±2단계(라이트 600→800 · 다크 500→300).
+     graphic 도 ±2 여야 한다 — 다크를 300 으로 두면 --danger-graphic(400)과 분리가 1.30 으로 Critical·High 가 한 색으로 읽힌다.
+     fill 은 알파도 강한 쪽이다(라이트 16% · 다크 20%) — 같은 알파면 두 등급 바탕이 1.04·1.09 로 갈리지 않는다 */
   --danger-strong-surface:var(--red-800);--danger-strong-surface-hover:var(--red-900);--danger-strong-surface-pressed:var(--red-950);
-  --danger-strong-fill:rgba(115,3,3,.08);--danger-strong-line:rgba(115,3,3,.22);
+  --danger-strong-fill:rgba(115,3,3,.16);--danger-strong-line:rgba(115,3,3,.22);
   --danger-strong-on:var(--static-white);--danger-strong-text:var(--red-800);--danger-strong-graphic:var(--red-800);
   --warning-surface:var(--orange-600);--warning-surface-hover:var(--orange-500);--warning-surface-pressed:var(--orange-400);
   --warning-fill:rgba(212,120,0,.08);--warning-line:rgba(212,120,0,.22);
@@ -65,12 +70,6 @@
   --info-surface:var(--cyan-600);--info-surface-hover:var(--cyan-500);--info-surface-pressed:var(--cyan-400);
   --info-fill:rgba(0,152,178,.08);--info-line:rgba(0,152,178,.22);
   --info-on:var(--neutral-950);--info-text:var(--cyan-700);--info-graphic:var(--cyan-600);
-  /* 심각도 — 3차에서 danger-strong + 상태색 매핑으로 교체한다. 섞인 상태를 만들지 않으려고 통째로 남겨 둔다 */
-  --sev-critical:var(--red-700);--sev-high:var(--red-500);--sev-medium:var(--orange-500);--sev-low:var(--cyan-500);--sev-info:var(--neutral-500);
-  --sev-critical-on:var(--static-white);--sev-high-on:var(--neutral-950);--sev-medium-on:var(--neutral-950);--sev-low-on:var(--neutral-950);--sev-info-on:var(--static-white);
-  --sev-critical-text:var(--red-800);--sev-high-text:var(--red-700);--sev-medium-text:var(--orange-700);--sev-low-text:var(--cyan-700);--sev-info-text:var(--neutral-600);
-  --sev-critical-bg:var(--red-100);--sev-high-bg:var(--red-50);--sev-medium-bg:var(--orange-50);--sev-low-bg:var(--cyan-50);--sev-info-bg:var(--neutral-100);
-  /* ── Spacing / Radius / Elevation / Motion / Type ─────────────── */
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;--space-20:80px;
   --card-pad:24px;--card-gap:20px;--row-h:52px;
   --radius-xs:2px;--radius-sm:4px;--radius-md:6px;--radius-lg:8px;--radius-xl:10px;--radius-full:999px;
@@ -104,7 +103,7 @@
   --line-strong:var(--neutral-600);--line-default:var(--neutral-700);--line-subtle:var(--neutral-800);
   --fill-weak:rgba(112,115,124,.12);--fill-base:rgba(112,115,124,.22);--fill-strong:rgba(112,115,124,.28);--fill-disabled:rgba(112,115,124,.16);
   /* 종전 중립 600 은 캔버스 2.58 · sunken 2.82 로 3:1 미달이었다 */
-  --graphic-muted:var(--neutral-400);
+  --muted-surface:var(--neutral-300);--muted-on:var(--neutral-950);--muted-graphic:var(--neutral-400);
   --focus-ring:var(--accent-400);--dimmer:rgba(23,23,25,.74);
   /* 다크 accent — 기준만 한 단계 다르다(라이트 600 · 다크 500). -on 판정과 밝은 제품 판정은 라이트와 공유한다.
      텍스트는 300(400 은 파랑 계열에서 패널 위 4.08 로 미달), 지표는 400(기준 500 이면 패널 위 2.47),
@@ -122,8 +121,8 @@
   --danger-fill:color-mix(in srgb,var(--red-500) 12%,transparent);--danger-line:rgba(255,66,66,.22);
   --danger-on:var(--neutral-950);--danger-text:var(--red-300);--danger-graphic:var(--red-400);
   --danger-strong-surface:var(--red-300);--danger-strong-surface-hover:var(--red-200);--danger-strong-surface-pressed:var(--red-100);
-  --danger-strong-fill:color-mix(in srgb,var(--red-300) 12%,transparent);--danger-strong-line:rgba(255,140,140,.22);
-  --danger-strong-on:var(--neutral-950);--danger-strong-text:var(--red-200);--danger-strong-graphic:var(--red-300);
+  --danger-strong-fill:color-mix(in srgb,var(--red-300) 20%,transparent);--danger-strong-line:rgba(255,140,140,.22);
+  --danger-strong-on:var(--neutral-950);--danger-strong-text:var(--red-200);--danger-strong-graphic:var(--red-200);
   --warning-surface:var(--orange-500);--warning-surface-hover:var(--orange-400);--warning-surface-pressed:var(--orange-300);
   --warning-fill:color-mix(in srgb,var(--orange-500) 12%,transparent);--warning-line:rgba(255,146,0,.22);
   --warning-on:var(--neutral-950);--warning-text:var(--orange-300);--warning-graphic:var(--orange-400);
@@ -133,12 +132,7 @@
   --info-surface:var(--cyan-500);--info-surface-hover:var(--cyan-400);--info-surface-pressed:var(--cyan-300);
   --info-fill:color-mix(in srgb,var(--cyan-500) 12%,transparent);--info-line:rgba(0,189,222,.22);
   --info-on:var(--neutral-950);--info-text:var(--cyan-300);--info-graphic:var(--cyan-400);
-  /* 다크 심각도 — critical 과 high 가 둘 다 red-400 이면 대비 1.00 으로 같은 색이 된다(5단계가 4단계로 읽혔다).
      라이트의 관계를 뒤집어 유지한다 — 어느 테마에서든 critical 이 배경과 대비가 더 크다(다크 8.98 vs 4.53) */
-  --sev-critical:var(--red-300);--sev-high:var(--red-500);--sev-medium:var(--orange-400);--sev-low:var(--cyan-400);--sev-info:var(--neutral-300);
-  --sev-critical-on:var(--neutral-950);--sev-high-on:var(--neutral-950);--sev-medium-on:var(--neutral-950);--sev-low-on:var(--neutral-950);--sev-info-on:var(--neutral-950);
-  --sev-critical-text:var(--red-200);--sev-high-text:var(--red-300);--sev-medium-text:var(--orange-400);--sev-low-text:var(--cyan-400);--sev-info-text:var(--neutral-300);
-  --sev-critical-bg:rgba(255,99,99,.16);--sev-high-bg:rgba(255,66,66,.12);--sev-medium-bg:rgba(255,169,56,.12);--sev-low-bg:rgba(40,208,237,.12);--sev-info-bg:rgba(112,115,124,.16);
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
   color-scheme:dark;
 }}
@@ -150,7 +144,7 @@
   --line-strong:var(--neutral-600);--line-default:var(--neutral-700);--line-subtle:var(--neutral-800);
   --fill-weak:rgba(112,115,124,.12);--fill-base:rgba(112,115,124,.22);--fill-strong:rgba(112,115,124,.28);--fill-disabled:rgba(112,115,124,.16);
   /* 종전 중립 600 은 캔버스 2.58 · sunken 2.82 로 3:1 미달이었다 */
-  --graphic-muted:var(--neutral-400);
+  --muted-surface:var(--neutral-300);--muted-on:var(--neutral-950);--muted-graphic:var(--neutral-400);
   --focus-ring:var(--accent-400);--dimmer:rgba(23,23,25,.74);
   /* 다크 accent — 기준만 한 단계 다르다(라이트 600 · 다크 500). -on 판정과 밝은 제품 판정은 라이트와 공유한다.
      텍스트는 300(400 은 파랑 계열에서 패널 위 4.08 로 미달), 지표는 400(기준 500 이면 패널 위 2.47),
@@ -168,8 +162,8 @@
   --danger-fill:color-mix(in srgb,var(--red-500) 12%,transparent);--danger-line:rgba(255,66,66,.22);
   --danger-on:var(--neutral-950);--danger-text:var(--red-300);--danger-graphic:var(--red-400);
   --danger-strong-surface:var(--red-300);--danger-strong-surface-hover:var(--red-200);--danger-strong-surface-pressed:var(--red-100);
-  --danger-strong-fill:color-mix(in srgb,var(--red-300) 12%,transparent);--danger-strong-line:rgba(255,140,140,.22);
-  --danger-strong-on:var(--neutral-950);--danger-strong-text:var(--red-200);--danger-strong-graphic:var(--red-300);
+  --danger-strong-fill:color-mix(in srgb,var(--red-300) 20%,transparent);--danger-strong-line:rgba(255,140,140,.22);
+  --danger-strong-on:var(--neutral-950);--danger-strong-text:var(--red-200);--danger-strong-graphic:var(--red-200);
   --warning-surface:var(--orange-500);--warning-surface-hover:var(--orange-400);--warning-surface-pressed:var(--orange-300);
   --warning-fill:color-mix(in srgb,var(--orange-500) 12%,transparent);--warning-line:rgba(255,146,0,.22);
   --warning-on:var(--neutral-950);--warning-text:var(--orange-300);--warning-graphic:var(--orange-400);
@@ -179,12 +173,7 @@
   --info-surface:var(--cyan-500);--info-surface-hover:var(--cyan-400);--info-surface-pressed:var(--cyan-300);
   --info-fill:color-mix(in srgb,var(--cyan-500) 12%,transparent);--info-line:rgba(0,189,222,.22);
   --info-on:var(--neutral-950);--info-text:var(--cyan-300);--info-graphic:var(--cyan-400);
-  /* 다크 심각도 — critical 과 high 가 둘 다 red-400 이면 대비 1.00 으로 같은 색이 된다(5단계가 4단계로 읽혔다).
      라이트의 관계를 뒤집어 유지한다 — 어느 테마에서든 critical 이 배경과 대비가 더 크다(다크 8.98 vs 4.53) */
-  --sev-critical:var(--red-300);--sev-high:var(--red-500);--sev-medium:var(--orange-400);--sev-low:var(--cyan-400);--sev-info:var(--neutral-300);
-  --sev-critical-on:var(--neutral-950);--sev-high-on:var(--neutral-950);--sev-medium-on:var(--neutral-950);--sev-low-on:var(--neutral-950);--sev-info-on:var(--neutral-950);
-  --sev-critical-text:var(--red-200);--sev-high-text:var(--red-300);--sev-medium-text:var(--orange-400);--sev-low-text:var(--cyan-400);--sev-info-text:var(--neutral-300);
-  --sev-critical-bg:rgba(255,99,99,.16);--sev-high-bg:rgba(255,66,66,.12);--sev-medium-bg:rgba(255,169,56,.12);--sev-low-bg:rgba(40,208,237,.12);--sev-info-bg:rgba(112,115,124,.16);
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
   color-scheme:dark;
 }
@@ -426,7 +415,7 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--brand-surface)}
 .grid-demo .cols i::after{content:attr(data-n);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:var(--danger-text);font-style:normal}
 .grid-demo .meta-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-tertiary);margin-top:10px}
 .shell-demo{display:grid;grid-template-columns:120px 1fr;height:180px;background:var(--surface-sunken);border:1px solid var(--line-subtle);border-radius:var(--radius-xl);overflow:hidden;margin:var(--space-4) 0 var(--space-6);font-size:12px;color:var(--text-tertiary);}
-.shell-demo>div{display:grid;place-items:center}.shell-demo .side{background:var(--fill-strong);border-right:1px solid var(--line-default)}
+.shell-demo>div{display:grid;place-items:center}.shell-demo .side{background:var(--surface-sunken);border-right:1px solid var(--line-default)}
 .shell-demo .main{padding:20px 32px;display:block}.shell-demo .main i{display:block;height:100%;border:1px dashed var(--line-strong);border-radius:6px;display:grid;place-items:center;font-style:normal}
 .type-sample{background:var(--surface-sunken);border:1px solid var(--line-subtle);border-radius:var(--radius-xl);padding:var(--space-12) var(--space-8);text-align:center;margin:var(--space-4) 0 var(--space-10)}
 .type-sample b{font-size:40px;font-weight:700;letter-spacing:-.0282em;line-height:1.3}
@@ -495,7 +484,8 @@ table.type-table td .smp{display:block;color:var(--text-primary)}
 .home-card .body span{font-size:14px;color:var(--text-secondary)}
 
 /* Anatomy / demo panel */
-.panel{background:var(--fill-strong);border-radius:var(--radius-lg);padding:var(--space-12) var(--space-10);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:var(--space-6);margin:var(--space-4) 0 var(--space-6);position:relative;min-height:200px}
+/* 예제 캔버스는 영역이지 옅은 면이 아니다 — 알파로 두면 그 위의 태그가 두 겹으로 쌓여 라벨이 AA 아래로 떨어진다 */
+.panel{background:var(--surface-sunken);border-radius:var(--radius-lg);padding:var(--space-12) var(--space-10);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:var(--space-6);margin:var(--space-4) 0 var(--space-6);position:relative;min-height:200px}
 .panel.left{justify-content:flex-start}
 .ph{border:1.5px dashed var(--line-default);border-radius:var(--radius-lg);background:var(--surface-sunken);color:var(--text-tertiary);display:grid;place-items:center;text-align:center;font-size:12px;padding:var(--space-8);min-height:180px;margin:var(--space-4) 0 var(--space-6)}
 .ph small{display:block;margin-top:4px;font-size:12px;opacity:.8}
@@ -844,14 +834,16 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--radius-full);line-height:1.6;background:var(--fill-strong);color:var(--text-secondary);white-space:nowrap}
 .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
 /* 기본형(서브틀)은 자기 가족의 옅은 바탕(-bg) + 글자용 단계(-text)를 쓴다.
-   종전에는 바탕이 --danger-fill/--warning-fill/--info-fill 이고 글자가 면 토큰이어서,
-   라이트에서 medium 2.07 · low 2.60 · high 3.44 · info 4.34 로 다섯 중 넷이 AA 미달이었다.
-   critical 과 high 이 같은 --danger-fill 을 쓰던 것도 -bg 로 갈려(red-100 vs red-50) 단계 구분이 생긴다 */
-.tag.critical{background:var(--sev-critical-bg);color:var(--sev-critical-text)}
-.tag.high{background:var(--sev-high-bg);color:var(--sev-high-text)}
-.tag.medium{background:var(--sev-medium-bg);color:var(--sev-medium-text)}
-.tag.low{background:var(--sev-low-bg);color:var(--sev-low-text)}
-.tag.info{background:var(--sev-info-bg);color:var(--sev-info-text)}
+   심각도 다섯 등급을 상태색 의도로 매핑한다 — Critical=danger-strong · High=danger · Medium=warning · Low=info · Info=중립.
+   마크업은 그대로다(class="tag critical" · React tone="critical") — 바뀌는 것은 이 규칙이 고르는 토큰뿐이다.
+   Critical 과 High 는 같은 빨강이라 바탕의 짙기가 유일한 단서다 — danger-strong 의 fill 알파를 강한 쪽으로 둬
+   라이트 1.23 · 다크 1.29 로 갈린다(같은 알파면 1.04 · 1.09 로 '지각 가능' 바닥에도 못 미친다).
+   Info 는 중립이라 톤 없는 기본 태그와 라벨 농도만 다르다 — 그게 '중립 등급'의 뜻이다 */
+.tag.critical{background:var(--danger-strong-fill);color:var(--danger-strong-text)}
+.tag.high{background:var(--danger-fill);color:var(--danger-text)}
+.tag.medium{background:var(--warning-fill);color:var(--warning-text)}
+.tag.low{background:var(--info-fill);color:var(--info-text)}
+.tag.info{background:var(--fill-strong);color:var(--text-tertiary)}
 .tag.ok{background:var(--success-fill);color:var(--success-text)}
 .tag.accent{background:var(--accent-fill);color:var(--accent-text)}
 .tag.sm{font-size:12px;padding:1px 8px}
@@ -860,11 +852,11 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .tag.outline{background:transparent;box-shadow:inset 0 0 0 1px currentColor}
 /* solid 는 면마다 글자색이 다르다 — 종전의 color:#fff 한 줄이 다섯 색을 덮어 10 조합 중 8이 AA 미달이었다
    (라이트 high 3.76 · medium 2.15 · low 2.77, 다크는 다섯 전부 1.67~2.77). 톤이 없는 .tag.solid 는 기본 회색 바탕을 그대로 쓴다 */
-.tag.solid.critical{background:var(--sev-critical);color:var(--sev-critical-on)}
-.tag.solid.high{background:var(--sev-high);color:var(--sev-high-on)}
-.tag.solid.medium{background:var(--sev-medium);color:var(--sev-medium-on)}
-.tag.solid.low{background:var(--sev-low);color:var(--sev-low-on)}
-.tag.solid.info{background:var(--sev-info);color:var(--sev-info-on)}   /* 규칙이 없어 .tag.info 의 회색 바탕에 흰 글자가 얹혀 라이트에서 1.1 이었다 — 예제 두 곳이 인라인으로 우회하고 있었다 */
+.tag.solid.critical{background:var(--danger-strong-surface);color:var(--danger-strong-on)}
+.tag.solid.high{background:var(--danger-surface);color:var(--danger-on)}
+.tag.solid.medium{background:var(--warning-surface);color:var(--warning-on)}
+.tag.solid.low{background:var(--info-surface);color:var(--info-on)}
+.tag.solid.info{background:var(--muted-surface);color:var(--muted-on)}   /* 규칙이 없어 .tag.info 의 회색 바탕에 흰 글자가 얹혀 라이트에서 1.1 이었다 — 예제 두 곳이 인라인으로 우회하고 있었다 */
 .tag.solid.ok{background:var(--success-surface);color:var(--success-on)}
 .tag.solid.accent{background:var(--accent-surface);color:var(--accent-on)}   /* React Tone 이 accent+solid 를 허용하는데 규칙이 없었다 */
 
@@ -1088,7 +1080,7 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 
 /* Indicator */
 .indicator{display:inline-flex;align-items:center;gap:8px;font-size:14px}
-.indicator::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--graphic-muted);flex:none}
+.indicator::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted-graphic);flex:none}
 .indicator.ok::before{background:var(--success-graphic)}
 .indicator.warn::before{background:var(--warning-graphic)}
 .indicator.danger::before{background:var(--danger-graphic)}
@@ -1191,27 +1183,36 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .kpi .delta svg{width:12px;height:12px;vertical-align:-1px}
 .kpi .delta.up{color:var(--danger-text)}
 .kpi .delta.down{color:var(--success-text)}
-.kpi.critical .value{color:var(--sev-critical-text)}
-.kpi.high .value{color:var(--sev-high-text)}
+.kpi.critical .value{color:var(--danger-strong-text)}
+.kpi.high .value{color:var(--danger-text)}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;width:100%}
 .chart{display:flex;flex-direction:column;gap:10px;width:100%;font-size:12px}
 .chart .row{display:grid;grid-template-columns:120px 1fr 56px;align-items:center;gap:12px}
 .chart .row .lbl{color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chart .bar{height:12px;border-radius:var(--radius-full);background:var(--fill-strong);overflow:hidden}
 .chart .bar i{display:block;height:100%;background:var(--accent-graphic);border-radius:var(--radius-full)}
-.chart .bar.critical i{background:var(--sev-critical)}
-.chart .bar.high i{background:var(--sev-high)}
-.chart .bar.medium i{background:var(--sev-medium)}
-.chart .bar.low i{background:var(--sev-low)}
+.chart .bar.critical i{background:var(--danger-strong-graphic)}
+.chart .bar.high i{background:var(--danger-graphic)}
+.chart .bar.medium i{background:var(--warning-graphic)}
+.chart .bar.low i{background:var(--info-graphic)}
 .chart .num{text-align:right;color:var(--text-secondary)}
 .chart-card{background:var(--surface-raised);border-radius:var(--radius-lg);box-shadow:var(--shadow-1);padding:20px 24px;display:flex;flex-direction:column;gap:16px;width:100%}
 .chart-card .chart-title{font-size:16px;font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center}
-.donut{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--sev-critical) 0 18%,var(--sev-high) 18% 45%,var(--sev-medium) 45% 75%,var(--sev-low) 75% 100%)}
+.donut{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--danger-strong-graphic) 0 18%,var(--danger-graphic) 18% 45%,var(--warning-graphic) 45% 75%,var(--info-graphic) 75% 100%)}
 .donut::after{content:attr(data-label);width:80px;height:80px;border-radius:50%;background:var(--surface-raised);display:grid;place-items:center;font-weight:700;font-size:16px;}
 .donut-row{display:flex;align-items:center;gap:24px}
 .chart-legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12px;color:var(--text-secondary)}
 .chart-legend span{display:inline-flex;align-items:center;gap:6px}
-.chart-legend i{width:10px;height:10px;border-radius:2px;background:var(--graphic-muted);flex:none}
+.chart-legend i{width:10px;height:10px;border-radius:2px;background:var(--muted-graphic);flex:none}
+/* 범례 스와치는 클래스로 고른다 — 예제 HTML 이 인라인 style 로 토큰을 참조하면
+   소비자 0 검사(assets/style.css 만 본다)가 그 참조를 세지 못하고, 데이터 파일에 토큰 이름이 흩어진다 */
+.chart-legend i.critical{background:var(--danger-strong-graphic)}
+.chart-legend i.high{background:var(--danger-graphic)}
+.chart-legend i.medium{background:var(--warning-graphic)}
+.chart-legend i.low{background:var(--info-graphic)}
+.chart-legend i.info{background:var(--muted-graphic)}
+.chart-legend i.ok{background:var(--success-graphic)}
+.chart-legend i.accent{background:var(--accent-graphic)}
 .chart-legend b{color:var(--text-primary);}
 .sparkline{display:flex;align-items:flex-end;gap:3px;height:32px}
 .sparkline i{display:block;width:6px;background:var(--accent-graphic);border-radius:2px}
@@ -1264,17 +1265,17 @@ div.kv dt{color:var(--text-tertiary);font-weight:500}div.kv dd{margin:0}
 .status-item .meta{margin-left:auto;font-size:12px;color:var(--text-tertiary);}
 .sev-band{display:flex;height:10px;border-radius:var(--radius-full);overflow:hidden;width:100%}
 .sev-band i{display:block;height:100%}
-.sev-band i.critical{background:var(--sev-critical)}
-.sev-band i.high{background:var(--sev-high)}
-.sev-band i.medium{background:var(--sev-medium)}
-.sev-band i.low{background:var(--sev-low)}
-.sev-band i.info{background:var(--sev-info)}
+.sev-band i.critical{background:var(--danger-strong-graphic)}
+.sev-band i.high{background:var(--danger-graphic)}
+.sev-band i.medium{background:var(--warning-graphic)}
+.sev-band i.low{background:var(--info-graphic)}
+.sev-band i.info{background:var(--muted-graphic)}
 .sev-cell{display:inline-flex;align-items:center;gap:8px}
-.sev-cell i{width:3px;height:16px;border-radius:2px;background:var(--sev-info)}
-.sev-cell i.critical{background:var(--sev-critical)}
-.sev-cell i.high{background:var(--sev-high)}
-.sev-cell i.medium{background:var(--sev-medium)}
-.sev-cell i.low{background:var(--sev-low)}
+.sev-cell i{width:3px;height:16px;border-radius:2px;background:var(--muted-graphic)}
+.sev-cell i.critical{background:var(--danger-strong-graphic)}
+.sev-cell i.high{background:var(--danger-graphic)}
+.sev-cell i.medium{background:var(--warning-graphic)}
+.sev-cell i.low{background:var(--info-graphic)}
 .onboard{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%;max-width:560px;margin:0 auto}
 .onboard .card{width:100%}
 .log-row{font-size:12px;}

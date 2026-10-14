@@ -434,7 +434,7 @@ const COMPONENTS = {
     thumb: `<span class="tag critical">Critical</span><span class="tag medium">Medium</span><span class="tag ok">정상</span>`,
     examples: [
       { id: "default", title: "Default", desc: "의미 색을 지정하지 않은 중립 태그입니다.", html: `<span class="tag">Tag</span>` },
-      { id: "severity", title: "Severity", desc: "위협 심각도 5단계. --sev-* 토큰과 1:1.", html: `
+      { id: "severity", title: "Severity", desc: "위협 심각도 5단계. 색은 상태색 의도 매핑입니다 — Critical=danger-strong · High=danger · Medium=warning · Low=info · Info=중립.", html: `
         <span class="tag critical">Critical</span>
         <span class="tag high">High</span>
         <span class="tag medium">Medium</span>
@@ -458,9 +458,9 @@ const COMPONENTS = {
         <span class="tag high">High</span>
         <span class="tag high lg">High</span>` },
     ],
-    props: [["tone", "critical | high | medium | low | info | ok | accent | (neutral)", "neutral", "의미별 색. 기본형은 <code>--sev-*-bg</code> + <code>--sev-*-text</code>, <code>.solid</code> 는 <code>--sev-*</code> + <code>--sev-*-on</code> 을 씁니다 — 면마다 글자색이 달라서 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
-    spec: [["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--sev-*-bg</code>, <code>.solid</code> 는 <code>--sev-*</code>"], ["Label", "Label/2 12 Semibold (세 사이즈 공통)"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
-    figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--sev-critical-bg", fg: "--sev-critical-text", solidBg: "--sev-critical", solidFg: "--sev-critical-on" }, high: { bg: "--sev-high-bg", fg: "--sev-high-text", solidBg: "--sev-high", solidFg: "--sev-high-on" }, medium: { bg: "--sev-medium-bg", fg: "--sev-medium-text", solidBg: "--sev-medium", solidFg: "--sev-medium-on" }, low: { bg: "--sev-low-bg", fg: "--sev-low-text", solidBg: "--sev-low", solidFg: "--sev-low-on" }, info: { bg: "--sev-info-bg", fg: "--sev-info-text", solidBg: "--sev-info", solidFg: "--sev-info-on" }, ok: { bg: "--success-fill", fg: "--success-text", solidBg: "--success-surface", solidFg: "--success-on" }, accent: { bg: "--accent-fill", fg: "--accent-text", solidBg: "--accent-surface", solidFg: "--accent-on" }, neutral: { bg: "--fill-strong", fg: "--text-secondary" } }, states: ["subtle", "outline", "solid"] },
+    props: [["tone", "critical | high | medium | low | info | ok | accent | (neutral)", "neutral", "의미별 색. 심각도 등급은 상태색 의도로 매핑됩니다 — 기본형은 <code>--{intent}-fill</code> + <code>--{intent}-text</code>, <code>.solid</code> 는 <code>--{intent}-surface</code> + <code>--{intent}-on</code>. 면마다 글자색이 달라서 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
+    spec: [["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--{intent}-fill</code>, <code>.solid</code> 는 <code>--{intent}-surface</code>"], ["Label", "Label/2 12 Semibold (세 사이즈 공통)"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
+    figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--danger-strong-fill", fg: "--danger-strong-text", solidBg: "--danger-strong-surface", solidFg: "--danger-strong-on" }, high: { bg: "--danger-fill", fg: "--danger-text", solidBg: "--danger-surface", solidFg: "--danger-on" }, medium: { bg: "--warning-fill", fg: "--warning-text", solidBg: "--warning-surface", solidFg: "--warning-on" }, low: { bg: "--info-fill", fg: "--info-text", solidBg: "--info-surface", solidFg: "--info-on" }, info: { bg: "--fill-strong", fg: "--text-tertiary", solidBg: "--muted-surface", solidFg: "--muted-on" }, ok: { bg: "--success-fill", fg: "--success-text", solidBg: "--success-surface", solidFg: "--success-on" }, accent: { bg: "--accent-fill", fg: "--accent-text", solidBg: "--accent-surface", solidFg: "--accent-on" }, neutral: { bg: "--fill-strong", fg: "--text-secondary" } }, states: ["subtle", "outline", "solid"] },
   },
 
   /* ------------------------------------------------ Dropdown (액션 메뉴) · Select (값 선택) — 같은 .dropdown CSS 를 쓰지만 용도가 달라 페이지를 나눈다 */
@@ -1249,7 +1249,7 @@ const COMPONENTS = {
   "data-visual": {
     status: "ready", react: ["Kpi","KpiGrid","ChartCard","BarChart","Donut","DonutRow","ChartLegend","Sparkline"], css: [".kpi", ".kpi-grid", ".chart", ".chart-card", ".donut", ".donut-row", ".chart-legend", ".sparkline"],
     desc: "대시보드의 수치·추이·비율을 보여줍니다. KPI 카드, 가로 막대, 도넛, 스파크라인을 CSS 만으로 구성하며 색은 심각도 토큰을 그대로 씁니다.",
-    thumb: `<div class="kpi compact" style="padding:12px 14px;min-width:120px"><span class="label">Critical</span><span class="value" style="font-size:24px;color:var(--sev-critical)">1,284</span></div>`,
+    thumb: `<div class="kpi compact" style="padding:12px 14px;min-width:120px"><span class="label">Critical</span><span class="value" style="font-size:24px;color:var(--danger-strong-text)">1,284</span></div>`,
     examples: [
       { id: "default", title: "Default", desc: "값 하나를 보여 주는 기본 KPI 입니다.", html: `<div class="kpi" style="max-width:240px"><span class="label">연결 에이전트</span><span class="value">1,247</span></div>` },
       { id: "kpi", title: "KPI", desc: "라벨 · 값 · 증감. 보안 지표는 증가가 위험(.up 빨강), 감소가 좋음(.down 초록).", html: `
@@ -1273,12 +1273,12 @@ const COMPONENTS = {
         <div class="chart-card" style="max-width:560px">
           <h3 class="chart-title">심각도 분포</h3>
           <div class="donut-row">
-            <div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%" data-label="1,054" style="background:conic-gradient(var(--sev-critical) 0 18%,var(--sev-high) 18% 45%,var(--sev-medium) 45% 75%,var(--sev-low) 75% 100%)"></div>
+            <div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%" data-label="1,054"></div>
             <div class="chart-legend" style="flex-direction:column">
-              <span><i style="background:var(--sev-critical)"></i>Critical <b>190</b></span>
-              <span><i style="background:var(--sev-high)"></i>High <b>285</b></span>
-              <span><i style="background:var(--sev-medium)"></i>Medium <b>316</b></span>
-              <span><i style="background:var(--sev-low)"></i>Low <b>263</b></span>
+              <span><i class="critical"></i>Critical <b>190</b></span>
+              <span><i class="high"></i>High <b>285</b></span>
+              <span><i class="medium"></i>Medium <b>316</b></span>
+              <span><i class="low"></i>Low <b>263</b></span>
             </div>
           </div>
         </div>` },
