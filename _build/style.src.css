@@ -648,8 +648,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
    버튼은 하나씩 크게 서고 참조 시스템도 버튼에는 상태색 라벨을 쓴다. 그 대가(라이트 2.9)는 게이트가 매 빌드 보고한다 */
 .btn.danger{background:var(--surface-negative-primary);color:var(--foreground-negative-strong)}
 .btn.danger:hover{background:var(--surface-negative-strong)}
-.btn.danger:active{background:var(--surface-negative-strong);box-shadow:inset 0 0 0 1px var(--line-negative-strong)}
-.btn.danger.secondary{background:transparent;color:var(--foreground-negative-primary);border-color:var(--line-negative-primary);box-shadow:none}
+.btn.danger:active{background:var(--surface-negative-strong)}
+.btn.danger.secondary{background:transparent;color:var(--foreground-negative-primary);border-color:var(--line-negative-primary)}
 .btn.danger.secondary:hover{background:var(--surface-negative-primary)}
 .btn.danger.secondary:active{background:var(--surface-negative-strong);border-color:var(--line-negative-strong)}   /* 위 .danger.secondary 가 :hover·:active 를 덮으므로 뒤에 둔다 */
 .btn.icon{width:44px;padding:0}
