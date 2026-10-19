@@ -1095,10 +1095,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const pane = document.querySelector('[data-docpane="semantic"]');
     const cells = [...pane.querySelectorAll(".val-cell")];
     const blank = cells.filter((c) => { const b2 = getComputedStyle(c.querySelector(".bar i")).backgroundColor; return !b2 || b2 === "rgba(0, 0, 0, 0)"; });
-    return { sections: pane.querySelectorAll("h2").length, cells: cells.length,
+    /* #roles(브랜드 역할 맵)는 토큰 절이 아니라 쓰는 법이다 — 스와치 줄이 없으므로 세지 않는다 */
+    const h2s = [...pane.querySelectorAll("h2")].filter((h) => h.id !== "roles");
+    return { sections: h2s.length, cells: cells.length,
       blank: blank.map((c) => c.dataset.token),
       /* 절마다 설명 문단이 하나씩 — 이미지의 형식이다 */
-      paras: pane.querySelectorAll("h2 + p").length,
+      paras: h2s.filter((h) => (h.nextElementSibling || {}).tagName === "P").length,
       checker: pane.querySelectorAll(".sem-row.checker").length,
       titles: [...pane.querySelectorAll("h2")].slice(0, 3).map((h) => h.textContent) };
   });
@@ -1160,20 +1162,23 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     `${a0.h}→${a1.h} · bottom ${a0.bottom}→${a1.bottom} · label ${a0.labelTop}→${a1.labelTop}`);
   await page.mouse.move(5, 5); await page.waitForTimeout(300);
 
-  // 브랜드 역할 맵이 Colors 에서 떨어져 나와 제 페이지를 가진다
-  await go("foundations/brand-role-map.html");
-  const brm = await page.evaluate(() => ({
-    h1: (document.querySelector("article h1") || {}).textContent || "",
-    roles: document.querySelectorAll("table.roles tbody tr").length,
-    dodont: document.querySelectorAll(".dodont>div").length,
-    side: [...document.querySelectorAll(".sidebar a")].some(a => /brand-role-map/.test(a.getAttribute("href") || "")),
-  }));
-  /* 세 쌍이다 — 브랜드색 오용 · 심각도 라벨 병기 · 두 축 겹침. 마지막 쌍은 심각도 색을 상태색에 접은 대가를 보여 준다 */
-  ok("brand role map has its own page with the table and all three pairs", /Brand role map/.test(brm.h1) && brm.roles === 5 && brm.dodont === 6 && brm.side, JSON.stringify(brm));
+  // 브랜드 역할 맵은 제 페이지를 버리고 Colors 의 Brand Mark 아래로 들어왔다
   await go("foundations/colors.html");
-  const left = await page.evaluate(() => ({ roles: document.querySelectorAll("table.roles").length }));
-  /* 설명을 줄이며 본문 링크를 걷어냈다 — 역할 맵은 사이드바 Foundations 와 Overview 본문으로 들어간다 */
-  ok("colors does not carry the role map table", left.roles === 0, JSON.stringify(left));
+  const brm = await page.evaluate(() => {
+    const pane = document.querySelector('[data-docpane="semantic"]');
+    const h = pane.querySelector("h2#roles"), mark = document.getElementById("company");
+    return {
+      inPane: !!h,
+      /* Brand Mark 뒤에 와야 한다 — 절 사이에 끼면 토큰 목록이 끊긴다 */
+      afterMark: !!(h && mark && (mark.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_FOLLOWING)),
+      rows: pane.querySelectorAll("table.roles tbody tr").length,
+      /* 한 쌍만 옮겼다 — 브랜드색 오용. 나머지 두 쌍은 싣지 않기로 했다 */
+      dodont: pane.querySelectorAll(".dodont>div").length,
+      side: [...document.querySelectorAll(".sidebar a")].some(a => /brand-role-map/.test(a.getAttribute("href") || "")),
+    };
+  });
+  ok("the role map sits under Brand Mark in the semantic tab, and its own page is gone",
+    brm.inPane && brm.afterMark && brm.rows === 5 && brm.dodont === 2 && !brm.side, JSON.stringify(brm));
 
   // Atomic 팔레트 칸 수 + 반응형 블록이 실제로 적용되는지 (한동안 컴포넌트 규칙에 덮여 죽어 있었다)
   /* Common 2 · Brand 5(제품 슬롯) · Cool Neutral 21(참조 시스템 램프) */
