@@ -282,6 +282,46 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
+
+  /* 눌림 — 종전 단정은 이 상태를 **하나도 재지 않았다**. 그래서 .btn.danger 의 테두리를 지웠을 때
+     눌림이 hover 와 같은 색이 된 것도, .btn.text 의 눌림이 제품색에서 중립색으로 튀던 것도 통과했다.
+     알파 틴트라 반드시 뒤 배경까지 쌓아 합성해야 한다 — 원문 값으로 재면 알파만 다른 같은 색이라 1.000 이 나온다.
+     방향까지 보는 이유: 중립 컨트롤은 hover 가 불투명 페이지 배경이라 다크에서 어두워졌다가
+     눌림에서 다시 밝아지는 뒤집힘이 있었다 */
+  const EFF = (sel) => {
+    const parse = (c) => { const sr = c.indexOf("color(srgb") === 0; const k = sr ? 255 : 1;
+      const v = (c.match(/[0-9.]+/g) || [0, 0, 0, 0]).map(Number);
+      return { r: v[0] * k, g: v[1] * k, b: v[2] * k, a: v.length > 3 ? v[3] : (c === "transparent" ? 0 : 1) }; };
+    const el = document.querySelector(sel); const stack = [];
+    for (let e = el; e; e = e.parentElement) { const c = parse(getComputedStyle(e).backgroundColor);
+      if (c.a > 0) stack.push(c); if (c.a >= 0.999) break; }
+    if (!stack.length || stack[stack.length - 1].a < 0.999) stack.push({ r: 255, g: 255, b: 255, a: 1 });
+    let out = stack.pop();
+    while (stack.length) { const t = stack.pop(); out = { r: t.r * t.a + out.r * (1 - t.a), g: t.g * t.a + out.g * (1 - t.a), b: t.b * t.a + out.b * (1 - t.a), a: 1 }; }
+    return `rgb(${Math.round(out.r)}, ${Math.round(out.g)}, ${Math.round(out.b)})`;
+  };
+  for (const [sel, name] of [["#ex-button-variant .btn.danger:not(.secondary)", "danger"], ["#ex-button-variant .btn.text", "text"]]) {
+    for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
+      await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
+      /* 테마를 바꾸기 전에 hover 를 반드시 푼다 — 마우스가 남아 있으면 rest 를 hover 로 읽는다 */
+      await page.mouse.move(2, 2); await page.waitForTimeout(280);
+      const el = page.locator(sel).first();
+      await el.evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
+      await page.mouse.move(2, 2); await page.waitForTimeout(240);
+      const read = () => page.evaluate(EFF, sel);
+      const rest = await read();
+      await el.hover(); await page.waitForTimeout(280); const hov = await read();
+      await page.mouse.down(); await page.waitForTimeout(280); const act = await read(); await page.mouse.up();
+      await page.mouse.move(2, 2); await page.waitForTimeout(240);
+      const L = (c) => { const v = c.match(/[0-9.]+/g).map(Number); const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
+        return 0.2126 * f(v[0]) + 0.7152 * f(v[1]) + 0.0722 * f(v[2]); };
+      const d1 = Math.sign(L(hov) - L(rest)), d2 = Math.sign(L(act) - L(hov));
+      ok(`${theme} ${name} button has three distinct states`, new Set([rest, hov, act]).size === 3, `${rest} → ${hov} → ${act}`);
+      ok(`${theme} ${name} button states run in one direction`, d1 !== 0 && d1 === d2, `${d1} · ${d2} — ${rest} → ${hov} → ${act}`);
+    }
+  }
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
+  await page.mouse.move(2, 2); await page.waitForTimeout(220);
   // 아웃라인 danger 는 .danger.secondary 가 :hover 를 덮어 아무 반응이 없었다
   const od = page.locator("#ex-button-variant .btn.danger.secondary");
   const odBase = await od.evaluate((e) => getComputedStyle(e).backgroundColor);
