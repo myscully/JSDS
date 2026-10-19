@@ -153,7 +153,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   /* 밝은 제품 적응(data-accent-light)을 걷어냈다 — 이제 제품 색은 흰 글자를 받칠 수 있어야 한다는 **제약**이고,
      빌드가 data.js 의 제품 전부를 검사한다. 여기서는 겹치지 않는 제품이 자기 색을 그대로 쓰는지만 본다 */
   ok("a non-clashing product keeps its own colour and never flips the label",
-    !bright.neutral && !bright.light && bright.surface === "#00704F", JSON.stringify(bright));
+    !bright.neutral && !bright.light && bright.surface === "#008760", JSON.stringify(bright));
 
   const readTokens = () => page.evaluate(() => {
     const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
@@ -225,7 +225,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     cases.map(([n2, L2]) => `${n2} ${L2.labelRgb}`).join(" · "));
   await accent("product-c");
   const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--surface-brand-primary").trim());
-  ok("light keeps the product colour", backLight === "#00704F", backLight);
+  ok("light keeps the product colour", backLight === "#008760", backLight);
   await accent("product-b");   // 뒤 케이스(Atomic 램프)가 중립 전환 상태를 전제한다 — 원복해 둔다
 
   // Atomic 의 Brand 램프도 함께 회색 — 제품 슬롯에서 파생되는 것은 전부 따라온다

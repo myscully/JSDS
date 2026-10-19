@@ -81,7 +81,7 @@ hover·pressed 는 더 어두워 자동으로 통과합니다.
 ```ts
 import { isLightAccent } from "@jiran/ds-react";
 isLightAccent("#00AD7B");  // true  — 흰 글자 2.89, Brand 슬롯에 쓸 수 없다
-isLightAccent("#00704F");  // false — 6.12, 같은 색상의 어두운 변형
+isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 가장 밝은 값
 ```
 
 - `applyAccent()` 는 더 이상 `data-accent-light` 를 설정하지 않습니다. 그 속성에 CSS 를 걸어 두었다면 지우세요.

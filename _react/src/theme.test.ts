@@ -56,7 +56,7 @@ describe("applyAccent", () => {
   /* 제품 색 제약 — 면 위 글자는 늘 흰색이라 제품 색이 그 흰 글자를 받쳐야 한다(라이트 기준 4.5) */
   it("isLightAccent 가 규격에 못 미치는 제품 색을 가려낸다", () => {
     expect(isLightAccent("#00AD7B")).toBe(true);   // 흰 글자 2.89 — 쓸 수 없다
-    expect(isLightAccent("#00704F")).toBe(false);  // 6.12 — 같은 색상의 어두운 변형
+    expect(isLightAccent("#008760")).toBe(false);  // 4.53 — 같은 색상에서 통과하는 가장 밝은 값
     expect(isLightAccent("#0066FF")).toBe(false);  // 4.83 — 참조 시스템의 기본색
   });
 
