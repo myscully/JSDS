@@ -11,7 +11,7 @@ npm i @jiran/ds-react
 import "@jiran/ds-react/style.css";
 import { ToastProvider, applyAccent } from "@jiran/ds-react";
 
-applyAccent("#2563EB"); // 제품 메인 컬러 → --accent-50~900
+applyAccent("#0066FF"); // 제품 메인 컬러 → --prod-40~60 (brand 다섯 단계)
 
 createRoot(document.getElementById("root")!).render(
   <ToastProvider><App /></ToastProvider>

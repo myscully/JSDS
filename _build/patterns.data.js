@@ -176,8 +176,8 @@ const PATTERNS = {
             <span class="spacer"></span>
             <button type="button" class="btn md secondary">${I("download")}내보내기</button>
           </div>
-          <div class="toolbar" style="font-size:12px;color:var(--text-secondary)">
-            <span>결과 <b style="color:var(--text-primary)">128</b>건</span>
+          <div class="toolbar" style="font-size:12px;color:var(--foreground-neutral-secondary)">
+            <span>결과 <b style="color:var(--foreground-neutral-primary)">128</b>건</span>
             <span class="chip sm on">Critical<i class="x" role="button" aria-label="제거">${I("x",10)}</i></span>
             <span class="chip sm on">High<i class="x" role="button" aria-label="제거">${I("x",10)}</i></span>
             <button type="button" class="btn sm text">필터 초기화</button>

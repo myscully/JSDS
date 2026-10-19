@@ -2,7 +2,7 @@ import { Avatar, Button, Count, Icon, SearchBar, TopBar, TopBarLogo, TopBarRight
 
 export default function Example() {
   return (
-    <TopBar style={{ borderRadius: "var(--radius-lg)", border: "1px solid var(--line-default)" }}>
+    <TopBar style={{ borderRadius: "var(--radius-lg)", border: "1px solid var(--line-neutral-secondary)" }}>
       <TopBarLogo href="#" name="Security Console" />
       <SearchBar placeholder="이벤트, 대상, IP 검색" label="전역 검색" shortcut="/" hotkey wrapperStyle={{ marginLeft: 16 }} />
       <TopBarRight>

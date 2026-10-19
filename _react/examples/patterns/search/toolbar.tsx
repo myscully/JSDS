@@ -27,8 +27,8 @@ export default function Example() {
         <Spacer />
         <Button variant="secondary" leading={<Icon name="download" />}>내보내기</Button>
       </Toolbar>
-      <Toolbar style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-        <span>결과 <b style={{ color: "var(--text-primary)" }}>128</b>건</span>
+      <Toolbar style={{ fontSize: 12, color: "var(--foreground-neutral-secondary)" }}>
+        <span>결과 <b style={{ color: "var(--foreground-neutral-primary)" }}>128</b>건</span>
         {filters.map((f) => (
           <Chip key={f} size="sm" selected onRemove={() => setFilters((s) => s.filter((x) => x !== f))} removeLabel="제거">{f}</Chip>
         ))}
