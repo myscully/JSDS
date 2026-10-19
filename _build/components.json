@@ -1,6 +1,6 @@
 {
   "version": "v0.6",
-  "generatedAt": "2026-10-19T00:30:02.185Z",
+  "generatedAt": "2026-10-19T00:34:10.065Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -1999,7 +1999,7 @@
           "tone",
           "critical | high | medium | low | ok | accent | (neutral)",
           "neutral",
-          "의미별 색. 심각도 등급은 상태색 의도로 매핑됩니다 — 기본형은 <code>--{intent}-fill</code> + <code>--{intent}-text</code>, <code>.solid</code> 는 <code>--{intent}-surface</code> + <code>--{intent}-on</code>. 면마다 글자색이 달라서 라벨 색을 직접 지정하지 마세요"
+          "의미별 색. 바탕은 틴트(<code>--surface-{negative|cautionary|…}-primary</code>)이고 <b>라벨은 중립 글자색</b>입니다 — 색은 점(<code>::before</code>)과 테두리가 나릅니다. <code>.solid</code> 는 한 단계 강한 틴트 + 테두리입니다(참조 시스템에 솔리드 상태 면이 없습니다). 라벨 색을 직접 지정하지 마세요"
         ],
         [
           "style",
@@ -2021,7 +2021,7 @@
         ],
         [
           "Container",
-          "radius/full · 기본형은 <code>--{intent}-fill</code>, <code>.solid</code> 는 <code>--{intent}-surface</code>"
+          "radius/full · 기본형은 <code>--surface-{…}-primary</code> 틴트, <code>.solid</code> 는 같은 틴트 + <code>--line-{…}</code> 테두리(Critical 만 <code>--surface-negative-strong</code>)"
         ],
         [
           "Label",
@@ -2105,7 +2105,7 @@
         {
           "id": "severity",
           "title": "Severity",
-          "desc": "위협 심각도 4단계. 색은 상태색 의도 매핑입니다 — Critical=danger · High=warning · Medium=info · Low=중립.",
+          "desc": "위협 심각도 4단계. 색은 상태·강조 의도 매핑입니다 — Critical=negative · High=cautionary · Medium=accent cyan · Low=중립. 라벨은 중립 글자색이고 색은 점과 틴트가 나릅니다.",
           "html": "<span class=\"tag critical\">Critical</span>\n<span class=\"tag high\">High</span>\n<span class=\"tag medium\">Medium</span>\n<span class=\"tag low\">Low</span>",
           "react": "import { Tag } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  return (\n    <>\n      <Tag tone=\"critical\">Critical</Tag>\n      <Tag tone=\"high\">High</Tag>\n      <Tag tone=\"medium\">Medium</Tag>\n      <Tag tone=\"low\">Low</Tag>\n    </>\n  );\n}"
         },

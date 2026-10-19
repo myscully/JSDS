@@ -434,7 +434,7 @@ const COMPONENTS = {
     thumb: `<span class="tag critical">Critical</span><span class="tag medium">Medium</span><span class="tag ok">정상</span>`,
     examples: [
       { id: "default", title: "Default", desc: "의미 색을 지정하지 않은 중립 태그입니다.", html: `<span class="tag">Tag</span>` },
-      { id: "severity", title: "Severity", desc: "위협 심각도 4단계. 색은 상태색 의도 매핑입니다 — Critical=danger · High=warning · Medium=info · Low=중립.", html: `
+      { id: "severity", title: "Severity", desc: "위협 심각도 4단계. 색은 상태·강조 의도 매핑입니다 — Critical=negative · High=cautionary · Medium=accent cyan · Low=중립. 라벨은 중립 글자색이고 색은 점과 틴트가 나릅니다.", html: `
         <span class="tag critical">Critical</span>
         <span class="tag high">High</span>
         <span class="tag medium">Medium</span>
@@ -458,8 +458,8 @@ const COMPONENTS = {
         <span class="tag high">High</span>
         <span class="tag high lg">High</span>` },
     ],
-    props: [["tone", "critical | high | medium | low | ok | accent | (neutral)", "neutral", "의미별 색. 심각도 등급은 상태색 의도로 매핑됩니다 — 기본형은 <code>--{intent}-fill</code> + <code>--{intent}-text</code>, <code>.solid</code> 는 <code>--{intent}-surface</code> + <code>--{intent}-on</code>. 면마다 글자색이 달라서 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
-    spec: [["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--{intent}-fill</code>, <code>.solid</code> 는 <code>--{intent}-surface</code>"], ["Label", "Label/2 12 Semibold (세 사이즈 공통)"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
+    props: [["tone", "critical | high | medium | low | ok | accent | (neutral)", "neutral", "의미별 색. 바탕은 틴트(<code>--surface-{negative|cautionary|…}-primary</code>)이고 <b>라벨은 중립 글자색</b>입니다 — 색은 점(<code>::before</code>)과 테두리가 나릅니다. <code>.solid</code> 는 한 단계 강한 틴트 + 테두리입니다(참조 시스템에 솔리드 상태 면이 없습니다). 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
+    spec: [["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--surface-{…}-primary</code> 틴트, <code>.solid</code> 는 같은 틴트 + <code>--line-{…}</code> 테두리(Critical 만 <code>--surface-negative-strong</code>)"], ["Label", "Label/2 12 Semibold (세 사이즈 공통)"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
     figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--surface-negative-primary", fg: "--foreground-negative-primary", solidBg: "--surface-negative-strong", solidFg: "--foreground-neutral-primary" }, high: { bg: "--surface-cautionary-primary", fg: "--foreground-cautionary-primary", solidBg: "--surface-cautionary-primary", solidFg: "--foreground-neutral-primary" }, medium: { bg: "--surface-accent-cyan", fg: "--foreground-accent-cyan", solidBg: "--surface-accent-cyan", solidFg: "--foreground-neutral-primary" }, low: { bg: "--surface-neutral-strong", fg: "--foreground-neutral-tertiary", solidBg: "--surface-neutral-strong", solidFg: "--foreground-neutral-primary" }, ok: { bg: "--surface-positive-primary", fg: "--foreground-positive-primary", solidBg: "--surface-positive-primary", solidFg: "--foreground-neutral-primary" }, accent: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary", solidBg: "--surface-brand-primary", solidFg: "--brand-label" }, neutral: { bg: "--surface-neutral-strong", fg: "--foreground-neutral-secondary" } }, states: ["subtle", "outline", "solid"] },
   },
 
