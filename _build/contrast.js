@@ -135,7 +135,8 @@ async function run() {
     if (ctx.accent) {
       await page.evaluate((k) => window.applyAccent(k), ctx.accent);
     } else {
-      await page.evaluate(() => { const r = document.documentElement; for (let i of [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]) r.style.removeProperty("--prod-" + i); r.removeAttribute("data-accent-light"); r.removeAttribute("data-accent-neutral"); });
+      /* 제품 슬롯 다섯 단계를 지운다 — 옛 10단계 목록을 그대로 두면 40·45·55·60 이 앞 맥락에서 새어 들어온다 */
+      await page.evaluate(() => { const r = document.documentElement; for (const i of [40, 45, 50, 55, 60]) r.style.removeProperty("--prod-" + i); r.removeAttribute("data-accent-light"); r.removeAttribute("data-accent-neutral"); });
     }
     await page.waitForTimeout(120);
     /* 선언 존재 검사 — 비어 있으면 그 선언이 파서에게 버려졌다 */

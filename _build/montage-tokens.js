@@ -20,78 +20,92 @@ const AT = {
   pink: { 10:"#3D0133",20:"#730560",30:"#A81690",40:"#D331B8",46:"#E846CD",50:"#F553DA",60:"#FA73E3",70:"#FF94ED",80:"#FFB8F3",90:"#FED3F7",95:"#FEECFB",99:"#FFFAFE" },
   redOrange: { 10:"#290F00",20:"#592100",30:"#913500",40:"#C94A00",48:"#F55A00",50:"#FF5E00",60:"#FF7B2E",70:"#FF9B61",80:"#FFBD96",90:"#FED9C4",95:"#FEEEE5",99:"#FFFAF7" },
 };
-const OP = { 5:0.05, 8:0.08, 12:0.12, 16:0.16, 22:0.22, 28:0.28, 43:0.43, 52:0.52, 61:0.61, 74:0.74, 88:0.88 };
-/* Montage 의 addHexOpacity 와 같은 계산 — 8자리 HEX */
-const a = (hex, o) => hex.slice(0, 7) + Math.round(o * 255).toString(16).padStart(2, "0").toUpperCase();
+/* 참조 시스템의 opacity 눈금. 이제 퍼센트를 그대로 쓰므로 이 표는 '어떤 값이 허용되는가'의 기록이다 —
+   여기 없는 숫자가 나오면 참조 시스템에서 온 값이 아니다(다크 line-neutral-primary 의 32 만 예외) */
+const OP_SCALE = [5, 8, 12, 16, 22, 28, 35, 43, 52, 61, 74, 88, 97];
 const kebab = (s) => s.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 const ACCENTS = ["lime", "cyan", "lightBlue", "violet", "purple", "pink"];
-/* brand 는 제품이 주입하는 슬롯이라 값이 아니라 참조다 — 기본값일 때 blue 와 같아지는지는 램프 대조가 본다 */
+/* 의미 토큰은 **램프를 참조한다** — 값을 굳혀 두지 않는다.
+   그래야 3계층(Primitive → Semantic → Component)이 말이 아니라 사실이 되고,
+   램프 한 줄을 고치면 그 가족이 전부 따라온다. 참조 시스템 버전을 올릴 때도 한 자리만 고치면 된다.
+   종전에는 brand 만 이렇게 이어져 있었고 나머지 11개 램프는 소비자가 0 이었다 —
+   Atomic 탭이 "Semantic 토큰이 참조하는 원천 값"이라고 적어 둔 채로. */
+const tok = (fam, n) => `--${kebab(fam)}-${n}`;
+const ref = (fam, n) => `var(${tok(fam, n)})`;
+/* 알파는 참조 시스템의 opacity 눈금 숫자를 그대로 쓴다(그쪽 소스가 0.08 이고 8자리 HEX 는 직렬화 산물이다).
+   Chromium 에서 두 표현이 같은 값으로 풀리는 것을 알파 토큰 68개 전수로 확인했다(차이 0.0000) */
+const mixVar = (t, pct) => `color-mix(in srgb,var(${t}) ${pct}%,transparent)`;
+const mixRef = (fam, n, pct) => mixVar(tok(fam, n), pct);
+/* brand 는 제품이 주입하는 슬롯이라 램프 이름이 다르다 — 기본값일 때 blue 와 같아지는지는 램프 대조가 본다 */
 const BR = (n) => `var(--brand-${n})`;
-const mix = (n, o) => `color-mix(in srgb,var(--brand-${n}) ${Math.round(o * 100)}%,transparent)`;
+const mix = (n, pct) => mixVar(`--brand-${n}`, pct);
 
 function semantic(theme) {
   const L = theme === "light";
-  const cn = (n) => AT.coolNeutral[n];
-  const base = L ? 50 : 60;
+  const cn = (n) => ref("coolNeutral", n);
+  const cnMix = (n, pct) => mixRef("coolNeutral", n, pct);
+  const base = L ? 50 : 60;                       /* 상태 hue 의 기준 단계 */
   const accFg = L ? { lime: 37, cyan: 40, lightBlue: 40, violet: 45, purple: 40, pink: 46 }
                   : { lime: 50, cyan: 50, lightBlue: 50, violet: 70, purple: 60, pink: 60 };
   const accSurf = L ? 50 : 60;
   const o = {};
   o["foreground-neutral-primary"] = L ? cn(10) : cn(99);
-  o["foreground-neutral-strong"] = L ? AT.common[0] : AT.common[100];
-  o["foreground-neutral-secondary"] = L ? a(cn(22), OP[88]) : a(cn(90), OP[88]);
-  o["foreground-neutral-tertiary"] = L ? a(cn(25), OP[61]) : a(cn(80), OP[61]);
-  o["foreground-neutral-quaternary"] = L ? a(cn(25), OP[28]) : a(cn(80), OP[28]);
+  o["foreground-neutral-strong"] = L ? "var(--static-black)" : "var(--static-white)";
+  o["foreground-neutral-secondary"] = L ? cnMix(22, 88) : cnMix(90, 88);
+  o["foreground-neutral-tertiary"] = L ? cnMix(25, 61) : cnMix(80, 61);
+  o["foreground-neutral-quaternary"] = L ? cnMix(25, 28) : cnMix(80, 28);
   o["foreground-neutral-inverse"] = L ? cn(99) : cn(10);
   o["foreground-brand-primary"] = BR(L ? 50 : 60);
   o["foreground-brand-inverse"] = BR(L ? 60 : 50);
-  o["foreground-positive-primary"] = AT.green[base];
-  o["foreground-cautionary-primary"] = AT.orange[base];
-  o["foreground-negative-primary"] = AT.red[base];
-  o["foreground-negative-strong"] = L ? AT.red[40] : AT.red[60];
-  o["foreground-disable-primary"] = L ? a(cn(25), OP[16]) : a(cn(70), OP[16]);
+  o["foreground-positive-primary"] = ref("green", base);
+  o["foreground-cautionary-primary"] = ref("orange", base);
+  o["foreground-negative-primary"] = ref("red", base);
+  o["foreground-negative-strong"] = ref("red", L ? 40 : 60);
+  o["foreground-disable-primary"] = L ? cnMix(25, 16) : cnMix(70, 16);
   o["foreground-inactive-primary"] = L ? cn(70) : cn(40);
-  for (const f of ACCENTS) o[`foreground-accent-${kebab(f)}`] = AT[f][accFg[f]];
-  o["background-neutral-primary"] = L ? AT.common[100] : cn(15);
+  for (const f of ACCENTS) o[`foreground-accent-${kebab(f)}`] = ref(f, accFg[f]);
+  o["background-neutral-primary"] = L ? "var(--static-white)" : cn(15);
   o["background-neutral-secondary"] = L ? cn(99) : cn(5);
-  o["surface-neutral-primary"] = L ? AT.common[100] : cn(15);
-  o["surface-neutral-secondary"] = L ? a(cn(50), OP[8]) : a(cn(50), OP[22]);
-  o["surface-neutral-tertiary"] = L ? a(cn(50), OP[5]) : a(cn(50), OP[12]);
-  o["surface-neutral-strong"] = L ? a(cn(50), OP[16]) : a(cn(50), OP[28]);
-  o["surface-neutral-inverse"] = L ? cn(15) : AT.common[100];
-  o["surface-elevated-primary"] = L ? AT.common[100] : cn(17);
+  o["surface-neutral-primary"] = L ? "var(--static-white)" : cn(15);
+  o["surface-neutral-secondary"] = L ? cnMix(50, 8) : cnMix(50, 22);
+  o["surface-neutral-tertiary"] = L ? cnMix(50, 5) : cnMix(50, 12);
+  o["surface-neutral-strong"] = L ? cnMix(50, 16) : cnMix(50, 28);
+  o["surface-neutral-inverse"] = L ? cn(15) : "var(--static-white)";
+  o["surface-elevated-primary"] = L ? "var(--static-white)" : cn(17);
   o["surface-elevated-secondary"] = L ? cn(99) : cn(7);
   o["surface-brand-primary"] = BR(L ? 50 : 60);
   o["surface-brand-strong"] = BR(L ? 45 : 55);
   o["surface-brand-heavy"] = BR(L ? 40 : 50);
-  o["surface-brand-subtle"] = mix(L ? 50 : 60, OP[5]);
-  o["surface-positive-primary"] = a(AT.green[base], OP[8]);
-  o["surface-cautionary-primary"] = a(AT.orange[base], OP[8]);
-  o["surface-negative-primary"] = a(AT.red[base], OP[8]);
-  o["surface-negative-strong"] = L ? a(AT.red[50], OP[12]) : a(AT.red[60], OP[22]);
+  o["surface-brand-subtle"] = mix(L ? 50 : 60, 5);
+  o["surface-positive-primary"] = mixRef("green", base, 8);
+  o["surface-cautionary-primary"] = mixRef("orange", base, 8);
+  o["surface-negative-primary"] = mixRef("red", base, 8);
+  o["surface-negative-strong"] = L ? mixRef("red", 50, 12) : mixRef("red", 60, 22);
   o["surface-disable-primary"] = L ? cn(98) : cn(22);
   for (const f of ACCENTS) {
-    o[`surface-accent-${kebab(f)}`] = a(AT[f][accSurf], OP[8]);
-    o[`surface-accent-${kebab(f)}-opaque`] = AT[f][accSurf];
+    o[`surface-accent-${kebab(f)}`] = mixRef(f, accSurf, 8);
+    o[`surface-accent-${kebab(f)}-opaque`] = ref(f, accSurf);
   }
-  o["line-neutral-primary"] = L ? a(cn(50), OP[22]) : a(cn(50), 0.32);
+  /* 다크 line-neutral-primary 만 참조 시스템이 눈금을 벗어나 0.32 를 직접 쓴다 */
+  o["line-neutral-primary"] = L ? cnMix(50, 22) : cnMix(50, 32);
   o["line-neutral-primary-opaque"] = L ? cn(96) : cn(25);
-  o["line-neutral-secondary"] = L ? a(cn(50), OP[16]) : a(cn(50), OP[28]);
+  o["line-neutral-secondary"] = L ? cnMix(50, 16) : cnMix(50, 28);
   o["line-neutral-secondary-opaque"] = L ? cn(97) : cn(23);
-  o["line-neutral-tertiary"] = L ? a(cn(50), OP[8]) : a(cn(50), OP[22]);
+  o["line-neutral-tertiary"] = L ? cnMix(50, 8) : cnMix(50, 22);
   o["line-neutral-tertiary-opaque"] = L ? cn(98) : cn(22);
-  o["line-brand-primary"] = mix(L ? 50 : 60, OP[28]);
-  o["line-brand-strong"] = mix(L ? 50 : 60, OP[43]);
-  o["line-brand-focus"] = mix(L ? 50 : 60, OP[12]);
-  o["line-positive-primary"] = a(AT.green[base], OP[43]);
-  o["line-cautionary-primary"] = a(AT.orange[base], OP[43]);
-  o["line-negative-primary"] = a(AT.red[base], OP[43]);
-  o["line-negative-strong"] = a(AT.red[base], OP[52]);
-  o["line-negative-focus"] = a(AT.red[base], OP[12]);
-  for (const f of ACCENTS) o[`line-accent-${kebab(f)}`] = a(AT[f][accFg[f]], OP[43]);
-  o["effect-dimmer-primary"] = L ? a(cn(10), OP[52]) : a(cn(10), OP[74]);
-  o["effect-transparent-primary"] = L ? a(AT.common[100], OP[8]) : a(cn(17), OP[61]);
-  o["effect-transparent-secondary"] = L ? a(AT.common[100], OP[28]) : a(cn(17), OP[61]);
+  o["line-brand-primary"] = mix(L ? 50 : 60, 28);
+  o["line-brand-strong"] = mix(L ? 50 : 60, 43);
+  o["line-brand-focus"] = mix(L ? 50 : 60, 12);
+  o["line-positive-primary"] = mixRef("green", base, 43);
+  o["line-cautionary-primary"] = mixRef("orange", base, 43);
+  o["line-negative-primary"] = mixRef("red", base, 43);
+  o["line-negative-strong"] = mixRef("red", base, 52);
+  o["line-negative-focus"] = mixRef("red", base, 12);
+  for (const f of ACCENTS) o[`line-accent-${kebab(f)}`] = mixRef(f, accFg[f], 43);
+  o["effect-dimmer-primary"] = L ? cnMix(10, 52) : cnMix(10, 74);
+  o["effect-transparent-primary"] = L ? mixVar("--static-white", 8) : cnMix(17, 61);
+  o["effect-transparent-secondary"] = L ? mixVar("--static-white", 28) : cnMix(17, 61);
+  /* static 은 그 자체가 프리미티브다 — 참조할 상위가 없다 */
   o["static-white"] = AT.common[100];
   o["static-black"] = AT.common[0];
   return o;
@@ -134,4 +148,4 @@ function diff(css) {
   return bad;
 }
 
-module.exports = { AT, OP, semantic, ramps, diff };
+module.exports = { AT, OP_SCALE, semantic, ramps, diff };
