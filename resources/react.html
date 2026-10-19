@@ -41,6 +41,7 @@
   <div class="main">
     <div class="page"><article id="content">
 <h1>React Package</h1><p class="lead"><code>@jiran/ds-react</code> — 이 가이드의 30개 컴포넌트와 패턴 래퍼를 실제 React 컴포넌트로 구현한 패키지입니다. 사이트와 같은 클래스 마크업을 렌더링하므로 스타일시트 하나로 동작하고, 각 컴포넌트 페이지의 React 탭 코드가 곧 사용법입니다.</p>
+<p class="note"><b>0.7.0 은 깨지는 변경입니다.</b> 컬러 토큰을 참조 시스템(Montage)의 시멘틱 층으로 값·이름까지 교체했습니다 — <code>dist/style.css</code> 의 변수 이름이 전부 바뀝니다. <b>마크업과 props 는 그대로</b>이므로 토큰을 직접 참조하지 않는 제품은 패키지만 올리면 됩니다. 전환표는 패키지의 <code>MIGRATION.md</code> 와 <a href="../foundations/colors.html">Foundations › Colors</a> 에 있습니다. <code>applyAccent()</code> 의 주입 단계는 10개에서 <b>5개</b>(<code>--prod-40~60</code>)로 바뀌었습니다.</p>
 <h2 id="install">설치</h2><div class="code-block"><button type="button" class="copy-btn" data-copy="react-install" data-label="복사">복사</button><pre><code id="react-install">npm i @jiran/ds-react
 
 <span class="tk-cmt">// main.tsx — 앱 진입점에서 한 번</span>

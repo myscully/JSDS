@@ -252,6 +252,7 @@ ${codeBlock("a11y-css", `:focus-visible{outline:2px solid var(--foreground-brand
   "components/overview": () => overviewPage("components"),
   "patterns/overview": () => overviewPage("patterns"),
   "resources/react": () => `<h1>React Package${nb("resources", "react")}</h1><p class="lead"><code>@jiran/ds-react</code> — 이 가이드의 30개 컴포넌트와 패턴 래퍼를 실제 React 컴포넌트로 구현한 패키지입니다. 사이트와 같은 클래스 마크업을 렌더링하므로 스타일시트 하나로 동작하고, 각 컴포넌트 페이지의 React 탭 코드가 곧 사용법입니다.</p>
+<p class="note"><b>0.7.0 은 깨지는 변경입니다.</b> 컬러 토큰을 참조 시스템(Montage)의 시멘틱 층으로 값·이름까지 교체했습니다 — <code>dist/style.css</code> 의 변수 이름이 전부 바뀝니다. <b>마크업과 props 는 그대로</b>이므로 토큰을 직접 참조하지 않는 제품은 패키지만 올리면 됩니다. 전환표는 패키지의 <code>MIGRATION.md</code> 와 <a href="#/foundations/colors">Foundations › Colors</a> 에 있습니다. <code>applyAccent()</code> 의 주입 단계는 10개에서 <b>5개</b>(<code>--prod-40~60</code>)로 바뀌었습니다.</p>
 <h2 id="install">설치</h2>${codeBlock("react-install", REACT_INSTALL, "tsx", "복사")}
 <div class="kv"><dt>테마</dt><dd><code>&lt;html data-theme="dark"&gt;</code> 또는 <code>setTheme("dark")</code>. 없으면 시스템 설정을 따릅니다. 포털(Popup·Toast)도 <code>&lt;html&gt;</code> 에서 토큰을 상속합니다</dd><dt>서체·배경</dt><dd>앱 루트에 <code>.ds-root</code> 를 붙이면 Pretendard · 본문 색 · 배경 토큰이 적용됩니다</dd><dt>브라우저</dt><dd><code>color-mix()</code> 사용 — Chrome 111+ · Safari 16.2+ · Firefox 113+</dd><dt>버전</dt><dd>패키지 major.minor 는 이 가이드 버전(${VERSION})과 같이 올립니다</dd></div>
 <h2 id="usage">사용</h2><p>모든 컴포넌트는 <code>forwardRef</code> · <code>className</code> 병합 · 나머지 props 전달을 지원합니다. 변형은 HTML 클래스와 같은 이름의 prop 입니다.</p>
