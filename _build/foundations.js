@@ -120,10 +120,10 @@ ${sem("company", "회사 마크", "지란지교시큐리티 브랜드 색입니�
         "red-orange": [99, 95, 90, 80, 70, 60, 50, 48, 40, 30, 20, 10],
       };
       const TITLE = { "cool-neutral": "Cool Neutral", "light-blue": "Light Blue", "red-orange": "Red Orange" };
-      const atomic = `<p>Semantic 토큰이 <b>실제로 참조하는</b> 원천 값입니다 — 의미 토큰은 값을 굳혀 두지 않고 <code>var(--orange-50)</code> 처럼 이 램프를 가리킵니다. 그래서 램프 한 줄을 고치면 그 가족(면·글자·보더)이 전부 따라옵니다. 램프와 단계 번호 모두 참조 시스템(Montage)의 Atomic 을 그대로 쓰고, <b>숫자가 클수록 밝습니다</b>.</p>
-<p><b>컴포넌트에서 직접 쓸 수 없습니다</b> — 빌드가 샘플 블록의 프리미티브 참조를 실패시킵니다. 새 의미 토큰을 만들 때 여기서 고릅니다. Brand 는 제품이 주입하는 다섯 단계이고, 제품을 지정하지 않으면 Blue 램프 값이 그대로 보입니다 — <code>accentScale()</code> 과 토큰 원본 CSS 는 <a href="#/resources/design-token">Design Token</a> 에 있습니다.</p>
-<p class="note">아직 쓰는 자리가 없는 램프가 둘 있습니다 — <b>Neutral</b>(순수 무채색. 화면은 <b>Cool Neutral</b> 을 씁니다)과 <b>Red Orange</b>. 참조 시스템과 1:1 을 유지하려고 함께 싣습니다.</p>
-${pal("Common", ["white", "black"], "static")}
+      /* 참조 시스템 docs 의 Atomic 페이지처럼 제목과 팔레트만 둔다 — 설명 문단이 없다.
+         프리미티브 규칙("컴포넌트에서 직접 쓰지 않음" · "숫자가 클수록 밝다")은
+         Resources › Design Token 의 Token Layers 에 있고, 빌드가 그 규칙을 강제한다 */
+      const atomic = `${pal("Common", ["white", "black"], "static")}
 ${pal("Brand", [60, 55, 50, 45, 40], "brand", "제품이 주입하는 슬롯 · 기본값은 Blue 램프")}
 ${Object.keys(R).map(k => pal(TITLE[k] || (k[0].toUpperCase() + k.slice(1)), R[k], k)).join("\n")}
 `;
