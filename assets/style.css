@@ -353,66 +353,20 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--company-mark)}
 .wbs-legend i{display:inline-block;width:14px;height:10px;border-radius:2px;background:var(--foreground-brand-primary);vertical-align:-1px;margin-right:6px}
 .wbs-legend i.sub{background:var(--line-brand-strong)}.wbs-legend i.final{background:var(--company-mark)}.wbs-legend i.hol{background:var(--background-neutral-secondary);border:1px solid var(--line-neutral-secondary)}.wbs-legend i.ms{width:3px;border-radius:0;background:var(--company-mark)}
 /* 컬러바 — 참고 시스템과 같은 형태: 높이 32, 가로 간격 0(바가 붙어 한 줄), 직각 + 위아래 1px hairline, 라벨은 8px 아래 가운데.
-   hover·팝오버 열림에서는 색을 그리는 i 만 bottom 고정으로 8px 위로 자란다 — 라벨은 움직이지 않는다 */
+   hover·팝오버 열림에서는 **바 상자 자체가** 8px 위로 자란다. 자라는 주체가 중요하다 —
+   체커 배경(--checker-bg)과 위아래 hairline, .faint 외곽선이 전부 .bar 에 붙어 있어서,
+   종전처럼 색 레이어(i)만 키우면 자란 8px 에는 체커가 없고 윗 라인이 색을 가로질렀다.
+   늘어난 높이만큼 margin-top 을 당겨 상쇄하므로 아래 라벨은 움직이지 않는다 */
 .sem-row{display:flex;gap:0;margin:var(--space-3) 0 var(--space-10)}
-.sem-row>.val-cell{flex:1;min-width:0;cursor:pointer;display:block;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:left}
-.sem-row .bar{height:32px;background:var(--checker-bg,transparent);position:relative;border-radius:0;overflow:visible;box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary)}
-.sem-row .bar i{position:absolute;inset:auto 0 0 0;height:100%;display:block;transition:height var(--motion-slow) ease}
-.sem-row .bar.line i{inset:auto 0 0 0;height:2px;top:50%;transform:translateY(-50%)}
-.sem-row:not(.checker) .bar.line{background:var(--background-neutral-secondary)}
-.sem-row>.val-cell:hover .bar:not(.line) i,.sem-row>.val-cell[aria-expanded="true"] .bar:not(.line) i{height:calc(100% + 8px)}
+/* display:flex 인 이유 — 버튼은 UA 가 내용을 세로 가운데에 둔다. block 으로 두면 이름이 두 줄인 칸과
+   한 줄인 칸의 높이 차(19px)가 위아래로 나뉘어 바가 9px 어긋난다(Surface - Accent 에서 그랬다) */
+.sem-row>.val-cell{flex:1;min-width:0;cursor:pointer;display:flex;flex-direction:column;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:left}
+.sem-row .bar{height:32px;background:var(--checker-bg,transparent);position:relative;border-radius:0;box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary);transition:height var(--motion-slow) ease,margin-top var(--motion-slow) ease}
+.sem-row .bar i{position:absolute;inset:0;display:block}
+.sem-row>.val-cell:hover .bar,.sem-row>.val-cell[aria-expanded="true"] .bar{height:40px;margin-top:-8px}
 .sem-row .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-neutral-secondary);border-radius:inherit;pointer-events:none}  /* 바탕과 구분되지 않는 색 — app.js 가 .faint 를 붙인다 */
 .sem-row .name{font-size:12px;font-weight:700;color:var(--foreground-neutral-primary);margin-top:8px;text-align:center}
 .checker{--checker-bg:repeating-conic-gradient(rgba(112,115,124,.16) 0 25%,transparent 0 50%) 0 0/12px 12px}
-/* 명도 사다리 — 두 모드를 나란히. 칩 색은 측정값 HEX 를 인라인으로 받으므로 현재 테마와 무관하다 */
-.lad{display:grid;grid-template-columns:170px 1fr 1fr;gap:var(--space-5);align-items:start;padding:var(--space-4) 0;border-top:1px solid var(--line-neutral-secondary)}
-.lad:first-of-type{border-top:0}
-.lad-name{font-size:13px;padding-top:2px}
-.lad-name b{display:block;font-weight:700;color:var(--foreground-neutral-primary)}
-.lad-name span{display:block;font-size:11px;color:var(--foreground-neutral-tertiary);margin-top:2px;line-height:1.4}
-.lad-head{font-size:11px;font-weight:700;color:var(--foreground-neutral-secondary);margin-bottom:6px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
-.lad-head em{font-style:normal;font-weight:600;color:var(--foreground-cautionary-primary)}
-.lad-head span{font-weight:600;color:var(--foreground-neutral-tertiary)}
-.lad-chip{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.3}
-.lad-chip i{width:36px;height:22px;flex:none;border-radius:var(--radius-xs);box-shadow:inset 0 0 0 1px var(--line-neutral-secondary)}
-.lad-chip b{font-weight:600;color:var(--foreground-neutral-secondary);font-family:var(--font-mono);font-size:10px}
-.lad-chip span{margin-left:auto;color:var(--foreground-neutral-tertiary);font-variant-numeric:tabular-nums}
-.lad-step{height:16px;margin-left:17px;border-left:1px solid var(--line-neutral-primary);display:flex;align-items:center}
-.lad-step span{font-size:10px;color:var(--foreground-neutral-tertiary);padding-left:8px;font-variant-numeric:tabular-nums}
-@media (max-width:760px){.lad{grid-template-columns:1fr;gap:var(--space-3)}}
-
-/* 대비표 — 게이트 산출물. 접어 두는 이유는 594행을 펼치면 페이지를 훑을 수 없기 때문이다.
-   advisory(기준 미달이나 빌드를 막지 않음)는 색으로 드러낸다 — 숫자를 숨기면 또 낡는다 */
-details.ct{margin:calc(var(--space-3) * -1) 0 var(--space-8);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);background:var(--background-neutral-secondary)}
-details.ct>summary{cursor:pointer;padding:8px 12px;font-size:12px;font-weight:600;color:var(--foreground-neutral-secondary);list-style:none}
-details.ct>summary::-webkit-details-marker{display:none}
-details.ct>summary::before{content:"▸";display:inline-block;width:14px;color:var(--foreground-neutral-tertiary)}
-details.ct[open]>summary::before{content:"▾"}
-details.ct>summary:hover{color:var(--foreground-neutral-primary)}
-details.ct .tablewrap{margin:0;padding:0 12px 12px}
-details.ct table{font-variant-numeric:tabular-nums}
-.ct-ok{color:var(--foreground-positive-primary)}
-.ct-no{color:var(--foreground-cautionary-primary)}
-/* 의도 × 역할 행렬 — 같은 역할이 의도를 가로질러 같은 열에 서야 '역할이 1급'이라는 것이 한눈에 보인다.
-   칸은 .sem-row 와 같은 .val-cell 버튼이라 값 팝오버(app.js 의 openColor)가 그대로 동작한다.
-   알파인 열(fill·line)만 .checker 를 걸어 투명도가 보이게 한다 */
-.sem-matrix{margin:var(--space-3) 0 var(--space-10);overflow-x:auto}
-.sem-matrix .sm-head,.sem-matrix .sm-row{display:grid;grid-template-columns:124px repeat(var(--cols),minmax(52px,1fr));align-items:end}
-.sem-matrix .sm-head{padding-bottom:6px;position:sticky;top:0;background:var(--background-neutral-primary);z-index:3}
-.sem-matrix .sm-head>span{font-size:11px;text-align:center;padding:0 2px;line-height:1.35}
-.sem-matrix .sm-head b{display:block;font-weight:700;color:var(--foreground-neutral-primary)}
-.sem-matrix .sm-head i{display:block;font-style:normal;color:var(--foreground-neutral-tertiary);font-variant-numeric:tabular-nums}
-.sem-matrix .sm-row{margin-bottom:6px}
-.sem-matrix .sm-label{font-size:12px;padding-right:12px;line-height:1.35;align-self:center}
-.sem-matrix .sm-label b{display:block;font-weight:700;color:var(--foreground-neutral-primary)}
-.sem-matrix .sm-label i{display:block;font-style:normal;font-size:11px;color:var(--foreground-neutral-tertiary)}
-.sem-matrix .val-cell{cursor:pointer;display:block;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit}
-.sem-matrix .bar{height:28px;background:var(--checker-bg,transparent);position:relative;overflow:visible;box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary)}
-.sem-matrix .bar i{position:absolute;inset:auto 0 0 0;height:100%;display:block;transition:height var(--motion-slow) ease}
-.sem-matrix .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-neutral-secondary);pointer-events:none}   /* 바탕과 구분되지 않는 색 — app.js 가 붙인다 */
-.sem-matrix .val-cell:hover,.sem-matrix .val-cell[aria-expanded="true"]{position:relative;z-index:2}
-.sem-matrix .val-cell:hover .bar i,.sem-matrix .val-cell[aria-expanded="true"] .bar i{height:calc(100% + 6px)}
-@media (max-width:760px){.sem-matrix .sm-head,.sem-matrix .sm-row{grid-template-columns:96px repeat(var(--cols),minmax(40px,1fr))}}
 .pal{margin:0 0 var(--space-8)}.pal h3{margin:0 0 8px;font-size:16px}
 .pal .scale{margin:0;align-items:end;grid-auto-rows:32px}.pal .scale .val-cell{height:32px;border-radius:0;transition:height var(--motion-slow) ease;box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary)}
 .pal .scale .val-cell:hover,.pal .scale .val-cell[aria-expanded="true"]{height:40px}   /* 바닥이 고정이라 위로 자라고 숫자 라벨은 버튼 하단 기준이라 제자리 */.pal .scale .val-cell i{font-size:10px;line-height:1;left:0;right:0;bottom:-18px;text-align:center;mix-blend-mode:normal;color:var(--foreground-neutral-primary);font-weight:700}

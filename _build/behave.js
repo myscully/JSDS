@@ -995,12 +995,17 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   ok("semantic colour bars are 32 tall, flush, square", barGeo.h === 32 && barGeo.gap === 0 && barGeo.radius === "0px", JSON.stringify(barGeo));
   ok("semantic bar label sits 8px below, centered", barGeo.labelGap === 8 && barGeo.align === "center", JSON.stringify(barGeo));
-  // hover 하면 색 레이어만 위로 8px 자란다 — 라벨은 움직이지 않아야 한다(bottom 고정이 이걸 보장한다)
-  /* --surface-brand-primary 는 의도 행렬로 옮겨갔다 — .sem-row 의 기하는 테마 절(Surface)에서 본다 */
+  /* hover 하면 **바 상자 자체가** 위로 8px 자란다 — 라벨은 움직이지 않아야 한다.
+     자라는 주체가 i(색)가 아니라 .bar 여야 하는 이유: 체커 배경과 위아래 hairline, .faint 외곽선이
+     전부 .bar 에 붙어 있다. 색만 키우면 자란 8px 에 체커가 없고 윗 라인이 색을 가로지른다 —
+     그게 실제로 났던 결함이고, 종전 단정은 i 만 재서 전부 통과했다 */
   const barSel = '.sem-row .val-cell[data-token="--background-neutral-primary"]';
   const grow = async (sel) => page.evaluate((s2) => {
-    const c = document.querySelector(s2), i = c.querySelector(".bar i"), n = c.querySelector(".name");
-    return { h: Math.round(i.getBoundingClientRect().height), top: Math.round(i.getBoundingClientRect().top),
+    const c = document.querySelector(s2), bar = c.querySelector(".bar"), i = bar.querySelector("i"), n = c.querySelector(".name");
+    const rb = bar.getBoundingClientRect(), ri = i.getBoundingClientRect();
+    return { h: Math.round(ri.height), top: Math.round(ri.top),
+      barH: Math.round(rb.height), barTop: Math.round(rb.top),
+      fills: Math.round(ri.top) === Math.round(rb.top) && Math.round(ri.height) === Math.round(rb.height),
       label: Math.round(n.getBoundingClientRect().top), exp: c.getAttribute("aria-expanded") };
   }, sel);
   /* hover() 가 스크롤을 일으키면 top 비교가 무의미해진다 — 먼저 뷰 가운데로 가져온다 */
@@ -1010,6 +1015,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.locator(barSel).hover(); await page.waitForTimeout(450);
   const g1 = await grow(barSel);
   ok("colour bar grows 8px upward on hover", g1.h - g0.h === 8 && g0.top - g1.top === 8, `${g0.h}→${g1.h} · top ${g0.top}→${g1.top}`);
+  /* 체커·라인이 붙어 있는 상자가 같이 자라야 한다 — 이것이 깨졌던 자리다 */
+  ok("the bar box itself grows, carrying the checker and hairlines",
+    g1.barH - g0.barH === 8 && g0.barTop - g1.barTop === 8, `${g0.barH}@${g0.barTop} → ${g1.barH}@${g1.barTop}`);
+  ok("the colour layer fills the bar exactly", g0.fills && g1.fills, `기본 ${g0.fills} · hover ${g1.fills}`);
   ok("the label does not move while the bar grows", g0.label === g1.label, `${g0.label} → ${g1.label}`);
   /* Semantic 탭 — 참조 시스템의 Colors › Semantic 과 같은 구성이어야 한다.
      절 26개(Foreground 8 · Background 1 · Surface 8 · Line 6 · Effect 2 · Static 1) + 우리가 더한 회사 마크 1.
@@ -1030,6 +1039,20 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("no swatch is blank", semPage.blank.length === 0, semPage.blank.join(" ") || "없음");
   /* 알파가 든 절만 체커 바탕 — 솔리드 절에 체커가 깔리면 반투명으로 오독된다 */
   ok("only the alpha sections are checkered", semPage.checker === 14, String(semPage.checker));
+  /* 한 절의 바들은 같은 높이에 서야 한다. Surface - Accent 는 칸이 12개라 이름이 두 줄이 되는데,
+     버튼의 UA 세로 가운데 정렬 때문에 한 줄짜리 칸의 바가 9px 내려앉아 있었다 */
+  const barAlign = await page.evaluate(() => {
+    const out = {};
+    for (const id of ["sf-accent", "ln-neutral", "fg-neutral"]) {
+      let e = document.getElementById(id);
+      while (e && !e.classList.contains("sem-row")) e = e.nextElementSibling;
+      const tops = [...e.querySelectorAll(".bar")].map((b) => Math.round(b.getBoundingClientRect().top));
+      out[id] = Math.max(...tops) - Math.min(...tops);
+    }
+    return out;
+  });
+  ok("every bar in a section sits at the same height, even when labels wrap",
+    Object.values(barAlign).every((v) => v === 0), JSON.stringify(barAlign));
   ok("the first sections follow the reference order", semPage.titles.join(" / ") === "Foreground - Neutral / Foreground - Brand / Foreground - Positive", semPage.titles.join(" / "));
   /* 알파 토큰의 값 팝오버는 8자리 Hex 여야 한다 */
   const alphaPop = await (async () => {

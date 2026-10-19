@@ -385,9 +385,8 @@ const ROOT=document.body.dataset.root||'../';
   /* 바탕과 거의 구분되지 않는 스와치(라이트의 흰색, 각 Subtle 틴트, 다크의 Surface 등)에 1px 라인을 둘러 형태가 보이게 한다.
      테마와 제품 컬러에 따라 달라지므로 빌드가 아니라 렌더 색을 재서 판단한다. Atomic 팔레트는 CSS 로 늘 라인을 두르고 있다 */
   function markFaintSwatches() {
-    /* 의도 행렬도 같은 표시가 필요하다 — --brand-label 처럼 흰 면은 흰 바탕에서 빈칸처럼 보인다.
-       체커가 깔린 칸(알파)은 제외한다: 바탕이 비치는 것이 정상이라 외곽선이 오히려 오독을 만든다 */
-    const bars = document.querySelectorAll(".sem-row:not(.checker) .bar:not(.line), .sem-matrix .val-cell:not(.checker) .bar");
+    /* 체커가 깔린 절(알파)은 제외한다 — 바탕이 비치는 것이 정상이라 외곽선이 오히려 오독을 만든다 */
+    const bars = document.querySelectorAll(".sem-row:not(.checker) .bar");
     if (!bars.length) return;
     const lin = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
     const lum = c => .2126 * lin(c[0]) + .7152 * lin(c[1]) + .0722 * lin(c[2]);
