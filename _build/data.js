@@ -25,11 +25,13 @@ const SITE = {
 };
 /* 제품별 Accent(메인 컬러) 프리셋. 실제 제품 컬러로 교체.
    **제약: 흰 글자가 4.5 를 넘는 색이어야 한다** — 면 위 글자는 늘 흰색이고 verify 가 검사한다.
-   제품 C 는 종전 #00AD7B 였는데 흰 글자가 2.89 라 규격에 못 미쳐 같은 색상의 어두운 값으로 내렸다 */
+   제품 C 는 이 제약에 두 번 걸려 내려온 값이다: #00AD7B(흰 글자 2.89) → #00704F(6.12) → #008760(4.53).
+   마지막은 #00966A(3.77) 요청에서 출발해 **같은 색상에서 통과하는 가장 밝은 값**으로 잡은 것이라
+   기준선 4.5 에서 여유가 0.03 뿐이다 — 조금이라도 밝게 조정하면 빌드가 막힌다 */
 const PRODUCTS = [
   { key: "product-a", name: "제품 A", hex: "#00AAB6", note: "제품 컬러로 교체" },
   { key: "product-b", name: "제품 B", hex: "#C30D2A", note: "제품 컬러로 교체" },
-  { key: "product-c", name: "제품 C", hex: "#00704F", note: "제품 컬러로 교체" },
+  { key: "product-c", name: "제품 C", hex: "#008760", note: "제품 컬러로 교체" },
 ];
 const CHANGELOG = [
   ["v0.6", "2026-09-09", "Foundations 재편(Web Desktop): Overview + Base material(Colors · Elevation · Grid · Icons · Typography). Colors 는 Semantic/Atomic 탭(Primary·Label·Fill·Line·Background·Static·Inverse·Interaction·Status·Severity·Brand·Material, Light/Dark 값 표시), Elevation 은 Shadow type(Normal/Spread) · Composition · Style 표(xs~xl 토큰 신설, --shadow-1~3 은 별칭), Grid 는 Artboard · Breakpoint · Spacing · Layout(12 컬럼), Icons 는 검색·Outline/Filled 갤러리, Typography 는 Basic · Word break · Style 표(행간 px, Pretendard 권장 자간). Radius · Motion · Accessibility · 토큰 원본은 Resources › Design Token 으로 이동. Semantic 토큰 추가(fill/line/static/interaction/dimmer/text-strong/border-subtle/accent-inverse/sev-*-bg), Primitive 팔레트 전 단계 보강."],
