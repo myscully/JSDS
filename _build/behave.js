@@ -131,15 +131,24 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         light: document.documentElement.hasAttribute("data-accent-light"),
         bg: btn ? getComputedStyle(btn).backgroundColor : "", text: txt ? getComputedStyle(txt).color : "",
         surface: g("--surface-brand-primary"), fg: g("--foreground-brand-primary"),
-        ramp: [40, 45, 50, 55, 60].map((k) => g("--brand-" + k)).join(" "),
+        ramp: [40, 45, 50, 55, 60].map((k) => g("--brand-" + k)),
+        /* 중립 전환이 '정말 중립 램프로' 갈렸는지 보려면 그 램프 값 전부가 필요하다.
+           단계 번호를 박아 두면 램프를 조정할 때마다 단정이 깨진다 — 단계 선택은 설계 선택이다 */
+        coolRamp: [5, 7, 10, 15, 17, 20, 22, 23, 25, 30, 40, 50, 60, 70, 80, 90, 95, 96, 97, 98, 99].map((k) => g("--cool-neutral-" + k)),
       };
     });
   };
   const teal = await accent("product-a"), red = await accent("product-b"), bright = await accent("product-c");
-  /* 청록 제품은 Medium(accent cyan)과 5도 차이라 이제 중립으로 내려간다 — 실측 각도로 고친 결과다 */
-  ok("a teal product now trips the status-clash guard", teal.neutral && teal.ramp === "#37383C #46474C #5A5C63 #70737C #878A93", JSON.stringify(teal));
+  /* 청록 제품은 Medium(accent cyan)과 5도 차이라 이제 중립으로 내려간다 — 실측 각도로 고친 결과다.
+     어느 중립 단계를 집는지는 설계 선택이라 박아 두지 않는다. 대신 **다섯 단계가 전부 중립 램프의 값이고
+     번호가 커질수록 밝다**를 본다 — 중립 전환이 뜻하는 바가 그것이고, 단계를 조정해도 살아남는다 */
+  const neutralRamp = (t) => t.ramp.every((v) => t.coolRamp.includes(v));
+  const lighterUp = (t) => { const L = (h) => { const n = parseInt(h.slice(1), 16); return ((n >> 16 & 255) + (n >> 8 & 255) + (n & 255)); };
+    return t.ramp.every((v, i) => i === 0 || L(v) > L(t.ramp[i - 1])); };
+  ok("a teal product now trips the status-clash guard",
+    teal.neutral && neutralRamp(teal) && lighterUp(teal), JSON.stringify(teal.ramp));
   ok("a red product turns the whole brand ramp neutral",
-    red.neutral && red.bg === "rgb(90, 92, 99)" && red.text === "rgb(90, 92, 99)" && red.surface === "#5A5C63", JSON.stringify(red));
+    red.neutral && neutralRamp(red) && lighterUp(red) && red.surface === red.ramp[2] && red.bg === red.text, JSON.stringify(red.ramp));
   /* 제품 C(#00AD7B)만 상태색과 겹치지 않는다. 밝은 제품이라 면 위 글자가 어두워지고 상태가 밝은 쪽으로 간다 */
   ok("a bright, non-clashing product keeps its own colour and flags data-accent-light",
     !bright.neutral && bright.light && bright.surface === "#00AD7B" && bright.bg === "rgb(0, 173, 123)", JSON.stringify(bright));
@@ -210,11 +219,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   // Atomic 의 Brand 램프도 함께 회색 — 제품 슬롯에서 파생되는 것은 전부 따라온다
   await go("foundations/colors.html");
+  /* 스와치가 토큰을 따라오는지가 요점이다 — 색을 박아 두면 중립 단계를 조정할 때마다 깨진다.
+     루트가 해석한 --brand-50 과 Atomic 스와치가 같은 색이어야 한다 */
   const ramp = await page.evaluate(() => {
     const at = document.querySelectorAll('[data-token="--brand-50"]');
-    return { n: at.length, bg: at.length ? getComputedStyle(at[0]).backgroundColor : "" };
+    const d = document.createElement("div"); document.body.append(d);
+    d.style.color = "var(--brand-50)"; const want = getComputedStyle(d).color; d.remove();
+    return { n: at.length, bg: at.length ? getComputedStyle(at[0]).backgroundColor : "", want };
   });
-  ok("Atomic Brand ramp follows the neutral switch", ramp.n === 1 && ramp.bg === "rgb(90, 92, 99)", JSON.stringify(ramp));
+  ok("Atomic Brand ramp follows the neutral switch", ramp.n === 1 && ramp.bg === ramp.want, JSON.stringify(ramp));
   const base = await accent("");
   ok("back to token accent clears the flag", !base.neutral, JSON.stringify(base));
 
