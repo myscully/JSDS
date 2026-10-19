@@ -79,13 +79,13 @@ ${sem("ef-dimmer", "Effect - Dimmer", "모달과 같이 층위가 생길 때 배
 ${sem("ef-transparent", "Effect - Transparent", "Chrome 효과를 적용할 때 사용하는 투명도가 포함 된 배경 색상입니다.", [["Primary", "--effect-transparent-primary"], ["Secondary", "--effect-transparent-secondary"]], { alpha: true })}
 ${sem("static", "Static", "Light, Dark 테마에 상관없이 고정된 고유 색으로 테마가 변경되더라도 색상을 유지하여 해당 요소에 대비를 줄 때 사용합니다.", [["White", "--static-white"], ["Black", "--static-black"]])}
 ${sem("company", "Brand Mark", "지란지교시큐리티 브랜드 색입니다. 참조 시스템의 Brand 는 제품 색이라 회사 정체성을 표기할 자리가 없어, 토큰 트리 밖에 따로 둡니다. 로고·헤더 마크에만 쓰고 제품 UI 의 Brand 로 쓰지 않습니다.", [["Mark", "--company-mark"], ["Subtle", "--company-mark-subtle"]])}
-<h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>제품 Brand</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand Mark</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다. 참조 시스템의 <code>brand</code> 자리에는 <b>제품이 주입하는 색</b>이 들어가고, 지란지교 오렌지는 토큰 트리 밖의 <code>--company-mark</code> 로 따로 둡니다.</p>
-${tbl(["축", "토큰", "쓰는 곳", "쓰지 않는 곳"], [
-  ["<b>제품 Brand</b>", "<code>--surface-brand-*</code> <code>--foreground-brand-*</code> <code>--line-brand-*</code>", "주요 행동 버튼(화면당 하나), 링크, 활성·선택 상태(탭 · 내비게이션 · 체크 · 스위치), 포커스 링", "위험도나 처리 결과 표현, 넓은 면의 장식 배경, 로고"],
-  ["<b>Status</b>", "<code>--*-negative-*</code> <code>--*-cautionary-*</code> <code>--*-positive-*</code>", "성공·실패·검토 대기 알림(토스트 · 배너 · 인라인 메시지), 입력 검증 오류, 파괴적 행동 버튼(<code>danger</code>)", "탐색·선택 상태, 브랜드 강조"],
-  ["<b>Severity</b>", "같은 Status 토큰 + <code>--surface-accent-cyan</code> · 중립", "위협·이벤트 등급 태그, 점·밴드, 표 행 강조, 대시보드 KPI. <b>항상 라벨(Critical 등)을 병기</b> — 색은 Status 와 공유하므로 라벨이 유일한 구분 수단입니다", "버튼·링크, 일반 처리 결과(성공/실패), 색만 있는 점·배경, <b>한 칸에 Status 와 함께</b>"],
-  ["<b>Brand Mark</b>", "<code>--company-mark</code> <code>--company-mark-subtle</code>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "제품 UI 의 Brand · CTA · 위험도 · 상태. 헤더 Accent 선택지에 없음 — 브랜드 디자인 시스템은 별도 제작"],
-  ["<b>중립(테마)</b>", "<code>--foreground-neutral-*</code> <code>--background-neutral-*</code> <code>--surface-neutral-*</code> <code>--line-neutral-*</code>", "화면 바탕, 텍스트, 구분선, 비활성 상태. 정보 밀도가 높은 콘솔의 기본 색", "강조. 회색 톤 차이만으로 상태나 등급을 표현"]
+<h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>Product Brand</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand Mark</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다.</p>
+${tbl(["축", "쓰는 곳", "쓰지 않는 곳"], [
+  ["<b>Product Brand</b>", "주요 행동 버튼(화면당 하나), 링크, 활성·선택 상태(탭 · 내비게이션 · 체크 · 스위치), 포커스 링", "위험도나 처리 결과 표현, 넓은 면의 장식 배경, 로고"],
+  ["<b>Status</b>", "성공·실패·검토 대기 알림(토스트 · 배너 · 인라인 메시지), 입력 검증 오류, 파괴적 행동 버튼(<code>danger</code>)", "탐색·선택 상태, 브랜드 강조"],
+  ["<b>Severity</b>", "위협·이벤트 등급 태그, 점·밴드, 표 행 강조, 대시보드 KPI. <b>항상 라벨(Critical 등)을 병기</b>", "버튼·링크, 일반 처리 결과(성공/실패), 색만 있는 점·배경, <b>한 칸에 Status 와 함께</b>"],
+  ["<b>Brand Mark</b>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "제품 UI 의 Brand · CTA · 위험도 · 상태. 헤더 Accent 선택지에 없음 — 브랜드 디자인 시스템은 별도 제작"],
+  ["<b>Neutral</b>", "화면 바탕, 텍스트, 구분선, 비활성 상태. 정보 밀도가 높은 콘솔의 기본 색", "강조. 회색 톤 차이만으로 상태나 등급을 표현"]
 ], "roles")}
 <div class="dodont">
   <div class="do"><div style="padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button type="button" class="btn md primary">정책 저장</button><button type="button" class="btn md secondary">취소</button><span style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><i style="width:18px;height:18px;border-radius:50%;background:var(--company-mark);display:inline-block"></i>JS Console</span></div><div class="body"><p>주요 행동은 제품 Primary, 회사 정체성은 헤더 마크에만. 두 색이 같은 화면에 있어도 역할이 겹치지 않습니다.</p></div></div>
