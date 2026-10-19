@@ -3,7 +3,7 @@
    render.js 가 PAGES 에 병합한다: Object.assign(PAGES, FOUNDATION_PAGES(helpers))
    ========================================================= */
 window.FOUNDATION_PAGES = function (H) {
-  const { codeBlock, tokenSection, sw, nb, STYLE, CONTRAST, LADDERS, VERSION, PRODUCTS, ICONS, I, LIB, dedent } = H;
+  const { codeBlock, tokenSection, sw, nb, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent } = H;
   const attr = s => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 
   /* ---------- 토큰 값 해석 (Light / Dark) ---------- */
