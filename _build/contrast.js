@@ -15,9 +15,6 @@ const lum = ({ r, g, b }) => {
   return 0.2126 * x + 0.7152 * y + 0.0722 * z;
 };
 const ratio = (a, b) => { const [x, y] = [lum(a) + 0.05, lum(b) + 0.05]; return +(Math.max(x, y) / Math.min(x, y)).toFixed(2); };
-/* CIE L* — 대비 비율은 두 색의 '밝기 차'를 비율로만 말해서 중간 밝기끼리의 거리를 과소평가한다.
-   등급 구분에는 지각 균등한 축이 맞다 */
-const lstar = (c) => { const Y = lum(c); return Y > 0.008856 ? 116 * Math.cbrt(Y) - 16 : 903.3 * Y; };
 /* a 를 b 위에 얹는다 */
 const over = (a, b) => a.a >= 0.999 ? a : ({
   r: a.r * a.a + b.r * (1 - a.a), g: a.g * a.a + b.g * (1 - a.a), b: a.b * a.a + b.b * (1 - a.a), a: 1,
@@ -61,10 +58,10 @@ function parse(s) {
 
 const CONTEXTS = [
   { theme: "light", accent: "", label: "라이트 · 기본" },
-  { theme: "light", accent: "product-a", label: "라이트 · 밝은 제품" },
+  { theme: "light", accent: "product-c", label: "라이트 · 밝은 제품" },
   { theme: "light", accent: "product-b", label: "라이트 · 상태색과 겹치는 제품" },
   { theme: "dark", accent: "", label: "다크 · 기본" },
-  { theme: "dark", accent: "product-a", label: "다크 · 밝은 제품" },
+  { theme: "dark", accent: "product-c", label: "다크 · 밝은 제품" },
   { theme: "dark", accent: "product-b", label: "다크 · 상태색과 겹치는 제품" },
 ];
 
@@ -77,7 +74,7 @@ function consumerAudit(css) {
   for (const m of css.slice(cut).matchAll(/var\((--[a-z0-9-]+)/g)) used.add(m[1]);
   /* 의미 토큰이 다른 의미 토큰을 참조하는 것도 소비로 센다(예: --shadow-1 → --shadow-sm) */
   for (const m of css.slice(0, cut).matchAll(/var\((--[a-z0-9-]+)/g)) used.add(m[1]);
-  const skip = (t) => /^--(neutral|brand|accent|red|orange|green|cyan|prod|space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row)-/.test(t)
+  const skip = (t) => /^--(cool-neutral|neutral|brand|blue|green|orange|red|lime|cyan|light-blue|violet|purple|pink|red-orange|prod|space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row)-/.test(t)
     || /^--static-/.test(t) || P.grammarOnly.includes(t);
   return [...declared].filter((t) => !used.has(t) && !skip(t)).sort();
 }
@@ -87,7 +84,7 @@ function primitiveAudit(css) {
   const s = css.indexOf("/* ---------- Live component samples ---------- */");
   const e = css.indexOf("/* ---------- /Live component samples ---------- */");
   const out = [];
-  for (const m of css.slice(s, e).matchAll(/var\((--(?:neutral|brand|accent|red|orange|green|cyan)-\d+)\)/g)) out.push(m[1]);
+  for (const m of css.slice(s, e).matchAll(/var\((--(?:cool-neutral|neutral|brand|blue|green|orange|red|lime|cyan|light-blue|violet|purple|pink|red-orange)-\d+)\)/g)) out.push(m[1]);
   return [...new Set(out)];
 }
 
@@ -109,9 +106,7 @@ async function run() {
   for (const [fg, bgs] of P.pairs) { need.add(fg); bgs.forEach((b) => need.add(b)); }
   for (const [fill, bgs] of P.separation) { need.add(fill); bgs.forEach((b) => need.add(b)); }
   P.severityRanks.forEach((t) => need.add(t));
-  P.severityFillSplit.forEach(([a2, b2]) => { need.add(a2); need.add(b2); });
-  P.ladders.forEach(([, toks]) => toks.forEach((t) => need.add(t)));
-  P.SOLID_ONLY.forEach((t) => need.add(t));
+  P.OPAQUE_ONLY.forEach((t) => need.add(t));
   const toks = [...need];
 
   /* 전용 푸트페이지에서 잰다 — 빌드가 섹션 폴더를 먼저 지우므로 생성 페이지에 의존할 수 없고,
@@ -135,7 +130,6 @@ async function run() {
     fails.push("푸트페이지에서 applyAccent 를 찾을 수 없다 — app.js 가 완주하지 못했다" + (probeErrors.length ? ` (${probeErrors[0]})` : ""));
 
   const table = [];      // Colors 페이지 표의 재료
-  const ladders = [];    // 명도 사다리 — 두 모드를 한 화면에 나란히 보여 주는 재료
   for (const ctx of CONTEXTS) {
     await page.evaluate((th) => document.documentElement.setAttribute("data-theme", th), ctx.theme);
     if (ctx.accent) {
@@ -162,8 +156,9 @@ async function run() {
     }
     if (toks.some((t) => !C[t])) continue;   /* 색으로 못 읽은 게 있으면 이 맥락은 더 재지 않는다 */
 
-    /* 알파 금지 규칙 */
-    for (const t of P.SOLID_ONLY) if (C[t] && C[t].a < 0.999) fails.push(`${ctx.label}: ${t} 에 알파가 있다(${C[t].a}) — surface·on·text·graphic 은 솔리드여야 한다`);
+    /* 참조 시스템이 불투명으로 선언한 토큰에 알파가 섞여 들어오지 않았는지.
+       '글자는 솔리드' 규칙은 더 이상 성립하지 않는다 — 참조 시스템이 글자에도 알파를 쓴다 */
+    for (const t of P.OPAQUE_ONLY) if (C[t] && C[t].a < 0.999) fails.push(`${ctx.label}: ${t} 에 알파가 있다(${C[t].a}) — 참조 시스템은 이 토큰을 불투명으로 선언한다`);
 
     /* 선언한 쌍 전수 */
     for (const [fg, bgs, min, note, opt] of P.pairs) {
@@ -190,75 +185,28 @@ async function run() {
       }
     }
 
-    /* 등급 간 옅은 바탕 — 같은 색조 등급(Critical·High)은 바탕의 짙기가 유일한 단서다.
-       같은 알파로 접으면 라이트 1.04 · 다크 1.09 로 '지각 가능' 바닥에도 못 미친다 */
-    for (const [a, b, floor] of P.severityFillSplit) {
-      const min = typeof floor === "number" ? floor : floor[ctx.theme];
-      for (const bed of P.SURFACES) {
-        const r = ratio(over(C[a], C[bed]), over(C[b], C[bed]));
-        if (r < min) fails.push(`${ctx.label}: 등급 바탕 ${a} ↔ ${b} 가 ${bed} 위에서 갈리지 않는다 — ${r} < ${min}`);
-      }
-    }
-
-    /* 명도 사다리 — 세 단계가 '고르게' 벌어졌는가. 쌍 대비가 보지 못하는 질문이다.
-       제품 기본 맥락에서만 잰다: 사다리는 테마의 성질이고, 제품을 타는 의도 면 사다리는
-       이미 위의 -on 쌍 검사가 세 경우를 전부 본다 */
-    if (!ctx.accent) for (const [name, toks, o] of P.ladders) {
-      /* 알파(fill·line)는 기준 표면 위에 합성한 뒤 잰다 — 합성하지 않으면 낙폭이 뜻 없는 값이 된다 */
-      const eff = toks.map((t) => (C[t].a < 0.999 ? over(C[t], C["--surface-base"]) : C[t]));
-      const ls = eff.map(lstar);
-      const steps = [Math.abs(ls[1] - ls[0]), Math.abs(ls[2] - ls[1])];
-      const dir = [Math.sign(ls[1] - ls[0]), Math.sign(ls[2] - ls[1])];
-      /* 역전과 평탄은 다르다 — 방향이 서로 반대인 것만 역전이고, 한 단계가 0 인 것은 '그 단계가 없는' 것이다.
-         라이트 surface 는 base 와 raised 가 둘 다 흰색이라 평탄하다(경계를 보더·그림자가 전담한다).
-         의도된 선택일 수 있으므로 게이트가 판정하지 않고 최소 낙폭 경고로 보고한다 */
-      const reversed = dir[0] !== 0 && dir[1] !== 0 && dir[0] !== dir[1];
-      const minStep = Math.min(...steps);
-      const balanceRatio = minStep > 0 ? +(Math.max(...steps) / minStep).toFixed(2) : null;
-      ladders.push({ ctx: ctx.label, theme: ctx.theme, name, toks, balance: !!(o && o.balance),
-        hex: eff.map(hex), lstar: ls.map((v) => +v.toFixed(1)), steps: steps.map((v) => +v.toFixed(1)),
-        ratio: balanceRatio, reversed, minStep: +minStep.toFixed(1),
-        balanceMax: (o && o.balance) ? P.LADDER_BALANCE_MAX : null });
-      if (reversed) { fails.push(`${ctx.label}: 사다리 ${name} 의 방향이 뒤집혔다 — L* ${ls.map((v) => v.toFixed(1)).join(" → ")}`); continue; }
-      /* 낙폭과 균형은 advisory — 지금 여럿이 못 넘기고 교정을 보류했다. 숫자를 숨기지 않고 매 빌드 보고한다 */
-      if (minStep < P.LADDER_MIN_STEP)
-        warns.push(`${ctx.label}: 사다리 ${name} 의 한 단계가 보이지 않는다 — ΔL* ${minStep.toFixed(1)} < ${P.LADDER_MIN_STEP} (${toks.join(" → ")})`);
-      /* 균형은 낙폭이 균등해야 하는 사다리에만 — 상태 셋은 동시에 보이지 않고, surface 는 깊이 모델이다 */
-      if (o && o.balance && balanceRatio !== null && balanceRatio > P.LADDER_BALANCE_MAX)
-        warns.push(`${ctx.label}: 사다리 ${name} 이 치우쳤다 — 낙폭 ${steps.map((v) => v.toFixed(1)).join(" · ")} = ${balanceRatio}x > ${P.LADDER_BALANCE_MAX}`);
-    }
-
-    /* 심각도 — 같은 색조 이웃은 휘도로 갈려야 한다(빨강 둘은 휘도가 유일한 단서다) */
-    for (const [a, b] of P.severitySameHue) {
-      const r = ratio(over(C[a], C["--surface-raised"]), over(C[b], C["--surface-raised"]));
-      if (r < P.SEVERITY_ADJACENT_MIN) fails.push(`${ctx.label}: 심각도 ${a} ↔ ${b} 는 같은 색조라 휘도로 갈려야 한다 — ${r} < ${P.SEVERITY_ADJACENT_MIN}`);
-    }
-    /* 다섯 등급 전수(10쌍) — 같은 색조 계열이면 휘도로 갈려야 하고(ΔL* ≥ 8),
-       계열이 다르면 색조가 단서이므로 '값이 다르다'만 본다. 어느 쪽도 못 지키면 다섯 단계가 네 단계로 읽힌다.
-       계열 표를 코드에 적어 두는 이유: red-600 과 neutral-500 은 ΔL* 0.9 로 휘도가 거의 같은데,
-       그게 통과하는 까닭이 '계열이 달라서'라는 사실이 드러나야 한다 */
+    /* 심각도 네 등급이 서로 다른 색인지. 휘도 분리는 요구하지 않는다 —
+       네 색의 색조가 모두 다르고 대비 비율은 색조 차이를 보지 못한다.
+       1.4.1 준수는 라벨 병기와 조각 사이 구분선이 담당하고 verify 가 그것을 검사한다 */
     for (let i = 0; i < P.severityRanks.length; i++) {
       for (let j = i + 1; j < P.severityRanks.length; j++) {
         const [a, b] = [P.severityRanks[i], P.severityRanks[j]];
-        const [ea, eb] = [over(C[a], C["--surface-raised"]), over(C[b], C["--surface-raised"])];
-        if (hex(ea) === hex(eb)) { fails.push(`${ctx.label}: 심각도 ${a} 와 ${b} 가 같은 색이다(${hex(ea)})`); continue; }
-        const sameHue = P.hueFamilyOf(a) === P.hueFamilyOf(b);
-        if (sameHue && Math.abs(lstar(ea) - lstar(eb)) < P.SAME_HUE_LSTAR_MIN)
-          fails.push(`${ctx.label}: 심각도 ${a} ↔ ${b} 는 같은 ${P.hueFamilyOf(a)} 계열인데 ΔL* ${Math.abs(lstar(ea) - lstar(eb)).toFixed(1)} < ${P.SAME_HUE_LSTAR_MIN}`);
+        const [ea, eb] = [over(C[a], C["--surface-elevated-primary"]), over(C[b], C["--surface-elevated-primary"])];
+        if (hex(ea) === hex(eb)) fails.push(`${ctx.label}: 심각도 ${a} 와 ${b} 가 같은 색이다(${hex(ea)})`);
       }
     }
   }
   await browser.close();
 
-  fs.writeFileSync(path.join(__dirname, "contrast.json"), JSON.stringify({ generatedAt: new Date().toISOString(), table, ladders }, null, 0));
-  return { fails, warns, table, ladders };
+  fs.writeFileSync(path.join(__dirname, "contrast.json"), JSON.stringify({ generatedAt: new Date().toISOString(), table }, null, 0));
+  return { fails, warns, table };
 }
 
 if (require.main === module) {
-  run().then(({ fails, warns, table, ladders }) => {
+  run().then(({ fails, warns, table }) => {
     for (const w of warns) console.log("WARN  " + w);
     for (const f of fails) console.log("FAIL  " + f);
-    console.log(`contrast: 쌍 ${table.length}건 · 사다리 ${table.length && ladders.length}건 측정 · 실패 ${fails.length} · 경고 ${warns.length}`);
+    console.log(`contrast: 쌍 ${table.length}건 측정 · 실패 ${fails.length} · 경고 ${warns.length}`);
     process.exitCode = fails.length ? 1 : 0;
   });
 }

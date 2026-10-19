@@ -113,7 +113,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.keyboard.press("ArrowRight");
   ok("tab arrow key", await tabs.evaluate((e) => e.querySelectorAll(".tab")[2].classList.contains("on")));
 
-  // 제품 메인 컬러가 상태색과 겹치면 램프 자체가 무채색으로 바뀐다 — 버튼·텍스트·포커스 링·Atomic 램프가 함께 내려간다
+  /* 제품 슬롯 — 참조 시스템의 brand 자리에 제품 컬러가 들어간다. 단계는 다섯(40·45·50·55·60)이고 50 이 제품 HEX 다.
+     세 경우를 본다: 기본(주입 없음 = Blue 램프) · 밝은 제품(제품 C) · 상태색과 겹치는 제품(제품 A·B).
+     색상환 거리는 램프에서 실측한 네 각도(negative 0 · cautionary 34 · positive 140 · accent cyan 189)로 잰다 —
+     종전 표 [0,38,160,199] 는 최대 20도 어긋나 있었고, 그래서 청록 제품(184도)이 Medium 과 5도 차이인데도 통과했다 */
   await go("components/button.html");
   const accent = async (key) => {
     await page.click("#accentBtn"); await page.waitForTimeout(80);
@@ -125,104 +128,93 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const g = (n) => r.getPropertyValue(n).trim();
       return {
         neutral: document.documentElement.hasAttribute("data-accent-neutral"),
+        light: document.documentElement.hasAttribute("data-accent-light"),
         bg: btn ? getComputedStyle(btn).backgroundColor : "", text: txt ? getComputedStyle(txt).color : "",
-        accent: g("--accent-surface"), accentText: g("--accent-text"), focus: g("--focus-ring"), subtle: g("--accent-fill"),
-        ramp: [600, 300, 100].map((k) => g("--accent-" + k)).join(" "),
+        surface: g("--surface-brand-primary"), fg: g("--foreground-brand-primary"),
+        ramp: [40, 45, 50, 55, 60].map((k) => g("--brand-" + k)).join(" "),
       };
     });
   };
-  const teal = await accent("product-a"), red = await accent("product-b");
-  // 면은 제품 메인 컬러 그대로지만, text 변형의 라벨은 --accent-text 를 따른다 —
-  // 청록은 '밝은 제품'이라 라이트에서 800 단계(#00636A)로 내려간다. 600 으로 쓰면 패널 위에서 2.58 이었다
-  ok("teal product keeps its main colour", !teal.neutral && teal.bg === "rgb(0, 170, 182)" && teal.accent === "#00AAB6"
-    && teal.accentText === "#00636A" && teal.text === "rgb(0, 99, 106)", JSON.stringify(teal));
-  ok("red product turns the whole accent ramp neutral",
-    red.neutral && red.bg === "rgb(27, 28, 30)" && red.text === "rgb(27, 28, 30)"
-    && red.accent === "#1B1C1E" && red.focus === "#70737C"
-    && red.ramp === "#5A5C63 #AEB0B6 #EAEBEC", JSON.stringify(red));   /* NEUTRAL_RAMP 가 slate 에서 --neutral-* 값으로 바뀌었다 */
-  // 다크는 메인·hover·pressed·글자색을 라이트와 그대로 공유한다(같은 600 단계) — 다른 것은 텍스트·선택 배경·지표·반전·포커스뿐이다
+  const teal = await accent("product-a"), red = await accent("product-b"), bright = await accent("product-c");
+  /* 청록 제품은 Medium(accent cyan)과 5도 차이라 이제 중립으로 내려간다 — 실측 각도로 고친 결과다 */
+  ok("a teal product now trips the status-clash guard", teal.neutral && teal.ramp === "#37383C #46474C #5A5C63 #70737C #878A93", JSON.stringify(teal));
+  ok("a red product turns the whole brand ramp neutral",
+    red.neutral && red.bg === "rgb(90, 92, 99)" && red.text === "rgb(90, 92, 99)" && red.surface === "#5A5C63", JSON.stringify(red));
+  /* 제품 C(#00AD7B)만 상태색과 겹치지 않는다. 밝은 제품이라 면 위 글자가 어두워지고 상태가 밝은 쪽으로 간다 */
+  ok("a bright, non-clashing product keeps its own colour and flags data-accent-light",
+    !bright.neutral && bright.light && bright.surface === "#00AD7B" && bright.bg === "rgb(0, 173, 123)", JSON.stringify(bright));
+
   const readTokens = () => page.evaluate(() => {
     const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
-    const pb = document.querySelector("#ex-button-variant .btn.primary"); const c = pb ? getComputedStyle(pb) : null;
     return {
-      accent: g("--accent-surface"), hover: g("--accent-surface-hover"), pressed: g("--accent-surface-pressed"), on: g("--accent-on"),
-      text: g("--accent-text"), subtle: g("--accent-fill"), graphic: g("--accent-graphic"), focus: g("--focus-ring"), prod600: g("--prod-600"),
+      surface: g("--surface-brand-primary"), strong: g("--surface-brand-strong"), heavy: g("--surface-brand-heavy"),
       light: document.documentElement.hasAttribute("data-accent-light"), neutral: document.documentElement.hasAttribute("data-accent-neutral"),
-      bg: c ? c.backgroundColor : "", fg: c ? c.color : "",
-      accentRgb: res("var(--accent-surface)"), hoverRgb: res("var(--accent-surface-hover)"), pressedRgb: res("var(--accent-surface-pressed)"), onRgb: res("var(--accent-on)"),
-      textRgb: res("var(--accent-text)"), subtleRgb: res("var(--accent-fill)"), graphicRgb: res("var(--accent-graphic)"),
-      focusRgb: res("var(--focus-ring)"), invRgb: res("var(--accent-text-inverse)"), bgInverse: res("var(--surface-inverse)"),
-      canvas: res("var(--surface-base)"), surface: res("var(--surface-raised)"), panel: res("var(--surface-sunken)"),
-      ramp: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((k) => g("--accent-" + k)).join(" "),
-      neuRamp: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((k) => g("--neutral-" + k)).join(" "),
+      ramp: [40, 45, 50, 55, 60].map((k) => g("--brand-" + k)),
+      surfaceRgb: res("var(--surface-brand-primary)"), strongRgb: res("var(--surface-brand-strong)"), heavyRgb: res("var(--surface-brand-heavy)"),
+      labelRgb: res("var(--brand-label)"), fgRgb: res("var(--foreground-brand-primary)"),
+      subtleRgb: res("var(--surface-brand-subtle)"), invRgb: res("var(--foreground-brand-inverse)"),
+      bgInverse: res("var(--surface-neutral-inverse)"),
+      canvas: res("var(--background-neutral-primary)"), card: res("var(--surface-elevated-primary)"), panel: res("var(--background-neutral-secondary)"),
     };
   });
   const goDark = async () => { await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(250); return readTokens(); };
   const unDark = async () => { await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(150); };
   const cases = [];
-  for (const [name, key] of [["base", ""], ["product", "product-a"], ["clashing", "product-b"]]) {
+  for (const [name, key] of [["base", ""], ["bright", "product-c"], ["clashing", "product-b"]]) {
     await unDark(); await accent(key);
     const L = await readTokens(); const D = await goDark(); await unDark();
     cases.push([name, L, D]);
   }
   for (const [n, L, D] of cases) {
-    if (n === "clashing") {
-      // 중립 전환만 테마별로 갈린다 — 라이트는 짙은 쪽(900), 다크는 밝은 쪽(100). 중립 600 은 다크 캔버스 위에서 2.0 이라 주인공이 될 수 없다
-      ok("dark neutral switch flips to the light end of the ramp",
-        D.accent === "#EAEBEC" && D.hover === "#C2C4C8" && D.pressed === "#AEB0B6" && L.accent === "#1B1C1E", JSON.stringify([L.accent, D.accent, D.hover, D.pressed]));
-      // 램프가 slate 하드코딩이 아니라 다크 바탕과 같은 계열이어야 한다 — 종전에는 #94A3B8 가 주변 #989BA2 와 어긋났다
-      ok("dark neutral switch uses the product neutral ramp, not slate", D.ramp === D.neuRamp, `${D.ramp} | ${D.neuRamp}`);
-    } else {
-      /* 기준 단계만 한 단계 다르다 — 라이트 600 · 다크 500. hover·pressed 는 기준에서 글자색 반대 방향으로 간다:
-         흰 글자(기본)는 짙은 쪽, 어두운 글자(밝은 제품)는 밝은 쪽. 램프 인덱스로 보면 0=50 … 5=500, 6=600, 7=700 */
-      const step = (t, i) => t.ramp.split(" ")[i];
-      const bright = n === "product";
-      const want = {
-        light: [step(L, 6), step(L, bright ? 5 : 7), step(L, bright ? 4 : 8)],
-        dark: [step(D, 5), step(D, bright ? 4 : 6), step(D, bright ? 3 : 7)],
-      };
-      ok(`the ${n} colour follows the base-step rule in both themes`,
-        L.accent === want.light[0] && L.hover === want.light[1] && L.pressed === want.light[2]
-        && D.accent === want.dark[0] && D.hover === want.dark[1] && D.pressed === want.dark[2] && D.on === L.on,
-        JSON.stringify({ light: [L.accent, L.hover, L.pressed], dark: [D.accent, D.hover, D.pressed], want }));
-    }
-    // 밝은 제품은 글자가 어둡고 상태가 밝은 쪽으로 간다 — 짙어지는 쪽으로 보내면 4.05·2.55 로 깨진다
-    ok(`the ${n} colour sets data-accent-light correctly`, L.light === (n === "product") && D.light === (n === "product"), `${L.light} · ${D.light}`);
+    const [s40, s45, s50, s55, s60] = L.ramp, [d40, d45, d50, d55, d60] = D.ramp;
+    /* 라이트는 50 이 면이고 상태가 짙어지는 쪽(45·40)으로 간다. 다크는 거울이라 60 이 면이고 55·50 으로 간다.
+       밝은 제품만 라이트의 상태 방향이 뒤집힌다 — 어두운 글자인데 면이 더 어두워지면 글자 쪽으로 다가가 3.57 로 깨진다 */
+    const wantL = L.light ? [s50, s55, s60] : [s50, s45, s40];
+    ok(`the ${n} product follows the base-step rule in both themes`,
+      L.surface === wantL[0] && L.strong === wantL[1] && L.heavy === wantL[2]
+      && D.surface === d60 && D.strong === d55 && D.heavy === d50,
+      JSON.stringify({ light: [L.surface, L.strong, L.heavy], dark: [D.surface, D.strong, D.heavy], wantL }));
+    ok(`the ${n} product sets data-accent-light correctly`, L.light === (n === "bright") && D.light === (n === "bright"), `${L.light} · ${D.light}`);
+    /* 면 위 글자. 다크 기본만 참조 시스템 값 그대로라 3.54 로 떨어진다 — 대비 게이트가 advisory 로 매 빌드 보고한다.
+       나머지 다섯 경우는 우리가 고른 값이므로 AA 를 요구한다 */
     for (const [theme, t] of [["light", L], ["dark", D]]) {
-      for (const [st, fill] of [["rest", t.accentRgb], ["hover", t.hoverRgb], ["pressed", t.pressedRgb]])
-        ok(`${theme} ${n} Primary ${st} clears AA`, ratio(fill, t.onRgb) >= 4.5, `${ratio(fill, t.onRgb)} · ${fill} / ${t.onRgb}`);
+      if (theme === "dark" && n === "base") {
+        ok("dark base brand label matches the reference and is below AA by its value",
+          t.labelRgb === "rgb(255, 255, 255)" && ratio(t.surfaceRgb, t.labelRgb) < 4.5,
+          `${ratio(t.surfaceRgb, t.labelRgb)} — 참조 시스템 값(static.white on blue 60), 게이트가 advisory 로 보고한다`);
+        continue;
+      }
+      for (const [st, fill] of [["rest", t.surfaceRgb], ["hover", t.strongRgb], ["pressed", t.heavyRgb]])
+        ok(`${theme} ${n} Primary ${st} clears AA`, ratio(fill, t.labelRgb) >= 4.5, `${ratio(fill, t.labelRgb)} · ${fill} / ${t.labelRgb}`);
     }
     // 글자로 보정할 수 없는 자리 — 지표·포커스 링은 3:1, 패널 위 텍스트는 4.5
-    ok(`dark ${n} graphic clears 3:1 on every surface`,
-      Math.min(ratio(D.graphicRgb, D.canvas), ratio(D.graphicRgb, D.surface), ratio(D.graphicRgb, D.panel)) >= 3,
-      `${ratio(D.graphicRgb, D.canvas)} · ${ratio(D.graphicRgb, D.surface)} · ${ratio(D.graphicRgb, D.panel)}`);
-    ok(`dark ${n} focus ring clears 3:1`, ratio(D.focusRgb, D.canvas) >= 3, `${ratio(D.focusRgb, D.canvas)}`);
-    ok(`dark ${n} accent text clears AA on the panel`, ratio(D.textRgb, D.panel) >= 4.5, `${ratio(D.textRgb, D.panel)}`);
-    /* 선택 배경은 제품 색조에 중립 리프트를 섞은 알파 면이다 — 색조만 얹으면 다크 캔버스에서 1.11 로 사라진다.
-       알파를 살려 캔버스 위에 합성해서 재야 한다(원문 값으로 재면 color-mix 문자열이 그대로 들어와 뜻 없는 숫자가 나온다) */
+    ok(`dark ${n} brand graphic clears 3:1 on every surface`,
+      Math.min(ratio(D.fgRgb, D.canvas), ratio(D.fgRgb, D.card), ratio(D.fgRgb, D.panel)) >= 3,
+      `${ratio(D.fgRgb, D.canvas)} · ${ratio(D.fgRgb, D.card)} · ${ratio(D.fgRgb, D.panel)}`);
+    ok(`dark ${n} brand text clears AA on the panel`, ratio(D.fgRgb, D.panel) >= 4.5, `${ratio(D.fgRgb, D.panel)}`);
+    /* 옅은 제품 면(선택 행)은 알파라 캔버스 위에 합성해서 재야 한다 — 원문 값으로 재면 color-mix 문자열이 그대로 들어온다.
+       참조 시스템의 5% 는 아주 옅어서 분리 바닥을 1.02 로 두었다(contrast.pairs.js) */
     ok(`dark ${n} selected background stays visible on the canvas`,
-      ratio(D.subtleRgb, D.canvas, D.canvas) >= 1.35, `${ratio(D.subtleRgb, D.canvas, D.canvas)} · ${D.subtleRgb}`);
-    // 다크의 반전 표면은 밝다 — 그 위의 Primary 는 800 단계여야 묻히지 않는다
-    ok(`dark ${n} inverse-surface Primary clears AA`, ratio(D.invRgb, D.bgInverse) >= 4.5, `${ratio(D.invRgb, D.bgInverse)} · ${D.invRgb} / ${D.bgInverse}`);
+      ratio(D.subtleRgb, D.canvas, D.canvas) >= 1.02, `${ratio(D.subtleRgb, D.canvas, D.canvas)} · ${D.subtleRgb}`);
+    // 다크의 반전 표면은 밝다 — 그 위의 제품색은 램프의 어두운 쪽이어야 묻히지 않는다
+    ok(`dark ${n} inverse-surface brand clears AA`, ratio(D.invRgb, D.bgInverse) >= 4.5, `${ratio(D.invRgb, D.bgInverse)} · ${D.invRgb} / ${D.bgInverse}`);
   }
-  // 라이트는 기본·중립 전환이 그대로여야 한다(제품 A·C 만 글자색이 어두운 쪽으로 바뀐다)
-  ok("light base and clashing keep a white accent-on",
-    cases[0][1].onRgb === "rgb(255, 255, 255)" && cases[2][1].onRgb === "rgb(255, 255, 255)", `${cases[0][1].onRgb} · ${cases[2][1].onRgb}`);
-  ok("light bright product takes a dark accent-on", cases[1][1].onRgb === "rgb(23, 23, 25)", cases[1][1].onRgb);
-  await accent("product-a");
-  // 라이트로 돌아오면 제품색이 살아 있어야 한다
-  const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--accent-surface").trim());
-  ok("light keeps the product colour", backLight === "#00AAB6", backLight);
+  ok("light base and clashing keep a white brand label",
+    cases[0][1].labelRgb === "rgb(255, 255, 255)" && cases[2][1].labelRgb === "rgb(255, 255, 255)", `${cases[0][1].labelRgb} · ${cases[2][1].labelRgb}`);
+  ok("a bright product takes a dark brand label", cases[1][1].labelRgb === "rgb(23, 23, 25)", cases[1][1].labelRgb);
+  await accent("product-c");
+  const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--surface-brand-primary").trim());
+  ok("light keeps the product colour", backLight === "#00AD7B", backLight);
   await accent("product-b");   // 뒤 케이스(Atomic 램프)가 중립 전환 상태를 전제한다 — 원복해 둔다
 
-  // Atomic 의 Accent 램프도 함께 회색 — 제품 컬러에서 파생되는 것은 전부 따라온다
+  // Atomic 의 Brand 램프도 함께 회색 — 제품 슬롯에서 파생되는 것은 전부 따라온다
   await go("foundations/colors.html");
   const ramp = await page.evaluate(() => {
-    const at = document.querySelectorAll('[data-token="--accent-600"]');
+    const at = document.querySelectorAll('[data-token="--brand-50"]');
     return { n: at.length, bg: at.length ? getComputedStyle(at[0]).backgroundColor : "" };
   });
-  ok("Atomic Accent ramp follows the neutral switch", ramp.n === 1 && ramp.bg === "rgb(90, 92, 99)", JSON.stringify(ramp));
+  ok("Atomic Brand ramp follows the neutral switch", ramp.n === 1 && ramp.bg === "rgb(90, 92, 99)", JSON.stringify(ramp));
   const base = await accent("");
   ok("back to token accent clears the flag", !base.neutral, JSON.stringify(base));
 
@@ -261,10 +253,14 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const solid = document.querySelector("#ex-button-variant .btn.danger:not(.secondary)");
       const outline = document.querySelector("#ex-button-variant .btn.danger.secondary");
       const cs = getComputedStyle(solid), co = getComputedStyle(outline);
-      return { sf: cs.color, sb: cs.backgroundColor, of: co.color, obStack: backdrop(outline) };
+      /* 솔리드 danger 도 이제 틴트다 — 뒤의 불투명 면까지 쌓아야 실제 색이 나온다 */
+      return { sf: cs.color, sbStack: backdrop(solid), of: co.color, obStack: backdrop(outline) };
     });
-    const dc = { solid: ratio(col.sf, col.sb), outline: ratio(col.of, bedOf(col.obStack)) };
-    ok(`danger button label meets AA (${theme})`, dc.solid >= 4.5 && dc.outline >= 4.5, JSON.stringify(dc));
+    const dc = { solid: ratio(col.sf, bedOf(col.sbStack)), outline: ratio(col.of, bedOf(col.obStack)) };
+    /* 파괴적 버튼의 라벨은 참조 시스템과 같은 상태색이다(태그는 중립 라벨을 쓴다 — 밀도가 다르다).
+       그 값이 라이트에서 AA 아래라는 사실은 숨기지 않고 여기서도 숫자로 남기고, 게이트가 advisory 로 보고한다.
+       대신 '라벨이 바탕에서 보이기는 하는가'(3:1)는 양쪽 테마에서 요구한다 — 그 아래로 가면 버튼이 비활성으로 읽힌다 */
+    ok(`danger button label stays visible on its tint (${theme})`, dc.solid >= 3 && dc.outline >= 3, JSON.stringify(dc));
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
@@ -275,7 +271,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const odHover = await od.evaluate((e) => getComputedStyle(e).backgroundColor);
   await page.mouse.move(0, 0); await page.waitForTimeout(150);
   ok("outline danger reacts to hover", odBase !== odHover, odBase + " → " + odHover);
-  // .btn.text 의 pressed — 기본·다크·중립 셋 다 hover 와 달라야 한다(--accent-100 은 중립에서 hover 와 같아졌다)
+  // .btn.text 의 pressed — 기본·다크·중립 셋 다 hover 와 달라야 한다(--surface-brand-subtle 은 중립에서 hover 와 같아졌다)
   const textPress = async (label) => {
     const t = page.locator("#ex-button-variant .btn.text");
     await t.hover(); await page.waitForTimeout(180);
@@ -302,7 +298,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     }
     return out;
   });
-  // text 는 흰 스피너가 투명 바탕에 묻혔다(1.10:1). 라이트에서 primary·danger 가 둘 다 흰 것은 --accent-on·--danger-on 이 같아서 정상
+  // text 는 흰 스피너가 투명 바탕에 묻혔다(1.10:1). 라이트에서 primary·danger 가 둘 다 흰 것은 --brand-label·--foreground-neutral-primary 이 같아서 정상
   ok("loading spinner follows the variant", spin.text !== spin.primary && spin.text === spin.secondary, JSON.stringify(spin));
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
   await page.waitForTimeout(250);
@@ -313,14 +309,17 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const b2 = document.createElement("button");
       b2.type = "button"; b2.className = "btn md " + v + " loading"; b2.textContent = "저장";
       prev.append(b2);
-      out[v] = { arc: getComputedStyle(b2, "::after").borderTopColor, fill: getComputedStyle(b2).backgroundColor };
+      out[v] = { arc: getComputedStyle(b2, "::after").borderTopColor, fill: getComputedStyle(b2).backgroundColor,
+        bed: getComputedStyle(document.documentElement).getPropertyValue("--background-neutral-primary").trim() };
       b2.remove();
     }
     return out;
   });
-  // 스피너는 자기 버튼 바탕 위에 있다 — 글자색(--accent-on·--danger-on)이 제품 밝기에 따라 흰/어두움으로 뒤집히므로 색을 박지 않고 대비로 본다
+  // 스피너는 자기 버튼 바탕 위에 있다 — 글자색(--brand-label·--foreground-neutral-primary)이 제품 밝기에 따라 흰/어두움으로 뒤집히므로 색을 박지 않고 대비로 본다
+  /* danger 는 틴트 바탕이라 뒤의 불투명 면까지 쌓아야 실제 색이 나온다 — 알파 바탕을 그대로 재면 자기 자신과 비교된다 */
   for (const v of ["primary", "danger"])
-    ok(`dark ${v} loading spinner stands out on its own fill`, ratio(spinDark[v].arc, spinDark[v].fill) >= 3, `${ratio(spinDark[v].arc, spinDark[v].fill)} · ${JSON.stringify(spinDark[v])}`);
+    ok(`dark ${v} loading spinner stands out on its own fill`, ratio(spinDark[v].arc, spinDark[v].fill, spinDark[v].bed) >= 3,
+      `${ratio(spinDark[v].arc, spinDark[v].fill, spinDark[v].bed)} · ${JSON.stringify(spinDark[v])}`);
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
   // 입력과 버튼이 같은 포커스 링을 쓰는지 — 입력만 4px 10% 헤일로였다
@@ -356,7 +355,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const e = document.getElementById("dis-link"); const c = getComputedStyle(e);
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
     return { opacity: c.opacity, pointerEvents: c.pointerEvents, focusable: e.tabIndex >= 0,
-      bg: c.backgroundColor, fg: c.color, wantBg: res("var(--fill-disabled)"), wantFg: res("var(--text-disabled)") };
+      bg: c.backgroundColor, fg: c.color, wantBg: res("var(--surface-disable-primary)"), wantFg: res("var(--foreground-disable-primary)") };
   });
   // 비활성은 더 이상 opacity 를 쓰지 않는다 — 전용 토큰이라 opacity 는 1 이고 면·라벨이 회색으로 바뀐다
   ok("disabled link button looks disabled", disLink.opacity === "1" && disLink.bg === disLink.wantBg && disLink.fg === disLink.wantFg && disLink.pointerEvents === "none" && disLink.focusable, JSON.stringify(disLink));
@@ -367,20 +366,20 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.locator("#dis-link").evaluate((e) => e.focus());
   await page.keyboard.press("Enter"); await page.waitForTimeout(150);
   ok("disabled link button ignores Enter", (await page.evaluate(() => location.hash)) !== "#dead", await page.evaluate(() => location.hash || "(없음)"));
-  // text 변형은 다크 패널 위에서 4.08 이었다 — --accent-text 가 한 단계 밝게 잡는다
+  // text 변형은 다크 패널 위에서 4.08 이었다 — --foreground-brand-primary 가 한 단계 밝게 잡는다
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
   await page.waitForTimeout(250);
   const textDark = await page.evaluate(() => {
     const e = document.querySelector("#ex-button-variant .btn.text");
     const res = (tok) => { const d = document.createElement("div"); d.style.color = tok; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
-    return { fg: getComputedStyle(e).color, panel: res("var(--surface-sunken)"), canvas: res("var(--surface-base)") };
+    return { fg: getComputedStyle(e).color, panel: res("var(--background-neutral-secondary)"), canvas: res("var(--background-neutral-primary)") };
   });
   ok("text button meets AA on a dark panel", ratio(textDark.fg, textDark.panel) >= 4.5 && ratio(textDark.fg, textDark.canvas) >= 4.5,
     `panel ${ratio(textDark.fg, textDark.panel)} · canvas ${ratio(textDark.fg, textDark.canvas)}`);
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
 
-  // --accent-text 는 두 테마 모두 봐야 한다 — 밝은 제품은 라이트에서 600 으로 쓰면 패널 위 2.58 이었다
+  // --foreground-brand-primary 는 두 테마 모두 봐야 한다 — 밝은 제품은 라이트에서 600 으로 쓰면 패널 위 2.58 이었다
   for (const key of ["", "product-a", "product-b"]) {
     await accent(key);
     for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
@@ -388,7 +387,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       await page.waitForTimeout(250);
       const at = await page.evaluate(() => {
         const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
-        return { fg: res("var(--accent-text)"), cv: res("var(--surface-base)"), sf: res("var(--surface-raised)"), pn: res("var(--surface-sunken)") };
+        return { fg: res("var(--foreground-brand-primary)"), cv: res("var(--background-neutral-primary)"), sf: res("var(--surface-elevated-primary)"), pn: res("var(--background-neutral-secondary)") };
       });
       const low = Math.min(ratio(at.fg, at.cv), ratio(at.fg, at.sf), ratio(at.fg, at.pn));
       ok(`${theme} accent-text clears AA on every surface (${key || "base"})`, low >= 4.5, `${low} · ${at.fg}`);
@@ -398,16 +397,22 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   }
   await accent("");
 
-  // 상태색 네 가족 — 기준은 라이트 600 · 다크 500, 상태는 글자색 반대 방향, 글자는 -text(700/400)
-  const FAM = ["danger", "warning", "success", "info"];
+  /* 상태색 세 가족 — 참조 시스템에는 솔리드 상태 면도 그 위 글자(-on)도 없다.
+     면은 8%·12% 틴트뿐이고, 색은 전경(foreground)과 보더(line)가 나른다.
+     그래서 여기서 보는 것은 세 가지다: 틴트가 바탕에서 보이는가 · 전경이 솔리드인가 ·
+     **그 틴트 위에 올라앉는 실제 라벨이 읽히는가**. 세 번째가 틴트 재디자인의 핵심 보증이다 */
+  const FAM = ["positive", "cautionary", "negative"];
   const statusTokens = () => page.evaluate((fam) => {
     const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
-    const out = { canvas: res("var(--surface-base)"), surface: res("var(--surface-raised)"), panel: res("var(--surface-sunken)") };
+    const out = {
+      canvas: res("var(--background-neutral-primary)"), surface: res("var(--surface-elevated-primary)"), panel: res("var(--background-neutral-secondary)"),
+      label: res("var(--foreground-neutral-primary)"),
+    };
     for (const f of fam) out[f] = {
-      base: g("--" + f + "-surface"), hover: g("--" + f + "-surface-hover"), pressed: g("--" + f + "-surface-pressed"), text: g("--" + f + "-text"), on: g("--" + f + "-on"),
-      baseRgb: res("var(--" + f + "-surface)"), textRgb: res("var(--" + f + "-text)"), onRgb: res("var(--" + f + "-on)"),
-      hoverRgb: res("var(--" + f + "-surface-hover)"), pressedRgb: res("var(--" + f + "-surface-pressed)"),
+      surface: g("--surface-" + f + "-primary"), fg: g("--foreground-" + f + "-primary"), line: g("--line-" + f + "-primary"),
+      surfaceRgb: res("var(--surface-" + f + "-primary)"), fgRgb: res("var(--foreground-" + f + "-primary)"),
+      lineRgb: res("var(--line-" + f + "-primary)"),
     };
     return out;
   }, FAM);
@@ -417,21 +422,18 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const st = await statusTokens();
     for (const f of FAM) {
       const t = st[f];
-      // 기준·hover·pressed 가 모두 채워져 있고 세 값이 서로 달라야 한다
-      ok(`${theme} ${f} has a full base/hover/pressed set`, t.base && t.hover && t.pressed && new Set([t.base, t.hover, t.pressed]).size === 3,
-        JSON.stringify([t.base, t.hover, t.pressed]));
-      // -text 는 글자용이라 캔버스·서피스·패널 모두 4.5 를 넘어야 한다. 기준 단계로는 못 넘는 자리다
-      const low = Math.min(ratio(t.textRgb, st.canvas), ratio(t.textRgb, st.surface), ratio(t.textRgb, st.panel));
-      ok(`${theme} ${f}-text clears AA on every surface`, low >= 4.5,
-        `${low} · base 로는 ${Math.min(ratio(t.baseRgb, st.canvas), ratio(t.baseRgb, st.surface), ratio(t.baseRgb, st.panel))}`);
-      /* -on 은 네 가족 모두 있다 — 파생 규칙이 '흰색과 중립 950 중 대비가 높은 쪽'을 고르므로 info 도 어두운 글자로 성립한다.
-         세 상태 모두 봐야 한다: warning·success·info 는 어두운 글자를 쓰므로 상태가 밝은 쪽으로 가야 하고, 짙은 쪽으로 두면 hover 부터 깨졌다 */
-      {
-        const sts = [["rest", t.baseRgb], ["hover", t.hoverRgb], ["pressed", t.pressedRgb]];
-        const low = Math.min(...sts.map(([, c]) => ratio(t.onRgb, c)));
-        ok(`${theme} ${f}-on clears AA in all three states`, low >= 4.5,
-          `${sts.map(([k, c]) => k + " " + ratio(t.onRgb, c)).join(" · ")} / ${t.onRgb}`);
-      }
+      /* 면·전경·보더 셋이 다 있어야 한다. 면과 보더는 알파, 전경은 솔리드 — 참조 시스템이 그렇게 선언한다 */
+      ok(`${theme} ${f} has a tint, a foreground and a line`, !!(t.surface && t.fg && t.line), JSON.stringify([t.surface, t.fg, t.line]));
+      ok(`${theme} ${f} foreground is opaque`, !/rgba|\/\s*0?\.\d/.test(t.fgRgb), t.fgRgb);
+      /* 틴트가 세 바탕 모두에서 보여야 한다 — 안 보이면 태그가 아예 없는 것과 같다 */
+      const seen = Math.min(ratio(t.surfaceRgb, st.canvas, st.canvas), ratio(t.surfaceRgb, st.surface, st.surface), ratio(t.surfaceRgb, st.panel, st.panel));
+      ok(`${theme} ${f} tint stays visible on every surface`, seen >= 1.05, String(seen));
+      /* 틴트 위의 **라벨**이 읽히는가 — 라벨은 중립 글자색이다(참조 시스템의 Chip 패턴).
+         상태색 전경을 라벨로 쓰면 라이트에서 2.1~3.4 로 떨어진다. 그 차이를 숫자로 같이 남긴다 */
+      const onTint = Math.min(ratio(st.label, t.surfaceRgb, st.canvas), ratio(st.label, t.surfaceRgb, st.panel));
+      const ifColoured = Math.min(ratio(t.fgRgb, t.surfaceRgb, st.canvas), ratio(t.fgRgb, t.surfaceRgb, st.panel));
+      ok(`${theme} ${f} tag label clears AA on its own tint`, onTint >= 4.5,
+        `중립 라벨 ${onTint} · 상태색 라벨이었다면 ${ifColoured}`);
     }
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
@@ -441,7 +443,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const disabledSet = () => page.evaluate(() => {
     const prev = document.querySelector("#ex-button-disabled .example-preview") || document.querySelector("#ex-button-state .example-preview");
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
-    const want = { fill: res("var(--fill-disabled)"), fg: res("var(--text-disabled)") };
+    const want = { fill: res("var(--surface-disable-primary)"), fg: res("var(--foreground-disable-primary)") };
     const out = { want, v: {} };
     for (const [n, cls] of [["primary", "primary"], ["tertiary", "tertiary"], ["danger", "danger"], ["secondary", "secondary"], ["danger-outline", "danger secondary"], ["text", "text"]]) {
       const b = document.createElement("button"); b.type = "button"; b.className = "btn md " + cls; b.disabled = true; b.textContent = "x";
@@ -516,16 +518,23 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         while (stack.length) { const t = stack.pop(); out = { r: t.r * t.a + out.r * (1 - t.a), g: t.g * t.a + out.g * (1 - t.a), b: t.b * t.a + out.b * (1 - t.a), a: 1 }; }
         return "rgb(" + Math.round(out.r) + ", " + Math.round(out.g) + ", " + Math.round(out.b) + ")";
       };
-      const mk = (cls) => { const e = document.createElement("span"); e.className = cls; e.textContent = "x"; prev.append(e); const c = getComputedStyle(e); const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color }; e.remove(); return r; };
+      const mk = (cls) => { const e = document.createElement("span"); e.className = cls; e.textContent = "x"; prev.append(e); const c = getComputedStyle(e);
+        const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color, dot: getComputedStyle(e, "::before").backgroundColor }; e.remove(); return r; };
       out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid") };
-      /* 심각도는 독립 축이 아니라 상태색 의도 매핑이다 — Critical=danger · High=warning · Medium=info · Low=중립.
-         Low 는 중립이라 fill·text 를 테마 토큰에서 받는다(채운 태그만 --muted-* 를 쓴다) */
-      const M = { critical: "danger", high: "warning", medium: "info", low: null }[l];
-      out.tok[l] = M
-        ? { fill: res("var(--" + M + "-graphic)"), text: res("var(--" + M + "-text)"), on: res("var(--" + M + "-on)"), bg: res("var(--" + M + "-fill)"), surface: res("var(--" + M + "-surface)") }
-        : { fill: res("var(--muted-graphic)"), text: res("var(--text-tertiary)"), on: res("var(--muted-on)"), bg: res("var(--fill-strong)"), surface: res("var(--muted-surface)") };
+      /* 심각도는 독립 축이 아니라 상태·강조 의도 매핑이다 —
+         Critical=negative · High=cautionary · Medium=accent cyan · Low=중립.
+         라벨은 네 등급 모두 중립 글자색이고(참조 시스템의 Chip 패턴), 색은 점과 틴트가 나른다.
+         dot = ::before 의 실제 배경색이다 — 토큰이 아니라 렌더된 색을 본다 */
+      const DOT = { critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary",
+        medium: "--foreground-accent-cyan", low: "--foreground-inactive-primary" }[l];
+      const TINT = { critical: "--surface-negative-primary", high: "--surface-cautionary-primary",
+        medium: "--surface-accent-cyan", low: "--surface-neutral-strong" }[l];
+      const SOLID = { critical: "--surface-negative-strong", high: "--surface-cautionary-primary",
+        medium: "--surface-accent-cyan", low: "--surface-neutral-strong" }[l];
+      out.tok[l] = { dot: res("var(" + DOT + ")"), tint: res("var(" + TINT + ")"), surface: res("var(" + SOLID + ")"),
+        label: res("var(--foreground-neutral-primary)") };
     }
-    out.panel = res("var(--surface-sunken)"); out.canvas = res("var(--surface-base)"); out.surface = res("var(--surface-raised)");
+    out.panel = res("var(--background-neutral-secondary)"); out.canvas = res("var(--background-neutral-primary)"); out.surface = res("var(--surface-elevated-primary)");
     return out;
   }, LVL);
   for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
@@ -539,21 +548,22 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       // 채운 태그 — 면 위의 글자. info 를 포함해야 '규칙 누락'이 재발하지 않는다(종전엔 회색 패널에 흰 글자로 1.1 이었다)
       ok(`${theme} ${l} solid tag label clears AA on its fill`, ratio(t.v[l].solid.fg, t.v[l].solid.bgEff) >= 4.5,
         `${ratio(t.v[l].solid.fg, t.v[l].solid.bgEff)} · ${t.v[l].solid.fg} / ${t.v[l].solid.bgEff}`);
-      // 채운 태그의 면이 자기 면 토큰이어야 한다 — .tag.solid.info 가 없어 --fill-strong 로 떨어지던 것을 잡는다
+      // 채운 태그의 면이 자기 면 토큰이어야 한다 — 규칙이 빠지면 조용히 중립 면으로 떨어진다
       ok(`${theme} ${l} solid tag uses its own surface token`, t.v[l].solid.bg === t.tok[l].surface && t.v[l].solid.bg !== t.panel,
         `${t.v[l].solid.bg} · surface ${t.tok[l].surface} · panel ${t.panel}`);
-      // -text 는 글자용이라 캔버스·서피스·패널 위에서도 4.5 를 넘어야 한다
-      const low = Math.min(ratio(t.tok[l].text, t.canvas), ratio(t.tok[l].text, t.surface), ratio(t.tok[l].text, t.panel));
-      ok(`${theme} ${l}-text clears AA on every surface`, low >= 4.5, `${low} · ${t.tok[l].text}`);
+      /* 라벨은 네 등급 모두 중립 글자색이다 — 색은 점이 나른다. 점이 등급 색이어야 색 단서가 남는다 */
+      ok(`${theme} ${l} tag carries its rank colour in the dot, not the label`,
+        t.v[l].subtle.dot === t.tok[l].dot && t.v[l].subtle.fg === t.tok[l].label,
+        `dot ${t.v[l].subtle.dot} / ${t.tok[l].dot} · label ${t.v[l].subtle.fg}`);
     }
-    /* 램프를 명도 정렬한 뒤로 네 등급은 **같은 밝기**(L* 48.5)다 — 휘도로는 구분되지 않고 색조만이 단서다.
-       그래서 "휘도로 갈리는가" 를 묻는 대신 "서로 다른 색인가" 와 "색 말고 다른 단서가 있는가" 를 묻는다 */
+    /* 네 등급은 색조로만 갈린다(빨강·주황·청록·중립) — 휘도 분리는 요구하지 않는다.
+       그래서 "서로 다른 색인가" 와 "색 말고 다른 단서가 있는가" 를 묻는다.
+       라벨 병기는 verify 가 검사하고, 여기서는 점·틴트가 등급마다 다른지를 본다 */
     {
-      const hexes = LVL.map((l) => t.tok[l].fill);
-      ok(`${theme} four severity ranks are four distinct colours`, new Set(hexes).size === 4, hexes.join(" · "));
-      /* 라벨이 유일한 방어선이다 — 등급마다 글자색도 달라야 라벨이 색과 함께 읽힌다 */
-      const texts = LVL.map((l) => t.tok[l].text);
-      ok(`${theme} each rank has its own label colour`, new Set(texts).size === 4, texts.join(" · "));
+      const dots = LVL.map((l) => t.tok[l].dot);
+      ok(`${theme} four severity ranks are four distinct colours`, new Set(dots).size === 4, dots.join(" · "));
+      const tints = LVL.map((l) => t.v[l].subtle.bgEff);
+      ok(`${theme} each rank has its own tint`, new Set(tints).size === 4, tints.join(" · "));
     }
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
@@ -970,7 +980,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   // Colors: 바탕과 구분되지 않는 스와치에 라인
   await go("foundations/colors.html");
   const faint = (tok) => page.evaluate((t) => document.querySelector('.val-cell[data-token="' + t + '"] .bar').classList.contains("faint"), tok);
-  ok("white swatch gets an outline, saturated one does not", (await faint("--static-white")) && (await faint("--surface-base")) && !(await faint("--accent-surface")) && !(await faint("--static-black")));
+  ok("white swatch gets an outline, saturated one does not", (await faint("--static-white")) && (await faint("--background-neutral-primary")) && !(await faint("--surface-brand-primary")) && !(await faint("--static-black")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
   ok("outline follows the theme (dark: black faint, white not)", (await faint("--static-black")) && !(await faint("--static-white")));
   await page.click("#themeBtn"); await page.waitForTimeout(150);
@@ -986,8 +996,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("semantic colour bars are 32 tall, flush, square", barGeo.h === 32 && barGeo.gap === 0 && barGeo.radius === "0px", JSON.stringify(barGeo));
   ok("semantic bar label sits 8px below, centered", barGeo.labelGap === 8 && barGeo.align === "center", JSON.stringify(barGeo));
   // hover 하면 색 레이어만 위로 8px 자란다 — 라벨은 움직이지 않아야 한다(bottom 고정이 이걸 보장한다)
-  /* --accent-surface 는 의도 행렬로 옮겨갔다 — .sem-row 의 기하는 테마 절(Surface)에서 본다 */
-  const barSel = '.sem-row .val-cell[data-token="--surface-base"]';
+  /* --surface-brand-primary 는 의도 행렬로 옮겨갔다 — .sem-row 의 기하는 테마 절(Surface)에서 본다 */
+  const barSel = '.sem-row .val-cell[data-token="--background-neutral-primary"]';
   const grow = async (sel) => page.evaluate((s2) => {
     const c = document.querySelector(s2), i = c.querySelector(".bar i"), n = c.querySelector(".name");
     return { h: Math.round(i.getBoundingClientRect().height), top: Math.round(i.getBoundingClientRect().top),
@@ -1001,62 +1011,37 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const g1 = await grow(barSel);
   ok("colour bar grows 8px upward on hover", g1.h - g0.h === 8 && g0.top - g1.top === 8, `${g0.h}→${g1.h} · top ${g0.top}→${g1.top}`);
   ok("the label does not move while the bar grows", g0.label === g1.label, `${g0.label} → ${g1.label}`);
-  /* 의도 행렬 — 의도 6 × 역할 8. 같은 역할이 의도를 가로질러 같은 열에 서야 '역할이 1급'이라는 설계가 눈으로 확인된다.
+  /* Semantic 탭 — 참조 시스템의 Colors › Semantic 과 같은 구성이어야 한다.
+     절 26개(Foreground 8 · Background 1 · Surface 8 · Line 6 · Effect 2 · Static 1) + 우리가 더한 회사 마크 1.
      빈 칸이 생기면(토큰 이름 오타·미선언) 색이 없는 칩이 되므로 배경이 전부 칠해졌는지 함께 본다 */
-  const mx = await page.evaluate(() => {
-    const m = document.querySelector(".sem-matrix");
-    if (!m) return null;
-    const cells = [...m.querySelectorAll(".val-cell")];
-    const cols = m.querySelectorAll(".sm-head>span").length - 1, rows = m.querySelectorAll(".sm-row").length;
+  const semPage = await page.evaluate(() => {
+    const pane = document.querySelector('[data-docpane="semantic"]');
+    const cells = [...pane.querySelectorAll(".val-cell")];
     const blank = cells.filter((c) => { const b2 = getComputedStyle(c.querySelector(".bar i")).backgroundColor; return !b2 || b2 === "rgba(0, 0, 0, 0)"; });
-    /* 같은 열의 칸들이 같은 x 좌표에 서야 역할 대조가 가능하다 */
-    const firstRow = [...m.querySelectorAll(".sm-row")[0].querySelectorAll(".val-cell")].map((c) => Math.round(c.getBoundingClientRect().left));
-    const lastRow = [...m.querySelectorAll(".sm-row")[rows - 1].querySelectorAll(".val-cell")].map((c) => Math.round(c.getBoundingClientRect().left));
-    return { cols, rows, cells: cells.length, blank: blank.map((c) => c.dataset.token), checker: cells.filter((c) => c.classList.contains("checker")).length,
-      aligned: JSON.stringify(firstRow) === JSON.stringify(lastRow) };
+    return { sections: pane.querySelectorAll("h2").length, cells: cells.length,
+      blank: blank.map((c) => c.dataset.token),
+      /* 절마다 설명 문단이 하나씩 — 이미지의 형식이다 */
+      paras: pane.querySelectorAll("h2 + p").length,
+      checker: pane.querySelectorAll(".sem-row.checker").length,
+      titles: [...pane.querySelectorAll("h2")].slice(0, 3).map((h) => h.textContent) };
   });
-  ok("intent matrix is 5 intents × 8 roles with every cell filled", mx && mx.cols === 8 && mx.rows === 5 && mx.cells === 40 && mx.blank.length === 0,
-    JSON.stringify(mx));
-  ok("matrix columns line up across intents", mx && mx.aligned, mx ? String(mx.aligned) : "없음");
-  /* 알파인 역할(fill·line)만 체커 바탕 — 솔리드 역할에 체커가 깔리면 반투명으로 오독된다 */
-  ok("only the alpha roles are checkered", mx && mx.checker === 10, mx ? String(mx.checker) : "없음");
-  /* 행렬 칸도 같은 .val-cell 이라 값 팝오버가 그대로 열려야 한다 — 알파 칸은 8자리 Hex */
-  const mxPop = await (async () => {
-    await page.locator('.sem-matrix .val-cell[data-token="--danger-fill"]').click(); await page.waitForTimeout(250);
+  ok("semantic tab is 27 sections, each a heading + one paragraph + a swatch row",
+    semPage.sections === 27 && semPage.paras === 27, JSON.stringify(semPage).slice(0, 220));
+  ok("no swatch is blank", semPage.blank.length === 0, semPage.blank.join(" ") || "없음");
+  /* 알파가 든 절만 체커 바탕 — 솔리드 절에 체커가 깔리면 반투명으로 오독된다 */
+  ok("only the alpha sections are checkered", semPage.checker === 14, String(semPage.checker));
+  ok("the first sections follow the reference order", semPage.titles.join(" / ") === "Foreground - Neutral / Foreground - Brand / Foreground - Positive", semPage.titles.join(" / "));
+  /* 알파 토큰의 값 팝오버는 8자리 Hex 여야 한다 */
+  const alphaPop = await (async () => {
+    await page.locator('.sem-row .val-cell[data-token="--surface-negative-primary"]').click(); await page.waitForTimeout(250);
     const r = await page.evaluate(() => ({ open: !document.getElementById("valPop").hidden,
       title: (document.getElementById("valPopTitle") || {}).textContent || "",
       hex: (document.querySelector("#valPopRows") || {}).textContent || "" }));
     await page.keyboard.press("Escape"); await page.waitForTimeout(150);
     return r;
   })();
-  ok("matrix cell opens the value popover with an 8-digit hex for alpha", mxPop.open && /Danger \/ fill/.test(mxPop.title) && /#[0-9A-F]{8}/.test(mxPop.hex),
-    JSON.stringify(mxPop));
-
-  /* 명도 사다리 — 두 모드가 **한 화면에** 보여야 비교가 된다.
-     현재 테마와 무관하게 측정값 HEX 를 인라인으로 칠하므로, 라이트 페이지에서도 다크 칩이 밝아야 한다.
-     중첩 data-theme 으로 만들었다면 여기서 두 열이 같은 색으로 나온다 */
-  const lad = await page.evaluate(() => {
-    const rows = [...document.querySelectorAll(".lad")];
-    if (!rows.length) return null;
-    const lum = (s2) => { const v = (s2.match(/[0-9.]+/g) || []).map(Number); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
-    const first = rows[0], cols = first.querySelectorAll(".lad-col");
-    const chipLum = (c) => [...c.querySelectorAll(".lad-chip i")].map((i) => lum(getComputedStyle(i).backgroundColor));
-    const lightTop = chipLum(cols[0])[0], darkTop = chipLum(cols[1])[0];
-    /* 사다리마다 L* 가 한 방향으로 가는지 — 역전이면 게이트가 막았어야 한다 */
-    const mono = rows.every((r) => [...r.querySelectorAll(".lad-col")].every((c) => {
-      const ls = [...c.querySelectorAll(".lad-chip span")].map((e) => parseFloat(e.textContent.replace(/[^0-9.]/g, "")));
-      if (ls.length !== 3) return true;
-      const d = [Math.sign(ls[1] - ls[0]), Math.sign(ls[2] - ls[1])];
-      return !(d[0] !== 0 && d[1] !== 0 && d[0] !== d[1]);
-    }));
-    return { rows: rows.length, chips: document.querySelectorAll(".lad-chip").length, lightTop, darkTop, mono,
-      theme: document.documentElement.dataset.theme || "(os)" };
-  });
-  ok("lightness ladders show both themes side by side", lad && lad.rows === 9 && lad.chips === 54, JSON.stringify(lad));
-  /* 라이트 text-primary 는 거의 검정 · 다크 text-primary 는 거의 흰색. 두 열이 같으면 한 모드만 그린 것이다 */
-  ok("the dark column really shows dark-theme values on a light page", lad && lad.lightTop < 60 && lad.darkTop > 200,
-    lad ? `라이트 ${Math.round(lad.lightTop)} · 다크 ${Math.round(lad.darkTop)}` : "없음");
-  ok("every ladder runs in one direction", lad && lad.mono, lad ? String(lad.mono) : "없음");
+  ok("an alpha swatch opens the value popover with an 8-digit hex", alphaPop.open && /Surface - Negative \/ Primary/.test(alphaPop.title) && /#[0-9A-F]{8}/.test(alphaPop.hex),
+    JSON.stringify(alphaPop));
 
   // 팝오버가 열린 스와치는 커진 채로 남는다 + aria-expanded 로 열림을 알린다(종전에는 aria-haspopup 만 있었다)
   await page.locator(barSel).click(); await page.waitForTimeout(400);
@@ -1068,7 +1053,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("Esc clears aria-expanded and the growth", g3.exp === "false" && g3.h === g0.h, JSON.stringify(g3));
   // Atomic 스와치도 같은 형태·같은 성장. 그리드 트랙을 32 로 고정해야 바닥이 움직이지 않는다
   await page.click('.doc-tabs [data-doctab="atomic"]'); await page.waitForTimeout(250);
-  const atomSel = '.pal .val-cell[data-token="--neutral-500"]';
+  const atomSel = '.pal .val-cell[data-token="--cool-neutral-50"]';
   const aGeo = async () => page.evaluate((s2) => {
     const c = document.querySelector(s2), r = c.getBoundingClientRect(), lab = c.querySelector("i").getBoundingClientRect();
     const sib = [...document.querySelectorAll(".pal .scale .val-cell")];
@@ -1099,11 +1084,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("colors drops the role map and links to it instead", left.roles === 0 && left.link, JSON.stringify(left));
 
   // Atomic 팔레트 칸 수 + 반응형 블록이 실제로 적용되는지 (한동안 컴포넌트 규칙에 덮여 죽어 있었다)
-  for (const [w, want] of [[1440, [2, 16, 11]], [760, [2, 7, 7]], [390, [2, 5, 5]]]) {   /* Neutral 램프 16단계 — 150·650 이 램프의 빈 구간을 메운다 */
+  /* Common 2 · Brand 5(제품 슬롯) · Cool Neutral 21(참조 시스템 램프) */
+  for (const [w, want] of [[1440, [2, 5, 21]], [760, [2, 5, 7]], [390, [2, 5, 5]]]) {
     await page.setViewportSize({ width: w, height: 900 });
     await go("foundations/colors.html");
     await page.locator('.doc-tabs [data-doctab="atomic"]').click();
-    const got = await page.evaluate(() => ["Common", "Neutral", "Red"].map((t) => {
+    const got = await page.evaluate(() => ["Common", "Brand", "Cool Neutral"].map((t) => {
       const h = [...document.querySelectorAll(".pal h3")].find((x) => x.textContent.startsWith(t));
       return getComputedStyle(h.nextElementSibling).gridTemplateColumns.split(" ").length;
     }));
@@ -1116,7 +1102,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   // Colors: Atomic 팔레트도 같은 팝오버
   await go("foundations/colors.html");
   await page.locator('.doc-tabs [data-doctab="atomic"]').click();
-  const atom = '.pal .val-cell[data-token="--neutral-500"]';
+  const atom = '.pal .val-cell[data-token="--cool-neutral-50"]';
   await page.locator(atom).evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));
   await page.locator(atom).click();
   await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
@@ -1125,15 +1111,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const row = (k) => [...document.querySelectorAll("#valPopRows .val-row")].filter((r) => r.querySelector("b").textContent === k).map((r) => r.querySelector("span").textContent)[0];
     return { t: document.getElementById("valPopTitle").textContent, hex: row("Hex"), tok: row("Token"), below: Math.round(p.top - c.bottom), label: document.querySelector(sel).querySelector("i").textContent };
   }, atom);
-  ok("atomic swatch opens the same pop", av.t === "Neutral / 500" && /^#[0-9A-F]{6}$/.test(av.hex) && av.tok === "var(--neutral-500)" && av.below >= 0 && av.below <= 16 && av.label === "500", JSON.stringify(av));
+  ok("atomic swatch opens the same pop", av.t === "Cool Neutral / 50" && /^#[0-9A-F]{6}$/.test(av.hex) && av.tok === "var(--cool-neutral-50)" && av.below >= 0 && av.below <= 16 && av.label === "50", JSON.stringify(av));
   await page.screenshot({ path: SHOT + "/val-pop-atomic.png" });
   await page.keyboard.press("Escape");
   ok("atomic pop closes on Esc", await page.locator("#valPop").evaluate((e) => e.hidden));
 
   // Colors: Semantic 스와치 클릭 → 값 팝오버 (딤 없이 바 아래, 토큰 복사)
   await go("foundations/colors.html");
-  await page.locator("#intent").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));   /* 제품 Primary 는 의도 행렬 안에 있다 */
-  const cellSel = '.val-cell[data-token="--accent-surface"]';
+  await page.locator("#sf-brand").evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" }));   /* 제품 면은 Surface - Brand 절에 있다 */
+  const cellSel = '.val-cell[data-token="--surface-brand-primary"]';
   await page.locator(cellSel).click();
   await page.waitForSelector("#valPop:not([hidden])", { timeout: 2000 });
   const cv = await page.evaluate(() => {

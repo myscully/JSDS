@@ -2,7 +2,7 @@ import { SideNav, SideNavGroup, SideNavItem } from "@jiran/ds-react";
 
 export default function Example() {
   return (
-    <SideNav footer="v2.4.1 · 라이선스 정상" style={{ border: "1px solid var(--line-default)", borderRadius: "var(--radius-lg)" }}>
+    <SideNav footer="v2.4.1 · 라이선스 정상" style={{ border: "1px solid var(--line-neutral-secondary)", borderRadius: "var(--radius-lg)" }}>
       <SideNavItem href="#" icon="home" active>대시보드</SideNavItem>
       <SideNavItem href="#" icon="list" count={12}>이벤트</SideNavItem>
       <SideNavGroup>보호</SideNavGroup>

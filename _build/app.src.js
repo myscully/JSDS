@@ -9,20 +9,28 @@
   /* Accent 스케일 */
   function hexToHsl(hex) { const n = parseInt(hex.slice(1), 16); const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2; if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); switch (mx) { case r: h = (g - b) / d + (g < b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; default: h = (r - g) / d + 4; } h /= 6; } return [h * 360, s * 100, l * 100]; }
   function hslToHex(h, s, l) { s /= 100; l /= 100; const k = n => (n + h / 30) % 12; const a = s * Math.min(l, 1 - l); const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return "#" + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, "0")).join("").toUpperCase(); }
-  function accentScale(hex) { const [h, s, l6] = hexToHsl(hex); const up = t => l6 + (88 - l6) * t, dn = t => l6 * t; const L = { 50: 96, 100: 90, 200: 80, 300: up(.55), 400: up(.32), 500: up(.13), 700: dn(.78), 800: dn(.58), 900: dn(.38) }; const S = { 50: .7, 100: .7, 200: .7, 300: .8, 400: .85, 500: .9 }; const out = {}; for (const [k, l] of Object.entries(L)) out[k] = hslToHex(h, Math.min(100, s * (S[k] || 1)), Math.max(0, Math.min(100, l))); out[600] = hex.toUpperCase(); return out; }
-  const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-  /* 제품 메인 컬러가 상태색과 헷갈리는지 — 색상환에서 danger 0 · warning 38 · success 160 · info 199 와 15도 미만이면 참.
-     채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다. 겹치면 램프 자체를 NEUTRAL_RAMP 로 갈아끼워,
-     --accent-* 를 참조하는 모든 것(버튼·링크·탭·체크박스·포커스 링·Atomic 램프)이 함께 중립으로 간다.
-     주입 이름이 --prod-* 인 이유: --prod-* 는 '제품이 넣는 입력'이고 --accent-* 는 '테마가 해석한 결과'다.
-     라이트와 다크가 같은 600 단계를 집고(톤 유지), 다크에서 다른 것은 텍스트·선택 배경·지표·반전뿐이다 — 그 판단은 전부 CSS 토큰 블록에 있다 */
-  const STATUS_HUES = [0, 38, 160, 199];
-  /* 중립 램프 — --neutral-* 와 같은 값. accentScale("#1B1C1E") 로 만들면 중간 단계에 색 기가 남아 쓸 수 없어 하드코딩한다.
-     종전에는 slate 였고, 그래서 라이트 중립 전환(#94A3B8)이 주변 다크 중립(#989BA2)과 한 톤 어긋났다 */
-  const NEUTRAL_RAMP = { 50: "#F7F7F8", 100: "#EAEBEC", 200: "#C2C4C8", 300: "#AEB0B6", 400: "#989BA2", 500: "#70737C", 600: "#5A5C63", 700: "#37383C", 800: "#2E2F33", 900: "#1B1C1E" };
+  /* 제품 램프 — 참조 시스템의 blue 램프에서 읽어 낸 규칙이다.
+     blue 는 단계 번호가 곧 HSL 명도 %다(40→41.0 · 45→46.1 · 50→50.0 · 55→55.1 · 60→60.0, 색조·채도 고정).
+     그래서 제품 HEX 를 50 에 놓고 L 만 그 간격대로 옮기면, 제품이 #0066FF 일 때 blue 가 정확히 재현된다.
+     다섯 단계뿐인 이유: 시멘틱이 brand 를 40·45·50·55·60 에서만 집는다 */
+  const BRAND_DL = { 40: -9.0, 45: -3.9, 50: 0, 55: 5.1, 60: 10.0 };
+  function accentScale(hex) {
+    const [h, s, l] = hexToHsl(hex);
+    const out = {};
+    for (const k of Object.keys(BRAND_DL)) out[k] = hslToHex(h, s, Math.max(0, Math.min(100, l + BRAND_DL[k])));
+    out[50] = hex.toUpperCase();
+    return out;
+  }
+  const STEPS = [40, 45, 50, 55, 60];
+  /* 제품 메인 컬러가 상태색과 헷갈리는지 — 색상환에서 15도 미만이면 참.
+     각도는 램프에서 실측했다: negative #FF4242 = 0 · cautionary #FF9200 = 34 · positive #00BF40 = 140 · accent cyan #00BDDE = 189.
+     종전 표 [0,38,160,199] 는 램프와 최대 20도 어긋나 있었다 — 초록이 160 으로 적혀 있었다.
+     채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다.
+     겹치면 --prod-* 를 넣지 않고 data-accent-neutral 만 켠다 — CSS 가 brand 다섯 단계를 중립으로 갈아끼운다 */
+  const STATUS_HUES = [0, 34, 140, 189];
   /* 메인 컬러 위에 흰 글자가 뜨는지 — 어두운 글자가 더 대비가 높으면 '밝은 제품'이다.
-     글자색만이 아니라 hover·pressed 방향까지 뒤집힌다(CSS 의 :root[data-accent-light]) — 짙어지는 쪽으로 가면 어두운 글자가 깨진다.
-     #171719 는 --neutral-950. NEUTRAL_RAMP 와 같은 방식의 하드코딩이다 */
+     참조 시스템에는 면 위 글자 역할(-on)이 없어 면을 옮길 자리가 없다. 그래서 글자(--brand-label)만 뒤집는다.
+     #171719 는 --cool-neutral-10 이다 */
   function relLum(hex) { const c = [0, 1, 2].map(i => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4)); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
   function ratio(a, b) { const [x, y] = [relLum(a) + .05, relLum(b) + .05]; return Math.max(x, y) / Math.min(x, y); }
   function isLightAccent(hex) { return ratio(hex, "#FFFFFF") < ratio(hex, "#171719"); }
@@ -33,12 +41,14 @@
   }
   function applyAccent(key) {
     const p = products.find(x => x.key === key);
-    if (!p) { /* 기본: CSS 토큰 값(--accent-*) 그대로 */ for (const k of STEPS) root.style.removeProperty("--prod-" + k); delete root.dataset.accent; delete root.dataset.accentNeutral; delete root.dataset.accentLight; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
+    const clear = () => { for (const k of STEPS) root.style.removeProperty("--prod-" + k); };
+    if (!p) { /* 기본: CSS 토큰 값(--brand-* → --blue-*) 그대로 */ clear(); delete root.dataset.accent; delete root.dataset.accentNeutral; delete root.dataset.accentLight; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
     const neutral = clashesWithStatus(p.hex);
-    const sc = neutral ? NEUTRAL_RAMP : accentScale(p.hex); for (const [k, v] of Object.entries(sc)) root.style.setProperty("--prod-" + k, v);
+    clear();
+    if (!neutral) { const sc = accentScale(p.hex); for (const k of STEPS) root.style.setProperty("--prod-" + k, sc[k]); }
     root.dataset.accent = p.key;
     if (neutral) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral;
-    if (!neutral && isLightAccent(sc[600])) root.dataset.accentLight = ""; else delete root.dataset.accentLight; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
+    if (!neutral && isLightAccent(p.hex)) root.dataset.accentLight = ""; else delete root.dataset.accentLight; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
     paintAccent();
   }
   window.applyAccent = applyAccent;
@@ -65,7 +75,7 @@
     markFaintSwatches();
   }
   if (accentPop) {
-    accentPop.innerHTML = '<button type="button" role="menuitemradio" aria-checked="false" data-accent=""><i style="background:var(--accent-600)"></i>기본 (토큰 값)</button>'
+    accentPop.innerHTML = '<button type="button" role="menuitemradio" aria-checked="false" data-accent=""><i style="background:var(--surface-brand-primary)"></i>기본 (토큰 값)</button>'
       + products.map(p => '<button type="button" role="menuitemradio" aria-checked="false" data-accent="' + p.key + '"><i style="background:' + p.hex + '"></i>' + p.name + "</button>").join("");
     /* stopPropagation 금지 — 바깥 클릭 닫기가 이 이벤트에 얹혀 있다 */
     accentPop.addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if (b) { applyAccent(b.dataset.accent); closePop(accentBtn, accentPop); accentBtn.focus(); } });
@@ -258,7 +268,7 @@
   }
 
   /* Colors: 스와치 → 값 모달. 값은 빌드가 아니라 클릭 시점의 렌더 색에서 읽는다 —
-     현재 테마와 헤더에서 고른 제품 컬러(--accent-surface*)가 모두 반영된 최종 색이어야 하기 때문. */
+     현재 테마와 헤더에서 고른 제품 컬러(--surface-brand-*)가 모두 반영된 최종 색이어야 하기 때문. */
   function openValue(cell) {
     const tok = "var(" + (cell.dataset.token || "") + ")";
     const rows = cell.dataset.kind === "shadow" ? [["Value", shadowOf(cell)], ["Token", tok]] : colorRows(cell, tok);
@@ -371,7 +381,7 @@
   /* 바탕과 거의 구분되지 않는 스와치(라이트의 흰색, 각 Subtle 틴트, 다크의 Surface 등)에 1px 라인을 둘러 형태가 보이게 한다.
      테마와 제품 컬러에 따라 달라지므로 빌드가 아니라 렌더 색을 재서 판단한다. Atomic 팔레트는 CSS 로 늘 라인을 두르고 있다 */
   function markFaintSwatches() {
-    /* 의도 행렬도 같은 표시가 필요하다 — --accent-on 처럼 흰 면은 흰 바탕에서 빈칸처럼 보인다.
+    /* 의도 행렬도 같은 표시가 필요하다 — --brand-label 처럼 흰 면은 흰 바탕에서 빈칸처럼 보인다.
        체커가 깔린 칸(알파)은 제외한다: 바탕이 비치는 것이 정상이라 외곽선이 오히려 오독을 만든다 */
     const bars = document.querySelectorAll(".sem-row:not(.checker) .bar:not(.line), .sem-matrix .val-cell:not(.checker) .bar");
     if (!bars.length) return;

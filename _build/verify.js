@@ -114,6 +114,33 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
     if (!/[가-힣A-Za-z0-9]/.test(m[3].replace(/<[^>]*>/g, ""))) fails.push(`${rel}: .sev-cell 에 라벨 글자가 없다 — 3px 막대 색만 남는다`);
 }
 
+/* 값 대조 — 시멘틱 75×2 와 램프가 참조 시스템(Montage)의 정의와 한 글자까지 같은지.
+   "값까지 동일하게 교체"가 이번 설계의 정의이므로 이것이 1차 방어선이다:
+   여기가 틀리면 대비·행동 검사가 다 통과해도 틀린 것이다. 정의는 montage-tokens.js 에 코드로 있다 */
+for (const d of require("./montage-tokens.js").diff(css)) fails.push(`참조 시스템과 다름 — ${d}`);
+
+/* CSS 안의 var() 가 전부 선언된 토큰을 가리키는지.
+   센티넬 가드는 '쌍 선언에 등장하는 토큰'만 보고, data-token 가드는 HTML 속성만 본다 —
+   그 사이에 구멍이 있었다: 어느 쪽에도 안 적힌 이름을 CSS 가 참조하면 상속색으로 떨어지고 빌드는 녹색이었다.
+   이번에 둘이 걸렸다 — .lead 의 --text-pri(선언된 적 없는 오타)와 icons-css.js 가 삽입한 묵은 이름들.
+   컴포넌트 지역 변수(인라인 style 이나 규칙 안에서 정의하는 것)는 토큰이 아니므로 예외 목록에 적는다 */
+{
+  const cut = css.indexOf("*{box-sizing");
+  const declared = new Set([...css.slice(0, cut).matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p"];
+  const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
+  const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
+  for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);
+  /* 생성 HTML 의 인라인 style 도 같은 구멍이다 — foundations.js 의 히어로·Do/Don't 가 토큰을 맨 문자열로 넘긴다.
+     CSS 만 보는 검사로는 안 잡히고, data-token 검사는 속성만 본다 */
+  for (const f of walk(OUT).filter((x) => x.endsWith(".html"))) {
+    const rel = path.relative(OUT, f);
+    const bad = [...new Set([...read(rel).matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]))]
+      .filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
+    for (const t of bad) fails.push(`${rel}: 인라인 style 이 var(${t}) 를 쓰는데 선언이 없다`);
+  }
+}
+
 /* 생성물이 가리키는 토큰이 전부 선언돼 있는지 — data-token 은 HTML 속성이라
    CSS 를 보는 가드 셋(주석 짝 · 선언 존재 · 센티넬)이 전부 놓칩니다.
    3차에서 --graphic-muted → --muted-graphic 개명이 foundations.js 의 sem() 맨 문자열에
@@ -132,8 +159,8 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
   }
   /* 반대 방향 — 의미 토큰 전수가 Colors 페이지에 스와치로 나와야 한다.
      4차에서 절을 채워 가며 0 으로 만든다. 그때 fails 로 승격한다 */
-  const isPrim = (k) => /^--(neutral|brand|accent|red|orange|green|cyan)-\d+$/.test(k);
-  const isScalar = (k) => /^--(space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row)-/.test(k) || /^--static-/.test(k);
+  const isPrim = (k) => /^--(cool-neutral|neutral|brand|blue|green|orange|red|lime|cyan|light-blue|violet|purple|pink|red-orange|prod)-\d+$/.test(k);
+  const isScalar = (k) => /^--(space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row|code)-/.test(k) || /^--static-/.test(k) || k === "--brand-label" || k === "--company-mark" || k === "--company-mark-subtle";
   const orphan = [...declared].filter((t) => !isPrim(t) && !isScalar(t) && !pointed.has(t)).sort();
   if (orphan.length) warns.push(`Colors 페이지에 스와치가 없는 의미 토큰 ${orphan.length}개 — ${orphan.slice(0, 6).join(" ")}${orphan.length > 6 ? " …" : ""}`);
 }

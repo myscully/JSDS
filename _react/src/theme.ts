@@ -1,6 +1,6 @@
 /* 테마 · Accent(제품 메인 컬러) 유틸 — 사이트 assets/app.js 의 accentScale 과 동일한 계산 */
 
-export type AccentScale = Record<50 | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900, string>;
+export type AccentScale = Record<40 | 45 | 50 | 55 | 60, string>;
 
 function hexToHsl(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
@@ -28,16 +28,20 @@ function hslToHex(h: number, s: number, l: number): string {
   return "#" + [f(0), f(8), f(4)].map((x) => Math.round(x * 255).toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
-/** 제품 메인 컬러 HEX 하나로 --accent-50~900 스케일을 만든다 (600 = 원값) */
+/** 제품 메인 컬러 HEX 하나로 --prod-40~60 스케일을 만든다 (50 = 원값).
+ *  규칙은 참조 시스템의 blue 램프에서 읽어 낸 것이다 — 단계 번호가 곧 HSL 명도 %이고 색조·채도는 고정이다.
+ *  ΔL 은 그 램프에서 실측했다: 40 −9.02 · 45 −3.922 · 55 +5.098 · 60 +10.0 %p.
+ *  #0066FF 를 넣으면 네 단계가 정확히 재현되고 55 만 초록 채널이 1/255 어긋난다(#1A76FF vs #1A75FF) —
+ *  참조 램프의 그 값이 곡선에서 살짝 벗어나 있기 때문이다. 기본 제품은 이 함수를 타지 않고
+ *  CSS 가 var(--prod-50, var(--blue-50)) 로 램프 HEX 를 직접 쓰므로, 기본 상태는 참조 시스템과 완전히 같다.
+ *  다섯 단계뿐인 이유는 시멘틱이 brand 를 그 다섯에서만 집기 때문이다. */
+const BRAND_DL: Record<number, number> = { 40: -9.02, 45: -3.922, 50: 0, 55: 5.098, 60: 10.0 };
 export function accentScale(hex: string): AccentScale {
-  const [h, s, l6] = hexToHsl(hex);
-  const up = (t: number) => l6 + (88 - l6) * t, dn = (t: number) => l6 * t;
-  const L: Record<number, number> = { 50: 96, 100: 90, 200: 80, 300: up(0.55), 400: up(0.32), 500: up(0.13), 700: dn(0.78), 800: dn(0.58), 900: dn(0.38) };
-  const S: Record<number, number> = { 50: 0.7, 100: 0.7, 200: 0.7, 300: 0.8, 400: 0.85, 500: 0.9 };
-  const out = {} as AccentScale;
-  for (const [k, l] of Object.entries(L)) (out as Record<string, string>)[k] = hslToHex(h, Math.min(100, s * (S[Number(k)] ?? 1)), Math.max(0, Math.min(100, l)));
-  out[600] = hex.toUpperCase();
-  return out;
+  const [h, s, l] = hexToHsl(hex);
+  const out = {} as Record<number, string>;
+  for (const k of Object.keys(BRAND_DL).map(Number)) out[k] = hslToHex(h, s, Math.max(0, Math.min(100, l + BRAND_DL[k])));
+  out[50] = hex.toUpperCase();
+  return out as AccentScale;
 }
 
 function relLum(hex: string): number {
@@ -49,21 +53,21 @@ function ratio(a: string, b: string): number {
   const [x, y] = [relLum(a) + 0.05, relLum(b) + 0.05];
   return Math.max(x, y) / Math.min(x, y);
 }
-/** 메인 컬러 위에 흰 글자가 뜨는지 — 어두운 글자(#171719 = --neutral-950)가 더 대비가 높으면 '밝은 제품' */
+/** 메인 컬러 위에 흰 글자가 뜨는지 — 어두운 글자(#171719 = --foreground-neutral-primary)가 더 대비가 높으면 '밝은 제품' */
 export function isLightAccent(hex: string): boolean {
   return ratio(hex, "#FFFFFF") < ratio(hex, "#171719");
 }
 
 /** :root 에 제품 램프를 --prod-* 로 주입. 앱 시작 시 한 번 호출.
- *  --accent-* 가 아니라 --prod-* 인 이유: --prod-* 는 '제품이 넣는 입력'이고 --accent-* 는 '테마가 해석한 결과'다.
- *  :root 가 var(--prod-N, 기본값) 으로 받아, 라이트는 600 · 다크는 400 단계를 집는다.
- *  다크에서도 버튼·체크박스·포커스 링은 제품 컬러이고, 배경 계열(--accent-fill 포함)만 중립으로 남는다. */
+ *  --brand-* 가 아니라 --prod-* 인 이유: --prod-* 는 '제품이 넣는 입력'이고 --brand-* 는 '테마가 해석한 결과'다.
+ *  :root 가 var(--prod-N, var(--blue-N)) 으로 받아, 라이트는 50·45·40 · 다크는 60·55·50 을 집는다.
+ *  참조 시스템에는 면 위 글자 역할이 없어 라벨이 늘 흰색이다 — 밝은 제품이면 data-accent-light 가 --brand-label 하나만 뒤집는다. */
 export function applyAccent(hex: string, root: HTMLElement = document.documentElement): AccentScale {
   const sc = accentScale(hex);
   for (const [k, v] of Object.entries(sc)) root.style.setProperty(`--prod-${k}`, v);
   root.dataset.accent = hex.toUpperCase();
   /* 메인 컬러가 밝으면 그 위의 흰 글자가 뜬다 — 글자를 어둡게, 상태는 밝은 쪽으로 보내는 CSS 규칙을 켠다 */
-  if (isLightAccent(sc[600])) root.dataset.accentLight = "";
+  if (isLightAccent(sc[50])) root.dataset.accentLight = "";
   else delete root.dataset.accentLight;
   return sc;
 }
