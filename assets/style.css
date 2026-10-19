@@ -37,8 +37,8 @@
      Figma 변수 경로와 1:1 이고, 토큰 이름이 공개 API 라 줄이지 않는다.
      알파가 들어간 토큰이 36개다. 글자에 알파를 쓰지 않는다는 우리 규칙은 참조 시스템이 이미 어긴다
      (foreground-neutral-secondary 가 88% 알파다) — 대신 그 글자들을 세 바탕 전부에서 재도록 쌍 선언에 넣는다 */
-  --foreground-neutral-primary:var(--cool-neutral-10);--foreground-neutral-strong:var(--static-black);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-22) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-25) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-25) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-99);
-  --foreground-brand-primary:var(--brand-50);--foreground-brand-inverse:var(--brand-60);
+  --foreground-neutral-primary:var(--cool-neutral-10);--foreground-neutral-strong:var(--cool-neutral-20);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-22) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-25) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-25) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-99);
+  --foreground-brand-primary:var(--brand-40);--foreground-brand-inverse:var(--brand-60);
   --foreground-positive-primary:var(--green-50);
   --foreground-cautionary-primary:var(--orange-50);
   --foreground-negative-primary:var(--red-50);--foreground-negative-strong:var(--red-40);
@@ -89,23 +89,23 @@
    blue 와 달리 테마마다 램프가 다르다 — 무채색에는 blue 같은 '중간 밝기 하나로 양쪽을 만족'이 없기 때문이다.
    라이트는 어두운 쪽이 면이고 흰 글자가 선다. --foreground-brand-inverse 만 반대쪽(반전 표면 위)이라 따로 덮는다 —
    덮지 않으면 brand-60 이 그대로 와서 반전 표면 위 3.6 으로 묻힌다(덮으면 4.94) */
-:root[data-accent-neutral]{--brand-40:var(--cool-neutral-15);--brand-45:var(--cool-neutral-22);--brand-50:var(--cool-neutral-30);--brand-55:var(--cool-neutral-40);--brand-60:var(--cool-neutral-50);--foreground-brand-inverse:var(--cool-neutral-60)}
+:root[data-accent-neutral]{--brand-40:var(--cool-neutral-15);--brand-45:var(--cool-neutral-22);--brand-50:var(--cool-neutral-30);--brand-55:var(--cool-neutral-40);--brand-60:var(--cool-neutral-50);--foreground-brand-inverse:var(--cool-neutral-60);--surface-brand-primary:var(--brand-40);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-50)}
 /* 제품 색이 밝으면 그 위의 흰 글자가 뜬다(#00AD7B 에서 2.89) — 면 위 글자를 어둡게 뒤집는다.
    그러면 상태 방향도 뒤집어야 한다: 어두운 글자인데 눌린 면이 더 어두워지면 글자 쪽으로 다가가 3.57 로 깨진다.
    기준 면(50)은 건드리지 않는다 — 옮기면 버튼이 제품 브랜드 색이 아니게 된다. 밝아지는 쪽(55·60)으로만 간다.
    글자용 단계도 내린다 — 밝은 제품의 50 은 흰 바탕에서 2.89 라 링크·레이블로 못 쓴다.
    다크는 덮지 않는다: 다크 블록이 뒤에서 같은 특정도로 다시 쓰고, 다크의 면(60·55·50)은 이미 어두운 글자에 맞다 */
-:root[data-accent-light]{--brand-label:var(--cool-neutral-10);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-60);--foreground-brand-primary:var(--brand-40)}
+:root[data-accent-light]{--brand-label:var(--cool-neutral-10);--surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-60)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   /* ── Semantic · Dark ──────────────────────────────────────────
      라이트와 같은 75 토큰이다. 값의 출처도 같다 — Montage 의 dark 테마를 그대로 받았다.
      이 블록은 아래 :root[data-theme="dark"] 에 **한 글자까지 같게** 한 번 더 들어간다.
      verify 가 두 벌의 동일성을 검사한다 — 한쪽만 고치면 OS 설정으로 들어온 다크가 조용히 낡는다 */
-  --foreground-neutral-primary:var(--cool-neutral-99);--foreground-neutral-strong:var(--static-white);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-90) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-80) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-80) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-10);
-  --foreground-brand-primary:var(--brand-60);--foreground-brand-inverse:var(--brand-50);
+  --foreground-neutral-primary:var(--cool-neutral-99);--foreground-neutral-strong:var(--cool-neutral-90);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-90) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-80) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-80) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-10);
+  --foreground-brand-primary:var(--brand-60);--foreground-brand-inverse:var(--brand-40);
   --foreground-positive-primary:var(--green-60);
   --foreground-cautionary-primary:var(--orange-60);
-  --foreground-negative-primary:var(--red-60);--foreground-negative-strong:var(--red-60);
+  --foreground-negative-primary:var(--red-60);--foreground-negative-strong:var(--red-50);
   --foreground-disable-primary:color-mix(in srgb,var(--cool-neutral-70) 16%,transparent);
   --foreground-inactive-primary:var(--cool-neutral-40);
   --foreground-accent-lime:var(--lime-50);--foreground-accent-cyan:var(--cyan-50);--foreground-accent-light-blue:var(--light-blue-50);--foreground-accent-violet:var(--violet-70);--foreground-accent-purple:var(--purple-60);--foreground-accent-pink:var(--pink-60);
@@ -137,11 +137,11 @@
      라이트와 같은 75 토큰이다. 값의 출처도 같다 — Montage 의 dark 테마를 그대로 받았다.
      이 블록은 아래 :root[data-theme="dark"] 에 **한 글자까지 같게** 한 번 더 들어간다.
      verify 가 두 벌의 동일성을 검사한다 — 한쪽만 고치면 OS 설정으로 들어온 다크가 조용히 낡는다 */
-  --foreground-neutral-primary:var(--cool-neutral-99);--foreground-neutral-strong:var(--static-white);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-90) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-80) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-80) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-10);
-  --foreground-brand-primary:var(--brand-60);--foreground-brand-inverse:var(--brand-50);
+  --foreground-neutral-primary:var(--cool-neutral-99);--foreground-neutral-strong:var(--cool-neutral-90);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-90) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-80) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-80) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-10);
+  --foreground-brand-primary:var(--brand-60);--foreground-brand-inverse:var(--brand-40);
   --foreground-positive-primary:var(--green-60);
   --foreground-cautionary-primary:var(--orange-60);
-  --foreground-negative-primary:var(--red-60);--foreground-negative-strong:var(--red-60);
+  --foreground-negative-primary:var(--red-60);--foreground-negative-strong:var(--red-50);
   --foreground-disable-primary:color-mix(in srgb,var(--cool-neutral-70) 16%,transparent);
   --foreground-inactive-primary:var(--cool-neutral-40);
   --foreground-accent-lime:var(--lime-50);--foreground-accent-cyan:var(--cyan-50);--foreground-accent-light-blue:var(--light-blue-50);--foreground-accent-violet:var(--violet-70);--foreground-accent-purple:var(--purple-60);--foreground-accent-pink:var(--pink-60);
@@ -171,13 +171,13 @@
 /* 다크 + 중립 전환 — 라이트의 거울이다. 면이 밝은 쪽이므로 면 위 글자를 어둡게 뒤집는다.
    여기서도 --foreground-brand-inverse 만 반대쪽이라 따로 덮는다(반전 표면이 다크에서는 흰색이다).
    특정도 (0,3,0) 으로 다크 블록과 [data-accent-light] 를 모두 이긴다 */
-:root[data-theme="dark"][data-accent-neutral]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-95);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-95);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}}
+:root[data-theme="dark"][data-accent-neutral]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-99);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-99);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}}
 /* 다크 + 밝은 제품 — 반전 표면만 방향이 반대다. 다크의 반전 표면은 흰색이라 그 위의 제품색은 어두워야 하는데,
    밝은 제품의 기준 단계(50)는 흰 바탕에서 2.89 다. 한 단계 짙은 40 으로 내린다.
    특정도 (0,3,0) 으로 다크 블록을 이긴다 */
-:root[data-theme="dark"][data-accent-light]{--foreground-brand-inverse:var(--brand-40)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-light]{--foreground-brand-inverse:var(--brand-40)}}
+:root[data-theme="dark"][data-accent-light]{--foreground-brand-inverse:var(--brand-40);--surface-brand-primary:var(--brand-55);--surface-brand-strong:var(--brand-50);--surface-brand-heavy:var(--brand-45)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-light]{--foreground-brand-inverse:var(--brand-40);--surface-brand-primary:var(--brand-55);--surface-brand-strong:var(--brand-50);--surface-brand-heavy:var(--brand-45)}}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -646,7 +646,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
    솔리드 상태 면이 없으므로 상태는 틴트 두 단계(8% → 12%)와 보더로 만든다.
    라벨에 상태색을 쓰는 것은 태그와 다른 선택이다 — 태그는 표에 빽빽이 들어가 중립 라벨이 필요하지만,
    버튼은 하나씩 크게 서고 참조 시스템도 버튼에는 상태색 라벨을 쓴다. 그 대가(라이트 2.9)는 게이트가 매 빌드 보고한다 */
-.btn.danger{background:var(--surface-negative-primary);color:var(--foreground-negative-strong);box-shadow:inset 0 0 0 1px var(--line-negative-primary)}
+.btn.danger{background:var(--surface-negative-primary);color:var(--foreground-negative-strong)}
 .btn.danger:hover{background:var(--surface-negative-strong)}
 .btn.danger:active{background:var(--surface-negative-strong);box-shadow:inset 0 0 0 1px var(--line-negative-strong)}
 .btn.danger.secondary{background:transparent;color:var(--foreground-negative-primary);border-color:var(--line-negative-primary);box-shadow:none}

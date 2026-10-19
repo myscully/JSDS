@@ -148,7 +148,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("a teal product now trips the status-clash guard",
     teal.neutral && neutralRamp(teal) && lighterUp(teal), JSON.stringify(teal.ramp));
   ok("a red product turns the whole brand ramp neutral",
-    red.neutral && neutralRamp(red) && lighterUp(red) && red.surface === red.ramp[2] && red.bg === red.text, JSON.stringify(red.ramp));
+    red.neutral && neutralRamp(red) && lighterUp(red) && red.ramp.includes(red.surface) && red.bg === red.text, JSON.stringify(red.ramp));
   /* 제품 C(#00AD7B)만 상태색과 겹치지 않는다. 밝은 제품이라 면 위 글자가 어두워지고 상태가 밝은 쪽으로 간다 */
   ok("a bright, non-clashing product keeps its own colour and flags data-accent-light",
     !bright.neutral && bright.light && bright.surface === "#00AD7B" && bright.bg === "rgb(0, 173, 123)", JSON.stringify(bright));
@@ -179,11 +179,16 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const [s40, s45, s50, s55, s60] = L.ramp, [d40, d45, d50, d55, d60] = D.ramp;
     /* 라이트는 50 이 면이고 상태가 짙어지는 쪽(45·40)으로 간다. 다크는 거울이라 60 이 면이고 55·50 으로 간다.
        밝은 제품만 라이트의 상태 방향이 뒤집힌다 — 어두운 글자인데 면이 더 어두워지면 글자 쪽으로 다가가 3.57 로 깨진다 */
-    const wantL = L.light ? [s50, s55, s60] : [s50, s45, s40];
+    /* 라이트의 상태 방향이 제품 종류마다 다르다.
+       기본은 50 에서 짙어지고(45·40), 밝은 제품은 어두운 글자라 밝아지며(55·60),
+       중립 제품은 거의 검정에서 시작해 밝아진다(40 → 45 → 50) */
+    const wantL = L.neutral ? [s40, s45, s50] : L.light ? [s50, s55, s60] : [s50, s45, s40];
+    /* 다크도 밝은 제품만 한 단계 짙다 — 면 위 글자가 어두워서 면이 너무 밝으면 눌린 상태가 흐려진다 */
+    const wantD = D.light ? [d55, d50, d45] : [d60, d55, d50];
     ok(`the ${n} product follows the base-step rule in both themes`,
       L.surface === wantL[0] && L.strong === wantL[1] && L.heavy === wantL[2]
-      && D.surface === d60 && D.strong === d55 && D.heavy === d50,
-      JSON.stringify({ light: [L.surface, L.strong, L.heavy], dark: [D.surface, D.strong, D.heavy], wantL }));
+      && D.surface === wantD[0] && D.strong === wantD[1] && D.heavy === wantD[2],
+      JSON.stringify({ light: [L.surface, L.strong, L.heavy], dark: [D.surface, D.strong, D.heavy], wantL, wantD }));
     ok(`the ${n} product sets data-accent-light correctly`, L.light === (n === "bright") && D.light === (n === "bright"), `${L.light} · ${D.light}`);
     /* 면 위 글자. 다크 기본만 참조 시스템 값 그대로라 3.54 로 떨어진다 — 대비 게이트가 advisory 로 매 빌드 보고한다.
        나머지 다섯 경우는 우리가 고른 값이므로 AA 를 요구한다 */
@@ -309,10 +314,14 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       out[v] = getComputedStyle(b2, "::after").borderTopColor;
       b2.remove();
     }
+    out.canvas = getComputedStyle(document.body).backgroundColor;
     return out;
   });
-  // text 는 흰 스피너가 투명 바탕에 묻혔다(1.10:1). 라이트에서 primary·danger 가 둘 다 흰 것은 --brand-label·--foreground-neutral-primary 이 같아서 정상
-  ok("loading spinner follows the variant", spin.text !== spin.primary && spin.text === spin.secondary, JSON.stringify(spin));
+  /* text 변형은 바탕이 투명이라, 흰 스피너를 그대로 쓰면 캔버스에 묻힌다(종전 1.10:1).
+     'secondary 와 같은 색인가'로 재던 것을 **묻히지 않는가**로 바꾼다 — 그게 원래 지키려던 것이고,
+     제품색 토큰의 단계가 바뀌어도 살아남는다 */
+  ok("loading spinner follows the variant", spin.text !== spin.primary && ratio(spin.text, spin.canvas) >= 3,
+    `${ratio(spin.text, spin.canvas)} · ${JSON.stringify(spin)}`);
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
   await page.waitForTimeout(250);
   const spinDark = await page.evaluate(() => {

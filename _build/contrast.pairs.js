@@ -53,7 +53,9 @@ const pairs = [
   ["--foreground-positive-primary", [...SURFACES, "--surface-positive-primary"], 4.5, "긍정 글자·아이콘", REF_STATUS],
   ["--foreground-cautionary-primary", [...SURFACES, "--surface-cautionary-primary"], 4.5, "주의 글자·아이콘", REF_STATUS],
   ["--foreground-negative-primary", [...SURFACES, "--surface-negative-primary"], 4.5, "부정 글자·아이콘", REF_STATUS],
-  ["--foreground-negative-strong", [...SURFACES, "--surface-negative-strong"], 4.5, "강조된 부정 글자", REF_STATUS],
+  /* 두 틴트 모두에 올라앉는다 — .btn.danger 가 이 글자를 8% 틴트(--surface-negative-primary) 위에 쓴다.
+     강한 틴트만 재고 있어서 파괴적 버튼의 실제 라벨 대비를 아무도 측정하지 않았다 */
+  ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨", REF_STATUS],
   ...ACCENTS.map((c) => [`--foreground-accent-${c}`, [...SURFACES, `--surface-accent-${c}`], 4.5, "강조색 글자·아이콘", REF_ACCENT]),
   /* 제품 면 위 글자 — 참조 시스템은 두 테마 모두 static.white 다. 다크 면(blue 60)에서 3.54 로 떨어진다.
      면을 옮길 자리가 없다(-on 역할이 없다) — 밝은 제품일 때만 data-accent-light 가 이 토큰을 뒤집는다 */

@@ -121,6 +121,29 @@ function ramps() {
   return out;
 }
 
+/* ── 참조 시스템에서 의도적으로 벗어난 자리 ──────────────────────
+   관용이 아니라 선언이다. [참조 값, 우리 값, 왜] 셋을 함께 적는다.
+   참조 값을 같이 적어 두는 이유: 상류가 움직이면 그 사실을 알아야 하고,
+   그래야 다음 사람이 '버그'와 '우리가 내린 결정'을 구분할 수 있다.
+   diff() 는 이 표에 적힌 토큰만 우리 값으로 기대하고, **표 자체도 검사한다** —
+   적어 둔 참조 값이 실제 참조 정의와 다르면 그것도 실패다. 이탈이 상류 변화를 가려서는 안 된다. */
+const DEVIATIONS = {
+  light: {
+    "foreground-brand-primary": ["var(--brand-50)", "var(--brand-40)",
+      "링크·레이블을 한 단계 짙게 — 흰 바탕에서 4.83 → 6.59"],
+    "foreground-neutral-strong": ["var(--static-black)", "var(--cool-neutral-20)",
+      "순수 검정 대신 중립 램프의 끝 — 램프 밖의 값을 글자로 쓰지 않는다(흰 바탕 14.35)"],
+  },
+  dark: {
+    "foreground-neutral-strong": ["var(--static-white)", "var(--cool-neutral-90)",
+      "순수 흰색 대신 중립 램프의 끝 — 라이트와 같은 이유다(다크 캔버스 9.76)"],
+    "foreground-negative-strong": ["var(--red-60)", "var(--red-50)",
+      "두 테마의 파괴적 버튼 라벨을 같은 빨강으로 — 다크 8% 틴트 위 5.30 → 4.48 로 내려간다(advisory)"],
+    "foreground-brand-inverse": ["var(--brand-50)", "var(--brand-40)",
+      "다크의 반전 표면은 흰색이라 한 단계 짙어야 한다 — 그 위에서 4.83 → 6.59"],
+  },
+};
+
 /* style.css 와 대조한다. 반환은 어긋난 자리의 설명 목록 */
 function diff(css) {
   const block = (sel) => {
@@ -138,14 +161,24 @@ function diff(css) {
   if (!light || !dark) return ["토큰 블록을 찾지 못했다 — :root 또는 :root[data-theme=\"dark\"]"];
   for (const [theme, got] of [["light", light], ["dark", dark]]) {
     const want = semantic(theme);
+    const dev = DEVIATIONS[theme] || {};
+    /* 이탈 표가 낡지 않았는지 먼저 본다 — 적어 둔 '참조 값'이 실제 참조 정의와 같아야 한다.
+       여기가 틀리면 상류가 움직였는데 이탈이 그걸 덮고 있다는 뜻이다 */
+    for (const [k, [ref]] of Object.entries(dev)) {
+      if (want[k] === undefined) { bad.push(`이탈 선언이 없는 토큰을 가리킨다 — ${theme} --${k}`); continue; }
+      if (want[k] !== ref) bad.push(`이탈 선언이 낡았다 — ${theme} --${k}: 참조 시스템은 이제 ${want[k]} 인데 표에는 ${ref} 라 적혀 있다`);
+    }
     for (const [k, v] of Object.entries(want)) {
+      const expect = dev[k] ? dev[k][1] : v;
       const have = got["--" + k];
       if (have === undefined) { bad.push(`${theme} --${k} 선언 없음`); continue; }
-      if (have !== v) bad.push(`${theme} --${k}: 참조 시스템은 ${v} 인데 ${have}`);
+      if (have !== expect) bad.push(dev[k]
+        ? `${theme} --${k}: 의도적 이탈이라 ${expect} 여야 하는데 ${have}`
+        : `${theme} --${k}: 참조 시스템은 ${v} 인데 ${have}`);
     }
   }
   for (const [k, v] of Object.entries(ramps())) if (light[k] !== v) bad.push(`램프 ${k}: 참조 시스템은 ${v} 인데 ${light[k]}`);
   return bad;
 }
 
-module.exports = { AT, OP_SCALE, semantic, ramps, diff };
+module.exports = { AT, OP_SCALE, DEVIATIONS, semantic, ramps, diff };
