@@ -47,12 +47,12 @@ window.FOUNDATION_PAGES = function (H) {
 
     /* ================= Brand role map ================= */
     "foundations/brand-role-map": () => `<h1>Brand role map</h1><p class="lead">색은 네 축으로만 씁니다. 어느 축을 어디에 쓰고 어디에 쓰지 않는지를 한 장으로 정리했습니다. 단계 값과 토큰 이름은 <a href="#/foundations/colors">Colors</a> 에 있습니다.</p>
-<h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>제품 Brand</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>회사 마크</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다. 참조 시스템의 <code>brand</code> 자리에는 <b>제품이 주입하는 색</b>이 들어가고, 지란지교 오렌지는 토큰 트리 밖의 <code>--company-mark</code> 로 따로 둡니다.</p>
+<h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>제품 Brand</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand Mark</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다. 참조 시스템의 <code>brand</code> 자리에는 <b>제품이 주입하는 색</b>이 들어가고, 지란지교 오렌지는 토큰 트리 밖의 <code>--company-mark</code> 로 따로 둡니다.</p>
 ${tbl(["축", "토큰", "쓰는 곳", "쓰지 않는 곳"], [
   ["<b>제품 Brand</b>", "<code>--surface-brand-*</code> <code>--foreground-brand-*</code> <code>--line-brand-*</code>", "주요 행동 버튼(화면당 하나), 링크, 활성·선택 상태(탭 · 내비게이션 · 체크 · 스위치), 포커스 링", "위험도나 처리 결과 표현, 넓은 면의 장식 배경, 로고"],
   ["<b>Status</b>", "<code>--*-negative-*</code> <code>--*-cautionary-*</code> <code>--*-positive-*</code>", "성공·실패·검토 대기 알림(토스트 · 배너 · 인라인 메시지), 입력 검증 오류, 파괴적 행동 버튼(<code>danger</code>)", "탐색·선택 상태, 브랜드 강조"],
   ["<b>Severity</b>", "같은 Status 토큰 + <code>--surface-accent-cyan</code> · 중립", "위협·이벤트 등급 태그, 점·밴드, 표 행 강조, 대시보드 KPI. <b>항상 라벨(Critical 등)을 병기</b> — 색은 Status 와 공유하므로 라벨이 유일한 구분 수단입니다", "버튼·링크, 일반 처리 결과(성공/실패), 색만 있는 점·배경, <b>한 칸에 Status 와 함께</b>"],
-  ["<b>회사 마크</b>", "<code>--company-mark</code> <code>--company-mark-subtle</code>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "제품 UI 의 Brand · CTA · 위험도 · 상태. 헤더 Accent 선택지에 없음 — 브랜드 디자인 시스템은 별도 제작"],
+  ["<b>Brand Mark</b>", "<code>--company-mark</code> <code>--company-mark-subtle</code>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "제품 UI 의 Brand · CTA · 위험도 · 상태. 헤더 Accent 선택지에 없음 — 브랜드 디자인 시스템은 별도 제작"],
   ["<b>중립(테마)</b>", "<code>--foreground-neutral-*</code> <code>--background-neutral-*</code> <code>--surface-neutral-*</code> <code>--line-neutral-*</code>", "화면 바탕, 텍스트, 구분선, 비활성 상태. 정보 밀도가 높은 콘솔의 기본 색", "강조. 회색 톤 차이만으로 상태나 등급을 표현"]
 ], "roles")}
 <div class="dodont">
@@ -67,12 +67,12 @@ ${tbl(["축", "토큰", "쓰는 곳", "쓰지 않는 곳"], [
     /* ================= Colors ================= */
     "foundations/colors": () => {
       /* 절의 순서·제목·설명은 참조 시스템(Montage)의 Colors › Semantic 페이지를 그대로 따른다.
-         값의 출처가 같으므로 설명도 같아야 한다 — 우리가 덧붙인 것은 Brand 절의 '제품 슬롯' 한 단락과 맨 끝의 회사 마크뿐이다 */
+         값의 출처가 같으므로 설명도 같아야 한다 — 우리가 덧붙인 것은 Brand 절의 '제품 슬롯' 한 구절과 맨 끝의 Brand Mark 절뿐이다 */
       const A = ["Lime", "Cyan", "Light Blue", "Violet", "Purple", "Pink"];
       const akey = (n) => n.toLowerCase().replace(/ /g, "-");
       const semantic = `
 ${sem("fg-neutral", "Foreground - Neutral", "텍스트, 아이콘 등 전경 요소에 사용하는 기본 색상입니다. Primary, Secondary, Tertiary, Quaternary 순으로 정보의 위계를 표현하며, Strong은 가장 높은 대비가 필요할 때, Inverse는 반전된 배경 위에서 사용합니다.", [["Primary", "--foreground-neutral-primary"], ["Strong", "--foreground-neutral-strong"], ["Secondary", "--foreground-neutral-secondary"], ["Tertiary", "--foreground-neutral-tertiary"], ["Quaternary", "--foreground-neutral-quaternary"], ["Inverse", "--foreground-neutral-inverse"]])}
-${sem("fg-brand", "Foreground - Brand", "브랜드 컬러를 텍스트, 아이콘 등 전경 요소에 사용할 때 활용합니다. Inverse는 반전된 배경 위에서 브랜드 컬러를 표현할 때 사용합니다. 이 시스템에서 Brand 는 <b>제품이 주입하는 슬롯</b>입니다 — 헤더의 Accent 선택으로 바꿔 보면 이 절의 색이 함께 바뀝니다. 면 위 글자는 늘 흰색이므로 <b>제품 색 위에서 흰 글자가 4.5 를 넘어야</b> 하고, 빌드가 검사합니다.", [["Primary", "--foreground-brand-primary"], ["Inverse", "--foreground-brand-inverse"]])}
+${sem("fg-brand", "Foreground - Brand", "브랜드 컬러를 텍스트, 아이콘 등 전경 요소에 사용할 때 활용합니다. Inverse는 반전된 배경 위에서 브랜드 컬러를 표현할 때 사용합니다. 이 시스템에서 Brand 는 <b>제품이 주입하는 슬롯</b>입니다.", [["Primary", "--foreground-brand-primary"], ["Inverse", "--foreground-brand-inverse"]])}
 ${sem("fg-positive", "Foreground - Positive", "긍정적인 상태를 전경 요소로 표현할 때 사용합니다.", [["Primary", "--foreground-positive-primary"]])}
 ${sem("fg-cautionary", "Foreground - Cautionary", "주의가 필요한 상태를 전경 요소로 표현할 때 사용합니다.", [["Primary", "--foreground-cautionary-primary"]])}
 ${sem("fg-negative", "Foreground - Negative", "부정적인 상태나 오류를 전경 요소로 표현할 때 사용합니다. 더 강한 대비가 필요한 경우 Strong을 사용합니다.", [["Primary", "--foreground-negative-primary"], ["Strong", "--foreground-negative-strong"]])}
@@ -82,7 +82,7 @@ ${sem("fg-accent", "Foreground - Accent", "시각적 대비를 명확하게 유�
 ${sem("bg-neutral", "Background - Neutral", "일반적인 화면의 배경 색상으로 활용합니다. 카드 UI와 같이 어떠한 요소와 배경의 구분을 분명히 둬야할 때 Secondary를 사용하여 대비를 줍니다.", [["Primary", "--background-neutral-primary"], ["Secondary", "--background-neutral-secondary"]])}
 ${sem("sf-neutral", "Surface - Neutral", "패널과 같이 어떠한 요소에서 표면 색상이 필요한 경우 사용합니다. 투명도가 포함된 Secondary, Tertiary, Strong으로 배경과의 구분 정도를 조절하며, Inverse는 반전된 표면을 표현할 때 사용합니다.", [["Primary", "--surface-neutral-primary"], ["Secondary", "--surface-neutral-secondary"], ["Tertiary", "--surface-neutral-tertiary"], ["Strong", "--surface-neutral-strong"], ["Inverse", "--surface-neutral-inverse"]], { alpha: true })}
 ${sem("sf-elevated", "Surface - Elevated", "모달과 같이 층위가 있는 화면에서 사용하는 표면 색상으로 다크 모드에서 Background - Neutral과의 색상 차이가 있습니다.", [["Primary", "--surface-elevated-primary"], ["Secondary", "--surface-elevated-secondary"]])}
-${sem("sf-brand", "Surface - Brand", "화면 내에서 가장 중요한 요소를 표현할 때 사용하는 브랜드 표면 색상입니다. Primary, Strong, Heavy를 상황에 맞게 적절히 선택하여 사용하며, Subtle은 옅은 브랜드 배경이 필요할 때 사용합니다. <b>Subtle Strong</b> 은 참조 시스템에 없는 단계로, 텍스트 버튼의 눌림에 쓰려고 더했습니다.", [["Primary", "--surface-brand-primary"], ["Strong", "--surface-brand-strong"], ["Heavy", "--surface-brand-heavy"], ["Subtle", "--surface-brand-subtle"], ["Subtle Strong", "--surface-brand-subtle-strong"]])}
+${sem("sf-brand", "Surface - Brand", "화면 내에서 가장 중요한 요소를 표현할 때 사용하는 브랜드 표면 색상입니다. Primary, Strong, Heavy를 상황에 맞게 적절히 선택하여 사용하며, Subtle은 옅은 브랜드 배경이 필요할 때 사용합니다.", [["Primary", "--surface-brand-primary"], ["Strong", "--surface-brand-strong"], ["Heavy", "--surface-brand-heavy"], ["Subtle", "--surface-brand-subtle"], ["Subtle Strong", "--surface-brand-subtle-strong"]])}
 ${sem("sf-positive", "Surface - Positive", "긍정적인 상태를 배경으로 표현할 때 사용합니다.", [["Primary", "--surface-positive-primary"]], { alpha: true })}
 ${sem("sf-cautionary", "Surface - Cautionary", "주의가 필요한 상태를 배경으로 표현할 때 사용합니다.", [["Primary", "--surface-cautionary-primary"]], { alpha: true })}
 ${sem("sf-negative", "Surface - Negative", "부정적인 상태나 오류를 배경으로 표현할 때 사용합니다. 더 강한 강조가 필요한 경우 Strong을 사용합니다. <b>Heavy</b> 는 참조 시스템에 없는 단계로, 파괴적 버튼의 눌림에 쓰려고 더했습니다.", [["Primary", "--surface-negative-primary"], ["Strong", "--surface-negative-strong"], ["Heavy", "--surface-negative-heavy"]], { alpha: true })}
@@ -97,7 +97,7 @@ ${sem("ln-accent", "Line - Accent", "시각적 대비를 명확하게 유지하�
 ${sem("ef-dimmer", "Effect - Dimmer", "모달과 같이 층위가 생길 때 배경과의 구분을 위해 어둡게 표시해야할 때 사용합니다.", [["Primary", "--effect-dimmer-primary"]], { alpha: true })}
 ${sem("ef-transparent", "Effect - Transparent", "Chrome 효과를 적용할 때 사용하는 투명도가 포함 된 배경 색상입니다.", [["Primary", "--effect-transparent-primary"], ["Secondary", "--effect-transparent-secondary"]], { alpha: true })}
 ${sem("static", "Static", "Light, Dark 테마에 상관없이 고정된 고유 색으로 테마가 변경되더라도 색상을 유지하여 해당 요소에 대비를 줄 때 사용합니다.", [["White", "--static-white"], ["Black", "--static-black"]])}
-${sem("company", "회사 마크", "지란지교시큐리티 브랜드 색입니다. 참조 시스템의 Brand 는 제품 색이라 회사 정체성을 표기할 자리가 없어, 토큰 트리 밖에 따로 둡니다. 로고·헤더 마크에만 쓰고 제품 UI 의 Brand 로 쓰지 않습니다 — 어느 축에 무엇을 쓰는지는 <a href=\"#/foundations/brand-role-map\">Brand role map</a> 에 있습니다.", [["Mark", "--company-mark"], ["Subtle", "--company-mark-subtle"]])}
+${sem("company", "Brand Mark", "지란지교시큐리티 브랜드 색입니다. 참조 시스템의 Brand 는 제품 색이라 회사 정체성을 표기할 자리가 없어, 토큰 트리 밖에 따로 둡니다. 로고·헤더 마크에만 쓰고 제품 UI 의 Brand 로 쓰지 않습니다.", [["Mark", "--company-mark"], ["Subtle", "--company-mark-subtle"]])}
 `;
       /* 램프와 단계 번호도 참조 시스템 그대로다 — 숫자가 클수록 밝다 */
       /* 램프는 **밝은 쪽부터** 늘어놓는다 — 참조 시스템 docs 와 같은 정렬이다
@@ -127,7 +127,7 @@ ${sem("company", "회사 마크", "지란지교시큐리티 브랜드 색입니�
 ${pal("Brand", [60, 55, 50, 45, 40], "brand", "제품이 주입하는 슬롯 · 기본값은 Blue 램프")}
 ${Object.keys(R).map(k => pal(TITLE[k] || (k[0].toUpperCase() + k.slice(1)), R[k], k)).join("\n")}
 `;
-      return `<h1>Colors${nb("foundations", "colors")}</h1><p class="lead">컬러 시스템은 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다. 상황에 맞는 색을 이름으로 고를 수 있도록 Semantic 토큰으로 제공하며, 스와치를 클릭하면 Hex · RGBA · 토큰 값을 볼 수 있고 토큰을 복사할 수 있습니다. 토큰 이름은 <code>--{그룹}-{하위}-{이름}</code> 이고 Figma 변수 경로와 1:1 입니다. 어느 색을 어디에 쓰는지는 <a href="#/foundations/brand-role-map">Brand role map</a> 에 있습니다.</p>
+      return `<h1>Colors${nb("foundations", "colors")}</h1><p class="lead">컬러 시스템은 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다. 상황에 맞는 색을 이름으로 고를 수 있도록 Semantic 토큰으로 제공하며, 스와치를 클릭하면 Hex · RGBA · 토큰 값을 볼 수 있고 토큰을 복사할 수 있습니다.</p>
 ${tabset([["semantic", "Semantic"], ["atomic", "Atomic"]], [semantic, atomic])}
 ${valPop()}`;
     },

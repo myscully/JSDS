@@ -1171,8 +1171,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   /* 세 쌍이다 — 브랜드색 오용 · 심각도 라벨 병기 · 두 축 겹침. 마지막 쌍은 심각도 색을 상태색에 접은 대가를 보여 준다 */
   ok("brand role map has its own page with the table and all three pairs", /Brand role map/.test(brm.h1) && brm.roles === 5 && brm.dodont === 6 && brm.side, JSON.stringify(brm));
   await go("foundations/colors.html");
-  const left = await page.evaluate(() => ({ roles: document.querySelectorAll("table.roles").length, link: !!document.querySelector('article a[href*="brand-role-map"]') }));
-  ok("colors drops the role map and links to it instead", left.roles === 0 && left.link, JSON.stringify(left));
+  const left = await page.evaluate(() => ({ roles: document.querySelectorAll("table.roles").length }));
+  /* 설명을 줄이며 본문 링크를 걷어냈다 — 역할 맵은 사이드바 Foundations 와 Overview 본문으로 들어간다 */
+  ok("colors does not carry the role map table", left.roles === 0, JSON.stringify(left));
 
   // Atomic 팔레트 칸 수 + 반응형 블록이 실제로 적용되는지 (한동안 컴포넌트 규칙에 덮여 죽어 있었다)
   /* Common 2 · Brand 5(제품 슬롯) · Cool Neutral 21(참조 시스템 램프) */
