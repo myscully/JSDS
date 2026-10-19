@@ -72,7 +72,7 @@ ${tbl(["축", "토큰", "쓰는 곳", "쓰지 않는 곳"], [
       const akey = (n) => n.toLowerCase().replace(/ /g, "-");
       const semantic = `
 ${sem("fg-neutral", "Foreground - Neutral", "텍스트, 아이콘 등 전경 요소에 사용하는 기본 색상입니다. Primary, Secondary, Tertiary, Quaternary 순으로 정보의 위계를 표현하며, Strong은 가장 높은 대비가 필요할 때, Inverse는 반전된 배경 위에서 사용합니다.", [["Primary", "--foreground-neutral-primary"], ["Strong", "--foreground-neutral-strong"], ["Secondary", "--foreground-neutral-secondary"], ["Tertiary", "--foreground-neutral-tertiary"], ["Quaternary", "--foreground-neutral-quaternary"], ["Inverse", "--foreground-neutral-inverse"]])}
-${sem("fg-brand", "Foreground - Brand", "브랜드 컬러를 텍스트, 아이콘 등 전경 요소에 사용할 때 활용합니다. Inverse는 반전된 배경 위에서 브랜드 컬러를 표현할 때 사용합니다. 이 시스템에서 Brand 는 <b>제품이 주입하는 슬롯</b>입니다 — 헤더의 Accent 선택으로 바꿔 보면 이 절의 색이 함께 바뀝니다.", [["Primary", "--foreground-brand-primary"], ["Inverse", "--foreground-brand-inverse"]])}
+${sem("fg-brand", "Foreground - Brand", "브랜드 컬러를 텍스트, 아이콘 등 전경 요소에 사용할 때 활용합니다. Inverse는 반전된 배경 위에서 브랜드 컬러를 표현할 때 사용합니다. 이 시스템에서 Brand 는 <b>제품이 주입하는 슬롯</b>입니다 — 헤더의 Accent 선택으로 바꿔 보면 이 절의 색이 함께 바뀝니다. 면 위 글자는 늘 흰색이므로 <b>제품 색 위에서 흰 글자가 4.5 를 넘어야</b> 하고, 빌드가 검사합니다.", [["Primary", "--foreground-brand-primary"], ["Inverse", "--foreground-brand-inverse"]])}
 ${sem("fg-positive", "Foreground - Positive", "긍정적인 상태를 전경 요소로 표현할 때 사용합니다.", [["Primary", "--foreground-positive-primary"]])}
 ${sem("fg-cautionary", "Foreground - Cautionary", "주의가 필요한 상태를 전경 요소로 표현할 때 사용합니다.", [["Primary", "--foreground-cautionary-primary"]])}
 ${sem("fg-negative", "Foreground - Negative", "부정적인 상태나 오류를 전경 요소로 표현할 때 사용합니다. 더 강한 대비가 필요한 경우 Strong을 사용합니다.", [["Primary", "--foreground-negative-primary"], ["Strong", "--foreground-negative-strong"]])}

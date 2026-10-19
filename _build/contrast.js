@@ -1,5 +1,5 @@
 /* 대비 게이트 — contrast.pairs.js 의 선언을 실제 생성 사이트에서 전수 측정한다.
-   라이트·다크 × 제품 세 경우(기본 · 밝은 제품 · 상태색과 겹치는 제품) = 6 맥락.
+   라이트·다크 × 제품 세 경우(기본 · 다른 제품 · 상태색과 겹치는 제품) = 6 맥락.
    기준 미달이면 빌드를 실패시키고, 통과하면 Colors 페이지 표의 재료(JSON)를 남긴다.
 
    파서가 핵심이다 — 종전에 토큰 값을 `s.match(/[0-9.]+/g)` 로 읽어 알파를 떨어뜨린 탓에
@@ -58,10 +58,10 @@ function parse(s) {
 
 const CONTEXTS = [
   { theme: "light", accent: "", label: "라이트 · 기본" },
-  { theme: "light", accent: "product-c", label: "라이트 · 밝은 제품" },
+  { theme: "light", accent: "product-c", label: "라이트 · 다른 제품" },
   { theme: "light", accent: "product-b", label: "라이트 · 상태색과 겹치는 제품" },
   { theme: "dark", accent: "", label: "다크 · 기본" },
-  { theme: "dark", accent: "product-c", label: "다크 · 밝은 제품" },
+  { theme: "dark", accent: "product-c", label: "다크 · 다른 제품" },
   { theme: "dark", accent: "product-b", label: "다크 · 상태색과 겹치는 제품" },
 ];
 
@@ -111,7 +111,7 @@ async function run() {
 
   /* 전용 푸트페이지에서 잰다 — 빌드가 섹션 폴더를 먼저 지우므로 생성 페이지에 의존할 수 없고,
      무엇보다 이 게이트가 페이지 렌더보다 앞서야 Colors 페이지가 측정 결과를 표로 쓸 수 있다.
-     제품 전환은 실제 경로를 쓴다: app.js 가 window.applyAccent 를 노출하고 램프 생성·밝은 제품 판정이
+     제품 전환은 실제 경로를 쓴다: app.js 가 window.applyAccent 를 노출하고 램프 생성·상태색 충돌 판정이
      모두 그 안에 있다 — 여기서 다시 구현하면 검증 가치가 사라진다.
      page.setContent 로는 외부 스크립트가 로드되지 않아 파일로 쓴다 */
   const probe = path.join(__dirname, ".contrast-probe.html");
