@@ -27,7 +27,7 @@ window.FOUNDATION_PAGES = function (H) {
   function semRow(items, o = {}) {
     /* "Background - Normal" 섹션의 "Normal" 처럼 섹션 제목이 이미 이름으로 끝나면 되풀이하지 않는다 */
     const label = name => (!o.group ? name : o.group.toLowerCase().endsWith(name.toLowerCase()) ? o.group : o.group + " / " + name);
-    return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<button type="button" class="val-cell" data-token="${tok}" data-label="${attr(label(name))}" aria-haspopup="dialog" title="${attr(label(name))} 값 보기"><div class="bar${o.line ? " line" : ""}"><i style="background:var(${tok})"></i></div><div class="name">${name}</div></button>`).join("")}</div>`;
+    return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<button type="button" class="val-cell" data-token="${tok}" data-label="${attr(label(name))}" aria-haspopup="dialog" title="${attr(label(name))} 값 보기"><div class="bar"><i style="background:var(${tok})"></i></div><div class="name">${name}</div></button>`).join("")}</div>`;
   }
   /* o.h3 — 상위 h2 아래 묶이는 절(Theme 의 구성원들). 포함 관계가 ToC 에 드러나야 한다 */
   const sem = (id, title, desc, items, o = {}) => `<h${o.h3 ? 3 : 2} id="${id}">${title}</h${o.h3 ? 3 : 2}><p>${desc}</p>${semRow(items, Object.assign({ group: title }, o))}`;
