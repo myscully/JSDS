@@ -150,8 +150,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("a red product turns the whole brand ramp neutral",
     red.neutral && neutralRamp(red) && lighterUp(red) && red.ramp.includes(red.surface) && red.bg === red.text, JSON.stringify(red.ramp));
   /* 제품 C(#00AD7B)만 상태색과 겹치지 않는다. 밝은 제품이라 면 위 글자가 어두워지고 상태가 밝은 쪽으로 간다 */
-  ok("a bright, non-clashing product keeps its own colour and flags data-accent-light",
-    !bright.neutral && bright.light && bright.surface === "#00AD7B" && bright.bg === "rgb(0, 173, 123)", JSON.stringify(bright));
+  /* 밝은 제품 적응(data-accent-light)을 걷어냈다 — 이제 제품 색은 흰 글자를 받칠 수 있어야 한다는 **제약**이고,
+     빌드가 data.js 의 제품 전부를 검사한다. 여기서는 겹치지 않는 제품이 자기 색을 그대로 쓰는지만 본다 */
+  ok("a non-clashing product keeps its own colour and never flips the label",
+    !bright.neutral && !bright.light && bright.surface === "#00704F", JSON.stringify(bright));
 
   const readTokens = () => page.evaluate(() => {
     const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
@@ -170,7 +172,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const goDark = async () => { await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(250); return readTokens(); };
   const unDark = async () => { await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(150); };
   const cases = [];
-  for (const [name, key] of [["base", ""], ["bright", "product-c"], ["clashing", "product-b"]]) {
+  for (const [name, key] of [["base", ""], ["other", "product-c"], ["clashing", "product-b"]]) {
     await unDark(); await accent(key);
     const L = await readTokens(); const D = await goDark(); await unDark();
     cases.push([name, L, D]);
@@ -182,21 +184,23 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     /* 라이트의 상태 방향이 제품 종류마다 다르다.
        기본은 50 에서 짙어지고(45·40), 밝은 제품은 어두운 글자라 밝아지며(55·60),
        중립 제품은 거의 검정에서 시작해 밝아진다(40 → 45 → 50) */
-    const wantL = L.neutral ? [s40, s45, s50] : L.light ? [s50, s55, s60] : [s50, s45, s40];
-    /* 다크도 밝은 제품만 한 단계 짙다 — 면 위 글자가 어두워서 면이 너무 밝으면 눌린 상태가 흐려진다 */
-    const wantD = D.light ? [d55, d50, d45] : [d60, d55, d50];
+    const wantL = L.neutral ? [s40, s45, s50] : [s50, s45, s40];
+    const wantD = [d60, d55, d50];
     ok(`the ${n} product follows the base-step rule in both themes`,
       L.surface === wantL[0] && L.strong === wantL[1] && L.heavy === wantL[2]
       && D.surface === wantD[0] && D.strong === wantD[1] && D.heavy === wantD[2],
       JSON.stringify({ light: [L.surface, L.strong, L.heavy], dark: [D.surface, D.strong, D.heavy], wantL, wantD }));
-    ok(`the ${n} product sets data-accent-light correctly`, L.light === (n === "bright") && D.light === (n === "bright"), `${L.light} · ${D.light}`);
-    /* 면 위 글자. 다크 기본만 참조 시스템 값 그대로라 3.54 로 떨어진다 — 대비 게이트가 advisory 로 매 빌드 보고한다.
-       나머지 다섯 경우는 우리가 고른 값이므로 AA 를 요구한다 */
+    ok(`the ${n} product never sets data-accent-light`, !L.light && !D.light, `${L.light} · ${D.light}`);
+    /* 면 위 글자. **다크에서 자기 색을 쓰는 제품은 전부** 참조 시스템 값 그대로라 rest 가 3.2~3.5 다 —
+       다크 면이 한 단계 밝은 brand-60 이고 참조는 그 위에 static.white 를 쓰기 때문이다.
+       밝은 제품 적응을 걷어낸 뒤로 이것이 기본만의 예외가 아니라 **모든 제품의 공통 성질**이 됐다.
+       중립 전환은 면이 밝은 회색이라 라벨을 뒤집고, 그쪽은 AA 를 요구한다.
+       라이트는 제품 색 제약(흰 글자 4.5)이 받치므로 전부 AA 다 */
     for (const [theme, t] of [["light", L], ["dark", D]]) {
-      if (theme === "dark" && n === "base") {
-        ok("dark base brand label matches the reference and is below AA by its value",
+      if (theme === "dark" && !t.neutral) {
+        ok(`dark ${n} brand label is white and inherits the reference shortfall`,
           t.labelRgb === "rgb(255, 255, 255)" && ratio(t.surfaceRgb, t.labelRgb) < 4.5,
-          `${ratio(t.surfaceRgb, t.labelRgb)} — 참조 시스템 값(static.white on blue 60), 게이트가 advisory 로 보고한다`);
+          `rest ${ratio(t.surfaceRgb, t.labelRgb)} — 참조 시스템 값(static.white on brand 60), 게이트가 advisory 로 보고한다`);
         continue;
       }
       for (const [st, fill] of [["rest", t.surfaceRgb], ["hover", t.strongRgb], ["pressed", t.heavyRgb]])
@@ -216,10 +220,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   }
   ok("light base and clashing keep a white brand label",
     cases[0][1].labelRgb === "rgb(255, 255, 255)" && cases[2][1].labelRgb === "rgb(255, 255, 255)", `${cases[0][1].labelRgb} · ${cases[2][1].labelRgb}`);
-  ok("a bright product takes a dark brand label", cases[1][1].labelRgb === "rgb(23, 23, 25)", cases[1][1].labelRgb);
+  /* 라이트에서는 어떤 제품이든 흰 글자다 — 적응이 사라졌으므로 제품마다 다를 이유가 없다 */
+  ok("every product keeps a white brand label in light", cases.every(([, L2]) => L2.labelRgb === "rgb(255, 255, 255)"),
+    cases.map(([n2, L2]) => `${n2} ${L2.labelRgb}`).join(" · "));
   await accent("product-c");
   const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--surface-brand-primary").trim());
-  ok("light keeps the product colour", backLight === "#00AD7B", backLight);
+  ok("light keeps the product colour", backLight === "#00704F", backLight);
   await accent("product-b");   // 뒤 케이스(Atomic 램프)가 중립 전환 상태를 전제한다 — 원복해 둔다
 
   // Atomic 의 Brand 램프도 함께 회색 — 제품 슬롯에서 파생되는 것은 전부 따라온다

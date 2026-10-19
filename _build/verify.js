@@ -55,7 +55,6 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   for (const [media, direct] of [
     ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])', ':root[data-theme="dark"]'],
     ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]', ':root[data-theme="dark"][data-accent-neutral]'],
-    ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-light]', ':root[data-theme="dark"][data-accent-light]'],
   ]) {
     const a2 = body(media), b2 = body(direct);
     if (a2 === null || b2 === null) fails.push(`style.src.css: 다크 블록 쌍을 찾지 못했다 — ${direct}`);
@@ -128,6 +127,37 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
       fails.push(`${m[1].trim()} 이 hover 에 --background-neutral-secondary 를 쓴다 — 상호작용 면은 틴트 쌍(--surface-neutral-secondary → -strong)이어야 다크에서 방향이 뒤집히지 않는다`);
 }
 
+/* 제품 색 제약 — 면 위 글자(--brand-label)는 늘 흰색이므로, 제품 색이 그 흰 글자를 받쳐야 한다.
+   종전에는 밝은 제품에 맞춰 글자를 뒤집는 적응(data-accent-light)이 있었는데 걷어냈다:
+   면을 어둡게 내리는 길은 다크에서 버튼이 캔버스에 묻혀 막혀 있고, 적응을 두면 참조에 없는 분기가 남는다.
+   적응을 걷어낸 자리를 이 가드가 메운다 — 규격 미달 제품이 들어오면 빌드가 막는다.
+   기준은 라이트의 기준 단계(제품 HEX 자체)다. hover·pressed 는 더 어두워 자동으로 통과하고,
+   다크까지 요구하면 참조의 기본색 #0066FF 조차(다크 면 brand-60 에서 3.54) 탈락한다 */
+{
+  const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const L = (hex) => { const c = [0, 1, 2].map((i) => lin(parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const onWhite = (hex) => 1.05 / (L(hex) + 0.05);
+  const hsl = (hex) => { const n = parseInt(hex.slice(1), 16), r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, sat = 0; const l = (mx + mn) / 2;
+    if (mx !== mn) { const d = mx - mn; sat = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      h = (mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4) / 6; }
+    return [h * 360, sat * 100]; };
+  /* 상태색 색상환 표는 app.src.js 가 하나의 출처다 — 여기 베껴 두면 드리프트한다.
+     실제로 종전 표가 램프와 20도 어긋난 적이 있다. 못 읽으면 조용히 넘기지 않고 실패시킨다 */
+  const hueSrc = fs.readFileSync(path.join(__dirname, "app.src.js"), "utf8");
+  const hueM = hueSrc.match(/const STATUS_HUES = \[([^\]]+)\]/);
+  if (!hueM) fails.push("app.src.js 에서 STATUS_HUES 를 읽지 못했다 — 제품 색 제약을 검사할 수 없다");
+  const HUES = hueM ? hueM[1].split(",").map((x) => parseFloat(x)) : [];
+  const clashes = (hex) => { const [h, sat] = hsl(hex); if (sat < 20) return false;
+    return HUES.some((t) => { const d = Math.abs(h - t) % 360; return Math.min(d, 360 - d) < 15; }); };
+  for (const p2 of require("./data.js").PRODUCTS) {
+    /* 상태색과 겹치는 제품은 중립 램프로 갈아끼워지므로 자기 색을 면에 쓰지 않는다 — 제약 대상이 아니다 */
+    if (clashes(p2.hex)) continue;
+    const r = onWhite(p2.hex);
+    if (r < 4.5) fails.push(`제품 색 ${p2.name}(${p2.hex}) 위에서 흰 글자가 ${r.toFixed(2)} — Brand 면의 글자는 늘 흰색이라 4.5 를 넘어야 한다`);
+  }
+}
+
 /* 값 대조 — 시멘틱 75×2 와 램프가 참조 시스템(Montage)의 정의와 한 글자까지 같은지.
    "값까지 동일하게 교체"가 이번 설계의 정의이므로 이것이 1차 방어선이다:
    여기가 틀리면 대비·행동 검사가 다 통과해도 틀린 것이다. 정의는 montage-tokens.js 에 코드로 있다 */
@@ -160,7 +190,7 @@ for (const d of require("./montage-tokens.js").diff(css)) fails.push(`참조 시
    3차에서 --graphic-muted → --muted-graphic 개명이 foundations.js 의 sem() 맨 문자열에
    닿지 않아 빈 칩이 하나 남았고, 빌드는 녹색이었습니다 */
 {
-  const blocks = [":root", ':root[data-theme="dark"]', ":root[data-accent-neutral]", ":root[data-accent-light]"];
+  const blocks = [":root", ':root[data-theme="dark"]', ":root[data-accent-neutral]"];
   const declared = new Set();
   for (const sel of blocks) for (const k of Object.keys(LIB.parseVars(LIB.rootBlock(css, sel)))) declared.add(k);
   const pointed = new Set();

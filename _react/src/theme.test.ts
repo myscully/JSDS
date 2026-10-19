@@ -44,14 +44,20 @@ describe("applyAccent", () => {
     expect([got[0], got[1], got[2], got[4]]).toEqual([want[0], want[1], want[2], want[4]]);
   });
 
-  /* 밝은 메인 컬러는 흰 글자가 뜬다 — 면 위 글자(--brand-label)를 뒤집는 CSS 규칙의 스위치다 */
-  it("밝은 메인 컬러에만 data-accent-light 를 켠다", () => {
-    applyAccent("#00AAB6");
-    expect(document.documentElement.hasAttribute("data-accent-light")).toBe(true);
-    expect(isLightAccent("#00AAB6")).toBe(true);
-    applyAccent("#2563EB");
+  /* 밝은 제품에 맞춰 뒤집던 적응을 걷어냈다 — 이제 isLightAccent 는 '검증 술어'다.
+     켜지 말아야 할 속성을 켜지 않는지까지 봐야 한다: 종전 CSS 규칙이 남아 있으면 조용히 되살아난다 */
+  it("data-accent-light 를 더 이상 켜지 않는다", () => {
+    applyAccent("#00AD7B");
     expect(document.documentElement.hasAttribute("data-accent-light")).toBe(false);
-    expect(isLightAccent("#2563EB")).toBe(false);
+    applyAccent("#0066FF");
+    expect(document.documentElement.hasAttribute("data-accent-light")).toBe(false);
+  });
+
+  /* 제품 색 제약 — 면 위 글자는 늘 흰색이라 제품 색이 그 흰 글자를 받쳐야 한다(라이트 기준 4.5) */
+  it("isLightAccent 가 규격에 못 미치는 제품 색을 가려낸다", () => {
+    expect(isLightAccent("#00AD7B")).toBe(true);   // 흰 글자 2.89 — 쓸 수 없다
+    expect(isLightAccent("#00704F")).toBe(false);  // 6.12 — 같은 색상의 어두운 변형
+    expect(isLightAccent("#0066FF")).toBe(false);  // 4.83 — 참조 시스템의 기본색
   });
 
   it("accentScale 은 50 에 입력 HEX 를 그대로 둔다", () => {

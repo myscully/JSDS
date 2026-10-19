@@ -1,6 +1,6 @@
 /* 대비 계약 — '한 화면에서 만날 수 있는 쌍'만 선언하고 값은 빌드가 잰다(contrast.js).
    사람이 숫자를 적지 않는다: 종전에는 페이지의 대비 수치가 네 번 낡았다.
-   측정은 실제 생성 사이트에서 라이트·다크 × 제품 세 경우(기본 · 밝은 제품 · 상태색과 겹치는 제품)로 전수 수행한다.
+   측정은 실제 생성 사이트에서 라이트·다크 × 제품 세 경우(기본 · 다른 제품 · 상태색과 겹치는 제품)로 전수 수행한다.
 
    이번 라운드부터 토큰 값이 참조 시스템(Montage, wanteddev/montage-web)의 것이다.
    그 값은 소비자 제품용이라 **우리 기준을 여럿 넘기지 못한다** — 라이트에서 상태색 글자가 2.2~3.4 다.
@@ -58,7 +58,9 @@ const pairs = [
   ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong", "--surface-negative-heavy"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨(rest·hover·pressed)", REF_STATUS],
   ...ACCENTS.map((c) => [`--foreground-accent-${c}`, [...SURFACES, `--surface-accent-${c}`], 4.5, "강조색 글자·아이콘", REF_ACCENT]),
   /* 제품 면 위 글자 — 참조 시스템은 두 테마 모두 static.white 다. 다크 면(blue 60)에서 3.54 로 떨어진다.
-     면을 옮길 자리가 없다(-on 역할이 없다) — 밝은 제품일 때만 data-accent-light 가 이 토큰을 뒤집는다 */
+     면을 옮길 자리가 없다(-on 역할이 없다). 그래서 적응 대신 제약을 건다 —
+     제품 색은 흰 글자가 4.5 를 넘어야 하고 verify 가 data.js 의 제품 전부를 검사한다.
+     다크 rest 가 3.54 인 것은 참조 시스템 값 그대로다(static.white on blue 60) */
   ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자", REF("참조 시스템 값 — 다크 제품 면에서 3.54")],
 
   /* 글자 없는 지표(점·바·밴드·도넛) — 1.4.11 의 3:1 */

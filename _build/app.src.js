@@ -28,12 +28,18 @@
      채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다.
      겹치면 --prod-* 를 넣지 않고 data-accent-neutral 만 켠다 — CSS 가 brand 다섯 단계를 중립으로 갈아끼운다 */
   const STATUS_HUES = [0, 34, 140, 189];
-  /* 메인 컬러 위에 흰 글자가 뜨는지 — 어두운 글자가 더 대비가 높으면 '밝은 제품'이다.
-     참조 시스템에는 면 위 글자 역할(-on)이 없어 면을 옮길 자리가 없다. 그래서 글자(--brand-label)만 뒤집는다.
-     #171719 는 --cool-neutral-10 이다 */
+  /* 제품 색 제약 — 면 위 글자는 늘 흰색이므로, 제품 색이 흰 글자를 받칠 수 있어야 한다.
+     종전에는 밝은 제품에 맞춰 글자를 어둡게 뒤집었지만(data-accent-light) 그 적응을 걷어냈다:
+     면을 어둡게 내려 흰 글자를 세우는 길은 다크에서 버튼이 캔버스에 묻혀(분리 1.11) 막혀 있고,
+     글자를 뒤집으면 참조 시스템에 없는 분기가 계속 남는다. 그래서 적응 대신 제약으로 바꿨다.
+     기준은 라이트의 기준 단계(brand-50 = 제품 HEX)다 — hover·pressed 는 더 어두워 자동으로 통과한다.
+     다크까지 요구하지 않는 이유: 참조의 기본색 #0066FF 조차 다크 면(brand-60)에서 3.54 다.
+     빌드도 같은 검사를 한다(verify.js) — 여기 경고는 런타임에 제품 색을 바꿔 넣는 경우를 위한 것이다 */
+  const BRAND_LABEL_MIN = 4.5;
   function relLum(hex) { const c = [0, 1, 2].map(i => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4)); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
   function ratio(a, b) { const [x, y] = [relLum(a) + .05, relLum(b) + .05]; return Math.max(x, y) / Math.min(x, y); }
-  function isLightAccent(hex) { return ratio(hex, "#FFFFFF") < ratio(hex, "#171719"); }
+  /* 흰 글자를 받치지 못하는 '밝은' 제품인가 — 이제 적응 스위치가 아니라 검증 술어다 */
+  function isLightAccent(hex) { return ratio(hex, "#FFFFFF") < BRAND_LABEL_MIN; }
   function clashesWithStatus(hex) {
     const [h, sat] = hexToHsl(hex);
     if (sat < 20) return false;
@@ -42,13 +48,15 @@
   function applyAccent(key) {
     const p = products.find(x => x.key === key);
     const clear = () => { for (const k of STEPS) root.style.removeProperty("--prod-" + k); };
-    if (!p) { /* 기본: CSS 토큰 값(--brand-* → --blue-*) 그대로 */ clear(); delete root.dataset.accent; delete root.dataset.accentNeutral; delete root.dataset.accentLight; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
+    if (!p) { /* 기본: CSS 토큰 값(--brand-* → --blue-*) 그대로 */ clear(); delete root.dataset.accent; delete root.dataset.accentNeutral; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
     const neutral = clashesWithStatus(p.hex);
     clear();
     if (!neutral) { const sc = accentScale(p.hex); for (const k of STEPS) root.style.setProperty("--prod-" + k, sc[k]); }
     root.dataset.accent = p.key;
     if (neutral) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral;
-    if (!neutral && isLightAccent(p.hex)) root.dataset.accentLight = ""; else delete root.dataset.accentLight; try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
+    if (!neutral && isLightAccent(p.hex))
+      console.warn(`[ds] 제품 색 ${p.hex} 위에서 흰 글자가 ${ratio(p.hex, "#FFFFFF").toFixed(2)} 로 ${BRAND_LABEL_MIN} 에 못 미칩니다 — 어두운 변형을 쓰세요`);
+    try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
     paintAccent();
   }
   window.applyAccent = applyAccent;

@@ -154,6 +154,12 @@ const ADDITIONS = {
     "파괴적 버튼의 눌림 — 참조의 부정 틴트가 primary·strong 둘뿐이라 hover 다음 단계가 없었다(라이트 16% · 다크 28%)",
   "surface-brand-subtle-strong":
     "텍스트 버튼의 눌림 — 참조의 brand 틴트가 subtle 하나뿐이라, 종전에는 중립색으로 떨어져 색상이 튀었다(두 테마 12%)",
+  "brand-label":
+    "brand 면 위 글자 — 참조에는 면 위 글자 역할(-on)이 아예 없고 늘 static.white 다. 기본값도 흰색이고, 다크 + 중립 전환에서만 뒤집힌다(그때는 면이 밝은 회색이다). 제품 색이 흰 글자를 받쳐야 한다는 제약이 이 토큰의 짝이다",
+  "company-mark":
+    "지란지교시큐리티 회사 마크 — 참조의 brand 는 제품 색이라 회사 정체성을 표기할 자리가 없다. 로고·헤더 마크 전용",
+  "company-mark-subtle":
+    "회사 마크의 옅은 배경 — 위와 같은 이유",
 };
 
 /* style.css 와 대조한다. 반환은 어긋난 자리의 설명 목록 */
@@ -194,8 +200,9 @@ function diff(css) {
   const refLight = semantic("light");
   for (const [k, why] of Object.entries(ADDITIONS)) {
     if (refLight[k] !== undefined) bad.push(`추가 선언이 낡았다 — --${k} 가 참조 시스템에도 생겼다(${why})`);
-    for (const [theme, got] of [["light", light], ["dark", dark]])
-      if (got["--" + k] === undefined) bad.push(`${theme} --${k} 선언 없음 — 더한 토큰으로 적혀 있는데 CSS 에 없다`);
+    /* 존재는 :root 에서만 본다 — 더한 토큰 중에는 다크에서 값이 같아 다시 선언하지 않는 것이 있고
+       (--brand-label · --company-mark), 변형 블록에서만 덮이는 것도 있다. 두 블록 모두를 요구하면 그것들이 걸린다 */
+    if (light["--" + k] === undefined) bad.push(`--${k} 선언 없음 — 더한 토큰으로 적혀 있는데 :root 에 없다`);
   }
   return bad;
 }

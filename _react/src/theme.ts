@@ -53,22 +53,27 @@ function ratio(a: string, b: string): number {
   const [x, y] = [relLum(a) + 0.05, relLum(b) + 0.05];
   return Math.max(x, y) / Math.min(x, y);
 }
-/** 메인 컬러 위에 흰 글자가 뜨는지 — 어두운 글자(#171719 = --foreground-neutral-primary)가 더 대비가 높으면 '밝은 제품' */
+/** 제품 색 위에서 흰 글자가 받쳐지는 최소 대비. 면 위 글자는 늘 흰색이다 */
+export const BRAND_LABEL_MIN = 4.5;
+/** 흰 글자를 받치지 못하는 '밝은' 제품 색인가.
+ *  **적응 스위치가 아니라 검증 술어다** — 0.8.0 부터 시스템은 밝은 제품에 맞춰 휘지 않는다.
+ *  참 이면 그 색은 Brand 슬롯에 쓸 수 없고, 어두운 변형을 만들어 넣어야 한다.
+ *  기준이 라이트인 이유: 다크 면은 한 단계 밝아져(brand-60) 참조의 기본색 #0066FF 조차 3.54 다. */
 export function isLightAccent(hex: string): boolean {
-  return ratio(hex, "#FFFFFF") < ratio(hex, "#171719");
+  return ratio(hex, "#FFFFFF") < BRAND_LABEL_MIN;
 }
 
 /** :root 에 제품 램프를 --prod-* 로 주입. 앱 시작 시 한 번 호출.
  *  --brand-* 가 아니라 --prod-* 인 이유: --prod-* 는 '제품이 넣는 입력'이고 --brand-* 는 '테마가 해석한 결과'다.
  *  :root 가 var(--prod-N, var(--blue-N)) 으로 받아, 라이트는 50·45·40 · 다크는 60·55·50 을 집는다.
- *  참조 시스템에는 면 위 글자 역할이 없어 라벨이 늘 흰색이다 — 밝은 제품이면 data-accent-light 가 --brand-label 하나만 뒤집는다. */
+ *  참조 시스템에는 면 위 글자 역할이 없어 라벨이 늘 흰색이다 — 그래서 제품 색에 제약이 걸린다(isLightAccent). */
 export function applyAccent(hex: string, root: HTMLElement = document.documentElement): AccentScale {
   const sc = accentScale(hex);
   for (const [k, v] of Object.entries(sc)) root.style.setProperty(`--prod-${k}`, v);
   root.dataset.accent = hex.toUpperCase();
-  /* 메인 컬러가 밝으면 그 위의 흰 글자가 뜬다 — 글자를 어둡게, 상태는 밝은 쪽으로 보내는 CSS 규칙을 켠다 */
-  if (isLightAccent(sc[50])) root.dataset.accentLight = "";
-  else delete root.dataset.accentLight;
+  /* 밝은 제품에 맞춰 뒤집던 규칙(data-accent-light)을 걷어냈다 — 이제는 제약이고, 못 넘으면 알린다 */
+  if (isLightAccent(hex))
+    console.warn(`[ds] 제품 색 ${hex} 위에서 흰 글자가 ${ratio(hex, "#FFFFFF").toFixed(2)} 로 ${BRAND_LABEL_MIN} 에 못 미칩니다 — 어두운 변형을 쓰세요`);
   return sc;
 }
 

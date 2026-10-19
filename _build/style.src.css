@@ -68,7 +68,8 @@
   /* 지란지교시큐리티 회사 마크. Montage 의 brand 는 제품 색이라 회사 정체성 표기가 들어갈 자리가 없다 */
   --company-mark:#FF7F00;--company-mark-subtle:#FFF4E8;
   /* brand 면 위의 글자. Montage 는 늘 static.white 지만, 제품이 밝은 색이면 그 흰 글자가 뜬다 —
-     applyAccent 가 판정해 data-accent-light 를 켜고 이 한 토큰만 뒤집는다 */
+     제품 색은 흰 글자가 4.5 를 넘어야 한다는 제약이 있고 빌드가 검사한다 — 그래서 라이트에서는 늘 흰색이다.
+     남는 예외는 다크 + 중립 전환 하나뿐이다: 거기선 면이 밝은 회색이라 글자가 어두워야 한다 */
   --brand-label:var(--static-white);
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;--space-20:80px;
   --card-pad:24px;--card-gap:20px;--row-h:52px;
@@ -90,12 +91,6 @@
    라이트는 어두운 쪽이 면이고 흰 글자가 선다. --foreground-brand-inverse 만 반대쪽(반전 표면 위)이라 따로 덮는다 —
    덮지 않으면 brand-60 이 그대로 와서 반전 표면 위 3.6 으로 묻힌다(덮으면 4.94) */
 :root[data-accent-neutral]{--brand-40:var(--cool-neutral-15);--brand-45:var(--cool-neutral-22);--brand-50:var(--cool-neutral-30);--brand-55:var(--cool-neutral-40);--brand-60:var(--cool-neutral-50);--foreground-brand-inverse:var(--cool-neutral-60);--surface-brand-primary:var(--brand-40);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-50)}
-/* 제품 색이 밝으면 그 위의 흰 글자가 뜬다(#00AD7B 에서 2.89) — 면 위 글자를 어둡게 뒤집는다.
-   그러면 상태 방향도 뒤집어야 한다: 어두운 글자인데 눌린 면이 더 어두워지면 글자 쪽으로 다가가 3.57 로 깨진다.
-   기준 면(50)은 건드리지 않는다 — 옮기면 버튼이 제품 브랜드 색이 아니게 된다. 밝아지는 쪽(55·60)으로만 간다.
-   글자용 단계도 내린다 — 밝은 제품의 50 은 흰 바탕에서 2.89 라 링크·레이블로 못 쓴다.
-   다크는 덮지 않는다: 다크 블록이 뒤에서 같은 특정도로 다시 쓰고, 다크의 면(60·55·50)은 이미 어두운 글자에 맞다 */
-:root[data-accent-light]{--brand-label:var(--cool-neutral-10);--surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-60)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   /* ── Semantic · Dark ──────────────────────────────────────────
      라이트와 같은 75 토큰이다. 값의 출처도 같다 — Montage 의 dark 테마를 그대로 받았다.
@@ -170,14 +165,9 @@
 }
 /* 다크 + 중립 전환 — 라이트의 거울이다. 면이 밝은 쪽이므로 면 위 글자를 어둡게 뒤집는다.
    여기서도 --foreground-brand-inverse 만 반대쪽이라 따로 덮는다(반전 표면이 다크에서는 흰색이다).
-   특정도 (0,3,0) 으로 다크 블록과 [data-accent-light] 를 모두 이긴다 */
+   특정도 (0,3,0) 으로 다크 블록을 이긴다 */
 :root[data-theme="dark"][data-accent-neutral]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-99);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-99);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}}
-/* 다크 + 밝은 제품 — 반전 표면만 방향이 반대다. 다크의 반전 표면은 흰색이라 그 위의 제품색은 어두워야 하는데,
-   밝은 제품의 기준 단계(50)는 흰 바탕에서 2.89 다. 한 단계 짙은 40 으로 내린다.
-   특정도 (0,3,0) 으로 다크 블록을 이긴다 */
-:root[data-theme="dark"][data-accent-light]{--foreground-brand-inverse:var(--brand-40);--surface-brand-primary:var(--brand-55);--surface-brand-strong:var(--brand-50);--surface-brand-heavy:var(--brand-45)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-light]{--foreground-brand-inverse:var(--brand-40);--surface-brand-primary:var(--brand-55);--surface-brand-strong:var(--brand-50);--surface-brand-heavy:var(--brand-45)}}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
