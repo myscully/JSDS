@@ -298,7 +298,7 @@ h4{font-size:14px;margin:var(--space-6) 0 var(--space-2)}
 p{margin:0 0 var(--space-3)}
 ul,ol{padding-left:1.3em;max-width:70ch}li{margin-bottom:6px}
 .doc-tabset{margin:var(--space-12) 0}
-.doc-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--line-neutral-secondary);margin:0 0 var(--space-8)}
+.doc-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--line-neutral-secondary);margin:0 0 var(--space-16)}
 .doc-tabs button{appearance:none;background:none;border:0;cursor:pointer;font:inherit;padding:10px 2px;font-size:16px;font-weight:500;color:var(--foreground-neutral-tertiary);border-bottom:2px solid transparent;margin-bottom:-1px}
 .doc-tabs button.on{color:var(--foreground-neutral-primary);font-weight:700;border-bottom-color:var(--foreground-neutral-primary)}
 /* Foundations */
@@ -357,7 +357,7 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--company-mark)}
 .sem-row .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-neutral-secondary);border-radius:inherit;pointer-events:none}  /* 바탕과 구분되지 않는 색 — app.js 가 .faint 를 붙인다 */
 .sem-row .name{font-size:12px;font-weight:700;color:var(--foreground-neutral-primary);margin-top:8px;text-align:center}
 .checker{--checker-bg:repeating-conic-gradient(rgba(112,115,124,.16) 0 25%,transparent 0 50%) 0 0/12px 12px}
-.pal{margin:0 0 var(--space-8)}.pal h3{margin:0 0 8px;font-size:16px}
+.pal{margin:0 0 var(--space-16)}.pal h3{margin:0 0 8px;font-size:16px}
 .pal .scale{margin:0;align-items:end;grid-auto-rows:32px}.pal .scale .val-cell{height:32px;border-radius:0;transition:height var(--motion-slow) ease;box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary)}
 .pal .scale .val-cell:hover,.pal .scale .val-cell[aria-expanded="true"]{height:40px}   /* 바닥이 고정이라 위로 자라고 숫자 라벨은 버튼 하단 기준이라 제자리 */.pal .scale .val-cell i{font-size:10px;line-height:1;left:0;right:0;bottom:-18px;text-align:center;mix-blend-mode:normal;color:var(--foreground-neutral-primary);font-weight:700}
 .pal .scale{margin-bottom:22px;gap:0;row-gap:24px}
