@@ -114,6 +114,20 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
     if (!/[가-힣A-Za-z0-9]/.test(m[3].replace(/<[^>]*>/g, ""))) fails.push(`${rel}: .sev-cell 에 라벨 글자가 없다 — 3px 막대 색만 남는다`);
 }
 
+/* 상호작용 면은 **틴트 쌍**을 써야 한다 — --surface-neutral-secondary → --surface-neutral-strong.
+   --background-neutral-secondary 는 불투명한 '페이지 배경' 토큰이고, 다크에서는 가장 어두운 면이다.
+   그걸 hover 에 쓰면 라이트에서는 어두워지는데 다크에서는 더 어두워졌다가 눌림에서 다시 밝아져
+   **방향이 뒤집힌다**. 표 행·메뉴 항목 등 여덟 곳이 그랬다.
+   사이트 크롬(코드 패널 버튼 등)은 제품 컴포넌트가 아니므로 샘플 블록만 본다 */
+{
+  const a = css.indexOf("/* ---------- Live component samples ---------- */");
+  const b = css.indexOf("/* ---------- /Live component samples ---------- */");
+  const body = css.slice(a, b).replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const m of body.matchAll(/([^{}\n]*:hover[^{}\n]*)\{([^{}]*)\}/g))
+    if (/background:\s*var\(--background-neutral-secondary\)/.test(m[2]))
+      fails.push(`${m[1].trim()} 이 hover 에 --background-neutral-secondary 를 쓴다 — 상호작용 면은 틴트 쌍(--surface-neutral-secondary → -strong)이어야 다크에서 방향이 뒤집히지 않는다`);
+}
+
 /* 값 대조 — 시멘틱 75×2 와 램프가 참조 시스템(Montage)의 정의와 한 글자까지 같은지.
    "값까지 동일하게 교체"가 이번 설계의 정의이므로 이것이 1차 방어선이다:
    여기가 틀리면 대비·행동 검사가 다 통과해도 틀린 것이다. 정의는 montage-tokens.js 에 코드로 있다 */

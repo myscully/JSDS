@@ -144,6 +144,18 @@ const DEVIATIONS = {
   },
 };
 
+/* ── 참조 시스템에 없는데 우리가 더한 토큰 ───────────────────
+   DEVIATIONS 와 같은 이유로 적는다. diff() 는 참조 토큰만 순회하므로 더한 것은 그냥 통과한다 —
+   그래서 더더욱 적어 둬야 한다. 적지 않으면 "참조 시스템에 이게 있었나"를 코드가 답하지 못한다.
+   diff() 가 이 표도 검사한다: 적어 둔 이름이 CSS 에 없으면 실패이고,
+   참조 정의에 같은 이름이 생기면(= 더 이상 '추가'가 아니면) 그것도 알린다. */
+const ADDITIONS = {
+  "surface-negative-heavy":
+    "파괴적 버튼의 눌림 — 참조의 부정 틴트가 primary·strong 둘뿐이라 hover 다음 단계가 없었다(라이트 16% · 다크 28%)",
+  "surface-brand-subtle-strong":
+    "텍스트 버튼의 눌림 — 참조의 brand 틴트가 subtle 하나뿐이라, 종전에는 중립색으로 떨어져 색상이 튀었다(두 테마 12%)",
+};
+
 /* style.css 와 대조한다. 반환은 어긋난 자리의 설명 목록 */
 function diff(css) {
   const block = (sel) => {
@@ -178,7 +190,14 @@ function diff(css) {
     }
   }
   for (const [k, v] of Object.entries(ramps())) if (light[k] !== v) bad.push(`램프 ${k}: 참조 시스템은 ${v} 인데 ${light[k]}`);
+  /* 더한 토큰 — 선언한 이름이 세 블록에 다 있는지, 그리고 아직 '추가'가 맞는지 */
+  const refLight = semantic("light");
+  for (const [k, why] of Object.entries(ADDITIONS)) {
+    if (refLight[k] !== undefined) bad.push(`추가 선언이 낡았다 — --${k} 가 참조 시스템에도 생겼다(${why})`);
+    for (const [theme, got] of [["light", light], ["dark", dark]])
+      if (got["--" + k] === undefined) bad.push(`${theme} --${k} 선언 없음 — 더한 토큰으로 적혀 있는데 CSS 에 없다`);
+  }
   return bad;
 }
 
-module.exports = { AT, OP_SCALE, DEVIATIONS, semantic, ramps, diff };
+module.exports = { AT, OP_SCALE, DEVIATIONS, ADDITIONS, semantic, ramps, diff };

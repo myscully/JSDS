@@ -48,10 +48,10 @@
   --background-neutral-primary:var(--static-white);--background-neutral-secondary:var(--cool-neutral-99);
   --surface-neutral-primary:var(--static-white);--surface-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 8%,transparent);--surface-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 5%,transparent);--surface-neutral-strong:color-mix(in srgb,var(--cool-neutral-50) 16%,transparent);--surface-neutral-inverse:var(--cool-neutral-15);
   --surface-elevated-primary:var(--static-white);--surface-elevated-secondary:var(--cool-neutral-99);
-  --surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-40);--surface-brand-subtle:color-mix(in srgb,var(--brand-50) 5%,transparent);
+  --surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-40);--surface-brand-subtle:color-mix(in srgb,var(--brand-50) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-50) 12%,transparent);
   --surface-positive-primary:color-mix(in srgb,var(--green-50) 8%,transparent);
   --surface-cautionary-primary:color-mix(in srgb,var(--orange-50) 8%,transparent);
-  --surface-negative-primary:color-mix(in srgb,var(--red-50) 8%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-50) 12%,transparent);
+  --surface-negative-primary:color-mix(in srgb,var(--red-50) 8%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-50) 12%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-50) 16%,transparent);
   --surface-disable-primary:var(--cool-neutral-98);
   --surface-accent-lime:color-mix(in srgb,var(--lime-50) 8%,transparent);--surface-accent-lime-opaque:var(--lime-50);--surface-accent-cyan:color-mix(in srgb,var(--cyan-50) 8%,transparent);--surface-accent-cyan-opaque:var(--cyan-50);--surface-accent-light-blue:color-mix(in srgb,var(--light-blue-50) 8%,transparent);--surface-accent-light-blue-opaque:var(--light-blue-50);--surface-accent-violet:color-mix(in srgb,var(--violet-50) 8%,transparent);--surface-accent-violet-opaque:var(--violet-50);--surface-accent-purple:color-mix(in srgb,var(--purple-50) 8%,transparent);--surface-accent-purple-opaque:var(--purple-50);--surface-accent-pink:color-mix(in srgb,var(--pink-50) 8%,transparent);--surface-accent-pink-opaque:var(--pink-50);
   --line-neutral-primary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--line-neutral-primary-opaque:var(--cool-neutral-96);--line-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 16%,transparent);--line-neutral-secondary-opaque:var(--cool-neutral-97);--line-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 8%,transparent);--line-neutral-tertiary-opaque:var(--cool-neutral-98);
@@ -112,10 +112,10 @@
   --background-neutral-primary:var(--cool-neutral-15);--background-neutral-secondary:var(--cool-neutral-5);
   --surface-neutral-primary:var(--cool-neutral-15);--surface-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--surface-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 12%,transparent);--surface-neutral-strong:color-mix(in srgb,var(--cool-neutral-50) 28%,transparent);--surface-neutral-inverse:var(--static-white);
   --surface-elevated-primary:var(--cool-neutral-17);--surface-elevated-secondary:var(--cool-neutral-7);
-  --surface-brand-primary:var(--brand-60);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-50);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);
+  --surface-brand-primary:var(--brand-60);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-50);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-60) 12%,transparent);
   --surface-positive-primary:color-mix(in srgb,var(--green-60) 8%,transparent);
   --surface-cautionary-primary:color-mix(in srgb,var(--orange-60) 8%,transparent);
-  --surface-negative-primary:color-mix(in srgb,var(--red-60) 8%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 22%,transparent);
+  --surface-negative-primary:color-mix(in srgb,var(--red-60) 8%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 22%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-60) 28%,transparent);
   --surface-disable-primary:var(--cool-neutral-22);
   --surface-accent-lime:color-mix(in srgb,var(--lime-60) 8%,transparent);--surface-accent-lime-opaque:var(--lime-60);--surface-accent-cyan:color-mix(in srgb,var(--cyan-60) 8%,transparent);--surface-accent-cyan-opaque:var(--cyan-60);--surface-accent-light-blue:color-mix(in srgb,var(--light-blue-60) 8%,transparent);--surface-accent-light-blue-opaque:var(--light-blue-60);--surface-accent-violet:color-mix(in srgb,var(--violet-60) 8%,transparent);--surface-accent-violet-opaque:var(--violet-60);--surface-accent-purple:color-mix(in srgb,var(--purple-60) 8%,transparent);--surface-accent-purple-opaque:var(--purple-60);--surface-accent-pink:color-mix(in srgb,var(--pink-60) 8%,transparent);--surface-accent-pink-opaque:var(--pink-60);
   --line-neutral-primary:color-mix(in srgb,var(--cool-neutral-50) 32%,transparent);--line-neutral-primary-opaque:var(--cool-neutral-25);--line-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 28%,transparent);--line-neutral-secondary-opaque:var(--cool-neutral-23);--line-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--line-neutral-tertiary-opaque:var(--cool-neutral-22);
@@ -148,10 +148,10 @@
   --background-neutral-primary:var(--cool-neutral-15);--background-neutral-secondary:var(--cool-neutral-5);
   --surface-neutral-primary:var(--cool-neutral-15);--surface-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--surface-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 12%,transparent);--surface-neutral-strong:color-mix(in srgb,var(--cool-neutral-50) 28%,transparent);--surface-neutral-inverse:var(--static-white);
   --surface-elevated-primary:var(--cool-neutral-17);--surface-elevated-secondary:var(--cool-neutral-7);
-  --surface-brand-primary:var(--brand-60);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-50);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);
+  --surface-brand-primary:var(--brand-60);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-50);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-60) 12%,transparent);
   --surface-positive-primary:color-mix(in srgb,var(--green-60) 8%,transparent);
   --surface-cautionary-primary:color-mix(in srgb,var(--orange-60) 8%,transparent);
-  --surface-negative-primary:color-mix(in srgb,var(--red-60) 8%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 22%,transparent);
+  --surface-negative-primary:color-mix(in srgb,var(--red-60) 8%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 22%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-60) 28%,transparent);
   --surface-disable-primary:var(--cool-neutral-22);
   --surface-accent-lime:color-mix(in srgb,var(--lime-60) 8%,transparent);--surface-accent-lime-opaque:var(--lime-60);--surface-accent-cyan:color-mix(in srgb,var(--cyan-60) 8%,transparent);--surface-accent-cyan-opaque:var(--cyan-60);--surface-accent-light-blue:color-mix(in srgb,var(--light-blue-60) 8%,transparent);--surface-accent-light-blue-opaque:var(--light-blue-60);--surface-accent-violet:color-mix(in srgb,var(--violet-60) 8%,transparent);--surface-accent-violet-opaque:var(--violet-60);--surface-accent-purple:color-mix(in srgb,var(--purple-60) 8%,transparent);--surface-accent-purple-opaque:var(--purple-60);--surface-accent-pink:color-mix(in srgb,var(--pink-60) 8%,transparent);--surface-accent-pink-opaque:var(--pink-60);
   --line-neutral-primary:color-mix(in srgb,var(--cool-neutral-50) 32%,transparent);--line-neutral-primary-opaque:var(--cool-neutral-25);--line-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 28%,transparent);--line-neutral-secondary-opaque:var(--cool-neutral-23);--line-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--line-neutral-tertiary-opaque:var(--cool-neutral-22);
@@ -641,14 +641,14 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn.tertiary:active{background:var(--surface-neutral-strong)}
 .btn.text{background:transparent;color:var(--foreground-brand-primary);padding-left:8px;padding-right:8px}
 .btn.text:hover{background:var(--surface-brand-subtle)}
-.btn.text:active{background:var(--surface-neutral-strong)}   /* --surface-brand-subtle 은 프리미티브이고 다크에 오버라이드가 없다. 중립 모드에선 hover 와 같은 색이 됐다 */
+.btn.text:active{background:var(--surface-brand-subtle-strong)}   /* 종전에는 중립색이라 누르는 순간 제품색에서 회색으로 튀었다 — 그 이유였던 '프리미티브라 다크 값이 없다'는 이제 사실이 아니다 */
 /* 파괴적 행동 버튼 — 참조 시스템의 Button 과 같은 조합이다(foreground.negative.strong on surface.negative.strong).
    솔리드 상태 면이 없으므로 상태는 틴트 두 단계(8% → 12%)와 보더로 만든다.
    라벨에 상태색을 쓰는 것은 태그와 다른 선택이다 — 태그는 표에 빽빽이 들어가 중립 라벨이 필요하지만,
    버튼은 하나씩 크게 서고 참조 시스템도 버튼에는 상태색 라벨을 쓴다. 그 대가(라이트 2.9)는 게이트가 매 빌드 보고한다 */
 .btn.danger{background:var(--surface-negative-primary);color:var(--foreground-negative-strong)}
 .btn.danger:hover{background:var(--surface-negative-strong)}
-.btn.danger:active{background:var(--surface-negative-strong)}
+.btn.danger:active{background:var(--surface-negative-heavy)}
 .btn.danger.secondary{background:transparent;color:var(--foreground-negative-primary);border-color:var(--line-negative-primary)}
 .btn.danger.secondary:hover{background:var(--surface-negative-primary)}
 .btn.danger.secondary:active{background:var(--surface-negative-strong);border-color:var(--line-negative-strong)}   /* 위 .danger.secondary 가 :hover·:active 를 덮으므로 뒤에 둔다 */
@@ -750,13 +750,15 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .calendar{width:296px;padding:12px;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:12px}
 .calendar .cal-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;padding:0 4px 8px}
 .calendar .cal-head button{border:0;background:transparent;font:inherit;cursor:pointer;width:28px;height:28px;border-radius:6px;color:var(--foreground-neutral-secondary)}
-.calendar .cal-head button:hover{background:var(--background-neutral-secondary)}
+.calendar .cal-head button:hover{background:var(--surface-neutral-secondary)}
+.calendar .cal-head button:active{background:var(--surface-neutral-strong)}
 .calendar .cal-head button{display:grid;place-items:center}
 .calendar .cal-head button svg{width:16px;height:16px}
 .calendar .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
 .calendar .dow{font-size:12px;color:var(--foreground-neutral-tertiary);padding:4px 0;font-weight:600}
 .calendar .day{height:34px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;color:var(--foreground-neutral-primary);cursor:pointer}
-.calendar .day:hover{background:var(--background-neutral-secondary)}
+.calendar .day:hover{background:var(--surface-neutral-secondary)}
+.calendar .day:active{background:var(--surface-neutral-strong)}
 .calendar .day.muted{color:var(--foreground-disable-primary)}
 .calendar .day.today{font-weight:700;color:var(--foreground-brand-primary)}
 .calendar .day.in-range{background:var(--surface-brand-subtle);border-radius:0}
@@ -806,7 +808,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 
 /* Chip */
 .chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--radius-full);border:1px solid var(--line-neutral-primary);background:var(--surface-elevated-primary);font:inherit;font-size:12px;font-weight:500;color:var(--foreground-neutral-primary);cursor:pointer;white-space:nowrap;transition:background var(--motion-fast),border-color var(--motion-fast)}
-.chip:hover{background:var(--background-neutral-secondary)}
+.chip:hover{background:var(--surface-neutral-secondary)}
+.chip:active{background:var(--surface-neutral-strong)}
 .chip.on{background:var(--surface-brand-subtle);border-color:var(--surface-brand-primary);color:var(--foreground-brand-primary)}
 .chip[aria-pressed]::before{content:"";width:14px;height:14px;flex:none;background:var(--foreground-disable-primary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat}
 .chip.on::before{background:currentColor}
@@ -864,7 +867,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .dropdown.up .menu{top:auto;bottom:calc(100% + 4px)}   /* 아래 공간이 모자라면 위로 뒤집어 연다(ds.js 가 열 때 계산) */
 .menu{min-width:200px;padding:6px;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);box-shadow:var(--shadow-2);list-style:none;margin:0;max-height:min(320px,60vh);overflow-y:auto;overscroll-behavior:contain}   /* 항목 약 8개까지 보이고 그 뒤로는 메뉴 안에서 스크롤 */
 .menu-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:14px;cursor:pointer;color:var(--foreground-neutral-primary);white-space:nowrap}
-.menu-item:hover{background:var(--background-neutral-secondary)}
+.menu-item:hover{background:var(--surface-neutral-secondary)}
+.menu-item:active{background:var(--surface-neutral-strong)}
 .menu-item.on{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);font-weight:600}
 .menu-item.danger{color:var(--foreground-negative-primary)}
 .menu-item[aria-disabled="true"]{opacity:.4;cursor:not-allowed;pointer-events:none}
@@ -907,7 +911,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 /* Pagination */
 .pagination{display:inline-flex;align-items:center;gap:4px}
 .pagination button{min-width:36px;height:36px;padding:0 8px;border:1px solid transparent;border-radius:var(--radius-md);background:transparent;font:inherit;font-size:14px;color:var(--foreground-neutral-secondary);cursor:pointer}
-.pagination button:hover{background:var(--background-neutral-secondary);color:var(--foreground-neutral-primary)}
+.pagination button:hover{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
+.pagination button:active{background:var(--surface-neutral-strong)}
 .pagination button.on{background:var(--surface-brand-primary);color:var(--brand-label);font-weight:600}
 .pagination button[disabled]{opacity:.4;cursor:not-allowed;pointer-events:none}
 .pagination button svg{width:16px;height:16px;display:block}
@@ -922,7 +927,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .sidenav{width:240px;padding:12px;background:var(--surface-elevated-primary);border-right:1px solid var(--line-neutral-secondary);display:flex;flex-direction:column;gap:2px;font-size:14px;min-height:320px}
 .sidenav .group{margin:12px 12px 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--foreground-neutral-tertiary);font-weight:600}
 .sidenav a{display:flex;align-items:center;font-weight:500;gap:10px;padding:8px 12px;border-radius:var(--radius-md);text-decoration:none;color:var(--foreground-neutral-primary);white-space:nowrap}
-.sidenav a:hover{background:var(--background-neutral-secondary)}
+.sidenav a:hover{background:var(--surface-neutral-secondary)}
+.sidenav a:active{background:var(--surface-neutral-strong)}
 .sidenav a.on{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);font-weight:600}
 .sidenav a svg{width:18px;height:18px;flex:none;color:var(--foreground-neutral-tertiary)}
 .sidenav a.on svg{color:var(--foreground-brand-primary)}
@@ -1109,7 +1115,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .tbl th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font-size:12px;height:44px;padding:0 16px;border-bottom:1px solid var(--line-neutral-secondary);white-space:nowrap;background:var(--background-neutral-secondary)}
 .tbl td{height:52px;padding:12px 16px;border-bottom:1px solid var(--line-neutral-secondary);vertical-align:middle}
 .tbl tbody tr:last-child td{border-bottom:0}
-.tbl tbody tr:hover td{background:var(--background-neutral-secondary)}
+.tbl tbody tr:hover td{background:var(--surface-neutral-secondary)}
+.tbl tbody tr:active td{background:var(--surface-neutral-strong)}
 .tbl tr.on td{background:var(--surface-brand-subtle)}
 .tbl tr.disabled td{color:var(--foreground-disable-primary)}
 .tbl.compact td{height:44px;padding:8px 16px;font-size:14px}
@@ -1141,7 +1148,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .list{list-style:none;margin:0;padding:0;width:100%;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);overflow:hidden;max-width:none}
 .list li{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line-neutral-secondary);font-size:14px;margin:0}
 .list li:last-child{border-bottom:0}
-.list.hover li:hover{background:var(--background-neutral-secondary);cursor:pointer}
+.list.hover li:hover{background:var(--surface-neutral-secondary);cursor:pointer}
+.list.hover li:active{background:var(--surface-neutral-strong)}
 .list li.on{background:var(--surface-brand-subtle)}
 .list .primary{font-weight:500;display:block}
 .list .meta{display:block;font-size:12px;color:var(--foreground-neutral-tertiary)}

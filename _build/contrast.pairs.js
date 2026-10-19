@@ -48,14 +48,14 @@ const pairs = [
   ["--foreground-inactive-primary", SURFACES, 4.5, "선택되지 않은 상태", REF("참조 시스템 값 — 라이트 2.78 · 다크 2.55")],
   ["--foreground-brand-primary", SURFACES, 4.5, "제품색 글자·링크"],
   /* 자기 옅은 면 위에서만 4.22~4.49 다 — 참조 시스템의 brand 50 과 그 5% 틴트 조합이 원래 그렇다 */
-  ["--foreground-brand-primary", ["--surface-brand-subtle"], 4.5, "옅은 제품 면 위 글자", REF("참조 시스템 값 — brand 와 그 5% 틴트 조합이 4.22~4.49")],
+  ["--foreground-brand-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "옅은 제품 면 위 글자 — 텍스트 버튼의 hover·pressed", REF("참조 시스템 값 — brand 와 그 틴트 조합이 4.2 언저리다")],
   ["--foreground-brand-inverse", ["--surface-neutral-inverse"], 4.5, "반전 표면 위 제품색 글자"],
   ["--foreground-positive-primary", [...SURFACES, "--surface-positive-primary"], 4.5, "긍정 글자·아이콘", REF_STATUS],
   ["--foreground-cautionary-primary", [...SURFACES, "--surface-cautionary-primary"], 4.5, "주의 글자·아이콘", REF_STATUS],
   ["--foreground-negative-primary", [...SURFACES, "--surface-negative-primary"], 4.5, "부정 글자·아이콘", REF_STATUS],
   /* 두 틴트 모두에 올라앉는다 — .btn.danger 가 이 글자를 8% 틴트(--surface-negative-primary) 위에 쓴다.
      강한 틴트만 재고 있어서 파괴적 버튼의 실제 라벨 대비를 아무도 측정하지 않았다 */
-  ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨", REF_STATUS],
+  ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong", "--surface-negative-heavy"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨(rest·hover·pressed)", REF_STATUS],
   ...ACCENTS.map((c) => [`--foreground-accent-${c}`, [...SURFACES, `--surface-accent-${c}`], 4.5, "강조색 글자·아이콘", REF_ACCENT]),
   /* 제품 면 위 글자 — 참조 시스템은 두 테마 모두 static.white 다. 다크 면(blue 60)에서 3.54 로 떨어진다.
      면을 옮길 자리가 없다(-on 역할이 없다) — 밝은 제품일 때만 data-accent-light 가 이 토큰을 뒤집는다 */
@@ -85,6 +85,9 @@ const separation = [
   ["--surface-cautionary-primary", SURFACES, { light: 1.05, dark: 1.05 }],
   ["--surface-negative-primary", SURFACES, { light: 1.05, dark: 1.05 }],
   ["--surface-negative-strong", SURFACES, { light: 1.08, dark: 1.08 }],
+  /* 눌림 단계 — 참조에 없어 우리가 더한 틴트다(montage-tokens.js 의 ADDITIONS) */
+  ["--surface-negative-heavy", SURFACES, { light: 1.1, dark: 1.1 }],
+  ["--surface-brand-subtle-strong", SURFACES, { light: 1.04, dark: 1.04 }],
   ...ACCENTS.map((c) => [`--surface-accent-${c}`, SURFACES, { light: 1.03, dark: 1.03 }]),
   /* 채운 제품 면이 페이지에서 보이는지 — 이 쌍이 없으면 '면이 배경에 녹는' 경우를 아무도 재지 않는다 */
   ...["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"]
