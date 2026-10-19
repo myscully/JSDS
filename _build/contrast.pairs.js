@@ -60,8 +60,16 @@ const pairs = [
   /* 제품 면 위 글자 — 참조 시스템은 두 테마 모두 static.white 다. 다크 면(blue 60)에서 3.54 로 떨어진다.
      면을 옮길 자리가 없다(-on 역할이 없다). 그래서 적응 대신 제약을 건다 —
      제품 색은 흰 글자가 4.5 를 넘어야 하고 verify 가 data.js 의 제품 전부를 검사한다.
-     다크 rest 가 3.54 인 것은 참조 시스템 값 그대로다(static.white on blue 60) */
-  ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자", REF("참조 시스템 값 — 다크 제품 면에서 3.54")],
+
+     **그 제약은 라이트 기준이다.** 다크는 면이 한 단계 밝은 brand-60 을 집으므로 rest 가 제품 색보다 밝아져
+     흰 글자가 3.2~3.5 로 떨어진다(기본 #0066FF 3.54 · 제품 C #00704F 3.24 — 제품 색마다 다르다).
+     참조 시스템이 다크의 brand 면을 blue-60 에 두고 그 위에 static.white 를 쓰기 때문이고,
+     다크까지 4.5 를 요구하면 **참조의 기본색부터 탈락한다.**
+
+     고치려면 다크 면을 어둡게 내려야 하는데 그러면 버튼이 어두운 캔버스에 묻힌다(분리 1.11~1.23, 바닥 1.5).
+     **제품 색이 앞으로 바뀔 수 있으므로 지금은 참조 값을 따르기로 했다**(사용자 결정) —
+     고친 것이 아니라 고르지 않은 것이고, 그래서 숨기지 않고 매 빌드 숫자를 보고한다 */
+  ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자", REF("참조 시스템 값 — 다크 면이 brand-60 이라 rest 가 3.2~3.5. 라이트는 제품 색 제약이 받친다")],
 
   /* 글자 없는 지표(점·바·밴드·도넛) — 1.4.11 의 3:1 */
   ["--foreground-negative-primary", SURFACES, 3, "Critical 지표"],
