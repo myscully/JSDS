@@ -3,7 +3,7 @@
    컴포넌트/패턴 상세는 components.data.js / patterns.data.js
    ========================================================= */
 const FIGMA = "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV";
-const VERSION = "v0.6";
+const VERSION = "v0.8";
 /* 사이드바·헤더에 N 배지를 붙일 페이지 */
 const NEW = new Set(["home/getting-started", "foundations/colors", "foundations/icons", "resources/design-token", "components/select"]);
 const SITE = {
@@ -34,6 +34,7 @@ const PRODUCTS = [
   { key: "product-c", name: "제품 C", hex: "#008760", note: "제품 컬러로 교체" },
 ];
 const CHANGELOG = [
+  ["v0.8", "2026-10-20", "컬러 시스템 전면 개편: 의미 토큰을 <code>--{그룹}-{하위}-{이름}</code> 여섯 그룹(foreground · background · surface · line · effect · static) 77개로 값·이름까지 교체하고, Atomic 램프 13개는 숫자가 클수록 밝은 체계로 통일. <code>brand</code> 는 제품이 주입하는 슬롯(<code>--prod-40~60</code> 다섯 단계)이고, 제품 색 위의 흰 글자가 4.5 를 넘어야 한다는 제약을 빌드가 검사합니다 — 종전의 밝은 제품 적응(<code>data-accent-light</code>)은 걷어냈습니다. Colors 페이지를 Semantic 27절 + Atomic 탭으로 재구성하고 브랜드 역할 맵을 그 안으로 합쳤습니다. React 패키지 0.8.0 은 깨지는 변경입니다(<code>_react/MIGRATION.md</code>)."],
   ["v0.6", "2026-09-09", "Foundations 재편(Web Desktop): Overview + Base material(Colors · Elevation · Grid · Icons · Typography). Colors 는 Semantic/Atomic 탭(Primary·Label·Fill·Line·Background·Static·Inverse·Interaction·Status·Severity·Brand·Material, Light/Dark 값 표시), Elevation 은 Shadow type(Normal/Spread) · Composition · Style 표(xs~xl 토큰 신설, --shadow-1~3 은 별칭), Grid 는 Artboard · Breakpoint · Spacing · Layout(12 컬럼), Icons 는 검색·Outline/Filled 갤러리, Typography 는 Basic · Word break · Style 표(행간 px, Pretendard 권장 자간). Radius · Motion · Accessibility · 토큰 원본은 Resources › Design Token 으로 이동. Semantic 토큰 추가(fill/line/static/interaction/dimmer/text-strong/border-subtle/accent-inverse/sev-*-bg), Primitive 팔레트 전 단계 보강."],
   ["v0.5", "2026-09-08", "React 컴포넌트 패키지 @jiran/ds-react 추가(_react/): 30개 컴포넌트·패턴 래퍼를 실제 React 컴포넌트로 구현(동작·접근성 포함), 사이트 React 탭을 패키지 사용 코드로 전환(예제 118개, 사이트 HTML 과 구조 일치 테스트). 아이콘을 assets/icons(Tabler) 로 통일하고 Iconography 갤러리 구성. Resources › React Package 페이지 추가. 사이트 프리뷰 전체를 실제로 동작하게 하는 순수 JS 동작 스크립트 assets/ds.js 추가(드롭다운·탭·페이지네이션·달력·표 정렬/선택·토스트·팝업 등) — HTML+CSS 로 쓰는 제품은 이 파일 한 줄로 같은 동작."],
   ["v0.4", "2026-09-07", "코드 중심 가이드로 전환: 컴포넌트 30개·패턴 11개 전부 라이브 프리뷰 + 복사 가능한 코드(HTML+CSS / React) + Props 표. 컴포넌트 CSS 를 style.css 의 'Live component samples' 블록으로 정리하고 페이지별로 자동 추출. Foundations 에 토큰 복사 블록 추가. 소스를 _build/data·components·patterns·lib·render·app.src 로 분리. Figma Components/Patterns 페이지에 코드 스펙과 동일한 변형 프레임 배치."],
