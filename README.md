@@ -15,7 +15,7 @@
 - `assets/app.js` — 테마 전환, Accent(제품 메인 컬러) 미리보기, 검색, 코드 복사/탭
 - `assets/ds.js` — **컴포넌트 동작 스크립트**(순수 JS, 의존성 없음). 드롭다운·탭·페이지네이션·달력·테이블 정렬/선택·토스트 등. 사이트 프리뷰가 이 파일로 동작하며, HTML 을 복사해 쓰는 제품도 `<script src="assets/ds.js" defer>` 한 줄로 같은 동작을 얻습니다. React 제품은 불필요(@jiran/ds-react 가 동작 포함)
 - `assets/fonts/PretendardVariable.woff2` — Pretendard Variable v1.3.9 (OFL)
-- `assets/icons/outline` `assets/icons/filled` — Tabler Icons(MIT) 전체 세트(원본, 빌드가 건드리지 않음). 사이트가 쓰는 아이콘 목록은 `_build/icons.js` 의 `ICON_NAMES`, 갤러리는 Foundations › Icons
+- `assets/icons/outline` `assets/icons/filled` — Tabler Icons(MIT) 중 **사이트가 쓰는 것만**(원본, 빌드가 건드리지 않음). 목록은 `_build/icons.js` 의 `ICON_NAMES`, 갤러리는 Foundations › Icons. **아이콘을 더할 때는 Tabler 원본 SVG 를 이 폴더에 먼저 넣고** `ICON_NAMES` 에 이름을 더합니다 — 없으면 빌드가 잡습니다
 
 ## 컬러 모델
 - 토큰은 참조 시스템의 Atomic 램프 13개와 시멘틱 77개를 값·이름까지 씁니다. `brand` 가 제품 메인 컬러 슬롯이고, 지란지교 오렌지(#FF7F00)는 트리 밖 `--company-mark` 로 두어 로고·헤더 마크에만 씁니다
