@@ -102,7 +102,7 @@ const COMPONENTS = {
       [".counter", "element", "—", "글자 수 표시. .row 안에서 라벨 우측 정렬"],
       ["disabled / readonly", "attribute", "—", "비활성 / 읽기 전용(배경 subtle)"],
     ],
-    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · border/strong 1px · focus ring 2px 30%"], ["Label", "Label/1 14 Semibold · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
+    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · focus ring 2px 30%"], ["Label", "Label/1 14 Semibold · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
     figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, error: { stroke: "--surface-negative-strong" } }, states: ["default", "hover", "focused", "error", "disabled", "readonly"] },
   },
 
@@ -137,7 +137,7 @@ const COMPONENTS = {
       ["kbd", "element", "—", "단축키 표시(전역 검색)"],
       [".clear", "button", "—", "값 지우기. 값이 있을 때만 렌더"],
     ],
-    spec: [["Size", "높이 40 (lg 48) · 최소 폭 280"], ["Container", "radius/md 6 · border/strong · focus ring"], ["Label", "Body/2 14 · 플레이스홀더 text/disabled"], ["Placement", "테이블 툴바 좌측, 전역 검색은 헤더 우측"]],
+    spec: [["Size", "높이 40 (lg 48) · 최소 폭 280"], ["Container", "radius/md 6 · line/neutral/primary · focus ring"], ["Label", "Body/2 14 · 플레이스홀더 foreground/disable/primary"], ["Placement", "테이블 툴바 좌측, 전역 검색은 헤더 우측"]],
     figma: { frame: "Search", radius: "radius/md", sizes: { md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" } }, states: ["default", "focused", "filled"] },
   },
 
@@ -178,7 +178,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".select-btn", "container", "—", "role=group. 버튼 2~5개"], [".outline", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-pressed=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
-    spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 36"], ["Container", "radius/md 6 · bg/panel"], ["Label", "Label/1 13.5 Medium · 선택 Semibold"], ["Placement", "카드 헤더 우측, 툴바"]],
+    spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 36"], ["Container", "radius/md 6 · surface/neutral/strong"], ["Label", "Label/1 13.5 Medium · 선택 Semibold"], ["Placement", "카드 헤더 우측, 툴바"]],
     figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--surface-neutral-strong" }, outline: { stroke: "--line-neutral-primary" } }, states: ["default", "selected", "disabled"] },
   },
 
@@ -216,7 +216,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".slider", "container", "—", ".row(라벨·값) + input[type=range](+ .ticks)"], ["--p", "css var (%)", "50%", "채워진 트랙 비율. value 와 동기화"], ["min / max / step", "attribute", "0 / 100 / 1", "네이티브 속성"], ["disabled", "attribute", "—", "비활성"]],
-    spec: [["Size", "트랙 6 · 썸 20 · 최소 폭 280"], ["Container", "트랙 radius/full · 썸 border 2px accent"], ["Label", "Label/2 13 · 현재 값 Semibold"], ["Placement", "정책 설정의 수치 항목. 정확 입력이 필요하면 Text Field 병행"]],
+    spec: [["Size", "트랙 6 · 썸 20 · 최소 폭 280"], ["Container", "트랙 radius/full · 썸 border 2px brand"], ["Label", "Label/2 13 · 현재 값 Semibold"], ["Placement", "정책 설정의 수치 항목. 정확 입력이 필요하면 Text Field 병행"]],
     figma: { frame: "Slider", sizes: { md: { track: 6, thumb: 20 } }, variants: { default: { fill: "--surface-brand-primary", track: "--surface-neutral-strong" } }, states: ["default", "hover", "focused", "disabled"] },
   },
 
@@ -297,7 +297,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".checkbox", "label wrapper", "—", "input[type=checkbox] + span(라벨, small 설명)"], ["checked / disabled", "attribute", "—", "네이티브 상태"], [".mixed", "boolean", "false", "부분 선택 외형(JS indeterminate 대체)"], [".checkbox-group", "container", "—", "세로 12px 간격. .row 로 가로 24px"]],
-    spec: [["Size", "박스 16 · 라벨 Body/2 14 · 클릭 영역 라벨 포함"], ["Container", "radius/sm 4 · border/strong 1.5px · 선택 accent"], ["Label", "Body/2 14 · 설명 Caption 12.5 tertiary"], ["Placement", "폼 옵션, 테이블 행 선택(.tbl .check)"]],
+    spec: [["Size", "박스 16 · 라벨 Body/2 14 · 클릭 영역 라벨 포함"], ["Container", "radius/sm 4 · line/neutral/primary 1.5px · 선택 brand"], ["Label", "Body/2 14 · 설명 Caption 12.5 tertiary"], ["Placement", "폼 옵션, 테이블 행 선택(.tbl .check)"]],
     figma: { frame: "Checkbox", radius: "radius/sm", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--line-neutral-primary" }, checked: { bg: "--surface-brand-primary" } }, states: ["unchecked", "checked", "indeterminate", "disabled", "focused"] },
   },
 
@@ -340,8 +340,8 @@ const COMPONENTS = {
         <button type="button" class="chip on" aria-pressed="true">Default</button>
         <button type="button" class="chip" aria-pressed="false" disabled>Disabled</button>` },
     ],
-    props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(accent subtle + 체크)"], [".x", "element", "—", "삭제 아이콘(Input Chip)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성"]],
-    spec: [["Size", "높이 32 (sm 26) · padding 0 12"], ["Container", "radius/full · border/strong · 선택 accent-subtle"], ["Label", "Label/1 13 Medium"], ["Placement", "검색 아래 필터 행, 입력 필드 안 값 목록"]],
+    props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(brand subtle + 체크)"], [".x", "element", "—", "삭제 아이콘(Input Chip)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성"]],
+    spec: [["Size", "높이 32 (sm 26) · padding 0 12"], ["Container", "radius/full · line/neutral/primary · 선택 brand subtle"], ["Label", "Label/1 13 Medium"], ["Placement", "검색 아래 필터 행, 입력 필드 안 값 목록"]],
     figma: { frame: "Chip", radius: "radius/full", sizes: { md: { h: 32 }, sm: { h: 26 } }, variants: { filter: { stroke: "--line-neutral-primary" }, selected: { bg: "--surface-brand-subtle", stroke: "--surface-brand-primary", fg: "--surface-brand-primary" }, input: {} }, states: ["default", "selected", "hover", "disabled"] },
   },
 
@@ -386,8 +386,8 @@ const COMPONENTS = {
           <label class="radio card"><input type="radio" name="plan"><span>강화 모드<small>의심 행위까지 차단, 오탐 증가</small></span></label>
         </div>` },
     ],
-    props: [[".radio", "label wrapper", "—", "input[type=radio] + span(라벨, small)"], ["name", "attribute", "—", "같은 그룹은 같은 name"], [".card", "boolean", "false", "카드형(보더 + 선택 시 accent)"], [".radio-group", "container", "—", "세로 12px. .row 로 가로"]],
-    spec: [["Size", "원 16 · 선택 내부 점 8"], ["Container", "radius/full · border/strong 1.5px"], ["Label", "Body/2 14 · 설명 Caption 12.5"], ["Placement", "폼의 배타 옵션, 설정의 동작 선택"]],
+    props: [[".radio", "label wrapper", "—", "input[type=radio] + span(라벨, small)"], ["name", "attribute", "—", "같은 그룹은 같은 name"], [".card", "boolean", "false", "카드형(보더 + 선택 시 brand)"], [".radio-group", "container", "—", "세로 12px. .row 로 가로"]],
+    spec: [["Size", "원 16 · 선택 내부 점 8"], ["Container", "radius/full · line/neutral/primary 1.5px"], ["Label", "Body/2 14 · 설명 Caption 12.5"], ["Placement", "폼의 배타 옵션, 설정의 동작 선택"]],
     figma: { frame: "Radio Button", radius: "radius/full", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--line-neutral-primary" }, checked: { stroke: "--surface-brand-primary" }, card: { stroke: "--line-neutral-secondary" } }, states: ["unchecked", "checked", "disabled", "focused"] },
   },
 
@@ -423,7 +423,7 @@ const COMPONENTS = {
         </div>`, layout: "left" },
     ],
     props: [[".switch", "label wrapper", "—", "input[type=checkbox][role=switch] + span"], ["checked / disabled", "attribute", "—", "네이티브 상태"], ["size", "(md) | sm", "md", "44×24 / 36×20"], [".label-left", "boolean", "false", "라벨을 왼쪽에"]],
-    spec: [["Size", "트랙 44×24 (sm 36×20) · 노브 20"], ["Container", "radius/full · off border/strong · on accent"], ["Label", "Body/2 14"], ["Placement", "설정 행 우측 끝, 테이블 '사용' 열"]],
+    spec: [["Size", "트랙 44×24 (sm 36×20) · 노브 20"], ["Container", "radius/full · off line/neutral/primary · on brand"], ["Label", "Body/2 14"], ["Placement", "설정 행 우측 끝, 테이블 '사용' 열"]],
     figma: { frame: "Switch", radius: "radius/full", sizes: { md: { w: 44, h: 24 }, sm: { w: 36, h: 20 } }, variants: { off: { bg: "--line-neutral-primary" }, on: { bg: "--surface-brand-primary" } }, states: ["off", "on", "disabled", "focused"] },
   },
 
@@ -545,7 +545,7 @@ const COMPONENTS = {
         <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" disabled><span class="placeholder">권한 없음</span></button></div>` },
     ],
     props: [[".dropdown", "container", "—", "position:relative. 열림은 .open"], [".trigger", "button", "—", "고른 값을 표시. 값이 없으면 안에 .placeholder"], [".menu", "ul", "—", "role=listbox · aria-label 필수"], [".menu-item", "li", "—", "role=option. 고른 항목 .on + aria-selected, 비활성 aria-disabled"]],
-    spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200 · 메뉴 최대 높이 320(약 8개, 넘으면 스크롤)"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · placeholder text/tertiary"], ["Placement", "필터 툴바, 폼 안의 선택 필드 · 아래 공간이 모자라면 위로 뒤집어 연다(.up)"]],
+    spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200 · 메뉴 최대 높이 320(약 8개, 넘으면 스크롤)"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · placeholder foreground/disable/primary"], ["Placement", "필터 툴바, 폼 안의 선택 필드 · 아래 공간이 모자라면 위로 뒤집어 연다(.up)"]],
     figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {} }, states: ["closed", "open", "selected", "disabled"] },
   },
 
@@ -607,7 +607,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".tabs", "container", "—", "role=tablist. 기본 Underline, 전체 폭"], [".tab", "button", "—", "role=tab, aria-selected. 활성 .on"], [".pill", "boolean", "false", "캡슐형(보조 전환)"], [".sm / .accent", "boolean", "false", "작은 크기 / 활성 색 accent"], [".count", "element", "—", "건수 배지"], ["disabled", "attribute", "—", "비활성 탭"]],
-    spec: [["Size", "높이 44 (sm 38) · 탭 간격 24"], ["Container", "하단 1px border/default · 활성 2px"], ["Label", "Title/2 14 Bold"], ["Placement", "페이지 헤더 아래, 카드 헤더 우측(pill)"]],
+    spec: [["Size", "높이 44 (sm 38) · 탭 간격 24"], ["Container", "하단 1px line/neutral/secondary · 활성 2px"], ["Label", "Title/2 14 Bold"], ["Placement", "페이지 헤더 아래, 카드 헤더 우측(pill)"]],
     figma: { frame: "Tab", sizes: { md: { h: 44 }, sm: { h: 38 } }, variants: { underline: {}, pill: { bg: "--surface-neutral-strong" } }, states: ["default", "active", "hover", "disabled"] },
   },
 
@@ -699,7 +699,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".pagination", "nav", "—", "aria-label=페이지. 버튼 36 (compact 32)"], ["button.on", "current", "—", "현재 페이지 + aria-current=page"], [".gap", "span", "—", "생략(…)"], [".compact / .outline", "boolean", "false", "작은 크기 / 보더형"], [".pagination-bar", "container", "—", "총 건수 + 페이지 크기 + 페이지네이션"]],
-    spec: [["Size", "버튼 36 (compact 32) · 간격 4"], ["Container", "radius/md · 현재 accent"], ["Label", "Body/2 14 · 현재 Semibold"], ["Placement", "테이블 하단 우측, 총 건수는 좌측"]],
+    spec: [["Size", "버튼 36 (compact 32) · 간격 4"], ["Container", "radius/md · 현재 brand"], ["Label", "Body/2 14 · 현재 Semibold"], ["Placement", "테이블 하단 우측, 총 건수는 좌측"]],
     figma: { frame: "Pagination", radius: "radius/md", sizes: { md: { h: 36 }, compact: { h: 32 } }, variants: { default: {}, outline: { stroke: "--line-neutral-secondary" } }, states: ["default", "current", "hover", "disabled"] },
   },
 
@@ -732,8 +732,8 @@ const COMPONENTS = {
           <a href="#" title="설정">${I("settings")}<span>설정</span></a>
         </nav>`, layout: "left" },
     ],
-    props: [[".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(accent subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기)"], [".collapsed", "boolean", "false", "폭 64, 아이콘만"], [".count", "element", "—", "미확인 건수"]],
-    spec: [["Size", "폭 240 (접힘 64) · 항목 높이 40"], ["Container", "bg/surface · 우측 1px border"], ["Label", "Body/2 14 · 그룹 Caption 11 uppercase"], ["Placement", "헤더 아래 좌측 고정, 전체 높이"]],
+    props: [[".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(brand subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기)"], [".collapsed", "boolean", "false", "폭 64, 아이콘만"], [".count", "element", "—", "미확인 건수"]],
+    spec: [["Size", "폭 240 (접힘 64) · 항목 높이 40"], ["Container", "surface/elevated/primary · 우측 1px border"], ["Label", "Body/2 14 · 그룹 Caption 11 uppercase"], ["Placement", "헤더 아래 좌측 고정, 전체 높이"]],
     figma: { frame: "Navigation", radius: "radius/md", sizes: { expanded: { w: 240 }, collapsed: { w: 64 }, item: { h: 40 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover", "active"] },
   },
 
@@ -765,7 +765,7 @@ const COMPONENTS = {
         </header>` },
     ],
     props: [[".topbar", "header", "—", "높이 56, 하단 1px"], [".logo", "a", "—", "제품 마크(i) + 이름 + small 버전"], ["nav a.on", "current", "—", "현재 1차 메뉴"], [".right", "container", "—", "우측 액션(알림·설정·아바타)"], [".avatar", "span", "—", "이니셜 32 (sm 24)"]],
-    spec: [["Size", "높이 56 · 좌우 padding 20"], ["Container", "bg/surface · 하단 border/default"], ["Label", "메뉴 Body/2 14 Medium · 로고 Bold"], ["Placement", "최상단 고정(sticky)"]],
+    spec: [["Size", "높이 56 · 좌우 padding 20"], ["Container", "surface/elevated/primary · 하단 line/neutral/secondary"], ["Label", "메뉴 Body/2 14 Medium · 로고 Bold"], ["Placement", "최상단 고정(sticky)"]],
     figma: { frame: "Top Navigation", sizes: { md: { h: 56 } }, variants: { menu: {}, search: {} }, states: ["default", "active"] },
   },
 
@@ -804,7 +804,7 @@ const COMPONENTS = {
       [".accordion-group", "container", "—", "여러 항목 묶음(8px 간격). React <code>AccordionGroup</code>"],
       [".accordion-group.flat", "boolean", "false", "카드형 묶음 — 간격 0 에 Surface 배경 · 좌우 20 · radius/lg. 항목에는 <code>.flat</code> 을 함께"],
     ],
-    spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · border/default"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전"]],
+    spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · line/neutral/secondary"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전"]],
     figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--line-neutral-secondary" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
   },
 
@@ -849,11 +849,11 @@ const COMPONENTS = {
       [".flush", "boolean", "false", "padding·gap 0 — 표나 목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖습니다"],
       [".clickable", "boolean", "false", "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. React <code>clickable</code> + <code>as</code>"],
       [".card-grid .card.clickable", "behavior", "—", "ds.js 가 단일 선택으로 묶어 <code>.on</code> 과 <code>aria-pressed</code> 를 함께 갱신하고 <code>ds:select</code> 를 발행합니다"],
-      [".on", "boolean", "false", "선택됨 — 안쪽 2px accent 링 + <code>--surface-brand-subtle</code> 배경. 포커스 링(outline)과 겹치지 않아 둘이 동시에 보입니다. React <code>selected</code>"],
+      [".on", "boolean", "false", "선택됨 — 안쪽 2px brand 링 + <code>--surface-brand-subtle</code> 배경. 포커스 링(outline)과 겹치지 않아 둘이 동시에 보입니다. React <code>selected</code>"],
       ["aria-busy", "attribute", "—", "불러오는 중 — 내용 대신 <code>.skeleton</code> 을 넣고 컨테이너에 둡니다. React <code>loading</code> 이 둘을 함께 처리합니다"],
       [".card-grid", "container", "—", "auto-fill minmax(260px,1fr) 그리드 · gap 20. React <code>CardGrid</code>"],
     ],
-    spec: [["Size", "최소 폭 260 · padding 24 (compact 16 · flush 0)"], ["Container", "radius/lg 8 · shadow/1 · bg/surface"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"], ["Motion", "clickable 은 --motion-fast 로 shadow/1 → shadow/2"]],
+    spec: [["Size", "최소 폭 260 · padding 24 (compact 16 · flush 0)"], ["Container", "radius/lg 8 · shadow/1 · surface/elevated/primary"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"], ["Motion", "clickable 은 --motion-fast 로 shadow/1 → shadow/2"]],
     figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-elevated-primary", shadow: "--shadow-1" }, bordered: { stroke: "--line-neutral-secondary" } }, states: ["default", "hover", "selected", "focused", "loading"] },
   },
 
@@ -940,7 +940,7 @@ const COMPONENTS = {
         <span class="tooltip-wrap show"><span class="indicator warn">검토 필요</span><span class="tooltip multi" role="tooltip">서명이 확인되지 않은 실행 파일입니다. 24시간 내 처리하지 않으면 자동 차단됩니다.</span></span>`, style: "padding-top:96px" },
     ],
     props: [[".tooltip-wrap", "container", "—", "position:relative 트리거 래퍼"], [".tooltip", "span", "—", "role=tooltip. 기본 위치 위"], ["position", ".bottom | .left | .right", "top", "위치"], [".show", "boolean", "false", "강제 표시(문서·디버그)"], [".multi", "boolean", "false", "여러 줄, 폭 220"]],
-    spec: [["Size", "높이 28 · padding 6 10 · 트리거와 8px"], ["Container", "radius 6 · bg/inverse · shadow/2 · 화살표 5px"], ["Label", "Caption 12.5 Medium inverse"], ["Placement", "아이콘 전용 버튼 필수, 잘린 텍스트, 차트 값"]],
+    spec: [["Size", "높이 28 · padding 6 10 · 트리거와 8px"], ["Container", "radius 6 · surface/neutral/inverse · shadow/2 · 화살표 5px"], ["Label", "Caption 12.5 Medium inverse"], ["Placement", "아이콘 전용 버튼 필수, 잘린 텍스트, 차트 값"]],
     figma: { frame: "Tooltip", radius: 6, sizes: { md: { h: 28 } }, variants: { top: {}, bottom: {}, left: {}, right: {} }, states: ["default", "multiline"] },
   },
 
@@ -965,7 +965,7 @@ const COMPONENTS = {
         <div class="banner" role="status">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다. 점검 중 콘솔 접속이 제한됩니다.<button type="button" class="btn sm secondary">자세히</button></div>`, layout: "stack", style: "padding:24px 0;gap:8px" },
     ],
     props: [[".notice", "div", "—", "role=status | alert. .ico + div(b 제목 + 본문 + .actions) + .close"], ["tone", "info | success | warning | danger", "neutral", "톤별 subtle 배경 + 30% 보더"], [".toast", "div", "—", "폭 360, 어두운 배경. .action 하나"], [".toast-stack", "container", "—", "aria-live=polite, 우측 하단 고정"], [".banner", "div", "—", "전체 폭. accent / .warning / .danger"]],
-    spec: [["Size", "Notice 최소 높이 56 · Toast 폭 360 · Banner 높이 44"], ["Container", "Notice radius/lg 8 · tone subtle + 30% 보더 · Toast bg/inverse"], ["Label", "Title Semibold 14 · Body 14"], ["Placement", "Notice 는 페이지 헤더 아래, Toast 우측 하단, Banner 헤더 위"]],
+    spec: [["Size", "Notice 최소 높이 56 · Toast 폭 360 · Banner 높이 44"], ["Container", "Notice radius/lg 8 · tone subtle + 30% 보더 · Toast surface/neutral/inverse"], ["Label", "Title Semibold 14 · Body 14"], ["Placement", "Notice 는 페이지 헤더 아래, Toast 우측 하단, Banner 헤더 위"]],
     figma: { frame: "Notification", radius: "radius/lg", sizes: { notice: { minH: 56 }, toast: { w: 360 }, banner: { h: 44 } }, variants: { info: { bg: "--surface-accent-cyan", fg: "--surface-accent-cyan" }, success: { bg: "--surface-positive-primary", fg: "--surface-positive-primary" }, warning: { bg: "--surface-cautionary-primary", fg: "--surface-cautionary-primary" }, danger: { bg: "--surface-negative-primary", fg: "--surface-negative-strong" }, toast: { bg: "--surface-neutral-inverse", fg: "--foreground-neutral-inverse" } }, states: ["default", "with-action", "dismissible"] },
   },
 
@@ -1067,8 +1067,8 @@ const COMPONENTS = {
           <button type="button" class="btn sm danger secondary">삭제</button>
         </div>` },
     ],
-    props: [[".divider", "hr | div", "—", "가로 1px border/default, margin 16 0"], [".strong / .dashed", "boolean", "false", "border/strong / 점선"], [".label", "div", "—", "가운데 라벨 텍스트"], [".vertical", "span", "—", "세로 1×24, 좌우 12"]],
-    spec: [["Size", "1px · 세로 24"], ["Container", "border/default (strong 시 border/strong)"], ["Label", "Caption 12 tertiary"], ["Placement", "설정 섹션 사이, 툴바 버튼 그룹 사이"]],
+    props: [[".divider", "hr | div", "—", "가로 1px line/neutral/secondary, margin 16 0"], [".strong / .dashed", "boolean", "false", "line/neutral/primary / 점선"], [".label", "div", "—", "가운데 라벨 텍스트"], [".vertical", "span", "—", "세로 1×24, 좌우 12"]],
+    spec: [["Size", "1px · 세로 24"], ["Container", "line/neutral/secondary (strong 시 line/neutral/primary)"], ["Label", "Caption 12 tertiary"], ["Placement", "설정 섹션 사이, 툴바 버튼 그룹 사이"]],
     figma: { frame: "Divider", sizes: { horizontal: { h: 1 }, vertical: { w: 1, h: 24 } }, variants: { default: { stroke: "--line-neutral-secondary" }, strong: { stroke: "--line-neutral-primary" }, label: {} }, states: ["default"] },
   },
 
@@ -1123,7 +1123,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".tbl-wrap", "container", "—", "보더 + radius/lg + 가로 스크롤. 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 52. .compact 44 · .zebra 줄무늬"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["tr.on / .disabled", "row", "—", "선택 / 비활성"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션"]],
-    spec: [["Size", "행 높이 52 (compact 44) · 헤더 44"], ["Container", "radius/lg 8 · border/default 1px · 셀 격자선 없음"], ["Label", "헤더 Label/2 12.5 Semibold tertiary · 셀 Body/2 14 · 숫자 tabular"], ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래 · 10열 이하 기본 노출"]],
+    spec: [["Size", "행 높이 52 (compact 44) · 헤더 44"], ["Container", "radius/lg 8 · line/neutral/secondary 1px · 셀 격자선 없음"], ["Label", "헤더 Label/2 12.5 Semibold tertiary · 셀 Body/2 14 · 숫자 tabular"], ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래 · 10열 이하 기본 노출"]],
     figma: { frame: "Data Table", radius: "radius/lg", sizes: { row: { h: 52 }, compact: { h: 44 }, header: { h: 44 } }, variants: { default: {}, selectable: {}, compact: {} }, states: ["default", "hover", "selected", "sorted", "empty"] },
   },
 
@@ -1182,7 +1182,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".tbl-wrap", "container", "—", "보더 + radius + 스크롤"], [".tbl", "table", "—", "기본 표"], [".kv", "boolean", "false", "키-값 표(th 폭 200, 우측 보더)"], [".zebra / .compact", "boolean", "false", "줄무늬 / 행 44"], ["td.num", "cell", "—", "숫자 우측 정렬"]],
-    spec: [["Size", "행 52 (compact 44) · kv th 폭 200"], ["Container", "radius/lg 8 · border/default"], ["Label", "헤더 Label/2 12.5 · 셀 Body/2 14"], ["Placement", "상세 패널, 리포트 요약"]],
+    spec: [["Size", "행 52 (compact 44) · kv th 폭 200"], ["Container", "radius/lg 8 · line/neutral/secondary"], ["Label", "헤더 Label/2 12.5 · 셀 Body/2 14"], ["Placement", "상세 패널, 리포트 요약"]],
     figma: { frame: "Table", radius: "radius/lg", sizes: { row: { h: 52 }, compact: { h: 44 } }, variants: { simple: {}, kv: {}, zebra: {} }, states: ["default"] },
   },
 
@@ -1211,7 +1211,7 @@ const COMPONENTS = {
         </ul>` },
     ],
     props: [[".list", "ul", "—", "보더 + radius/lg. li 는 flex row"], [".primary / .meta / .end", "elements", "—", "제목 / 부제 / 우측 영역"], [".hover / li.on", "boolean", "false", "행 hover 배경 / 선택"], [".dense / .plain", "boolean", "false", "행 40 / 보더 없음"]],
-    spec: [["Size", "행 최소 56 (dense 40)"], ["Container", "radius/lg · border/default · 행 사이 1px"], ["Label", "제목 Body/2 14 Medium · 부제 Caption 12.5"], ["Placement", "상세 패널 목록, 설정의 항목 목록"]],
+    spec: [["Size", "행 최소 56 (dense 40)"], ["Container", "radius/lg · line/neutral/secondary · 행 사이 1px"], ["Label", "제목 Body/2 14 Medium · 부제 Caption 12.5"], ["Placement", "상세 패널 목록, 설정의 항목 목록"]],
     figma: { frame: "List", radius: "radius/lg", sizes: { md: { h: 56 }, dense: { h: 40 } }, variants: { default: {}, media: {}, selectable: {} }, states: ["default", "hover", "selected"] },
   },
 
@@ -1240,8 +1240,8 @@ const COMPONENTS = {
           <button type="button" class="tile horizontal" aria-pressed="false"><span class="ico">${I("list")}</span><div><b>상세 이벤트</b><span>CSV · 최대 10만 행</span></div></button>
         </div>` },
     ],
-    props: [[".tile", "button", "—", ".ico + b(제목) + span(설명). aria-pressed"], [".on", "boolean", "false", "선택(accent 보더·배경)"], [".horizontal", "boolean", "false", "가로 배치"], ["disabled", "attribute", "—", "선택 불가"], [".tile-grid", "container", "—", "auto-fill 180px 그리드"]],
-    spec: [["Size", "최소 폭 180 · padding 16 · 아이콘 36"], ["Container", "radius/lg 8 · border/default · 선택 accent"], ["Label", "제목 Body/2 14 Semibold · 설명 Caption 12.5"], ["Placement", "마법사의 유형 선택, 연동 목록"]],
+    props: [[".tile", "button", "—", ".ico + b(제목) + span(설명). aria-pressed"], [".on", "boolean", "false", "선택(brand 보더·배경)"], [".horizontal", "boolean", "false", "가로 배치"], ["disabled", "attribute", "—", "선택 불가"], [".tile-grid", "container", "—", "auto-fill 180px 그리드"]],
+    spec: [["Size", "최소 폭 180 · padding 16 · 아이콘 36"], ["Container", "radius/lg 8 · line/neutral/secondary · 선택 brand"], ["Label", "제목 Body/2 14 Semibold · 설명 Caption 12.5"], ["Placement", "마법사의 유형 선택, 연동 목록"]],
     figma: { frame: "Item Tile", radius: "radius/lg", sizes: { md: { minW: 180, pad: 16 } }, variants: { default: { stroke: "--line-neutral-secondary" }, selected: { stroke: "--surface-brand-primary", bg: "--surface-brand-subtle" } }, states: ["default", "hover", "selected", "disabled"] },
   },
 

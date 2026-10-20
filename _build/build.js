@@ -154,7 +154,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 - \`assets/icons/outline\` \`assets/icons/filled\` — Tabler Icons(MIT) 전체 세트(원본, 빌드가 건드리지 않음). 사이트가 쓰는 아이콘 목록은 \`_build/icons.js\` 의 \`ICON_NAMES\`, 갤러리는 Foundations › Icons
 
 ## 컬러 모델
-- 토큰은 참조 시스템(Montage)의 Atomic 램프 14개와 시멘틱 75개를 값·이름까지 그대로 씁니다. \`brand\` 가 제품 메인 컬러 슬롯이고, 지란지교 오렌지(#FF7F00)는 트리 밖 \`--company-mark\` 로 두어 로고·헤더 마크에만 씁니다
+- 토큰은 참조 시스템의 Atomic 램프 13개와 시멘틱 77개를 값·이름까지 씁니다. \`brand\` 가 제품 메인 컬러 슬롯이고, 지란지교 오렌지(#FF7F00)는 트리 밖 \`--company-mark\` 로 두어 로고·헤더 마크에만 씁니다
 - 제품에 적용할 때: 제품 메인 컬러 HEX 하나로 \`--prod-40~60\` 다섯 단계를 생성해 주입(\`app.js\` 의 \`accentScale\` 참고)하고 나머지 토큰은 그대로 사용
 - **제품 색 제약**: Brand 면 위 글자는 늘 흰색이라 제품 색 위에서 흰 글자가 **4.5** 를 넘어야 합니다 — \`verify\` 가 검사합니다
 - 헤더의 Accent 선택은 미리보기용입니다. 실제 제품 컬러는 \`_build/data.js\` 의 \`PRODUCTS\` 에 등록하세요
@@ -163,7 +163,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 | 파일 | 내용 |
 |---|---|
 | \`data.js\` | 사이트 구조(SITE) · 제품 컬러(PRODUCTS) · 버전 · Changelog |
-| \`components.data.js\` | 컴포넌트 30개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
+| \`components.data.js\` | 컴포넌트 31개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
 | \`patterns.data.js\` | 패턴 11개: 사용 컴포넌트(uses) · 예제 · 가이드라인 |
 | \`style.src.css\` | 스타일 원본. 컴포넌트 CSS 는 \`/* ---------- Live component samples ---------- */\` 블록 안에 평면 규칙으로 작성(코드 패널 추출 대상) |
 | \`lib.js\` | cssFor(컴포넌트 CSS 추출) · htmlToJsx(React 코드 생성) · hl(구문 강조) · tokenBlock |

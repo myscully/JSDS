@@ -167,11 +167,12 @@ const GS_HTML_USE = `<!-- 컴포넌트 페이지 HTML+CSS 탭에서 복사한 �
 <script>
   DS.init(document.getElementById("dynamic-area")); // 나중에 DOM 에 넣은 마크업만 한 번
 </script>`;
-const GS_ACCENT_CSS = `/* 제품 메인 컬러 하나로 생성한 10단계를 :root 에 덮어씁니다 (생성 함수는 Design Token › Accent 스케일 생성) */
+const GS_ACCENT_CSS = `/* 제품 메인 컬러 하나로 만든 다섯 단계를 :root 에 주입합니다 (생성 함수는 Design Token › Accent 스케일 생성) */
+/* 아래는 #0066FF 를 넣었을 때의 출력입니다 — 제품 색으로 바꿔 쓰세요 */
 :root{
-  --accent-50:#EFF2FA; --surface-brand-subtle:#D8DFF3; --accent-200:#B1BFE7; --line-brand-strong:#849CE1; --accent-400:#5A7CDC;
-  --accent-500:#3661DA; --accent-600:#1D4ED8; --accent-700:#173DA8; --accent-800:#112D7D; --accent-900:#0B1E52;
-}`;
+  --prod-40:#0054D1; --prod-45:#005EEB; --prod-50:#0066FF; --prod-55:#1A76FF; --prod-60:#3385FF;
+}
+/* --prod-* 를 넣지 않으면 기본 파랑이 쓰입니다. 면 위 글자는 늘 흰색이므로 흰 글자가 4.5 를 넘는 색이어야 합니다 */`;
 const PAGES = {
   "home/getting-started": () => {
     const designer = `<ol class="guide-steps">
@@ -179,7 +180,7 @@ const PAGES = {
 <li><b>내 디자인 파일에서 라이브러리 켜기</b>작업할 파일을 열고 왼쪽 <b>Assets</b> 패널 → 책 모양(Libraries) 아이콘 → <b>JS Design System</b> 을 켭니다. 한 번 켜 두면 그 파일에서 계속 쓸 수 있습니다.</li>
 <li><b>컴포넌트 넣기</b>Assets 검색창에 이름(예: Button, Tag, Data Table)을 입력하고 캔버스로 끌어다 놓습니다. 넣은 것은 인스턴스라 원본은 바뀌지 않고, 원본이 갱신되면 따라서 갱신됩니다.</li>
 <li><b>변형·상태 바꾸기</b>인스턴스를 선택하면 오른쪽 패널에 <code>variant</code> · <code>size</code> · <code>state</code> 드롭다운이 보입니다. 이름은 이 사이트 각 컴포넌트 페이지의 Props 표와 같아서, 개발자와 같은 말로 이야기할 수 있습니다.</li>
-<li><b>색·글자·그림자는 스타일만</b>직접 색을 고르지 말고 채우기 → <b>Variables</b> 탭에서 <code>bg/</code> <code>text/</code> <code>border/</code> <code>primary/</code> <code>status/</code> <code>severity/</code> 변수를 씁니다. 글자는 Text Style, 그림자는 Effect Style. 이렇게 해야 제품 컬러·다크 테마가 자동으로 맞춰집니다.</li>
+<li><b>색·글자·그림자는 스타일만</b>직접 색을 고르지 말고 채우기 → <b>Variables</b> 탭에서 <code>foreground/</code> <code>background/</code> <code>surface/</code> <code>line/</code> <code>effect/</code> <code>static/</code> 변수를 씁니다. 글자는 Text Style, 그림자는 Effect Style. 이렇게 해야 제품 컬러·다크 테마가 자동으로 맞춰집니다.</li>
 </ol>`;
     const react = `<ol class="guide-steps">
 <li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyAccent</code> 에 제품 메인 컬러 HEX 하나를 넣으면 나머지 색은 자동입니다.${codeBlock("gs-react-install", REACT_INSTALL, "tsx", "복사")}</li>
@@ -190,7 +191,7 @@ const PAGES = {
 <li><b>assets 폴더 복사</b><a href="https://github.com/myscully/JSDS" target="_blank" rel="noopener">저장소 ↗</a>의 <code>assets/style.css</code> · <code>assets/ds.js</code> · <code>assets/fonts/</code> 세 가지를 함께 프로젝트에 넣습니다. <code>style.css</code> 가 <code>fonts/PretendardVariable.woff2</code> 를 상대 경로로 참조하므로 폴더 구조를 유지하고, 서버에 <code>.woff2</code> MIME(<code>font/woff2</code>)이 등록돼 있어야 기본 서체로 보이지 않습니다.</li>
 <li><b>HTML 에 연결</b>스타일시트 한 줄, 동작 스크립트 한 줄입니다. <code>ds.js</code> 는 의존성 없는 순수 JS 로 드롭다운·탭·달력·표 정렬·토스트 등을 붙여 주며, <code>defer</code> 로 싣고 나중에 DOM 에 넣은 마크업에는 <code>DS.init(요소)</code> 를 한 번 호출합니다. 다크 테마는 <code>body</code> 가 아니라 <code>html</code> 요소의 <code>data-theme="dark"</code> 로 정합니다.${codeBlock("gs-html-link", GS_HTML_LINK, "html", "복사")}</li>
 <li><b>컴포넌트 페이지에서 복사</b>예제 아래 <b>코드 보기 → 복사</b>. 전체 CSS 대신 일부만 쓰려면 같은 곳의 <b>Component CSS</b> 와 <a href="#/resources/design-token">Design Token</a> 의 <code>:root</code> 토큰만 가져갑니다. 이벤트(<code>ds:select</code> · <code>ds:tab</code> 등)와 API 는 <a href="#/resources/react#dsjs">React Package › assets/ds.js</a>.${codeBlock("gs-html-use", GS_HTML_USE, "html", "복사")}</li>
-<li><b>제품 컬러 적용</b><code>--accent-*</code> 열 단계만 제품 메인 컬러로 바꾸면 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다. HEX 하나로 10단계를 만드는 함수는 <a href="#/resources/design-token#accent-js">Design Token › Accent 스케일 생성</a>.${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}</li>
+<li><b>제품 컬러 적용</b><code>--prod-40~60</code> 다섯 단계만 제품 메인 컬러로 바꾸면 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다. HEX 하나로 다섯 단계를 만드는 함수는 <a href="#/resources/design-token#accent-js">Design Token › Accent 스케일 생성</a>.${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}</li>
 </ol>`;
     return `<h1>Getting started${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 제외한 모든 기본 구성(색 · 글자 · 간격 · 컴포넌트 · 패턴)을 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
 <p class="t-body-2">어느 역할이든 각 <a href="#/components/overview">컴포넌트 페이지</a>가 사용법의 단일 출처입니다. Examples 로 실제 동작과 상태를, Props 표로 허용되는 변형을, 코드 보기로 HTML+CSS · React 코드를 확인합니다. 필요한 컴포넌트가 없으면 <a href="#/resources/contribution">Contribution</a> 절차로 제안합니다.</p>
@@ -216,7 +217,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
 <h2 id="why">왜 만드나</h2><p>제품마다 메인 컬러가 다르고 출시 시기도 다르지만, 사용자는 같은 회사의 제품을 씁니다. 리뉴얼이나 신규 제품을 시작할 때마다 무채색·서체·간격·컴포넌트를 새로 정하지 않도록, <b>메인 컬러를 제외한 나머지 기본 구성</b>을 이 시스템이 제공합니다.</p>
 <h2 id="how">어떻게 쓰나</h2><div class="kv"><dt>디자이너</dt><dd>Figma 라이브러리의 컴포넌트를 쓰고, 이 가이드의 예제·Props 로 변형과 상태를 확인합니다</dd><dt>개발자</dt><dd>React 제품은 <a href="#/resources/react"><code>@jiran/ds-react</code></a> 패키지를 설치하고 각 페이지 React 탭 코드를 그대로 씁니다. 그 외에는 HTML+CSS 탭 코드에 <code>assets/style.css</code> + <code>assets/ds.js</code>(동작)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--prod-40~60</code> 다섯 단계를 만들어 주입 → <code>--brand-*</code> 가 받고 <code>surface/foreground/line</code> 의 brand 계열이 전부 따라옵니다. 지정하지 않으면 Blue 램프 값이 그대로 쓰입니다</dd></div>
 <p>역할별 단계 안내는 <a href="#/home/getting-started">Getting started</a>를 참고하세요.</p>
-<h2 id="scope">범위</h2><div class="kv"><dt>제공하는 것</dt><dd>Gray Scale, 타이포그래피, 간격·반경·엘리베이션, 아이콘 규칙, 컴포넌트 30개(Desktop, 코드 포함), 패턴 11개, 토큰</dd><dt>제품이 정하는 것</dt><dd>Accent Primary(제품 메인 컬러). 헤더의 Accent 선택으로 각 제품 컬러가 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd><code>#FF7F00</code>은 제품 UI 의 Accent 로 쓰지 않습니다. 이 시스템은 관리자 웹 제품 기준이며, 브랜드 디자인 시스템은 별도로 제작합니다</dd><dt>플랫폼</dt><dd>Desktop 웹 (관리 콘솔) 우선</dd></div>
+<h2 id="scope">범위</h2><div class="kv"><dt>제공하는 것</dt><dd>중립 램프, 타이포그래피, 간격·반경·엘리베이션, 아이콘 규칙, 컴포넌트 31개(Desktop, 코드 포함), 패턴 11개, 토큰</dd><dt>제품이 정하는 것</dt><dd>Accent Primary(제품 메인 컬러). 헤더의 Accent 선택으로 각 제품 컬러가 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd><code>#FF7F00</code>은 제품 UI 의 Accent 로 쓰지 않습니다. 이 시스템은 관리자 웹 제품 기준이며, 브랜드 디자인 시스템은 별도로 제작합니다</dd><dt>플랫폼</dt><dd>Desktop 웹 (관리 콘솔) 우선</dd></div>
 <h2 id="team">운영</h2><p>기획팀 디자인파트가 운영하며, Figma 라이브러리와 이 가이드를 함께 갱신합니다. 제안·기여 절차는 <a href="#/resources/contribution">Contribution</a>을 참고하세요.</p>`,
   "home/principles": () => `<h1>UX Principles</h1><p class="lead">보안 관리자는 하루 종일 콘솔을 봅니다. 화려함보다 정확함, 밀도, 예측 가능성이 우선입니다.</p>
 <h2 id="p1">1. 위험은 한눈에</h2><p>심각도·상태는 색과 형태(태그·점·밴드)로 동시에 인코딩합니다. 색만으로 의미를 전달하지 않습니다.</p>
@@ -228,7 +229,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
     const css = STYLE(); const root = css.slice(css.indexOf(":root{"), css.indexOf("*{box-sizing")).trim();
     return `<h1>Design Token${nb("resources", "design-token")}</h1><p class="lead">이 가이드가 쓰는 토큰 원본(CSS 변수 · Light/Dark)과 Radius · Motion · Accessibility 규칙입니다. <code>--accent-*</code> 만 제품 컬러로 바꾸면 나머지는 그대로 씁니다. 색의 의미와 사용 규칙은 <a href="#/foundations/colors">Foundations › Colors</a> 를 참고하세요.</p>
 <p><button class="btn sm secondary" type="button" data-copy="tokencss" data-label="전체 CSS 복사">전체 CSS 복사</button></p>
-<h2 id="layers">Token Layers</h2><div class="kv"><dt>Primitive</dt><dd><code>--cool-neutral-*</code> <code>--blue-*</code> <code>--red-*</code> <code>--orange-*</code>… 참조 시스템(Montage)의 Atomic 램프 14개를 값과 번호까지 그대로. 숫자가 클수록 밝습니다. 컴포넌트에서 직접 쓰지 않음 (<a href="#/foundations/colors">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--{그룹}-{하위}-{이름}</code> — 그룹은 <code>foreground</code> · <code>background</code> · <code>surface</code> · <code>line</code> · <code>effect</code> · <code>static</code> 여섯입니다(<code>--foreground-neutral-primary</code> · <code>--surface-brand-heavy</code> · <code>--line-negative-focus</code> …). 75개이고 Figma 변수 경로와 1:1 입니다. 컴포넌트는 이것만 참조하고, 프리미티브 직접 참조는 빌드가 막습니다 (<a href="#/foundations/colors">Colors › Semantic</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--prod-40~60</code> 다섯 단계를 생성해 주입 → 나머지 토큰은 공통. 면 위 글자가 늘 흰색이라 <b>제품 색 위에서 흰 글자가 4.5 를 넘어야</b> 합니다</dd></div>
+<h2 id="layers">Token Layers</h2><div class="kv"><dt>Primitive</dt><dd><code>--cool-neutral-*</code> <code>--blue-*</code> <code>--red-*</code> <code>--orange-*</code>… 참조 시스템의 Atomic 램프 13개를 값과 번호까지 그대로. 숫자가 클수록 밝습니다. 컴포넌트에서 직접 쓰지 않음 (<a href="#/foundations/colors">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--{그룹}-{하위}-{이름}</code> — 그룹은 <code>foreground</code> · <code>background</code> · <code>surface</code> · <code>line</code> · <code>effect</code> · <code>static</code> 여섯입니다(<code>--foreground-neutral-primary</code> · <code>--surface-brand-heavy</code> · <code>--line-negative-focus</code> …). 77개이고 Figma 변수 경로와 1:1 입니다. 컴포넌트는 이것만 참조하고, 프리미티브 직접 참조는 빌드가 막습니다 (<a href="#/foundations/colors">Colors › Semantic</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--prod-40~60</code> 다섯 단계를 생성해 주입 → 나머지 토큰은 공통. 면 위 글자가 늘 흰색이라 <b>제품 색 위에서 흰 글자가 4.5 를 넘어야</b> 합니다</dd></div>
 <h2 id="css">CSS Variables</h2><p>Light 기본값 + Dark 오버라이드(<code>prefers-color-scheme</code> 및 <code>[data-theme="dark"]</code>)를 포함합니다.</p>${codeBlock("tokencss", root, "css", "CSS 복사")}
 <h2 id="radius">Radius</h2><p>역할별로 반경을 정해 두고, 모든 블록에 같은 반경을 찍지 않습니다. 타일을 클릭하면 토큰이 복사됩니다.</p>
 <div class="tiles radius">${RADII().map(([n, v]) => `<div style="border-radius:${v}px" data-copy-text="var(--radius-${n})" title="복사">${n} ${v === 999 ? "" : v}</div>`).join("")}</div>
@@ -247,7 +248,7 @@ ${codeBlock("a11y-css", `:focus-visible{outline:2px solid var(--foreground-brand
   "components/overview": () => overviewPage("components"),
   "patterns/overview": () => overviewPage("patterns"),
   "resources/react": () => `<h1>React Package${nb("resources", "react")}</h1><p class="lead"><code>@jiran/ds-react</code> — 이 가이드의 30개 컴포넌트와 패턴 래퍼를 실제 React 컴포넌트로 구현한 패키지입니다. 사이트와 같은 클래스 마크업을 렌더링하므로 스타일시트 하나로 동작하고, 각 컴포넌트 페이지의 React 탭 코드가 곧 사용법입니다.</p>
-<p class="note"><b>0.7.0 은 깨지는 변경입니다.</b> 컬러 토큰을 참조 시스템(Montage)의 시멘틱 층으로 값·이름까지 교체했습니다 — <code>dist/style.css</code> 의 변수 이름이 전부 바뀝니다. <b>마크업과 props 는 그대로</b>이므로 토큰을 직접 참조하지 않는 제품은 패키지만 올리면 됩니다. 전환표는 패키지의 <code>MIGRATION.md</code> 와 <a href="#/foundations/colors">Foundations › Colors</a> 에 있습니다. <code>applyAccent()</code> 의 주입 단계는 10개에서 <b>5개</b>(<code>--prod-40~60</code>)로 바뀌었습니다.</p>
+<p class="note"><b>0.8.0 은 깨지는 변경입니다.</b> 컬러 토큰을 의미 층째 값·이름까지 교체했습니다 — <code>dist/style.css</code> 의 변수 이름이 전부 바뀝니다. <b>마크업과 props 는 그대로</b>이므로 토큰을 직접 참조하지 않는 제품은 패키지만 올리면 됩니다. 전환표는 패키지의 <code>MIGRATION.md</code> 와 <a href="#/foundations/colors">Foundations › Colors</a> 에 있습니다. <code>applyAccent()</code> 의 주입 단계는 10개에서 <b>5개</b>(<code>--prod-40~60</code>)로 바뀌었습니다.</p>
 <h2 id="install">설치</h2>${codeBlock("react-install", REACT_INSTALL, "tsx", "복사")}
 <div class="kv"><dt>테마</dt><dd><code>&lt;html data-theme="dark"&gt;</code> 또는 <code>setTheme("dark")</code>. 없으면 시스템 설정을 따릅니다. 포털(Popup·Toast)도 <code>&lt;html&gt;</code> 에서 토큰을 상속합니다</dd><dt>서체·배경</dt><dd>앱 루트에 <code>.ds-root</code> 를 붙이면 Pretendard · 본문 색 · 배경 토큰이 적용됩니다</dd><dt>브라우저</dt><dd><code>color-mix()</code> 사용 — Chrome 111+ · Safari 16.2+ · Firefox 113+</dd><dt>버전</dt><dd>패키지 major.minor 는 이 가이드 버전(${VERSION})과 같이 올립니다</dd></div>
 <h2 id="usage">사용</h2><p>모든 컴포넌트는 <code>forwardRef</code> · <code>className</code> 병합 · 나머지 props 전달을 지원합니다. 변형은 HTML 클래스와 같은 이름의 prop 입니다.</p>

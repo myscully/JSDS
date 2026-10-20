@@ -7,7 +7,7 @@
 @font-face{font-family:"Pretendard";font-weight:45 920;font-style:normal;font-display:swap;src:url("fonts/PretendardVariable.woff2") format("woff2-variations")}
 :root{
   /* ── Primitive · Atomic ───────────────────────────────────────
-     참조 시스템(Montage, wanteddev/montage-web)의 램프를 **값과 번호 체계까지 그대로** 쓴다.
+     참조 시스템의 램프를 **값과 번호 체계까지 그대로** 쓴다.
      번호는 숫자가 클수록 밝다(5 가 가장 어둡고 99 가 가장 밝다) — 우리 종전 체계와 방향이 반대다.
      의미 토큰만 이 이름을 참조한다. 컴포넌트가 직접 쓰면 verify 가 실패시킨다.
      출처: packages/theme 의 atomic 램프 파일 전부. 손으로 적지 않는다 */
@@ -24,15 +24,15 @@
   --purple-10:#290247;--purple-20:#580A7D;--purple-30:#861CB8;--purple-40:#AD36E3;--purple-50:#CB59FF;--purple-60:#D478FF;--purple-70:#DE96FF;--purple-80:#E9BAFF;--purple-90:#F2D6FF;--purple-95:#F9EDFF;--purple-99:#FEFBFF;
   --pink-10:#3D0133;--pink-20:#730560;--pink-30:#A81690;--pink-40:#D331B8;--pink-46:#E846CD;--pink-50:#F553DA;--pink-60:#FA73E3;--pink-70:#FF94ED;--pink-80:#FFB8F3;--pink-90:#FED3F7;--pink-95:#FEECFB;--pink-99:#FFFAFE;
   --red-orange-10:#290F00;--red-orange-20:#592100;--red-orange-30:#913500;--red-orange-40:#C94A00;--red-orange-48:#F55A00;--red-orange-50:#FF5E00;--red-orange-60:#FF7B2E;--red-orange-70:#FF9B61;--red-orange-80:#FFBD96;--red-orange-90:#FED9C4;--red-orange-95:#FEEEE5;--red-orange-99:#FFFAF7;
-  /* 제품 메인 컬러 슬롯 — Montage 의 brand(고정 파랑)가 우리에게는 '제품이 주입하는 색'이다.
+  /* 제품 메인 컬러 슬롯 — 참조 시스템에서 고정 파랑이던 brand 가 우리에게는 '제품이 주입하는 색'이다.
      applyAccent 가 --prod-* 를 인라인으로 넣으면 다섯 단계가 한꺼번에 갈린다.
-     기본값은 Montage blue 와 같다 — 제품을 지정하지 않으면 참조 시스템과 픽셀까지 일치한다.
+     기본값은 blue 램프와 같다 — 제품을 지정하지 않으면 참조 값과 픽셀까지 일치한다.
      다섯 단계뿐인 이유: 시멘틱이 brand 를 40·45·50·55·60 에서만 집는다.
      파생 규칙은 blue 램프에서 읽어 냈다 — 단계 번호가 곧 HSL 명도 %다(40→41.0 · 45→46.1 · 50→50.0 · 55→55.1 · 60→60.0).
-     그래서 제품 HEX 를 50 에 놓고 L 을 −9.0 · −3.9 · +5.1 · +10.0 %p 옮기면 blue 가 정확히 재현된다 */
+     그래서 제품 HEX 를 50 에 놓고 L 을 −9.0 · −3.9 · +5.1 · +10.0 %p 옮기면 blue 가 재현된다(55 만 반올림으로 1 단위 어긋난다: #1A76FF vs #1A75FF) */
   --brand-40:var(--prod-40,var(--blue-40));--brand-45:var(--prod-45,var(--blue-45));--brand-50:var(--prod-50,var(--blue-50));--brand-55:var(--prod-55,var(--blue-55));--brand-60:var(--prod-60,var(--blue-60));
   /* ── Semantic · Light ─────────────────────────────────────────
-     Montage 의 semantic/index.ts 를 값까지 그대로 받았다. 75 토큰.
+     참조 시스템의 의미 층을 값까지 그대로 받았다. 75 토큰.
      이름은 트리 경로를 그대로 편 것이다 — color/semantic/surface/brand/heavy → --surface-brand-heavy.
      Figma 변수 경로와 1:1 이고, 토큰 이름이 공개 API 라 줄이지 않는다.
      알파가 들어간 토큰이 36개다. 글자에 알파를 쓰지 않는다는 우리 규칙은 참조 시스템이 이미 어긴다
@@ -64,10 +64,10 @@
   --effect-transparent-primary:color-mix(in srgb,var(--static-white) 8%,transparent);--effect-transparent-secondary:color-mix(in srgb,var(--static-white) 28%,transparent);
   --static-white:#FFFFFF;
   --static-black:#000000;
-  /* Montage 트리 밖 — 셋뿐이고, 왜 밖인지가 각각 적혀 있다 */
-  /* 지란지교시큐리티 회사 마크. Montage 의 brand 는 제품 색이라 회사 정체성 표기가 들어갈 자리가 없다 */
+  /* 참조 트리 밖 — 셋뿐이고, 왜 밖인지가 각각 적혀 있다 */
+  /* 지란지교시큐리티 회사 마크. 이 시스템의 brand 는 제품 색이라 회사 정체성 표기가 들어갈 자리가 없다 */
   --company-mark:#FF7F00;--company-mark-subtle:#FFF4E8;
-  /* brand 면 위의 글자. Montage 는 늘 static.white 지만, 제품이 밝은 색이면 그 흰 글자가 뜬다 —
+  /* brand 면 위의 글자. 참조 시스템은 늘 static.white 지만, 제품이 밝은 색이면 그 흰 글자가 뜬다 —
      제품 색은 흰 글자가 4.5 를 넘어야 한다는 제약이 있고 빌드가 검사한다 — 그래서 라이트에서는 늘 흰색이다.
      남는 예외는 다크 + 중립 전환 하나뿐이다: 거기선 면이 밝은 회색이라 글자가 어두워야 한다 */
   --brand-label:var(--static-white);
@@ -93,7 +93,7 @@
 :root[data-accent-neutral]{--brand-40:var(--cool-neutral-15);--brand-45:var(--cool-neutral-22);--brand-50:var(--cool-neutral-30);--brand-55:var(--cool-neutral-40);--brand-60:var(--cool-neutral-50);--foreground-brand-inverse:var(--cool-neutral-60);--surface-brand-primary:var(--brand-40);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-50)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   /* ── Semantic · Dark ──────────────────────────────────────────
-     라이트와 같은 75 토큰이다. 값의 출처도 같다 — Montage 의 dark 테마를 그대로 받았다.
+     라이트와 같은 75 토큰이다. 값의 출처도 같다 — 참조 시스템의 dark 테마를 그대로 받았다.
      이 블록은 아래 :root[data-theme="dark"] 에 **한 글자까지 같게** 한 번 더 들어간다.
      verify 가 두 벌의 동일성을 검사한다 — 한쪽만 고치면 OS 설정으로 들어온 다크가 조용히 낡는다 */
   --foreground-neutral-primary:var(--cool-neutral-99);--foreground-neutral-strong:var(--cool-neutral-90);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-90) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-80) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-80) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-10);
@@ -129,7 +129,7 @@
 }}
 :root[data-theme="dark"]{
   /* ── Semantic · Dark ──────────────────────────────────────────
-     라이트와 같은 75 토큰이다. 값의 출처도 같다 — Montage 의 dark 테마를 그대로 받았다.
+     라이트와 같은 75 토큰이다. 값의 출처도 같다 — 참조 시스템의 dark 테마를 그대로 받았다.
      이 블록은 아래 :root[data-theme="dark"] 에 **한 글자까지 같게** 한 번 더 들어간다.
      verify 가 두 벌의 동일성을 검사한다 — 한쪽만 고치면 OS 설정으로 들어온 다크가 조용히 낡는다 */
   --foreground-neutral-primary:var(--cool-neutral-99);--foreground-neutral-strong:var(--cool-neutral-90);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-90) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-80) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-80) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-10);
@@ -810,9 +810,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .chip[disabled]{opacity:.4;cursor:not-allowed;pointer-events:none}
 .chip-group{display:flex;flex-wrap:wrap;gap:8px}
 
-/* Tag — 참조 시스템(Montage)의 Chip 패턴을 따른다: 바탕은 상태 틴트이고 **라벨은 중립 글자색**이다.
+/* Tag — 참조 시스템의 Chip 패턴을 따른다: 바탕은 상태 틴트이고 **라벨은 중립 글자색**이다.
    상태색을 라벨에 쓰면 라이트에서 2.1~3.4 로 떨어진다(주의 2.24 · 긍정 2.46 · 부정 3.44).
-   Montage 도 그 색을 배너의 제목·아이콘에만 쓰고 칩 라벨에는 쓰지 않는다 — 밀도 높은 표가 기본 화면이라 그 구분을 따른다.
+   참조 시스템도 그 색을 배너의 제목·아이콘에만 쓰고 칩 라벨에는 쓰지 않는다 — 밀도 높은 표가 기본 화면이라 그 구분을 따른다.
    색은 점(::before)과 테두리가 나른다. 심각도 네 등급은 Critical=negative · High=cautionary · Medium=accent cyan · Low=중립이고,
    마크업은 그대로다(class="tag critical" · React tone="critical").
    solid 는 '채운 태그'였다 — 참조 시스템에 솔리드 상태 면이 없어 같은 틴트 + 테두리로 한 단계 강조하도록 다시 디자인했다.

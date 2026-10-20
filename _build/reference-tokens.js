@@ -1,5 +1,6 @@
-/* 참조 시스템(Montage · wanteddev/montage-web)의 토큰 정의를 코드로 옮겨 둔 것.
-   출처: packages/theme 의 atomic 램프 파일 전부 · semantic/index.ts · opacity/index.ts.
+/* 참조 시스템의 토큰 정의를 코드로 옮겨 둔 것.
+   출처: 참조 theme 패키지의 atomic 램프 파일 전부 · semantic/index.ts · opacity/index.ts.
+   (어느 시스템을 참조했는지는 이 파일을 만든 커밋에 적혀 있다 — 사이트·문서에서는 이름을 쓰지 않는다.)
    이 파일의 목적은 **대조**다 — style.src.css 가 참조 시스템과 한 글자라도 달라지면 verify 가 실패시킨다.
    "값까지 동일하게 교체"가 이번 설계의 정의이므로, 이것이 틀리면 다른 검사가 다 통과해도 틀린 것이다.
    참조 시스템을 새 버전으로 올릴 때는 여기만 고치고 빌드를 돌리면 어긋난 자리가 전부 나온다. */

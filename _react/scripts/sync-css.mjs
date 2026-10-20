@@ -22,10 +22,10 @@ const samples = src.slice(a, b + LIB.SAMPLES_END.length);
 const base = `/* ---------- Base (패키지용 최소 규칙) ---------- */
 *{box-sizing:border-box}
 @media (prefers-reduced-motion:reduce){*,*::details-content{transition:none!important;animation:none!important}}
-:focus-visible{outline:2px solid var(--border-focus);outline-offset:2px}
+:focus-visible{outline:2px solid var(--foreground-brand-primary);outline-offset:2px}
 [hidden]{display:none!important}
 /* 앱 루트(또는 body)에 .ds-root 를 붙이면 서체·색·배경 토큰이 적용됩니다 */
-.ds-root{font-family:var(--font-sans);font-size:15px;line-height:1.65;color:var(--text-primary);background:var(--bg-canvas);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.ds-root{font-family:var(--font-sans);font-size:15px;line-height:1.65;color:var(--foreground-neutral-primary);background:var(--background-neutral-primary);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .ds-root pre,.ds-root pre code{font-family:var(--font-mono)}.ds-root code,.ds-root kbd{font-family:var(--font-sans)}
 .ds-root a{color:inherit}`;
 
@@ -43,6 +43,15 @@ for (const bad of [".header{", ".sidebar{", ".shell{", ".toc{", ".drawer{", ".dr
 }
 for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"]) {
   if (!out.includes(must)) throw new Error(`sync-css: 필수 규칙 없음: ${must}`);
+}
+
+/* base 는 손으로 쓴 규칙이라 토큰 개명을 따라가지 못한다 — 여기서 한 번 더 본다.
+   verify.js 도 dist 를 검사하지만, 그쪽은 사이트를 빌드해야 돌고 이쪽은 패키지만 빌드해도 돈다 */
+{
+  const decl = new Set([...out.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+  const dead = [...new Set([...out.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]))]
+    .filter((t) => !decl.has(t) && !t.startsWith("--prod-") && t !== "--p" && t !== "--checker-bg" && !t.startsWith("--cols"));
+  if (dead.length) throw new Error(`sync-css: 선언이 없는 토큰을 참조함: ${dead.join(" ")}`);
 }
 
 const dist = path.resolve(here, "..", "dist");

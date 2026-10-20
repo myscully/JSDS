@@ -87,7 +87,7 @@ if (!fs.existsSync(path.join(OUT, "resources/react.html"))) fails.push("resource
 if (!fs.existsSync(path.join(OUT, "home/getting-started.html"))) fails.push("home/getting-started.html 없음");
 else { const gs = article(read("home/getting-started.html")); for (const m of gs.matchAll(/data-copy="([^"]+)"/g)) if (!new RegExp(`id="${m[1]}"`).test(gs)) fails.push(`home/getting-started.html: data-copy 대상 #${m[1]} 없음`); if (/href="#\//.test(gs)) fails.push('home/getting-started.html: 변환되지 않은 href="#/"'); if (!/data-doctab="designer"/.test(gs) || !/class="guide-steps"/.test(gs)) fails.push("home/getting-started.html: 대상별 탭·단계 목록 없음"); if (!/id="platforms"/.test(gs) || !/1024–1279/.test(gs)) fails.push("home/getting-started.html: 지원 환경 표 없음"); }
 if (!/href="home\/getting-started\.html"/.test(read("index.html"))) fails.push("index.html: Getting started 링크 없음");
-// Foundations: Montage 구성(Overview + Base material 5) 그대로, 옛 페이지 없음
+// Foundations: 참조 구성(Overview + Base material 5) 그대로, 옛 페이지 없음
 const fnd = fs.readdirSync(path.join(OUT, "foundations")).filter(f => f.endsWith(".html")).sort().join(",");
 if (fnd !== "colors.html,elevation.html,grid.html,icons.html,index.html,overview.html,typography.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);
 for (const f of ["colors", "elevation", "grid", "icons", "typography"]) { const b = article(read(`foundations/${f}.html`)); if (!/<h2 /.test(b)) fails.push(`foundations/${f}.html: 섹션(h2) 없음`); if (/href="#\//.test(b)) fails.push(`foundations/${f}.html: 변환되지 않은 href="#/"`); }
@@ -158,10 +158,10 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
   }
 }
 
-/* 값 대조 — 시멘틱 75×2 와 램프가 참조 시스템(Montage)의 정의와 한 글자까지 같은지.
+/* 값 대조 — 시멘틱 75×2 와 램프가 참조 시스템의 정의와 한 글자까지 같은지.
    "값까지 동일하게 교체"가 이번 설계의 정의이므로 이것이 1차 방어선이다:
-   여기가 틀리면 대비·행동 검사가 다 통과해도 틀린 것이다. 정의는 montage-tokens.js 에 코드로 있다 */
-for (const d of require("./montage-tokens.js").diff(css)) fails.push(`참조 시스템과 다름 — ${d}`);
+   여기가 틀리면 대비·행동 검사가 다 통과해도 틀린 것이다. 정의는 reference-tokens.js 에 코드로 있다 */
+for (const d of require("./reference-tokens.js").diff(css)) fails.push(`참조 시스템과 다름 — ${d}`);
 
 /* CSS 안의 var() 가 전부 선언된 토큰을 가리키는지.
    센티넬 가드는 '쌍 선언에 등장하는 토큰'만 보고, data-token 가드는 HTML 속성만 본다 —
@@ -182,6 +182,39 @@ for (const d of require("./montage-tokens.js").diff(css)) fails.push(`참조 시
     const bad = [...new Set([...read(rel).matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]))]
       .filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
     for (const t of bad) fails.push(`${rel}: 인라인 style 이 var(${t}) 를 쓰는데 선언이 없다`);
+  }
+  /* 문서의 코드 예시(<pre>)가 **선언**하는 토큰도 본다. var() 가드는 쓰는 쪽만 보므로
+     '--accent-50:#EFF2FA' 처럼 죽은 이름을 선언만 하는 예시는 통과했다 —
+     Getting started 의 제품 컬러 CSS 가 개명 뒤로도 옛 열 단계를 그대로 싣고 있었다.
+     복사해 붙이라고 둔 코드라, 틀리면 그대로 제품에 들어간다 */
+  const unesc = (t) => t.replace(/<[^>]+>/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  for (const f of walk(OUT).filter((x) => x.endsWith(".html"))) {
+    const rel = path.relative(OUT, f);
+    const seen = new Set();
+    for (const m of read(rel).matchAll(/<pre[^>]*>([\s\S]*?)<\/pre>/g)) {
+      const code = unesc(m[1]);
+      for (const d of [...code.matchAll(/(--[a-z0-9-]+)\s*:/g), ...code.matchAll(/var\((--[a-z0-9-]+)/g)]) {
+        const t = d[1];
+        if (declared.has(t) || t.startsWith("--prod-") || LOCAL.includes(t) || seen.has(t)) continue;
+        seen.add(t);
+        fails.push(`${rel}: 코드 예시가 ${t} 를 쓰는데 선언에 없다 — 붙여 넣으면 아무 일도 하지 않는다`);
+      }
+    }
+  }
+  /* 패키지가 싣는 CSS 도 같은 검사를 받아야 한다. sync-css.mjs 가 손으로 쓴 base 규칙이
+     개명 뒤에도 옛 이름을 참조하고 있었고(.ds-root 의 글자·배경, 포커스 링), 사이트만 보는
+     가드로는 영영 안 잡힌다. dist 는 산출물이라 없을 수 있다 — 그때는 경고로 넘긴다 */
+  {
+    const distCss = path.resolve(__dirname, "..", "_react", "dist", "style.css");
+    if (!fs.existsSync(distCss)) warns.push("_react/dist/style.css 없음 — 패키지 CSS 검사를 건너뛴다(npm run build)");
+    else {
+      const d = fs.readFileSync(distCss, "utf8");
+      const dDecl = new Set([...d.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+      const dBad = [...new Set([...d.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]))]
+        .filter((t) => !dDecl.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
+      for (const t of dBad) fails.push(`_react/dist/style.css: var(${t}) 를 쓰는데 선언이 없다 — 패키지를 쓰는 앱에서 상속색으로 떨어진다`);
+    }
   }
 }
 

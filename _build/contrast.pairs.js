@@ -2,7 +2,7 @@
    사람이 숫자를 적지 않는다: 종전에는 페이지의 대비 수치가 네 번 낡았다.
    측정은 실제 생성 사이트에서 라이트·다크 × 제품 세 경우(기본 · 다른 제품 · 상태색과 겹치는 제품)로 전수 수행한다.
 
-   이번 라운드부터 토큰 값이 참조 시스템(Montage, wanteddev/montage-web)의 것이다.
+   이번 라운드부터 토큰 값이 참조 시스템의 것이다.
    그 값은 소비자 제품용이라 **우리 기준을 여럿 넘기지 못한다** — 라이트에서 상태색 글자가 2.2~3.4 다.
    값을 그대로 쓰기로 한 결정이므로 그 쌍들을 advisory 로 내린다. 지우지 않고 매 빌드 숫자를 보고한다 —
    숨기면 "검사하고 있다"고 착각하게 된다. advisory 가 붙은 줄마다 '왜'가 적혀 있어야 한다. */
@@ -12,7 +12,7 @@ const SURFACES = ["--background-neutral-primary", "--surface-elevated-primary", 
 const ACCENTS = ["lime", "cyan", "light-blue", "violet", "purple", "pink"];
 
 /* 참조 시스템이 **불투명으로 선언한** 토큰 — 알파가 섞여 들어오면 바탕마다 다르게 측정된다.
-   Montage 는 글자에도 알파를 쓰므로(foreground-neutral-secondary 가 88%) '글자는 솔리드' 규칙은 성립하지 않는다.
+   참조 시스템은 글자에도 알파를 쓰므로(foreground-neutral-secondary 가 88%) '글자는 솔리드' 규칙은 성립하지 않는다.
    대신 '원본이 불투명한 것은 불투명해야 한다'만 검사한다 — 알파 글자는 세 바탕 전부에서 따로 잰다 */
 const OPAQUE_ONLY = [
   ...SURFACES, "--surface-neutral-primary", "--surface-neutral-inverse", "--surface-elevated-secondary",
@@ -30,7 +30,7 @@ const OPAQUE_ONLY = [
 
 /* 참조 시스템 값이 우리 기준에 못 미쳐 advisory 로 내린 것들 — 사유를 한 줄씩 적는다 */
 const REF = (why) => ({ advisory: true, why });
-const REF_STATUS = REF("참조 시스템 값 — 라이트에서 2.2~3.4. Montage 는 이 색을 배너의 제목·아이콘에만 쓰고 칩 라벨에는 쓰지 않는다");
+const REF_STATUS = REF("참조 시스템 값 — 라이트에서 2.2~3.4. 참조 시스템은 이 색을 배너의 제목·아이콘에만 쓰고 칩 라벨에는 쓰지 않는다");
 const REF_ACCENT = REF("참조 시스템 값 — 장식 강조색이라 라이트에서 6 중 5가 4.5 미만이다");
 
 /* [전경, 바탕들, 최소 대비, 메모, 옵션] */
@@ -95,7 +95,7 @@ const separation = [
   ["--surface-cautionary-primary", SURFACES, { light: 1.05, dark: 1.05 }],
   ["--surface-negative-primary", SURFACES, { light: 1.05, dark: 1.05 }],
   ["--surface-negative-strong", SURFACES, { light: 1.08, dark: 1.08 }],
-  /* 눌림 단계 — 참조에 없어 우리가 더한 틴트다(montage-tokens.js 의 ADDITIONS) */
+  /* 눌림 단계 — 참조에 없어 우리가 더한 틴트다(reference-tokens.js 의 ADDITIONS) */
   ["--surface-negative-heavy", SURFACES, { light: 1.1, dark: 1.1 }],
   ["--surface-brand-subtle-strong", SURFACES, { light: 1.04, dark: 1.04 }],
   ...ACCENTS.map((c) => [`--surface-accent-${c}`, SURFACES, { light: 1.03, dark: 1.03 }]),

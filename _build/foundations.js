@@ -47,7 +47,7 @@ window.FOUNDATION_PAGES = function (H) {
 
     /* ================= Colors ================= */
     "foundations/colors": () => {
-      /* 절의 순서·제목·설명은 참조 시스템(Montage)의 Colors › Semantic 페이지를 그대로 따른다.
+      /* 절의 순서·제목·설명은 참조 시스템의 Colors › Semantic 구성을 그대로 따른다.
          값의 출처가 같으므로 설명도 같아야 한다 — 우리가 덧붙인 것은 Brand 절의 '제품 슬롯' 한 구절과 맨 끝의 Brand Mark 절뿐이다 */
       const A = ["Lime", "Cyan", "Light Blue", "Violet", "Purple", "Pink"];
       const akey = (n) => n.toLowerCase().replace(/ /g, "-");
