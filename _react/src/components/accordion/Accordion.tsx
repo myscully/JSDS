@@ -1,4 +1,4 @@
-import { forwardRef, type CSSProperties, type DetailsHTMLAttributes, type HTMLAttributes, type MouseEvent, type ReactNode, type SyntheticEvent } from "react";
+import { forwardRef, useRef, type CSSProperties, type DetailsHTMLAttributes, type HTMLAttributes, type MouseEvent, type ReactNode, type SyntheticEvent } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 
@@ -25,9 +25,20 @@ export const Accordion = forwardRef<HTMLDetailsElement, AccordionProps>(function
   ref,
 ) {
   const [isOpen, set] = useControllable<boolean>({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
+  /* details 는 브라우저가 DOM 을 먼저 토글한다. 제어 모드에서 부모가 open 을 그대로 두면
+     리렌더가 없어 React 가 되돌릴 기회가 없다 — 여기서 동기적으로 되돌린다.
+     되돌리면 toggle 이 한 번 더 나는데, 그 이벤트로 onOpenChange 가 두 번 불리지 않게 막는다 */
+  const reverting = useRef(false);
   const toggle = (e: SyntheticEvent<HTMLDetailsElement>) => {
+    const el = e.currentTarget;
+    if (reverting.current) { reverting.current = false; return; }
     (onToggle as ((ev: SyntheticEvent<HTMLDetailsElement>) => void) | undefined)?.(e);
-    set(e.currentTarget.open);
+    const next = el.open;
+    set(next);
+    if (open !== undefined && next !== open) {
+      reverting.current = true;
+      el.open = open;
+    }
   };
   const extraProps = name ? ({ name } as Record<string, string>) : {};
   /* disabled 는 summary 클릭을 삼켜 막는다 — CSS 의 pointer-events 는 마우스만 막고,
