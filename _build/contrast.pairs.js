@@ -52,10 +52,10 @@ const pairs = [
   ["--foreground-brand-inverse", ["--surface-neutral-inverse"], 4.5, "반전 표면 위 제품색 글자"],
   ["--foreground-positive-primary", [...SURFACES, "--surface-positive-primary"], 4.5, "긍정 글자·아이콘", REF_STATUS],
   ["--foreground-cautionary-primary", [...SURFACES, "--surface-cautionary-primary"], 4.5, "주의 글자·아이콘", REF_STATUS],
-  ["--foreground-negative-primary", [...SURFACES, "--surface-negative-primary"], 4.5, "부정 글자·아이콘", REF_STATUS],
+  ["--foreground-negative-primary", [...SURFACES, "--surface-negative-primary"], 4.5, "부정 아이콘·그래픽(글자는 strong)", REF_STATUS],
   /* 두 틴트 모두에 올라앉는다 — .btn.danger 가 이 글자를 8% 틴트(--surface-negative-primary) 위에 쓴다.
      강한 틴트만 재고 있어서 파괴적 버튼의 실제 라벨 대비를 아무도 측정하지 않았다 */
-  ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong", "--surface-negative-heavy"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨(rest·hover·pressed)", REF_STATUS],
+  ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong", "--surface-negative-heavy"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨(rest·hover·pressed). 라이트는 primary(3.44)보다 나아 글자에 쓰지만, 다크는 strong(red-50)이 primary(red-60)보다 어두워 elevated 위 4.63 · 위험 보조 버튼 hover 틴트 위 4.48 로 내려간다 — 참조 값을 바꾸지 않고 예외로 둔다", REF_STATUS],
   ...ACCENTS.map((c) => [`--foreground-accent-${c}`, [...SURFACES, `--surface-accent-${c}`], 4.5, "강조색 글자·아이콘", REF_ACCENT]),
   /* 제품 면 위 글자 — 참조 시스템은 두 테마 모두 static.white 다. 다크 면(blue 60)에서 3.54 로 떨어진다.
      면을 옮길 자리가 없다(-on 역할이 없다). 그래서 적응 대신 제약을 건다 —

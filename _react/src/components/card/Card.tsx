@@ -2,7 +2,7 @@ import { forwardRef, type ElementType, type HTMLAttributes } from "react";
 import { cx } from "../../utils/cx";
 
 export interface CardProps extends HTMLAttributes<HTMLElement> {
-  /** shadow 대신 1px 보더 (카드 위 카드) */
+  /** @deprecated 효과 없음 — 기본 카드가 이미 1px 보더입니다. 호환을 위해서만 남깁니다 */
   bordered?: boolean;
   /** padding 16 · 제목 14 */
   compact?: boolean;
@@ -21,7 +21,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   /** as="button" 일 때 — 폼 안에서는 명시 */
   type?: "button" | "submit";
 }
-/** 관련 정보와 액션을 묶는 컨테이너. Surface + shadow/1, radius/lg */
+/** 관련 정보와 액션을 묶는 컨테이너. Surface + 1px line/neutral/secondary 보더, radius/lg */
 export const Card = forwardRef<HTMLElement, CardProps>(function Card({ bordered, compact, flush, clickable, selected, loading, as, className, children, ...rest }, ref) {
   const Comp: ElementType = as ?? "div";
   /* 선택 카드는 button 이어야 Space 로도 눌리고 상태가 읽힌다 — .on 만으로는 보조기기에 전해지지 않는다 */

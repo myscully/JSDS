@@ -166,7 +166,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       labelRgb: res("var(--brand-label)"), fgRgb: res("var(--foreground-brand-primary)"),
       subtleRgb: res("var(--surface-brand-subtle)"), invRgb: res("var(--foreground-brand-inverse)"),
       bgInverse: res("var(--surface-neutral-inverse)"),
-      canvas: res("var(--background-neutral-primary)"), card: res("var(--surface-elevated-primary)"), panel: res("var(--background-neutral-secondary)"),
+      canvas: res("var(--background-neutral-primary)"), card: res("var(--surface-elevated-primary)"), subtle: res("var(--background-neutral-secondary)"),
     };
   });
   const goDark = async () => { await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(250); return readTokens(); };
@@ -208,9 +208,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     }
     // 글자로 보정할 수 없는 자리 — 지표·포커스 링은 3:1, 패널 위 텍스트는 4.5
     ok(`dark ${n} brand graphic clears 3:1 on every surface`,
-      Math.min(ratio(D.fgRgb, D.canvas), ratio(D.fgRgb, D.card), ratio(D.fgRgb, D.panel)) >= 3,
-      `${ratio(D.fgRgb, D.canvas)} · ${ratio(D.fgRgb, D.card)} · ${ratio(D.fgRgb, D.panel)}`);
-    ok(`dark ${n} brand text clears AA on the panel`, ratio(D.fgRgb, D.panel) >= 4.5, `${ratio(D.fgRgb, D.panel)}`);
+      Math.min(ratio(D.fgRgb, D.canvas), ratio(D.fgRgb, D.card), ratio(D.fgRgb, D.subtle)) >= 3,
+      `${ratio(D.fgRgb, D.canvas)} · ${ratio(D.fgRgb, D.card)} · ${ratio(D.fgRgb, D.subtle)}`);
+    ok(`dark ${n} brand text clears AA on the subtle background`, ratio(D.fgRgb, D.subtle) >= 4.5, `${ratio(D.fgRgb, D.subtle)}`);
     /* 옅은 제품 면(선택 행)은 알파라 캔버스 위에 합성해서 재야 한다 — 원문 값으로 재면 color-mix 문자열이 그대로 들어온다.
        참조 시스템의 5% 는 아주 옅어서 분리 바닥을 1.02 로 두었다(contrast.pairs.js) */
     ok(`dark ${n} selected background stays visible on the canvas`,
@@ -440,10 +440,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const textDark = await page.evaluate(() => {
     const e = document.querySelector("#ex-button-variant .btn.text");
     const res = (tok) => { const d = document.createElement("div"); d.style.color = tok; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
-    return { fg: getComputedStyle(e).color, panel: res("var(--background-neutral-secondary)"), canvas: res("var(--background-neutral-primary)") };
+    return { fg: getComputedStyle(e).color, subtle: res("var(--background-neutral-secondary)"), canvas: res("var(--background-neutral-primary)") };
   });
-  ok("text button meets AA on a dark panel", ratio(textDark.fg, textDark.panel) >= 4.5 && ratio(textDark.fg, textDark.canvas) >= 4.5,
-    `panel ${ratio(textDark.fg, textDark.panel)} · canvas ${ratio(textDark.fg, textDark.canvas)}`);
+  ok("text button meets AA on the dark subtle background", ratio(textDark.fg, textDark.subtle) >= 4.5 && ratio(textDark.fg, textDark.canvas) >= 4.5,
+    `subtle ${ratio(textDark.fg, textDark.subtle)} · canvas ${ratio(textDark.fg, textDark.canvas)}`);
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
 
@@ -474,7 +474,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
     const out = {
-      canvas: res("var(--background-neutral-primary)"), surface: res("var(--surface-elevated-primary)"), panel: res("var(--background-neutral-secondary)"),
+      canvas: res("var(--background-neutral-primary)"), surface: res("var(--surface-elevated-primary)"), subtle: res("var(--background-neutral-secondary)"),
       label: res("var(--foreground-neutral-primary)"),
     };
     for (const f of fam) out[f] = {
@@ -494,12 +494,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       ok(`${theme} ${f} has a tint, a foreground and a line`, !!(t.surface && t.fg && t.line), JSON.stringify([t.surface, t.fg, t.line]));
       ok(`${theme} ${f} foreground is opaque`, !/rgba|\/\s*0?\.\d/.test(t.fgRgb), t.fgRgb);
       /* 틴트가 세 바탕 모두에서 보여야 한다 — 안 보이면 태그가 아예 없는 것과 같다 */
-      const seen = Math.min(ratio(t.surfaceRgb, st.canvas, st.canvas), ratio(t.surfaceRgb, st.surface, st.surface), ratio(t.surfaceRgb, st.panel, st.panel));
+      const seen = Math.min(ratio(t.surfaceRgb, st.canvas, st.canvas), ratio(t.surfaceRgb, st.surface, st.surface), ratio(t.surfaceRgb, st.subtle, st.subtle));
       ok(`${theme} ${f} tint stays visible on every surface`, seen >= 1.05, String(seen));
       /* 틴트 위의 **라벨**이 읽히는가 — 라벨은 중립 글자색이다(참조 시스템의 Chip 패턴).
          상태색 전경을 라벨로 쓰면 라이트에서 2.1~3.4 로 떨어진다. 그 차이를 숫자로 같이 남긴다 */
-      const onTint = Math.min(ratio(st.label, t.surfaceRgb, st.canvas), ratio(st.label, t.surfaceRgb, st.panel));
-      const ifColoured = Math.min(ratio(t.fgRgb, t.surfaceRgb, st.canvas), ratio(t.fgRgb, t.surfaceRgb, st.panel));
+      const onTint = Math.min(ratio(st.label, t.surfaceRgb, st.canvas), ratio(st.label, t.surfaceRgb, st.subtle));
+      const ifColoured = Math.min(ratio(t.fgRgb, t.surfaceRgb, st.canvas), ratio(t.fgRgb, t.surfaceRgb, st.subtle));
       ok(`${theme} ${f} tag label clears AA on its own tint`, onTint >= 4.5,
         `중립 라벨 ${onTint} · 상태색 라벨이었다면 ${ifColoured}`);
     }
@@ -602,7 +602,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       out.tok[l] = { dot: res("var(" + DOT + ")"), tint: res("var(" + TINT + ")"), surface: res("var(" + SOLID + ")"),
         label: res("var(--foreground-neutral-primary)") };
     }
-    out.panel = res("var(--background-neutral-secondary)"); out.canvas = res("var(--background-neutral-primary)"); out.surface = res("var(--surface-elevated-primary)");
+    out.subtle = res("var(--background-neutral-secondary)"); out.canvas = res("var(--background-neutral-primary)"); out.surface = res("var(--surface-elevated-primary)");
     return out;
   }, LVL);
   for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
@@ -617,8 +617,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       ok(`${theme} ${l} solid tag label clears AA on its fill`, ratio(t.v[l].solid.fg, t.v[l].solid.bgEff) >= 4.5,
         `${ratio(t.v[l].solid.fg, t.v[l].solid.bgEff)} · ${t.v[l].solid.fg} / ${t.v[l].solid.bgEff}`);
       // 채운 태그의 면이 자기 면 토큰이어야 한다 — 규칙이 빠지면 조용히 중립 면으로 떨어진다
-      ok(`${theme} ${l} solid tag uses its own surface token`, t.v[l].solid.bg === t.tok[l].surface && t.v[l].solid.bg !== t.panel,
-        `${t.v[l].solid.bg} · surface ${t.tok[l].surface} · panel ${t.panel}`);
+      ok(`${theme} ${l} solid tag uses its own surface token`, t.v[l].solid.bg === t.tok[l].surface && t.v[l].solid.bg !== t.subtle,
+        `${t.v[l].solid.bg} · surface ${t.tok[l].surface} · subtle ${t.subtle}`);
       /* 라벨은 네 등급 모두 중립 글자색이다 — 색은 점이 나른다. 점이 등급 색이어야 색 단서가 남는다 */
       ok(`${theme} ${l} tag carries its rank colour in the dot, not the label`,
         t.v[l].subtle.dot === t.tok[l].dot && t.v[l].subtle.fg === t.tok[l].label,
@@ -885,13 +885,13 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const foot390 = await footFit();
   ok("card foot stays inside at 390", foot390.바깥으로 <= 0, JSON.stringify(foot390));
   await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
-  // .bordered 는 "shadow 대신 보더" 이므로 선택돼도 shadow/1 이 돌아오면 안 된다
+  // 카드는 보더로 구획한다 — 선택돼도 shadow/1 이 붙으면 안 된다(호환용 .bordered 도 같다)
   const bOn = await page.evaluate(() => {
     const prev = document.querySelector("#ex-card-variant .example-preview");
-    const mk = (cls) => { const c = prev.querySelector(".card.bordered").cloneNode(true); c.className = cls; prev.append(c); const st = getComputedStyle(c); return { shadow: st.boxShadow, border: st.borderWidth, bg: st.backgroundColor }; };
+    const mk = (cls) => { const c = prev.querySelector(".card").cloneNode(true); c.className = cls; prev.append(c); const st = getComputedStyle(c); return { shadow: st.boxShadow, border: st.borderWidth, bg: st.backgroundColor }; };
     return { on: mk("card bordered on"), plain: mk("card on") };
   });
-  ok("bordered+selected keeps the ring only", bOn.on.shadow.includes("inset") && !/1px 3px/.test(bOn.on.shadow) && bOn.on.border === "1px" && /1px 3px/.test(bOn.plain.shadow), JSON.stringify(bOn));
+  ok("selected card keeps the ring only", [bOn.on, bOn.plain].every((x) => x.shadow.includes("inset") && !/1px 3px/.test(x.shadow) && x.border === "1px"), JSON.stringify(bOn));
   // loading 예제
   const ld = await page.evaluate(() => {
     const c = document.querySelector("#ex-card-loading .card");
