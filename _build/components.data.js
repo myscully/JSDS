@@ -50,7 +50,7 @@ const COMPONENTS = {
           <button type="button" class="btn md danger secondary" disabled>Danger outline</button>
           <button type="button" class="btn md text" disabled>Text</button>
         </div>` , layout: "stack" },
-      { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(8px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
+      { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(16px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
         <div class="btn-group">
           <button type="button" class="btn md text">초기화</button>
           <button type="button" class="btn md secondary">취소</button>
@@ -63,12 +63,12 @@ const COMPONENTS = {
       ["size", "sm | md | lg", "md", "높이 36 / 44 / 52"],
       [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
       [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
-      [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(8px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
+      [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(16px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
       ["disabled", "attribute", "—", "비활성. 전용 토큰 — fill 은 <code>--surface-disable-primary</code> 면 + <code>--foreground-disable-primary</code> 라벨, outline 은 면을 비우고 보더만 회색. 투명도를 덮지 않아 변형마다 다른 색이 남지 않습니다"],
       ["type", "button | submit | reset", "button", "폼 안에서는 명시"],
     ],
     spec: [["State", "면은 기준 단계에서 <b>글자색 반대 방향</b>으로. fill: primary <code>--surface-brand-primary</code> → <code>-hover</code> → <code>-pressed</code> / danger 동일. outline·tertiary: 반투명 <code>--surface-neutral-tertiary</code> .03 → <code>--surface-neutral-secondary</code> .05 → <code>--surface-neutral-strong</code> .10. text: 라벨 <code>--foreground-brand-primary</code>, hover <code>--surface-brand-subtle</code>, pressed <code>--surface-neutral-strong</code>. 비활성은 전용 토큰, 포커스는 전 변형 공통 <code>--foreground-brand-primary</code> 2px"], ["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"], ["Label", "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
-    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--surface-brand-primary", fg: "--brand-label" }, secondary: { bg: "transparent", fg: "--foreground-neutral-primary", stroke: "--line-neutral-primary" }, tertiary: { bg: "--surface-neutral-tertiary", fg: "--foreground-neutral-primary" }, text: { bg: "transparent", fg: "--foreground-brand-primary" }, danger: { bg: "--surface-negative-strong", fg: "--foreground-neutral-primary" }, "danger secondary": { bg: "transparent", fg: "--foreground-negative-primary", stroke: "--surface-negative-strong" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"], disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary", outlineBg: "transparent", outlineStroke: "--surface-disable-primary" } },
+    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--surface-brand-primary", fg: "--brand-label" }, secondary: { bg: "transparent", fg: "--foreground-neutral-primary", stroke: "--line-neutral-primary" }, tertiary: { bg: "--surface-neutral-tertiary", fg: "--foreground-neutral-primary" }, text: { bg: "transparent", fg: "--foreground-brand-primary" }, danger: { bg: "--surface-negative-strong", fg: "--foreground-neutral-primary" }, "danger secondary": { bg: "transparent", fg: "--foreground-negative-strong", stroke: "--surface-negative-strong" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"], disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary", outlineBg: "transparent", outlineStroke: "--surface-disable-primary" } },
   },
 
   /* ------------------------------------------------ Text Field */
@@ -179,7 +179,7 @@ const COMPONENTS = {
     ],
     props: [[".select-btn", "container", "—", "role=group. 버튼 2~5개"], [".outline", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-pressed=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
     spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 36"], ["Container", "radius/md 6 · surface/neutral/strong"], ["Label", "Label/1 13.5 Medium · 선택 Semibold"], ["Placement", "카드 헤더 우측, 툴바"]],
-    figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--surface-neutral-strong" }, outline: { stroke: "--line-neutral-primary" } }, states: ["default", "selected", "disabled"] },
+    figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--surface-neutral-secondary" }, outline: { stroke: "--line-neutral-primary" } }, states: ["default", "selected", "disabled"] },
   },
 
   /* ------------------------------------------------ Slider */
@@ -519,7 +519,7 @@ const COMPONENTS = {
             <li class="menu-item" role="option">인사팀</li>
             <li class="menu-item" role="option">법무팀</li>
           </ul>
-        </div>`, layout: "tall top" },
+        </div>`, layout: "top" },
       { id: "open", title: "Open / Selected", desc: "닫힘과 열림을 나란히 둔 모습입니다. 열린 메뉴는 role=listbox, 고른 항목은 .on + aria-selected.", html: `
         <div class="dropdown">
           <button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false"><span class="placeholder">그룹 선택</span></button>
@@ -802,7 +802,7 @@ const COMPONENTS = {
       ["summary small", "element", "—", "우측 보조 정보(React <code>extra</code>). 제목 앞 아이콘은 <code>summary &gt; svg</code> 로 두면 16~18 로 고정됩니다"],
       [".body", "element", "—", "본문. 높이를 제한하려면 <code>max-height</code> + <code>overflow</code>(React <code>bodyStyle</code>)"],
       [".accordion-group", "container", "—", "여러 항목 묶음(8px 간격). React <code>AccordionGroup</code>"],
-      [".accordion-group.flat", "boolean", "false", "카드형 묶음 — 간격 0 에 Surface 배경 · 좌우 20 · radius/lg. 항목에는 <code>.flat</code> 을 함께"],
+      [".accordion-group.flat", "boolean", "false", "카드형 묶음 — 간격 0 에 Surface 배경 · 1px line/neutral/secondary 보더 · 좌우 20 · radius/lg. 항목에는 <code>.flat</code> 을 함께"],
     ],
     spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · line/neutral/secondary"], ["Label", "Title/1 16 Semibold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전"]],
     figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--line-neutral-secondary" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
@@ -811,10 +811,10 @@ const COMPONENTS = {
   /* ------------------------------------------------ Card */
   "card": {
     status: "ready", react: ["Card","CardHead","CardTitle","CardDesc","CardFoot","CardGrid"], css: [".card", ".card-grid"],
-    desc: "관련 정보와 액션을 한 덩어리로 묶는 컨테이너입니다. 보더 대신 Surface 배경 + shadow/1 로 구획합니다.",
+    desc: "관련 정보와 액션을 한 덩어리로 묶는 컨테이너입니다. Surface 배경 + 1px line/neutral/secondary 보더로 구획합니다.",
     thumb: `<div class="card compact" style="min-width:200px"><div class="card-head"><h3 class="title" style="font-size:14px">라이선스</h3><span class="tag ok sm">정상</span></div><p class="desc" style="font-size:12px">2026-12-31 만료</p></div>`,
     examples: [
-      { id: "basic", title: "Default", desc: "head(제목 + 상태) · desc · foot(액션 우측). 보더 없이 Surface 배경과 shadow/1 로 구획합니다.", html: `
+      { id: "basic", title: "Default", desc: "head(제목 + 상태) · desc · foot(액션 우측). Surface 배경과 1px 보더로 구획하고 그림자는 두지 않습니다.", html: `
         <div class="card" style="width:360px">
           <div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div>
           <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
@@ -826,8 +826,7 @@ const COMPONENTS = {
           <div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div>
           <p class="desc">이번 주 탐지 <b>412</b>건, 지난주보다 18% 증가</p>
         </div>` },
-      { id: "variant", title: "Bordered / Compact", desc: "카드 위에 카드를 겹칠 때는 .bordered, 밀도 높은 그리드는 .compact.", html: `
-        <div class="card bordered" style="width:280px"><h3 class="title">Bordered</h3><p class="desc">그림자 대신 1px 보더</p></div>
+      { id: "variant", title: "Compact", desc: "밀도 높은 그리드는 .compact. 카드 위에 카드를 겹쳐도 기본 카드의 1px 보더로 구분됩니다.", html: `
         <div class="card compact" style="width:280px"><h3 class="title">Compact</h3><p class="desc">padding 16 · 제목 14</p></div>` },
       { id: "clickable", title: "Clickable / Selected", desc: "카드 전체가 눌리면 .clickable. 이동이면 a, 선택이면 button + aria-pressed 로 두고 선택된 것에 .on 을 줍니다.", html: `
         <div class="card-grid" style="max-width:600px">
@@ -844,7 +843,7 @@ const COMPONENTS = {
     props: [
       [".card", "container", "—", "flex column · gap 12 · padding 24 · 최소 폭 260. React <code>Card</code>"],
       [".card-head / .title / .desc / .card-foot", "elements", "—", "헤더(양끝 정렬) / 제목 Title/1 16·24 / 설명 Body/2 14 / 푸터 우측 정렬 — React <code>CardHead</code>·<code>CardTitle</code>·<code>CardDesc</code>·<code>CardFoot</code>"],
-      [".bordered", "boolean", "false", "shadow 대신 1px 보더. 카드 위에 카드를 겹칠 때"],
+      [".bordered", "boolean", "false", "<b>호환용 — 효과 없음.</b> 기본 카드가 이미 1px 보더라 새 코드에서는 쓰지 않습니다"],
       [".compact", "boolean", "false", "padding 16 · gap 8 · 제목 14(Title/2)"],
       [".flush", "boolean", "false", "padding·gap 0 — 표나 목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖습니다"],
       [".clickable", "boolean", "false", "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. React <code>clickable</code> + <code>as</code>"],
@@ -853,8 +852,8 @@ const COMPONENTS = {
       ["aria-busy", "attribute", "—", "불러오는 중 — 내용 대신 <code>.skeleton</code> 을 넣고 컨테이너에 둡니다. React <code>loading</code> 이 둘을 함께 처리합니다"],
       [".card-grid", "container", "—", "auto-fill minmax(260px,1fr) 그리드 · gap 20. React <code>CardGrid</code>"],
     ],
-    spec: [["Size", "최소 폭 260 · padding 24 (compact 16 · flush 0)"], ["Container", "radius/lg 8 · shadow/1 · surface/elevated/primary"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"], ["Motion", "clickable 은 --motion-fast 로 shadow/1 → shadow/2"]],
-    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-elevated-primary", shadow: "--shadow-1" }, bordered: { stroke: "--line-neutral-secondary" } }, states: ["default", "hover", "selected", "focused", "loading"] },
+    spec: [["Size", "최소 폭 260 · padding 24 (compact 16 · flush 0)"], ["Container", "radius/lg 8 · 1px line/neutral/secondary · surface/elevated/primary"], ["Label", "제목 Title/1 16 Semibold · 설명 Body/2 14"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"], ["Motion", "clickable 은 --motion-fast 로 그림자 없음 → shadow/2"]],
+    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-secondary" }, bordered: { stroke: "--line-neutral-secondary" } }, states: ["default", "hover", "selected", "focused", "loading"] },
   },
 
   /* ------------------------------------------------ Popup */
@@ -986,7 +985,7 @@ const COMPONENTS = {
           <div class="skeleton-row"><span class="skeleton circle"></span><div class="lines"><span class="skeleton title"></span><span class="skeleton text"></span></div></div>
           <div class="skeleton-row"><span class="skeleton circle"></span><div class="lines"><span class="skeleton title"></span><span class="skeleton text short"></span></div></div>
           <span class="skeleton rect"></span>
-        </div>`, layout: "white" },
+        </div>` },
       { id: "progress", title: "Progress", desc: "진행률을 알 때. 배포·검사 진행. 완료는 success, 실패는 danger.", html: `
         <div style="width:100%;max-width:480px;display:flex;flex-direction:column;gap:20px">
           <div class="progress-row"><div class="row"><span>정책 배포 중</span><span>842 / 1,284</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"><i style="width:66%"></i></div></div>
@@ -1249,7 +1248,7 @@ const COMPONENTS = {
   "data-visual": {
     status: "ready", react: ["Kpi","KpiGrid","ChartCard","BarChart","Donut","DonutRow","ChartLegend","Sparkline"], css: [".kpi", ".kpi-grid", ".chart", ".chart-card", ".donut", ".donut-row", ".chart-legend", ".sparkline"],
     desc: "대시보드의 수치·추이·비율을 보여줍니다. KPI 카드, 가로 막대, 도넛, 스파크라인을 CSS 만으로 구성하며 색은 심각도 토큰을 그대로 씁니다.",
-    thumb: `<div class="kpi compact" style="padding:12px 14px;min-width:120px"><span class="label">Critical</span><span class="value" style="font-size:24px;color:var(--foreground-negative-primary)">1,284</span></div>`,
+    thumb: `<div class="kpi compact" style="padding:12px 14px;min-width:120px"><span class="label">Critical</span><span class="value" style="font-size:24px;color:var(--foreground-negative-strong)">1,284</span></div>`,
     examples: [
       { id: "default", title: "Default", desc: "값 하나를 보여 주는 기본 KPI 입니다.", html: `<div class="kpi" style="max-width:240px"><span class="label">연결 에이전트</span><span class="value">1,247</span></div>` },
       { id: "kpi", title: "KPI", desc: "라벨 · 값 · 증감. 보안 지표는 증가가 위험(.up 빨강), 감소가 좋음(.down 초록).", html: `
@@ -1285,8 +1284,8 @@ const COMPONENTS = {
       { id: "spark", title: "Sparkline", desc: "카드 안 소형 추이. 강조 막대는 .hi.", html: `
         <div class="kpi" style="min-width:260px"><span class="label">일별 탐지</span><span class="value">412</span><div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div></div>` },
     ],
-    props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".chart-card", "container", "—", "차트를 담는 카드. Card 와 같은 Surface·radius/lg·shadow/1 이고 padding 20 24 · gap 16 입니다. React <code>ChartCard</code>"], [".sparkline", "div", "—", "i height% 막대, .hi 강조"]],
-    spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·shadow/1, 다만 padding 20 24 · gap 16"], ["Label", "Caption 12.5 tertiary · 값 tabular"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열"]],
+    props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".chart-card", "container", "—", "차트를 담는 카드. Card 와 같은 Surface·radius/lg·1px 보더이고 padding 20 24 · gap 16 입니다. React <code>ChartCard</code>"], [".sparkline", "div", "—", "i height% 막대, .hi 강조"]],
+    spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·1px 보더, 다만 padding 20 24 · gap 16"], ["Label", "Caption 12.5 tertiary · 값 tabular"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열"]],
     figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, bar: {}, donut: {}, sparkline: {} }, states: ["default"] },
   },
 };
