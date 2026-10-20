@@ -15,7 +15,7 @@ const ICON_NAMES = [
   // 탐색 · 화살표
   "chevron-left", "chevron-right", "chevron-up", "chevron-down", "chevrons-left", "chevrons-right", "arrow-left", "arrow-right", "arrow-up",
   "arrow-down", "arrow-narrow-left", "arrow-narrow-right", "arrow-up-right", "arrow-down-right", "arrow-back-up", "arrow-forward-up", "arrows-sort",
-  "sort-ascending", "sort-descending", "arrows-maximize", "arrows-minimize", "maximize", "minimize", "switch-horizontal",
+  "sort-ascending", "sort-descending", "slash", "arrows-maximize", "arrows-minimize", "maximize", "minimize", "switch-horizontal",
   // 상태 · 피드백
   "info-circle", "info-square", "alert-triangle", "alert-circle", "alert-octagon", "circle-check", "circle-x", "circle-minus", "circle-plus",
   "help-circle", "exclamation-circle", "ban", "forbid", "progress", "hourglass", "loader-2", "rotate", "repeat",
