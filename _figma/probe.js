@@ -122,7 +122,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [] };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [] };
 for (const p of figma.root.children) {
   if (!CURRENT_PAGES.includes(p.name)) continue;
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
@@ -132,7 +132,7 @@ for (const p of figma.root.children) {
       const foot = kid("Foot"), actions = kid("Actions");
       return {
         id: c.id, name: c.name, fill: paint(c.fills), stroke: paint(c.strokes),
-        sw: c.strokeWeight === figma.mixed ? "mixed" : c.strokeWeight, shadow: shadows(c),
+        sw: c.strokeWeight === figma.mixed ? "mixed" : c.strokeWeight, shadow: shadows(c), opacity: +c.opacity.toFixed(2),
         gap: "itemSpacing" in c ? c.itemSpacing : null,
         foot: foot ? foot.itemSpacing : null, actions: actions ? actions.itemSpacing : null,
       };
@@ -141,7 +141,31 @@ for (const p of figma.root.children) {
   /* 글자에 negative/primary 가 묶이면 안 된다 — 저장소 규칙이 "글자는 strong, primary 는 아이콘·그래픽" 이다 */
   const inInstance = (n) => { for (let q = n.parent; q && q.type !== "PAGE"; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
   for (const t of p.findAllWithCriteria({ types: ["TEXT"] })) {
-    if (!inInstance(t) && paint(t.fills).includes("foreground/negative/primary")) components.negText.push(t.id);   // 인스턴스는 원본을 고치면 따라온다
+    if (inInstance(t)) continue;   // 인스턴스는 원본을 고치면 따라온다
+    const f = paint(t.fills);
+    if (f.includes("foreground/negative/primary")) components.negText.push(t.id);
+    if (/\$surface\//.test(f)) components.textOnSurface.push(t.id);   // 글자에 면 토큰 — 라이트는 같아 보여도 다크에서 갈린다
+  }
+  /* 저장소에 없는 변수를 물고 있는 노드 — opaque 보더와 옛 변수 층(color/* · site/*)이 여기 걸린다 */
+  for (const n of p.findAll((k) => ("fills" in k || "strokes" in k) && !inInstance(k))) {
+    for (const arr of [n.fills, n.strokes]) {
+      if (!arr || arr === figma.mixed) continue;
+      for (const pt of arr) {
+        const v = pt.boundVariables && pt.boundVariables.color && byId.get(pt.boundVariables.color.id);
+        if (!v) continue;
+        const bucket = /-opaque$/.test(v.name) ? components.opaque : /^color\/(semantic|atomic)\//.test(v.name) ? null : components.legacy;
+        if (!bucket) continue;
+        const e = bucket[v.name] || (bucket[v.name] = { n: 0, ids: [] });
+        e.n++; if (e.ids.length < 4) e.ids.push(n.id);
+      }
+    }
+  }
+  /* 섹션 세로 간격 — 겹침이 0 이어도 간격이 들쭉날쭉하면 다음 사람이 기준을 모른다 */
+  const secs = p.children.filter((n) => n.type === "SECTION" && n.visible !== false).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < secs.length; i++) {
+    const a = secs[i - 1], b = secs[i];
+    if (Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) <= 0) continue;   // 옆 칸에 놓인 섹션은 세로 간격 대상이 아니다
+    components.sections.push({ page: p.name, a: a.name, b: b.name, gap: Math.round(b.y - (a.y + a.height)) });
   }
 }
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
