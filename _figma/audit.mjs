@@ -220,7 +220,7 @@ function diffComponents(c, want, bad, notes) {
   }
   if (c.textOnSurface === undefined) notes.push("덤프에 글자 토큰·옛 변수·섹션 간격 조사가 없습니다 — 옛 probe.js 로 만든 덤프입니다");
   if ((c.textOnSurface || []).length) bad.push(`글자에 surface/* 토큰 ${c.textOnSurface.length}개 — 글자는 foreground (${c.textOnSurface.slice(0, 6).join(" ")}${c.textOnSurface.length > 6 ? " …" : ""})`);
-  for (const [name, e] of Object.entries(c.opaque || {})) bad.push(`저장소에 없는 opaque 토큰 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
+  for (const [name, e] of Object.entries(c.opaque || {})) bad.push(`컴포넌트 CSS 가 쓰지 않는 opaque 토큰 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
   for (const [name, e] of Object.entries(c.legacy || {})) bad.push(`현재 페이지에 옛 변수 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
   for (const s of c.sections || []) if (s.gap !== want.sectionGap) bad.push(`섹션 간격 ${s.page}: ${s.a} → ${s.b} ${s.gap} ≠ ${want.sectionGap}`);
   if ((c.negText || []).length) bad.push(`글자에 foreground/negative/primary ${c.negText.length}개 — 저장소는 글자에 strong (${c.negText.slice(0, 6).join(" ")}${c.negText.length > 6 ? " …" : ""})`);
