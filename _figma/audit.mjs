@@ -161,6 +161,19 @@ function componentsExpect() {
       Default: figTok(cssRule(".btn.danger").background), Hover: figTok(cssRule(".btn.danger:hover").background), Pressed: figTok(cssRule(".btn.danger:active").background),
     },
     dangerSecondary: { Hover: figTok(cssRule(".btn.danger.secondary:hover").background), Pressed: figTok(cssRule(".btn.danger.secondary:active").background) },
+    /* 비활성 — opacity 로 흐리지 않고 전용 토큰으로 칠한다(CLAUDE.md). 투명 변형은 면이 없고 secondary 계열은 보더만 남는다 */
+    disabled: (() => {
+      const d = (s) => cssRule(`.btn${s}[disabled],.btn${s}[aria-disabled="true"]`);
+      const base = d(""), sec = d(".secondary"), dsec = d(".danger.secondary"), txt = d(".text");
+      const face = (r) => (r.background === "transparent" ? "-" : figTok(r.background || base.background));
+      const line = (r) => (r["border-color"] && r["border-color"] !== "transparent" ? figTok(r["border-color"]) : null);
+      return {
+        "Primary": { fill: face(base), stroke: null }, "Tertiary": { fill: face(base), stroke: null }, "Danger": { fill: face(base), stroke: null },
+        "Secondary": { fill: face(sec), stroke: line(sec) }, "Danger Secondary": { fill: face(dsec), stroke: line(dsec) }, "Text": { fill: face(txt), stroke: null },
+      };
+    })(),
+    /* Figma 레이아웃 규칙 — CSS 에 없는 값이라 여기 상수로 둔다. 출처: .claude/agents/figma-sync.md "섹션 간격은 200px" */
+    sectionGap: 200,
     /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
     requiredSets: ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group"],
   };
@@ -196,6 +209,20 @@ function diffComponents(c, want, bad, notes) {
     const st = state(v.name);
     if ((st === "Hover" || st === "Pressed") && !v.fill.includes("$" + want.dangerSecondary[st])) bad.push(`Danger Secondary ${st} 면 ${v.fill} ≠ ${want.dangerSecondary[st]} — ${v.name} (${v.id})`);
   }
+  for (const v of btn.filter((x) => /State=Disabled/.test(x.name))) {
+    const m = /Variant=(Primary|Secondary|Tertiary|Text|Danger Secondary|Danger)(?=,|$)/.exec(v.name);
+    const w = m && want.disabled[m[1]];
+    if (!w) continue;
+    if (v.opacity !== undefined && v.opacity < 1) bad.push(`Disabled 를 opacity ${v.opacity} 로 흐림 — ${v.name} (${v.id})`);
+    const fillOk = w.fill === "-" ? v.fill === "-" : v.fill.includes("$" + w.fill);
+    if (!fillOk) bad.push(`Disabled 면 ${v.fill} ≠ ${w.fill === "-" ? "없음" : w.fill} — ${v.name} (${v.id})`);
+    if (w.stroke && !v.stroke.includes("$" + w.stroke)) bad.push(`Disabled 보더 ${v.stroke} ≠ ${w.stroke} — ${v.name} (${v.id})`);
+  }
+  if (c.textOnSurface === undefined) notes.push("덤프에 글자 토큰·옛 변수·섹션 간격 조사가 없습니다 — 옛 probe.js 로 만든 덤프입니다");
+  if ((c.textOnSurface || []).length) bad.push(`글자에 surface/* 토큰 ${c.textOnSurface.length}개 — 글자는 foreground (${c.textOnSurface.slice(0, 6).join(" ")}${c.textOnSurface.length > 6 ? " …" : ""})`);
+  for (const [name, e] of Object.entries(c.opaque || {})) bad.push(`저장소에 없는 opaque 토큰 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
+  for (const [name, e] of Object.entries(c.legacy || {})) bad.push(`현재 페이지에 옛 변수 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
+  for (const s of c.sections || []) if (s.gap !== want.sectionGap) bad.push(`섹션 간격 ${s.page}: ${s.a} → ${s.b} ${s.gap} ≠ ${want.sectionGap}`);
   if ((c.negText || []).length) bad.push(`글자에 foreground/negative/primary ${c.negText.length}개 — 저장소는 글자에 strong (${c.negText.slice(0, 6).join(" ")}${c.negText.length > 6 ? " …" : ""})`);
 }
 
