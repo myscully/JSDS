@@ -42,17 +42,17 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 61 · verify 0/0 · contrast 786쌍 실패 0 · advisory 258 · behave 281/281 · react 196+3
+pages 61 · verify 0/0 · contrast 822쌍 실패 0 · advisory 294 · behave 281/281 · react 196+3
 ```
 
-`advisory 258` 은 참조 시스템 값을 따르느라 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된
+`advisory 294` 는 참조 시스템 값을 따르느라 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된
 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
 ## 토큰 체계 (v0.8)
 
 - **Atomic** `--{램프}-{단계}` — 램프 13개, **숫자가 클수록 밝습니다**. 컴포넌트에서 직접 쓰지 않습니다.
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
-  여섯 그룹 **77개** + 트리 밖 3개(`--brand-label` · `--company-mark` · `--company-mark-subtle`) = **80**.
+  여섯 그룹 **79개**(참조 75 + 더한 4) + 트리 밖 3개(`--brand-label` · `--company-mark` · `--company-mark-subtle`) = **82**.
 - **제품 색**은 `--prod-40~60` 다섯 단계로 주입되고 `brand` 계열이 따라옵니다.
   **제품 색 위의 흰 글자가 4.5 를 넘어야 하고 빌드가 검사합니다**(`verify.js`).
 - 비활성은 `--surface-disable-primary` · `--foreground-disable-primary` 로 칠합니다. `opacity` 로

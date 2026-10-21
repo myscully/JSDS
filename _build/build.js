@@ -154,7 +154,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 - \`assets/icons/outline\` \`assets/icons/filled\` — Tabler Icons(MIT) 중 **사이트가 쓰는 것만**(원본, 빌드가 건드리지 않음). 목록은 \`_build/icons.js\` 의 \`ICON_NAMES\`, 갤러리는 Foundations › Icons. **아이콘을 더할 때는 Tabler 원본 SVG 를 이 폴더에 먼저 넣고** \`ICON_NAMES\` 에 이름을 더합니다 — 없으면 빌드가 잡습니다
 
 ## 컬러 모델
-- 토큰은 참조 시스템의 Atomic 램프 13개와 시멘틱 77개를 값·이름까지 씁니다. \`brand\` 가 제품 메인 컬러 슬롯이고, 지란지교 오렌지(#FF7F00)는 트리 밖 \`--company-mark\` 로 두어 로고·헤더 마크에만 씁니다
+- 토큰은 참조 시스템의 Atomic 램프 13개와 시멘틱 79개(참조 75 + 우리가 더한 4)를 씁니다. \`brand\` 가 제품 메인 컬러 슬롯이고, 지란지교 오렌지(#FF7F00)는 트리 밖 \`--company-mark\` 로 두어 로고·헤더 마크에만 씁니다
 - 제품에 적용할 때: 제품 메인 컬러 HEX 하나로 \`--prod-40~60\` 다섯 단계를 생성해 주입(\`app.js\` 의 \`accentScale\` 참고)하고 나머지 토큰은 그대로 사용
 - **제품 색 제약**: Brand 면 위 글자는 늘 흰색이라 제품 색 위에서 흰 글자가 **4.5** 를 넘어야 합니다 — \`verify\` 가 검사합니다
 - 헤더의 Accent 선택은 미리보기용입니다. 실제 제품 컬러는 \`_build/data.js\` 의 \`PRODUCTS\` 에 등록하세요

@@ -106,6 +106,46 @@ for (const p of figma.root.children) {
   }
 }
 
+/* ---------- 컴포넌트 ----------
+   변수만 맞추고 컴포넌트를 안 봐서, 카드 그림자·버튼 간격·Danger 버튼 모양이 저장소와 한참 어긋난 채로 있었다.
+   덤프가 커지면 옮기다 틀리므로 정해 둔 세트만 짧게 읽는다. 기대값은 audit.mjs 가 저장소 CSS 에서 읽는다 */
+const SURVEY_SETS = ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group"];
+const vname = (b) => { const v = b && byId.get(b.id); return v ? v.name.replace("color/semantic/", "") : null; };
+const paint = (arr) => {
+  if (!arr || arr === figma.mixed) return "-";
+  const o = [];
+  for (const p of arr) {
+    if (p.visible === false) continue;
+    const b = vname(p.boundVariables && p.boundVariables.color);
+    o.push(b ? "$" + b : p.type === "SOLID" ? "raw#" + hex2(p.color.r) + hex2(p.color.g) + hex2(p.color.b) : p.type);
+  }
+  return o.join(",") || "-";
+};
+const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
+const components = { sets: {}, missingSets: [], negText: [] };
+for (const p of figma.root.children) {
+  if (!CURRENT_PAGES.includes(p.name)) continue;
+  for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    if (!SURVEY_SETS.includes(set.name)) continue;
+    components.sets[set.name] = set.children.map((c) => {
+      const kid = (nm) => c.findOne((k) => k.name === nm && "itemSpacing" in k);
+      const foot = kid("Foot"), actions = kid("Actions");
+      return {
+        id: c.id, name: c.name, fill: paint(c.fills), stroke: paint(c.strokes),
+        sw: c.strokeWeight === figma.mixed ? "mixed" : c.strokeWeight, shadow: shadows(c),
+        gap: "itemSpacing" in c ? c.itemSpacing : null,
+        foot: foot ? foot.itemSpacing : null, actions: actions ? actions.itemSpacing : null,
+      };
+    });
+  }
+  /* 글자에 negative/primary 가 묶이면 안 된다 — 저장소 규칙이 "글자는 strong, primary 는 아이콘·그래픽" 이다 */
+  const inInstance = (n) => { for (let q = n.parent; q && q.type !== "PAGE"; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
+  for (const t of p.findAllWithCriteria({ types: ["TEXT"] })) {
+    if (!inInstance(t) && paint(t.fills).includes("foreground/negative/primary")) components.negText.push(t.id);   // 인스턴스는 원본을 고치면 따라온다
+  }
+}
+components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
+
 return {
   pages: figma.root.children.map((p) => ({ name: p.name, id: p.id, children: p.children.length })),
   fonts: { total: families.size, pretendard: pretendard.length ? pretendard : null },
@@ -115,4 +155,5 @@ return {
   icons: { outline: icons.outline.length, filled: icons.filled.length, outlineNames: icons.outline, filledNames: icons.filled },
   overflow,
   overlap,
+  components,
 };
