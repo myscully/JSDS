@@ -641,6 +641,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn.danger.secondary{background:transparent;color:var(--foreground-negative-strong);border-color:var(--line-negative-primary)}
 .btn.danger.secondary:hover{background:var(--surface-negative-primary)}
 .btn.danger.secondary:active{background:var(--surface-negative-strong);border-color:var(--line-negative-strong)}   /* 위 .danger.secondary 가 :hover·:active 를 덮으므로 뒤에 둔다 */
+/* 다크에서는 8% 틴트가 바탕과 거의 구분되지 않아 hover 를 strong 틴트로 — 글자 대비는 contrast.pairs.js 의 REF_STATUS 예외 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.danger.secondary:hover:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-strong)}}
+:root[data-theme="dark"] .btn.danger.secondary:hover:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-strong)}
 .btn.icon{width:44px;padding:0}
 .btn.icon.sm{width:36px}
 .btn.icon.lg{width:52px}
@@ -662,7 +665,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn.text.loading::after{border-top-color:var(--foreground-brand-primary)}
 .btn.danger.loading::after{border-top-color:var(--foreground-negative-strong)}
 .btn.danger.secondary.loading::after{border-top-color:var(--foreground-negative-strong)}
-.btn-group{display:inline-flex;gap:16px;align-items:center}
+.btn-group{display:inline-flex;gap:12px;align-items:center}
 .btn-group.end{justify-content:flex-end;width:100%}
 
 /* Text Field */
@@ -883,7 +886,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .tabs .tab .count{font-size:12px;font-weight:700;padding:1px 6px;border-radius:var(--radius-full);background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);min-width:0;height:auto}
 .tabs .tab.on .count{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
 .tabs.accent .tab.on{color:var(--foreground-brand-primary);border-bottom-color:var(--foreground-brand-primary)}
-.tabs.pill{display:inline-flex;gap:4px;border:0;background:var(--surface-neutral-strong);padding:3px;border-radius:var(--radius-md);width:auto}
+.tabs.pill{display:inline-flex;gap:4px;border:0;background:var(--surface-neutral-secondary);padding:3px;border-radius:var(--radius-md);width:auto}
 .tabs.pill .tab{padding:6px 14px;border:0;border-radius:6px;margin:0;font-size:14px}
 .tabs.pill .tab.on{background:var(--surface-elevated-primary);box-shadow:var(--shadow-1);font-weight:600}
 .tabs.sm .tab{font-size:12px;padding:8px 12px}
@@ -981,7 +984,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .card .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .card .title{font-size:16px;line-height:24px;font-weight:600;margin:0}   /* Title/1 의 line-height — 빠지면 문맥에 따라 25.6(문서)·28(패턴)·26.4(패키지)로 흔들린다 */
 .card .desc{font-size:14px;color:var(--foreground-neutral-secondary);margin:0;line-height:1.6}
-.card .card-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:auto;padding-top:4px}   /* wrap 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿지 않는다 */
+.card .card-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px;margin-top:auto;padding-top:4px}   /* wrap 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿지 않는다 */
 /* button.card 는 UA 기본값(Arial·가운데 정렬·outset 보더)이 새므로 리셋한다. 보더는 .card 의 1px 이 덮으므로 border 는 리셋하지 않는다 */
 .card.clickable{appearance:none;font:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer;transition:box-shadow var(--motion-fast)}
 .card.bordered{box-shadow:none;border:1px solid var(--line-neutral-secondary)}   /* 호환용 — 기본 카드가 같은 1px 보더를 가져 효과가 없다. 문서에서는 내렸다 */
@@ -1001,7 +1004,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .popup{position:relative;width:440px;max-width:100%;background:var(--surface-elevated-primary);border-radius:var(--radius-xl);box-shadow:var(--shadow-3);padding:24px;display:flex;flex-direction:column;gap:12px}
 .popup .popup-title{font-size:18px;font-weight:700;margin:0;display:flex;align-items:center;gap:10px}
 .popup .popup-body{font-size:14px;color:var(--foreground-neutral-secondary);margin:0;line-height:1.6}
-.popup .popup-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.popup .popup-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:12px}
 .popup .popup-close{position:absolute;top:16px;right:16px}
 .popup.lg{width:640px}
 .popup.danger .popup-title{color:var(--foreground-negative-strong)}
@@ -1231,7 +1234,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .form .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form .form-row .field{min-width:0}
 .form .form-section{font-size:16px;font-weight:600;margin:4px 0 -8px;padding-top:8px}
-.form .form-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:16px;border-top:1px solid var(--line-neutral-secondary)}
+.form .form-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:16px;border-top:1px solid var(--line-neutral-secondary)}
 .form .form-actions .left{margin-right:auto}
 .form .field{min-width:0}
 .terms{display:flex;flex-direction:column;gap:4px;width:100%;max-width:560px}

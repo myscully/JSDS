@@ -50,7 +50,7 @@ const COMPONENTS = {
           <button type="button" class="btn md danger secondary" disabled>Danger outline</button>
           <button type="button" class="btn md text" disabled>Text</button>
         </div>` , layout: "stack" },
-      { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(16px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
+      { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(12px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
         <div class="btn-group">
           <button type="button" class="btn md text">초기화</button>
           <button type="button" class="btn md secondary">취소</button>
@@ -63,7 +63,7 @@ const COMPONENTS = {
       ["size", "sm | md | lg", "md", "높이 36 / 44 / 52"],
       [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
       [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
-      [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(16px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
+      [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(12px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
       ["disabled", "attribute", "—", "비활성. 전용 토큰 — fill 은 <code>--surface-disable-primary</code> 면 + <code>--foreground-disable-primary</code> 라벨, outline 은 면을 비우고 보더만 회색. 투명도를 덮지 않아 변형마다 다른 색이 남지 않습니다"],
       ["type", "button | submit | reset", "button", "폼 안에서는 명시"],
     ],
@@ -608,7 +608,7 @@ const COMPONENTS = {
     ],
     props: [[".tabs", "container", "—", "role=tablist. 기본 Underline, 전체 폭"], [".tab", "button", "—", "role=tab, aria-selected. 활성 .on"], [".pill", "boolean", "false", "캡슐형(보조 전환)"], [".sm / .accent", "boolean", "false", "작은 크기 / 활성 색 accent"], [".count", "element", "—", "건수 배지"], ["disabled", "attribute", "—", "비활성 탭"]],
     spec: [["Size", "높이 44 (sm 38) · 탭 간격 24"], ["Container", "하단 1px line/neutral/secondary · 활성 2px"], ["Label", "Title/2 14 Bold"], ["Placement", "페이지 헤더 아래, 카드 헤더 우측(pill)"]],
-    figma: { frame: "Tab", sizes: { md: { h: 44 }, sm: { h: 38 } }, variants: { underline: {}, pill: { bg: "--surface-neutral-strong" } }, states: ["default", "active", "hover", "disabled"] },
+    figma: { frame: "Tab", sizes: { md: { h: 44 }, sm: { h: 38 } }, variants: { underline: {}, pill: { bg: "--surface-neutral-secondary" } }, states: ["default", "active", "hover", "disabled"] },
   },
 
   /* ------------------------------------------------ Breadcrumb */
