@@ -131,8 +131,8 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
    종전에는 밝은 제품에 맞춰 글자를 뒤집는 적응(data-accent-light)이 있었는데 걷어냈다:
    면을 어둡게 내리는 길은 다크에서 버튼이 캔버스에 묻혀 막혀 있고, 적응을 두면 참조에 없는 분기가 남는다.
    적응을 걷어낸 자리를 이 가드가 메운다 — 규격 미달 제품이 들어오면 빌드가 막는다.
-   기준은 라이트의 기준 단계(제품 HEX 자체)다. hover·pressed 는 더 어두워 자동으로 통과하고,
-   다크까지 요구하면 참조의 기본색 #0066FF 조차(다크 면 brand-60 에서 3.54) 탈락한다 */
+   기준은 제품 HEX 자체(brand-50)다. 다크 rest 도 같은 단계라 이 검사 하나가 두 테마의 rest 를 받친다.
+   라이트 hover·pressed 는 더 어두워 자동으로 통과하고, 다크 hover·pressed 는 밝아지는 쪽이라 advisory 다 */
 {
   const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
   const L = (hex) => { const c = [0, 1, 2].map((i) => lin(parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
