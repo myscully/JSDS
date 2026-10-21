@@ -109,7 +109,7 @@ for (const p of figma.root.children) {
 /* ---------- 컴포넌트 ----------
    변수만 맞추고 컴포넌트를 안 봐서, 카드 그림자·버튼 간격·Danger 버튼 모양이 저장소와 한참 어긋난 채로 있었다.
    덤프가 커지면 옮기다 틀리므로 정해 둔 세트만 짧게 읽는다. 기대값은 audit.mjs 가 저장소 CSS 에서 읽는다 */
-const SURVEY_SETS = ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group"];
+const SURVEY_SETS = ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item"];
 const vname = (b) => { const v = b && byId.get(b.id); return v ? v.name.replace("color/semantic/", "") : null; };
 const paint = (arr) => {
   if (!arr || arr === figma.mixed) return "-";
@@ -130,11 +130,13 @@ for (const p of figma.root.children) {
     components.sets[set.name] = set.children.map((c) => {
       const kid = (nm) => c.findOne((k) => k.name === nm && "itemSpacing" in k);
       const foot = kid("Foot"), actions = kid("Actions");
+      const label = c.findOne((k) => k.type === "TEXT" && k.visible !== false);
       return {
         id: c.id, name: c.name, fill: paint(c.fills), stroke: paint(c.strokes),
         sw: c.strokeWeight === figma.mixed ? "mixed" : c.strokeWeight, shadow: shadows(c), opacity: +c.opacity.toFixed(2),
         gap: "itemSpacing" in c ? c.itemSpacing : null,
         foot: foot ? foot.itemSpacing : null, actions: actions ? actions.itemSpacing : null,
+        text: label ? paint(label.fills) : null,
       };
     });
   }

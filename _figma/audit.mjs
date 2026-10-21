@@ -174,8 +174,19 @@ function componentsExpect() {
     })(),
     /* Figma 레이아웃 규칙 — CSS 에 없는 값이라 여기 상수로 둔다. 출처: .claude/agents/figma-sync.md "섹션 간격은 200px" */
     sectionGap: 200,
+    /* 버튼 변형별 상태 면 — 투명은 "-" */
+    buttonFace: Object.fromEntries(["primary", "secondary", "tertiary", "text"].map((v) => {
+      const f = (sel) => { const b = cssRule(sel).background; return b === "transparent" ? "-" : figTok(b); };
+      return [v[0].toUpperCase() + v.slice(1), { Default: f(`.btn.${v}`), Hover: f(`.btn.${v}:hover`), Pressed: f(`.btn.${v}:active`) }];
+    })),
+    /* 태그 톤 — 라벨 글자는 톤과 상관없이 .tag 의 color 하나다. Figma 의 Info 는 저장소의 기본 .tag 가 맡는다 */
+    tag: {
+      label: figTok(cssRule(".tag").color),
+      face: Object.fromEntries([["Info", ".tag"], ...["critical", "high", "medium", "low", "ok", "accent"].map((t) => [t[0].toUpperCase() + t.slice(1), `.tag.${t}`])].map(([k, sel]) => [k, figTok(cssRule(sel).background)])),
+    },
+    bannerWarning: figTok(cssRule(".banner.warning").background),
     /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
-    requiredSets: ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group"],
+    requiredSets: ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item"],
   };
 }
 
@@ -209,6 +220,26 @@ function diffComponents(c, want, bad, notes) {
     const st = state(v.name);
     if ((st === "Hover" || st === "Pressed") && !v.fill.includes("$" + want.dangerSecondary[st])) bad.push(`Danger Secondary ${st} 면 ${v.fill} ≠ ${want.dangerSecondary[st]} — ${v.name} (${v.id})`);
   }
+  for (const v of btn) {
+    const m = /Variant=(Primary|Secondary|Tertiary|Text)(?=,|$)/.exec(v.name), st = state(v.name);
+    const w = m && st && want.buttonFace[m[1]][st];
+    if (!w) continue;
+    if (w === "-" ? v.fill !== "-" : !v.fill.includes("$" + w)) bad.push(`${m[1]} ${st} 면 ${v.fill} ≠ ${w === "-" ? "없음" : w} — ${v.name} (${v.id})`);
+  }
+  /* 비활성을 opacity 로 흐리는 것은 버튼만의 문제가 아니다 — 조사하는 세트 전부에서 본다 */
+  for (const [set, vs] of Object.entries(sets)) {
+    if (set === "Button") continue;
+    for (const v of vs) if (/Disabled/.test(v.name) && v.opacity !== undefined && v.opacity < 1) bad.push(`${set} Disabled 를 opacity ${v.opacity} 로 흐림 — ${v.name} (${v.id})`);
+  }
+  for (const v of (sets["Tag"] || []).filter((x) => !/Solid|Outline/.test(x.name))) {
+    const t = /(Critical|High|Medium|Low|Ok|Accent|Info)/.exec(v.name);
+    if (!t) continue;
+    const w = want.tag.face[t[1]];
+    if (!v.fill.includes("$" + w)) bad.push(`Tag ${t[1]} 바탕 ${v.fill} ≠ ${w} — ${v.name} (${v.id})`);
+    if (v.text && !v.text.includes("$" + want.tag.label)) bad.push(`Tag ${t[1]} 라벨 ${v.text} ≠ ${want.tag.label} — ${v.name} (${v.id})`);
+  }
+  for (const v of (sets["Banner"] || []).filter((x) => /Warning/.test(x.name)))
+    if (!v.fill.includes("$" + want.bannerWarning)) bad.push(`Banner Warning 바탕 ${v.fill} ≠ ${want.bannerWarning} (${v.id})`);
   for (const v of btn.filter((x) => /State=Disabled/.test(x.name))) {
     const m = /Variant=(Primary|Secondary|Tertiary|Text|Danger Secondary|Danger)(?=,|$)/.exec(v.name);
     const w = m && want.disabled[m[1]];
