@@ -7,6 +7,7 @@
  *   토큰   _build/style.src.css 의 :root 와 :root[data-theme="dark"]
  *   아이콘 _build/icons.gen.js 의 ICONS
  *   타입   assets/style.css 의 .t-* 클래스
+ *   컴포넌트 _build/style.src.css 의 .card · .card-foot · .tabs · .btn.danger … 규칙 (표면 그림자·보더, 간격, 트랙, Danger 상태)
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -133,6 +134,71 @@ function typeScale() {
   return out;
 }
 
+/* ---------- 컴포넌트 ----------
+   기대값은 style.src.css 의 해당 규칙에서 읽는다 — 간격 12 를 여기 적어 두면 CSS 가 바뀌는 날 거짓이 된다 */
+function cssRule(sel) {
+  const css = read("_build/style.src.css");
+  const esc = sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = css.match(new RegExp("(?:^|\\n|\\})" + esc + "\\{([^}]*)\\}"));
+  if (!m) throw new Error("CSS 규칙 없음: " + sel);
+  return Object.fromEntries(m[1].split(";").filter((x) => x.includes(":")).map((x) => { const i = x.indexOf(":"); return [x.slice(0, i).trim(), x.slice(i + 1).trim()]; }));
+}
+/* --surface-neutral-secondary → surface/neutral/secondary (그룹/하위/나머지) */
+const figTok = (v) => { const m = /var\(--([a-z]+)-([a-z]+)-([a-z-]+)\)/.exec(v || ""); return m ? `${m[1]}/${m[2]}/${m[3]}` : null; };
+const px = (v) => (v ? parseFloat(v) : null);
+
+function componentsExpect() {
+  const surface = (sel) => { const r = cssRule(sel); const b = /1px solid (var\([^)]+\))/.exec(r.border || ""); return { shadow: !!r["box-shadow"] && r["box-shadow"] !== "none", stroke: b ? figTok(b[1]) : null }; };
+  return {
+    surfaces: { "Card": surface(".card"), "Chart Card": surface(".chart-card"), "KPI": surface(".kpi") },
+    gap: {
+      cardFoot: px(cssRule(".card .card-foot").gap),
+      popupActions: px(cssRule(".popup .popup-actions").gap),
+      tabItem: px(cssRule(".tabs .tab").gap),
+    },
+    track: { pill: figTok(cssRule(".tabs.pill").background), selectFilled: figTok(cssRule(".select-btn").background) },
+    danger: {
+      Default: figTok(cssRule(".btn.danger").background), Hover: figTok(cssRule(".btn.danger:hover").background), Pressed: figTok(cssRule(".btn.danger:active").background),
+    },
+    dangerSecondary: { Hover: figTok(cssRule(".btn.danger.secondary:hover").background), Pressed: figTok(cssRule(".btn.danger.secondary:active").background) },
+    /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
+    requiredSets: ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group"],
+  };
+}
+
+function diffComponents(c, want, bad, notes) {
+  if (!c) { notes.push("덤프에 컴포넌트 조사가 없습니다 — 옛 probe.js 로 만든 덤프입니다"); return; }
+  for (const s of c.missingSets || []) if (want.requiredSets.includes(s)) bad.push(`컴포넌트 세트 없음: ${s}`);
+  const sets = c.sets || {};
+  const state = (n) => (/Hover/.test(n) ? "Hover" : /Pressed|Active/.test(n) ? "Pressed" : /Disabled|Loading|Focus/.test(n) ? null : "Default");
+  for (const [set, w] of Object.entries(want.surfaces)) {
+    for (const v of sets[set] || []) {
+      if (!/Hover/.test(v.name) && w.shadow === false && v.shadow > 0) bad.push(`${set} 그림자 남음 — ${v.name} (${v.id})`);
+      if (!/Selected/.test(v.name) && w.stroke && !(v.stroke.includes("$" + w.stroke) && !v.stroke.includes(w.stroke + "-opaque") && v.sw === 1))
+        bad.push(`${set} 보더 다름 — ${v.name}: Figma[${v.stroke} ${v.sw}px] 저장소[1px ${w.stroke}] (${v.id})`);
+      if (set === "Card" && v.foot !== null && v.foot !== want.gap.cardFoot) bad.push(`Card Foot 간격 ${v.foot} ≠ ${want.gap.cardFoot} — ${v.name} (${v.id})`);
+    }
+  }
+  for (const v of sets["Popup"] || []) if (v.actions !== null && v.actions !== want.gap.popupActions) bad.push(`Popup Actions 간격 ${v.actions} ≠ ${want.gap.popupActions} — ${v.name} (${v.id})`);
+  for (const v of sets["Tab Item"] || []) if (v.gap !== null && v.gap !== want.gap.tabItem) bad.push(`Tab Item 간격 ${v.gap} ≠ ${want.gap.tabItem} — ${v.name} (${v.id})`);
+  for (const v of (sets["Tab"] || []).filter((x) => /Style=Pill/.test(x.name)))
+    if (!v.fill.includes("$" + want.track.pill)) bad.push(`Tab Pill 트랙 ${v.fill} ≠ ${want.track.pill} (${v.id})`);
+  for (const v of (sets["Select Button"] || []).filter((x) => /Style=Filled/.test(x.name)))
+    if (!v.fill.includes("$" + want.track.selectFilled)) bad.push(`Select Button 트랙 ${v.fill} ≠ ${want.track.selectFilled} (${v.id})`);
+  const btn = sets["Button"] || [];
+  for (const v of btn.filter((x) => /Variant=Danger(?! Secondary)/.test(x.name))) {
+    const st = state(v.name);
+    if (st && !v.fill.includes("$" + want.danger[st])) bad.push(`Danger ${st} 면 ${v.fill} ≠ ${want.danger[st]} — ${v.name} (${v.id})`);
+  }
+  const ds = btn.filter((x) => /Variant=Danger Secondary/.test(x.name));
+  if (btn.length && !ds.length) bad.push("Button 에 Danger Secondary 변형이 없습니다");
+  for (const v of ds) {
+    const st = state(v.name);
+    if ((st === "Hover" || st === "Pressed") && !v.fill.includes("$" + want.dangerSecondary[st])) bad.push(`Danger Secondary ${st} 면 ${v.fill} ≠ ${want.dangerSecondary[st]} — ${v.name} (${v.id})`);
+  }
+  if ((c.negText || []).length) bad.push(`글자에 foreground/negative/primary ${c.negText.length}개 — 저장소는 글자에 strong (${c.negText.slice(0, 6).join(" ")}${c.negText.length > 6 ? " …" : ""})`);
+}
+
 function expect_() {
   const t = tokens();
   const ic = icons();
@@ -143,6 +209,7 @@ function expect_() {
     space: t.space,
     icons: { outline: ic.outline, filled: ic.filled },
     typeScale: ts,
+    components: componentsExpect(),
     counts: {
       primitives: Object.keys(t.primitives).length,
       semantic: Object.keys(t.semantic).length,
@@ -194,6 +261,7 @@ function diff(dumpPath) {
 
   const notes = [];
   if (got.fonts && !got.fonts.pretendard) notes.push("Pretendard 가 Figma 에 없습니다 — 텍스트 스타일 교정과 서체 복구는 막혀 있습니다");
+  diffComponents(got.components, want.components, bad, notes);
 
   return { bad, notes, counts: want.counts };
 }

@@ -51,7 +51,7 @@
   --surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-40);--surface-brand-subtle:color-mix(in srgb,var(--brand-50) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-50) 12%,transparent);
   --surface-positive-primary:color-mix(in srgb,var(--green-50) 12%,transparent);
   --surface-cautionary-primary:color-mix(in srgb,var(--orange-50) 12%,transparent);
-  --surface-negative-primary:color-mix(in srgb,var(--red-50) 12%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-50) 16%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-50) 22%,transparent);
+  --surface-negative-primary:color-mix(in srgb,var(--red-50) 12%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-50) 16%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-50) 22%,transparent);--surface-negative-hover:color-mix(in srgb,var(--red-50) 12%,transparent);--surface-negative-pressed:color-mix(in srgb,var(--red-50) 16%,transparent);
   --surface-disable-primary:var(--cool-neutral-98);
   --surface-accent-lime:color-mix(in srgb,var(--lime-50) 12%,transparent);--surface-accent-lime-opaque:var(--lime-50);--surface-accent-cyan:color-mix(in srgb,var(--cyan-50) 12%,transparent);--surface-accent-cyan-opaque:var(--cyan-50);--surface-accent-light-blue:color-mix(in srgb,var(--light-blue-50) 12%,transparent);--surface-accent-light-blue-opaque:var(--light-blue-50);--surface-accent-violet:color-mix(in srgb,var(--violet-50) 12%,transparent);--surface-accent-violet-opaque:var(--violet-50);--surface-accent-purple:color-mix(in srgb,var(--purple-50) 12%,transparent);--surface-accent-purple-opaque:var(--purple-50);--surface-accent-pink:color-mix(in srgb,var(--pink-50) 12%,transparent);--surface-accent-pink-opaque:var(--pink-50);
   --line-neutral-primary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--line-neutral-primary-opaque:var(--cool-neutral-96);--line-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 16%,transparent);--line-neutral-secondary-opaque:var(--cool-neutral-97);--line-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 8%,transparent);--line-neutral-tertiary-opaque:var(--cool-neutral-98);
@@ -110,7 +110,7 @@
   --surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-60);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-60) 12%,transparent);
   --surface-positive-primary:color-mix(in srgb,var(--green-60) 12%,transparent);
   --surface-cautionary-primary:color-mix(in srgb,var(--orange-60) 12%,transparent);
-  --surface-negative-primary:color-mix(in srgb,var(--red-60) 12%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 20%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-60) 28%,transparent);
+  --surface-negative-primary:color-mix(in srgb,var(--red-60) 12%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 20%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-60) 28%,transparent);--surface-negative-hover:color-mix(in srgb,var(--red-60) 20%,transparent);--surface-negative-pressed:color-mix(in srgb,var(--red-60) 28%,transparent);
   --surface-disable-primary:var(--cool-neutral-22);
   --surface-accent-lime:color-mix(in srgb,var(--lime-60) 12%,transparent);--surface-accent-lime-opaque:var(--lime-60);--surface-accent-cyan:color-mix(in srgb,var(--cyan-60) 12%,transparent);--surface-accent-cyan-opaque:var(--cyan-60);--surface-accent-light-blue:color-mix(in srgb,var(--light-blue-60) 12%,transparent);--surface-accent-light-blue-opaque:var(--light-blue-60);--surface-accent-violet:color-mix(in srgb,var(--violet-60) 12%,transparent);--surface-accent-violet-opaque:var(--violet-60);--surface-accent-purple:color-mix(in srgb,var(--purple-60) 12%,transparent);--surface-accent-purple-opaque:var(--purple-60);--surface-accent-pink:color-mix(in srgb,var(--pink-60) 12%,transparent);--surface-accent-pink-opaque:var(--pink-60);
   --line-neutral-primary:color-mix(in srgb,var(--cool-neutral-50) 32%,transparent);--line-neutral-primary-opaque:var(--cool-neutral-25);--line-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 28%,transparent);--line-neutral-secondary-opaque:var(--cool-neutral-23);--line-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--line-neutral-tertiary-opaque:var(--cool-neutral-22);
@@ -146,7 +146,7 @@
   --surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-60);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-60) 12%,transparent);
   --surface-positive-primary:color-mix(in srgb,var(--green-60) 12%,transparent);
   --surface-cautionary-primary:color-mix(in srgb,var(--orange-60) 12%,transparent);
-  --surface-negative-primary:color-mix(in srgb,var(--red-60) 12%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 20%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-60) 28%,transparent);
+  --surface-negative-primary:color-mix(in srgb,var(--red-60) 12%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 20%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-60) 28%,transparent);--surface-negative-hover:color-mix(in srgb,var(--red-60) 20%,transparent);--surface-negative-pressed:color-mix(in srgb,var(--red-60) 28%,transparent);
   --surface-disable-primary:var(--cool-neutral-22);
   --surface-accent-lime:color-mix(in srgb,var(--lime-60) 12%,transparent);--surface-accent-lime-opaque:var(--lime-60);--surface-accent-cyan:color-mix(in srgb,var(--cyan-60) 12%,transparent);--surface-accent-cyan-opaque:var(--cyan-60);--surface-accent-light-blue:color-mix(in srgb,var(--light-blue-60) 12%,transparent);--surface-accent-light-blue-opaque:var(--light-blue-60);--surface-accent-violet:color-mix(in srgb,var(--violet-60) 12%,transparent);--surface-accent-violet-opaque:var(--violet-60);--surface-accent-purple:color-mix(in srgb,var(--purple-60) 12%,transparent);--surface-accent-purple-opaque:var(--purple-60);--surface-accent-pink:color-mix(in srgb,var(--pink-60) 12%,transparent);--surface-accent-pink-opaque:var(--pink-60);
   --line-neutral-primary:color-mix(in srgb,var(--cool-neutral-50) 32%,transparent);--line-neutral-primary-opaque:var(--cool-neutral-25);--line-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 28%,transparent);--line-neutral-secondary-opaque:var(--cool-neutral-23);--line-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--line-neutral-tertiary-opaque:var(--cool-neutral-22);
@@ -639,14 +639,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn.danger:hover{background:var(--surface-negative-strong)}
 .btn.danger:active{background:var(--surface-negative-heavy)}
 .btn.danger.secondary{background:transparent;color:var(--foreground-negative-strong);border-color:var(--line-negative-primary)}
-.btn.danger.secondary:hover{background:var(--surface-negative-primary)}
-.btn.danger.secondary:active{background:var(--surface-negative-strong);border-color:var(--line-negative-strong)}   /* 위 .danger.secondary 가 :hover·:active 를 덮으므로 뒤에 둔다 */
-/* 다크에서는 12% 틴트가 바탕과 거의 구분되지 않아 hover 를 strong 틴트로 — 글자 대비는 contrast.pairs.js 의 REF_STATUS 예외 */
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.danger.secondary:hover:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-strong)}}
-:root[data-theme="dark"] .btn.danger.secondary:hover:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-strong)}
-/* 다크의 눌림은 hover 보다 한 단계 더 밝게 — hover 를 strong 으로 올렸으니 눌림은 heavy */
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.danger.secondary:active:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-heavy)}}
-:root[data-theme="dark"] .btn.danger.secondary:active:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-heavy)}
+.btn.danger.secondary:hover{background:var(--surface-negative-hover)}   /* 테마마다 단계가 달라(라이트 12 · 다크 20%) 전용 토큰 — Figma 도 변수 하나로 같은 구조를 쓴다 */
+.btn.danger.secondary:active{background:var(--surface-negative-pressed);border-color:var(--line-negative-strong)}   /* 위 .danger.secondary 가 :hover·:active 를 덮으므로 뒤에 둔다 */
 .btn.icon{width:44px;padding:0}
 .btn.icon.sm{width:36px}
 .btn.icon.lg{width:52px}
