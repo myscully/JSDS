@@ -69,7 +69,7 @@ const pairs = [
      고치려면 다크 면을 어둡게 내려야 하는데 그러면 버튼이 어두운 캔버스에 묻힌다(분리 1.11~1.23, 바닥 1.5).
      **제품 색이 앞으로 바뀔 수 있으므로 지금은 참조 값을 따르기로 했다**(사용자 결정) —
      고친 것이 아니라 고르지 않은 것이고, 그래서 숨기지 않고 매 빌드 숫자를 보고한다 */
-  ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자", REF("참조 시스템 값 — 다크 면이 brand-60 이라 rest 가 3.2~3.5. 라이트는 제품 색 제약이 받친다")],
+  ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자", REF("다크는 rest 가 제품 HEX(brand-50)라 제품 색 제약이 받치고, 상태가 밝아지는 쪽(55 → 60)이라 hover·pressed 만 4.5 아래다 — #0066FF 4.13 · 3.54, 밝은 제품 #008760 3.31 · 2.51")],
 
   /* 글자 없는 지표(점·바·밴드·도넛) — 1.4.11 의 3:1 */
   ["--foreground-negative-primary", SURFACES, 3, "Critical 지표"],

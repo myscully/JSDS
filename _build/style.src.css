@@ -107,7 +107,7 @@
   --background-neutral-primary:var(--cool-neutral-15);--background-neutral-secondary:var(--cool-neutral-5);
   --surface-neutral-primary:var(--cool-neutral-15);--surface-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--surface-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 12%,transparent);--surface-neutral-strong:color-mix(in srgb,var(--cool-neutral-50) 28%,transparent);--surface-neutral-inverse:var(--static-white);
   --surface-elevated-primary:var(--cool-neutral-17);--surface-elevated-secondary:var(--cool-neutral-7);
-  --surface-brand-primary:var(--brand-60);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-50);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-60) 12%,transparent);
+  --surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-60);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-60) 12%,transparent);
   --surface-positive-primary:color-mix(in srgb,var(--green-60) 8%,transparent);
   --surface-cautionary-primary:color-mix(in srgb,var(--orange-60) 8%,transparent);
   --surface-negative-primary:color-mix(in srgb,var(--red-60) 8%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 22%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-60) 28%,transparent);
@@ -143,7 +143,7 @@
   --background-neutral-primary:var(--cool-neutral-15);--background-neutral-secondary:var(--cool-neutral-5);
   --surface-neutral-primary:var(--cool-neutral-15);--surface-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--surface-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 12%,transparent);--surface-neutral-strong:color-mix(in srgb,var(--cool-neutral-50) 28%,transparent);--surface-neutral-inverse:var(--static-white);
   --surface-elevated-primary:var(--cool-neutral-17);--surface-elevated-secondary:var(--cool-neutral-7);
-  --surface-brand-primary:var(--brand-60);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-50);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-60) 12%,transparent);
+  --surface-brand-primary:var(--brand-50);--surface-brand-strong:var(--brand-55);--surface-brand-heavy:var(--brand-60);--surface-brand-subtle:color-mix(in srgb,var(--brand-60) 5%,transparent);--surface-brand-subtle-strong:color-mix(in srgb,var(--brand-60) 12%,transparent);
   --surface-positive-primary:color-mix(in srgb,var(--green-60) 8%,transparent);
   --surface-cautionary-primary:color-mix(in srgb,var(--orange-60) 8%,transparent);
   --surface-negative-primary:color-mix(in srgb,var(--red-60) 8%,transparent);--surface-negative-strong:color-mix(in srgb,var(--red-60) 22%,transparent);--surface-negative-heavy:color-mix(in srgb,var(--red-60) 28%,transparent);
@@ -644,6 +644,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 /* 다크에서는 8% 틴트가 바탕과 거의 구분되지 않아 hover 를 strong 틴트로 — 글자 대비는 contrast.pairs.js 의 REF_STATUS 예외 */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.danger.secondary:hover:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-strong)}}
 :root[data-theme="dark"] .btn.danger.secondary:hover:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-strong)}
+/* 다크의 눌림은 hover 보다 한 단계 더 밝게 — hover 를 strong 으로 올렸으니 눌림은 heavy */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.danger.secondary:active:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-heavy)}}
+:root[data-theme="dark"] .btn.danger.secondary:active:not([disabled]):not([aria-disabled="true"]){background:var(--surface-negative-heavy)}
 .btn.icon{width:44px;padding:0}
 .btn.icon.sm{width:36px}
 .btn.icon.lg{width:52px}

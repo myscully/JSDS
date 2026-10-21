@@ -65,7 +65,7 @@ export function isLightAccent(hex: string): boolean {
 
 /** :root 에 제품 램프를 --prod-* 로 주입. 앱 시작 시 한 번 호출.
  *  --brand-* 가 아니라 --prod-* 인 이유: --prod-* 는 '제품이 넣는 입력'이고 --brand-* 는 '테마가 해석한 결과'다.
- *  :root 가 var(--prod-N, var(--blue-N)) 으로 받아, 라이트는 50·45·40 · 다크는 60·55·50 을 집는다.
+ *  :root 가 var(--prod-N, var(--blue-N)) 으로 받아, 라이트는 50·45·40 · 다크는 50·55·60 을 집는다.
  *  참조 시스템에는 면 위 글자 역할이 없어 라벨이 늘 흰색이다 — 그래서 제품 색에 제약이 걸린다(isLightAccent). */
 export function applyAccent(hex: string, root: HTMLElement = document.documentElement): AccentScale {
   const sc = accentScale(hex);

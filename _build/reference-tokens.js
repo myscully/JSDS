@@ -139,9 +139,13 @@ const DEVIATIONS = {
     "foreground-neutral-strong": ["var(--static-white)", "var(--cool-neutral-90)",
       "순수 흰색 대신 중립 램프의 끝 — 라이트와 같은 이유다(다크 캔버스 9.76)"],
     "foreground-negative-strong": ["var(--red-60)", "var(--red-50)",
-      "두 테마의 파괴적 버튼 라벨을 같은 빨강으로 — 다크 8% 틴트 위 5.30 → 4.48 로 내려간다(advisory)"],
+      "두 테마의 파괴적 버튼 라벨을 같은 빨강으로 — 다크 hover(22% 틴트) 위 3.57 · elevated 위 4.63(advisory)"],
     "foreground-brand-inverse": ["var(--brand-50)", "var(--brand-40)",
       "다크의 반전 표면은 흰색이라 한 단계 짙어야 한다 — 그 위에서 4.83 → 6.59"],
+    "surface-brand-primary": ["var(--brand-60)", "var(--brand-50)",
+      "다크 면도 제품 HEX 그 자체로 — 제품 색 제약(흰 글자 4.5)이 다크 rest 까지 받친다(#0066FF 3.54 → 4.83). 캔버스 분리 3.53"],
+    "surface-brand-heavy": ["var(--brand-50)", "var(--brand-60)",
+      "다크의 상태는 밝아지는 방향(50 → 55 → 60) — 틴트형 버튼(알파가 커질수록 밝아짐)과 같은 방향. strong 은 참조와 같은 55 라 따로 적지 않는다"],
   },
 };
 

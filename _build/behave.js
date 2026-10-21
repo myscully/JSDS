@@ -179,28 +179,27 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   }
   for (const [n, L, D] of cases) {
     const [s40, s45, s50, s55, s60] = L.ramp, [d40, d45, d50, d55, d60] = D.ramp;
-    /* 라이트는 50 이 면이고 상태가 짙어지는 쪽(45·40)으로 간다. 다크는 거울이라 60 이 면이고 55·50 으로 간다.
+    /* 라이트는 50 이 면이고 상태가 짙어지는 쪽(45·40)으로 간다. 다크도 50 이 면이고 밝아지는 쪽(55·60)으로 간다.
        밝은 제품만 라이트의 상태 방향이 뒤집힌다 — 어두운 글자인데 면이 더 어두워지면 글자 쪽으로 다가가 3.57 로 깨진다 */
     /* 라이트의 상태 방향이 제품 종류마다 다르다.
        기본은 50 에서 짙어지고(45·40), 밝은 제품은 어두운 글자라 밝아지며(55·60),
        중립 제품은 거의 검정에서 시작해 밝아진다(40 → 45 → 50) */
     const wantL = L.neutral ? [s40, s45, s50] : [s50, s45, s40];
-    const wantD = [d60, d55, d50];
+    const wantD = [d50, d55, d60];
     ok(`the ${n} product follows the base-step rule in both themes`,
       L.surface === wantL[0] && L.strong === wantL[1] && L.heavy === wantL[2]
       && D.surface === wantD[0] && D.strong === wantD[1] && D.heavy === wantD[2],
       JSON.stringify({ light: [L.surface, L.strong, L.heavy], dark: [D.surface, D.strong, D.heavy], wantL, wantD }));
     ok(`the ${n} product never sets data-accent-light`, !L.light && !D.light, `${L.light} · ${D.light}`);
-    /* 면 위 글자. **다크에서 자기 색을 쓰는 제품은 전부** 참조 시스템 값 그대로라 rest 가 3.2~3.5 다 —
-       다크 면이 한 단계 밝은 brand-60 이고 참조는 그 위에 static.white 를 쓰기 때문이다.
-       밝은 제품 적응을 걷어낸 뒤로 이것이 기본만의 예외가 아니라 **모든 제품의 공통 성질**이 됐다.
+    /* 면 위 글자. 다크 rest 도 제품 HEX(brand-50)라 제품 색 제약이 받쳐 AA 다.
+       상태는 밝아지는 쪽(55·60)이라 hover·pressed 는 4.5 아래로 내려가고, 게이트가 advisory 로 보고한다.
        중립 전환은 면이 밝은 회색이라 라벨을 뒤집고, 그쪽은 AA 를 요구한다.
        라이트는 제품 색 제약(흰 글자 4.5)이 받치므로 전부 AA 다 */
     for (const [theme, t] of [["light", L], ["dark", D]]) {
       if (theme === "dark" && !t.neutral) {
-        ok(`dark ${n} brand label is white and inherits the reference shortfall`,
-          t.labelRgb === "rgb(255, 255, 255)" && ratio(t.surfaceRgb, t.labelRgb) < 4.5,
-          `rest ${ratio(t.surfaceRgb, t.labelRgb)} — 참조 시스템 값(static.white on brand 60), 게이트가 advisory 로 보고한다`);
+        ok(`dark ${n} brand label is white and its rest clears AA`,
+          t.labelRgb === "rgb(255, 255, 255)" && ratio(t.surfaceRgb, t.labelRgb) >= 4.5,
+          `rest ${ratio(t.surfaceRgb, t.labelRgb)} — 다크 면 brand-50 = 제품 HEX, hover·pressed 는 advisory`);
         continue;
       }
       for (const [st, fill] of [["rest", t.surfaceRgb], ["hover", t.strongRgb], ["pressed", t.heavyRgb]])

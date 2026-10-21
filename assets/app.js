@@ -37,7 +37,7 @@ const ROOT=document.body.dataset.root||'../';
      면을 어둡게 내려 흰 글자를 세우는 길은 다크에서 버튼이 캔버스에 묻혀(분리 1.11) 막혀 있고,
      글자를 뒤집으면 참조 시스템에 없는 분기가 계속 남는다. 그래서 적응 대신 제약으로 바꿨다.
      기준은 라이트의 기준 단계(brand-50 = 제품 HEX)다 — hover·pressed 는 더 어두워 자동으로 통과한다.
-     다크까지 요구하지 않는 이유: 참조의 기본색 #0066FF 조차 다크 면(brand-60)에서 3.54 다.
+     다크 rest 도 같은 단계(brand-50)라 이 제약이 두 테마의 rest 를 받친다. 다크 hover·pressed(55·60)는 advisory 다.
      빌드도 같은 검사를 한다(verify.js) — 여기 경고는 런타임에 제품 색을 바꿔 넣는 경우를 위한 것이다 */
   const BRAND_LABEL_MIN = 4.5;
   function relLum(hex) { const c = [0, 1, 2].map(i => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4)); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
