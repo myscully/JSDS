@@ -146,14 +146,17 @@ for (const p of figma.root.children) {
     if (f.includes("foreground/negative/primary")) components.negText.push(t.id);
     if (/\$surface\//.test(f)) components.textOnSurface.push(t.id);   // 글자에 면 토큰 — 라이트는 같아 보여도 다크에서 갈린다
   }
-  /* 저장소에 없는 변수를 물고 있는 노드 — opaque 보더와 옛 변수 층(color/* · site/*)이 여기 걸린다 */
+  /* 컴포넌트가 써서는 안 되는 변수를 물고 있는 노드 — opaque 보더와 옛 변수 층(color/* · site/*)이 여기 걸린다.
+     opaque 토큰 자체는 저장소에 있다(참조 토큰). 다만 컴포넌트 CSS 가 쓰지 않으므로, 토큰 견본을 늘어놓는
+     1 Theme 에서만 허용한다 — 견본을 다른 토큰으로 묶으면 토큰 문서가 거짓이 된다 */
+  const swatchPage = p.name === "1 Theme";
   for (const n of p.findAll((k) => ("fills" in k || "strokes" in k) && !inInstance(k))) {
     for (const arr of [n.fills, n.strokes]) {
       if (!arr || arr === figma.mixed) continue;
       for (const pt of arr) {
         const v = pt.boundVariables && pt.boundVariables.color && byId.get(pt.boundVariables.color.id);
         if (!v) continue;
-        const bucket = /-opaque$/.test(v.name) ? components.opaque : /^color\/(semantic|atomic)\//.test(v.name) ? null : components.legacy;
+        const bucket = /-opaque$/.test(v.name) ? (swatchPage ? null : components.opaque) : /^color\/(semantic|atomic)\//.test(v.name) ? null : components.legacy;
         if (!bucket) continue;
         const e = bucket[v.name] || (bucket[v.name] = { n: 0, ids: [] });
         e.n++; if (e.ids.length < 4) e.ids.push(n.id);
