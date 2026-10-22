@@ -11,7 +11,7 @@
 | `_build/style.src.css` | **토큰과 컴포넌트 CSS 의 단일 출처.** 사이트·패키지·Figma 가 전부 여기서 나옵니다 |
 | `_build/reference-tokens.js` | 참조 시스템의 토큰 정의를 코드로 옮긴 대장. `DEVIATIONS`(값을 바꾼 것) · `ADDITIONS`(우리가 더한 것) |
 | `_react/` | **원본.** `@jiran/ds-react` 패키지. `dist/` 는 생성물이라 git 에 없습니다 |
-| `_figma/` | **원본.** Figma 작업 도구 — `font.js`(폰트 안전 로더) · `probe.js`(조사) · `audit.mjs`(대조) |
+| `_figma/` | **원본.** Figma 작업 도구 — `font.js`(폰트 안전 로더) · `probe.js`(조사) · `audit.mjs`(대조) · `font-revert.md`(Noto 대체 → Pretendard 되돌리기 표) |
 | `assets/` `home/` `foundations/` `components/` `patterns/` `resources/` `index.html` | **전부 생성물.** 직접 고치지 말고 `_build/` 를 고친 뒤 빌드하세요 |
 
 ## 일하는 방식
@@ -71,9 +71,10 @@ pages 61 · verify 0/0 · contrast 822쌍 실패 0 · advisory 294 · behave 283
 ### 지금 막혀 있는 것
 
 **Figma 에 Pretendard 가 설치돼 있지 않습니다**(플러그인 환경이 보는 1,938 패밀리 중 0건).
-Figma 는 폰트가 없으면 `fontSize` 하나 바꾸는 것도 거부하므로 **텍스트 스타일 14단계 교정**과
-**`Noto Sans KR` 로 임시 작성한 노드 약 550개의 서체 복구**가 보류돼 있습니다. 앱을 완전히 종료했다
-다시 켜거나(데스크톱) Font Helper 를 설치하면(브라우저) 풀립니다.
+그래서 2026-10-22 에 **텍스트 스타일 14단계를 `Noto Sans KR` 로 대체해서** 저장소 값(크기·행간·자간)으로
+교정했습니다. 남은 것은 **서체를 Pretendard 로 되돌리는 일**뿐이고, 필요한 표(스타일 id · 원래 굵기)와
+스타일에 연결되지 않은 Noto 노드 713개의 내역은 `_figma/font-revert.md` 에 있습니다.
+앱을 완전히 종료했다 다시 켜거나(데스크톱) Font Helper 를 설치하면(브라우저) 풀립니다.
 
 ## 보고하는 법
 
