@@ -1,9 +1,17 @@
 # Pretendard 되돌리기 표
 
-> **상태(2026-10-22)**: 아래 되돌리기는 **사람이 데스크톱에서 직접 했다**. 텍스트 스타일 14단계와 Heading/0 이
-> Pretendard 로 돌아갔고(크기·행간·자간은 교정값 그대로), 현재 페이지 노드도 대부분 돌아갔다 — 마지막 확인 시
-> Noto 로 남은 현재 페이지 노드는 Overview 2 · Resource 9. 이 문서는 경과 기록과, 남은 노드를 찾을 때의 참고로 둔다.
-> 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 텍스트 편집은 거기서 할 수 없다.
+> **상태(2026-10-22 마지막 확인)**
+> - 텍스트 스타일 14단계 · Heading/0 은 **사람이 데스크톱에서 직접 Pretendard 로 되돌렸다**(크기·행간·자간은 교정값 그대로).
+> - 그 뒤 사람의 결정("보류 사항은 Noto 로 우선 수정, 나중에 사람이 Pretendard 로")에 따라 에이전트가 Noto 로 고친 것:
+>   - 글자 노드 10개 — Tag 목록 라벨 6 · 로그 뷰어 새 행 4. 서체를 바꾸며 스타일 연결이 풀렸으니 되돌릴 때 원래 스타일(Label/2 · Body/2)에 다시 연결한다
+>   - **Caption/0 스타일** 1개 — 서체만 Noto Sans KR Medium(크기 13 · 행간 140% 그대로). 스타일만 Pretendard Medium 으로 되돌리면 쓰는 노드 11개(3 Component Tooltip 10 · Web / Home 1)가 따라온다
+>   - 노드 id · 원래 서체/스타일 · 바뀐 글자: `_figma/font-revert-nodes.tsv`
+> - 이 일과 무관하게 Noto 로 남은 현재 페이지 노드: Overview(302:2) 의 305:1788 · 305:1790(Regular, 스타일 없음). Resource 는 0
+> - **스타일에 연결할 후보 210개**(연결하지 않음): 크기·굵기·행간이 14단계와 같은데 스타일이 없는 노드 —
+>   1 Theme 200(Heading/3 27 · Heading/4 15 · Label/2 79 · Caption/2 79), 3 Component 6, 4 Pattern 4. 목록은 `_figma/font-link-candidates.tsv`(자간은 비교하지 않았다)
+> - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
+
+아래는 처음 Noto 로 대체 교정할 때의 기록이다.
 
 Figma 에 Pretendard 가 없어서(플러그인 환경이 보는 1,938 패밀리 중 0건) 2026-10-22 에 텍스트 스타일 14단계를
 **Noto Sans KR 로 대체해서** 저장소 값으로 교정했다. 크기·행간·자간은 이미 저장소 값이다.
@@ -36,9 +44,9 @@ Noto 에는 SemiBold 가 없어 Bold 로 간다. 다만 14단계 중 SemiBold �
 현재 페이지 raw 노드(굵기별): 1 Theme Regular 109 · Bold 42 · Medium 367 / 2 Element Medium 11 /
 3 Component Regular 21 / Overview Medium 2 · Regular 2 / Resource Regular 8 · Medium 1.
 
-## 14단계 밖의 스타일 3개(손대지 않음)
+## 14단계 밖의 스타일 3개
 | 스타일 | 서체 | 쓰는 노드 |
 | --- | --- | --- |
 | Display/0 | Pretendard Bold 56 | 1 (Web / Home) |
-| Caption/0 | Pretendard Medium 13 | 11 (3 Component 10 · Web / Home 1) — 현재 페이지에서 폰트 없이 렌더링된다 |
-| Heading/0 | Noto Sans KR Bold 48 | 1 (Web / Foundations) |
+| Caption/0 | Noto Sans KR Medium 13 (원래 Pretendard Medium — 위 상태 참고) | 11 (3 Component 10 · Web / Home 1) |
+| Heading/0 | Pretendard Bold 48 (사람이 되돌림) | 1 (Web / Foundations) |
