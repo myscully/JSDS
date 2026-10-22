@@ -131,12 +131,16 @@ for (const p of figma.root.children) {
       const kid = (nm) => c.findOne((k) => k.name === nm && "itemSpacing" in k);
       const foot = kid("Foot"), actions = kid("Actions");
       const label = c.findOne((k) => k.type === "TEXT" && k.visible !== false);
+      const dot = c.findOne((k) => k.type === "ELLIPSE" && k.visible !== false);
+      const count = c.findOne((k) => /count/i.test(k.name) && "fills" in k && k.type !== "TEXT");
+      const texts = c.findAll((k) => k.type === "TEXT" && k.visible !== false).slice(0, 4).map((k) => k.name + "=" + paint(k.fills));
       return {
         id: c.id, name: c.name, fill: paint(c.fills), stroke: paint(c.strokes),
         sw: c.strokeWeight === figma.mixed ? "mixed" : c.strokeWeight, shadow: shadows(c), opacity: +c.opacity.toFixed(2),
         gap: "itemSpacing" in c ? c.itemSpacing : null,
         foot: foot ? foot.itemSpacing : null, actions: actions ? actions.itemSpacing : null,
-        text: label ? paint(label.fills) : null,
+        text: label ? paint(label.fills) : null, dot: dot ? paint(dot.fills) : null,
+        count: count ? paint(count.fills) : null, texts,
       };
     });
   }
