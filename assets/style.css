@@ -557,7 +557,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
   .shell{grid-template-columns:1fr}
   .hmenu-nav{display:flex}
   .page{padding:var(--space-10) var(--space-8) var(--space-16)}
-  .page table{display:block;max-width:100%;overflow-x:auto}
+  .page table:not(.tbl){display:block;max-width:100%;overflow-x:auto}   /* 문서 표만 — 컴포넌트 .tbl 은 .tbl-wrap 이 스크롤한다. 같이 걸면 표가 블록이 되어 자기 폭(266)에서 잘리고 열이 한 글자씩 접혔다 */
   .tablewrap table{display:table}
 }
 @media (max-width:767px){

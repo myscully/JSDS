@@ -761,11 +761,19 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     if (!tr) return null;
     const res = (v) => { const d = document.createElement("div"); d.style.color = v; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
     const tag = getComputedStyle(tr.querySelector(".tag")), link = getComputedStyle(tr.querySelector(".link")), dot = getComputedStyle(tr.querySelector(".indicator"), "::before");
-    return { tagBg: tag.backgroundColor, tagFg: tag.color, tagDot: getComputedStyle(tr.querySelector(".tag"), "::before").backgroundColor, link: link.color, linkEvents: link.pointerEvents, dot: dot.backgroundColor,
+    const a = tr.querySelector(".link"); a.focus();
+    return { focusable: document.activeElement === a, tagBg: tag.backgroundColor, tagFg: tag.color, tagDot: getComputedStyle(tr.querySelector(".tag"), "::before").backgroundColor, link: link.color, linkEvents: link.pointerEvents, dot: dot.backgroundColor,
       wantBg: res("var(--surface-disable-primary)"), wantFg: res("var(--foreground-disable-primary)") };
   });
   ok("a disabled table row greys its tag, link and status dot with the disable tokens",
-    !!offRow && offRow.tagBg === offRow.wantBg && [offRow.tagFg, offRow.tagDot, offRow.link, offRow.dot].every((c) => c === offRow.wantFg) && offRow.linkEvents === "none", JSON.stringify(offRow));
+    !!offRow && offRow.tagBg === offRow.wantBg && [offRow.tagFg, offRow.tagDot, offRow.link, offRow.dot].every((c) => c === offRow.wantFg) && offRow.linkEvents === "none" && offRow.focusable === false, JSON.stringify(offRow));
+  /* 좁은 폭에서 표는 자기 폭을 지키고 .tbl-wrap 이 가로 스크롤한다 — 문서용 .page table 규칙이 .tbl 을
+     블록으로 바꿔 266px 에서 잘리고 열이 한 글자씩 접혔다 */
+  await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(250);
+  const narrow = await page.evaluate(() => { const w = document.querySelector("#ex-data-table-basic .tbl-wrap"), t = w.querySelector("table");
+    return { display: getComputedStyle(t).display, table: Math.round(t.getBoundingClientRect().width), wrap: w.clientWidth, scroll: w.scrollWidth }; });
+  await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
+  ok("data table keeps its width at 390 and the wrapper scrolls", narrow.display === "table" && narrow.table > narrow.wrap && narrow.scroll > narrow.wrap, JSON.stringify(narrow));
   const tbl = page.locator(".example-preview .tbl-wrap").filter({ has: page.locator("th.check") }).first();
   const rowsBefore = await tbl.locator("tbody tr.on").count();
   await tbl.locator("th.check input").click();

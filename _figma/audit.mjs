@@ -383,7 +383,26 @@ function diff(dumpPath) {
   for (const o of (got.overlap || []).filter((x) => x.current !== false)) bad.push(`겹침 ${o.page}: ${o.a} ↔ ${o.b} (${o.by.join("×")})`);
 
   const notes = [];
-  if (got.fonts && !got.fonts.pretendard) notes.push("Pretendard 가 Figma 에 없습니다 — 텍스트 스타일 교정과 서체 복구는 막혀 있습니다");
+  if (got.fonts && !got.fonts.pretendard) notes.push("Pretendard 가 Figma 에 없어 텍스트 스타일을 Noto Sans KR 로 대체해 두었습니다 — 되돌리기는 _figma/font-revert.md");
+
+  /* 텍스트 스타일 — typeScale 을 계산만 하고 대조하지 않아 "어긋남 0" 에 글자 크기가 빠져 있었다.
+     저장소 .t-* 는 서체 이름을 적지 않으므로 서체는 Pretendard · Noto Sans KR(대체) 를 모두 받고 굵기만 본다 */
+  const W = { Thin: 100, Light: 300, DemiLight: 350, Regular: 400, Medium: 500, SemiBold: 600, Bold: 700, Black: 900 };
+  const ts = new Map((got.textStyles || []).map((t) => [t.name, t]));
+  for (const [name, w] of Object.entries(want.typeScale)) {
+    const t = ts.get(name);
+    if (!t) { bad.push(`텍스트 스타일 없음 ${name}`); continue; }
+    const fam = /^(Pretendard|Noto Sans KR)\b/.exec(t.font), wt = W[(t.font || "").split(" ").pop()];
+    const em = parseFloat(w.letterSpacing) * (/em$/.test(w.letterSpacing) ? 100 : 0);   // 0.0282em = 2.82%
+    const ls = parseFloat(t.letterSpacing) * (/%$/.test(t.letterSpacing) ? 1 : 0);
+    const off = [];
+    if (!fam) off.push(`서체 ${t.font}`);
+    if (w.weight && wt !== w.weight) off.push(`굵기 ${wt} ≠ ${w.weight}`);
+    if (t.size !== w.size) off.push(`크기 ${t.size} ≠ ${w.size}`);
+    if (w.lineHeight && t.lineHeight !== w.lineHeight) off.push(`행간 ${t.lineHeight} ≠ ${w.lineHeight}`);
+    if (Math.abs(ls - em) > 0.01) off.push(`자간 ${+ls.toFixed(2)}% ≠ ${+em.toFixed(2)}%`);
+    if (off.length) bad.push(`텍스트 스타일 ${name}: ${off.join(" · ")}`);
+  }
   diffComponents(got.components, want.components, bad, notes);
 
   return { bad, notes, counts: want.counts };

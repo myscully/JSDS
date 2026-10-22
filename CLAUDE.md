@@ -42,7 +42,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 61 · verify 0/0 · contrast 822쌍 실패 0 · advisory 294 · behave 283/283 · react 197+3
+pages 61 · verify 0/0 · contrast 822쌍 실패 0 · advisory 294 · behave 284/284 · react 198+3
 ```
 
 `advisory 294` 는 참조 시스템 값을 따르느라 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된

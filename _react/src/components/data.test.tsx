@@ -10,6 +10,14 @@ const rows: R[] = [{ id: "a", name: "b", n: 2 }, { id: "b", name: "a", n: 1 }, {
 const cols = [{ key: "name", header: "이름", sortable: true }, { key: "n", header: "수", num: true, sortable: true }];
 
 describe("DataTable", () => {
+  /* 비활성 행은 inert — pointer-events 만으로는 키보드 Tab 이 행 안 링크로 들어갔다 */
+  it("rowProps disabled 행은 .disabled + inert, 다른 행은 inert 아님", () => {
+    const { container } = render(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} rowProps={(r) => ({ disabled: r.id === rows[0].id })} />);
+    const trs = container.querySelectorAll("tbody tr");
+    expect(trs[0]).toHaveClass("disabled");
+    expect(trs[0].hasAttribute("inert")).toBe(true);
+    expect(trs[1].hasAttribute("inert")).toBe(false);
+  });
   it("헤더 클릭으로 asc → desc 정렬, aria-sort 표시", async () => {
     render(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />);
     const th = screen.getByRole("columnheader", { name: "수" });
