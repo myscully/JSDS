@@ -1,6 +1,6 @@
 {
   "version": "v0.8",
-  "generatedAt": "2026-10-22T05:49:56.155Z",
+  "generatedAt": "2026-10-22T06:00:55.376Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -3396,7 +3396,7 @@
         ".tooltip",
         ".tooltip-wrap"
       ],
-      "css": "/* JS Design System v0.8 · .tooltip, .tooltip-wrap · 토큰(var(--*))은 assets/style.css :root 참고 */\n.tooltip-wrap{position:relative;display:inline-flex}\n.tooltip{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:12px;font-weight:500;line-height:1.4;padding:6px 10px;border-radius:6px;white-space:nowrap;box-shadow:var(--shadow-2);z-index:10;pointer-events:none;opacity:0;transition:opacity var(--motion-fast)}\n.tooltip::after{content:\"\";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--surface-neutral-inverse)}\n.tooltip.bottom{bottom:auto;top:calc(100% + 8px)}\n.tooltip.bottom::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--surface-neutral-inverse)}\n.tooltip.left{left:auto;right:calc(100% + 8px);bottom:50%;transform:translateY(50%)}\n.tooltip.left::after{left:100%;top:50%;transform:translateY(-50%);border-top-color:transparent;border-left-color:var(--surface-neutral-inverse)}\n.tooltip.right{left:calc(100% + 8px);bottom:50%;transform:translateY(50%)}\n.tooltip.right::after{left:auto;right:100%;top:50%;transform:translateY(-50%);border-top-color:transparent;border-right-color:var(--surface-neutral-inverse)}\n.tooltip-wrap:hover .tooltip,.tooltip-wrap:focus-within .tooltip,.tooltip-wrap.show .tooltip{opacity:1}\n.tooltip.multi{white-space:normal;width:220px;text-align:left}",
+      "css": "/* JS Design System v0.8 · .tooltip, .tooltip-wrap · 토큰(var(--*))은 assets/style.css :root 참고 */\n.tooltip-wrap{position:relative;display:inline-flex}\n.tooltip{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:12px;font-weight:400;line-height:18px;letter-spacing:0.0252em;padding:6px 10px;border-radius:6px;white-space:nowrap;box-shadow:var(--shadow-2);z-index:10;pointer-events:none;opacity:0;transition:opacity var(--motion-fast)}\n.tooltip::after{content:\"\";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--surface-neutral-inverse)}\n.tooltip.bottom{bottom:auto;top:calc(100% + 8px)}\n.tooltip.bottom::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--surface-neutral-inverse)}\n.tooltip.left{left:auto;right:calc(100% + 8px);bottom:50%;transform:translateY(50%)}\n.tooltip.left::after{left:100%;top:50%;transform:translateY(-50%);border-top-color:transparent;border-left-color:var(--surface-neutral-inverse)}\n.tooltip.right{left:calc(100% + 8px);bottom:50%;transform:translateY(50%)}\n.tooltip.right::after{left:auto;right:100%;top:50%;transform:translateY(-50%);border-top-color:transparent;border-right-color:var(--surface-neutral-inverse)}\n.tooltip-wrap:hover .tooltip,.tooltip-wrap:focus-within .tooltip,.tooltip-wrap.show .tooltip{opacity:1}\n.tooltip.multi{white-space:normal;width:220px;text-align:left}",
       "props": [
         [
           ".tooltip-wrap",
@@ -3432,7 +3432,7 @@
       "spec": [
         [
           "Size",
-          "높이 28 · padding 6 10 · 트리거와 8px"
+          "높이 30 · padding 6 10 · 트리거와 8px"
         ],
         [
           "Container",
@@ -3440,7 +3440,7 @@
         ],
         [
           "Label",
-          "Caption 12.5 Medium inverse"
+          "Caption/1 12 · 행간 18 · Regular · inverse"
         ],
         [
           "Placement",
@@ -3452,7 +3452,7 @@
         "radius": 6,
         "sizes": {
           "md": {
-            "h": 28
+            "h": 30
           }
         },
         "variants": {
