@@ -1,5 +1,6 @@
-import { forwardRef, type CSSProperties, type HTMLAttributes, type TableHTMLAttributes, type TdHTMLAttributes, type ThHTMLAttributes } from "react";
+import { forwardRef, useCallback, type CSSProperties, type HTMLAttributes, type TableHTMLAttributes, type TdHTMLAttributes, type ThHTMLAttributes } from "react";
 import { cx } from "../../utils/cx";
+import { mergeRefs } from "../../utils/hooks";
 
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   /** 행 44 */
@@ -32,7 +33,10 @@ export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   log?: boolean;
 }
 export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function TableRow({ selected, disabled, log, className, ...rest }, ref) {
-  return <tr ref={ref} className={cx({ on: selected, disabled, "log-row": log }, className) || undefined} {...rest} />;
+  /* 비활성 행은 inert — CSS 의 pointer-events 는 마우스만 막고 키보드 Tab 은 행 안 링크로 들어갔다.
+     React 18 과 19 가 inert prop 을 다르게 다뤄 DOM 에 직접 둔다 */
+  const inertRef = useCallback((el: HTMLTableRowElement | null) => { if (el) el.toggleAttribute("inert", !!disabled); }, [disabled]);
+  return <tr ref={mergeRefs(ref, inertRef)} className={cx({ on: selected, disabled, "log-row": log }, className) || undefined} {...rest} />;
 });
 
 export interface TableHeaderProps extends ThHTMLAttributes<HTMLTableCellElement> {
