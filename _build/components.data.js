@@ -488,6 +488,17 @@ const COMPONENTS = {
             <li class="menu-item danger" role="menuitem">${I("trash")}삭제</li>
           </ul>
         </div>`, layout: "tall", style: "justify-content:flex-end;padding-right:120px" },
+      { id: "states", title: "Item States", desc: "기본 · 선택(.on) · 위험(.danger) · 비활성(aria-disabled). 아이콘은 기본이 tertiary 이고, 나머지 상태에서는 글자색을 따릅니다.", html: `
+        <div class="dropdown open">
+          <button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button>
+          <ul class="menu" role="menu" style="left:auto;right:0">
+            <li class="menu-item" role="menuitem">${I("pencil")}편집</li>
+            <li class="menu-item on" role="menuitem">${I("list")}목록으로 보기</li>
+            <li class="menu-item" role="menuitem" aria-disabled="true">${I("share")}공유<span class="hint">권한 없음</span></li>
+            <li class="menu-sep" role="separator"></li>
+            <li class="menu-item danger" role="menuitem">${I("trash")}삭제</li>
+          </ul>
+        </div>`, layout: "tall", style: "justify-content:flex-end;padding-right:120px" },
       { id: "disabled", title: "Disabled", desc: "권한이 없어 열 수 없는 상태입니다.", html: `
         <div class="dropdown"><button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false" disabled>${I("dots")}</button></div>` },
     ],
@@ -1077,7 +1088,7 @@ const COMPONENTS = {
     desc: "로그·이벤트·정책 목록처럼 대량의 행 데이터를 다룹니다. 정렬·선택·행 액션을 갖춘 콘솔의 핵심 컴포넌트입니다. 단순 표는 Table 을 씁니다.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><thead><tr><th>시간</th><th>심각도</th></tr></thead><tbody><tr><td>09:41</td><td><span class="tag critical sm">Critical</span></td></tr><tr><td>09:40</td><td><span class="tag medium sm">Medium</span></td></tr></tbody></table></div>`,
     examples: [
-      { id: "basic", title: "Default (Sortable)", desc: "헤더 클릭 정렬. 정렬 중인 열은 .sorted(.desc). 숫자 열은 .num.", html: `
+      { id: "basic", title: "Default (Sortable)", desc: "헤더 클릭 정렬. 정렬 중인 열은 .sorted(.desc). 숫자 열은 .num. 처리할 수 없는 행은 tr.disabled — 글자 · 태그 · 링크 · 상태 점이 모두 비활성 색이 됩니다.", html: `
         <div class="tbl-wrap">
           <table class="tbl">
             <thead><tr><th class="sortable sorted desc" aria-sort="descending">시간</th><th class="sortable">심각도</th><th>이벤트</th><th class="sortable">대상</th><th class="num sortable">횟수</th><th>상태</th></tr></thead>
@@ -1085,7 +1096,7 @@ const COMPONENTS = {
               <tr><td>09:41:12</td><td><span class="tag critical">Critical</span></td><td><a href="#" class="link">랜섬웨어 행위 탐지</a></td><td>PC-2041 · 김민준</td><td class="num">3</td><td><span class="indicator danger">차단</span></td></tr>
               <tr><td>09:40:58</td><td><span class="tag medium">Medium</span></td><td><a href="#" class="link">미승인 USB 연결</a></td><td>PC-1187 · 이서연</td><td class="num">1</td><td><span class="indicator warn">검토 필요</span></td></tr>
               <tr><td>09:38:03</td><td><span class="tag low">Low</span></td><td><a href="#" class="link">정책 동기화 완료</a></td><td>Server-03</td><td class="num">12</td><td><span class="indicator ok">정상</span></td></tr>
-              <tr><td>09:36:47</td><td><span class="tag high">High</span></td><td><a href="#" class="link">알려진 악성코드 차단</a></td><td>PC-0932 · 박지훈</td><td class="num">2</td><td><span class="indicator danger">차단</span></td></tr>
+              <tr class="disabled"><td>09:36:47</td><td><span class="tag high">High</span></td><td><a href="#" class="link">알려진 악성코드 차단</a></td><td>PC-0932 · 박지훈</td><td class="num">2</td><td><span class="indicator danger">차단</span></td></tr>
             </tbody>
           </table>
         </div>` },
