@@ -182,7 +182,7 @@ function componentsExpect() {
     /* 태그 톤 — 라벨 글자는 톤과 상관없이 .tag 의 color 하나다. Figma 의 Info 는 저장소의 기본 .tag 가 맡는다 */
     tag: {
       label: figTok(cssRule(".tag").color),
-      face: Object.fromEntries([["Info", ".tag"], ...["critical", "high", "medium", "low", "ok", "accent"].map((t) => [t[0].toUpperCase() + t.slice(1), `.tag.${t}`])].map(([k, sel]) => [k, figTok(cssRule(sel).background)])),
+      face: Object.fromEntries([["info", ".tag"], ["neutral", ".tag"], ...["critical", "high", "medium", "low", "ok", "accent"].map((t) => [t, `.tag.${t}`])].map(([k, sel]) => [k, figTok(cssRule(sel).background)])),
     },
     bannerWarning: figTok(cssRule(".banner.warning").background),
     /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
@@ -231,12 +231,15 @@ function diffComponents(c, want, bad, notes) {
     if (set === "Button") continue;
     for (const v of vs) if (/Disabled/.test(v.name) && v.opacity !== undefined && v.opacity < 1) bad.push(`${set} Disabled 를 opacity ${v.opacity} 로 흐림 — ${v.name} (${v.id})`);
   }
-  for (const v of (sets["Tag"] || []).filter((x) => !/Solid|Outline/.test(x.name))) {
-    const t = /(Critical|High|Medium|Low|Ok|Accent|Info)/.exec(v.name);
-    if (!t) continue;
-    const w = want.tag.face[t[1]];
-    if (!v.fill.includes("$" + w)) bad.push(`Tag ${t[1]} 바탕 ${v.fill} ≠ ${w} — ${v.name} (${v.id})`);
-    if (v.text && !v.text.includes("$" + want.tag.label)) bad.push(`Tag ${t[1]} 라벨 ${v.text} ≠ ${want.tag.label} — ${v.name} (${v.id})`);
+  /* 이름 전체를 훑으면 Size=Medium 을 Medium 톤으로 읽는다 — 속성 값을 직접 읽는다 */
+  const prop = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name); return m ? m[1].trim() : null; };
+  for (const v of sets["Tag"] || []) {
+    const tone = prop(v.name, "Tone"), style = prop(v.name, "Style");
+    if (!tone || (style && style !== "Subtle")) continue;   // Outline·Solid 는 바탕 규칙이 달라 여기서 보지 않는다
+    const w = want.tag.face[tone.toLowerCase()];
+    if (!w) { bad.push(`Tag 톤 ${tone} 은 저장소에 없습니다 — ${v.name} (${v.id})`); continue; }
+    if (!v.fill.includes("$" + w)) bad.push(`Tag ${tone} 바탕 ${v.fill} ≠ ${w} — ${v.name} (${v.id})`);
+    if (v.text && !v.text.includes("$" + want.tag.label)) bad.push(`Tag ${tone} 라벨 ${v.text} ≠ ${want.tag.label} — ${v.name} (${v.id})`);
   }
   for (const v of (sets["Banner"] || []).filter((x) => /Warning/.test(x.name)))
     if (!v.fill.includes("$" + want.bannerWarning)) bad.push(`Banner Warning 바탕 ${v.fill} ≠ ${want.bannerWarning} (${v.id})`);
