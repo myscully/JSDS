@@ -1123,6 +1123,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
    (0,3,1)·(0,3,2) 로 .tag.solid.* (0,3,0) 와 그 ::before (0,3,1) 를 이긴다 */
 .tbl tr.disabled .tag{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);box-shadow:none}
 .tbl tr.disabled .tag::before{background:var(--foreground-disable-primary)}
+/* 링크와 상태 점도 자기 색을 쥐고 있어 같은 이유로 남았다. 비활성 행의 링크는 누를 수 없다 */
+.tbl tr.disabled .link{color:var(--foreground-disable-primary);pointer-events:none}
+.tbl tr.disabled .indicator::before{background:var(--foreground-disable-primary)}
 .tbl.compact td{height:44px;padding:8px 16px;font-size:14px}
 .tbl.compact th{height:40px}
 .tbl.zebra tbody tr:nth-child(even) td{background:var(--background-neutral-secondary)}

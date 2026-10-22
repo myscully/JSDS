@@ -103,14 +103,13 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("static open menu closes on trigger click", await menuDd.evaluate((e) => !e.classList.contains("open")));
   await menuDd.locator("[aria-haspopup]").click();
   ok("menu dropdown re-opens", await menuDd.evaluate((e) => e.classList.contains("open") && e.querySelector("[aria-haspopup]").getAttribute("aria-expanded") === "true"));
-  /* 메뉴 아이콘이 상태를 따르는지 — .menu-item svg 가 tertiary 로 고정해 선택·위험 아이콘이 회색이었다 */
-  const menuIcon = await page.evaluate(() => {
-    const m = document.querySelector("#ex-dropdown-menu .menu");
-    const mk = (cls, extra) => { const li = document.createElement("li"); li.className = "menu-item " + cls; if (extra) li.setAttribute("aria-disabled", "true"); li.innerHTML = "<svg viewBox=\"0 0 16 16\"></svg>x"; m.append(li); const r = [getComputedStyle(li).color, getComputedStyle(li.querySelector("svg")).color]; li.remove(); return r; };
-    return { plain: mk(""), on: mk("on"), danger: mk("danger"), off: mk("", true) };
-  });
+  /* 메뉴 아이콘이 상태를 따르는지 — .menu-item svg 가 tertiary 로 고정해 선택·위험 아이콘이 회색이었다. 실제 예제(Item States)를 잰다 */
+  const menuIcon = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll("#ex-dropdown-states .menu-item")].map((li) => {
+    const k = li.classList.contains("on") ? "on" : li.classList.contains("danger") ? "danger" : li.getAttribute("aria-disabled") === "true" ? "off" : "plain";
+    return [k, [getComputedStyle(li).color, getComputedStyle(li.querySelector("svg")).color]];
+  })));
   ok("menu icon follows the label colour when selected, dangerous or disabled",
-    ["on", "danger", "off"].every((k) => menuIcon[k][0] === menuIcon[k][1]) && menuIcon.plain[0] !== menuIcon.plain[1], JSON.stringify(menuIcon));
+    ["on", "danger", "off", "plain"].every((k) => menuIcon[k]) && ["on", "danger", "off"].every((k) => menuIcon[k][0] === menuIcon[k][1]) && menuIcon.plain[0] !== menuIcon.plain[1], JSON.stringify(menuIcon));
   await page.screenshot({ path: SHOT + "/dropdown.png", clip: await menuDd.boundingBox().then((bb) => ({ x: bb.x - 10, y: bb.y - 10, width: bb.width + 200, height: bb.height + 260 })) });
 
   // Tabs
@@ -756,17 +755,17 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   // Data table
   await go("components/data-table.html");
-  /* 비활성 행의 태그 — 태그가 자기 색을 쥐고 있어 행이 비활성이어도 심각도 색이 활성처럼 남았다 */
-  const offTag = await page.evaluate(() => {
-    const t = document.querySelector(".example-preview .tbl tbody"); const tr = document.createElement("tr"); tr.className = "disabled";
-    tr.innerHTML = "<td><span class=\"tag solid critical\">Critical</span></td>"; t.append(tr);
-    const tag = tr.querySelector(".tag"), st = getComputedStyle(tag), dot = getComputedStyle(tag, "::before");
+  /* 비활성 행 — 태그 · 링크 · 상태 점은 자기 색을 쥐고 있어 td 의 color 만으로는 활성처럼 남았다. 실제 예제(Default)의 tr.disabled 를 잰다 */
+  const offRow = await page.evaluate(() => {
+    const tr = document.querySelector("#ex-data-table-basic tr.disabled");
+    if (!tr) return null;
     const res = (v) => { const d = document.createElement("div"); d.style.color = v; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
-    const r = { bg: st.backgroundColor, fg: st.color, dot: dot.backgroundColor, ring: st.boxShadow, wantBg: res("var(--surface-disable-primary)"), wantFg: res("var(--foreground-disable-primary)") };
-    tr.remove(); return r;
+    const tag = getComputedStyle(tr.querySelector(".tag")), link = getComputedStyle(tr.querySelector(".link")), dot = getComputedStyle(tr.querySelector(".indicator"), "::before");
+    return { tagBg: tag.backgroundColor, tagFg: tag.color, tagDot: getComputedStyle(tr.querySelector(".tag"), "::before").backgroundColor, link: link.color, linkEvents: link.pointerEvents, dot: dot.backgroundColor,
+      wantBg: res("var(--surface-disable-primary)"), wantFg: res("var(--foreground-disable-primary)") };
   });
-  ok("a tag inside a disabled table row is painted with the disable tokens",
-    offTag.bg === offTag.wantBg && offTag.fg === offTag.wantFg && offTag.dot === offTag.wantFg && offTag.ring === "none", JSON.stringify(offTag));
+  ok("a disabled table row greys its tag, link and status dot with the disable tokens",
+    !!offRow && offRow.tagBg === offRow.wantBg && [offRow.tagFg, offRow.tagDot, offRow.link, offRow.dot].every((c) => c === offRow.wantFg) && offRow.linkEvents === "none", JSON.stringify(offRow));
   const tbl = page.locator(".example-preview .tbl-wrap").filter({ has: page.locator("th.check") }).first();
   const rowsBefore = await tbl.locator("tbody tr.on").count();
   await tbl.locator("th.check input").click();
