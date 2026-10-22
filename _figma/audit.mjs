@@ -210,7 +210,7 @@ function componentsExpect() {
     kpiValue: { Critical: figTok(cssRule(".kpi.critical .value").color), High: figTok(cssRule(".kpi.high .value").color) },
     banner: Object.fromEntries([["Accent", ".banner"], ["Warning", ".banner.warning"], ["Danger", ".banner.danger"]].map(([k, s]) => { const r = cssRule(s), b = cssRule(".banner"); return [k, { fill: figTok(r.background || b.background), label: figTok(r.color || b.color) }]; })),
     menuItem: { hover: figTok(cssRule(".menu-item:hover").background), selected: figTok(cssRule(".menu-item.on").background) },
-    tabCount: figTok(cssRule(".tabs .tab .count").background),
+    tabCount: { base: figTok(cssRule(".tabs .tab .count").background), on: figTok(cssRule(".tabs .tab.on .count").background) },
     /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
     requiredSets: ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item"],
   };
@@ -301,7 +301,10 @@ function diffComponents(c, want, bad, notes) {
     const w = type === "Selected" && st !== "Disabled" ? want.menuItem.selected : st === "Hover" ? want.menuItem.hover : null;   // .on 이 :hover 뒤에 있어 선택 항목은 hover 에도 brand-subtle
     if (w && !has$(v.fill, w)) bad.push(`Menu Item ${type} ${st} 면 ${v.fill} ≠ ${w} (${v.id})`);
   }
-  for (const v of sets["Tab Item"] || []) if (v.count && !has$(v.count, want.tabCount)) bad.push(`Tab count 배지 ${v.count} ≠ ${want.tabCount} — ${v.name} (${v.id})`);
+  for (const v of sets["Tab Item"] || []) {
+    const w = prop(v.name, "State") === "Selected" ? want.tabCount.on : want.tabCount.base;   // 선택 탭의 배지는 .tabs .tab.on .count 를 따로 갖는다
+    if (v.count && !has$(v.count, w)) bad.push(`Tab count 배지 ${v.count} ≠ ${w} — ${v.name} (${v.id})`);
+  }
   for (const v of btn.filter((x) => /State=Disabled/.test(x.name))) {
     const m = /Variant=(Primary|Secondary|Tertiary|Text|Danger Secondary|Danger)(?=,|$)/.exec(v.name);
     const w = m && want.disabled[m[1]];
