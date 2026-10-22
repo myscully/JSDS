@@ -383,7 +383,13 @@ function diff(dumpPath) {
   for (const o of (got.overlap || []).filter((x) => x.current !== false)) bad.push(`겹침 ${o.page}: ${o.a} ↔ ${o.b} (${o.by.join("×")})`);
 
   const notes = [];
-  if (got.fonts && !got.fonts.pretendard) notes.push("Pretendard 가 Figma 에 없어 텍스트 스타일을 Noto Sans KR 로 대체해 두었습니다 — 되돌리기는 _figma/font-revert.md");
+  /* 서체 상태는 덤프의 실제 스타일 서체로 말한다 — 고정 문구를 찍다가 사람이 Pretendard 로 되돌린 뒤에도 "Noto 대체" 라고 했다 */
+  if (got.fonts && !got.fonts.pretendard) {
+    const noto = (got.textStyles || []).filter((t) => /^Noto Sans KR/.test(t.font)).map((t) => t.name);
+    notes.push(noto.length
+      ? `Figma 에 Pretendard 가 없어 텍스트 스타일 ${noto.length}개가 Noto Sans KR 대체입니다(${noto.slice(0, 4).join(" · ")}${noto.length > 4 ? " …" : ""}) — 되돌리기는 _figma/font-revert.md`
+      : "텍스트 스타일은 Pretendard 지만 이 플러그인 환경에는 Pretendard 가 없습니다 — 글자 내용·스타일 연결 같은 텍스트 편집은 여기서 할 수 없습니다");
+  }
 
   /* 텍스트 스타일 — typeScale 을 계산만 하고 대조하지 않아 "어긋남 0" 에 글자 크기가 빠져 있었다.
      저장소 .t-* 는 서체 이름을 적지 않으므로 서체는 Pretendard · Noto Sans KR(대체) 를 모두 받고 굵기만 본다 */
