@@ -1010,7 +1010,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 
 /* Tooltip */
 .tooltip-wrap{position:relative;display:inline-flex}
-.tooltip{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:12px;font-weight:500;line-height:1.4;padding:6px 10px;border-radius:6px;white-space:nowrap;box-shadow:var(--shadow-2);z-index:10;pointer-events:none;opacity:0;transition:opacity var(--motion-fast)}
+.tooltip{position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:12px;font-weight:400;line-height:18px;letter-spacing:0.0252em;padding:6px 10px;border-radius:6px;white-space:nowrap;box-shadow:var(--shadow-2);z-index:10;pointer-events:none;opacity:0;transition:opacity var(--motion-fast)}
 .tooltip::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--surface-neutral-inverse)}
 .tooltip.bottom{bottom:auto;top:calc(100% + 8px)}
 .tooltip.bottom::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--surface-neutral-inverse)}
