@@ -1,0 +1,24 @@
+# 이번 작업(2026-10-22 i)에서 Noto Sans KR 로 바꾼 노드 — 사람이 Pretendard 로 되돌릴 목록
+# page	node	원래(서체/스타일)	지금	글자(바뀐 것은 이전 → 이후)
+3 Component	I326:1191;326:973	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	Critical → High
+3 Component	I326:1196;326:982	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	Critical → Medium
+3 Component	I326:1201;326:991	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	Critical → Low
+3 Component	I326:1206;326:1000	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	Critical → Info
+3 Component	I326:1211;326:1009	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	Critical → OK
+3 Component	I326:1216;326:1018	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	Critical → Accent
+4 Pattern	530:20	(복제 원본 339:368) Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	2026-09-07 09:41:09.114 → 2026-09-07 09:39:57.980
+4 Pattern	530:24	(복제 원본 339:376) Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	10.0.0.3 → 10.0.7.10
+4 Pattern	530:26	(복제 원본 339:378) Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Server-03 → PC-0932
+4 Pattern	530:28	(복제 원본 339:380) Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	policy.sync ok (rev 2041) → scan.scheduled completed files=48213 threats=0
+# 스타일 Caption/0 (S:1ce4e231237a96216306d44c54af9858e6e593a5) 서체 Pretendard Medium → Noto Sans KR Medium. 스타일 하나만 되돌리면 아래 11개가 따라온다(글자 변경 없음)
+3 Component	334:3179	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제 (Tooltip 원본 Top)
+3 Component	334:3184	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제
+3 Component	334:3189	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제
+3 Component	334:3194	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제
+3 Component	334:3199	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	최근 24시간 동안 … (Multi)
+3 Component	I334:3232;334:3179	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제 (인스턴스)
+3 Component	I334:3237;334:3184	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제 (인스턴스)
+3 Component	I334:3246;334:3189	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제 (인스턴스)
+3 Component	I334:3255;334:3194	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제 (인스턴스)
+3 Component	I334:3273;334:3199	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	최근 24시간 동안 … (인스턴스)
+Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	© 2026 지란지교시큐리티 기획팀 디자인파트
