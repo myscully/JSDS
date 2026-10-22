@@ -34,7 +34,7 @@ Noto 에는 SemiBold 가 없어 Bold 로 간다. 다만 14단계 중 SemiBold �
 | Body/2 | S:dacbacc3a34994c6f27b892f3a8545a170e87c71, | Pretendard Regular |
 | Label/1 | S:4b96cfa08f9c9bcb9e3c80134eed888b8dfaeadd, | Pretendard Medium |
 | Label/2 | S:a44c9ae2cd1dd578f334c69449bba0d92c7a2f4d, | Pretendard Medium |
-| Caption/1 | S:43eeb1c2792da7498768252abbee3fb2999a0a32, | Pretendard Regular |
+| Caption/1 | S:43eeb1c2792da7498768252abbee3fb2999a0a32, | Pretendard Medium (2026-10-22 사람이 Regular → Medium, 저장소도 500) |
 | Caption/2 | S:9ae5a850dfb8897595693498f3282801f31278a6, | Pretendard Regular |
 
 ## 스타일에 연결되지 않은 Noto 노드

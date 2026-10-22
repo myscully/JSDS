@@ -950,7 +950,7 @@ const COMPONENTS = {
         <span class="tooltip-wrap show"><span class="indicator warn">검토 필요</span><span class="tooltip multi" role="tooltip">서명이 확인되지 않은 실행 파일입니다. 24시간 내 처리하지 않으면 자동 차단됩니다.</span></span>`, style: "padding-top:96px" },
     ],
     props: [[".tooltip-wrap", "container", "—", "position:relative 트리거 래퍼"], [".tooltip", "span", "—", "role=tooltip. 기본 위치 위"], ["position", ".bottom | .left | .right", "top", "위치"], [".show", "boolean", "false", "강제 표시(문서·디버그)"], [".multi", "boolean", "false", "여러 줄, 폭 220"]],
-    spec: [["Size", "높이 30 · padding 6 10 · 트리거와 8px"], ["Container", "radius 6 · surface/neutral/inverse · shadow/2 · 화살표 5px"], ["Label", "Caption/1 12 · 행간 18 · Regular · inverse"], ["Placement", "아이콘 전용 버튼 필수, 잘린 텍스트, 차트 값"]],
+    spec: [["Size", "높이 30 · padding 6 10 · 트리거와 8px"], ["Container", "radius 6 · surface/neutral/inverse · shadow/2 · 화살표 5px"], ["Label", "Caption/1 12 · 행간 18 · Medium · inverse"], ["Placement", "아이콘 전용 버튼 필수, 잘린 텍스트, 차트 값"]],
     figma: { frame: "Tooltip", radius: 6, sizes: { md: { h: 30 } }, variants: { top: {}, bottom: {}, left: {}, right: {} }, states: ["default", "multiline"] },
   },
 
