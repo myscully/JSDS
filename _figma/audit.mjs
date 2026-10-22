@@ -144,7 +144,11 @@ function cssRule(sel) {
   return Object.fromEntries(m[1].split(";").filter((x) => x.includes(":")).map((x) => { const i = x.indexOf(":"); return [x.slice(0, i).trim(), x.slice(i + 1).trim()]; }));
 }
 /* --surface-neutral-secondary → surface/neutral/secondary (그룹/하위/나머지) */
-const figTok = (v) => { const m = /var\(--([a-z]+)-([a-z]+)-([a-z-]+)\)/.exec(v || ""); return m ? `${m[1]}/${m[2]}/${m[3]}` : null; };
+const figTok = (v) => {
+  if (/var\(--brand-label\)/.test(v || "")) return "brand/label";   // 트리 밖 토큰 — Figma 에서는 color/semantic/brand/label
+  const m = /var\(--([a-z]+)-([a-z]+)-([a-z-]+)\)/.exec(v || ""); return m ? `${m[1]}/${m[2]}/${m[3]}` : null;
+};
+const inset = (v) => (/inset/.test(v || "") ? figTok(v) : null);
 const px = (v) => (v ? parseFloat(v) : null);
 
 function componentsExpect() {
@@ -185,6 +189,28 @@ function componentsExpect() {
       face: Object.fromEntries([["info", ".tag"], ["neutral", ".tag"], ...["critical", "high", "medium", "low", "ok", "accent"].map((t) => [t, `.tag.${t}`])].map(([k, sel]) => [k, figTok(cssRule(sel).background)])),
     },
     bannerWarning: figTok(cssRule(".banner.warning").background),
+    /* Tag 세 스타일 — 점(::before)·Outline·Solid 까지. 톤에 규칙이 없으면 기본 .tag / .tag.solid 를 따른다 */
+    tagStyle: (() => {
+      const has = (sel) => { try { return cssRule(sel); } catch { return null; } };
+      const tones = ["info", "neutral", "critical", "high", "medium", "low", "ok", "accent"];
+      const sel = (t) => (t === "info" || t === "neutral" ? "" : "." + t);
+      const base = cssRule(".tag"), solid = cssRule(".tag.solid");
+      return {
+        outline: { stroke: inset(cssRule(".tag.outline")["box-shadow"]) },
+        tones: Object.fromEntries(tones.map((t) => {
+          const dot = has(`.tag${sel(t)}::before`) || cssRule(".tag::before"), s = has(`.tag.solid${sel(t)}`) || {}, sd = has(`.tag.solid${sel(t)}::before`);
+          const sBg = s.background || (has(`.tag${sel(t)}`) || base).background;
+          return [t, {
+            dot: figTok(dot.background),
+            solid: { fill: figTok(sBg), stroke: s["box-shadow"] === "none" ? null : inset(s["box-shadow"] || solid["box-shadow"]), label: figTok(s.color || base.color), dot: figTok((sd || dot).background) },
+          }];
+        })),
+      };
+    })(),
+    kpiValue: { Critical: figTok(cssRule(".kpi.critical .value").color), High: figTok(cssRule(".kpi.high .value").color) },
+    banner: Object.fromEntries([["Accent", ".banner"], ["Warning", ".banner.warning"], ["Danger", ".banner.danger"]].map(([k, s]) => { const r = cssRule(s), b = cssRule(".banner"); return [k, { fill: figTok(r.background || b.background), label: figTok(r.color || b.color) }]; })),
+    menuItem: { hover: figTok(cssRule(".menu-item:hover").background), selected: figTok(cssRule(".menu-item.on").background) },
+    tabCount: figTok(cssRule(".tabs .tab .count").background),
     /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
     requiredSets: ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item"],
   };
@@ -241,8 +267,41 @@ function diffComponents(c, want, bad, notes) {
     if (!v.fill.includes("$" + w)) bad.push(`Tag ${tone} 바탕 ${v.fill} ≠ ${w} — ${v.name} (${v.id})`);
     if (v.text && !v.text.includes("$" + want.tag.label)) bad.push(`Tag ${tone} 라벨 ${v.text} ≠ ${want.tag.label} — ${v.name} (${v.id})`);
   }
-  for (const v of (sets["Banner"] || []).filter((x) => /Warning/.test(x.name)))
-    if (!v.fill.includes("$" + want.bannerWarning)) bad.push(`Banner Warning 바탕 ${v.fill} ≠ ${want.bannerWarning} (${v.id})`);
+  const has$ = (got, w) => (w === null ? true : w === "-" ? got === "-" : !!got && got.includes("$" + w));
+  for (const v of sets["Tag"] || []) {
+    const tone = (prop(v.name, "Tone") || "").toLowerCase(), style = prop(v.name, "Style"), w = want.tagStyle.tones[tone];
+    if (!w) continue;
+    if (style === "Subtle" && v.dot && !has$(v.dot, w.dot)) bad.push(`Tag ${tone} 점 ${v.dot} ≠ ${w.dot} — ${v.name} (${v.id})`);
+    if (style === "Outline") {
+      if (v.fill !== "-") bad.push(`Tag Outline 면이 있음 ${v.fill} — ${v.name} (${v.id})`);
+      if (!has$(v.stroke, want.tagStyle.outline.stroke)) bad.push(`Tag Outline 보더 ${v.stroke} ≠ ${want.tagStyle.outline.stroke} — ${v.name} (${v.id})`);
+      if (v.text && !has$(v.text, want.tag.label)) bad.push(`Tag Outline 라벨 ${v.text} ≠ ${want.tag.label} — ${v.name} (${v.id})`);
+      if (v.dot && !has$(v.dot, w.dot)) bad.push(`Tag Outline 점 ${v.dot} ≠ ${w.dot} — ${v.name} (${v.id})`);
+    }
+    if (style === "Solid") {
+      const s = w.solid;
+      if (!has$(v.fill, s.fill)) bad.push(`Tag Solid 면 ${v.fill} ≠ ${s.fill} — ${v.name} (${v.id})`);
+      if (s.stroke ? !has$(v.stroke, s.stroke) : v.stroke !== "-") bad.push(`Tag Solid 보더 ${v.stroke} ≠ ${s.stroke || "없음"} — ${v.name} (${v.id})`);
+      if (v.text && !has$(v.text, s.label)) bad.push(`Tag Solid 라벨 ${v.text} ≠ ${s.label} — ${v.name} (${v.id})`);
+      if (v.dot && !has$(v.dot, s.dot)) bad.push(`Tag Solid 점 ${v.dot} ≠ ${s.dot} — ${v.name} (${v.id})`);
+    }
+  }
+  for (const v of sets["KPI"] || []) {
+    const w = want.kpiValue[prop(v.name, "Tone")], val = (v.texts || []).find((t) => /value/i.test(t.split("=")[0]));
+    if (w && val && !has$(val.slice(val.indexOf("=") + 1), w)) bad.push(`KPI 값 ${val} ≠ ${w} — ${v.name} (${v.id})`);
+  }
+  for (const v of sets["Banner"] || []) {
+    const w = want.banner[prop(v.name, "Tone")];
+    if (!w) continue;
+    if (!has$(v.fill, w.fill)) bad.push(`Banner ${prop(v.name, "Tone")} 바탕 ${v.fill} ≠ ${w.fill} (${v.id})`);
+    if (v.text && !has$(v.text, w.label)) bad.push(`Banner ${prop(v.name, "Tone")} 글자 ${v.text} ≠ ${w.label} (${v.id})`);
+  }
+  for (const v of sets["Menu Item"] || []) {
+    const type = prop(v.name, "Type"), st = prop(v.name, "State");
+    const w = type === "Selected" && st !== "Disabled" ? want.menuItem.selected : st === "Hover" ? want.menuItem.hover : null;   // .on 이 :hover 뒤에 있어 선택 항목은 hover 에도 brand-subtle
+    if (w && !has$(v.fill, w)) bad.push(`Menu Item ${type} ${st} 면 ${v.fill} ≠ ${w} (${v.id})`);
+  }
+  for (const v of sets["Tab Item"] || []) if (v.count && !has$(v.count, want.tabCount)) bad.push(`Tab count 배지 ${v.count} ≠ ${want.tabCount} — ${v.name} (${v.id})`);
   for (const v of btn.filter((x) => /State=Disabled/.test(x.name))) {
     const m = /Variant=(Primary|Secondary|Tertiary|Text|Danger Secondary|Danger)(?=,|$)/.exec(v.name);
     const w = m && want.disabled[m[1]];
