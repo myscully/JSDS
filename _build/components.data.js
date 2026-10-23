@@ -1011,7 +1011,7 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Indicator */
   "indicator": {
-    status: "ready", react: ["Indicator","Count","WithCount","Steps"], css: [".indicator", ".count", ".with-count", ".steps"],
+    status: "ready", react: ["Indicator","Count","WithCount","Steps"], css: [".indicator", ".count", ".with-count", ".steps", ".sr-only"],   // .sr-only — Steps 완료 숨김 문구가 쓴다. 빠지면 복사한 CSS 에서 " (완료)" 가 화면에 보인다
     desc: "상태 점, 건수 배지, 단계 표시처럼 작은 시각 신호입니다. 텍스트 라벨과 함께 써 색만으로 의미를 전달하지 않습니다.",
     thumb: `<span class="indicator ok">정상</span><span class="indicator danger">차단</span><span class="count">3</span>`,
     examples: [
