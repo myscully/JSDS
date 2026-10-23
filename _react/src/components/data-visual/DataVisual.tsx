@@ -105,6 +105,7 @@ export const Donut = forwardRef<HTMLDivElement, DonutProps>(function Donut({ seg
   const aria = segments.map((s) => `${s.label} ${Math.round((s.value / total) * 100)}%`).join(", ");
   return <div ref={ref} className={cx("donut", className)} role="img" aria-label={aria} data-label={label} style={{ background: `conic-gradient(${stops.join(",")})`, ...style }} {...rest} />;
 });
+/** 도넛 + 범례 한 줄 — 도넛은 왼쪽, 범례는 오른쪽 끝(space-between). 카드가 넓으면 둘 사이가 벌어진다 */
 export const DonutRow = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function DonutRow({ className, ...rest }, ref) {
   return <div ref={ref} className={cx("donut-row", className)} {...rest} />;
 });

@@ -2,7 +2,7 @@ import { Card, CardDesc, CardHead, CardTitle, SelectButton, Sparkline } from "@j
 
 export default function Example() {
   return (
-    <Card style={{ width: 480 }}>
+    <Card style={{ width: 360 }}>
       <CardHead>
         <CardTitle>주간 탐지 추이</CardTitle>
         {/* 패널이 없으니 탭이 아니라 role=group + aria-pressed */}

@@ -743,7 +743,7 @@ const COMPONENTS = {
           <a href="#" title="설정">${I("settings")}<span>설정</span></a>
         </nav>`, layout: "left" },
     ],
-    props: [[".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(brand subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기)"], [".collapsed", "boolean", "false", "폭 64, 아이콘만"], [".count", "element", "—", "미확인 건수"]],
+    props: [[".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(brand subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기). 선택(.on)되면 brand 글자"], [".collapsed", "boolean", "false", "폭 64, 아이콘만"], [".count", "element", "—", "미확인 건수"]],
     spec: [["Size", "폭 240 (접힘 64) · 항목 높이 40"], ["Container", "surface/elevated/primary · 우측 1px border"], ["Label", "Body/2 14 · 그룹 Caption 11 uppercase"], ["Placement", "헤더 아래 좌측 고정, 전체 높이"]],
     figma: { frame: "Navigation", radius: "radius/md", sizes: { expanded: { w: 240 }, collapsed: { w: 64 }, item: { h: 40 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover", "active"] },
   },
@@ -832,7 +832,7 @@ const COMPONENTS = {
           <div class="card-foot"><button type="button" class="btn sm secondary">상세</button><button type="button" class="btn sm primary">갱신</button></div>
         </div>` },
       { id: "header", title: "Header Actions", desc: "헤더 우측에 기간 선택(Select Button) 또는 더 보기 메뉴. 패널이 없으니 탭이 아니라 role=group + aria-pressed 를 씁니다.", html: `
-        <div class="card" style="width:480px">
+        <div class="card" style="width:360px">
           <div class="card-head"><h3 class="title">주간 탐지 추이</h3><div class="select-btn" role="group" aria-label="기간"><button type="button" class="on" aria-pressed="true">7일</button><button type="button" aria-pressed="false">30일</button></div></div>
           <div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div>
           <p class="desc">이번 주 탐지 <b>412</b>건, 지난주보다 18% 증가</p>
@@ -1038,7 +1038,7 @@ const COMPONENTS = {
           <li><i>4</i>검토 · 배포</li>
         </ol>` },
     ],
-    props: [[".indicator", "span", "—", "점 + 라벨. ok | warn | danger | info | accent | (neutral)"], [".pulse", "boolean", "false", "깜빡임(위험 실시간)"], [".count", "span", "—", "건수. .accent / .neutral / .dot(점만)"], [".with-count", "wrapper", "—", "아이콘 우상단에 count 배치"], [".steps li", "li", "—", ".done 완료, .on 현재. .vertical 세로"]],
+    props: [[".indicator", "span", "—", "점 + 라벨. ok | warn | danger | info | accent | (neutral)"], [".pulse", "boolean", "false", "깜빡임(위험 실시간)"], [".count", "span", "—", "건수. 기본은 진한 빨강(--foreground-negative-strong) + 흰 숫자. .accent / .neutral / .dot(점만)"], [".with-count", "wrapper", "—", "아이콘 우상단에 count 배치"], [".steps li", "li", "—", ".done 완료(체크 아이콘 --foreground-positive-primary), .on 현재. .vertical 세로"]],
     spec: [["Size", "점 8 · count 높이 20 · step 원 24"], ["Container", "radius/full"], ["Label", "Body/2 14 · count 11 Bold · steps 13"], ["Placement", "테이블 상태 열, 내비 건수, 마법사 상단"]],
     figma: { frame: "Indicator", radius: "radius/full", sizes: { dot: 8, count: { h: 20 }, step: 24 }, variants: { ok: { fg: "--surface-positive-primary" }, warn: { fg: "--surface-cautionary-primary" }, danger: { fg: "--surface-negative-strong" }, info: { fg: "--surface-accent-cyan" }, neutral: { fg: "--graphic-muted" } }, states: ["default", "pulse"] },
   },
@@ -1280,7 +1280,7 @@ const COMPONENTS = {
           </div>
         </div>` },
       { id: "donut", title: "Donut + Legend", desc: "구성 비율. conic-gradient 로 그리고 중앙 값은 data-label.", html: `
-        <div class="chart-card" style="max-width:560px">
+        <div class="chart-card" style="max-width:320px">
           <h3 class="chart-title">심각도 분포</h3>
           <div class="donut-row">
             <div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%" data-label="1,054"></div>
@@ -1292,10 +1292,10 @@ const COMPONENTS = {
             </div>
           </div>
         </div>` },
-      { id: "spark", title: "Sparkline", desc: "카드 안 소형 추이. 강조 막대는 .hi.", html: `
-        <div class="kpi" style="min-width:260px"><span class="label">일별 탐지</span><span class="value">412</span><div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div></div>` },
+      { id: "spark", title: "Sparkline", desc: "카드 안 소형 추이. 강조 막대는 .hi. KPI 안에 두면 값 오른쪽에 놓이고 밑변을 숫자 기준선에 맞춥니다. 자리가 모자라면 값 아래로 내려갑니다.", html: `
+        <div class="kpi" style="min-width:min(320px, 100%)"><span class="label">일별 탐지</span><span class="value">412</span><div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div></div>` },
     ],
-    props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".chart-card", "container", "—", "차트를 담는 카드. Card 와 같은 Surface·radius/lg·1px 보더이고 padding 20 24 · gap 16 입니다. React <code>ChartCard</code>"], [".sparkline", "div", "—", "i height% 막대, .hi 강조"]],
+    props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label"], [".donut-row", "div", "—", "도넛 + 범례 한 줄. 도넛은 왼쪽, 범례는 오른쪽 끝(space-between) — 카드가 넓으면 둘 사이가 벌어집니다"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".chart-card", "container", "—", "차트를 담는 카드. Card 와 같은 Surface·radius/lg·1px 보더이고 padding 20 24 · gap 16 입니다. React <code>ChartCard</code>"], [".sparkline", "div", "—", "i height% 막대, .hi 강조. .kpi 의 자식이면 값 오른쪽(밑변 = 숫자 기준선), 좁으면 값 아래"]],
     spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·1px 보더, 다만 padding 20 24 · gap 16"], ["Label", "Caption 12.5 tertiary · 값 tabular"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열"]],
     figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, bar: {}, donut: {}, sparkline: {} }, states: ["default"] },
   },

@@ -42,11 +42,11 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 61 · verify 0/0 · contrast 822쌍 실패 0 · advisory 294 · behave 284/284 · react 198+3
+pages 61 · verify 0/0 · contrast 828쌍 실패 0 · advisory 297 · behave 287/287 · react 198+3
 ```
 
-`advisory 294` 는 참조 시스템 값을 따르느라 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된
-예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
+`advisory 297` 은 참조 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
+우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
 ## 토큰 체계 (v0.8)
 

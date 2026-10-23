@@ -1,4 +1,4 @@
-// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등 290 케이스를 실제 클릭으로 확인, 스크린샷은 .behave/
+// 사이트 프리뷰 동작 검증 (assets/ds.js): 빌드 후 `node behave.js` — 드롭다운·탭·달력·표 정렬 등을 실제 클릭으로 확인(케이스 수는 gates 출력이 말한다), 스크린샷은 .behave/
 const path = require("path");
 const SITE = path.resolve(__dirname, "..");
 const { chromium } = require(path.join(SITE, "_build/node_modules/playwright"));
@@ -932,7 +932,31 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const nav = page.locator(".example-preview .sidenav").first();
   await nav.locator("a").nth(2).click();
   ok("sidenav active moves", await nav.evaluate((e) => e.querySelectorAll("a.on").length === 1 && e.querySelectorAll("a")[2].classList.contains("on")));
+  /* 하위 항목을 골라도 brand 글자 — .sub 가 .on 과 특정도가 같고 뒤에 있어 회색이 이겼다 */
+  await nav.locator("a.sub").first().click();
+  const subOn = await nav.evaluate((e) => {
+    const a = e.querySelector("a.sub"), d = document.createElement("div"); d.style.color = "var(--foreground-brand-primary)"; document.body.append(d);
+    const want = getComputedStyle(d).color; d.remove();
+    return { on: a.classList.contains("on"), color: getComputedStyle(a).color, want };
+  });
+  ok("selected sub item uses the brand colour", subOn.on && subOn.color === subOn.want, JSON.stringify(subOn));
   ok("no scroll jump (hash unchanged)", !(await page.evaluate(() => location.hash)));
+
+  // Data Visual — sparkline 을 품은 KPI: 값 옆이면 밑변이 숫자 기준선, 좁으면 값 아래로 내려가 넘치지 않는다
+  await go("components/data-visual.html");
+  const spark = await page.evaluate(() => {
+    const m = (k) => { const v = k.querySelector(".value"), sp = k.querySelector(".sparkline");
+      const pr = document.createElement("span"); pr.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline"; v.append(pr); const base = pr.getBoundingClientRect().bottom; pr.remove();
+      const s = sp.getBoundingClientRect(), vr = v.getBoundingClientRect(), kr = k.getBoundingClientRect();
+      return { beside: s.top < vr.bottom && s.bottom > vr.top, drift: +(s.bottom - base).toFixed(1), inside: s.right <= kr.right - 1 + 0.5, overflow: k.scrollWidth > k.clientWidth }; };
+    const ex = document.querySelector("#ex-data-visual-spark .kpi");
+    /* 좁은 칸(최소 폭 180)에 긴 값 — 2열 grid 였을 때 보더 밖으로 넘쳤다 */
+    const narrow = ex.cloneNode(true); narrow.style.cssText = "width:180px;min-width:0"; narrow.querySelector(".value").innerHTML = "1,247<small>/ 1,284</small>";   /* KPI 예제의 실제 마크업(단위는 small) */
+    ex.parentElement.append(narrow);
+    const r = { example: m(ex), narrow: m(narrow) }; narrow.remove(); return r;
+  });
+  ok("sparkline KPI sits beside the value on its baseline", spark.example.beside && Math.abs(spark.example.drift) <= 1 && spark.example.inside, JSON.stringify(spark.example));
+  ok("sparkline KPI wraps under a long value instead of overflowing", !spark.narrow.beside && spark.narrow.inside && !spark.narrow.overflow, JSON.stringify(spark.narrow));
 
   // Notice / toast
   await go("components/notification.html");
