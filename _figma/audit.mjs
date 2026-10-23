@@ -139,14 +139,19 @@ function typeScale() {
 function cssRule(sel) {
   const css = read("_build/style.src.css");
   const esc = sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const m = css.match(new RegExp("(?:^|\\n|\\})" + esc + "\\{([^}]*)\\}"));
+  let m = css.match(new RegExp("(?:^|\\n|\\})" + esc + "\\{([^}]*)\\}"));
+  /* 셀렉터 목록 안에 있는 규칙(예: .sidenav.collapsed a span,…,.sidenav.collapsed a.sub{…})도 찾는다 */
+  if (!m) for (const r of css.matchAll(/(?:^|\n|\})([^{}@]+)\{([^}]*)\}/g)) if (r[1].split(",").map((x) => x.trim()).includes(sel)) { m = [null, r[2]]; break; }
   if (!m) throw new Error("CSS 규칙 없음: " + sel);
   return Object.fromEntries(m[1].split(";").filter((x) => x.includes(":")).map((x) => { const i = x.indexOf(":"); return [x.slice(0, i).trim(), x.slice(i + 1).trim()]; }));
 }
 /* --surface-neutral-secondary → surface/neutral/secondary (그룹/하위/나머지) */
 const figTok = (v) => {
-  if (/var\(--brand-label\)/.test(v || "")) return "brand/label";   // 트리 밖 토큰 — Figma 에서는 color/semantic/brand/label
-  const m = /var\(--([a-z]+)-([a-z]+)-([a-z-]+)\)/.exec(v || ""); return m ? `${m[1]}/${m[2]}/${m[3]}` : null;
+  const m = /var\(--([a-z0-9-]+)\)/.exec(v || ""); if (!m) return null;
+  const p = m[1].split("-");
+  /* 두 마디 토큰 — static/white · brand/label(트리 밖, Figma 에서는 color/semantic/brand/label) */
+  if (p[0] === "static" || p[0] === "brand") return p[0] + "/" + p.slice(1).join("-");
+  return p.length >= 3 ? `${p[0]}/${p[1]}/${p.slice(2).join("-")}` : null;
 };
 const inset = (v) => (/inset/.test(v || "") ? figTok(v) : null);
 const px = (v) => (v ? parseFloat(v) : null);
@@ -212,7 +217,26 @@ function componentsExpect() {
     menuItem: { hover: figTok(cssRule(".menu-item:hover").background), selected: figTok(cssRule(".menu-item.on").background) },
     tabCount: { base: figTok(cssRule(".tabs .tab .count").background), on: figTok(cssRule(".tabs .tab.on .count").background) },
     /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
-    requiredSets: ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item"],
+    /* Count · Status Indicator · Step · Navigation Item · Sparkline · Donut — 기대값은 전부 CSS 에서 */
+    countBadge: (() => { const base = cssRule(".count"); const t = (sel) => { const r = cssRule(sel); return { fill: figTok(r.background || base.background), text: figTok(r.color || base.color) }; };
+      return { Danger: t(".count"), Neutral: t(".count.neutral"), Accent: t(".count.accent"), Dot: { fill: figTok(cssRule(".count.dot").background || base.background), text: null } }; })(),   // .count.dot 은 배경을 따로 두지 않아 .count 를 따른다
+    statusDot: Object.fromEntries([["Neutral", ".indicator::before"], ["OK", ".indicator.ok::before"], ["Warn", ".indicator.warn::before"], ["Danger", ".indicator.danger::before"], ["Info", ".indicator.info::before"], ["Accent", ".indicator.accent::before"]].map(([k, sel]) => [k, figTok(cssRule(sel).background)])),
+    step: (() => { const r = cssRule; return {
+      Todo: { circle: figTok(r(".steps li i").background), number: figTok(r(".steps li i").color), label: figTok(r(".steps li").color) },
+      Done: { circle: figTok(r(".steps li.done i").background), check: figTok(r(".steps li.done i").color), label: figTok(r(".steps li").color) },
+      Current: { circle: figTok(r(".steps li.on i").background), number: figTok(r(".steps li.on i").color), label: figTok(r(".steps li.on").color) } }; })(),
+    navItem: (() => { const r = cssRule; return {
+      hover: figTok(r(".sidenav a:hover").background), pressed: figTok(r(".sidenav a:active").background),
+      selected: { fill: figTok(r(".sidenav a.on").background), label: figTok(r(".sidenav a.on").color), icon: figTok(r(".sidenav a.on svg").color) },
+      base: { label: figTok(r(".sidenav a").color), icon: figTok(r(".sidenav a svg").color) },
+      sub: { label: figTok(r(".sidenav a.sub").color), selected: figTok(r(".sidenav a.sub.on").color) } }; })(),
+    sparkBars: { bar: figTok(cssRule(".sparkline i").background), hi: figTok(cssRule(".sparkline i.hi").background) },
+    donut: (() => { const bg = cssRule(".donut").background;
+      const gaps = [...bg.matchAll(/var\(--surface-elevated-primary\) ([\d.]+)% ([\d.]+)%/g)].map((x) => +x[2] - +x[1]).filter((w) => w > 0.9);   // 0 · 100 끝의 반쪽 틈은 뺀다
+      return { gapDeg: gaps.length ? +(gaps[0] * 3.6).toFixed(2) : 0, row: cssRule(".donut-row")["justify-content"] }; })(),
+    /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
+    requiredSets: ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item",
+      "Count", "Status Indicator", "Step", "Steps", "Navigation Item", "Navigation"],
   };
 }
 
@@ -304,6 +328,57 @@ function diffComponents(c, want, bad, notes) {
   for (const v of sets["Tab Item"] || []) {
     const w = prop(v.name, "State") === "Selected" ? want.tabCount.on : want.tabCount.base;   // 선택 탭의 배지는 .tabs .tab.on .count 를 따로 갖는다
     if (v.count && !has$(v.count, w)) bad.push(`Tab count 배지 ${v.count} ≠ ${w} — ${v.name} (${v.id})`);
+  }
+  for (const v of sets["Count"] || []) {
+    const tone = prop(v.name, "Tone"), w = want.countBadge[tone]; if (!w) continue;
+    if (!has$(v.fill, w.fill)) bad.push(`Count ${tone} 면 ${v.fill} ≠ ${w.fill} (${v.id})`);
+    if (w.text && v.text && !has$(v.text, w.text)) bad.push(`Count ${tone} 숫자 ${v.text} ≠ ${w.text} (${v.id})`);
+  }
+  const si = sets["Status Indicator"] || [];
+  for (const v of si) { const tone = prop(v.name, "Tone"), w = want.statusDot[tone]; if (w && v.dot && !has$(v.dot, w)) bad.push(`Status Indicator ${tone} 점 ${v.dot} ≠ ${w} (${v.id})`); }
+  if (si.length && !si.some((v) => /Pulse=On/.test(v.name))) bad.push("Status Indicator 에 Pulse=On 변형이 없습니다(.indicator.pulse)");
+  for (const v of sets["Step"] || []) {
+    const st = prop(v.name, "State"), w = want.step[st]; if (!w) continue;
+    for (const k of ["circle", "check", "number", "label"]) if (w[k] && v[k] !== undefined && !has$(v[k], w[k])) bad.push(`Step ${st} ${k} ${v[k]} ≠ ${w[k]} (${v.id})`);
+  }
+  const ni = sets["Navigation Item"] || [];
+  for (const v of ni) {
+    const type = prop(v.name, "Type"), st = prop(v.name, "State"), w = want.navItem, tag = `Navigation Item ${type} ${st}`;
+    if (st === "Hover" && !has$(v.fill, w.hover)) bad.push(`${tag} 면 ${v.fill} ≠ ${w.hover} (${v.id})`);
+    if (st === "Pressed" && !has$(v.fill, w.pressed)) bad.push(`${tag} 면 ${v.fill} ≠ ${w.pressed} (${v.id})`);
+    if (st === "Selected") {
+      if (!has$(v.fill, w.selected.fill)) bad.push(`${tag} 면 ${v.fill} ≠ ${w.selected.fill} (${v.id})`);
+      const lw = type === "Sub" ? w.sub.selected : w.selected.label;
+      if (v.label && !has$(v.label, lw)) bad.push(`${tag} 글자 ${v.label} ≠ ${lw} (${v.id})`);
+      if (v.icon && !has$(v.icon, w.selected.icon)) bad.push(`${tag} 아이콘 ${v.icon} ≠ ${w.selected.icon} (${v.id})`);
+    } else {
+      const lw = type === "Sub" ? w.sub.label : w.base.label;
+      if (v.label && !has$(v.label, lw)) bad.push(`${tag} 글자 ${v.label} ≠ ${lw} (${v.id})`);
+      if (v.icon && !has$(v.icon, w.base.icon)) bad.push(`${tag} 아이콘 ${v.icon} ≠ ${w.base.icon} (${v.id})`);
+    }
+    if (v.countInstance === false) bad.push(`${tag} 건수가 Count 인스턴스가 아닙니다 — 톤을 고를 수 없다 (${v.id})`);   // React countTone
+  }
+  if (ni.length && !ni.some((v) => prop(v.name, "State") === "Pressed")) bad.push("Navigation Item 에 State=Pressed 변형이 없습니다(.sidenav a:active)");
+  /* 컨테이너가 항목 인스턴스로 짜였는지 · 접힌 내비의 빈 칸 */
+  for (const nm of ["Navigation", "Steps"]) for (const v of sets[nm] || []) {
+    const it = v.items; if (!it) continue;
+    if (it.raw > 0 || it.inst === 0) bad.push(`${nm} 가 항목 인스턴스로 짜이지 않았습니다 — 복제본 ${it.raw} · 인스턴스 ${it.inst} (${v.name}, ${v.id})`);
+    if (it.empty > 0) bad.push(`${nm} 에 빈 칸 프레임 ${it.empty}개 (${v.name}, ${v.id})`);
+  }
+  /* Sparkline 막대 — 강조는 하나, 나머지는 옅은 막대 */
+  const sparkCheck = (where, v) => { const b = v.bars; if (!b) return;
+    const hi = b["$" + want.sparkBars.hi] || 0, lo = b["$" + want.sparkBars.bar] || 0, all = Object.values(b).reduce((n, x) => n + x, 0);
+    if (hi !== 1 || lo !== all - 1) bad.push(`${where} 막대 ${JSON.stringify(b)} ≠ 강조 1(${want.sparkBars.hi}) · 나머지 ${want.sparkBars.bar} (${v.id})`); };
+  for (const v of sets["Chart Card"] || []) sparkCheck("Chart Card", v);
+  const kpis = sets["KPI"] || [];
+  for (const v of kpis) sparkCheck("KPI", v);
+  if (kpis.length && !kpis.some((v) => /Sparkline=On/.test(v.name))) bad.push("KPI 에 Sparkline=On 변형이 없습니다(.kpi:has(> .sparkline))");
+  /* Donut — 호 사이 틈(CSS 의 면 색 틈과 같은 각도)과 도넛 + 범례 행 */
+  for (const v of sets["Chart Card"] || []) {
+    if (!v.donutGaps) continue;
+    if (v.donutGaps.some((g) => Math.abs(g - want.donut.gapDeg) > 0.5)) bad.push(`Donut 호 사이 간격 ${v.donutGaps.join(" · ")}° ≠ ${want.donut.gapDeg}° (${v.id})`);
+    if (v.donutStrokes) bad.push(`Donut 호에 테두리 ${v.donutStrokes}개 — 틈은 비워서 만든다 (${v.id})`);
+    if (want.donut.row === "space-between" && v.row !== "SPACE_BETWEEN/FILL") bad.push(`Donut + 범례 행 ${v.row} ≠ SPACE_BETWEEN/FILL(.donut-row) (${v.id})`);
   }
   for (const v of btn.filter((x) => /State=Disabled/.test(x.name))) {
     const m = /Variant=(Primary|Secondary|Tertiary|Text|Danger Secondary|Danger)(?=,|$)/.exec(v.name);

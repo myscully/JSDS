@@ -113,6 +113,12 @@ describe("Donut", () => {
     expect(d).toHaveAttribute("aria-label", "A 25%, B 75%");
     expect(d.style.background).toContain("conic-gradient");
   });
+  /* 조각 사이 틈 — 밝기 대비가 낮아 틈이 없으면 색상으로만 갈린다(사이트 .donut 과 같은 계산) */
+  it("조각마다 양쪽에 면 색 틈을 둔다", () => {
+    const { container } = render(<Donut segments={[{ label: "A", value: 1, tone: "critical" }, { label: "B", value: 3, tone: "low" }]} />);
+    const bg = (container.firstElementChild as HTMLElement).getAttribute("style") ?? "";
+    expect(bg.match(/--surface-elevated-primary/g)?.length).toBe(4);
+  });
 });
 
 describe("Card", () => {
