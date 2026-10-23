@@ -734,7 +734,7 @@ const COMPONENTS = {
           <a href="#">${I("settings")}<span>설정</span></a>
           <div class="foot">v2.4.1 · 라이선스 정상</div>
         </nav>`, layout: "left" },
-      { id: "collapsed", title: "Collapsed", desc: "1280 이하 또는 사용자가 접었을 때. 아이콘만, 라벨은 툴팁으로.", html: `
+      { id: "collapsed", title: "Collapsed", desc: "1280 이하 또는 사용자가 접었을 때. 아이콘만, 라벨은 툴팁으로. 하위 항목과 .foot 은 숨고, 현재 메뉴가 하위 항목이면 부모(.has-on)가 선택 모양을 이어받습니다.", html: `
         <nav class="sidenav collapsed" aria-label="주 메뉴" style="border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg)">
           <a href="#" class="on" aria-current="page" title="대시보드">${I("home")}<span>대시보드</span></a>
           <a href="#" title="이벤트">${I("list")}<span>이벤트</span></a>
@@ -743,9 +743,9 @@ const COMPONENTS = {
           <a href="#" title="설정">${I("settings")}<span>설정</span></a>
         </nav>`, layout: "left" },
     ],
-    props: [[".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(brand subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기). 선택(.on)되면 brand 글자"], [".collapsed", "boolean", "false", "폭 64, 아이콘만"], [".count", "element", "—", "미확인 건수"]],
+    props: [[".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(brand subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기). 선택(.on)되면 brand 글자"], ["a.has-on", "parent", "—", "하위 항목이 현재 메뉴인 부모. 펼친 레일에서는 그대로, 접힌 레일에서는 하위 항목이 숨으니 선택 모양이 된다. 접힌 레일에서는 aria-current=\"true\" 도 함께(React hasActiveChild 는 자동)"], [".collapsed", "boolean", "false", "폭 64, 아이콘만"], [".count", "element", "—", "미확인 건수"]],
     spec: [["Size", "폭 240 (접힘 64) · 항목 높이 38.4 (padding 8 · 글자 14 · 행간 1.6)"], ["Container", "surface/elevated/primary · 우측 1px border"], ["Label", "Body/2 14 · 그룹 12 SemiBold uppercase"], ["Placement", "헤더 아래 좌측 고정, 전체 높이"]],
-    figma: { frame: "Navigation", radius: "radius/md", sizes: { expanded: { w: 240 }, collapsed: { w: 64 }, item: { h: 38.4 } }, variants: { default: {}, collapsed: {}, selected: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary" }, sub: { fg: "--foreground-neutral-secondary", selected: { fg: "--foreground-brand-primary" } } }, states: ["default", "hover", "active", "sub selected"] },
+    figma: { frame: "Navigation", radius: "radius/md", sizes: { expanded: { w: 240 }, collapsed: { w: 64 }, item: { h: 38.4 } }, variants: { default: {}, collapsed: { hasOn: { bg: "--surface-brand-subtle", icon: "--foreground-brand-primary" } }, selected: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary" }, sub: { fg: "--foreground-neutral-secondary", selected: { fg: "--foreground-brand-primary" } } }, states: ["default", "hover", "active", "sub selected"] },
   },
 
   /* ------------------------------------------------ Top Navigation */
