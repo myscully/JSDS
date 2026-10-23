@@ -15,6 +15,7 @@
 >   내비 Selected → 600 5 · Sub → 500 8 · 그룹 → 600 6 · KPI delta → 600 12 · Chart Card 제목 → 600 6 · 범례 값 → 700 8.
 >   `_figma/font-weight-todo.tsv`. "원본" 행을 고치면 인스턴스가 따라오고, "서체 덮어씀" 행은 따로 고친다. Pretendard 가 있어야 바꿀 수 있다.
 >   목록 밖에 하나 더: 도넛 가운데 값 330:2381 도 700 이어야 한다(지금 Noto Sans KR Medium — 목록 머리 주석)
+> - 2026-10-23 k: Properties 값 칩 3개(Pressed 582:3 · Pulse 582:5 · Sparkline 582:7)를 옆 칩을 복제해 만들며 Noto Sans KR Medium 으로 썼다(사람의 결정). 원래 서체·스타일은 Pretendard Medium · Caption/1 — `font-revert-nodes.tsv` 맨 아래 "2026-10-23 k" 절
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 아래는 처음 Noto 로 대체 교정할 때의 기록이다.

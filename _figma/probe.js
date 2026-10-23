@@ -13,6 +13,18 @@
 const CURRENT_PAGES = ["Overview", "1 Theme", "2 Element", "3 Component", "4 Pattern", "Resource"];
 const OVERFLOW_MIN = 10;   // 도형 외곽선·그림자 번짐이 만드는 2~6px 는 잡지 않는다
 
+/* ---------- 페이지 불러오기 ----------
+   불러오지 않은 페이지는 인스턴스 속 노드를 돌려주지 않는다. 그래서 이 조사는 실행할 때 열려 있던 첫 페이지 말고는
+   인스턴스 안을 못 봤고, 한 번도 열리지 않은 페이지는 통째로 비어 보였다. 2026-10-23 k 에 잰 값(TEXT 수 · 그중 인스턴스 속):
+     3 Component       1925 · 0  →  2721 · 796      (FRAME 1630 → 2188)
+     두 번째 Overview   0 · 0     →  250 · 0        (368:3228 — 그전 덤프에는 자식 0 으로 찍혔다)
+     4 Pattern          479 · 0   →  505 · 26
+   page.loadAsync() 와 figma.setCurrentPageAsync() 는 같은 수를 돌려준다(3 Component 2721 · 796 으로 같음).
+   loadAsync 는 현재 페이지를 바꾸지 않아 한 번의 실행에서 모든 페이지를 불러올 수 있으므로 이쪽을 쓴다 —
+   setCurrentPageAsync 는 실행마다 한 번만 쓰는 것이 권장이고 페이지를 바꿀 때마다 문서를 다시 읽는다.
+   전부 불러오는 데 페이지당 20~70ms. 아이콘 컴포넌트(전부 1 Theme)는 불러와도 수가 같다(313 · 145) */
+for (const p of figma.root.children) await p.loadAsync();
+
 /* ---------- 폰트 ---------- */
 const fonts = await figma.listAvailableFontsAsync();
 const families = new Set(fonts.map((f) => f.fontName.family));
@@ -80,8 +92,13 @@ icons.outline.sort(); icons.filled.sort();
 
 /* ---------- 넘침 · 겹침 ----------
    넘침: 자식이 부모 경계 밖. 겹침: 같은 페이지의 **최상위 노드끼리**.
-   두 번째를 빠뜨린 것이 지난 사고였다 — 둘을 한 함수에서 같이 본다. */
+   두 번째를 빠뜨린 것이 지난 사고였다 — 둘을 한 함수에서 같이 본다.
+   넘침은 네 방향을 본다(2026-10-23 k 까지는 오른쪽·아래만 봐서, 섹션이 왼쪽·위로 밀려 자식이 음수 좌표에 있으면 놓쳤다).
+   왼쪽·위가 가장 크면 side 를 적는다 — 오른쪽·아래 항목은 예전과 같은 모양이다.
+   인스턴스 속 프레임은 넘침 검사에서 뺀다 — 원본 컴포넌트를 검사하면 따라오고, 페이지를 불러오기 전에도 (열려 있던
+   첫 페이지 말고는) 보지 않았다. 인스턴스를 줄이거나 글자를 덮어써 생기는 넘침은 여기서 못 잡는다 */
 const overflow = [], overlap = [];
+const inInst = (n) => { for (let q = n.parent; q && q.type !== "PAGE"; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
 for (const p of figma.root.children) {
   const inScope = CURRENT_PAGES.includes(p.name);
   const tops = p.children.filter((n) => n.visible !== false && n.width && n.height);
@@ -94,15 +111,19 @@ for (const p of figma.root.children) {
     }
   }
   if (!inScope) continue;
-  for (const c of p.findAll((n) => (n.type === "SECTION" || n.type === "FRAME" || n.type === "COMPONENT" || n.type === "COMPONENT_SET") && n.children && n.children.length)) {
-    let r = -Infinity, b = -Infinity;
+  for (const c of p.findAll((n) => (n.type === "SECTION" || n.type === "FRAME" || n.type === "COMPONENT" || n.type === "COMPONENT_SET") && n.children && n.children.length && !inInst(n))) {
+    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
     for (const k of c.children) {
       if (k.visible === false) continue;
+      l = Math.min(l, k.x);
+      t = Math.min(t, k.y);
       r = Math.max(r, k.x + k.width);
       b = Math.max(b, k.y + k.height);
     }
-    const over = Math.max(r - c.width, b - c.height);
-    if (over > OVERFLOW_MIN) overflow.push({ page: p.name, node: c.name, id: c.id, by: Math.round(over), clips: c.clipsContent === true });
+    const sides = { right: r - c.width, bottom: b - c.height, left: -l, top: -t };
+    const side = Object.keys(sides).reduce((a, k) => (sides[k] > sides[a] ? k : a), "right");
+    const over = sides[side];
+    if (over > OVERFLOW_MIN) overflow.push({ page: p.name, node: c.name, id: c.id, by: Math.round(over), clips: c.clipsContent === true, ...(side === "left" || side === "top" ? { side } : {}) });
   }
 }
 
@@ -128,6 +149,12 @@ for (const p of figma.root.children) {
   if (!CURRENT_PAGES.includes(p.name)) continue;
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
     if (!SURVEY_SETS.includes(set.name)) continue;
+    /* 컴포넌트 속성 연결 — 이름·종류가 같은 노드가 변형마다 같은 속성을 참조하는지 audit 이 보려고 모은다.
+       복제(clone)한 변형은 연결이 빠진 채 세트에 들어온다(2026-10-23 j 에 8개가 그랬다). 인스턴스 속은 내려가지 않는다 */
+    const own = (root, fn) => { for (const k of root.children || []) { fn(k); if (k.type !== "INSTANCE" && "children" in k) own(k, fn); } };
+    const rkey = (n) => n.name + "|" + n.type;
+    const refKeys = new Set();
+    for (const c of set.children) own(c, (n) => { const r = n.componentPropertyReferences; if (r && Object.keys(r).length) refKeys.add(rkey(n)); });
     components.sets[set.name] = set.children.map((c) => {
       /* 이름 있는 부품 — 값이 있을 때만 기록해 덤프가 커지지 않게 한다 */
       const named = (nm, t) => c.findOne((k) => k.name === nm && (!t || k.type === t));
@@ -155,13 +182,39 @@ for (const p of figma.root.children) {
       const dot = c.findOne((k) => k.type === "ELLIPSE" && k.visible !== false);
       const count = c.findOne((k) => /count/i.test(k.name) && "fills" in k && k.type !== "TEXT");
       const texts = c.findAll((k) => k.type === "TEXT" && k.visible !== false).slice(0, 4).map((k) => k.name + "=" + paint(k.fills));
+      /* 2026-10-23 k 에 더한 필드 — 맨 뒤에 붙여 앞 필드의 순서·값은 예전 덤프와 같게 둔다 */
+      const extra = {};
+      /* 체크 선 굵기 — Figma 는 인스턴스 크기와 상관없이 px 로 그린다. 저장소는 24 viewBox 의 stroke-width 를 아이콘 폭에 맞춰 줄인다 */
+      const ckv = circle && circle.findOne && circle.findOne((k) => k.type === "VECTOR");
+      if (ckv) extra.checkW = ckv.strokeWeight === figma.mixed ? "mixed" : ckv.strokeWeight;
+      /* 점 둘레 고리(Pulse) — 점의 바깥 테두리나 퍼짐 그림자. 없으면 적지 않는다 */
+      if (dot) {
+        const st = (dot.strokes || []).filter((x) => x.visible !== false);
+        const sh = ("effects" in dot ? dot.effects : []).filter((e) => e.visible !== false && e.type === "DROP_SHADOW" && (e.spread || 0) > 0);
+        if (st.length && dot.strokeWeight !== figma.mixed && dot.strokeWeight > 0) extra.ring = paint(dot.strokes) + "|" + dot.strokeWeight + "|" + dot.strokeAlign;
+        else if (sh.length) { const b = vname(sh[0].boundVariables && sh[0].boundVariables.color); extra.ring = (b ? "$" + b : "raw") + "|" + sh[0].spread + "|SHADOW"; }
+      }
+      /* 도넛 호 — 시작·끝 각도(Figma 각도: 3시 방향 0°, 시계 방향)와 색. audit 이 CSS conic-gradient 정지점과 맞춘다 */
+      if (donut) extra.donutArcs = donut.findAll((k) => k.type === "ELLIPSE" && k.arcData).map((e) => [e.arcData.startingAngle, e.arcData.endingAngle].map((x) => +((x * 180) / Math.PI).toFixed(2)).concat(paint(e.fills))).sort((a, b) => a[0] - b[0]);
+      /* 속성 연결 — 세트 안 어느 변형에서든 연결이 있는 "이름|종류" 만, 이 변형에 그 노드가 있으면 연결(없으면 "") */
+      if (refKeys.size) {
+        const refs = {};
+        own(c, (n) => {
+          const k = rkey(n); if (!refKeys.has(k)) return;
+          const r = n.componentPropertyReferences || {};
+          const cur = new Set(refs[k] ? refs[k].split(";") : []);
+          for (const f of Object.keys(r)) cur.add(f + "=" + r[f]);
+          refs[k] = [...cur].filter(Boolean).sort().join(";");
+        });
+        extra.refs = refs;
+      }
       return {
         id: c.id, name: c.name, fill: paint(c.fills), stroke: paint(c.strokes),
         sw: c.strokeWeight === figma.mixed ? "mixed" : c.strokeWeight, shadow: shadows(c), opacity: +c.opacity.toFixed(2),
         gap: "itemSpacing" in c ? c.itemSpacing : null,
         foot: foot ? foot.itemSpacing : null, actions: actions ? actions.itemSpacing : null,
         text: label ? paint(label.fills) : null, dot: dot ? paint(dot.fills) : null,
-        count: count ? paint(count.fills) : null, countInstance: count ? count.type === "INSTANCE" : null, texts, ...parts,
+        count: count ? paint(count.fills) : null, countInstance: count ? count.type === "INSTANCE" : null, texts, ...parts, ...extra,
       };
     });
   }
@@ -175,6 +228,21 @@ for (const p of figma.root.children) {
         else if (k.type === "FRAME" && (k.findOne((x) => x.type === "INSTANCE" && /^icon\//.test(x.name)) || (nm === "Steps" && k.findOne((x) => x.type === "TEXT")) || (k.children.length === 1 && k.children[0].type === "TEXT" && k.height >= 36))) raw++;
       }
       v.items = { inst, raw, empty };
+      /* 항목 목록(순서대로) — audit 이 저장소 예제(사이트)와 순서·라벨·상태·아이콘을 맞춘다. 숨은 건수 배지는 적지 않는다 */
+      const list = [];
+      for (const k of node.children) {
+        if (k.type === "INSTANCE") {
+          const m = await k.getMainComponentAsync();
+          const tx = (n) => { const x = k.findOne((y) => y.type === "TEXT" && y.name === n && y.visible !== false); return x ? x.characters : null; };
+          const ic = k.findOne((y) => y.type === "INSTANCE" && (y.name === "Icon" || /^icon\//.test(y.name)) && y.visible !== false);
+          const icm = ic ? await ic.getMainComponentAsync() : null;
+          const cn = k.findOne((y) => y.type === "INSTANCE" && y.name === "Count" && y.visible !== false);
+          const ct = cn ? cn.findOne((y) => y.type === "TEXT") : null;
+          list.push({ item: m ? m.name : null, label: tx("Label"), number: tx("Number"), icon: icm ? icm.name.replace(/^icon\/(outline|filled)\//, "") : null, count: ct ? ct.characters : null });
+        } else if (k.type === "FRAME" && k.children.length) { const x = k.findOne((y) => y.type === "TEXT"); list.push({ group: x ? x.characters : null }); }
+        else list.push({ other: k.type + (k.type === "FRAME" ? " (빈 칸)" : "") });
+      }
+      v.itemsList = list;
     }
   }
   /* 글자에 negative/primary 가 묶이면 안 된다 — 저장소 규칙이 "글자는 strong, primary 는 아이콘·그래픽" 이다 */
