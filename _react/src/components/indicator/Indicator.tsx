@@ -19,6 +19,7 @@ export interface CountProps extends Omit<HTMLAttributes<HTMLSpanElement>, "child
   value?: number;
   /** 이 값을 넘으면 "99+" 형식 */
   max?: number;
+  /** 없으면 기본 — 진한 빨강(--foreground-negative-strong) + 흰 숫자. 위험·미확인이 아닌 중립 건수는 neutral */
   tone?: "accent" | "neutral";
   /** 숫자 없이 점만 (새 알림 표시) */
   dot?: boolean;

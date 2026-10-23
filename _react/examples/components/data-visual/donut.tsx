@@ -9,7 +9,7 @@ const SEGMENTS = [
 
 export default function Example() {
   return (
-    <ChartCard title="심각도 분포" style={{ maxWidth: 560 }}>
+    <ChartCard title="심각도 분포" style={{ maxWidth: 320 }}>
       <DonutRow>
         <Donut segments={SEGMENTS} label="1,054" />
         <ChartLegend column items={SEGMENTS.map((s) => ({ label: s.label, value: s.value, tone: s.tone }))} />
