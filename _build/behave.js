@@ -940,6 +940,13 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { on: a.classList.contains("on"), color: getComputedStyle(a).color, want };
   });
   ok("selected sub item uses the brand colour", subOn.on && subOn.color === subOn.want, JSON.stringify(subOn));
+  /* 접힌 레일의 하위 항목 — 아이콘이 없어 글자만 64px 레일 안에 그려졌다. 항목째 숨는다(예제에 sub 가 없어 넣어서 잰다) */
+  const railSub = await page.evaluate(() => {
+    const nav = document.querySelector("#ex-navigation-collapsed .sidenav.collapsed"), a = document.createElement("a");
+    a.href = "#"; a.className = "sub"; a.textContent = "USB 제어"; nav.append(a);
+    const r = { sub: getComputedStyle(a).display, item: getComputedStyle(nav.querySelector("a:not(.sub)")).display }; a.remove(); return r;
+  });
+  ok("collapsed rail hides sub items", railSub.sub === "none" && railSub.item !== "none", JSON.stringify(railSub));
   ok("no scroll jump (hash unchanged)", !(await page.evaluate(() => location.hash)));
 
   // Data Visual — sparkline 을 품은 KPI: 값 옆이면 밑변이 숫자 기준선, 좁으면 값 아래로 내려가 넘치지 않는다
@@ -957,6 +964,24 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   ok("sparkline KPI sits beside the value on its baseline", spark.example.beside && Math.abs(spark.example.drift) <= 1 && spark.example.inside, JSON.stringify(spark.example));
   ok("sparkline KPI wraps under a long value instead of overflowing", !spark.narrow.beside && spark.narrow.inside && !spark.narrow.overflow, JSON.stringify(spark.narrow));
+
+  /* 강조 막대 — 일반 막대와 같은 brand-primary 라 .hi 가 보이지 않았다 */
+  const sparkTone = await page.evaluate(() => { const bars = [...document.querySelectorAll("#ex-data-visual-spark .sparkline i")];
+    const hi = bars.find((b) => b.classList.contains("hi")), lo = bars.find((b) => !b.classList.contains("hi"));
+    return { hi: getComputedStyle(hi).backgroundColor, lo: getComputedStyle(lo).backgroundColor }; });
+  ok("sparkline highlight bar differs from the others", sparkTone.hi !== sparkTone.lo, JSON.stringify(sparkTone));
+  /* 도넛 조각 사이 틈 없음 — React Donut 과 같은 모양 */
+  const donutGap = await page.evaluate(() => { const bg = getComputedStyle(document.querySelector("#ex-data-visual-donut .donut")).backgroundImage;
+    const d = document.createElement("div"); d.style.color = "var(--surface-elevated-primary)"; document.body.append(d); const gap = getComputedStyle(d).color; d.remove();
+    return { gapInGradient: bg.includes(gap), colors: new Set(bg.match(/(rgba?|color)\([^)]*\)/g) || []).size }; });   // 브라우저는 색마다 시작·끝을 두 번 적는다 — 종류를 센다
+  ok("donut has no gaps between segments", !donutGap.gapInGradient && donutGap.colors === 4, JSON.stringify(donutGap));
+
+  // Steps — 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다
+  await go("components/indicator.html");
+  const stepSr = await page.evaluate(() => { const li = document.querySelector("#ex-indicator-steps li.done"), sr = li && li.querySelector(".sr-only");
+    if (!sr) return null; const r = sr.getBoundingClientRect();
+    return { text: sr.textContent, w: r.width, h: r.height, onHasSr: !!document.querySelector("#ex-indicator-steps li.on .sr-only") }; });
+  ok("done steps carry a screen-reader-only label", !!stepSr && /완료/.test(stepSr.text) && stepSr.w <= 1 && stepSr.h <= 1 && !stepSr.onHasSr, JSON.stringify(stepSr));
 
   // Notice / toast
   await go("components/notification.html");

@@ -100,6 +100,8 @@ const separation = [
   /* 눌림 단계 — 참조에 없어 우리가 더한 틴트다(reference-tokens.js 의 ADDITIONS) */
   ["--surface-negative-heavy", SURFACES, { light: 1.1, dark: 1.1 }],
   ["--surface-brand-subtle-strong", SURFACES, { light: 1.04, dark: 1.04 }],
+  /* Sparkline 일반 막대 — 강조(.hi)와 갈리도록 옅게 했다. 장식(aria-hidden)이라 3:1 대상은 아니지만 막대가 바탕에 녹으면 안 된다 */
+  ["--line-brand-primary", SURFACES, { light: 1.4, dark: 1.4 }],   // 실측 라이트 1.45~1.61 · 다크 1.45~2.45
   ...ACCENTS.map((c) => [`--surface-accent-${c}`, SURFACES, { light: 1.03, dark: 1.03 }]),
   /* 채운 제품 면이 페이지에서 보이는지 — 이 쌍이 없으면 '면이 배경에 녹는' 경우를 아무도 재지 않는다 */
   ...["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"]

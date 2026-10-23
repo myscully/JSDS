@@ -202,6 +202,13 @@ for (const d of require("./reference-tokens.js").diff(css)) fails.push(`참조 �
       }
     }
   }
+  /* 컴포넌트의 figma 필드(components.json 으로 나간다)도 같은 구멍이다 — Indicator 가 개명 전 이름
+     --graphic-muted 를 들고 있었고, 점 색도 CSS 와 다른 토큰이었다. 이 필드로 Figma 를 맞추면 없는 토큰이 간다 */
+  for (const [k, c] of Object.entries(COMPONENTS)) {
+    if (!c || typeof c !== "object" || !c.figma) continue;
+    const bad = [...new Set([...JSON.stringify(c.figma).matchAll(/"(--[a-z0-9-]+)"/g)].map((m) => m[1]))].filter((t) => !declared.has(t)).sort();
+    for (const t of bad) fails.push(`components.data.js ${k}.figma: ${t} 가 선언에 없다 — 이 필드로 Figma 를 맞추면 없는 토큰이 간다`);
+  }
   /* 패키지가 싣는 CSS 도 같은 검사를 받아야 한다. sync-css.mjs 가 손으로 쓴 base 규칙이
      개명 뒤에도 옛 이름을 참조하고 있었고(.ds-root 의 글자·배경, 포커스 링), 사이트만 보는
      가드로는 영영 안 잡힌다. dist 는 산출물이라 없을 수 있다 — 그때는 경고로 넘긴다 */

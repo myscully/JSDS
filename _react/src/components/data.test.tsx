@@ -4,6 +4,18 @@ import { DataTable } from "./data-table/DataTable";
 import { Accordion, AccordionGroup } from "./accordion/Accordion";
 import { Card, CardGrid, CardTitle } from "./card/Card";
 import { Donut } from "./data-visual/DataVisual";
+import { Steps } from "./indicator/Indicator";
+
+/* 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다 — 숨김 문구로 알린다 */
+describe("Steps", () => {
+  it("완료 항목에만 (완료) 숨김 문구가 붙는다", () => {
+    const { container } = render(<Steps items={["가", "나", "다"]} current={1} />);
+    const li = container.querySelectorAll("li");
+    expect(li[0].querySelector(".sr-only")?.textContent).toBe(" (완료)");
+    expect(li[1].querySelector(".sr-only")).toBeNull();
+    expect(li[2].querySelector(".sr-only")).toBeNull();
+  });
+});
 
 type R = { id: string; name: string; n: number };
 const rows: R[] = [{ id: "a", name: "b", n: 2 }, { id: "b", name: "a", n: 1 }, { id: "c", name: "c", n: 3 }];

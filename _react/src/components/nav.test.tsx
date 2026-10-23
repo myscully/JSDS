@@ -3,6 +3,17 @@ import userEvent from "@testing-library/user-event";
 import { Tab, TabList, TabPanel, Tabs } from "./tab/Tabs";
 import { Pagination, paginate } from "./pagination/Pagination";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbMore } from "./breadcrumb/Breadcrumb";
+import { SideNav, SideNavItem } from "./navigation/SideNav";
+
+/* 건수 톤 — 기본(미확인)은 진한 빨강 .count, 전체 개수처럼 중립인 건수는 countTone 으로 고른다 */
+describe("SideNav", () => {
+  it("count 는 기본 .count, countTone 으로 neutral · accent 를 고른다", () => {
+    const { container } = render(<SideNav><SideNavItem count={12}>이벤트</SideNavItem><SideNavItem count={3} countTone="neutral">전체</SideNavItem></SideNav>);
+    const counts = container.querySelectorAll(".count");
+    expect(counts[0].className).toBe("count");
+    expect(counts[1].className).toBe("count neutral");
+  });
+});
 
 describe("Tabs", () => {
   it("클릭·방향키로 전환하고 패널을 바꾼다", async () => {

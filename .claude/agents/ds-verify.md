@@ -26,13 +26,10 @@ node _build/gates.mjs          # 전부 (build·verify·contrast·behave·react)
 node _build/gates.mjs --quick  # 사이트만 — React 를 건드리지 않았을 때
 ```
 
+기준값은 `CLAUDE.md` 의 "게이트" 절에 있습니다 — 여기에 숫자를 따로 적지 않습니다(두 곳에 두면 한쪽이 낡습니다).
 기준값과 다르면 **무엇이 달라졌는지** 적습니다.
 
-```
-pages 61 · verify 0/0 · contrast 786쌍 실패 0 · advisory 258 · behave 281/281 · react 196+3
-```
-
-`advisory 258` 은 **선언된 예외**이지 실패가 아닙니다. 숫자가 움직였다면 어느 쌍이 왜 움직였는지
+`advisory` 는 **선언된 예외**이지 실패가 아닙니다. 숫자가 움직였다면 어느 쌍이 왜 움직였는지
 `_build/contrast.pairs.js` 에서 확인하세요.
 
 React 패키지를 건드렸다면 빌드도 확인합니다 — `cd _react && npm run build`.
