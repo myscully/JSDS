@@ -26,7 +26,7 @@ const logTable = (rows) => `
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
-    status: "ready", react: ["Form","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button"], css: [".form"],
+    status: "ready", react: ["Form","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button", "notification"], css: [".form"], borrows: [".t-label-1"],
     desc: "정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.",
     thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm primary">저장</button></div></div>`,
     principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "포커스가 떠날 때 필드 단위로, 제출 시 첫 오류로 스크롤"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
@@ -132,7 +132,7 @@ const PATTERNS = {
 
   /* ------------------------------------------------ Service Pattern */
   "onboarding": {
-    status: "ready", react: ["Onboard","Steps"], uses: ["indicator", "card", "item-tile", "button"], css: [".onboard"],
+    status: "ready", react: ["Onboard","Steps"], uses: ["indicator", "card", "item-tile", "button"], css: [".onboard"], borrows: [".keep-all"],
     desc: "첫 사용자가 콘솔을 설정하는 단계형 흐름입니다. 진행 단계 표시, 한 단계 한 결정, 건너뛰기 허용.",
     thumb: `<ol class="steps" style="font-size:12px"><li class="done"><i style="width:18px;height:18px;font-size:10px">${I("check",10)}</i>1</li><li class="on"><i style="width:18px;height:18px;font-size:10px">2</i>2</li><li><i style="width:18px;height:18px;font-size:10px">3</i>3</li></ol>`,
     examples: [
@@ -198,7 +198,7 @@ const PATTERNS = {
   },
 
   "system-status": {
-    status: "ready", react: ["StatusList","StatusItem"], uses: ["indicator", "card", "tag", "notification", "loading"], css: [".status-list", ".status-item", ".stack"],
+    status: "ready", react: ["StatusList","StatusItem"], uses: ["indicator", "card", "tag", "notification", "loading", "button"], css: [".status-list", ".status-item", ".stack"], borrows: [".row-2"],
     desc: "에이전트·서버·연동 서비스의 상태를 한눈에 보여줍니다. 정상은 조용하게, 이상은 눈에 띄게.",
     thumb: `<div class="status-list" style="grid-template-columns:1fr;width:200px;gap:6px"><div class="status-item" style="padding:8px 10px;font-size:12px"><span class="indicator ok">수집 서버</span><span class="meta">99.9%</span></div><div class="status-item" style="padding:8px 10px;font-size:12px"><span class="indicator danger">SIEM</span><span class="meta">끊김</span></div></div>`,
     examples: [

@@ -2,7 +2,7 @@
    render.js — 페이지 렌더러 + 해시 라우터 (브라우저 전용)
    data.js · components.data.js · patterns.data.js · lib.js 가 먼저 로드되어야 합니다.
    ========================================================= */
-const { esc, dedent, cssFor, tokenBlock, parseVars, rootBlock, htmlToJsx, hl } = LIB;
+const { esc, dedent, cssFor, cssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl } = LIB;
 const $ = s => document.querySelector(s);
 const STYLE = () => window.STYLE_TEXT || "";
 const nb = (sec, key) => NEW.has(`${sec}/${key}`) ? '<span class="n">N</span>' : "";
@@ -90,7 +90,7 @@ function usageBlock(key, css, label, names = []) {
 <h3>HTML</h3>${codeBlock(`usage-${key}`, USAGE_HTML, "html")}
 <h3>Component CSS <small style="font-weight:400;color:var(--foreground-neutral-tertiary);font-size:12px">${esc(label)}</small></h3>${codeBlock(`css-${key}`, css, "css", "CSS 복사")}`;
 }
-const cssOf = c => typeof c.css === "string" ? c.css : cssFor([].concat(c.css || []), STYLE(), VERSION);
+const cssOf = c => typeof c.css === "string" ? c.css : cssFor(cssPrefixes(c, COMPONENTS), STYLE(), VERSION);
 
 /* 예제 목록(컴포넌트 · 패턴 공용). 예제가 하나뿐이면 번호 제목을 두지 않는다 —
    나눠 가리킬 것이 없고 "대시보드" 아래 "1. 대시보드" 처럼 페이지 제목과 겹친다 */
@@ -100,7 +100,7 @@ const examplesBlock = (sec, key, list, css, label) => (list || []).map((ex, i) =
 function componentPage(key) {
   const c = COMPONENTS[key]; const t = titleOf("components", key);
   if (!c) return `<h1>${t}</h1><p class="lead">${t} 컴포넌트는 아직 작성되지 않았습니다.</p><div class="ph">라이브 프리뷰 · 코드<small>components.data.js 에 항목을 추가하세요</small></div>`;
-  const css = cssOf(c); const label = [].concat(c.css || []).join(", ");
+  const css = cssOf(c); const label = cssPrefixes(c, COMPONENTS).join(", ");
   return `<h1>${t}${nb("components", key)}</h1><p class="lead">${c.desc}</p>
 ${examplesBlock("components", key, c.examples, css, label)}
 <h2 id="props">Props</h2><p>HTML 에서는 클래스와 속성으로, React(<code>@jiran/ds-react</code>)에서는 같은 이름의 prop(<code>variant</code> · <code>size</code> …)으로 변형·상태를 지정합니다.</p>${propsTable(c.props)}
@@ -109,7 +109,7 @@ ${usageBlock(key, css, label, c.react || [])}`;
 function patternPage(key) {
   const c = PATTERNS[key]; const t = titleOf("patterns", key);
   if (!c) return templatePage("patterns", key);
-  const uses = c.uses || []; const prefixes = [...new Set([...uses.flatMap(u => [].concat((COMPONENTS[u] || {}).css || [])), ...[].concat(c.css || [])])];
+  const uses = c.uses || []; const prefixes = cssPrefixes(c, COMPONENTS);
   const css = cssFor(prefixes, STYLE(), VERSION); const label = prefixes.join(", ");
   const group = (allPages("patterns").find(p => p.key === key) || {}).group;
   return `<h1>${t}${nb("patterns", key)}</h1><p class="lead">${c.desc}</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses">${uses.map(u => `<a href="#/components/${u}">${titleOf("components", u)}</a>`).join("")}</div>
