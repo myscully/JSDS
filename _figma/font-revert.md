@@ -9,6 +9,12 @@
 > - 이 일과 무관하게 Noto 로 남은 현재 페이지 노드: Overview(302:2) 의 305:1788 · 305:1790(Regular, 스타일 없음). Resource 는 0
 > - **스타일에 연결할 후보 210개**(연결하지 않음): 크기·굵기·행간이 14단계와 같은데 스타일이 없는 노드 —
 >   1 Theme 200(Heading/3 27 · Heading/4 15 · Label/2 79 · Caption/2 79), 3 Component 6, 4 Pattern 4. 목록은 `_figma/font-link-candidates.tsv`(자간은 비교하지 않았다)
+> - 2026-10-23: Count · Steps · 내비 · 도넛을 저장소에 맞추며 글자 **내용**을 바꾼 17개가 Noto 로 바뀌었다
+>   (도넛 값 5 · Steps 4번째 항목 4 · 내비 라벨 8). `font-revert-nodes.tsv` 아래쪽에 이어 적었다
+> - **글자 굵기**가 저장소와 다른 노드 120행, 9종 — 건수 숫자(Count·Step·내비) → 700 53 · Step 라벨 Current → 600 6 · Done·Todo → 400 16 ·
+>   내비 Selected → 600 5 · Sub → 500 8 · 그룹 → 600 6 · KPI delta → 600 12 · Chart Card 제목 → 600 6 · 범례 값 → 700 8.
+>   `_figma/font-weight-todo.tsv`. "원본" 행을 고치면 인스턴스가 따라오고, "서체 덮어씀" 행은 따로 고친다. Pretendard 가 있어야 바꿀 수 있다.
+>   목록 밖에 하나 더: 도넛 가운데 값 330:2381 도 700 이어야 한다(지금 Noto Sans KR Medium — 목록 머리 주석)
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 아래는 처음 Noto 로 대체 교정할 때의 기록이다.

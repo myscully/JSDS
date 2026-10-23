@@ -22,3 +22,25 @@
 3 Component	I334:3255;334:3194	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	정책 복제 (인스턴스)
 3 Component	I334:3273;334:3199	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	최근 24시간 동안 … (인스턴스)
 Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/0	© 2026 지란지교시큐리티 기획팀 디자인파트
+
+# 이번 작업(2026-10-23 j)에서 글자 내용을 바꾸며 Noto Sans KR 로 바뀐 노드 17개 — 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: 서체를 '원래' 서체로 돌리고 원래 스타일에 다시 연결한다(글자는 그대로). 인스턴스 안 노드는 덮어쓰기라 원본을 고쳐도 따라오지 않는다
+# 이 덮어쓰기를 품은 컴포넌트의 문서용 인스턴스(Navigation 332:2900 · Steps 333:3344 · 333:3365 · Chart Card 330:2605)는 원본을 따르므로 따로 고칠 것이 없다
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+3 Component	330:2381	Pretendard Medium · Title/1 연결	Noto Sans KR Medium · 스타일 없음	1,284 → 1,054	Chart Card / Type=Donut · 도넛 가운데 값(위치를 가운데로 다시 맞춤)
+3 Component	330:2386	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	234 → 190	Chart Card / Type=Donut · 범례 Critical 값
+3 Component	330:2390	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	351 → 285	Chart Card / Type=Donut · 범례 High 값
+3 Component	330:2394	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	390 → 316	Chart Card / Type=Donut · 범례 Medium 값
+3 Component	330:2398	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	309 → 263	Chart Card / Type=Donut · 범례 Low 값
+3 Component	I559:3065;333:3155	Pretendard Medium · Label/2 (원본 333:3155 를 따름)	Noto Sans KR Medium · 스타일 없음	3 → 4	Steps / Orientation=Horizontal · 4번째 Step(State=Todo) 번호
+3 Component	I559:3065;333:3156	Pretendard Medium · Caption/1 (원본 333:3156 을 따름)	Noto Sans KR Medium · 스타일 없음	검토 → 배포	Steps / Orientation=Horizontal · 4번째 Step(State=Todo) 라벨
+3 Component	I559:3082;333:3155	Pretendard Medium · Label/2 (원본 333:3155 를 따름)	Noto Sans KR Medium · 스타일 없음	3 → 4	Steps / Orientation=Vertical · 4번째 Step(State=Todo) 번호
+3 Component	I559:3082;333:3156	Pretendard Medium · Caption/1 (원본 333:3156 을 따름)	Noto Sans KR Medium · 스타일 없음	검토 → 배포	Steps / Orientation=Vertical · 4번째 Step(State=Todo) 라벨
+3 Component	I560:3084;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 이벤트 로그	Navigation / State=Expanded · Navigation Item(Default) Label 속성
+3 Component	I560:3095;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 리포트	Navigation / State=Expanded · Navigation Item(Default) Label 속성
+3 Component	I560:3108;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 정보 유출 방지	Navigation / State=Expanded · Navigation Item(Default) Label 속성
+3 Component	I560:3118;332:2754	Pretendard Regular · Body/2 (원본 332:2754 를 따름)	Noto Sans KR Regular · 스타일 없음	대시보드 → 외부 메일	Navigation / State=Expanded · Navigation Item(Sub) Label 속성
+3 Component	I560:3123;332:2754	Pretendard Regular · Body/2 (원본 332:2754 를 따름)	Noto Sans KR Regular · 스타일 없음	대시보드 → USB · 매체	Navigation / State=Expanded · Navigation Item(Sub) Label 속성
+3 Component	I560:3127;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 에이전트	Navigation / State=Expanded · Navigation Item(Default) Label 속성
+3 Component	I560:3140;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 사용자	Navigation / State=Expanded · Navigation Item(Default) Label 속성
+3 Component	I560:3153;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 설정	Navigation / State=Expanded · Navigation Item(Default) Label 속성
