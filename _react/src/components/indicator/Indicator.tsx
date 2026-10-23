@@ -67,6 +67,7 @@ export const Steps = forwardRef<HTMLOListElement, StepsProps>(function Steps({ i
           <li key={i} className={cx({ done, on })} aria-current={on ? "step" : undefined}>
             <i>{done ? <Icon name="check" size={12} /> : i + 1}</i>
             {label}
+            {done && <span className="sr-only"> (완료)</span>}
           </li>
         );
       })}

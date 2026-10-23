@@ -38,13 +38,15 @@ export interface SideNavItemProps extends AnchorHTMLAttributes<HTMLAnchorElement
   active?: boolean;
   /** 미확인 건수 */
   count?: number | string;
+  /** 건수 톤 — 없으면 기본(진한 빨강 · 미확인). 전체 개수처럼 중립인 건수는 "neutral", 강조는 "accent" */
+  countTone?: "accent" | "neutral";
   /** 하위 항목(들여쓰기, 아이콘 없음) */
   sub?: boolean;
   /** 링크 요소 (react-router Link 등) */
   as?: ElementType;
   children?: ReactNode;
 }
-export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem({ icon, active, count, sub, as, className, children, title, ...rest }, ref) {
+export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem({ icon, active, count, countTone, sub, as, className, children, title, ...rest }, ref) {
   const { collapsed } = useContext(Ctx);
   const Link: ElementType = as ?? "a";
   const autoTitle = collapsed && typeof children === "string" ? children : undefined;
@@ -52,7 +54,7 @@ export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(funct
     <Link ref={ref} className={cx(active && "on", sub && "sub", className) || undefined} aria-current={active ? "page" : undefined} title={title ?? autoTitle} {...rest}>
       {icon && <Icon name={icon} />}
       {sub ? children : <span>{children}</span>}
-      {count !== undefined && <span className="count">{count}</span>}
+      {count !== undefined && <span className={cx("count", countTone)}>{count}</span>}
     </Link>
   );
 });
