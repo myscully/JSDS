@@ -13,6 +13,16 @@ describe("SideNav", () => {
     expect(counts[0].className).toBe("count");
     expect(counts[1].className).toBe("count neutral");
   });
+
+  /* 접힌 레일은 하위 항목을 숨긴다 — 현재 메뉴가 하위 항목이면 부모가 선택을 이어받아야 레일에 표시가 남는다 */
+  it("hasActiveChild 는 .has-on 을 달고, 접힌 레일에서만 aria-current=\"true\" 를 이어받는다", () => {
+    const parent = (collapsed: boolean) => render(<SideNav collapsed={collapsed}><SideNavItem icon="shield" hasActiveChild>정책</SideNavItem><SideNavItem sub active>USB 제어</SideNavItem></SideNav>).container.querySelector("a")!;
+    const open = parent(false), rail = parent(true);
+    expect(open.className).toBe("has-on");
+    expect(open.getAttribute("aria-current")).toBeNull();
+    expect(rail.className).toBe("has-on");
+    expect(rail.getAttribute("aria-current")).toBe("true");
+  });
 });
 
 describe("Tabs", () => {

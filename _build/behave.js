@@ -833,6 +833,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("onboarding prev disabled at first step", await ob.evaluate((e) => e.querySelectorAll(".steps li")[0].classList.contains("on") && e.querySelector('[data-step="prev"]').disabled && e.querySelectorAll(".steps li")[1].querySelector("i").textContent.trim() === "2"));
   await ob.locator(".tile").nth(1).click();
   ok("onboarding tiles single select", await ob.evaluate((e) => e.querySelectorAll(".tile.on").length === 1 && e.querySelectorAll(".tile")[1].getAttribute("aria-pressed") === "true"));
+  /* 완료 문단 — 한국어 기본 줄바꿈은 음절 사이에서 끊겨 1440 에서 "…있습니 / 다." 로 한 글자 줄이 남았다. .keep-all 로 어절째 넘긴다 */
+  const obLast = await page.evaluate(() => { const p = document.querySelector("#ex-onboarding-done .desc"), r = document.createRange(); r.selectNodeContents(p);
+    const rows = {}; for (const x of r.getClientRects()) { const k = Math.round(x.top); rows[k] = (rows[k] || 0) + x.width; }
+    const ws = Object.keys(rows).sort((a, b) => a - b).map((k) => Math.round(rows[k])); return { lines: ws.length, last: ws[ws.length - 1] }; });
+  ok("onboarding done text keeps its last word whole", obLast.last > 30, JSON.stringify(obLast));
   await go("components/date-picker.html");
   const rc = page.locator("#ex-date-picker-range .example-preview .calendar");
   await rc.locator('[data-preset="7"]').click();
@@ -940,6 +945,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { on: a.classList.contains("on"), color: getComputedStyle(a).color, want };
   });
   ok("selected sub item uses the brand colour", subOn.on && subOn.color === subOn.want, JSON.stringify(subOn));
+  /* 하위 항목을 고르면 바로 위 부모가 .has-on, 다른 항목을 고르면 풀린다 — ds.js 가 .on 만 옮겨 부모 표시가 남으면 접힌 레일에서 두 항목이 선택돼 보인다 */
+  const parentMark = await nav.evaluate((e) => { let p = e.querySelector("a.sub.on").previousElementSibling; while (p && p.matches("a.sub")) p = p.previousElementSibling;
+    return { parent: p && p.textContent.trim(), has: [...e.querySelectorAll("a.has-on")].map((a) => a.textContent.trim()) }; });
+  await nav.locator("a").first().click();
+  const parentCleared = await nav.evaluate((e) => e.querySelectorAll("a.has-on").length);
+  ok("picking a sub item marks its parent, picking another item clears it", parentMark.has.length === 1 && parentMark.has[0] === parentMark.parent && parentCleared === 0, JSON.stringify({ ...parentMark, parentCleared }));
   /* 접힌 레일의 하위 항목 — 아이콘이 없어 글자만 64px 레일 안에 그려졌다. 항목째 숨는다(예제에 sub 가 없어 넣어서 잰다) */
   const railSub = await page.evaluate(() => {
     const nav = document.querySelector("#ex-navigation-collapsed .sidenav.collapsed"), a = document.createElement("a");
@@ -947,6 +958,20 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const r = { sub: getComputedStyle(a).display, item: getComputedStyle(nav.querySelector("a:not(.sub)")).display }; a.remove(); return r;
   });
   ok("collapsed rail hides sub items", railSub.sub === "none" && railSub.item !== "none", JSON.stringify(railSub));
+  /* 접힌 레일 — .foot 은 64 폭에서 한 글자씩 세로로 쪼개졌고(React 는 접히면 그리지 않는다), 현재 메뉴가 하위 항목이면 레일 어디에도 선택 표시가 없었다.
+     부모(.has-on)가 접힌 레일에서만 .on 과 같은 면·아이콘이 된다(예제에 없는 상황이라 넣어서 잰다) */
+  const railMore = await page.evaluate(() => {
+    const rail = document.querySelector("#ex-navigation-collapsed .sidenav.collapsed"), open = document.querySelector("#ex-navigation-basic .sidenav:not(.collapsed)");
+    const foot = document.createElement("div"); foot.className = "foot"; foot.textContent = "v2.4.1 · 라이선스 정상"; rail.append(foot);
+    const look = (a) => ({ bg: getComputedStyle(a).backgroundColor, icon: getComputedStyle(a.querySelector("svg")).color });
+    const pick = (nav) => { const items = [...nav.querySelectorAll("a:not(.on):not(.sub)")], p = items[0]; p.classList.add("has-on");
+      const r = { parent: look(p), on: look(nav.querySelector("a.on:not(.sub)") || p), plain: look(items[1]) }; p.classList.remove("has-on"); return r; };
+    const r = { foot: getComputedStyle(foot).display, rail: pick(rail), open: pick(open) }; foot.remove(); return r;
+  });
+  ok("collapsed rail hides the footer", railMore.foot === "none", railMore.foot);
+  ok("parent of the current sub item looks selected only in the collapsed rail",
+    JSON.stringify(railMore.rail.parent) === JSON.stringify(railMore.rail.on) && JSON.stringify(railMore.rail.parent) !== JSON.stringify(railMore.rail.plain)
+    && JSON.stringify(railMore.open.parent) === JSON.stringify(railMore.open.plain), JSON.stringify(railMore));
   ok("no scroll jump (hash unchanged)", !(await page.evaluate(() => location.hash)));
 
   // Data Visual — sparkline 을 품은 KPI: 값 옆이면 밑변이 숫자 기준선, 좁으면 값 아래로 내려가 넘치지 않는다
@@ -982,6 +1007,22 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     if (!sr) return null; const r = sr.getBoundingClientRect();
     return { text: sr.textContent, w: r.width, h: r.height, onHasSr: !!document.querySelector("#ex-indicator-steps li.on .sr-only") }; });
   ok("done steps carry a screen-reader-only label", !!stepSr && /완료/.test(stepSr.text) && stepSr.w <= 1 && stepSr.h <= 1 && !stepSr.onHasSr, JSON.stringify(stepSr));
+  /* 390 — 미리보기(.panel)가 가운데 정렬이라 넘친 예제는 왼쪽이 잘려 스크롤로도 못 봤다("기본 정보" → "정보"). safe center 는 넘칠 때만 왼쪽부터 놓는다 */
+  const stepFit = () => page.evaluate(() => { const pv = document.querySelector("#ex-indicator-steps .example-preview"), s = pv.querySelector(".steps").getBoundingClientRect(), p = pv.getBoundingClientRect();
+    return { left: Math.round(s.left - p.left), right: Math.round(p.right - s.right), scrolls: pv.scrollWidth > pv.clientWidth }; });
+  const step1440 = await stepFit();
+  await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(250);
+  const step390 = await stepFit();
+  await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
+  ok("an overflowing preview starts at its left edge at 390", step390.left >= 0 && step390.scrolls, JSON.stringify(step390));
+  ok("a preview that fits stays centred", Math.abs(step1440.left - step1440.right) <= 1 && !step1440.scrolls, JSON.stringify(step1440));
+
+  // KPI 값 — 색이 없어 부모 색을 물려받았다. 패턴 개요 썸네일(.ov-card .thumb 은 tertiary 글자)에서 99.2% 만 회색이었다
+  await go("patterns/overview.html");
+  const kpiInk = await page.evaluate(() => { const v = document.querySelector(".ov-card .thumb .kpi:not(.critical):not(.high) .value");
+    const d = document.createElement("div"); d.style.color = "var(--foreground-neutral-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove();
+    return v ? { color: getComputedStyle(v).color, want } : null; });
+  ok("KPI value keeps the primary text colour inside a thumbnail", !!kpiInk && kpiInk.color === kpiInk.want, JSON.stringify(kpiInk));
 
   // Notice / toast
   await go("components/notification.html");

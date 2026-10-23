@@ -42,16 +42,19 @@ export interface SideNavItemProps extends AnchorHTMLAttributes<HTMLAnchorElement
   countTone?: "accent" | "neutral";
   /** 하위 항목(들여쓰기, 아이콘 없음) */
   sub?: boolean;
+  /** 하위 항목이 현재 메뉴인 부모(.has-on). 펼친 레일에서는 모양이 그대로이고, 하위 항목이 숨는 접힌 레일에서 선택 모양과 aria-current="true" 를 이어받는다 */
+  hasActiveChild?: boolean;
   /** 링크 요소 (react-router Link 등) */
   as?: ElementType;
   children?: ReactNode;
 }
-export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem({ icon, active, count, countTone, sub, as, className, children, title, ...rest }, ref) {
+export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem({ icon, active, count, countTone, sub, hasActiveChild, as, className, children, title, ...rest }, ref) {
   const { collapsed } = useContext(Ctx);
   const Link: ElementType = as ?? "a";
   const autoTitle = collapsed && typeof children === "string" ? children : undefined;
+  const current = active ? "page" : collapsed && hasActiveChild ? "true" : undefined;
   return (
-    <Link ref={ref} className={cx(active && "on", sub && "sub", className) || undefined} aria-current={active ? "page" : undefined} title={title ?? autoTitle} {...rest}>
+    <Link ref={ref} className={cx(active && "on", hasActiveChild && "has-on", sub && "sub", className) || undefined} aria-current={current} title={title ?? autoTitle} {...rest}>
       {icon && <Icon name={icon} />}
       {sub ? children : <span>{children}</span>}
       {count !== undefined && <span className={cx("count", countTone)}>{count}</span>}

@@ -154,7 +154,7 @@ const PATTERNS = {
           <ol class="steps"><li class="done"><i>${I("check",12)}</i>조직 정보<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>보호 수준<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>에이전트 배포<span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>4</i>완료</li></ol>
           <div class="card" style="align-items:center;text-align:center">
             <span class="indicator ok" style="font-size:16px;font-weight:600">설정이 완료되었습니다</span>
-            <p class="desc">표준 보호 · 에이전트 12대 연결 대기 중. 첫 이벤트가 들어오면 대시보드에서 확인할 수 있습니다.</p>
+            <p class="desc keep-all">표준 보호 · 에이전트 12대 연결 대기 중. 첫 이벤트가 들어오면 대시보드에서 확인할 수 있습니다.</p>
             <button type="button" class="btn lg primary">대시보드로 이동</button>
           </div>
         </div>` },

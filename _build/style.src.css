@@ -458,7 +458,7 @@ table.type-table td .smp{display:block;color:var(--foreground-neutral-primary)}
 
 /* Anatomy / demo panel */
 /* 예제 캔버스는 영역이지 옅은 면이 아니다 — 알파로 두면 그 위의 태그가 두 겹으로 쌓여 라벨이 AA 아래로 떨어진다 */
-.panel{background:var(--background-neutral-primary);border-radius:var(--radius-lg);padding:var(--space-12) var(--space-10);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:var(--space-6);margin:var(--space-4) 0 var(--space-6);position:relative;min-height:200px}
+.panel{background:var(--background-neutral-primary);border-radius:var(--radius-lg);padding:var(--space-12) var(--space-10);display:flex;flex-wrap:wrap;justify-content:center;justify-content:safe center;align-items:center;gap:var(--space-6);margin:var(--space-4) 0 var(--space-6);position:relative;min-height:200px}   /* safe — 넘치면 왼쪽부터 놓는다. 가운데 정렬로 넘친 예제는 왼쪽이 잘려 스크롤로도 못 봤다(390). 앞의 center 는 safe 를 모르는 엔진이 선언째 버리지 않게 */
 .panel.left{justify-content:flex-start}
 .ph{border:1.5px dashed var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--background-neutral-secondary);color:var(--foreground-neutral-tertiary);display:grid;place-items:center;text-align:center;font-size:12px;padding:var(--space-8);min-height:180px;margin:var(--space-4) 0 var(--space-6)}
 .ph small{display:block;margin-top:4px;font-size:12px;opacity:.8}
@@ -935,7 +935,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .sidenav a.sub.on{color:var(--foreground-brand-primary)}   /* .sub 가 .on 과 특정도가 같고 뒤에 있어, 하위 항목을 골라도 회색이 이겼다 */
 .sidenav.collapsed{width:64px;padding:12px 10px}
 .sidenav.collapsed a{justify-content:center;padding:10px 0}
-.sidenav.collapsed a span,.sidenav.collapsed .group,.sidenav.collapsed a .count,.sidenav.collapsed a.sub{display:none}   /* 하위 항목은 아이콘이 없어 레일에서 글자만 남았다 — 항목째 숨긴다 */
+.sidenav.collapsed a span,.sidenav.collapsed .group,.sidenav.collapsed a .count,.sidenav.collapsed a.sub,.sidenav.collapsed .foot{display:none}   /* 하위 항목은 아이콘이 없어 레일에서 글자만 남았다 — 항목째 숨긴다. .foot 은 64 폭에서 한 글자씩 세로로 쪼개졌다(React 는 접히면 그리지 않는다) */
+.sidenav.collapsed a.has-on{background:var(--surface-brand-subtle)}   /* 하위 항목이 현재 메뉴인 부모 — 레일에서는 하위 항목이 숨으니 부모가 선택 모양을 이어받는다. 펼친 레일에서는 모양이 그대로 */
+.sidenav.collapsed a.has-on svg{color:var(--foreground-brand-primary)}
 .sidenav .foot{margin-top:auto;padding:12px;font-size:12px;color:var(--foreground-neutral-tertiary)}
 
 /* Top Navigation */
@@ -1185,7 +1187,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 /* Data Visual */
 .kpi{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:20px 24px;min-width:180px;display:flex;flex-direction:column;gap:4px}
 .kpi .label{font-size:12px;color:var(--foreground-neutral-tertiary);font-weight:500}
-.kpi .value{font-size:32px;font-weight:700;letter-spacing:-.02em;line-height:1.2;white-space:nowrap}
+.kpi .value{font-size:32px;font-weight:700;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;color:var(--foreground-neutral-primary)}   /* 색이 없어 부모 색을 물려받았다 — 개요 썸네일(tertiary 글자)에서 값만 회색이 됐다 */
 .kpi .value small{font-size:16px;font-weight:500;color:var(--foreground-neutral-tertiary);margin-left:2px}
 .kpi .delta{font-size:12px;font-weight:600;color:var(--foreground-neutral-secondary)}
 .kpi .delta svg{width:12px;height:12px;vertical-align:-1px}
