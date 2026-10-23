@@ -970,11 +970,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const hi = bars.find((b) => b.classList.contains("hi")), lo = bars.find((b) => !b.classList.contains("hi"));
     return { hi: getComputedStyle(hi).backgroundColor, lo: getComputedStyle(lo).backgroundColor }; });
   ok("sparkline highlight bar differs from the others", sparkTone.hi !== sparkTone.lo, JSON.stringify(sparkTone));
-  /* 도넛 조각 사이 틈 없음 — React Donut 과 같은 모양 */
+  /* 도넛 조각 사이 틈 — 이웃 조각의 밝기 대비가 낮아 틈이 없으면 색상으로만 갈린다(React Donut 과 같은 계산) */
   const donutGap = await page.evaluate(() => { const bg = getComputedStyle(document.querySelector("#ex-data-visual-donut .donut")).backgroundImage;
     const d = document.createElement("div"); d.style.color = "var(--surface-elevated-primary)"; document.body.append(d); const gap = getComputedStyle(d).color; d.remove();
     return { gapInGradient: bg.includes(gap), colors: new Set(bg.match(/(rgba?|color)\([^)]*\)/g) || []).size }; });   // 브라우저는 색마다 시작·끝을 두 번 적는다 — 종류를 센다
-  ok("donut has no gaps between segments", !donutGap.gapInGradient && donutGap.colors === 4, JSON.stringify(donutGap));
+  ok("donut keeps a surface-coloured gap between segments", donutGap.gapInGradient && donutGap.colors === 5, JSON.stringify(donutGap));
 
   // Steps — 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다
   await go("components/indicator.html");

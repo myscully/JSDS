@@ -42,7 +42,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 61 · verify 0/0 · contrast 828쌍 실패 0 · advisory 296 · behave 291/291 · react 200+3
+pages 61 · verify 0/0 · contrast 828쌍 실패 0 · advisory 296 · behave 291/291 · react 201+3
 ```
 
 `advisory 296` 은 참조 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에

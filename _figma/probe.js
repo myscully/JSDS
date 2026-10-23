@@ -109,7 +109,8 @@ for (const p of figma.root.children) {
 /* ---------- 컴포넌트 ----------
    변수만 맞추고 컴포넌트를 안 봐서, 카드 그림자·버튼 간격·Danger 버튼 모양이 저장소와 한참 어긋난 채로 있었다.
    덤프가 커지면 옮기다 틀리므로 정해 둔 세트만 짧게 읽는다. 기대값은 audit.mjs 가 저장소 CSS 에서 읽는다 */
-const SURVEY_SETS = ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item"];
+const SURVEY_SETS = ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item",
+  "Count", "Status Indicator", "Step", "Steps", "Navigation Item", "Navigation"];
 const vname = (b) => { const v = b && byId.get(b.id); return v ? v.name.replace("color/semantic/", "") : null; };
 const paint = (arr) => {
   if (!arr || arr === figma.mixed) return "-";
@@ -128,6 +129,26 @@ for (const p of figma.root.children) {
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
     if (!SURVEY_SETS.includes(set.name)) continue;
     components.sets[set.name] = set.children.map((c) => {
+      /* 이름 있는 부품 — 값이 있을 때만 기록해 덤프가 커지지 않게 한다 */
+      const named = (nm, t) => c.findOne((k) => k.name === nm && (!t || k.type === t));
+      const vecStroke = (n) => { const v = n && (n.type === "VECTOR" ? n : n.findOne && n.findOne((k) => k.type === "VECTOR")); return v ? paint(v.strokes) : null; };
+      const parts = {};
+      const circle = named("Circle"), icon = named("Icon"), num = named("Number", "TEXT"), lab = named("Label", "TEXT");
+      if (circle) { parts.circle = paint(circle.fills); const ck = vecStroke(circle); if (ck) parts.check = ck; }
+      if (num) parts.number = paint(num.fills);
+      if (lab) parts.label = paint(lab.fills);
+      if (icon) { const ic = vecStroke(icon); if (ic) parts.icon = ic; }
+      /* 막대 묶음 — Chart Card 의 Sparkline 과 KPI 안의 Sparkline. 강조는 하나여야 한다 */
+      const spark = named("Sparkline") || (/Type=Sparkline/.test(c.name) ? named("Chart") : null);
+      if (spark) { const t = {}; for (const r of spark.findAll((k) => k.type === "RECTANGLE")) { const pf = paint(r.fills); t[pf] = (t[pf] || 0) + 1; } parts.bars = t; }
+      /* 도넛 — 호 사이 간격(도)과 호 테두리 수, 도넛 + 범례 행의 정렬 */
+      const donut = named("Donut");
+      if (donut) {
+        const arcs = donut.findAll((k) => k.type === "ELLIPSE" && k.arcData).map((e) => [e.arcData.startingAngle, e.arcData.endingAngle].map((x) => (x * 180) / Math.PI)).sort((a, b) => a[0] - b[0]);
+        parts.donutGaps = arcs.map((a, i) => +((i + 1 < arcs.length ? arcs[i + 1][0] : arcs[0][0] + 360) - a[1]).toFixed(2));
+        parts.donutStrokes = donut.findAll((k) => k.type === "ELLIPSE").reduce((n, e) => n + (e.strokes || []).filter((x) => x.visible !== false).length, 0);
+        const row = donut.parent; if (row && "primaryAxisAlignItems" in row) parts.row = row.primaryAxisAlignItems + "/" + (row.layoutSizingHorizontal || "-");
+      }
       const kid = (nm) => c.findOne((k) => k.name === nm && "itemSpacing" in k);
       const foot = kid("Foot"), actions = kid("Actions");
       const label = c.findOne((k) => k.type === "TEXT" && k.visible !== false);
@@ -140,9 +161,21 @@ for (const p of figma.root.children) {
         gap: "itemSpacing" in c ? c.itemSpacing : null,
         foot: foot ? foot.itemSpacing : null, actions: actions ? actions.itemSpacing : null,
         text: label ? paint(label.fills) : null, dot: dot ? paint(dot.fills) : null,
-        count: count ? paint(count.fills) : null, texts,
+        count: count ? paint(count.fills) : null, countInstance: count ? count.type === "INSTANCE" : null, texts, ...parts,
       };
     });
+  }
+  /* 컨테이너가 항목 인스턴스로 짜였는지 — 복제본이면 항목을 고쳐도 따라오지 않는다. 접힌 내비의 빈 칸도 센다 */
+  for (const [nm, item] of [["Navigation", "Navigation Item"], ["Steps", "Step"]]) {
+    for (const v of components.sets[nm] || []) {
+      const node = await figma.getNodeByIdAsync(v.id); let inst = 0, raw = 0, empty = 0;
+      for (const k of node.children) {
+        if (k.type === "INSTANCE") { const m = await k.getMainComponentAsync(); if (m && m.parent && m.parent.name === item) inst++; }
+        else if (k.type === "FRAME" && !k.children.length) empty++;
+        else if (k.type === "FRAME" && (k.findOne((x) => x.type === "INSTANCE" && /^icon\//.test(x.name)) || (nm === "Steps" && k.findOne((x) => x.type === "TEXT")) || (k.children.length === 1 && k.children[0].type === "TEXT" && k.height >= 36))) raw++;
+      }
+      v.items = { inst, raw, empty };
+    }
   }
   /* 글자에 negative/primary 가 묶이면 안 된다 — 저장소 규칙이 "글자는 strong, primary 는 아이콘·그래픽" 이다 */
   const inInstance = (n) => { for (let q = n.parent; q && q.type !== "PAGE"; q = q.parent) if (q.type === "INSTANCE") return true; return false; };

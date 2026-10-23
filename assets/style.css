@@ -1213,9 +1213,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .chart .num{text-align:right;color:var(--foreground-neutral-secondary)}
 .chart-card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:20px 24px;display:flex;flex-direction:column;gap:16px;width:100%}
 .chart-card .chart-title{font-size:16px;font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center}
-/* 조각 사이를 1.2% 만큼 표면색으로 비운다 — 램프를 명도 정렬한 뒤로 네 등급이 같은 밝기(L* 48.5)라
-   구분선이 없으면 경계 대비가 1.00 이고 도넛이 네 조각이 아니라 한 덩어리로 읽힌다 */
-.donut{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--foreground-negative-primary) 0 18%,var(--foreground-cautionary-primary) 18% 45.1%,var(--foreground-accent-cyan) 45.1% 75%,var(--foreground-inactive-primary) 75% 100%)}   /* 조각 사이 틈 없음 — React Donut 이 세그먼트에서 만드는 그라데이션과 같은 모양(190 · 285 · 316 · 263 기준) */
+/* 조각 사이를 1.2%(양쪽 0.6%) 만큼 면 색으로 비운다 — 이웃 조각의 밝기 대비가 라이트 1.23~1.53 · 다크 1.18~2.97 이라
+   틈이 없으면 색상으로만 갈리고, 색각 이상에서는 한 덩어리로 읽힌다. React Donut 도 같은 식으로 그린다(190 · 285 · 316 · 263 기준 값) */
+.donut{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--surface-elevated-primary) 0 0.6%,var(--foreground-negative-primary) 0.6% 17.4%,var(--surface-elevated-primary) 17.4% 18.6%,var(--foreground-cautionary-primary) 18.6% 44.5%,var(--surface-elevated-primary) 44.5% 45.7%,var(--foreground-accent-cyan) 45.7% 74.4%,var(--surface-elevated-primary) 74.4% 75.6%,var(--foreground-inactive-primary) 75.6% 99.4%,var(--surface-elevated-primary) 99.4% 100%)}
 .donut::after{content:attr(data-label);width:80px;height:80px;border-radius:50%;background:var(--surface-elevated-primary);display:grid;place-items:center;font-weight:700;font-size:16px;}
 .donut-row{display:flex;align-items:center;justify-content:space-between;gap:24px}
 .chart-legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12px;color:var(--foreground-neutral-secondary)}
