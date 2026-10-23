@@ -156,6 +156,41 @@ const figTok = (v) => {
 const inset = (v) => (/inset/.test(v || "") ? figTok(v) : null);
 const px = (v) => (v ? parseFloat(v) : null);
 
+/* ---------- 사이트 예제(저장소 = 사이트) ----------
+   컨테이너(Steps · Navigation)는 사이트 예제와 순서 · 라벨 · 상태 · 아이콘을 맞춘다. 예제 HTML 은 components.data.js 의
+   템플릿 문자열 그대로 읽는다 — 아이콘은 ${I("이름")} 으로 적혀 있어 이름을 바로 얻는다 */
+function exampleHtml(comp, id) {
+  const src = read("_build/components.data.js");
+  const i = src.indexOf('"' + comp + '": {');
+  if (i < 0) throw new Error("components.data.js 에 컴포넌트 없음: " + comp);
+  const next = /\n  "[a-z0-9-]+": \{/g; next.lastIndex = i + 1;
+  const n = next.exec(src), end = n ? n.index : src.length;
+  const j = src.indexOf('{ id: "' + id + '"', i);
+  if (j < 0 || j > end) throw new Error("components.data.js 에 예제 없음: " + comp + " / " + id);
+  const h = src.indexOf("html: `", j), e = src.indexOf("`", h + 7);
+  return src.slice(h + 7, e);
+}
+const strip = (s) => s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+function stepsExample() {
+  return [...exampleHtml("indicator", "steps").matchAll(/<li([^>]*)>([\s\S]*?)<\/li>/g)].map((m) => {
+    const cls = ((/class="([^"]*)"/.exec(m[1]) || [])[1] || "").split(/\s+/);
+    const i = /<i>([\s\S]*?)<\/i>/.exec(m[2]), ic = i && /\$\{I\("([a-z0-9-]+)"/.exec(i[1]);
+    return { state: cls.includes("done") ? "Done" : cls.includes("on") ? "Current" : "Todo", mark: ic ? ic[1] : i ? strip(i[1]) : null,
+      label: strip(m[2].replace(/<i>[\s\S]*?<\/i>/, "").replace(/<span class="sr-only">[\s\S]*?<\/span>/g, "")) };
+  });
+}
+function navExample() {
+  const out = [];
+  for (const m of exampleHtml("navigation", "basic").matchAll(/<a([^>]*)>([\s\S]*?)<\/a>|<div class="(group|foot)">([\s\S]*?)<\/div>/g)) {
+    if (m[3]) { out.push({ kind: m[3], label: strip(m[4]) }); continue; }
+    const cls = ((/class="([^"]*)"/.exec(m[1]) || [])[1] || "").split(/\s+/);
+    const ic = /\$\{I\("([a-z0-9-]+)"/.exec(m[2]), ct = /<span class="count[^"]*">([\s\S]*?)<\/span>/.exec(m[2]);
+    const body = m[2].replace(/\$\{[^}]*\}/g, "").replace(/<span class="count[^"]*">[\s\S]*?<\/span>/g, "");
+    out.push({ kind: "item", type: cls.includes("sub") ? "Sub" : "Default", state: cls.includes("on") ? "Selected" : "Default", icon: ic ? ic[1] : null, label: strip(body), count: ct ? strip(ct[1]) : null });
+  }
+  return out;
+}
+
 function componentsExpect() {
   const surface = (sel) => { const r = cssRule(sel); const b = /1px solid (var\([^)]+\))/.exec(r.border || ""); return { shadow: !!r["box-shadow"] && r["box-shadow"] !== "none", stroke: b ? figTok(b[1]) : null }; };
   return {
@@ -212,7 +247,7 @@ function componentsExpect() {
         })),
       };
     })(),
-    kpiValue: { Critical: figTok(cssRule(".kpi.critical .value").color), High: figTok(cssRule(".kpi.high .value").color) },
+    kpiValue: { Default: figTok(cssRule(".kpi .value").color), Critical: figTok(cssRule(".kpi.critical .value").color), High: figTok(cssRule(".kpi.high .value").color) },   // Default 는 .kpi .value 에 색이 생긴 뒤(2026-10-23 k)부터 본다 — 색이 없으면 null 이라 건너뛴다
     banner: Object.fromEntries([["Accent", ".banner"], ["Warning", ".banner.warning"], ["Danger", ".banner.danger"]].map(([k, s]) => { const r = cssRule(s), b = cssRule(".banner"); return [k, { fill: figTok(r.background || b.background), label: figTok(r.color || b.color) }]; })),
     menuItem: { hover: figTok(cssRule(".menu-item:hover").background), selected: figTok(cssRule(".menu-item.on").background) },
     tabCount: { base: figTok(cssRule(".tabs .tab .count").background), on: figTok(cssRule(".tabs .tab.on .count").background) },
@@ -231,6 +266,24 @@ function componentsExpect() {
       base: { label: figTok(r(".sidenav a").color), icon: figTok(r(".sidenav a svg").color) },
       sub: { label: figTok(r(".sidenav a.sub").color), selected: figTok(r(".sidenav a.sub.on").color) } }; })(),
     sparkBars: { bar: figTok(cssRule(".sparkline i").background), hi: figTok(cssRule(".sparkline i.hi").background) },
+    /* 컨테이너 — 사이트 예제와 순서 · 라벨 · 상태 · 아이콘. Steps 는 Indicator 의 steps 예제, Navigation 은 Default 예제 */
+    stepsItems: stepsExample(),
+    navItems: navExample(),
+    /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
+    donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
+      .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
+      .filter((s) => s.tok !== "surface/elevated/primary"),
+    /* 체크 선 굵기 — 24 viewBox 의 stroke-width 를 아이콘 폭으로 줄인 실제 굵기(3 × 12/24 = 1.5). Figma 는 px 로 그린다 */
+    checkStroke: (() => { const r = cssRule(".steps li i svg"); return parseFloat(r["stroke-width"]) * (parseFloat(r.width) / 24); })(),
+    /* Pulse 고리 — 색은 box-shadow 색과 같은 계열(foreground/negative/primary → negative), 굵기는 @keyframes pulse 의 최대 퍼짐 이하 */
+    pulse: (() => {
+      const tok = figTok(cssRule(".indicator.pulse::before")["box-shadow"]);
+      const css = read("_build/style.src.css"), i = css.indexOf("@keyframes pulse{");
+      if (i < 0) throw new Error("@keyframes pulse 없음");
+      let d = 0, j = i; for (; j < css.length; j++) { if (css[j] === "{") d++; else if (css[j] === "}") { d--; if (!d) break; } }
+      const spreads = [...css.slice(i, j).matchAll(/box-shadow:\s*0 0 0 ([\d.]+)px/g)].map((x) => +x[1]);
+      return { tok, family: tok ? tok.split("/")[1] : null, max: spreads.length ? Math.max(...spreads) : null };
+    })(),
     donut: (() => { const bg = cssRule(".donut").background;
       const gaps = [...bg.matchAll(/var\(--surface-elevated-primary\) ([\d.]+)% ([\d.]+)%/g)].map((x) => +x[2] - +x[1]).filter((w) => w > 0.9);   // 0 · 100 끝의 반쪽 틈은 뺀다
       return { gapDeg: gaps.length ? +(gaps[0] * 3.6).toFixed(2) : 0, row: cssRule(".donut-row")["justify-content"] }; })(),
@@ -365,6 +418,69 @@ function diffComponents(c, want, bad, notes) {
     if (it.raw > 0 || it.inst === 0) bad.push(`${nm} 가 항목 인스턴스로 짜이지 않았습니다 — 복제본 ${it.raw} · 인스턴스 ${it.inst} (${v.name}, ${v.id})`);
     if (it.empty > 0) bad.push(`${nm} 에 빈 칸 프레임 ${it.empty}개 (${v.name}, ${v.id})`);
   }
+  /* 컨테이너 내용 — 사이트 예제와 순서 · 라벨 · 상태 · 아이콘. Figma 글자를 고쳐 맞추지 않는다: 다르면 실패로 남겨 사람이 고른다 */
+  const seqDiff = (where, v, site, fig, fmt) => {
+    const n = Math.max(site.length, fig.length);
+    for (let i = 0; i < n; i++) {
+      const a = site[i] ? fmt(site[i]) : "없음", b = fig[i] ? fmt(fig[i]) : "없음";
+      if (a !== b) bad.push(`${where} 항목 ${i + 1}: 저장소 [${a}] ≠ Figma [${b}] (${v.name}, ${v.id})`);
+    }
+  };
+  for (const v of sets["Steps"] || []) {
+    if (!v.itemsList) { notes.push("덤프에 컨테이너 항목 목록이 없습니다 — 2026-10-23 k 이전 probe.js 로 만든 덤프입니다"); break; }
+    const fig = v.itemsList.filter((x) => x.item).map((x) => ({ state: x.item.replace(/^.*State=/, ""), mark: x.icon || x.number, label: x.label }));
+    seqDiff("Steps", v, want.stepsItems, fig, (x) => `${x.state} · ${x.mark} · ${x.label}`);
+  }
+  for (const v of (sets["Navigation"] || []).filter((x) => /State=Expanded/.test(x.name))) {
+    if (!v.itemsList) break;
+    const fig = v.itemsList.filter((x) => x.item || x.group).map((x) => x.group ? { kind: "group", label: x.group }
+      : { kind: "item", type: prop(x.item, "Type"), state: prop(x.item, "State"), icon: x.icon, label: x.label, count: x.count });
+    seqDiff("Navigation", v, want.navItems, fig, (x) => x.kind === "item" ? `${x.type}${x.state === "Selected" ? "·선택" : ""} · ${x.icon || "아이콘 없음"} · ${x.label}${x.count ? " · 건수 " + x.count : ""}` : `${x.kind === "group" ? "그룹" : "foot"} · ${x.label}`);
+  }
+  /* 도넛 호 각도 — CSS 정지점과 ±0.5° · 색 */
+  for (const v of sets["Chart Card"] || []) {
+    if (!v.donutArcs) continue;
+    const ang = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
+    if (v.donutArcs.length !== want.donutArcs.length) bad.push(`Donut 호 ${v.donutArcs.length}개 ≠ ${want.donutArcs.length}개(.donut conic-gradient) (${v.id})`);
+    else want.donutArcs.forEach((w, i) => { const [s, e, p] = v.donutArcs[i];
+      if (ang(s, w.from) > 0.5 || ang(e, w.to) > 0.5 || !has$(p, w.tok)) bad.push(`Donut 호 ${i + 1}: Figma ${s}°~${e}° ${p} ≠ 저장소 ${+w.from.toFixed(2)}°~${+w.to.toFixed(2)}° ${w.tok} (${v.id})`); });
+  }
+  /* 체크 선 굵기 — 저장소의 실제 굵기(stroke-width × 폭/24) */
+  for (const nm of ["Step", "Steps"]) for (const v of sets[nm] || []) {
+    if (v.checkW === undefined) continue;
+    if (typeof v.checkW !== "number" || Math.abs(v.checkW - want.checkStroke) > 0.01) bad.push(`${nm} 체크 선 굵기 ${v.checkW} ≠ ${want.checkStroke}(.steps li i svg: stroke-width × 폭/24) — ${v.name} (${v.id})`);
+  }
+  /* Pulse 고리 — Pulse=On 은 같은 계열 토큰 · 0 < 굵기 ≤ 최대 퍼짐, Pulse=Off 는 고리 없음.
+     고리(ring)는 2026-10-23 k 의 probe.js 부터 적으므로, 그 전 덤프(새 필드가 하나도 없음)에서는 보지 않는다 */
+  const newProbe = Object.values(sets).some((vs) => vs.some((v) => v.refs !== undefined || v.itemsList !== undefined || v.checkW !== undefined));
+  for (const v of newProbe ? si : []) {
+    const p = prop(v.name, "Pulse"); if (!p) continue;
+    const [paintR, wR] = (v.ring || "").split("|"), w = +wR, tok = /\$([a-z]+)\/([a-z]+)\//.exec(paintR || "");
+    if (p === "On") {
+      if (!v.ring) bad.push(`Status Indicator Pulse=On 에 고리가 없습니다(.indicator.pulse) — ${v.name} (${v.id})`);
+      else {
+        if (!tok || tok[2] !== want.pulse.family) bad.push(`Pulse 고리 색 ${paintR} 이 ${want.pulse.tok} 계열(${want.pulse.family})이 아닙니다 — ${v.name} (${v.id})`);
+        if (!(w > 0 && w <= want.pulse.max)) bad.push(`Pulse 고리 굵기 ${wR} 가 0 초과 ${want.pulse.max} 이하(@keyframes pulse)가 아닙니다 — ${v.name} (${v.id})`);
+      }
+    } else if (v.ring) bad.push(`Status Indicator Pulse=Off 에 고리가 있습니다 ${v.ring} — ${v.name} (${v.id})`);
+  }
+  /* 컴포넌트 속성 연결 — 어떤 변형에서 이름·종류가 같은 노드가 속성 P 를 참조하면, 같은 노드를 가진 다른 변형도 P 를 참조해야 한다.
+     복제(clone)해 넣은 변형은 연결이 빠진 채 들어온다(2026-10-23 j 에 8개). 같은 빠짐은 묶어서 한 줄로 */
+  if (Object.values(sets).some((vs) => vs.some((v) => v.refs !== undefined))) {
+    for (const [set, vs] of Object.entries(sets)) {
+      const all = {};
+      for (const v of vs) for (const [k, r] of Object.entries(v.refs || {})) for (const x of r.split(";").filter(Boolean)) (all[k] = all[k] || new Set()).add(x);
+      const miss = {};
+      for (const v of vs) for (const [k, r] of Object.entries(v.refs || {})) {
+        const have = new Set(r.split(";").filter(Boolean));
+        for (const x of all[k] || []) if (!have.has(x)) (miss[k + " → " + x] = miss[k + " → " + x] || []).push(v);
+      }
+      for (const [kx, list] of Object.entries(miss)) {
+        const [k, x] = kx.split(" → "), [nm, ty] = k.split("|");
+        bad.push(`${set} 속성 연결 빠짐 — ${nm}(${ty}) 이 ${x} 를 참조하지 않는 변형 ${list.length}개: ${list.slice(0, 3).map((v) => v.name + " " + v.id).join(" · ")}${list.length > 3 ? " …" : ""}`);
+      }
+    }
+  } else notes.push("덤프에 컴포넌트 속성 연결 조사가 없습니다 — 2026-10-23 k 이전 probe.js 로 만든 덤프입니다");
   /* Sparkline 막대 — 강조는 하나, 나머지는 옅은 막대 */
   const sparkCheck = (where, v) => { const b = v.bars; if (!b) return;
     const hi = b["$" + want.sparkBars.hi] || 0, lo = b["$" + want.sparkBars.bar] || 0, all = Object.values(b).reduce((n, x) => n + x, 0);
@@ -454,7 +570,7 @@ function diff(dumpPath) {
   list(want.icons.outline, got.icons ? got.icons.outlineNames || [] : [], "outline 아이콘");
   list(want.icons.filled, got.icons ? got.icons.filledNames || [] : [], "filled 아이콘");
 
-  for (const o of got.overflow || []) bad.push(`넘침 ${o.page} / ${o.node} +${o.by}${o.clips ? " (잘림)" : ""}`);
+  for (const o of got.overflow || []) bad.push(`넘침 ${o.page} / ${o.node} +${o.by}${o.side ? " (" + (o.side === "left" ? "왼쪽" : "위") + ")" : ""}${o.clips ? " (잘림)" : ""}`);
   for (const o of (got.overlap || []).filter((x) => x.current !== false)) bad.push(`겹침 ${o.page}: ${o.a} ↔ ${o.b} (${o.by.join("×")})`);
 
   const notes = [];

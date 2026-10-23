@@ -44,3 +44,10 @@ Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/
 3 Component	I560:3127;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 에이전트	Navigation / State=Expanded · Navigation Item(Default) Label 속성
 3 Component	I560:3140;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 사용자	Navigation / State=Expanded · Navigation Item(Default) Label 속성
 3 Component	I560:3153;332:2732	Pretendard Medium · Title/2 (원본 332:2732 를 따름)	Noto Sans KR Medium · 스타일 없음	대시보드 → 설정	Navigation / State=Expanded · Navigation Item(Default) Label 속성
+
+# 2026-10-23 k — Properties 값 칩 3개를 옆 칩을 복제해 새로 만들며 글자를 Noto Sans KR 로 썼다(사람의 결정 "지금 Noto 로 추가"). 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: 서체를 Pretendard Medium 으로 돌리고 Caption/1 스타일에 다시 연결한다(복제 원본 칩과 같게). 칩 프레임 자체는 원본 칩의 복제라 그대로 둔다
+# page	node	원래 써야 할(서체/스타일)	지금	글자	어디
+3 Component	582:3	Pretendard Medium · Caption/1 연결(복제 원본 332:3083 "Collapsed" 칩과 같게)	Noto Sans KR Medium · 스타일 없음	Pressed (새 칩 582:2)	Card/Navigation · Properties · "Navigation Item · Type · State =" 행 끝
+3 Component	582:5	Pretendard Medium · Caption/1 연결(복제 원본 333:3225 "Accent" 칩과 같게)	Noto Sans KR Medium · 스타일 없음	Pulse (새 칩 582:4)	Card/Indicator · Properties · "Status Indicator · Tone =" 행 끝
+3 Component	582:7	Pretendard Medium · Caption/1 연결(복제 원본 330:2508 "Down" 칩과 같게)	Noto Sans KR Medium · 스타일 없음	Sparkline (새 칩 582:6)	Card/Data Visual · Properties · "KPI · Delta =" 행 끝
