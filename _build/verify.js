@@ -209,6 +209,30 @@ for (const d of require("./reference-tokens.js").diff(css)) fails.push(`참조 �
     const bad = [...new Set([...JSON.stringify(c.figma).matchAll(/"(--[a-z0-9-]+)"/g)].map((m) => m[1]))].filter((t) => !declared.has(t)).sort();
     for (const t of bad) fails.push(`components.data.js ${k}.figma: ${t} 가 선언에 없다 — 이 필드로 Figma 를 맞추면 없는 토큰이 간다`);
   }
+  /* 복사용 CSS 가 예제가 쓰는 클래스를 다 담는지 — Steps 완료 숨김 문구가 .sr-only 없이 붙어 나가 화면에 보이던 결함(ec1c8e6)과
+     같은 구멍이 15쪽에 있었다(Card 예제의 .btn · .tag …). 시스템에 규칙이 있는 클래스만 본다 — 사이트 전용 클래스는 붙여 넣을 대상이 아니다.
+     이름이 어딘가에 나오는지만 보면 덮어쓰기만 실린 것을 놓친다 — Tab 예제의 .count 는 .tabs .tab .count 만 실리고
+     .count{display:inline-grid…} 가 빠져 배지 모양이 달랐다. 그래서 자기 규칙(셀렉터가 .x 하나 — 의사 클래스만 붙은 것)이 시스템에 있으면
+     그것도 실려야 한다. ".x 로 시작"으로 셌더니 .btn 을 빌리며 함께 실린 .empty .btn 이 .empty 의 자기 규칙으로 셈됐다 */
+  {
+    const src = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8");
+    const selectorsIn = (css) => [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{[^{}]*\}/g)].flatMap((m) => m[1].split(",").map((x) => x.trim()));
+    const classesIn = (css) => new Set(selectorsIn(css).flatMap((s) => [...s.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((x) => x[1])));
+    const rootsIn = (css) => new Set(selectorsIn(css).map((s) => (/^\.([a-zA-Z][\w-]*)(?::{1,2}[\w-]+(?:\([^)]*\))?)*$/.exec(s) || [])[1]).filter(Boolean));
+    const samples = src.slice(src.indexOf(LIB.SAMPLES_START) + LIB.SAMPLES_START.length, src.indexOf(LIB.SAMPLES_END));
+    const ruled = classesIn(samples), rooted = rootsIn(samples);
+    for (const [sec, list] of [["components", COMPONENTS], ["patterns", PATTERNS]]) for (const [k, c] of Object.entries(list)) {
+      if (!c || typeof c !== "object" || !c.examples || typeof c.css === "string") continue;
+      const copyCss = LIB.cssFor(LIB.cssPrefixes(c, COMPONENTS), src, ""), copy = classesIn(copyCss), copyRoots = rootsIn(copyCss);
+      for (const ex of c.examples) {
+        const used = new Set([...(ex.html || "").matchAll(/class="([^"]*)"/g)].flatMap((m) => m[1].split(/\s+/)).filter(Boolean));
+        const miss = [...used].filter((cl) => ruled.has(cl) && !copy.has(cl));
+        const bare = [...used].filter((cl) => rooted.has(cl) && copy.has(cl) && !copyRoots.has(cl));
+        if (miss.length) fails.push(`${sec}/${k}.html #ex-${k}-${ex.id}: 복사용 CSS 에 ${miss.map((x) => "." + x).join(" ")} 규칙이 없다 — 붙여 넣은 쪽에서 그 부분이 스타일 없이 그려진다(css · borrows · uses 에 더한다)`);
+        if (bare.length) fails.push(`${sec}/${k}.html #ex-${k}-${ex.id}: 복사용 CSS 에 ${bare.map((x) => "." + x).join(" ")} 의 덮어쓰기만 있고 자기 규칙(.x{…})이 없다 — 붙여 넣으면 기본 모양 없이 덮어쓰기만 먹는다(borrows 에 더한다)`);
+      }
+    }
+  }
   /* 패키지가 싣는 CSS 도 같은 검사를 받아야 한다. sync-css.mjs 가 손으로 쓴 base 규칙이
      개명 뒤에도 옛 이름을 참조하고 있었고(.ds-root 의 글자·배경, 포커스 링), 사이트만 보는
      가드로는 영영 안 잡힌다. dist 는 산출물이라 없을 수 있다 — 그때는 경고로 넘긴다 */

@@ -2,6 +2,7 @@
    lib.js — 브라우저(standalone 미리보기)와 node(build.js) 공용 함수
    - esc / dedent : 문자열 유틸
    - cssFor      : 공유 스타일시트의 'Live component samples' 블록에서 컴포넌트 CSS 추출
+   - cssPrefixes : 복사용 CSS 의 범위(자기 css + uses 의 css)
    - tokenBlock  : :root 토큰 중 접두어에 해당하는 변수만 추출
    - parseVars   : :root / dark 블록을 {name:value} 객체로
    - htmlToJsx   : HTML 샘플 → React(TSX) 코드
@@ -45,6 +46,13 @@
     for (const [name, kf] of Object.entries(keyframes)) if (out.some(r => /animation/.test(r) && new RegExp("\\b" + name + "\\b").test(r))) out.push(kf);
     const head = `/* JS Design System ${version || ""} · ${prefixes.join(", ")} · 토큰(var(--*))은 assets/style.css :root 참고 */`;
     return head + "\n" + out.join("\n");
+  }
+  /* 복사용 CSS 의 범위 — 자기 css + 예제가 빌려 쓰는 접두어(borrows) + 함께 쓰는 컴포넌트(uses)의 css.
+     borrows 는 그 페이지의 복사본에만 들어가고 uses 로 옮겨 가지 않는다 — css 에 섞었더니 Card 가 빌린
+     .select-btn 이 Card 를 쓰는 패턴(Onboarding)까지 따라갔고, react.html 의 '컴포넌트 ↔ 클래스' 표에 .btn 이 섞였다.
+     페이지(render.js) · components.json(build.js) · verify.js 가 이 식 하나를 쓴다. 컴포넌트 페이지만 uses 를 빼고 셌었다 */
+  function cssPrefixes(c, components) {
+    return [...new Set([...(c.uses || []).flatMap(u => [].concat((components[u] || {}).css || [])), ...[].concat(c.css || []), ...(c.borrows || [])])];
   }
   /* 블록 끝은 괄호 짝으로 찾는다 — 주석 안의 중괄호(역할 문법 --{intent}-{role} 같은 표기)는 세지 않는다.
      첫 '}' 까지 자르던 종전 구현은 그 주석 한 줄에 :root 블록이 중간에서 끊겨 --space-* 가 사라졌다 */
@@ -179,6 +187,6 @@
     return out;
   }
 
-  const api = { esc, dedent, cssFor, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  const api = { esc, dedent, cssFor, cssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);
