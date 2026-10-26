@@ -1,6 +1,6 @@
 {
   "version": "v0.8",
-  "generatedAt": "2026-10-26T05:11:25.367Z",
+  "generatedAt": "2026-10-26T06:22:10.874Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -788,7 +788,7 @@
       "spec": [
         [
           "State",
-          "rest → hover → pressed 로 <b>라이트는 어두워지고 다크는 밝아집니다</b>. primary <code>--surface-brand-primary</code> → <code>-strong</code> → <code>-heavy</code>(라이트 brand 50·45·40 · 다크 50·55·60) · danger <code>--surface-negative-primary</code> → <code>-strong</code> → <code>-heavy</code>. secondary 투명 → <code>--surface-neutral-secondary</code> → <code>-strong</code> · tertiary <code>--surface-neutral-tertiary</code> → <code>-secondary</code> → <code>-strong</code>. text: 라벨 <code>--foreground-brand-primary</code>, hover <code>--surface-brand-subtle</code>, pressed <code>--surface-brand-subtle-strong</code>. 틴트는 알파가 커지는 구조라 같은 토큰이 테마에 따라 방향을 뒤집고, 불투명 primary 는 두 테마 모두 제품 HEX(50)에서 출발해 테마별로 반대 방향 단계를 집습니다. 비활성은 전용 토큰, 포커스는 전 변형 공통 <code>--foreground-brand-primary</code> 2px"
+          "rest → hover → pressed 로 <b>라이트는 어두워지고 다크는 밝아집니다</b>. primary <code>--surface-brand-primary</code> → <code>-strong</code> → <code>-heavy</code>(라이트 brand 50·45·40 · 다크 50·55·60) · danger <code>--surface-negative-primary</code> → <code>-strong</code> → <code>-heavy</code>. secondary 투명 → <code>--surface-neutral-secondary</code> → <code>-strong</code> · tertiary <code>--surface-neutral-tertiary</code> → <code>-secondary</code> → <code>-strong</code>. text: 라벨 <code>--foreground-brand-primary</code>, hover <code>--surface-brand-subtle</code>, pressed <code>--surface-brand-subtle-strong</code>. 틴트는 알파가 커지는 구조라 같은 토큰이 테마에 따라 방향을 뒤집고, 불투명 primary 는 두 테마 모두 제품 HEX(50)에서 출발해 테마별로 반대 방향 단계를 집습니다. 비활성은 전용 토큰, 포커스는 전 변형 공통 <code>--foreground-brand-primary</code> 1px 외곽선(2px 띄움)"
         ],
         [
           "Size",
