@@ -876,6 +876,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const errWant = await page.evaluate(() => { const c = (v) => { const d = document.createElement("div"); d.style.color = `var(${v})`; document.body.append(d); const x = getComputedStyle(d).color; d.remove(); return x; };
     return { edge: c("--foreground-negative-primary"), halo: c("--line-negative-focus") }; });
   ok("an error field keeps a red edge and halo on focus", errRing.shadow.includes(errWant.edge) && errRing.shadow.includes(errWant.halo) && errRing.outline === "none", JSON.stringify({ errRing, errWant }));
+  /* 오류 테두리 — 16% 틴트라 필드 면 대비 1.23 으로 테두리만으로는 오류가 보이지 않았다. 불투명 빨강(사람의 결정 2026-10-26) */
+  const errBorder = await page.evaluate((want) => { if (document.activeElement) document.activeElement.blur();
+    return { border: getComputedStyle(document.querySelector("#ex-text-field-basic .field.error input")).borderTopColor, want }; }, errWant.edge);
+  ok("an error field border is opaque red without focus", errBorder.border === errBorder.want, JSON.stringify(errBorder));
   const chkRing = await fieldRing("components/checkbox.html", "#ex-checkbox-default input");
   ok("selection controls keep the global focus outline", chkRing.outline !== "none" && !/inset/.test(chkRing.shadow), JSON.stringify(chkRing));
   await go("components/card.html");
