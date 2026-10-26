@@ -102,8 +102,8 @@ const COMPONENTS = {
       [".counter", "element", "—", "글자 수 표시. .row 안에서 라벨 우측 정렬"],
       ["disabled / readonly", "attribute", "—", "비활성 / 읽기 전용(배경 subtle)"],
     ],
-    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus · 오류일 때는 foreground/negative/primary · line/negative/focus"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
-    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", focused: { stroke: "--foreground-negative-primary", inner: "--foreground-negative-primary", ring: "--line-negative-focus" } } }, states: ["default", "hover", "focused", "error", "error focused", "disabled", "readonly"] },
+    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 1px foreground/brand/primary · 바깥 4px line/brand/focus · 오류일 때는 foreground/negative/primary · line/negative/focus"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
+    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", focused: { stroke: "--foreground-negative-primary", ring: "--line-negative-focus" } } }, states: ["default", "hover", "focused", "error", "error focused", "disabled", "readonly"] },
   },
 
   /* ------------------------------------------------ Search */
@@ -137,8 +137,8 @@ const COMPONENTS = {
       ["kbd", "element", "—", "단축키 표시(전역 검색)"],
       [".clear", "button", "—", "값 지우기. 값이 있을 때만 렌더"],
     ],
-    spec: [["Size", "높이 40 (lg 48) · 최소 폭 280"], ["Container", "radius/md 6 · line/neutral/primary · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus"], ["Label", "Body/2 14 · 플레이스홀더 foreground/disable/primary"], ["Placement", "테이블 툴바 좌측, 전역 검색은 헤더 우측"]],
-    figma: { frame: "Search", radius: "radius/md", sizes: { md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["default", "focused", "filled"] },
+    spec: [["Size", "높이 40 (lg 48) · 최소 폭 280"], ["Container", "radius/md 6 · line/neutral/primary · 포커스: 테두리 1px foreground/brand/primary · 바깥 4px line/brand/focus"], ["Label", "Body/2 14 · 플레이스홀더 foreground/disable/primary"], ["Placement", "테이블 툴바 좌측, 전역 검색은 헤더 우측"]],
+    figma: { frame: "Search", radius: "radius/md", sizes: { md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["default", "focused", "filled"] },
   },
 
   /* ------------------------------------------------ Select Button */
@@ -259,7 +259,7 @@ const COMPONENTS = {
     ],
     props: [[".datepicker", "container", "—", "label + .field-btn(+ .calendar). 열림은 .open"], [".field-btn", "button", "—", "값 표시 트리거. 기간은 .sep 로 구분"], [".calendar", "popover", "—", ".cal-head + .cal-grid(.dow ×7, .day ×42) + .cal-foot"], [".day.on / .in-range / .today / .muted", "state", "—", "선택 / 기간 사이 / 오늘 / 다른 달"], ["disabled", "attribute", "—", "선택 불가 날짜"]],
     spec: [["Size", "필드 44 · 달력 폭 296 · 날짜 셀 34"], ["Container", "달력 radius/lg 8 · shadow/2"], ["Label", "요일 12 SemiBold tertiary · 날짜 12 Regular · 필드 Body/2 14"], ["Placement", "필드 아래 4px. 화면 하단이면 위로"]],
-    figma: { frame: "Date Picker", radius: "radius/lg", sizes: { field: { h: 44 }, calendar: { w: 296 }, day: { h: 34 } }, variants: { single: {}, range: {}, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["closed", "focused", "open", "selected", "range"] },
+    figma: { frame: "Date Picker", radius: "radius/lg", sizes: { field: { h: 44 }, calendar: { w: 296 }, day: { h: 34 } }, variants: { single: {}, range: {}, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["closed", "focused", "open", "selected", "range"] },
   },
 
   /* ------------------------------------------------ Checkbox */
@@ -557,7 +557,7 @@ const COMPONENTS = {
     ],
     props: [[".dropdown", "container", "—", "position:relative. 열림은 .open. inline-block 이라 상자 높이가 놓인 곳의 글자 크기를 따른다 — 단독이면 앱 기본 글자, 입력 폼(.field) 안 14, .pagination-bar 안 12"], [".trigger", "button", "—", "고른 값을 표시. 값이 없으면 안에 .placeholder"], [".menu", "ul", "—", "role=listbox · aria-label 필수"], [".menu-item", "li", "—", "role=option. 고른 항목 .on + aria-selected, 비활성 aria-disabled"]],
     spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200 · 메뉴 최대 높이 320(약 8개, 넘으면 스크롤)"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · placeholder foreground/disable/primary"], ["Placement", "필터 툴바, 폼 안의 선택 필드 · 아래 공간이 모자라면 위로 뒤집어 연다(.up)"]],
-    figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {}, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["closed", "focused", "open", "selected", "disabled"] },
+    figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {}, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["closed", "focused", "open", "selected", "disabled"] },
   },
 
   /* ------------------------------------------------ Tab */
