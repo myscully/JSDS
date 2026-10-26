@@ -1387,10 +1387,22 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("doc chrome intact (no page errors so far)", errors.length === 0, errors.join(" | "));
 
   // sweep: every component/pattern page loads w/o errors
+  /* + 컴포넌트는 기본 글자(body)에 기대지 않는다 — React 앱의 .ds-root(15px/1.65)에서도 사이트(16px/1.6)와 같은 배치여야 한다.
+     줄 높이를 상속받아 1440 에서 미리보기 83개가 달랐다. 주변 크기를 따르게 만든 셋(Pagination · Dropdown · 심각도 셀)은 사람 결정 대기라 뺀다 */
   const fs = require("fs");
-  for (const sec of ["components", "patterns"]) for (const f of fs.readdirSync(path.join(SITE, sec))) { await go(`${sec}/${f}`); }
+  const ADAPTIVE = ["ex-pagination-basic", "ex-select-default", "ex-select-open", "ex-severity-scale"];
+  const sig = () => Object.fromEntries([...document.querySelectorAll(".example-preview")].map((pv) => { const P = pv.getBoundingClientRect();
+    const els = [...pv.querySelectorAll("*")].filter((e) => e.getClientRects().length && !e.closest(".spinner, .skeleton, .indicator.pulse"));   // 숨은 것 · 움직이는 것은 뺀다
+    return [(pv.closest(".example") || {}).id, els.map((e) => { const r = e.getBoundingClientRect(); return [r.left - P.left, r.top - P.top, r.width, r.height].map((x) => Math.round(x * 2) / 2).join(","); }).join("|")]; }));
+  const leaned = [];
+  for (const sec of ["components", "patterns"]) for (const f of fs.readdirSync(path.join(SITE, sec))) { await go(`${sec}/${f}`);
+    if (!f.endsWith(".html") || /^(index|overview)\.html$/.test(f)) continue;
+    const a = await page.evaluate(sig), st = await page.addStyleTag({ content: "body{font-size:15px !important;line-height:1.65 !important}" });
+    const c = await page.evaluate(sig); await st.evaluate((s) => s.remove());
+    for (const k of Object.keys(a)) if (a[k] !== c[k] && !ADAPTIVE.includes(k)) leaned.push(k.replace(/^ex-/, "")); }
   await go("index.html");
   ok("all pages load without JS errors", errors.length === 0, errors.slice(0, 3).join(" | "));
+  ok("components keep their layout under the React base font (15px/1.65)", leaned.length === 0, `${leaned.length}: ${leaned.slice(0, 12).join(" ")}`);
 
   // 반응형: 데스크톱~모바일 전 폭에서 가로 넘침 없음
   for (const w of [1440, 1280, 1024, 768, 390]) {
