@@ -150,9 +150,12 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null };
-/* 값 입력 필드의 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다 */
-const FOCUS_BOX = { "Text Field": "Input", "Search": null, "Select": "Trigger", "Date Picker": "Field" };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null };
+/* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
+   k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
+   Slider 는 엄지가 아니라 range 전체라 Track 280×20) */
+const FOCUS_BOX = { "Text Field": "Input", "Search": null, "Select": "Trigger", "Date Picker": "Field", "Checkbox": "Box", "Radio Button": "Circle", "Switch": "Track", "Slider": "Track" };
+const effectColors = { nodes: 0, styled: 0, bound: 0, raw: [] };
 for (const p of figma.root.children) {
   if (!isCurrent(p)) continue;
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
@@ -313,18 +316,38 @@ for (const p of figma.root.children) {
     }
     components.specs.push({ card: card.name, id: card.id, rows });
   }
-  /* 값 입력 필드 4종의 Focused(2026-10-26 k5) — audit 이 사이트 CSS 의 테두리 · inset · 후광과 맞춘다.
-     변형마다 칸의 테두리(토큰 · 굵기 · 정렬)와 안쪽 · 바깥 그림자([토큰, spread, blur, "x,y"]) */
+  /* 포커스 변형(2026-10-26 k5) — audit 이 사이트 CSS 의 테두리 · inset · 후광(값 입력 필드), 전역 :focus-visible 외곽선(선택 컨트롤, k6)과 맞춘다.
+     변형마다 칸의 테두리(토큰 · 굵기 · 정렬) · 면 · 안쪽 · 바깥 그림자([토큰, spread, blur, "x,y"] — 배열 순서 그대로, 뒤의 것이 위에 그려진다).
+     State 값이 "Focused" 로 끝나는 변형을 모은다 — k6 의 "Error Focused"(오류 필드의 포커스)도 여기 들어오고 state 에 값을 적는다 */
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
     if (!Object.prototype.hasOwnProperty.call(FOCUS_BOX, set.name)) continue;
     const list = [];
-    for (const v of set.children.filter((k) => /(?:^|, )State=Focused(?:,|$)/.test(k.name))) {
+    for (const v of set.children) {
+      const sm = /(?:^|, )State=((?:[^,=]+ )?Focused)(?:,|$)/.exec(v.name);
+      if (!sm) continue;
       const box = FOCUS_BOX[set.name] ? v.findOne((k) => k.name === FOCUS_BOX[set.name] && "strokes" in k) : v;
-      if (!box) { list.push({ variant: v.name, id: v.id, box: null }); continue; }
+      if (!box) { list.push({ variant: v.name, id: v.id, state: sm[1], box: null }); continue; }
       const fx = (t) => box.effects.filter((e) => e.visible !== false && e.type === t).map((e) => [vname(e.boundVariables && e.boundVariables.color) || "raw", e.spread || 0, e.radius || 0, e.offset ? e.offset.x + "," + e.offset.y : "0,0"]);
-      list.push({ variant: v.name, id: v.id, box: box.id, stroke: paint(box.strokes), sw: box.strokeWeight === figma.mixed ? "mixed" : box.strokeWeight, align: box.strokeAlign, inner: fx("INNER_SHADOW"), drop: fx("DROP_SHADOW") });
+      list.push({ variant: v.name, id: v.id, state: sm[1], box: box.id, stroke: paint(box.strokes), sw: box.strokeWeight === figma.mixed ? "mixed" : box.strokeWeight, align: box.strokeAlign, fill: paint(box.fills), size: [+box.width.toFixed(2), +box.height.toFixed(2)], inner: fx("INNER_SHADOW"), drop: fx("DROP_SHADOW") });
     }
     components.focus[set.name] = list;
+  }
+  /* 효과(그림자) 색의 변수 연결(2026-10-26 k6) — 현재 페이지의 컴포넌트 세트 안, 인스턴스 밖 노드의 보이는 그림자를 본다.
+     효과 스타일(Shadow/1 …)을 쓴 노드는 연결된 것으로 친다 — 스타일 자체의 값은 effectStyles 로 따로 본다.
+     거짓 경보를 피하려고 빼는 것: 인스턴스 속 노드(원본 쪽에서 본다 — 그래서 인스턴스에서 효과를 덮어쓴 것은 여기서 못 잡는다),
+     숨긴 효과(visible false), 색이 없는 흐림(LAYER_BLUR · BACKGROUND_BLUR). 세트 밖 컴포넌트와 문서 프레임은 범위 밖이다.
+     변수는 이 파일의 로컬 변수로만 알아본다 — 라이브러리 변수에 묶인 색은 묶이지 않은 것으로 나온다(지금 이 파일은 로컬 변수만 쓴다) */
+  for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    for (const n of set.findAll((k) => "effects" in k && k.effects.length > 0 && !inInstance(k))) {
+      effectColors.nodes++;
+      if (n.effectStyleId && n.effectStyleId !== figma.mixed) { effectColors.styled++; continue; }
+      let v = n; while (v.parent && v.parent.type !== "COMPONENT_SET") v = v.parent;
+      for (const e of n.effects) {
+        if (e.visible === false || !e.color) continue;
+        if (e.boundVariables && e.boundVariables.color && byId.get(e.boundVariables.color.id)) { effectColors.bound++; continue; }
+        effectColors.raw.push({ page: p.name, set: set.name, variant: v.name, node: n.name, id: n.id, type: e.type, color: "#" + hex2(e.color.r) + hex2(e.color.g) + hex2(e.color.b) + "@" + +e.color.a.toFixed(2), spread: e.spread || 0, blur: e.radius || 0 });
+      }
+    }
   }
   /* Tag 높이(2026-10-26 k5) — 크기마다 [가장 낮은 높이, 가장 높은 높이, 변형 수]. audit 이 사이트 실측(.tag.sm · .tag · .tag.lg)과 ±0.5 로 맞춘다 */
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
@@ -335,6 +358,7 @@ for (const p of figma.root.children) {
   }
 }
 for (const k of Object.keys(FOCUS_BOX)) if (!components.focus[k]) components.focus[k] = null;   // 세트가 없으면 null — audit 이 어긋남으로 낸다
+components.effectColors = effectColors;
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
 
 return {

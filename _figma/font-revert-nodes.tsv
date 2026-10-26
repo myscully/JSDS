@@ -139,3 +139,25 @@ Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/
 # 같은 작업에서 글자만 다시 바뀐 k4 절 노드 2개 — 이미 Noto 라 되돌리는 법은 k4 절 그대로
 3 Component	322:641	Pretendard Regular · 스타일 없음(k4 절과 같음)	Noto Sans KR Regular · 스타일 없음	radius/md 6 · line/neutral/primary 1px · focus ring 2px 30% → radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus	Card/Text Field · Spec · Container 행 값
 3 Component	332:3055	Pretendard Regular · 스타일 없음(k4 절과 같음)	Noto Sans KR Regular · 스타일 없음	surface/elevated/primary · 우측 1px border → surface/elevated/primary · 우측 1px line/neutral/secondary	Card/Navigation · Spec · Container 행 값(k4 에 바꾸기 전 글로 돌아갔다)
+
+# 2026-10-26 k6 — Card Flush 의 글자를 사이트 예제(#ex-card-flush)로 바꾸며(사람의 결정 D) 새로 Noto Sans KR 로 바뀐 노드 13개 · 글자만 다시 바뀐 k4 절 노드 1개. 사람이 Pretendard 로 되돌릴 목록
+# 13개는 모두 인스턴스 속 층의 서체 덮어쓰기다(버튼 1 · 표 머리 3 · 표 셀 9). 글자는 인스턴스 속성 값(Label#315:0 · Label#328:0 · Value#328:5)으로 넣었다
+# 되돌릴 때: 그 층의 서체 덮어쓰기만 지운다 — 원본(315:447 · 328:1514 · 328:1538 · 328:1546)의 Pretendard 와 스타일로 돌아가고, 글자는 속성 값이라 그대로 남는다
+# 제목 635:3104 는 바꾸지 않았다 — 세트 13개 변형이 함께 쓰는 Title#326:128 에 묶여 있어, 한 변형의 글자를 바꾸면 속성 기본값이 바뀌어 13개 제목이 모두 바뀐다(임시 세트로 확인)
+# 같은 작업에서 새로 생긴 Pretendard 글자(되돌릴 것 없음): Text Field Error Focused 변형 3개(655:3632 · 655:3639 · 655:3646)의 글자 12개(복제 원본 그대로), Tag 문서 카드 Tone 칩의 default 글자 656:3132(옆 칩 글자 326:1184 를 복제 — 326:1184 는 Neutral 칩째 지움)
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+3 Component	I635:3113;315:447	Pretendard Medium · Label/2 (원본 315:447 을 따름)	Noto Sans KR Medium · 스타일 없음	버튼 → 전체 보기	Card / Size=Flush 635:3102 · Head · Button(Text · Small) 635:3113 의 Label 속성
+3 Component	I635:3119;328:1514	Pretendard Medium · Label/2 (원본 328:1514 를 따름)	Noto Sans KR Medium · 스타일 없음	헤더 → 시간	Card / Size=Flush · Table · Header · Table Header Cell 635:3119 의 Label 속성
+3 Component	I635:3121;328:1514	Pretendard Medium · Label/2 (원본 328:1514 를 따름)	Noto Sans KR Medium · 스타일 없음	헤더 → 이벤트	Card / Size=Flush · Table · Header · Table Header Cell 635:3121 의 Label 속성
+3 Component	I635:3123;328:1514	Pretendard Medium · Label/2 (원본 328:1514 를 따름)	Noto Sans KR Medium · 스타일 없음	헤더 → 횟수	Card / Size=Flush · Table · Header · Table Header Cell 635:3123 의 Label 속성(오른쪽 정렬 칸)
+3 Component	I635:3126;328:1538	Pretendard Regular · Body/2 (원본 328:1538 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 09:41	Card / Size=Flush · Table · Row 1 · Table Cell(Text) 635:3126 의 Value 속성
+3 Component	I635:3128;328:1538	Pretendard Regular · Body/2 (원본 328:1538 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → USB 연결 차단	Card / Size=Flush · Table · Row 1 · Table Cell(Text) 635:3128 의 Value 속성
+3 Component	I635:3130;328:1546	Pretendard Regular · Body/2 (원본 328:1546 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 3	Card / Size=Flush · Table · Row 1 · Table Cell(Number) 635:3130 의 Value 속성
+3 Component	I635:3133;328:1538	Pretendard Regular · Body/2 (원본 328:1538 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 09:12	Card / Size=Flush · Table · Row 2 · Table Cell(Text) 635:3133 의 Value 속성
+3 Component	I635:3135;328:1538	Pretendard Regular · Body/2 (원본 328:1538 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 악성 URL 접속 시도	Card / Size=Flush · Table · Row 2 · Table Cell(Text) 635:3135 의 Value 속성
+3 Component	I635:3137;328:1546	Pretendard Regular · Body/2 (원본 328:1546 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 12	Card / Size=Flush · Table · Row 2 · Table Cell(Number) 635:3137 의 Value 속성
+3 Component	I635:3140;328:1538	Pretendard Regular · Body/2 (원본 328:1538 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 08:57	Card / Size=Flush · Table · Row 3 · Table Cell(Text) 635:3140 의 Value 속성
+3 Component	I635:3142;328:1538	Pretendard Regular · Body/2 (원본 328:1538 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 정책 위반 파일 전송	Card / Size=Flush · Table · Row 3 · Table Cell(Text) 635:3142 의 Value 속성
+3 Component	I635:3144;328:1546	Pretendard Regular · Body/2 (원본 328:1546 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 1	Card / Size=Flush · Table · Row 3 · Table Cell(Number) 635:3144 의 Value 속성
+# 같은 작업에서 글자만 다시 바뀐 k4 절 노드 1개 — 이미 Noto 라 되돌리는 법은 k4 절 그대로
+3 Component	322:641	Pretendard Regular · 스타일 없음(k4 절과 같음)	Noto Sans KR Regular · 스타일 없음	(k5 글) → 끝에 " · 오류일 때는 foreground/negative/primary · line/negative/focus" 를 덧붙임	Card/Text Field · Spec · Container 행 값(두 줄이 되어 글자 높이 22 → 44)
