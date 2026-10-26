@@ -671,11 +671,11 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field{display:flex;flex-direction:column;gap:6px;min-width:260px;font-size:14px;line-height:1.6}
 .field label{font-weight:600}
 .field label em{color:var(--foreground-negative-strong);font-style:normal;margin-left:2px}
-.field input,.field textarea{height:44px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);padding:0 14px;font:inherit;font-size:14px;background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);width:100%;transition:border-color var(--motion-fast)}
+.field input,.field textarea{height:44px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);padding:0 14px;font:inherit;font-size:14px;background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);width:100%;transition:border-color var(--motion-fast),box-shadow var(--motion-fast)}
 .field textarea{height:auto;min-height:96px;padding:10px 14px;resize:vertical;line-height:1.5}
 .field input::placeholder,.field textarea::placeholder{color:var(--foreground-disable-primary)}
 .field input:hover,.field textarea:hover{border-color:var(--line-neutral-primary)}
-.field input:focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary)}
+.field input:focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}   /* 값 입력 필드의 포커스 — 테두리 + 안쪽 1px 불투명 brand(2px 가장자리, 대비 6.59 · 4.82) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26) */
 .field input:disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
 .field input:read-only{background:var(--background-neutral-secondary)}
 .field .help{color:var(--foreground-neutral-tertiary);font-size:12px}
@@ -685,17 +685,17 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field.lg input{height:52px;font-size:16px;padding:0 16px}
 .field .affix{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary)}
 .field .affix input{border:0;height:auto;padding:0;flex:1;background:transparent;outline:0;min-width:0}
-.field .affix:focus-within{border-color:var(--foreground-brand-primary)}
+.field .affix:focus-within{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}
 .field .affix span{color:var(--foreground-neutral-tertiary);font-size:12px;white-space:nowrap}
 .field .counter{margin-left:auto;font-size:12px;color:var(--foreground-neutral-tertiary)}
 .field .row{display:flex;justify-content:space-between;align-items:baseline}
 
 /* Search */
-.searchbar{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;min-width:280px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);transition:border-color var(--motion-fast);font-size:16px;line-height:1.6}
+.searchbar{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;min-width:280px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);transition:border-color var(--motion-fast),box-shadow var(--motion-fast);font-size:16px;line-height:1.6}
 .searchbar svg{width:18px;height:18px;color:var(--foreground-neutral-tertiary);flex:none}
 .searchbar input{flex:1;border:0;background:transparent;font:inherit;font-size:14px;color:var(--foreground-neutral-primary);outline:0;min-width:0}
 .searchbar input::placeholder{color:var(--foreground-disable-primary)}
-.searchbar:focus-within{border-color:var(--foreground-brand-primary)}
+.searchbar:focus-within{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}
 .searchbar .clear{border:0;padding:0;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);width:20px;height:20px;border-radius:50%;font:inherit;font-size:12px;line-height:0;cursor:pointer;display:grid;place-items:center;flex:none}
 .searchbar .clear svg{display:block;width:12px;height:12px}
 .searchbar kbd{font-size:12px;color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:4px;padding:1px 5px;background:var(--background-neutral-secondary)}
@@ -736,6 +736,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .datepicker label{font-weight:600}
 .datepicker .field-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;min-width:240px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:14px;color:var(--foreground-neutral-primary);cursor:pointer;text-align:left}
 .datepicker .field-btn:hover{border-color:var(--line-neutral-primary)}
+.datepicker .field-btn:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}
 .datepicker .field-btn svg{width:18px;height:18px;color:var(--foreground-neutral-tertiary);margin-left:auto}
 .datepicker .field-btn .placeholder{color:var(--foreground-disable-primary)}
 .datepicker .field-btn .sep{color:var(--foreground-disable-primary)}
@@ -855,6 +856,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .dropdown{position:relative;display:inline-block;line-height:1.6}
 .dropdown .trigger{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px 0 14px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:14px;color:var(--foreground-neutral-primary);cursor:pointer;min-width:200px;justify-content:space-between}
 .dropdown .trigger:hover{border-color:var(--line-neutral-primary)}
+.dropdown .trigger:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}
 .dropdown .trigger .placeholder{color:var(--foreground-disable-primary)}
 .dropdown .trigger::after{content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
 .dropdown.open .trigger{border-color:var(--foreground-brand-primary)}

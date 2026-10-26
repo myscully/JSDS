@@ -102,8 +102,8 @@ const COMPONENTS = {
       [".counter", "element", "—", "글자 수 표시. .row 안에서 라벨 우측 정렬"],
       ["disabled / readonly", "attribute", "—", "비활성 / 읽기 전용(배경 subtle)"],
     ],
-    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · focus ring 2px 30%"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
-    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, error: { stroke: "--surface-negative-strong" } }, states: ["default", "hover", "focused", "error", "disabled", "readonly"] },
+    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
+    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--surface-negative-strong" } }, states: ["default", "hover", "focused", "error", "disabled", "readonly"] },
   },
 
   /* ------------------------------------------------ Search */
@@ -137,8 +137,8 @@ const COMPONENTS = {
       ["kbd", "element", "—", "단축키 표시(전역 검색)"],
       [".clear", "button", "—", "값 지우기. 값이 있을 때만 렌더"],
     ],
-    spec: [["Size", "높이 40 (lg 48) · 최소 폭 280"], ["Container", "radius/md 6 · line/neutral/primary · focus ring"], ["Label", "Body/2 14 · 플레이스홀더 foreground/disable/primary"], ["Placement", "테이블 툴바 좌측, 전역 검색은 헤더 우측"]],
-    figma: { frame: "Search", radius: "radius/md", sizes: { md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" } }, states: ["default", "focused", "filled"] },
+    spec: [["Size", "높이 40 (lg 48) · 최소 폭 280"], ["Container", "radius/md 6 · line/neutral/primary · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus"], ["Label", "Body/2 14 · 플레이스홀더 foreground/disable/primary"], ["Placement", "테이블 툴바 좌측, 전역 검색은 헤더 우측"]],
+    figma: { frame: "Search", radius: "radius/md", sizes: { md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["default", "focused", "filled"] },
   },
 
   /* ------------------------------------------------ Select Button */
@@ -259,7 +259,7 @@ const COMPONENTS = {
     ],
     props: [[".datepicker", "container", "—", "label + .field-btn(+ .calendar). 열림은 .open"], [".field-btn", "button", "—", "값 표시 트리거. 기간은 .sep 로 구분"], [".calendar", "popover", "—", ".cal-head + .cal-grid(.dow ×7, .day ×42) + .cal-foot"], [".day.on / .in-range / .today / .muted", "state", "—", "선택 / 기간 사이 / 오늘 / 다른 달"], ["disabled", "attribute", "—", "선택 불가 날짜"]],
     spec: [["Size", "필드 44 · 달력 폭 296 · 날짜 셀 34"], ["Container", "달력 radius/lg 8 · shadow/2"], ["Label", "요일 12 SemiBold tertiary · 날짜 12 Regular · 필드 Body/2 14"], ["Placement", "필드 아래 4px. 화면 하단이면 위로"]],
-    figma: { frame: "Date Picker", radius: "radius/lg", sizes: { field: { h: 44 }, calendar: { w: 296 }, day: { h: 34 } }, variants: { single: {}, range: {} }, states: ["closed", "open", "selected", "range"] },
+    figma: { frame: "Date Picker", radius: "radius/lg", sizes: { field: { h: 44 }, calendar: { w: 296 }, day: { h: 34 } }, variants: { single: {}, range: {}, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["closed", "focused", "open", "selected", "range"] },
   },
 
   /* ------------------------------------------------ Checkbox */
@@ -557,7 +557,7 @@ const COMPONENTS = {
     ],
     props: [[".dropdown", "container", "—", "position:relative. 열림은 .open. inline-block 이라 상자 높이가 놓인 곳의 글자 크기를 따른다 — 단독이면 앱 기본 글자, 입력 폼(.field) 안 14, .pagination-bar 안 12"], [".trigger", "button", "—", "고른 값을 표시. 값이 없으면 안에 .placeholder"], [".menu", "ul", "—", "role=listbox · aria-label 필수"], [".menu-item", "li", "—", "role=option. 고른 항목 .on + aria-selected, 비활성 aria-disabled"]],
     spec: [["Size", "트리거 높이 40 · 항목 높이 36 · 메뉴 최소 폭 200 · 메뉴 최대 높이 320(약 8개, 넘으면 스크롤)"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Body/2 14 · placeholder foreground/disable/primary"], ["Placement", "필터 툴바, 폼 안의 선택 필드 · 아래 공간이 모자라면 위로 뒤집어 연다(.up)"]],
-    figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {} }, states: ["closed", "open", "selected", "disabled"] },
+    figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {}, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["closed", "focused", "open", "selected", "disabled"] },
   },
 
   /* ------------------------------------------------ Tab */
@@ -744,7 +744,7 @@ const COMPONENTS = {
         </nav>`, layout: "left" },
     ],
     props: [[".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(brand subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기). 선택(.on)되면 brand 글자"], ["a.has-on", "parent", "—", "하위 항목이 현재 메뉴인 부모. 펼친 레일에서는 그대로, 접힌 레일에서는 하위 항목이 숨으니 선택 모양이 된다. 접힌 레일에서는 aria-current=\"true\" 도 함께(React hasActiveChild 는 자동)"], [".collapsed", "boolean", "false", "폭 64, 아이콘만"], [".count", "element", "—", "미확인 건수"]],
-    spec: [["Size", "폭 240 (접힘 64) · 항목 높이 38.4 (padding 8 · 글자 14 · 행간 1.6)"], ["Container", "surface/elevated/primary · 우측 1px border"], ["Label", "항목 14 Medium · 선택 14 SemiBold · 그룹 12 SemiBold uppercase"], ["Placement", "헤더 아래 좌측 고정, 전체 높이"]],
+    spec: [["Size", "폭 240 (접힘 64) · 항목 높이 38.4 (padding 8 · 글자 14 · 행간 1.6)"], ["Container", "surface/elevated/primary · 우측 1px line/neutral/secondary"], ["Label", "항목 14 Medium · 선택 14 SemiBold · 그룹 12 SemiBold uppercase"], ["Placement", "헤더 아래 좌측 고정, 전체 높이"]],
     figma: { frame: "Navigation", radius: "radius/md", sizes: { expanded: { w: 240 }, collapsed: { w: 64 }, item: { h: 38.4 } }, variants: { default: {}, collapsed: { hasOn: { bg: "--surface-brand-subtle", icon: "--foreground-brand-primary" } }, selected: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary" }, sub: { fg: "--foreground-neutral-secondary", selected: { fg: "--foreground-brand-primary" } } }, states: ["default", "hover", "active", "sub selected"] },
   },
 
@@ -821,7 +821,7 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Card */
   "card": {
-    status: "ready", react: ["Card","CardHead","CardTitle","CardDesc","CardFoot","CardGrid"], css: [".card", ".card-grid"], borrows: [".tag", ".btn", ".select-btn", ".sparkline", ".skeleton"],
+    status: "ready", react: ["Card","CardHead","CardTitle","CardDesc","CardFoot","CardGrid"], css: [".card", ".card-grid"], borrows: [".tag", ".btn", ".select-btn", ".sparkline", ".skeleton", ".tbl"],
     desc: "관련 정보와 액션을 한 덩어리로 묶는 컨테이너입니다. Surface 배경 + 1px line/neutral/secondary 보더로 구획합니다.",
     thumb: `<div class="card compact" style="min-width:200px"><div class="card-head"><h3 class="title" style="font-size:14px">라이선스</h3><span class="tag ok sm">정상</span></div><p class="desc" style="font-size:12px">2026-12-31 만료</p></div>`,
     examples: [
@@ -839,6 +839,18 @@ const COMPONENTS = {
         </div>` },
       { id: "variant", title: "Compact", desc: "밀도 높은 그리드는 .compact. 카드 위에 카드를 겹쳐도 기본 카드의 1px 보더로 구분됩니다.", html: `
         <div class="card compact" style="width:280px"><h3 class="title">Compact</h3><p class="desc">padding 16 · 제목 14</p></div>` },
+      { id: "flush", title: "Flush", desc: "표를 카드 폭까지 채울 때는 .flush — padding · gap 0, 머리만 16 · 24. 안에는 테두리 없는 표(.tbl)를 둡니다. .tbl-wrap 과 List 는 자체 테두리가 있어 두 겹이 됩니다.", html: `
+        <div class="card flush" style="width:400px">
+          <div class="card-head"><h3 class="title">최근 이벤트</h3><button type="button" class="btn sm text">전체 보기</button></div>
+          <table class="tbl compact">
+            <thead><tr><th>시간</th><th>이벤트</th><th class="num">횟수</th></tr></thead>
+            <tbody>
+              <tr><td>09:41</td><td>USB 연결 차단</td><td class="num">3</td></tr>
+              <tr><td>09:12</td><td>악성 URL 접속 시도</td><td class="num">12</td></tr>
+              <tr><td>08:57</td><td>정책 위반 파일 전송</td><td class="num">1</td></tr>
+            </tbody>
+          </table>
+        </div>` },
       { id: "clickable", title: "Clickable / Selected", desc: "카드 전체가 눌리면 .clickable. 이동이면 a, 선택이면 button + aria-pressed 로 두고 선택된 것에 .on 을 줍니다.", html: `
         <div class="card-grid" style="max-width:600px">
           <button type="button" class="card clickable" aria-pressed="false"><h3 class="title">USB 제어</h3><p class="desc">정책 12개</p></button>
@@ -856,7 +868,7 @@ const COMPONENTS = {
       [".card-head / .title / .desc / .card-foot", "elements", "—", "헤더(양끝 정렬) / 제목 Title/1 16·24 / 설명 Body/2 14 / 푸터 우측 정렬 — React <code>CardHead</code>·<code>CardTitle</code>·<code>CardDesc</code>·<code>CardFoot</code>"],
       [".bordered", "boolean", "false", "<b>호환용 — 효과 없음.</b> 기본 카드가 이미 1px 보더라 새 코드에서는 쓰지 않습니다"],
       [".compact", "boolean", "false", "padding 16 · gap 8 · 제목 14(Title/2)"],
-      [".flush", "boolean", "false", "padding·gap 0 — 표나 목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖습니다"],
+      [".flush", "boolean", "false", "padding·gap 0 — 표를 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖습니다. 안에는 테두리 없는 .tbl 을 둡니다(.tbl-wrap · List 는 자체 테두리가 있어 두 겹)"],
       [".clickable", "boolean", "false", "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. React <code>clickable</code> + <code>as</code>"],
       [".card-grid .card.clickable", "behavior", "—", "ds.js 가 단일 선택으로 묶어 <code>.on</code> 과 <code>aria-pressed</code> 를 함께 갱신하고 <code>ds:select</code> 를 발행합니다"],
       [".on", "boolean", "false", "선택됨 — 안쪽 2px brand 링 + <code>--surface-brand-subtle</code> 배경. 포커스 링(outline)과 겹치지 않아 둘이 동시에 보입니다. React <code>selected</code>"],

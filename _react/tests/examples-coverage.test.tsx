@@ -1,4 +1,4 @@
-/* 사이트의 모든 예제(components 120 · patterns 21)에 대응하는 React 예제 파일이 있는지, 고아 파일이 없는지 */
+/* 사이트의 모든 예제(components 121 · patterns 21)에 대응하는 React 예제 파일이 있는지, 고아 파일이 없는지 */
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
@@ -19,6 +19,6 @@ describe("예제 커버리지", () => {
   it("모든 사이트 예제에 React 예제가 있다", () => {
     const missing = expected.filter((k) => !files.includes(k));
     expect(missing, `누락 ${missing.length}/${expected.length}`).toEqual([]);
-    expect(expected.length).toBe(141); // components 120 + patterns 21
+    expect(expected.length).toBe(142); // components 121 + patterns 21
   });
 });

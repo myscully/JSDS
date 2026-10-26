@@ -79,7 +79,7 @@ const pairs = [
   ["--foreground-accent-cyan", SURFACES, 3, "Medium 지표"],
   ["--foreground-inactive-primary", SURFACES, 3, "Low 지표 · 비활성 점", REF("참조 시스템 값 — 라이트 2.78 · 다크 2.55")],
   ["--foreground-positive-primary", SURFACES, 3, "긍정 지표", REF("참조 시스템 값 — 라이트 2.46")],
-  ["--foreground-brand-primary", SURFACES, 3, "제품색 지표 · 포커스 링"],
+  ["--foreground-brand-primary", SURFACES, 3, "제품색 지표 · 포커스 링"],   // 값 입력 필드의 포커스 가장자리도 이 토큰(2px). 바깥 4px --line-brand-focus 후광은 장식이라 쌍을 두지 않는다(라이트 1.19 · 다크 1.16)
   /* 컴포넌트 경계 — 참조 시스템의 line/neutral/primary 는 중립 50 의 22% 다 */
   ["--line-neutral-primary", SURFACES, 3, "컴포넌트 경계", REF("참조 시스템 값 — 아웃라인 경계의 식별은 라벨과 채운 면이 함께 맡는다(1.4.11)")],
 ];
@@ -130,7 +130,7 @@ const grammarOnly = [
     .filter((t) => !/cyan$/.test(t) || /opaque|line/.test(t)),
   ...ACCENTS.filter((c) => c !== "cyan").map((c) => `--surface-accent-${c}`),
   "--line-neutral-primary-opaque", "--line-neutral-secondary-opaque", "--line-neutral-tertiary-opaque",
-  "--line-brand-strong", "--line-brand-focus", "--line-negative-strong", "--line-negative-focus",
+  "--line-brand-strong", "--line-negative-strong", "--line-negative-focus",   // --line-brand-focus 는 값 입력 필드 포커스 후광으로 쓰기 시작해 뺐다
   "--line-positive-primary",
   "--effect-transparent-primary", "--effect-transparent-secondary",
   "--company-mark-subtle",
