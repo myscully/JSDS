@@ -679,7 +679,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field input:disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
 .field input:read-only{background:var(--background-neutral-secondary)}
 .field .help{color:var(--foreground-neutral-tertiary);font-size:12px}
-.field.error input,.field.error textarea,.field.error .affix{border-color:var(--surface-negative-strong)}
+.field.error input,.field.error textarea,.field.error .affix{border-color:var(--foreground-negative-primary)}   /* 불투명 빨강 — 16% 틴트(--surface-negative-strong)는 필드 면 대비 1.23 · 1.34 라 테두리만으로 오류가 보이지 않았다. 3.44 · 5.47(사람의 결정 2026-10-26) */
 .field.error input:focus,.field.error textarea:focus-within,.field.error .affix:focus-within{border-color:var(--foreground-negative-primary);box-shadow:inset 0 0 0 1px var(--foreground-negative-primary),0 0 0 4px var(--line-negative-focus)}   /* 오류 필드의 포커스 — 빨강 가장자리(대비 3.44 · 5.47) + 빨강 후광(장식). brand 링이 오류 테두리를 덮지 않게(사람의 결정 2026-10-26) */
 .field.error .help{color:var(--foreground-negative-strong)}
 .field.sm input{height:36px;font-size:12px;padding:0 12px}

@@ -103,7 +103,7 @@ const COMPONENTS = {
       ["disabled / readonly", "attribute", "—", "비활성 / 읽기 전용(배경 subtle)"],
     ],
     spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus · 오류일 때는 foreground/negative/primary · line/negative/focus"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
-    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--surface-negative-strong", focused: { stroke: "--foreground-negative-primary", inner: "--foreground-negative-primary", ring: "--line-negative-focus" } } }, states: ["default", "hover", "focused", "error", "error focused", "disabled", "readonly"] },
+    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", focused: { stroke: "--foreground-negative-primary", inner: "--foreground-negative-primary", ring: "--line-negative-focus" } } }, states: ["default", "hover", "focused", "error", "error focused", "disabled", "readonly"] },
   },
 
   /* ------------------------------------------------ Search */
