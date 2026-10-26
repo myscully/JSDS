@@ -1388,7 +1388,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   // sweep: every component/pattern page loads w/o errors
   /* + 컴포넌트는 기본 글자(body)에 기대지 않는다 — React 앱의 .ds-root(15px/1.65)에서도 사이트(16px/1.6)와 같은 배치여야 한다.
-     줄 높이를 상속받아 1440 에서 미리보기 83개가 달랐다. 주변 크기를 따르게 만든 셋(Pagination · Dropdown · 심각도 셀)은 사람 결정 대기라 뺀다 */
+     줄 높이를 상속받아 1440 에서 미리보기 83개가 달랐다. 뺀 넷은 놓인 곳의 글자 크기를 따르게 만든 셋(Pagination 의 생략 기호 · Dropdown · 심각도 셀)을
+     단독으로 둔 예제다 — 사람의 결정(2026-10-26): 따르게 두고 Props · 설명에 적는다 */
   const fs = require("fs");
   const ADAPTIVE = ["ex-pagination-basic", "ex-select-default", "ex-select-open", "ex-severity-scale"];
   const sig = () => Object.fromEntries([...document.querySelectorAll(".example-preview")].map((pv) => { const P = pv.getBoundingClientRect();
