@@ -97,13 +97,13 @@ const COMPONENTS = {
     props: [
       [".field", "container", "—", "label + input(+ .help) 묶음. 폼 안에서 min-width 해제"],
       ["size", "sm | (md) | lg", "md", "입력 높이 36 / 44 / 52"],
-      [".error", "boolean", "false", "보더 danger, help 를 오류 메시지로. input 에 aria-invalid"],
+      [".error", "boolean", "false", "보더 danger, help 를 오류 메시지로. input 에 aria-invalid. 포커스 때는 빨강 가장자리 + --line-negative-focus 후광"],
       [".affix", "wrapper", "—", "접두어/접미어 span 과 input 을 감싸는 컨테이너"],
       [".counter", "element", "—", "글자 수 표시. .row 안에서 라벨 우측 정렬"],
       ["disabled / readonly", "attribute", "—", "비활성 / 읽기 전용(배경 subtle)"],
     ],
-    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
-    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--surface-negative-strong" } }, states: ["default", "hover", "focused", "error", "disabled", "readonly"] },
+    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus · 오류일 때는 foreground/negative/primary · line/negative/focus"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
+    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", inner: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--surface-negative-strong", focused: { stroke: "--foreground-negative-primary", inner: "--foreground-negative-primary", ring: "--line-negative-focus" } } }, states: ["default", "hover", "focused", "error", "error focused", "disabled", "readonly"] },
   },
 
   /* ------------------------------------------------ Search */
