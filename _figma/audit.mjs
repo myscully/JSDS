@@ -11,7 +11,7 @@
  *   컨테이너 _build/components.data.js 의 예제 HTML(순서 · 라벨 · 아이콘), 내비 기하는 빌드된 components/navigation.html 을
  *            헤드리스 Chromium 으로 잰 값(_build/node_modules/playwright — 없으면 어긋남으로 남긴다)
  *   Spec   _build/components.data.js 의 spec 행 ↔ 문서 카드 "Card/…" 의 Spec 글
- *   포커스 _build/style.src.css 의 값 입력 필드 포커스 규칙(오류 필드 포함)과 전역 :focus-visible 외곽선(선택 컨트롤) — focusExpect
+ *   포커스 _build/style.src.css 의 값 입력 필드 포커스 규칙(오류 필드 포함)과 전역 :focus-visible 외곽선(선택 컨트롤 · Button 의 Focus Ring) — focusExpect
  *   효과 색 컴포넌트 세트의 그림자 색이 변수나 효과 스타일에 묶였는지(2026-10-26 k6) — 기대값 없이 probe 가 모은 것을 그대로 어긋남으로
  *   버튼   빌드된 components/button.html 에 "버튼" 버튼을 붙여 Chromium 으로 잰 상자(테두리 + padding · 높이)(2026-10-26 k7)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7)
@@ -278,11 +278,14 @@ async function siteMeasure() {
    값 입력 필드 — 사람의 결정(k5): Text Field · Search · Select 트리거 · Date Picker 필드의 포커스는 테두리 1px + inset 1px(합쳐 2px 가장자리)
    + 0 0 0 4px 후광. k6: 오류 필드(.field.error)의 포커스는 같은 모양을 negative 토큰으로 — Figma 에서는 Text Field 의 State=Error Focused.
    기대값은 사이트 CSS 에서 읽는다 — [기본 규칙(테두리 굵기), 포커스 규칙(border-color · box-shadow)]. 읽지 못하면 어긋남으로 낸다.
-   선택 컨트롤 — 사이트의 전역 :focus-visible 외곽선(굵기 · offset · 색). k6 에는 바깥 그림자 두 겹(틈을 면 색으로 칠함)으로 그렸으나,
-   사람의 결정(k7): 틈은 사이트에서 판 색이 비쳐 보이는 자리이므로 어느 바탕 위에서도 같게 — 선만 있는 고리 하나("Focus Ring")로 그린다.
-   고리는 칸에서 offset + 굵기 만큼 바깥(dx = dy = −(offset+굵기), 크기 = 칸 + 2 × (offset+굵기)), 선 brand · 굵기 · INSIDE, 면 없음, 효과 없음.
-   모서리는 칸 모서리 + offset + 굵기(사이트 외곽선은 border-radius 를 따라 커진다 — 칸이 각지면 고리도 각지고, 완전히 둥글면 고리도 완전히 둥글다).
-   칸에는 그림자가 남지 않아야 한다. Slider 칸(Track = range 280×20)은 사이트 range 처럼 바탕이 없어야 한다(.slider input[type=range] 의 background) */
+   외곽선 포커스(선택 컨트롤 · Button) — 사이트의 전역 :focus-visible 외곽선(굵기 · offset · 색). k6 에는 바깥 그림자 두 겹(틈을 면 색으로 칠함)으로
+   그렸으나, 사람의 결정(k7): 틈은 사이트에서 판 색이 비쳐 보이는 자리이므로 어느 바탕 위에서도 같게 — 선만 있는 고리 하나("Focus Ring")로 그린다.
+   k8(외곽선 2px → 1px)에 표현을 하나로 맞췄다 — Button 이 쓰던 방식: 고리 사각형은 사이트 outline-offset 상자 그 자체(dx = dy = −offset,
+   크기 = 칸 + 2 × offset)이고 선은 OUTSIDE 로 굵기만큼 바깥에 그린다. 그래서 굵기가 바뀌어도 선 굵기 하나만 고치면 되고, 사각형 경계가 곧 CSS 의
+   outline 시작선이다(k7 의 INSIDE 방식은 굵기가 바뀌면 자리 · 크기 · 모서리를 모두 다시 맞춰야 했다). 선 brand · 굵기 · OUTSIDE, 면 없음, 효과 없음.
+   모서리는 칸 모서리 + offset(사이트 외곽선 안쪽 모서리는 border-radius + offset — 칸이 각지면 고리도 각지고, 완전히 둥글면 고리도 완전히 둥글다).
+   칸에는 그림자가 남지 않아야 한다. Slider 칸(Track = range 280×20)은 사이트 range 처럼 바탕이 없어야 한다(.slider input[type=range] 의 background).
+   Button 은 변형 자신이 칸이다(k8). 사이트에서 외곽선을 쓰지만 Figma 에 Focused 변형이 없는 것(Tab · Pagination · Chip …)은 대조할 것이 없다 */
 const FOCUS_CSS = [
   { set: "Text Field", state: "Focused", base: ".field input", rule: ".field input:focus" },
   { set: "Text Field", state: "Error Focused", base: ".field input", rule: ".field.error input:focus" },
@@ -290,7 +293,7 @@ const FOCUS_CSS = [
   { set: "Select", state: "Focused", base: ".dropdown .trigger", rule: ".dropdown .trigger:focus-visible" },
   { set: "Date Picker", state: "Focused", base: ".datepicker .field-btn", rule: ".datepicker .field-btn:focus-visible" },
 ];
-const RING_SETS = ["Checkbox", "Radio Button", "Switch", "Slider"];
+const RING_SETS = ["Checkbox", "Radio Button", "Switch", "Slider", "Button"];
 function focusExpect() {
   const fields = [];
   const shadow = (s) => { const nums = s.replace(/var\([^)]*\)/g, " ").replace(/\binset\b/, " ").trim().split(/\s+/).filter(Boolean).map(parseFloat); return { x: nums[0] || 0, y: nums[1] || 0, blur: nums[2] || 0, spread: nums[3] || 0, tok: figTok(s), inset: /\binset\b/.test(s) }; };
@@ -772,17 +775,19 @@ function diffComponents(c, want, bad, notes) {
     for (const set of [...new Set(want.focus.fields.map((w) => w.set))]) for (const v of c.focus[set] || []) {
       if (!want.focus.fields.some((w) => w.set === set && w.state === stateOf(v))) bad.push(`${set} ${v.variant} (${v.id}) — 기대값이 없는 포커스 상태(${stateOf(v)}). 사이트 규칙이 있으면 audit.mjs 의 FOCUS_CSS 에 더하세요`);
     }
-    /* 선택 컨트롤 — 사이트 :focus-visible 외곽선을 선만 있는 고리("Focus Ring")로(2026-10-26 k7). 규칙은 focusExpect 머리 주석 */
+    /* 외곽선 포커스(선택 컨트롤 · Button) — 사이트 :focus-visible 외곽선을 선만 있는 고리("Focus Ring")로(2026-10-26 k7 · k8). 규칙은 focusExpect 머리 주석 */
     const r = want.focus.ring;
-    const ringOld = RING_SETS.every((s) => (c.focus[s] || []).every((v) => v.ring === undefined));
-    if (RING_SETS.some((s) => !(s in c.focus))) notes.push("덤프에 선택 컨트롤 포커스 조사가 없습니다 — 2026-10-26 k6 전 probe.js 로 만든 덤프입니다");
-    else if (ringOld) notes.push("덤프에 선택 컨트롤의 고리(Focus Ring) 조사가 없습니다 — 2026-10-26 k7 전 probe.js 로 만든 덤프입니다");
-    else if (r.error) bad.push(`선택 컨트롤 포커스 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${r.error}`);
-    else for (const set of RING_SETS) {
+    /* 옛 덤프 — 세트가 조사에 없거나(선택 컨트롤 k6 전 · Button k8 전) 고리 필드가 없으면(k7 전) 그 세트만 NOTE 로 넘긴다 */
+    const ringSets = RING_SETS.filter((s) => {
+      if (!(s in c.focus)) { notes.push(`덤프에 ${s} 포커스 조사가 없습니다 — ${s === "Button" ? "2026-10-26 k8" : "2026-10-26 k6"} 전 probe.js 로 만든 덤프입니다`); return false; }
+      if ((c.focus[s] || []).length && c.focus[s].every((v) => v.ring === undefined)) { notes.push(`덤프에 ${s} 의 고리(Focus Ring) 조사가 없습니다 — 2026-10-26 k7 전 probe.js 로 만든 덤프입니다`); return false; }
+      return true;
+    });
+    if (ringSets.length && r.error) bad.push(`외곽선 포커스 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${r.error}`);
+    else for (const set of ringSets) {
       const list = c.focus[set];
       if (!list) { bad.push(`${set} 세트가 없어 Focused 를 대조하지 못했습니다`); continue; }
       if (!list.length) { bad.push(`${set} 에 State=Focused 변형이 없습니다 — 사이트 ${r.css}`); continue; }
-      const out = r.offset + r.width;
       const full = (rad, w, h) => typeof rad === "number" && rad >= Math.min(w, h) / 2 - 0.01;
       for (const v of list) {
         const at = `${set} ${v.variant} (${v.id})`;
@@ -791,13 +796,13 @@ function diffComponents(c, want, bad, notes) {
         if (set === "Slider" && r.sliderTrack && v.fill !== r.sliderTrack) bad.push(`${at} 칸(${v.box}) 면 ${v.fill} — 사이트 range 는 바탕이 없습니다(${r.sliderTrackCss})`);
         const g = v.ring;
         if (!g) { bad.push(`${at} — Focus Ring 이 없습니다. 사이트 outline ${r.width}px ${r.tok} · offset ${r.offset}`); continue; }
-        if (g.stroke !== "$" + r.tok || g.sw !== r.width || g.align !== "INSIDE") bad.push(`${at} 고리 선 ${g.stroke} · ${g.sw}px · ${g.align} ≠ ${r.tok} · ${r.width}px · INSIDE`);
+        if (g.stroke !== "$" + r.tok || g.sw !== r.width || g.align !== "OUTSIDE") bad.push(`${at} 고리 선 ${g.stroke} · ${g.sw}px · ${g.align} ≠ ${r.tok} · ${r.width}px · OUTSIDE`);
         if (g.fill !== "-") bad.push(`${at} 고리에 면 ${g.fill} — 틈은 비어 있어야 바탕이 비칩니다`);
         if (g.fx) bad.push(`${at} 고리에 효과 ${g.fx}개`);
-        const ex = { dx: -out, dy: -out, w: +(v.size[0] + 2 * out).toFixed(2), h: +(v.size[1] + 2 * out).toFixed(2) };
-        if (Math.abs(g.dx - ex.dx) > 0.5 || Math.abs(g.dy - ex.dy) > 0.5 || Math.abs(g.w - ex.w) > 0.5 || Math.abs(g.h - ex.h) > 0.5) bad.push(`${at} 고리 자리 ${g.dx},${g.dy} · ${g.w}×${g.h} ≠ 칸에서 ${ex.dx},${ex.dy} · ${ex.w}×${ex.h}(offset ${r.offset} + 굵기 ${r.width})`);
+        const ex = { dx: -r.offset, dy: -r.offset, w: +(v.size[0] + 2 * r.offset).toFixed(2), h: +(v.size[1] + 2 * r.offset).toFixed(2) };
+        if (Math.abs(g.dx - ex.dx) > 0.5 || Math.abs(g.dy - ex.dy) > 0.5 || Math.abs(g.w - ex.w) > 0.5 || Math.abs(g.h - ex.h) > 0.5) bad.push(`${at} 고리 자리 ${g.dx},${g.dy} · ${g.w}×${g.h} ≠ 칸에서 ${ex.dx},${ex.dy} · ${ex.w}×${ex.h}(outline-offset ${r.offset} 상자 — 선 ${r.width}px 는 그 바깥)`);
         if (full(v.radius, v.size[0], v.size[1])) { if (!full(g.radius, g.w, g.h)) bad.push(`${at} 고리 모서리 ${g.radius} — 칸이 완전히 둥글어 고리도 완전히 둥글어야 합니다`); }
-        else if (typeof v.radius === "number") { const er = v.radius > 0 ? v.radius + out : 0; if (Math.abs(g.radius - er) > 0.5) bad.push(`${at} 고리 모서리 ${g.radius} ≠ ${er}(칸 ${v.radius}${v.radius > 0 ? " + " + out : " — 각진 칸은 각진 고리"})`); }
+        else if (typeof v.radius === "number") { const er = v.radius > 0 ? v.radius + r.offset : 0; if (Math.abs(g.radius - er) > 0.5) bad.push(`${at} 고리 모서리 ${g.radius} ≠ ${er}(칸 ${v.radius}${v.radius > 0 ? " + offset " + r.offset : " — 각진 칸은 각진 고리"})`); }
       }
     }
   } else notes.push("덤프에 값 입력 필드 Focused 조사가 없습니다 — 2026-10-26 k5 전 probe.js 로 만든 덤프입니다");

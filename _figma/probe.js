@@ -156,8 +156,8 @@ const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== f
 const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {} };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
-   Slider 는 엄지가 아니라 range 전체라 Track 280×20) */
-const FOCUS_BOX = { "Text Field": "Input", "Search": null, "Select": "Trigger", "Date Picker": "Field", "Checkbox": "Box", "Radio Button": "Circle", "Switch": "Track", "Slider": "Track" };
+   Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다 — 변형 자신이 칸이고 고리(Focus Ring)는 변형의 자식이다 */
+const FOCUS_BOX = { "Text Field": "Input", "Search": null, "Select": "Trigger", "Date Picker": "Field", "Checkbox": "Box", "Radio Button": "Circle", "Switch": "Track", "Slider": "Track", "Button": null };
 const effectColors = { nodes: 0, styled: 0, bound: 0, raw: [] };
 for (const p of figma.root.children) {
   if (!isCurrent(p)) continue;
@@ -335,7 +335,8 @@ for (const p of figma.root.children) {
       if (!box) { list.push({ variant: v.name, id: v.id, state: sm[1], box: null }); continue; }
       const fx = (t) => box.effects.filter((e) => e.visible !== false && e.type === t).map((e) => [vname(e.boundVariables && e.boundVariables.color) || "raw", e.spread || 0, e.radius || 0, e.offset ? e.offset.x + "," + e.offset.y : "0,0"]);
       const rad = (n) => ("cornerRadius" in n ? (n.cornerRadius === figma.mixed ? "mixed" : n.cornerRadius) : null);
-      /* 선만 있는 고리(2026-10-26 k7) — 이름이 "Focus Ring" 인 노드. 칸에 대한 위치(dx · dy, 절대 좌표 차)와 크기 · 선 · 면 · 모서리를 적는다 */
+      /* 선만 있는 고리(2026-10-26 k7) — 이름이 "Focus Ring" 인 노드. 칸에 대한 위치(dx · dy, 절대 좌표 차)와 크기 · 선(정렬 포함) · 면 · 모서리를 적는다.
+         노드의 경계는 선이 아니라 사각형 자체다 — OUTSIDE 선이면 선은 경계 바깥으로 그려진다(k8 부터 이 표현으로 맞췄다, audit 주석) */
       const ringNode = v.findOne((k) => k.name === "Focus Ring");
       const ring = ringNode ? { id: ringNode.id, dx: +(ringNode.absoluteTransform[0][2] - box.absoluteTransform[0][2]).toFixed(2), dy: +(ringNode.absoluteTransform[1][2] - box.absoluteTransform[1][2]).toFixed(2), w: +ringNode.width.toFixed(2), h: +ringNode.height.toFixed(2), stroke: paint(ringNode.strokes), sw: ringNode.strokeWeight === figma.mixed ? "mixed" : ringNode.strokeWeight, align: ringNode.strokeAlign, fill: paint(ringNode.fills), radius: rad(ringNode), fx: ringNode.effects.filter((e) => e.visible !== false).length } : null;
       list.push({ variant: v.name, id: v.id, state: sm[1], box: box.id, stroke: paint(box.strokes), sw: box.strokeWeight === figma.mixed ? "mixed" : box.strokeWeight, align: box.strokeAlign, fill: paint(box.fills), size: [+box.width.toFixed(2), +box.height.toFixed(2)], inner: fx("INNER_SHADOW"), drop: fx("DROP_SHADOW"), radius: rad(box), ring });
