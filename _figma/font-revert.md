@@ -32,6 +32,11 @@
 >   `font-revert-nodes.tsv` 맨 아래 "2026-10-26 k5" 절. 같은 때 만든 변형 8개(Select · Date Picker Focused 3 · Tag Solid Accent 3 · Card Flush · Breadcrumb Icon)는 글자를 고치지 않아
 >   복제 원본의 Pretendard 그대로다 — 그래서 굵기가 사이트와 다른 원본 노드가 늘었다(아래 표에서 다시 셈: Tag 라벨 57 → 60 · Card 제목 12 → 13 · Date Picker 라벨 4 → 6 · Breadcrumb 현재 2 → 3).
 >   Card Flush 의 표 머리 3개는 Table Header Cell 인스턴스라 원본 328:1514 를 따른다(원본 수 4 그대로)
+> - 2026-10-26 k6: Card Flush 의 글자를 사이트 예제(#ex-card-flush)로 바꾸며(사람의 결정) **13개가 새로 Noto** 가 됐다 — 모두 인스턴스 속 층의 서체 덮어쓰기(버튼 1 · 표 머리 3 · 표 셀 9)이고
+>   글자는 인스턴스 속성 값으로 넣었다. 되돌릴 때는 서체 덮어쓰기만 지우면 원본의 Pretendard · 스타일로 돌아간다. 제목 635:3104 는 세트 공용 Title 속성이라 바꾸지 않았다.
+>   Text Field Spec Container 322:641 은 k4 에 이미 Noto 라 글자만 다시 바뀌었다(오류 포커스 문장을 덧붙임). `font-revert-nodes.tsv` 맨 아래 "2026-10-26 k6" 절.
+>   새 Text Field Error Focused 변형 3개(655:3632 · 655:3639 · 655:3646)와 Tag Tone 칩의 default 글자 656:3132 는 복제라 Pretendard 그대로다 —
+>   그래서 굵기 표의 Text Field 라벨 · 필수 36 → 42, 도움말 18 → 21, Small 값 6 → 7 로 다시 셌다
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
@@ -60,8 +65,8 @@ Figma 14단계는 20 · 22 · 16 · 18 이라 다르다 — 내비 말고는 줄
 | 역할 | Figma 원본 노드(개수) | Figma 지금 | 사이트 실측 |
 | --- | --- | --- | --- |
 | Button 라벨 | 315:6 · 315:13 · 315:20 …(108) | 12 · 14 · 16 / 500(Label/2 · Label/1 · Title/1) | 12 · 14 · 16 / 600 |
-| Text Field 라벨 · 필수 표시 | 322:367 · 322:368 …(36) | 14 / 500(Label/1) | 600 |
-| Text Field 도움말 · Small 값 | 322:371 …(18) · 322:370 …(6) | 12 / 500(Caption/1) | 400 |
+| Text Field 라벨 · 필수 표시 | 322:367 · 322:368 …(42 — k6 Error Focused 6 포함) | 14 / 500(Label/1) | 600 |
+| Text Field 도움말 · Small 값 | 322:371 …(21) · 322:370 …(7) — k6 Error Focused 4 포함 | 12 / 500(Caption/1) | 400 |
 | Select Button 기본 · 선택 | 323:624 …(4) · 323:626 …(2) | 400(Body/2) · 500(Label/1) | 500 · 600 |
 | Slider 라벨 · 값 · 눈금 | 325:626 …(4) · 325:627 …(4) · 325:633 …(12) | 500 · 500 · 500 | 400 · 600 · 400 |
 | Date Picker 라벨 | 325:818 …(6 — k5 Focused 634:3094 · 634:3099 포함) | 500(Label/1) | 600 |

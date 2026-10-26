@@ -11,6 +11,8 @@
  *   컨테이너 _build/components.data.js 의 예제 HTML(순서 · 라벨 · 아이콘), 내비 기하는 빌드된 components/navigation.html 을
  *            헤드리스 Chromium 으로 잰 값(_build/node_modules/playwright — 없으면 어긋남으로 남긴다)
  *   Spec   _build/components.data.js 의 spec 행 ↔ 문서 카드 "Card/…" 의 Spec 글
+ *   포커스 _build/style.src.css 의 값 입력 필드 포커스 규칙(오류 필드 포함)과 전역 :focus-visible 외곽선(선택 컨트롤) — focusExpect
+ *   효과 색 컴포넌트 세트의 그림자 색이 변수나 효과 스타일에 묶였는지(2026-10-26 k6) — 기대값 없이 probe 가 모은 것을 그대로 어긋남으로
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -250,24 +252,45 @@ async function siteMeasure() {
   return out;
 }
 
-/* ---------- 값 입력 필드 포커스(2026-10-26 k5) ----------
-   사람의 결정(k5): Text Field · Search · Select 트리거 · Date Picker 필드의 포커스는 테두리 1px + inset 1px(합쳐 2px 가장자리) + 0 0 0 4px 후광.
-   기대값은 사이트 CSS 에서 읽는다 — [기본 규칙(테두리 굵기), 포커스 규칙(border-color · box-shadow)]. 읽지 못하면 어긋남으로 낸다 */
-const FOCUS_CSS = { "Text Field": [".field input", ".field input:focus"], "Search": [".searchbar", ".searchbar:focus-within"], "Select": [".dropdown .trigger", ".dropdown .trigger:focus-visible"], "Date Picker": [".datepicker .field-btn", ".datepicker .field-btn:focus-visible"] };
+/* ---------- 포커스(2026-10-26 k5 · k6) ----------
+   값 입력 필드 — 사람의 결정(k5): Text Field · Search · Select 트리거 · Date Picker 필드의 포커스는 테두리 1px + inset 1px(합쳐 2px 가장자리)
+   + 0 0 0 4px 후광. k6: 오류 필드(.field.error)의 포커스는 같은 모양을 negative 토큰으로 — Figma 에서는 Text Field 의 State=Error Focused.
+   기대값은 사이트 CSS 에서 읽는다 — [기본 규칙(테두리 굵기), 포커스 규칙(border-color · box-shadow)]. 읽지 못하면 어긋남으로 낸다.
+   선택 컨트롤 — 사람의 결정(k6): 사이트의 전역 :focus-visible 외곽선(굵기 · offset · 색)을 Figma 에서는 "틈(면 색) + brand 선" 바깥 그림자 두 겹으로
+   그린다 — [brand spread offset+굵기, 틈 spread offset] 순서. 뒤에 오는 그림자가 위에 그려져 틈이 brand 안쪽을 덮는다(임시 노드를 픽셀로 읽어 확인,
+   반대 순서면 brand 가 틈까지 덮는다). Figma 는 면이 없는 프레임에는 그림자를 그리지 않으므로(같은 시험 — 면 없음 · 면 투명도 0 모두 그림자 0)
+   칸에 면이 있어야 한다. 틈 색은 사이트 예제 판(.example-preview.panel)의 바탕을 잰 것이다 — 라이트 #FFFFFF · 다크 #1B1C1E = --background-neutral-primary */
+const FOCUS_CSS = [
+  { set: "Text Field", state: "Focused", base: ".field input", rule: ".field input:focus" },
+  { set: "Text Field", state: "Error Focused", base: ".field input", rule: ".field.error input:focus" },
+  { set: "Search", state: "Focused", base: ".searchbar", rule: ".searchbar:focus-within" },
+  { set: "Select", state: "Focused", base: ".dropdown .trigger", rule: ".dropdown .trigger:focus-visible" },
+  { set: "Date Picker", state: "Focused", base: ".datepicker .field-btn", rule: ".datepicker .field-btn:focus-visible" },
+];
+const RING_SETS = ["Checkbox", "Radio Button", "Switch", "Slider"];
+const RING_GAP = "background/neutral/primary";
 function focusExpect() {
-  const out = {};
+  const fields = [];
   const shadow = (s) => { const nums = s.replace(/var\([^)]*\)/g, " ").replace(/\binset\b/, " ").trim().split(/\s+/).filter(Boolean).map(parseFloat); return { x: nums[0] || 0, y: nums[1] || 0, blur: nums[2] || 0, spread: nums[3] || 0, tok: figTok(s), inset: /\binset\b/.test(s) }; };
-  for (const [set, [base, sel]] of Object.entries(FOCUS_CSS)) {
+  for (const { set, state, base, rule } of FOCUS_CSS) {
     try {
-      const b = cssRule(base), f = cssRule(sel);
+      const b = cssRule(base), f = cssRule(rule);
       const bw = parseFloat((/(\d+(?:\.\d+)?)px\s+solid/.exec(b.border || "") || [])[1]);
       const parts = (f["box-shadow"] || "").split(/,(?![^(]*\))/).map((x) => x.trim()).filter(Boolean).map(shadow);
       const ins = parts.filter((x) => x.inset), ring = parts.filter((x) => !x.inset);
-      if (!(bw > 0) || !figTok(f["border-color"]) || ins.length !== 1 || ring.length !== 1) throw new Error(`${sel} 의 border · box-shadow 를 읽지 못했습니다(${b.border} / ${f["border-color"]} / ${f["box-shadow"]})`);
-      out[set] = { border: { tok: figTok(f["border-color"]), w: bw }, inner: ins[0], ring: ring[0], css: sel };
-    } catch (e) { out[set] = { error: String(e.message || e) }; }
+      if (!(bw > 0) || !figTok(f["border-color"]) || ins.length !== 1 || ring.length !== 1) throw new Error(`${rule} 의 border · box-shadow 를 읽지 못했습니다(${b.border} / ${f["border-color"]} / ${f["box-shadow"]})`);
+      fields.push({ set, state, border: { tok: figTok(f["border-color"]), w: bw }, inner: ins[0], ring: ring[0], css: rule });
+    } catch (e) { fields.push({ set, state, error: String(e.message || e) }); }
   }
-  return out;
+  let ring;
+  try {
+    const r = cssRule(":focus-visible");
+    const m = /(\d+(?:\.\d+)?)px\s+solid\s+(var\(--[a-z0-9-]+\))/.exec(r.outline || "");
+    const off = parseFloat(r["outline-offset"]);
+    if (!m || !(off >= 0) || !figTok(m[2])) throw new Error(`:focus-visible 의 outline · outline-offset 을 읽지 못했습니다(${r.outline} / ${r["outline-offset"]})`);
+    ring = { tok: figTok(m[2]), width: +m[1], offset: off, gap: RING_GAP, css: ":focus-visible" };
+  } catch (e) { ring = { error: String(e.message || e) }; }
+  return { fields, ring };
 }
 
 /* ---------- 문서 카드 Spec(2026-10-26 k3) ----------
@@ -690,24 +713,47 @@ function diffComponents(c, want, bad, notes) {
     }
     for (const [slug, s] of fig) if (!want.specs[slug]) bad.push(`Spec 카드 ${s.card}(${s.id}) 에 맞는 저장소 컴포넌트가 없습니다(키 ${slug})`);
   } else notes.push("덤프에 문서 카드 Spec 이 없습니다 — 2026-10-26 k3 전 probe.js 로 만든 덤프입니다");
-  /* 값 입력 필드 4종의 Focused(2026-10-26 k5) — 테두리 · 안쪽 줄 · 후광의 토큰과 굵기를 사이트 CSS 와 맞춘다.
+  /* 포커스(2026-10-26 k5 · k6) — 값 입력 필드는 테두리 · 안쪽 줄 · 후광의 토큰과 굵기를 사이트 CSS 와 맞춘다.
      Figma 는 안쪽 그림자를 INSIDE 테두리 밑에 그린다(임시 노드로 확인 — spread 1 은 1px 테두리에 완전히 가려지고, spread 2 라야
      테두리 안쪽에 1px 이 보인다). 그래서 CSS 의 inset Npx 는 Figma 안쪽 그림자 spread = N + 테두리 굵기 로 그린 것을 기대한다.
-     세트나 Focused 변형이 없으면, 기대값을 CSS 에서 읽지 못하면 어긋남이다 */
+     변형은 State 값으로 가른다(Focused · Error Focused — 옛 덤프에는 state 가 없어 Focused 로 본다). 기대값이 없는 포커스 상태도 어긋남이다.
+     선택 컨트롤(k6)은 focusExpect 머리 주석의 두 겹 그림자를 기대한다. 세트나 변형이 없으면, 기대값을 CSS 에서 읽지 못하면 어긋남이다 */
   if (c.focus) {
-    for (const [set, w] of Object.entries(want.focus)) {
-      if (w.error) { bad.push(`${set} 포커스 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${w.error}`); continue; }
+    const stateOf = (v) => v.state || "Focused";
+    const ok = (fx, tok, spread, blur) => fx.length === 1 && fx[0][0] === tok && fx[0][1] === spread && fx[0][2] === blur && fx[0][3] === "0,0";
+    for (const w of want.focus.fields) {
+      if (w.error) { bad.push(`${w.set} State=${w.state} 포커스 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${w.error}`); continue; }
+      const all = c.focus[w.set];
+      if (!all) { bad.push(`${w.set} 세트가 없어 State=${w.state} 를 대조하지 못했습니다`); continue; }
+      const list = all.filter((v) => stateOf(v) === w.state);
+      if (!list.length) { bad.push(`${w.set} 에 State=${w.state} 변형이 없습니다 — 사이트 ${w.css}`); continue; }
+      const innerSpread = w.inner.spread + w.border.w;
+      for (const v of list) {
+        const at = `${w.set} ${v.variant} (${v.id})`;
+        if (!v.box) { bad.push(`${at} — 포커스 칸을 찾지 못했습니다`); continue; }
+        if (v.stroke !== "$" + w.border.tok || v.sw !== w.border.w || v.align !== "INSIDE") bad.push(`${at} 테두리 ${v.stroke} · ${v.sw}px · ${v.align} ≠ ${w.border.tok} · ${w.border.w}px · INSIDE`);
+        if (!ok(v.inner, w.inner.tok, innerSpread, w.inner.blur)) bad.push(`${at} 안쪽 줄 ${JSON.stringify(v.inner)} ≠ [${w.inner.tok}, spread ${innerSpread}(inset ${w.inner.spread} + 테두리 ${w.border.w}), blur ${w.inner.blur}]`);
+        if (!ok(v.drop, w.ring.tok, w.ring.spread, w.ring.blur)) bad.push(`${at} 후광 ${JSON.stringify(v.drop)} ≠ [${w.ring.tok}, spread ${w.ring.spread}, blur ${w.ring.blur}]`);
+      }
+    }
+    for (const set of [...new Set(want.focus.fields.map((w) => w.set))]) for (const v of c.focus[set] || []) {
+      if (!want.focus.fields.some((w) => w.set === set && w.state === stateOf(v))) bad.push(`${set} ${v.variant} (${v.id}) — 기대값이 없는 포커스 상태(${stateOf(v)}). 사이트 규칙이 있으면 audit.mjs 의 FOCUS_CSS 에 더하세요`);
+    }
+    /* 선택 컨트롤 — 사이트 :focus-visible 외곽선을 두 겹 그림자로 */
+    const r = want.focus.ring;
+    if (RING_SETS.some((s) => !(s in c.focus))) notes.push("덤프에 선택 컨트롤 포커스 조사가 없습니다 — 2026-10-26 k6 전 probe.js 로 만든 덤프입니다");
+    else if (r.error) bad.push(`선택 컨트롤 포커스 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${r.error}`);
+    else for (const set of RING_SETS) {
       const list = c.focus[set];
       if (!list) { bad.push(`${set} 세트가 없어 Focused 를 대조하지 못했습니다`); continue; }
-      if (!list.length) { bad.push(`${set} 에 State=Focused 변형이 없습니다 — 사이트 ${w.css}`); continue; }
-      const innerSpread = w.inner.spread + w.border.w;
+      if (!list.length) { bad.push(`${set} 에 State=Focused 변형이 없습니다 — 사이트 ${r.css}`); continue; }
+      const want2 = [[r.tok, r.offset + r.width, 0, "0,0"], [r.gap, r.offset, 0, "0,0"]];
       for (const v of list) {
         const at = `${set} ${v.variant} (${v.id})`;
         if (!v.box) { bad.push(`${at} — 포커스 칸을 찾지 못했습니다`); continue; }
-        if (v.stroke !== "$" + w.border.tok || v.sw !== w.border.w || v.align !== "INSIDE") bad.push(`${at} 테두리 ${v.stroke} · ${v.sw}px · ${v.align} ≠ ${w.border.tok} · ${w.border.w}px · INSIDE`);
-        const ok = (fx, tok, spread, blur) => fx.length === 1 && fx[0][0] === tok && fx[0][1] === spread && fx[0][2] === blur && fx[0][3] === "0,0";
-        if (!ok(v.inner, w.inner.tok, innerSpread, w.inner.blur)) bad.push(`${at} 안쪽 줄 ${JSON.stringify(v.inner)} ≠ [${w.inner.tok}, spread ${innerSpread}(inset ${w.inner.spread} + 테두리 ${w.border.w}), blur ${w.inner.blur}]`);
-        if (!ok(v.drop, w.ring.tok, w.ring.spread, w.ring.blur)) bad.push(`${at} 후광 ${JSON.stringify(v.drop)} ≠ [${w.ring.tok}, spread ${w.ring.spread}, blur ${w.ring.blur}]`);
+        if (JSON.stringify(v.drop) !== JSON.stringify(want2)) bad.push(`${at} 포커스 고리 ${JSON.stringify(v.drop)} ≠ ${JSON.stringify(want2)} — 사이트 outline ${r.width}px ${r.tok} · offset ${r.offset}(틈 ${r.gap} 이 위에 오게 이 순서)`);
+        if (v.inner && v.inner.length) bad.push(`${at} 안쪽 그림자 ${JSON.stringify(v.inner)} — 사이트 외곽선에는 안쪽 줄이 없습니다`);
+        if (!v.fill || v.fill === "-") bad.push(`${at} 포커스 칸(${v.box})에 면이 없어 Figma 가 그림자를 그리지 않습니다`);
       }
     }
   } else notes.push("덤프에 값 입력 필드 Focused 조사가 없습니다 — 2026-10-26 k5 전 probe.js 로 만든 덤프입니다");
@@ -722,6 +768,11 @@ function diffComponents(c, want, bad, notes) {
       if (Math.abs(f[0] - tg[k]) > 0.5 || Math.abs(f[1] - tg[k]) > 0.5) bad.push(`Tag Size=${size} 높이 ${f[0] === f[1] ? f[0] : f[0] + "~" + f[1]}(변형 ${f[2]}) ≠ 사이트 실측 ${+tg[k].toFixed(2)}`);
     }
   } else notes.push("덤프에 Tag 높이가 없습니다 — 2026-10-26 k5 전 probe.js 로 만든 덤프입니다");
+  /* 효과(그림자) 색의 변수 연결(2026-10-26 k6) — 사람의 결정: 컴포넌트 세트의 그림자 색은 변수에 묶거나 효과 스타일로 칠한다.
+     변수 없는 색이 하나라도 남으면 어긋남이다. 범위와 거짓 경보를 피하려고 뺀 것은 probe.js 의 같은 날짜 주석에 */
+  if (c.effectColors) {
+    for (const e of c.effectColors.raw) bad.push(`효과 색이 변수에 묶이지 않았습니다 — ${e.set} · ${e.variant} · ${e.node} (${e.id}) ${e.type} ${e.color} spread ${e.spread} blur ${e.blur}`);
+  } else notes.push("덤프에 효과 색 조사가 없습니다 — 2026-10-26 k6 전 probe.js 로 만든 덤프입니다");
 }
 
 function expect_() {
