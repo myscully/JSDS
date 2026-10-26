@@ -130,3 +130,12 @@ Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/
 3 Component	623:3094	(새로 만듦 — 옆 행 320:1243(Placement) 복제) Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	(새 글자) 본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 …	Card/Accordion · Spec · 새 행 623:3092 값
 3 Component	623:3096	(새로 만듦 — 옆 행 326:1811(Placement) 복제) Pretendard Medium · Label/1	Noto Sans KR Medium · 스타일 없음	(새 글자) Motion	Card/Card · Spec · 새 행 623:3095 이름
 3 Component	623:3097	(새로 만듦 — 옆 행 326:1811(Placement) 복제) Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	(새 글자) clickable 은 --motion-fast 로 그림자 없음 → shadow/2	Card/Card · Spec · 새 행 623:3095 값
+
+# 2026-10-26 k5 — 문서 카드 Spec 글 3행(Text Field · Search · Navigation 의 Container)을 사이트 spec 행(_build/components.data.js, a5662a6)과 같게 고치며(사람의 결정 B) 새로 Noto Sans KR 로 바뀐 노드 1개 · 글자만 다시 바뀐 k4 절 노드 2개. 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: 서체만 Pretendard Regular 로 돌린다(글자는 그대로). 셋 다 편집 직전에 스타일이 없었다(행간 160% · 자간 0 — 편집 스크립트가 본 값)
+# 같은 작업에서 만든 변형 8개(Select Focused 634:3089 · Date Picker Focused 634:3093 · 634:3098 · Tag Solid Accent 634:3622 · 634:3625 · 634:3628 · Card Flush 635:3102 · Breadcrumb Icon 635:3652)는 글자를 고치지 않아 Noto 가 없다 — 글자는 복제 원본의 Pretendard 그대로이고, Card Flush 의 표 · 버튼은 인스턴스 기본 글자(헤더 · 텍스트 · 버튼)다
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+3 Component	322:811	Pretendard Regular · 스타일 없음(행간 160% · 자간 0)	Noto Sans KR Regular · 스타일 없음	radius/md 6 · line/neutral/primary · focus ring → radius/md 6 · line/neutral/primary · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus	Card/Search · Spec · Container 행 값(두 줄이 되어 글자 높이 22 → 44)
+# 같은 작업에서 글자만 다시 바뀐 k4 절 노드 2개 — 이미 Noto 라 되돌리는 법은 k4 절 그대로
+3 Component	322:641	Pretendard Regular · 스타일 없음(k4 절과 같음)	Noto Sans KR Regular · 스타일 없음	radius/md 6 · line/neutral/primary 1px · focus ring 2px 30% → radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px line/brand/focus	Card/Text Field · Spec · Container 행 값
+3 Component	332:3055	Pretendard Regular · 스타일 없음(k4 절과 같음)	Noto Sans KR Regular · 스타일 없음	surface/elevated/primary · 우측 1px border → surface/elevated/primary · 우측 1px line/neutral/secondary	Card/Navigation · Spec · Container 행 값(k4 에 바꾸기 전 글로 돌아갔다)
