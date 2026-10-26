@@ -74,7 +74,7 @@ const pairs = [
   ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자", REF("다크는 rest 가 제품 HEX(brand-50)라 제품 색 제약이 받치고, 상태가 밝아지는 쪽(55 → 60)이라 hover·pressed 만 4.5 아래다 — #0066FF 4.13 · 3.54, 밝은 제품 #008760 3.31 · 2.51")],
 
   /* 글자 없는 지표(점·바·밴드·도넛) — 1.4.11 의 3:1 */
-  ["--foreground-negative-primary", SURFACES, 3, "Critical 지표"],
+  ["--foreground-negative-primary", SURFACES, 3, "Critical 지표"],   // 오류 필드의 포커스 가장자리도 이 토큰(2px). 바깥 4px --line-negative-focus 후광은 장식(1.17)
   ["--foreground-cautionary-primary", SURFACES, 3, "High 지표", REF("참조 시스템 값 — 라이트 2.24")],
   ["--foreground-accent-cyan", SURFACES, 3, "Medium 지표"],
   ["--foreground-inactive-primary", SURFACES, 3, "Low 지표 · 비활성 점", REF("참조 시스템 값 — 라이트 2.78 · 다크 2.55")],
@@ -130,7 +130,7 @@ const grammarOnly = [
     .filter((t) => !/cyan$/.test(t) || /opaque|line/.test(t)),
   ...ACCENTS.filter((c) => c !== "cyan").map((c) => `--surface-accent-${c}`),
   "--line-neutral-primary-opaque", "--line-neutral-secondary-opaque", "--line-neutral-tertiary-opaque",
-  "--line-brand-strong", "--line-negative-strong", "--line-negative-focus",   // --line-brand-focus 는 값 입력 필드 포커스 후광으로 쓰기 시작해 뺐다
+  "--line-brand-strong", "--line-negative-strong",   // --line-brand-focus · --line-negative-focus 는 값 입력 필드 포커스 후광으로 쓰기 시작해 뺐다
   "--line-positive-primary",
   "--effect-transparent-primary", "--effect-transparent-secondary",
   "--company-mark-subtle",

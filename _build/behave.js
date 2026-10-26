@@ -871,6 +871,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     select: await fieldRing("components/select.html", "#ex-select-default .dropdown .trigger"),
     date: await fieldRing("components/date-picker.html", "#ex-date-picker-default .field-btn") };
   ok("value fields show the 2px brand edge and 4px halo on focus", Object.values(rings).every((r) => /inset/.test(r.shadow) && /0px 0px 0px 4px/.test(r.shadow) && r.outline === "none" && r.edge), JSON.stringify(rings));
+  /* 오류 필드의 포커스 — brand 링이 빨간 오류 테두리를 덮었다. 빨강 가장자리 + --line-negative-focus 후광(사람의 결정 2026-10-26) */
+  const errRing = await fieldRing("components/text-field.html", "#ex-text-field-basic .field.error input");
+  const errWant = await page.evaluate(() => { const c = (v) => { const d = document.createElement("div"); d.style.color = `var(${v})`; document.body.append(d); const x = getComputedStyle(d).color; d.remove(); return x; };
+    return { edge: c("--foreground-negative-primary"), halo: c("--line-negative-focus") }; });
+  ok("an error field keeps a red edge and halo on focus", errRing.shadow.includes(errWant.edge) && errRing.shadow.includes(errWant.halo) && errRing.outline === "none", JSON.stringify({ errRing, errWant }));
   const chkRing = await fieldRing("components/checkbox.html", "#ex-checkbox-default input");
   ok("selection controls keep the global focus outline", chkRing.outline !== "none" && !/inset/.test(chkRing.shadow), JSON.stringify(chkRing));
   await go("components/card.html");
