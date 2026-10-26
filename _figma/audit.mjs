@@ -179,15 +179,17 @@ function stepsExample() {
       label: strip(m[2].replace(/<i>[\s\S]*?<\/i>/, "").replace(/<span class="sr-only">[\s\S]*?<\/span>/g, "")) };
   });
 }
-function navExample() {
+function navExample(id = "basic") {
   const out = [];
-  for (const m of exampleHtml("navigation", "basic").matchAll(/<a([^>]*)>([\s\S]*?)<\/a>|<div class="(group|foot)">([\s\S]*?)<\/div>/g)) {
+  for (const m of exampleHtml("navigation", id).matchAll(/<a([^>]*)>([\s\S]*?)<\/a>|<div class="(group|foot)">([\s\S]*?)<\/div>/g)) {
     if (m[3]) { out.push({ kind: m[3], label: strip(m[4]) }); continue; }
     const cls = ((/class="([^"]*)"/.exec(m[1]) || [])[1] || "").split(/\s+/);
     const ic = /\$\{I\("([a-z0-9-]+)"/.exec(m[2]), ct = /<span class="count[^"]*">([\s\S]*?)<\/span>/.exec(m[2]);
     const body = m[2].replace(/\$\{[^}]*\}/g, "").replace(/<span class="count[^"]*">[\s\S]*?<\/span>/g, "");
     out.push({ kind: "item", type: cls.includes("sub") ? "Sub" : "Default", state: cls.includes("on") ? "Selected" : "Default", icon: ic ? ic[1] : null, label: strip(body), count: ct ? strip(ct[1]) : null });
   }
+  /* 접힌 예제(.sidenav.collapsed) — 하위 항목 · 그룹 · 건수 · foot 은 CSS 가 숨긴다. 남는 항목은 Figma 의 Type=Collapsed 와 맞춘다 */
+  if (id === "collapsed") return out.filter((x) => x.kind === "item" && x.type !== "Sub").map((x) => ({ ...x, type: "Collapsed", count: null }));
   return out;
 }
 
@@ -269,6 +271,7 @@ function componentsExpect() {
     /* 컨테이너 — 사이트 예제와 순서 · 라벨 · 상태 · 아이콘. Steps 는 Indicator 의 steps 예제, Navigation 은 Default 예제 */
     stepsItems: stepsExample(),
     navItems: navExample(),
+    navCollapsed: navExample("collapsed"),
     /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
     donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
       .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
@@ -292,6 +295,12 @@ function componentsExpect() {
       "Count", "Status Indicator", "Step", "Steps", "Navigation Item", "Navigation"],
   };
 }
+
+/* 속성 연결 규칙의 선언된 예외 — 넷(세트 · 변형 · 노드 · 속성)이 다 맞을 때만 넘긴다. 다른 빠짐은 그대로 잡는다 */
+const REF_EXCEPTIONS = [
+  { set: "Button", variant: /(?:^|, )State=Loading(?:,|$)/, key: "Leading Icon|INSTANCE", ref: "visible=Leading Icon#315:121",
+    why: "State=Loading 은 그 자리에 스피너를 늘 보이므로 Leading Icon 속성으로 끄지 않는다(사람의 결정 2026-10-23 k2). 범위: Button · State=Loading · Leading Icon(INSTANCE) · visible=Leading Icon#315:121" },
+];
 
 function diffComponents(c, want, bad, notes) {
   if (!c) { notes.push("덤프에 컴포넌트 조사가 없습니다 — 옛 probe.js 로 만든 덤프입니다"); return; }
@@ -431,11 +440,23 @@ function diffComponents(c, want, bad, notes) {
     const fig = v.itemsList.filter((x) => x.item).map((x) => ({ state: x.item.replace(/^.*State=/, ""), mark: x.icon || x.number, label: x.label }));
     seqDiff("Steps", v, want.stepsItems, fig, (x) => `${x.state} · ${x.mark} · ${x.label}`);
   }
-  for (const v of (sets["Navigation"] || []).filter((x) => /State=Expanded/.test(x.name))) {
+  const navFmt = (x) => x.kind === "item" ? `${x.type}${x.state === "Selected" ? "·선택" : ""} · ${x.icon || "아이콘 없음"} · ${x.label}${x.count ? " · 건수 " + x.count : ""}` : `${x.kind === "group" ? "그룹" : "foot"} · ${x.label}`;
+  for (const v of sets["Navigation"] || []) {
     if (!v.itemsList) break;
-    const fig = v.itemsList.filter((x) => x.item || x.group).map((x) => x.group ? { kind: "group", label: x.group }
-      : { kind: "item", type: prop(x.item, "Type"), state: prop(x.item, "State"), icon: x.icon, label: x.label, count: x.count });
-    seqDiff("Navigation", v, want.navItems, fig, (x) => x.kind === "item" ? `${x.type}${x.state === "Selected" ? "·선택" : ""} · ${x.icon || "아이콘 없음"} · ${x.label}${x.count ? " · 건수 " + x.count : ""}` : `${x.kind === "group" ? "그룹" : "foot"} · ${x.label}`);
+    const collapsed = /State=Collapsed/.test(v.name);
+    if (!collapsed && !/State=Expanded/.test(v.name)) continue;
+    const fig = v.itemsList.filter((x) => x.item || x.group || x.foot).map((x) => x.group ? { kind: "group", label: x.group } : x.foot ? { kind: "foot", label: x.foot }
+      : { kind: "item", type: prop(x.item, "Type"), state: prop(x.item, "State"), icon: x.icon, label: collapsed ? x.labelProp : x.label, count: x.count });   // 접힌 레일은 라벨 글자가 없다 — Label 속성 값(사이트의 숨은 span · title)
+    seqDiff("Navigation", v, collapsed ? want.navCollapsed : want.navItems, fig, navFmt);
+  }
+  /* 컨테이너 항목의 아이콘 색 — Navigation Item 은 기본 · 선택 아이콘 색, Steps 는 Done 체크 색. 아이콘을 바꿔 끼운 인스턴스에서
+     이름이 다른 층(list 의 점 3개 등)이 아이콘 원본 색으로 남았다(2026-10-23 k2) — 원본 변형만 봐서는 못 잡는다 */
+  for (const [nm, exp] of [["Navigation", (x) => (prop(x.item, "State") === "Selected" ? want.navItem.selected.icon : want.navItem.base.icon)], ["Steps", (x) => (want.step[prop(x.item, "State")] || {}).check]]) {
+    for (const v of sets[nm] || []) for (const [i, x] of (v.itemsList || []).entries()) {
+      if (!x.item || !x.iconPaints) continue;
+      const w = exp(x); if (!w) continue;
+      if (x.iconPaints !== "$" + w) bad.push(`${nm} 항목 ${i + 1} 아이콘 색 ${x.iconPaints} ≠ ${w} — ${x.labelProp || x.label} (${v.name}, ${v.id})`);
+    }
   }
   /* 도넛 호 각도 — CSS 정지점과 ±0.5° · 색 */
   for (const v of sets["Chart Card"] || []) {
@@ -467,19 +488,27 @@ function diffComponents(c, want, bad, notes) {
   /* 컴포넌트 속성 연결 — 어떤 변형에서 이름·종류가 같은 노드가 속성 P 를 참조하면, 같은 노드를 가진 다른 변형도 P 를 참조해야 한다.
      복제(clone)해 넣은 변형은 연결이 빠진 채 들어온다(2026-10-23 j 에 8개). 같은 빠짐은 묶어서 한 줄로 */
   if (Object.values(sets).some((vs) => vs.some((v) => v.refs !== undefined))) {
+    const hits = new Map(REF_EXCEPTIONS.map((e) => [e, 0]));
     for (const [set, vs] of Object.entries(sets)) {
       const all = {};
       for (const v of vs) for (const [k, r] of Object.entries(v.refs || {})) for (const x of r.split(";").filter(Boolean)) (all[k] = all[k] || new Set()).add(x);
-      const miss = {};
+      const miss = {}; let excused = 0;
       for (const v of vs) for (const [k, r] of Object.entries(v.refs || {})) {
         const have = new Set(r.split(";").filter(Boolean));
-        for (const x of all[k] || []) if (!have.has(x)) (miss[k + " → " + x] = miss[k + " → " + x] || []).push(v);
+        for (const x of all[k] || []) if (!have.has(x)) {
+          const e = REF_EXCEPTIONS.find((e) => e.set === set && e.variant.test(v.name) && e.key === k && e.ref === x);
+          if (e) { excused++; hits.set(e, hits.get(e) + 1); continue; }
+          (miss[k + " → " + x] = miss[k + " → " + x] || []).push(v);
+        }
       }
+      if (excused) notes.push(`${set} 속성 연결 빠짐 ${excused}개는 선언된 예외입니다 — ${REF_EXCEPTIONS.filter((e) => e.set === set).map((e) => e.why).join(" / ")}`);
       for (const [kx, list] of Object.entries(miss)) {
         const [k, x] = kx.split(" → "), [nm, ty] = k.split("|");
         bad.push(`${set} 속성 연결 빠짐 — ${nm}(${ty}) 이 ${x} 를 참조하지 않는 변형 ${list.length}개: ${list.slice(0, 3).map((v) => v.name + " " + v.id).join(" · ")}${list.length > 3 ? " …" : ""}`);
       }
     }
+    /* 맞는 곳이 없는 예외는 남겨 두면 나중에 같은 이름의 진짜 빠짐을 덮는다 — 원인이 없어졌으면 지운다 */
+    for (const [e, n] of hits) if (!n) notes.push(`선언된 예외가 맞는 곳이 없습니다 — ${e.set} · ${e.key} · ${e.ref}. 원인이 없어졌으면 audit.mjs 의 REF_EXCEPTIONS 에서 지우세요`);
   } else notes.push("덤프에 컴포넌트 속성 연결 조사가 없습니다 — 2026-10-23 k 이전 probe.js 로 만든 덤프입니다");
   /* Sparkline 막대 — 강조는 하나, 나머지는 옅은 막대 */
   const sparkCheck = (where, v) => { const b = v.bars; if (!b) return;
@@ -509,7 +538,7 @@ function diffComponents(c, want, bad, notes) {
   if ((c.textOnSurface || []).length) bad.push(`글자에 surface/* 토큰 ${c.textOnSurface.length}개 — 글자는 foreground (${c.textOnSurface.slice(0, 6).join(" ")}${c.textOnSurface.length > 6 ? " …" : ""})`);
   for (const [name, e] of Object.entries(c.opaque || {})) bad.push(`컴포넌트 CSS 가 쓰지 않는 opaque 토큰 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
   for (const [name, e] of Object.entries(c.legacy || {})) bad.push(`현재 페이지에 옛 변수 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
-  for (const s of c.sections || []) if (s.gap !== want.sectionGap) bad.push(`섹션 간격 ${s.page}: ${s.a} → ${s.b} ${s.gap} ≠ ${want.sectionGap}`);
+  for (const s of c.sections || []) if (s.gap !== want.sectionGap) bad.push(`섹션 간격 ${s.page}${s.pageId ? "(" + s.pageId + ")" : ""}: ${s.a} → ${s.b} ${s.gap} ≠ ${want.sectionGap}`);
   if ((c.negText || []).length) bad.push(`글자에 foreground/negative/primary ${c.negText.length}개 — 저장소는 글자에 strong (${c.negText.slice(0, 6).join(" ")}${c.negText.length > 6 ? " …" : ""})`);
 }
 
@@ -570,8 +599,8 @@ function diff(dumpPath) {
   list(want.icons.outline, got.icons ? got.icons.outlineNames || [] : [], "outline 아이콘");
   list(want.icons.filled, got.icons ? got.icons.filledNames || [] : [], "filled 아이콘");
 
-  for (const o of got.overflow || []) bad.push(`넘침 ${o.page} / ${o.node} +${o.by}${o.side ? " (" + (o.side === "left" ? "왼쪽" : "위") + ")" : ""}${o.clips ? " (잘림)" : ""}`);
-  for (const o of (got.overlap || []).filter((x) => x.current !== false)) bad.push(`겹침 ${o.page}: ${o.a} ↔ ${o.b} (${o.by.join("×")})`);
+  for (const o of got.overflow || []) bad.push(`넘침 ${o.page}${o.pageId ? "(" + o.pageId + ")" : ""} / ${o.node} +${o.by}${o.side ? " (" + (o.side === "left" ? "왼쪽" : "위") + ")" : ""}${o.clips ? " (잘림)" : ""}`);
+  for (const o of (got.overlap || []).filter((x) => x.current !== false)) bad.push(`겹침 ${o.page}${o.pageId ? "(" + o.pageId + ")" : ""}: ${o.a} ↔ ${o.b} (${o.by.join("×")})`);
 
   const notes = [];
   /* 서체 상태는 덤프의 실제 스타일 서체로 말한다 — 고정 문구를 찍다가 사람이 Pretendard 로 되돌린 뒤에도 "Noto 대체" 라고 했다 */
@@ -581,6 +610,21 @@ function diff(dumpPath) {
       ? `Figma 에 Pretendard 가 없어 텍스트 스타일 ${noto.length}개가 Noto Sans KR 대체입니다(${noto.slice(0, 4).join(" · ")}${noto.length > 4 ? " …" : ""}) — 되돌리기는 _figma/font-revert.md`
       : "텍스트 스타일은 Pretendard 지만 이 플러그인 환경에는 Pretendard 가 없습니다 — 글자 내용·스타일 연결 같은 텍스트 편집은 여기서 할 수 없습니다");
   }
+
+  /* 대조 범위 — probe 는 현재 페이지를 id 로 고른다(2026-10-23 k2). 범위의 id 가 파일에 없으면(페이지를 지우고 다시 만들면)
+     그 페이지는 조사되지 않은 채 "어긋남 0" 이 나오므로 어긋남으로 잡는다. 이름이 같은데 범위 밖인 페이지는 매번 알린다 —
+     빼는 것이 소리 없이 일어나지 않게 */
+  if (got.scope) {
+    const pg = new Map((got.pages || []).map((p) => [p.id, p]));
+    for (const [id, name] of Object.entries(got.scope)) {
+      const p = pg.get(id);
+      if (!p) bad.push(`대조 범위의 페이지 ${name}(${id}) 가 파일에 없습니다 — 그 페이지는 조사되지 않았습니다. probe.js 의 CURRENT_PAGES 를 고치세요`);
+      else if (p.name !== name) notes.push(`대조 범위의 페이지 ${id} 이름이 "${p.name}" 입니다(probe.js 에는 "${name}") — 조사는 id 로 했습니다`);
+    }
+    const names = new Set(Object.values(got.scope));
+    const out = (got.pages || []).filter((p) => names.has(p.name) && !Object.prototype.hasOwnProperty.call(got.scope, p.id));
+    if (out.length) notes.push(`대조에서 뺀 같은 이름의 페이지 ${out.length}개 — ${out.map((p) => p.name + "(" + p.id + ")").join(" · ")}. probe.js 의 CURRENT_PAGES 가 id 로 고릅니다`);
+  } else notes.push("덤프에 대조 범위(scope)가 없습니다 — 어느 페이지를 조사했는지 덤프로는 확인할 수 없습니다(2026-10-23 k2 전 probe.js 는 이름으로 골라 같은 이름의 페이지가 섞였습니다)");
 
   /* 텍스트 스타일 — typeScale 을 계산만 하고 대조하지 않아 "어긋남 0" 에 글자 크기가 빠져 있었다.
      저장소 .t-* 는 서체 이름을 적지 않으므로 서체는 Pretendard · Noto Sans KR(대체) 를 모두 받고 굵기만 본다 */

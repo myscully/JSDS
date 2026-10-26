@@ -11,11 +11,15 @@
 >   1 Theme 200(Heading/3 27 · Heading/4 15 · Label/2 79 · Caption/2 79), 3 Component 6, 4 Pattern 4. 목록은 `_figma/font-link-candidates.tsv`(자간은 비교하지 않았다)
 > - 2026-10-23: Count · Steps · 내비 · 도넛을 저장소에 맞추며 글자 **내용**을 바꾼 17개가 Noto 로 바뀌었다
 >   (도넛 값 5 · Steps 4번째 항목 4 · 내비 라벨 8). `font-revert-nodes.tsv` 아래쪽에 이어 적었다
-> - **글자 굵기**가 저장소와 다른 노드 120행, 9종 — 건수 숫자(Count·Step·내비) → 700 53 · Step 라벨 Current → 600 6 · Done·Todo → 400 16 ·
->   내비 Selected → 600 5 · Sub → 500 8 · 그룹 → 600 6 · KPI delta → 600 12 · Chart Card 제목 → 600 6 · 범례 값 → 700 8.
+> - **글자 굵기**가 저장소와 다른 노드 112행(2026-10-23 k2 에 다시 셈 — j 에는 120행), 9종 — 건수 숫자(Count·Step·내비) → 700 47 · Step 라벨 Current → 600 6 · Done·Todo → 400 16 ·
+>   내비 Selected → 600 5 · Sub → 500 8 · 그룹 → 600 4 · KPI delta → 600 12 · Chart Card 제목 → 600 6 · 범례 값 → 700 8.
 >   `_figma/font-weight-todo.tsv`. "원본" 행을 고치면 인스턴스가 따라오고, "서체 덮어씀" 행은 따로 고친다. Pretendard 가 있어야 바꿀 수 있다.
 >   목록 밖에 하나 더: 도넛 가운데 값 330:2381 도 700 이어야 한다(지금 Noto Sans KR Medium — 목록 머리 주석)
-> - 2026-10-23 k: Properties 값 칩 3개(Pressed 582:3 · Pulse 582:5 · Sparkline 582:7)를 옆 칩을 복제해 만들며 Noto Sans KR Medium 으로 썼다(사람의 결정). 원래 서체·스타일은 Pretendard Medium · Caption/1 — `font-revert-nodes.tsv` 맨 아래 "2026-10-23 k" 절
+> - 2026-10-23 k: Properties 값 칩 3개(Pressed 582:3 · Pulse 582:5 · Sparkline 582:7)를 옆 칩을 복제해 만들며 Noto Sans KR Medium 으로 썼다(사람의 결정). 원래 서체·스타일은 Pretendard Medium · Caption/1 — `font-revert-nodes.tsv` "2026-10-23 k" 절
+> - 2026-10-23 k2: Steps · 내비를 사이트 예제(Indicator steps · Navigation basic)에 맞추며 글자 내용을 바꾼 노드 **10개가 새로 Noto** 가 됐다 —
+>   Steps 라벨·번호 8(559:3052 · 3057 · 3061 · 3069 · 3074 · 3078 안) · 그룹 라벨 '보호' 332:2809 · 새 foot 글자 589:105(되돌릴 서체 Pretendard Regular 12 · 행간 19.2px, 맞는 14단계 스타일 없음).
+>   j 절 노드 6개는 이미 Noto 라 글자만 다시 바뀌었고, j 절의 I560:3095;332:2732('리포트')는 항목째 지웠다. 문서용 인스턴스 속 Noto 21개(332:2900 안 9 · 333:3344 안 6 · 333:3365 안 6)는 이 덮어쓰기를 따른다.
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-23 k2" 절. 굵기 목록 `font-weight-todo.tsv` 도 이때 다시 셌다(120 → 112행 — 지운 노드 4 · Step 상태를 바꿔 하위 노드가 바뀐 행 −16 +12)
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 아래는 처음 Noto 로 대체 교정할 때의 기록이다.
