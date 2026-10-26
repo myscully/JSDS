@@ -408,11 +408,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   };
   const ringBtn = await ringOf("components/button.html", "#ex-button-variant .btn.primary");
   const ringInput = await ringOf("components/text-field.html", "#ex-text-field-basic input");
-  ok("input and button share one focus ring", ringBtn === ringInput && /2px solid/.test(ringBtn), ringBtn + " vs " + ringInput);
+  /* 값 입력 필드는 외곽선 대신 2px brand 가장자리 + 4px 후광을 쓴다(사람의 결정 2026-10-26) — 버튼은 외곽선 그대로, 필드는 외곽선을 끈다 */
+  ok("button keeps the 2px focus outline while value fields turn it off", /2px solid/.test(ringBtn) && /none/.test(ringInput), ringBtn + " vs " + ringInput);
   // 입력은 마우스 클릭에도 링이 떠야 한다(버튼은 아니어야 한다)
   await page.locator("#ex-text-field-basic input").first().click(); await page.waitForTimeout(200);
-  const clickRing = await page.evaluate(() => { const i = document.querySelector("#ex-text-field-basic input"); return { fv: i.matches(":focus-visible"), outline: getComputedStyle(i).outlineStyle }; });
-  ok("input keeps its ring on mouse click", clickRing.fv && clickRing.outline === "solid", JSON.stringify(clickRing));
+  const clickRing = await page.evaluate(() => { const i = document.querySelector("#ex-text-field-basic input"); return { fv: i.matches(":focus-visible"), shadow: getComputedStyle(i).boxShadow }; });
+  ok("input keeps its ring on mouse click", clickRing.fv && /inset/.test(clickRing.shadow) && /0px 0px 0px 4px/.test(clickRing.shadow), JSON.stringify(clickRing));   // 링은 :focus 의 box-shadow 라 클릭에도 뜬다
   await go("components/button.html");
   const lgIcon = await page.evaluate(() => {
     const b2 = document.querySelector("#ex-button-icon .btn.icon.lg");
@@ -858,6 +859,20 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const cf = page.locator("#ex-text-field-affix .example-preview .field").filter({ has: page.locator(".counter") }).first();
   await cf.locator("input").fill("새 정책");
   ok("text field counter updates", (await cf.locator(".counter").textContent()) === "4 / 80");
+  /* 값 입력 필드의 포커스 — 테두리 + 안쪽 1px 불투명 brand(2px 가장자리) + 바깥 4px 후광, 전역 외곽선은 끈다(사람의 결정 2026-10-26).
+     선택 컨트롤은 전역 :focus-visible 외곽선 그대로다 */
+  const fieldRing = async (pg, sel, boxSel) => { await go(pg); await page.locator(sel).first().evaluate((e) => e.focus());
+    await page.keyboard.press("Tab"); await page.keyboard.press("Shift+Tab"); await page.waitForTimeout(250);   // 키보드 포커스(:focus-visible) · box-shadow 전환이 끝난 뒤
+    return page.evaluate(([sel, boxSel]) => { const f = document.querySelector(sel), box = boxSel ? f.closest(boxSel) : f, cs = getComputedStyle(box);
+      const d = document.createElement("div"); d.style.color = "var(--foreground-brand-primary)"; document.body.append(d); const brand = getComputedStyle(d).color; d.remove();
+      return { shadow: cs.boxShadow, outline: getComputedStyle(f).outlineStyle, edge: cs.borderTopColor === brand, visible: f.matches(":focus-visible") }; }, [sel, boxSel]); };
+  const rings = { field: await fieldRing("components/text-field.html", "#ex-text-field-basic .field input"),
+    search: await fieldRing("components/search.html", "#ex-search-basic .searchbar input", ".searchbar"),
+    select: await fieldRing("components/select.html", "#ex-select-default .dropdown .trigger"),
+    date: await fieldRing("components/date-picker.html", "#ex-date-picker-default .field-btn") };
+  ok("value fields show the 2px brand edge and 4px halo on focus", Object.values(rings).every((r) => /inset/.test(r.shadow) && /0px 0px 0px 4px/.test(r.shadow) && r.outline === "none" && r.edge), JSON.stringify(rings));
+  const chkRing = await fieldRing("components/checkbox.html", "#ex-checkbox-default input");
+  ok("selection controls keep the global focus outline", chkRing.outline !== "none" && !/inset/.test(chkRing.shadow), JSON.stringify(chkRing));
   await go("components/card.html");
   /* 문서 제목 자간(h3 -0.01em)이 미리보기의 카드 제목까지 먹어 배포 CSS 와 0.16px 달랐다 — 문서 제목에만 남는다 */
   const h3Ls = await page.evaluate(() => { const ls = (e) => e && getComputedStyle(e).letterSpacing;

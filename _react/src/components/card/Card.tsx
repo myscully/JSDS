@@ -6,7 +6,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   bordered?: boolean;
   /** padding 16 · 제목 14 */
   compact?: boolean;
-  /** padding·gap 0 — 표나 목록을 카드 폭까지 채울 때 */
+  /** padding·gap 0 — 표를 카드 폭까지 채울 때. 안의 Table 은 wrap={false}(.tbl-wrap · List 는 자체 테두리가 있어 두 겹이 된다) */
   flush?: boolean;
   /** 불러오는 중 — children 대신 Skeleton 을 보여주고 aria-busy 를 켭니다 */
   loading?: boolean;
