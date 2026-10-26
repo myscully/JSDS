@@ -144,13 +144,16 @@ const paint = (arr) => {
   const o = [];
   for (const p of arr) {
     if (p.visible === false) continue;
+    /* 불투명도 0 인 칠은 "transparent" 로 적는다(2026-10-26 k7) — 버튼의 1px 투명 테두리(사이트 border:1px solid transparent)가
+       raw#000000 으로 보여 검은 선처럼 읽히지 않게. 숨긴 칠(visible false)은 예전처럼 건너뛴다 */
+    if (p.opacity === 0) { o.push("transparent"); continue; }
     const b = vname(p.boundVariables && p.boundVariables.color);
     o.push(b ? "$" + b : p.type === "SOLID" ? "raw#" + hex2(p.color.r) + hex2(p.color.g) + hex2(p.color.b) : p.type);
   }
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {} };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20) */
@@ -160,6 +163,9 @@ for (const p of figma.root.children) {
   if (!isCurrent(p)) continue;
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
     if (!SURVEY_SETS.includes(set.name)) continue;
+    /* 기본 변형(2026-10-26 k7) — 인스턴스를 새로 꺼낼 때 나오는 변형. Figma 는 층 순서가 아니라 자리로 정한다(세트 안에서 왼쪽 위에 놓인 변형 —
+       첫 자식으로 옮겨도 바뀌지 않았다). audit 이 사이트의 기본값(Tag size md)과 맞춘다 */
+    components.defaults[set.name] = set.defaultVariant ? set.defaultVariant.name : null;
     /* 컴포넌트 속성 연결 — 이름·종류가 같은 노드가 변형마다 같은 속성을 참조하는지 audit 이 보려고 모은다.
        복제(clone)한 변형은 연결이 빠진 채 세트에 들어온다(2026-10-23 j 에 8개가 그랬다). 인스턴스 속은 내려가지 않는다 */
     const own = (root, fn) => { for (const k of root.children || []) { fn(k); if (k.type !== "INSTANCE" && "children" in k) own(k, fn); } };
@@ -328,9 +334,22 @@ for (const p of figma.root.children) {
       const box = FOCUS_BOX[set.name] ? v.findOne((k) => k.name === FOCUS_BOX[set.name] && "strokes" in k) : v;
       if (!box) { list.push({ variant: v.name, id: v.id, state: sm[1], box: null }); continue; }
       const fx = (t) => box.effects.filter((e) => e.visible !== false && e.type === t).map((e) => [vname(e.boundVariables && e.boundVariables.color) || "raw", e.spread || 0, e.radius || 0, e.offset ? e.offset.x + "," + e.offset.y : "0,0"]);
-      list.push({ variant: v.name, id: v.id, state: sm[1], box: box.id, stroke: paint(box.strokes), sw: box.strokeWeight === figma.mixed ? "mixed" : box.strokeWeight, align: box.strokeAlign, fill: paint(box.fills), size: [+box.width.toFixed(2), +box.height.toFixed(2)], inner: fx("INNER_SHADOW"), drop: fx("DROP_SHADOW") });
+      const rad = (n) => ("cornerRadius" in n ? (n.cornerRadius === figma.mixed ? "mixed" : n.cornerRadius) : null);
+      /* 선만 있는 고리(2026-10-26 k7) — 이름이 "Focus Ring" 인 노드. 칸에 대한 위치(dx · dy, 절대 좌표 차)와 크기 · 선 · 면 · 모서리를 적는다 */
+      const ringNode = v.findOne((k) => k.name === "Focus Ring");
+      const ring = ringNode ? { id: ringNode.id, dx: +(ringNode.absoluteTransform[0][2] - box.absoluteTransform[0][2]).toFixed(2), dy: +(ringNode.absoluteTransform[1][2] - box.absoluteTransform[1][2]).toFixed(2), w: +ringNode.width.toFixed(2), h: +ringNode.height.toFixed(2), stroke: paint(ringNode.strokes), sw: ringNode.strokeWeight === figma.mixed ? "mixed" : ringNode.strokeWeight, align: ringNode.strokeAlign, fill: paint(ringNode.fills), radius: rad(ringNode), fx: ringNode.effects.filter((e) => e.visible !== false).length } : null;
+      list.push({ variant: v.name, id: v.id, state: sm[1], box: box.id, stroke: paint(box.strokes), sw: box.strokeWeight === figma.mixed ? "mixed" : box.strokeWeight, align: box.strokeAlign, fill: paint(box.fills), size: [+box.width.toFixed(2), +box.height.toFixed(2)], inner: fx("INNER_SHADOW"), drop: fx("DROP_SHADOW"), radius: rad(box), ring });
     }
     components.focus[set.name] = list;
+  }
+  /* 버튼 상자(2026-10-26 k7) — State=Default 변형마다 폭 · 높이와 라벨 글자의 폭 · x. audit 이 사이트 버튼("버튼" 라벨)을 헤드리스 Chromium 으로 잰
+     폭에서 글자 폭을 뺀 몫(테두리 + padding)과 맞춘다 — 글자 폭은 서체 · 자간 때문에 Figma 와 사이트가 다르다(Figma 는 텍스트 스타일의 자간을 지닌다) */
+  for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    if (set.name !== "Button") continue;
+    components.buttons = set.children.filter((v) => /(?:^|, )State=Default(?:,|$)/.test(v.name)).map((v) => {
+      const t = v.findOne((k) => k.type === "TEXT" && k.visible !== false);
+      return { name: v.name, id: v.id, w: +v.width.toFixed(2), h: +v.height.toFixed(2), stroke: paint(v.strokes), sw: v.strokeWeight === figma.mixed ? "mixed" : v.strokeWeight, label: t ? [t.characters, +t.width.toFixed(2), +t.x.toFixed(2)] : null };
+    });
   }
   /* 효과(그림자) 색의 변수 연결(2026-10-26 k6) — 현재 페이지의 컴포넌트 세트 안, 인스턴스 밖 노드의 보이는 그림자를 본다.
      효과 스타일(Shadow/1 …)을 쓴 노드는 연결된 것으로 친다 — 스타일 자체의 값은 effectStyles 로 따로 본다.
