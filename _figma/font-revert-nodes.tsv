@@ -83,3 +83,50 @@ Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/
 3 Component	332:3052	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	폭 240 (접힘 64) · 항목 높이 40 → 폭 240 (접힘 64) · 항목 높이 38.4 (padding 8 · 글자 14 · 행간 1.6)	Card/Navigation 332:2879 · Spec · Size 행(332:3050) 값
 3 Component	332:3058	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Body/2 14 · 그룹 Caption 11 uppercase → 항목 14 Medium · 선택 14 SemiBold · 그룹 12 SemiBold uppercase	Card/Navigation 332:2879 · Spec · Label 행(332:3056) 값
 3 Component	333:3265	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Body/2 14 · count 11 Bold · steps 13 → Body/2 14 · count 12 Bold · steps 12	Card/Indicator 333:3198 · Spec · Label 행(333:3263) 값
+
+# 2026-10-26 k4 — 문서 카드 Spec 글을 사이트 spec 행(_build/components.data.js)과 같게 고치며 Noto Sans KR 로 바뀐 노드 42개(값 글자 36 + 새 행 3개의 이름 · 값 6). 사람이 Pretendard 로 되돌릴 목록
+# 원래 스타일: 편집 직전 서체는 모두 Pretendard Regular 였고 스타일은 두 가지였다(편집 스크립트가 본 조합) — 행간 22 · 자간 1.45% 가 남은 33개는 Body/2 연결, 행간 % · 자간 0 이 남은 3개는 스타일 없음
+# 되돌릴 때: 서체를 원래 서체로 돌리고 Body/2 였던 것은 다시 연결한다(글자는 그대로). 새 행은 옆 행을 복제해 만든 것이라 그 행과 같게(이름 Pretendard Medium · Label/1, 값 Pretendard Regular · Body/2)
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+3 Component	317:323	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	radius/md 6 · 좌우 padding 14 / 20 / 26 → radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)	Card/Button · Spec · Container 행 값
+3 Component	317:326	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Label/1 15 Semibold · 동사로 시작 → 14 SemiBold (sm 12 · lg 16) · 동사로 시작	Card/Button · Spec · Label 행 값
+3 Component	320:327	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Label/1 13 Medium → Label/2 12	Card/Chip · Spec · Label 행 값
+3 Component	320:551	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Body/2 14 · 그룹 라벨 Caption 11 uppercase → 항목 Body/2 14 · 선택 SemiBold brand · 그룹 라벨 12 SemiBold uppe…	Card/Dropdown · Spec · Label 행 값
+3 Component	320:1082	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Caption 12 tertiary → 라벨 12 Regular tertiary	Card/Divider · Spec · Label 행 값
+3 Component	320:1242	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Title/1 15 Semibold · 본문 Body/2 14 secondary → 제목 16 SemiBold · 본문 Body/2 14 secondary	Card/Accordion · Spec · Label 행 값
+3 Component	322:641	Pretendard Regular · 스타일 없음(행간 % · 자간 0)	Noto Sans KR Regular · 스타일 없음	radius/md 6 · line/neutral/primary 1px · focus ring 2px → radius/md 6 · line/neutral/primary 1px · focus ring 2px 30%	Card/Text Field · Spec · Container 행 값
+3 Component	322:644	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Label/1 14 Semibold · 필수는 em(*) → 라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)	Card/Text Field · Spec · Label 행 값
+3 Component	323:706	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Label/1 13.5 Medium · 선택 Semibold → Label/1 14 · 선택 14 SemiBold	Card/Select Button · Spec · Label 행 값
+3 Component	324:709	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Body/2 14 · 설명 Caption 12.5 tertiary → Body/2 14 · 설명 12 Regular tertiary	Card/Checkbox · Spec · Label 행 값
+3 Component	324:846	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Body/2 14 · 설명 Caption 12.5 → Body/2 14 · 설명 12 Regular tertiary	Card/Radio Button · Spec · Label 행 값
+3 Component	325:786	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	트랙 radius/full · 썸 border 2px accent → 트랙 radius/full · 썸 border 2px brand	Card/Slider · Spec · Container 행 값
+3 Component	325:789	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Label/2 13 · 현재 값 Semibold → 라벨 12 Regular · 현재 값 12 SemiBold · 눈금 12 tertiary	Card/Slider · Spec · Label 행 값
+3 Component	325:1429	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	요일 Caption 11 · 날짜 Body/2 13 → 요일 12 SemiBold tertiary · 날짜 12 Regular · 필드 Body/2 14	Card/Date Picker · Spec · Label 행 값
+3 Component	326:1294	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	높이 24 (sm 20 · lg 28) · padding 3/10 → 높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)	Card/Tag · Spec · Size 행 값
+3 Component	326:1297	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	radius/full · subtle 배경 → radius/full · 기본형은 --surface-{…}-primary 틴트, .solid 는 같은 …	Card/Tag · Spec · Container 행 값
+3 Component	326:1300	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Label/2 12 Semibold → 12 SemiBold (세 사이즈 공통)	Card/Tag · Spec · Label 행 값
+3 Component	326:1804	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	최소 폭 260 · padding 24 (compact 16) → 최소 폭 260 · padding 24 (compact 16 · flush 0)	Card/Card · Spec · Size 행 값
+3 Component	326:1807	Pretendard Regular · 스타일 없음(행간 % · 자간 0)	Noto Sans KR Regular · 스타일 없음	radius/lg 8 · shadow/1 · surface/elevated/primary → radius/lg 8 · 1px line/neutral/secondary · surface/elevat…	Card/Card · Spec · Container 행 값
+3 Component	326:1810	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	제목 Title/1 16 Semibold · 설명 Body/2 14 → 제목 16 SemiBold · 설명 Body/2 14 secondary	Card/Card · Spec · Label 행 값
+3 Component	327:1598	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	제목 Body/2 14 Medium · 부제 Caption 12.5 → 제목 14 Medium · 부제 12 Regular tertiary	Card/List · Spec · Label 행 값
+3 Component	327:1903	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	제목 Body/2 14 Semibold · 설명 Caption 12.5 → 제목 14 Bold · 설명 12 Regular tertiary	Card/Item Tile · Spec · Label 행 값
+3 Component	328:2655	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	헤더 Label/2 12.5 Semibold tertiary · 셀 Body/2 14 · 숫자 tabular → 헤더 12 SemiBold tertiary · 셀 Body/2 14 · 숫자 tabular · 오른쪽 …	Card/Data Table · Spec · Label 행 값
+3 Component	330:2264	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	헤더 Label/2 12.5 · 셀 Body/2 14 → 헤더 12 SemiBold tertiary · 셀 Body/2 14 · kv 헤더 14 Medium s…	Card/Table · Spec · Label 행 값
+3 Component	330:2549	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	chart-card = Card 규격 → chart-card = Card 와 같은 Surface·radius/lg·1px 보더, 다만 paddi…	Card/Data Visual · Spec · Container 행 값
+3 Component	330:2552	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Caption 12.5 tertiary · 값 tabular → 라벨 12 Medium tertiary · 값 32 Bold(일반 숫자)	Card/Data Visual · Spec · Label 행 값
+3 Component	331:2287	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Caption 13 tertiary → 문구 12 Regular — 스피너 tertiary · 진행 secondary	Card/Loading · Spec · Label 행 값
+3 Component	331:2621	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Title/1 15 Medium · 활성 Bold → 14 Medium tertiary · 선택 14 Bold · pill 선택 14 SemiBold	Card/Tab · Spec · Label 행 값
+3 Component	332:2396	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	높이 20 · 항목 간격 6 → 높이 22(텍스트 행) · 아이콘이 들어간 행은 24 · 항목 간격 6	Card/Breadcrumb · Spec · Size 행 값
+3 Component	332:2402	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Body/2 13.5 tertiary · 현재 primary Semibold → Body/2 14 tertiary · 현재 primary Semibold	Card/Breadcrumb · Spec · Label 행 값
+3 Component	332:2672	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	radius/md · 현재 accent → radius/md · 현재 brand	Card/Pagination · Spec · Container 행 값
+3 Component	332:3055	Pretendard Regular · 스타일 없음(행간 % · 자간 0)	Noto Sans KR Regular · 스타일 없음	surface/elevated/primary · 우측 1px line/neutral/secondary → surface/elevated/primary · 우측 1px border	Card/Navigation · Spec · Container 행 값
+3 Component	332:3334	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	메뉴 Body/2 14 Medium · 로고 Bold → 메뉴 14 Medium secondary · 로고 16 Bold	Card/Top Navigation · Spec · Label 행 값
+3 Component	333:3029	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Title Semibold 14 · Body 14 → 제목 14 Bold · 본문 Body/2 14	Card/Notification · Spec · Label 행 값
+3 Component	334:3286	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	높이 28 · padding 6 10 · 트리거와 8px → 높이 30 · padding 6 10 · 트리거와 8px	Card/Tooltip · Spec · Size 행 값
+3 Component	334:3292	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Caption 12.5 Medium inverse → Caption/1 12 · 행간 18 · Medium · inverse	Card/Tooltip · Spec · Label 행 값
+3 Component	623:3090	(새로 만듦 — 옆 행 317:318(Size) 복제) Pretendard Medium · Label/1	Noto Sans KR Medium · 스타일 없음	(새 글자) State	Card/Button · Spec · 새 행 623:3089 이름
+3 Component	623:3091	(새로 만듦 — 옆 행 317:318(Size) 복제) Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	(새 글자) rest → hover → pressed 로 라이트는 어두워지고 다크는 밝아집니다. primary --…	Card/Button · Spec · 새 행 623:3089 값
+3 Component	623:3093	(새로 만듦 — 옆 행 320:1243(Placement) 복제) Pretendard Medium · Label/1	Noto Sans KR Medium · 스타일 없음	(새 글자) Motion	Card/Accordion · Spec · 새 행 623:3092 이름
+3 Component	623:3094	(새로 만듦 — 옆 행 320:1243(Placement) 복제) Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	(새 글자) 본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 …	Card/Accordion · Spec · 새 행 623:3092 값
+3 Component	623:3096	(새로 만듦 — 옆 행 326:1811(Placement) 복제) Pretendard Medium · Label/1	Noto Sans KR Medium · 스타일 없음	(새 글자) Motion	Card/Card · Spec · 새 행 623:3095 이름
+3 Component	623:3097	(새로 만듦 — 옆 행 326:1811(Placement) 복제) Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	(새 글자) clickable 은 --motion-fast 로 그림자 없음 → shadow/2	Card/Card · Spec · 새 행 623:3095 값
