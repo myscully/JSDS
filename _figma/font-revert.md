@@ -19,7 +19,10 @@
 > - 2026-10-23 k2: Steps · 내비를 사이트 예제(Indicator steps · Navigation basic)에 맞추며 글자 내용을 바꾼 노드 **10개가 새로 Noto** 가 됐다 —
 >   Steps 라벨·번호 8(559:3052 · 3057 · 3061 · 3069 · 3074 · 3078 안) · 그룹 라벨 '보호' 332:2809 · 새 foot 글자 589:105(되돌릴 서체 Pretendard Regular 12 · 행간 19.2px, 맞는 14단계 스타일 없음).
 >   j 절 노드 6개는 이미 Noto 라 글자만 다시 바뀌었고, j 절의 I560:3095;332:2732('리포트')는 항목째 지웠다. 문서용 인스턴스 속 Noto 21개(332:2900 안 9 · 333:3344 안 6 · 333:3365 안 6)는 이 덮어쓰기를 따른다.
->   `font-revert-nodes.tsv` 맨 아래 "2026-10-23 k2" 절. 굵기 목록 `font-weight-todo.tsv` 도 이때 다시 셌다(120 → 112행 — 지운 노드 4 · Step 상태를 바꿔 하위 노드가 바뀐 행 −16 +12)
+>   `font-revert-nodes.tsv` "2026-10-23 k2" 절. 굵기 목록 `font-weight-todo.tsv` 도 이때 다시 셌다(120 → 112행 — 지운 노드 4 · Step 상태를 바꿔 하위 노드가 바뀐 행 −16 +12)
+> - 2026-10-26 k3: 문서 카드 Spec 글 3개를 사이트 spec 행과 같게 고치며 **Noto Sans KR Regular** 로 바뀌었다(사람의 결정 — 정해진 2곳만) —
+>   Card/Navigation Size 332:3052 · Label 332:3058, Card/Indicator Label 333:3265. 원래 서체·스타일은 셋 다 Pretendard Regular · Body/2.
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-26 k3" 절. 같은 때 내비 항목 높이 · 그룹 칸을 사이트 실측에 맞췄지만 글자 노드는 건드리지 않아(칸의 높이 · 여백만) 굵기 목록은 그대로다
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 아래는 처음 Noto 로 대체 교정할 때의 기록이다.
