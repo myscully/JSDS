@@ -8,9 +8,13 @@
  *   아이콘 _build/icons.gen.js 의 ICONS
  *   타입   assets/style.css 의 .t-* 클래스
  *   컴포넌트 _build/style.src.css 의 .card · .card-foot · .tabs · .btn.danger … 규칙 (표면 그림자·보더, 간격, 트랙, Danger 상태)
+ *   컨테이너 _build/components.data.js 의 예제 HTML(순서 · 라벨 · 아이콘), 내비 기하는 빌드된 components/navigation.html 을
+ *            헤드리스 Chromium 으로 잰 값(_build/node_modules/playwright — 없으면 어긋남으로 남긴다)
+ *   Spec   _build/components.data.js 의 spec 행 ↔ 문서 카드 "Card/…" 의 Spec 글
  */
 import fs from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
@@ -193,6 +197,57 @@ function navExample(id = "basic") {
   return out;
 }
 
+/* ---------- 사이트 실측(2026-10-26 k3) ----------
+   내비 항목 · 그룹의 높이와 세로 위치는 CSS 규칙만 읽어서는 얻을 수 없다(줄 높이 상속 · flex gap · 여백). 그래서 빌드된 사이트
+   components/navigation.html 을 헤드리스 Chromium 으로 열어 Default(#ex-navigation-basic) · Collapsed(#ex-navigation-collapsed)
+   예제를 잰다. 기준점은 레일 안쪽(padding box)의 위 끝이다 — 사이트 예제는 미리보기용으로 네 변에 1px 테두리를 인라인 style 로
+   따로 달아 그만큼 내려가 있고, 컴포넌트 CSS(.sidenav)의 테두리는 오른쪽 1px 뿐이라 Figma 레일에는 위 테두리가 없다.
+   재지 못하면(Playwright 없음 · 빌드 안 됨) 빼고 넘어가지 않고 어긋남으로 남긴다 */
+async function siteNav() {
+  let chromium;
+  try { ({ chromium } = require(path.join(ROOT, "_build/node_modules/playwright"))); }
+  catch (e) { return { error: "playwright 를 불러오지 못했습니다(" + String(e.message).split("\n")[0] + ")" }; }
+  const file = path.join(ROOT, "components/navigation.html");
+  if (!fs.existsSync(file)) return { error: "components/navigation.html 이 없습니다 — 사이트를 빌드하세요" };
+  let b;
+  try {
+    b = await chromium.launch();
+    const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
+    await p.goto("file://" + file);
+    const r = await p.evaluate(() => {
+      const one = (sel) => {
+        const nav = document.querySelector(sel); if (!nav) return null;
+        const cs = getComputedStyle(nav), top = nav.getBoundingClientRect().top + parseFloat(cs.borderTopWidth);
+        const kids = [...nav.children].filter((k) => getComputedStyle(k).display !== "none").map((k) => {
+          const c = getComputedStyle(k), box = k.getBoundingClientRect();
+          return { kind: k.tagName === "A" ? "item" : k.classList.contains("group") ? "group" : k.classList.contains("foot") ? "foot" : "other",
+            y: box.top - top, h: box.height, mt: parseFloat(c.marginTop), mb: parseFloat(c.marginBottom), pb: parseFloat(c.paddingBottom) };
+        });
+        return { padBottom: parseFloat(cs.paddingBottom), kids };
+      };
+      return { basic: one("#ex-navigation-basic .sidenav"), collapsed: one("#ex-navigation-collapsed .sidenav") };
+    });
+    if (!r.basic || !r.collapsed) return { error: "사이트에서 내비 예제(#ex-navigation-basic · #ex-navigation-collapsed)를 찾지 못했습니다" };
+    return r;
+  } catch (e) {
+    return { error: "사이트를 재지 못했습니다(" + String(e.message).split("\n")[0] + ")" };
+  } finally { if (b) await b.close(); }
+}
+
+/* ---------- 문서 카드 Spec(2026-10-26 k3) ----------
+   저장소 값은 _build/components.data.js 의 spec 행이다. 파일을 그대로 실행해 읽는다(아이콘 함수 I 는 빈 글로 대신한다).
+   사이트에 보이는 글로 바꿔 둔다 — HTML 태그를 지우고 엔티티를 푼다. 맞대는 규칙은 diffComponents 의 Spec 대조 주석에 */
+const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", apos: "'", nbsp: " " };
+const specNorm = (s) => String(s).normalize("NFC").replace(/\s+/g, " ").trim();
+const specSite = (s) => specNorm(String(s).replace(/<[^>]+>/g, "").replace(/&(amp|lt|gt|quot|#39|apos|nbsp);/g, (_, e) => ENT[e]));
+function specExpect() {
+  const box = { I: () => "", module: { exports: {} } };
+  vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
+  const out = {};
+  for (const [slug, c] of Object.entries(box.module.exports)) out[slug] = (c.spec || []).map(([k, v]) => [specNorm(k), specSite(v)]);
+  return out;
+}
+
 function componentsExpect() {
   const surface = (sel) => { const r = cssRule(sel); const b = /1px solid (var\([^)]+\))/.exec(r.border || ""); return { shadow: !!r["box-shadow"] && r["box-shadow"] !== "none", stroke: b ? figTok(b[1]) : null }; };
   return {
@@ -272,6 +327,8 @@ function componentsExpect() {
     stepsItems: stepsExample(),
     navItems: navExample(),
     navCollapsed: navExample("collapsed"),
+    /* 문서 카드 Spec — 컴포넌트 키별 [행 이름, 사이트 글] (2026-10-26 k3) */
+    specs: specExpect(),
     /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
     donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
       .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
@@ -441,6 +498,7 @@ function diffComponents(c, want, bad, notes) {
     seqDiff("Steps", v, want.stepsItems, fig, (x) => `${x.state} · ${x.mark} · ${x.label}`);
   }
   const navFmt = (x) => x.kind === "item" ? `${x.type}${x.state === "Selected" ? "·선택" : ""} · ${x.icon || "아이콘 없음"} · ${x.label}${x.count ? " · 건수 " + x.count : ""}` : `${x.kind === "group" ? "그룹" : "foot"} · ${x.label}`;
+  let geoErr = null, geoNote = false;
   for (const v of sets["Navigation"] || []) {
     if (!v.itemsList) break;
     const collapsed = /State=Collapsed/.test(v.name);
@@ -448,7 +506,37 @@ function diffComponents(c, want, bad, notes) {
     const fig = v.itemsList.filter((x) => x.item || x.group || x.foot).map((x) => x.group ? { kind: "group", label: x.group } : x.foot ? { kind: "foot", label: x.foot }
       : { kind: "item", type: prop(x.item, "Type"), state: prop(x.item, "State"), icon: x.icon, label: collapsed ? x.labelProp : x.label, count: x.count });   // 접힌 레일은 라벨 글자가 없다 — Label 속성 값(사이트의 숨은 span · title)
     seqDiff("Navigation", v, collapsed ? want.navCollapsed : want.navItems, fig, navFmt);
+    /* 기하(2026-10-26 k3) — 사이트 실측과 ±0.5. 항목은 칸의 y · 높이, 그룹은 바깥 여백까지 친 칸(margin box: y − margin-top,
+       높이 + margin-top + margin-bottom)과 글자 가운데, foot 은 레일 아래 끝에서 글자 아래 끝까지의 거리(margin-top:auto 로 아래에 붙는지).
+       Figma 글자 상자는 텍스트 스타일 행간(Label/2 16 · Title/2 20)이라 사이트 줄 상자(행간 1.6)와 높이가 다를 수 있어 그룹은 가운데로 본다.
+       레일 높이(560)는 화면 높이를 나타내는 값으로 두기로 했다(사람의 결정 2026-10-26) — 보지 않는다 */
+    const geo = want.navGeo;
+    if (!geo) continue;
+    const list = v.itemsList.filter((x) => x.item || x.group || x.foot);
+    if (list.some((x) => x.y === undefined)) { geoNote = true; continue; }
+    if (geo.error) { geoErr = geo.error; continue; }
+    const site = (collapsed ? geo.collapsed : geo.basic).kids.filter((k) => k.kind !== "other");
+    if (site.length !== list.length) continue;   // 항목 수가 다르면 위 seqDiff 가 이미 어긋남으로 냈다
+    const r2 = (x) => +x.toFixed(2), off = (a, b) => Math.abs(a - b) > 0.5;
+    const rail = v.box ? v.box.h : null;
+    for (const [i, x] of list.entries()) {
+      const s = site[i], nm = x.group || x.foot || x.labelProp || x.label, at = `(${v.name}, ${v.id})`;
+      const kind = x.group ? "group" : x.foot ? "foot" : "item";
+      if (s.kind !== kind) continue;   // 종류가 다르면 seqDiff 가 냈다
+      if (kind === "item") {
+        if (off(x.y, s.y) || off(x.h, s.h)) bad.push(`Navigation 항목 ${i + 1} 칸 y ${r2(x.y)} · 높이 ${r2(x.h)} ≠ 사이트 실측 ${r2(s.y)} · ${r2(s.h)} — ${nm} ${at}`);
+      } else if (kind === "group") {
+        const my = s.y - s.mt, mh = s.h + s.mt + s.mb, fc = x.ty + x.th / 2, sc = s.y + s.h / 2;
+        if (off(x.y, my) || off(x.h, mh)) bad.push(`Navigation 그룹 ${i + 1} 칸(바깥 여백 포함) y ${r2(x.y)} · 높이 ${r2(x.h)} ≠ 사이트 실측 ${r2(my)} · ${r2(mh)} — ${nm} ${at}`);
+        if (off(fc, sc)) bad.push(`Navigation 그룹 ${i + 1} 글자 가운데 ${r2(fc)} ≠ 사이트 실측 ${r2(sc)} — ${nm} ${at}`);
+      } else if (rail !== null) {
+        const fb = rail - (x.ty + x.th), sb = geo.basic.padBottom + s.pb;
+        if (off(fb, sb)) bad.push(`Navigation foot 글자 아래 끝이 레일 아래에서 ${r2(fb)} ≠ 사이트 ${r2(sb)}(레일 padding ${geo.basic.padBottom} + foot padding ${s.pb}) — 아래에 붙지 않았습니다 ${at}`);
+      }
+    }
   }
+  if (geoErr) bad.push(`내비 기하를 사이트와 대조하지 못했습니다 — ${geoErr}`);
+  if (geoNote) notes.push("덤프에 컨테이너 기하(y · 높이)가 없습니다 — 2026-10-26 k3 전 probe.js 로 만든 덤프입니다");
   /* 컨테이너 항목의 아이콘 색 — Navigation Item 은 기본 · 선택 아이콘 색, Steps 는 Done 체크 색. 아이콘을 바꿔 끼운 인스턴스에서
      이름이 다른 층(list 의 점 3개 등)이 아이콘 원본 색으로 남았다(2026-10-23 k2) — 원본 변형만 봐서는 못 잡는다 */
   for (const [nm, exp] of [["Navigation", (x) => (prop(x.item, "State") === "Selected" ? want.navItem.selected.icon : want.navItem.base.icon)], ["Steps", (x) => (want.step[prop(x.item, "State")] || {}).check]]) {
@@ -540,6 +628,30 @@ function diffComponents(c, want, bad, notes) {
   for (const [name, e] of Object.entries(c.legacy || {})) bad.push(`현재 페이지에 옛 변수 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
   for (const s of c.sections || []) if (s.gap !== want.sectionGap) bad.push(`섹션 간격 ${s.page}${s.pageId ? "(" + s.pageId + ")" : ""}: ${s.a} → ${s.b} ${s.gap} ≠ ${want.sectionGap}`);
   if ((c.negText || []).length) bad.push(`글자에 foreground/negative/primary ${c.negText.length}개 — 저장소는 글자에 strong (${c.negText.slice(0, 6).join(" ")}${c.negText.length > 6 ? " …" : ""})`);
+  /* 문서 카드 Spec 글 ↔ 저장소 spec 행(2026-10-26 k3). 모든 컴포넌트를 본다. 맞대는 법
+     - 카드: Figma 프레임 "Card/<이름>" 의 <이름>을 소문자로, 공백을 "-" 로 바꾼 것이 components.data.js 의 키다("Text Field" → text-field).
+       짝이 없는 카드 · 키는 둘 다 어긋남이다
+     - 행: 행 이름(Size · Container · Label · Placement · State · Motion …)이 같은 것끼리 맞댄다. 순서는 보지 않는다. 한쪽에만 있는 행도 어긋남이다
+     - 글: 저장소 값은 사이트에 보이는 글로 바꾼다 — HTML 태그(<code> · <b> …)를 지우고 엔티티 &amp; &lt; &gt; &quot; &#39; &apos; &nbsp; 를 푼다.
+       그다음 양쪽 모두 Unicode NFC 로 맞추고(macOS 가 한글을 NFD 로 넣는 일이 있다), 공백류(줄바꿈 · NBSP 포함)가 이어지면 공백 하나로, 앞뒤 공백은 지운다.
+       그 밖의 차이(숫자 · 단위 · 문장부호 · 대소문자 · 토큰 이름 · 글 순서)는 그대로 어긋남이다 — 어느 쪽이 맞는지는 사람이 고른다.
+       사이트 Spec 은 실측으로 자주 고쳐지므로(2026-10 에 22행) 이 대조는 Figma 글이 뒤처진 곳을 찾는 데 쓴다. 고친 곳은 2026-10-26 k3 의 3행뿐이다 */
+  if (c.specs) {
+    const key = (card) => card.replace(/^Card\//, "").trim().toLowerCase().replace(/\s+/g, "-");
+    const fig = new Map(c.specs.map((s) => [key(s.card), s]));
+    for (const [slug, rows] of Object.entries(want.specs)) {
+      const s = fig.get(slug);
+      if (!s) { bad.push(`Spec 카드 없음: ${slug} — Figma 에 "Card/…" 문서 카드나 그 안의 Spec 프레임이 없습니다`); continue; }
+      const nm = s.card.replace(/^Card\//, ""), have = new Map(s.rows.map((r) => [specNorm(r[0]), r]));
+      for (const [row, site] of rows) {
+        const f = have.get(row);
+        if (!f) bad.push(`Spec ${nm} · ${row}: 저장소에만 있는 행 — 저장소 [${site}] (카드 ${s.id})`);
+        else if (specNorm(f[1]) !== site) bad.push(`Spec ${nm} · ${row}: 저장소 [${site}] ≠ Figma [${specNorm(f[1])}] (${f[2]})`);
+      }
+      for (const [row, f] of have) if (!rows.some((r) => r[0] === row)) bad.push(`Spec ${nm} · ${row}: Figma 에만 있는 행 — Figma [${specNorm(f[1])}] (${f[2]})`);
+    }
+    for (const [slug, s] of fig) if (!want.specs[slug]) bad.push(`Spec 카드 ${s.card}(${s.id}) 에 맞는 저장소 컴포넌트가 없습니다(키 ${slug})`);
+  } else notes.push("덤프에 문서 카드 Spec 이 없습니다 — 2026-10-26 k3 전 probe.js 로 만든 덤프입니다");
 }
 
 function expect_() {
@@ -565,8 +677,9 @@ function expect_() {
 }
 
 /* ---------- 대조 ---------- */
-function diff(dumpPath) {
+function diff(dumpPath, navGeo) {
   const want = expect_();
+  want.components.navGeo = navGeo;   // 사이트 실측(siteNav) — 진입점이 미리 잰다
   const got = JSON.parse(fs.readFileSync(dumpPath, "utf8"));
   const bad = [];
   const list = (a, b, label) => {
@@ -652,10 +765,12 @@ function diff(dumpPath) {
 /* ---------- 진입점 ---------- */
 const [cmd, arg] = process.argv.slice(2);
 if (cmd === "expect") {
-  console.log(JSON.stringify(expect_(), null, 1));
+  const w = expect_();
+  w.components.navGeo = await siteNav();
+  console.log(JSON.stringify(w, null, 1));
 } else if (cmd === "diff") {
   if (!arg) { console.error("쓰는 법: node _figma/audit.mjs diff <덤프.json>"); process.exit(2); }
-  const { bad, notes, counts } = diff(arg);
+  const { bad, notes, counts } = diff(arg, await siteNav());
   console.log("기대값:", JSON.stringify(counts));
   for (const n of notes) console.log("NOTE ", n);
   if (!bad.length) { console.log("어긋남 0 — Figma 와 저장소가 같습니다."); process.exit(0); }

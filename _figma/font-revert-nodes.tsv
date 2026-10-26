@@ -76,3 +76,10 @@ Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/
 3 Component	I560:3123;332:2754	Pretendard Regular · Body/2 (j 절과 같음)	Noto Sans KR Regular · 스타일 없음	USB · 매체 → 네트워크	Navigation / State=Expanded · Navigation Item(Sub) Label 속성
 # 같은 작업에서 지운 j 절 노드 1개 — 되돌릴 것 없음(j 절의 행은 기록으로 남긴다)
 3 Component	I560:3095;332:2732	Pretendard Medium · Title/2 (j 절과 같음)	(지움)	리포트	Navigation / State=Expanded · '리포트' 항목 인스턴스 560:3095 를 지움(사이트 예제에 없음)
+
+# 2026-10-26 k3 — 문서 카드 Spec 글을 사이트 spec 행(_build/components.data.js)과 같게 고치며 Noto Sans KR 로 바뀐 노드 3개(사람의 결정 "정해진 2곳만"). 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: 서체를 Pretendard Regular 로 돌리고 Body/2 스타일에 다시 연결한다(글자는 그대로). 크기 14 · 행간 22 · 자간 1.45% 는 스타일 연결이 풀린 뒤에도 그대로다(바뀐 것은 서체와 글자뿐)
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+3 Component	332:3052	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	폭 240 (접힘 64) · 항목 높이 40 → 폭 240 (접힘 64) · 항목 높이 38.4 (padding 8 · 글자 14 · 행간 1.6)	Card/Navigation 332:2879 · Spec · Size 행(332:3050) 값
+3 Component	332:3058	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Body/2 14 · 그룹 Caption 11 uppercase → 항목 14 Medium · 선택 14 SemiBold · 그룹 12 SemiBold uppercase	Card/Navigation 332:2879 · Spec · Label 행(332:3056) 값
+3 Component	333:3265	Pretendard Regular · Body/2 연결	Noto Sans KR Regular · 스타일 없음	Body/2 14 · count 11 Bold · steps 13 → Body/2 14 · count 12 Bold · steps 12	Card/Indicator 333:3198 · Spec · Label 행(333:3263) 값

@@ -150,7 +150,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [] };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [] };
 for (const p of figma.root.children) {
   if (!isCurrent(p)) continue;
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
@@ -236,6 +236,15 @@ for (const p of figma.root.children) {
       v.items = { inst, raw, empty };
       /* 항목 목록(순서대로) — audit 이 저장소 예제(사이트)와 순서·라벨·상태·아이콘을 맞춘다. 숨은 건수 배지는 적지 않는다 */
       const list = [];
+      /* 기하(2026-10-26 k3) — 컨테이너 기준 y · 높이. 그룹 · foot 프레임은 안 글자의 y · 높이도 적는다(ty · th, 컨테이너 기준).
+         audit 이 사이트 예제를 헤드리스 Chromium 으로 잰 값과 ±0.5 로 맞춘다. 항목마다 맨 뒤에 붙여 앞 필드는 예전과 같다 */
+      const oy = node.absoluteTransform[1][2];
+      const geo = (k) => {
+        const g = { y: +k.y.toFixed(2), h: +k.height.toFixed(2) };
+        const t = k.type === "FRAME" ? k.findOne((y) => y.type === "TEXT") : null;
+        if (t) { g.ty = +(t.absoluteTransform[1][2] - oy).toFixed(2); g.th = +t.height.toFixed(2); }
+        return g;
+      };
       for (const k of node.children) {
         if (k.type === "INSTANCE") {
           const m = await k.getMainComponentAsync();
@@ -248,11 +257,12 @@ for (const p of figma.root.children) {
           const lp = Object.entries(k.componentProperties || {}).find(([key, v]) => /^Label#/.test(key) && v.type === "TEXT");
           /* 아이콘 색 — 아이콘을 바꿔 끼우면(swap) 이름이 맞는 층에만 색 덮어쓰기가 남고 나머지는 아이콘 원본 색으로 돌아간다(2026-10-23 k2, list 아이콘) */
           const ip = ic ? [...new Set(ic.findAll((y) => ["VECTOR", "ELLIPSE", "RECTANGLE", "LINE", "POLYGON", "STAR", "BOOLEAN_OPERATION"].includes(y.type) && y.visible !== false).flatMap((y) => [paint(y.strokes), paint(y.fills)]).filter((x) => x !== "-"))].sort().join("|") : null;
-          list.push({ item: m ? m.name : null, label: tx("Label"), number: tx("Number"), icon: icm ? icm.name.replace(/^icon\/(outline|filled)\//, "") : null, count: ct ? ct.characters : null, labelProp: lp ? lp[1].value : null, iconPaints: ip });
-        } else if (k.type === "FRAME" && k.children.length) { const x = k.findOne((y) => y.type === "TEXT"); list.push(/^foot$/i.test(k.name) ? { foot: x ? x.characters : null } : { group: x ? x.characters : null }); }
-        else list.push({ other: k.type + (k.type === "FRAME" ? " (빈 칸)" : "") });
+          list.push({ item: m ? m.name : null, label: tx("Label"), number: tx("Number"), icon: icm ? icm.name.replace(/^icon\/(outline|filled)\//, "") : null, count: ct ? ct.characters : null, labelProp: lp ? lp[1].value : null, iconPaints: ip, ...geo(k) });
+        } else if (k.type === "FRAME" && k.children.length) { const x = k.findOne((y) => y.type === "TEXT"); list.push({ ...(/^foot$/i.test(k.name) ? { foot: x ? x.characters : null } : { group: x ? x.characters : null }), ...geo(k) }); }
+        else list.push({ other: k.type + (k.type === "FRAME" ? " (빈 칸)" : ""), ...geo(k) });
       }
       v.itemsList = list;
+      v.box = { h: +node.height.toFixed(2), pad: [node.paddingTop, node.paddingBottom], gap: node.itemSpacing };
     }
   }
   /* 글자에 negative/primary 가 묶이면 안 된다 — 저장소 규칙이 "글자는 strong, primary 는 아이콘·그래픽" 이다 */
@@ -286,6 +296,20 @@ for (const p of figma.root.children) {
     const a = secs[i - 1], b = secs[i];
     if (Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) <= 0) continue;   // 옆 칸에 놓인 섹션은 세로 간격 대상이 아니다
     components.sections.push({ page: p.name, pageId: p.id, a: a.name, b: b.name, gap: Math.round(b.y - (a.y + a.height)) });
+  }
+  /* 문서 카드의 Spec 행(2026-10-26 k3) — audit 이 저장소 components.data.js 의 spec 행과 맞춘다.
+     카드는 이름이 "Card/<컴포넌트>" 인 프레임이고, 그 안에서 제목 글자 "Spec" 을 가진 "Spec" 프레임의 자식 프레임 하나가 한 행이다
+     (보이는 글자 둘: 행 이름 · 값). 값 글자의 id 도 적는다 — 어긋난 행을 고칠 사람이 바로 찾게 */
+  for (const card of p.findAll((n) => n.type === "FRAME" && /^Card\//.test(n.name) && !inInstance(n))) {
+    const spec = card.findOne((n) => n.type === "FRAME" && n.name === "Spec" && n.children.some((k) => k.type === "TEXT" && k.characters.trim() === "Spec"));
+    if (!spec) continue;
+    const rows = [];
+    for (const r of spec.children) {
+      if (r.type !== "FRAME" || r.visible === false) continue;
+      const ts = r.findAll((n) => n.type === "TEXT" && n.visible !== false);
+      if (ts.length >= 2) rows.push([ts[0].characters, ts.slice(1).map((t) => t.characters).join(" "), ts[1].id]);
+    }
+    components.specs.push({ card: card.name, id: card.id, rows });
   }
 }
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
