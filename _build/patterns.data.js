@@ -309,7 +309,7 @@ const PATTERNS = {
     status: "ready", react: ["SevBand","SevCell"], uses: ["tag", "indicator", "data-visual", "data-table"], css: [".sev-band", ".sev-cell", ".stack"],
     desc: "위협 심각도 4단계(Critical · High · Medium · Low)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
     thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>`,
-    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태·강조 의도 매핑</b>입니다 — Critical=<code>negative</code> · High=<code>cautionary</code> · Medium=<code>accent cyan</code> · Low=중립. 면은 틴트(<code>--surface-*</code>), 점·지표는 솔리드 전경(<code>--foreground-*</code>)을 씁니다. 토큰 전체는 <a href=\"#/foundations/colors\">Colors › Semantic</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조"], ["정렬", "항상 Critical → Low. <b>라벨을 반드시 함께</b> 둡니다 — 색조가 주된 단서이고, 색만으로 의미를 전달하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다"]],
+    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태·강조 의도 매핑</b>입니다 — Critical=<code>negative</code> · High=<code>cautionary</code> · Medium=<code>accent cyan</code> · Low=중립. 면은 틴트(<code>--surface-*</code>), 점·지표는 솔리드 전경(<code>--foreground-*</code>)을 씁니다. 토큰 전체는 <a href=\"#/foundations/colors\">Colors › Semantic</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조. .sev-cell 글자는 놓인 곳의 크기를 따른다(표 안 14)"], ["정렬", "항상 Critical → Low. <b>라벨을 반드시 함께</b> 둡니다 — 색조가 주된 단서이고, 색만으로 의미를 전달하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다"]],
     examples: [
       { id: "scale", title: "4단계 스케일", desc: "Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.", html: `
         <div class="stack" style="max-width:640px;gap:20px">

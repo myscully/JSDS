@@ -1,6 +1,6 @@
 {
   "version": "v0.8",
-  "generatedAt": "2026-10-26T02:31:48.785Z",
+  "generatedAt": "2026-10-26T02:39:34.806Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -2164,7 +2164,7 @@
           ".dropdown",
           "container",
           "—",
-          "position:relative. 열림은 .open"
+          "position:relative. 열림은 .open. inline-block 이라 상자 높이가 놓인 곳의 글자 크기를 따른다(트리거 버튼 · 메뉴 항목 글자는 따로 정해져 있다)"
         ],
         [
           ".menu",
@@ -2277,7 +2277,7 @@
           ".dropdown",
           "container",
           "—",
-          "position:relative. 열림은 .open"
+          "position:relative. 열림은 .open. inline-block 이라 상자 높이가 놓인 곳의 글자 크기를 따른다 — 단독이면 앱 기본 글자, 입력 폼(.field) 안 14, .pagination-bar 안 12"
         ],
         [
           ".trigger",
@@ -2646,7 +2646,7 @@
           ".gap",
           "span",
           "—",
-          "생략(…)"
+          "생략(…). 글자 크기는 놓인 곳을 따른다 — 단독이면 앱 기본 글자, .pagination-bar 안이면 12(번호 버튼은 14 · compact 12 로 정해져 있다)"
         ],
         [
           ".compact / .outline",
