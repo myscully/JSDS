@@ -98,6 +98,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   // Dropdown (액션 메뉴)
   await go("components/dropdown.html");
+  /* 문서 목록 규칙(li 아래 여백 6px)이 미리보기 메뉴 항목 사이까지 먹어, 미리보기가 배포 CSS(복사본·React)보다 항목마다 6px 벌어졌다 */
+  const menuLi = await page.evaluate(() => getComputedStyle(document.querySelector("#ex-dropdown-menu .menu-item")).marginBottom);
+  ok("docs list spacing stays out of preview menus", menuLi === "0px", menuLi);
   const menuDd = page.locator(`#ex-dropdown-menu .example-preview .dropdown`).first();
   await menuDd.locator("[aria-haspopup]").click();
   ok("static open menu closes on trigger click", await menuDd.evaluate((e) => !e.classList.contains("open")));
@@ -755,6 +758,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   // Data table
   await go("components/data-table.html");
+  /* 숫자 열 — 고정폭 숫자라야 자릿수가 세로로 맞는다(React 는 .ds-root 가 전체에 건다). 사이트 표만 비례폭이었다 */
+  const numFig = await page.evaluate(() => getComputedStyle(document.querySelector("#ex-data-table-basic td.num")).fontVariantNumeric);
+  ok("table number cells use tabular figures", /tabular-nums/.test(numFig), numFig);
   /* 비활성 행 — 태그 · 링크 · 상태 점은 자기 색을 쥐고 있어 td 의 color 만으로는 활성처럼 남았다. 실제 예제(Default)의 tr.disabled 를 잰다 */
   const offRow = await page.evaluate(() => {
     const tr = document.querySelector("#ex-data-table-basic tr.disabled");
@@ -838,6 +844,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const rows = {}; for (const x of r.getClientRects()) { const k = Math.round(x.top); rows[k] = (rows[k] || 0) + x.width; }
     const ws = Object.keys(rows).sort((a, b) => a - b).map((k) => Math.round(rows[k])); return { lines: ws.length, last: ws[ws.length - 1] }; });
   ok("onboarding done text keeps its last word whole", obLast.last > 30, JSON.stringify(obLast));
+  /* 390 — .onboard 가 가운데 정렬이라 넘친 Steps 의 양끝이 잘렸다. safe center 는 넘칠 때만 왼쪽부터 놓는다 */
+  await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(250);
+  const obFit = await page.evaluate(() => { const pv = document.querySelector("#ex-onboarding-done .example-preview"), s = pv.querySelector(".steps").getBoundingClientRect();
+    return { left: Math.round(s.left - pv.getBoundingClientRect().left), scrolls: pv.scrollWidth > pv.clientWidth }; });
+  await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
+  ok("onboarding steps start inside the preview at 390", obFit.left >= 0 && obFit.scrolls, JSON.stringify(obFit));
   await go("components/date-picker.html");
   const rc = page.locator("#ex-date-picker-range .example-preview .calendar");
   await rc.locator('[data-preset="7"]').click();
@@ -847,6 +859,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await cf.locator("input").fill("새 정책");
   ok("text field counter updates", (await cf.locator(".counter").textContent()) === "4 / 80");
   await go("components/card.html");
+  /* 문서 제목 자간(h3 -0.01em)이 미리보기의 카드 제목까지 먹어 배포 CSS 와 0.16px 달랐다 — 문서 제목에만 남는다 */
+  const h3Ls = await page.evaluate(() => { const ls = (e) => e && getComputedStyle(e).letterSpacing;
+    return { preview: ls(document.querySelector(".example-preview h3")), doc: ls([...document.querySelectorAll("article h3")].find((h) => !h.closest(".example-preview"))) }; });
+  ok("docs heading letter-spacing stays out of previews", h3Ls.preview === "normal" && !!h3Ls.doc && h3Ls.doc !== "normal", JSON.stringify(h3Ls));
   const cg = page.locator("#ex-card-clickable .example-preview .card-grid");
   await cg.locator(".card.clickable").first().click();
   ok("clickable card single select", await cg.evaluate((e) => e.querySelectorAll(".card.on").length === 1 && e.querySelectorAll(".card")[0].classList.contains("on")));
