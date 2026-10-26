@@ -223,8 +223,8 @@ for (const d of require("./reference-tokens.js").diff(css)) fails.push(`참조 �
     const ruled = classesIn(samples), rooted = rootsIn(samples);
     for (const [sec, list] of [["components", COMPONENTS], ["patterns", PATTERNS]]) for (const [k, c] of Object.entries(list)) {
       if (!c || typeof c !== "object" || !c.examples || typeof c.css === "string") continue;
-      const copyCss = LIB.cssFor(LIB.cssPrefixes(c, COMPONENTS), src, ""), copy = classesIn(copyCss), copyRoots = rootsIn(copyCss);
       for (const ex of c.examples) {
+        const copyCss = LIB.cssFor(LIB.exampleCssPrefixes(c, COMPONENTS, ex.html), src, ""), copy = classesIn(copyCss), copyRoots = rootsIn(copyCss);   // 예제 코드 패널의 복사본(그 예제 몫)
         const used = new Set([...(ex.html || "").matchAll(/class="([^"]*)"/g)].flatMap((m) => m[1].split(/\s+/)).filter(Boolean));
         const miss = [...used].filter((cl) => ruled.has(cl) && !copy.has(cl));
         const bare = [...used].filter((cl) => rooted.has(cl) && copy.has(cl) && !copyRoots.has(cl));

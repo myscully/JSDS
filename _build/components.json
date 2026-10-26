@@ -1,6 +1,6 @@
 {
   "version": "v0.8",
-  "generatedAt": "2026-10-26T01:09:35.969Z",
+  "generatedAt": "2026-10-26T01:13:00.313Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -800,7 +800,7 @@
         ],
         [
           "Label",
-          "Label/1 14 Semibold (sm 12 · lg 16) · 동사로 시작"
+          "14 SemiBold (sm 12 · lg 16) · 동사로 시작"
         ],
         [
           "Placement",
@@ -991,7 +991,7 @@
         ],
         [
           "Label",
-          "Label/1 14 Semibold · 필수는 em(*)"
+          "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"
         ],
         [
           "Placement",
@@ -2034,7 +2034,7 @@
         ],
         [
           "Label",
-          "Label/2 12 Semibold (세 사이즈 공통)"
+          "12 SemiBold (세 사이즈 공통)"
         ],
         [
           "Placement",
@@ -2425,7 +2425,7 @@
         ],
         [
           "Label",
-          "Title/2 14 Bold"
+          "14 Medium tertiary · 선택 14 Bold · pill 선택 14 SemiBold"
         ],
         [
           "Placement",
@@ -2799,7 +2799,7 @@
         ],
         [
           "Label",
-          "Body/2 14 · 그룹 12 SemiBold uppercase"
+          "항목 14 Medium · 선택 14 SemiBold · 그룹 12 SemiBold uppercase"
         ],
         [
           "Placement",
@@ -2927,7 +2927,7 @@
         ],
         [
           "Label",
-          "메뉴 Body/2 14 Medium · 로고 Bold"
+          "메뉴 14 Medium secondary · 로고 16 Bold"
         ],
         [
           "Placement",
@@ -3054,7 +3054,7 @@
         ],
         [
           "Label",
-          "Title/1 16 Semibold · 본문 Body/2 14 secondary"
+          "제목 16 SemiBold · 본문 Body/2 14 secondary"
         ],
         [
           "Placement",
@@ -3198,7 +3198,7 @@
         ],
         [
           "Label",
-          "제목 Title/1 16 Semibold · 설명 Body/2 14"
+          "제목 16 SemiBold · 설명 Body/2 14 secondary"
         ],
         [
           "Placement",
@@ -3387,8 +3387,8 @@
           "id": "danger",
           "title": "Danger Confirm",
           "desc": "삭제·초기화. 제목은 danger 색, 주 액션은 Danger 버튼, 필요하면 확인 입력.",
-          "html": "<div class=\"popup danger\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"d-title\">\n  <h3 class=\"popup-title\" id=\"d-title\">정책 12개를 삭제할까요?</h3>\n  <p class=\"popup-body\">삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</p>\n  <div class=\"field\"><label for=\"confirm\">확인을 위해 <b>삭제</b> 를 입력하세요</label><input id=\"confirm\" placeholder=\"삭제\"></div>\n  <div class=\"popup-actions\"><button type=\"button\" class=\"btn md secondary\" data-popup-close>취소</button><button type=\"button\" class=\"btn md danger\" disabled>삭제</button></div>\n</div>",
-          "react": "import { useState } from \"react\";\nimport { Button, PopupActions, PopupBody, PopupSurface, PopupTitle, TextField } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  const [confirm, setConfirm] = useState(\"\");\n  return (\n    <PopupSurface danger>\n      <PopupTitle>정책 12개를 삭제할까요?</PopupTitle>\n      <PopupBody>삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</PopupBody>\n      <TextField id=\"confirm\" label={<>확인을 위해 <b>삭제</b> 를 입력하세요</>} placeholder=\"삭제\" value={confirm} onChange={(e) => setConfirm(e.target.value)} />\n      <PopupActions>\n        <Button variant=\"secondary\">취소</Button>\n        <Button variant=\"danger\" disabled={confirm !== \"삭제\"}>삭제</Button>\n      </PopupActions>\n    </PopupSurface>\n  );\n}"
+          "html": "<div class=\"popup danger\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"d-title\">\n  <h3 class=\"popup-title\" id=\"d-title\">정책 12개를 삭제할까요?</h3>\n  <p class=\"popup-body\">삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</p>\n  <div class=\"field\"><label for=\"confirm\">확인을 위해 \"삭제\" 를 입력하세요</label><input id=\"confirm\" placeholder=\"삭제\"></div>\n  <div class=\"popup-actions\"><button type=\"button\" class=\"btn md secondary\" data-popup-close>취소</button><button type=\"button\" class=\"btn md danger\" disabled>삭제</button></div>\n</div>",
+          "react": "import { useState } from \"react\";\nimport { Button, PopupActions, PopupBody, PopupSurface, PopupTitle, TextField } from \"@jiran/ds-react\";\n\nexport default function Example() {\n  const [confirm, setConfirm] = useState(\"\");\n  return (\n    <PopupSurface danger>\n      <PopupTitle>정책 12개를 삭제할까요?</PopupTitle>\n      <PopupBody>삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</PopupBody>\n      <TextField id=\"confirm\" label='확인을 위해 \"삭제\" 를 입력하세요' placeholder=\"삭제\" value={confirm} onChange={(e) => setConfirm(e.target.value)} />\n      <PopupActions>\n        <Button variant=\"secondary\">취소</Button>\n        <Button variant=\"danger\" disabled={confirm !== \"삭제\"}>삭제</Button>\n      </PopupActions>\n    </PopupSurface>\n  );\n}"
         },
         {
           "id": "form",
@@ -3579,7 +3579,7 @@
         ],
         [
           "Label",
-          "Title Semibold 14 · Body 14"
+          "제목 14 Bold · 본문 Body/2 14"
         ],
         [
           "Placement",
@@ -4009,7 +4009,7 @@
         ],
         [
           "Label",
-          "Caption 12 tertiary"
+          "라벨 12 Regular tertiary"
         ],
         [
           "Placement",
@@ -4139,7 +4139,7 @@
         ],
         [
           "Label",
-          "헤더 12 SemiBold tertiary · 셀 Body/2 14 · 숫자 오른쪽 정렬(.num)"
+          "헤더 12 SemiBold tertiary · 셀 Body/2 14 · 숫자 tabular · 오른쪽 정렬(.num)"
         ],
         [
           "Placement",

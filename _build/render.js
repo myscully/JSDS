@@ -2,7 +2,7 @@
    render.js — 페이지 렌더러 + 해시 라우터 (브라우저 전용)
    data.js · components.data.js · patterns.data.js · lib.js 가 먼저 로드되어야 합니다.
    ========================================================= */
-const { esc, dedent, cssFor, cssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl } = LIB;
+const { esc, dedent, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl } = LIB;
 const $ = s => document.querySelector(s);
 const STYLE = () => window.STYLE_TEXT || "";
 const nb = (sec, key) => NEW.has(`${sec}/${key}`) ? '<span class="n">N</span>' : "";
@@ -84,25 +84,33 @@ import "@jiran/ds-react/style.css";
 ${names.length ? `
 // 컴포넌트
 import { ${names.join(", ")} } from "@jiran/ds-react";` : ""}`;
+/* 복사본의 전제 — style.css 의 box-sizing · body · code·kbd 규칙을 그대로 뽑는다(옮겨 적으면 값이 갈린다). 복사본만 붙이면 content-box · Times 16px 로
+   그려져 Card 360 → 410px, Popup 입력칸이 팝업 밖으로 샜다. code·kbd 가 빠지면 검색창의 "/" 힌트(kbd)가 monospace 로 떨어진다.
+   스타일시트가 있는데 규칙을 못 찾으면 빌드를 멈춘다 */
+const baseCss = () => { const s = STYLE(); if (!s) return ""; const pick = (re) => { const m = s.match(re); if (!m) throw new Error("style.src.css 에서 복사본 전제 규칙을 찾지 못했다: " + re); return m[0]; };
+  return [/^\*\{box-sizing:border-box\}/m, /^body\{margin:0;[^}]*\}/m, /^code,kbd\{[^}]*\}/m].map(pick).join("\n"); };
 function usageBlock(key, css, label, names = []) {
   return `<h2 id="usage">Usage</h2><p><b>React</b>: <code>@jiran/ds-react</code> 패키지를 설치하고 <code>style.css</code> 를 한 번 import 하면 위 React 탭 코드를 그대로 쓸 수 있습니다(<a href="#/resources/react">React Package</a>). <b>HTML</b>: <code>assets/style.css</code> 를 연결하고(일부만 필요하면 아래 컴포넌트 CSS 복사), 동작이 필요하면 <code>assets/ds.js</code> 를 함께 넣습니다 — 이 페이지의 프리뷰가 그 스크립트로 동작합니다. 색은 전부 <a href="#/resources/design-token">토큰</a>(<code>var(--surface-brand-primary)</code> 등)을 참조하므로 <code>--accent-*</code> 만 제품 컬러로 바꾸면 됩니다.</p>
 <h3>React <small style="font-weight:400;color:var(--foreground-neutral-tertiary);font-size:12px">@jiran/ds-react</small></h3>${codeBlock(`react-${key}`, reactUsage(names), "tsx", "복사")}
 <h3>HTML</h3>${codeBlock(`usage-${key}`, USAGE_HTML, "html")}
+<h3>복사본의 전제</h3><p>아래 "Component CSS" 만 붙일 때는 이 규칙들과 Pretendard(<code>assets/fonts</code>) · <code>:root</code> 토큰을 전제로 그려집니다 — <code>assets/style.css</code> 의 값 그대로입니다. 앱에 같은 규칙이 있으면 넣지 않아도 됩니다.</p>${codeBlock(`base-${key}`, baseCss(), "css", "복사")}
 <h3>Component CSS <small style="font-weight:400;color:var(--foreground-neutral-tertiary);font-size:12px">${esc(label)}</small></h3>${codeBlock(`css-${key}`, css, "css", "CSS 복사")}`;
 }
 const cssOf = c => typeof c.css === "string" ? c.css : cssFor(cssPrefixes(c, COMPONENTS), STYLE(), VERSION);
 
 /* 예제 목록(컴포넌트 · 패턴 공용). 예제가 하나뿐이면 번호 제목을 두지 않는다 —
    나눠 가리킬 것이 없고 "대시보드" 아래 "1. 대시보드" 처럼 페이지 제목과 겹친다 */
-const examplesBlock = (sec, key, list, css, label) => (list || []).map((ex, i) =>
-  ((list.length > 1 ? `<h2 id="ex-${ex.id}">${i + 1}. ${ex.title}</h2>` : "") + (ex.desc ? `<p>${ex.desc}</p>` : "") + exampleBlock(sec, key, ex, css, label))).join("");
+/* 예제 코드 패널의 CSS 는 그 예제 몫만(exampleCssPrefixes) — 빌린 접두어를 쓰지 않는 예제에까지 페이지 전체 복사본이 실렸다 */
+const exampleCss = (c, ex) => { if (typeof c.css === "string") return { css: c.css, label: "" }; const p = exampleCssPrefixes(c, COMPONENTS, ex.html); return { css: cssFor(p, STYLE(), VERSION), label: p.join(", ") }; };
+const examplesBlock = (sec, key, c) => (c.examples || []).map((ex, i, list) => { const x = exampleCss(c, ex);
+  return (list.length > 1 ? `<h2 id="ex-${ex.id}">${i + 1}. ${ex.title}</h2>` : "") + (ex.desc ? `<p>${ex.desc}</p>` : "") + exampleBlock(sec, key, ex, x.css, x.label); }).join("");
 
 function componentPage(key) {
   const c = COMPONENTS[key]; const t = titleOf("components", key);
   if (!c) return `<h1>${t}</h1><p class="lead">${t} 컴포넌트는 아직 작성되지 않았습니다.</p><div class="ph">라이브 프리뷰 · 코드<small>components.data.js 에 항목을 추가하세요</small></div>`;
   const css = cssOf(c); const label = cssPrefixes(c, COMPONENTS).join(", ");
   return `<h1>${t}${nb("components", key)}</h1><p class="lead">${c.desc}</p>
-${examplesBlock("components", key, c.examples, css, label)}
+${examplesBlock("components", key, c)}
 <h2 id="props">Props</h2><p>HTML 에서는 클래스와 속성으로, React(<code>@jiran/ds-react</code>)에서는 같은 이름의 prop(<code>variant</code> · <code>size</code> …)으로 변형·상태를 지정합니다.</p>${propsTable(c.props)}
 ${usageBlock(key, css, label, c.react || [])}`;
 }
@@ -114,7 +122,7 @@ function patternPage(key) {
   const group = (allPages("patterns").find(p => p.key === key) || {}).group;
   return `<h1>${t}${nb("patterns", key)}</h1><p class="lead">${c.desc}</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지를 참고하세요.</p><div class="uses">${uses.map(u => `<a href="#/components/${u}">${titleOf("components", u)}</a>`).join("")}</div>
 ${c.principles ? `<div class="kv">${c.principles.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</div>` : ""}
-${examplesBlock("patterns", key, c.examples, css, label)}
+${examplesBlock("patterns", key, c)}
 ${usageBlock(key, css, label, [...new Set([...(c.react || []), ...uses.flatMap(u => (COMPONENTS[u] || {}).react || [])])])}`;
 }
 

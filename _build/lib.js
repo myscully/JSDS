@@ -2,7 +2,7 @@
    lib.js — 브라우저(standalone 미리보기)와 node(build.js) 공용 함수
    - esc / dedent : 문자열 유틸
    - cssFor      : 공유 스타일시트의 'Live component samples' 블록에서 컴포넌트 CSS 추출
-   - cssPrefixes : 복사용 CSS 의 범위(자기 css + uses 의 css)
+   - cssPrefixes : 복사용 CSS 의 범위(자기 css + borrows + uses 의 css) · exampleCssPrefixes : 예제 하나의 범위
    - tokenBlock  : :root 토큰 중 접두어에 해당하는 변수만 추출
    - parseVars   : :root / dark 블록을 {name:value} 객체로
    - htmlToJsx   : HTML 샘플 → React(TSX) 코드
@@ -53,6 +53,12 @@
      페이지(render.js) · components.json(build.js) · verify.js 가 이 식 하나를 쓴다. 컴포넌트 페이지만 uses 를 빼고 셌었다 */
   function cssPrefixes(c, components) {
     return [...new Set([...(c.uses || []).flatMap(u => [].concat((components[u] || {}).css || [])), ...[].concat(c.css || []), ...(c.borrows || [])])];
+  }
+  /* 예제 하나의 복사본 범위 — 빌린 접두어는 그 예제 HTML 이 실제로 쓰는 클래스만. 자기 css · uses 는 그대로.
+     페이지 전체 복사본을 예제마다 넣었더니 Card 쪽이 98 → 353KB 가 됐다. 페이지 아래 Component CSS 는 cssPrefixes 전부 */
+  function exampleCssPrefixes(c, components, html) {
+    const used = new Set([...String(html || "").matchAll(/class="([^"]*)"/g)].flatMap(m => m[1].split(/\s+/)));
+    return cssPrefixes({ ...c, borrows: (c.borrows || []).filter(p => used.has(p.replace(/^\./, ""))) }, components);
   }
   /* 블록 끝은 괄호 짝으로 찾는다 — 주석 안의 중괄호(역할 문법 --{intent}-{role} 같은 표기)는 세지 않는다.
      첫 '}' 까지 자르던 종전 구현은 그 주석 한 줄에 :root 블록이 중간에서 끊겨 --space-* 가 사라졌다 */
@@ -187,6 +193,6 @@
     return out;
   }
 
-  const api = { esc, dedent, cssFor, cssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  const api = { esc, dedent, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);
