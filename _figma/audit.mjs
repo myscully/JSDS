@@ -13,6 +13,8 @@
  *   Spec   _build/components.data.js 의 spec 행 ↔ 문서 카드 "Card/…" 의 Spec 글
  *   포커스 _build/style.src.css 의 값 입력 필드 포커스 규칙(오류 필드 포함)과 전역 :focus-visible 외곽선(선택 컨트롤) — focusExpect
  *   효과 색 컴포넌트 세트의 그림자 색이 변수나 효과 스타일에 묶였는지(2026-10-26 k6) — 기대값 없이 probe 가 모은 것을 그대로 어긋남으로
+ *   버튼   빌드된 components/button.html 에 "버튼" 버튼을 붙여 Chromium 으로 잰 상자(테두리 + padding · 높이)(2026-10-26 k7)
+ *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7)
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -211,7 +213,7 @@ async function siteMeasure() {
   /* 한 번 띄운 브라우저로 내비(2026-10-26 k3)와 Tag 높이(2026-10-26 k5)를 잰다. 어느 하나를 못 재면 그쪽에만 error 를 단다 */
   let chromium;
   try { ({ chromium } = require(path.join(ROOT, "_build/node_modules/playwright"))); }
-  catch (e) { const err = { error: "playwright 를 불러오지 못했습니다(" + String(e.message).split("\n")[0] + ")" }; return { nav: err, tag: err }; }
+  catch (e) { const err = { error: "playwright 를 불러오지 못했습니다(" + String(e.message).split("\n")[0] + ")" }; return { nav: err, tag: err, btn: err }; }
   let b;
   const out = {};
   try {
@@ -245,9 +247,29 @@ async function siteMeasure() {
       });
       out.tag = t.sm && t.md && t.lg ? t : { error: "사이트 Tag 예제에서 세 크기(.tag.sm · .tag · .tag.lg)를 다 찾지 못했습니다 " + JSON.stringify(t) };
     }
+    /* 버튼(2026-10-26 k7) — components/button.html 에 "버튼" 라벨 버튼을 잠시 붙여(파일은 그대로) 변형 · 크기 · 아이콘만 여부마다
+       폭 · 높이 · 라벨 글자의 폭과 x 를 잰다. Figma 변형의 라벨이 "버튼" 이라 같은 글로 잰다. 아이콘만 있는 버튼은 16 아이콘 하나 */
+    if (!(await open("button"))) out.btn = { error: "components/button.html 이 없습니다 — 사이트를 빌드하세요" };
+    else {
+      out.btn = await p.evaluate(async () => {
+        await document.fonts.ready;
+        const host = document.createElement("div"); host.style.cssText = "position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px";
+        (document.querySelector(".example-preview") || document.body).appendChild(host);
+        const res = {};
+        for (const v of ["primary", "secondary", "tertiary", "text", "danger", "danger secondary"]) for (const s of ["sm", "md", "lg"]) for (const icon of [false, true]) {
+          const e = document.createElement("button"); e.type = "button"; e.className = "btn " + v + " " + s + (icon ? " icon" : "");
+          if (icon) e.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24"></svg>'; else e.textContent = "버튼";
+          host.appendChild(e);
+          const r = e.getBoundingClientRect(), rg = document.createRange(); rg.selectNodeContents(e); const tr = rg.getBoundingClientRect();
+          res[v + "|" + s + "|" + icon] = { w: +r.width.toFixed(3), h: +r.height.toFixed(3), text: icon ? null : +tr.width.toFixed(3), textX: icon ? null : +(tr.left - r.left).toFixed(3) };
+        }
+        host.remove();
+        return res;
+      });
+    }
   } catch (e) {
     const err = { error: "사이트를 재지 못했습니다(" + String(e.message).split("\n")[0] + ")" };
-    if (!out.nav) out.nav = err; if (!out.tag) out.tag = err;
+    if (!out.nav) out.nav = err; if (!out.tag) out.tag = err; if (!out.btn) out.btn = err;
   } finally { if (b) await b.close(); }
   return out;
 }
@@ -256,10 +278,11 @@ async function siteMeasure() {
    값 입력 필드 — 사람의 결정(k5): Text Field · Search · Select 트리거 · Date Picker 필드의 포커스는 테두리 1px + inset 1px(합쳐 2px 가장자리)
    + 0 0 0 4px 후광. k6: 오류 필드(.field.error)의 포커스는 같은 모양을 negative 토큰으로 — Figma 에서는 Text Field 의 State=Error Focused.
    기대값은 사이트 CSS 에서 읽는다 — [기본 규칙(테두리 굵기), 포커스 규칙(border-color · box-shadow)]. 읽지 못하면 어긋남으로 낸다.
-   선택 컨트롤 — 사람의 결정(k6): 사이트의 전역 :focus-visible 외곽선(굵기 · offset · 색)을 Figma 에서는 "틈(면 색) + brand 선" 바깥 그림자 두 겹으로
-   그린다 — [brand spread offset+굵기, 틈 spread offset] 순서. 뒤에 오는 그림자가 위에 그려져 틈이 brand 안쪽을 덮는다(임시 노드를 픽셀로 읽어 확인,
-   반대 순서면 brand 가 틈까지 덮는다). Figma 는 면이 없는 프레임에는 그림자를 그리지 않으므로(같은 시험 — 면 없음 · 면 투명도 0 모두 그림자 0)
-   칸에 면이 있어야 한다. 틈 색은 사이트 예제 판(.example-preview.panel)의 바탕을 잰 것이다 — 라이트 #FFFFFF · 다크 #1B1C1E = --background-neutral-primary */
+   선택 컨트롤 — 사이트의 전역 :focus-visible 외곽선(굵기 · offset · 색). k6 에는 바깥 그림자 두 겹(틈을 면 색으로 칠함)으로 그렸으나,
+   사람의 결정(k7): 틈은 사이트에서 판 색이 비쳐 보이는 자리이므로 어느 바탕 위에서도 같게 — 선만 있는 고리 하나("Focus Ring")로 그린다.
+   고리는 칸에서 offset + 굵기 만큼 바깥(dx = dy = −(offset+굵기), 크기 = 칸 + 2 × (offset+굵기)), 선 brand · 굵기 · INSIDE, 면 없음, 효과 없음.
+   모서리는 칸 모서리 + offset + 굵기(사이트 외곽선은 border-radius 를 따라 커진다 — 칸이 각지면 고리도 각지고, 완전히 둥글면 고리도 완전히 둥글다).
+   칸에는 그림자가 남지 않아야 한다. Slider 칸(Track = range 280×20)은 사이트 range 처럼 바탕이 없어야 한다(.slider input[type=range] 의 background) */
 const FOCUS_CSS = [
   { set: "Text Field", state: "Focused", base: ".field input", rule: ".field input:focus" },
   { set: "Text Field", state: "Error Focused", base: ".field input", rule: ".field.error input:focus" },
@@ -268,7 +291,6 @@ const FOCUS_CSS = [
   { set: "Date Picker", state: "Focused", base: ".datepicker .field-btn", rule: ".datepicker .field-btn:focus-visible" },
 ];
 const RING_SETS = ["Checkbox", "Radio Button", "Switch", "Slider"];
-const RING_GAP = "background/neutral/primary";
 function focusExpect() {
   const fields = [];
   const shadow = (s) => { const nums = s.replace(/var\([^)]*\)/g, " ").replace(/\binset\b/, " ").trim().split(/\s+/).filter(Boolean).map(parseFloat); return { x: nums[0] || 0, y: nums[1] || 0, blur: nums[2] || 0, spread: nums[3] || 0, tok: figTok(s), inset: /\binset\b/.test(s) }; };
@@ -288,9 +310,18 @@ function focusExpect() {
     const m = /(\d+(?:\.\d+)?)px\s+solid\s+(var\(--[a-z0-9-]+\))/.exec(r.outline || "");
     const off = parseFloat(r["outline-offset"]);
     if (!m || !(off >= 0) || !figTok(m[2])) throw new Error(`:focus-visible 의 outline · outline-offset 을 읽지 못했습니다(${r.outline} / ${r["outline-offset"]})`);
-    ring = { tok: figTok(m[2]), width: +m[1], offset: off, gap: RING_GAP, css: ":focus-visible" };
+    const sb = (cssRule(".slider input[type=range]").background || "").trim();
+    ring = { tok: figTok(m[2]), width: +m[1], offset: off, css: ":focus-visible", sliderTrack: sb === "transparent" ? "-" : null, sliderTrackCss: ".slider input[type=range] background:" + (sb || "(없음)") };
   } catch (e) { ring = { error: String(e.message || e) }; }
   return { fields, ring };
+}
+
+/* Tag 기본 크기(2026-10-26 k7) — components.data.js 의 Tag props 에서 size 행의 기본값(md)을 읽어 Figma 크기 이름으로 */
+function tagDefaultSize() {
+  const box = { I: () => "", module: { exports: {} } };
+  vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
+  const row = ((box.module.exports.tag || {}).props || []).find((r) => r[0] === "size");
+  return row ? { sm: "Small", md: "Medium", lg: "Large" }[String(row[2]).trim()] || null : null;
 }
 
 /* ---------- 문서 카드 Spec(2026-10-26 k3) ----------
@@ -390,6 +421,8 @@ function componentsExpect() {
     specs: specExpect(),
     /* 값 입력 필드 4종의 포커스 — 사이트 CSS (2026-10-26 k5) */
     focus: focusExpect(),
+    /* Tag 기본 크기 — props 의 size 기본값(2026-10-26 k7) */
+    tagDefault: tagDefaultSize(),
     /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
     donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
       .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
@@ -739,21 +772,32 @@ function diffComponents(c, want, bad, notes) {
     for (const set of [...new Set(want.focus.fields.map((w) => w.set))]) for (const v of c.focus[set] || []) {
       if (!want.focus.fields.some((w) => w.set === set && w.state === stateOf(v))) bad.push(`${set} ${v.variant} (${v.id}) — 기대값이 없는 포커스 상태(${stateOf(v)}). 사이트 규칙이 있으면 audit.mjs 의 FOCUS_CSS 에 더하세요`);
     }
-    /* 선택 컨트롤 — 사이트 :focus-visible 외곽선을 두 겹 그림자로 */
+    /* 선택 컨트롤 — 사이트 :focus-visible 외곽선을 선만 있는 고리("Focus Ring")로(2026-10-26 k7). 규칙은 focusExpect 머리 주석 */
     const r = want.focus.ring;
+    const ringOld = RING_SETS.every((s) => (c.focus[s] || []).every((v) => v.ring === undefined));
     if (RING_SETS.some((s) => !(s in c.focus))) notes.push("덤프에 선택 컨트롤 포커스 조사가 없습니다 — 2026-10-26 k6 전 probe.js 로 만든 덤프입니다");
+    else if (ringOld) notes.push("덤프에 선택 컨트롤의 고리(Focus Ring) 조사가 없습니다 — 2026-10-26 k7 전 probe.js 로 만든 덤프입니다");
     else if (r.error) bad.push(`선택 컨트롤 포커스 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${r.error}`);
     else for (const set of RING_SETS) {
       const list = c.focus[set];
       if (!list) { bad.push(`${set} 세트가 없어 Focused 를 대조하지 못했습니다`); continue; }
       if (!list.length) { bad.push(`${set} 에 State=Focused 변형이 없습니다 — 사이트 ${r.css}`); continue; }
-      const want2 = [[r.tok, r.offset + r.width, 0, "0,0"], [r.gap, r.offset, 0, "0,0"]];
+      const out = r.offset + r.width;
+      const full = (rad, w, h) => typeof rad === "number" && rad >= Math.min(w, h) / 2 - 0.01;
       for (const v of list) {
         const at = `${set} ${v.variant} (${v.id})`;
         if (!v.box) { bad.push(`${at} — 포커스 칸을 찾지 못했습니다`); continue; }
-        if (JSON.stringify(v.drop) !== JSON.stringify(want2)) bad.push(`${at} 포커스 고리 ${JSON.stringify(v.drop)} ≠ ${JSON.stringify(want2)} — 사이트 outline ${r.width}px ${r.tok} · offset ${r.offset}(틈 ${r.gap} 이 위에 오게 이 순서)`);
-        if (v.inner && v.inner.length) bad.push(`${at} 안쪽 그림자 ${JSON.stringify(v.inner)} — 사이트 외곽선에는 안쪽 줄이 없습니다`);
-        if (!v.fill || v.fill === "-") bad.push(`${at} 포커스 칸(${v.box})에 면이 없어 Figma 가 그림자를 그리지 않습니다`);
+        if (v.drop.length || v.inner.length) bad.push(`${at} 칸(${v.box})에 그림자가 남아 있습니다 ${JSON.stringify(v.drop.concat(v.inner))} — 고리는 Focus Ring 이 그립니다`);
+        if (set === "Slider" && r.sliderTrack && v.fill !== r.sliderTrack) bad.push(`${at} 칸(${v.box}) 면 ${v.fill} — 사이트 range 는 바탕이 없습니다(${r.sliderTrackCss})`);
+        const g = v.ring;
+        if (!g) { bad.push(`${at} — Focus Ring 이 없습니다. 사이트 outline ${r.width}px ${r.tok} · offset ${r.offset}`); continue; }
+        if (g.stroke !== "$" + r.tok || g.sw !== r.width || g.align !== "INSIDE") bad.push(`${at} 고리 선 ${g.stroke} · ${g.sw}px · ${g.align} ≠ ${r.tok} · ${r.width}px · INSIDE`);
+        if (g.fill !== "-") bad.push(`${at} 고리에 면 ${g.fill} — 틈은 비어 있어야 바탕이 비칩니다`);
+        if (g.fx) bad.push(`${at} 고리에 효과 ${g.fx}개`);
+        const ex = { dx: -out, dy: -out, w: +(v.size[0] + 2 * out).toFixed(2), h: +(v.size[1] + 2 * out).toFixed(2) };
+        if (Math.abs(g.dx - ex.dx) > 0.5 || Math.abs(g.dy - ex.dy) > 0.5 || Math.abs(g.w - ex.w) > 0.5 || Math.abs(g.h - ex.h) > 0.5) bad.push(`${at} 고리 자리 ${g.dx},${g.dy} · ${g.w}×${g.h} ≠ 칸에서 ${ex.dx},${ex.dy} · ${ex.w}×${ex.h}(offset ${r.offset} + 굵기 ${r.width})`);
+        if (full(v.radius, v.size[0], v.size[1])) { if (!full(g.radius, g.w, g.h)) bad.push(`${at} 고리 모서리 ${g.radius} — 칸이 완전히 둥글어 고리도 완전히 둥글어야 합니다`); }
+        else if (typeof v.radius === "number") { const er = v.radius > 0 ? v.radius + out : 0; if (Math.abs(g.radius - er) > 0.5) bad.push(`${at} 고리 모서리 ${g.radius} ≠ ${er}(칸 ${v.radius}${v.radius > 0 ? " + " + out : " — 각진 칸은 각진 고리"})`); }
       }
     }
   } else notes.push("덤프에 값 입력 필드 Focused 조사가 없습니다 — 2026-10-26 k5 전 probe.js 로 만든 덤프입니다");
@@ -773,6 +817,38 @@ function diffComponents(c, want, bad, notes) {
   if (c.effectColors) {
     for (const e of c.effectColors.raw) bad.push(`효과 색이 변수에 묶이지 않았습니다 — ${e.set} · ${e.variant} · ${e.node} (${e.id}) ${e.type} ${e.color} spread ${e.spread} blur ${e.blur}`);
   } else notes.push("덤프에 효과 색 조사가 없습니다 — 2026-10-26 k6 전 probe.js 로 만든 덤프입니다");
+  const pv = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name || ""); return m ? m[1].trim() : null; };
+  /* 버튼 상자(2026-10-26 k7) — 사람의 결정: 사이트 버튼의 1px 투명 테두리 몫을 Figma 에도 둔다. State=Default 변형마다 사이트에서 잰 같은 버튼과
+     (폭 − 라벨 폭) = 테두리 + padding, 라벨 x = 테두리 + 왼쪽 padding, 높이를 ±0.5 로 맞춘다. 아이콘만 있는 버튼은 폭 · 높이.
+     라벨 폭 자체는 맞추지 않는다 — Figma 텍스트 스타일이 자간(Label/2 2.52% · Label/1 1.45% · Title/1 0.57%)을 지니고 자동 폭이 정수로 올라가
+     사이트(.btn 자간 0)보다 0.3 ~ 1.3px 넓다. 그 차이는 글자를 고쳐야 하고 지금은 Pretendard 가 없어 막혀 있다. 잴 수 없으면 어긋남이다 */
+  if (c.buttons !== undefined) {
+    const sb = want.btnSite;
+    if (!sb || sb.error) bad.push(`버튼 상자를 사이트와 대조하지 못했습니다 — ${sb ? sb.error : "잴 수 없음"}`);
+    else if (!c.buttons || !c.buttons.length) bad.push("Button 세트가 없어 버튼 상자를 대조하지 못했습니다");
+    else {
+      const VAR = { Primary: "primary", Secondary: "secondary", Tertiary: "tertiary", Text: "text", Danger: "danger", "Danger Secondary": "danger secondary" }, SIZE = { Small: "sm", Medium: "md", Large: "lg" };
+      for (const v of c.buttons) {
+        const io = pv(v.name, "Icon Only") === "True", s = sb[VAR[pv(v.name, "Variant")] + "|" + SIZE[pv(v.name, "Size")] + "|" + io];
+        const at = `Button ${v.name} (${v.id})`;
+        if (!s) { bad.push(`${at} — 사이트에서 같은 버튼을 재지 못했습니다`); continue; }
+        if (Math.abs(v.h - s.h) > 0.5) bad.push(`${at} 높이 ${v.h} ≠ 사이트 ${s.h}`);
+        if (io) { if (Math.abs(v.w - s.w) > 0.5) bad.push(`${at} 폭 ${v.w} ≠ 사이트 ${s.w}`); continue; }
+        if (!v.label) { bad.push(`${at} — 라벨 글자를 찾지 못했습니다`); continue; }
+        const box = +(v.w - v.label[1]).toFixed(2), sbox = +(s.w - s.text).toFixed(2);
+        if (Math.abs(box - sbox) > 0.5) bad.push(`${at} 테두리 + padding ${box}(폭 ${v.w} − 라벨 ${v.label[1]}) ≠ 사이트 ${sbox}(폭 ${s.w} − 라벨 ${s.text})`);
+        if (Math.abs(v.label[2] - s.textX) > 0.5) bad.push(`${at} 라벨 x ${v.label[2]} ≠ 사이트 ${s.textX}(테두리 + 왼쪽 padding)`);
+      }
+    }
+  } else notes.push("덤프에 버튼 상자가 없습니다 — 2026-10-26 k7 전 probe.js 로 만든 덤프입니다");
+  /* 기본 변형(2026-10-26 k7) — 사람의 결정: Tag 세트의 기본 변형 크기는 사이트 기본(Tag props 의 size 기본값 md → Medium).
+     Figma 의 기본 변형은 세트에서 왼쪽 위에 놓인 변형이다 — 그래서 각 Style 묶음에서 Medium 줄이 맨 위에 온다 */
+  if (c.defaults) {
+    const d = c.defaults.Tag;
+    if (!want.tagDefault) bad.push("Tag 기본 크기를 components.data.js 의 props 에서 읽지 못했습니다");
+    else if (!d) bad.push("Tag 세트의 기본 변형을 읽지 못했습니다");
+    else if (pv(d, "Size") !== want.tagDefault) bad.push(`Tag 기본 변형 "${d}" — Size 가 사이트 기본(${want.tagDefault})이 아닙니다`);
+  } else notes.push("덤프에 세트 기본 변형이 없습니다 — 2026-10-26 k7 전 probe.js 로 만든 덤프입니다");
 }
 
 function expect_() {
@@ -802,6 +878,7 @@ function diff(dumpPath, site) {
   const want = expect_();
   want.components.navGeo = site.nav;   // 사이트 실측(siteMeasure) — 진입점이 미리 잰다
   want.components.tagSite = site.tag;
+  want.components.btnSite = site.btn;
   const got = JSON.parse(fs.readFileSync(dumpPath, "utf8"));
   const bad = [];
   const list = (a, b, label) => {
@@ -891,6 +968,7 @@ if (cmd === "expect") {
   const site = await siteMeasure();
   w.components.navGeo = site.nav;
   w.components.tagSite = site.tag;
+  w.components.btnSite = site.btn;
   console.log(JSON.stringify(w, null, 1));
 } else if (cmd === "diff") {
   if (!arg) { console.error("쓰는 법: node _figma/audit.mjs diff <덤프.json>"); process.exit(2); }
