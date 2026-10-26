@@ -409,7 +409,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const ringBtn = await ringOf("components/button.html", "#ex-button-variant .btn.primary");
   const ringInput = await ringOf("components/text-field.html", "#ex-text-field-basic input");
   /* 값 입력 필드는 외곽선 대신 2px brand 가장자리 + 4px 후광을 쓴다(사람의 결정 2026-10-26) — 버튼은 외곽선 그대로, 필드는 외곽선을 끈다 */
-  ok("button keeps the 2px focus outline while value fields turn it off", /2px solid/.test(ringBtn) && /none/.test(ringInput), ringBtn + " vs " + ringInput);
+  ok("button keeps the 1px focus outline while value fields turn it off", /^1px solid/.test(ringBtn) && /none/.test(ringInput), ringBtn + " vs " + ringInput);   // 외곽선 2px → 1px(사람의 결정 2026-10-26)
   // 입력은 마우스 클릭에도 링이 떠야 한다(버튼은 아니어야 한다)
   await page.locator("#ex-text-field-basic input").first().click(); await page.waitForTimeout(200);
   const clickRing = await page.evaluate(() => { const i = document.querySelector("#ex-text-field-basic input"); return { fv: i.matches(":focus-visible"), shadow: getComputedStyle(i).boxShadow }; });

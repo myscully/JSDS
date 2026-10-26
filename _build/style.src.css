@@ -181,7 +181,7 @@ a{color:inherit}
 pre,pre code{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 code,kbd{font-family:var(--font-sans);font-variant-numeric:tabular-nums}
 code{font-size:inherit}
-:focus-visible{outline:2px solid var(--foreground-brand-primary);outline-offset:2px}
+:focus-visible{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}   /* 포커스 외곽선 1px(사람의 결정 2026-10-26 — 2px 에서). 값 입력 필드는 외곽선 대신 자기 링을 쓴다 */
 [hidden]{display:none!important}
 
 /* ---------- Header (브랜드 · 버전 · 상단 메뉴 · 아이콘 버튼) ---------- */
