@@ -10,7 +10,13 @@
  *   3) node _figma/audit.mjs diff <그 파일>   → 저장소 기대값과 대조
  */
 
-const CURRENT_PAGES = ["Overview", "1 Theme", "2 Element", "3 Component", "4 Pattern", "Resource"];
+/* 현재 페이지는 이름이 아니라 id 로 고른다(2026-10-23 k2). 이름으로 고르면 같은 이름의 작업 중 페이지가 함께 들어왔다 —
+   두 번째 "Overview"(368:3228)는 사람이 쓰는 작업 페이지인데 이름이 같아 대조 대상이 됐고, 덤프에는 page 이름만 남아
+   어느 Overview 인지 구분할 수 없었다. 그래서 넘침·겹침·섹션 항목에 pageId 를 함께 적는다.
+   id 로 고르면 반대 구멍이 생긴다 — 페이지를 지우고 다시 만들어 id 가 바뀌면 그 페이지는 소리 없이 빠진다.
+   그래서 이 표를 덤프의 scope 로 내보내고, audit 이 pages 와 맞춰 없는 id 는 어긋남으로, 같은 이름인데 범위 밖인 페이지는 NOTE 로 알린다 */
+const CURRENT_PAGES = { "302:2": "Overview", "302:3": "1 Theme", "302:4": "2 Element", "302:5": "3 Component", "302:6": "4 Pattern", "302:7": "Resource" };
+const isCurrent = (p) => Object.prototype.hasOwnProperty.call(CURRENT_PAGES, p.id);
 const OVERFLOW_MIN = 10;   // 도형 외곽선·그림자 번짐이 만드는 2~6px 는 잡지 않는다
 
 /* ---------- 페이지 불러오기 ----------
@@ -100,14 +106,14 @@ icons.outline.sort(); icons.filled.sort();
 const overflow = [], overlap = [];
 const inInst = (n) => { for (let q = n.parent; q && q.type !== "PAGE"; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
 for (const p of figma.root.children) {
-  const inScope = CURRENT_PAGES.includes(p.name);
+  const inScope = isCurrent(p);
   const tops = p.children.filter((n) => n.visible !== false && n.width && n.height);
   for (let i = 0; i < tops.length; i++) {
     for (let j = i + 1; j < tops.length; j++) {
       const a = tops[i], b = tops[j];
       const ix = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
       const iy = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
-      if (ix > 1 && iy > 1) overlap.push({ page: p.name, a: a.name, b: b.name, by: [Math.round(ix), Math.round(iy)], current: inScope });
+      if (ix > 1 && iy > 1) overlap.push({ page: p.name, pageId: p.id, a: a.name, b: b.name, by: [Math.round(ix), Math.round(iy)], current: inScope });
     }
   }
   if (!inScope) continue;
@@ -123,7 +129,7 @@ for (const p of figma.root.children) {
     const sides = { right: r - c.width, bottom: b - c.height, left: -l, top: -t };
     const side = Object.keys(sides).reduce((a, k) => (sides[k] > sides[a] ? k : a), "right");
     const over = sides[side];
-    if (over > OVERFLOW_MIN) overflow.push({ page: p.name, node: c.name, id: c.id, by: Math.round(over), clips: c.clipsContent === true, ...(side === "left" || side === "top" ? { side } : {}) });
+    if (over > OVERFLOW_MIN) overflow.push({ page: p.name, pageId: p.id, node: c.name, id: c.id, by: Math.round(over), clips: c.clipsContent === true, ...(side === "left" || side === "top" ? { side } : {}) });
   }
 }
 
@@ -146,7 +152,7 @@ const paint = (arr) => {
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
 const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [] };
 for (const p of figma.root.children) {
-  if (!CURRENT_PAGES.includes(p.name)) continue;
+  if (!isCurrent(p)) continue;
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
     if (!SURVEY_SETS.includes(set.name)) continue;
     /* 컴포넌트 속성 연결 — 이름·종류가 같은 노드가 변형마다 같은 속성을 참조하는지 audit 이 보려고 모은다.
@@ -225,7 +231,7 @@ for (const p of figma.root.children) {
       for (const k of node.children) {
         if (k.type === "INSTANCE") { const m = await k.getMainComponentAsync(); if (m && m.parent && m.parent.name === item) inst++; }
         else if (k.type === "FRAME" && !k.children.length) empty++;
-        else if (k.type === "FRAME" && (k.findOne((x) => x.type === "INSTANCE" && /^icon\//.test(x.name)) || (nm === "Steps" && k.findOne((x) => x.type === "TEXT")) || (k.children.length === 1 && k.children[0].type === "TEXT" && k.height >= 36))) raw++;
+        else if (k.type === "FRAME" && !/^foot$/i.test(k.name) && (k.findOne((x) => x.type === "INSTANCE" && /^icon\//.test(x.name)) || (nm === "Steps" && k.findOne((x) => x.type === "TEXT")) || (k.children.length === 1 && k.children[0].type === "TEXT" && k.height >= 36))) raw++;   // "Foot" 프레임(.sidenav .foot)은 항목이 아니다
       }
       v.items = { inst, raw, empty };
       /* 항목 목록(순서대로) — audit 이 저장소 예제(사이트)와 순서·라벨·상태·아이콘을 맞춘다. 숨은 건수 배지는 적지 않는다 */
@@ -238,8 +244,12 @@ for (const p of figma.root.children) {
           const icm = ic ? await ic.getMainComponentAsync() : null;
           const cn = k.findOne((y) => y.type === "INSTANCE" && y.name === "Count" && y.visible !== false);
           const ct = cn ? cn.findOne((y) => y.type === "TEXT") : null;
-          list.push({ item: m ? m.name : null, label: tx("Label"), number: tx("Number"), icon: icm ? icm.name.replace(/^icon\/(outline|filled)\//, "") : null, count: ct ? ct.characters : null });
-        } else if (k.type === "FRAME" && k.children.length) { const x = k.findOne((y) => y.type === "TEXT"); list.push({ group: x ? x.characters : null }); }
+          /* 접힌 레일은 라벨 글자가 없어 Label 속성 값으로 비교한다(사이트는 숨은 span · title 에 라벨이 있다) */
+          const lp = Object.entries(k.componentProperties || {}).find(([key, v]) => /^Label#/.test(key) && v.type === "TEXT");
+          /* 아이콘 색 — 아이콘을 바꿔 끼우면(swap) 이름이 맞는 층에만 색 덮어쓰기가 남고 나머지는 아이콘 원본 색으로 돌아간다(2026-10-23 k2, list 아이콘) */
+          const ip = ic ? [...new Set(ic.findAll((y) => ["VECTOR", "ELLIPSE", "RECTANGLE", "LINE", "POLYGON", "STAR", "BOOLEAN_OPERATION"].includes(y.type) && y.visible !== false).flatMap((y) => [paint(y.strokes), paint(y.fills)]).filter((x) => x !== "-"))].sort().join("|") : null;
+          list.push({ item: m ? m.name : null, label: tx("Label"), number: tx("Number"), icon: icm ? icm.name.replace(/^icon\/(outline|filled)\//, "") : null, count: ct ? ct.characters : null, labelProp: lp ? lp[1].value : null, iconPaints: ip });
+        } else if (k.type === "FRAME" && k.children.length) { const x = k.findOne((y) => y.type === "TEXT"); list.push(/^foot$/i.test(k.name) ? { foot: x ? x.characters : null } : { group: x ? x.characters : null }); }
         else list.push({ other: k.type + (k.type === "FRAME" ? " (빈 칸)" : "") });
       }
       v.itemsList = list;
@@ -275,13 +285,14 @@ for (const p of figma.root.children) {
   for (let i = 1; i < secs.length; i++) {
     const a = secs[i - 1], b = secs[i];
     if (Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) <= 0) continue;   // 옆 칸에 놓인 섹션은 세로 간격 대상이 아니다
-    components.sections.push({ page: p.name, a: a.name, b: b.name, gap: Math.round(b.y - (a.y + a.height)) });
+    components.sections.push({ page: p.name, pageId: p.id, a: a.name, b: b.name, gap: Math.round(b.y - (a.y + a.height)) });
   }
 }
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
 
 return {
   pages: figma.root.children.map((p) => ({ name: p.name, id: p.id, children: p.children.length })),
+  scope: CURRENT_PAGES,
   fonts: { total: families.size, pretendard: pretendard.length ? pretendard : null },
   variables,
   textStyles,

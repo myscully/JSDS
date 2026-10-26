@@ -1,26 +1,30 @@
-# 글자 굵기 목록(편집 없음) — 2026-10-23 j, 4번(컨테이너 재구성) 이후에 셈. 현재 페이지 6개를 페이지마다 열고 숨은 인스턴스 자식까지 세었다 — 3 Component 120 · 나머지 5쪽 0
+# 글자 굵기 목록(편집 없음) — 2026-10-23 k2 에 다시 셈(내비 · Steps 를 사이트 예제에 맞춘 뒤). 현재 페이지 6개를 id 로 골라 불러오고 숨은 인스턴스 자식까지 세었다 — 3 Component 112 · 나머지 5쪽 0. 처음 센 것은 2026-10-23 j(120행)
 # 고치는 법: "원본" 행을 고치면 "인스턴스·원본 따름" 행은 따라온다. "인스턴스·서체 덮어씀" 행(이번에 Noto 로 바뀐 글자)은 인스턴스 쪽 덮어쓰기라 따로 고친다
 # Pretendard 가 이 플러그인 환경에 없어 굵기는 여기서 바꾸지 않았다(CLAUDE.md: 폰트가 없으면 Figma 가 fontSize 하나도 거부). 9종 밖에서 찾은 것: 도넛 가운데 값 330:2381(+문서 인스턴스 I330:2605;330:2381 확인) — 저장소 .donut::after 700, 지금 Noto Sans KR Medium
-# 분류별 행 수: A 53 · B 6 · C 16 · D 5 · E 8 · F 6 · G 12 · H 6 · I 8 = 120
+# 분류별 행 수: A 47 · B 6 · C 16 · D 5 · E 8 · F 4 · G 12 · H 6 · I 8 = 112
+# k2 에서 120 → 112: 지운 노드의 행 4(그룹 '모니터링' 332:2786 원본 · 문서 인스턴스, '리포트' 560:3095 건수 배지 · 문서 인스턴스) · Step 상태를 바꿔(559:3057/3074 Current→Done, 559:3061/3078 Todo→Current) 하위 노드가 바뀐 행 16 빠지고 12 들어옴 · 글자·서체·인스턴스 이름만 바뀐 행 20(Steps 라벨 · 내비 라벨 · 그룹 '보호' 332:2809 가 Noto 로)
 페이지	세트/변형	노드	지금 서체	저장소 굵기	분류	원본/인스턴스	보임	글자
 3 Component	Count / Tone=Accent	333:3141	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	원본	보임	12
 3 Component	Count / Tone=Danger	333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	원본	보임	12
 3 Component	Count / Tone=Neutral	333:3139	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	원본	보임	12
 3 Component	Step / State=Current	333:3151	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	원본	보임	2
 3 Component	Step / State=Todo	333:3155	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	원본	보임	3
-3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 배포 (559:3065)	I559:3065;333:3155	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	4
-3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 배포 (559:3082)	I559:3082;333:3155	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	4
+3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 검토 · 배포 (559:3065)	I559:3065;333:3155	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	4
+3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 규칙 설정 (559:3061)	I559:3061;333:3151	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	3
+3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 검토 · 배포 (559:3082)	I559:3082;333:3155	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	4
+3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 규칙 설정 (559:3078)	I559:3078;333:3151	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	3
+3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3061;333:3151	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	3
 3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3065;333:3155	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	4
+3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3078;333:3151	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	3
 3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3082;333:3155	Noto Sans KR Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·서체 덮어씀	보임	4
-3 Component	Navigation / State=Expanded · 인스턴스 USB · 매체 (560:3123)	I560:3123;555:3556;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
+3 Component	Navigation / State=Expanded · 인스턴스 USB 제어 (560:3118)	I560:3118;555:3556;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
+3 Component	Navigation / State=Expanded · 인스턴스 네트워크 (560:3123)	I560:3123;555:3556;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation / State=Expanded · 인스턴스 대시보드 (560:3076)	I560:3076;555:3554;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
-3 Component	Navigation / State=Expanded · 인스턴스 리포트 (560:3095)	I560:3095;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation / State=Expanded · 인스턴스 사용자 (560:3140)	I560:3140;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation / State=Expanded · 인스턴스 설정 (560:3153)	I560:3153;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation / State=Expanded · 인스턴스 에이전트 (560:3127)	I560:3127;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
-3 Component	Navigation / State=Expanded · 인스턴스 외부 메일 (560:3118)	I560:3118;555:3556;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
-3 Component	Navigation / State=Expanded · 인스턴스 이벤트 로그 (560:3084)	I560:3084;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	12
-3 Component	Navigation / State=Expanded · 인스턴스 정보 유출 방지 (560:3108)	I560:3108;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
+3 Component	Navigation / State=Expanded · 인스턴스 이벤트 (560:3084)	I560:3084;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	12
+3 Component	Navigation / State=Expanded · 인스턴스 정책 (560:3108)	I560:3108;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation Item / Type=Default, State=Default · 인스턴스 Count (555:3550)	I555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation Item / Type=Default, State=Hover · 인스턴스 Count (555:3552)	I555:3552;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation Item / Type=Default, State=Pressed · 인스턴스 Count (556:3048)	I556:3048;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
@@ -29,16 +33,11 @@
 3 Component	Navigation Item / Type=Sub, State=Hover · 인스턴스 Count (555:3558)	I555:3558;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation Item / Type=Sub, State=Pressed · 인스턴스 Count (556:3051)	I556:3051;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	Navigation Item / Type=Sub, State=Selected · 인스턴스 Count (555:3560)	I555:3560;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
-3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 검토 (559:3061)	I559:3061;333:3155	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	3
-3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 조건 설정 (559:3057)	I559:3057;333:3151	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	2
-3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 검토 (559:3078)	I559:3078;333:3155	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	3
-3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 조건 설정 (559:3074)	I559:3074;333:3151	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	2
 3 Component	인스턴스 Count (333:3293) · @ Properties / List / Content	I333:3293;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	12
 3 Component	인스턴스 Count (333:3295) · @ Properties / List / Content	I333:3295;333:3139	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	12
 3 Component	인스턴스 Count (333:3298) · @ Properties / List / Content	I333:3298;333:3141	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	12
 3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3076;555:3554;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3084;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	12
-3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3095;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3108;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3118;555:3556;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
 3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3123;555:3556;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	숨김	12
@@ -52,32 +51,28 @@
 3 Component	인스턴스 Navigation Item (332:3146) · @ Properties / List / Content	I332:3146;555:3550;333:3137	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	12
 3 Component	인스턴스 Step (333:3319) · @ Properties / List / Content	I333:3319;333:3151	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	2
 3 Component	인스턴스 Step (333:3327) · @ Properties / List / Content	I333:3327;333:3155	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	3
-3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3057;333:3151	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	2
-3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3061;333:3155	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	3
-3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3074;333:3151	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	2
-3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3078;333:3155	Pretendard Medium	700	A Count·Step·내비 건수 숫자 (Medium→700)	인스턴스·원본 따름	보임	3
 3 Component	Step / State=Current	333:3152	Pretendard Medium	600	B Step Current 라벨 (→600)	원본	보임	조건 설정
-3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 조건 설정 (559:3057)	I559:3057;333:3152	Pretendard Medium	600	B Step Current 라벨 (→600)	인스턴스·원본 따름	보임	조건 설정
-3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 조건 설정 (559:3074)	I559:3074;333:3152	Pretendard Medium	600	B Step Current 라벨 (→600)	인스턴스·원본 따름	보임	조건 설정
+3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 규칙 설정 (559:3061)	I559:3061;333:3152	Noto Sans KR Medium	600	B Step Current 라벨 (→600)	인스턴스·서체 덮어씀	보임	규칙 설정
+3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 규칙 설정 (559:3078)	I559:3078;333:3152	Noto Sans KR Medium	600	B Step Current 라벨 (→600)	인스턴스·서체 덮어씀	보임	규칙 설정
+3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3061;333:3152	Noto Sans KR Medium	600	B Step Current 라벨 (→600)	인스턴스·서체 덮어씀	보임	규칙 설정
+3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3078;333:3152	Noto Sans KR Medium	600	B Step Current 라벨 (→600)	인스턴스·서체 덮어씀	보임	규칙 설정
 3 Component	인스턴스 Step (333:3319) · @ Properties / List / Content	I333:3319;333:3152	Pretendard Medium	600	B Step Current 라벨 (→600)	인스턴스·원본 따름	보임	조건 설정
-3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3057;333:3152	Pretendard Medium	600	B Step Current 라벨 (→600)	인스턴스·원본 따름	보임	조건 설정
-3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3074;333:3152	Pretendard Medium	600	B Step Current 라벨 (→600)	인스턴스·원본 따름	보임	조건 설정
 3 Component	Step / State=Done	333:3148	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	원본	보임	대상 선택
 3 Component	Step / State=Todo	333:3156	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	원본	보임	검토
-3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 배포 (559:3065)	I559:3065;333:3156	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	배포
-3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 배포 (559:3082)	I559:3082;333:3156	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	배포
-3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3065;333:3156	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	배포
-3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3082;333:3156	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	배포
-3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 검토 (559:3061)	I559:3061;333:3156	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	검토
-3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 대상 선택 (559:3052)	I559:3052;333:3148	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	대상 선택
-3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 검토 (559:3078)	I559:3078;333:3156	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	검토
-3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 대상 선택 (559:3069)	I559:3069;333:3148	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	대상 선택
+3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 검토 · 배포 (559:3065)	I559:3065;333:3156	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	검토 · 배포
+3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 기본 정보 (559:3052)	I559:3052;333:3148	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	기본 정보
+3 Component	Steps / Orientation=Horizontal · 인스턴스 Step · 적용 대상 (559:3057)	I559:3057;333:3148	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	적용 대상
+3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 검토 · 배포 (559:3082)	I559:3082;333:3156	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	검토 · 배포
+3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 기본 정보 (559:3069)	I559:3069;333:3148	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	기본 정보
+3 Component	Steps / Orientation=Vertical · 인스턴스 Step · 적용 대상 (559:3074)	I559:3074;333:3148	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	적용 대상
+3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3052;333:3148	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	기본 정보
+3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3057;333:3148	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	적용 대상
+3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3065;333:3156	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	검토 · 배포
+3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3069;333:3148	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	기본 정보
+3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3074;333:3148	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	적용 대상
+3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3082;333:3156	Noto Sans KR Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·서체 덮어씀	보임	검토 · 배포
 3 Component	인스턴스 Step (333:3314) · @ Properties / List / Content	I333:3314;333:3148	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	대상 선택
 3 Component	인스턴스 Step (333:3327) · @ Properties / List / Content	I333:3327;333:3156	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	검토
-3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3052;333:3148	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	대상 선택
-3 Component	인스턴스 Steps (333:3344) · @ Properties / List / Content	I333:3344;559:3061;333:3156	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	검토
-3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3069;333:3148	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	대상 선택
-3 Component	인스턴스 Steps (333:3365) · @ Properties / List / Content	I333:3365;559:3078;333:3156	Pretendard Medium	400	C Step Done·Todo 라벨 (→400)	인스턴스·원본 따름	보임	검토
 3 Component	Navigation Item / Type=Default, State=Selected	332:2750	Pretendard Medium	600	D 내비 Selected 라벨 (→600)	원본	보임	대시보드
 3 Component	Navigation Item / Type=Sub, State=Selected	332:2762	Pretendard Medium	600	D 내비 Selected 라벨 (→600)	원본	보임	대시보드
 3 Component	Navigation / State=Expanded · 인스턴스 대시보드 (560:3076)	I560:3076;332:2750	Pretendard Medium	600	D 내비 Selected 라벨 (→600)	인스턴스·원본 따름	보임	대시보드
@@ -86,16 +81,14 @@
 3 Component	Navigation Item / Type=Sub, State=Default	332:2754	Pretendard Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	원본	보임	대시보드
 3 Component	Navigation Item / Type=Sub, State=Hover	332:2758	Pretendard Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	원본	보임	대시보드
 3 Component	Navigation Item / Type=Sub, State=Pressed	556:3050	Pretendard Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	원본	보임	대시보드
-3 Component	Navigation / State=Expanded · 인스턴스 USB · 매체 (560:3123)	I560:3123;332:2754	Noto Sans KR Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·서체 덮어씀	보임	USB · 매체
-3 Component	Navigation / State=Expanded · 인스턴스 외부 메일 (560:3118)	I560:3118;332:2754	Noto Sans KR Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·서체 덮어씀	보임	외부 메일
-3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3118;332:2754	Noto Sans KR Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·서체 덮어씀	보임	외부 메일
-3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3123;332:2754	Noto Sans KR Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·서체 덮어씀	보임	USB · 매체
+3 Component	Navigation / State=Expanded · 인스턴스 USB 제어 (560:3118)	I560:3118;332:2754	Noto Sans KR Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·서체 덮어씀	보임	USB 제어
+3 Component	Navigation / State=Expanded · 인스턴스 네트워크 (560:3123)	I560:3123;332:2754	Noto Sans KR Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·서체 덮어씀	보임	네트워크
+3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3118;332:2754	Noto Sans KR Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·서체 덮어씀	보임	USB 제어
+3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;560:3123;332:2754	Noto Sans KR Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·서체 덮어씀	보임	네트워크
 3 Component	인스턴스 Navigation Item (332:3123) · @ Properties / List / Content	I332:3123;332:2754	Pretendard Regular	500	E 내비 Sub 기본·Hover 라벨 (→500, 새 Sub Pressed 포함)	인스턴스·원본 따름	보임	대시보드
-3 Component	Navigation / State=Expanded	332:2786	Pretendard Medium	600	F 내비 그룹 라벨 (→600)	원본	보임	모니터링
-3 Component	Navigation / State=Expanded	332:2809	Pretendard Medium	600	F 내비 그룹 라벨 (→600)	원본	보임	정책
+3 Component	Navigation / State=Expanded	332:2809	Noto Sans KR Medium	600	F 내비 그룹 라벨 (→600)	원본	보임	보호
 3 Component	Navigation / State=Expanded	332:2826	Pretendard Medium	600	F 내비 그룹 라벨 (→600)	원본	보임	관리
-3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;332:2786	Pretendard Medium	600	F 내비 그룹 라벨 (→600)	인스턴스·원본 따름	보임	모니터링
-3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;332:2809	Pretendard Medium	600	F 내비 그룹 라벨 (→600)	인스턴스·원본 따름	보임	정책
+3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;332:2809	Noto Sans KR Medium	600	F 내비 그룹 라벨 (→600)	인스턴스·원본 따름	보임	보호
 3 Component	인스턴스 Navigation (332:2900) · @ Properties / List / Content	I332:2900;332:2826	Pretendard Medium	600	F 내비 그룹 라벨 (→600)	인스턴스·원본 따름	보임	관리
 3 Component	KPI / Tone=Critical, Delta=Down, Sparkline=Off	330:2322	Pretendard Medium	600	G KPI delta (→600)	원본	보임	8% 어제 대비
 3 Component	KPI / Tone=Critical, Delta=Up, Sparkline=Off	330:2311	Pretendard Medium	600	G KPI delta (→600)	원본	보임	12% 어제 대비
