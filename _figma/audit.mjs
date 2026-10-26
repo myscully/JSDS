@@ -141,7 +141,8 @@ function typeScale() {
 /* ---------- 컴포넌트 ----------
    기대값은 style.src.css 의 해당 규칙에서 읽는다 — 간격 12 를 여기 적어 두면 CSS 가 바뀌는 날 거짓이 된다 */
 function cssRule(sel) {
-  const css = read("_build/style.src.css");
+  /* 주석을 먼저 지운다 — 규칙 뒤에 붙은 설명 주석이 다음 규칙의 셀렉터 앞에 끼어 목록 안 셀렉터를 못 찾았다(2026-10-26 k5) */
+  const css = read("_build/style.src.css").replace(/\/\*[\s\S]*?\*\//g, "");
   const esc = sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   let m = css.match(new RegExp("(?:^|\\n|\\})" + esc + "\\{([^}]*)\\}"));
   /* 셀렉터 목록 안에 있는 규칙(예: .sidenav.collapsed a span,…,.sidenav.collapsed a.sub{…})도 찾는다 */
@@ -202,36 +203,71 @@ function navExample(id = "basic") {
    components/navigation.html 을 헤드리스 Chromium 으로 열어 Default(#ex-navigation-basic) · Collapsed(#ex-navigation-collapsed)
    예제를 잰다. 기준점은 레일 안쪽(padding box)의 위 끝이다 — 사이트 예제는 미리보기용으로 네 변에 1px 테두리를 인라인 style 로
    따로 달아 그만큼 내려가 있고, 컴포넌트 CSS(.sidenav)의 테두리는 오른쪽 1px 뿐이라 Figma 레일에는 위 테두리가 없다.
-   재지 못하면(Playwright 없음 · 빌드 안 됨) 빼고 넘어가지 않고 어긋남으로 남긴다 */
-async function siteNav() {
+   재지 못하면(Playwright 없음 · 빌드 안 됨) 빼고 넘어가지 않고 어긋남으로 남긴다.
+   Tag 세 크기의 높이(2026-10-26 k5)도 같은 브라우저로 components/tag.html 예제에서 잰다(줄 높이 1.6 × 12px + padding 이라 CSS 만으로는 소수점이 맞지 않는다) */
+async function siteMeasure() {
+  /* 한 번 띄운 브라우저로 내비(2026-10-26 k3)와 Tag 높이(2026-10-26 k5)를 잰다. 어느 하나를 못 재면 그쪽에만 error 를 단다 */
   let chromium;
   try { ({ chromium } = require(path.join(ROOT, "_build/node_modules/playwright"))); }
-  catch (e) { return { error: "playwright 를 불러오지 못했습니다(" + String(e.message).split("\n")[0] + ")" }; }
-  const file = path.join(ROOT, "components/navigation.html");
-  if (!fs.existsSync(file)) return { error: "components/navigation.html 이 없습니다 — 사이트를 빌드하세요" };
+  catch (e) { const err = { error: "playwright 를 불러오지 못했습니다(" + String(e.message).split("\n")[0] + ")" }; return { nav: err, tag: err }; }
   let b;
+  const out = {};
   try {
     b = await chromium.launch();
     const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
-    await p.goto("file://" + file);
-    const r = await p.evaluate(() => {
-      const one = (sel) => {
-        const nav = document.querySelector(sel); if (!nav) return null;
-        const cs = getComputedStyle(nav), top = nav.getBoundingClientRect().top + parseFloat(cs.borderTopWidth);
-        const kids = [...nav.children].filter((k) => getComputedStyle(k).display !== "none").map((k) => {
-          const c = getComputedStyle(k), box = k.getBoundingClientRect();
-          return { kind: k.tagName === "A" ? "item" : k.classList.contains("group") ? "group" : k.classList.contains("foot") ? "foot" : "other",
-            y: box.top - top, h: box.height, mt: parseFloat(c.marginTop), mb: parseFloat(c.marginBottom), pb: parseFloat(c.paddingBottom) };
-        });
-        return { padBottom: parseFloat(cs.paddingBottom), kids };
-      };
-      return { basic: one("#ex-navigation-basic .sidenav"), collapsed: one("#ex-navigation-collapsed .sidenav") };
-    });
-    if (!r.basic || !r.collapsed) return { error: "사이트에서 내비 예제(#ex-navigation-basic · #ex-navigation-collapsed)를 찾지 못했습니다" };
-    return r;
+    const open = async (page) => { const file = path.join(ROOT, "components", page + ".html"); if (!fs.existsSync(file)) return false; await p.goto("file://" + file); return true; };
+    /* 내비 */
+    if (!(await open("navigation"))) out.nav = { error: "components/navigation.html 이 없습니다 — 사이트를 빌드하세요" };
+    else {
+      const r = await p.evaluate(() => {
+        const one = (sel) => {
+          const nav = document.querySelector(sel); if (!nav) return null;
+          const cs = getComputedStyle(nav), top = nav.getBoundingClientRect().top + parseFloat(cs.borderTopWidth);
+          const kids = [...nav.children].filter((k) => getComputedStyle(k).display !== "none").map((k) => {
+            const c = getComputedStyle(k), box = k.getBoundingClientRect();
+            return { kind: k.tagName === "A" ? "item" : k.classList.contains("group") ? "group" : k.classList.contains("foot") ? "foot" : "other",
+              y: box.top - top, h: box.height, mt: parseFloat(c.marginTop), mb: parseFloat(c.marginBottom), pb: parseFloat(c.paddingBottom) };
+          });
+          return { padBottom: parseFloat(cs.paddingBottom), kids };
+        };
+        return { basic: one("#ex-navigation-basic .sidenav"), collapsed: one("#ex-navigation-collapsed .sidenav") };
+      });
+      out.nav = r.basic && r.collapsed ? r : { error: "사이트에서 내비 예제(#ex-navigation-basic · #ex-navigation-collapsed)를 찾지 못했습니다" };
+    }
+    /* Tag 높이 — 예제 안의 .tag.sm · .tag(크기 클래스 없음) · .tag.lg 첫 것 */
+    if (!(await open("tag"))) out.tag = { error: "components/tag.html 이 없습니다 — 사이트를 빌드하세요" };
+    else {
+      const t = await p.evaluate(() => {
+        const h = (sel) => { const e = document.querySelector(sel); return e ? +e.getBoundingClientRect().height.toFixed(3) : null; };
+        return { sm: h(".example-preview .tag.sm"), md: h(".example-preview .tag:not(.sm):not(.lg)"), lg: h(".example-preview .tag.lg") };
+      });
+      out.tag = t.sm && t.md && t.lg ? t : { error: "사이트 Tag 예제에서 세 크기(.tag.sm · .tag · .tag.lg)를 다 찾지 못했습니다 " + JSON.stringify(t) };
+    }
   } catch (e) {
-    return { error: "사이트를 재지 못했습니다(" + String(e.message).split("\n")[0] + ")" };
+    const err = { error: "사이트를 재지 못했습니다(" + String(e.message).split("\n")[0] + ")" };
+    if (!out.nav) out.nav = err; if (!out.tag) out.tag = err;
   } finally { if (b) await b.close(); }
+  return out;
+}
+
+/* ---------- 값 입력 필드 포커스(2026-10-26 k5) ----------
+   사람의 결정(k5): Text Field · Search · Select 트리거 · Date Picker 필드의 포커스는 테두리 1px + inset 1px(합쳐 2px 가장자리) + 0 0 0 4px 후광.
+   기대값은 사이트 CSS 에서 읽는다 — [기본 규칙(테두리 굵기), 포커스 규칙(border-color · box-shadow)]. 읽지 못하면 어긋남으로 낸다 */
+const FOCUS_CSS = { "Text Field": [".field input", ".field input:focus"], "Search": [".searchbar", ".searchbar:focus-within"], "Select": [".dropdown .trigger", ".dropdown .trigger:focus-visible"], "Date Picker": [".datepicker .field-btn", ".datepicker .field-btn:focus-visible"] };
+function focusExpect() {
+  const out = {};
+  const shadow = (s) => { const nums = s.replace(/var\([^)]*\)/g, " ").replace(/\binset\b/, " ").trim().split(/\s+/).filter(Boolean).map(parseFloat); return { x: nums[0] || 0, y: nums[1] || 0, blur: nums[2] || 0, spread: nums[3] || 0, tok: figTok(s), inset: /\binset\b/.test(s) }; };
+  for (const [set, [base, sel]] of Object.entries(FOCUS_CSS)) {
+    try {
+      const b = cssRule(base), f = cssRule(sel);
+      const bw = parseFloat((/(\d+(?:\.\d+)?)px\s+solid/.exec(b.border || "") || [])[1]);
+      const parts = (f["box-shadow"] || "").split(/,(?![^(]*\))/).map((x) => x.trim()).filter(Boolean).map(shadow);
+      const ins = parts.filter((x) => x.inset), ring = parts.filter((x) => !x.inset);
+      if (!(bw > 0) || !figTok(f["border-color"]) || ins.length !== 1 || ring.length !== 1) throw new Error(`${sel} 의 border · box-shadow 를 읽지 못했습니다(${b.border} / ${f["border-color"]} / ${f["box-shadow"]})`);
+      out[set] = { border: { tok: figTok(f["border-color"]), w: bw }, inner: ins[0], ring: ring[0], css: sel };
+    } catch (e) { out[set] = { error: String(e.message || e) }; }
+  }
+  return out;
 }
 
 /* ---------- 문서 카드 Spec(2026-10-26 k3) ----------
@@ -329,6 +365,8 @@ function componentsExpect() {
     navCollapsed: navExample("collapsed"),
     /* 문서 카드 Spec — 컴포넌트 키별 [행 이름, 사이트 글] (2026-10-26 k3) */
     specs: specExpect(),
+    /* 값 입력 필드 4종의 포커스 — 사이트 CSS (2026-10-26 k5) */
+    focus: focusExpect(),
     /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
     donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
       .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
@@ -652,6 +690,38 @@ function diffComponents(c, want, bad, notes) {
     }
     for (const [slug, s] of fig) if (!want.specs[slug]) bad.push(`Spec 카드 ${s.card}(${s.id}) 에 맞는 저장소 컴포넌트가 없습니다(키 ${slug})`);
   } else notes.push("덤프에 문서 카드 Spec 이 없습니다 — 2026-10-26 k3 전 probe.js 로 만든 덤프입니다");
+  /* 값 입력 필드 4종의 Focused(2026-10-26 k5) — 테두리 · 안쪽 줄 · 후광의 토큰과 굵기를 사이트 CSS 와 맞춘다.
+     Figma 는 안쪽 그림자를 INSIDE 테두리 밑에 그린다(임시 노드로 확인 — spread 1 은 1px 테두리에 완전히 가려지고, spread 2 라야
+     테두리 안쪽에 1px 이 보인다). 그래서 CSS 의 inset Npx 는 Figma 안쪽 그림자 spread = N + 테두리 굵기 로 그린 것을 기대한다.
+     세트나 Focused 변형이 없으면, 기대값을 CSS 에서 읽지 못하면 어긋남이다 */
+  if (c.focus) {
+    for (const [set, w] of Object.entries(want.focus)) {
+      if (w.error) { bad.push(`${set} 포커스 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${w.error}`); continue; }
+      const list = c.focus[set];
+      if (!list) { bad.push(`${set} 세트가 없어 Focused 를 대조하지 못했습니다`); continue; }
+      if (!list.length) { bad.push(`${set} 에 State=Focused 변형이 없습니다 — 사이트 ${w.css}`); continue; }
+      const innerSpread = w.inner.spread + w.border.w;
+      for (const v of list) {
+        const at = `${set} ${v.variant} (${v.id})`;
+        if (!v.box) { bad.push(`${at} — 포커스 칸을 찾지 못했습니다`); continue; }
+        if (v.stroke !== "$" + w.border.tok || v.sw !== w.border.w || v.align !== "INSIDE") bad.push(`${at} 테두리 ${v.stroke} · ${v.sw}px · ${v.align} ≠ ${w.border.tok} · ${w.border.w}px · INSIDE`);
+        const ok = (fx, tok, spread, blur) => fx.length === 1 && fx[0][0] === tok && fx[0][1] === spread && fx[0][2] === blur && fx[0][3] === "0,0";
+        if (!ok(v.inner, w.inner.tok, innerSpread, w.inner.blur)) bad.push(`${at} 안쪽 줄 ${JSON.stringify(v.inner)} ≠ [${w.inner.tok}, spread ${innerSpread}(inset ${w.inner.spread} + 테두리 ${w.border.w}), blur ${w.inner.blur}]`);
+        if (!ok(v.drop, w.ring.tok, w.ring.spread, w.ring.blur)) bad.push(`${at} 후광 ${JSON.stringify(v.drop)} ≠ [${w.ring.tok}, spread ${w.ring.spread}, blur ${w.ring.blur}]`);
+      }
+    }
+  } else notes.push("덤프에 값 입력 필드 Focused 조사가 없습니다 — 2026-10-26 k5 전 probe.js 로 만든 덤프입니다");
+  /* Tag 높이(2026-10-26 k5) — 크기마다 모든 변형이 사이트 실측과 ±0.5. 잴 수 없으면 어긋남이다 */
+  if (c.tagHeights !== undefined) {
+    const tg = want.tagSite;
+    if (!tg || tg.error) bad.push(`Tag 높이를 사이트와 대조하지 못했습니다 — ${tg ? tg.error : "잴 수 없음"}`);
+    else if (!c.tagHeights) bad.push("Tag 세트가 없어 높이를 대조하지 못했습니다");
+    else for (const [size, k] of [["Small", "sm"], ["Medium", "md"], ["Large", "lg"]]) {
+      const f = c.tagHeights[size];
+      if (!f) { bad.push(`Tag 에 Size=${size} 변형이 없습니다`); continue; }
+      if (Math.abs(f[0] - tg[k]) > 0.5 || Math.abs(f[1] - tg[k]) > 0.5) bad.push(`Tag Size=${size} 높이 ${f[0] === f[1] ? f[0] : f[0] + "~" + f[1]}(변형 ${f[2]}) ≠ 사이트 실측 ${+tg[k].toFixed(2)}`);
+    }
+  } else notes.push("덤프에 Tag 높이가 없습니다 — 2026-10-26 k5 전 probe.js 로 만든 덤프입니다");
 }
 
 function expect_() {
@@ -677,9 +747,10 @@ function expect_() {
 }
 
 /* ---------- 대조 ---------- */
-function diff(dumpPath, navGeo) {
+function diff(dumpPath, site) {
   const want = expect_();
-  want.components.navGeo = navGeo;   // 사이트 실측(siteNav) — 진입점이 미리 잰다
+  want.components.navGeo = site.nav;   // 사이트 실측(siteMeasure) — 진입점이 미리 잰다
+  want.components.tagSite = site.tag;
   const got = JSON.parse(fs.readFileSync(dumpPath, "utf8"));
   const bad = [];
   const list = (a, b, label) => {
@@ -766,11 +837,13 @@ function diff(dumpPath, navGeo) {
 const [cmd, arg] = process.argv.slice(2);
 if (cmd === "expect") {
   const w = expect_();
-  w.components.navGeo = await siteNav();
+  const site = await siteMeasure();
+  w.components.navGeo = site.nav;
+  w.components.tagSite = site.tag;
   console.log(JSON.stringify(w, null, 1));
 } else if (cmd === "diff") {
   if (!arg) { console.error("쓰는 법: node _figma/audit.mjs diff <덤프.json>"); process.exit(2); }
-  const { bad, notes, counts } = diff(arg, await siteNav());
+  const { bad, notes, counts } = diff(arg, await siteMeasure());
   console.log("기대값:", JSON.stringify(counts));
   for (const n of notes) console.log("NOTE ", n);
   if (!bad.length) { console.log("어긋남 0 — Figma 와 저장소가 같습니다."); process.exit(0); }

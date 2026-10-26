@@ -150,7 +150,9 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [] };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null };
+/* 값 입력 필드의 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다 */
+const FOCUS_BOX = { "Text Field": "Input", "Search": null, "Select": "Trigger", "Date Picker": "Field" };
 for (const p of figma.root.children) {
   if (!isCurrent(p)) continue;
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
@@ -311,7 +313,28 @@ for (const p of figma.root.children) {
     }
     components.specs.push({ card: card.name, id: card.id, rows });
   }
+  /* 값 입력 필드 4종의 Focused(2026-10-26 k5) — audit 이 사이트 CSS 의 테두리 · inset · 후광과 맞춘다.
+     변형마다 칸의 테두리(토큰 · 굵기 · 정렬)와 안쪽 · 바깥 그림자([토큰, spread, blur, "x,y"]) */
+  for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    if (!Object.prototype.hasOwnProperty.call(FOCUS_BOX, set.name)) continue;
+    const list = [];
+    for (const v of set.children.filter((k) => /(?:^|, )State=Focused(?:,|$)/.test(k.name))) {
+      const box = FOCUS_BOX[set.name] ? v.findOne((k) => k.name === FOCUS_BOX[set.name] && "strokes" in k) : v;
+      if (!box) { list.push({ variant: v.name, id: v.id, box: null }); continue; }
+      const fx = (t) => box.effects.filter((e) => e.visible !== false && e.type === t).map((e) => [vname(e.boundVariables && e.boundVariables.color) || "raw", e.spread || 0, e.radius || 0, e.offset ? e.offset.x + "," + e.offset.y : "0,0"]);
+      list.push({ variant: v.name, id: v.id, box: box.id, stroke: paint(box.strokes), sw: box.strokeWeight === figma.mixed ? "mixed" : box.strokeWeight, align: box.strokeAlign, inner: fx("INNER_SHADOW"), drop: fx("DROP_SHADOW") });
+    }
+    components.focus[set.name] = list;
+  }
+  /* Tag 높이(2026-10-26 k5) — 크기마다 [가장 낮은 높이, 가장 높은 높이, 변형 수]. audit 이 사이트 실측(.tag.sm · .tag · .tag.lg)과 ±0.5 로 맞춘다 */
+  for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    if (set.name !== "Tag") continue;
+    const by = {};
+    for (const v of set.children) { const m = /(?:^|, )Size=([^,]+)/.exec(v.name); if (!m) continue; const e = by[m[1]] || (by[m[1]] = [Infinity, -Infinity, 0]); e[0] = Math.min(e[0], v.height); e[1] = Math.max(e[1], v.height); e[2]++; }
+    components.tagHeights = Object.fromEntries(Object.entries(by).map(([k, e]) => [k, [+e[0].toFixed(2), +e[1].toFixed(2), e[2]]]));
+  }
 }
+for (const k of Object.keys(FOCUS_BOX)) if (!components.focus[k]) components.focus[k] = null;   // 세트가 없으면 null — audit 이 어긋남으로 낸다
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
 
 return {

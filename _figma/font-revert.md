@@ -27,6 +27,11 @@
 >   값 글자 36(원래 Pretendard Regular · Body/2 33 · 스타일 없음 3), 새 행 이름 3(Label/1 Medium 복제) · 새 행 값 3(Body/2 복제).
 >   `font-revert-nodes.tsv` 맨 아래 "2026-10-26 k4" 절. 같은 때 고친 컴포넌트(Tag 높이 · Text Field Focused 고리)는 칸 · 테두리 · 효과만 바꿔 글자 노드는 그대로다.
 >   Pretendard 가 있어야 하는 글자 줄 상자 · 자간 · 굵기는 아래 "Pretendard 가 생기면 할 일" 에 모았다
+> - 2026-10-26 k5: 문서 카드 Spec 글 3행(Text Field · Search · Navigation 의 Container)을 사이트 spec 행 그대로 고치며 **1개가 새로 Noto** 가 됐다(사람의 결정) —
+>   Card/Search Container 값 322:811(원래 Pretendard Regular · 스타일 없음). 322:641 · 332:3055 는 k4 에 이미 Noto 라 글자만 다시 바뀌었다.
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-26 k5" 절. 같은 때 만든 변형 8개(Select · Date Picker Focused 3 · Tag Solid Accent 3 · Card Flush · Breadcrumb Icon)는 글자를 고치지 않아
+>   복제 원본의 Pretendard 그대로다 — 그래서 굵기가 사이트와 다른 원본 노드가 늘었다(아래 표에서 다시 셈: Tag 라벨 57 → 60 · Card 제목 12 → 13 · Date Picker 라벨 4 → 6 · Breadcrumb 현재 2 → 3).
+>   Card Flush 의 표 머리 3개는 Table Header Cell 인스턴스라 원본 328:1514 를 따른다(원본 수 4 그대로)
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
@@ -59,19 +64,19 @@ Figma 14단계는 20 · 22 · 16 · 18 이라 다르다 — 내비 말고는 줄
 | Text Field 도움말 · Small 값 | 322:371 …(18) · 322:370 …(6) | 12 / 500(Caption/1) | 400 |
 | Select Button 기본 · 선택 | 323:624 …(4) · 323:626 …(2) | 400(Body/2) · 500(Label/1) | 500 · 600 |
 | Slider 라벨 · 값 · 눈금 | 325:626 …(4) · 325:627 …(4) · 325:633 …(12) | 500 · 500 · 500 | 400 · 600 · 400 |
-| Date Picker 라벨 | 325:818 …(4) | 500(Label/1) | 600 |
+| Date Picker 라벨 | 325:818 …(6 — k5 Focused 634:3094 · 634:3099 포함) | 500(Label/1) | 600 |
 | 달력 머리(월 · 요일) | 325:844 …(2) · 325:850 …(14) | 500(Label/2) | 600 |
 | 달력 날짜 | Date Picker 안 66 · Calendar Day 325:805 …(4) | 500(Caption/1) | 400 |
 | 달력 선택 · 오늘 날짜 | Date Picker 안 4 · Calendar Day 325:809 …(2) | 500(Label/2) | 선택 600 · 오늘 700 |
 | Checkbox · Radio 설명 | 324:537 …(9) · 324:729 …(6) | 500(Caption/1) | 400 |
-| Tag 라벨 | 326:961 …(57) | 500(Label/2) | 600 |
+| Tag 라벨 | 326:961 …(60 — k5 Solid Accent 634:3624 · 634:3627 · 634:3630 포함) | 500(Label/2) | 600 |
 | Menu Item 선택 · 힌트 | 320:365 …(3) · 320:348 …(9) | 500 · 500 | 600 · 400 |
 | Dropdown 그룹 라벨 | 320:418 | 500 · 자간 2.52%(Label/2) | 600 · .06em |
 | Tab 기본 · 선택 · 작은 선택 · 건수 | 331:2363 …(6) · 331:2367 …(3) · 331:2379 …(3) · 331:2365 …(18) | 400 · 500 · 500 · 500 | 500 · 700(pill 600) · 700 · 700 |
-| Breadcrumb 현재 | 332:2318 · 332:2333 | 500(Title/2) | 600 |
+| Breadcrumb 현재 | 332:2318 · 332:2333 · 635:3660(k5 Icon) | 500(Title/2) | 600 |
 | Top Navigation 로고 · 아바타 | 332:3158 · 332:3184 · 332:3180 · 332:3215 | 500 | 700 |
 | Accordion 제목 · 메타 | 320:1099 …(6) · 320:1100 …(6) | 500 · 500 | 600 · 400 |
-| Card 제목 | 326:1318 …(12) | 16 · 행간 24 / 500(Title/1, compact 도 같음) | 600 — compact 는 14 · 행간 20 |
+| Card 제목 | 326:1318 …(13 — k5 Flush 635:3104 포함) | 16 · 행간 24 / 500(Title/1, compact 도 같음) | 600 — compact 는 14 · 행간 20 |
 | Notice 제목 · Toast 액션 · Banner 링크 | 333:2703 …(5) · 333:2803 …(2) · 333:2818 …(3) | 500 | 700 · 600 · 600 |
 | Divider 라벨 | 320:1019 | 500(Caption/1) | 400 |
 | 표 머리(Table Header Cell · Table) | 328:1514 …(4) · 330:1971 …(8) | 500(Label/2) | 600 |
