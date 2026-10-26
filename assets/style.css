@@ -675,18 +675,18 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field textarea{height:auto;min-height:96px;padding:10px 14px;resize:vertical;line-height:1.5}
 .field input::placeholder,.field textarea::placeholder{color:var(--foreground-disable-primary)}
 .field input:hover,.field textarea:hover{border-color:var(--line-neutral-primary)}
-.field input:focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}   /* 값 입력 필드의 포커스 — 테두리 + 안쪽 1px 불투명 brand(2px 가장자리, 대비 6.59 · 4.82) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26) */
+.field input:focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 brand(대비 6.59 · 4.82) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로) */
 .field input:disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
 .field input:read-only{background:var(--background-neutral-secondary)}
 .field .help{color:var(--foreground-neutral-tertiary);font-size:12px}
 .field.error input,.field.error textarea,.field.error .affix{border-color:var(--foreground-negative-primary)}   /* 불투명 빨강 — 16% 틴트(--surface-negative-strong)는 필드 면 대비 1.23 · 1.34 라 테두리만으로 오류가 보이지 않았다. 3.44 · 5.47(사람의 결정 2026-10-26) */
-.field.error input:focus,.field.error textarea:focus-within,.field.error .affix:focus-within{border-color:var(--foreground-negative-primary);box-shadow:inset 0 0 0 1px var(--foreground-negative-primary),0 0 0 4px var(--line-negative-focus)}   /* 오류 필드의 포커스 — 빨강 가장자리(대비 3.44 · 5.47) + 빨강 후광(장식). brand 링이 오류 테두리를 덮지 않게(사람의 결정 2026-10-26) */
+.field.error input:focus,.field.error textarea:focus-within,.field.error .affix:focus-within{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}   /* 오류 필드의 포커스 — 빨강 테두리 1px(대비 3.44 · 5.47) + 빨강 후광(장식). brand 링이 오류 테두리를 덮지 않게(사람의 결정 2026-10-26) */
 .field.error .help{color:var(--foreground-negative-strong)}
 .field.sm input{height:36px;font-size:12px;padding:0 12px}
 .field.lg input{height:52px;font-size:16px;padding:0 16px}
 .field .affix{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary)}
 .field .affix input{border:0;height:auto;padding:0;flex:1;background:transparent;outline:0;min-width:0}
-.field .affix:focus-within{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}
+.field .affix:focus-within{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
 .field .affix span{color:var(--foreground-neutral-tertiary);font-size:12px;white-space:nowrap}
 .field .counter{margin-left:auto;font-size:12px;color:var(--foreground-neutral-tertiary)}
 .field .row{display:flex;justify-content:space-between;align-items:baseline}
@@ -696,7 +696,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .searchbar svg{width:18px;height:18px;color:var(--foreground-neutral-tertiary);flex:none}
 .searchbar input{flex:1;border:0;background:transparent;font:inherit;font-size:14px;color:var(--foreground-neutral-primary);outline:0;min-width:0}
 .searchbar input::placeholder{color:var(--foreground-disable-primary)}
-.searchbar:focus-within{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}
+.searchbar:has(input:focus){border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 함께 나왔다(사람의 결정 2026-10-26) */
 .searchbar .clear{border:0;padding:0;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);width:20px;height:20px;border-radius:50%;font:inherit;font-size:12px;line-height:0;cursor:pointer;display:grid;place-items:center;flex:none}
 .searchbar .clear svg{display:block;width:12px;height:12px}
 .searchbar kbd{font-size:12px;color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:4px;padding:1px 5px;background:var(--background-neutral-secondary)}
@@ -737,7 +737,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .datepicker label{font-weight:600}
 .datepicker .field-btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;min-width:240px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:14px;color:var(--foreground-neutral-primary);cursor:pointer;text-align:left}
 .datepicker .field-btn:hover{border-color:var(--line-neutral-primary)}
-.datepicker .field-btn:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}
+.datepicker .field-btn:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
 .datepicker .field-btn svg{width:18px;height:18px;color:var(--foreground-neutral-tertiary);margin-left:auto}
 .datepicker .field-btn .placeholder{color:var(--foreground-disable-primary)}
 .datepicker .field-btn .sep{color:var(--foreground-disable-primary)}
@@ -765,12 +765,12 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 
 /* Checkbox */
 .checkbox{display:inline-flex;align-items:flex-start;gap:8px;font-size:14px;cursor:pointer;line-height:1.4}
-.checkbox input{appearance:none;-webkit-appearance:none;flex:none;width:16px;height:16px;margin:2px 0 0;border:1.5px solid var(--line-neutral-primary);border-radius:var(--radius-sm);background:var(--surface-elevated-primary);display:grid;place-items:center;cursor:inherit;transition:background var(--motion-fast),border-color var(--motion-fast)}
-.checkbox input:hover{border-color:var(--line-neutral-primary)}
-.checkbox input:checked,.checkbox input:indeterminate,.checkbox input.mixed{background:var(--surface-brand-primary);border-color:var(--surface-brand-primary)}
+.checkbox input{appearance:none;-webkit-appearance:none;flex:none;width:16px;height:16px;margin:2px 0 0;border:0;box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);border-radius:var(--radius-sm);background:var(--surface-elevated-primary);display:grid;place-items:center;cursor:inherit;transition:background var(--motion-fast),border-color var(--motion-fast)}
+.checkbox input:hover{box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary)}   /* 테두리를 안쪽 그림자로 그린다 — Chromium 은 border 1.5px 를 1px 로 내려 엔진마다 굵기가 달랐다(사람의 결정 2026-10-26: 1.5px 로 통일) */
+.checkbox input:checked,.checkbox input:indeterminate,.checkbox input.mixed{background:var(--surface-brand-primary);box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary)}
 .checkbox input:checked::after{content:"";width:12px;height:12px;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat}
 .checkbox input:indeterminate::after,.checkbox input.mixed::after{content:"";width:12px;height:12px;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3C/svg%3E") center/contain no-repeat}
-.checkbox input:disabled{background:var(--surface-disable-primary);border-color:var(--surface-disable-primary);cursor:not-allowed}
+.checkbox input:disabled{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary);cursor:not-allowed}
 .checkbox input:checked:disabled::after,.checkbox input:indeterminate:disabled::after{background:var(--foreground-disable-primary)}
 .checkbox input:disabled+span{color:var(--foreground-disable-primary)}
 .checkbox small{display:block;color:var(--foreground-neutral-tertiary);font-size:12px;font-weight:400}
@@ -779,11 +779,11 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 
 /* Radio Button */
 .radio{display:inline-flex;align-items:flex-start;gap:8px;font-size:14px;cursor:pointer;line-height:1.4}
-.radio input{appearance:none;-webkit-appearance:none;flex:none;width:16px;height:16px;margin:2px 0 0;border:1.5px solid var(--line-neutral-primary);border-radius:50%;background:var(--surface-elevated-primary);cursor:inherit;display:grid;place-items:center;transition:background var(--motion-fast),border-color var(--motion-fast)}
-.radio input:hover{border-color:var(--line-neutral-primary)}
+.radio input{appearance:none;-webkit-appearance:none;flex:none;width:16px;height:16px;margin:2px 0 0;border:0;box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);border-radius:50%;background:var(--surface-elevated-primary);cursor:inherit;display:grid;place-items:center;transition:background var(--motion-fast),border-color var(--motion-fast)}
+.radio input:hover{box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary)}
 .radio input:checked{border-color:var(--surface-brand-primary);background:var(--surface-brand-primary)}
 .radio input:checked::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand-label)}
-.radio input:disabled{background:var(--surface-disable-primary);border-color:var(--surface-disable-primary);cursor:not-allowed}
+.radio input:disabled{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary);cursor:not-allowed}
 .radio input:checked:disabled::after{background:var(--foreground-disable-primary)}
 .radio input:disabled+span{color:var(--foreground-disable-primary)}
 .radio small{display:block;color:var(--foreground-neutral-tertiary);font-size:12px;font-weight:400}
@@ -857,7 +857,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .dropdown{position:relative;display:inline-block;line-height:1.6}
 .dropdown .trigger{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px 0 14px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:14px;color:var(--foreground-neutral-primary);cursor:pointer;min-width:200px;justify-content:space-between}
 .dropdown .trigger:hover{border-color:var(--line-neutral-primary)}
-.dropdown .trigger:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary),0 0 0 4px var(--line-brand-focus);outline:none}
+.dropdown .trigger:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
 .dropdown .trigger .placeholder{color:var(--foreground-disable-primary)}
 .dropdown .trigger::after{content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
 .dropdown.open .trigger{border-color:var(--foreground-brand-primary)}

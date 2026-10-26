@@ -413,7 +413,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   // 입력은 마우스 클릭에도 링이 떠야 한다(버튼은 아니어야 한다)
   await page.locator("#ex-text-field-basic input").first().click(); await page.waitForTimeout(200);
   const clickRing = await page.evaluate(() => { const i = document.querySelector("#ex-text-field-basic input"); return { fv: i.matches(":focus-visible"), shadow: getComputedStyle(i).boxShadow }; });
-  ok("input keeps its ring on mouse click", clickRing.fv && /inset/.test(clickRing.shadow) && /0px 0px 0px 4px/.test(clickRing.shadow), JSON.stringify(clickRing));   // 링은 :focus 의 box-shadow 라 클릭에도 뜬다
+  ok("input keeps its ring on mouse click", clickRing.fv && /0px 0px 0px 4px/.test(clickRing.shadow), JSON.stringify(clickRing));   // 링은 :focus 의 box-shadow 라 클릭에도 뜬다
   await go("components/button.html");
   const lgIcon = await page.evaluate(() => {
     const b2 = document.querySelector("#ex-button-icon .btn.icon.lg");
@@ -859,29 +859,38 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const cf = page.locator("#ex-text-field-affix .example-preview .field").filter({ has: page.locator(".counter") }).first();
   await cf.locator("input").fill("새 정책");
   ok("text field counter updates", (await cf.locator(".counter").textContent()) === "4 / 80");
-  /* 값 입력 필드의 포커스 — 테두리 + 안쪽 1px 불투명 brand(2px 가장자리) + 바깥 4px 후광, 전역 외곽선은 끈다(사람의 결정 2026-10-26).
+  /* 값 입력 필드의 포커스 — 테두리 1px 불투명 brand + 바깥 4px 후광, 전역 외곽선은 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로).
      선택 컨트롤은 전역 :focus-visible 외곽선 그대로다 */
   const fieldRing = async (pg, sel, boxSel) => { await go(pg); await page.locator(sel).first().evaluate((e) => e.focus());
     await page.keyboard.press("Tab"); await page.keyboard.press("Shift+Tab"); await page.waitForTimeout(250);   // 키보드 포커스(:focus-visible) · box-shadow 전환이 끝난 뒤
     return page.evaluate(([sel, boxSel]) => { const f = document.querySelector(sel), box = boxSel ? f.closest(boxSel) : f, cs = getComputedStyle(box);
       const d = document.createElement("div"); d.style.color = "var(--foreground-brand-primary)"; document.body.append(d); const brand = getComputedStyle(d).color; d.remove();
-      return { shadow: cs.boxShadow, outline: getComputedStyle(f).outlineStyle, edge: cs.borderTopColor === brand, visible: f.matches(":focus-visible") }; }, [sel, boxSel]); };
+      return { shadow: cs.boxShadow, outline: getComputedStyle(f).outlineStyle, border: cs.borderTopColor, edge: cs.borderTopColor === brand, visible: f.matches(":focus-visible") }; }, [sel, boxSel]); };
   const rings = { field: await fieldRing("components/text-field.html", "#ex-text-field-basic .field input"),
     search: await fieldRing("components/search.html", "#ex-search-basic .searchbar input", ".searchbar"),
     select: await fieldRing("components/select.html", "#ex-select-default .dropdown .trigger"),
     date: await fieldRing("components/date-picker.html", "#ex-date-picker-default .field-btn") };
-  ok("value fields show the 2px brand edge and 4px halo on focus", Object.values(rings).every((r) => /inset/.test(r.shadow) && /0px 0px 0px 4px/.test(r.shadow) && r.outline === "none" && r.edge), JSON.stringify(rings));
+  ok("value fields show a 1px brand border and 4px halo on focus", Object.values(rings).every((r) => !/inset/.test(r.shadow) && /0px 0px 0px 4px/.test(r.shadow) && r.outline === "none" && r.edge), JSON.stringify(rings));
+  /* 검색창 링은 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 겹쳤다(사람의 결정 2026-10-26) */
+  await go("components/search.html"); await page.locator("#ex-search-extras .searchbar .clear").first().evaluate((e) => e.focus());
+  await page.keyboard.press("Tab"); await page.keyboard.press("Shift+Tab"); await page.waitForTimeout(250);
+  const clearFocus = await page.evaluate(() => { const c = document.querySelector("#ex-search-extras .searchbar .clear"); return { focused: document.activeElement === c, bar: getComputedStyle(c.closest(".searchbar")).boxShadow, outline: getComputedStyle(c).outlineStyle }; });
+  ok("the search clear button shows only its own outline", clearFocus.focused && !/4px/.test(clearFocus.bar) && clearFocus.outline === "solid", JSON.stringify(clearFocus));
   /* 오류 필드의 포커스 — brand 링이 빨간 오류 테두리를 덮었다. 빨강 가장자리 + --line-negative-focus 후광(사람의 결정 2026-10-26) */
   const errRing = await fieldRing("components/text-field.html", "#ex-text-field-basic .field.error input");
   const errWant = await page.evaluate(() => { const c = (v) => { const d = document.createElement("div"); d.style.color = `var(${v})`; document.body.append(d); const x = getComputedStyle(d).color; d.remove(); return x; };
     return { edge: c("--foreground-negative-primary"), halo: c("--line-negative-focus") }; });
-  ok("an error field keeps a red edge and halo on focus", errRing.shadow.includes(errWant.edge) && errRing.shadow.includes(errWant.halo) && errRing.outline === "none", JSON.stringify({ errRing, errWant }));
+  ok("an error field keeps a red border and halo on focus", errRing.border === errWant.edge && errRing.shadow.includes(errWant.halo) && !/inset/.test(errRing.shadow) && errRing.outline === "none", JSON.stringify({ errRing, errWant }));
   /* 오류 테두리 — 16% 틴트라 필드 면 대비 1.23 으로 테두리만으로는 오류가 보이지 않았다. 불투명 빨강(사람의 결정 2026-10-26) */
   const errBorder = await page.evaluate((want) => { if (document.activeElement) document.activeElement.blur();
     return { border: getComputedStyle(document.querySelector("#ex-text-field-basic .field.error input")).borderTopColor, want }; }, errWant.edge);
   ok("an error field border is opaque red without focus", errBorder.border === errBorder.want, JSON.stringify(errBorder));
   const chkRing = await fieldRing("components/checkbox.html", "#ex-checkbox-default input");
-  ok("selection controls keep the global focus outline", chkRing.outline !== "none" && !/inset/.test(chkRing.shadow), JSON.stringify(chkRing));
+  ok("selection controls keep the global focus outline", chkRing.outline !== "none" && !/0px 0px 0px 4px/.test(chkRing.shadow), JSON.stringify(chkRing));
+  /* Checkbox · Radio 테두리 1.5px — border 1.5px 는 Chromium 이 1px 로 내려 엔진마다 굵기가 달랐다. 안쪽 그림자로 그린다(사람의 결정 2026-10-26) */
+  const edge15 = []; for (const [pg, sel] of [["components/checkbox.html", "#ex-checkbox-default input"], ["components/radio-button.html", ".example-preview .radio input"]]) { await go(pg);
+    edge15.push(await page.evaluate((sel) => [...document.querySelectorAll(sel)].slice(0, 3).map((i) => { const c = getComputedStyle(i); return c.borderTopWidth + " | " + c.boxShadow; }), sel)); }
+  ok("checkbox and radio draw a 1.5px edge in every engine", edge15.flat().every((x) => /^0px \| .*0px 0px 0px 1\.5px inset/.test(x)), JSON.stringify(edge15));
   await go("components/card.html");
   /* 문서 제목 자간(h3 -0.01em)이 미리보기의 카드 제목까지 먹어 배포 CSS 와 0.16px 달랐다 — 문서 제목에만 남는다 */
   const h3Ls = await page.evaluate(() => { const ls = (e) => e && getComputedStyle(e).letterSpacing;
