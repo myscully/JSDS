@@ -161,3 +161,8 @@ Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/
 3 Component	I635:3144;328:1546	Pretendard Regular · Body/2 (원본 328:1546 을 따름)	Noto Sans KR Regular · 스타일 없음	텍스트 → 1	Card / Size=Flush · Table · Row 3 · Table Cell(Number) 635:3144 의 Value 속성
 # 같은 작업에서 글자만 다시 바뀐 k4 절 노드 1개 — 이미 Noto 라 되돌리는 법은 k4 절 그대로
 3 Component	322:641	Pretendard Regular · 스타일 없음(k4 절과 같음)	Noto Sans KR Regular · 스타일 없음	(k5 글) → 끝에 " · 오류일 때는 foreground/negative/primary · line/negative/focus" 를 덧붙임	Card/Text Field · Spec · Container 행 값(두 줄이 되어 글자 높이 22 → 44)
+
+# 2026-10-26 k8 — Button Spec State 행 값을 사이트 글(포커스 "1px 외곽선(2px 띄움)", 2ea4e2c)로 다시 고쳤다(사람의 결정 C). 새로 Noto 가 된 노드는 없다 — 글자만 다시 바뀐 k4 절 노드 1개
+# 되돌리는 법은 k4 절 그대로(새 행을 옆 행 317:318(Size) 복제로 만들었으므로 Pretendard Regular · Body/2)
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+3 Component	623:3091	(k4 절과 같음) Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	…포커스는 전 변형 공통 --foreground-brand-primary 2px → …포커스는 전 변형 공통 --foreground-brand-primary 1px 외곽선(2px 띄움)	Card/Button · Spec · State 행(623:3089) 값
