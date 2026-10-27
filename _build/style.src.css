@@ -781,7 +781,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .radio{display:inline-flex;align-items:flex-start;gap:8px;font-size:14px;cursor:pointer;line-height:1.4}
 .radio input{appearance:none;-webkit-appearance:none;flex:none;width:16px;height:16px;margin:2px 0 0;border:0;box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);border-radius:50%;background:var(--surface-elevated-primary);cursor:inherit;display:grid;place-items:center;transition:background var(--motion-fast),border-color var(--motion-fast)}
 .radio input:hover{box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary)}
-.radio input:checked{border-color:var(--surface-brand-primary);background:var(--surface-brand-primary)}
+.radio input:checked{box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary);background:var(--surface-brand-primary)}   /* 테두리를 안쪽 그림자로 바꾸며 여기만 border-color 로 남아, 선택된 Radio 의 brand 면 위에 기본 회색 띠가 남았다 */
 .radio input:checked::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand-label)}
 .radio input:disabled{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary);cursor:not-allowed}
 .radio input:checked:disabled::after{background:var(--foreground-disable-primary)}

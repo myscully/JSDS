@@ -891,6 +891,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const edge15 = []; for (const [pg, sel] of [["components/checkbox.html", "#ex-checkbox-default input"], ["components/radio-button.html", ".example-preview .radio input"]]) { await go(pg);
     edge15.push(await page.evaluate((sel) => [...document.querySelectorAll(sel)].slice(0, 3).map((i) => { const c = getComputedStyle(i); return c.borderTopWidth + " | " + c.boxShadow; }), sel)); }
   ok("checkbox and radio draw a 1.5px edge in every engine", edge15.flat().every((x) => /^0px \| .*0px 0px 0px 1\.5px inset/.test(x)), JSON.stringify(edge15));
+  /* 선택된 상태는 1.5px 띠도 brand — Radio 만 border-color 로 남아 brand 면 위에 회색 띠(22%)가 보였다 */
+  const onEdge = []; for (const [pg, sel] of [["components/checkbox.html", ".example-preview .checkbox input:checked"], ["components/radio-button.html", ".example-preview .radio input:checked:not(:disabled)"]]) { await go(pg);
+    onEdge.push(await page.evaluate((sel) => { const i = document.querySelector(sel), c = getComputedStyle(i); return { bg: c.backgroundColor, shadow: c.boxShadow }; }, sel)); }
+  ok("checked checkbox and radio keep the edge in the brand fill colour", onEdge.every((x) => x.shadow.startsWith(x.bg)), JSON.stringify(onEdge));
   await go("components/card.html");
   /* 문서 제목 자간(h3 -0.01em)이 미리보기의 카드 제목까지 먹어 배포 CSS 와 0.16px 달랐다 — 문서 제목에만 남는다 */
   const h3Ls = await page.evaluate(() => { const ls = (e) => e && getComputedStyle(e).letterSpacing;
