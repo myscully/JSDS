@@ -191,3 +191,71 @@ Resource	342:19	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 �
 Resource	342:23	Pretendard Regular · 스타일 없음(행간 160% · 자간 0)	Noto Sans KR Regular · 스타일 없음	…여섯 그룹 77개… → …여섯 그룹 79개…(사이트 resources/design-token.html 이 :root 에서 센 수)	Card/Token Layers(342:6) · Semantic 행 · Figma Variables 칸
 # 같은 작업에서 글자만 다시 바뀐 k10 절 노드 1개 — 이미 Noto 라 되돌리는 법은 k10 절 그대로
 Resource	342:42	Pretendard Regular · Body/2(k10 절과 같음)	Noto Sans KR Regular · 스타일 없음	텍스트 대비 4.5:1, 대형 텍스트·UI 요소 3:1. Neutral 500 이상만 텍스트에 사용 → 텍스트 대비 4.5:1, 대형 텍스트·UI 요소 3:1. 글자색은 --foreground-* 토큰으로 칠하고, 채운 면 위 글자만 --brand-label(Brand 면) · --static-white(Count) 를 씁니다 — 대비는 빌드가 잽니다	Card/Accessibility(342:32) · 목록 첫 줄 — 두 줄이 되어 글자 높이 22 → 44
+
+# 2026-10-27 k15 — 사람의 결정(Date Picker 마저 맞춤 · 새 글자는 변형마다 그대로). 새로 Noto Sans KR 이 된 노드 63개. 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: 인스턴스 속 "서체 덮어쓰기" 7개(하단 라벨 5 · 문서 카드 값 2)는 서체 덮어쓰기만 지우면 원본의 Pretendard · 스타일로 돌아간다(글자 덮어쓰기는 남긴다).
+#   그 밖은 서체를 Pretendard(같은 굵기 · 선택 칸은 SemiBold)로 돌리고, 원래 스타일이 적힌 것은 그 스타일에 다시 연결한다. sm · lg 값 26 은 스타일 없이 12 · 16 / 행간 160% / 자간 0(사이트 .datepicker line-height 1.6)
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+3 Component	I754:124;315:102	Pretendard Medium · Label/2(Button 원본 라벨)	Noto Sans KR Medium · 서체 덮어쓰기	버튼 → 적용	Calendar Foot Type=Single(754:125) · Apply — 달력 하단, 모든 달력 화면 · Date Picker Open 이 이 인스턴스를 따른다
+3 Component	I754:123;315:447	Pretendard Medium · Label/2(Button 원본 라벨)	Noto Sans KR Medium · 서체 덮어쓰기	버튼 → 오늘	Calendar Foot Type=Single · Today — 달력 하단, 모든 달력 화면 · Date Picker Open 이 이 인스턴스를 따른다
+3 Component	I754:152;315:102	Pretendard Medium · Label/2(Button 원본 라벨)	Noto Sans KR Medium · 서체 덮어쓰기	버튼 → 적용	Calendar Foot Type=Range(754:153) · Apply — 달력 하단, 모든 달력 화면 · Date Picker Open 이 이 인스턴스를 따른다
+3 Component	I754:151;315:447	Pretendard Medium · Label/2(Button 원본 라벨)	Noto Sans KR Medium · 서체 덮어쓰기	버튼 → 최근 7일	Calendar Foot Type=Range · Preset 7 — 달력 하단, 모든 달력 화면 · Date Picker Open 이 이 인스턴스를 따른다
+3 Component	I754:167;315:447	Pretendard Medium · Label/2(Button 원본 라벨)	Noto Sans KR Medium · 서체 덮어쓰기	버튼 → 최근 30일	Calendar Foot Type=Range · Preset 30 — 달력 하단, 모든 달력 화면 · Date Picker Open 이 이 인스턴스를 따른다
+3 Component	755:105	Pretendard Medium · Label/2(복제한 제목)	Noto Sans KR Medium · 스타일 없음	2026년 10월 → 2026년 11월	Calendar View=Two Months(755:2) 둘째 달 제목
+3 Component	755:269	Pretendard Medium · Label/2(복제한 제목)	Noto Sans KR Medium · 스타일 없음	2026년 10월 → 2016–2027	Calendar View=Year(755:264) 제목(사이트 titleOf — 12년 묶음)
+3 Component	755:389	Pretendard Medium · Label/2(복제한 제목)	Noto Sans KR Medium · 스타일 없음	2026년 10월 → 2026년	Calendar View=Month(755:384) 제목
+3 Component	755:361	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2016	Calendar View=Year 칸
+3 Component	755:363	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2017	Calendar View=Year 칸
+3 Component	755:365	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2018	Calendar View=Year 칸
+3 Component	755:367	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2019	Calendar View=Year 칸
+3 Component	755:369	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2020	Calendar View=Year 칸
+3 Component	755:371	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2021	Calendar View=Year 칸
+3 Component	755:373	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2022	Calendar View=Year 칸
+3 Component	755:375	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2023	Calendar View=Year 칸
+3 Component	755:377	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2024	Calendar View=Year 칸
+3 Component	755:379	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2025	Calendar View=Year 칸
+3 Component	755:381	(새로 만듦)	Noto Sans KR Bold 12 · 행간 19.2 · 스타일 없음	2026	Calendar View=Year 칸 — 선택(.cell.on 600, Noto 에 SemiBold 가 없어 Bold)
+3 Component	755:383	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2027	Calendar View=Year 칸
+3 Component	755:481	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	1월	Calendar View=Month 칸
+3 Component	755:483	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	2월	Calendar View=Month 칸
+3 Component	755:485	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	3월	Calendar View=Month 칸
+3 Component	755:487	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	4월	Calendar View=Month 칸
+3 Component	755:489	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	5월	Calendar View=Month 칸
+3 Component	755:491	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	6월	Calendar View=Month 칸
+3 Component	755:493	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	7월	Calendar View=Month 칸
+3 Component	755:495	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	8월	Calendar View=Month 칸
+3 Component	755:497	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	9월	Calendar View=Month 칸
+3 Component	755:499	(새로 만듦)	Noto Sans KR Bold 12 · 행간 19.2 · 스타일 없음	10월	Calendar View=Month 칸 — 선택
+3 Component	755:501	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	11월	Calendar View=Month 칸
+3 Component	755:503	(새로 만듦)	Noto Sans KR Regular 12 · 행간 19.2 · 스타일 없음	12월	Calendar View=Month 칸
+3 Component	I325:1129;325:820	Pretendard Regular · Body/2(원본 값)	Noto Sans KR Regular · 서체 덮어쓰기 · 자동 폭	2026-10-15 → 2026-09-01 ~ 2026-09-07	문서 카드 인스턴스 325:1129(Range → Type=Button, Size=Medium, State=Default) — 사이트 field 예제의 기간
+3 Component	I325:1289;325:831	Pretendard Regular · Body/2(원본 값)	Noto Sans KR Regular · 서체 덮어쓰기 · 자동 폭	2026-10-15 → 2026-09-01 ~ 2026-09-07	문서 카드 인스턴스 325:1289(Range → Type=Button, Size=Medium, State=Open, 안의 Calendar 는 View=Range) — 사이트 field 예제의 기간
+3 Component	756:4261	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Small, State=Default 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4272	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Large, State=Default 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4283	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Small, State=Focused 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4294	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Large, State=Focused 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4305	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Small, State=Open 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4317	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Large, State=Open 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4329	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Small, State=Disabled 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4340	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Large, State=Disabled 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4351	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Small, State=Error 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4362	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Large, State=Error 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4373	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Small, State=Error Focused 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4384	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Button, Size=Large, State=Error Focused 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4396	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Small, State=Default 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4403	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Large, State=Default 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4410	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Small, State=Focused 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4417	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Large, State=Focused 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4424	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Small, State=Disabled 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4431	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Large, State=Disabled 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4438	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Small, State=Read-only 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4445	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Large, State=Read-only 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4452	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Small, State=Error 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4459	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Large, State=Error 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4466	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Small, State=Error Focused 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4473	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Large, State=Error Focused 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	756:4480	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 12 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Small, State=Open 값 — 사이트 .datepicker.sm .field-btn / .field.sm input
+3 Component	756:4488	Pretendard Regular · Body/2(md 복제)	Noto Sans KR Regular 16 · 행간 160% · 자간 0 · 스타일 없음	2026-10-15(그대로)	Date Picker Type=Input, Size=Large, State=Open 값 — 사이트 .datepicker.lg .field-btn / .field.lg input
+3 Component	325:1423	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	필드 44 · 달력 폭 296 · 날짜 셀 34 → 필드 36 · 44 · 52 · 달력 폭 296(두 달 590) · 날짜 셀 높이 34 · 연/월 셀 40	Card/Date Picker Spec Size 값
+3 Component	325:1432	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	필드 아래 4px. 화면 하단이면 위로 → 필드 아래 4px. 아래 자리가 모자라고 위가 더 넓으면 필드 위 4px	Card/Date Picker Spec Placement 값
+4 Pattern	337:138	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	최근 24시간 → 2026-10-21 ~ 2026-10-27	Card/검색 툴바 기간 필드 — 사이트 patterns.data.js(data-default-preset=7, ded3003)

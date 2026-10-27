@@ -298,6 +298,7 @@ const FOCUS_CSS = [
   { set: "Search", state: "Focused", base: ".searchbar", rule: ".searchbar:has(input:focus)" },
   { set: "Select", state: "Focused", base: ".dropdown .trigger", rule: ".dropdown .trigger:focus-visible" },
   { set: "Date Picker", state: "Focused", base: ".datepicker .field-btn", rule: ".datepicker .field-btn:focus-visible" },
+  { set: "Date Picker", state: "Error Focused", base: ".datepicker .field-btn", rule: ".datepicker.error .field-btn:focus-visible" },   // k14 — 입력형(.affix)은 datePickerExpect 가 따로 본다
 ];
 const RING_SETS = ["Checkbox", "Radio Button", "Switch", "Slider", "Button"];
 function focusExpect() {
@@ -360,6 +361,69 @@ function chipTileExpect() {
     };
     for (const [k, o] of Object.entries(out)) for (const [f, v] of Object.entries(o)) if (!v) throw new Error(`${k}.${f} 를 읽지 못했습니다`);
     return out;
+  } catch (e) { return { error: String(e.message || e) }; }
+}
+
+/* Date Picker 필드 · 날짜 칸(2026-10-27 k14) — 저장소 4199ac6 의 개편. 기대값은 사이트 CSS 에서 읽고, 못 읽으면 어긋남이다.
+   필드 변형 표 — Type=Button(.datepicker .field-btn) · Input(.datepicker.field > .affix, Text Field 셸) × Size=Small · Medium · Large
+   (사이트 .sm · 기본 · .lg — Figma 의 Button · Tag 와 같은 크기 이름) × State. 상태 목록은 사이트 예제(components.data.js date-picker 의 Sizes · States · Input / Error)와
+   CSS 규칙이 있는 것만이다: Default · Focused(:focus-visible / :has(input:focus)) · Open(.open) · Disabled(:disabled / :has(input:disabled)) ·
+   Read-only(입력형만 — 버튼형은 readonly 가 없다) · Error(.error) · Error Focused. 입력형 안쪽 입력칸에는 후광이 없어야 한다(.field .affix input:focus 의 box-shadow:none).
+   날짜 칸 상태 — .calendar .day 와 상태 규칙. Start · End 는 .on 에 띠 쪽 모서리 0, In-range · Preview 는 같은 띠, Preview End 는 띠 + inset 1px 선(Figma 는 INSIDE 선),
+   Muted(다른 달)는 띠 · 선택 없이 흐린 글자, Focused 는 전역 :focus-visible 외곽선(고리 "Focus Ring" — focusExpect 머리 주석의 표현) */
+const DP_STATES = { Button: ["Default", "Focused", "Open", "Disabled", "Error", "Error Focused"], Input: ["Default", "Focused", "Open", "Disabled", "Read-only", "Error", "Error Focused"] };
+const DP_SIZES = { Small: ".sm", Medium: "", Large: ".lg" };
+/* 달력 화면(2026-10-27 k15) — 사이트 예제의 화면: Calendar(단일 · 일 화면) · Range(기간) · 두 달(Range two, data-calendars=2) · 연 · 월(제목을 눌러 연 → 월).
+   달력 안 날짜 칸은 "Day/<상태>" 프레임이고(Blank 는 두 달 보기의 빈 칸 — .day.blank visibility:hidden), 면 · 글자는 Calendar Day 상태 기대값과 같아야 한다.
+   적용은 값이 열기 전과 같으면 꺼진다(사이트 components.data.js cal() · ds.js) — 견본은 처음 값 그대로라 State=Disabled */
+const CAL_VIEWS = ["Day", "Range", "Two Months", "Year", "Month"];
+const DAY_STATES = ["Default", "Hover", "Today", "Selected", "Start", "End", "In-range", "Preview", "Preview End", "Muted", "Disabled", "Focused"];
+function datePickerExpect() {
+  try {
+    const halo = (v) => { const m = /^0 0 0 ([\d.]+)px (var\(--[a-z0-9-]+\))$/.exec((v || "").trim()); return m ? [figTok(m[2]), +m[1], 0] : null; };
+    const radius = (v) => { const n = String(v || "").trim().split(/\s+/).map(parseFloat); return n.length === 1 ? [n[0], n[0], n[0], n[0]] : n.length === 4 ? n : null; };
+    const need = (v, what) => { if (v === null || v === undefined || (Array.isArray(v) && v.some((x) => x === null || Number.isNaN(x)))) throw new Error(what + " 를 읽지 못했습니다"); return v; };
+    const T = (sel, prop) => need(figTok(cssRule(sel)[prop]), sel + " " + prop);
+    const fields = {};
+    for (const [type, base, sz, rules] of [
+      ["Button", ".datepicker .field-btn", (k) => `.datepicker${k} .field-btn`, { Focused: ".datepicker .field-btn:focus-visible", Open: ".datepicker.open:not(.error) .field-btn", Disabled: ".datepicker .field-btn:disabled", Error: ".datepicker.error .field-btn", "Error Focused": ".datepicker.error .field-btn:focus-visible" }],
+      ["Input", ".field .affix", (k) => `.field${k} .affix`, { Focused: ".field .affix:has(input:focus)", Open: ".datepicker.open:not(.error) .affix", Disabled: ".field .affix:has(input:disabled)", "Read-only": ".field .affix:has(input:read-only:not(:disabled))", Error: ".field.error .affix", "Error Focused": ".field.error .affix:has(input:focus)" }],
+    ]) {
+      const b = cssRule(base), bw = need(parseFloat((/([\d.]+)px\s+solid/.exec(b.border || "") || [])[1]), base + " border 굵기");
+      const def = { fill: need(figTok(b.background), base + " background"), stroke: need(figTok(b.border), base + " border"), sw: bw, drop: [] };
+      const h = {}; for (const [k, c] of Object.entries(DP_SIZES)) h[k] = need(px(cssRule(sz(c)).height), sz(c) + " height");
+      const st = { Default: { ...def, css: base } };
+      for (const s of DP_STATES[type].slice(1)) {
+        const r = cssRule(rules[s]), e = { ...def, css: rules[s] };
+        if (r["border-color"]) e.stroke = need(figTok(r["border-color"]), rules[s] + " border-color");
+        if (r.background) e.fill = need(figTok(r.background), rules[s] + " background");
+        if (r["box-shadow"]) e.drop = [need(halo(r["box-shadow"]), rules[s] + " box-shadow")];
+        st[s] = e;
+      }
+      fields[type] = { h, st };
+    }
+    const inner = cssRule(".field .affix input:focus")["box-shadow"];
+    if (inner !== "none") throw new Error(".field .affix input:focus 의 box-shadow 가 none 이 아닙니다(" + inner + ")");
+    const d = cssRule(".calendar .day"), base = { fill: (d.background || "").trim() === "transparent" ? "-" : need(null, ".calendar .day background"), stroke: "-", radius: need(radius(d["border-radius"]), ".calendar .day border-radius"), text: T(".calendar .day", "color"), ring: null };
+    const on = { ...base, fill: T(".calendar .day.on", "background"), text: T(".calendar .day.on", "color") };
+    const band = cssRule(".calendar .day.in-range"), bandE = { ...base, fill: T(".calendar .day.in-range", "background"), radius: need(radius(band["border-radius"]), ".calendar .day.in-range border-radius") };
+    const pe = cssRule(".calendar .day.preview-end"), peIn = /inset\s+0\s+0\s+0\s+([\d.]+)px\s+(var\(--[a-z0-9-]+\))/.exec(pe["box-shadow"] || "");
+    const ring = cssRule(":focus-visible"), rm = /([\d.]+)px\s+solid\s+(var\(--[a-z0-9-]+\))/.exec(ring.outline || "");
+    const hov = '.calendar .day:hover:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"])';
+    const days = {
+      Default: base,
+      Hover: { ...base, fill: T(hov, "background") },
+      Today: { ...base, text: T(".calendar .day.today", "color") },
+      Selected: on,
+      Start: { ...on, radius: need(radius(cssRule(".calendar .day.on.start:not(.end)")["border-radius"]), ".calendar .day.on.start:not(.end) border-radius") },
+      End: { ...on, radius: need(radius(cssRule(".calendar .day.on.end:not(.start)")["border-radius"]), ".calendar .day.on.end:not(.start) border-radius") },
+      "In-range": bandE, Preview: { ...bandE },
+      "Preview End": { ...base, fill: T(".calendar .day.preview-end", "background"), stroke: need(peIn && figTok(peIn[2]), ".calendar .day.preview-end inset"), sw: peIn && +peIn[1] },
+      Muted: { ...base, text: T(".calendar .day.muted", "color") },
+      Disabled: { ...base, text: T(".calendar .day[disabled]", "color") },
+      Focused: { ...base, ring: need(rm && figTok(rm[2]) + "|" + +rm[1] + "|OUTSIDE", ":focus-visible outline") },
+    };
+    return { fields, days };
   } catch (e) { return { error: String(e.message || e) }; }
 }
 
@@ -474,6 +538,8 @@ function componentsExpect() {
     controls: controlsExpect(),
     /* Chip 삭제(x) · 비활성 Item Tile — 사이트 CSS (2026-10-27 k12) */
     chipTile: chipTileExpect(),
+    /* Date Picker 필드 · 날짜 칸 — 사이트 CSS (2026-10-27 k14) */
+    datePicker: datePickerExpect(),
     /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
     donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
       .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
@@ -939,6 +1005,61 @@ function diffComponents(c, want, bad, notes) {
       }
     }
   } else notes.push("덤프에 Chip 삭제 · 비활성 Item Tile 조사가 없습니다 — 2026-10-27 k12 전 probe.js 로 만든 덤프입니다");
+  /* Date Picker 필드 · 날짜 칸(2026-10-27 k14) — 기대값은 datePickerExpect */
+  if (c.datePicker !== undefined || c.calendarDay !== undefined) {
+    const dp = want.datePicker, vp = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name || ""); return m ? m[1].trim() : null; };
+    if (dp.error) bad.push(`Date Picker 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${dp.error}`);
+    else {
+      const list = c.datePicker || [], seen = new Set(), stray = [];
+      if (!list.length) bad.push("Date Picker 세트가 없어 필드를 대조하지 못했습니다");
+      for (const v of list) {
+        const t = vp(v.variant, "Type"), z = vp(v.variant, "Size"), s = vp(v.variant, "State"), f = dp.fields[t];
+        if (!f || !(z in DP_SIZES) || !DP_STATES[t].includes(s)) { if (!/Calendar|View/.test(v.variant)) stray.push(`${v.variant}(${v.id})`); continue; }
+        seen.add(`${t}|${z}|${s}`);
+        const w = f.st[s], at = `Date Picker ${v.variant} (${v.id})`;
+        if (v.h === null) { bad.push(`${at} — "Field" 칸을 찾지 못했습니다`); continue; }
+        if (Math.abs(v.h - f.h[z]) > 0.5) bad.push(`${at} 필드 높이 ${v.h} ≠ ${f.h[z]} — 사이트 ${t === "Button" ? ".datepicker" + DP_SIZES[z] + " .field-btn" : ".field" + DP_SIZES[z] + " .affix"}`);
+        if (v.fill !== "$" + w.fill) bad.push(`${at} 면 ${v.fill} ≠ ${w.fill} — 사이트 ${w.css}`);
+        if (v.stroke !== "$" + w.stroke || v.sw !== w.sw) bad.push(`${at} 테두리 ${v.stroke} · ${v.sw}px ≠ ${w.stroke} · ${w.sw}px — 사이트 ${w.css}`);
+        if (JSON.stringify(v.drop) !== JSON.stringify(w.drop)) bad.push(`${at} 바깥 그림자 ${JSON.stringify(v.drop)} ≠ ${JSON.stringify(w.drop)} — 사이트 ${w.css}`);
+        if (t === "Input" && v.innerFx !== 0) bad.push(`${at} 안쪽 입력칸 ${v.innerFx === null ? '("Input" 노드 없음)' : "효과 " + v.innerFx + "개"} — 사이트 .field .affix input:focus 는 box-shadow:none(고리는 .affix 가 그린다)`);
+      }
+      const miss = []; for (const [t, sts] of Object.entries(DP_STATES)) for (const z of Object.keys(DP_SIZES)) for (const s of sts) if (!seen.has(`${t}|${z}|${s}`)) miss.push(`Type=${t}, Size=${z}, State=${s}`);
+      if (miss.length) bad.push(`Date Picker 에 없는 변형 ${miss.length}개(기대 ${Object.values(DP_STATES).reduce((n, a) => n + a.length, 0) * 3}) — ${miss.slice(0, 4).join(" · ")}${miss.length > 4 ? " …" : ""}`);
+      if (stray.length) bad.push(`Date Picker 에 표에 없는 변형 ${stray.length}개 — ${stray.slice(0, 4).join(" · ")}${stray.length > 4 ? " …" : ""}(Type=Button · Input × Size × State 로)`);
+      const days = c.calendarDay || [], dseen = new Set();
+      if (!days.length) bad.push("Calendar Day 세트가 없어 날짜 칸을 대조하지 못했습니다");
+      for (const v of days) {
+        const s = vp(v.variant, "State"), w = dp.days[s], at = `Calendar Day ${v.variant} (${v.id})`;
+        if (!w) { bad.push(`${at} — 표에 없는 상태(${DAY_STATES.join(" · ")})`); continue; }
+        dseen.add(s);
+        if (v.fill !== (w.fill === "-" ? "-" : "$" + w.fill)) bad.push(`${at} 면 ${v.fill} ≠ ${w.fill === "-" ? "없음" : w.fill}`);
+        if (w.stroke === "-" ? v.stroke !== "-" : v.stroke !== "$" + w.stroke || v.sw !== w.sw || v.align !== "INSIDE") bad.push(`${at} 테두리 ${v.stroke} · ${v.sw} · ${v.align} ≠ ${w.stroke === "-" ? "없음" : w.stroke + " · " + w.sw + " · INSIDE"}`);
+        if (JSON.stringify(v.radius) !== JSON.stringify(w.radius)) bad.push(`${at} 모서리 ${JSON.stringify(v.radius)} ≠ ${JSON.stringify(w.radius)}`);
+        if (v.text !== "$" + w.text) bad.push(`${at} 글자 ${v.text} ≠ ${w.text}`);
+        if ((v.ring || null) !== (w.ring ? "$" + w.ring : null)) bad.push(`${at} 고리 ${v.ring} ≠ ${w.ring || "없음"}`);
+      }
+      const dmiss = DAY_STATES.filter((s) => !dseen.has(s));
+      if (dmiss.length) bad.push(`Calendar Day 에 없는 상태 ${dmiss.length}개 — ${dmiss.join(" · ")}`);
+      if (c.calendar !== undefined) {
+        const cv = c.calendar || [], views = cv.map((v) => vp(v.variant, "View"));
+        const vmiss = CAL_VIEWS.filter((x) => !views.includes(x));
+        if (vmiss.length) bad.push(`Calendar 세트에 없는 화면 ${vmiss.length}개 — ${vmiss.join(" · ")}`);
+        for (const v of cv) {
+          const at = `Calendar ${v.variant} (${v.id})`;
+          for (const cell of v.cells) {
+            const [nm, fill, text] = cell.split("|"), st = nm.slice(4);
+            if (st === "Blank") { if (text !== "-") bad.push(`${at} ${nm} — 빈 칸에 글자가 있습니다`); continue; }
+            const w = dp.days[st];
+            if (!w) { bad.push(`${at} ${nm} — 표에 없는 날짜 칸 상태`); continue; }
+            if (fill !== (w.fill === "-" ? "-" : "$" + w.fill) || text !== "$" + w.text) bad.push(`${at} ${nm} 면 ${fill} · 글자 ${text} ≠ ${w.fill === "-" ? "없음" : w.fill} · ${w.text}`);
+          }
+          if (!v.apply.length) bad.push(`${at} — 적용 버튼(Apply)이 없습니다`);
+          else if (v.apply.some((x) => x !== "Disabled")) bad.push(`${at} 적용 버튼 State ${v.apply.join(",")} ≠ Disabled — 견본은 값이 그대로라 꺼져 있다(사이트 cal())`);
+        }
+      } else notes.push("덤프에 달력 화면 조사가 없습니다 — 2026-10-27 k15 전 probe.js 로 만든 덤프입니다");
+    }
+  } else notes.push("덤프에 Date Picker 필드 · 날짜 칸 조사가 없습니다 — 2026-10-27 k14 전 probe.js 로 만든 덤프입니다");
   const pv = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name || ""); return m ? m[1].trim() : null; };
   /* 버튼 상자(2026-10-26 k7) — 사람의 결정: 사이트 버튼의 1px 투명 테두리 몫을 Figma 에도 둔다. State=Default 변형마다 사이트에서 잰 같은 버튼과
      (폭 − 라벨 폭) = 테두리 + padding, 라벨 x = 테두리 + 왼쪽 padding, 높이를 ±0.5 로 맞춘다. 아이콘만 있는 버튼은 폭 · 높이.
