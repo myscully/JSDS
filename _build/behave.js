@@ -106,6 +106,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const menuHover = await page.evaluate(() => { const li = document.querySelector("#ex-dropdown-menu .menu-item:not(.on):not(.danger)"), d = document.createElement("div"); d.style.background = "var(--surface-neutral-tertiary)"; document.body.append(d);
     const want = getComputedStyle(d).backgroundColor; d.remove(); return { bg: getComputedStyle(li).backgroundColor, want }; });
   ok("menu item hover uses the tertiary tint", menuHover.bg === menuHover.want, JSON.stringify(menuHover));
+  /* 비활성 Slider 는 라벨 · 값도 흐리게 — :disabled 가 input 에만 걸려 막대만 흐렸다(사람의 결정 2026-10-27) */
+  await go("components/slider.html");
+  const sliderOff = await page.evaluate(() => { const s = document.querySelector("#ex-slider-disabled .slider"), d = document.createElement("div"); d.style.color = "var(--foreground-disable-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove();
+    return { label: getComputedStyle(s.querySelector("label")).color, val: getComputedStyle(s.querySelector(".val")).color, want }; });
+  ok("a disabled slider dims its label and value", sliderOff.label === sliderOff.want && sliderOff.val === sliderOff.want, JSON.stringify(sliderOff));
+  await go("components/dropdown.html");   // 뒤의 Dropdown 단정으로 돌아간다
   const menuDd = page.locator(`#ex-dropdown-menu .example-preview .dropdown`).first();
   await menuDd.locator("[aria-haspopup]").click();
   ok("static open menu closes on trigger click", await menuDd.evaluate((e) => !e.classList.contains("open")));
