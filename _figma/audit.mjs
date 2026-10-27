@@ -17,6 +17,7 @@
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7)
  *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
  *   선택 컨트롤 선택된 Radio · 선택 + 비활성 Radio 의 면 · 테두리 · 점, 비활성 Slider 의 라벨 · 값 글자 칠(2026-10-27 k11) — controlsExpect
+ *   비활성 안쪽 층 이름에 Disabled 가 든 변형 · 노드 안의 불투명도(2026-10-27 k12) · Chip 삭제(x) · 비활성 Item Tile 칠 — chipTileExpect
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -345,6 +346,23 @@ function controlsExpect() {
   } catch (e) { return { error: String(e.message || e) }; }
 }
 
+/* Chip 의 삭제(x) · 비활성 Item Tile(2026-10-27 k12) — 사람의 결정: 사이트를 고쳐(971b446) 비활성 입력값 Chip 의 x 는 면 없이 foreground-disable,
+   비활성 Item Tile 의 아이콘 면은 surface-disable, 아이콘 · 설명은 foreground-disable. CSS 에서 읽는다 — .chip .x(background · color),
+   .chip[disabled] .x(background · color), .tile[disabled] .ico(background), .tile[disabled] span:not(.tag)(color). 하나라도 못 읽으면 어긋남 */
+function chipTileExpect() {
+  try {
+    const x = cssRule(".chip .x"), xd = cssRule(".chip[disabled] .x"), ti = cssRule(".tile[disabled] .ico"), ts = cssRule(".tile[disabled] span:not(.tag)");
+    const none = (v) => /^(transparent|none)$/.test((v || "").trim());
+    const out = {
+      chip: { face: figTok(x.background), icon: figTok(x.color) },
+      chipDisabled: { face: none(xd.background) ? "-" : figTok(xd.background), icon: figTok(xd.color) },
+      tile: { icoFace: figTok(ti.background), icon: figTok(ts.color), desc: figTok(ts.color) },
+    };
+    for (const [k, o] of Object.entries(out)) for (const [f, v] of Object.entries(o)) if (!v) throw new Error(`${k}.${f} 를 읽지 못했습니다`);
+    return out;
+  } catch (e) { return { error: String(e.message || e) }; }
+}
+
 /* Tag 기본 크기(2026-10-26 k7) — components.data.js 의 Tag props 에서 size 행의 기본값(md)을 읽어 Figma 크기 이름으로 */
 function tagDefaultSize() {
   const box = { I: () => "", module: { exports: {} } };
@@ -454,6 +472,8 @@ function componentsExpect() {
     tagDefault: tagDefaultSize(),
     /* 선택된 Radio · 비활성 Slider 글자의 칠 — 사이트 CSS (2026-10-27 k11) */
     controls: controlsExpect(),
+    /* Chip 삭제(x) · 비활성 Item Tile — 사이트 CSS (2026-10-27 k12) */
+    chipTile: chipTileExpect(),
     /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
     donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
       .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
@@ -893,6 +913,32 @@ function diffComponents(c, want, bad, notes) {
       }
     }
   } else notes.push("덤프에 선택 컨트롤의 칠 조사가 없습니다 — 2026-10-27 k11 전 probe.js 로 만든 덤프입니다");
+  /* 비활성 안쪽 층(2026-10-27 k12) — 사람의 결정: 이름에 Disabled 가 든 변형 · 노드 안에서 opacity 로 흐린 층이 있으면 어긋남이다(비활성은 토큰으로 — CLAUDE.md).
+     이름으로 고르므로 비활성 밖의 반투명(표 정렬 아이콘 0.45)은 대상이 아니다. 비활성 층의 이름에 Disabled 가 없으면 이 검사가 못 본다 — 이름을 붙여 둔다 */
+  if (c.disabledInner !== undefined) {
+    for (const t of c.disabledInner) bad.push(`${t.set ? t.set + " " : ""}${t.variant} 안의 ${t.name} (${t.id}) 불투명도 ${t.opacity} — 비활성 안쪽 층은 opacity 로 흐리지 않고 --foreground-disable-primary · --surface-disable-primary 로 칠합니다`);
+  } else notes.push("덤프에 비활성 안쪽 층 조사가 없습니다 — 2026-10-27 k12 전 probe.js 로 만든 덤프입니다");
+  /* Chip 의 삭제(x) · 비활성 Item Tile(2026-10-27 k12) — 기대값은 chipTileExpect */
+  if (c.chipX !== undefined || c.tileDisabled !== undefined) {
+    const ct = want.chipTile;
+    if (ct.error) bad.push(`Chip 삭제 · 비활성 Item Tile 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${ct.error}`);
+    else {
+      if (!c.chipX || !c.chipX.length) bad.push("Chip 세트에 Type=Input 변형이 없어 삭제(x)를 대조하지 못했습니다");
+      for (const v of c.chipX || []) {
+        const dis = /(?:^|, )State=Disabled(?:,|$)/.test(v.variant), w = dis ? ct.chipDisabled : ct.chip, at = `Chip ${v.variant} (${v.id}) 삭제(x)`;
+        const faceOk = w.face === "-" ? v.face === "-" || v.face === "transparent" : v.face === "$" + w.face;
+        if (!faceOk) bad.push(`${at} 면 ${v.face} ≠ ${w.face === "-" ? "없음" : w.face} — 사이트 ${dis ? ".chip[disabled] .x" : ".chip .x"}`);
+        if (v.icon !== "$" + w.icon) bad.push(`${at} 아이콘 ${v.icon} ≠ ${w.icon} — 사이트 ${dis ? ".chip[disabled] .x" : ".chip .x"}`);
+      }
+      if (!c.tileDisabled || !c.tileDisabled.length) bad.push("Item Tile 세트에 State=Disabled 변형이 없어 대조하지 못했습니다");
+      for (const v of c.tileDisabled || []) {
+        const at = `Item Tile ${v.variant} (${v.id})`;
+        if (v.icoFace !== "$" + ct.tile.icoFace) bad.push(`${at} 아이콘 면 ${v.icoFace} ≠ ${ct.tile.icoFace} — 사이트 .tile[disabled] .ico`);
+        if (v.icon !== "$" + ct.tile.icon) bad.push(`${at} 아이콘 ${v.icon} ≠ ${ct.tile.icon} — 사이트 .tile[disabled] .ico`);
+        if (v.desc !== "$" + ct.tile.desc) bad.push(`${at} 설명 글자 ${v.desc} ≠ ${ct.tile.desc} — 사이트 .tile[disabled] span:not(.tag)`);
+      }
+    }
+  } else notes.push("덤프에 Chip 삭제 · 비활성 Item Tile 조사가 없습니다 — 2026-10-27 k12 전 probe.js 로 만든 덤프입니다");
   const pv = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name || ""); return m ? m[1].trim() : null; };
   /* 버튼 상자(2026-10-26 k7) — 사람의 결정: 사이트 버튼의 1px 투명 테두리 몫을 Figma 에도 둔다. State=Default 변형마다 사이트에서 잰 같은 버튼과
      (폭 − 라벨 폭) = 테두리 + padding, 라벨 x = 테두리 + 왼쪽 padding, 높이를 ±0.5 로 맞춘다. 아이콘만 있는 버튼은 폭 · 높이.

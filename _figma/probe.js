@@ -153,7 +153,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null } };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다 — 변형 자신이 칸이고 고리(Focus Ring)는 변형의 자식이다 */
@@ -394,6 +394,32 @@ for (const p of figma.root.children) {
     if (set.name === "Slider") components.controls.sliderDisabled = set.children.filter((v) => /(?:^|, )State=Disabled(?:,|$)/.test(v.name)).map((v) => {
       const t = (nm) => { const x = v.findOne((k) => k.type === "TEXT" && k.name === nm); return x ? paint(x.fills) : null; };
       return { variant: v.name, id: v.id, label: t("Label"), value: t("Value") };
+    });
+  }
+  /* 비활성 안쪽 층(2026-10-27 k12) — 이름에 Disabled 가 든 변형 · 노드(예: Date Picker 안의 Day/Disabled)의 자신과 자손 가운데 불투명도가 1 이 아닌 층.
+     인스턴스 속은 빼고 본다(원본 쪽에서 잡힌다). 이름으로 고르므로 비활성 밖의 반투명(표 정렬 아이콘 0.45 — 사이트도 opacity .45)은 걸리지 않는다.
+     변형 자신의 불투명도는 위 "반투명 컴포넌트" 가 본다 */
+  const underInst = (n, root) => { for (let q = n.parent; q && q !== root; q = q.parent) if (q.type === "INSTANCE") return true; return false; };
+  for (const c of p.findAllWithCriteria({ types: ["COMPONENT"] })) {
+    const roots = /Disabled/.test(c.name) ? [c] : c.findAll((k) => /Disabled/.test(k.name) && !underInst(k, c));
+    const seen = new Set();
+    for (const r of roots) for (const k of [r].concat(r.findAll(() => true))) {
+      if (k === c || seen.has(k.id) || !("opacity" in k) || !(k.opacity < 0.999) || underInst(k, c)) continue;
+      seen.add(k.id);
+      components.disabledInner.push({ set: c.parent && c.parent.type === "COMPONENT_SET" ? c.parent.name : null, variant: c.name, id: k.id, name: k.name, opacity: +k.opacity.toFixed(2) });
+    }
+  }
+  /* Chip 의 삭제(x) · 비활성 Item Tile(2026-10-27 k12) — audit 이 사이트 CSS(.chip .x · .chip[disabled] .x · .tile[disabled] .ico · span:not(.tag))와 맞춘다.
+     Chip Type=Input 변형마다 Remove 면과 그 안 아이콘 벡터의 선, Item Tile State=Disabled 변형마다 Icon 프레임 면 · 아이콘 선 · Description 글자 칠 */
+  for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    const vecs = (n) => { const ic = n && n.findOne((k) => k.type === "INSTANCE"); const vs = ic ? ic.findAll((k) => k.type === "VECTOR" && k.visible !== false) : []; return vs.length ? [...new Set(vs.map((x) => paint(x.strokes)))].join("|") : null; };
+    if (set.name === "Chip") components.chipX = set.children.filter((v) => /(?:^|, )Type=Input(?:,|$)/.test(v.name)).map((v) => {
+      const r = v.findOne((k) => k.name === "Remove");
+      return { variant: v.name, id: v.id, face: r ? paint(r.fills) : null, icon: vecs(r) };
+    });
+    if (set.name === "Item Tile") components.tileDisabled = set.children.filter((v) => /(?:^|, )State=Disabled(?:,|$)/.test(v.name)).map((v) => {
+      const ico = v.findOne((k) => k.type === "FRAME" && k.name === "Icon"), d = v.findOne((k) => k.type === "TEXT" && k.name === "Description");
+      return { variant: v.name, id: v.id, icoFace: ico ? paint(ico.fills) : null, icon: vecs(ico), desc: d ? paint(d.fills) : null };
     });
   }
 }
