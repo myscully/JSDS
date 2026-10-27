@@ -606,7 +606,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .t-title-2{font-size:14px;line-height:20px;font-weight:500;letter-spacing:0.0145em}
 .t-body-1{font-size:16px;line-height:26px;font-weight:400;letter-spacing:0.0057em}
 .t-body-2{font-size:14px;line-height:22px;font-weight:400;letter-spacing:0.0145em}
-.t-label-1{font-size:14px;line-height:20px;font-weight:500;letter-spacing:0.0145em}
+.t-label-1{font-size:14px;line-height:20px;font-weight:600;letter-spacing:0.0145em}   /* 500 → 600: 사람이 Figma 스타일을 SemiBold 로 바꾼 것을 저장소로(사람의 결정 2026-10-27). 필드 라벨(.field label · .datepicker label 600)과 같아졌다 */
 .t-label-2{font-size:12px;line-height:16px;font-weight:500;letter-spacing:0.0252em}
 .t-caption-1{font-size:12px;line-height:18px;font-weight:500;letter-spacing:0.0252em}   /* 참조 400 → 500(2026-10-22 사람의 결정, Figma 와 함께). Label/2 와는 행간(16 · 18)으로 갈린다 */
 .t-caption-2{font-size:10px;line-height:14px;font-weight:400;letter-spacing:0.0311em}
