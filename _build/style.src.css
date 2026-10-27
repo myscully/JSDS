@@ -720,6 +720,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .slider{display:flex;flex-direction:column;gap:8px;min-width:280px;font-size:12px;line-height:1.6}
 .slider .row{display:flex;justify-content:space-between;color:var(--foreground-neutral-secondary)}
 .slider .val{font-weight:600;color:var(--foreground-neutral-primary)}
+.slider:has(input:disabled) .row,.slider:has(input:disabled) .val{color:var(--foreground-disable-primary)}   /* 비활성이면 라벨 · 값도 흐리게 — :disabled 가 input 에만 걸려 막대만 흐렸다(사람의 결정 2026-10-27, Checkbox · Radio · Switch 와 같게) */
 .slider input[type=range]{width:100%;height:20px;margin:0;appearance:none;-webkit-appearance:none;background:transparent;cursor:pointer}
 .slider input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:var(--radius-full);background:linear-gradient(to right,var(--foreground-brand-primary) var(--p,50%),var(--surface-neutral-strong) var(--p,50%))}
 .slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:var(--surface-elevated-primary);border:2px solid var(--surface-brand-primary);margin-top:-7px;box-shadow:var(--shadow-1)}
