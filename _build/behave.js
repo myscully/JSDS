@@ -884,6 +884,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const cf = page.locator("#ex-text-field-affix .example-preview .field").filter({ has: page.locator(".counter") }).first();
   await cf.locator("input").fill("새 정책");
   ok("text field counter updates", (await cf.locator(".counter").textContent()) === "4 / 80");
+  /* 비활성 입력칸의 면은 비활성 토큰, 읽기 전용은 읽기 전용 면 — :read-only 가 disabled 에도 맞아 비활성 면을 덮었다(2026-10-27) */
+  const tfState = await page.evaluate(() => { const box = document.querySelector("#ex-text-field-state .example-preview"), dis = box.querySelector("input:disabled"), ro = box.querySelector("input[readonly]:not(:disabled)"), tok = (v) => { const d = document.createElement("div"); d.style.background = `var(${v})`; document.body.append(d); const c = getComputedStyle(d).backgroundColor; d.remove(); return c; };
+    return { dis: getComputedStyle(dis).backgroundColor, ro: getComputedStyle(ro).backgroundColor, wantDis: tok("--surface-disable-primary"), wantRo: tok("--background-neutral-secondary") }; });
+  ok("disabled text field uses the disable surface, read-only keeps its own", tfState.dis === tfState.wantDis && tfState.ro === tfState.wantRo, JSON.stringify(tfState));
   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 brand + 바깥 4px 후광, 전역 외곽선은 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로).
      선택 컨트롤은 전역 :focus-visible 외곽선 그대로다 */
   const fieldRing = async (pg, sel, boxSel) => { await go(pg); await page.locator(sel).first().evaluate((e) => e.focus());
