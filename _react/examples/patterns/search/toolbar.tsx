@@ -27,7 +27,7 @@ export default function Example() {
       <Toolbar>
         <SearchBar placeholder="이벤트, 단말, IP 검색" wrapperStyle={{ minWidth: 320 }} />
         <Select options={[{ value: "2", label: "심각도: 2" }]} defaultValue="2" triggerStyle={{ minWidth: 140, height: 40 }} />
-        <DatePicker mode="range" max={today} presets={PRESETS} displayText="최근 24시간" triggerStyle={{ height: 40, minWidth: 200 }} />
+        <DatePicker mode="range" max={today} presets={PRESETS} defaultValue={{ start: daysAgo(6), end: today }} displayText="최근 7일" triggerStyle={{ height: 40, minWidth: 200 }} />
         <Spacer />
         <Button variant="secondary" leading={<Icon name="download" />}>내보내기</Button>
       </Toolbar>

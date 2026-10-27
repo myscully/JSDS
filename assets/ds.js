@@ -148,6 +148,10 @@
     var ph = btn && $(".placeholder", btn), st = host._dp = { mode: mode, view: mode === "month" ? "month" : "day", draft: null, month: null, focus: null, hover: null, opener: null, live: "" };
     st.ph = ph ? ph.textContent.trim() : null;
     st.help = host.getAttribute("data-help") || (help && !host.classList.contains("error") ? help.textContent : "");
+    /* data-default-preset="7": 값이 없으면 오늘 기준 최근 N일을 처음 값으로 — 마크업의 날짜 글자는 스크립트 전의 자리 표시다.
+       "최근 24시간" 이라는 이름만 있고 달력에는 기간이 없던 검색 툴바(사람의 결정 2026-10-27) */
+    var dfp = Number(host.getAttribute("data-default-preset"));
+    if (mode === "range" && dfp > 0 && !host.hasAttribute("data-start")) { var te = dpToday(host); writeValue(host, mode, { a: addDays(te, -(dfp - 1)), b: te }); display(host); }
     if (!host.hasAttribute("data-value") && !host.hasAttribute("data-start")) {
       var txt = btn ? btn.textContent : inp ? inp.value : "", ds = [], re = mode === "month" ? /(\d{4})-(\d{2})(?!-\d)/g : /(\d{4})-(\d{2})-(\d{2})/g, mm;
       while ((mm = re.exec(txt))) { var pd = mode === "month" ? parseYM(mm[0]) : parseYMD(mm[0]); if (pd) ds.push(pd); }   // 없는 날짜(2026-13-01)는 다른 날로 넘기지 않고 버린다
@@ -262,7 +266,7 @@
     var pickCell = function (sel) { return cells.filter(function (c) { return c.matches(sel); })[0]; };
     var target = (f && pickCell('[data-date="' + f + '"],[data-ym="' + f + '"],[data-year="' + f + '"]')) || pickCell(".on") || pickCell(".today") || pickCell(':not([aria-disabled="true"])') || cells[0];
     $$(".cal-grid .day[data-date], .cal-grid .cell", cal).forEach(function (c) { c.tabIndex = c === target ? 0 : -1; });
-    var ap = $('[data-cal="apply"]', cal); if (ap) ap.disabled = !!(rg && a && !b);   // 끝이 없는 기간은 적용할 수 없다
+    var ap = $('[data-cal="apply"]', cal); if (ap) ap.disabled = !!(rg && a && !b) || valText(st.mode, v) === valText(st.mode, readValue(host, st.mode));   // 끝이 없는 기간, 열기 전과 같은 값은 적용할 수 없다(사람의 결정 2026-10-27 — 값 지우기는 초기화의 일)
   }
   function setExpanded(host, open) { $$(".field-btn, .cal-btn", host).forEach(function (b) { b.setAttribute("aria-expanded", String(open)); }); }
   function openDP(host, opener) {

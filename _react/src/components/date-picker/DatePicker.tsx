@@ -437,7 +437,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(function D
       )}
       {items.includes("reset") && <Button size="sm" variant="text" data-cal="reset" onClick={() => { setDraft(null); if (instant) done(null); }}>{LABELS.reset}</Button>}
       {items.includes("cancel") && <Button size="sm" variant="secondary" data-cal="cancel" onClick={() => setOpen(false, true)}>{LABELS.cancel}</Button>}
-      {items.includes("apply") && <Button size="sm" data-cal="apply" disabled={halfRange} onClick={() => done(draft)}>{LABELS.apply}</Button>}
+      {items.includes("apply") && <Button size="sm" data-cal="apply" disabled={halfRange || textOf(mode, draft) === committedText} onClick={() => done(draft)}>{LABELS.apply}</Button>}
     </>
   );
   const hasFoot = (mode === "range" && !!presets?.length) || items.some((k) => k !== "today" || mode === "single");

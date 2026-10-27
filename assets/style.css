@@ -778,14 +778,14 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .calendar .day{height:34px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;color:var(--foreground-neutral-primary);cursor:pointer}
 .calendar .day:hover:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"]){background:var(--surface-neutral-secondary)}   /* 선택 · 기간 · 선택 불가 칸은 호버 면을 얹지 않는다 */
 .calendar .day:active:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"]){background:var(--surface-neutral-strong)}
-.calendar .day.muted{color:var(--foreground-disable-primary)}
+.calendar .day.muted{color:var(--foreground-neutral-tertiary)}   /* 다른 달 날은 고를 수 있다 — 고를 수 없는 날(비활성 색)과 구분한다(사람의 결정 2026-10-27) */
 .calendar .day.today{font-weight:700;color:var(--foreground-brand-primary)}
-.calendar .day.in-range,.calendar .day.preview{background:var(--surface-brand-subtle);border-radius:0}
-.calendar .day.in-range:hover,.calendar .day.preview:hover{background:var(--surface-brand-subtle-strong)}
+.calendar .day.in-range,.calendar .day.preview{background:var(--surface-brand-subtle-strong);border-radius:0}   /* subtle 은 달력 면과 1.07 이라 띠가 거의 안 보였다(사람의 결정 2026-10-27 한 단계 진하게) */
+.calendar .day.in-range:hover,.calendar .day.preview:hover{box-shadow:inset 0 0 0 1px var(--line-brand-primary)}   /* subtle-strong 과 primary 사이에 면 토큰이 없어 호버는 안쪽 선으로 */
 .calendar .day.on{background:var(--surface-brand-primary);color:var(--brand-label);font-weight:600}
 .calendar .day.on.start:not(.end){border-radius:6px 0 0 6px}   /* 기간 양끝이 띠에 붙는다 */
 .calendar .day.on.end:not(.start){border-radius:0 6px 6px 0}
-.calendar .day.preview-end{background:var(--surface-brand-subtle);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary)}   /* 미리보기 끝 — 띠 색에 brand 테두리. 호버 면(회색)을 얹지 않는다 */
+.calendar .day.preview-end{background:var(--surface-brand-subtle-strong);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary)}   /* 미리보기 끝 — 띠 색에 brand 테두리. 호버 면(회색)을 얹지 않는다 */
 .calendar .day[disabled],.calendar .day[aria-disabled="true"]{color:var(--foreground-disable-primary);cursor:not-allowed}
 .calendar .day.blank{visibility:hidden}
 .calendar .day:focus-visible,.calendar .cell:focus-visible{position:relative;z-index:1}   /* 다음 칸이 외곽선을 덮지 않게 */

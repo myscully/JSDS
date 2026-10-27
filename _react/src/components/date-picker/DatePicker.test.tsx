@@ -270,6 +270,14 @@ describe("DatePicker", () => {
     expect(cell("2026-09-07")).toHaveClass("on");
   });
 
+  it("적용은 값이 바뀌어야 켜진다", async () => {
+    render(<DatePicker today={TODAY} />);
+    await openField();
+    expect(screen.getByRole("button", { name: "적용" })).toBeDisabled();
+    await userEvent.click(cell("2026-09-10"));
+    expect(screen.getByRole("button", { name: "적용" })).toBeEnabled();
+  });
+
   it("버튼형 필드의 이름은 라벨 + 값", () => {
     render(<DatePicker label="시작일" defaultValue={TODAY} />);
     expect(screen.getByRole("button", { name: "시작일 2026-09-07" })).toBeInTheDocument();

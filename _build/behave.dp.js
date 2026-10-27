@@ -419,9 +419,10 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await dp.locator(".cal-btn").click();
     await dp.locator(".affix input").fill("2026-03-15"); await dp.locator(".affix input").press("Enter");
     const t = await dp.evaluate((e) => ({ title: e.querySelector(".cal-title").textContent, on: e.querySelector(".day.on")?.dataset.date }));
-    await dp.locator('.calendar [data-cal="apply"]').click();
-    const v = await dp.evaluate((e) => ({ v: e.dataset.value, i: e.querySelector("input").value }));
-    ok("typing while the calendar is open moves the calendar and apply keeps it", t.title === "2026년 3월" && t.on === "2026-03-15" && v.v === "2026-03-15" && v.i === "2026-03-15", JSON.stringify({ t, v }));
+    const v = await dp.evaluate((e) => ({ v: e.dataset.value, i: e.querySelector("input").value, apply: e.querySelector('[data-cal="apply"]').disabled }));
+    /* 입력의 Enter 가 이미 확정했으므로 초안 = 확정 값 — 적용은 꺼져 예전 값으로 되돌릴 길이 없다 */
+    ok("typing while the calendar is open moves the calendar and apply keeps it", t.title === "2026년 3월" && t.on === "2026-03-15" && v.v === "2026-03-15" && v.i === "2026-03-15" && v.apply, JSON.stringify({ t, v }));
+    await page.keyboard.press("Escape");
   });
   await step("an impossible date in the markup is not turned into another date", async () => {
     const dp = dpOf("input", 2);
@@ -469,6 +470,36 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await toTop(c);
     const r = await c.evaluate((e) => { const a = e.querySelector("[aria-live]"); e.querySelector('.cal-nav[data-nav="1"]').click(); const b2 = e.querySelector("[aria-live]"); return { same: a === b2, text: b2.textContent }; });
     ok("the live region stays the same node across months", r.same && r.text === "2026년 10월", JSON.stringify(r));
+  });
+
+  // ── 사람의 결정(2026-10-27) — 띠 진하게 · 흐린 날 · 툴바 처음 값 · 바뀐 것이 없으면 적용 끔 ─────
+  await step("the range band uses the stronger tint and dimmed days differ from disabled ones", async () => {
+    await go("components/date-picker.html");
+    const dp = dpOf("two-months");
+    await toTop(dp);
+    await dp.locator(".field-btn").click();
+    const r = await dp.evaluate((e) => { const c = (sel, p = "color") => getComputedStyle(e.querySelector(sel))[p]; return { band: c(".day.in-range", "backgroundColor"), dis: c('.day[aria-disabled="true"]') }; }).catch(() => null);   // 두 달 보기에는 흐린 칸이 없다(비운 칸) — 흐린 날은 아래 단독 달력에서
+    const want = { band: await tok("--surface-brand-subtle-strong", "backgroundColor"), dis: await tok("--foreground-disable-primary") };
+    await page.keyboard.press("Escape");
+    const muted = await page.locator(`${ex("calendar")} .calendar .day.muted`).first().evaluate((d) => getComputedStyle(d).color), tert = await tok("--foreground-neutral-tertiary");
+    ok("the range band uses the stronger tint and dimmed days differ from disabled ones", r && r.band === want.band && r.dis === want.dis && muted === tert && muted !== want.dis, JSON.stringify({ r, muted, tert, want }));
+  });
+  await step("the search toolbar starts with the last 7 days", async () => {
+    await go("patterns/search.html");
+    const dp = page.locator(".example-preview .datepicker").first();
+    const r = await dp.evaluate((e) => ({ t: e.querySelector(".field-btn").textContent.replace(/\s+/g, " ").trim(), s: e.dataset.start, e: e.dataset.end }));
+    ok("the search toolbar starts with the last 7 days", r.t === "2026-10-21 ~ 2026-10-27" && r.s === "2026-10-21" && r.e === "2026-10-27", JSON.stringify(r));
+    await go("components/date-picker.html");
+  });
+  await step("apply stays off until the value changes", async () => {
+    const dp = dpOf("default");
+    await toTop(dp);
+    await dp.locator(".field-btn").click();
+    const off = await dp.evaluate((e) => e.querySelector('[data-cal="apply"]').disabled);
+    await day(dp, "2026-10-10").click();
+    const on = await dp.evaluate((e) => e.querySelector('[data-cal="apply"]').disabled);
+    ok("apply stays off until the value changes", off && !on, JSON.stringify({ off, on }));
+    await page.keyboard.press("Escape");
   });
 
   // ── 크기 · 상태 ────────────────────────────────────────────
