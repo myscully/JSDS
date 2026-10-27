@@ -16,6 +16,7 @@
  *   버튼   빌드된 components/button.html 에 "버튼" 버튼을 붙여 Chromium 으로 잰 상자(테두리 + padding · 높이)(2026-10-26 k7)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7)
  *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
+ *   선택 컨트롤 선택된 Radio · 선택 + 비활성 Radio 의 면 · 테두리 · 점, 비활성 Slider 의 라벨 · 값 글자 칠(2026-10-27 k11) — controlsExpect
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -324,6 +325,26 @@ function focusExpect() {
   return { fields, ring };
 }
 
+/* 선택 컨트롤의 칠(2026-10-27 k11) — 선택된 Radio(면 · 안쪽 테두리 · 점)와 선택 + 비활성 Radio, 비활성 Slider 의 라벨 · 값 글자.
+   CSS 에서 읽는다: .radio input:checked(background · inset box-shadow) · ::after(점) · :disabled · :checked:disabled::after,
+   .slider:has(input:disabled) .row(color). 테두리는 inset box-shadow 의 굵기와 토큰이다(Figma 는 INSIDE 선). 하나라도 못 읽으면 어긋남이다 */
+function controlsExpect() {
+  try {
+    const ins = (v) => { const m = /inset\s+0\s+0\s+0\s+([\d.]+)px\s+(var\(--[a-z0-9-]+\))/.exec(v || ""); return m ? { w: +m[1], tok: figTok(m[2]) } : null; };
+    const ck = cssRule(".radio input:checked"), ckA = cssRule(".radio input:checked::after"), dis = cssRule(".radio input:disabled"), disA = cssRule(".radio input:checked:disabled::after");
+    const sl = cssRule(".slider:has(input:disabled) .row");
+    const r1 = ins(ck["box-shadow"]), r2 = ins(dis["box-shadow"]);
+    const out = {
+      radioChecked: { face: figTok(ck.background), ring: r1 && r1.tok, sw: r1 && r1.w, dot: figTok(ckA.background), css: ".radio input:checked" },
+      radioDisabled: { face: figTok(dis.background), ring: r2 && r2.tok, sw: r2 && r2.w, dot: figTok(disA.background), css: ".radio input:disabled · :checked:disabled::after" },
+      sliderText: figTok(sl.color),
+    };
+    for (const k of ["radioChecked", "radioDisabled"]) for (const f of ["face", "ring", "sw", "dot"]) if (!out[k][f]) throw new Error(`${out[k].css} 의 ${f} 를 읽지 못했습니다`);
+    if (!out.sliderText) throw new Error(".slider:has(input:disabled) .row 의 color 를 읽지 못했습니다");
+    return out;
+  } catch (e) { return { error: String(e.message || e) }; }
+}
+
 /* Tag 기본 크기(2026-10-26 k7) — components.data.js 의 Tag props 에서 size 행의 기본값(md)을 읽어 Figma 크기 이름으로 */
 function tagDefaultSize() {
   const box = { I: () => "", module: { exports: {} } };
@@ -431,6 +452,8 @@ function componentsExpect() {
     focus: focusExpect(),
     /* Tag 기본 크기 — props 의 size 기본값(2026-10-26 k7) */
     tagDefault: tagDefaultSize(),
+    /* 선택된 Radio · 비활성 Slider 글자의 칠 — 사이트 CSS (2026-10-27 k11) */
+    controls: controlsExpect(),
     /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
     donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
       .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
@@ -850,6 +873,26 @@ function diffComponents(c, want, bad, notes) {
       bad.push(`${t.set ? t.set + " " : ""}${t.name} (${t.id}) 불투명도 ${t.opacity} — 컴포넌트는 1 이어야 합니다${/Disabled/.test(t.name) ? ". 비활성은 --surface-disable-primary · --foreground-disable-primary 로 칠합니다" : ""}`);
     }
   } else notes.push("덤프에 반투명 컴포넌트 조사가 없습니다 — 2026-10-27 k10 전 probe.js 로 만든 덤프입니다");
+  /* 선택 컨트롤의 칠(2026-10-27 k11) — 사람의 결정: 선택된 Radio 는 사이트처럼 brand 면 + 같은 색 안쪽 1.5px + brand-label 점,
+     선택 + 비활성은 disable 면 · 테두리 + foreground-disable 점. 비활성 Slider 는 라벨 · 값도 foreground-disable. 기대값은 controlsExpect */
+  if (c.controls !== undefined) {
+    const ce = want.controls;
+    if (ce.error) bad.push(`선택 컨트롤의 칠 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${ce.error}`);
+    else {
+      if (!c.controls.radio || !c.controls.radio.length) bad.push("Radio Button 세트에 Value=Checked 변형이 없어 선택 칠을 대조하지 못했습니다");
+      for (const v of c.controls.radio || []) {
+        const w = /(?:^|, )State=Disabled(?:,|$)/.test(v.variant) ? ce.radioDisabled : ce.radioChecked;
+        const at = `Radio Button ${v.variant} (${v.id})`;
+        if (v.face !== "$" + w.face) bad.push(`${at} 면 ${v.face} ≠ ${w.face} — 사이트 ${w.css}`);
+        if (v.ring !== "$" + w.ring || v.sw !== w.sw) bad.push(`${at} 테두리 ${v.ring} · ${v.sw}px ≠ ${w.ring} · ${w.sw}px(안쪽) — 사이트 ${w.css}`);
+        if (v.dot !== "$" + w.dot) bad.push(`${at} 점 ${v.dot} ≠ ${w.dot} — 사이트 ${w.css}`);
+      }
+      if (!c.controls.sliderDisabled || !c.controls.sliderDisabled.length) bad.push("Slider 세트에 State=Disabled 변형이 없어 비활성 글자를 대조하지 못했습니다");
+      for (const v of c.controls.sliderDisabled || []) for (const f of ["label", "value"]) {
+        if (v[f] !== "$" + ce.sliderText) bad.push(`Slider ${v.variant} (${v.id}) ${f === "label" ? "라벨" : "값"} 글자 ${v[f]} ≠ ${ce.sliderText} — 사이트 .slider:has(input:disabled) .row · .val`);
+      }
+    }
+  } else notes.push("덤프에 선택 컨트롤의 칠 조사가 없습니다 — 2026-10-27 k11 전 probe.js 로 만든 덤프입니다");
   const pv = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name || ""); return m ? m[1].trim() : null; };
   /* 버튼 상자(2026-10-26 k7) — 사람의 결정: 사이트 버튼의 1px 투명 테두리 몫을 Figma 에도 둔다. State=Default 변형마다 사이트에서 잰 같은 버튼과
      (폭 − 라벨 폭) = 테두리 + padding, 라벨 x = 테두리 + 왼쪽 padding, 높이를 ±0.5 로 맞춘다. 아이콘만 있는 버튼은 폭 · 높이.

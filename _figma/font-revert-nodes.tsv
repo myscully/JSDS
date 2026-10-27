@@ -183,3 +183,11 @@ Resource	342:79	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 �
 # page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
 Resource	342:42	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	텍스트 대비 4.5:1, 대형 텍스트·UI 요소 3:1. Gray 500 이상만 텍스트에 사용 → 텍스트 대비 4.5:1, 대형 텍스트·UI 요소 3:1. Neutral 500 이상만 텍스트에 사용	Card/Accessibility(342:32) · 목록 첫 줄(342:39) — 사이트 _build/render.js 접근성 목록 첫 항목 그대로
 Resource	342:19	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	Primitive 컬렉션 (Value): color/{gray·neutral·accent·red·amber·emerald·sky·brand}/{step}, space/{n}, radius/{name}, size/*, motion/* → Primitive 컬렉션 (Value): color/atomic/{cool-neutral·neutral·blue·green·orange·red·lime·cyan·light-blue·violet·purple·pink·red-orange}/{step}, space/{n}, radius/{name}, size/*, motion/*	Card/Token Layers(342:6) · Primitive 행 · Figma Variables 칸 — 램프 목록만 사이트(_build/render.js Variables · Styles 의 Primitive 줄)와 같게. 글자 높이 88 → 154, 카드 970 → 1014
+
+# 2026-10-27 k11 — 사람의 결정 4(Resource 글 둘, 사이트 c273b0e). 새로 Noto Sans KR 로 바뀐 노드 1개 · 글자만 다시 바뀐 k10 절 노드 1개. 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: 342:23 은 서체만 Pretendard Regular 로 돌린다(편집 직전에 스타일이 없었다 — 행간 160% · 자간 0 그대로). 342:42 는 k10 절 그대로(Body/2 에 다시 연결)
+# 같은 작업에서 칠만 바꾼 노드(비활성 14 · 안쪽 층 28 · 선택 Radio 2 · Slider 글자 2)는 서체를 건드리지 않아 Pretendard 그대로다
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+Resource	342:23	Pretendard Regular · 스타일 없음(행간 160% · 자간 0)	Noto Sans KR Regular · 스타일 없음	…여섯 그룹 77개… → …여섯 그룹 79개…(사이트 resources/design-token.html 이 :root 에서 센 수)	Card/Token Layers(342:6) · Semantic 행 · Figma Variables 칸
+# 같은 작업에서 글자만 다시 바뀐 k10 절 노드 1개 — 이미 Noto 라 되돌리는 법은 k10 절 그대로
+Resource	342:42	Pretendard Regular · Body/2(k10 절과 같음)	Noto Sans KR Regular · 스타일 없음	텍스트 대비 4.5:1, 대형 텍스트·UI 요소 3:1. Neutral 500 이상만 텍스트에 사용 → 텍스트 대비 4.5:1, 대형 텍스트·UI 요소 3:1. 글자색은 --foreground-* 토큰으로 칠하고, 채운 면 위 글자만 --brand-label(Brand 면) · --static-white(Count) 를 씁니다 — 대비는 빌드가 잽니다	Card/Accessibility(342:32) · 목록 첫 줄 — 두 줄이 되어 글자 높이 22 → 44

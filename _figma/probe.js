@@ -153,7 +153,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [] };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null } };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다 — 변형 자신이 칸이고 고리(Focus Ring)는 변형의 자식이다 */
@@ -382,6 +382,19 @@ for (const p of figma.root.children) {
   for (const n of p.findAllWithCriteria({ types: ["COMPONENT", "COMPONENT_SET"] })) {
     if (!(n.opacity < 0.999)) continue;
     components.translucent.push({ set: n.type === "COMPONENT" && n.parent && n.parent.type === "COMPONENT_SET" ? n.parent.name : n.type === "COMPONENT_SET" ? "(세트)" : null, name: n.name, id: n.id, opacity: +n.opacity.toFixed(2) });
+  }
+  /* 선택 컨트롤의 칠(2026-10-27 k11) — audit 이 사이트 CSS 와 맞춘다. Radio Button 의 Value=Checked 변형마다 Circle 의 면 · 선(굵기)과 Dot 의 면,
+     Slider 의 State=Disabled 변형마다 Label · Value 글자의 칠. 선택된 Radio 가 흰 면 + brand 링 + brand 점으로 사이트(brand 면 + 흰 점)와 달랐고,
+     비활성 Slider 의 라벨 · 값은 흐리지 않았다. 세트가 없으면 null 로 남는다 */
+  for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    if (set.name === "Radio Button") components.controls.radio = set.children.filter((v) => /(?:^|, )Value=Checked(?:,|$)/.test(v.name)).map((v) => {
+      const c = v.findOne((k) => k.name === "Circle"), d = v.findOne((k) => k.name === "Dot");
+      return { variant: v.name, id: v.id, face: c ? paint(c.fills) : null, ring: c ? paint(c.strokes) : null, sw: c && c.strokeWeight !== figma.mixed ? c.strokeWeight : null, dot: d ? paint(d.fills) : null };
+    });
+    if (set.name === "Slider") components.controls.sliderDisabled = set.children.filter((v) => /(?:^|, )State=Disabled(?:,|$)/.test(v.name)).map((v) => {
+      const t = (nm) => { const x = v.findOne((k) => k.type === "TEXT" && k.name === nm); return x ? paint(x.fills) : null; };
+      return { variant: v.name, id: v.id, label: t("Label"), value: t("Value") };
+    });
   }
 }
 for (const k of Object.keys(FOCUS_BOX)) if (!components.focus[k]) components.focus[k] = null;   // 세트가 없으면 null — audit 이 어긋남으로 낸다
