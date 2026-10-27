@@ -171,7 +171,8 @@ for (const d of require("./reference-tokens.js").diff(css)) fails.push(`참조 �
 {
   const cut = css.indexOf("*{box-sizing");
   const declared = new Set([...css.slice(0, cut).matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p"];
+  /* --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left"];
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);

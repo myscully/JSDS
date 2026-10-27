@@ -741,27 +741,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await clr.click();
   ok("search clear empties + hides", await clr.evaluate((e) => e.closest(".searchbar").querySelector("input").value === "" && e.hidden));
 
-  // Date picker
-  await go("components/date-picker.html");
-  const dp = page.locator(`${ex("date-picker", "field")} .datepicker`).first();
-  await dp.locator(".field-btn").click();
-  ok("datepicker opens + generates calendar", await dp.evaluate((e) => e.classList.contains("open") && e.querySelectorAll(".calendar .day").length >= 28));
-  ok("open calendar is not clipped by the example section", await dp.evaluate((e) => { const cal = e.querySelector(".calendar"); cal.scrollIntoView({ block: "center", behavior: "instant" }); const c = cal.getBoundingClientRect(), p = e.closest(".example").getBoundingClientRect(); return c.bottom > p.bottom && getComputedStyle(e.closest(".example")).overflow === "visible" && document.elementFromPoint(c.left + 20, c.bottom - 20)?.closest(".calendar") === cal; }));
-  await dp.locator(".calendar").evaluate((c) => c.scrollIntoView({ block: "center", behavior: "instant" })); // 달력이 섹션 밖으로 나가므로 상단 고정 헤더에 가리지 않게 가운데로
-  await dp.locator(".calendar .day:not(.muted)").nth(9).click();
-  await dp.locator(".calendar [data-cal=apply]").click();
-  ok("datepicker apply sets field", await dp.evaluate((e) => /\d{4}-\d{2}-10/.test(e.querySelector(".field-btn").textContent) && !e.classList.contains("open") && !e.querySelector(".placeholder")));
-  const rdp = page.locator(`${ex("date-picker", "field")} .datepicker`).nth(1);
-  await rdp.locator(".field-btn").click();
-  ok("range field builds range calendar", await rdp.evaluate((e) => e.querySelectorAll(".day.on").length === 2 && e.querySelectorAll(".day.in-range").length === 5));
-  await page.screenshot({ path: SHOT + "/datepicker.png", clip: await rdp.boundingBox().then((bb) => ({ x: bb.x - 10, y: bb.y - 10, width: bb.width + 40, height: bb.height + 340 })) });
-  const cal = page.locator(`${ex("date-picker", "calendar")} .calendar`).first();
-  await page.keyboard.press("Escape"); // 앞서 연 필드 달력(absolute) 닫기
-  await cal.evaluate((c) => c.scrollIntoView({ block: "center", behavior: "instant" })); // 상단 고정 헤더에 가리지 않게
-  await cal.locator(".cal-head button").last().click();
-  ok("static calendar next month", await cal.evaluate((e) => e.querySelector(".cal-head span").textContent.includes("10월")));
-  await cal.locator(".day:not(.muted)").nth(4).click();
-  ok("static calendar day select", await cal.evaluate((e) => e.querySelectorAll(".day.on").length === 1 && e.querySelector(".day.on").textContent === "5"));
+  // Date picker — behave.dp.js(오늘을 고정한 별도 컨텍스트, 맨 끝에서 부른다)
 
   // Checkbox master, terms
   await go("components/checkbox.html");
@@ -876,10 +856,6 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { left: Math.round(s.left - pv.getBoundingClientRect().left), scrolls: pv.scrollWidth > pv.clientWidth }; });
   await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
   ok("onboarding steps start inside the preview at 390", obFit.left >= 0 && obFit.scrolls, JSON.stringify(obFit));
-  await go("components/date-picker.html");
-  const rc = page.locator("#ex-date-picker-range .example-preview .calendar");
-  await rc.locator('[data-preset="7"]').click();
-  ok("calendar preset marks 7-day range", await rc.evaluate((e) => { const on = e.querySelectorAll(".day.on").length, inr = e.querySelectorAll(".day.in-range").length; return (on === 2 && inr === 5) || (on === 1 && inr <= 5) /* 월 경계 */; }));
   await go("components/text-field.html");
   const cf = page.locator("#ex-text-field-affix .example-preview .field").filter({ has: page.locator(".counter") }).first();
   await cf.locator("input").fill("새 정책");
@@ -1503,6 +1479,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.setViewportSize({ width: 1440, height: 900 });
   await go("components/button.html");
   ok("hamburger hidden at 1440", await page.evaluate(() => document.getElementById("menuBtn").getBoundingClientRect().width === 0));
+
+  /* Date Picker · Calendar — 날짜를 고정해야 해서 따로 돈다. 옛 "월 경계" 허용(프리셋이 달을 넘으면 한쪽만 맞아도 통과)은 지웠다 */
+  await require("./behave.dp.js")({ b, ok, SITE, path });
 
   await b.close();
   let fail = 0;

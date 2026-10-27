@@ -49,6 +49,7 @@ const pairs = [
   ["--foreground-brand-primary", SURFACES, 4.5, "제품색 글자·링크"],
   /* 자기 옅은 면 위에서만 4.22~4.49 다 — 참조 시스템의 brand 50 과 그 5% 틴트 조합이 원래 그렇다 */
   ["--foreground-brand-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "옅은 제품 면 위 글자 — 텍스트 버튼의 hover·pressed", REF("참조 시스템 값 — brand 와 그 틴트 조합이 4.2 언저리다")],
+  ["--foreground-neutral-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "Date Picker 기간 사이 · 미리보기 날짜와 그 위 호버(2026-10-27) — 쓰고 있었는데 선언이 없었다. 다른 달(흐린) 칸은 띠를 칠하지 않아 이 쌍이 없다"],
   ["--foreground-brand-inverse", ["--surface-neutral-inverse"], 4.5, "반전 표면 위 제품색 글자"],
   ["--foreground-positive-primary", [...SURFACES, "--surface-positive-primary"], 4.5, "긍정 글자·아이콘 — Steps 완료 체크(.steps li.done i)도 이 쌍이다. 틴트 위 라이트 2.06~2.19 · 다크 6.43~8.03 — 그래픽 3:1 에도 라이트가 못 미친다, 사람의 결정", REF_STATUS],
   ["--foreground-cautionary-primary", [...SURFACES, "--surface-cautionary-primary"], 4.5, "주의 글자·아이콘", REF_STATUS],
