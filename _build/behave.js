@@ -699,10 +699,20 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const xchips = page.locator(".example-preview .chip .x");
   const nx = await xchips.count();
   if (nx) { await xchips.first().click(); await page.waitForTimeout(250); ok("input chip removed", (await xchips.count()) === nx - 1); }
+  /* 비활성 입력값 칩 — x 의 원 면을 없애고 비활성 글자색, 눌러도 지워지지 않는다(사람의 결정 2026-10-27) */
+  const chipOff = await page.evaluate(() => { const c = document.querySelector("#ex-chip-size .example-preview .chip[aria-disabled=true]"), x = c && c.querySelector(".x"), d = document.createElement("div"); d.style.color = "var(--foreground-disable-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove();
+    if (!x) return { missing: true }; const cs = getComputedStyle(x); return { bg: cs.backgroundColor, color: cs.color, want }; });
+  await page.evaluate(() => document.querySelector("#ex-chip-size .example-preview .chip[aria-disabled=true] .x").click()); await page.waitForTimeout(250);   // dismiss 는 170ms 뒤에 지운다
+  chipOff.kept = await page.evaluate(() => !!document.querySelector("#ex-chip-size .example-preview .chip[aria-disabled=true]"));
+  ok("a disabled input chip dims its remove button and keeps the chip", chipOff.bg === "rgba(0, 0, 0, 0)" && chipOff.color === chipOff.want && chipOff.kept, JSON.stringify(chipOff));
   await go("components/item-tile.html");
   const tile = page.locator(".example-preview .tile[aria-pressed]").first();
   const tb = await tile.getAttribute("aria-pressed"); await tile.click();
   ok("tile toggles", (await tile.getAttribute("aria-pressed")) !== tb);
+  /* 비활성 타일 — 아이콘 면은 타일 면과 같게, 아이콘 · 설명은 비활성 글자색(사람의 결정 2026-10-27) */
+  const tileOff = await page.evaluate(() => { const t = document.querySelector("#ex-item-tile-grid .example-preview .tile[disabled]"), ico = t.querySelector(".ico"), desc = t.querySelector(":scope > span:not(.ico):not(.tag)"), d = document.createElement("div"); d.style.color = "var(--foreground-disable-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove();
+    return { face: getComputedStyle(t).backgroundColor, icoBg: getComputedStyle(ico).backgroundColor, ico: getComputedStyle(ico).color, desc: getComputedStyle(desc).color, want }; });
+  ok("a disabled tile dims its icon and description", tileOff.icoBg === tileOff.face && tileOff.ico === tileOff.want && tileOff.desc === tileOff.want, JSON.stringify(tileOff));
 
   // Pagination
   await go("components/pagination.html");

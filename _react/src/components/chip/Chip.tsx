@@ -38,10 +38,11 @@ export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
   if (onRemove) {
     const remove = (e: MouseEvent | KeyboardEvent) => {
       e.stopPropagation();
-      onRemove();
+      if (!disabled) onRemove();
     };
+    /* span 은 disabled 속성을 못 가진다 — aria-disabled 로 비활성을 알리고 CSS 가 칩과 x 를 흐린다(.btn 과 같게) */
     return (
-      <span className={cls} {...(rest as HTMLAttributes<HTMLSpanElement>)}>
+      <span className={cls} aria-disabled={disabled || undefined} {...(rest as HTMLAttributes<HTMLSpanElement>)}>
         {icon && <Icon name={icon} size={14} />}
         {children}
         <i
@@ -49,6 +50,7 @@ export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
           role="button"
           tabIndex={disabled ? -1 : 0}
           aria-label={removeLabel}
+          aria-disabled={disabled || undefined}
           onClick={remove}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") { e.preventDefault(); remove(e); }

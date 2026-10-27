@@ -6,6 +6,7 @@ export default function Example() {
       <Chip size="sm" defaultSelected>Small</Chip>
       <Chip defaultSelected>Default</Chip>
       <Chip disabled>Disabled</Chip>
+      <Chip disabled onRemove={() => {}}>10.0.0.12</Chip>
     </>
   );
 }

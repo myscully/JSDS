@@ -818,7 +818,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .chip .x:hover{background:var(--line-neutral-primary)}
 .chip .x svg{width:10px;height:10px}
 .chip.sm{height:26px;padding:0 10px;font-size:12px}
-.chip[disabled]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed;pointer-events:none}
+.chip[disabled],.chip[aria-disabled="true"]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed;pointer-events:none}   /* 입력값 칩은 span 이라 disabled 속성을 못 가진다 — aria-disabled 로 (.btn 과 같게) */
+.chip[disabled] .x,.chip[aria-disabled="true"] .x{background:transparent;color:var(--foreground-disable-primary)}   /* 지울 수 없는 칩의 x 가 회색 원 + 진한 x 로 활성처럼 보였다(사람의 결정 2026-10-27) */
 .chip-group{display:flex;flex-wrap:wrap;gap:8px;line-height:1.6}
 
 /* Tag — 참조 시스템의 Chip 패턴을 따른다: 바탕은 상태 틴트이고 **라벨은 중립 글자색**이다.
@@ -1189,6 +1190,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .tile.horizontal{flex-direction:row;align-items:center}
 .tile.horizontal>div{display:flex;flex-direction:column;gap:2px;min-width:0}
 .tile[disabled]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed;pointer-events:none}
+.tile[disabled] .ico{background:var(--surface-disable-primary)}
+.tile[disabled] .ico,.tile[disabled] span:not(.tag){color:var(--foreground-disable-primary)}   /* 비활성 타일의 아이콘(brand)과 설명(tertiary)이 흐려지지 않았다(사람의 결정 2026-10-27). 우상단 Tag 는 자기 색을 둔다 */
 
 /* Data Visual */
 .kpi{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:20px 24px;min-width:180px;display:flex;flex-direction:column;gap:4px;line-height:1.6}
