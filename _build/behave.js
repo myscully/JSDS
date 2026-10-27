@@ -713,6 +713,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const tileOff = await page.evaluate(() => { const t = document.querySelector("#ex-item-tile-grid .example-preview .tile[disabled]"), ico = t.querySelector(".ico"), desc = t.querySelector(":scope > span:not(.ico):not(.tag)"), d = document.createElement("div"); d.style.color = "var(--foreground-disable-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove();
     return { face: getComputedStyle(t).backgroundColor, icoBg: getComputedStyle(ico).backgroundColor, ico: getComputedStyle(ico).color, desc: getComputedStyle(desc).color, want }; });
   ok("a disabled tile dims its icon and description", tileOff.icoBg === tileOff.face && tileOff.ico === tileOff.want && tileOff.desc === tileOff.want, JSON.stringify(tileOff));
+  /* 비활성 타일의 우상단 Tag 도 비활성 면 · 글자색(사람의 결정 2026-10-27) */
+  const tagOff = await page.evaluate(() => { const t = document.querySelector("#ex-item-tile-badge .example-preview .tile[disabled]"), g = t.querySelector(".tag"), d = document.createElement("div"); d.style.color = "var(--foreground-disable-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove();
+    return { face: getComputedStyle(t).backgroundColor, bg: getComputedStyle(g).backgroundColor, color: getComputedStyle(g).color, dot: getComputedStyle(g, "::before").backgroundColor, want }; });
+  ok("a disabled tile dims its tag", tagOff.bg === tagOff.face && tagOff.color === tagOff.want && tagOff.dot === tagOff.want, JSON.stringify(tagOff));
 
   // Pagination
   await go("components/pagination.html");

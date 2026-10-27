@@ -1191,7 +1191,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .tile.horizontal>div{display:flex;flex-direction:column;gap:2px;min-width:0}
 .tile[disabled]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed;pointer-events:none}
 .tile[disabled] .ico{background:var(--surface-disable-primary)}
-.tile[disabled] .ico,.tile[disabled] span:not(.tag){color:var(--foreground-disable-primary)}   /* 비활성 타일의 아이콘(brand)과 설명(tertiary)이 흐려지지 않았다(사람의 결정 2026-10-27). 우상단 Tag 는 자기 색을 둔다 */
+.tile[disabled] .ico,.tile[disabled] span:not(.tag){color:var(--foreground-disable-primary)}   /* 비활성 타일의 아이콘(brand)과 설명(tertiary)이 흐려지지 않았다(사람의 결정 2026-10-27) */
+.tile[disabled] .tag{background:var(--surface-disable-primary);box-shadow:none;color:var(--foreground-disable-primary)}
+.tile[disabled] .tag::before{background:var(--foreground-disable-primary)}   /* 우상단 Tag 도 비활성 면 · 글자색 — 상태 색(연결됨 · NEW)이 비활성 타일에서 눈에 띄었다(사람의 결정 2026-10-27) */
 
 /* Data Visual */
 .kpi{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:20px 24px;min-width:180px;display:flex;flex-direction:column;gap:4px;line-height:1.6}
