@@ -153,7 +153,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다 — 변형 자신이 칸이고 고리(Focus Ring)는 변형의 자식이다 */
@@ -421,6 +421,28 @@ for (const p of figma.root.children) {
       const ico = v.findOne((k) => k.type === "FRAME" && k.name === "Icon"), d = v.findOne((k) => k.type === "TEXT" && k.name === "Description");
       return { variant: v.name, id: v.id, icoFace: ico ? paint(ico.fills) : null, icon: vecs(ico), desc: d ? paint(d.fills) : null };
     });
+  }
+  /* Date Picker 필드 · 날짜 칸(2026-10-27 k14) — audit 이 사이트 CSS(.datepicker .field-btn · .field .affix 와 그 상태 규칙, .calendar .day 상태 규칙)와 맞춘다.
+     필드: 변형마다 "Field" 칸(버튼형은 .field-btn, 입력형은 .affix)의 높이 · 면 · 테두리(굵기) · 바깥 그림자([토큰, spread, blur]),
+     입력형은 안쪽 "Input" 노드의 효과 수(사이트는 입력칸에 후광이 없다 — 고리는 .affix 가 그린다).
+     날짜 칸: Calendar Day 변형마다 면 · 테두리(굵기 · 정렬) · 네 모서리(왼위 · 오위 · 오아래 · 왼아래) · 글자 칠 · 고리(Focus Ring 의 선|굵기|정렬) */
+  for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    const drops = (n) => n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").map((e) => [vname(e.boundVariables && e.boundVariables.color) || "raw", e.spread || 0, e.radius || 0]);
+    if (set.name === "Date Picker") components.datePicker = set.children.map((v) => {
+      const f = v.findOne((k) => k.name === "Field" && "strokes" in k), inp = f && f.findOne((k) => k.name === "Input");
+      return { variant: v.name, id: v.id, h: f ? +f.height.toFixed(2) : null, fill: f ? paint(f.fills) : null, stroke: f ? paint(f.strokes) : null, sw: f && f.strokeWeight !== figma.mixed ? f.strokeWeight : null, drop: f ? drops(f) : null, innerFx: inp ? inp.effects.filter((e) => e.visible !== false).length : null };
+    });
+    if (set.name === "Calendar Day") components.calendarDay = set.children.map((v) => {
+      const t = v.findOne((k) => k.type === "TEXT"), r = v.findOne((k) => k.name === "Focus Ring");
+      return { variant: v.name, id: v.id, fill: paint(v.fills), stroke: paint(v.strokes), sw: v.strokeWeight === figma.mixed ? "mixed" : v.strokeWeight, align: v.strokeAlign, radius: [v.topLeftRadius, v.topRightRadius, v.bottomRightRadius, v.bottomLeftRadius], text: t ? paint(t.fills) : null, ring: r ? paint(r.strokes) + "|" + r.strokeWeight + "|" + r.strokeAlign : null };
+    });
+    /* 달력(2026-10-27 k15) — Calendar 세트의 화면(View) 변형마다 달력 안 날짜 칸("Day/<상태>" 프레임, 인스턴스 밖)의 [이름|면|글자] 종류와
+       적용 버튼("Apply" 인스턴스)의 State 값. audit 이 날짜 칸을 Calendar Day 기대값(사이트 .calendar .day 상태 규칙)과, 적용을 비활성(값이 그대로면 꺼짐)과 맞춘다 */
+    if (set.name === "Calendar") components.calendar = set.children.map((v) => ({
+      variant: v.name, id: v.id,
+      cells: [...new Set(v.findAll((k) => /^Day\//.test(k.name) && k.type === "FRAME").map((k) => { const t = k.findOne((x) => x.type === "TEXT"); return k.name + "|" + paint(k.fills) + "|" + (t ? paint(t.fills) : "-"); }))].sort(),
+      apply: v.findAll((k) => k.type === "INSTANCE" && k.name === "Apply").map((k) => (k.componentProperties.State || {}).value || null),
+    }));
   }
 }
 for (const k of Object.keys(FOCUS_BOX)) if (!components.focus[k]) components.focus[k] = null;   // 세트가 없으면 null — audit 이 어긋남으로 낸다
