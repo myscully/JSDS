@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Checkbox } from "./checkbox/Checkbox";
 import { Radio, RadioGroup } from "./radio-button/Radio";
@@ -71,5 +71,15 @@ describe("form controls", () => {
     expect(onSel).toHaveBeenCalledWith(true);
     await userEvent.click(screen.getByRole("button", { name: "삭제" }));
     expect(onRemove).toHaveBeenCalled();
+  });
+  /* 입력값 칩은 span 이라 disabled 속성 대신 aria-disabled — 넘기지 않아 비활성 칩이 활성처럼 그려지고 x 가 눌렸다 */
+  it("비활성 입력값 칩은 칩과 x 에 aria-disabled 를 달고 삭제하지 않는다", () => {
+    const onRemove = vi.fn();
+    render(<Chip disabled onRemove={onRemove}>B</Chip>);
+    const x = screen.getByRole("button", { name: "삭제" });
+    expect(x.closest(".chip")).toHaveAttribute("aria-disabled", "true");
+    expect(x).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(x);
+    expect(onRemove).not.toHaveBeenCalled();
   });
 });

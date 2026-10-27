@@ -335,12 +335,13 @@ const COMPONENTS = {
           <span class="chip">192.168.1.0/24<i class="x" role="button" aria-label="삭제">${I("x",10)}</i></span>
           <button type="button" class="chip">${I("plus")}추가</button>
         </div>` },
-      { id: "size", title: "Size / Disabled", html: `
+      { id: "size", title: "Size / Disabled", desc: "비활성. 입력값 칩(span)은 disabled 속성을 못 가져 aria-disabled=\"true\" 로 씁니다 — 삭제(x)도 함께 흐려집니다.", html: `
         <button type="button" class="chip sm on" aria-pressed="true">Small</button>
         <button type="button" class="chip on" aria-pressed="true">Default</button>
-        <button type="button" class="chip" aria-pressed="false" disabled>Disabled</button>` },
+        <button type="button" class="chip" aria-pressed="false" disabled>Disabled</button>
+        <span class="chip" aria-disabled="true">10.0.0.12<i class="x" role="button" aria-label="삭제" aria-disabled="true">${I("x",10)}</i></span>` },
     ],
-    props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(brand subtle + 체크)"], [".x", "element", "—", "삭제 아이콘(Input Chip)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성"]],
+    props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(brand subtle + 체크)"], [".x", "element", "—", "삭제 아이콘(Input Chip)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성. 입력값 칩(span)은 aria-disabled=\"true\""]],
     spec: [["Size", "높이 32 (sm 26) · padding 0 12"], ["Container", "radius/full · line/neutral/primary · 선택 brand subtle"], ["Label", "Label/2 12"], ["Placement", "검색 아래 필터 행, 입력 필드 안 값 목록"]],
     figma: { frame: "Chip", radius: "radius/full", sizes: { md: { h: 32 }, sm: { h: 26 } }, variants: { filter: { stroke: "--line-neutral-primary" }, selected: { bg: "--surface-brand-subtle", stroke: "--surface-brand-primary", fg: "--surface-brand-primary" }, input: {} }, states: ["default", "selected", "hover", "disabled"] },
   },

@@ -277,7 +277,7 @@
     // Select Button
     if ((el = closest(t, ".select-btn > button")) && !el.disabled) { activate(closest(el, ".select-btn"), "button", el, "aria-pressed"); fire(el, "ds:select"); return; }
     // Chip
-    if ((el = closest(t, ".chip .x"))) { dismiss(closest(el, ".chip")); return; }
+    if ((el = closest(t, ".chip .x"))) { if (el.getAttribute("aria-disabled") !== "true") dismiss(closest(el, ".chip")); return; }   // 비활성 입력값 칩은 지우지 않는다 — CSS pointer-events 만 믿으면 보조기술의 클릭이 지운다
     if ((el = closest(t, "button.chip[aria-pressed]")) && !el.disabled) { var on = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", on); el.setAttribute("aria-pressed", String(on)); return; }
     // Tile
     if ((el = closest(t, ".tile[aria-pressed]")) && !el.disabled) { var grid = closest(el, ".tile-grid"), single = grid && grid.dataset.single !== undefined; if (single) activate(grid, ".tile", el, "aria-pressed"); else { var o2 = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", o2); el.setAttribute("aria-pressed", String(o2)); } return; }
