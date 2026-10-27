@@ -1254,10 +1254,11 @@ const COMPONENTS = {
           <button type="button" class="tile" aria-pressed="false"><span class="ico">${I("list")}</span><b>스크립트 제한</b><span>PowerShell·WSH 실행 제어</span></button>
           <button type="button" class="tile" aria-pressed="false" disabled><span class="ico">${I("chart-bar")}</span><b>SIEM 연동</b><span>Enterprise 전용</span></button>
         </div>` },
-      { id: "badge", title: "With Tag", desc: "우상단에 상태·신규 태그.", html: `
+      { id: "badge", title: "With Tag", desc: "우상단에 상태·신규 태그. 비활성 타일에서는 태그도 비활성 색으로 흐립니다.", html: `
         <div class="tile-grid" style="max-width:560px">
           <button type="button" class="tile"><span class="tag accent sm plain">NEW</span><span class="ico">${I("bell")}</span><b>Slack 알림</b><span>채널로 이벤트 전송</span></button>
           <button type="button" class="tile"><span class="tag ok sm">연결됨</span><span class="ico">${I("user")}</span><b>AD 연동</b><span>사용자·그룹 동기화</span></button>
+          <button type="button" class="tile" disabled><span class="tag accent sm">Enterprise</span><span class="ico">${I("chart-bar")}</span><b>SIEM 연동</b><span>이벤트 로그 전달</span></button>
         </div>` },
       { id: "horizontal", title: "Horizontal", desc: "좁은 폭에서는 가로 배치.", html: `
         <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:420px">
