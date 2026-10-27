@@ -7,7 +7,7 @@ export default function Example() {
   const [month, setMonth] = useState(new Date(2026, 8, 1));
   /* 날짜를 누르면 초안, 적용을 눌러야 확정 — 사이트 예제와 같다 */
   const [draft, setDraft] = useState<Date | null>(TODAY);
-  const [, setValue] = useState<Date | null>(TODAY);
+  const [value, setValue] = useState<Date | null>(TODAY);
   return (
     <Calendar
       month={month}
@@ -19,7 +19,7 @@ export default function Example() {
       footer={
         <>
           <Button size="sm" variant="text" data-cal="today" onClick={() => { setMonth(new Date(2026, 8, 1)); setDraft(TODAY); }}>오늘</Button>
-          <Button size="sm" data-cal="apply" onClick={() => setValue(draft)}>적용</Button>
+          <Button size="sm" data-cal="apply" disabled={draft?.getTime() === value?.getTime()} onClick={() => setValue(draft)}>적용</Button>
         </>
       }
     />
