@@ -39,6 +39,9 @@
 >   그래서 굵기 표의 Text Field 라벨 · 필수 36 → 42, 도움말 18 → 21, Small 값 6 → 7 로 다시 셌다
 > - 2026-10-26 k8: Button Spec State 행 값 623:3091 을 사이트 글(포커스 "1px 외곽선(2px 띄움)")로 다시 고쳤다 — k4 에 이미 Noto 라 새로 Noto 가 된 노드는 없다.
 >   `font-revert-nodes.tsv` 맨 아래 "2026-10-26 k8" 절. 포커스 고리(1px)는 사각형의 선이라 글자와 상관없다. 아래 "Pretendard 가 생기면 할 일" 에 Button 라벨 자간 0 을 더했다(사람의 결정)
+> - 2026-10-26 k9: Resource 글 둘을 고치며(사람의 결정 C) **2개가 새로 Noto** 가 됐다 — 접근성 문장 342:46(사이트 문장 그대로, 옛 토큰 이름 --border-focus 를 뺐다) ·
+>   아이콘 수 342:79(Filled 30 → 145, 파일에서 다시 셈). 원래 Pretendard Regular · Body/2. Resource 의 Noto 는 0 → 2(위 2026-10-22 줄의 "Resource 는 0" 은 그때 기준).
+>   Text Field · Search Spec Container 322:641 · 322:811 은 이미 Noto 라 글자만 다시 바뀌었다. `font-revert-nodes.tsv` 맨 아래 "2026-10-26 k9" 절
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)

@@ -166,3 +166,13 @@ Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/
 # 되돌리는 법은 k4 절 그대로(새 행을 옆 행 317:318(Size) 복제로 만들었으므로 Pretendard Regular · Body/2)
 # page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
 3 Component	623:3091	(k4 절과 같음) Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	…포커스는 전 변형 공통 --foreground-brand-primary 2px → …포커스는 전 변형 공통 --foreground-brand-primary 1px 외곽선(2px 띄움)	Card/Button · Spec · State 행(623:3089) 값
+
+# 2026-10-26 k9 — 사람의 결정 B · C(값 입력 필드 포커스를 테두리 1px + 4px 후광으로, e303736). 새로 Noto Sans KR 로 바뀐 노드 2개(Resource — 이 페이지에서 처음) · 글자만 다시 바뀐 노드 2개
+# 되돌릴 때: Resource 두 노드는 서체를 Pretendard Regular 로 돌리고 Body/2 스타일에 다시 연결한다(글자는 그대로). 크기 14 · 행간 22 · 자간 1.45% 는 스타일 연결이 풀린 뒤에도 그대로다
+# 3 Component 두 노드는 k4 · k5 절 그대로(이미 Noto, 편집 직전에 스타일 없음 — 행간 160% · 자간 0)
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+Resource	342:46	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	모든 인터랙션 키보드 접근, 포커스 링 항상 표시(:focus-visible 2px --border-focus) → 모든 인터랙션 키보드 접근, 포커스 링 항상 표시 — 기본은 :focus-visible 1px --foreground-brand-primary 외곽선(2px 띄움), 값 입력 필드(Text Field · Search · Select · Date Picker)는 테두리 1px 같은 색 + 바깥 4px --line-brand-focus 후광(오류 필드는 --foreground-negative-primary · --line-negative-focus)	Card/Accessibility(342:32) · 목록 둘째 줄(342:43) — 사이트 resources/design-token.html 접근성 목록 둘째 항목 그대로. 글자 높이 22 → 88(4줄), 카드 548 → 614
+Resource	342:79	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	Color(Semantic · Primitive, Light/Dark) · Typography · Icon(Outline 313 · Filled 30) → Color(Semantic · Primitive, Light/Dark) · Typography · Icon(Outline 313 · Filled 145)	Card/페이지 구성(342:63) · 표 행(342:77) 값 — 아이콘 수는 이 파일의 컴포넌트 수(1 Theme 의 icon/outline 313 · icon/filled 145, 다른 페이지 0)
+# 같은 작업에서 글자만 다시 바뀐 노드 2개 — 이미 Noto 라 되돌리는 법은 k4 · k5 절 그대로
+3 Component	322:641	Pretendard Regular · 스타일 없음(k4 절과 같음)	Noto Sans KR Regular · 스타일 없음	…포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px … → …포커스: 테두리 1px foreground/brand/primary · 바깥 4px …(사이트 spec 행 그대로)	Card/Text Field · Spec · Container 행 값(두 줄 그대로, 높이 44)
+3 Component	322:811	Pretendard Regular · 스타일 없음(k5 절과 같음)	Noto Sans KR Regular · 스타일 없음	…포커스: 테두리 + 안쪽 1px foreground/brand/primary(2px) · 바깥 4px … → …포커스: 테두리 1px foreground/brand/primary · 바깥 4px …(사이트 spec 행 그대로)	Card/Search · Spec · Container 행 값(두 줄 그대로, 높이 44)

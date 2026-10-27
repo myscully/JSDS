@@ -11,7 +11,7 @@
  *   컨테이너 _build/components.data.js 의 예제 HTML(순서 · 라벨 · 아이콘), 내비 기하는 빌드된 components/navigation.html 을
  *            헤드리스 Chromium 으로 잰 값(_build/node_modules/playwright — 없으면 어긋남으로 남긴다)
  *   Spec   _build/components.data.js 의 spec 행 ↔ 문서 카드 "Card/…" 의 Spec 글
- *   포커스 _build/style.src.css 의 값 입력 필드 포커스 규칙(오류 필드 포함)과 전역 :focus-visible 외곽선(선택 컨트롤 · Button 의 Focus Ring) — focusExpect
+ *   포커스 _build/style.src.css 의 값 입력 필드 포커스 규칙(오류 필드 포함 · k9 부터 inset 없음)과 전역 :focus-visible 외곽선(선택 컨트롤 · Button 의 Focus Ring) — focusExpect
  *   효과 색 컴포넌트 세트의 그림자 색이 변수나 효과 스타일에 묶였는지(2026-10-26 k6) — 기대값 없이 probe 가 모은 것을 그대로 어긋남으로
  *   버튼   빌드된 components/button.html 에 "버튼" 버튼을 붙여 Chromium 으로 잰 상자(테두리 + padding · 높이)(2026-10-26 k7)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7)
@@ -274,10 +274,13 @@ async function siteMeasure() {
   return out;
 }
 
-/* ---------- 포커스(2026-10-26 k5 · k6) ----------
+/* ---------- 포커스(2026-10-26 k5 · k6 · k9) ----------
    값 입력 필드 — 사람의 결정(k5): Text Field · Search · Select 트리거 · Date Picker 필드의 포커스는 테두리 1px + inset 1px(합쳐 2px 가장자리)
    + 0 0 0 4px 후광. k6: 오류 필드(.field.error)의 포커스는 같은 모양을 negative 토큰으로 — Figma 에서는 Text Field 의 State=Error Focused.
-   기대값은 사이트 CSS 에서 읽는다 — [기본 규칙(테두리 굵기), 포커스 규칙(border-color · box-shadow)]. 읽지 못하면 어긋남으로 낸다.
+   k9(사람의 결정 "필드에서 focus 됐을 경우에는 1px 브랜드 컬러와 4px 의 박스 섀도우가 함께 나오는 형태"): inset 을 뺐다 — 테두리 1px + 후광만.
+   그래서 inset 은 **있어도 없어도 읽는다**: CSS 에 inset 이 없으면 Figma 칸에도 안쪽 그림자가 없어야 하고, 있으면 예전처럼 spread 를 맞춘다.
+   검색창 링은 입력칸에 포커스가 있을 때만이다(.searchbar:has(input:focus) — :focus-within 이면 지우기 버튼 포커스에도 링이 나왔다).
+   기대값은 사이트 CSS 에서 읽는다 — [기본 규칙(테두리 굵기), 포커스 규칙(border-color · box-shadow)]. 테두리 · 후광을 읽지 못하면 어긋남으로 낸다.
    외곽선 포커스(선택 컨트롤 · Button) — 사이트의 전역 :focus-visible 외곽선(굵기 · offset · 색). k6 에는 바깥 그림자 두 겹(틈을 면 색으로 칠함)으로
    그렸으나, 사람의 결정(k7): 틈은 사이트에서 판 색이 비쳐 보이는 자리이므로 어느 바탕 위에서도 같게 — 선만 있는 고리 하나("Focus Ring")로 그린다.
    k8(외곽선 2px → 1px)에 표현을 하나로 맞췄다 — Button 이 쓰던 방식: 고리 사각형은 사이트 outline-offset 상자 그 자체(dx = dy = −offset,
@@ -289,7 +292,7 @@ async function siteMeasure() {
 const FOCUS_CSS = [
   { set: "Text Field", state: "Focused", base: ".field input", rule: ".field input:focus" },
   { set: "Text Field", state: "Error Focused", base: ".field input", rule: ".field.error input:focus" },
-  { set: "Search", state: "Focused", base: ".searchbar", rule: ".searchbar:focus-within" },
+  { set: "Search", state: "Focused", base: ".searchbar", rule: ".searchbar:has(input:focus)" },
   { set: "Select", state: "Focused", base: ".dropdown .trigger", rule: ".dropdown .trigger:focus-visible" },
   { set: "Date Picker", state: "Focused", base: ".datepicker .field-btn", rule: ".datepicker .field-btn:focus-visible" },
 ];
@@ -303,8 +306,9 @@ function focusExpect() {
       const bw = parseFloat((/(\d+(?:\.\d+)?)px\s+solid/.exec(b.border || "") || [])[1]);
       const parts = (f["box-shadow"] || "").split(/,(?![^(]*\))/).map((x) => x.trim()).filter(Boolean).map(shadow);
       const ins = parts.filter((x) => x.inset), ring = parts.filter((x) => !x.inset);
-      if (!(bw > 0) || !figTok(f["border-color"]) || ins.length !== 1 || ring.length !== 1) throw new Error(`${rule} 의 border · box-shadow 를 읽지 못했습니다(${b.border} / ${f["border-color"]} / ${f["box-shadow"]})`);
-      fields.push({ set, state, border: { tok: figTok(f["border-color"]), w: bw }, inner: ins[0], ring: ring[0], css: rule });
+      /* inset 은 0 또는 1개(k9 부터 0 이 정답), 후광은 꼭 1개 */
+      if (!(bw > 0) || !figTok(f["border-color"]) || ins.length > 1 || (ins.length && !ins[0].tok) || ring.length !== 1 || !ring[0].tok) throw new Error(`${rule} 의 border · box-shadow 를 읽지 못했습니다(${b.border} / ${f["border-color"]} / ${f["box-shadow"]})`);
+      fields.push({ set, state, border: { tok: figTok(f["border-color"]), w: bw }, inner: ins[0] || null, ring: ring[0], css: rule });
     } catch (e) { fields.push({ set, state, error: String(e.message || e) }); }
   }
   let ring;
@@ -749,11 +753,12 @@ function diffComponents(c, want, bad, notes) {
     }
     for (const [slug, s] of fig) if (!want.specs[slug]) bad.push(`Spec 카드 ${s.card}(${s.id}) 에 맞는 저장소 컴포넌트가 없습니다(키 ${slug})`);
   } else notes.push("덤프에 문서 카드 Spec 이 없습니다 — 2026-10-26 k3 전 probe.js 로 만든 덤프입니다");
-  /* 포커스(2026-10-26 k5 · k6) — 값 입력 필드는 테두리 · 안쪽 줄 · 후광의 토큰과 굵기를 사이트 CSS 와 맞춘다.
+  /* 포커스(2026-10-26 k5 · k6 · k9) — 값 입력 필드는 테두리 · 안쪽 줄 · 후광의 토큰과 굵기를 사이트 CSS 와 맞춘다.
      Figma 는 안쪽 그림자를 INSIDE 테두리 밑에 그린다(임시 노드로 확인 — spread 1 은 1px 테두리에 완전히 가려지고, spread 2 라야
      테두리 안쪽에 1px 이 보인다). 그래서 CSS 의 inset Npx 는 Figma 안쪽 그림자 spread = N + 테두리 굵기 로 그린 것을 기대한다.
+     k9 부터 CSS 에 inset 이 없다 — 그때는 Figma 칸에 안쪽 그림자가 하나도 없어야 한다(남은 안쪽 그림자가 어긋남).
      변형은 State 값으로 가른다(Focused · Error Focused — 옛 덤프에는 state 가 없어 Focused 로 본다). 기대값이 없는 포커스 상태도 어긋남이다.
-     선택 컨트롤(k6)은 focusExpect 머리 주석의 두 겹 그림자를 기대한다. 세트나 변형이 없으면, 기대값을 CSS 에서 읽지 못하면 어긋남이다 */
+     선택 컨트롤 · Button 은 아래 외곽선 대조가 본다. 세트나 변형이 없으면, 기대값을 CSS 에서 읽지 못하면 어긋남이다 */
   if (c.focus) {
     const stateOf = (v) => v.state || "Focused";
     const ok = (fx, tok, spread, blur) => fx.length === 1 && fx[0][0] === tok && fx[0][1] === spread && fx[0][2] === blur && fx[0][3] === "0,0";
@@ -763,12 +768,13 @@ function diffComponents(c, want, bad, notes) {
       if (!all) { bad.push(`${w.set} 세트가 없어 State=${w.state} 를 대조하지 못했습니다`); continue; }
       const list = all.filter((v) => stateOf(v) === w.state);
       if (!list.length) { bad.push(`${w.set} 에 State=${w.state} 변형이 없습니다 — 사이트 ${w.css}`); continue; }
-      const innerSpread = w.inner.spread + w.border.w;
+      const innerSpread = w.inner ? w.inner.spread + w.border.w : 0;
       for (const v of list) {
         const at = `${w.set} ${v.variant} (${v.id})`;
         if (!v.box) { bad.push(`${at} — 포커스 칸을 찾지 못했습니다`); continue; }
         if (v.stroke !== "$" + w.border.tok || v.sw !== w.border.w || v.align !== "INSIDE") bad.push(`${at} 테두리 ${v.stroke} · ${v.sw}px · ${v.align} ≠ ${w.border.tok} · ${w.border.w}px · INSIDE`);
-        if (!ok(v.inner, w.inner.tok, innerSpread, w.inner.blur)) bad.push(`${at} 안쪽 줄 ${JSON.stringify(v.inner)} ≠ [${w.inner.tok}, spread ${innerSpread}(inset ${w.inner.spread} + 테두리 ${w.border.w}), blur ${w.inner.blur}]`);
+        if (!w.inner) { if (v.inner.length) bad.push(`${at} 안쪽 그림자가 남아 있습니다 ${JSON.stringify(v.inner)} — 사이트 ${w.css} 에는 inset 이 없습니다(테두리 ${w.border.w}px + 후광)`); }
+        else if (!ok(v.inner, w.inner.tok, innerSpread, w.inner.blur)) bad.push(`${at} 안쪽 줄 ${JSON.stringify(v.inner)} ≠ [${w.inner.tok}, spread ${innerSpread}(inset ${w.inner.spread} + 테두리 ${w.border.w}), blur ${w.inner.blur}]`);
         if (!ok(v.drop, w.ring.tok, w.ring.spread, w.ring.blur)) bad.push(`${at} 후광 ${JSON.stringify(v.drop)} ≠ [${w.ring.tok}, spread ${w.ring.spread}, blur ${w.ring.blur}]`);
       }
     }
