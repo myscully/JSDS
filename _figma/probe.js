@@ -153,7 +153,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {} };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [] };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다 — 변형 자신이 칸이고 고리(Focus Ring)는 변형의 자식이다 */
@@ -375,6 +375,13 @@ for (const p of figma.root.children) {
     const by = {};
     for (const v of set.children) { const m = /(?:^|, )Size=([^,]+)/.exec(v.name); if (!m) continue; const e = by[m[1]] || (by[m[1]] = [Infinity, -Infinity, 0]); e[0] = Math.min(e[0], v.height); e[1] = Math.max(e[1], v.height); e[2]++; }
     components.tagHeights = Object.fromEntries(Object.entries(by).map(([k, e]) => [k, [+e[0].toFixed(2), +e[1].toFixed(2), e[2]]]));
+  }
+  /* 반투명 컴포넌트(2026-10-27 k10) — 자기 불투명도가 1 이 아닌 컴포넌트(세트의 변형 · 단독 컴포넌트)와 컴포넌트 세트. 조사하는 세트(SURVEY_SETS)만이 아니라 전부 본다.
+     비활성을 변형 불투명도 0.4 로 흐린 것이 21개 있었다(k10 에 잼) — 저장소 규칙은 --surface-disable-primary · --foreground-disable-primary 로 칠하기다(CLAUDE.md).
+     audit 이 OPACITY_OK 에 선언된 것 말고는 어긋남으로 낸다. 안쪽 층의 불투명도는 적지 않는다 — 표 정렬 아이콘 0.45 처럼 사이트도 opacity 로 그리는 표현이 있다 */
+  for (const n of p.findAllWithCriteria({ types: ["COMPONENT", "COMPONENT_SET"] })) {
+    if (!(n.opacity < 0.999)) continue;
+    components.translucent.push({ set: n.type === "COMPONENT" && n.parent && n.parent.type === "COMPONENT_SET" ? n.parent.name : n.type === "COMPONENT_SET" ? "(세트)" : null, name: n.name, id: n.id, opacity: +n.opacity.toFixed(2) });
   }
 }
 for (const k of Object.keys(FOCUS_BOX)) if (!components.focus[k]) components.focus[k] = null;   // 세트가 없으면 null — audit 이 어긋남으로 낸다

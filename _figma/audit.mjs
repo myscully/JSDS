@@ -15,6 +15,7 @@
  *   효과 색 컴포넌트 세트의 그림자 색이 변수나 효과 스타일에 묶였는지(2026-10-26 k6) — 기대값 없이 probe 가 모은 것을 그대로 어긋남으로
  *   버튼   빌드된 components/button.html 에 "버튼" 버튼을 붙여 Chromium 으로 잰 상자(테두리 + padding · 높이)(2026-10-26 k7)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7)
+ *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -460,6 +461,10 @@ const REF_EXCEPTIONS = [
     why: "State=Loading 은 그 자리에 스피너를 늘 보이므로 Leading Icon 속성으로 끄지 않는다(사람의 결정 2026-10-23 k2). 범위: Button · State=Loading · Leading Icon(INSTANCE) · visible=Leading Icon#315:121" },
 ];
 
+/* 반투명 컴포넌트의 선언된 예외(2026-10-27 k10) — 컴포넌트 자체가 반투명이어야 하는 것만 [세트, 변형 이름 정규식, 이유] 로 적는다
+   (예: 끌기 미리보기 · 딤 오버레이 견본). 비활성 표현은 여기 넣지 않는다 — 비활성은 토큰으로 칠한다(CLAUDE.md). 지금은 없다 */
+const OPACITY_OK = [];
+
 function diffComponents(c, want, bad, notes) {
   if (!c) { notes.push("덤프에 컴포넌트 조사가 없습니다 — 옛 probe.js 로 만든 덤프입니다"); return; }
   for (const s of c.missingSets || []) if (want.requiredSets.includes(s)) bad.push(`컴포넌트 세트 없음: ${s}`);
@@ -496,11 +501,13 @@ function diffComponents(c, want, bad, notes) {
     if (!w) continue;
     if (w === "-" ? v.fill !== "-" : !v.fill.includes("$" + w)) bad.push(`${m[1]} ${st} 면 ${v.fill} ≠ ${w === "-" ? "없음" : w} — ${v.name} (${v.id})`);
   }
-  /* 비활성을 opacity 로 흐리는 것은 버튼만의 문제가 아니다 — 조사하는 세트 전부에서 본다 */
+  /* 비활성을 opacity 로 흐리는 것은 버튼만의 문제가 아니다 — 조사하는 세트 전부에서 본다(모든 컴포넌트로 넓힌 검사는 아래 "반투명 컴포넌트") */
+  const dimmed = new Set();
   for (const [set, vs] of Object.entries(sets)) {
     if (set === "Button") continue;
-    for (const v of vs) if (/Disabled/.test(v.name) && v.opacity !== undefined && v.opacity < 1) bad.push(`${set} Disabled 를 opacity ${v.opacity} 로 흐림 — ${v.name} (${v.id})`);
+    for (const v of vs) if (/Disabled/.test(v.name) && v.opacity !== undefined && v.opacity < 1) { dimmed.add(v.id); bad.push(`${set} Disabled 를 opacity ${v.opacity} 로 흐림 — ${v.name} (${v.id})`); }
   }
+  for (const v of sets.Button || []) if (/Disabled/.test(v.name) && v.opacity !== undefined && v.opacity < 1) dimmed.add(v.id);   // Button 은 아래 Button 검사가 낸다
   /* 이름 전체를 훑으면 Size=Medium 을 Medium 톤으로 읽는다 — 속성 값을 직접 읽는다 */
   const prop = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name); return m ? m[1].trim() : null; };
   for (const v of sets["Tag"] || []) {
@@ -828,6 +835,21 @@ function diffComponents(c, want, bad, notes) {
   if (c.effectColors) {
     for (const e of c.effectColors.raw) bad.push(`효과 색이 변수에 묶이지 않았습니다 — ${e.set} · ${e.variant} · ${e.node} (${e.id}) ${e.type} ${e.color} spread ${e.spread} blur ${e.blur}`);
   } else notes.push("덤프에 효과 색 조사가 없습니다 — 2026-10-26 k6 전 probe.js 로 만든 덤프입니다");
+  /* 반투명 컴포넌트(2026-10-27 k10) — 사람의 결정: 컴포넌트 변형의 불투명도를 본다. 자기 불투명도가 1 이 아닌 컴포넌트 · 변형 · 세트는 어긋남이다.
+     비활성은 opacity 로 흐리지 않고 --surface-disable-primary(면 · 테두리) · --foreground-disable-primary(글자 · 표시)로 칠한다(CLAUDE.md · 사이트 :disabled 규칙).
+     거짓 경보가 날 수 있는 경우와 규칙:
+       - 컴포넌트 자체가 반투명이어야 하는 것(끌기 미리보기 · 딤 오버레이 견본 등)은 OPACITY_OK 에 이유와 함께 선언한다. 비활성은 선언 대상이 아니다.
+       - 안쪽 층(아이콘 · 장식 · 프레임)의 불투명도는 probe 가 적지 않는다 — 사이트도 opacity 로 그리는 표현이 있어서다(.tbl th.sortable::after 0.45 ↔ Figma 정렬 아이콘 0.45).
+         그래서 변형 안의 층을 opacity 로 흐린 비활성(예: 달력 Day/Disabled 프레임)은 이 검사로 잡히지 않는다.
+       - 숨긴 변형도 본다. 위 조사 세트 검사가 이미 낸 Disabled 는 다시 내지 않는다 */
+  if (c.translucent !== undefined) {
+    for (const t of c.translucent) {
+      if (dimmed.has(t.id)) continue;
+      const ok = OPACITY_OK.find((e) => e.set === t.set && e.variant.test(t.name));
+      if (ok) { notes.push(`반투명 컴포넌트 ${t.set} · ${t.name} 는 선언된 예외입니다 — ${ok.why}`); continue; }
+      bad.push(`${t.set ? t.set + " " : ""}${t.name} (${t.id}) 불투명도 ${t.opacity} — 컴포넌트는 1 이어야 합니다${/Disabled/.test(t.name) ? ". 비활성은 --surface-disable-primary · --foreground-disable-primary 로 칠합니다" : ""}`);
+    }
+  } else notes.push("덤프에 반투명 컴포넌트 조사가 없습니다 — 2026-10-27 k10 전 probe.js 로 만든 덤프입니다");
   const pv = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name || ""); return m ? m[1].trim() : null; };
   /* 버튼 상자(2026-10-26 k7) — 사람의 결정: 사이트 버튼의 1px 투명 테두리 몫을 Figma 에도 둔다. State=Default 변형마다 사이트에서 잰 같은 버튼과
      (폭 − 라벨 폭) = 테두리 + padding, 라벨 x = 테두리 + 왼쪽 padding, 높이를 ±0.5 로 맞춘다. 아이콘만 있는 버튼은 폭 · 높이.

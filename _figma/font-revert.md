@@ -42,6 +42,9 @@
 > - 2026-10-26 k9: Resource 글 둘을 고치며(사람의 결정 C) **2개가 새로 Noto** 가 됐다 — 접근성 문장 342:46(사이트 문장 그대로, 옛 토큰 이름 --border-focus 를 뺐다) ·
 >   아이콘 수 342:79(Filled 30 → 145, 파일에서 다시 셈). 원래 Pretendard Regular · Body/2. Resource 의 Noto 는 0 → 2(위 2026-10-22 줄의 "Resource 는 0" 은 그때 기준).
 >   Text Field · Search Spec Container 322:641 · 322:811 은 이미 Noto 라 글자만 다시 바뀌었다. `font-revert-nodes.tsv` 맨 아래 "2026-10-26 k9" 절
+> - 2026-10-27 k10: Resource 글 둘을 고치며(사람의 결정 3) **2개가 새로 Noto** 가 됐다 — 접근성 첫 줄 342:42(Gray 500 → 사이트 글 Neutral 500) ·
+>   Token Layers Primitive 칸 342:19(옛 램프 gray · accent · amber · emerald · sky · brand → 지금 램프 13개). 원래 Pretendard Regular · Body/2. Resource 의 Noto 는 2 → 4.
+>   비활성 변형 7개는 칠만 바꿔 글자 서체는 그대로다. `font-revert-nodes.tsv` 맨 아래 "2026-10-27 k10" 절
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
