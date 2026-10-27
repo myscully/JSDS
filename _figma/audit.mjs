@@ -1078,6 +1078,19 @@ function diff(dumpPath, site) {
     if (Math.abs(ls - em) > 0.01) off.push(`자간 ${+ls.toFixed(2)}% ≠ ${+em.toFixed(2)}%`);
     if (off.length) bad.push(`텍스트 스타일 ${name}: ${off.join(" · ")}`);
   }
+  /* 게시 숨김(2026-10-27 k13) — 사람의 결정 "게시에서 숨김": 옛 변수는 아카이브(v0.3) 페이지만 쓰므로 지우지 않고 라이브러리 게시에서만 숨긴다.
+     LEGACY_HIDDEN 의 그룹은 모두 숨겨야 하고, 그 밖의 변수(atomic · semantic 등 지금 쓰는 것)가 숨겨지면 실수다 — 둘 다 어긋남 */
+  const LEGACY_HIDDEN = [
+    { collection: "Primitive", re: /^color\/(gray|accent|red|amber|emerald|sky|brand|ink)\//, why: "v0.3 프리미티브 — 지금 램프(color/atomic/*)로 바뀌었고 아카이브 페이지만 쓴다(k12 에 셈: 80개, 현재 페이지 0)" },
+    { collection: "Semantic", re: /^site\//, why: "v0.3 사이트 문서용 별칭 — 옛 프리미티브를 가리키고 아카이브 페이지만 쓴다(k12 에 셈: 10개)" },
+  ];
+  if (got.publishing) {
+    const hidden = new Set(got.publishing.hidden), legacy = [];
+    for (const g of LEGACY_HIDDEN) for (const n of Object.keys((got.variables && got.variables[g.collection] && got.variables[g.collection].values) || {})) if (g.re.test(n)) legacy.push(g.collection + "/" + n);
+    const notHidden = legacy.filter((k) => !hidden.has(k)), wrong = [...hidden].filter((k) => !legacy.includes(k));
+    if (notHidden.length) bad.push(`게시에서 숨기지 않은 옛 변수 ${notHidden.length}개(대상 ${legacy.length}) — ${notHidden.slice(0, 6).join(" · ")}${notHidden.length > 6 ? " …" : ""}`);
+    if (wrong.length) bad.push(`옛 변수가 아닌데 게시에서 숨긴 변수 ${wrong.length}개 — ${wrong.slice(0, 6).join(" · ")}${wrong.length > 6 ? " …" : ""}`);
+  } else notes.push("덤프에 게시 숨김 조사가 없습니다 — 2026-10-27 k13 전 probe.js 로 만든 덤프입니다");
   diffComponents(got.components, want.components, bad, notes);
 
   return { bad, notes, counts: want.counts };

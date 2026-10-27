@@ -427,6 +427,12 @@ for (const k of Object.keys(FOCUS_BOX)) if (!components.focus[k]) components.foc
 components.effectColors = effectColors;
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
 
+/* 게시 숨김(2026-10-27 k13) — hiddenFromPublishing 이 켜진 로컬 변수를 "컬렉션/이름" 으로. audit 이 옛 변수(옛 프리미티브 8그룹 + site/*)는
+   모두 숨겨졌는지, 그 밖의 변수(지금 쓰는 atomic · semantic 등)는 숨겨지지 않았는지 본다 */
+const publishing = { hidden: [] };
+for (const c of cols) for (const id of c.variableIds) { const v = byId.get(id); if (v && v.hiddenFromPublishing) publishing.hidden.push(c.name + "/" + v.name); }
+publishing.hidden.sort();
+
 return {
   pages: figma.root.children.map((p) => ({ name: p.name, id: p.id, children: p.children.length })),
   scope: CURRENT_PAGES,
@@ -438,4 +444,5 @@ return {
   overflow,
   overlap,
   components,
+  publishing,
 };
