@@ -101,6 +101,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   /* 문서 목록 규칙(li 아래 여백 6px)이 미리보기 메뉴 항목 사이까지 먹어, 미리보기가 배포 CSS(복사본·React)보다 항목마다 6px 벌어졌다 */
   const menuLi = await page.evaluate(() => getComputedStyle(document.querySelector("#ex-dropdown-menu .menu-item")).marginBottom);
   ok("docs list spacing stays out of preview menus", menuLi === "0px", menuLi);
+  /* 메뉴 항목 호버는 --surface-neutral-tertiary(사람의 결정 2026-10-27 — secondary 에서) */
+  await page.locator("#ex-dropdown-menu .menu-item:not(.on):not(.danger)").first().hover(); await page.waitForTimeout(150);
+  const menuHover = await page.evaluate(() => { const li = document.querySelector("#ex-dropdown-menu .menu-item:not(.on):not(.danger)"), d = document.createElement("div"); d.style.background = "var(--surface-neutral-tertiary)"; document.body.append(d);
+    const want = getComputedStyle(d).backgroundColor; d.remove(); return { bg: getComputedStyle(li).backgroundColor, want }; });
+  ok("menu item hover uses the tertiary tint", menuHover.bg === menuHover.want, JSON.stringify(menuHover));
   const menuDd = page.locator(`#ex-dropdown-menu .example-preview .dropdown`).first();
   await menuDd.locator("[aria-haspopup]").click();
   ok("static open menu closes on trigger click", await menuDd.evaluate((e) => !e.classList.contains("open")));
