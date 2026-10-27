@@ -161,3 +161,20 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 표·목록의 **라벨 자체는 중립 글자색**(대비 17.9)이라 밀도 높은 화면의 가독성은 유지됩니다.
 색 아래로 떨어지는 것은 배너의 제목·아이콘과 상태 점이며, 그래서 **색만으로 의미를 전달하지 않는다**는
 규칙(라벨 병기)이 권고가 아니라 제약입니다.
+
+## Date Picker · Calendar (2026-10-27)
+
+기능을 더하면서 마크업과 몇 가지 동작이 바뀌었습니다. 대부분 그대로 올리면 되고, 아래를 직접 쓰던 곳만 확인하세요.
+
+| 바뀐 것 | 전 | 후 |
+|---|---|---|
+| 선택 불가 날짜 | `<button disabled>` | `aria-disabled="true"` — 화살표 키가 지나갈 수 있게. 테스트에서 `toBeDisabled()` 로 찾았다면 `aria-disabled` 로 |
+| 날짜 칸 의미 | `<button aria-selected>`(무효) | `role="grid"` > `role="row"` > `role="gridcell"`, 이름은 전체 날짜("2026년 9월 7일 월요일") |
+| 단독 `Calendar` 의 role | `dialog` | `group`. 팝오버로 쓸 때는 `dialog` prop → `role="dialog" aria-modal="true"` |
+| 제목 | `<span>` | `<button class="cal-title">` — 누르면 연 → 월 화면 |
+| `displayText` | 값이 있어도 늘 보임 | 값이 없을 때만 — 고른 값이 가려지던 것을 고쳤다 |
+| 기간 적용 | 끝이 없어도 적용(`"YYYY-MM-DD ~ "`) | 끝을 고르기 전에는 적용 비활성 |
+| Esc | 열린 피커 전부 닫힘 | 포커스가 든 피커 하나만 닫고 필드로 포커스 |
+
+새 props: `mode="month"` · `calendars={2}` · `footer={["today","reset","cancel","apply"] | false}` · `allowTyping` · `help` · `error` ·
+`messages` · `size` · `readOnly` · `required` · `inputId`. 새 함수: `parseDate` · `parseMonth` · `formatMonth`.

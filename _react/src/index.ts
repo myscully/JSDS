@@ -42,7 +42,7 @@ export { Dropdown, DropdownTrigger, Menu, MenuItem, MenuSep, MenuLabel, Select, 
 export { Tooltip, type TooltipProps } from "./components/tooltip/Tooltip";
 export { Popup, PopupSurface, PopupTitle, PopupBody, PopupActions, PopupForm, type PopupProps, type PopupSurfaceProps } from "./components/popup/Popup";
 export { Notice, Toast, ToastStack, Banner, ToastProvider, useToast, type NoticeProps, type ToastProps, type ToastStackProps, type BannerProps, type ToastProviderProps, type ToastOptions } from "./components/notification/Notification";
-export { Calendar, DatePicker, formatDate, type CalendarProps, type DatePickerProps, type DateRange } from "./components/date-picker/DatePicker";
+export { Calendar, DatePicker, formatDate, formatMonth, parseDate, parseMonth, type CalendarProps, type CalendarView, type DatePickerFooterItem, type DatePickerMessages, type DatePickerMode, type DatePickerProps, type DateRange, type DateValue } from "./components/date-picker/DatePicker";
 
 // E. containers & data
 export { Accordion, AccordionGroup, type AccordionProps, type AccordionGroupProps } from "./components/accordion/Accordion";

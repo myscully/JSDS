@@ -15,6 +15,10 @@ const COLUMNS: DataTableColumn<Row>[] = [
   { key: "status", header: "상태", render: (r) => (r.status === "blocked" ? <Indicator tone="danger">차단</Indicator> : <Indicator tone="warn">검토 필요</Indicator>) },
 ];
 
+const today = new Date();
+const daysAgo = (n: number) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - n);
+const PRESETS = [{ label: "최근 7일", range: (): [Date, Date] => [daysAgo(6), today] }, { label: "최근 30일", range: (): [Date, Date] => [daysAgo(29), today] }];
+
 export default function Example() {
   const [filters, setFilters] = useState(["Critical", "High"]);
   const [page, setPage] = useState(1);
@@ -23,7 +27,7 @@ export default function Example() {
       <Toolbar>
         <SearchBar placeholder="이벤트, 단말, IP 검색" wrapperStyle={{ minWidth: 320 }} />
         <Select options={[{ value: "2", label: "심각도: 2" }]} defaultValue="2" triggerStyle={{ minWidth: 140, height: 40 }} />
-        <DatePicker mode="range" displayText="최근 24시간" triggerStyle={{ height: 40, minWidth: 200 }} />
+        <DatePicker mode="range" max={today} presets={PRESETS} displayText="최근 24시간" triggerStyle={{ height: 40, minWidth: 200 }} />
         <Spacer />
         <Button variant="secondary" leading={<Icon name="download" />}>내보내기</Button>
       </Toolbar>

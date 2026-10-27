@@ -172,7 +172,7 @@ const PATTERNS = {
           <div class="toolbar">
             <div class="searchbar" role="search" style="min-width:320px">${I("search")}<input type="search" placeholder="이벤트, 단말, IP 검색" aria-label="검색"></div>
             <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" style="min-width:140px;height:40px">심각도: 2</button></div>
-            <div class="datepicker"><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false" style="height:40px;min-width:200px">최근 24시간${I("calendar")}</button></div>
+            <div class="datepicker" data-mode="range" data-max="today" data-presets="7 30"><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false" style="height:40px;min-width:200px">최근 24시간${I("calendar")}</button></div>
             <span class="spacer"></span>
             <button type="button" class="btn md secondary">${I("download")}내보내기</button>
           </div>

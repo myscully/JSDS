@@ -98,7 +98,9 @@ describe("Calendar", () => {
     const days = container.querySelectorAll(".day");
     expect(days).toHaveLength(35);
     expect(days[0]).toHaveClass("muted"); expect(days[1]).toHaveClass("muted"); expect(days[2]).not.toHaveClass("muted");
-    expect(days[34]).toHaveClass("muted"); expect(days[34]).toBeDisabled(); expect(days[0]).not.toBeDisabled();
+    /* 선택 불가 날은 disabled 가 아니라 aria-disabled — 화살표 키가 지나갈 수 있게(2026-10-27) */
+    expect(days[34]).toHaveClass("muted"); expect(days[34]).toHaveAttribute("aria-disabled", "true"); expect(days[0]).not.toHaveAttribute("aria-disabled");
+    expect(days[2]).toHaveAttribute("role", "gridcell");
     const seven = Array.from(days).find((d) => d.textContent === "7" && !d.classList.contains("muted"))!;
     expect(seven).toHaveClass("on", "today");
     expect(seven).toHaveAttribute("aria-selected", "true");
