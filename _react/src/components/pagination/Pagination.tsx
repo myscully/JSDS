@@ -51,7 +51,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
   const items = paginate(page, total, { siblings, boundaries });
   const go = (p: number) => { if (p >= 1 && p <= total && p !== page) onChange?.(p); };
   return (
-    <nav ref={ref} className={cx("pagination", { compact, outline }, className)} aria-label={label} {...rest}>
+    <nav ref={ref} className={cx("pagination", { compact, outlined: outline }, className)} aria-label={label} {...rest}>
       <button type="button" aria-label={prevLabel} disabled={page <= 1} onClick={() => go(page - 1)}>
         <Icon name="chevron-left" size={16} />
       </button>

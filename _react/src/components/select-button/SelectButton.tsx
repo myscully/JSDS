@@ -28,7 +28,7 @@ function SelectButtonInner<T extends string>(
 ) {
   const [cur, set] = useControllable<T | undefined>({ value, defaultValue: defaultValue ?? options[0]?.value, onChange: onChange as (v: T | undefined) => void });
   return (
-    <div ref={ref} className={cx("select-btn", { outline }, className)} role="group" aria-label={label} {...rest}>
+    <div ref={ref} className={cx("select-btn", { outlined: outline }, className)} role="group" aria-label={label} {...rest}>
       {options.map((o) => {
         const on = o.value === cur;
         return (

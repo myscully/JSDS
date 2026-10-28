@@ -17,9 +17,9 @@ const simple = (cls: string, name: string) => {
 /** 세로 16px 간격 */
 export const Stack = simple("stack", "Stack");
 /** 1:1 2열 */
-export const Row2 = simple("row-2", "Row2");
+export const Row2 = simple("layout-row-2", "Row2");
 /** 2:1 2열 */
-export const Row3 = simple("row-3", "Row3");
+export const Row3 = simple("layout-row-3", "Row3");
 /** 검색·필터·액션 가로 배치 */
 export const Toolbar = simple("toolbar", "Toolbar");
 /** 온보딩 세로 중앙 컨테이너 */

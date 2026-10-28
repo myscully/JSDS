@@ -38,7 +38,7 @@ describe("Button", () => {
 
   it("block · leading/trailing", () => {
     const { container } = render(<Button block leading={<i data-testid="L" />} trailing={<i data-testid="T" />}>저장</Button>);
-    expect(container.firstElementChild!.className).toBe("btn md primary block");
+    expect(container.firstElementChild!.className).toBe("btn md primary full-width");
     const kids = [...container.firstElementChild!.children].map((c) => c.getAttribute("data-testid"));
     expect(kids).toEqual(["L", "T"]);
   });

@@ -178,3 +178,18 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 
 새 props: `mode="month"` · `calendars={2}` · `footer={["today","reset","cancel","apply"] | false}` · `allowTyping` · `help` · `error` ·
 `messages` · `size` · `readOnly` · `required` · `inputId`. 새 함수: `parseDate` · `parseMonth` · `formatMonth`.
+
+## Tailwind 와 겹치던 클래스 (2026-10-28)
+
+Tailwind 3·4 는 `.block` · `.outline` · `.row-2` · `.row-3` 을 유틸리티로 만듭니다. 앱 어딘가에서 그 유틸리티를 쓰면
+같은 이름의 JSDS 클래스에도 적용돼 SelectButton · Tag · Pagination 에 외곽선이 덧생기고(v3 3px · v4 1px),
+Button 이 `display:block` 이 됐습니다(v3, Tailwind 를 뒤에 불러올 때). 그래서 클래스 이름만 바꿨습니다.
+
+| 전 | 후 | React props |
+| --- | --- | --- |
+| `.btn.block` · `.searchbar.block` | `.full-width` | `block` 그대로 |
+| `.select-btn.outline` · `.tag.outline` · `.pagination.outline` | `.outlined` | `outline` · `variant="outline"` 그대로 |
+| `.row-2` · `.row-3` | `.layout-row-2` · `.layout-row-3` | `Row2` · `Row3` 그대로 |
+
+React 컴포넌트만 쓰는 앱은 고칠 것이 없습니다. 클래스를 직접 쓴 마크업·CSS 만 바꾸세요.
+남은 겹침은 `.fixed` · `.sr-only` 둘이고, 내용이 Tailwind 와 같아 그대로 둡니다.

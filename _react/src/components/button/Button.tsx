@@ -44,7 +44,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   if (process.env.NODE_ENV !== "production" && icon && !rest["aria-label"] && !rest["aria-labelledby"]) {
     console.warn("[ds-react] Button icon 전용 버튼에는 aria-label 이 필요합니다.");
   }
-  const cls = cx("btn", size, VARIANT_CLASS[variant], { icon, block, loading }, className);
+  const cls = cx("btn", size, VARIANT_CLASS[variant], { icon, "full-width": block, loading }, className);
   const extra = Comp === "button" ? { type: type ?? "button", disabled } : { "aria-disabled": disabled || undefined };
   /* loading 중에는 클릭을 삼킨다. disabled 를 걸지 않는 이유는 포커스를 유지해야 스크린리더가 aria-busy 변화를 읽기 때문.
      as="a" 처럼 button 이 아닐 때는 disabled 속성이 먹지 않아 aria-disabled 만 나가므로 클릭도 여기서 막는다 */

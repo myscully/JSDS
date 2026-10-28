@@ -649,7 +649,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn svg{width:18px;height:18px;flex:none}
 .btn.sm svg{width:16px;height:16px}
 .btn.lg svg{width:20px;height:20px}
-.btn.block{width:100%}
+.btn.full-width{width:100%}
 /* 비활성은 opacity 가 아니라 전용 토큰이다 — opacity .4 로 덮으면 비활성 danger 에 붉은 기가, 비활성 outline 에 제품색 보더가 남아 변형마다 다른 색으로 읽혔다.
    fill 은 회색 면 + 회색 라벨, outline 은 면을 비우고 보더만 회색으로. 비활성 텍스트는 WCAG 1.4.3 적용 제외다(라이트 2.08 · 다크 4.80).
    .btn.danger.secondary 가 (0,3,0) 이라 전용 규칙을 (0,4,0) 으로 둬야 이긴다 — 순서만으로는 안 된다.
@@ -707,7 +707,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .searchbar kbd{font-size:12px;color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:4px;padding:1px 5px;background:var(--background-neutral-secondary)}
 .searchbar.lg{height:48px}
 .searchbar.lg input{font-size:16px}
-.searchbar.block{width:100%}
+.searchbar.full-width{width:100%}
 
 /* Select Button (Segmented) */
 .select-btn{display:inline-flex;padding:3px;gap:2px;background:var(--surface-neutral-secondary);border-radius:var(--radius-md);line-height:1.6}
@@ -716,10 +716,10 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .select-btn button:hover{color:var(--foreground-neutral-primary)}
 .select-btn button.on{background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);font-weight:600;box-shadow:var(--shadow-1)}
 .select-btn button[disabled]{color:var(--foreground-disable-primary);cursor:not-allowed}
-.select-btn.outline{background:transparent;padding:0;gap:0;border:1px solid var(--line-neutral-primary);overflow:hidden}
-.select-btn.outline button{border-radius:0;height:36px}
-.select-btn.outline button+button{border-left:1px solid var(--line-neutral-primary)}
-.select-btn.outline button.on{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);box-shadow:none}
+.select-btn.outlined{background:transparent;padding:0;gap:0;border:1px solid var(--line-neutral-primary);overflow:hidden}
+.select-btn.outlined button{border-radius:0;height:36px}
+.select-btn.outlined button+button{border-left:1px solid var(--line-neutral-primary)}
+.select-btn.outlined button.on{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);box-shadow:none}
 
 /* Slider */
 .slider{display:flex;flex-direction:column;gap:8px;min-width:280px;font-size:12px;line-height:1.6}
@@ -883,7 +883,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .tag.sm{font-size:12px;padding:1px 8px}
 .tag.lg{font-size:12px;padding:5px 12px}
 .tag.plain::before{display:none}
-.tag.outline{background:transparent;box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
+.tag.outlined{background:transparent;box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
 .tag.solid{box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
 .tag.solid.critical{background:var(--surface-negative-strong);box-shadow:inset 0 0 0 1px var(--line-negative-strong)}
 .tag.solid.high{box-shadow:inset 0 0 0 1px var(--line-cautionary-primary)}
@@ -961,8 +961,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .pagination button svg{width:16px;height:16px;display:block}
 .pagination .gap{min-width:36px;text-align:center;color:var(--foreground-disable-primary)}
 .pagination.compact button{min-width:32px;height:32px;font-size:12px}
-.pagination.outline button{border-color:var(--line-neutral-secondary);background:var(--surface-elevated-primary)}
-.pagination.outline button.on{border-color:var(--surface-brand-primary); color:var(--foreground-brand-primary);}
+.pagination.outlined button{border-color:var(--line-neutral-secondary);background:var(--surface-elevated-primary)}
+.pagination.outlined button.on{border-color:var(--surface-brand-primary); color:var(--foreground-brand-primary);}
 .pagination-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;font-size:12px;color:var(--foreground-neutral-secondary);line-height:1.6}
 .pagination-bar .dropdown .trigger{height:32px;min-width:120px;font-size:12px}
 
@@ -1292,8 +1292,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .page-head .sub{font-size:14px;color:var(--foreground-neutral-secondary);margin:4px 0 0}
 .page-head .actions{display:flex;gap:8px;flex:none}
 .stack{display:flex;flex-direction:column;gap:16px;width:100%;line-height:1.6}
-.row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;line-height:1.6}
-.row-3{display:grid;grid-template-columns:2fr 1fr;gap:16px;width:100%;line-height:1.6}
+.layout-row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;line-height:1.6}
+.layout-row-3{display:grid;grid-template-columns:2fr 1fr;gap:16px;width:100%;line-height:1.6}
 .toolbar{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap;line-height:1.6}
 .toolbar .spacer{flex:1}
 .form{display:flex;flex-direction:column;gap:20px;width:100%;max-width:640px;background:var(--surface-elevated-primary);padding:24px;border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);line-height:1.6}
