@@ -160,6 +160,14 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     });
   };
   const teal = await accent("product-a"), red = await accent("product-b"), bright = await accent("product-c");
+  /* 메뉴의 "기본" 견본은 제품 색 · 테마와 상관없이 기본 brand(#0066FF) — 토큰을 썼더니 적용된 제품 색 · 다크 값을 따라갔다(사람의 결정 2026-10-28) */
+  const baseSwatch = await page.evaluate(() => {
+    const root = document.documentElement, was = root.getAttribute("data-theme"), sw = () => getComputedStyle(document.querySelector('#accentPop [data-accent=""] i')).backgroundColor;
+    const withAccent = sw(); root.setAttribute("data-theme", "dark"); const dark = sw();
+    if (was === null) root.removeAttribute("data-theme"); else root.setAttribute("data-theme", was);
+    return { withAccent, dark };
+  });
+  ok("the default swatch in the product color menu stays #0066FF", baseSwatch.withAccent === "rgb(0, 102, 255)" && baseSwatch.dark === "rgb(0, 102, 255)", JSON.stringify(baseSwatch));
   /* 청록 제품은 Medium(accent cyan)과 5도 차이라 이제 중립으로 내려간다 — 실측 각도로 고친 결과다.
      어느 중립 단계를 집는지는 설계 선택이라 박아 두지 않는다. 대신 **다섯 단계가 전부 중립 램프의 값이고
      번호가 커질수록 밝다**를 본다 — 중립 전환이 뜻하는 바가 그것이고, 단계를 조정해도 살아남는다 */
