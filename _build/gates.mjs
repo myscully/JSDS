@@ -14,9 +14,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, "..");
 const quick = process.argv.includes("--quick");
 
+/* CI(환경변수 CI=true)에서는 vitest 가 파이프로도 색 코드를 찍는다 — 숫자를 뽑기 전에 걷어낸다 */
+const plain = (t) => t.replace(/\x1b\[[0-9;]*m/g, "");
 const run = (cmd, args, cwd) => {
   const r = spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
-  return { code: r.status, out: (r.stdout || "") + (r.error ? String(r.error) : ""), err: r.stderr || "" };
+  return { code: r.status, out: plain((r.stdout || "") + (r.error ? String(r.error) : "")), err: plain(r.stderr || "") };
 };
 const pick = (text, re) => { const m = text.match(re); return m ? m.slice(1) : null; };
 
