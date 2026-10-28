@@ -32,6 +32,12 @@
       return new RegExp("(^|[\\s>+~(,])" + reEsc(p) + tail).test(sel);
     });
   }
+  /* 셀렉터 목록을 괄호 밖 쉼표에서만 가른다 — .btn:where(.outline.primary,.text) 를 그냥 가르면 '.text' 가 따로 떨어진다(2026-10-28) */
+  function splitSelectors(list) {
+    const out = []; let d = 0, cur = "";
+    for (const ch of list) { if (ch === "(") d++; if (ch === ")") d--; if (ch === "," && !d) { out.push(cur); cur = ""; } else cur += ch; }
+    return [...out, cur].map(s => s.trim()).filter(Boolean);
+  }
   /* prefixes: [".btn", ".tag"] → 해당 셀렉터로 시작하는 규칙만. 블록 안에는 평면 규칙만 둔다(@media 금지) */
   function cssFor(prefixes, css, version) {
     let block = samplesBlock(css).replace(/\/\*[\s\S]*?\*\//g, "");
@@ -40,7 +46,7 @@
     block = block.replace(/@keyframes\s+([\w-]+)\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, (m, name) => { keyframes[name] = m.trim(); return ""; });
     const re = /([^{}]+)\{([^{}]*)\}/g; const out = []; let m;
     while ((m = re.exec(block))) {
-      const sels = m[1].split(",").map(s => s.trim()).filter(Boolean);
+      const sels = splitSelectors(m[1]);
       if (sels.some(s => selectorMatches(s, prefixes))) out.push(sels.join(",") + "{" + m[2].trim() + "}");
     }
     for (const [name, kf] of Object.entries(keyframes)) if (out.some(r => /animation/.test(r) && new RegExp("\\b" + name + "\\b").test(r))) out.push(kf);
@@ -193,6 +199,6 @@
     return out;
   }
 
-  const api = { esc, dedent, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  const api = { esc, dedent, splitSelectors, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);

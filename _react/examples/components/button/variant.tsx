@@ -1,14 +1,18 @@
-import { Button } from "@jiran/ds-react";
+import { Button, ButtonGroup } from "@jiran/ds-react";
 
 export default function Example() {
   return (
     <>
-      <Button variant="primary">Primary</Button>
-      <Button variant="secondary">Secondary</Button>
-      <Button variant="tertiary">Tertiary</Button>
-      <Button variant="text">Text</Button>
-      <Button variant="danger">Danger</Button>
-      <Button variant="danger-secondary">Danger (outline)</Button>
+      <ButtonGroup>
+        <Button variant="solid" color="primary">Primary</Button>
+        <Button variant="solid" color="assistive">Assistive</Button>
+        <Button variant="solid" color="negative">Negative</Button>
+      </ButtonGroup>
+      <ButtonGroup>
+        <Button variant="outline" color="primary">Primary</Button>
+        <Button variant="outline" color="assistive">Assistive</Button>
+        <Button variant="outline" color="negative">Negative</Button>
+      </ButtonGroup>
     </>
   );
 }

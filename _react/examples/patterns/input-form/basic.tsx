@@ -21,7 +21,7 @@ export default function Example() {
       </RadioGroup>
       <Checkbox defaultChecked description="에이전트가 다음 체크인에서 적용합니다">저장 즉시 배포</Checkbox>
       <FormActions>
-        <Button variant="text">취소</Button>
+        <Button variant="outline" color="assistive">취소</Button>
         <Button type="submit">정책 저장</Button>
       </FormActions>
     </Form>

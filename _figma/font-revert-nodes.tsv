@@ -259,3 +259,30 @@ Resource	342:42	Pretendard Regular · Body/2(k10 절과 같음)	Noto Sans KR Reg
 3 Component	325:1423	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	필드 44 · 달력 폭 296 · 날짜 셀 34 → 필드 36 · 44 · 52 · 달력 폭 296(두 달 590) · 날짜 셀 높이 34 · 연/월 셀 40	Card/Date Picker Spec Size 값
 3 Component	325:1432	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	필드 아래 4px. 화면 하단이면 위로 → 필드 아래 4px. 아래 자리가 모자라고 위가 더 넓으면 필드 위 4px	Card/Date Picker Spec Placement 값
 4 Pattern	337:138	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	최근 24시간 → 2026-10-21 ~ 2026-10-27	Card/검색 툴바 기간 필드 — 사이트 patterns.data.js(data-default-preset=7, ded3003)
+
+# 2026-10-28 k16 — 사람의 정의(Button 개편 · 높이 32/40/48)를 Figma 에 맞춤. 새로 Noto Sans KR 이 된 노드 19개(3 Component). 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: 서체를 Pretendard(같은 굵기 — "Noto Bold" 로 적힌 행은 원래 SemiBold 다. 이 환경의 Noto Sans KR 에 SemiBold 가 없어 makeFont 가 Bold 로 대체했다)로 돌리고,
+#   원래 스타일이 적힌 것은 그 스타일에 다시 연결한다. 복제로 생긴 노드(780:4159 · 780:4160 · 781:*)는 "원래" 칸에 복제 원본의 서체 · 스타일을 적었다.
+#   623:3091 · 325:1423 은 k4 · k15 에 Noto 였다가 사람이 Pretendard 로 되돌린 노드다 — 이번에 글자를 고치며 다시 Noto 가 됐다
+# 같은 작업에서 복제로 Pretendard 그대로 늘어난 글자: Button 새 변형 87개 중 라벨이 있는 Outline Primary 15(나머지 72는 아이콘 전용이라 글자 없음 — Focused 18 을 지워 Button 라벨은 105개),
+#   Properties 의 새 목록 칩 4(781:4184 default · 781:4221 False · 781:4222 default · 781:4224 True). 4 Pattern 의 버튼 프레임 3개는 글자 칠만 바꿔 서체는 그대로다
+# page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
+3 Component	623:3091	Pretendard Regular · 스타일 없음	Noto Sans KR Regular · 스타일 없음	rest → hover → pressed 로 … 포커스는 전 변형 공통 … → Normal → Hover → Pressed 로 … 키보드 포커스는 상태가 아니라 전 변형 공통 --foreground-brand-primary 1px 외곽선(2px 띄움)	Card/Button Spec State 값 — components.data.js button.spec State
+3 Component	317:320	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	sm 36 · md 44 · lg 52 (높이) → sm 32 · md 40 · lg 48 (높이 고정)	Card/Button Spec Size 값
+3 Component	317:323	Pretendard Regular · 스타일 없음	Noto Sans KR Regular · 스타일 없음	radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정) → … (text 변형은 8 고정 · 아이콘 전용은 정사각)	Card/Button Spec Container 값
+3 Component	317:329	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽 → 수평은 주 행동이 오른쪽 · 수직은 주 행동이 위 · Lv.4 는 화면당 하나	Card/Button Spec Placement 값
+3 Component	780:4159	Pretendard SemiBold · Label/1(317:319 복제)	Noto Sans KR Bold · 스타일 없음	Size → Priority	Card/Button Spec 새 행 Priority 이름(행 프레임 780:4158, Size 행 복제)
+3 Component	780:4160	Pretendard Regular · Body/2(317:320 복제 — 복제 시점에는 이미 Noto)	Noto Sans KR Regular · 스타일 없음	sm 32 · md 40 · lg 48 (높이 고정) → Lv.4 Primary Solid · Lv.3 Primary Outline · Lv.2 Assistive Solid · Lv.1 Assistive Outline · 되돌리기 어려운 행동은 Negative	Card/Button Spec 새 행 Priority 값
+3 Component	322:638	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	sm 36 · md 44 · lg 52 → sm 32 · md 40 · lg 48	Card/Text Field Spec Size 값
+3 Component	325:1423	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	필드 36 · 44 · 52 · … → 필드 32 · 40 · 48 · 달력 폭 296(두 달 590) · 날짜 셀 높이 34 · 연/월 셀 40	Card/Date Picker Spec Size 값
+3 Component	317:93	Pretendard Medium · Caption/1	Noto Sans KR Medium · 스타일 없음	Primary → Solid	Card/Button Properties Variant 칩 1(default)
+3 Component	317:96	Pretendard Medium · Caption/1	Noto Sans KR Medium · 스타일 없음	Secondary → Outline	Card/Button Properties Variant 칩 2
+3 Component	317:98	Pretendard Medium · Caption/1	Noto Sans KR Medium · 스타일 없음	Tertiary → Text	Card/Button Properties Variant 칩 3
+3 Component	317:100	Pretendard Medium · Caption/1	Noto Sans KR Medium · 스타일 없음	Text → Plain	Card/Button Properties Variant 칩 4
+3 Component	781:4181	Pretendard SemiBold · Label/1(317:91 복제)	Noto Sans KR Bold · 스타일 없음	Variant = → Color =	Card/Button Properties 새 목록 Color 제목(781:4179, Variant 목록 복제)
+3 Component	781:4183	Pretendard Medium · Caption/1(317:93 복제 — 복제 시점에는 이미 Noto)	Noto Sans KR Medium · 스타일 없음	Solid → Primary	Card/Button Properties Color 칩 1(default)
+3 Component	781:4186	Pretendard Medium · Caption/1(317:96 복제 — 복제 시점에는 이미 Noto)	Noto Sans KR Medium · 스타일 없음	Outline → Assistive	Card/Button Properties Color 칩 2
+3 Component	781:4188	Pretendard Medium · Caption/1(317:98 복제 — 복제 시점에는 이미 Noto)	Noto Sans KR Medium · 스타일 없음	Text → Negative	Card/Button Properties Color 칩 3
+3 Component	317:193	Pretendard Medium · Caption/1	Noto Sans KR Medium · 스타일 없음	Default → Normal	Card/Button Properties State 칩 1(default)
+3 Component	781:4219	Pretendard SemiBold · Label/1(317:264 복제)	Noto Sans KR Bold · 스타일 없음	Icon Only = → Loading =	Card/Button Properties 새 목록 Loading 제목(781:4217, Icon Only 목록 복제)
+3 Component	317:287	Pretendard SemiBold · Label/1	Noto Sans KR Bold · 스타일 없음	Leading Icon · Trailing Icon → Icon Left · Icon Right	Card/Button Properties 아이콘 불리언 목록 제목

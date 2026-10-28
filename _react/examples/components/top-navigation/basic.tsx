@@ -12,9 +12,9 @@ export default function Example() {
       </TopBarNav>
       <TopBarRight>
         <WithCount count={<Count value={3} />}>
-          <Button size="sm" variant="tertiary" icon aria-label="알림 3건"><Icon name="bell" /></Button>
+          <Button color="assistive" iconOnly size="sm" aria-label="알림 3건"><Icon name="bell" /></Button>
         </WithCount>
-        <Button size="sm" variant="tertiary" icon aria-label="설정"><Icon name="settings" /></Button>
+        <Button color="assistive" iconOnly size="sm" aria-label="설정"><Icon name="settings" /></Button>
         <Divider orientation="vertical" />
         <Avatar initials="JH" title="정희 · 관리자" />
       </TopBarRight>

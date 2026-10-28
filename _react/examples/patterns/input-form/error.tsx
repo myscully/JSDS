@@ -7,8 +7,8 @@ export default function Example() {
       <TextField id="e1" label="정책 이름" required error="정책 이름을 입력하세요" />
       <TextField id="e2" label="허용 IP" defaultValue="10.0.0" error="올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12" />
       <FormActions>
-        <Button variant="danger-secondary" className="left">삭제</Button>
-        <Button variant="text">취소</Button>
+        <Button variant="outline" color="negative" className="left">삭제</Button>
+        <Button variant="outline" color="assistive">취소</Button>
         <Button type="submit">정책 저장</Button>
       </FormActions>
     </Form>

@@ -2,8 +2,8 @@ import { Avatar, Button, Icon, List, ListItem } from "@jiran/ds-react";
 
 const actions = (
   <>
-    <Button size="sm" variant="tertiary" icon aria-label="편집"><Icon name="pencil" /></Button>
-    <Button size="sm" variant="tertiary" icon aria-label="더 보기"><Icon name="dots" /></Button>
+    <Button color="assistive" iconOnly size="sm" aria-label="편집"><Icon name="pencil" /></Button>
+    <Button color="assistive" iconOnly size="sm" aria-label="더 보기"><Icon name="dots" /></Button>
   </>
 );
 

@@ -57,7 +57,7 @@ describe("Popup", () => {
         <button>opener</button>
         <Popup open onClose={onClose}>
           <PopupTitle>제목</PopupTitle>
-          <PopupActions><Button variant="secondary">취소</Button><Button>확인</Button></PopupActions>
+          <PopupActions><Button variant="outline" color="assistive">취소</Button><Button>확인</Button></PopupActions>
         </Popup>
       </>,
     );

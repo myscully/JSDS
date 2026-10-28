@@ -11,7 +11,7 @@ export interface FieldOwnProps {
   help?: ReactNode;
   /** true 또는 오류 메시지. 보더 danger + aria-invalid */
   error?: boolean | ReactNode;
-  /** 입력 높이 36 / 44 / 52 */
+  /** 입력 높이 32 / 40 / 48 — Button 과 같다 */
   size?: Size;
   /** 라벨 오른쪽 글자 수 표시 (showCount) */
   counter?: ReactNode;

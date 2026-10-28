@@ -27,7 +27,7 @@ function App() {
       <div className="demo-bar">
         <h1>@jiran/ds-react demo · {keys.length} examples</h1>
         <SelectButton label="Accent" defaultValue={PRODUCTS[0][0]} options={PRODUCTS.map(([hex, name]) => ({ value: hex, label: name }))} onChange={(hex) => applyAccent(hex)} />
-        <Button size="sm" variant="secondary" onClick={() => { const next: Theme = theme === "dark" ? "light" : "dark"; setTheme(next); location.reload(); }}>테마 전환</Button>
+        <Button variant="outline" color="assistive" size="sm" onClick={() => { const next: Theme = theme === "dark" ? "light" : "dark"; setTheme(next); location.reload(); }}>테마 전환</Button>
       </div>
       <div className="demo-page">
         {[...byPage.entries()].map(([page, list]) => (

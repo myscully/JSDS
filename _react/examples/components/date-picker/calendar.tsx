@@ -18,7 +18,7 @@ export default function Example() {
       max={new Date(2026, 8, 30)}
       footer={
         <>
-          <Button size="sm" variant="text" data-cal="today" onClick={() => { setMonth(new Date(2026, 8, 1)); setDraft(TODAY); }}>오늘</Button>
+          <Button variant="text" size="sm" data-cal="today" onClick={() => { setMonth(new Date(2026, 8, 1)); setDraft(TODAY); }}>오늘</Button>
           <Button size="sm" data-cal="apply" disabled={draft?.getTime() === value?.getTime()} onClick={() => setValue(draft)}>적용</Button>
         </>
       }

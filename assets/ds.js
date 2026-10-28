@@ -105,7 +105,7 @@
      설정: data-mode(single · range · month) · data-min/max(YYYY-MM-DD | today) · data-footer("today reset cancel apply" | none)
            · data-calendars(1 · 2) · data-presets("7 30") · data-today(정적 데모의 오늘) */
   var DOW = ["일", "월", "화", "수", "목", "금", "토"];
-  var FOOT = { today: ["text", "오늘"], reset: ["text", "초기화"], cancel: ["secondary", "취소"], apply: ["primary", "적용"] };
+  var FOOT = { today: ["text", "오늘"], reset: ["text", "초기화"], cancel: ["outline assistive", "취소"], apply: ["solid primary", "적용"] };
   var MSG = { format: "날짜 형식이 올바르지 않습니다. 예: ", min: " 이후 날짜를 입력하세요", max: " 이전 날짜를 입력하세요", order: "종료일이 시작일보다 빠릅니다" };
   var ymKey = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1); };
   var firstOf = function (d) { return new Date(d.getFullYear(), d.getMonth(), 1); };
@@ -585,11 +585,23 @@
     $$(".datepicker.open[data-ds-opened]").forEach(function (dp) { if (!dp.contains(e.target)) closeDP(dp, false); });   // 바깥 클릭은 초안을 버리고 포커스는 옮기지 않는다
   }, true);
 
-  /* Loading 버튼과 비활성 링크 버튼: pointer-events:none 는 마우스만 막고 키보드 Enter/Space 는 그대로 click 을 쏜다.
-     버튼 자신에 달린 핸들러가 타깃 단계에서 먼저 실행되므로 버블이 아니라 캡처 단계에서 막아야 한다. */
+  /* Loading 버튼과 비활성 링크 버튼: 비활성 링크의 pointer-events:none 는 마우스만 막고 키보드 Enter/Space 는 그대로 click 을 쏜다.
+     버튼 자신에 달린 핸들러가 타깃 단계에서 먼저 실행되므로 버블이 아니라 캡처 단계에서 막아야 한다.
+     Loading 은 disabled 와 달리 포커스를 남기고 click · mousedown · pointerdown · keydown 넷을 막는다(사람의 정의 2026-10-28).
+     loading 에는 pointer-events:none 이 없다 — 있으면 마우스 클릭이 버튼을 지나 뒤의 행 · 카드에서 실행된다.
+     keydown 은 이동 키(NAV)와 수정 키 조합(단축키)을 그대로 보낸다 — 문서 캡처에서 끊으면 Esc 닫기 · 화살표 이동 · 전역 단축키가
+     loading 동안 멈춘다. 그래서 버튼 자신의 리스너도 이 키들은 받는다(React 는 onKeyDown 을 아예 부르지 않는다). 기본 동작은 Enter/Space 만 막는다 */
+  var NAV = ["Tab", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"];
   doc.addEventListener("click", function (e) {
     if (closest(e.target, '.btn.loading,.btn[aria-disabled="true"]')) { e.preventDefault(); e.stopPropagation(); }
   }, true);
+  ["mousedown", "pointerdown", "keydown"].forEach(function (type) {
+    doc.addEventListener(type, function (e) {
+      if (!closest(e.target, ".btn.loading") || (type === "keydown" && (NAV.indexOf(e.key) >= 0 || e.ctrlKey || e.metaKey || e.altKey))) return;
+      e.stopPropagation();
+      if (type !== "keydown" || e.key === "Enter" || e.key === " ") e.preventDefault();
+    }, true);
+  });
 
   doc.addEventListener("keydown", function (e) {
     var dd = closest(e.target, ".dropdown.open");

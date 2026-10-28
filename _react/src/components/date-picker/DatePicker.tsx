@@ -327,7 +327,7 @@ export interface DatePickerProps extends Omit<HTMLAttributes<HTMLDivElement>, "o
   error?: boolean | ReactNode;
   /** 입력 검사 문구 덮어쓰기 */
   messages?: Partial<DatePickerMessages>;
-  /** 필드 높이 36 / 44 / 52 */
+  /** 필드 높이 32 / 40 / 48 — Button 과 같다 */
   size?: Size;
   disabled?: boolean;
   /** 입력형에서 값만 보이고 달력을 열지 않는다 */
@@ -430,13 +430,13 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(function D
     <>
       {mode === "range" && presets?.map((p, i) => {
         const [s, e] = p.range();
-        return <Button key={`p${i}`} size="sm" variant="text" disabled={outOf(s, min, max) || outOf(e, min, max)} onClick={() => done({ start: s, end: e })}>{p.label}</Button>;
+        return <Button variant="text" key={`p${i}`} size="sm" disabled={outOf(s, min, max) || outOf(e, min, max)} onClick={() => done({ start: s, end: e })}>{p.label}</Button>;
       })}
       {items.includes("today") && mode === "single" && (
-        <Button size="sm" variant="text" data-cal="today" disabled={outOf(todayD, min, max)} onClick={() => { setMonth(firstOf(todayD)); setView("day"); setDraft(todayD); if (instant) done(todayD); }}>{LABELS.today}</Button>
+        <Button variant="text" size="sm" data-cal="today" disabled={outOf(todayD, min, max)} onClick={() => { setMonth(firstOf(todayD)); setView("day"); setDraft(todayD); if (instant) done(todayD); }}>{LABELS.today}</Button>
       )}
-      {items.includes("reset") && <Button size="sm" variant="text" data-cal="reset" onClick={() => { setDraft(null); if (instant) done(null); }}>{LABELS.reset}</Button>}
-      {items.includes("cancel") && <Button size="sm" variant="secondary" data-cal="cancel" onClick={() => setOpen(false, true)}>{LABELS.cancel}</Button>}
+      {items.includes("reset") && <Button variant="text" size="sm" data-cal="reset" onClick={() => { setDraft(null); if (instant) done(null); }}>{LABELS.reset}</Button>}
+      {items.includes("cancel") && <Button variant="outline" color="assistive" size="sm" data-cal="cancel" onClick={() => setOpen(false, true)}>{LABELS.cancel}</Button>}
       {items.includes("apply") && <Button size="sm" data-cal="apply" disabled={halfRange || textOf(mode, draft) === committedText} onClick={() => done(draft)}>{LABELS.apply}</Button>}
     </>
   );

@@ -7,14 +7,16 @@
  *   토큰   _build/style.src.css 의 :root 와 :root[data-theme="dark"]
  *   아이콘 _build/icons.gen.js 의 ICONS
  *   타입   assets/style.css 의 .t-* 클래스
- *   컴포넌트 _build/style.src.css 의 .card · .card-foot · .tabs · .btn.danger … 규칙 (표면 그림자·보더, 간격, 트랙, Danger 상태)
+ *   컴포넌트 _build/style.src.css 의 .card · .card-foot · .tabs … 규칙 (표면 그림자·보더, 간격, 트랙)
+ *   Button  .btn:where(형태.색) · :hover · :active · 비활성 규칙 — 변형 표(Variant × Color × Size × State × Icon Only × Loading)와 칠(2026-10-28 k16, buttonExpect)
  *   컨테이너 _build/components.data.js 의 예제 HTML(순서 · 라벨 · 아이콘), 내비 기하는 빌드된 components/navigation.html 을
  *            헤드리스 Chromium 으로 잰 값(_build/node_modules/playwright — 없으면 어긋남으로 남긴다)
  *   Spec   _build/components.data.js 의 spec 행 ↔ 문서 카드 "Card/…" 의 Spec 글
- *   포커스 _build/style.src.css 의 값 입력 필드 포커스 규칙(오류 필드 포함 · k9 부터 inset 없음)과 전역 :focus-visible 외곽선(선택 컨트롤 · Button 의 Focus Ring) — focusExpect
+ *   포커스 _build/style.src.css 의 값 입력 필드 포커스 규칙(오류 필드 포함 · k9 부터 inset 없음)과 전역 :focus-visible 외곽선(선택 컨트롤의 Focus Ring — Button 은 k16 에 Focused 변형을 지워 뺐다) — focusExpect
  *   효과 색 컴포넌트 세트의 그림자 색이 변수나 효과 스타일에 묶였는지(2026-10-26 k6) — 기대값 없이 probe 가 모은 것을 그대로 어긋남으로
- *   버튼   빌드된 components/button.html 에 "버튼" 버튼을 붙여 Chromium 으로 잰 상자(테두리 + padding · 높이)(2026-10-26 k7)
- *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7)
+ *   버튼   빌드된 components/button.html 에 "버튼" 버튼을 붙여 Chromium 으로 잰 상자(테두리 + padding · 높이)(2026-10-26 k7, k16 에 새 클래스로)
+ *   Text Field 입력칸 높이 ↔ .field input · .sm · .lg(2026-10-28 k16)
+ *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7) · Button 의 variant · color · size 기본값(k16)
  *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
  *   선택 컨트롤 선택된 Radio · 선택 + 비활성 Radio 의 면 · 테두리 · 점, 비활성 Slider 의 라벨 · 값 글자 칠(2026-10-27 k11) — controlsExpect
  *   비활성 안쪽 층 이름에 Disabled 가 든 변형 · 노드 안의 불투명도(2026-10-27 k12) · Chip 삭제(x) · 비활성 Item Tile 칠 — chipTileExpect
@@ -30,6 +32,7 @@ const require = createRequire(import.meta.url);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, "..");
 const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
+const { splitSelectors } = require(path.join(ROOT, "_build/lib.js"));
 
 /* ---------- 토큰 ---------- */
 const GROUPS = ["foreground", "background", "surface", "line", "effect", "static"];
@@ -152,8 +155,10 @@ function cssRule(sel) {
   const css = read("_build/style.src.css").replace(/\/\*[\s\S]*?\*\//g, "");
   const esc = sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   let m = css.match(new RegExp("(?:^|\\n|\\})" + esc + "\\{([^}]*)\\}"));
-  /* 셀렉터 목록 안에 있는 규칙(예: .sidenav.collapsed a span,…,.sidenav.collapsed a.sub{…})도 찾는다 */
-  if (!m) for (const r of css.matchAll(/(?:^|\n|\})([^{}@]+)\{([^}]*)\}/g)) if (r[1].split(",").map((x) => x.trim()).includes(sel)) { m = [null, r[2]]; break; }
+  /* 셀렉터 목록 안에 있는 규칙(예: .sidenav.collapsed a span,…,.sidenav.collapsed a.sub{…})도 찾는다.
+     목록은 괄호 밖의 쉼표에서만 가른다(2026-10-28 k16) — Button 개편 뒤 .btn:where(.text,.icon-only:not(.solid,.outline))[disabled] 처럼
+     괄호 안에 쉼표가 든 셀렉터가 생겼고, 쉼표마다 가르면 ".btn:where(.text" 같은 조각이 되어 찾지 못했다. 사이트 빌드와 같은 함수(_build/lib.js splitSelectors)를 쓴다 */
+  if (!m) for (const r of css.matchAll(/(?:^|\n|\})([^{}@]+)\{([^}]*)\}/g)) if (splitSelectors(r[1]).includes(sel)) { m = [null, r[2]]; break; }
   if (!m) throw new Error("CSS 규칙 없음: " + sel);
   return Object.fromEntries(m[1].split(";").filter((x) => x.includes(":")).map((x) => { const i = x.indexOf(":"); return [x.slice(0, i).trim(), x.slice(i + 1).trim()]; }));
 }
@@ -250,25 +255,27 @@ async function siteMeasure() {
       });
       out.tag = t.sm && t.md && t.lg ? t : { error: "사이트 Tag 예제에서 세 크기(.tag.sm · .tag · .tag.lg)를 다 찾지 못했습니다 " + JSON.stringify(t) };
     }
-    /* 버튼(2026-10-26 k7) — components/button.html 에 "버튼" 라벨 버튼을 잠시 붙여(파일은 그대로) 변형 · 크기 · 아이콘만 여부마다
-       폭 · 높이 · 라벨 글자의 폭과 x 를 잰다. Figma 변형의 라벨이 "버튼" 이라 같은 글로 잰다. 아이콘만 있는 버튼은 16 아이콘 하나 */
+    /* 버튼(2026-10-26 k7 · 2026-10-28 k16 새 클래스) — components/button.html 에 "버튼" 라벨 버튼을 잠시 붙여(파일은 그대로) 형태 · 색 · 크기 · 아이콘 전용 여부마다
+       폭 · 높이 · 라벨 글자의 폭과 x 를 잰다. Figma 변형의 라벨이 "버튼" 이라 같은 글로 잰다. 아이콘 전용은 16 아이콘 하나.
+       열쇠는 "Variant|Color|sm|true" — 클래스는 btnClass(Solid/Outline → "solid primary" · Text → "text" · Plain → "primary" + icon-only) */
     if (!(await open("button"))) out.btn = { error: "components/button.html 이 없습니다 — 사이트를 빌드하세요" };
     else {
-      out.btn = await p.evaluate(async () => {
+      const combos = BTN_COMBOS.map(([v, c]) => [v + "|" + c, btnClass(v, c)]);
+      out.btn = await p.evaluate(async ({ combos, sizes }) => {
         await document.fonts.ready;
         const host = document.createElement("div"); host.style.cssText = "position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px";
         (document.querySelector(".example-preview") || document.body).appendChild(host);
         const res = {};
-        for (const v of ["primary", "secondary", "tertiary", "text", "danger", "danger secondary"]) for (const s of ["sm", "md", "lg"]) for (const icon of [false, true]) {
-          const e = document.createElement("button"); e.type = "button"; e.className = "btn " + v + " " + s + (icon ? " icon" : "");
+        for (const [key, cls] of combos) for (const s of sizes) for (const icon of [false, true]) {
+          const e = document.createElement("button"); e.type = "button"; e.className = "btn " + cls + " " + s + (icon ? " icon-only" : "");
           if (icon) e.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24"></svg>'; else e.textContent = "버튼";
           host.appendChild(e);
           const r = e.getBoundingClientRect(), rg = document.createRange(); rg.selectNodeContents(e); const tr = rg.getBoundingClientRect();
-          res[v + "|" + s + "|" + icon] = { w: +r.width.toFixed(3), h: +r.height.toFixed(3), text: icon ? null : +tr.width.toFixed(3), textX: icon ? null : +(tr.left - r.left).toFixed(3) };
+          res[key + "|" + s + "|" + icon] = { w: +r.width.toFixed(3), h: +r.height.toFixed(3), text: icon ? null : +tr.width.toFixed(3), textX: icon ? null : +(tr.left - r.left).toFixed(3) };
         }
         host.remove();
         return res;
-      });
+      }, { combos, sizes: Object.values(BTN_SIZES) });
     }
   } catch (e) {
     const err = { error: "사이트를 재지 못했습니다(" + String(e.message).split("\n")[0] + ")" };
@@ -300,7 +307,8 @@ const FOCUS_CSS = [
   { set: "Date Picker", state: "Focused", base: ".datepicker .field-btn", rule: ".datepicker .field-btn:focus-visible" },
   { set: "Date Picker", state: "Error Focused", base: ".datepicker .field-btn", rule: ".datepicker.error .field-btn:focus-visible" },   // k14 — 입력형(.affix)은 datePickerExpect 가 따로 본다
 ];
-const RING_SETS = ["Checkbox", "Radio Button", "Switch", "Slider", "Button"];
+/* Button 은 2026-10-28 k16 에 뺐다 — 사람의 정의로 포커스는 상태가 아니라 코드의 전역 :focus-visible 이고 Figma 에 Focused 변형을 두지 않는다(btnMatrix 가 남은 Focused 를 낸다) */
+const RING_SETS = ["Checkbox", "Radio Button", "Switch", "Slider"];
 function focusExpect() {
   const fields = [];
   const shadow = (s) => { const nums = s.replace(/var\([^)]*\)/g, " ").replace(/\binset\b/, " ").trim().split(/\s+/).filter(Boolean).map(parseFloat); return { x: nums[0] || 0, y: nums[1] || 0, blur: nums[2] || 0, spread: nums[3] || 0, tok: figTok(s), inset: /\binset\b/.test(s) }; };
@@ -427,6 +435,70 @@ function datePickerExpect() {
   } catch (e) { return { error: String(e.message || e) }; }
 }
 
+/* Button(2026-10-28 k16) — 사람의 정의(2026-10-28)로 개편한 체계. Figma 속성 ↔ 사이트 클래스:
+     Variant  Solid(.solid) · Outline(.outline) · Text(.text, 정의 밖 — 색은 Primary 만) · Plain(형태 없는 .icon-only — Icon Only=True 에만)
+     Color    Primary · Assistive · Negative(.primary · .assistive · .negative)
+     Size     Small · Medium · Large(.sm · .md · .lg — 높이 32 · 40 · 48, 아이콘 전용은 정사각)
+     State    Normal · Hover(:hover) · Pressed(:active) · Disabled([disabled]). 포커스는 상태가 아니라 전역 :focus-visible 이라 Focused 변형이 없다
+     Loading  True 는 State=Normal · Icon Only=False 에만(.loading — 상태가 아니라 옵션. 면 · 테두리 · 글자는 Normal 과 같다)
+   옛 이름 대응(Figma 변형은 이름만 바꿔 재사용 — 인스턴스 연결 유지): Primary → Solid/Primary · Tertiary → Solid/Assistive · Secondary → Outline/Assistive ·
+   Danger → Solid/Negative · Danger Secondary → Outline/Negative · Text → Text/Primary(아이콘 전용은 Plain/Primary) · State=Default → Normal · State=Loading → Loading=True.
+   기대값은 style.src.css 의 .btn:where(형태.색) 규칙과 :hover · :active, 비활성 세 규칙(.btn[disabled] · .btn:where(.outline)[disabled] ·
+   .btn:where(.text,.icon-only:not(.solid,.outline))[disabled])에서 읽는다. 규칙에 없는 값은 앞 상태(없으면 .btn)를 물려받는다 — CSS 캐스케이드와 같다.
+   테두리는 .btn 의 1px solid transparent 가 기본이라 "transparent"(probe 가 불투명도 0 칠을 그렇게 적는다). 못 읽으면 어긋남이다 */
+const BTN_COMBOS = [["Solid", "Primary"], ["Solid", "Assistive"], ["Solid", "Negative"], ["Outline", "Primary"], ["Outline", "Assistive"], ["Outline", "Negative"], ["Text", "Primary"], ["Plain", "Primary"], ["Plain", "Assistive"], ["Plain", "Negative"]];
+const BTN_SIZES = { Small: "sm", Medium: "md", Large: "lg" };
+const BTN_STATES = ["Normal", "Hover", "Pressed", "Disabled"];
+const btnClass = (v, c) => (v === "Text" ? "text" : v === "Plain" ? c.toLowerCase() : v.toLowerCase() + " " + c.toLowerCase());
+/* 기대하는 변형 이름 전부 — Text 는 아이콘 전용이 없고(아이콘 전용 Primary 는 Plain), Plain 은 아이콘 전용에만, Loading=True 는 Normal · 라벨 버튼에만 */
+function btnMatrix() {
+  const out = [];
+  for (const [v, c] of BTN_COMBOS) for (const io of ["False", "True"]) {
+    if ((v === "Text" && io === "True") || (v === "Plain" && io === "False")) continue;
+    for (const z of Object.keys(BTN_SIZES)) {
+      for (const st of BTN_STATES) out.push({ Variant: v, Color: c, Size: z, State: st, "Icon Only": io, Loading: "False" });
+      if (io === "False") out.push({ Variant: v, Color: c, Size: z, State: "Normal", "Icon Only": io, Loading: "True" });
+    }
+  }
+  return out;
+}
+function buttonExpect() {
+  try {
+    const base = cssRule(".btn");
+    const sel = (v, c) => (v === "Text" ? ".btn:where(.text)" : v === "Plain" ? `.btn:where(.icon-only:not(.solid,.outline).${c.toLowerCase()})` : `.btn:where(.${v.toLowerCase()}.${c.toLowerCase()})`);
+    const face = (r, prev) => (r.background === undefined ? prev : /^(transparent|none)$/.test(r.background.trim()) ? "-" : figTok(r.background));
+    const line = (r, prev) => (r["border-color"] === undefined ? prev : r["border-color"].trim() === "transparent" ? "transparent" : figTok(r["border-color"]));
+    const ink = (r, prev) => (r.color === undefined ? prev : figTok(r.color));
+    const step = (r, p) => ({ fill: face(r, p.fill), stroke: line(r, p.stroke), fg: ink(r, p.fg) });
+    if (!/1px solid transparent/.test(base.border || "")) throw new Error(".btn 의 border 가 1px solid transparent 가 아닙니다(" + base.border + ")");
+    const root = { fill: face(base, "-"), stroke: "transparent", fg: null };
+    const dBase = cssRule(".btn[disabled]"), dOut = cssRule(".btn:where(.outline)[disabled]"), dFlat = cssRule(".btn:where(.text,.icon-only:not(.solid,.outline))[disabled]");
+    const out = {};
+    for (const [v, c] of BTN_COMBOS) {
+      const s = sel(v, c), n = step(cssRule(s), root);
+      const has = (x) => { try { return cssRule(x); } catch { return {}; } };
+      const h = step(has(s + ":hover"), n), a = step(has(s + ":active"), n);
+      let d = step(dBase, n);
+      if (v === "Outline") d = step(dOut, d);
+      if (v === "Text" || v === "Plain") d = step(dFlat, d);
+      const e = { Normal: { ...n, css: s }, Hover: { ...h, css: s + ":hover" }, Pressed: { ...a, css: s + ":active" }, Disabled: { ...d, css: v === "Outline" ? ".btn:where(.outline)[disabled]" : v === "Solid" ? ".btn[disabled]" : ".btn:where(.text,.icon-only:not(.solid,.outline))[disabled]" } };
+      for (const [st, x] of Object.entries(e)) for (const f of ["fill", "stroke", "fg"]) if (!x[f]) throw new Error(`${v}/${c} ${st} 의 ${f} 를 읽지 못했습니다(${x.css})`);
+      out[v + "/" + c] = e;
+    }
+    return out;
+  } catch (e) { return { error: String(e.message || e) }; }
+}
+/* Button 기본 변형(2026-10-28 k16) — components.data.js 의 Button props 기본값(variant solid · color primary · size md)을 Figma 이름으로 */
+function buttonDefault() {
+  const box = { I: () => "", module: { exports: {} } };
+  vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
+  const props = (box.module.exports.button || {}).props || [], dv = (k) => { const r = props.find((x) => x[0] === k); return r ? String(r[2]).trim() : null; };
+  const cap = (x) => (x ? x[0].toUpperCase() + x.slice(1) : null);
+  const z = { sm: "Small", md: "Medium", lg: "Large" }[dv("size")];
+  const out = { Variant: cap(dv("variant")), Color: cap(dv("color")), Size: z || null, State: "Normal", "Icon Only": "False", Loading: "False" };
+  return Object.values(out).every(Boolean) ? out : null;
+}
+
 /* Tag 기본 크기(2026-10-26 k7) — components.data.js 의 Tag props 에서 size 행의 기본값(md)을 읽어 Figma 크기 이름으로 */
 function tagDefaultSize() {
   const box = { I: () => "", module: { exports: {} } };
@@ -459,28 +531,10 @@ function componentsExpect() {
       tabItem: px(cssRule(".tabs .tab").gap),
     },
     track: { pill: figTok(cssRule(".tabs.pill").background), selectFilled: figTok(cssRule(".select-btn").background) },
-    danger: {
-      Default: figTok(cssRule(".btn.danger").background), Hover: figTok(cssRule(".btn.danger:hover").background), Pressed: figTok(cssRule(".btn.danger:active").background),
-    },
-    dangerSecondary: { Hover: figTok(cssRule(".btn.danger.secondary:hover").background), Pressed: figTok(cssRule(".btn.danger.secondary:active").background) },
-    /* 비활성 — opacity 로 흐리지 않고 전용 토큰으로 칠한다(CLAUDE.md). 투명 변형은 면이 없고 secondary 계열은 보더만 남는다 */
-    disabled: (() => {
-      const d = (s) => cssRule(`.btn${s}[disabled],.btn${s}[aria-disabled="true"]`);
-      const base = d(""), sec = d(".secondary"), dsec = d(".danger.secondary"), txt = d(".text");
-      const face = (r) => (r.background === "transparent" ? "-" : figTok(r.background || base.background));
-      const line = (r) => (r["border-color"] && r["border-color"] !== "transparent" ? figTok(r["border-color"]) : null);
-      return {
-        "Primary": { fill: face(base), stroke: null }, "Tertiary": { fill: face(base), stroke: null }, "Danger": { fill: face(base), stroke: null },
-        "Secondary": { fill: face(sec), stroke: line(sec) }, "Danger Secondary": { fill: face(dsec), stroke: line(dsec) }, "Text": { fill: face(txt), stroke: null },
-      };
-    })(),
+    /* Button(2026-10-28 k16 — 사람의 정의로 개편) — 형태 × 색 × 상태마다 면 · 테두리 · 글자(아이콘) 색. 규칙은 buttonExpect 머리 주석 */
+    button: buttonExpect(),
     /* Figma 레이아웃 규칙 — CSS 에 없는 값이라 여기 상수로 둔다. 출처: .claude/agents/figma-sync.md "섹션 간격은 200px" */
     sectionGap: 200,
-    /* 버튼 변형별 상태 면 — 투명은 "-" */
-    buttonFace: Object.fromEntries(["primary", "secondary", "tertiary", "text"].map((v) => {
-      const f = (sel) => { const b = cssRule(sel).background; return b === "transparent" ? "-" : figTok(b); };
-      return [v[0].toUpperCase() + v.slice(1), { Default: f(`.btn.${v}`), Hover: f(`.btn.${v}:hover`), Pressed: f(`.btn.${v}:active`) }];
-    })),
     /* 태그 톤 — 라벨 글자는 톤과 상관없이 .tag 의 color 하나다. Figma 의 Info 는 저장소의 기본 .tag 가 맡는다 */
     tag: {
       label: figTok(cssRule(".tag").color),
@@ -534,6 +588,10 @@ function componentsExpect() {
     focus: focusExpect(),
     /* Tag 기본 크기 — props 의 size 기본값(2026-10-26 k7) */
     tagDefault: tagDefaultSize(),
+    /* Button 기본 변형 — props 의 variant · color · size 기본값(2026-10-28 k16) */
+    buttonDefault: buttonDefault(),
+    /* Text Field 입력칸 높이 — .field input · .field.sm input · .field.lg input(2026-10-28 k16) */
+    textFieldH: (() => { try { const h = { Small: px(cssRule(".field.sm input").height), Medium: px(cssRule(".field input").height), Large: px(cssRule(".field.lg input").height) }; return Object.values(h).every((x) => x > 0) ? h : { error: "높이를 읽지 못했습니다 " + JSON.stringify(h) }; } catch (e) { return { error: String(e.message || e) }; } })(),
     /* 선택된 Radio · 비활성 Slider 글자의 칠 — 사이트 CSS (2026-10-27 k11) */
     controls: controlsExpect(),
     /* Chip 삭제(x) · 비활성 Item Tile — 사이트 CSS (2026-10-27 k12) */
@@ -566,8 +624,8 @@ function componentsExpect() {
 
 /* 속성 연결 규칙의 선언된 예외 — 넷(세트 · 변형 · 노드 · 속성)이 다 맞을 때만 넘긴다. 다른 빠짐은 그대로 잡는다 */
 const REF_EXCEPTIONS = [
-  { set: "Button", variant: /(?:^|, )State=Loading(?:,|$)/, key: "Leading Icon|INSTANCE", ref: "visible=Leading Icon#315:121",
-    why: "State=Loading 은 그 자리에 스피너를 늘 보이므로 Leading Icon 속성으로 끄지 않는다(사람의 결정 2026-10-23 k2). 범위: Button · State=Loading · Leading Icon(INSTANCE) · visible=Leading Icon#315:121" },
+  { set: "Button", variant: /(?:^|, )Loading=True(?:,|$)/, key: "Icon Left|INSTANCE", ref: "visible=Icon Left#315:121",
+    why: "Loading=True 는 그 자리에 스피너를 늘 보이므로 Icon Left 속성으로 끄지 않는다(사람의 결정 2026-10-23 k2 — 그때 이름은 State=Loading · Leading Icon, 2026-10-28 k16 에 Loading 옵션 · Icon Left 로). 범위: Button · Loading=True · Icon Left(INSTANCE) · visible=Icon Left#315:121" },
 ];
 
 /* 반투명 컴포넌트의 선언된 예외(2026-10-27 k10) — 컴포넌트 자체가 반투명이어야 하는 것만 [세트, 변형 이름 정규식, 이유] 로 적는다
@@ -578,7 +636,6 @@ function diffComponents(c, want, bad, notes) {
   if (!c) { notes.push("덤프에 컴포넌트 조사가 없습니다 — 옛 probe.js 로 만든 덤프입니다"); return; }
   for (const s of c.missingSets || []) if (want.requiredSets.includes(s)) bad.push(`컴포넌트 세트 없음: ${s}`);
   const sets = c.sets || {};
-  const state = (n) => (/Hover/.test(n) ? "Hover" : /Pressed|Active/.test(n) ? "Pressed" : /Disabled|Loading|Focus/.test(n) ? null : "Default");
   for (const [set, w] of Object.entries(want.surfaces)) {
     for (const v of sets[set] || []) {
       if (!/Hover/.test(v.name) && w.shadow === false && v.shadow > 0) bad.push(`${set} 그림자 남음 — ${v.name} (${v.id})`);
@@ -593,22 +650,31 @@ function diffComponents(c, want, bad, notes) {
     if (!v.fill.includes("$" + want.track.pill)) bad.push(`Tab Pill 트랙 ${v.fill} ≠ ${want.track.pill} (${v.id})`);
   for (const v of (sets["Select Button"] || []).filter((x) => /Style=Filled/.test(x.name)))
     if (!v.fill.includes("$" + want.track.selectFilled)) bad.push(`Select Button 트랙 ${v.fill} ≠ ${want.track.selectFilled} (${v.id})`);
+  /* Button(2026-10-28 k16) — 변형 표(btnMatrix)와 이름이 하나하나 맞는지(빠진 것 · 표에 없는 것 · 옛 이름), 그리고 변형마다 면 · 테두리 · 글자(아이콘 전용은 아이콘 선) 색.
+     규칙과 옛 이름 대응은 buttonExpect 머리 주석. 색은 칠 하나와 정확히 같아야 한다($토큰 · 면 없음 "-" · 투명 테두리 "transparent").
+     Loading=True 는 Normal 과 같은 칠이다. 아이콘 전용의 아이콘 색은 probe 가 "Icon" 노드의 벡터 선으로 적는다 */
   const btn = sets["Button"] || [];
-  for (const v of btn.filter((x) => /Variant=Danger(?! Secondary)/.test(x.name))) {
-    const st = state(v.name);
-    if (st && !v.fill.includes("$" + want.danger[st])) bad.push(`Danger ${st} 면 ${v.fill} ≠ ${want.danger[st]} — ${v.name} (${v.id})`);
-  }
-  const ds = btn.filter((x) => /Variant=Danger Secondary/.test(x.name));
-  if (btn.length && !ds.length) bad.push("Button 에 Danger Secondary 변형이 없습니다");
-  for (const v of ds) {
-    const st = state(v.name);
-    if ((st === "Hover" || st === "Pressed") && !v.fill.includes("$" + want.dangerSecondary[st])) bad.push(`Danger Secondary ${st} 면 ${v.fill} ≠ ${want.dangerSecondary[st]} — ${v.name} (${v.id})`);
-  }
-  for (const v of btn) {
-    const m = /Variant=(Primary|Secondary|Tertiary|Text)(?=,|$)/.exec(v.name), st = state(v.name);
-    const w = m && st && want.buttonFace[m[1]][st];
-    if (!w) continue;
-    if (w === "-" ? v.fill !== "-" : !v.fill.includes("$" + w)) bad.push(`${m[1]} ${st} 면 ${v.fill} ≠ ${w === "-" ? "없음" : w} — ${v.name} (${v.id})`);
+  {
+    const bv = (name) => Object.fromEntries(String(name).split(", ").map((kv) => kv.split("=")).filter((x) => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
+    const key = (o) => ["Variant", "Color", "Size", "State", "Icon Only", "Loading"].map((k) => k + "=" + (o[k] || "?")).join(", ");
+    const exp = new Set(btnMatrix().map(key)), got = new Map(btn.map((v) => [key(bv(v.name)), v]));
+    if (btn.length) {
+      const miss = [...exp].filter((k) => !got.has(k)), stray = btn.filter((v) => !exp.has(key(bv(v.name))));
+      if (miss.length) bad.push(`Button 에 없는 변형 ${miss.length}개(기대 ${exp.size}) — ${miss.slice(0, 4).join(" · ")}${miss.length > 4 ? " …" : ""}`);
+      if (stray.length) bad.push(`Button 에 표에 없는 변형 ${stray.length}개 — ${stray.slice(0, 4).map((v) => v.name + "(" + v.id + ")").join(" · ")}${stray.length > 4 ? " …" : ""}(옛 이름 · Focused 는 지웠어야 합니다 — buttonExpect 머리 주석)`);
+    }
+    const we = want.button;
+    if (we.error) bad.push(`Button 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${we.error}`);
+    else for (const v of btn) {
+      const o = bv(v.name), e = we[o.Variant + "/" + o.Color], w = e && e[o.State];
+      if (!w) continue;   // 표에 없는 변형은 위에서 냈다
+      const at = `Button ${v.name} (${v.id})`, tok = (t) => (t === "-" || t === "transparent" ? t : "$" + t);
+      if (v.fill !== tok(w.fill)) bad.push(`${at} 면 ${v.fill} ≠ ${w.fill === "-" ? "없음" : w.fill} — 사이트 ${w.css}`);
+      if (v.stroke !== tok(w.stroke)) bad.push(`${at} 테두리 ${v.stroke} ≠ ${w.stroke} — 사이트 ${w.css}`);
+      const fg = o["Icon Only"] === "True" ? v.icon : v.text;
+      if (fg !== tok(w.fg)) bad.push(`${at} ${o["Icon Only"] === "True" ? "아이콘" : "글자"} ${fg} ≠ ${w.fg} — 사이트 ${w.css}`);
+      if (v.opacity !== undefined && v.opacity < 1) bad.push(`${at} 불투명도 ${v.opacity} — 비활성은 토큰으로 칠합니다`);
+    }
   }
   /* 비활성을 opacity 로 흐리는 것은 버튼만의 문제가 아니다 — 조사하는 세트 전부에서 본다(모든 컴포넌트로 넓힌 검사는 아래 "반투명 컴포넌트") */
   const dimmed = new Set();
@@ -829,15 +895,6 @@ function diffComponents(c, want, bad, notes) {
     if (v.donutGaps.some((g) => Math.abs(g - want.donut.gapDeg) > 0.5)) bad.push(`Donut 호 사이 간격 ${v.donutGaps.join(" · ")}° ≠ ${want.donut.gapDeg}° (${v.id})`);
     if (v.donutStrokes) bad.push(`Donut 호에 테두리 ${v.donutStrokes}개 — 틈은 비워서 만든다 (${v.id})`);
     if (want.donut.row === "space-between" && v.row !== "SPACE_BETWEEN/FILL") bad.push(`Donut + 범례 행 ${v.row} ≠ SPACE_BETWEEN/FILL(.donut-row) (${v.id})`);
-  }
-  for (const v of btn.filter((x) => /State=Disabled/.test(x.name))) {
-    const m = /Variant=(Primary|Secondary|Tertiary|Text|Danger Secondary|Danger)(?=,|$)/.exec(v.name);
-    const w = m && want.disabled[m[1]];
-    if (!w) continue;
-    if (v.opacity !== undefined && v.opacity < 1) bad.push(`Disabled 를 opacity ${v.opacity} 로 흐림 — ${v.name} (${v.id})`);
-    const fillOk = w.fill === "-" ? v.fill === "-" : v.fill.includes("$" + w.fill);
-    if (!fillOk) bad.push(`Disabled 면 ${v.fill} ≠ ${w.fill === "-" ? "없음" : w.fill} — ${v.name} (${v.id})`);
-    if (w.stroke && !v.stroke.includes("$" + w.stroke)) bad.push(`Disabled 보더 ${v.stroke} ≠ ${w.stroke} — ${v.name} (${v.id})`);
   }
   if (c.textOnSurface === undefined) notes.push("덤프에 글자 토큰·옛 변수·섹션 간격 조사가 없습니다 — 옛 probe.js 로 만든 덤프입니다");
   if ((c.textOnSurface || []).length) bad.push(`글자에 surface/* 토큰 ${c.textOnSurface.length}개 — 글자는 foreground (${c.textOnSurface.slice(0, 6).join(" ")}${c.textOnSurface.length > 6 ? " …" : ""})`);
@@ -1061,7 +1118,19 @@ function diffComponents(c, want, bad, notes) {
     }
   } else notes.push("덤프에 Date Picker 필드 · 날짜 칸 조사가 없습니다 — 2026-10-27 k14 전 probe.js 로 만든 덤프입니다");
   const pv = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name || ""); return m ? m[1].trim() : null; };
-  /* 버튼 상자(2026-10-26 k7) — 사람의 결정: 사이트 버튼의 1px 투명 테두리 몫을 Figma 에도 둔다. State=Default 변형마다 사이트에서 잰 같은 버튼과
+  /* Text Field 입력칸 높이(2026-10-28 k16) — 변형마다 "Input" 칸 높이를 사이트 .field input · .field.sm input · .field.lg input 과 ±0.5. 버튼과 같은 32 · 40 · 48 */
+  if (c.textField !== undefined) {
+    const th = want.textFieldH;
+    if (!th || th.error) bad.push(`Text Field 높이 기대값을 읽지 못했습니다 — ${th ? th.error : "없음"}`);
+    else if (!c.textField || !c.textField.length) bad.push("Text Field 세트가 없어 입력칸 높이를 대조하지 못했습니다");
+    else for (const v of c.textField) {
+      const z = pv(v.variant, "Size"), w = th[z], at = `Text Field ${v.variant} (${v.id})`;
+      if (!w) bad.push(`${at} — 크기 ${z} 의 기대값이 없습니다`);
+      else if (v.h === null) bad.push(`${at} — "Input" 칸을 찾지 못했습니다`);
+      else if (Math.abs(v.h - w) > 0.5) bad.push(`${at} 입력칸 높이 ${v.h} ≠ ${w} — 사이트 .field${z === "Medium" ? "" : z === "Small" ? ".sm" : ".lg"} input`);
+    }
+  } else notes.push("덤프에 Text Field 입력칸 높이가 없습니다 — 2026-10-28 k16 전 probe.js 로 만든 덤프입니다");
+  /* 버튼 상자(2026-10-26 k7) — 사람의 결정: 사이트 버튼의 1px 투명 테두리 몫을 Figma 에도 둔다. State=Normal · Loading=False 변형마다(k16 전에는 State=Default) 사이트에서 잰 같은 버튼과
      (폭 − 라벨 폭) = 테두리 + padding, 라벨 x = 테두리 + 왼쪽 padding, 높이를 ±0.5 로 맞춘다. 아이콘만 있는 버튼은 폭 · 높이.
      라벨 폭 자체는 맞추지 않는다 — Figma 텍스트 스타일이 자간(Label/2 2.52% · Label/1 1.45% · Title/1 0.57%)을 지니고 자동 폭이 정수로 올라가
      사이트(.btn 자간 0)보다 0.3 ~ 1.3px 넓다. 그 차이는 글자를 고쳐야 하고 지금은 Pretendard 가 없어 막혀 있다. 잴 수 없으면 어긋남이다 */
@@ -1070,9 +1139,8 @@ function diffComponents(c, want, bad, notes) {
     if (!sb || sb.error) bad.push(`버튼 상자를 사이트와 대조하지 못했습니다 — ${sb ? sb.error : "잴 수 없음"}`);
     else if (!c.buttons || !c.buttons.length) bad.push("Button 세트가 없어 버튼 상자를 대조하지 못했습니다");
     else {
-      const VAR = { Primary: "primary", Secondary: "secondary", Tertiary: "tertiary", Text: "text", Danger: "danger", "Danger Secondary": "danger secondary" }, SIZE = { Small: "sm", Medium: "md", Large: "lg" };
       for (const v of c.buttons) {
-        const io = pv(v.name, "Icon Only") === "True", s = sb[VAR[pv(v.name, "Variant")] + "|" + SIZE[pv(v.name, "Size")] + "|" + io];
+        const io = pv(v.name, "Icon Only") === "True", s = sb[pv(v.name, "Variant") + "|" + pv(v.name, "Color") + "|" + BTN_SIZES[pv(v.name, "Size")] + "|" + io];
         const at = `Button ${v.name} (${v.id})`;
         if (!s) { bad.push(`${at} — 사이트에서 같은 버튼을 재지 못했습니다`); continue; }
         if (Math.abs(v.h - s.h) > 0.5) bad.push(`${at} 높이 ${v.h} ≠ 사이트 ${s.h}`);
@@ -1091,6 +1159,11 @@ function diffComponents(c, want, bad, notes) {
     if (!want.tagDefault) bad.push("Tag 기본 크기를 components.data.js 의 props 에서 읽지 못했습니다");
     else if (!d) bad.push("Tag 세트의 기본 변형을 읽지 못했습니다");
     else if (pv(d, "Size") !== want.tagDefault) bad.push(`Tag 기본 변형 "${d}" — Size 가 사이트 기본(${want.tagDefault})이 아닙니다`);
+    /* Button 기본 변형(2026-10-28 k16) — 사이트 props 기본값(variant solid · color primary · size md) + Normal · 라벨 버튼 · 로딩 아님 */
+    const bd = c.defaults.Button, bw = want.buttonDefault;
+    if (!bw) bad.push("Button 기본값을 components.data.js 의 props 에서 읽지 못했습니다");
+    else if (!bd) bad.push("Button 세트의 기본 변형을 읽지 못했습니다");
+    else { const off = Object.entries(bw).filter(([k, v]) => pv(bd, k) !== v); if (off.length) bad.push(`Button 기본 변형 "${bd}" — ${off.map(([k, v]) => k + "=" + v).join(", ")} 이어야 합니다(사이트 props 기본값)`); }
   } else notes.push("덤프에 세트 기본 변형이 없습니다 — 2026-10-26 k7 전 probe.js 로 만든 덤프입니다");
 }
 
