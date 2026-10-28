@@ -303,7 +303,7 @@ ul:where(:not(.example-preview *)),ol:where(:not(.example-preview *)){padding-le
 .doc-tabs button{appearance:none;background:none;border:0;cursor:pointer;font:inherit;padding:10px 2px;font-size:16px;font-weight:500;color:var(--foreground-neutral-tertiary);border-bottom:2px solid transparent;margin-bottom:-1px}
 .doc-tabs button.on{color:var(--foreground-neutral-primary);font-weight:700;border-bottom-color:var(--foreground-neutral-primary)}
 /* Foundations */
-.fnd-hero{background:var(--background-neutral-secondary);border:1px solid var(--line-neutral-tertiary);border-radius:var(--radius-xl);padding:var(--space-10) var(--space-8);display:flex;justify-content:center;gap:var(--space-8);margin:var(--space-6) 0 var(--space-12);flex-wrap:wrap}
+.fnd-hero{background:var(--background-neutral-secondary);border-radius:var(--radius-xl);padding:var(--space-10) var(--space-8);display:flex;justify-content:center;gap:var(--space-8);margin:var(--space-6) 0 var(--space-12);flex-wrap:wrap}
 .fnd-hero>div{width:120px;height:120px;border-radius:var(--radius-xl);display:grid;place-items:center;font-weight:800;color:var(--foreground-neutral-primary)}
 .base-list{border-top:1px solid var(--line-neutral-secondary);margin:var(--space-4) 0 var(--space-10)}
 .base-list a{display:grid;grid-template-columns:160px 1fr auto;gap:var(--space-6);align-items:center;padding:22px 0;border-bottom:1px solid var(--line-neutral-secondary);text-decoration:none;color:inherit}
