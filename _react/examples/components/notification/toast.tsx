@@ -6,7 +6,7 @@ function Demo() {
   return (
     <ButtonGroup>
       <Button onClick={() => toast.show({ message: "정책 'USB 차단' 이 저장되었습니다", action: { label: "실행 취소", onClick: () => {} } })}>저장</Button>
-      <Button variant="danger-secondary" onClick={() => toast.show({ tone: "danger", message: "내보내기에 실패했습니다", action: { label: "다시 시도", onClick: () => {} } })}>
+      <Button variant="outline" color="negative" onClick={() => toast.show({ tone: "danger", message: "내보내기에 실패했습니다", action: { label: "다시 시도", onClick: () => {} } })}>
         실패 알림
       </Button>
     </ButtonGroup>

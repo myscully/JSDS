@@ -3,7 +3,7 @@ import { Button, Notice, PageHead, Select, Setting, SettingsSection, Slider, Sta
 export default function Example() {
   return (
     <Stack style={{ maxWidth: 760 }}>
-      <PageHead title="외부 USB 차단" sub="POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06" actions={<><Button variant="secondary">복제</Button><Button>배포</Button></>} />
+      <PageHead title="외부 USB 차단" sub="POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06" actions={<><Button variant="outline">복제</Button><Button>배포</Button></>} />
       <Notice tone="warning" title="배포되지 않은 변경 2건">변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</Notice>
       <SettingsSection title="탐지">
         <Setting title="실시간 보호" description="파일 실행 시 즉시 검사합니다"><Switch defaultChecked aria-label="실시간 보호" /></Setting>

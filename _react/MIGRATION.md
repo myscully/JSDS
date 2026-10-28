@@ -6,8 +6,9 @@
 `dist/style.css` 의 토큰 이름은 이 패키지의 공개 API 입니다 — 제품 CSS 에서 `var(--text-primary)` 처럼
 직접 참조하고 있었다면 아래 표대로 바꿔야 합니다.
 
-**마크업은 바뀌지 않습니다.** 컴포넌트 props(`tone` · `variant` · `size`)와 클래스 이름은 그대로입니다.
-토큰을 직접 참조하지 않는 제품은 패키지만 올리면 됩니다.
+**토큰 교체(0.7)만으로는 마크업이 바뀌지 않았지만, 2026-10-28 Button 정의를 다시 내리면서 Button 의 props · 클래스 이름과
+높이(버튼 · Text Field · Date Picker 필드)가 바뀌었습니다** — 아래 [Button (2026-10-28)](#button-2026-10-28) 절을 보세요.
+그 밖의 컴포넌트 props(`tone` · `variant` · `size`)와 클래스 이름은 그대로입니다.
 
 ## 이름 규칙
 
@@ -178,3 +179,37 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 
 새 props: `mode="month"` · `calendars={2}` · `footer={["today","reset","cancel","apply"] | false}` · `allowTyping` · `help` · `error` ·
 `messages` · `size` · `readOnly` · `required` · `inputId`. 새 함수: `parseDate` · `parseMonth` · `formatMonth`.
+
+## Button (2026-10-28)
+
+Button 정의를 다시 내렸습니다. 형태(`variant`: solid · outline)와 색(`color`: primary · assistive · negative)을 나누고,
+높이를 4px 씩 낮췄습니다. 별칭은 두지 않았습니다 — TypeScript 는 옛 값을 타입 오류로 알려 주지만,
+**JS 로 쓰거나 HTML 클래스를 직접 쓰는 쪽은 옛 이름이 아무 신호 없이 "면 없는 검은 글자 버튼"이 됩니다**
+(`btn md primary` · `btn md secondary` 는 이제 어느 규칙에도 걸리지 않습니다). React 는 개발 모드에서 옛 `variant` 값과
+`icon` · `leading` · `trailing` prop 을 콘솔로 알리고 DOM 에는 내지 않습니다. HTML 은 아래 표대로 클래스를 바꿔야 합니다.
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| `variant="primary"` (기본) | 생략 (= `variant="solid" color="primary"`) | `.btn.solid.primary` |
+| `variant="secondary"` | `variant="outline" color="assistive"` — 대체 행동이면 `variant="outline"`(primary) | `.btn.outline.assistive` |
+| `variant="tertiary"` | `color="assistive"` | `.btn.solid.assistive` |
+| `variant="danger"` | `color="negative"` | `.btn.solid.negative` |
+| `variant="danger-secondary"` | `variant="outline" color="negative"` | `.btn.outline.negative` |
+| `variant="text"` | 그대로(정의 밖 변형, 색은 primary 만) | `.btn.text` |
+| `icon` | `iconOnly` — `variant` 를 생략하면 배경 없음, hover 에만 면 | `.icon` → `.icon-only` |
+| `leading` / `trailing` | `iconLeft` / `iconRight` (동시에 쓰지 않음) | — |
+| — | `ButtonGroup vertical` (주 행동이 위) | `.btn-group.vertical` |
+
+| 바뀐 것 | 전 | 후 |
+| --- | --- | --- |
+| Button 높이 sm · md · lg | 36 · 44 · 52 | 32 · 40 · 48 (padding · 글자 · 아이콘 크기는 그대로) |
+| Text Field · Date Picker 필드 높이 | 36 · 44 · 52 | 32 · 40 · 48 — 버튼과 나란히 맞는다 |
+| `loading` 이 막는 것 | click(마우스 클릭은 `pointer-events:none` 으로 버튼을 지나 **부모에서 실행**됐다) | `onClick` · `onMouseDown` · `onPointerDown` · `onKeyDown` 과 그 캡처 변형 — 부모로도 올라가지 않는다. 탐색 키(Tab · Esc · 화살표 · Home/End · PageUp/Down)와 수정 키 조합은 부모로 올라간다. 포커스는 남는다 |
+| 사용자의 `onClickCapture` · 핸들러가 loading 가드를 덮음 | 덮었다(`rest` 가 뒤) | 덮지 못한다 |
+| 아이콘 전용 기본 면 | 변형의 면 | `variant` 생략 시 배경 없음 |
+| 표 행 동작 `.tbl .actions .btn` · `.action-bar .btn` 높이 덮어쓰기 | 32 로 덮음 | `sm`(32) 을 쓴다 — 표 행 덮어쓰기는 지움, 액션 바는 좌우 12 만 남음 |
+
+| 변형 규칙의 특이도 | `.btn.primary` 등 (0,2,0) | `.btn:where(.solid.primary)` 등 (0,1,0) — 비활성 `.btn[disabled]` 하나가 순서와 무관하게 이긴다. **그 대신 제품 CSS 의 클래스 하나짜리 규칙(0,1,0)이 style.css 뒤에 오면 버튼의 면 · 글자를 이기고**, `.x .btn`(0,2,0) 은 hover · pressed · 비활성까지 이긴다. 버튼을 덮어쓰고 있었다면 확인하세요 |
+
+새로 내보내는 타입: `ButtonColor`.
+

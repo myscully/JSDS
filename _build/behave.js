@@ -144,7 +144,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await page.locator(`#accentPop [data-accent="${key}"]`).click(); await page.waitForTimeout(150);
     return page.evaluate(() => {
       /* 마지막 호출은 Colors 페이지에서 일어나 버튼이 없다 — 그때는 플래그만 본다 */
-      const btn = document.querySelector("#ex-button-variant .btn.primary"), txt = document.querySelector("#ex-button-variant .btn.text");
+      const btn = document.querySelector("#ex-button-variant .btn.solid.primary"), txt = document.querySelector("#ex-button-variant .btn.outline.primary");
       const r = getComputedStyle(document.documentElement);
       const g = (n) => r.getPropertyValue(n).trim();
       return {
@@ -271,18 +271,33 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("back to token accent clears the flag", !base.neutral, JSON.stringify(base));
 
   // Button: loading 은 마우스·키보드 클릭을 모두 막는다 (pointer-events:none 만으로는 Enter 가 통과했다)
+  /* 정의(2026-10-28): disabled 와 달리 포커스는 남고 click · mousedown · pointerdown · keydown 넷을 막는다. Tab 은 통과해야 빠져나간다 */
   await go("components/button.html");
-  await page.evaluate(() => { window.__hit = 0; document.querySelectorAll("#ex-button-state .btn").forEach((b) => b.addEventListener("click", () => window.__hit++)); });
-  const loadBtn = page.locator("#ex-button-state .btn.loading").first();
+  await page.evaluate(() => { window.__hit = {}; document.querySelectorAll("#ex-button-loading .btn, #ex-button-state .btn").forEach((b) => ["click", "mousedown", "pointerdown", "keydown"].forEach((t) => b.addEventListener(t, () => { window.__hit[t] = (window.__hit[t] || 0) + 1; }))); });
+  const loadBtn = page.locator("#ex-button-loading .btn.loading").first();
   ok("loading button carries aria-busy", (await loadBtn.getAttribute("aria-busy")) === "true");
   await loadBtn.evaluate((e) => e.focus());
-  await page.keyboard.press("Enter"); await page.keyboard.press("Space");
-  await loadBtn.evaluate((e) => e.click());
+  ok("loading button keeps focus (not disabled)", await loadBtn.evaluate((e) => document.activeElement === e && !e.disabled));
+  await page.keyboard.press("Enter"); await page.keyboard.press("Space"); await page.keyboard.press("a");
+  await loadBtn.evaluate((e) => { e.click(); e.dispatchEvent(new MouseEvent("mousedown", { bubbles: true })); e.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })); });
   await page.waitForTimeout(80);
-  ok("loading blocks click from mouse and keyboard", (await page.evaluate(() => window.__hit)) === 0);
+  const loadHit = await page.evaluate(() => window.__hit);
+  ok("loading blocks click · mousedown · pointerdown · keydown", Object.keys(loadHit).length === 0, JSON.stringify(loadHit));
+  /* 실제 마우스 클릭 — pointer-events:none 이던 때는 클릭이 버튼을 지나 뒤의 요소(행 · 카드)에서 실행됐다 */
+  await page.evaluate(() => { window.__parent = 0; document.querySelector("#ex-button-loading .example-preview").addEventListener("click", () => window.__parent++); });
+  await loadBtn.click(); await page.waitForTimeout(60);
+  ok("a real click on a loading button reaches neither it nor its parent", (await page.evaluate(() => window.__parent)) === 0 && !(await page.evaluate(() => window.__hit.click)), JSON.stringify(await page.evaluate(() => [window.__parent, window.__hit])));
+  /* 이동 키 · 단축키는 문서까지 올라가야 한다 — 끊으면 화살표 이동 · 전역 단축키가 loading 동안 멈춘다 */
+  await page.evaluate(() => { window.__doc = []; document.addEventListener("keydown", (e) => window.__doc.push(e.key + (e.ctrlKey ? "+ctrl" : ""))); });
+  await loadBtn.evaluate((e) => e.focus());
+  await page.keyboard.press("ArrowDown"); await page.keyboard.press("a"); await page.keyboard.press("Control+k");
+  const docKeys = (await page.evaluate(() => window.__doc)).filter((k) => !/^(Control|Meta|Alt|Shift)/.test(k));   // 수정 키 자체의 keydown 은 ctrlKey 가 켜져 통과한다 — 단축키의 일부라 맞다
+  ok("loading lets navigation keys and shortcuts through, stops the rest", docKeys.join() === "ArrowDown,k+ctrl", JSON.stringify(docKeys));
+  await page.keyboard.press("Tab"); await page.waitForTimeout(60);
+  ok("Tab still leaves a loading button", await loadBtn.evaluate((e) => document.activeElement !== e));
   await page.locator("#ex-button-state .btn").first().evaluate((e) => e.click());
   await page.waitForTimeout(60);
-  ok("a normal button still fires", (await page.evaluate(() => window.__hit)) === 1);
+  ok("a normal button still fires", (await page.evaluate(() => window.__hit.click)) === 1);
   // danger 는 color:#fff 가 하드코딩이라 다크에서 바탕이 밝아지며 2.77:1 까지 떨어졌다.
   for (const theme of ["light", "dark"]) {
     await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
@@ -302,8 +317,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         }
         return stack;
       };
-      const solid = document.querySelector("#ex-button-variant .btn.danger:not(.secondary)");
-      const outline = document.querySelector("#ex-button-variant .btn.danger.secondary");
+      const solid = document.querySelector("#ex-button-variant .btn.solid.negative");
+      const outline = document.querySelector("#ex-button-variant .btn.outline.negative");
       const cs = getComputedStyle(solid), co = getComputedStyle(outline);
       /* 솔리드 danger 도 이제 틴트다 — 뒤의 불투명 면까지 쌓아야 실제 색이 나온다 */
       return { sf: cs.color, sbStack: backdrop(solid), of: co.color, obStack: backdrop(outline) };
@@ -312,12 +327,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     /* 파괴적 버튼의 라벨은 참조 시스템과 같은 상태색이다(태그는 중립 라벨을 쓴다 — 밀도가 다르다).
        그 값이 라이트에서 AA 아래라는 사실은 숨기지 않고 여기서도 숫자로 남기고, 게이트가 advisory 로 보고한다.
        대신 '라벨이 바탕에서 보이기는 하는가'(3:1)는 양쪽 테마에서 요구한다 — 그 아래로 가면 버튼이 비활성으로 읽힌다 */
-    ok(`danger button label stays visible on its tint (${theme})`, dc.solid >= 3 && dc.outline >= 3, JSON.stringify(dc));
+    ok(`negative button label stays visible on its tint (${theme})`, dc.solid >= 3 && dc.outline >= 3, JSON.stringify(dc));
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
 
-  /* 눌림 — 종전 단정은 이 상태를 **하나도 재지 않았다**. 그래서 .btn.danger 의 테두리를 지웠을 때
+  /* 눌림 — 종전 단정은 이 상태를 **하나도 재지 않았다**. 그래서 .btn.danger(지금 solid negative) 의 테두리를 지웠을 때
      눌림이 hover 와 같은 색이 된 것도, .btn.text 의 눌림이 제품색에서 중립색으로 튀던 것도 통과했다.
      알파 틴트라 반드시 뒤 배경까지 쌓아 합성해야 한다 — 원문 값으로 재면 알파만 다른 같은 색이라 1.000 이 나온다.
      방향까지 보는 이유: 중립 컨트롤은 hover 가 불투명 페이지 배경이라 다크에서 어두워졌다가
@@ -334,7 +349,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     while (stack.length) { const t = stack.pop(); out = { r: t.r * t.a + out.r * (1 - t.a), g: t.g * t.a + out.g * (1 - t.a), b: t.b * t.a + out.b * (1 - t.a), a: 1 }; }
     return `rgb(${Math.round(out.r)}, ${Math.round(out.g)}, ${Math.round(out.b)})`;
   };
-  for (const [sel, name] of [["#ex-button-variant .btn.danger:not(.secondary)", "danger"], ["#ex-button-variant .btn.text", "text"]]) {
+  for (const [sel, name] of [["#ex-button-variant .btn.solid.negative", "solid negative"], ["#ex-button-text .btn.text", "text"], ["#ex-button-variant .btn.outline.primary", "outline primary"], ["#ex-button-icon-only .btn.assistive.icon-only:not(.outline)", "plain icon-only assistive"]]) {
     for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
       await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
       /* 테마를 바꾸기 전에 hover 를 반드시 푼다 — 마우스가 남아 있으면 rest 를 hover 로 읽는다 */
@@ -356,16 +371,16 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.mouse.move(2, 2); await page.waitForTimeout(220);
-  // 아웃라인 danger 는 .danger.secondary 가 :hover 를 덮어 아무 반응이 없었다
-  const od = page.locator("#ex-button-variant .btn.danger.secondary");
+  // 아웃라인 negative(옛 .danger.secondary)는 :hover 를 덮어 아무 반응이 없었다
+  const od = page.locator("#ex-button-variant .btn.outline.negative");
   const odBase = await od.evaluate((e) => getComputedStyle(e).backgroundColor);
   await od.hover(); await page.waitForTimeout(200);
   const odHover = await od.evaluate((e) => getComputedStyle(e).backgroundColor);
   await page.mouse.move(0, 0); await page.waitForTimeout(150);
-  ok("outline danger reacts to hover", odBase !== odHover, odBase + " → " + odHover);
+  ok("outline negative reacts to hover", odBase !== odHover, odBase + " → " + odHover);
   // .btn.text 의 pressed — 기본·다크·중립 셋 다 hover 와 달라야 한다(--surface-brand-subtle 은 중립에서 hover 와 같아졌다)
   const textPress = async (label) => {
-    const t = page.locator("#ex-button-variant .btn.text");
+    const t = page.locator("#ex-button-text .btn.text").last();
     await t.hover(); await page.waitForTimeout(180);
     const h = await t.evaluate((e) => getComputedStyle(e).backgroundColor);
     await page.mouse.down(); await page.waitForTimeout(180);
@@ -381,9 +396,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const spin = await page.evaluate(() => {
     const prev = document.querySelector("#ex-button-state .example-preview");
     const out = {};
-    for (const v of ["primary", "secondary", "text", "danger"]) {
+    for (const [v, cls] of [["primary", "solid primary"], ["assistive", "outline assistive"], ["text", "text"], ["negative", "solid negative"]]) {
       const b2 = document.createElement("button");
-      b2.type = "button"; b2.className = "btn md " + v + " loading"; b2.textContent = "저장";
+      b2.type = "button"; b2.className = "btn md " + cls + " loading"; b2.textContent = "저장";
       prev.append(b2);
       out[v] = getComputedStyle(b2, "::after").borderTopColor;
       b2.remove();
@@ -392,7 +407,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return out;
   });
   /* text 변형은 바탕이 투명이라, 흰 스피너를 그대로 쓰면 캔버스에 묻힌다(종전 1.10:1).
-     'secondary 와 같은 색인가'로 재던 것을 **묻히지 않는가**로 바꾼다 — 그게 원래 지키려던 것이고,
+     'assistive 와 같은 색인가'로 재던 것을 **묻히지 않는가**로 바꾼다 — 그게 원래 지키려던 것이고,
      제품색 토큰의 단계가 바뀌어도 살아남는다 */
   ok("loading spinner follows the variant", spin.text !== spin.primary && ratio(spin.text, spin.canvas) >= 3,
     `${ratio(spin.text, spin.canvas)} · ${JSON.stringify(spin)}`);
@@ -401,9 +416,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const spinDark = await page.evaluate(() => {
     const prev = document.querySelector("#ex-button-state .example-preview");
     const out = {};
-    for (const v of ["primary", "danger"]) {
+    for (const v of ["primary", "negative"]) {
       const b2 = document.createElement("button");
-      b2.type = "button"; b2.className = "btn md " + v + " loading"; b2.textContent = "저장";
+      b2.type = "button"; b2.className = "btn md solid " + v + " loading"; b2.textContent = "저장";
       prev.append(b2);
       out[v] = { arc: getComputedStyle(b2, "::after").borderTopColor, fill: getComputedStyle(b2).backgroundColor,
         bed: getComputedStyle(document.documentElement).getPropertyValue("--background-neutral-primary").trim() };
@@ -412,8 +427,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return out;
   });
   // 스피너는 자기 버튼 바탕 위에 있다 — 글자색(--brand-label·--foreground-neutral-primary)이 제품 밝기에 따라 흰/어두움으로 뒤집히므로 색을 박지 않고 대비로 본다
-  /* danger 는 틴트 바탕이라 뒤의 불투명 면까지 쌓아야 실제 색이 나온다 — 알파 바탕을 그대로 재면 자기 자신과 비교된다 */
-  for (const v of ["primary", "danger"])
+  /* negative 는 틴트 바탕이라 뒤의 불투명 면까지 쌓아야 실제 색이 나온다 — 알파 바탕을 그대로 재면 자기 자신과 비교된다 */
+  for (const v of ["primary", "negative"])
     ok(`dark ${v} loading spinner stands out on its own fill`, ratio(spinDark[v].arc, spinDark[v].fill, spinDark[v].bed) >= 3,
       `${ratio(spinDark[v].arc, spinDark[v].fill, spinDark[v].bed)} · ${JSON.stringify(spinDark[v])}`);
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
@@ -425,7 +440,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await page.keyboard.press("Tab"); await page.keyboard.press("Shift+Tab"); await page.waitForTimeout(200);
     return page.locator(sel).first().evaluate((e) => { const c = getComputedStyle(e); return c.outlineWidth + " " + c.outlineStyle + " " + c.outlineColor; });
   };
-  const ringBtn = await ringOf("components/button.html", "#ex-button-variant .btn.primary");
+  const ringBtn = await ringOf("components/button.html", "#ex-button-variant .btn.solid.primary");
   const ringInput = await ringOf("components/text-field.html", "#ex-text-field-basic input");
   /* 값 입력 필드는 외곽선 대신 2px brand 가장자리 + 4px 후광을 쓴다(사람의 결정 2026-10-26) — 버튼은 외곽선 그대로, 필드는 외곽선을 끈다 */
   ok("button keeps the 1px focus outline while value fields turn it off", /^1px solid/.test(ringBtn) && /none/.test(ringInput), ringBtn + " vs " + ringInput);   // 외곽선 2px → 1px(사람의 결정 2026-10-26)
@@ -435,16 +450,31 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("input keeps its ring on mouse click", clickRing.fv && /0px 0px 0px 4px/.test(clickRing.shadow), JSON.stringify(clickRing));   // 링은 :focus 의 box-shadow 라 클릭에도 뜬다
   await go("components/button.html");
   const lgIcon = await page.evaluate(() => {
-    const b2 = document.querySelector("#ex-button-icon .btn.icon.lg");
+    const b2 = document.querySelector("#ex-button-icon-only .btn.icon-only.lg");
     if (!b2) return { 없음: true };
     const r = b2.getBoundingClientRect(), svg = b2.querySelector("svg").getBoundingClientRect();
     return { 버튼: Math.round(r.width) + "x" + Math.round(r.height), 아이콘: Math.round(svg.width) };
   });
-  ok("lg icon button renders at 52 with a 20px icon", lgIcon.버튼 === "52x52" && lgIcon.아이콘 === 20, JSON.stringify(lgIcon));
+  ok("lg icon button renders at 48 with a 20px icon", lgIcon.버튼 === "48x48" && lgIcon.아이콘 === 20, JSON.stringify(lgIcon));
+  /* 버튼 · Text Field · Date Picker 필드는 같은 32 · 40 · 48 이다(사람의 결정 2026-10-28) — 나란히 놓으면 맞아야 한다 */
+  const heights = await page.evaluate(() => {
+    const prev = document.querySelector("#ex-button-size .example-preview"), out = {};
+    for (const z of ["sm", "md", "lg"]) {
+      const box = document.createElement("div");
+      box.innerHTML = `<button type="button" class="btn ${z} solid primary">a</button><div class="field ${z}"><input></div><div class="field ${z}"><div class="affix"><input></div></div><div class="datepicker ${z}"><button type="button" class="field-btn">2026-10-28</button></div>`;
+      prev.append(box);
+      out[z] = [box.querySelector(".btn"), box.querySelector(".field > input"), box.querySelector(".affix"), box.querySelector(".field-btn")].map((e) => Math.round(e.getBoundingClientRect().height));
+      box.remove();
+    }
+    return out;
+  });
+  ok("button and field heights match at 32 · 40 · 48", ["sm", "md", "lg"].every((z, i) => heights[z].every((h) => h === [32, 40, 48][i])), JSON.stringify(heights));
+  const plainRest = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#ex-button-icon-only .btn.assistive.icon-only:not(.outline)")); return c.backgroundColor + " / " + c.borderTopColor; });
+  ok("plain icon-only button has no fill or border at rest", plainRest === "rgba(0, 0, 0, 0) / rgba(0, 0, 0, 0)", plainRest);
   // 링크는 disabled 속성을 못 가진다 — React as="a" + disabled 는 aria-disabled 로만 나왔고 CSS·JS 가 그걸 몰랐다
   await page.evaluate(() => {
     const prev = document.querySelector("#ex-button-state .example-preview");
-    prev.insertAdjacentHTML("beforeend", '<a href="#dead" id="dis-link" class="btn md primary" aria-disabled="true">비활성 링크</a>');
+    prev.insertAdjacentHTML("beforeend", '<a href="#dead" id="dis-link" class="btn md solid primary" aria-disabled="true">비활성 링크</a>');
     window.__navHit = 0;
     document.getElementById("dis-link").addEventListener("click", () => window.__navHit++);
   });
@@ -467,7 +497,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark"));
   await page.waitForTimeout(250);
   const textDark = await page.evaluate(() => {
-    const e = document.querySelector("#ex-button-variant .btn.text");
+    const e = document.querySelector("#ex-button-text .btn.text");
     const res = (tok) => { const d = document.createElement("div"); d.style.color = tok; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
     return { fg: getComputedStyle(e).color, subtle: res("var(--background-neutral-secondary)"), canvas: res("var(--background-neutral-primary)") };
   });
@@ -542,7 +572,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
     const want = { fill: res("var(--surface-disable-primary)"), fg: res("var(--foreground-disable-primary)") };
     const out = { want, v: {} };
-    for (const [n, cls] of [["primary", "primary"], ["tertiary", "tertiary"], ["danger", "danger"], ["secondary", "secondary"], ["danger-outline", "danger secondary"], ["text", "text"]]) {
+    for (const [n, cls] of [["solid-primary", "solid primary"], ["solid-assistive", "solid assistive"], ["solid-negative", "solid negative"], ["outline-primary", "outline primary"], ["outline-assistive", "outline assistive"], ["outline-negative", "outline negative"], ["text", "text"], ["plain", "assistive icon-only"]]) {
       const b = document.createElement("button"); b.type = "button"; b.className = "btn md " + cls; b.disabled = true; b.textContent = "x";
       prev.append(b); const c = getComputedStyle(b);
       out.v[n] = { bg: c.backgroundColor, fg: c.color, border: c.borderTopColor, opacity: c.opacity };
@@ -556,19 +586,19 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const d = await disabledSet();
     const TRANSPARENT = "rgba(0, 0, 0, 0)";
     ok(`${theme} disabled fill uses the disabled tokens`,
-      ["primary", "tertiary", "danger"].every((n) => d.v[n].bg === d.want.fill && d.v[n].fg === d.want.fg && d.v[n].opacity === "1"), JSON.stringify(d));
+      ["solid-primary", "solid-assistive", "solid-negative"].every((n) => d.v[n].bg === d.want.fill && d.v[n].fg === d.want.fg && d.v[n].opacity === "1"), JSON.stringify(d));
     ok(`${theme} disabled outline empties the fill and greys the border`,
-      ["secondary", "danger-outline"].every((n) => d.v[n].bg === TRANSPARENT && d.v[n].border === d.want.fill && d.v[n].fg === d.want.fg), JSON.stringify(d.v));
-    ok(`${theme} disabled text stays transparent`, d.v.text.bg === TRANSPARENT && d.v.text.fg === d.want.fg, JSON.stringify(d.v.text));
+      ["outline-primary", "outline-assistive", "outline-negative"].every((n) => d.v[n].bg === TRANSPARENT && d.v[n].border === d.want.fill && d.v[n].fg === d.want.fg), JSON.stringify(d.v));
+    ok(`${theme} disabled text and plain icon-only stay transparent`, ["text", "plain"].every((n) => d.v[n].bg === TRANSPARENT && d.v[n].fg === d.want.fg), JSON.stringify([d.v.text, d.v.plain]));
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
 
-  // 중립 버튼의 rest·hover·pressed 가 실제로 서로 다른 색이어야 한다 — 라이트 tertiary 는 불투명 면 때문에 hover 가 보이지 않았다
+  // 중립 버튼의 rest·hover·pressed 가 실제로 서로 다른 색이어야 한다 — 라이트 solid assistive(옛 tertiary)는 불투명 면 때문에 hover 가 보이지 않았다
   for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
     await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
     await page.waitForTimeout(250);
-    for (const [n, cls] of [["secondary", "secondary"], ["tertiary", "tertiary"], ["text", "text"]]) {
+    for (const [n, cls] of [["outline assistive", "outline assistive"], ["solid assistive", "solid assistive"], ["outline primary", "outline primary"], ["text", "text"], ["plain icon-only", "assistive icon-only"]]) {
       await page.evaluate((c) => {
         const prev = document.querySelector("#ex-button-variant .example-preview");
         const b = document.createElement("button"); b.type = "button"; b.id = "hv-probe"; b.className = "btn md " + c; b.textContent = "probe";
@@ -969,7 +999,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   // wrap 이 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿을 수 없다
   const footFit = async () => page.evaluate(() => {
     const f = document.querySelector("#ex-card-basic .card-foot");
-    f.innerHTML = ["정책 상세 보기", "라이선스 갱신 요청", "담당자에게 문의"].map((t) => `<button type="button" class="btn sm secondary">${t}</button>`).join("");
+    f.innerHTML = ["정책 상세 보기", "라이선스 갱신 요청", "담당자에게 문의"].map((t) => `<button type="button" class="btn sm outline assistive">${t}</button>`).join("");
     const card = f.closest(".card"), cr = card.getBoundingClientRect();
     const pad = parseFloat(getComputedStyle(card).paddingLeft);
     const left = Math.min(...[...f.children].map((c) => c.getBoundingClientRect().left - cr.left));

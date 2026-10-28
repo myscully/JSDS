@@ -8,6 +8,15 @@
  *   1) cat _figma/probe.js  → 내용을 use_figma 의 code 로 전달
  *   2) 돌려받은 JSON 을 파일로 저장
  *   3) node _figma/audit.mjs diff <그 파일>   → 저장소 기대값과 대조
+ *
+ * 돌려받는 값이 48KB 를 넘으면 use_figma 가 거부한다(2026-10-28 k16 에 처음 만남 — 덤프 약 244KB, "Return value exceeds the 48000-byte limit").
+ * 그때는 이 파일 본문을 고치지 말고 **감싸서** 보낸다(k16 에 그렇게 했다):
+ *   - 맨 위에 lz-string 의 compressToBase64(_react/node_modules/lz-string/libs/lz-string.min.js 의 _compress · compressToBase64 부분)를 두고,
+ *   - 이 파일 본문 전체를 `const __probe = async () => { … };` 안에 넣고,
+ *   - 끝에 `const b64 = LZ.compressToBase64(JSON.stringify(await __probe())); return { run: "<표식>", len: b64.length, part: b64.slice(OFF, OFF + 46000) };`
+ *     를 붙여 OFF = 0, 46000, … 으로 나눠 부른다(k16 에 base64 약 74KB → 두 번).
+ *   - 받은 part 를 이어 붙여 `require("./_react/node_modules/lz-string").decompressFromBase64(…)` 로 풀면 덤프 JSON 이다.
+ *     part 를 손으로 옮겨 적지 않는다 — 한 글자만 틀려도 풀리지 않는다. 에이전트 대화 기록(jsonl)에 도구 결과가 그대로 남으니 거기서 <표식>으로 찾아 꺼낸다
  */
 
 /* 현재 페이지는 이름이 아니라 id 로 고른다(2026-10-23 k2). 이름으로 고르면 같은 이름의 작업 중 페이지가 함께 들어왔다 —
@@ -153,11 +162,12 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
-   Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다 — 변형 자신이 칸이고 고리(Focus Ring)는 변형의 자식이다 */
-const FOCUS_BOX = { "Text Field": "Input", "Search": null, "Select": "Trigger", "Date Picker": "Field", "Checkbox": "Box", "Radio Button": "Circle", "Switch": "Track", "Slider": "Track", "Button": null };
+   Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다가 2026-10-28 k16 에 뺐다 — 사람의 정의로 버튼 포커스는 상태가 아니라
+   코드의 전역 :focus-visible 이라 Focused 변형을 지웠다(남아 있으면 audit 의 Button 변형 표 대조가 낸다) */
+const FOCUS_BOX = { "Text Field": "Input", "Search": null, "Select": "Trigger", "Date Picker": "Field", "Checkbox": "Box", "Radio Button": "Circle", "Switch": "Track", "Slider": "Track" };
 const effectColors = { nodes: 0, styled: 0, bound: 0, raw: [] };
 for (const p of figma.root.children) {
   if (!isCurrent(p)) continue;
@@ -343,11 +353,13 @@ for (const p of figma.root.children) {
     }
     components.focus[set.name] = list;
   }
-  /* 버튼 상자(2026-10-26 k7) — State=Default 변형마다 폭 · 높이와 라벨 글자의 폭 · x. audit 이 사이트 버튼("버튼" 라벨)을 헤드리스 Chromium 으로 잰
+  /* 버튼 상자(2026-10-26 k7) — State=Normal · Loading=False 변형마다 폭 · 높이와 라벨 글자의 폭 · x(2026-10-28 k16 전에는 State=Default — 개편으로 Normal 이 됐고
+     로딩은 상태가 아니라 옵션이라 따로 뺀다). audit 이 사이트 버튼("버튼" 라벨)을 헤드리스 Chromium 으로 잰
      폭에서 글자 폭을 뺀 몫(테두리 + padding)과 맞춘다 — 글자 폭은 서체 · 자간 때문에 Figma 와 사이트가 다르다(Figma 는 텍스트 스타일의 자간을 지닌다) */
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    if (set.name === "Text Field") components.textField = set.children.map((v) => { const f = v.findOne((k) => k.name === "Input" && "strokes" in k); return { variant: v.name, id: v.id, h: f ? +f.height.toFixed(2) : null }; });   // 입력칸 높이(2026-10-28 k16) — audit 이 .field input 높이와 맞춘다
     if (set.name !== "Button") continue;
-    components.buttons = set.children.filter((v) => /(?:^|, )State=Default(?:,|$)/.test(v.name)).map((v) => {
+    components.buttons = set.children.filter((v) => /(?:^|, )State=Normal(?:,|$)/.test(v.name) && !/(?:^|, )Loading=True(?:,|$)/.test(v.name)).map((v) => {
       const t = v.findOne((k) => k.type === "TEXT" && k.visible !== false);
       return { name: v.name, id: v.id, w: +v.width.toFixed(2), h: +v.height.toFixed(2), stroke: paint(v.strokes), sw: v.strokeWeight === figma.mixed ? "mixed" : v.strokeWeight, label: t ? [t.characters, +t.width.toFixed(2), +t.x.toFixed(2)] : null };
     });

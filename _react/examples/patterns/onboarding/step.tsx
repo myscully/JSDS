@@ -15,7 +15,7 @@ export default function Example() {
         </TileGrid>
         <CardFoot>
           <Button variant="text">건너뛰기</Button>
-          <Button variant="secondary">이전</Button>
+          <Button variant="outline" color="assistive">이전</Button>
           <Button>다음</Button>
         </CardFoot>
       </Card>

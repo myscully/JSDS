@@ -4,7 +4,7 @@ export default function Example() {
   return (
     <Dropdown kind="menu" align="end" defaultOpen>
       <DropdownTrigger asChild>
-        <Button variant="secondary" icon aria-label="더 보기"><Icon name="dots" /></Button>
+        <Button variant="outline" color="assistive" iconOnly aria-label="더 보기"><Icon name="dots" /></Button>
       </DropdownTrigger>
       <Menu>
         <MenuLabel>정책</MenuLabel>

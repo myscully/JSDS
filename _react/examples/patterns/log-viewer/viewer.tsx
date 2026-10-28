@@ -33,7 +33,7 @@ export default function Example() {
         </ChipGroup>
         <Spacer />
         <SelectButton outline label="갱신" value={live} onChange={setLive} options={[{ value: "live", label: <Indicator tone="danger" pulse style={{ gap: 6 }}>실시간</Indicator> }, { value: "pause", label: "일시정지" }]} />
-        <Button variant="secondary" leading={<Icon name="download" />}>CSV</Button>
+        <Button variant="outline" color="assistive" iconLeft={<Icon name="download" />}>CSV</Button>
       </Toolbar>
       <DataTable
         compact
@@ -42,7 +42,7 @@ export default function Example() {
         rowKey={(r) => String(r.id)}
         defaultSort={{ key: "time", dir: "desc" }}
         rowProps={() => ({ log: true })}
-        actions={() => <Button size="sm" variant="tertiary" icon aria-label="상세"><Icon name="dots" /></Button>}
+        actions={() => <Button color="assistive" iconOnly size="sm" aria-label="상세"><Icon name="dots" /></Button>}
       />
       <PaginationBar summary={<>총 <b>48,213</b>건 · 최신 100건 표시</>}>
         <Pagination compact page={page} total={483} siblings={2} onChange={setPage} />

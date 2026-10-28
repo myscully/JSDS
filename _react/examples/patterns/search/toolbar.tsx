@@ -29,14 +29,14 @@ export default function Example() {
         <Select options={[{ value: "2", label: "심각도: 2" }]} defaultValue="2" triggerStyle={{ minWidth: 140, height: 40 }} />
         <DatePicker mode="range" max={today} presets={PRESETS} defaultValue={{ start: daysAgo(6), end: today }} displayText="최근 7일" triggerStyle={{ height: 40, minWidth: 200 }} />
         <Spacer />
-        <Button variant="secondary" leading={<Icon name="download" />}>내보내기</Button>
+        <Button variant="outline" color="assistive" iconLeft={<Icon name="download" />}>내보내기</Button>
       </Toolbar>
       <Toolbar style={{ fontSize: 12, color: "var(--foreground-neutral-secondary)" }}>
         <span>결과 <b style={{ color: "var(--foreground-neutral-primary)" }}>128</b>건</span>
         {filters.map((f) => (
           <Chip key={f} size="sm" selected onRemove={() => setFilters((s) => s.filter((x) => x !== f))} removeLabel="제거">{f}</Chip>
         ))}
-        <Button size="sm" variant="text" onClick={() => setFilters([])}>필터 초기화</Button>
+        <Button variant="text" size="sm" onClick={() => setFilters([])}>필터 초기화</Button>
       </Toolbar>
       <DataTable columns={COLUMNS} rows={ROWS} rowKey={(r) => r.id} defaultSort={{ key: "time", dir: "desc" }} />
       <PaginationBar summary={<>총 <b>128</b>건 · 1–50</>}>

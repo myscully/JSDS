@@ -27,9 +27,9 @@ export default function Example() {
       onSelectedChange={setSelected}
       actionBar={(sel) => (
         <ActionBar count={sel.size}>
-          <Button size="sm" variant="secondary">허용 처리</Button>
-          <Button size="sm" variant="secondary" leading={<Icon name="download" />}>내보내기</Button>
-          <Button size="sm" variant="danger-secondary">삭제</Button>
+          <Button variant="outline" color="assistive" size="sm">허용 처리</Button>
+          <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>내보내기</Button>
+          <Button variant="outline" color="negative" size="sm">삭제</Button>
         </ActionBar>
       )}
     />

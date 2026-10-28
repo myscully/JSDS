@@ -18,7 +18,7 @@ const logTable = (rows) => `
           <table class="tbl compact">
             <thead><tr><th class="sortable sorted desc" aria-sort="descending">시간</th><th>심각도</th><th>소스 IP</th><th>단말</th><th>메시지</th><th class="actions"></th></tr></thead>
             <tbody>
-              ${rows.map(([t, tone, lv, ip, host, msg]) => `<tr class="log-row"><td>2026-09-07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td>${msg}</td><td class="actions"><button type="button" class="btn sm tertiary icon" aria-label="상세">${I("dots")}</button></td></tr>`).join("\n              ")}
+              ${rows.map(([t, tone, lv, ip, host, msg]) => `<tr class="log-row"><td>2026-09-07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td>${msg}</td><td class="actions"><button type="button" class="btn sm assistive icon-only" aria-label="상세">${I("dots")}</button></td></tr>`).join("\n              ")}
             </tbody>
           </table>
         </div>`;
@@ -28,7 +28,7 @@ const PATTERNS = {
   "input-form": {
     status: "ready", react: ["Form","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button", "notification"], css: [".form"], borrows: [".t-label-1"],
     desc: "정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.",
-    thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm primary">저장</button></div></div>`,
+    thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
     principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "포커스가 떠날 때 필드 단위로, 제출 시 첫 오류로 스크롤"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
     examples: [
       { id: "basic", title: "기본 폼", desc: "섹션 제목(.form-section)으로 그룹을 나누고, 마지막에 .form-actions.", html: `
@@ -46,14 +46,14 @@ const PATTERNS = {
             <label class="radio"><input type="radio" name="fa"><span>알림만</span></label>
           </fieldset>
           <label class="checkbox"><input type="checkbox" checked><span>저장 즉시 배포<small>에이전트가 다음 체크인에서 적용합니다</small></span></label>
-          <div class="form-actions"><button type="button" class="btn md text">취소</button><button type="submit" class="btn md primary">정책 저장</button></div>
+          <div class="form-actions"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
       { id: "error", title: "오류 상태", desc: "제출 후 오류. 필드 오류 + 상단 요약 Notice(오류 3개 이상일 때).", html: `
         <form class="form" novalidate>
           <div class="notice danger" role="alert" style="margin-bottom:-4px"><span class="ico">${I("alert-circle",20)}</span><div><b>입력값 2개를 확인해 주세요</b>정책 이름, 허용 IP</div></div>
           <div class="field error"><label for="e1">정책 이름 <em>*</em></label><input id="e1" aria-invalid="true" aria-describedby="e1h"><span class="help" id="e1h">정책 이름을 입력하세요</span></div>
           <div class="field error"><label for="e2">허용 IP</label><input id="e2" value="10.0.0" aria-invalid="true" aria-describedby="e2h"><span class="help" id="e2h">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div>
-          <div class="form-actions"><button type="button" class="btn md danger secondary left">삭제</button><button type="button" class="btn md text">취소</button><button type="submit" class="btn md primary">정책 저장</button></div>
+          <div class="form-actions"><button type="button" class="btn md outline negative left">삭제</button><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
     ],
   },
@@ -69,7 +69,7 @@ const PATTERNS = {
           <div class="item"><label class="checkbox"><input type="checkbox" checked><span>서비스 이용약관</span></label><span class="req">필수</span><button type="button" class="view">보기</button></div>
           <div class="item"><label class="checkbox"><input type="checkbox" checked><span>개인정보 수집·이용</span></label><span class="req">필수</span><button type="button" class="view">보기</button></div>
           <div class="item"><label class="checkbox"><input type="checkbox"><span>보안 소식 이메일 수신</span></label><span class="opt">선택</span></div>
-          <div class="btn-group end" style="margin-top:16px"><button type="button" class="btn md primary">다음</button></div>
+          <div class="btn-group end" style="margin-top:16px"><button type="button" class="btn md solid primary">다음</button></div>
         </div>` },
       { id: "inline", title: "전문 펼쳐 보기", desc: "약관 전문은 Accordion 으로 같은 화면에서 펼칩니다.", html: `
         <div class="terms">
@@ -89,17 +89,17 @@ const PATTERNS = {
           <span class="ico">${I("shield")}</span>
           <b>아직 정책이 없습니다</b>
           <span>템플릿에서 시작하거나 새 정책을 만들어 에이전트에 배포하세요.</span>
-          <div class="btn-group"><button type="button" class="btn md secondary">템플릿 보기</button><button type="button" class="btn md primary">${I("plus")}정책 만들기</button></div>
+          <div class="btn-group"><button type="button" class="btn md outline primary">템플릿 보기</button><button type="button" class="btn md solid primary">${I("plus")}정책 만들기</button></div>
         </div>` },
       { id: "nores", title: "검색 결과 없음", html: `
         <div class="empty" style="max-width:560px">
           <span class="ico">${I("search")}</span>
           <b>'랜섬웨어 2025' 에 대한 결과가 없습니다</b>
           <span>검색어를 줄이거나 기간 필터(최근 24시간)를 넓혀 보세요.</span>
-          <button type="button" class="btn md secondary">필터 초기화</button>
+          <button type="button" class="btn md outline assistive">필터 초기화</button>
         </div>` },
       { id: "compact", title: "패널 안 빈 상태", desc: "카드·사이드 패널처럼 좁은 영역은 .compact.", html: `
-        <div class="empty compact" style="max-width:480px"><span class="ico">${I("inbox")}</span><div><b style="font-size:14px">연결된 알림 채널이 없습니다</b><span style="display:block">Slack 또는 이메일을 연결하세요.</span></div><button type="button" class="btn sm secondary" style="margin:0 0 0 auto">연결</button></div>` },
+        <div class="empty compact" style="max-width:480px"><span class="ico">${I("inbox")}</span><div><b style="font-size:14px">연결된 알림 채널이 없습니다</b><span style="display:block">Slack 또는 이메일을 연결하세요.</span></div><button type="button" class="btn sm outline assistive" style="margin:0 0 0 auto">연결</button></div>` },
     ],
   },
 
@@ -146,7 +146,7 @@ const PATTERNS = {
               <button type="button" class="tile on" aria-pressed="true"><span class="ico">S</span><b>표준</b><span>알려진 위협 차단. 권장</span></button>
               <button type="button" class="tile" aria-pressed="false"><span class="ico">E</span><b>강화</b><span>의심 행위까지 차단</span></button>
             </div>
-            <div class="card-foot"><button type="button" class="btn md text">건너뛰기</button><button type="button" class="btn md secondary" data-step="prev">이전</button><button type="button" class="btn md primary" data-step="next">다음</button></div>
+            <div class="card-foot"><button type="button" class="btn md text">건너뛰기</button><button type="button" class="btn md outline assistive" data-step="prev">이전</button><button type="button" class="btn md solid primary" data-step="next">다음</button></div>
           </div>
         </div>` },
       { id: "done", title: "완료", desc: "요약 + 첫 행동으로 이어지는 Primary.", html: `
@@ -155,7 +155,7 @@ const PATTERNS = {
           <div class="card" style="align-items:center;text-align:center">
             <span class="indicator ok" style="font-size:16px;font-weight:600">설정이 완료되었습니다</span>
             <p class="desc keep-all">표준 보호 · 에이전트 12대 연결 대기 중. 첫 이벤트가 들어오면 대시보드에서 확인할 수 있습니다.</p>
-            <button type="button" class="btn lg primary">대시보드로 이동</button>
+            <button type="button" class="btn lg solid primary">대시보드로 이동</button>
           </div>
         </div>` },
     ],
@@ -174,7 +174,7 @@ const PATTERNS = {
             <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" style="min-width:140px;height:40px">심각도: 2</button></div>
             <div class="datepicker" data-mode="range" data-max="today" data-presets="7 30" data-default-preset="7"><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false" style="height:40px;min-width:200px">2026-10-21 <span class="sep">~</span> 2026-10-27${I("calendar")}</button></div>
             <span class="spacer"></span>
-            <button type="button" class="btn md secondary">${I("download")}내보내기</button>
+            <button type="button" class="btn md outline assistive">${I("download")}내보내기</button>
           </div>
           <div class="toolbar" style="font-size:12px;color:var(--foreground-neutral-secondary)">
             <span>결과 <b style="color:var(--foreground-neutral-primary)">128</b>건</span>
@@ -204,7 +204,7 @@ const PATTERNS = {
     examples: [
       { id: "overview", title: "서비스 상태 보드", html: `
         <div class="stack" style="max-width:800px">
-          <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20)}</span><div><b>SIEM 연동 연결 끊김</b>09:12 부터 이벤트 전송이 실패하고 있습니다. 인증 토큰을 확인하세요.<div class="actions"><button type="button" class="btn sm primary">연동 설정</button><button type="button" class="btn sm text">다시 시도</button></div></div></div>
+          <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20)}</span><div><b>SIEM 연동 연결 끊김</b>09:12 부터 이벤트 전송이 실패하고 있습니다. 인증 토큰을 확인하세요.<div class="actions"><button type="button" class="btn sm solid primary">연동 설정</button><button type="button" class="btn sm text">다시 시도</button></div></div></div>
           <div class="status-list">
             <div class="status-item"><span class="indicator ok">수집 서버</span><span class="meta">가동 99.98%</span></div>
             <div class="status-item"><span class="indicator ok">정책 배포</span><span class="meta">rev 2041</span></div>
@@ -231,7 +231,7 @@ const PATTERNS = {
     examples: [
       { id: "full", title: "대시보드", html: `
         <div class="stack">
-          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="group" aria-label="기간"><button type="button" class="on" aria-pressed="true">24시간</button><button type="button" aria-pressed="false">7일</button><button type="button" aria-pressed="false">30일</button></div><button type="button" class="btn md secondary icon" aria-label="새로 고침">${I("refresh")}</button></div></div>
+          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="group" aria-label="기간"><button type="button" class="on" aria-pressed="true">24시간</button><button type="button" aria-pressed="false">7일</button><button type="button" aria-pressed="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
           <div class="kpi-grid">
             <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><span class="delta up">${I("arrow-up",12)} 12% 전일 대비</span></div>
             <div class="kpi"><span class="label">차단률</span><span class="value">99.2<small>%</small></span><span class="delta down">${I("arrow-down",12)} 0.3%p</span></div>
@@ -272,7 +272,7 @@ const PATTERNS = {
             <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">INFO</button></div>
             <span class="spacer"></span>
             <div class="select-btn outline" role="group" aria-label="갱신"><button type="button" class="on" aria-pressed="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" aria-pressed="false">일시정지</button></div>
-            <button type="button" class="btn md secondary">${I("download")}CSV</button>
+            <button type="button" class="btn md outline assistive">${I("download")}CSV</button>
           </div>
           ${logTable(LOG_ROWS)}
           <div class="pagination-bar"><span>총 <b>48,213</b>건 · 최신 100건 표시</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><span class="gap">…</span><button type="button">483</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
@@ -287,7 +287,7 @@ const PATTERNS = {
     examples: [
       { id: "sections", title: "설정 섹션", html: `
         <div class="stack" style="max-width:760px">
-          <div class="page-head"><div><h2 class="title">외부 USB 차단</h2><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06</p></div><div class="actions"><button type="button" class="btn md secondary">복제</button><button type="button" class="btn md primary">배포</button></div></div>
+          <div class="page-head"><div><h2 class="title">외부 USB 차단</h2><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06</p></div><div class="actions"><button type="button" class="btn md outline primary">복제</button><button type="button" class="btn md solid primary">배포</button></div></div>
           <div class="notice warning" role="status"><span class="ico">${I("alert-triangle",20)}</span><div><b>배포되지 않은 변경 2건</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>
           <div class="settings-section">
             <div class="section-head">탐지</div>

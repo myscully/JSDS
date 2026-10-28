@@ -5,7 +5,7 @@ export default function Example() {
     <Card flush style={{ width: 400 }}>
       <CardHead>
         <CardTitle>최근 이벤트</CardTitle>
-        <Button size="sm" variant="text">전체 보기</Button>
+        <Button variant="text" size="sm">전체 보기</Button>
       </CardHead>
       {/* 테두리 없는 표 — wrap 을 끄지 않으면 .tbl-wrap 의 테두리가 카드 테두리와 겹친다 */}
       <Table compact wrap={false}>

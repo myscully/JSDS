@@ -48,13 +48,15 @@ const pairs = [
   ["--foreground-inactive-primary", SURFACES, 4.5, "선택되지 않은 상태", REF("참조 시스템 값 — 라이트 2.78 · 다크 2.55")],
   ["--foreground-brand-primary", SURFACES, 4.5, "제품색 글자·링크"],
   /* 자기 옅은 면 위에서만 4.22~4.49 다 — 참조 시스템의 brand 50 과 그 5% 틴트 조합이 원래 그렇다 */
-  ["--foreground-brand-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "옅은 제품 면 위 글자 — 텍스트 버튼의 hover·pressed", REF("참조 시스템 값 — brand 와 그 틴트 조합이 4.2 언저리다")],
+  ["--foreground-brand-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "옅은 제품 면 위 글자 — text · outline primary · 면 없는 아이콘 전용 primary 버튼의 hover·pressed", REF("참조 시스템 값 — brand 와 그 틴트 조합이 4.2 언저리다")],
+  /* Assistive 버튼 라벨 — solid 면(tertiary 단계), 그리고 solid · outline · 면 없는 아이콘 전용이 hover 에 올라앉는 secondary 단계(2026-10-28 정의 때 셌더니 선언이 없었다) */
+  ["--foreground-neutral-primary", ["--surface-neutral-tertiary", "--surface-neutral-secondary"], 4.5, "Assistive 버튼 라벨 — rest · hover 면"],
   ["--foreground-neutral-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "Date Picker 기간 사이 · 미리보기 날짜와 그 위 호버(2026-10-27) — 쓰고 있었는데 선언이 없었다. 다른 달(흐린) 칸은 띠를 칠하지 않아 이 쌍이 없다"],
   ["--foreground-brand-inverse", ["--surface-neutral-inverse"], 4.5, "반전 표면 위 제품색 글자"],
   ["--foreground-positive-primary", [...SURFACES, "--surface-positive-primary"], 4.5, "긍정 글자·아이콘 — Steps 완료 체크(.steps li.done i)도 이 쌍이다. 틴트 위 라이트 2.06~2.19 · 다크 6.43~8.03 — 그래픽 3:1 에도 라이트가 못 미친다, 사람의 결정", REF_STATUS],
   ["--foreground-cautionary-primary", [...SURFACES, "--surface-cautionary-primary"], 4.5, "주의 글자·아이콘", REF_STATUS],
   ["--foreground-negative-primary", [...SURFACES, "--surface-negative-primary"], 4.5, "부정 아이콘·그래픽(글자는 strong)", REF_STATUS],
-  /* 두 틴트 모두에 올라앉는다 — .btn.danger 가 이 글자를 12% 틴트(--surface-negative-primary) 위에 쓴다.
+  /* 두 틴트 모두에 올라앉는다 — solid negative 버튼(옛 .btn.danger)이 이 글자를 12% 틴트(--surface-negative-primary) 위에 쓴다.
      강한 틴트만 재고 있어서 파괴적 버튼의 실제 라벨 대비를 아무도 측정하지 않았다 */
   ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong", "--surface-negative-heavy", "--surface-negative-hover", "--surface-negative-pressed"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨(rest·hover·pressed). 라이트는 primary(3.44)보다 나아 글자에 쓰지만, 다크는 strong(red-50)이 primary(red-60)보다 어두워 elevated 위 4.63 으로 내려간다. 위험 버튼 rest·hover·pressed 는 라이트 12·16·22% 틴트 위 3.93 · 3.73 · 3.44, 다크 위험 보조 버튼 hover·pressed 는 20·28% 틴트 위 3.70 · 3.20 — 틴트를 한 단계 진하게 한 대가이고 참조 값을 바꾸지 않고 예외로 둔다", REF_STATUS],
   /* Count 배지 — 진한 빨강 면 위 흰 숫자(사람의 결정). 면 토큰이 아니라 전경 토큰(--foreground-negative-strong)을 면으로 쓴다 */

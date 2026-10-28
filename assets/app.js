@@ -221,8 +221,8 @@ const ROOT=document.body.dataset.root||'../';
     if (copy) {
       const text = copy.dataset.copyText !== undefined ? copy.dataset.copyText : ((document.getElementById(copy.dataset.copy) || {}).textContent || "");
       copyText(text);
-      /* 아이콘 전용 버튼(.icon)은 글자를 바꾸면 SVG 가 지워지므로 .copied 로 피드백한다 */
-      if (copy.tagName === "BUTTON" && !copy.classList.contains("icon")) { const label = copy.dataset.label || copy.textContent; copy.dataset.label = label; copy.textContent = "복사됨"; setTimeout(() => { copy.textContent = label; }, 1500); }
+      /* 아이콘 전용 버튼(.icon-only)은 글자를 바꾸면 SVG 가 지워지므로 .copied 로 피드백한다 */
+      if (copy.tagName === "BUTTON" && !copy.classList.contains("icon-only")) { const label = copy.dataset.label || copy.textContent; copy.dataset.label = label; copy.textContent = "복사됨"; setTimeout(() => { copy.textContent = label; }, 1500); }
       else { copy.classList.add("copied"); setTimeout(() => copy.classList.remove("copied"), 1200); }
       return;
     }

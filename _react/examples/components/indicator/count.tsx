@@ -8,10 +8,10 @@ export default function Example() {
       <Count value={12} tone="accent" />
       <Count value={128} tone="neutral" max={999} />
       <WithCount count={<Count value={5} />}>
-        <Button variant="secondary" icon aria-label="알림 5건"><Icon name="bell" /></Button>
+        <Button variant="outline" color="assistive" iconOnly aria-label="알림 5건"><Icon name="bell" /></Button>
       </WithCount>
       <WithCount count={<Count dot />}>
-        <Button variant="secondary" icon aria-label="새 알림"><Icon name="bell" /></Button>
+        <Button variant="outline" color="assistive" iconOnly aria-label="새 알림"><Icon name="bell" /></Button>
       </WithCount>
     </>
   );

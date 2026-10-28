@@ -217,7 +217,8 @@ for (const d of require("./reference-tokens.js").diff(css)) fails.push(`참조 �
      그것도 실려야 한다. ".x 로 시작"으로 셌더니 .btn 을 빌리며 함께 실린 .empty .btn 이 .empty 의 자기 규칙으로 셈됐다 */
   {
     const src = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8");
-    const selectorsIn = (css) => [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{[^{}]*\}/g)].flatMap((m) => m[1].split(",").map((x) => x.trim()));
+    /* 쉼표는 괄호 밖에서만 가른다 — .btn:where(.outline.primary,.text) 를 그냥 가르면 '.text' 가 자기 규칙으로 셈됐다(2026-10-28) */
+    const selectorsIn = (css) => [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{[^{}]*\}/g)].flatMap((m) => LIB.splitSelectors(m[1]));
     const classesIn = (css) => new Set(selectorsIn(css).flatMap((s) => [...s.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((x) => x[1])));
     const rootsIn = (css) => new Set(selectorsIn(css).map((s) => (/^\.([a-zA-Z][\w-]*)(?::{1,2}[\w-]+(?:\([^)]*\))?)*$/.exec(s) || [])[1]).filter(Boolean));
     const samples = src.slice(src.indexOf(LIB.SAMPLES_START) + LIB.SAMPLES_START.length, src.indexOf(LIB.SAMPLES_END));

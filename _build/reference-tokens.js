@@ -210,11 +210,11 @@ const ADDITIONS = {
   "surface-negative-heavy":
     "파괴적 버튼의 눌림 — 참조의 부정 틴트가 primary·strong 둘뿐이라 hover 다음 단계가 없었다(라이트 22% · 다크 28% — strong 보다 한 단계 위)",
   "surface-negative-hover":
-    "위험 보조 버튼 hover — 다크는 옅은 틴트가 바탕에 묻혀 한 단계 진하게(라이트 12% · 다크 20%). 테마마다 집는 단계가 달라, CSS 의 다크 전용 규칙 대신 토큰으로 두어 Figma 도 변수 하나로 같은 구조를 쓴다",
+    "면이 빈 Negative 버튼(Outline · 면 없는 아이콘 전용) hover — 다크는 옅은 틴트가 바탕에 묻혀 한 단계 진하게(라이트 12% · 다크 20%). 테마마다 집는 단계가 달라, CSS 의 다크 전용 규칙 대신 토큰으로 두어 Figma 도 변수 하나로 같은 구조를 쓴다",
   "surface-negative-pressed":
-    "위험 보조 버튼 pressed — hover 보다 한 단계 위(라이트 16% · 다크 28%). 위와 같은 이유",
+    "면이 빈 Negative 버튼(Outline · 면 없는 아이콘 전용) pressed — hover 보다 한 단계 위(라이트 16% · 다크 28%). 위와 같은 이유",
   "surface-brand-subtle-strong":
-    "텍스트 버튼의 눌림 — 참조의 brand 틴트가 subtle 하나뿐이라, 종전에는 중립색으로 떨어져 색상이 튀었다(두 테마 12%)",
+    "제품색 글자 버튼(text · outline primary · 면 없는 primary 아이콘 전용)과 달력 기간 띠의 눌림 · 강한 면 — 참조의 brand 틴트가 subtle 하나뿐이라, 종전에는 중립색으로 떨어져 색상이 튀었다(두 테마 12%)",
   "brand-label":
     "brand 면 위 글자 — 참조에는 면 위 글자 역할(-on)이 아예 없고 늘 static.white 다. 기본값도 흰색이고, 다크 + 중립 전환에서만 뒤집힌다(그때는 면이 밝은 회색이다). 제품 색이 흰 글자를 받쳐야 한다는 제약이 이 토큰의 짝이다",
   "company-mark":

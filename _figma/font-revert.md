@@ -56,6 +56,13 @@
 >   서체 덮어쓰기) · 달력 화면 27(두 달 둘째 제목 1 · 연 화면 제목 1 + 칸 12 · 월 화면 제목 1 + 칸 12) · 문서 카드 Range → Button 인스턴스 값 2 · sm · lg 필드 값 26 · Spec 2 · 검색 툴바 기간 1.
 >   `font-revert-nodes.tsv` 맨 아래 "2026-10-27 k15" 절. 같은 때 복제로 Pretendard 그대로 늘어난 글자: sm · lg 26변형의 라벨 26 · Calendar 화면의 요일 · 날짜(복제한 달력 프레임 — 굵기 표의 달력 머리 · 날짜 수가 늘었다).
 >   k14 줄의 "Noto 가 있어야 남은 일" 은 이것으로 끝났다
+> - 2026-10-28 k16: Button 개편(사람의 정의 2026-10-28 — 형태 Solid · Outline · Text · Plain × 색 Primary · Assistive · Negative, 상태 Normal · Hover · Pressed · Disabled, Loading 옵션, 높이 32 · 40 · 48)을
+>   Figma 에 맞추며 **19개가 새로 Noto** 가 됐다 — 문서 카드 Spec 8(Button State · Size · Container · Placement 값 4 + 새 Priority 행 이름 · 값 2, Text Field · Date Picker Size 값 2)
+>   · Card/Button Properties 11(Variant 칩 4 · State 칩 1 · 아이콘 불리언 제목 1 · 새 Color 목록 제목 + 칩 3 · 새 Loading 목록 제목 1).
+>   이 환경의 Noto Sans KR 에는 SemiBold 가 없어 제목 4개(780:4159 · 781:4181 · 781:4219 · 317:287 — 원래 Pretendard SemiBold · Label/1)는 **Bold(700)** 로 대체됐다.
+>   623:3091 · 325:1423 은 k4 · k15 에 Noto 였다가 사람이 되돌린 노드로, 글자를 다시 고쳐 또 Noto 가 됐다. `font-revert-nodes.tsv` 맨 아래 "2026-10-28 k16" 절.
+>   복제라 Pretendard 그대로 늘어난 글자: Button Outline Primary 라벨 15 · Properties 새 목록 칩 4. Focused 변형 18개를 지워 Button 라벨은 108 → 105개다(아래 "Button 라벨 자간" 절).
+>   변형 칠 · 높이 · 이름, 인스턴스 크기 덮어쓰기, 4 Pattern 버튼 프레임 칠은 글자를 건드리지 않아 서체가 그대로다
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
@@ -81,7 +88,7 @@
 - Button 라벨의 자간을 **0** 으로. 지금은 타입 스케일 텍스트 스타일의 자간을 그대로 지닌다 — Label/2 2.52%(12px) · Label/1 1.45%(14px) · Title/1 0.57%(16px).
   사이트 `.btn` 은 자간 0 이다(헤드리스 Chromium 실측 2026-10-26 k7). 그래서 Figma 버튼이 라벨 폭만큼 넓다 — sm +1.25 · md +0.8 · lg +0.34
   (라벨 "버튼": Figma 22 · 25 · 28 / 사이트 20.75 · 24.20 · 27.66). 상자(테두리 + padding)는 k7 에 사이트와 맞췄다.
-- 대상 원본 라벨 108개(인스턴스는 따라온다): Label/2 36개 315:6 · 315:39 · 315:60 … 456:3607, Label/1 36개 315:13 · 315:46 · 315:67 … 456:3612,
+- 대상 원본 라벨 108개(인스턴스는 따라온다 — 2026-10-28 k16 에 105개가 됐다: Focused 변형 18개를 지우고 Outline Primary 15개를 복제. 지금 목록은 Button 세트 315:737 의 TEXT 노드 전부): Label/2 36개 315:6 · 315:39 · 315:60 … 456:3607, Label/1 36개 315:13 · 315:46 · 315:67 … 456:3612,
   Title/1 36개 315:20 · 315:53 · 315:74 … 456:3617. 텍스트 스타일 자체는 다른 컴포넌트도 쓰므로 스타일이 아니라 노드에서 자간을 덮어쓴다.
 - 고친 뒤 확인: `node _figma/audit.mjs diff` 의 버튼 상자 대조는 라벨 폭을 빼고 보므로, 전체 폭은 덤프의 components.buttons(폭 · 라벨 폭)로 사이트 실측과 견준다.
 
@@ -92,7 +99,7 @@ Figma 14단계는 20 · 22 · 16 · 18 이라 다르다 — 내비 말고는 줄
 
 | 역할 | Figma 원본 노드(개수) | Figma 지금 | 사이트 실측 |
 | --- | --- | --- | --- |
-| Button 라벨 | 315:6 · 315:13 · 315:20 …(108) | 12 · 14 · 16 / 500(Label/2 · Label/1 · Title/1) | 12 · 14 · 16 / 600 |
+| Button 라벨 | 315:6 · 315:13 · 315:20 …(105 — k16 에 Focused 18 을 지우고 Outline Primary 15 를 복제) | 12 · 14 · 16 / 500(Label/2 · Label/1 · Title/1) | 12 · 14 · 16 / 600 |
 | Text Field 라벨 · 필수 표시 | 322:367 · 322:368 …(42 — k6 Error Focused 6 포함) | 14 / 500(Label/1) | 600 |
 | Text Field 도움말 · Small 값 | 322:371 …(21) · 322:370 …(7) — k6 Error Focused 4 포함 | 12 / 500(Caption/1) | 400 |
 | Select Button 기본 · 선택 | 323:624 …(4) · 323:626 …(2) | 400(Body/2) · 500(Label/1) | 500 · 600 |

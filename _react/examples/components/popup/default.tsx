@@ -12,7 +12,7 @@ export default function Example() {
         <PopupTitle>정책을 배포할까요?</PopupTitle>
         <PopupBody>변경 사항이 1,284대에 적용됩니다.</PopupBody>
         <PopupActions>
-          <Button variant="secondary" onClick={close}>취소</Button>
+          <Button variant="outline" color="assistive" onClick={close}>취소</Button>
           <Button onClick={close}>배포</Button>
         </PopupActions>
       </Popup>

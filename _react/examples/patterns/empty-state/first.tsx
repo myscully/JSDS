@@ -8,8 +8,8 @@ export default function Example() {
       style={{ maxWidth: 560 }}
       actions={
         <ButtonGroup>
-          <Button variant="secondary">템플릿 보기</Button>
-          <Button leading={<Icon name="plus" />}>정책 만들기</Button>
+          <Button variant="outline">템플릿 보기</Button>
+          <Button iconLeft={<Icon name="plus" />}>정책 만들기</Button>
         </ButtonGroup>
       }
     >

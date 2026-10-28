@@ -10,7 +10,7 @@ export default function Example() {
         <Checkbox>모든 그룹에 적용</Checkbox>
       </PopupForm>
       <PopupActions>
-        <Button variant="secondary">취소</Button>
+        <Button variant="outline" color="assistive">취소</Button>
         <Button>추가</Button>
       </PopupActions>
     </PopupSurface>

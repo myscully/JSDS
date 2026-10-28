@@ -21,7 +21,7 @@ export default function Example() {
         actions={
           <>
             <SelectButton label="기간" defaultValue="24h" options={[{ value: "24h", label: "24시간" }, { value: "7d", label: "7일" }, { value: "30d", label: "30일" }]} />
-            <Button variant="secondary" icon aria-label="새로 고침"><Icon name="refresh" /></Button>
+            <Button variant="outline" color="assistive" iconOnly aria-label="새로 고침"><Icon name="refresh" /></Button>
           </>
         }
       />
@@ -45,7 +45,7 @@ export default function Example() {
       <Card flush>
         <CardHead>
           <CardTitle>최근 Critical 이벤트</CardTitle>
-          <Button as="a" href="#" size="sm" variant="text">전체 보기 →</Button>
+          <Button variant="text" as="a" href="#" size="sm">전체 보기 →</Button>
         </CardHead>
         <Table wrap={false}>
           <TableHead><TableRow><TableHeader>시간</TableHeader><TableHeader>이벤트</TableHeader><TableHeader>대상</TableHeader><TableHeader>상태</TableHeader></TableRow></TableHead>

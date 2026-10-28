@@ -14,7 +14,7 @@ export { Icon, type IconProps } from "./icons/Icon";
 export { ICONS, ICON_NAMES, type IconName } from "./icons/icons.data";
 
 // A. primitives
-export { Button, ButtonGroup, type ButtonProps, type ButtonGroupProps, type ButtonVariant } from "./components/button/Button";
+export { Button, ButtonGroup, type ButtonProps, type ButtonGroupProps, type ButtonVariant, type ButtonColor } from "./components/button/Button";
 export { Tag, type TagProps, type TagVariant } from "./components/tag/Tag";
 export { Indicator, Count, WithCount, Steps, type IndicatorProps, type CountProps, type WithCountProps, type StepsProps } from "./components/indicator/Indicator";
 export { Divider, type DividerProps } from "./components/divider/Divider";

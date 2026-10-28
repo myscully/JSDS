@@ -507,7 +507,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     const dp = await page.evaluate(() => [...document.querySelectorAll("#ex-date-picker-size .example-preview .field-btn")].map((x) => Math.round(x.getBoundingClientRect().height)));
     await go("components/text-field.html");
     const tf = await page.evaluate(() => [...document.querySelectorAll("#ex-text-field-size .example-preview input")].map((x) => Math.round(x.getBoundingClientRect().height)));
-    ok("sizes match the Text Field heights", dp.join() === "36,44,52" && tf.join() === dp.join(), JSON.stringify({ dp, tf }));
+    ok("sizes match the Text Field heights", dp.join() === "32,40,48" && tf.join() === dp.join()   /* 버튼과 같은 32 · 40 · 48(2026-10-28) */, JSON.stringify({ dp, tf }));
     await go("components/date-picker.html");
   });
   await step("disabled and read-only fields don't open", async () => {

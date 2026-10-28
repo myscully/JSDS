@@ -24,7 +24,7 @@ const cal = (o) => {
   };
   const weeks = Array.from({ length: rows }, (_, r) => `<div class="cal-week" role="row">${days.slice(r * 7, r * 7 + 7).map(cell).join("")}</div>`).join("\n    ");
   const btn = (cls, attr, label) => `<button type="button" class="btn sm ${cls}" ${attr}${attr === 'data-cal="apply"' ? " disabled" : ""}>${label}</button>`;   // 적용은 값이 바뀌어야 켜진다 — 정적 달력은 처음 값 그대로라 꺼져 있다
-  const foot = [...presets.map((n) => btn("text", `data-preset="${n}"`, `최근 ${n}일`)), ...[["today", "text", "오늘"], ["reset", "text", "초기화"], ["cancel", "secondary", "취소"], ["apply", "primary", "적용"]].filter(([k]) => list.includes(k)).map(([k, c, l]) => btn(c, `data-cal="${k}"`, l))].join("");
+  const foot = [...presets.map((n) => btn("text", `data-preset="${n}"`, `최근 ${n}일`)), ...[["today", "text", "오늘"], ["reset", "text", "초기화"], ["cancel", "outline assistive", "취소"], ["apply", "solid primary", "적용"]].filter(([k]) => list.includes(k)).map(([k, c, l]) => btn(c, `data-cal="${k}"`, l))].join("");
   const data = [`data-mode="${o.mode || "single"}"`, o.mode === "range" ? `data-start="${a}" data-end="${b}"` : a ? `data-value="${a}"` : "", o.today && `data-today="${o.today}"`, o.min && `data-min="${o.min}"`, o.max && `data-max="${o.max}"`, `data-footer="${o.footer || "none"}"`, presets.length && `data-presets="${o.presets}"`].filter(Boolean).join(" ");
   return `<div class="calendar" role="group" aria-label="날짜 선택" ${data}>
   <div class="cal-head"><button type="button" class="cal-nav" data-nav="-1" aria-label="이전 달">${I("chevron-left", 16)}</button><button type="button" class="cal-title" aria-label="${title}, 연도 선택">${title}</button><button type="button" class="cal-nav" data-nav="1" aria-label="다음 달">${I("chevron-right", 16)}</button></div>
@@ -40,63 +40,101 @@ const COMPONENTS = {
   /* ------------------------------------------------ Button */
   "button": {
     status: "ready", react: ["Button","ButtonGroup"], css: [".btn", ".btn-group"],
-    desc: "사용자의 의도를 명확하게 전달하고 행동을 유도합니다. 버튼의 형태와 색은 우선순위를 시각적으로 구분합니다.",
-    thumb: `<button type="button" class="btn md primary">저장</button><button type="button" class="btn md secondary">취소</button>`,
+    desc: "사용자의 의도를 명확하게 전달하고 행동을 유도합니다. 형태(Solid · Outline)와 색(Primary · Assistive · Negative)의 조합으로 우선순위를 구분합니다.",
+    thumb: `<button type="button" class="btn md outline assistive">취소</button><button type="button" class="btn md solid primary">저장</button>`,
     examples: [
-      { id: "default", title: "Default", desc: "변형·크기를 지정하지 않은 기본 버튼입니다. 화면의 주 행동 하나에만 씁니다.", html: `<button type="button" class="btn md primary">정책 저장</button>` },
-      { id: "variant", title: "Variant", desc: "우선순위에 따라 Primary(화면당 하나) · Secondary · Tertiary · Text · Danger 를 씁니다. 제품 메인 컬러가 상태색과 겹치면 제품 컬러가 쓰이는 곳이 모두 중립색으로 내려가, Primary 도 함께 바뀝니다(<a href=\"#/foundations/colors#neutral\">Colors › 중립 전환</a>).", html: `
-        <button type="button" class="btn md primary">Primary</button>
-        <button type="button" class="btn md secondary">Secondary</button>
-        <button type="button" class="btn md tertiary">Tertiary</button>
-        <button type="button" class="btn md text">Text</button>
-        <button type="button" class="btn md danger">Danger</button>
-        <button type="button" class="btn md danger secondary">Danger (outline)</button>` },
-      { id: "size", title: "Size", desc: "sm 36 · md 44 · lg 52. 테이블·툴바 안에서는 sm, 폼 하단은 md, 온보딩·빈 화면은 lg.", html: `
-        <button type="button" class="btn sm primary">Small</button>
-        <button type="button" class="btn md primary">Medium</button>
-        <button type="button" class="btn lg primary">Large</button>` },
-      { id: "icon", title: "Icon", desc: "아이콘은 라벨 앞뒤 중 한쪽에 하나만 둡니다(양쪽 동시 금지). 아이콘 전용 버튼은 .icon 과 aria-label 을 함께 씁니다. 아이콘 크기는 버튼 크기를 따릅니다 — sm 16 · md 18 · lg 20.", html: `
-        <button type="button" class="btn md primary">${I("plus")}정책 추가</button>
-        <button type="button" class="btn md secondary">${I("download")}내보내기</button>
-        <button type="button" class="btn md secondary icon" aria-label="더 보기">${I("dots")}</button>
-        <button type="button" class="btn md tertiary icon" aria-label="새로 고침">${I("refresh")}</button>
-        <button type="button" class="btn md danger secondary icon" aria-label="삭제">${I("trash")}</button>
-        <button type="button" class="btn lg secondary icon" aria-label="설정">${I("settings")}</button>` },
-      { id: "state", title: "State", desc: "Hover 와 Pressed 는 CSS 가 처리합니다 — 면은 기준 단계에서 <b>글자색 반대 방향</b>으로 한 단계·두 단계 갑니다. Loading 은 .loading 클래스로, 라벨은 자리만 지키고 보이지 않아 폭이 흔들리지 않으며 클릭은 마우스·키보드 모두 막힙니다. 비활성은 아래 Disabled 에서 따로 다룹니다.", html: `
-        <button type="button" class="btn md primary">Default</button>
-        <button type="button" class="btn md secondary">Default</button>
-        <button type="button" class="btn md primary loading" aria-busy="true">저장 중</button>
-        <button type="button" class="btn md secondary loading" aria-busy="true">불러오는 중</button>` },
-      { id: "disabled", title: "Disabled", desc: "비활성은 투명도를 덮지 않고 <b>전용 토큰</b>을 씁니다 — fill 은 회색 면(<code>--surface-disable-primary</code>) + 회색 라벨(<code>--foreground-disable-primary</code>), outline 은 면을 비우고 보더만 회색으로 바뀝니다. 그래서 어떤 변형이든 비활성은 한 가지 회색으로 읽힙니다. 비활성 요소는 탭 순서에서 빠지므로, 막는 대신 <b>왜 누를 수 없는지 알려주는 쪽</b>을 먼저 검토하세요. 링크는 <code>disabled</code> 를 가질 수 없어 <code>aria-disabled=\"true\"</code> 를 씁니다.", html: `
+      { id: "default", title: "Default", desc: "Primary Solid 가 기본입니다(React 는 <code>variant</code> · <code>color</code> 를 생략하면 이것). 화면에서 가장 중요한 행동 하나에만 씁니다.", html: `<button type="button" class="btn md solid primary">정책 저장</button>` },
+      { id: "variant", title: "Variant · Color", desc: "형태는 <b>Solid</b> 와 <b>Outline</b> 두 가지, 색은 <b>Primary</b>(기본) · <b>Assistive</b> · <b>Negative</b> 세 가지입니다. Negative 는 위험 · 경고성 행동에만 씁니다. 제품 메인 컬러가 상태색과 겹치면 제품 컬러가 쓰이는 곳이 모두 중립색으로 내려가, Primary 도 함께 바뀝니다(<a href=\"#/foundations/colors#neutral\">Colors › 중립 전환</a>).", html: `
         <div class="btn-group">
-          <button type="button" class="btn md primary" disabled>Primary</button>
-          <button type="button" class="btn md tertiary" disabled>Tertiary</button>
-          <button type="button" class="btn md danger" disabled>Danger</button>
+          <button type="button" class="btn md solid primary">Primary</button>
+          <button type="button" class="btn md solid assistive">Assistive</button>
+          <button type="button" class="btn md solid negative">Negative</button>
         </div>
         <div class="btn-group">
-          <button type="button" class="btn md secondary" disabled>Secondary</button>
-          <button type="button" class="btn md danger secondary" disabled>Danger outline</button>
-          <button type="button" class="btn md text" disabled>Text</button>
-        </div>` , layout: "stack" },
-      { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(12px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
+          <button type="button" class="btn md outline primary">Primary</button>
+          <button type="button" class="btn md outline assistive">Assistive</button>
+          <button type="button" class="btn md outline negative">Negative</button>
+        </div>`, layout: "stack" },
+      { id: "priority", title: "Priority", desc: "<b>Lv.4 Primary Solid</b> — 화면에서 가장 중요한 메인 행동을 유도 · 제안합니다. <b>Lv.3 Primary Outline</b> — 미리보기 · 임시 저장처럼 대체 행동을 제안합니다. <b>Lv.2 Assistive Solid</b> — 토글 버튼을 보조합니다. <b>Lv.1 Assistive Outline</b> — 닫기 · 취소 같은 보조 행동을 제시합니다. 삭제 · 탈퇴처럼 <b>되돌리기 어려운 행동</b>에는 우선순위와 별개로 Negative 를 씁니다.", html: `
         <div class="btn-group">
-          <button type="button" class="btn md text">초기화</button>
-          <button type="button" class="btn md secondary">취소</button>
-          <button type="button" class="btn md primary">정책 저장</button>
+          <button type="button" class="btn md outline assistive">취소</button>
+          <button type="button" class="btn md solid assistive">필터</button>
+          <button type="button" class="btn md outline primary">미리보기</button>
+          <button type="button" class="btn md solid primary">정책 저장</button>
         </div>
-        <button type="button" class="btn lg primary block" style="max-width:320px">시작하기</button>`, layout: "stack center" },
+        <div class="btn-group">
+          <button type="button" class="btn md outline assistive">취소</button>
+          <button type="button" class="btn md solid negative">정책 삭제</button>
+        </div>`, layout: "stack" },
+      { id: "size", title: "Size", desc: "sm 32 · md 40 · lg 48. <b>높이는 고정</b>하고 너비는 라벨에 맞춰 자유롭게 씁니다. Text Field · Date Picker 필드도 같은 높이라 나란히 놓으면 맞습니다. 테이블 · 툴바 안에서는 sm, 폼 하단은 md, 온보딩 · 빈 화면은 lg.", html: `
+        <button type="button" class="btn sm solid primary">Small</button>
+        <button type="button" class="btn md solid primary">Medium</button>
+        <button type="button" class="btn lg solid primary">Large</button>` },
+      { id: "icon", title: "Icon", desc: "아이콘은 행동의 의미를 보완할 때만 선택적으로 넣습니다. 라벨의 왼쪽(iconLeft) 또는 오른쪽(iconRight)에 하나만 두고, <b>양쪽에 동시에 두는 것은 지양</b>합니다. 아이콘 크기는 버튼 크기를 따릅니다 — sm 16 · md 18 · lg 20.", html: `
+        <button type="button" class="btn md solid primary">${I("plus")}정책 추가</button>
+        <button type="button" class="btn md outline assistive">${I("download")}내보내기</button>
+        <button type="button" class="btn md outline primary">다음 단계${I("chevron-right")}</button>` },
+      { id: "icon-only", title: "Icon only", desc: "누구나 즉시 이해할 수 있는 보편적인 아이콘으로 <b>의미가 명확히 전달될 때만</b> 라벨 없이 씁니다. <code>.icon-only</code>(React <code>iconOnly</code>)와 <code>aria-label</code> 을 함께 둡니다. 형태를 주지 않으면 <b>배경이 없고 hover · pressed 에만 면</b>이 나타납니다(첫 줄). Solid · Outline 을 주면 그 면을 가진 정사각 버튼이 됩니다(둘째 줄).", html: `
+        <div class="btn-group">
+          <button type="button" class="btn md primary icon-only" aria-label="추가">${I("plus")}</button>
+          <button type="button" class="btn md assistive icon-only" aria-label="새로 고침">${I("refresh")}</button>
+          <button type="button" class="btn md negative icon-only" aria-label="삭제">${I("trash")}</button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn sm outline assistive icon-only" aria-label="더 보기">${I("dots")}</button>
+          <button type="button" class="btn md outline assistive icon-only" aria-label="더 보기">${I("dots")}</button>
+          <button type="button" class="btn lg solid primary icon-only" aria-label="설정">${I("settings")}</button>
+        </div>`, layout: "stack" },
+      { id: "state", title: "State", desc: "상태는 <b>Normal · Hover · Pressed · Disabled</b> 네 가지입니다. Hover 와 Pressed 는 CSS 가 처리합니다 — 면은 기준 단계에서 <b>글자색 반대 방향</b>으로 한 단계 · 두 단계 갑니다. 마우스를 올리고 눌러 보세요. Disabled 는 아래에서 따로 다룹니다.", html: `
+        <button type="button" class="btn md solid primary">Normal</button>
+        <button type="button" class="btn md outline primary">Normal</button>
+        <button type="button" class="btn md solid assistive">Normal</button>
+        <button type="button" class="btn md outline assistive">Normal</button>` },
+      { id: "disabled", title: "Disabled", desc: "<code>disabled</code> 옵션으로 비활성을 표시합니다. 투명도를 덮지 않고 <b>전용 토큰</b>을 씁니다 — Solid 는 회색 면(<code>--surface-disable-primary</code>) + 회색 라벨(<code>--foreground-disable-primary</code>), Outline 은 면을 비우고 보더만 회색, 배경 없는 아이콘 전용 · Text 는 라벨만 회색입니다. 그래서 어떤 색이든 비활성은 한 가지 회색으로 읽힙니다. 비활성 요소는 탭 순서에서 빠지므로, 막는 대신 <b>왜 누를 수 없는지 알려주는 쪽</b>을 먼저 검토하세요. 링크는 <code>disabled</code> 를 가질 수 없어 <code>aria-disabled=\"true\"</code> 를 씁니다.", html: `
+        <div class="btn-group">
+          <button type="button" class="btn md solid primary" disabled>Primary</button>
+          <button type="button" class="btn md solid assistive" disabled>Assistive</button>
+          <button type="button" class="btn md solid negative" disabled>Negative</button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn md outline primary" disabled>Primary</button>
+          <button type="button" class="btn md outline assistive" disabled>Assistive</button>
+          <button type="button" class="btn md outline negative" disabled>Negative</button>
+          <button type="button" class="btn md assistive icon-only" aria-label="새로 고침" disabled>${I("refresh")}</button>
+        </div>`, layout: "stack" },
+      { id: "loading", title: "Loading", desc: "파일 업로드 · 전송 · 저장처럼 <b>잠깐 기다리는 상태</b>를 버튼 안에서 간단히 보여줄 때 씁니다. <code>.loading</code>(React <code>loading</code>)으로 켜고 <code>aria-busy=\"true\"</code> 를 함께 둡니다. <b>disabled 와 다르게</b> 포커스는 남고, <code>click</code> · <code>mousedown</code> · <code>pointerdown</code> · <code>keydown</code> 이벤트 실행을 막습니다 — 버튼 뒤의 행 · 카드로도 전달되지 않습니다. 이동 키(Tab · Esc · 화살표 · Home/End · PageUp/Down)와 단축키(Ctrl · ⌘ · Alt 조합)는 막지 않아 포커스를 옮기거나 팝업을 닫을 수 있습니다. 라벨은 자리만 지켜 폭이 흔들리지 않습니다. 로딩 중 페이지를 이탈하면 동작이 중단되므로, 긴 작업은 진행 표시와 함께 별도 화면에서 다룹니다.", html: `
+        <button type="button" class="btn md solid primary loading" aria-busy="true">저장 중</button>
+        <button type="button" class="btn md outline assistive loading" aria-busy="true">불러오는 중</button>
+        <button type="button" class="btn md solid negative loading" aria-busy="true">삭제 중</button>` },
+      { id: "text", title: "Text", desc: "Solid · Outline 정의 밖의 변형입니다. 카드 머리의 '전체 보기', 달력 하단의 '오늘 · 초기화'처럼 <b>문장 속 링크에 가까운 가벼운 행동</b>에만 씁니다. 색은 Primary 하나이고 좌우 여백이 8 로 좁습니다. 취소 · 닫기에는 Assistive Outline 을 씁니다.", html: `
+        <button type="button" class="btn sm text">전체 보기</button>
+        <button type="button" class="btn md text">초기화</button>` },
+      { id: "placement", title: "Placement", desc: "메인과 서브가 분명히 다른 버튼을 <b>수평</b>으로 놓으면 유도 목적이 분명한 버튼을 <b>오른쪽</b>에(<code>.btn-group</code>, 폼 하단은 <code>.end</code>), <b>수직</b>으로 놓으면 <b>위</b>에 둡니다(<code>.btn-group.vertical</code> — 같은 폭으로 늘어납니다). 버튼 사이는 수평 12 · 수직 8. 전체 폭 하나는 <code>.block</code>.", html: `
+        <div class="btn-group end">
+          <button type="button" class="btn md outline assistive">취소</button>
+          <button type="button" class="btn md outline primary">임시 저장</button>
+          <button type="button" class="btn md solid primary">정책 저장</button>
+        </div>
+        <div class="btn-group vertical" style="width:320px">
+          <button type="button" class="btn lg solid primary">시작하기</button>
+          <button type="button" class="btn lg outline assistive">나중에 하기</button>
+        </div>`, layout: "stack center" },
     ],
     props: [
-      ["variant", "primary | secondary | tertiary | text | danger | danger secondary", "—", "우선순위. <code>danger secondary</code> 는 danger 아웃라인(React 는 <code>danger-secondary</code>). fill 은 primary · tertiary · danger, outline 은 secondary · danger secondary"],
-      ["size", "sm | md | lg", "md", "높이 36 / 44 / 52"],
-      [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
-      [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
-      [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(12px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
-      ["disabled", "attribute", "—", "비활성. 전용 토큰 — fill 은 <code>--surface-disable-primary</code> 면 + <code>--foreground-disable-primary</code> 라벨, outline 은 면을 비우고 보더만 회색. 투명도를 덮지 않아 변형마다 다른 색이 남지 않습니다"],
+      ["variant", "solid | outline | text", "solid", "형태. Solid 는 면을 채우고 Outline 은 면을 비우고 보더를 둡니다. <code>text</code> 는 정의 밖 변형(색은 primary 만). 아이콘 전용에서 생략하면 배경 없음"],
+      ["color", "primary | assistive | negative", "primary", "색. assistive 는 보조 행동, negative 는 삭제 · 탈퇴처럼 되돌리기 어려운 행동"],
+      ["size", "sm | md | lg", "md", "높이 32 / 40 / 48 고정 · 너비 자유"],
+      [".icon-only", "boolean", "false", "아이콘 전용 정사각 버튼(React <code>iconOnly</code>). aria-label 필수. 형태를 주지 않으면 배경 없음 · hover 에만 면"],
+      [".btn svg", "element", "—", "라벨 왼쪽 또는 오른쪽에 하나만(React <code>iconLeft</code> / <code>iconRight</code>), 양쪽 동시는 지양. 크기는 sm 16 · md 18 · lg 20"],
+      [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다. <code>aria-busy=\"true\"</code> 를 함께 두고, disabled 와 달리 포커스는 남은 채 click · mousedown · pointerdown · keydown 을 막습니다(이동 키 · 단축키는 통과)"],
+      ["disabled", "attribute", "—", "비활성. 전용 토큰 — Solid 는 <code>--surface-disable-primary</code> 면 + <code>--foreground-disable-primary</code> 라벨, Outline 은 면을 비우고 보더만 회색. 투명도를 덮지 않아 색마다 다른 회색이 남지 않습니다"],
+      [".block", "boolean", "false", "전체 폭"],
+      [".btn-group", "container", "—", "버튼 묶음 — 수평 12px 간격, 주 행동이 오른쪽. 폼 하단 우측 정렬은 <code>.end</code>, 수직은 <code>.vertical</code>(주 행동이 위, 8px)"],
+      ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
       ["type", "button | submit | reset", "button", "폼 안에서는 명시"],
     ],
-    spec: [["State", "rest → hover → pressed 로 <b>라이트는 어두워지고 다크는 밝아집니다</b>. primary <code>--surface-brand-primary</code> → <code>-strong</code> → <code>-heavy</code>(라이트 brand 50·45·40 · 다크 50·55·60) · danger <code>--surface-negative-primary</code> → <code>-strong</code> → <code>-heavy</code>. secondary 투명 → <code>--surface-neutral-secondary</code> → <code>-strong</code> · tertiary <code>--surface-neutral-tertiary</code> → <code>-secondary</code> → <code>-strong</code>. text: 라벨 <code>--foreground-brand-primary</code>, hover <code>--surface-brand-subtle</code>, pressed <code>--surface-brand-subtle-strong</code>. 틴트는 알파가 커지는 구조라 같은 토큰이 테마에 따라 방향을 뒤집고, 불투명 primary 는 두 테마 모두 제품 HEX(50)에서 출발해 테마별로 반대 방향 단계를 집습니다. 비활성은 전용 토큰, 포커스는 전 변형 공통 <code>--foreground-brand-primary</code> 1px 외곽선(2px 띄움)"], ["Size", "sm 36 · md 44 · lg 52 (높이)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정)"], ["Label", "14 SemiBold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "페이지 Primary 버튼은 화면당 하나, 우측 정렬 · 폼에서는 저장이 오른쪽"]],
-    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 36, px: 14, fs: 12 }, md: { h: 44, px: 20, fs: 14 }, lg: { h: 52, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { primary: { bg: "--surface-brand-primary", fg: "--brand-label" }, secondary: { bg: "transparent", fg: "--foreground-neutral-primary", stroke: "--line-neutral-primary" }, tertiary: { bg: "--surface-neutral-tertiary", fg: "--foreground-neutral-primary" }, text: { bg: "transparent", fg: "--foreground-brand-primary" }, danger: { bg: "--surface-negative-strong", fg: "--foreground-neutral-primary" }, "danger secondary": { bg: "transparent", fg: "--foreground-negative-strong", stroke: "--surface-negative-strong" } }, states: ["default", "hover", "pressed", "focused", "disabled", "loading"], disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary", outlineBg: "transparent", outlineStroke: "--surface-disable-primary" } },
+    spec: [["Priority", "Lv.4 Primary Solid · Lv.3 Primary Outline · Lv.2 Assistive Solid · Lv.1 Assistive Outline · 되돌리기 어려운 행동은 Negative"], ["State", "Normal → Hover → Pressed 로 <b>라이트는 어두워지고 다크는 밝아집니다</b>. Solid primary <code>--surface-brand-primary</code> → <code>-strong</code> → <code>-heavy</code>(라이트 brand 50·45·40 · 다크 50·55·60) · Solid assistive <code>--surface-neutral-tertiary</code> → <code>-secondary</code> → <code>-strong</code> · Solid negative <code>--surface-negative-primary</code> → <code>-strong</code> → <code>-heavy</code>. Outline 은 면이 투명에서 출발 — primary <code>--surface-brand-subtle</code> → <code>-subtle-strong</code>, assistive <code>--surface-neutral-secondary</code> → <code>-strong</code>, negative <code>--surface-negative-hover</code> → <code>-pressed</code>. 틴트는 알파가 커지는 구조라 같은 토큰이 테마에 따라 방향을 뒤집고, 불투명 primary 는 두 테마 모두 제품 HEX(50)에서 출발해 테마별로 반대 방향 단계를 집습니다. Disabled 는 전용 토큰. 키보드 포커스는 상태가 아니라 전 변형 공통 <code>--foreground-brand-primary</code> 1px 외곽선(2px 띄움)"], ["Size", "sm 32 · md 40 · lg 48 (높이 고정)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정 · 아이콘 전용은 정사각)"], ["Label", "14 SemiBold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "수평은 주 행동이 오른쪽 · 수직은 주 행동이 위 · Lv.4 는 화면당 하나"]],
+    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 32, px: 14, fs: 12 }, md: { h: 40, px: 20, fs: 14 }, lg: { h: 48, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { "solid primary": { bg: "--surface-brand-primary", fg: "--brand-label" }, "outline primary": { bg: "transparent", fg: "--foreground-brand-primary", stroke: "--line-brand-primary" }, "solid assistive": { bg: "--surface-neutral-tertiary", fg: "--foreground-neutral-primary" }, "outline assistive": { bg: "transparent", fg: "--foreground-neutral-primary", stroke: "--line-neutral-primary" }, "solid negative": { bg: "--surface-negative-primary", fg: "--foreground-negative-strong" }, "outline negative": { bg: "transparent", fg: "--foreground-negative-strong", stroke: "--line-negative-primary" }, text: { bg: "transparent", fg: "--foreground-brand-primary" }, "plain primary": { bg: "transparent", fg: "--foreground-brand-primary" }, "plain assistive": { bg: "transparent", fg: "--foreground-neutral-secondary" }, "plain negative": { bg: "transparent", fg: "--foreground-negative-strong" } }, states: ["normal", "hover", "pressed", "disabled"], loading: true, disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary", outlineBg: "transparent", outlineStroke: "--surface-disable-primary" } },
   },
 
   /* ------------------------------------------------ Text Field */
@@ -108,10 +146,10 @@ const COMPONENTS = {
       { id: "basic", title: "Default / Error", desc: "오류 시 .error 를 필드에 붙이고 help 를 오류 메시지로 바꿉니다. 원인과 해결 방법을 함께 씁니다.", html: `
         <div class="field"><label for="ip1">허용 IP</label><input id="ip1" value="10.0.0.12"><span class="help">IPv4 형식</span></div>
         <div class="field error"><label for="ip2">허용 IP</label><input id="ip2" value="10.0.0" aria-invalid="true" aria-describedby="ip2-err"><span class="help" id="ip2-err">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div>` },
-      { id: "size", title: "Size", desc: "sm 36 · md 44 · lg 52. 버튼과 같은 높이로 나란히 배치합니다.", html: `
-        <div class="field sm"><label>Small</label><input placeholder="36px"></div>
-        <div class="field"><label>Medium</label><input placeholder="44px"></div>
-        <div class="field lg"><label>Large</label><input placeholder="52px"></div>`, layout: "top" },
+      { id: "size", title: "Size", desc: "sm 32 · md 40 · lg 48. 버튼과 같은 높이로 나란히 배치합니다.", html: `
+        <div class="field sm"><label>Small</label><input placeholder="32px"></div>
+        <div class="field"><label>Medium</label><input placeholder="40px"></div>
+        <div class="field lg"><label>Large</label><input placeholder="48px"></div>`, layout: "top" },
       { id: "affix", title: "Prefix / Suffix / Counter", desc: "단위·접두어는 .affix 컨테이너 안에 span 으로. 글자 수 제한은 .counter.", html: `
         <div class="field"><label>보관 기간</label><div class="affix"><input value="90"><span>일</span></div></div>
         <div class="field"><label>관리 콘솔 주소</label><div class="affix"><span>https://</span><input placeholder="console.example.com"></div></div>
@@ -124,14 +162,14 @@ const COMPONENTS = {
     ],
     props: [
       [".field", "container", "—", "label + input(+ .help) 묶음. 폼 안에서 min-width 해제"],
-      ["size", "sm | (md) | lg", "md", "입력 높이 36 / 44 / 52"],
+      ["size", "sm | (md) | lg", "md", "입력 높이 32 / 40 / 48"],
       [".error", "boolean", "false", "보더 danger, help 를 오류 메시지로. input 에 aria-invalid. 포커스 때는 빨강 가장자리 + --line-negative-focus 후광"],
       [".affix", "wrapper", "—", "접두어/접미어 span 과 input 을 감싸는 컨테이너"],
       [".counter", "element", "—", "글자 수 표시. .row 안에서 라벨 우측 정렬"],
       ["disabled / readonly", "attribute", "—", "비활성 / 읽기 전용(배경 subtle)"],
     ],
-    spec: [["Size", "sm 36 · md 44 · lg 52"], ["Container", "radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 1px foreground/brand/primary · 바깥 4px line/brand/focus · 오류일 때는 foreground/negative/primary · line/negative/focus"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
-    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", focused: { stroke: "--foreground-negative-primary", ring: "--line-negative-focus" } } }, states: ["default", "hover", "focused", "error", "error focused", "disabled", "readonly"] },
+    spec: [["Size", "sm 32 · md 40 · lg 48"], ["Container", "radius/md 6 · line/neutral/primary 1px · 포커스: 테두리 1px foreground/brand/primary · 바깥 4px line/brand/focus · 오류일 때는 foreground/negative/primary · line/negative/focus"], ["Label", "라벨 14 SemiBold · 입력 Body/2 14 · 필수는 em(*)"], ["Placement", "라벨은 필드 위, 도움말은 아래. 좌우 여백 14"]],
+    figma: { frame: "Text Field", radius: "radius/md", sizes: { sm: { h: 32 }, md: { h: 40 }, lg: { h: 48 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-primary" }, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", focused: { stroke: "--foreground-negative-primary", ring: "--line-negative-focus" } } }, states: ["default", "hover", "focused", "error", "error focused", "disabled", "readonly"] },
   },
 
   /* ------------------------------------------------ Search */
@@ -272,7 +310,7 @@ const COMPONENTS = {
         <div class="datepicker" data-footer="today reset cancel apply" data-value="2026-09-07"><label>전체 버튼</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false">2026-09-07 ${I("calendar")}</button></div>
         <div class="datepicker" data-footer="none"><label>바로 적용</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
         <div class="datepicker" data-mode="range" data-footer="none"><label>기간 바로 적용</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>`, layout: "top" },
-      { id: "size", title: "Size", desc: "높이 36 · 44 · 52 — Text Field 와 같습니다(.sm · .lg).", html: `
+      { id: "size", title: "Size", desc: "높이 32 · 40 · 48 — Text Field · Button 과 같습니다(.sm · .lg).", html: `
         <div class="datepicker sm"><label>Small</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
         <div class="datepicker"><label>Medium</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
         <div class="datepicker lg"><label>Large</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>`, layout: "top" },
@@ -280,9 +318,9 @@ const COMPONENTS = {
         <div class="datepicker" data-value="2026-09-07"><label>비활성</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false" disabled>2026-09-07 ${I("calendar")}</button></div>
         <div class="datepicker field"><label for="dp-ro">읽기 전용</label><div class="affix"><input id="dp-ro" value="2026-09-07" placeholder="YYYY-MM-DD" autocomplete="off" aria-describedby="dp-ro-help" readonly><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false" disabled>${I("calendar")}</button></div><span class="help" id="dp-ro-help">정책이 정한 날짜</span></div>`, layout: "top" },
     ],
-    props: [[".datepicker", "container", "—", "label + .field-btn(+ .calendar). 열림은 .open, 위로 펼침은 .up"], ["data-mode", "single | range | month", "single", "없으면 .field-btn 안 .sep 로 기간을 알아낸다"], ["data-value / data-start · data-end", "YYYY-MM-DD (월은 YYYY-MM)", "—", "확정 값. ds.js 가 이 값만 믿는다"], ["data-min / data-max", "YYYY-MM-DD | today", "—", "밖의 날짜 · 월 · 연은 aria-disabled"], ["data-footer", "today reset cancel apply | none", "single: today apply · 그 외: apply", "none 이면 고르는 순간 적용"], ["data-calendars", "1 | 2", "1", "기간을 두 달로. 767px 이하 1"], ["data-presets", "\"7 30\"", "—", "기간 프리셋(최근 N일). 누르는 즉시 확정한다(적용 버튼과 별개). min/max 밖이면 비활성"], ["data-default-preset", "N", "—", "값이 없으면 오늘 기준 최근 N일을 처음 값으로(기간)"], ["data-today", "YYYY-MM-DD", "오늘", "정적 데모용"], [".sm / .lg", "size", "md", "필드 높이 36 / 44 / 52"], [".field + .affix + input + .cal-btn", "입력형", "—", "직접 입력. 오류는 .error + aria-invalid + .help"], ["disabled / readonly", "attribute", "—", "버튼형 disabled, 입력형 readonly(+ .cal-btn disabled)"], [".calendar", "popover", "—", ".cal-head(.cal-nav · .cal-title) + .cal-grid[role=grid](.cal-week ×주 수 · .day 주 수×7, 28–42) + .cal-foot"], [".day.on · .start · .end · .in-range · .preview · .today · .muted", "state", "—", "선택 / 기간 양끝 / 사이 / 미리보기 / 오늘 / 다른 달"], ["ds:date", "event", "—", "확정 때만. {value} · 기간 {value:\"A ~ B\", start, end}"]],
-    spec: [["Size", "필드 36 · 44 · 52 · 달력 폭 296(두 달 590) · 날짜 셀 높이 34 · 연/월 셀 40"], ["Container", "달력 radius/lg 8 · shadow/2"], ["Label", "요일 12 SemiBold tertiary · 날짜 12 Regular · 필드 Body/2 14"], ["Placement", "필드 아래 4px. 아래 자리가 모자라고 위가 더 넓으면 필드 위 4px"]],
-    figma: { frame: "Date Picker", radius: "radius/lg", sizes: { sm: { h: 36 }, md: { h: 44 }, lg: { h: 52 }, calendar: { w: 296 }, day: { h: 34 }, cell: { h: 40 } }, variants: { single: {}, range: { band: "--surface-brand-subtle", endpoint: "--surface-brand-primary" }, month: {}, input: {}, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", ring: "--line-negative-focus" }, disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary" } }, states: ["closed", "focused", "open", "selected", "range", "preview", "error", "disabled", "read-only"] },
+    props: [[".datepicker", "container", "—", "label + .field-btn(+ .calendar). 열림은 .open, 위로 펼침은 .up"], ["data-mode", "single | range | month", "single", "없으면 .field-btn 안 .sep 로 기간을 알아낸다"], ["data-value / data-start · data-end", "YYYY-MM-DD (월은 YYYY-MM)", "—", "확정 값. ds.js 가 이 값만 믿는다"], ["data-min / data-max", "YYYY-MM-DD | today", "—", "밖의 날짜 · 월 · 연은 aria-disabled"], ["data-footer", "today reset cancel apply | none", "single: today apply · 그 외: apply", "none 이면 고르는 순간 적용"], ["data-calendars", "1 | 2", "1", "기간을 두 달로. 767px 이하 1"], ["data-presets", "\"7 30\"", "—", "기간 프리셋(최근 N일). 누르는 즉시 확정한다(적용 버튼과 별개). min/max 밖이면 비활성"], ["data-default-preset", "N", "—", "값이 없으면 오늘 기준 최근 N일을 처음 값으로(기간)"], ["data-today", "YYYY-MM-DD", "오늘", "정적 데모용"], [".sm / .lg", "size", "md", "필드 높이 32 / 40 / 48"], [".field + .affix + input + .cal-btn", "입력형", "—", "직접 입력. 오류는 .error + aria-invalid + .help"], ["disabled / readonly", "attribute", "—", "버튼형 disabled, 입력형 readonly(+ .cal-btn disabled)"], [".calendar", "popover", "—", ".cal-head(.cal-nav · .cal-title) + .cal-grid[role=grid](.cal-week ×주 수 · .day 주 수×7, 28–42) + .cal-foot"], [".day.on · .start · .end · .in-range · .preview · .today · .muted", "state", "—", "선택 / 기간 양끝 / 사이 / 미리보기 / 오늘 / 다른 달"], ["ds:date", "event", "—", "확정 때만. {value} · 기간 {value:\"A ~ B\", start, end}"]],
+    spec: [["Size", "필드 32 · 40 · 48 · 달력 폭 296(두 달 590) · 날짜 셀 높이 34 · 연/월 셀 40"], ["Container", "달력 radius/lg 8 · shadow/2"], ["Label", "요일 12 SemiBold tertiary · 날짜 12 Regular · 필드 Body/2 14"], ["Placement", "필드 아래 4px. 아래 자리가 모자라고 위가 더 넓으면 필드 위 4px"]],
+    figma: { frame: "Date Picker", radius: "radius/lg", sizes: { sm: { h: 32 }, md: { h: 40 }, lg: { h: 48 }, calendar: { w: 296 }, day: { h: 34 }, cell: { h: 40 } }, variants: { single: {}, range: { band: "--surface-brand-subtle", endpoint: "--surface-brand-primary" }, month: {}, input: {}, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", ring: "--line-negative-focus" }, disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary" } }, states: ["closed", "focused", "open", "selected", "range", "preview", "error", "disabled", "read-only"] },
   },
 
 
@@ -496,7 +534,7 @@ const COMPONENTS = {
     examples: [
       { id: "default", title: "Default", desc: "닫힌 기본 상태입니다. 더 보기 버튼을 누르면 액션 목록이 열립니다.", html: `
         <div class="dropdown">
-          <button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button>
+          <button type="button" class="btn md outline assistive icon-only" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button>
           <ul class="menu" role="menu" style="left:auto;right:0">
             <li class="menu-item" role="menuitem">${I("pencil")}편집</li>
             <li class="menu-item" role="menuitem">${I("download")}내보내기</li>
@@ -504,7 +542,7 @@ const COMPONENTS = {
         </div>` },
       { id: "menu", title: "Action Menu", desc: "더 보기(⋯) 버튼에서 여는 액션 목록. 그룹 라벨·구분선·위험 액션.", html: `
         <div class="dropdown open">
-          <button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button>
+          <button type="button" class="btn md outline assistive icon-only" aria-label="더 보기" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button>
           <ul class="menu" role="menu" style="left:auto;right:0">
             <li class="menu-label">정책</li>
             <li class="menu-item" role="menuitem">${I("pencil")}편집</li>
@@ -515,7 +553,7 @@ const COMPONENTS = {
         </div>`, layout: "tall", style: "justify-content:flex-end;padding-right:120px" },
       { id: "states", title: "Item States", desc: "기본 · 선택(.on) · 위험(.danger) · 비활성(aria-disabled). 아이콘은 기본이 tertiary 이고, 나머지 상태에서는 글자색을 따릅니다.", html: `
         <div class="dropdown open">
-          <button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button>
+          <button type="button" class="btn md outline assistive icon-only" aria-label="더 보기" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button>
           <ul class="menu" role="menu" style="left:auto;right:0">
             <li class="menu-item" role="menuitem">${I("pencil")}편집</li>
             <li class="menu-item on" role="menuitem">${I("list")}목록으로 보기</li>
@@ -525,7 +563,7 @@ const COMPONENTS = {
           </ul>
         </div>`, layout: "tall", style: "justify-content:flex-end;padding-right:120px" },
       { id: "disabled", title: "Disabled", desc: "권한이 없어 열 수 없는 상태입니다.", html: `
-        <div class="dropdown"><button type="button" class="btn md secondary icon" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false" disabled>${I("dots")}</button></div>` },
+        <div class="dropdown"><button type="button" class="btn md outline assistive icon-only" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false" disabled>${I("dots")}</button></div>` },
     ],
     props: [[".dropdown", "container", "—", "position:relative. 열림은 .open. inline-block 이라 상자 높이가 놓인 곳의 글자 크기를 따른다(트리거 버튼 · 메뉴 항목 글자는 따로 정해져 있다)"], [".menu", "ul", "—", "role=menu. 우측 정렬은 left:auto;right:0"], [".menu-item", "li", "—", "role=menuitem. .danger 위험, aria-disabled 비활성, .hint 단축키. 아이콘은 기본이 tertiary 이고 .on · .danger · 비활성에서는 글자색을 따릅니다"], [".menu-sep / .menu-label", "li", "—", "구분선 / 그룹 라벨"]],
     spec: [["Size", "항목 높이 36 · 메뉴 최소 폭 200"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "항목 Body/2 14 · 선택 SemiBold brand · 그룹 라벨 12 SemiBold uppercase tertiary · 힌트 12 tertiary"], ["Placement", "테이블 행 액션·카드 헤더(우측 정렬 메뉴) · 아래 공간이 모자라면 위로 뒤집어 연다(.up)"]],
@@ -784,8 +822,8 @@ const COMPONENTS = {
           <a href="#" class="logo"><i></i>Security Console <small>v2.4</small></a>
           <nav aria-label="주 메뉴"><a href="#" class="on" aria-current="page">대시보드</a><a href="#">이벤트</a><a href="#">정책</a><a href="#">에이전트</a></nav>
           <div class="right">
-            <span class="with-count"><button type="button" class="btn sm tertiary icon" aria-label="알림 3건">${I("bell")}</button><span class="count">3</span></span>
-            <button type="button" class="btn sm tertiary icon" aria-label="설정">${I("settings")}</button>
+            <span class="with-count"><button type="button" class="btn sm assistive icon-only" aria-label="알림 3건">${I("bell")}</button><span class="count">3</span></span>
+            <button type="button" class="btn sm assistive icon-only" aria-label="설정">${I("settings")}</button>
             <span class="divider vertical" role="separator" aria-orientation="vertical"></span>
             <span class="avatar" title="정희 · 관리자">JH</span>
           </div>
@@ -795,7 +833,7 @@ const COMPONENTS = {
           <a href="#" class="logo"><i></i>Security Console</a>
           <div class="searchbar" role="search" style="margin-left:16px">${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="전역 검색"><kbd>/</kbd></div>
           <div class="right">
-            <span class="with-count"><button type="button" class="btn sm tertiary icon" aria-label="알림">${I("bell")}</button><span class="count dot" aria-hidden="true"></span></span>
+            <span class="with-count"><button type="button" class="btn sm assistive icon-only" aria-label="알림">${I("bell")}</button><span class="count dot" aria-hidden="true"></span></span>
             <span class="avatar">JH</span>
           </div>
         </header>` },
@@ -854,7 +892,7 @@ const COMPONENTS = {
         <div class="card" style="width:360px">
           <div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div>
           <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
-          <div class="card-foot"><button type="button" class="btn sm secondary">상세</button><button type="button" class="btn sm primary">갱신</button></div>
+          <div class="card-foot"><button type="button" class="btn sm outline assistive">상세</button><button type="button" class="btn sm solid primary">갱신</button></div>
         </div>` },
       { id: "header", title: "Header Actions", desc: "헤더 우측에 기간 선택(Select Button) 또는 더 보기 메뉴. 패널이 없으니 탭이 아니라 role=group + aria-pressed 를 씁니다.", html: `
         <div class="card" style="width:360px">
@@ -908,35 +946,35 @@ const COMPONENTS = {
   "popup": {
     status: "ready", react: ["Popup","PopupSurface","PopupTitle","PopupBody","PopupActions","PopupForm"], css: [".popup", ".popup-backdrop"], borrows: [".btn", ".field", ".checkbox"],
     desc: "사용자의 확인이나 짧은 입력이 필요할 때 화면 위에 띄우는 모달입니다. 되돌리기 어려운 동작 앞에 반드시 둡니다.",
-    thumb: `<div class="popup" style="width:220px;padding:14px;gap:6px"><h3 class="popup-title" style="font-size:12px">정책 삭제</h3><p class="popup-body" style="font-size:12px">되돌릴 수 없습니다.</p><div class="popup-actions" style="margin-top:4px"><button class="btn sm secondary" style="height:26px;font-size:12px">취소</button><button class="btn sm danger" style="height:26px;font-size:12px">삭제</button></div></div>`,
+    thumb: `<div class="popup" style="width:220px;padding:14px;gap:6px"><h3 class="popup-title" style="font-size:12px">정책 삭제</h3><p class="popup-body" style="font-size:12px">되돌릴 수 없습니다.</p><div class="popup-actions" style="margin-top:4px"><button class="btn sm outline assistive" style="height:26px;font-size:12px">취소</button><button class="btn sm solid negative" style="height:26px;font-size:12px">삭제</button></div></div>`,
     examples: [
       { id: "default", title: "Default", desc: "제목 · 본문 · 액션으로 이루어진 기본 구성입니다.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="d-title">
           <h3 class="popup-title" id="d-title">정책을 배포할까요?</h3>
           <p class="popup-body">변경 사항이 1,284대에 적용됩니다.</p>
-          <div class="popup-actions"><button type="button" class="btn md secondary" data-popup-close>취소</button><button type="button" class="btn md primary">배포</button></div>
+          <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid primary">배포</button></div>
         </div>
       ` },
       { id: "confirm", title: "Confirm", desc: "실제 화면에서는 .popup-backdrop 으로 감쌉니다(코드 참조). 예제는 팝업만 표시.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="c-title">
           <h3 class="popup-title" id="c-title">정책을 배포할까요?</h3>
           <p class="popup-body">변경 사항이 12개 그룹, 1,284대에 적용됩니다. 에이전트는 다음 체크인(최대 5분)에서 정책을 받습니다.</p>
-          <div class="popup-actions"><button type="button" class="btn md secondary" data-popup-close>취소</button><button type="button" class="btn md primary">배포</button></div>
+          <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid primary">배포</button></div>
         </div>`, react: `
         import { useState } from "react";
         export function DeployConfirm() {
           const [open, setOpen] = useState(false);
           return (
             <>
-              <button type="button" className="btn md primary" onClick={() => setOpen(true)}>배포</button>
+              <button type="button" className="btn md solid primary" onClick={() => setOpen(true)}>배포</button>
               {open && (
                 <div className="popup-backdrop" onClick={() => setOpen(false)}>
                   <div className="popup" role="dialog" aria-modal="true" aria-labelledby="c-title" onClick={e => e.stopPropagation()}>
                     <h3 className="popup-title" id="c-title">정책을 배포할까요?</h3>
                     <p className="popup-body">변경 사항이 12개 그룹, 1,284대에 적용됩니다.</p>
                     <div className="popup-actions">
-                      <button type="button" className="btn md secondary" onClick={() => setOpen(false)}>취소</button>
-                      <button type="button" className="btn md primary" onClick={() => setOpen(false)}>배포</button>
+                      <button type="button" className="btn md outline assistive" onClick={() => setOpen(false)}>취소</button>
+                      <button type="button" className="btn md solid primary" onClick={() => setOpen(false)}>배포</button>
                     </div>
                   </div>
                 </div>
@@ -944,12 +982,12 @@ const COMPONENTS = {
             </>
           );
         }` },
-      { id: "danger", title: "Danger Confirm", desc: "삭제·초기화. 제목은 danger 색, 주 액션은 Danger 버튼, 필요하면 확인 입력.", html: `
+      { id: "danger", title: "Danger Confirm", desc: "삭제·초기화. 제목은 danger 색, 주 액션은 Negative 버튼, 필요하면 확인 입력.", html: `
         <div class="popup danger" role="dialog" aria-modal="true" aria-labelledby="d-title">
           <h3 class="popup-title" id="d-title">정책 12개를 삭제할까요?</h3>
           <p class="popup-body">삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</p>
           <div class="field"><label for="confirm">확인을 위해 "삭제" 를 입력하세요</label><input id="confirm" placeholder="삭제"></div>
-          <div class="popup-actions"><button type="button" class="btn md secondary" data-popup-close>취소</button><button type="button" class="btn md danger" disabled>삭제</button></div>
+          <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid negative" disabled>삭제</button></div>
         </div>` },
       { id: "form", title: "Form", desc: "짧은 입력(필드 1~3개). 그 이상은 별도 페이지나 드로어.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="f-title">
@@ -959,7 +997,7 @@ const COMPONENTS = {
             <div class="field"><label for="reason">사유</label><input id="reason" placeholder="예: 사내 배포 도구"></div>
             ${cb("모든 그룹에 적용")}
           </div>
-          <div class="popup-actions"><button type="button" class="btn md secondary" data-popup-close>취소</button><button type="button" class="btn md primary">추가</button></div>
+          <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid primary">추가</button></div>
         </div>` },
     ],
     props: [[".popup-backdrop", "overlay", "—", "fixed, rgba(15,23,42,.65), 중앙 정렬"], [".popup", "dialog", "—", "role=dialog aria-modal aria-labelledby. 폭 440 (lg 640)"], [".popup-title / .popup-body / .popup-actions", "elements", "—", "제목 18 / 본문 14 / 액션 우측"], [".danger", "boolean", "false", "제목 danger 색"], [".popup-form", "container", "—", "필드 세로 16px 간격"]],
@@ -971,18 +1009,18 @@ const COMPONENTS = {
   "tooltip": {
     status: "ready", react: ["Tooltip"], css: [".tooltip", ".tooltip-wrap"], borrows: [".btn", ".indicator"],
     desc: "아이콘 버튼의 이름이나 짧은 보조 설명을 hover/focus 시 보여줍니다. 필수 정보를 툴팁에만 두지 않습니다.",
-    thumb: `<span class="tooltip-wrap show"><button class="btn sm secondary icon" aria-label="새로 고침">${I("refresh")}</button><span class="tooltip" role="tooltip">새로 고침</span></span>`,
+    thumb: `<span class="tooltip-wrap show"><button class="btn sm outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button><span class="tooltip" role="tooltip">새로 고침</span></span>`,
     examples: [
-      { id: "default", title: "Default", desc: "요소 위쪽에 뜨는 기본 위치입니다.", html: `<span class="tooltip-wrap show"><button type="button" class="btn md secondary">새로 고침</button><span class="tooltip" role="tooltip">목록을 다시 불러옵니다</span></span>` },
+      { id: "default", title: "Default", desc: "요소 위쪽에 뜨는 기본 위치입니다.", html: `<span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">새로 고침</button><span class="tooltip" role="tooltip">목록을 다시 불러옵니다</span></span>` },
       { id: "position", title: "Position", desc: "기본 위. .bottom / .left / .right. 예제는 .show 로 항상 표시.", html: `
-        <span class="tooltip-wrap show"><button type="button" class="btn md secondary">Top</button><span class="tooltip" role="tooltip">위 (기본)</span></span>
-        <span class="tooltip-wrap show"><button type="button" class="btn md secondary">Bottom</button><span class="tooltip bottom" role="tooltip">아래</span></span>
-        <span class="tooltip-wrap show"><button type="button" class="btn md secondary">Left</button><span class="tooltip left" role="tooltip">왼쪽</span></span>
-        <span class="tooltip-wrap show"><button type="button" class="btn md secondary">Right</button><span class="tooltip right" role="tooltip">오른쪽</span></span>`, style: "gap:104px;padding:64px 40px" },
+        <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Top</button><span class="tooltip" role="tooltip">위 (기본)</span></span>
+        <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Bottom</button><span class="tooltip bottom" role="tooltip">아래</span></span>
+        <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Left</button><span class="tooltip left" role="tooltip">왼쪽</span></span>
+        <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Right</button><span class="tooltip right" role="tooltip">오른쪽</span></span>`, style: "gap:104px;padding:64px 40px" },
       { id: "hover", title: "On Hover / Focus", desc: "실제 동작. 아이콘 버튼 위에 마우스를 올리거나 포커스하세요. aria-describedby 로 연결.", html: `
-        <span class="tooltip-wrap"><button type="button" class="btn md secondary icon" aria-label="새로 고침" aria-describedby="tt1">${I("refresh")}</button><span class="tooltip" role="tooltip" id="tt1">새로 고침</span></span>
-        <span class="tooltip-wrap"><button type="button" class="btn md secondary icon" aria-label="필터" aria-describedby="tt2">${I("filter")}</button><span class="tooltip" role="tooltip" id="tt2">필터</span></span>
-        <span class="tooltip-wrap"><button type="button" class="btn md danger secondary icon" aria-label="삭제" aria-describedby="tt3">${I("trash")}</button><span class="tooltip" role="tooltip" id="tt3">삭제</span></span>`, style: "padding-top:64px" },
+        <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침" aria-describedby="tt1">${I("refresh")}</button><span class="tooltip" role="tooltip" id="tt1">새로 고침</span></span>
+        <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="필터" aria-describedby="tt2">${I("filter")}</button><span class="tooltip" role="tooltip" id="tt2">필터</span></span>
+        <span class="tooltip-wrap"><button type="button" class="btn md outline negative icon-only" aria-label="삭제" aria-describedby="tt3">${I("trash")}</button><span class="tooltip" role="tooltip" id="tt3">삭제</span></span>`, style: "padding-top:64px" },
       { id: "multi", title: "Multiline", desc: "두 줄 이상은 .multi (폭 220). 그 이상 설명은 Popover/도움말 링크.", html: `
         <span class="tooltip-wrap show"><span class="indicator warn">검토 필요</span><span class="tooltip multi" role="tooltip">서명이 확인되지 않은 실행 파일입니다. 24시간 내 처리하지 않으면 자동 차단됩니다.</span></span>`, style: "padding-top:96px" },
     ],
@@ -1001,7 +1039,7 @@ const COMPONENTS = {
       { id: "notice", title: "Notice (Inline)", desc: "페이지에 고정. Info · Success · Warning · Danger. role=status(정보) 또는 alert(위험).", html: `
         <div class="notice info" role="status" style="max-width:600px"><span class="ico">${I("info-circle",20)}</span><div><b>정책이 아직 배포되지 않았습니다</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div><button type="button" class="close" aria-label="닫기">${I("x",14)}</button></div>
         <div class="notice success" role="status" style="max-width:600px"><span class="ico">${I("circle-check",20)}</span><div><b>배포 완료</b>1,284대 중 1,284대에 적용되었습니다.</div></div>
-        <div class="notice warning" role="status" style="max-width:600px"><span class="ico">${I("alert-triangle",20)}</span><div><b>라이선스가 3일 후 만료됩니다</b>만료 시 신규 이벤트 수집이 중단됩니다.<div class="actions"><button type="button" class="btn sm primary">갱신 요청</button></div></div></div>
+        <div class="notice warning" role="status" style="max-width:600px"><span class="ico">${I("alert-triangle",20)}</span><div><b>라이선스가 3일 후 만료됩니다</b>만료 시 신규 이벤트 수집이 중단됩니다.<div class="actions"><button type="button" class="btn sm solid primary">갱신 요청</button></div></div></div>
         <div class="notice danger" role="alert" style="max-width:600px"><span class="ico">${I("alert-circle",20)}</span><div><b>에이전트 37대 연결 끊김</b>10분 이상 체크인이 없습니다. 네트워크 상태를 확인하세요.</div></div>`, layout: "stack" },
       { id: "toast", title: "Toast", desc: "짧은 결과 알림. 우측 하단, 3~5초 후 자동 소멸, 실행 취소 액션 가능. aria-live=polite.", html: `
         <div class="toast-stack" aria-live="polite">
@@ -1009,7 +1047,7 @@ const COMPONENTS = {
           <div class="toast danger"><span class="ico">${I("alert-circle",20)}</span>내보내기에 실패했습니다<button type="button" class="action">다시 시도</button></div>
         </div>` },
       { id: "banner", title: "Banner", desc: "시스템 전체 공지(점검·라이선스). 헤더 위 전체 폭, 닫기 가능.", html: `
-        <div class="banner" role="status">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다. 점검 중 콘솔 접속이 제한됩니다.<button type="button" class="btn sm secondary">자세히</button></div>`, layout: "stack", style: "padding:24px 0;gap:8px" },
+        <div class="banner" role="status">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다. 점검 중 콘솔 접속이 제한됩니다.<button type="button" class="btn sm outline assistive">자세히</button></div>`, layout: "stack", style: "padding:24px 0;gap:8px" },
     ],
     props: [[".notice", "div", "—", "role=status | alert. .ico + div(b 제목 + 본문 + .actions) + .close"], ["tone", "info | success | warning | danger", "neutral", "톤별 subtle 배경 + 30% 보더"], [".toast", "div", "—", "폭 360, 어두운 배경. .action 하나"], [".toast-stack", "container", "—", "aria-live=polite, 우측 하단 고정"], [".banner", "div", "—", "전체 폭. accent / .warning / .danger"]],
     spec: [["Size", "Notice 최소 높이 56 · Toast 폭 360 · Banner 높이 44"], ["Container", "Notice radius/lg 8 · tone subtle + 30% 보더 · Toast surface/neutral/inverse"], ["Label", "제목 14 Bold · 본문 Body/2 14"], ["Placement", "Notice 는 페이지 헤더 아래, Toast 우측 하단, Banner 헤더 위"]],
@@ -1065,8 +1103,8 @@ const COMPONENTS = {
         <span class="count">99+</span>
         <span class="count accent">12</span>
         <span class="count neutral">128</span>
-        <span class="with-count"><button type="button" class="btn md secondary icon" aria-label="알림 5건">${I("bell")}</button><span class="count">5</span></span>
-        <span class="with-count"><button type="button" class="btn md secondary icon" aria-label="새 알림">${I("bell")}</button><span class="count dot" aria-hidden="true"></span></span>` },
+        <span class="with-count"><button type="button" class="btn md outline assistive icon-only" aria-label="알림 5건">${I("bell")}</button><span class="count">5</span></span>
+        <span class="with-count"><button type="button" class="btn md outline assistive icon-only" aria-label="새 알림">${I("bell")}</button><span class="count dot" aria-hidden="true"></span></span>` },
       { id: "steps", title: "Steps", desc: "온보딩·마법사 진행 단계. 완료 .done, 현재 .on.", html: `
         <ol class="steps">
           <li class="done"><i>${I("check",12)}</i>기본 정보<span class="sr-only"> (완료)</span></li>
@@ -1108,12 +1146,12 @@ const COMPONENTS = {
         <div style="width:100%;max-width:480px"><div class="divider label" role="separator">또는</div><div class="divider label" role="separator">2026-09-07</div></div>` },
       { id: "vertical", title: "Vertical", desc: "툴바에서 버튼 그룹을 나눕니다. 높이 24.", html: `
         <div style="display:flex;align-items:center">
-          <button type="button" class="btn sm tertiary">편집</button>
-          <button type="button" class="btn sm tertiary">복제</button>
+          <button type="button" class="btn sm solid assistive">편집</button>
+          <button type="button" class="btn sm solid assistive">복제</button>
           <span class="divider vertical" role="separator" aria-orientation="vertical"></span>
-          <button type="button" class="btn sm tertiary">내보내기</button>
+          <button type="button" class="btn sm solid assistive">내보내기</button>
           <span class="divider vertical" role="separator" aria-orientation="vertical"></span>
-          <button type="button" class="btn sm danger secondary">삭제</button>
+          <button type="button" class="btn sm outline negative">삭제</button>
         </div>` },
     ],
     props: [[".divider", "hr | div", "—", "가로 1px line/neutral/secondary, margin 16 0"], [".strong / .dashed", "boolean", "false", "line/neutral/primary / 점선"], [".label", "div", "—", "가운데 라벨 텍스트"], [".vertical", "span", "—", "세로 1×24, 좌우 12"]],
@@ -1141,7 +1179,7 @@ const COMPONENTS = {
         </div>` },
       { id: "selectable", title: "Selectable + Action Bar", desc: "체크박스 열(.check) + 선택 시 상단 액션 바. 선택 행은 .on.", html: `
         <div class="tbl-wrap">
-          <div class="action-bar"><b>2개 선택</b><span class="spacer"></span><button type="button" class="btn sm secondary">허용 처리</button><button type="button" class="btn sm secondary">${I("download")}내보내기</button><button type="button" class="btn sm danger secondary">삭제</button></div>
+          <div class="action-bar"><b>2개 선택</b><span class="spacer"></span><button type="button" class="btn sm outline assistive">허용 처리</button><button type="button" class="btn sm outline assistive">${I("download")}내보내기</button><button type="button" class="btn sm outline negative">삭제</button></div>
           <table class="tbl">
             <thead><tr><th class="check"><label class="checkbox"><input type="checkbox" class="mixed" aria-label="전체 선택"></label></th><th>정책</th><th>적용 그룹</th><th class="num">대상</th><th>수정</th><th>사용</th></tr></thead>
             <tbody>
@@ -1249,8 +1287,8 @@ const COMPONENTS = {
         </ul>` },
       { id: "media", title: "With Avatar / Actions", desc: "선행 아이콘·아바타와 후행 액션 버튼.", html: `
         <ul class="list" style="max-width:560px">
-          <li><span class="avatar">김</span><div><span class="primary">김민준</span><span class="meta">보안팀 · 관리자</span></div><span class="end"><button type="button" class="btn sm tertiary icon" aria-label="편집">${I("pencil")}</button><button type="button" class="btn sm tertiary icon" aria-label="더 보기">${I("dots")}</button></span></li>
-          <li><span class="avatar">이</span><div><span class="primary">이서연</span><span class="meta">인프라팀 · 운영자</span></div><span class="end"><button type="button" class="btn sm tertiary icon" aria-label="편집">${I("pencil")}</button><button type="button" class="btn sm tertiary icon" aria-label="더 보기">${I("dots")}</button></span></li>
+          <li><span class="avatar">김</span><div><span class="primary">김민준</span><span class="meta">보안팀 · 관리자</span></div><span class="end"><button type="button" class="btn sm assistive icon-only" aria-label="편집">${I("pencil")}</button><button type="button" class="btn sm assistive icon-only" aria-label="더 보기">${I("dots")}</button></span></li>
+          <li><span class="avatar">이</span><div><span class="primary">이서연</span><span class="meta">인프라팀 · 운영자</span></div><span class="end"><button type="button" class="btn sm assistive icon-only" aria-label="편집">${I("pencil")}</button><button type="button" class="btn sm assistive icon-only" aria-label="더 보기">${I("dots")}</button></span></li>
         </ul>` },
       { id: "select", title: "Selectable / Dense", desc: "행 클릭 선택(.hover + .on). 밀도 높은 목록은 .dense.", html: `
         <ul class="list hover dense" style="max-width:480px" role="listbox">
