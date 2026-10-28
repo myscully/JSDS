@@ -63,16 +63,34 @@ export function isLightAccent(hex: string): boolean {
   return ratio(hex, "#FFFFFF") < BRAND_LABEL_MIN;
 }
 
+/** 상태색 네 가족의 색상각 — 사이트 app.src.js 의 STATUS_HUES 와 같은 값이다.
+ *  램프에서 실측했다: negative #FF4242 = 0 · cautionary #FF9200 = 34 · positive #00BF40 = 140 · accent cyan #00BDDE = 189 */
+export const STATUS_HUES = [0, 34, 140, 189] as const;
+/** 제품 메인 컬러가 상태색과 헷갈리는가 — 색상환에서 15도 미만이면 참.
+ *  채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다(사이트 clashesWithStatus 와 같은 규칙) */
+export function clashesWithStatus(hex: string): boolean {
+  const [h, sat] = hexToHsl(hex);
+  if (sat < 20) return false;
+  return STATUS_HUES.some((t) => { const d = Math.abs(h - t) % 360; return Math.min(d, 360 - d) < 15; });
+}
+
 /** :root 에 제품 램프를 --prod-* 로 주입. 앱 시작 시 한 번 호출.
  *  --brand-* 가 아니라 --prod-* 인 이유: --prod-* 는 '제품이 넣는 입력'이고 --brand-* 는 '테마가 해석한 결과'다.
  *  :root 가 var(--prod-N, var(--blue-N)) 으로 받아, 라이트는 50·45·40 · 다크는 50·55·60 을 집는다.
- *  참조 시스템에는 면 위 글자 역할이 없어 라벨이 늘 흰색이다 — 그래서 제품 색에 제약이 걸린다(isLightAccent). */
+ *  참조 시스템에는 면 위 글자 역할이 없어 라벨이 늘 흰색이다 — 그래서 제품 색에 제약이 걸린다(isLightAccent).
+ *  제품 색이 상태색과 겹치면(clashesWithStatus) --prod-* 를 넣지 않고 data-accent-neutral 만 켠다 —
+ *  style.css 가 brand 다섯 단계를 중립으로 갈아끼운다. 사이트 Accent 미리보기와 같은 동작이다.
+ *  돌려주는 스케일은 겹침 여부와 관계없이 제품 색에서 만든 값이다. */
 export function applyAccent(hex: string, root: HTMLElement = document.documentElement): AccentScale {
   const sc = accentScale(hex);
-  for (const [k, v] of Object.entries(sc)) root.style.setProperty(`--prod-${k}`, v);
+  const neutral = clashesWithStatus(hex);
+  for (const k of Object.keys(sc)) root.style.removeProperty(`--prod-${k}`);
+  if (!neutral) for (const [k, v] of Object.entries(sc)) root.style.setProperty(`--prod-${k}`, v);
   root.dataset.accent = hex.toUpperCase();
-  /* 밝은 제품에 맞춰 뒤집던 규칙(data-accent-light)을 걷어냈다 — 이제는 제약이고, 못 넘으면 알린다 */
-  if (isLightAccent(hex))
+  if (neutral) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral;
+  /* 밝은 제품에 맞춰 뒤집던 규칙(data-accent-light)을 걷어냈다 — 이제는 제약이고, 못 넘으면 알린다.
+     중립으로 내린 경우는 제품 색이 면에 쓰이지 않으므로 알리지 않는다 */
+  if (!neutral && isLightAccent(hex))
     console.warn(`[ds] 제품 색 ${hex} 위에서 흰 글자가 ${ratio(hex, "#FFFFFF").toFixed(2)} 로 ${BRAND_LABEL_MIN} 에 못 미칩니다 — 어두운 변형을 쓰세요`);
   return sc;
 }
