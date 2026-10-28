@@ -78,19 +78,19 @@ const COMPONENTS = {
           <button type="button" class="btn md danger secondary" disabled>Danger outline</button>
           <button type="button" class="btn md text" disabled>Text</button>
         </div>` , layout: "stack" },
-      { id: "group", title: "Group / Block", desc: "버튼 묶음은 .btn-group(12px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .block.", html: `
+      { id: "group", title: "Group / Full width", desc: "버튼 묶음은 .btn-group(12px 간격), 저장이 가장 오른쪽. 폼 하단에서는 .end 로 오른쪽 정렬. 전체 폭은 .full-width.", html: `
         <div class="btn-group">
           <button type="button" class="btn md text">초기화</button>
           <button type="button" class="btn md secondary">취소</button>
           <button type="button" class="btn md primary">정책 저장</button>
         </div>
-        <button type="button" class="btn lg primary block" style="max-width:320px">시작하기</button>`, layout: "stack center" },
+        <button type="button" class="btn lg primary full-width" style="max-width:320px">시작하기</button>`, layout: "stack center" },
     ],
     props: [
       ["variant", "primary | secondary | tertiary | text | danger | danger secondary", "—", "우선순위. <code>danger secondary</code> 는 danger 아웃라인(React 는 <code>danger-secondary</code>). fill 은 primary · tertiary · danger, outline 은 secondary · danger secondary"],
       ["size", "sm | md | lg", "md", "높이 36 / 44 / 52"],
       [".icon", "boolean", "false", "아이콘 전용 정사각 버튼. aria-label 필수"],
-      [".block", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
+      [".full-width", "boolean", "false", "전체 폭"], [".btn svg", "element", "—", "아이콘은 라벨 앞뒤 어느 한쪽에 하나만(React <code>leading</code> / <code>trailing</code>). 크기는 sm 16 · md 18 · lg 20"], ["a.btn", "element", "—", "링크를 버튼 모양으로 쓸 때(React <code>as</code>). 이동이면 <code>a</code>, 실행이면 <code>button</code>. 링크는 <code>disabled</code> 속성을 가질 수 없어 비활성은 <code>aria-disabled=\"true\"</code> 로 — React <code>disabled</code> 가 그 속성과 클릭 차단을 함께 처리합니다"],
       [".loading", "boolean", "false", "스피너만 보이고 라벨은 자리만 지킵니다(폭이 흔들리지 않게). <code>aria-busy=\"true\"</code> 를 함께 두고, 마우스·키보드 클릭은 모두 막힙니다"], [".btn-group", "container", "—", "버튼 묶음(12px 간격). 폼 하단 우측 정렬은 <code>.end</code>"],
       ["disabled", "attribute", "—", "비활성. 전용 토큰 — fill 은 <code>--surface-disable-primary</code> 면 + <code>--foreground-disable-primary</code> 라벨, outline 은 면을 비우고 보더만 회색. 투명도를 덮지 않아 변형마다 다른 색이 남지 않습니다"],
       ["type", "button | submit | reset", "button", "폼 안에서는 명시"],
@@ -146,10 +146,10 @@ const COMPONENTS = {
         <div class="searchbar" role="search">${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="검색"><kbd>/</kbd></div>
         <div class="searchbar" role="search">${I("search")}<input type="search" value="랜섬웨어" aria-label="검색"><button type="button" class="clear" aria-label="지우기">${I("x",12)}</button></div>` },
       { id: "large", title: "Large / Block", desc: "빈 화면·온보딩처럼 검색이 화면의 주된 행동일 때 lg + block.", html: `
-        <div class="searchbar lg block" role="search" style="max-width:560px">${I("search")}<input type="search" placeholder="어떤 정책을 찾으시나요?" aria-label="검색"></div>` },
+        <div class="searchbar lg full-width" role="search" style="max-width:560px">${I("search")}<input type="search" placeholder="어떤 정책을 찾으시나요?" aria-label="검색"></div>` },
       { id: "filters", title: "With Filters", desc: "검색 + 필터 칩 조합. 선택된 칩(.on)은 결과 수와 함께 보여줍니다.", html: `
         <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:720px">
-          <div class="searchbar block" role="search">${I("search")}<input type="search" placeholder="로그 검색" aria-label="로그 검색"></div>
+          <div class="searchbar full-width" role="search">${I("search")}<input type="search" placeholder="로그 검색" aria-label="로그 검색"></div>
           <div class="chip-group">
             <button type="button" class="chip on" aria-pressed="true">Critical</button>
             <button type="button" class="chip on" aria-pressed="true">High</button>
@@ -194,7 +194,7 @@ const COMPONENTS = {
           );
         }` },
       { id: "outline", title: "Outline", desc: "툴바에서 다른 버튼과 나란히 둘 때 아웃라인형.", html: `
-        <div class="select-btn outline" role="group" aria-label="보기">
+        <div class="select-btn outlined" role="group" aria-label="보기">
           <button type="button" class="on" aria-pressed="true">${I("list")}목록</button>
           <button type="button" aria-pressed="false">${I("chart-bar")}차트</button>
         </div>` },
@@ -205,7 +205,7 @@ const COMPONENTS = {
           <button type="button" aria-pressed="false" disabled>허용</button>
         </div>` },
     ],
-    props: [[".select-btn", "container", "—", "role=group. 버튼 2~5개"], [".outline", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-pressed=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
+    props: [[".select-btn", "container", "—", "role=group. 버튼 2~5개"], [".outlined", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-pressed=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
     spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 36"], ["Container", "radius/md 6 · surface/neutral/strong"], ["Label", "Label/1 14 · 선택 14 SemiBold"], ["Placement", "카드 헤더 우측, 툴바"]],
     figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--surface-neutral-secondary" }, outline: { stroke: "--line-neutral-primary" } }, states: ["default", "selected", "disabled"] },
   },
@@ -472,8 +472,8 @@ const COMPONENTS = {
         <span class="tag">보관</span>
         <span class="tag accent">신규</span>` },
       { id: "style", title: "Style", desc: "Outline · Solid(강조) · Plain(점 없음).", html: `
-        <span class="tag critical outline">Critical</span>
-        <span class="tag medium outline">Medium</span>
+        <span class="tag critical outlined">Critical</span>
+        <span class="tag medium outlined">Medium</span>
         <span class="tag critical solid">Critical</span>
         <span class="tag ok solid">정상</span>
         <span class="tag plain">v2.4.1</span>
@@ -483,7 +483,7 @@ const COMPONENTS = {
         <span class="tag high">High</span>
         <span class="tag high lg">High</span>` },
     ],
-    props: [["tone", "critical | high | medium | low | ok | accent | (neutral)", "neutral", "의미별 색. 바탕은 틴트(<code>--surface-{negative|cautionary|…}-primary</code>)이고 <b>라벨은 중립 글자색</b>입니다 — 색은 점(<code>::before</code>)과 테두리가 나릅니다. <code>.solid</code> 는 한 단계 강한 틴트 + 테두리입니다(참조 시스템에 솔리드 상태 면이 없습니다). 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
+    props: [["tone", "critical | high | medium | low | ok | accent | (neutral)", "neutral", "의미별 색. 바탕은 틴트(<code>--surface-{negative|cautionary|…}-primary</code>)이고 <b>라벨은 중립 글자색</b>입니다 — 색은 점(<code>::before</code>)과 테두리가 나릅니다. <code>.solid</code> 는 한 단계 강한 틴트 + 테두리입니다(참조 시스템에 솔리드 상태 면이 없습니다). 라벨 색을 직접 지정하지 마세요"], ["style", ".outlined | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
     spec: [["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--surface-{…}-primary</code> 틴트, <code>.solid</code> 는 같은 틴트 + <code>--line-{…}</code> 테두리(Critical 만 <code>--surface-negative-strong</code>)"], ["Label", "12 SemiBold (세 사이즈 공통)"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
     figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--surface-negative-primary", fg: "--foreground-negative-primary", solidBg: "--surface-negative-strong", solidFg: "--foreground-neutral-primary" }, high: { bg: "--surface-cautionary-primary", fg: "--foreground-cautionary-primary", solidBg: "--surface-cautionary-primary", solidFg: "--foreground-neutral-primary" }, medium: { bg: "--surface-accent-cyan", fg: "--foreground-accent-cyan", solidBg: "--surface-accent-cyan", solidFg: "--foreground-neutral-primary" }, low: { bg: "--surface-neutral-strong", fg: "--foreground-neutral-tertiary", solidBg: "--surface-neutral-strong", solidFg: "--foreground-neutral-primary" }, ok: { bg: "--surface-positive-primary", fg: "--foreground-positive-primary", solidBg: "--surface-positive-primary", solidFg: "--foreground-neutral-primary" }, accent: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary", solidBg: "--surface-brand-primary", solidFg: "--brand-label" }, neutral: { bg: "--surface-neutral-strong", fg: "--foreground-neutral-secondary" } }, states: ["subtle", "outline", "solid"] },
   },
@@ -722,7 +722,7 @@ const COMPONENTS = {
         <nav class="pagination compact" aria-label="페이지">
           <button type="button" aria-label="이전">${I("chevron-left",16)}</button><button type="button">7</button><button type="button" class="on" aria-current="page">8</button><button type="button">9</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button>
         </nav>
-        <nav class="pagination outline" aria-label="페이지">
+        <nav class="pagination outlined" aria-label="페이지">
           <button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button>
         </nav>` },
       { id: "bar", title: "Pagination Bar", desc: "테이블 하단. 총 건수 · 페이지 크기 · 페이지 이동.", html: `
@@ -734,7 +734,7 @@ const COMPONENTS = {
           </div>
         </div>` },
     ],
-    props: [[".pagination", "nav", "—", "aria-label=페이지. 버튼 36 (compact 32)"], ["button.on", "current", "—", "현재 페이지 + aria-current=page"], [".gap", "span", "—", "생략(…). 글자 크기는 놓인 곳을 따른다 — 단독이면 앱 기본 글자, .pagination-bar 안이면 12(번호 버튼은 14 · compact 12 로 정해져 있다)"], [".compact / .outline", "boolean", "false", "작은 크기 / 보더형"], [".pagination-bar", "container", "—", "총 건수 + 페이지 크기 + 페이지네이션"]],
+    props: [[".pagination", "nav", "—", "aria-label=페이지. 버튼 36 (compact 32)"], ["button.on", "current", "—", "현재 페이지 + aria-current=page"], [".gap", "span", "—", "생략(…). 글자 크기는 놓인 곳을 따른다 — 단독이면 앱 기본 글자, .pagination-bar 안이면 12(번호 버튼은 14 · compact 12 로 정해져 있다)"], [".compact / .outlined", "boolean", "false", "작은 크기 / 보더형"], [".pagination-bar", "container", "—", "총 건수 + 페이지 크기 + 페이지네이션"]],
     spec: [["Size", "버튼 36 (compact 32) · 간격 4"], ["Container", "radius/md · 현재 brand"], ["Label", "Body/2 14 · 현재 Semibold"], ["Placement", "테이블 하단 우측, 총 건수는 좌측"]],
     figma: { frame: "Pagination", radius: "radius/md", sizes: { md: { h: 36 }, compact: { h: 32 } }, variants: { default: {}, outline: { stroke: "--line-neutral-secondary" } }, states: ["default", "current", "hover", "disabled"] },
   },
