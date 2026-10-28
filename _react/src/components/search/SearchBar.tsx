@@ -50,7 +50,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
     if (e.key === "Escape" && clearable) set("");
   };
   return (
-    <div className={cx("searchbar", size === "lg" && "lg", { block }, wrapperClassName)} role="search" style={wrapperStyle}>
+    <div className={cx("searchbar", size === "lg" && "lg", { "full-width": block }, wrapperClassName)} role="search" style={wrapperStyle}>
       <Icon name="search" />
       <input ref={mergeRefs(inner, ref)} type="search" value={cur} onChange={(e) => set(e.target.value)} onKeyDown={keyDown} aria-label={label} {...rest} />
       {shortcut && !cur && <kbd>{shortcut}</kbd>}

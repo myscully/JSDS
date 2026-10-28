@@ -18,7 +18,7 @@ export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag({ tone, va
   return (
     <span
       ref={ref}
-      className={cx("tag", tone, variant !== "subtle" && variant, size !== "md" && size, className)}
+      className={cx("tag", tone, variant !== "subtle" && (variant === "outline" ? "outlined" : variant), size !== "md" && size, className)}
       {...rest}
     />
   );

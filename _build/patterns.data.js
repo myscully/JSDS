@@ -198,7 +198,7 @@ const PATTERNS = {
   },
 
   "system-status": {
-    status: "ready", react: ["StatusList","StatusItem"], uses: ["indicator", "card", "tag", "notification", "loading", "button"], css: [".status-list", ".status-item", ".stack"], borrows: [".row-2"],
+    status: "ready", react: ["StatusList","StatusItem"], uses: ["indicator", "card", "tag", "notification", "loading", "button"], css: [".status-list", ".status-item", ".stack"], borrows: [".layout-row-2"],
     desc: "에이전트·서버·연동 서비스의 상태를 한눈에 보여줍니다. 정상은 조용하게, 이상은 눈에 띄게.",
     thumb: `<div class="status-list" style="grid-template-columns:1fr;width:200px;gap:6px"><div class="status-item" style="padding:8px 10px;font-size:12px"><span class="indicator ok">수집 서버</span><span class="meta">99.9%</span></div><div class="status-item" style="padding:8px 10px;font-size:12px"><span class="indicator danger">SIEM</span><span class="meta">끊김</span></div></div>`,
     examples: [
@@ -215,7 +215,7 @@ const PATTERNS = {
           </div>
         </div>`, layout: "stack" },
       { id: "agents", title: "에이전트 상태 요약", desc: "연결 상태 비율 + 진행 중 작업.", html: `
-        <div class="row-2" style="max-width:800px">
+        <div class="layout-row-2" style="max-width:800px">
           <div class="card"><div class="card-head"><h3 class="title">에이전트 연결</h3><span class="tag ok">정상</span></div><div class="progress-row"><div class="row"><span>온라인</span><span>1,247 / 1,284</span></div><div class="progress success" role="progressbar" aria-valuenow="97"><i style="width:97%"></i></div></div><p class="desc">오프라인 37대 · 10분 이상 미체크인 12대</p></div>
           <div class="card"><div class="card-head"><h3 class="title">진행 중 작업</h3><span class="spinner sm" role="status" aria-label="진행 중"></span></div><div class="progress-row"><div class="row"><span>정책 rev 2041 배포</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66"><i style="width:66%"></i></div></div><p class="desc">842 / 1,284대 완료 · 예상 3분</p></div>
         </div>` },
@@ -224,7 +224,7 @@ const PATTERNS = {
 
   /* ------------------------------------------------ Security Console */
   "dashboard": {
-    status: "ready", react: ["PageHead","Stack","Row3"], uses: ["data-visual", "card", "tag", "data-table", "select-button", "button"], css: [".page-head", ".stack", ".row-2", ".row-3"],
+    status: "ready", react: ["PageHead","Stack","Row3"], uses: ["data-visual", "card", "tag", "data-table", "select-button", "button"], css: [".page-head", ".stack", ".layout-row-2", ".layout-row-3"],
     desc: "보안 관리자의 첫 화면. 상단 KPI 4개, 아래 추이·분포 차트, 최근 이벤트 표. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
     thumb: `<div class="kpi-grid" style="width:240px;gap:6px"><div class="kpi critical" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">Critical</span><span class="value" style="font-size:18px">1,284</span></div><div class="kpi" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">차단률</span><span class="value" style="font-size:18px">99.2%</span></div></div>`,
     principles: [["위계", "KPI(무슨 일) → 차트(어디서·얼마나) → 표(무엇을 할지)"], ["기간", "화면 우상단 Select Button 하나로 전체 기간을 바꿈"], ["밀도", "카드 gap 20, 카드 내부 24. 스크롤 없이 첫 화면에 KPI+차트"]],
@@ -238,7 +238,7 @@ const PATTERNS = {
             <div class="kpi"><span class="label">연결 에이전트</span><span class="value">1,247<small>/ 1,284</small></span><span class="delta">37대 오프라인</span></div>
             <div class="kpi"><span class="label">미처리 검토</span><span class="value">5</span><span class="delta">24시간 내 처리</span></div>
           </div>
-          <div class="row-3">
+          <div class="layout-row-3">
             <div class="chart-card"><h3 class="chart-title">유형별 탐지</h3><div class="chart">
               <div class="row"><span class="lbl">랜섬웨어</span><div class="bar critical"><i style="width:82%"></i></div><span class="num">412</span></div>
               <div class="row"><span class="lbl">악성코드</span><div class="bar high"><i style="width:61%"></i></div><span class="num">306</span></div>
@@ -271,7 +271,7 @@ const PATTERNS = {
             <div class="searchbar" role="search" style="min-width:360px">${I("search")}<input type="search" placeholder='메시지 검색 · host:"PC-2041" level:crit' aria-label="로그 검색"></div>
             <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">INFO</button></div>
             <span class="spacer"></span>
-            <div class="select-btn outline" role="group" aria-label="갱신"><button type="button" class="on" aria-pressed="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" aria-pressed="false">일시정지</button></div>
+            <div class="select-btn outlined" role="group" aria-label="갱신"><button type="button" class="on" aria-pressed="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" aria-pressed="false">일시정지</button></div>
             <button type="button" class="btn md secondary">${I("download")}CSV</button>
           </div>
           ${logTable(LOG_ROWS)}
