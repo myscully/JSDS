@@ -83,7 +83,9 @@
     markFaintSwatches();
   }
   if (accentPop) {
-    accentPop.innerHTML = '<button type="button" role="menuitemradio" aria-checked="false" data-accent=""><i style="background:var(--surface-brand-primary)"></i>기본 (토큰 값)</button>'
+    /* "기본" 견본은 다른 제품 견본처럼 고정 hex(--blue-50) — 토큰(--surface-brand-primary)은 지금 적용된 제품 색 · 다크 값을 따라가
+       '기본' 이 다른 색으로 보였다(사람의 결정 2026-10-28) */
+    accentPop.innerHTML = '<button type="button" role="menuitemradio" aria-checked="false" data-accent=""><i style="background:#0066FF"></i>기본 (토큰 값)</button>'
       + products.map(p => '<button type="button" role="menuitemradio" aria-checked="false" data-accent="' + p.key + '"><i style="background:' + p.hex + '"></i>' + p.name + "</button>").join("");
     /* stopPropagation 금지 — 바깥 클릭 닫기가 이 이벤트에 얹혀 있다 */
     accentPop.addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if (b) { applyAccent(b.dataset.accent); closePop(accentBtn, accentPop); accentBtn.focus(); } });
