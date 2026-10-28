@@ -1,0 +1,55 @@
+# 게이트(_build/gates.mjs)를 PR 과 main 푸시마다 돌린다.
+# 로컬 pre-commit 훅은 훅을 건 클론에서만 돌기 때문에, 누가 올리든 같은 검사를 받게 여기로 옮겼다.
+# 기준값은 CLAUDE.md 의 '게이트' 절 — gates.mjs 는 실제 실패(verify · contrast · behave · react)가 있을 때만 exit 1 이다.
+name: gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            _build/package-lock.json
+            _react/package-lock.json
+
+      - name: install (_build)
+        working-directory: _build
+        run: npm ci
+
+      - name: install chromium (playwright)
+        working-directory: _build
+        run: npx playwright install --with-deps chromium
+
+      - name: install (_react)
+        working-directory: _react
+        run: npm ci
+
+      - name: gates
+        run: node _build/gates.mjs
+
+      - name: behave screenshots (실패 시)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: behave-screenshots
+          path: _build/.behave/
+          if-no-files-found: ignore
