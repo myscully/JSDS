@@ -489,10 +489,15 @@
   }
 
   /* ---------- Popup ---------- */
-  /** DS.popup.open("#id") / DS.popup.close(): .popup 요소를 배경과 함께 표시 */
+  /** DS.popup.open("#id") / DS.popup.close(): .popup 요소를 배경과 함께 표시.
+      열려 있는 동안 Tab · Shift+Tab 은 팝업 안에서 돌고, 닫으면 연 요소로 포커스가 돌아간다 — React Popup(useFocusTrap)과 같다.
+      종전에는 가둠이 없어 aria-modal 팝업에서 Tab 으로 뒤 페이지에 나갔다(2026-10-28, 사람의 결정) */
+  var FOCUSABLE = 'button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  var focusablesIn = function (root) { return $$(FOCUSABLE, root).filter(function (x) { return x.getClientRects().length > 0; }); };
   var popup = {
     open: function (sel) {
       var el = typeof sel === "string" ? $(sel) : sel; if (!el) return;
+      popup._prev = doc.activeElement;
       var bd = doc.createElement("div"); bd.className = "popup-backdrop"; bd.dataset.dsPopup = "1";
       el.dataset.dsHome = "1"; var ph = doc.createComment("popup"); el.parentNode.insertBefore(ph, el); el._dsPlaceholder = ph;
       bd.appendChild(el); doc.body.appendChild(bd); doc.body.style.overflow = "hidden";
@@ -502,6 +507,7 @@
       var bd = $(".popup-backdrop[data-ds-popup]"); if (!bd) return;
       var el = $(".popup", bd); if (el && el._dsPlaceholder) { el._dsPlaceholder.parentNode.replaceChild(el, el._dsPlaceholder); delete el._dsPlaceholder; }
       bd.remove(); doc.body.style.overflow = "";
+      var prev = popup._prev; popup._prev = null; if (prev && prev.focus && doc.contains(prev)) prev.focus();
     },
   };
 
@@ -614,6 +620,11 @@
       if (e.key === "ArrowDown" && e.altKey) { e.preventDefault(); var cb = $(".cal-btn", dh); if (!dh.classList.contains("open") && cb && !cb.disabled) openDP(dh, cb); return; } }
     if (e.key === "Escape") { var dpo = closest(e.target, ".datepicker.open"); if (dpo) { closeDP(dpo, true); return; }   // 포커스가 든 피커 하나만
       $$(".dropdown.open[data-ds-opened]").forEach(function (d) { setOpen(d, false); var tr = $("[aria-haspopup]", d); tr && tr.focus(); }); if ($(".popup-backdrop[data-ds-popup]")) popup.close(); return; }
+    var pbd = e.key === "Tab" && $(".popup-backdrop[data-ds-popup]"), pel = pbd && $(".popup", pbd);
+    if (pel) { var fl = focusablesIn(pel), cur = doc.activeElement;
+      if (!fl.length) { e.preventDefault(); return; }
+      if (e.shiftKey && (cur === fl[0] || !pel.contains(cur))) { e.preventDefault(); fl[fl.length - 1].focus(); return; }
+      if (!e.shiftKey && (cur === fl[fl.length - 1] || !pel.contains(cur))) { e.preventDefault(); fl[0].focus(); return; } }
     if (dd && ["ArrowDown", "ArrowUp", "Home", "End", "Enter", " "].indexOf(e.key) >= 0) {
       var items = itemsOf(dd), i = items.indexOf(doc.activeElement); if (!items.length) return;
       var n = e.key === "ArrowDown" ? (i + 1) % items.length : e.key === "ArrowUp" ? (i - 1 + items.length) % items.length : e.key === "Home" ? 0 : e.key === "End" ? items.length - 1 : -1;

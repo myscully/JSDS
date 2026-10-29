@@ -9,6 +9,7 @@
  *   타입   assets/style.css 의 .t-* 클래스
  *   컴포넌트 _build/style.src.css 의 .card · .card-foot · .tabs … 규칙 (표면 그림자·보더, 간격, 트랙)
  *   Button  .btn:where(형태.색) · :hover · :active · 비활성 규칙 — 변형 표(Variant × Color × Size × State × Icon Only × Loading)와 칠(2026-10-28 k16, buttonExpect)
+ *           Loading 변형 — .btn.loading(라벨 투명 · 자리 유지) · ::after 스피너(16 · 가운데 · 윗변 색 규칙 넷)(2026-10-28 k17)
  *   컨테이너 _build/components.data.js 의 예제 HTML(순서 · 라벨 · 아이콘), 내비 기하는 빌드된 components/navigation.html 을
  *            헤드리스 Chromium 으로 잰 값(_build/node_modules/playwright — 없으면 어긋남으로 남긴다)
  *   Spec   _build/components.data.js 의 spec 행 ↔ 문서 카드 "Card/…" 의 Spec 글
@@ -440,7 +441,8 @@ function datePickerExpect() {
      Color    Primary · Assistive · Negative(.primary · .assistive · .negative)
      Size     Small · Medium · Large(.sm · .md · .lg — 높이 32 · 40 · 48, 아이콘 전용은 정사각)
      State    Normal · Hover(:hover) · Pressed(:active) · Disabled([disabled]). 포커스는 상태가 아니라 전역 :focus-visible 이라 Focused 변형이 없다
-     Loading  True 는 State=Normal · Icon Only=False 에만(.loading — 상태가 아니라 옵션. 면 · 테두리 · 글자는 Normal 과 같다)
+     Loading  True 는 State=Normal 에만(.loading — 상태가 아니라 옵션. 면 · 테두리는 Normal 과 같고 글자는 .btn.loading 의 color:transparent).
+              2026-10-28 k17 에 아이콘 전용(Solid · Outline · Plain × 색 3 × 크기 3 = 27)에도 더했다 — 사이트 .btn.icon-only.loading 도 같은 규칙을 탄다
    옛 이름 대응(Figma 변형은 이름만 바꿔 재사용 — 인스턴스 연결 유지): Primary → Solid/Primary · Tertiary → Solid/Assistive · Secondary → Outline/Assistive ·
    Danger → Solid/Negative · Danger Secondary → Outline/Negative · Text → Text/Primary(아이콘 전용은 Plain/Primary) · State=Default → Normal · State=Loading → Loading=True.
    기대값은 style.src.css 의 .btn:where(형태.색) 규칙과 :hover · :active, 비활성 세 규칙(.btn[disabled] · .btn:where(.outline)[disabled] ·
@@ -450,14 +452,14 @@ const BTN_COMBOS = [["Solid", "Primary"], ["Solid", "Assistive"], ["Solid", "Neg
 const BTN_SIZES = { Small: "sm", Medium: "md", Large: "lg" };
 const BTN_STATES = ["Normal", "Hover", "Pressed", "Disabled"];
 const btnClass = (v, c) => (v === "Text" ? "text" : v === "Plain" ? c.toLowerCase() : v.toLowerCase() + " " + c.toLowerCase());
-/* 기대하는 변형 이름 전부 — Text 는 아이콘 전용이 없고(아이콘 전용 Primary 는 Plain), Plain 은 아이콘 전용에만, Loading=True 는 Normal · 라벨 버튼에만 */
+/* 기대하는 변형 이름 전부 — Text 는 아이콘 전용이 없고(아이콘 전용 Primary 는 Plain), Plain 은 아이콘 전용에만, Loading=True 는 Normal 에만(k17 부터 아이콘 전용 포함) */
 function btnMatrix() {
   const out = [];
   for (const [v, c] of BTN_COMBOS) for (const io of ["False", "True"]) {
     if ((v === "Text" && io === "True") || (v === "Plain" && io === "False")) continue;
     for (const z of Object.keys(BTN_SIZES)) {
       for (const st of BTN_STATES) out.push({ Variant: v, Color: c, Size: z, State: st, "Icon Only": io, Loading: "False" });
-      if (io === "False") out.push({ Variant: v, Color: c, Size: z, State: "Normal", "Icon Only": io, Loading: "True" });
+      out.push({ Variant: v, Color: c, Size: z, State: "Normal", "Icon Only": io, Loading: "True" });
     }
   }
   return out;
@@ -474,6 +476,19 @@ function buttonExpect() {
     const root = { fill: face(base, "-"), stroke: "transparent", fg: null };
     const dBase = cssRule(".btn[disabled]"), dOut = cssRule(".btn:where(.outline)[disabled]"), dFlat = cssRule(".btn:where(.text,.icon-only:not(.solid,.outline))[disabled]");
     const out = {};
+    /* Loading(2026-10-28 k17) — 라벨은 .btn.loading 의 color, 스피너는 .btn.loading::after 의 크기와 윗변 색.
+       윗변 색 규칙 셋은 :where 라 무게가 같아 **뒤에 오는 것이 이긴다** — 아래 순서는 style.src.css 의 순서다. 조건은 각 :where 목록을 형태 · 색으로 옮긴 것 */
+    const ld = cssRule(".btn.loading"), la = cssRule(".btn.loading::after");
+    if (!/transparent/.test(ld.color || "")) throw new Error(".btn.loading 의 color 가 transparent 가 아닙니다(" + ld.color + ")");
+    const spinTop = (r) => { const t = figTok(r["border-top-color"]); if (!t) throw new Error("스피너 윗변 색을 읽지 못했습니다(" + r["border-top-color"] + ")"); return t; };
+    const SPIN = [
+      [() => true, spinTop(la), ".btn.loading::after"],
+      [(v, c) => c === "Assistive" && v !== "Text", spinTop(cssRule(".btn:where(.assistive:not(.text)).loading::after")), ".btn:where(.assistive:not(.text)).loading::after"],
+      [(v, c) => (v === "Outline" && c === "Primary") || v === "Text" || (v === "Plain" && c === "Primary"), spinTop(cssRule(".btn:where(.outline.primary,.text,.icon-only:not(.solid,.outline).primary).loading::after")), ".btn:where(.outline.primary,.text,.icon-only:not(.solid,.outline).primary).loading::after"],
+      [(v, c) => c === "Negative" && v !== "Text", spinTop(cssRule(".btn:where(.negative:not(.text)).loading::after")), ".btn:where(.negative:not(.text)).loading::after"],
+    ];
+    const spinSize = px(la.width);
+    if (!(spinSize > 0) || px(la.height) !== spinSize) throw new Error(".btn.loading::after 의 크기를 읽지 못했습니다(" + la.width + " × " + la.height + ")");
     for (const [v, c] of BTN_COMBOS) {
       const s = sel(v, c), n = step(cssRule(s), root);
       const has = (x) => { try { return cssRule(x); } catch { return {}; } };
@@ -483,6 +498,8 @@ function buttonExpect() {
       if (v === "Text" || v === "Plain") d = step(dFlat, d);
       const e = { Normal: { ...n, css: s }, Hover: { ...h, css: s + ":hover" }, Pressed: { ...a, css: s + ":active" }, Disabled: { ...d, css: v === "Outline" ? ".btn:where(.outline)[disabled]" : v === "Solid" ? ".btn[disabled]" : ".btn:where(.text,.icon-only:not(.solid,.outline))[disabled]" } };
       for (const [st, x] of Object.entries(e)) for (const f of ["fill", "stroke", "fg"]) if (!x[f]) throw new Error(`${v}/${c} ${st} 의 ${f} 를 읽지 못했습니다(${x.css})`);
+      const sp = SPIN.filter(([m]) => m(v, c)).pop();
+      e.Loading = { ...n, fg: "transparent", spin: sp[1], spinCss: sp[2], spinSize, css: s + ".loading" };
       out[v + "/" + c] = e;
     }
     return out;
@@ -623,9 +640,9 @@ function componentsExpect() {
 }
 
 /* 속성 연결 규칙의 선언된 예외 — 넷(세트 · 변형 · 노드 · 속성)이 다 맞을 때만 넘긴다. 다른 빠짐은 그대로 잡는다 */
+/* Button · Loading=True · Icon Left 의 예외(2026-10-23 k2)는 2026-10-28 k17 에 지웠다 — 스피너를 "Spinner" 로 떼고 Icon Left 를 되살려
+   visible=Icon Left 속성에 다시 연결했다(층 불투명도 0 으로 숨김 — 사이트 .btn.loading 이 아이콘을 투명하게 두고 자리는 지키는 것과 같다) */
 const REF_EXCEPTIONS = [
-  { set: "Button", variant: /(?:^|, )Loading=True(?:,|$)/, key: "Icon Left|INSTANCE", ref: "visible=Icon Left#315:121",
-    why: "Loading=True 는 그 자리에 스피너를 늘 보이므로 Icon Left 속성으로 끄지 않는다(사람의 결정 2026-10-23 k2 — 그때 이름은 State=Loading · Leading Icon, 2026-10-28 k16 에 Loading 옵션 · Icon Left 로). 범위: Button · Loading=True · Icon Left(INSTANCE) · visible=Icon Left#315:121" },
 ];
 
 /* 반투명 컴포넌트의 선언된 예외(2026-10-27 k10) — 컴포넌트 자체가 반투명이어야 하는 것만 [세트, 변형 이름 정규식, 이유] 로 적는다
@@ -652,7 +669,8 @@ function diffComponents(c, want, bad, notes) {
     if (!v.fill.includes("$" + want.track.selectFilled)) bad.push(`Select Button 트랙 ${v.fill} ≠ ${want.track.selectFilled} (${v.id})`);
   /* Button(2026-10-28 k16) — 변형 표(btnMatrix)와 이름이 하나하나 맞는지(빠진 것 · 표에 없는 것 · 옛 이름), 그리고 변형마다 면 · 테두리 · 글자(아이콘 전용은 아이콘 선) 색.
      규칙과 옛 이름 대응은 buttonExpect 머리 주석. 색은 칠 하나와 정확히 같아야 한다($토큰 · 면 없음 "-" · 투명 테두리 "transparent").
-     Loading=True 는 Normal 과 같은 칠이다. 아이콘 전용의 아이콘 색은 probe 가 "Icon" 노드의 벡터 선으로 적는다 */
+     Loading=True 는 면 · 테두리가 Normal 과 같고, 라벨 버튼의 글자는 "transparent"(.btn.loading color — k17). 아이콘 전용의 아이콘 색은 probe 가 "Icon" 노드의 벡터 선으로 적는다
+     (Loading 의 아이콘은 층 불투명도 0 으로 숨겨 선 색은 Normal 그대로다 — 숨김은 아래 Loading 대조가 본다) */
   const btn = sets["Button"] || [];
   {
     const bv = (name) => Object.fromEntries(String(name).split(", ").map((kv) => kv.split("=")).filter((x) => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
@@ -666,7 +684,7 @@ function diffComponents(c, want, bad, notes) {
     const we = want.button;
     if (we.error) bad.push(`Button 기대값을 사이트 CSS 에서 읽지 못했습니다 — ${we.error}`);
     else for (const v of btn) {
-      const o = bv(v.name), e = we[o.Variant + "/" + o.Color], w = e && e[o.State];
+      const o = bv(v.name), e = we[o.Variant + "/" + o.Color], w = e && (o.Loading === "True" && o["Icon Only"] === "False" ? e.Loading : e[o.State]);
       if (!w) continue;   // 표에 없는 변형은 위에서 냈다
       const at = `Button ${v.name} (${v.id})`, tok = (t) => (t === "-" || t === "transparent" ? t : "$" + t);
       if (v.fill !== tok(w.fill)) bad.push(`${at} 면 ${v.fill} ≠ ${w.fill === "-" ? "없음" : w.fill} — 사이트 ${w.css}`);
@@ -674,6 +692,27 @@ function diffComponents(c, want, bad, notes) {
       const fg = o["Icon Only"] === "True" ? v.icon : v.text;
       if (fg !== tok(w.fg)) bad.push(`${at} ${o["Icon Only"] === "True" ? "아이콘" : "글자"} ${fg} ≠ ${w.fg} — 사이트 ${w.css}`);
       if (v.opacity !== undefined && v.opacity < 1) bad.push(`${at} 불투명도 ${v.opacity} — 비활성은 토큰으로 칠합니다`);
+    }
+  }
+  /* Button Loading(2026-10-28 k17) — 사이트는 .btn.loading{color:transparent} 로 라벨 · 아이콘(currentColor)을 지우되 자리는 지키고, ::after 스피너만 가운데 보인다.
+     probe 의 components.btnLoading 으로 본다: 폭 · 높이가 같은 이름의 Loading=False 와 같은지(±0.5), 스피너("Spinner")가 절대 배치 · 가운데(±0.5) · 사이트 크기인지,
+     스피너 선 색이 윗변 색 규칙(buttonExpect 의 SPIN)과 같은지, 스피너 말고 보이는 층이 없는지(leak — 글자는 칠, 나머지는 층 불투명도로 본다.
+     visible 은 보지 않는다 — Icon Left · Icon Right 는 인스턴스에서 속성으로 켜질 수 있다) */
+  if (c.btnLoading !== undefined) {
+    const we = want.button;
+    if (!c.btnLoading || !c.btnLoading.length) bad.push("Button 세트에 Loading 변형이 없어 Loading 모양을 대조하지 못했습니다");
+    else if (!we.error) for (const L of c.btnLoading) {
+      const o = Object.fromEntries(String(L.name).split(", ").map((kv) => kv.split("=")).filter((x) => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
+      const e = we[o.Variant + "/" + o.Color]; if (!e) continue;
+      const w = e.Loading, at = `Button Loading ${L.name} (${L.id})`;
+      if (L.sibW === null) bad.push(`${at} 짝(Loading=False) 변형이 없어 폭을 대조하지 못했습니다`);
+      else if (Math.abs(L.w - L.sibW) > 0.5 || Math.abs(L.h - L.sibH) > 0.5) bad.push(`${at} 크기 ${L.w}×${L.h} ≠ Loading=False ${L.sibW}×${L.sibH} — 사이트는 라벨 자리를 지킨다(.btn.loading color:transparent)`);
+      const sp = L.spinner;
+      if (!sp) { bad.push(`${at} 스피너(이름 "Spinner") 없음 — 사이트 ${w.spinCss}`); continue; }
+      if (sp.abs !== "ABSOLUTE" || Math.abs(sp.dx) > 0.5 || Math.abs(sp.dy) > 0.5) bad.push(`${at} 스피너가 가운데 절대 배치가 아님(${sp.abs} · 중심 어긋남 ${sp.dx}, ${sp.dy})`);
+      if (Math.abs(sp.w - w.spinSize) > 0.5 || Math.abs(sp.h - w.spinSize) > 0.5) bad.push(`${at} 스피너 ${sp.w}×${sp.h} ≠ ${w.spinSize} — 사이트 .btn.loading::after`);
+      if (sp.stroke !== "$" + w.spin) bad.push(`${at} 스피너 선 ${sp.stroke} ≠ ${w.spin} — 사이트 ${w.spinCss}`);
+      if (L.leak && L.leak.length) bad.push(`${at} 스피너 말고 보이는 층 ${L.leak.join(" · ")} — 사이트는 라벨 · 아이콘을 투명하게 둔다`);
     }
   }
   /* 비활성을 opacity 로 흐리는 것은 버튼만의 문제가 아니다 — 조사하는 세트 전부에서 본다(모든 컴포넌트로 넓힌 검사는 아래 "반투명 컴포넌트") */

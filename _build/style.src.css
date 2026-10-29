@@ -622,7 +622,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn:where(.solid.primary){background:var(--surface-brand-primary);color:var(--brand-label)}
 .btn:where(.solid.primary):hover{background:var(--surface-brand-strong)}
 .btn:where(.solid.primary):active{background:var(--surface-brand-heavy)}
-.btn:where(.outline.primary){border-color:var(--line-brand-primary);color:var(--foreground-brand-primary)}   /* Lv3 대체 행동(미리보기 · 임시 저장) — 면은 text 와 같은 brand 틴트 두 단계 */
+.btn:where(.outline.primary){border-color:var(--foreground-brand-primary);color:var(--foreground-brand-primary)}   /* Lv3 대체 행동(미리보기 · 임시 저장) — 면은 text 와 같은 brand 틴트 두 단계. 테두리는 글자와 같은 불투명 제품색: --line-brand-primary(반투명)는 바탕 대비 1.5 라 text 변형과 구분되는 유일한 단서가 거의 안 보였다(사람의 결정 2026-10-28) */
 .btn:where(.outline.primary):hover{background:var(--surface-brand-subtle)}
 .btn:where(.outline.primary):active{background:var(--surface-brand-subtle-strong)}
 /* 중립 버튼의 면은 반투명 3단(fill alternative .03 → normal .05 → strong .10)이다 — 바탕이 무엇이든 같은 간격으로 어두워진다.
