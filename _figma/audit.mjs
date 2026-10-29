@@ -258,7 +258,7 @@ async function siteMeasure() {
     }
     /* 버튼(2026-10-26 k7 · 2026-10-28 k16 새 클래스) — components/button.html 에 "버튼" 라벨 버튼을 잠시 붙여(파일은 그대로) 형태 · 색 · 크기 · 아이콘 전용 여부마다
        폭 · 높이 · 라벨 글자의 폭과 x 를 잰다. Figma 변형의 라벨이 "버튼" 이라 같은 글로 잰다. 아이콘 전용은 16 아이콘 하나.
-       열쇠는 "Variant|Color|sm|true" — 클래스는 btnClass(Solid/Outline → "solid primary" · Text → "text" · Plain → "primary" + icon-only) */
+       열쇠는 "Variant|Color|sm|true" — 클래스는 btnClass(Solid/Outline → "solid primary" · Text → "text" · "text assistive"(2026-10-29 k19) · Plain → "primary" + icon-only) */
     if (!(await open("button"))) out.btn = { error: "components/button.html 이 없습니다 — 사이트를 빌드하세요" };
     else {
       const combos = BTN_COMBOS.map(([v, c]) => [v + "|" + c, btnClass(v, c)]);
@@ -437,7 +437,9 @@ function datePickerExpect() {
 }
 
 /* Button(2026-10-28 k16) — 사람의 정의(2026-10-28)로 개편한 체계. Figma 속성 ↔ 사이트 클래스:
-     Variant  Solid(.solid) · Outline(.outline) · Text(.text, 정의 밖 — 색은 Primary 만) · Plain(형태 없는 .icon-only — Icon Only=True 에만)
+     Variant  Solid(.solid) · Outline(.outline) · Text(.text, 정의 밖 — 색은 Primary · Assistive 둘, Negative 없음) · Plain(형태 없는 .icon-only — Icon Only=True 에만)
+              Text/Assistive 는 2026-10-29 k19 에 더했다(사람의 결정) — 클래스 .text.assistive. Text/Primary 는 색 클래스 없이 .text 다.
+              CSS 는 .btn:where(.text) 위에 .btn:where(.text.assistive) 를 덮으므로(같은 무게, 뒤가 이김) 기대값도 두 규칙을 차례로 겹쳐 읽는다(BTN_SEL)
      Color    Primary · Assistive · Negative(.primary · .assistive · .negative)
      Size     Small · Medium · Large(.sm · .md · .lg — 높이 32 · 40 · 48, 아이콘 전용은 정사각)
      State    Normal · Hover(:hover) · Pressed(:active) · Disabled([disabled]). 포커스는 상태가 아니라 전역 :focus-visible 이라 Focused 변형이 없다
@@ -448,10 +450,12 @@ function datePickerExpect() {
    기대값은 style.src.css 의 .btn:where(형태.색) 규칙과 :hover · :active, 비활성 세 규칙(.btn[disabled] · .btn:where(.outline)[disabled] ·
    .btn:where(.text,.icon-only:not(.solid,.outline))[disabled])에서 읽는다. 규칙에 없는 값은 앞 상태(없으면 .btn)를 물려받는다 — CSS 캐스케이드와 같다.
    테두리는 .btn 의 1px solid transparent 가 기본이라 "transparent"(probe 가 불투명도 0 칠을 그렇게 적는다). 못 읽으면 어긋남이다 */
-const BTN_COMBOS = [["Solid", "Primary"], ["Solid", "Assistive"], ["Solid", "Negative"], ["Outline", "Primary"], ["Outline", "Assistive"], ["Outline", "Negative"], ["Text", "Primary"], ["Plain", "Primary"], ["Plain", "Assistive"], ["Plain", "Negative"]];
+const BTN_COMBOS = [["Solid", "Primary"], ["Solid", "Assistive"], ["Solid", "Negative"], ["Outline", "Primary"], ["Outline", "Assistive"], ["Outline", "Negative"], ["Text", "Primary"], ["Text", "Assistive"], ["Plain", "Primary"], ["Plain", "Assistive"], ["Plain", "Negative"]];
 const BTN_SIZES = { Small: "sm", Medium: "md", Large: "lg" };
 const BTN_STATES = ["Normal", "Hover", "Pressed", "Disabled"];
-const btnClass = (v, c) => (v === "Text" ? "text" : v === "Plain" ? c.toLowerCase() : v.toLowerCase() + " " + c.toLowerCase());
+const btnClass = (v, c) => (v === "Text" ? (c === "Primary" ? "text" : "text " + c.toLowerCase()) : v === "Plain" ? c.toLowerCase() : v.toLowerCase() + " " + c.toLowerCase());
+/* 형태 · 색의 CSS 규칙 — 캐스케이드 순서대로(뒤가 이김). Text/Assistive 만 둘이다: .text 의 규칙 위에 .text.assistive 가 덮는다(2026-10-29 k19) */
+const BTN_SEL = (v, c) => (v === "Text" ? (c === "Primary" ? [".btn:where(.text)"] : [".btn:where(.text)", `.btn:where(.text.${c.toLowerCase()})`]) : v === "Plain" ? [`.btn:where(.icon-only:not(.solid,.outline).${c.toLowerCase()})`] : [`.btn:where(.${v.toLowerCase()}.${c.toLowerCase()})`]);
 /* 기대하는 변형 이름 전부 — Text 는 아이콘 전용이 없고(아이콘 전용 Primary 는 Plain), Plain 은 아이콘 전용에만, Loading=True 는 Normal 에만(k17 부터 아이콘 전용 포함) */
 function btnMatrix() {
   const out = [];
@@ -467,7 +471,6 @@ function btnMatrix() {
 function buttonExpect() {
   try {
     const base = cssRule(".btn");
-    const sel = (v, c) => (v === "Text" ? ".btn:where(.text)" : v === "Plain" ? `.btn:where(.icon-only:not(.solid,.outline).${c.toLowerCase()})` : `.btn:where(.${v.toLowerCase()}.${c.toLowerCase()})`);
     const face = (r, prev) => (r.background === undefined ? prev : /^(transparent|none)$/.test(r.background.trim()) ? "-" : figTok(r.background));
     const line = (r, prev) => (r["border-color"] === undefined ? prev : r["border-color"].trim() === "transparent" ? "transparent" : figTok(r["border-color"]));
     const ink = (r, prev) => (r.color === undefined ? prev : figTok(r.color));
@@ -477,23 +480,24 @@ function buttonExpect() {
     const dBase = cssRule(".btn[disabled]"), dOut = cssRule(".btn:where(.outline)[disabled]"), dFlat = cssRule(".btn:where(.text,.icon-only:not(.solid,.outline))[disabled]");
     const out = {};
     /* Loading(2026-10-28 k17) — 라벨은 .btn.loading 의 color, 스피너는 .btn.loading::after 의 크기와 호 색(color).
-       호 색 규칙 셋은 :where 라 무게가 같아 **뒤에 오는 것이 이긴다** — 아래 순서는 style.src.css 의 순서다. 조건은 각 :where 목록을 형태 · 색으로 옮긴 것 */
+       호 색 규칙 셋은 :where 라 무게가 같아 **뒤에 오는 것이 이긴다** — 아래 순서는 style.src.css 의 순서다. 조건은 각 :where 목록을 형태 · 색으로 옮긴 것.
+       2026-10-29 k19 — Text/Assistive 가 생기며 셀렉터가 바뀌었다: Assistive 는 Text 를 포함(.assistive), Primary 쪽 목록의 Text 는 Assistive 가 아닌 것만(.text:not(.assistive)) */
     const ld = cssRule(".btn.loading"), la = cssRule(".btn.loading::after");
     if (!/transparent/.test(ld.color || "")) throw new Error(".btn.loading 의 color 가 transparent 가 아닙니다(" + ld.color + ")");
     /* 2026-10-29 회색 바탕 고리를 빼고 3/4 호 하나로 — 호의 색은 ::after 의 color(테두리는 currentColor) */
     const spinTop = (r) => { const t = figTok(r.color); if (!t) throw new Error("스피너 색(::after color)을 읽지 못했습니다(" + r.color + ")"); return t; };
     const SPIN = [
       [() => true, spinTop(la), ".btn.loading::after"],
-      [(v, c) => c === "Assistive" && v !== "Text", spinTop(cssRule(".btn:where(.assistive:not(.text)).loading::after")), ".btn:where(.assistive:not(.text)).loading::after"],
-      [(v, c) => (v === "Outline" && c === "Primary") || v === "Text" || (v === "Plain" && c === "Primary"), spinTop(cssRule(".btn:where(.outline.primary,.text,.icon-only:not(.solid,.outline).primary).loading::after")), ".btn:where(.outline.primary,.text,.icon-only:not(.solid,.outline).primary).loading::after"],
+      [(v, c) => c === "Assistive", spinTop(cssRule(".btn:where(.assistive).loading::after")), ".btn:where(.assistive).loading::after"],
+      [(v, c) => (v === "Outline" && c === "Primary") || (v === "Text" && c !== "Assistive") || (v === "Plain" && c === "Primary"), spinTop(cssRule(".btn:where(.outline.primary,.text:not(.assistive),.icon-only:not(.solid,.outline).primary).loading::after")), ".btn:where(.outline.primary,.text:not(.assistive),.icon-only:not(.solid,.outline).primary).loading::after"],
       [(v, c) => c === "Negative" && v !== "Text", spinTop(cssRule(".btn:where(.negative:not(.text)).loading::after")), ".btn:where(.negative:not(.text)).loading::after"],
     ];
     const spinSize = px(la.width);
     if (!(spinSize > 0) || px(la.height) !== spinSize) throw new Error(".btn.loading::after 의 크기를 읽지 못했습니다(" + la.width + " × " + la.height + ")");
     for (const [v, c] of BTN_COMBOS) {
-      const s = sel(v, c), n = step(cssRule(s), root);
+      const ss = BTN_SEL(v, c), s = ss[ss.length - 1], n = ss.reduce((p, x) => step(cssRule(x), p), root);
       const has = (x) => { try { return cssRule(x); } catch { return {}; } };
-      const h = step(has(s + ":hover"), n), a = step(has(s + ":active"), n);
+      const h = ss.reduce((p, x) => step(has(x + ":hover"), p), n), a = ss.reduce((p, x) => step(has(x + ":active"), p), n);
       let d = step(dBase, n);
       if (v === "Outline") d = step(dOut, d);
       if (v === "Text" || v === "Plain") d = step(dFlat, d);

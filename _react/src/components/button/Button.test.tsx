@@ -12,7 +12,9 @@ describe("Button", () => {
       [<Button variant="outline" color="assistive">a</Button>, "btn md outline assistive"],
       [<Button color="negative" size="sm">a</Button>, "btn sm solid negative"],
       [<Button variant="outline" color="negative" size="lg">a</Button>, "btn lg outline negative"],
-      [<Button variant="text" color="negative">a</Button>, "btn md text"],   // text 는 정의 밖 — 색은 primary 하나라 color 를 내지 않는다
+      [<Button variant="text">a</Button>, "btn md text"],   // text 는 정의 밖 — primary 는 색 클래스 없이
+      [<Button variant="text" color="assistive">a</Button>, "btn md text assistive"],
+      [<Button variant="text" color="negative">a</Button>, "btn md text"],   // negative 는 text 에 없다 — 무시(개발 모드 경고)
     ];
     for (const [el, cls] of cases) {
       const { container, unmount } = render(el);

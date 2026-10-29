@@ -1,5 +1,5 @@
 // pre-commit 검사: _build/style.src.css 를 커밋하면서 assets/style.css 를 다시 만들지 않은 경우를 막는다.
-//   build.js:22 와 같은 변환(폰트 URL 한 곳)을 적용해 스테이징된 내용끼리 비교한다.
+//   build.js 와 같은 변환(lib.js 의 siteCss — 폰트 URL + 예제 고정 상태)을 적용해 스테이징된 내용끼리 비교한다.
 const { execFileSync } = require("child_process");
 
 const SRC = "_build/style.src.css", OUT = "assets/style.css";
@@ -11,7 +11,7 @@ let src, out;
 try { src = staged(SRC); out = staged(OUT); }
 catch (e) { process.exit(0); } // 파일이 아직 없는 커밋(초기화 등)은 막지 않는다
 
-const expected = src.replace('url("PretendardVariable.woff2")', 'url("fonts/PretendardVariable.woff2")');
+const expected = require("../lib.js").siteCss(src);
 if (expected === out) process.exit(0);
 
 process.stderr.write(`

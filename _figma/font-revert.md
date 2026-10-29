@@ -74,6 +74,10 @@
 >   `font-revert-nodes.tsv` 맨 아래 "2026-10-29 k18" 절.
 >   **되돌릴 때 함께 할 일(사람의 결정 — Figma 에서는 지금 건드리지 않음)**: k17 의 317:336(Card/Button 사용 가이드 Do 목록)은 다섯 줄이 한 노드에 들어가 이웃 목록 항목보다 줄 사이가 좁다.
 >   Pretendard 로 되돌릴 때 데스크톱에서 항목별 노드로 나누거나 줄 간격을 이웃 항목과 맞춘다. tsv 의 k17 절 317:336 행 '어디' 열 끝에도 적었다
+> - 2026-10-29 k19: Button Text/Assistive 추가(사람의 결정 2026-10-29)와 Outline Primary 테두리 `--line-brand-strong` 을 맞추며 **새로 Noto 가 된 노드는 0개**다.
+>   Text/Assistive 15변형(815:9 … 815:102)은 Text/Primary 를 복제해 라벨이 Pretendard 그대로다(칠 · 속성 연결만 바꿈 — 폰트를 올리지 않았다). Button 라벨은 105 → 120개.
+>   글자를 고친 623:3091(Card/Button Spec State 값 — "primary(테두리 · 글자 …)" → "primary(테두리 --line-brand-strong · 글자 …)")은 k16 부터 Noto 였다(새로 바뀐 것 아님 — 되돌릴 행은 k16 절).
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-29 k19" 절(행 없음 · 주석만)
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
@@ -110,7 +114,7 @@ Figma 14단계는 20 · 22 · 16 · 18 이라 다르다 — 내비 말고는 줄
 
 | 역할 | Figma 원본 노드(개수) | Figma 지금 | 사이트 실측 |
 | --- | --- | --- | --- |
-| Button 라벨 | 315:6 · 315:13 · 315:20 …(105 — k16 에 Focused 18 을 지우고 Outline Primary 15 를 복제) | 12 · 14 · 16 / 500(Label/2 · Label/1 · Title/1) | 12 · 14 · 16 / 600 |
+| Button 라벨 | 315:6 · 315:13 · 315:20 …(120 — k16 에 Focused 18 을 지우고 Outline Primary 15 를 복제, k19 에 Text/Assistive 15 를 복제) | 12 · 14 · 16 / 500(Label/2 · Label/1 · Title/1) | 12 · 14 · 16 / 600 |
 | Text Field 라벨 · 필수 표시 | 322:367 · 322:368 …(42 — k6 Error Focused 6 포함) | 14 / 500(Label/1) | 600 |
 | Text Field 도움말 · Small 값 | 322:371 …(21) · 322:370 …(7) — k6 Error Focused 4 포함 | 12 / 500(Caption/1) | 400 |
 | Select Button 기본 · 선택 | 323:624 …(4) · 323:626 …(2) | 400(Body/2) · 500(Label/1) | 500 · 600 |

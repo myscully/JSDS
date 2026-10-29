@@ -41,7 +41,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   for (const f of ["assets/style.css", "assets/app.js", "assets/ds.js", "assets/fonts"]) fs.rmSync(path.join(OUT, f), { recursive: true, force: true });
   fs.mkdirSync(path.join(OUT, "assets", "fonts"), { recursive: true });
   fs.copyFileSync(FONT, path.join(OUT, "assets", "fonts", "PretendardVariable.woff2"));
-  fs.writeFileSync(path.join(OUT, "assets", "style.css"), css);
+  fs.writeFileSync(path.join(OUT, "assets", "style.css"), LIB.siteCss(cssSrc));   // 폰트 URL + 예제 고정 상태 — pre-commit 검사도 같은 함수로 비교한다
   fs.writeFileSync(path.join(OUT, "assets", "ds.js"), fs.readFileSync(path.join(__dirname, "ds.src.js"), "utf8"));
   const index = routes.map(r => ({ t: r.title, s: r.secTitle, g: r.group, u: rel(r.sec, r.key, "") }));
   fs.writeFileSync(path.join(OUT, "assets", "app.js"),

@@ -105,6 +105,7 @@ const separation = [
   ["--surface-brand-subtle-strong", SURFACES, { light: 1.04, dark: 1.04 }],
   /* Sparkline 일반 막대 — 강조(.hi)와 갈리도록 옅게 했다. 장식(aria-hidden)이라 3:1 대상은 아니지만 막대가 바탕에 녹으면 안 된다 */
   ["--line-brand-primary", SURFACES, { light: 1.4, dark: 1.4 }],   // 실측 라이트 1.45~1.61 · 다크 1.45~2.45
+  ["--line-brand-strong", SURFACES, { light: 1.7, dark: 1.7 }],   // Outline Primary 버튼 테두리(2026-10-29) — 실측 기본 제품 라이트 1.92 · 다크 1.90, 가장 낮은 곳은 제품 C 의 패널 바탕 1.79. 비텍스트 3:1 에는 못 미치지만 라벨(제품색 글자)이 버튼을 알린다
   ...ACCENTS.map((c) => [`--surface-accent-${c}`, SURFACES, { light: 1.03, dark: 1.03 }]),
   /* 채운 제품 면이 페이지에서 보이는지 — 이 쌍이 없으면 '면이 배경에 녹는' 경우를 아무도 재지 않는다 */
   ...["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"]
@@ -133,7 +134,7 @@ const grammarOnly = [
     .filter((t) => !/cyan$/.test(t) || /opaque|line/.test(t)),
   ...ACCENTS.filter((c) => c !== "cyan").map((c) => `--surface-accent-${c}`),
   "--line-neutral-primary-opaque", "--line-neutral-secondary-opaque", "--line-neutral-tertiary-opaque",
-  "--line-brand-strong", "--line-negative-strong",   // --line-brand-focus · --line-negative-focus 는 값 입력 필드 포커스 후광으로 쓰기 시작해 뺐다
+  "--line-negative-strong",   // --line-brand-focus · --line-negative-focus 는 값 입력 필드 포커스 후광으로, --line-brand-strong 은 Outline Primary 버튼 테두리로(2026-10-29) 쓰기 시작해 뺐다
   "--line-positive-primary",
   "--effect-transparent-primary", "--effect-transparent-secondary",
   "--company-mark-subtle",

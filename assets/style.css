@@ -628,7 +628,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn:where(.solid.primary){background:var(--surface-brand-primary);color:var(--brand-label)}
 .btn:where(.solid.primary):hover{background:var(--surface-brand-strong)}
 .btn:where(.solid.primary):active{background:var(--surface-brand-heavy)}
-.btn:where(.outline.primary){border-color:var(--foreground-brand-primary);color:var(--foreground-brand-primary)}   /* Lv3 대체 행동(미리보기 · 임시 저장) — 면은 text 와 같은 brand 틴트 두 단계. 테두리는 글자와 같은 불투명 제품색: --line-brand-primary(반투명)는 바탕 대비 1.5 라 text 변형과 구분되는 유일한 단서가 거의 안 보였다(사람의 결정 2026-10-28) */
+.btn:where(.outline.primary){border-color:var(--line-brand-strong);color:var(--foreground-brand-primary)}   /* Lv3 대체 행동(미리보기 · 임시 저장) — 면은 text 와 같은 brand 틴트 두 단계. 테두리는 brand 43%(--line-brand-strong): 반투명 28%(--line-brand-primary)는 바탕 대비 1.5 라 text 변형과 구분되는 단서가 거의 안 보였고, 글자와 같은 불투명 제품색은 Lv4 에 너무 가까웠다(사람의 결정 2026-10-28 → 2026-10-29) */
 .btn:where(.outline.primary):hover{background:var(--surface-brand-subtle)}
 .btn:where(.outline.primary):active{background:var(--surface-brand-subtle-strong)}
 /* 중립 버튼의 면은 반투명 3단(fill alternative .03 → normal .05 → strong .10)이다 — 바탕이 무엇이든 같은 간격으로 어두워진다.
@@ -650,11 +650,15 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn:where(.outline.negative){border-color:var(--line-negative-primary);color:var(--foreground-negative-strong)}
 .btn:where(.outline.negative):hover{background:var(--surface-negative-hover)}   /* 테마마다 단계가 달라(라이트 12 · 다크 20%) 전용 토큰 — Figma 도 변수 하나로 같은 구조를 쓴다 */
 .btn:where(.outline.negative):active{background:var(--surface-negative-pressed);border-color:var(--line-negative-strong)}
-/* text — 정의 밖 변형(사람의 결정 2026-10-28). 색은 primary 하나 */
+/* text — 정의 밖 변형(사람의 결정 2026-10-28). 색은 primary(색 클래스 없음) · assistive(2026-10-29) 둘 */
 .btn:where(.text){color:var(--foreground-brand-primary)}
 .btn.text{padding-left:8px;padding-right:8px}   /* 크기 규칙(.sm 등, 0,2,0)보다 뒤에 같은 무게로 둬야 좌우 8 이 이긴다 */
 .btn:where(.text):hover{background:var(--surface-brand-subtle)}
 .btn:where(.text):active{background:var(--surface-brand-subtle-strong)}   /* 종전에는 중립색이라 누르는 순간 제품색에서 회색으로 튀었다 */
+/* text assistive — 색 클래스가 없으면 primary, .assistive 를 붙이면 중립(사람의 결정 2026-10-29). 면 없는 아이콘 전용 assistive 와 같은 토큰 */
+.btn:where(.text.assistive){color:var(--foreground-neutral-secondary)}
+.btn:where(.text.assistive):hover{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
+.btn:where(.text.assistive):active{background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary)}
 /* 아이콘 전용 — variant 를 주지 않으면 면 없이 아이콘만, hover · pressed 에만 면이 나타난다. solid · outline 을 주면 그 면을 가진 정사각 버튼 */
 .btn.icon-only{width:40px;padding:0}
 .btn.icon-only.sm{width:32px}
@@ -683,9 +687,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn.loading{position:relative;color:transparent;cursor:progress}
 /* 스피너는 회색 바탕 고리 없이 3/4 호 하나 — Figma 의 loader-2 와 같은 모양(사람의 결정 2026-10-29). 색은 color 로 주고 테두리가 currentColor 를 따른다 */
 .btn.loading::after{content:"";position:absolute;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;color:var(--brand-label);animation:spin .8s linear infinite}
-.btn:where(.assistive:not(.text)).loading::after{color:var(--surface-brand-primary)}
-.btn:where(.outline.primary,.text,.icon-only:not(.solid,.outline).primary).loading::after{color:var(--foreground-brand-primary)}
-.btn:where(.negative:not(.text)).loading::after{color:var(--foreground-negative-strong)}   /* text 는 색이 primary 하나라 negative 를 붙여도 글자는 제품색이다 — 스피너만 빨개지지 않게 */
+.btn:where(.assistive).loading::after{color:var(--surface-brand-primary)}
+.btn:where(.outline.primary,.text:not(.assistive),.icon-only:not(.solid,.outline).primary).loading::after{color:var(--foreground-brand-primary)}
+.btn:where(.negative:not(.text)).loading::after{color:var(--foreground-negative-strong)}   /* text 의 색은 primary · assistive 둘이라 negative 를 붙여도 글자는 제품색이다 — 스피너만 빨개지지 않게 */
 /* 묶음 — 수평이면 주 행동이 오른쪽(.end 로 오른쪽 정렬), 수직이면 주 행동이 위(.vertical, 같은 폭) */
 .btn-group{display:inline-flex;gap:12px;align-items:center;line-height:1.6}
 .btn-group.end{justify-content:flex-end;width:100%}
@@ -1373,3 +1377,27 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .onboard .card{width:100%}
 .log-row{font-size:12px;line-height:1.6}
 /* ---------- /Live component samples ---------- */
+
+/* 예제 고정 상태(사이트 전용, build.js 가 생성) — State 예제가 Hover · Pressed 를 나란히 보인다 */
+.btn:where(.solid.primary)[data-state="hover"]{background:var(--surface-brand-strong)}
+.btn:where(.solid.primary)[data-state="pressed"]{background:var(--surface-brand-heavy)}
+.btn:where(.outline.primary)[data-state="hover"]{background:var(--surface-brand-subtle)}
+.btn:where(.outline.primary)[data-state="pressed"]{background:var(--surface-brand-subtle-strong)}
+.btn:where(.solid.assistive)[data-state="hover"]{background:var(--surface-neutral-secondary)}
+.btn:where(.solid.assistive)[data-state="pressed"]{background:var(--surface-neutral-strong)}
+.btn:where(.outline.assistive)[data-state="hover"]{background:var(--surface-neutral-secondary)}
+.btn:where(.outline.assistive)[data-state="pressed"]{background:var(--surface-neutral-strong)}
+.btn:where(.solid.negative)[data-state="hover"]{background:var(--surface-negative-strong)}
+.btn:where(.solid.negative)[data-state="pressed"]{background:var(--surface-negative-heavy)}
+.btn:where(.outline.negative)[data-state="hover"]{background:var(--surface-negative-hover)}
+.btn:where(.outline.negative)[data-state="pressed"]{background:var(--surface-negative-pressed);border-color:var(--line-negative-strong)}
+.btn:where(.text)[data-state="hover"]{background:var(--surface-brand-subtle)}
+.btn:where(.text)[data-state="pressed"]{background:var(--surface-brand-subtle-strong)}
+.btn:where(.text.assistive)[data-state="hover"]{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
+.btn:where(.text.assistive)[data-state="pressed"]{background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary)}
+.btn:where(.icon-only:not(.solid,.outline).primary)[data-state="hover"]{background:var(--surface-brand-subtle)}
+.btn:where(.icon-only:not(.solid,.outline).primary)[data-state="pressed"]{background:var(--surface-brand-subtle-strong)}
+.btn:where(.icon-only:not(.solid,.outline).assistive)[data-state="hover"]{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
+.btn:where(.icon-only:not(.solid,.outline).assistive)[data-state="pressed"]{background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary)}
+.btn:where(.icon-only:not(.solid,.outline).negative)[data-state="hover"]{background:var(--surface-negative-hover)}
+.btn:where(.icon-only:not(.solid,.outline).negative)[data-state="pressed"]{background:var(--surface-negative-pressed)}
