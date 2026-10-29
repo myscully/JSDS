@@ -66,9 +66,14 @@ function exampleBlock(sec, pageKey, ex, css, cssLabel) {
 </div>
 </section>`;
 }
+/* Props 표 — 이름은 positive 태그(React prop · HTML 클래스가 다르면 " / " · " · " 로 갈라 나란히), 값 목록은 텍스트, 기본값은 중립 태그.
+   열 폭은 CSS(table.props th)가 20 · 25 · 15 · 40% 로 고정한다(사람의 결정 2026-10-29) */
+const propTag = (t, tone) => `<span class="tag ${tone ? tone + " " : ""}plain sm">${esc(t)}</span>`;
 function propsTable(rows) {
   if (!rows || !rows.length) return "";
-  return `<div class="tablewrap"><table class="props"><thead><tr><th>Prop / Class</th><th>Type · Values</th><th>Default</th><th>Description</th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r[0])}</td><td><code>${esc(r[1])}</code></td><td>${r[2] ? `<code>${esc(r[2])}</code>` : "—"}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table></div>`;
+  const names = (n) => n.split(/ \/ | · /).map((x) => propTag(x.trim(), "ok")).join("");
+  const dflt = (d) => !d || d === "—" ? "—" : propTag(d);
+  return `<div class="tablewrap"><table class="props"><thead><tr><th>Prop / Class</th><th>Type · Values</th><th>Default</th><th>Description</th></tr></thead><tbody>${rows.map(r => `<tr><td>${names(r[0])}</td><td>${esc(r[1])}</td><td>${dflt(r[2])}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table></div>`;
 }
 const USAGE_HTML = `<!-- 1) 토큰 + 전체 컴포넌트 스타일 한 번에 연결 -->
 <link rel="stylesheet" href="assets/style.css">

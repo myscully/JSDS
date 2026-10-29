@@ -477,8 +477,13 @@ th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font
 td{height:var(--row-h);padding:12px var(--space-4);border-bottom:1px solid var(--line-neutral-secondary);vertical-align:middle}
 tbody tr:last-child td{border-bottom:0}
 td code{background:var(--surface-neutral-strong);padding:1px 6px;border-radius:4px;font-size:12px}
-table.props td:nth-child(1){font-weight:600;white-space:nowrap;font-size:12px}
-table.props td:nth-child(2) code,table.props td:nth-child(3) code{white-space:pre-wrap;word-break:break-word}
+table.props{table-layout:fixed;width:100%}   /* 열 폭 고정 — 종전에는 설명이 폭을 다 가져가 이름 · 값 · 기본값이 여러 줄로 꺾였다(사람의 결정 2026-10-29) */
+table.props th:nth-child(1){width:20%}
+table.props th:nth-child(2){width:25%}
+table.props th:nth-child(3){width:15%}
+table.props th:nth-child(4){width:40%}
+table.props td:nth-child(2){overflow-wrap:anywhere}
+table.props td .tag{white-space:normal;overflow-wrap:anywhere;margin:2px 4px 2px 0}   /* 이름 · 기본값 태그는 칸 안에서 줄을 바꾼다 — 고정 폭에서 nowrap 이면 넘친다 */
 table.props td:nth-child(4){color:var(--foreground-neutral-secondary)}
 pre{background:var(--code-bg);color:var(--code-chip-fg);padding:var(--space-5);border-radius:var(--radius-lg);overflow-x:auto;font-size:12px;line-height:1.6;margin:var(--space-4) 0 var(--space-6);tab-size:2}
 pre code{font-size:inherit}

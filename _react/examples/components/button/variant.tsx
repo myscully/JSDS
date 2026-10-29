@@ -7,8 +7,6 @@ export default function Example() {
         <Button variant="solid" color="primary">Primary</Button>
         <Button variant="solid" color="assistive">Assistive</Button>
         <Button variant="solid" color="negative">Negative</Button>
-      </ButtonGroup>
-      <ButtonGroup>
         <Button variant="outline" color="primary">Primary</Button>
         <Button variant="outline" color="assistive">Assistive</Button>
         <Button variant="outline" color="negative">Negative</Button>
