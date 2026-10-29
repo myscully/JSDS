@@ -1157,13 +1157,16 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const t = document.querySelector("table.props"), W = t.getBoundingClientRect().width;
     const rows = [...t.tBodies[0].rows];
     return { pct: [...t.tHead.rows[0].cells].map((c) => Math.round(c.getBoundingClientRect().width / W * 100)),
-      names: rows.every((r) => r.cells[0].querySelectorAll(".tag.ok").length > 0 && !r.cells[0].querySelector(":not(.tag)")),
+      names: rows.every((r) => r.cells[0].querySelectorAll(".tag.ok").length > 0 && !r.cells[0].querySelector(":not(.tag):not(.prop-tags)")),
+      /* 태그끼리 붙지 않는다 — 같은 줄이면 가로로, 다음 줄이면 세로로 6 이상 */
+      gap: Math.min(...rows.flatMap((r) => { const t = [...r.cells[0].querySelectorAll(".tag")].map((x) => x.getBoundingClientRect());
+        return t.slice(1).map((b, i) => { const a = t[i]; return Math.abs(a.top - b.top) < 1 ? b.left - a.right : b.top - a.bottom; }); }), 99),
       types: rows.every((r) => !r.cells[1].querySelector("code") && r.cells[1].textContent.trim()),
       defaults: rows.every((r) => { const d = r.cells[2]; return d.textContent.trim() === "—" ? !d.querySelector(".tag") : !!d.querySelector(".tag:not(.ok)"); }),
       overflow: rows.flatMap((r) => [...r.cells].filter((c) => c.scrollWidth > c.clientWidth + 1).map((c) => c.cellIndex)) };
   });
   ok("props table: fixed widths, positive name tags, text values, neutral default tags, no overflow",
-    pt.pct.join() === "20,25,15,40" && pt.names && pt.types && pt.defaults && !pt.overflow.length, JSON.stringify(pt));
+    pt.pct.join() === "20,25,15,40" && pt.gap >= 5.5 && pt.names && pt.types && pt.defaults && !pt.overflow.length, JSON.stringify(pt));
   const cs = await page.evaluate(() => ({
     first: document.querySelector('#content h2[id^="ex-"]').textContent,
     tag: document.querySelector('#content h2[id^="ex-"]').tagName,

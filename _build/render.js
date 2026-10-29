@@ -71,8 +71,8 @@ function exampleBlock(sec, pageKey, ex, css, cssLabel) {
 const propTag = (t, tone) => `<span class="tag ${tone ? tone + " " : ""}plain sm">${esc(t)}</span>`;
 function propsTable(rows) {
   if (!rows || !rows.length) return "";
-  const names = (n) => n.split(/ \/ | · /).map((x) => propTag(x.trim(), "ok")).join("");
-  const dflt = (d) => !d || d === "—" ? "—" : propTag(d);
+  const names = (n) => `<div class="prop-tags">${n.split(/ \/ | · /).map((x) => propTag(x.trim(), "ok")).join("")}</div>`;
+  const dflt = (d) => !d || d === "—" ? "—" : `<div class="prop-tags">${propTag(d)}</div>`;
   return `<div class="tablewrap"><table class="props"><thead><tr><th>Prop / Class</th><th>Type · Values</th><th>Default</th><th>Description</th></tr></thead><tbody>${rows.map(r => `<tr><td>${names(r[0])}</td><td>${esc(r[1])}</td><td>${dflt(r[2])}</td><td>${r[3]}</td></tr>`).join("")}</tbody></table></div>`;
 }
 const USAGE_HTML = `<!-- 1) 토큰 + 전체 컴포넌트 스타일 한 번에 연결 -->

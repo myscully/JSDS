@@ -483,7 +483,8 @@ table.props th:nth-child(2){width:25%}
 table.props th:nth-child(3){width:15%}
 table.props th:nth-child(4){width:40%}
 table.props td:nth-child(2){overflow-wrap:anywhere}
-table.props td .tag{white-space:normal;overflow-wrap:anywhere;margin:2px 4px 2px 0}   /* 이름 · 기본값 태그는 칸 안에서 줄을 바꾼다 — 고정 폭에서 nowrap 이면 넘친다 */
+table.props .prop-tags{display:flex;flex-wrap:wrap;gap:6px}   /* 태그끼리 6 띄우고, 칸을 넘으면 태그째 다음 줄로 — 흐름 안 inline 태그는 줄 끝에서 태그 안쪽이 꺾이고 위아래가 붙었다(사람의 결정 2026-10-29) */
+table.props .prop-tags .tag{white-space:normal;overflow-wrap:anywhere}   /* 태그 하나가 칸보다 길 때만 그 안에서 꺾인다 — nowrap 이면 고정 폭 칸을 넘친다 */
 table.props td:nth-child(4){color:var(--foreground-neutral-secondary)}
 pre{background:var(--code-bg);color:var(--code-chip-fg);padding:var(--space-5);border-radius:var(--radius-lg);overflow-x:auto;font-size:12px;line-height:1.6;margin:var(--space-4) 0 var(--space-6);tab-size:2}
 pre code{font-size:inherit}
