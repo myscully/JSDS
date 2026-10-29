@@ -68,6 +68,12 @@
 >   같은 때 글자를 고친 623:3091(Card/Button Spec State 값 — "primary(테두리 · 글자 --foreground-brand-primary)" 를 더함)은 k16 에 이미 Noto 였다(새로 바뀐 것 아님 — 되돌릴 목록은 k16 절에 있다).
 >   `font-revert-nodes.tsv` 맨 아래 "2026-10-28 k17" 절. Loading=True 21변형의 라벨은 **칠 불투명도만 0** 으로 했다(폰트를 올리지 않았다 — 서체 · 스타일 그대로 Pretendard).
 >   새 아이콘 전용 Loading 27변형은 글자가 없어 Button 라벨은 105개 그대로다. 4 Pattern 입력칸 높이 · Outline Primary 테두리 변수는 글자를 건드리지 않았다
+> - 2026-10-29 k18: 4 Pattern 정책 설정의 허용 장치 시리얼 입력칸(339:548)의 글자를 사이트 값으로 바꾸며 **1개가 새로 Noto** 가 됐다 —
+>   339:549("예: 0781-5583, 0951-1666" → "4C530001, 4C530002", 사이트 `patterns.data.js` 정책 설정의 `<input value>` 그대로, 원래 Pretendard Regular · Body/2).
+>   사이트는 placeholder 가 아니라 값이라 글자 칠도 placeholder 색(foreground/disable/primary · 칠 불투명도 0.16) → foreground/neutral/primary 로 바꿨다(`.field input` 의 color). 칠은 되돌릴 것 없다.
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-29 k18" 절.
+>   **되돌릴 때 함께 할 일(사람의 결정 — Figma 에서는 지금 건드리지 않음)**: k17 의 317:336(Card/Button 사용 가이드 Do 목록)은 다섯 줄이 한 노드에 들어가 이웃 목록 항목보다 줄 사이가 좁다.
+>   Pretendard 로 되돌릴 때 데스크톱에서 항목별 노드로 나누거나 줄 간격을 이웃 항목과 맞춘다. tsv 의 k17 절 317:336 행 '어디' 열 끝에도 적었다
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)

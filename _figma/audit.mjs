@@ -476,11 +476,12 @@ function buttonExpect() {
     const root = { fill: face(base, "-"), stroke: "transparent", fg: null };
     const dBase = cssRule(".btn[disabled]"), dOut = cssRule(".btn:where(.outline)[disabled]"), dFlat = cssRule(".btn:where(.text,.icon-only:not(.solid,.outline))[disabled]");
     const out = {};
-    /* Loading(2026-10-28 k17) — 라벨은 .btn.loading 의 color, 스피너는 .btn.loading::after 의 크기와 윗변 색.
-       윗변 색 규칙 셋은 :where 라 무게가 같아 **뒤에 오는 것이 이긴다** — 아래 순서는 style.src.css 의 순서다. 조건은 각 :where 목록을 형태 · 색으로 옮긴 것 */
+    /* Loading(2026-10-28 k17) — 라벨은 .btn.loading 의 color, 스피너는 .btn.loading::after 의 크기와 호 색(color).
+       호 색 규칙 셋은 :where 라 무게가 같아 **뒤에 오는 것이 이긴다** — 아래 순서는 style.src.css 의 순서다. 조건은 각 :where 목록을 형태 · 색으로 옮긴 것 */
     const ld = cssRule(".btn.loading"), la = cssRule(".btn.loading::after");
     if (!/transparent/.test(ld.color || "")) throw new Error(".btn.loading 의 color 가 transparent 가 아닙니다(" + ld.color + ")");
-    const spinTop = (r) => { const t = figTok(r["border-top-color"]); if (!t) throw new Error("스피너 윗변 색을 읽지 못했습니다(" + r["border-top-color"] + ")"); return t; };
+    /* 2026-10-29 회색 바탕 고리를 빼고 3/4 호 하나로 — 호의 색은 ::after 의 color(테두리는 currentColor) */
+    const spinTop = (r) => { const t = figTok(r.color); if (!t) throw new Error("스피너 색(::after color)을 읽지 못했습니다(" + r.color + ")"); return t; };
     const SPIN = [
       [() => true, spinTop(la), ".btn.loading::after"],
       [(v, c) => c === "Assistive" && v !== "Text", spinTop(cssRule(".btn:where(.assistive:not(.text)).loading::after")), ".btn:where(.assistive:not(.text)).loading::after"],
