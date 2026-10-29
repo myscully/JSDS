@@ -675,10 +675,11 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 /* loading — disabled 와 다르다: 포커스는 남고(aria-busy) click · mousedown · pointerdown · keydown 은 ds.js(React 는 Button) 가 막는다. 라벨은 자리만 지켜 폭이 흔들리지 않는다.
    pointer-events:none 을 두지 않는다 — 두면 클릭이 버튼을 지나 뒤의 행 · 카드에 그대로 떨어져, 막는다던 클릭이 부모에서 실행됐다 */
 .btn.loading{position:relative;color:transparent;cursor:progress}
-.btn.loading::after{content:"";position:absolute;width:16px;height:16px;border:2px solid var(--surface-neutral-strong);border-top-color:var(--brand-label);border-radius:50%;animation:spin .8s linear infinite}
-.btn:where(.assistive:not(.text)).loading::after{border-top-color:var(--surface-brand-primary)}
-.btn:where(.outline.primary,.text,.icon-only:not(.solid,.outline).primary).loading::after{border-top-color:var(--foreground-brand-primary)}
-.btn:where(.negative:not(.text)).loading::after{border-top-color:var(--foreground-negative-strong)}   /* text 는 색이 primary 하나라 negative 를 붙여도 글자는 제품색이다 — 스피너만 빨개지지 않게 */
+/* 스피너는 회색 바탕 고리 없이 3/4 호 하나 — Figma 의 loader-2 와 같은 모양(사람의 결정 2026-10-29). 색은 color 로 주고 테두리가 currentColor 를 따른다 */
+.btn.loading::after{content:"";position:absolute;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;color:var(--brand-label);animation:spin .8s linear infinite}
+.btn:where(.assistive:not(.text)).loading::after{color:var(--surface-brand-primary)}
+.btn:where(.outline.primary,.text,.icon-only:not(.solid,.outline).primary).loading::after{color:var(--foreground-brand-primary)}
+.btn:where(.negative:not(.text)).loading::after{color:var(--foreground-negative-strong)}   /* text 는 색이 primary 하나라 negative 를 붙여도 글자는 제품색이다 — 스피너만 빨개지지 않게 */
 /* 묶음 — 수평이면 주 행동이 오른쪽(.end 로 오른쪽 정렬), 수직이면 주 행동이 위(.vertical, 같은 폭) */
 .btn-group{display:inline-flex;gap:12px;align-items:center;line-height:1.6}
 .btn-group.end{justify-content:flex-end;width:100%}
