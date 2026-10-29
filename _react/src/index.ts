@@ -7,7 +7,7 @@ export { useControllable } from "./utils/useControllable";
 export { useId } from "./utils/useId";
 export { Portal, type PortalProps } from "./utils/Portal";
 export { useOutsideClick, useEscape, useFocusTrap, mergeRefs } from "./utils/hooks";
-export { accentScale, applyAccent, isLightAccent, setTheme, getTheme, type AccentScale, type Theme } from "./theme";
+export { accentScale, applyAccent, isLightAccent, clashesWithStatus, STATUS_HUES, setTheme, getTheme, type AccentScale, type Theme } from "./theme";
 export { LABELS, type LabelKey } from "./labels";
 
 export { Icon, type IconProps } from "./icons/Icon";

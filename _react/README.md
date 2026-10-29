@@ -10,6 +10,8 @@
 npm i @jiran/ds-react
 ```
 
+> **사내 배포 전용입니다.** 공개 npm 에 실수로 올라가지 않도록 `package.json` 을 `"private": true` 로 막아 두었습니다. 사내 레지스트리가 정해지면 `publishConfig` 로 그곳만 가리키게 한 뒤 풉니다.
+
 ```tsx
 // main.tsx — 앱 진입점에서 한 번
 import "@jiran/ds-react/style.css";
@@ -36,7 +38,7 @@ createRoot(document.getElementById("root")!).render(
 | `src/patterns/` | 패턴 레이아웃 래퍼 (Stack · Toolbar · Form · Empty · Notes · Settings …) |
 | `src/icons/` | `Icon` + 생성 파일 `icons.data.ts` (`_build/icons.js` 의 36개 Tabler 아이콘 — 사이트 Foundations › Icons 갤러리와 동일) |
 | `src/utils/` | `cx` · `useControllable` · `useId` · `Portal` · `useOutsideClick` · `useEscape` · `useFocusTrap` |
-| `src/theme.ts` | `accentScale` · `applyAccent` · `setTheme` |
+| `src/theme.ts` | `accentScale` · `applyAccent`(상태색과 겹치면 `data-accent-neutral` 로 중립) · `clashesWithStatus` · `setTheme` |
 | `examples/<sec>/<page>/<id>.tsx` | **사이트 React 탭에 그대로 표시되는 예제**(118개). 테스트가 렌더해 사이트 HTML 과 구조를 비교 |
 | `tests/` | `site-consistency` (태그·클래스·상태 속성 비교) · `examples-coverage` |
 | `scripts/` | `gen-icons` · `sync-css`(style.css 합성) · `check-version` · `visual-compare` |
