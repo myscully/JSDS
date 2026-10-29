@@ -349,7 +349,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     while (stack.length) { const t = stack.pop(); out = { r: t.r * t.a + out.r * (1 - t.a), g: t.g * t.a + out.g * (1 - t.a), b: t.b * t.a + out.b * (1 - t.a), a: 1 }; }
     return `rgb(${Math.round(out.r)}, ${Math.round(out.g)}, ${Math.round(out.b)})`;
   };
-  for (const [sel, name] of [["#ex-button-variant .btn.solid.negative", "solid negative"], ["#ex-button-text .btn.text", "text"], ["#ex-button-variant .btn.outline.primary", "outline primary"], ["#ex-button-icon-only .btn.assistive.icon-only:not(.outline)", "plain icon-only assistive"]]) {
+  for (const [sel, name] of [["#ex-button-variant .btn.solid.negative", "solid negative"], ["#ex-button-text .btn.text:not(.assistive)", "text"], ["#ex-button-text .btn.text.assistive", "text assistive"], ["#ex-button-variant .btn.outline.primary", "outline primary"], ["#ex-button-icon-only .btn.assistive.icon-only:not(.outline)", "plain icon-only assistive"]]) {
     for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
       await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
       /* 테마를 바꾸기 전에 hover 를 반드시 푼다 — 마우스가 남아 있으면 rest 를 hover 로 읽는다 */
@@ -380,7 +380,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("outline negative reacts to hover", odBase !== odHover, odBase + " → " + odHover);
   // .btn.text 의 pressed — 기본·다크·중립 셋 다 hover 와 달라야 한다(--surface-brand-subtle 은 중립에서 hover 와 같아졌다)
   const textPress = async (label) => {
-    const t = page.locator("#ex-button-text .btn.text").last();
+    const t = page.locator("#ex-button-text .btn.text:not(.assistive)").last();
     await t.hover(); await page.waitForTimeout(180);
     const h = await t.evaluate((e) => getComputedStyle(e).backgroundColor);
     await page.mouse.down(); await page.waitForTimeout(180);
@@ -456,6 +456,19 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { 버튼: Math.round(r.width) + "x" + Math.round(r.height), 아이콘: Math.round(svg.width) };
   });
   ok("lg icon button renders at 48 with a 20px icon", lgIcon.버튼 === "48x48" && lgIcon.아이콘 === 20, JSON.stringify(lgIcon));
+  /* State 예제의 고정 상태(data-state, 사이트 전용 — build.js 가 :hover · :active 에서 생성)가 실제 hover · pressed 와 같은 색인가 */
+  const forced = [];
+  for (const v of ["solid.primary", "outline.primary", "solid.assistive", "outline.assistive"]) {
+    const base = page.locator(`#ex-button-state .btn.${v}:not([data-state]):not([disabled])`);
+    await base.scrollIntoViewIfNeeded(); await base.hover(); await page.waitForTimeout(260);
+    const realHover = await base.evaluate((e) => [getComputedStyle(e).backgroundColor, getComputedStyle(e).borderTopColor].join());
+    await page.mouse.down(); await page.waitForTimeout(260);
+    const realPress = await base.evaluate((e) => [getComputedStyle(e).backgroundColor, getComputedStyle(e).borderTopColor].join());
+    await page.mouse.up(); await page.mouse.move(1, 1); await page.waitForTimeout(260);
+    const fake = await page.evaluate((v) => ["hover", "pressed"].map((st) => { const e = document.querySelector(`#ex-button-state .btn.${v}[data-state="${st}"]`); return [getComputedStyle(e).backgroundColor, getComputedStyle(e).borderTopColor].join(); }), v);
+    forced.push({ v, ok: fake[0] === realHover && fake[1] === realPress, realHover, realPress, fake });
+  }
+  ok("State example's fixed Hover · Pressed match the real states", forced.every((f) => f.ok), JSON.stringify(forced.filter((f) => !f.ok)));
   /* 버튼 · Text Field · Date Picker 필드는 같은 32 · 40 · 48 이다(사람의 결정 2026-10-28) — 나란히 놓으면 맞아야 한다 */
   const heights = await page.evaluate(() => {
     const prev = document.querySelector("#ex-button-size .example-preview"), out = {};
@@ -598,7 +611,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
     await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
     await page.waitForTimeout(250);
-    for (const [n, cls] of [["outline assistive", "outline assistive"], ["solid assistive", "solid assistive"], ["outline primary", "outline primary"], ["text", "text"], ["plain icon-only", "assistive icon-only"]]) {
+    for (const [n, cls] of [["outline assistive", "outline assistive"], ["solid assistive", "solid assistive"], ["outline primary", "outline primary"], ["text", "text"], ["text assistive", "text assistive"], ["plain icon-only", "assistive icon-only"]]) {
       await page.evaluate((c) => {
         const prev = document.querySelector("#ex-button-variant .example-preview");
         const b = document.createElement("button"); b.type = "button"; b.id = "hv-probe"; b.className = "btn md " + c; b.textContent = "probe";

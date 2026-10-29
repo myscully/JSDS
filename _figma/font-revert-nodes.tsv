@@ -302,3 +302,7 @@ Resource	342:42	Pretendard Regular · Body/2(k10 절과 같음)	Noto Sans KR Reg
 #   같은 일로 남은 것(Figma 를 건드리지 않음): 317:336(k17 절)의 줄 간격 — 위 k17 행의 '어디' 열 끝에 적었다
 # page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
 4 Pattern	339:549	Pretendard Regular · Body/2	Noto Sans KR Regular · 스타일 없음	예: 0781-5583, 0951-1666 → 4C530001, 4C530002	Card/정책 설정 예시 · 저장장치 · 허용 장치 시리얼 입력칸(339:548) 글자 — 사이트 patterns.data.js 정책 설정(policy-settings) input value
+
+# 2026-10-29 k19 — Button Text/Assistive 15변형 추가 · Outline Primary 테두리 --line-brand-strong. 새로 Noto Sans KR 이 된 노드 0개 — 되돌릴 행 없음
+#   Text/Assistive 15변형(815:9 · 815:16 · 815:23 · 815:30 · 815:37 · 815:44 · 815:51 · 815:58 · 815:65 · 815:72 · 815:76 · 815:80 · 815:84 · 815:93 · 815:102)은 Text/Primary 복제 — 라벨은 Pretendard 그대로(칠 · 속성 연결만 바꿈)
+#   같은 작업에서 글자를 고친 623:3091(Card/Button Spec State 값)은 k16 에 이미 Noto 였다 — 되돌릴 행은 k16 절에 있다(글자만 이번에 "테두리 --line-brand-strong" 을 더했다)

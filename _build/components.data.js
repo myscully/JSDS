@@ -55,10 +55,10 @@ const COMPONENTS = {
         </div>` },
       { id: "priority", title: "Priority", desc: "<b>Lv.4 Primary Solid</b> — 화면에서 가장 중요한 메인 행동을 유도 · 제안합니다. <b>Lv.3 Primary Outline</b> — 미리보기 · 임시 저장처럼 대체 행동을 제안합니다. <b>Lv.2 Assistive Solid</b> — 토글 버튼을 보조합니다. <b>Lv.1 Assistive Outline</b> — 닫기 · 취소 같은 보조 행동을 제시합니다. 삭제 · 탈퇴처럼 <b>되돌리기 어려운 행동</b>에는 우선순위와 별개로 Negative 를 씁니다.", html: `
         <div class="btn-group">
-          <button type="button" class="btn md outline assistive">취소</button>
-          <button type="button" class="btn md solid assistive">필터</button>
-          <button type="button" class="btn md outline primary">미리보기</button>
           <button type="button" class="btn md solid primary">정책 저장</button>
+          <button type="button" class="btn md outline primary">미리보기</button>
+          <button type="button" class="btn md solid assistive">필터</button>
+          <button type="button" class="btn md outline assistive">취소</button>
           <button type="button" class="btn md solid negative">정책 삭제</button>
         </div>` },
       { id: "size", title: "Size", desc: "<b>높이는 고정</b>하고 너비는 라벨에 맞춰 자유롭게 씁니다. 테이블 · 툴바 안에서는 Small, 폼 하단은 Medium, 온보딩 · 빈 화면은 Large.", html: `
@@ -79,10 +79,24 @@ const COMPONENTS = {
           <button type="button" class="btn lg solid primary icon-only" aria-label="설정">${I("settings")}</button>
         </div>` },
       { id: "state", title: "State", desc: "상태는 <b>Normal · Hover · Pressed · Disabled</b> 네 가지입니다.", html: `
-        <button type="button" class="btn md solid primary">Normal</button>
-        <button type="button" class="btn md outline primary">Normal</button>
-        <button type="button" class="btn md solid assistive">Normal</button>
-        <button type="button" class="btn md outline assistive">Normal</button>` },
+        <div style="display:grid;grid-template-columns:repeat(4,auto);gap:12px">
+          <button type="button" class="btn md solid primary">Normal</button>
+          <button type="button" class="btn md outline primary">Normal</button>
+          <button type="button" class="btn md solid assistive">Normal</button>
+          <button type="button" class="btn md outline assistive">Normal</button>
+          <button type="button" class="btn md solid primary" data-state="hover">Hover</button>
+          <button type="button" class="btn md outline primary" data-state="hover">Hover</button>
+          <button type="button" class="btn md solid assistive" data-state="hover">Hover</button>
+          <button type="button" class="btn md outline assistive" data-state="hover">Hover</button>
+          <button type="button" class="btn md solid primary" data-state="pressed">Pressed</button>
+          <button type="button" class="btn md outline primary" data-state="pressed">Pressed</button>
+          <button type="button" class="btn md solid assistive" data-state="pressed">Pressed</button>
+          <button type="button" class="btn md outline assistive" data-state="pressed">Pressed</button>
+          <button type="button" class="btn md solid primary" disabled>Disabled</button>
+          <button type="button" class="btn md outline primary" disabled>Disabled</button>
+          <button type="button" class="btn md solid assistive" disabled>Disabled</button>
+          <button type="button" class="btn md outline assistive" disabled>Disabled</button>
+        </div>` },
       { id: "disabled", title: "Disabled", desc: "<code>disabled</code> 옵션으로 비활성을 표시합니다.", html: `
         <div class="btn-group">
           <button type="button" class="btn md solid primary" disabled>Primary</button>
@@ -97,9 +111,11 @@ const COMPONENTS = {
         <button type="button" class="btn md solid primary loading" aria-busy="true">저장 중</button>
         <button type="button" class="btn md outline assistive loading" aria-busy="true">불러오는 중</button>
         <button type="button" class="btn md solid negative loading" aria-busy="true">삭제 중</button>` },
-      { id: "text", title: "Text", desc: "Solid · Outline 정의 밖의 변형입니다. 카드 머리의 '전체 보기', 달력 하단의 '오늘 · 초기화'처럼 <b>문장 속 링크에 가까운 가벼운 행동</b>에만 씁니다.", html: `
+      { id: "text", title: "Text", desc: "카드 머리의 '전체 보기', 달력 하단의 '오늘 · 초기화'처럼 <b>문장 속 링크에 가까운 가벼운 행동</b>에만 씁니다.", html: `
         <button type="button" class="btn sm text">전체 보기</button>
-        <button type="button" class="btn md text">초기화</button>` },
+        <button type="button" class="btn md text">초기화</button>
+        <button type="button" class="btn sm text assistive">전체 보기</button>
+        <button type="button" class="btn md text assistive">초기화</button>` },
       { id: "placement", title: "Placement", desc: "메인과 서브가 분명히 다른 버튼을 <b>수평</b>으로 놓으면 유도 목적이 분명한 버튼을 <b>오른쪽</b>에, <b>수직</b>으로 놓으면 <b>위</b>에 둡니다.", html: `
         <div class="btn-group">
           <button type="button" class="btn md outline assistive">취소</button>
@@ -112,7 +128,7 @@ const COMPONENTS = {
         </div>`, layout: "stack center" },
     ],
     props: [
-      ["variant", "solid | outline | text", "solid", "형태. Solid 는 면을 채우고 Outline 은 테두리만 둡니다. <code>text</code> 는 Solid · Outline 정의 밖의 변형이고 색은 primary 하나입니다. iconOnly 에서 생략하면 배경이 없습니다"],
+      ["variant", "solid | outline | text", "solid", "형태. Solid 는 면을 채우고 Outline 은 테두리만 둡니다. <code>text</code> 는 Solid · Outline 정의 밖의 변형이고 색은 primary · assistive 둘입니다(assistive 는 <code>.text.assistive</code>). iconOnly 에서 생략하면 배경이 없습니다"],
       ["color", "primary | assistive | negative", "primary", "색. Primary 는 주 행동, Assistive 는 보조 행동, Negative 는 삭제 · 탈퇴처럼 되돌리기 어려운 위험 · 경고성 행동"],
       ["size", "sm | md | lg", "md", "높이 32 · 40 · 48 고정, 너비는 라벨에 맞춰 자유"],
       ["iconLeft / iconRight", "ReactNode", "—", "라벨 왼쪽 · 오른쪽 아이콘. 행동의 의미를 보완할 때만 쓰고 한쪽에만 둡니다(동시 사용 지양). HTML 은 라벨 앞이나 뒤에 <code>svg</code> 를 둡니다. 크기는 sm 16 · md 18 · lg 20"],
@@ -126,8 +142,8 @@ const COMPONENTS = {
       ["end / .end", "boolean", "false", "ButtonGroup — 묶음을 오른쪽 정렬(폼 하단)"],
       ["vertical / .vertical", "boolean", "false", "ButtonGroup — 수직 배열(간격 8, 같은 폭). 주 행동이 위"],
     ],
-    spec: [["Priority", "Lv.4 Primary Solid · Lv.3 Primary Outline · Lv.2 Assistive Solid · Lv.1 Assistive Outline · 되돌리기 어려운 행동은 Negative"], ["State", "Normal → Hover → Pressed 로 <b>라이트는 어두워지고 다크는 밝아집니다</b>. Solid primary <code>--surface-brand-primary</code> → <code>-strong</code> → <code>-heavy</code>(라이트 brand 50·45·40 · 다크 50·55·60) · Solid assistive <code>--surface-neutral-tertiary</code> → <code>-secondary</code> → <code>-strong</code> · Solid negative <code>--surface-negative-primary</code> → <code>-strong</code> → <code>-heavy</code>. Outline 은 면이 투명에서 출발 — primary(테두리 · 글자 <code>--foreground-brand-primary</code>) <code>--surface-brand-subtle</code> → <code>-subtle-strong</code>, assistive <code>--surface-neutral-secondary</code> → <code>-strong</code>, negative <code>--surface-negative-hover</code> → <code>-pressed</code>. 틴트는 알파가 커지는 구조라 같은 토큰이 테마에 따라 방향을 뒤집고, 불투명 primary 는 두 테마 모두 제품 HEX(50)에서 출발해 테마별로 반대 방향 단계를 집습니다. Disabled 는 전용 토큰. 키보드 포커스는 상태가 아니라 전 변형 공통 <code>--foreground-brand-primary</code> 1px 외곽선(2px 띄움)"], ["Size", "sm 32 · md 40 · lg 48 (높이 고정)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정 · 아이콘 전용은 정사각)"], ["Label", "14 SemiBold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "수평은 주 행동이 오른쪽 · 수직은 주 행동이 위 · Lv.4 는 화면당 하나"]],
-    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 32, px: 14, fs: 12 }, md: { h: 40, px: 20, fs: 14 }, lg: { h: 48, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { "solid primary": { bg: "--surface-brand-primary", fg: "--brand-label" }, "outline primary": { bg: "transparent", fg: "--foreground-brand-primary", stroke: "--foreground-brand-primary" }, "solid assistive": { bg: "--surface-neutral-tertiary", fg: "--foreground-neutral-primary" }, "outline assistive": { bg: "transparent", fg: "--foreground-neutral-primary", stroke: "--line-neutral-primary" }, "solid negative": { bg: "--surface-negative-primary", fg: "--foreground-negative-strong" }, "outline negative": { bg: "transparent", fg: "--foreground-negative-strong", stroke: "--line-negative-primary" }, text: { bg: "transparent", fg: "--foreground-brand-primary" }, "plain primary": { bg: "transparent", fg: "--foreground-brand-primary" }, "plain assistive": { bg: "transparent", fg: "--foreground-neutral-secondary" }, "plain negative": { bg: "transparent", fg: "--foreground-negative-strong" } }, states: ["normal", "hover", "pressed", "disabled"], loading: true, disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary", outlineBg: "transparent", outlineStroke: "--surface-disable-primary" } },
+    spec: [["Priority", "Lv.4 Primary Solid · Lv.3 Primary Outline · Lv.2 Assistive Solid · Lv.1 Assistive Outline · 되돌리기 어려운 행동은 Negative"], ["State", "Normal → Hover → Pressed 로 <b>라이트는 어두워지고 다크는 밝아집니다</b>. Solid primary <code>--surface-brand-primary</code> → <code>-strong</code> → <code>-heavy</code>(라이트 brand 50·45·40 · 다크 50·55·60) · Solid assistive <code>--surface-neutral-tertiary</code> → <code>-secondary</code> → <code>-strong</code> · Solid negative <code>--surface-negative-primary</code> → <code>-strong</code> → <code>-heavy</code>. Outline 은 면이 투명에서 출발 — primary(테두리 <code>--line-brand-strong</code> · 글자 <code>--foreground-brand-primary</code>) <code>--surface-brand-subtle</code> → <code>-subtle-strong</code>, assistive <code>--surface-neutral-secondary</code> → <code>-strong</code>, negative <code>--surface-negative-hover</code> → <code>-pressed</code>. 틴트는 알파가 커지는 구조라 같은 토큰이 테마에 따라 방향을 뒤집고, 불투명 primary 는 두 테마 모두 제품 HEX(50)에서 출발해 테마별로 반대 방향 단계를 집습니다. Disabled 는 전용 토큰. 키보드 포커스는 상태가 아니라 전 변형 공통 <code>--foreground-brand-primary</code> 1px 외곽선(2px 띄움)"], ["Size", "sm 32 · md 40 · lg 48 (높이 고정)"], ["Container", "radius/md 6 · 좌우 padding 14 / 20 / 26 (text 변형은 8 고정 · 아이콘 전용은 정사각)"], ["Label", "14 SemiBold (sm 12 · lg 16) · 동사로 시작"], ["Placement", "수평은 주 행동이 오른쪽 · 수직은 주 행동이 위 · Lv.4 는 화면당 하나"]],
+    figma: { frame: "Button", radius: "radius/md", sizes: { sm: { h: 32, px: 14, fs: 12 }, md: { h: 40, px: 20, fs: 14 }, lg: { h: 48, px: 26, fs: 16 } }, iconSize: { sm: 16, md: 18, lg: 20 }, variants: { "solid primary": { bg: "--surface-brand-primary", fg: "--brand-label" }, "outline primary": { bg: "transparent", fg: "--foreground-brand-primary", stroke: "--line-brand-strong" }, "solid assistive": { bg: "--surface-neutral-tertiary", fg: "--foreground-neutral-primary" }, "outline assistive": { bg: "transparent", fg: "--foreground-neutral-primary", stroke: "--line-neutral-primary" }, "solid negative": { bg: "--surface-negative-primary", fg: "--foreground-negative-strong" }, "outline negative": { bg: "transparent", fg: "--foreground-negative-strong", stroke: "--line-negative-primary" }, text: { bg: "transparent", fg: "--foreground-brand-primary" }, "text assistive": { bg: "transparent", fg: "--foreground-neutral-secondary" }, "plain primary": { bg: "transparent", fg: "--foreground-brand-primary" }, "plain assistive": { bg: "transparent", fg: "--foreground-neutral-secondary" }, "plain negative": { bg: "transparent", fg: "--foreground-negative-strong" } }, states: ["normal", "hover", "pressed", "disabled"], loading: true, disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary", outlineBg: "transparent", outlineStroke: "--surface-disable-primary" } },
   },
 
   /* ------------------------------------------------ Text Field */

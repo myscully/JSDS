@@ -38,6 +38,23 @@
     for (const ch of list) { if (ch === "(") d++; if (ch === ")") d--; if (ch === "," && !d) { out.push(cur); cur = ""; } else cur += ch; }
     return [...out, cur].map(s => s.trim()).filter(Boolean);
   }
+  /* 예제의 고정 상태(사이트 전용) — 버튼 :hover · :active 규칙을 [data-state="hover" | "pressed"] 로 옮겨 쓴다.
+     같은 원본에서 만들어 색이 어긋날 수 없고, 샘플 블록 밖(assets/style.css 끝)에만 붙어 패키지 · 복사용 CSS 에는 가지 않는다(2026-10-29) */
+  function demoStateCss(css) {
+    const out = [];
+    for (const m of samplesBlock(css).replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const sels = splitSelectors(m[1]).filter(s => /^\.btn\b/.test(s) && /:(hover|active)\b/.test(s))
+        .map(s => s.replace(/:hover\b/g, '[data-state="hover"]').replace(/:active\b/g, '[data-state="pressed"]'));
+      if (sels.length) out.push(sels.join(",") + "{" + m[2].trim() + "}");
+    }
+    return out.join("\n");
+  }
+  /* 사이트의 assets/style.css — 원본에서 폰트 URL 한 곳을 바꾸고 예제 고정 상태를 끝에 붙인다.
+     build.js 와 pre-commit 검사(git-hooks/check-build.js)가 이 함수 하나를 쓴다 — 둘이 따로 변환하면 검사가 빌드를 오판한다 */
+  function siteCss(src) {
+    return src.replace('url("PretendardVariable.woff2")', 'url("fonts/PretendardVariable.woff2")')
+      + "\n/* 예제 고정 상태(사이트 전용, build.js 가 생성) — State 예제가 Hover · Pressed 를 나란히 보인다 */\n" + demoStateCss(src) + "\n";
+  }
   /* prefixes: [".btn", ".tag"] → 해당 셀렉터로 시작하는 규칙만. 블록 안에는 평면 규칙만 둔다(@media 금지) */
   function cssFor(prefixes, css, version) {
     let block = samplesBlock(css).replace(/\/\*[\s\S]*?\*\//g, "");
@@ -199,6 +216,6 @@
     return out;
   }
 
-  const api = { esc, dedent, splitSelectors, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  const api = { esc, dedent, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);

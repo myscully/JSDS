@@ -2,7 +2,7 @@ import { forwardRef, type KeyboardEvent, type MouseEvent, type PointerEvent, typ
 import { cx } from "../../utils/cx";
 import type { Size } from "../../types";
 
-/** 형태 — solid · outline. text 는 정의 밖 변형(색은 primary 만) */
+/** 형태 — solid · outline. text 는 정의 밖 변형(색은 primary · assistive) */
 export type ButtonVariant = "solid" | "outline" | "text";
 /** 색 — primary(기본) · assistive(보조) · negative(되돌리기 어려운 행동) */
 export type ButtonColor = "primary" | "assistive" | "negative";
@@ -52,11 +52,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     if (iconLeft && iconRight) console.warn("[ds-react] Button 아이콘은 iconLeft · iconRight 중 하나만 씁니다.");
     if (variant && !VARIANTS.includes(variant)) console.warn(`[ds-react] Button variant="${variant}" 는 없습니다 — solid · outline · text (MIGRATION.md 의 Button 전환표).`);
     if (!COLORS.includes(color)) console.warn(`[ds-react] Button color="${color}" 는 없습니다 — primary · assistive · negative.`);
-    if (variant === "text" && color !== "primary") console.warn("[ds-react] Button text 변형의 색은 primary 하나입니다 — color 는 무시됩니다.");
+    if (variant === "text" && color === "negative") console.warn("[ds-react] Button text 변형의 색은 primary · assistive 둘입니다 — negative 는 무시됩니다.");
     for (const k of LEGACY_PROPS) if (k in props) console.warn(`[ds-react] Button ${k} prop 은 바뀌었습니다 — ${{ icon: "iconOnly", leading: "iconLeft", trailing: "iconRight" }[k]} (MIGRATION.md).`);
   }
   const form = variant ?? (iconOnly ? undefined : "solid");
-  const cls = cx("btn", size, form, form !== "text" && color, { "icon-only": iconOnly, block, loading }, className);
+  /* text 는 색 클래스가 없으면 primary — 사이트의 `btn md text` 마크업이 그대로 primary 로 남는다. assistive 만 클래스를 붙인다 */
+  const cls = cx("btn", size, form, form !== "text" ? color : color === "assistive" && color, { "icon-only": iconOnly, block, loading }, className);
   const extra = Comp === "button" ? { type: type ?? "button", disabled } : { "aria-disabled": disabled || undefined };
   /* loading 중에는 네 이벤트(캡처 변형 포함)를 부르지 않는다. disabled 를 걸지 않는 이유는 포커스를 유지해야 스크린리더가 aria-busy 변화를 읽기 때문.
      as="a" 처럼 button 이 아닐 때는 disabled 속성이 먹지 않아 aria-disabled 만 나가므로 클릭도 여기서 막는다.

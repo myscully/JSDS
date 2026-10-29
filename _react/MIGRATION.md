@@ -195,7 +195,7 @@ Button 정의를 다시 내렸습니다. 형태(`variant`: solid · outline)와 
 | `variant="tertiary"` | `color="assistive"` | `.btn.solid.assistive` |
 | `variant="danger"` | `color="negative"` | `.btn.solid.negative` |
 | `variant="danger-secondary"` | `variant="outline" color="negative"` | `.btn.outline.negative` |
-| `variant="text"` | 그대로(정의 밖 변형, 색은 primary 만) | `.btn.text` |
+| `variant="text"` | 그대로(정의 밖 변형, 색은 primary · assistive — `color="assistive"`) | `.btn.text` · `.btn.text.assistive` |
 | `icon` | `iconOnly` — `variant` 를 생략하면 배경 없음, hover 에만 면 | `.icon` → `.icon-only` |
 | `leading` / `trailing` | `iconLeft` / `iconRight` (동시에 쓰지 않음) | — |
 | — | `ButtonGroup vertical` (주 행동이 위) | `.btn-group.vertical` |
