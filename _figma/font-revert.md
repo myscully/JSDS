@@ -63,6 +63,11 @@
 >   623:3091 · 325:1423 은 k4 · k15 에 Noto 였다가 사람이 되돌린 노드로, 글자를 다시 고쳐 또 Noto 가 됐다. `font-revert-nodes.tsv` 맨 아래 "2026-10-28 k16" 절.
 >   복제라 Pretendard 그대로 늘어난 글자: Button Outline Primary 라벨 15 · Properties 새 목록 칩 4. Focused 변형 18개를 지워 Button 라벨은 108 → 105개다(아래 "Button 라벨 자간" 절).
 >   변형 칠 · 높이 · 이름, 인스턴스 크기 덮어쓰기, 4 Pattern 버튼 프레임 칠은 글자를 건드리지 않아 서체가 그대로다
+> - 2026-10-28 k17: Button 후속(사람의 결정 2026-10-28 — Outline Primary 테두리 · 아이콘 전용 Loading · Loading 라벨 숨김)과 Card/Button 사용 가이드 문구를 맞추며 **1개가 새로 Noto** 가 됐다 —
+>   317:336(Card/Button 사용 가이드 Do 목록의 옛 "Danger" 항목 → 사이트 button.examples priority 의 desc 다섯 줄, 원래 Pretendard Regular · Body/2).
+>   같은 때 글자를 고친 623:3091(Card/Button Spec State 값 — "primary(테두리 · 글자 --foreground-brand-primary)" 를 더함)은 k16 에 이미 Noto 였다(새로 바뀐 것 아님 — 되돌릴 목록은 k16 절에 있다).
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-28 k17" 절. Loading=True 21변형의 라벨은 **칠 불투명도만 0** 으로 했다(폰트를 올리지 않았다 — 서체 · 스타일 그대로 Pretendard).
+>   새 아이콘 전용 Loading 27변형은 글자가 없어 Button 라벨은 105개 그대로다. 4 Pattern 입력칸 높이 · Outline Primary 테두리 변수는 글자를 건드리지 않았다
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)

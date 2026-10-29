@@ -162,7 +162,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, btnLoading: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다가 2026-10-28 k16 에 뺐다 — 사람의 정의로 버튼 포커스는 상태가 아니라
@@ -362,6 +362,20 @@ for (const p of figma.root.children) {
     components.buttons = set.children.filter((v) => /(?:^|, )State=Normal(?:,|$)/.test(v.name) && !/(?:^|, )Loading=True(?:,|$)/.test(v.name)).map((v) => {
       const t = v.findOne((k) => k.type === "TEXT" && k.visible !== false);
       return { name: v.name, id: v.id, w: +v.width.toFixed(2), h: +v.height.toFixed(2), stroke: paint(v.strokes), sw: v.strokeWeight === figma.mixed ? "mixed" : v.strokeWeight, label: t ? [t.characters, +t.width.toFixed(2), +t.x.toFixed(2)] : null };
+    });
+    /* Loading 변형(2026-10-28 k17) — 사이트 .btn.loading 은 라벨 · 아이콘을 투명하게 두고 자리는 지키며 ::after 스피너만 가운데 보인다.
+       변형마다 크기와 짝(같은 이름의 Loading=False) 크기, 스피너("Spinner")의 배치 · 중심 어긋남 · 크기 · 선 색, 그리고 스피너 말고 보이는 층(leak)을 적는다.
+       leak: 글자는 보이는 칠 중 불투명도 0 이 아닌 것이 있으면, 나머지 층은 층 불투명도가 0 이 아니면 — visible 은 보지 않는다(아이콘은 인스턴스에서 속성으로 켜진다) */
+    components.btnLoading = set.children.filter((v) => /(?:^|, )Loading=True(?:,|$)/.test(v.name)).map((v) => {
+      const sib = set.children.find((s) => s.name === v.name.replace("Loading=True", "Loading=False"));
+      const sp = v.children.find((k) => k.name === "Spinner");
+      const vec = sp && (sp.type === "VECTOR" ? sp : sp.findOne && sp.findOne((k) => k.type === "VECTOR"));
+      const leak = v.children.filter((k) => k !== sp && (k.type === "TEXT" ? (k.fills === figma.mixed || k.fills.some((f) => f.visible !== false && f.opacity !== 0)) : k.opacity > 0)).map((k) => k.name);
+      return {
+        name: v.name, id: v.id, w: +v.width.toFixed(2), h: +v.height.toFixed(2), sibW: sib ? +sib.width.toFixed(2) : null, sibH: sib ? +sib.height.toFixed(2) : null,
+        spinner: sp ? { abs: sp.layoutPositioning, dx: +(sp.x + sp.width / 2 - v.width / 2).toFixed(2), dy: +(sp.y + sp.height / 2 - v.height / 2).toFixed(2), w: +sp.width.toFixed(2), h: +sp.height.toFixed(2), stroke: vec ? paint(vec.strokes) : "-" } : null,
+        leak,
+      };
     });
   }
   /* 효과(그림자) 색의 변수 연결(2026-10-26 k6) — 현재 페이지의 컴포넌트 세트 안, 인스턴스 밖 노드의 보이는 그림자를 본다.

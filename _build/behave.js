@@ -1135,11 +1135,20 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   // Popup API
   await go("components/popup.html");
   const popupSel = await page.evaluate(() => { const p = document.querySelector(".example-preview .popup"); p.id = "test-popup"; return "#test-popup"; });
+  /* 연 요소를 기억해야 닫을 때 돌려준다 — 페이지의 첫 예제 코드 탭 버튼처럼 팝업 밖의 버튼에서 연다 */
+  await page.evaluate(() => { const o = document.createElement("button"); o.id = "popup-opener"; o.textContent = "열기"; document.querySelector("main, body").prepend(o); o.focus(); });
   await page.evaluate((s) => window.DS.popup.open(s), popupSel);
   ok("DS.popup.open mounts backdrop", await page.evaluate(() => !!document.querySelector("body > .popup-backdrop[data-ds-popup] .popup")));
   await page.screenshot({ path: SHOT + "/popup.png" });
+  /* 포커스 가둠 — 종전에는 마지막 버튼에서 Tab 을 누르면 뒤 페이지(.brand)로 나갔다 */
+  const trap = [];
+  for (let i = 0; i < 8; i++) { await page.keyboard.press("Tab"); trap.push(await page.evaluate(() => !!document.activeElement.closest(".popup-backdrop[data-ds-popup] .popup"))); }
+  await page.keyboard.press("Shift+Tab"); trap.push(await page.evaluate(() => !!document.activeElement.closest(".popup-backdrop[data-ds-popup] .popup")));
+  ok("popup keeps Tab and Shift+Tab inside", trap.every(Boolean), JSON.stringify(trap));
   await page.keyboard.press("Escape");
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
+  ok("popup close returns focus to the opener", await page.evaluate(() => document.activeElement && document.activeElement.id === "popup-opener"));
+  await page.evaluate(() => document.getElementById("popup-opener").remove());
 
   // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
   await go("components/button.html");
