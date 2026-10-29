@@ -3,7 +3,7 @@ import { Button, ButtonGroup } from "@jiran/ds-react";
 export default function Example() {
   return (
     <>
-      <ButtonGroup end>
+      <ButtonGroup>
         <Button variant="outline" color="assistive">취소</Button>
         <Button variant="outline">임시 저장</Button>
         <Button>정책 저장</Button>
