@@ -711,7 +711,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   // Accordion: disabled 는 마우스·키보드 양쪽을 막고 보조기기에도 알려야 한다 + name 그룹 단일 개방 + flat 마지막 줄
   await go("components/accordion.html");
-  const accDis = page.locator("#ex-accordion-flat .accordion.disabled");
+  const accDis = page.locator("#ex-accordion-state .accordion.disabled");
   ok("disabled accordion carries aria-disabled", (await accDis.locator("summary").getAttribute("aria-disabled")) === "true");
   // pointer-events:none 이라 Playwright 의 click() 은 actionability 에서 멈춘다 — 요소에게 직접 클릭을 보낸다
   await accDis.locator("summary").evaluate((e) => e.click());
@@ -721,21 +721,49 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.keyboard.press("Enter"); await page.keyboard.press("Space");
   await page.waitForTimeout(120);
   ok("disabled accordion ignores Enter and Space", (await accDis.evaluate((e) => e.open)) === false);
-  await page.locator("#ex-accordion-group .accordion").nth(1).locator("summary").evaluate((e) => e.click());
+  await page.locator("#ex-accordion-single .accordion").nth(1).locator("summary").evaluate((e) => e.click());
   await page.waitForTimeout(350);
-  const accGrp = await page.evaluate(() => [...document.querySelectorAll("#ex-accordion-group .accordion")].map((d) => d.open));
+  const accGrp = await page.evaluate(() => [...document.querySelectorAll("#ex-accordion-single .accordion")].map((d) => d.open));
   ok("name group keeps only one panel open", JSON.stringify(accGrp) === "[false,true,false]", JSON.stringify(accGrp));
   const accFlat = await page.evaluate(() => {
-    const it = [...document.querySelectorAll("#ex-accordion-flat .accordion.flat")];
+    const it = [...document.querySelectorAll("#ex-accordion-variant .accordion.flat")];
     return { last: getComputedStyle(it[it.length - 1]).borderBottomWidth, first: getComputedStyle(it[0]).borderBottomWidth };
   });
   ok("last flat row drops its bottom border", accFlat.last === "0px" && accFlat.first === "1px", JSON.stringify(accFlat));
   // 보간 중간값을 재면 경쟁 조건이 되므로 전환 선언 자체를 본다
   const accMotion = await page.evaluate(() => {
-    const d = document.querySelector("#ex-accordion-basic .accordion");
+    const d = document.querySelector("#ex-accordion-default .accordion");
     return { prop: getComputedStyle(d, "::details-content").transitionProperty, size: getComputedStyle(d).interpolateSize };
   });
   ok("accordion body height is transitioned", /height/.test(accMotion.prop) && accMotion.size === "allow-keywords", JSON.stringify(accMotion));
+  /* 정의(2026-10-29): 크기 sm 40 · md 52 · lg 60, Hover 는 헤더 면 --surface-neutral-secondary, Disabled 는 hover 없음 */
+  const accH = await page.evaluate(() => [...document.querySelectorAll("#ex-accordion-size summary")].map((x) => Math.round(x.getBoundingClientRect().height)));
+  ok("accordion header heights are 40 · 52 · 60", accH.join() === "40,52,60", JSON.stringify(accH));
+  const accHov = page.locator("#ex-accordion-state .accordion:not(.disabled) summary").first();
+  await accHov.scrollIntoViewIfNeeded(); await page.mouse.move(1, 1); await page.waitForTimeout(200);
+  const accRest = await accHov.evaluate((e) => getComputedStyle(e).backgroundColor);
+  await accHov.hover(); await page.waitForTimeout(260);
+  const accOver = await accHov.evaluate((e) => ({ bg: getComputedStyle(e).backgroundColor, want: (() => { const d = document.createElement("div"); d.style.background = "var(--surface-neutral-secondary)"; document.body.append(d); const v = getComputedStyle(d).backgroundColor; d.remove(); return v; })() }));
+  const accFixed = await page.evaluate(() => getComputedStyle(document.querySelector('#ex-accordion-state summary[data-state="hover"]')).backgroundColor);
+  await page.mouse.move(1, 1); await page.waitForTimeout(200);
+  ok("accordion header shows the hover fill, and the fixed Hover example matches it", accRest !== accOver.bg && accOver.bg === accOver.want && accFixed === accOver.bg, JSON.stringify({ accRest, accOver, accFixed }));
+  ok("disabled accordion has no hover (pointer-events none)", (await accDis.evaluate((e) => getComputedStyle(e).pointerEvents)) === "none");
+  /* 헤더 안 조작 요소는 약관 동의만 예외 — 체크박스를 누르면 체크만 바뀌고 아코디언은 펼쳐지지 않아야 한다 */
+  await go("patterns/terms-agreement.html");
+  const termsAcc = page.locator("#ex-terms-agreement-inline .accordion").first();
+  const termsBefore = await termsAcc.evaluate((d) => ({ open: d.open, checked: d.querySelector("summary input").checked }));
+  await termsAcc.locator("summary input").click(); await page.waitForTimeout(250);
+  const termsAfter = await termsAcc.evaluate((d) => ({ open: d.open, checked: d.querySelector("summary input").checked }));
+  ok("terms checkbox in an accordion header toggles the check only", termsAfter.open === termsBefore.open && termsAfter.checked !== termsBefore.checked, JSON.stringify({ termsBefore, termsAfter }));
+  await go("components/accordion.html");
+  const accHead = await page.evaluate(() => [...document.querySelectorAll("#ex-accordion-header summary")].map((s) => {
+    const r = s.getBoundingClientRect(), cs = getComputedStyle(s), af = getComputedStyle(s, "::after"), svg = s.querySelector(":scope>svg"), sm = s.querySelector(":scope>small");
+    const t = [...s.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim()), rg = document.createRange(); rg.selectNodeContents(t);
+    const last = (sm || rg).getBoundingClientRect().right - r.left;   // 셰브론 앞 마지막 내용
+    return { textX: Math.round(rg.getBoundingClientRect().left - r.left), want: Math.round(parseFloat(cs.paddingLeft) + (svg ? svg.getBoundingClientRect().width + parseFloat(cs.columnGap) : 0)), gap: cs.columnGap,
+      chevR: Math.round(last + parseFloat(cs.columnGap) + parseFloat(af.marginLeft) + parseFloat(af.width)), edge: Math.round(r.width - parseFloat(cs.paddingRight)) };
+  }));
+  ok("accordion header: gap 8, title right after the leading icon (left-aligned), chevron at the right", accHead.length === 2 && accHead.every((h) => h.gap === "8px" && Math.abs(h.textX - h.want) <= 1 && Math.abs(h.chevR - h.edge) <= 1), JSON.stringify(accHead));
 
   // Select button, chip, tile
   await go("components/select-button.html");

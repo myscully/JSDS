@@ -162,7 +162,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, btnLoading: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, btnLoading: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null, accordion: null, accordionProps: null };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다가 2026-10-28 k16 에 뺐다 — 사람의 정의로 버튼 포커스는 상태가 아니라
@@ -357,6 +357,41 @@ for (const p of figma.root.children) {
      로딩은 상태가 아니라 옵션이라 따로 뺀다). audit 이 사이트 버튼("버튼" 라벨)을 헤드리스 Chromium 으로 잰
      폭에서 글자 폭을 뺀 몫(테두리 + padding)과 맞춘다 — 글자 폭은 서체 · 자간 때문에 Figma 와 사이트가 다르다(Figma 는 텍스트 스타일의 자간을 지닌다) */
   for (const set of p.findAllWithCriteria({ types: ["COMPONENT_SET"] })) {
+    /* Accordion(2026-10-29 k21 — 사람의 정의로 Variant Outline · Flat × Size Small · Medium · Large × State Collapsed · Expanded · Hover · Disabled).
+       변형마다 헤더("Summary")의 높이 · 면 · 네 모서리(와 묶인 변수) · 제목("Title") 글자 칠 · 크기 · 보조 정보("Meta") 칠 · 셰브론("Chevron") 크기와 선 색.
+       audit 이 사이트 CSS(.accordion summary · .sm/.md/.lg · :hover · .disabled · ::after)와 맞춘다.
+       앞 아이콘(2026-10-29 k22 — 사람의 결정): 헤더의 "Icon" 인스턴스 — 순서(0 이 맨 앞) · 폭 · 높이 · 기본 보임 · 선 색(첫 VECTOR) · 연결된 속성.
+       세트의 속성 정의(accordionProps — 이름 · 종류 · 기본값)도 함께 낸다. audit 이 .accordion summary>svg · .sm · .lg 의 width 와 맞춘다.
+       숨긴 인스턴스는 하위 층을 내주지 않는다(k22 에 잼 — visible false 인 Icon 은 children 이 0 이고, 켜면 3 이다. I<인스턴스>;<원본 층> id 로도 못 얻는다).
+       그래서 선 색은 이렇게 읽는다: 하위 층이 보이면 그 층 → 안 보이면 overrides 에 strokes 덮어쓰기가 없을 때 원본 컴포넌트의 층(그대로 물려받으므로 같다) →
+       덮어쓰기가 있는데 숨겨져 있으면 값을 못 읽으므로 "override(hidden)" 으로 적는다(audit 은 NOTE 로 센다).
+       헤더 줄(2026-10-30 k24 — 사이트 .accordion summary 가 gap 12 → 8, space-between 을 버리고 왼쪽 정렬): row 에 헤더의 방향 · itemSpacing · 주축 정렬 ·
+       자식 순서(이름을 > 로 이음) · 제목의 가로 크기 방식과 글자 정렬 · 보조 정보의 가로 크기 방식을 낸다. audit 이 gap 은 .accordion summary 의 gap 과,
+       배치는 "제목이 FILL + LEFT"(= 사이트의 margin-left:auto — 제목은 아이콘 바로 뒤, 보조 정보 · 셰브론은 오른쪽 끝)로 맞춘다 */
+    if (set.name === "Accordion") components.accordionProps = Object.fromEntries(Object.entries(set.componentPropertyDefinitions).map(([k, d]) => [k, { type: d.type, def: d.defaultValue }]));
+    const accInk = new Map();
+    if (set.name === "Accordion") for (const v of set.children) {
+      const s = v.findOne((k) => k.name === "Summary"), ic = s && s.children.find((k) => k.name === "Icon");
+      if (!ic || ic.type !== "INSTANCE") continue;
+      const icv = ic.findOne((k) => k.type === "VECTOR");
+      if (icv) { accInk.set(ic.id, paint(icv.strokes)); continue; }
+      if ((ic.overrides || []).some((o) => o.id !== ic.id && o.overriddenFields.includes("strokes"))) { accInk.set(ic.id, "override(hidden)"); continue; }
+      const mc = await ic.getMainComponentAsync(), mv = mc && mc.findOne((k) => k.type === "VECTOR");
+      accInk.set(ic.id, mv ? paint(mv.strokes) : null);
+    }
+    if (set.name === "Accordion") components.accordion = set.children.map((v) => {
+      const s = v.findOne((k) => k.name === "Summary"), t = s && s.findOne((k) => k.name === "Title" && k.type === "TEXT"), m = s && s.findOne((k) => k.name === "Meta" && k.type === "TEXT");
+      const ch = s && s.findOne((k) => k.name === "Chevron"), vec = ch && ch.findOne && ch.findOne((k) => k.type === "VECTOR");
+      const ic = s && s.children.find((k) => k.name === "Icon");
+      const rb = s && s.boundVariables && s.boundVariables.topLeftRadius;
+      return { name: v.name, id: v.id, h: s ? +s.height.toFixed(2) : null, face: s ? paint(s.fills) : null,
+        r: s ? [s.topLeftRadius, s.topRightRadius, s.bottomRightRadius, s.bottomLeftRadius] : null, rv: rb ? vname(rb) : null,
+        title: t ? paint(t.fills) : null, fs: t ? (t.fontSize === figma.mixed ? "mixed" : t.fontSize) : null, meta: m ? paint(m.fills) : null,
+        chevW: ch ? +ch.width.toFixed(2) : null, chev: vec ? paint(vec.strokes) : null,
+        icon: ic ? { idx: s.children.indexOf(ic), w: +ic.width.toFixed(2), h: +ic.height.toFixed(2), vis: ic.visible, ink: accInk.has(ic.id) ? accInk.get(ic.id) : null, ref: ic.componentPropertyReferences || null } : null,
+        row: s ? { lm: s.layoutMode, gap: s.itemSpacing, pa: s.primaryAxisAlignItems, order: s.children.map((k) => k.name).join(">"),
+          tSz: t ? t.layoutSizingHorizontal : null, tAl: t ? t.textAlignHorizontal : null, mSz: m ? m.layoutSizingHorizontal : null } : null };
+    });
     if (set.name === "Text Field") components.textField = set.children.map((v) => { const f = v.findOne((k) => k.name === "Input" && "strokes" in k); return { variant: v.name, id: v.id, h: f ? +f.height.toFixed(2) : null }; });   // 입력칸 높이(2026-10-28 k16) — audit 이 .field input 높이와 맞춘다
     if (set.name !== "Button") continue;
     components.buttons = set.children.filter((v) => /(?:^|, )State=Normal(?:,|$)/.test(v.name) && !/(?:^|, )Loading=True(?:,|$)/.test(v.name)).map((v) => {

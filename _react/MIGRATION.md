@@ -213,3 +213,19 @@ Button 정의를 다시 내렸습니다. 형태(`variant`: solid · outline)와 
 
 새로 내보내는 타입: `ButtonColor`.
 
+## Accordion (2026-10-29)
+
+Accordion 정의를 다시 내렸습니다. 형태(`variant`: outline · flat)와 크기(`size`: sm · md · lg)를 두고, 헤더에 Hover 면을 더했습니다.
+`flat` boolean 은 별칭 없이 바뀌었습니다 — React 는 개발 모드에서 옛 prop 을 알리고 DOM 에는 내지 않습니다.
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| (기본) | 생략 (= `variant="outline" size="md"`) | `.accordion.md.outline` — 클래스가 없어도 같은 모양 |
+| `flat` | `variant="flat"` | `.accordion.flat` |
+| `AccordionGroup flat` | `AccordionGroup variant="flat"` | `.accordion-group.flat` |
+| — | `size="sm"` · `size="lg"` (헤더 40 · 60, 기본 md 52) | `.accordion.sm` · `.accordion.lg` |
+| — | 헤더 Hover — 면 `--surface-neutral-secondary` | `.accordion summary:hover` |
+
+헤더 안에는 버튼 · 체크박스 같은 조작 요소를 두지 않습니다 — 약관 동의(`Terms`)의 항목 체크박스만 예외입니다.
+새로 내보내는 타입: `AccordionVariant`.
+

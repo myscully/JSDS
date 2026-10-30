@@ -73,7 +73,7 @@ const PATTERNS = {
         </div>` },
       { id: "inline", title: "전문 펼쳐 보기", desc: "약관 전문은 Accordion 으로 같은 화면에서 펼칩니다.", html: `
         <div class="terms">
-          <details class="accordion" style="max-width:560px"><summary><label class="checkbox" style="font-weight:600"><input type="checkbox" checked><span>서비스 이용약관 <span class="req">필수</span></span></label></summary><div class="body" style="max-height:120px;overflow:auto">제1조(목적) 이 약관은 지란지교시큐리티가 제공하는 서비스의 이용 조건과 절차를 규정합니다. 제2조(정의) … 제3조(약관의 효력) …</div></details>
+          <details class="accordion md outline" open style="max-width:560px"><summary><label class="checkbox" style="font-weight:600"><input type="checkbox" checked><span>서비스 이용약관 <span class="req">필수</span></span></label></summary><div class="body" style="max-height:120px;overflow:auto">제1조(목적) 이 약관은 지란지교시큐리티가 제공하는 서비스의 이용 조건과 절차를 규정합니다. 제2조(정의) … 제3조(약관의 효력) …</div></details>
         </div>` },
     ],
   },
@@ -126,7 +126,7 @@ const PATTERNS = {
           </ul>
         </div>` },
       { id: "collapsed", title: "접힌 유의사항", desc: "길거나 부차적인 안내는 Accordion 으로 접습니다.", html: `
-        <details class="accordion" style="max-width:600px"><summary>${I("info-circle")}유의사항 <small>3개</small></summary><div class="body"><ul style="margin:0;padding-left:1.2em"><li>정책은 배포 후 최대 5분 내 적용됩니다.</li><li>격리 파일은 30일 보관됩니다.</li><li>예외는 해시·경로 기준입니다.</li></ul></div></details>` },
+        <details class="accordion md outline" style="max-width:600px"><summary>${I("info-circle")}유의사항 <small>3개</small></summary><div class="body"><ul style="margin:0;padding-left:1.2em"><li>정책은 배포 후 최대 5분 내 적용됩니다.</li><li>격리 파일은 30일 보관됩니다.</li><li>예외는 해시·경로 기준입니다.</li></ul></div></details>` },
     ],
   },
 

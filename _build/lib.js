@@ -38,12 +38,12 @@
     for (const ch of list) { if (ch === "(") d++; if (ch === ")") d--; if (ch === "," && !d) { out.push(cur); cur = ""; } else cur += ch; }
     return [...out, cur].map(s => s.trim()).filter(Boolean);
   }
-  /* 예제의 고정 상태(사이트 전용) — 버튼 :hover · :active 규칙을 [data-state="hover" | "pressed"] 로 옮겨 쓴다.
+  /* 예제의 고정 상태(사이트 전용) — 버튼 · 아코디언의 :hover · :active 규칙을 [data-state="hover" | "pressed"] 로 옮겨 쓴다.
      같은 원본에서 만들어 색이 어긋날 수 없고, 샘플 블록 밖(assets/style.css 끝)에만 붙어 패키지 · 복사용 CSS 에는 가지 않는다(2026-10-29) */
   function demoStateCss(css) {
     const out = [];
     for (const m of samplesBlock(css).replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      const sels = splitSelectors(m[1]).filter(s => /^\.btn\b/.test(s) && /:(hover|active)\b/.test(s))
+      const sels = splitSelectors(m[1]).filter(s => /^\.(btn|accordion)\b/.test(s) && /:(hover|active)\b/.test(s))   // 버튼 · 아코디언 헤더(2026-10-29)
         .map(s => s.replace(/:hover\b/g, '[data-state="hover"]').replace(/:active\b/g, '[data-state="pressed"]'));
       if (sels.length) out.push(sels.join(",") + "{" + m[2].trim() + "}");
     }

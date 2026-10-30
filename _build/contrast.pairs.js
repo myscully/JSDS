@@ -51,6 +51,9 @@ const pairs = [
   ["--foreground-brand-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "옅은 제품 면 위 글자 — text · outline primary · 면 없는 아이콘 전용 primary 버튼의 hover·pressed", REF("참조 시스템 값 — brand 와 그 틴트 조합이 4.2 언저리다")],
   /* Assistive 버튼 라벨 — solid 면(tertiary 단계), 그리고 solid · outline · 면 없는 아이콘 전용이 hover 에 올라앉는 secondary 단계(2026-10-28 정의 때 셌더니 선언이 없었다) */
   ["--foreground-neutral-primary", ["--surface-neutral-tertiary", "--surface-neutral-secondary"], 4.5, "Assistive 버튼 라벨 — rest · hover 면"],
+  /* Accordion 헤더 Hover(2026-10-29) — 제목은 위 쌍(neutral-primary on surface-neutral-secondary), 보조 정보 · 셰브론은 여기 */
+  ["--foreground-neutral-tertiary", ["--surface-neutral-secondary"], 4.5, "Accordion 헤더 보조 정보 — hover 면", REF("참조 시스템 값 — tertiary 는 바탕에서도 3.67 · 3.78")],
+  ["--foreground-neutral-secondary", ["--surface-neutral-secondary"], 3, "Accordion 셰브론 — hover 면(그래픽 3:1)"],
   ["--foreground-neutral-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "Date Picker 기간 사이 · 미리보기 날짜와 그 위 호버(2026-10-27) — 쓰고 있었는데 선언이 없었다. 다른 달(흐린) 칸은 띠를 칠하지 않아 이 쌍이 없다"],
   ["--foreground-brand-inverse", ["--surface-neutral-inverse"], 4.5, "반전 표면 위 제품색 글자"],
   ["--foreground-positive-primary", [...SURFACES, "--surface-positive-primary"], 4.5, "긍정 글자·아이콘 — Steps 완료 체크(.steps li.done i)도 이 쌍이다. 틴트 위 라이트 2.06~2.19 · 다크 6.43~8.03 — 그래픽 3:1 에도 라이트가 못 미친다, 사람의 결정", REF_STATUS],

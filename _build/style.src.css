@@ -927,7 +927,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .dropdown .trigger:hover{border-color:var(--line-neutral-primary)}
 .dropdown .trigger:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
 .dropdown .trigger .placeholder{color:var(--foreground-disable-primary)}
-.dropdown .trigger::after{content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
+.dropdown .trigger::after{content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast);margin-left:auto}
 .dropdown.open .trigger{border-color:var(--foreground-brand-primary)}
 .dropdown.open .trigger::after{transform:rotate(180deg)}
 .dropdown .trigger[disabled]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
@@ -1028,21 +1028,34 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .avatar{width:32px;height:32px;border-radius:50%;background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);display:inline-grid;place-items:center;font-size:12px;font-weight:700;flex:none;line-height:1.6}
 .avatar.sm{width:24px;height:24px;font-size:10px}
 
-/* Accordion */
+/* Accordion — 변형 Outline(기본, 클래스 .outline 은 명시용) · Flat, 크기 sm 40 · md 52 · lg 60, 상태 Collapsed · Expanded · Hover · Disabled(사람의 정의 2026-10-29).
+   헤더 안에는 조작 요소를 두지 않는다 — 약관 동의의 항목 체크박스만 예외(Terms Agreement 패턴) */
 .accordion{border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);width:100%;interpolate-size:allow-keywords;line-height:1.6}
-.accordion summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;font-weight:600;font-size:16px;line-height:24px;cursor:pointer}   /* Title/1 의 line-height — 빠지면 본문 1.6 을 상속해 헤더가 54 가 된다(스펙 52) */
+.accordion summary{list-style:none;display:flex;align-items:center;gap:8px;padding:14px 20px;font-weight:600;font-size:16px;line-height:24px;cursor:pointer;border-radius:calc(var(--radius-lg) - 1px);transition:background var(--motion-fast)}   /* Title/1 의 line-height — 빠지면 본문 1.6 을 상속해 헤더가 54 가 된다(스펙 52). radius 는 hover 면이 둥근 테두리 밖으로 삐지지 않게 */
+.accordion[open] summary{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.accordion summary:hover{background:var(--surface-neutral-secondary)}   /* Hover — 누를 수 있는 영역이라는 신호. Button Assistive 의 hover 와 같은 토큰. Pressed 는 두지 않는다 */
 .accordion summary::-webkit-details-marker{display:none}
-.accordion summary::after{content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
+.accordion summary::after{content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast);margin-left:auto}   /* 셰브론만 오른쪽 끝으로 — space-between 이면 앞 아이콘이 있을 때 제목이 가운데로 뜬다 */
+.accordion summary:has(>small)::after{margin-left:0}   /* 보조 정보가 오른쪽으로 밀고 셰브론은 그 옆 8 */
 .accordion[open] summary::after{transform:rotate(180deg)}
 .accordion summary small{font-weight:400;color:var(--foreground-neutral-tertiary);margin-left:auto;font-size:12px}
 .accordion summary>svg{flex:none;width:18px;height:18px}   /* 제목이 길어도 찌그러지지 않게 — 셰브론(::after)과 같은 보호 */
 .accordion .body{padding:0 20px 16px;font-size:14px;color:var(--foreground-neutral-secondary);line-height:1.6}
+.accordion.outline{border-color:var(--line-neutral-secondary)}   /* 기본 모양을 이름으로 부르는 명시용 — 클래스가 없어도 Outline 이다 */
+.accordion.md summary{padding:14px 20px;font-size:16px;line-height:24px}   /* md 는 기본값과 같다 — 크기를 명시한 마크업용 */
+.accordion.md .body{padding:0 20px 16px;font-size:14px}
+.accordion.sm summary{padding:9px 16px;font-size:14px;line-height:22px}
+.accordion.sm summary>svg{width:16px;height:16px}
+.accordion.sm .body{padding:0 16px 12px;font-size:12px}
+.accordion.lg summary{padding:17px 24px;font-size:18px;line-height:26px}
+.accordion.lg summary::after,.accordion.lg summary>svg{width:20px;height:20px}
+.accordion.lg .body{padding:0 24px 20px}
 .accordion.disabled{pointer-events:none}
 .accordion.disabled summary,.accordion.disabled summary small,.accordion.disabled .body{color:var(--foreground-disable-primary)}
 .accordion.disabled summary::after{background:var(--foreground-disable-primary)}
 .accordion.flat{border:0;border-radius:0;border-bottom:1px solid var(--line-neutral-secondary)}
-.accordion.flat summary{padding:14px 4px}
-.accordion.flat .body{padding:0 4px 16px}
+.accordion.flat summary,.accordion.flat[open] summary{padding-left:4px;padding-right:4px;border-radius:var(--radius-md)}   /* 세로 여백은 크기를 따르고 좌우는 4 — 묶음(.accordion-group.flat)이 좌우 20 을 그린다 */
+.accordion.flat .body{padding-left:4px;padding-right:4px}
 .accordion.flat:last-child{border-bottom:0}   /* 카드 바닥에 선이 매달리지 않게 */
 .accordion-group{display:flex;flex-direction:column;gap:8px;width:100%;line-height:1.6}
 .accordion-group.flat{gap:0;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);padding:0 20px;border-radius:var(--radius-lg)}

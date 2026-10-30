@@ -70,10 +70,21 @@ describe("Accordion", () => {
     expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
-  it("flat 은 details 와 그룹에 클래스로", () => {
-    render(<AccordionGroup flat data-testid="g"><Accordion flat title="제목">내용</Accordion></AccordionGroup>);
+  it("variant · size 는 사이트 마크업과 같은 클래스로 — 기본 md outline, 그룹은 flat 일 때만", () => {
+    render(<AccordionGroup variant="flat" data-testid="g"><Accordion variant="flat" size="sm" title="제목">내용</Accordion><Accordion title="기본">내용</Accordion></AccordionGroup>);
     expect(screen.getByTestId("g").className).toBe("accordion-group flat");
-    expect(document.querySelector("details")!.className).toBe("accordion flat");
+    const [a, b] = document.querySelectorAll("details");
+    expect(a.className).toBe("accordion sm flat");
+    expect(b.className).toBe("accordion md outline");
+  });
+  it("옛 flat prop 은 DOM 에 새지 않고 개발 모드에서 알린다", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const legacy = { flat: true } as unknown as Record<string, never>;
+    render(<AccordionGroup {...legacy} data-testid="g2"><Accordion {...legacy} title="옛">내용</Accordion></AccordionGroup>);
+    expect(screen.getByTestId("g2")).not.toHaveAttribute("flat");
+    expect(document.querySelector("details:last-of-type")).not.toHaveAttribute("flat");
+    expect(warn.mock.calls.length).toBe(2);
+    warn.mockRestore();
   });
 
   it("disabled 는 tabIndex -1 과 aria-disabled 를 함께 단다", () => {

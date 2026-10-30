@@ -168,10 +168,14 @@ async function run() {
         const beds = C[bg].a < 0.999 ? P.SURFACES : [null];
         for (const bed of beds) {
           const eff = bed ? over(C[bg], C[bed]) : C[bg];
-          const r = ratio(C[fg], eff);
+          /* 글자도 반투명일 수 있다(tertiary 61% · secondary 88% …) — 바탕 위에 합성한 색으로 잰다.
+             종전에는 C[fg] 를 그대로 재 알파를 버렸다: 흰 바탕 위 tertiary 가 실제 3.66 인데 11.71 로 나와,
+             기준 아래인 쌍 108 개가 통과로 보였다(2026-10-29 발견 · 수정). CLAUDE.md '알파는 합성해서 잰다' */
+          const fgEff = over(C[fg], eff);
+          const r = ratio(fgEff, eff);
           const label = bed ? `${bg} / ${bed}` : bg;
-          table.push({ ctx: ctx.label, theme: ctx.theme, accent: ctx.accent, fg, bg: label, min, r, note, pass: r >= min, hex: { fg: hex(C[fg]), bg: hex(eff) } });
-          if (r < min) (opt && opt.advisory ? warns : fails).push(`${ctx.label}: ${fg}(${hex(C[fg])}) on ${label}(${hex(eff)}) = ${r} < ${min}`);
+          table.push({ ctx: ctx.label, theme: ctx.theme, accent: ctx.accent, fg, bg: label, min, r, note, pass: r >= min, hex: { fg: hex(fgEff), bg: hex(eff) } });
+          if (r < min) (opt && opt.advisory ? warns : fails).push(`${ctx.label}: ${fg}(${hex(fgEff)}) on ${label}(${hex(eff)}) = ${r} < ${min}`);
         }
       }
     }

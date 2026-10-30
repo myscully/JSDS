@@ -4,6 +4,7 @@ export default function Example() {
   return (
     <Terms>
       <Accordion
+        defaultOpen
         style={{ maxWidth: 560 }}
         bodyStyle={{ maxHeight: 120, overflow: "auto" }}
         title={
