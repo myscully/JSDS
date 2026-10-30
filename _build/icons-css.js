@@ -23,7 +23,7 @@ const RULES = [
   [".switch.sm input:checked::after", "left:18px"],
   [".checkbox input:indeterminate::after,.checkbox input.mixed::after", `content:"";width:12px;height:12px;background:var(--brand-label);${mask("minus", "outline", { strokeWidth: 3.5 })}`],
   [".chip[aria-pressed]::before", `content:"";width:14px;height:14px;flex:none;background:var(--foreground-disable-primary);${mask("check")}`],
-  [".dropdown .trigger::after", `content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast);margin-left:auto`],   // 셰브론만 오른쪽 끝 — 앞 아이콘 뒤에 제목이 붙는다,
+  [".dropdown .trigger::after", `content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast)`],
   [".dropdown.open .trigger::after", "transform:rotate(180deg)"],
   [".accordion summary::after", `content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast);margin-left:auto`],   // 셰브론만 오른쪽 끝 — 앞 아이콘 뒤에 제목이 붙는다,
   [".accordion[open] summary::after", "transform:rotate(180deg)"],
