@@ -78,6 +78,31 @@
 >   Text/Assistive 15변형(815:9 … 815:102)은 Text/Primary 를 복제해 라벨이 Pretendard 그대로다(칠 · 속성 연결만 바꿈 — 폰트를 올리지 않았다). Button 라벨은 105 → 120개.
 >   글자를 고친 623:3091(Card/Button Spec State 값 — "primary(테두리 · 글자 …)" → "primary(테두리 --line-brand-strong · 글자 …)")은 k16 부터 Noto 였다(새로 바뀐 것 아님 — 되돌릴 행은 k16 절).
 >   `font-revert-nodes.tsv` 맨 아래 "2026-10-29 k19" 절(행 없음 · 주석만)
+> - 2026-10-29 k20: Patterns Overview 페이지(829:4419)에 새 화면 **Patterns / Overview — 1440(835:2)** 을 그리며 **70개가 새로 Noto** 가 됐다 —
+>   Components Overview 화면(829:4420)을 복제해 글자 · 굵기를 바꾼 30(상단 메뉴 Components · Patterns 굵기 2, h1 · lead · 본문 문단 3, 좌측 메뉴 그룹 머리 3 + 항목 11,
+>   카드 라벨 11) · 새로 만든 카드 그룹 이름 11 · 썸네일 29(인스턴스 덮어쓰기 18 — Text Field · Button · Checkbox · Step · Search · Chip · Status Indicator · KPI · Tag, 새 글자 11).
+>   SemiBold 로 의도한 것(좌측 메뉴 그룹 머리 · 카드 라벨 · 썸네일 라벨 몇)은 Noto 에 SemiBold 가 없어 **Bold** 로 대체됐다 — 행마다 끝에 되돌릴 굵기 `[→ Pretendard …]` 를 적었다.
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-29 k20" 절. 글자가 그대로인 복제 노드(JS Design System · v0.8 · Home · Foundations · Resources · N 2 · Overview · → · Step 숫자 2)는 Pretendard 그대로다.
+>   이 페이지는 `probe.js` 의 CURRENT_PAGES 밖이라 audit 의 서체 · 넘침 검사가 보지 않는다(겹침은 범위 밖 항목으로만 남는다)
+> - 2026-10-29 k21: Accordion 재정의(사람의 결정 2026-10-29 — Variant Outline · Flat × Size Small · Medium · Large × State Collapsed · Expanded · Hover · Disabled, 헤더 40 · 52 · 60)를
+>   Figma 에 맞추며 **23개가 새로 Noto** 가 됐다 — 세트의 Small · Large 제목 16(14/22 · 18/26) · Small Expanded 본문 2(12/19.2) · Card/Accordion Spec 값 5(Size · Container · Label · Placement · Motion).
+>   크기가 Medium 과 달라 서체를 올려야 했던 글자만 Noto 다. 이 환경의 Noto Sans KR 에 SemiBold 가 없어 제목 16개는 **Bold(700)** 로 대체됐다 — 그래서 지금 세트는 Medium 제목(Pretendard Medium 500)과
+>   Small · Large 제목(Noto Bold)의 굵기가 다르게 보인다. 둘 다 사이트 600 이라 Pretendard SemiBold 로 되돌리면 같아진다(아래 굵기 표의 Accordion 행).
+>   Spec 글 320:1242 · 623:3094 는 k4 에 Noto 였다가 사람이 되돌린 노드로, 글자를 다시 고쳐 또 Noto 가 됐다. `font-revert-nodes.tsv` 맨 아래 "2026-10-29 k21" 절.
+>   복제라 Pretendard 그대로 늘어난 글자: Medium Hover 두 변형의 제목 2 · 보조 정보 2, Small · Large 16변형의 보조 정보 16(12 그대로), Large Expanded 본문 2(14 그대로).
+>   Card/Accordion Properties 는 **Noto 없이** 고쳤다 — Card/Button 의 Pretendard 칩('Variant =' · Size 목록 머리 · Hover)과 다른 카드의 Outline 칩을 복제해 옮겼다(다른 부모로 옮겨도 폰트를 올리지 않아도 됐다 — 이번에 처음 확인).
+>   'Style =' 320:1152 · 'Default' 칩 320:1153 은 지웠다
+> - 2026-10-29 k22: Accordion 후속 결정(사람의 결정 2026-10-29) 네 가지를 맞추며 **23개가 새로 Noto** 가 됐다(3 Component 17 · 4 Pattern 6) —
+>   ① 세트의 Medium 제목 8(320:1099 · 320:1105 · 844:4251 · 320:1113 · 320:1119 · 320:1125 · 844:4257 · 320:1133)을 Pretendard Medium · Title/1 → **Noto Bold** 로 바꿔 Small · Large(k21)와 굵기를 맞췄다
+>   (글자 · 16/24 · 자간 그대로, Title/1 연결은 풀림 — 되돌릴 때 다시 연결하지 말고 Pretendard **SemiBold** 로).
+>   ② 4 Pattern 예시 2 — 약관 동의(336:98)에 "전문 펼쳐 보기"(Accordion 854:177 Outline/Medium/Expanded, 앞 아이콘 자리를 Checkbox Checked 로 교체 · 라벨 "서비스 이용약관 필수" · 본문은 사이트 약관 글),
+>   유의사항(336:221)에 "접힌 유의사항"(Accordion 854:201 Outline/Medium/Collapsed, Icon 켬 · info-circle · 제목 "유의사항" · 보조 정보 "3개"). 예시 설명 2 · 인스턴스 덮어쓰기 4 가 Noto.
+>   ③ 앞 아이콘 속성(Icon · Icon Swap)은 글자를 건드리지 않아 Noto 0. ④ Card/Accordion 머리 설명 320:1141 과 사용 가이드 Do 4 · Don't 4(기존 2 + 복제 6)가 Noto.
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-29 k22" 절(행마다 되돌릴 굵기 `[→ …]`)
+> - 2026-10-29 k23: 약관 동의 예외를 그리는 방식(Accordion 인스턴스 유지 — Icon 자리를 Checkbox 로 교체 · Title 숨김, 사람의 결정 2026-10-29)을 Card/Accordion 사용 가이드에 적으며
+>   **1개가 새로 Noto** 가 됐다 — Don't(320:1252) 2번째 항목 854:4513 바로 아래 보조 줄 862:4300(854:4513 복제 · 14/22 · foreground 칠 그대로).
+>   글이 세 줄이라 Don't 216 → 290, 사용 가이드 행 · 카드 320:1138 이 30 늘어 섹션 1 Layout(320:1024)을 4978 → 5008 로 키우고 아래 섹션 7개를 30 내렸다(간격 200 유지).
+>   `font-revert-nodes.tsv` 맨 아래 "2026-10-29 k23" 절
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
@@ -130,7 +155,7 @@ Figma 14단계는 20 · 22 · 16 · 18 이라 다르다 — 내비 말고는 줄
 | Tab 기본 · 선택 · 작은 선택 · 건수 | 331:2363 …(6) · 331:2367 …(3) · 331:2379 …(3) · 331:2365 …(18) | 400 · 500 · 500 · 500 | 500 · 700(pill 600) · 700 · 700 |
 | Breadcrumb 현재 | 332:2318 · 332:2333 · 635:3660(k5 Icon) | 500(Title/2) | 600 |
 | Top Navigation 로고 · 아바타 | 332:3158 · 332:3184 · 332:3180 · 332:3215 | 500 | 700 |
-| Accordion 제목 · 메타 | 320:1099 …(6) · 320:1100 …(6) | 500 · 500 | 600 · 400 |
+| Accordion 메타 | 320:1100 …(24 — k21 에 Hover · Small · Large 복제로 18 늘었다. 제목은 k22 에 Medium 8개도 Noto Bold 가 되어 이 표에서 빠졌다 — 제목 24개 모두 tsv k21 · k22 절에서 Pretendard SemiBold 로 되돌린다) | 500 | 400 |
 | Card 제목 | 326:1318 …(13 — k5 Flush 635:3104 포함) | 16 · 행간 24 / 500(Title/1, compact 도 같음) | 600 — compact 는 14 · 행간 20 |
 | Notice 제목 · Toast 액션 · Banner 링크 | 333:2703 …(5) · 333:2803 …(2) · 333:2818 …(3) | 500 | 700 · 600 · 600 |
 | Divider 라벨 | 320:1019 | 500(Caption/1) | 400 |

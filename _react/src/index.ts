@@ -45,7 +45,7 @@ export { Notice, Toast, ToastStack, Banner, ToastProvider, useToast, type Notice
 export { Calendar, DatePicker, formatDate, formatMonth, parseDate, parseMonth, type CalendarProps, type CalendarView, type DatePickerFooterItem, type DatePickerMessages, type DatePickerMode, type DatePickerProps, type DateRange, type DateValue } from "./components/date-picker/DatePicker";
 
 // E. containers & data
-export { Accordion, AccordionGroup, type AccordionProps, type AccordionGroupProps } from "./components/accordion/Accordion";
+export { Accordion, AccordionGroup, type AccordionProps, type AccordionGroupProps, type AccordionVariant } from "./components/accordion/Accordion";
 export { Card, CardHead, CardTitle, CardDesc, CardFoot, CardGrid, type CardProps, type CardTitleProps } from "./components/card/Card";
 export { List, ListItem, type ListProps, type ListItemProps } from "./components/list/List";
 export { Tile, TileGrid, type TileProps } from "./components/item-tile/Tile";

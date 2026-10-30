@@ -17,6 +17,10 @@
  *   효과 색 컴포넌트 세트의 그림자 색이 변수나 효과 스타일에 묶였는지(2026-10-26 k6) — 기대값 없이 probe 가 모은 것을 그대로 어긋남으로
  *   버튼   빌드된 components/button.html 에 "버튼" 버튼을 붙여 Chromium 으로 잰 상자(테두리 + padding · 높이)(2026-10-26 k7, k16 에 새 클래스로)
  *   Text Field 입력칸 높이 ↔ .field input · .sm · .lg(2026-10-28 k16)
+ *   Accordion 변형 표(Variant × Size × State = 24) · 크기별 헤더 높이 · 제목 크기 · 셰브론 크기 ↔ .accordion summary · .sm/.md/.lg,
+ *           Hover 헤더 면 ↔ summary:hover · 모서리, Disabled 글자 · 보조 정보 · 셰브론 ↔ .accordion.disabled, 기본 변형 ↔ props 기본값(2026-10-29 k21, accordionExpect),
+ *           앞 아이콘 "Icon" 크기 ↔ .accordion summary>svg · .sm · .lg, 색 = 제목, 기본 숨김 · Icon(불리언 false) · 인스턴스 교체 속성 연결(2026-10-29 k22)
+ *           헤더 줄 간격 ↔ .accordion summary gap · 왼쪽 정렬(Icon > Title(FILL · LEFT) > Meta > Chevron)(2026-10-30 k24)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7) · Button 의 variant · color · size 기본값(k16)
  *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
  *   선택 컨트롤 선택된 Radio · 선택 + 비활성 Radio 의 면 · 테두리 · 점, 비활성 Slider 의 라벨 · 값 글자 칠(2026-10-27 k11) — controlsExpect
@@ -521,6 +525,78 @@ function buttonDefault() {
   return Object.values(out).every(Boolean) ? out : null;
 }
 
+/* Accordion(2026-10-29 k21 — 사람의 정의 2026-10-29) — 변형 표와 크기 · 상태별 모양을 저장소에서 읽는다.
+     축     components.data.js 의 accordion.figma(variants outline · flat → Variant Outline · Flat, sizes sm · md · lg → Size Small · Medium · Large,
+            states → State Collapsed · Expanded · Hover · Disabled). 옛 이름 대응(Figma 변형은 이름만 바꿔 재사용 — 인스턴스 연결 유지): Style=Default → Variant=Outline ·
+            Style=Flat → Variant=Flat, 크기 축이 없던 옛 변형은 Size=Medium. 이름에 Style 이 남았거나 축이 빠졌으면 표에 없는 변형으로 낸다
+     헤더   높이 = .accordion.{sm,md,lg} summary 의 padding 위 + line-height + padding 아래(없으면 .accordion summary) — 40 · 52 · 60. Flat 도 같다(좌우만 4).
+            figma.sizes 의 h · fs 와 CSS 가 다르면 기대값을 못 만든 것으로 낸다(사이트 두 곳이 어긋난 것). 제목 크기 = 같은 규칙의 font-size,
+            셰브론 = .accordion summary::after 의 width(.lg 는 .accordion.lg summary::after)
+     아이콘 (2026-10-29 k22 — 사람의 결정) 헤더 맨 앞의 "Icon" 인스턴스. 크기 = .accordion.{sm,lg} summary>svg 의 width(없으면 .accordion summary>svg) — 16 · 18 · 20.
+            선 색은 제목 글자 칠과 같다(사이트 svg 는 currentColor — Disabled 는 비활성 색이 따라온다). 기본은 숨김이고 visible 은 불리언 속성 Icon(기본 false),
+            mainComponent 는 INSTANCE_SWAP 속성에 연결한다. 옛 덤프(k22 전 probe)에는 icon · accordionProps 가 없다 — 그때는 NOTE
+     Hover  헤더 면만 .accordion summary:hover 의 background. 모서리는 Outline 이 .accordion summary 의 calc(var(--radius-lg) - 1px)(닫힌 헤더라 네 모서리 모두),
+            Flat 은 .accordion.flat summary 의 var(--radius-md) — 이쪽은 변수에 묶였는지도 본다. Hover 가 아닌 변형의 헤더는 면이 없어야 한다("-")
+     칠     Disabled 의 제목 · 보조 정보 = .accordion.disabled summary 의 color, 셰브론 선 = .accordion.disabled summary::after 의 background.
+            그 밖의 상태는 보조 정보 = .accordion summary small 의 color, 셰브론 = .accordion summary::after 의 background, 제목은 비활성 색이 아니어야 한다.
+            테두리 = .accordion 의 border 색(Outline 은 네 변, Flat 은 아래 변 — 굵기는 보지 않는다)
+     기본   props 의 variant · size 기본값(outline · md) + State=Collapsed
+     헤더 줄 (2026-10-30 k24) 간격 = .accordion.{sm,md,lg} summary 의 gap(없으면 .accordion summary) — 8. 사이트는 왼쪽 정렬이다: 아이콘 → 8 → 제목 →
+            (보조 정보 small, margin-left:auto) → 셰브론(::after, margin-left:auto — 보조 정보가 있으면 그 뒤 8). Figma 에서 같은 모양은
+            가로 자동 배치 · 자식 순서 Icon > Title > Meta > Chevron · 제목 FILL + 글자 LEFT(제목이 남는 폭을 먹어 보조 정보 · 셰브론을 오른쪽 끝으로 민다) ·
+            보조 정보는 FILL 이 아님. 예전 사이트의 space-between 은 아이콘을 켜면 제목이 가운데로 갔다 — 그 모양이 돌아오면 여기서 걸린다 */
+const ACC_SIZES = { Small: "sm", Medium: "md", Large: "lg" };
+function accordionExpect() {
+  try {
+    const box = { I: () => "", module: { exports: {} } };
+    vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
+    const a = box.module.exports.accordion || {}, fg = a.figma || {};
+    const cap = (x) => (x ? x[0].toUpperCase() + x.slice(1) : x);
+    const variants = Object.keys(fg.variants || {}).map(cap), states = (fg.states || []).map(cap);
+    const sizes = Object.keys(fg.sizes || {}).map((k) => Object.keys(ACC_SIZES).find((z) => ACC_SIZES[z] === k));
+    if (!variants.length || !states.length || !sizes.length || sizes.some((z) => !z)) throw new Error("components.data.js accordion.figma 의 variants · states · sizes 를 읽지 못했습니다");
+    const root = vars(block(read("_build/style.src.css"), ":root"));
+    const radius = (v) => {   // var(--radius-md) → { tok: "radius/md", px } · calc(var(--radius-lg) - 1px) → { px: 7 }
+      const c = /calc\(var\(--([a-z0-9-]+)\)\s*-\s*([\d.]+)px\)/.exec(v || ""); if (c) return { tok: null, px: px(root["--" + c[1]]) - +c[2] };
+      const m = /^var\(--([a-z0-9]+)-([a-z0-9-]+)\)$/.exec(String(v || "").trim()); if (m) return { tok: m[1] + "/" + m[2], px: px(root["--" + m[1] + "-" + m[2]]) };
+      throw new Error("모서리 값을 읽지 못했습니다(" + v + ")");
+    };
+    const base = cssRule(".accordion summary"), after = cssRule(".accordion summary::after");
+    const pad = (v) => { const p = String(v || "").trim().split(/\s+/).map(px); return [p[0], p.length > 2 ? p[2] : p[0]]; };
+    const size = {};
+    for (const z of sizes) {
+      const sel = `.accordion.${ACC_SIZES[z]} summary`, r = cssRule(sel);
+      const [pt, pb] = pad(r.padding || base.padding), lh = px(r["line-height"] || base["line-height"]), fs = px(r["font-size"] || base["font-size"]);
+      let chev = px(after.width);
+      try { const l = cssRule(sel + "::after"); if (l.width) chev = px(l.width); } catch {}
+      if (![pt, pb, lh, fs, chev].every((x) => x > 0)) throw new Error(sel + " 의 padding · line-height · font-size 를 읽지 못했습니다");
+      let icon = px(cssRule(".accordion summary>svg").width), iconCss = ".accordion summary>svg";
+      try { const l = cssRule(sel + ">svg"); if (l.width) { icon = px(l.width); iconCss = sel + ">svg"; } } catch {}
+      if (!(icon > 0)) throw new Error(sel + ">svg 의 width 를 읽지 못했습니다");
+      const gap = px(r.gap || base.gap);
+      if (gap === null || !(gap >= 0)) throw new Error(sel + " 의 gap 을 읽지 못했습니다(.accordion summary 에 gap 이 있어야 합니다)");
+      size[z] = { h: pt + lh + pb, fs, chev, icon, iconCss, gap, css: sel };
+      const d = fg.sizes[ACC_SIZES[z]];
+      if (d && (d.h !== size[z].h || d.fs !== fs)) throw new Error(`components.data.js accordion.figma.sizes.${ACC_SIZES[z]}(h ${d.h} · fs ${d.fs})와 CSS ${sel}(h ${size[z].h} · fs ${fs})가 다릅니다`);
+    }
+    const hoverFace = figTok(cssRule(".accordion summary:hover").background);
+    const dis = cssRule(".accordion.disabled summary"), disAfter = cssRule(".accordion.disabled summary::after");
+    const want = {
+      variants, sizes, states, size,
+      hover: { face: hoverFace, radius: { Outline: radius(base["border-radius"]), Flat: radius(cssRule(".accordion.flat summary")["border-radius"]) } },
+      disabled: { ink: figTok(dis.color), chev: figTok(disAfter.background) },
+      normal: { meta: figTok(cssRule(".accordion summary small").color), chev: figTok(after.background) },
+      stroke: figTok(cssRule(".accordion").border),
+    };
+    for (const [k, v] of [["hover 면", want.hover.face], ["비활성 글자", want.disabled.ink], ["비활성 셰브론", want.disabled.chev], ["보조 정보", want.normal.meta], ["셰브론", want.normal.chev], ["테두리", want.stroke]]) if (!v) throw new Error(k + " 토큰을 읽지 못했습니다");
+    const props = a.props || [], dv = (k) => { const r = props.find((x) => String(x[0]).split(/[ /]/)[0] === k); return r ? String(r[2]).trim() : null; };
+    const dz = Object.keys(ACC_SIZES).find((z) => ACC_SIZES[z] === dv("size"));
+    want.default = dv("variant") && dz ? `Variant=${cap(dv("variant"))}, Size=${dz}, State=${states[0]}` : null;
+    if (!want.default) throw new Error("props 의 variant · size 기본값을 읽지 못했습니다");
+    return want;
+  } catch (e) { return { error: String(e.message || e) }; }
+}
+
 /* Tag 기본 크기(2026-10-26 k7) — components.data.js 의 Tag props 에서 size 행의 기본값(md)을 읽어 Figma 크기 이름으로 */
 function tagDefaultSize() {
   const box = { I: () => "", module: { exports: {} } };
@@ -612,6 +688,8 @@ function componentsExpect() {
     tagDefault: tagDefaultSize(),
     /* Button 기본 변형 — props 의 variant · color · size 기본값(2026-10-28 k16) */
     buttonDefault: buttonDefault(),
+    /* Accordion 변형 표 · 헤더 · Hover · Disabled · 기본 변형 — 사이트 CSS 와 components.data.js(2026-10-29 k21) */
+    accordion: accordionExpect(),
     /* Text Field 입력칸 높이 — .field input · .field.sm input · .field.lg input(2026-10-28 k16) */
     textFieldH: (() => { try { const h = { Small: px(cssRule(".field.sm input").height), Medium: px(cssRule(".field input").height), Large: px(cssRule(".field.lg input").height) }; return Object.values(h).every((x) => x > 0) ? h : { error: "높이를 읽지 못했습니다 " + JSON.stringify(h) }; } catch (e) { return { error: String(e.message || e) }; } })(),
     /* 선택된 Radio · 비활성 Slider 글자의 칠 — 사이트 CSS (2026-10-27 k11) */
@@ -697,6 +775,84 @@ function diffComponents(c, want, bad, notes) {
       const fg = o["Icon Only"] === "True" ? v.icon : v.text;
       if (fg !== tok(w.fg)) bad.push(`${at} ${o["Icon Only"] === "True" ? "아이콘" : "글자"} ${fg} ≠ ${w.fg} — 사이트 ${w.css}`);
       if (v.opacity !== undefined && v.opacity < 1) bad.push(`${at} 불투명도 ${v.opacity} — 비활성은 토큰으로 칠합니다`);
+    }
+  }
+  /* Accordion(2026-10-29 k21) — 규칙은 accordionExpect 머리 주석. probe 의 components.accordion(변형마다 헤더 · 제목 · 보조 정보 · 셰브론)과
+     sets.Accordion(테두리)으로 본다. 옛 probe 덤프에는 components.accordion 이 없다 — 그때는 NOTE 로만 알린다 */
+  {
+    const wa = want.accordion, acc = c.accordion;
+    if (wa.error) bad.push(`Accordion 기대값을 저장소에서 읽지 못했습니다 — ${wa.error}`);
+    else if (acc === undefined) notes.push("덤프에 Accordion 조사(components.accordion)가 없습니다 — 2026-10-29 k21 전 probe.js 로 만든 덤프입니다");
+    else if (!acc || !acc.length) bad.push("Accordion 세트를 조사하지 못했습니다(components.accordion 비어 있음)");
+    else {
+      const av = (name) => Object.fromEntries(String(name).split(", ").map((kv) => kv.split("=")).filter((x) => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
+      const AX = ["Variant", "Size", "State"], key = (o) => AX.map((k) => k + "=" + (o[k] || "?")).join(", ");
+      const exp = new Set(); for (const v of wa.variants) for (const z of wa.sizes) for (const s of wa.states) exp.add(key({ Variant: v, Size: z, State: s }));
+      const stray = acc.filter((v) => { const o = av(v.name); return !exp.has(key(o)) || Object.keys(o).length !== AX.length; });
+      const got = new Set(acc.map((v) => key(av(v.name)))), miss = [...exp].filter((k) => !got.has(k));
+      if (miss.length) bad.push(`Accordion 에 없는 변형 ${miss.length}개(기대 ${exp.size}) — ${miss.slice(0, 4).join(" · ")}${miss.length > 4 ? " …" : ""}`);
+      if (stray.length) bad.push(`Accordion 에 표에 없는 변형 ${stray.length}개 — ${stray.slice(0, 4).map((v) => v.name + "(" + v.id + ")").join(" · ")}${stray.length > 4 ? " …" : ""}(옛 이름 Style=Default · Flat 은 Variant 로 바꿨어야 합니다 — accordionExpect 머리 주석)`);
+      if ((c.defaults || {}).Accordion !== wa.default) bad.push(`Accordion 기본 변형 ${(c.defaults || {}).Accordion} ≠ ${wa.default} — components.data.js accordion props 기본값`);
+      const strokes = new Map((sets["Accordion"] || []).map((v) => [v.id, v.stroke]));
+      let iconOld = false, rowOld = false; const iconHidden = [];
+      if (c.accordionProps === undefined) notes.push("덤프에 Accordion 속성 정의(components.accordionProps)가 없습니다 — 2026-10-29 k22 전 probe.js 로 만든 덤프입니다");
+      else {
+        const ib = Object.entries(c.accordionProps || {}).find(([k, d]) => /^Icon#/.test(k) && d.type === "BOOLEAN");
+        if (!ib) bad.push("Accordion 에 불리언 속성 Icon 이 없습니다(2026-10-29 k22 — 앞 아이콘)");
+        else if (ib[1].def !== false) bad.push(`Accordion 속성 Icon 기본값 ${ib[1].def} ≠ false`);
+        if (!Object.values(c.accordionProps || {}).some((d) => d.type === "INSTANCE_SWAP")) bad.push("Accordion 에 앞 아이콘 인스턴스 교체 속성이 없습니다(2026-10-29 k22)");
+      }
+      for (const v of acc) {
+        const o = av(v.name), z = wa.size[o.Size], at = `Accordion ${v.name} (${v.id})`;
+        if (!z || !wa.variants.includes(o.Variant) || !wa.states.includes(o.State)) continue;   // 표에 없는 변형은 위에서 냈다
+        if (v.h === null) { bad.push(`${at} 헤더(이름 "Summary") 없음`); continue; }
+        if (Math.abs(v.h - z.h) > 0.5) bad.push(`${at} 헤더 높이 ${v.h} ≠ ${z.h} — 사이트 ${z.css}(padding + line-height)`);
+        if (v.fs !== z.fs) bad.push(`${at} 제목 크기 ${v.fs} ≠ ${z.fs} — 사이트 ${z.css}`);
+        if (v.chevW === null || Math.abs(v.chevW - z.chev) > 0.5) bad.push(`${at} 셰브론 ${v.chevW} ≠ ${z.chev} — 사이트 .accordion summary::after`);
+        if (v.icon === undefined) iconOld = true;
+        else if (!v.icon) bad.push(`${at} 앞 아이콘(이름 "Icon") 없음 — 사이트 ${z.iconCss}`);
+        else {
+          const ic = v.icon, ref = ic.ref || {};
+          if (Math.abs(ic.w - z.icon) > 0.5 || Math.abs(ic.h - z.icon) > 0.5) bad.push(`${at} 앞 아이콘 ${ic.w}×${ic.h} ≠ ${z.icon} — 사이트 ${z.iconCss}`);
+          if (ic.idx !== 0) bad.push(`${at} 앞 아이콘이 헤더 맨 앞이 아님(순서 ${ic.idx})`);
+          if (ic.ink === "override(hidden)") iconHidden.push(v.id);   // 숨긴 인스턴스의 덮어쓴 선 색은 플러그인이 읽지 못한다 — probe.js 의 Accordion 주석
+          else if (ic.ink !== v.title) bad.push(`${at} 앞 아이콘 선 ${ic.ink} ≠ 제목 ${v.title} — 사이트 svg 는 currentColor`);
+          if (ic.vis !== false) bad.push(`${at} 앞 아이콘이 기본으로 보임 — Icon 기본값 false 와 맞지 않습니다`);
+          const pd = c.accordionProps || {};
+          if (!ref.visible || !pd[ref.visible] || pd[ref.visible].type !== "BOOLEAN" || !/^Icon#/.test(ref.visible)) bad.push(`${at} 앞 아이콘 보임이 불리언 속성 Icon 에 연결되지 않음(${ref.visible || "없음"})`);
+          if (!ref.mainComponent || !pd[ref.mainComponent] || pd[ref.mainComponent].type !== "INSTANCE_SWAP") bad.push(`${at} 앞 아이콘이 인스턴스 교체 속성에 연결되지 않음(${ref.mainComponent || "없음"})`);
+        }
+        if (v.row === undefined) rowOld = true;
+        else if (!v.row) bad.push(`${at} 헤더 줄을 조사하지 못했습니다`);
+        else {
+          const rw = v.row;
+          if (rw.lm !== "HORIZONTAL") bad.push(`${at} 헤더가 가로 자동 배치가 아님(${rw.lm}) — 사이트 .accordion summary display:flex`);
+          if (rw.gap !== z.gap) bad.push(`${at} 헤더 간격 ${rw.gap} ≠ ${z.gap} — 사이트 ${z.css} gap`);
+          if (rw.order !== "Icon>Title>Meta>Chevron") bad.push(`${at} 헤더 자식 순서 ${rw.order} ≠ Icon>Title>Meta>Chevron`);
+          if (rw.tSz !== "FILL" || rw.tAl !== "LEFT") bad.push(`${at} 제목 ${rw.tSz}/${rw.tAl} ≠ FILL/LEFT — 제목은 아이콘 바로 뒤, 보조 정보 · 셰브론은 오른쪽 끝(사이트 margin-left:auto)`);
+          if (rw.mSz === "FILL") bad.push(`${at} 보조 정보가 FILL — 셰브론 바로 앞(8)에 붙어야 합니다`);
+        }
+        const st = strokes.get(v.id);
+        if (st !== undefined && !String(st).includes("$" + wa.stroke)) bad.push(`${at} 테두리 ${st} ≠ ${wa.stroke} — 사이트 .accordion border`);
+        if (o.State === "Hover") {
+          const hr = wa.hover.radius[o.Variant];
+          if (v.face !== "$" + wa.hover.face) bad.push(`${at} Hover 헤더 면 ${v.face} ≠ ${wa.hover.face} — 사이트 .accordion summary:hover`);
+          if (!v.r || v.r.some((x) => Math.abs(x - hr.px) > 0.01)) bad.push(`${at} Hover 헤더 모서리 ${JSON.stringify(v.r)} ≠ ${hr.px} — 둥근 테두리 안쪽(${o.Variant === "Flat" ? ".accordion.flat summary" : ".accordion summary"} border-radius)`);
+          if (hr.tok && v.rv !== hr.tok) bad.push(`${at} Hover 헤더 모서리가 ${hr.tok} 에 묶이지 않음(${v.rv || "값만"})`);
+        } else if (v.face !== "-") bad.push(`${at} 헤더 면 ${v.face} — Hover 가 아닌 헤더는 면이 없습니다(사이트 .accordion summary)`);
+        if (o.State === "Disabled") {
+          if (v.title !== "$" + wa.disabled.ink) bad.push(`${at} 제목 ${v.title} ≠ ${wa.disabled.ink} — 사이트 .accordion.disabled summary`);
+          if (v.meta !== null && v.meta !== "$" + wa.disabled.ink) bad.push(`${at} 보조 정보 ${v.meta} ≠ ${wa.disabled.ink} — 사이트 .accordion.disabled summary small`);
+          if (v.chev !== "$" + wa.disabled.chev) bad.push(`${at} 셰브론 ${v.chev} ≠ ${wa.disabled.chev} — 사이트 .accordion.disabled summary::after`);
+        } else {
+          if (v.title === "$" + wa.disabled.ink) bad.push(`${at} 제목이 비활성 색(${wa.disabled.ink}) — Disabled 가 아닙니다`);
+          if (v.meta !== null && v.meta !== "$" + wa.normal.meta) bad.push(`${at} 보조 정보 ${v.meta} ≠ ${wa.normal.meta} — 사이트 .accordion summary small`);
+          if (v.chev !== "$" + wa.normal.chev) bad.push(`${at} 셰브론 ${v.chev} ≠ ${wa.normal.chev} — 사이트 .accordion summary::after`);
+        }
+      }
+      if (iconHidden.length) notes.push(`Accordion 앞 아이콘 ${iconHidden.length}개는 숨긴 채 선 색을 덮어써 플러그인이 값을 읽지 못합니다(${iconHidden.slice(0, 3).join(" · ")}${iconHidden.length > 3 ? " …" : ""}) — 켜서 확인해야 합니다(2026-10-29 k22 에 켜서 잼: Disabled 6개 foreground/disable/primary = 제목)`);
+      if (iconOld) notes.push("덤프의 Accordion 변형에 앞 아이콘 조사(icon)가 없습니다 — 2026-10-29 k22 전 probe.js 로 만든 덤프입니다");
+      if (rowOld) notes.push("덤프의 Accordion 변형에 헤더 줄 조사(row)가 없습니다 — 2026-10-30 k24 전 probe.js 로 만든 덤프입니다");
     }
   }
   /* Button Loading(2026-10-28 k17) — 사이트는 .btn.loading{color:transparent} 로 라벨 · 아이콘(currentColor)을 지우되 자리는 지키고, ::after 스피너만 가운데 보인다.

@@ -855,40 +855,63 @@ const COMPONENTS = {
   /* ------------------------------------------------ Accordion */
   "accordion": {
     status: "ready", react: ["Accordion","AccordionGroup"], css: [".accordion", ".accordion-group"],
-    desc: "긴 설명이나 고급 설정을 접어 두고 필요할 때 펼칩니다. 네이티브 <code>details/summary</code> 를 써 JS 없이 동작하며, 펼침 상태 전달과 키보드 조작(Tab · Enter · Space)도 브라우저 기본 동작이라 기본·그룹에는 별도 ARIA 가 필요 없습니다. 예외는 비활성뿐입니다 — <code>pointer-events</code> 와 <code>tabindex=\"-1\"</code> 은 마우스·키보드만 막고 스크린리더에는 아무것도 알리지 않으므로 <code>aria-disabled=\"true\"</code> 를 함께 둡니다.",
-    thumb: `<details class="accordion" open style="min-width:200px"><summary style="padding:10px 14px;font-size:12px">고급 설정</summary><div class="body" style="padding:0 14px 10px;font-size:12px">내용</div></details>`,
+    desc: "긴 설명 · 고급 설정 · FAQ 처럼 당장 보지 않아도 되는 정보를 접어 두었다가 필요할 때 펼칩니다. 핵심 정보와 필수 입력은 펼쳐 두고, 같은 층위의 화면 전환에는 Tab, 순서 진행에는 Steps 를 씁니다.",
+    thumb: `<details class="accordion sm outline" open style="min-width:200px"><summary style="padding:10px 14px;font-size:12px">고급 설정</summary><div class="body" style="padding:0 14px 10px;font-size:12px">내용</div></details>`,
     examples: [
-      { id: "basic", title: "Default", desc: "details.accordion > summary + .body. open 속성으로 초기 펼침.", layout: "top", html: `
-        <details class="accordion" open style="max-width:560px">
-          <summary>고급 탐지 옵션 <small>3개 설정</small></summary>
+      { id: "default", title: "Default", desc: "Outline · md 가 기본이고, 처음에는 <b>닫힌 상태</b>로 둡니다. 사용자가 반드시 봐야 하는 첫 항목만 예외로 펼쳐 둡니다(<code>open</code>).", layout: "top", html: `
+        <details class="accordion md outline" style="max-width:560px">
+          <summary>고급 탐지 옵션</summary>
           <div class="body">휴리스틱 분석, 메모리 스캔, 스크립트 차단을 개별로 켜고 끕니다. 기본값은 모두 켬입니다.</div>
         </details>` },
-      { id: "group", title: "Group", desc: "여러 항목. 하나만 펼치려면 같은 name 을 줍니다(브라우저 지원 시).", layout: "top", html: `
-        <div class="accordion-group" style="max-width:560px">
-          <details class="accordion" name="faq" open><summary>정책은 언제 적용되나요?</summary><div class="body">배포 버튼을 누른 뒤 에이전트가 다음 체크인(최대 5분)에서 받아 적용합니다.</div></details>
-          <details class="accordion" name="faq"><summary>차단된 파일은 어디에 보관되나요?</summary><div class="body">격리 저장소에 30일 보관 후 자동 삭제됩니다.</div></details>
-          <details class="accordion" name="faq"><summary>예외 처리는 어떻게 하나요?</summary><div class="body">정책 › 예외 목록에서 해시 또는 경로를 등록합니다.</div></details>
-        </div>` },
-      { id: "flat", title: "Flat / Disabled", desc: "카드 안에서는 보더 없는 .flat — 배경·여백·radius 는 .accordion-group.flat 이 그립니다. 권한이 없으면 .disabled.", html: `
+      { id: "variant", title: "Variant", desc: "<b>Outline</b>(기본)은 항목마다 테두리가 있는 카드로, 페이지 바탕 위에 씁니다. <b>Flat</b> 은 테두리 없이 구분선만 있어 카드 · 패널 안에 씁니다 — 바탕 · 테두리 · 좌우 여백은 <code>.accordion-group.flat</code> 이 그립니다.", layout: "top", html: `
+        <details class="accordion md outline" style="max-width:560px"><summary>Outline</summary><div class="body">항목마다 테두리가 있는 카드입니다.</div></details>
         <div class="accordion-group flat" style="max-width:560px">
-          <details class="accordion flat" open><summary>일반</summary><div class="body">정책 이름, 설명, 적용 그룹</div></details>
-          <details class="accordion flat"><summary>스케줄</summary><div class="body">적용 요일과 시간대</div></details>
-          <details class="accordion flat disabled"><summary tabindex="-1" aria-disabled="true">감사 로그 <small>권한 필요</small></summary><div class="body">관리자 권한이 있어야 열람할 수 있습니다.</div></details>
+          <details class="accordion md flat"><summary>Flat</summary><div class="body">구분선으로 나뉩니다.</div></details>
+          <details class="accordion md flat"><summary>Flat</summary><div class="body">구분선으로 나뉩니다.</div></details>
         </div>` },
+      { id: "size", title: "Size", desc: "sm 40 · md 52 · lg 60. 헤더 높이는 고정하고 너비는 컨테이너를 채웁니다. 패널 · 사이드 영역은 sm, 일반 화면은 md, 넓은 안내 화면은 lg.", layout: "top", html: `
+        <details class="accordion sm outline" style="max-width:560px"><summary>Small</summary><div class="body">헤더 40 · 제목 14</div></details>
+        <details class="accordion md outline" style="max-width:560px"><summary>Medium</summary><div class="body">헤더 52 · 제목 16</div></details>
+        <details class="accordion lg outline" style="max-width:560px"><summary>Large</summary><div class="body">헤더 60 · 제목 18</div></details>` },
+      { id: "state", title: "State", desc: "상태는 <b>Collapsed · Expanded · Hover · Disabled</b> 네 가지입니다. Hover 는 헤더 면을 옅게 칠해 누를 수 있는 영역임을 알립니다. Disabled 는 권한처럼 열 수 없는 이유가 있을 때만 쓰고, 그 이유를 보조 정보로 함께 보입니다.", layout: "top", html: `
+        <details class="accordion md outline" style="max-width:560px"><summary>Collapsed</summary><div class="body">펼친 내용</div></details>
+        <details class="accordion md outline" open style="max-width:560px"><summary>Expanded</summary><div class="body">펼친 내용입니다.</div></details>
+        <details class="accordion md outline" style="max-width:560px"><summary data-state="hover">Hover</summary><div class="body">펼친 내용</div></details>
+        <details class="accordion md outline disabled" style="max-width:560px"><summary tabindex="-1" aria-disabled="true">Disabled <small>권한 필요</small></summary><div class="body">관리자 권한이 있어야 열람할 수 있습니다.</div></details>` },
+      { id: "header", title: "Header", desc: "제목은 필수이고 내용을 예측할 수 있는 명사형 · 질문형 한 줄로 씁니다. 개수 · 상태 같은 <b>보조 정보는 오른쪽</b>에, 앞 아이콘은 의미를 보완할 때만 둡니다. 펼침 화살표는 오른쪽에 고정되고 헤더 전체가 클릭 영역입니다. <b>헤더 안에는 버튼 · 체크박스 같은 조작 요소를 두지 않습니다</b> — 약관 동의의 항목 체크박스만 예외입니다(<a href=\"#/patterns/terms-agreement\">Terms Agreement</a>).", layout: "top", html: `
+        <details class="accordion md outline" style="max-width:560px"><summary>탐지 예외 목록 <small>12개</small></summary><div class="body">예외로 등록된 해시 · 경로입니다.</div></details>
+        <details class="accordion md outline" style="max-width:560px"><summary>${I("info-circle")}유의사항</summary><div class="body">배포 후 최대 5분 안에 적용됩니다.</div></details>` },
+      { id: "group", title: "Group", desc: "여러 항목은 <code>.accordion-group</code>(간격 8)으로 묶고, <b>여러 개를 동시에 펼칠 수 있는 것</b>이 기본입니다. 한 묶음에는 3~7개를 권장하고, 더 많으면 검색 · 필터나 별도 페이지를 씁니다.", layout: "top", html: `
+        <div class="accordion-group" style="max-width:560px">
+          <details class="accordion md outline" open><summary>일반</summary><div class="body">정책 이름, 설명, 적용 그룹</div></details>
+          <details class="accordion md outline"><summary>스케줄</summary><div class="body">적용 요일과 시간대</div></details>
+          <details class="accordion md outline"><summary>알림</summary><div class="body">차단 시 알림 받을 채널</div></details>
+        </div>` },
+      { id: "single", title: "Single open", desc: "같은 <code>name</code> 을 주면 하나를 펼칠 때 나머지가 닫힙니다(브라우저 지원 시). FAQ 처럼 <b>한 번에 하나만 읽는 목록</b>에만 씁니다.", layout: "top", html: `
+        <div class="accordion-group" style="max-width:560px">
+          <details class="accordion md outline" name="faq" open><summary>정책은 언제 적용되나요?</summary><div class="body">배포 버튼을 누른 뒤 에이전트가 다음 체크인(최대 5분)에서 받아 적용합니다.</div></details>
+          <details class="accordion md outline" name="faq"><summary>차단된 파일은 어디에 보관되나요?</summary><div class="body">격리 저장소에 30일 보관 후 자동 삭제됩니다.</div></details>
+          <details class="accordion md outline" name="faq"><summary>예외 처리는 어떻게 하나요?</summary><div class="body">정책 › 예외 목록에서 해시 또는 경로를 등록합니다.</div></details>
+        </div>` },
+      { id: "body", title: "Body", desc: "본문에는 텍스트와 폼 요소를 둘 수 있습니다. <b>아코디언 안에 아코디언을 넣지 않습니다</b>. 내용이 길면 높이를 제한하고 스크롤합니다(React <code>bodyStyle</code>).", layout: "top", html: `
+        <details class="accordion md outline" open style="max-width:560px">
+          <summary>변경 이력 <small>최근 30일</small></summary>
+          <div class="body" style="max-height:120px;overflow:auto">2026-10-28 실시간 보호 켬<br>2026-10-21 USB 검사 예외 추가<br>2026-10-14 스케줄 변경(평일 09–18)<br>2026-10-07 알림 채널 추가<br>2026-09-30 정책 생성</div>
+        </details>` },
     ],
     props: [
-      ["details.accordion", "container", "—", "summary + .body. 제목은 React <code>title</code>"],
-      ["open", "attribute", "—", "펼침 상태. React 는 <code>open</code>(제어) 또는 <code>defaultOpen</code> + <code>onOpenChange</code>"],
-      ["name", "attribute", "—", "같은 name 은 하나만 펼침(브라우저 지원 시)"],
-      [".flat", "boolean", "false", "보더 없는 구분선형. 마지막 항목은 아래 선을 지웁니다"],
-      [".disabled", "boolean", "false", "펼칠 수 없음 — summary 에 <code>tabindex=\"-1\"</code> 과 <code>aria-disabled=\"true\"</code> 를 함께 둡니다(React <code>disabled</code> 가 둘 다 넣습니다)"],
-      ["summary small", "element", "—", "우측 보조 정보(React <code>extra</code>). 제목 앞 아이콘은 <code>summary &gt; svg</code> 로 두면 16~18 로 고정됩니다"],
-      [".body", "element", "—", "본문. 높이를 제한하려면 <code>max-height</code> + <code>overflow</code>(React <code>bodyStyle</code>)"],
-      [".accordion-group", "container", "—", "여러 항목 묶음(8px 간격). React <code>AccordionGroup</code>"],
-      [".accordion-group.flat", "boolean", "false", "카드형 묶음 — 간격 0 에 Surface 배경 · 1px line/neutral/secondary 보더 · 좌우 20 · radius/lg. 항목에는 <code>.flat</code> 을 함께"],
+      ["variant / .outline · .flat", "outline | flat", "outline", "형태. Outline 은 항목마다 테두리가 있는 카드(페이지 바탕 위), Flat 은 구분선형(카드 · 패널 안 — <code>.accordion-group.flat</code> 과 함께)"],
+      ["size", "sm | md | lg", "md", "헤더 높이 40 · 52 · 60 고정, 제목 14 · 16 · 18"],
+      ["title / summary", "ReactNode", "—", "제목(필수). 명사형 · 질문형 한 줄 권장. 앞 아이콘은 <code>summary &gt; svg</code>"],
+      ["extra / summary small", "ReactNode", "—", "오른쪽 보조 정보(개수 · 상태 · 비활성 이유)"],
+      ["open / defaultOpen", "boolean", "false", "펼침 상태. 기본은 닫힘 — 반드시 봐야 하는 첫 항목만 펼쳐 둡니다. React 는 <code>open</code>(제어) 또는 <code>defaultOpen</code> + <code>onOpenChange</code>"],
+      ["name", "string", "—", "같은 name 은 하나만 펼침(브라우저 지원 시). FAQ 처럼 한 번에 하나만 읽는 목록에만"],
+      ["disabled / .disabled", "boolean", "false", "열 수 없음. 이유를 보조 정보로 함께 보입니다. HTML 은 summary 에 <code>tabindex=\"-1\"</code> 과 <code>aria-disabled=\"true\"</code> 를 함께(React 가 둘 다 넣습니다)"],
+      ["bodyStyle / .body", "CSSProperties", "—", "본문. 길면 <code>max-height</code> + <code>overflow</code> 로 높이를 제한합니다. 아코디언 중첩 금지"],
+      ["AccordionGroup / .accordion-group", "container", "—", "묶음. Outline 은 간격 8, <code>variant=\"flat\"</code>(<code>.flat</code>)은 간격 0 · 카드 바탕 · 테두리 · 좌우 20. 3~7개 권장"],
     ],
-    spec: [["Size", "헤더 높이 52 · 본문 padding 0 20 16"], ["Container", "radius/lg 8 · line/neutral/secondary"], ["Label", "제목 16 SemiBold · 본문 Body/2 14 secondary"], ["Placement", "설정 폼의 고급 옵션, FAQ"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전"]],
-    figma: { frame: "Accordion", radius: "radius/lg", sizes: { md: { h: 52 } }, variants: { default: { stroke: "--line-neutral-secondary" }, flat: {} }, states: ["collapsed", "expanded", "disabled"] },
+    spec: [["Size", "헤더 sm 40 · md 52 · lg 60 · 본문 padding sm 0 16 12 · md 0 20 16 · lg 0 24 20 (Flat 은 좌우 4)"], ["Container", "radius/lg 8 · Outline 은 line/neutral/secondary 1px · Hover 는 헤더 면 surface/neutral/secondary"], ["Label", "제목 14 · 16 · 18 SemiBold · 보조 정보 12 tertiary · 본문 Body/2 14 secondary(sm 12)"], ["Placement", "설정 폼의 고급 옵션, FAQ · 헤더 안 조작 요소 금지(약관 동의만 예외)"], ["Motion", "본문 높이는 --motion-base 로 보간(::details-content 미지원 브라우저는 즉시 열림) · 셰브론은 --motion-fast 로 회전 · Hover 면은 --motion-fast"]],
+    figma: { frame: "Accordion", radius: "radius/lg", sizes: { sm: { h: 40, fs: 14 }, md: { h: 52, fs: 16 }, lg: { h: 60, fs: 18 } }, variants: { outline: { stroke: "--line-neutral-secondary" }, flat: {} }, states: ["collapsed", "expanded", "hover", "disabled"], hover: { bg: "--surface-neutral-secondary" } },
   },
 
   /* ------------------------------------------------ Card */
