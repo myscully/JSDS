@@ -614,7 +614,7 @@ function accordionExpect() {
             색은 링크 색(.breadcrumb li color — a 는 inherit)
      구분자 .breadcrumb li+li::before 의 width · height · background, 아이콘 이름은 _build/icons-css.js 의 같은 규칙 mask("…"). 항목 사이(홀수 자리)마다 하나
      접힘   collapsed 예제의 .more 아이콘 이름, 크기 = .breadcrumb .more svg width, 색 = .more color · :hover color. 접힌 행은 홈 + … + 끝 2개(항목 4)
-     글자   .breadcrumb 의 font-size · line-height, 링크 색 = li color, Hover = a:hover color + text-decoration underline, 현재 = li[aria-current] color · font-weight(굵기 없는 규칙은 400).
+     글자   .breadcrumb 의 font-size · line-height(k27 에 14 → 13 — 14단계 밖이라 스타일 이름이 아니라 숫자로 맞춘다), 링크 색 = li color, Hover = a:hover color + text-decoration underline, 현재 = li[aria-current] color · font-weight(굵기 없는 규칙은 400).
             현재 굵기는 2026-11-02 사람의 결정으로 600 → 500(Medium — CSS 가 바뀌면 기대값도 따라온다). k25 에 Noto Sans KR 에 SemiBold 가 없어 600 을 Bold 로 둔 것은
             k26 에 Noto Sans KR Medium 으로 고쳤다. 기대값이 600 인데 Noto Bold 면 NOTE 로만 알린다(_figma/font-revert.md k25 · k26 — 되돌릴 목록)
      Focus  :focus-visible 의 outline(굵기 · 색) · outline-offset — 항목 칸에서 offset 만큼 바깥의 "Focus Ring"(OUTSIDE 선, 면 없음). Focus 가 아닌 항목 · 변형에는 고리가 없다 */
@@ -987,7 +987,7 @@ function diffComponents(c, want, bad, notes) {
             if (!fam) bad.push(`${at} ${what} ${k.n} 서체 ${t.font}`);
             if (wt !== ww) { if (fam && fam[1] === "Noto Sans KR" && ww === 600 && wt === 700) notes.push(`${at} ${what} 굵기 600 이 Noto Sans KR Bold(700)로 대체돼 있습니다 — 이 환경의 Noto 에 SemiBold 가 없음(되돌릴 목록 _figma/font-revert.md k25 · k26)`); else bad.push(`${at} ${what} ${k.n} 굵기 ${wt} ≠ ${ww}(${t.font})`); }
           };
-          for (const k of items) if (k.tx && (k.tx.fs !== wb.fs || k.tx.lh !== wb.lh)) bad.push(`${at} ${k.n} 글자 ${k.tx.fs}/${k.tx.lh} ≠ ${wb.fs}/${wb.lh} — 사이트 .breadcrumb(Body/2)`);
+          for (const k of items) if (k.tx && (k.tx.fs !== wb.fs || k.tx.lh !== wb.lh)) bad.push(`${at} ${k.n} 글자 ${k.tx.fs}/${k.tx.lh} ≠ ${wb.fs}/${wb.lh} — 사이트 .breadcrumb font-size · line-height(2026-11-02 k27 부터 13/22 — 타이포 단계 밖이라 텍스트 스타일에 연결하지 않음)`);
           /* 마지막 항목 = 현재 페이지(current 는 축이 아니라 마지막 항목 — k26) */
           const last = items[items.length - 1];
           if (!last || !last.tx) bad.push(`${at} 마지막 항목이 현재 페이지 글자가 아님 — ${last ? last.n : "없음"}(모든 변형의 마지막 항목이 현재 페이지입니다)`);
