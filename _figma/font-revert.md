@@ -129,6 +129,12 @@
 >   Spec Label 값 332:2402 는 저장소 spec 그대로 "13/22(타이포 단계 밖) tertiary · Hover primary + 밑줄 · 현재 primary Medium" 으로 글자만 바뀌었다.
 >   **되돌릴 때 크기 13 · 행간 22 를 지킨다** — 14단계에 13/22 스타일이 없으니 Body/2(14/22)에 다시 연결하지 말고 스타일 없이 Pretendard 로만 돌린다(연결하면 14 로 돌아가 audit 이 어긋남으로 낸다).
 >   `font-revert-nodes.tsv` 맨 아래 "2026-11-02 k27" 절(k26 행에도 크기 표시를 덧붙임)
+> - 2026-11-02 k28: 4 Pattern 정책 설정 화면(339:480)에 Breadcrumb 를 넣으며(사람의 결정 2026-11-02 — 사이트 patterns.data.js policy-settings sections 예제) **2개가 새로 Noto** 가 됐다(4 Pattern) —
+>   Breadcrumb 인스턴스 934:173(Type=Default, State=Default · detach 안 함)의 글자 덮어쓰기 I934:173;918:4375 "정보 유출 방지 → USB 제어"(Noto Sans KR Regular 13/22) ·
+>   I934:173;918:4377 "외부 메일 첨부 차단 → 외부 USB 차단"(Noto Sans KR Medium 13/22). "정책" 은 원본 글자와 같아 덮어쓰지 않았다.
+>   원본 글자가 이미 Noto 라 덮어쓰기도 Noto 다(덮어쓴 필드 characters · styledTextSegments — 원본을 Pretendard 로 돌려도 이 덮어쓰기의 서체는 따로 돌려야 할 수 있다).
+>   인스턴스와 페이지 머리 339:481 을 세로 간격 8 묶음 934:172("Head")로 감싸 화면 맨 앞에 두었고 아래 Notice 와 간격 16 은 그대로 — 화면 882 → 914 · 카드 339:449 1836 → 1868 ·
+>   섹션 3 Security Console(339:43) 2130 → 2162(아래 여백 70 유지 · 맨 아래 섹션이라 옮긴 섹션 없음). `font-revert-nodes.tsv` 맨 아래 "2026-11-02 k28" 절
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)

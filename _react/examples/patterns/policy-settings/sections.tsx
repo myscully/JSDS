@@ -1,9 +1,18 @@
-import { Button, Notice, PageHead, Select, Setting, SettingsSection, Slider, Stack, Switch, TextField } from "@jiran/ds-react";
+import { Breadcrumb, BreadcrumbHome, BreadcrumbItem, Button, Notice, PageHead, Select, Setting, SettingsSection, Slider, Stack, Switch, TextField } from "@jiran/ds-react";
 
 export default function Example() {
   return (
     <Stack style={{ maxWidth: 760 }}>
-      <PageHead title="외부 USB 차단" sub="POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06" actions={<><Button variant="outline">복제</Button><Button>배포</Button></>} />
+      {/* 편집 화면 — Breadcrumb 는 페이지 타이틀 위 8px */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <Breadcrumb>
+          <BreadcrumbHome href="#" />
+          <BreadcrumbItem href="#">정책</BreadcrumbItem>
+          <BreadcrumbItem href="#">USB 제어</BreadcrumbItem>
+          <BreadcrumbItem current>외부 USB 차단</BreadcrumbItem>
+        </Breadcrumb>
+        <PageHead title="외부 USB 차단" sub="POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06" actions={<><Button variant="outline">복제</Button><Button>배포</Button></>} />
+      </div>
       <Notice tone="warning" title="배포되지 않은 변경 2건">변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</Notice>
       <SettingsSection title="탐지">
         <Setting title="실시간 보호" description="파일 실행 시 즉시 검사합니다"><Switch defaultChecked aria-label="실시간 보호" /></Setting>

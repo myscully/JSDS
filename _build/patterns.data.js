@@ -281,13 +281,23 @@ const PATTERNS = {
   },
 
   "policy-settings": {
-    status: "ready", react: ["SettingsSection","Setting","PageHead"], uses: ["switch", "select", "slider", "text-field", "radio-button", "notification", "button"], css: [".settings-section", ".setting", ".page-head", ".stack"],
+    status: "ready", react: ["SettingsSection","Setting","PageHead","Breadcrumb"], uses: ["breadcrumb", "switch", "select", "slider", "text-field", "radio-button", "notification", "button"], css: [".settings-section", ".setting", ".page-head", ".stack"],
     desc: "정책·시스템 설정 화면입니다. 섹션별 카드에 '라벨+설명 | 컨트롤' 행을 쌓고, 즉시 적용(Switch)과 저장 필요(폼)를 구분합니다.",
     thumb: `<div class="settings-section" style="padding:4px 12px;width:220px"><div class="setting" style="padding:8px 0"><div class="info"><b style="font-size:12px">실시간 보호</b></div><label class="switch sm"><input type="checkbox" checked></label></div><div class="setting" style="padding:8px 0"><div class="info"><b style="font-size:12px">USB 검사</b></div><label class="switch sm"><input type="checkbox"></label></div></div>`,
     examples: [
       { id: "sections", title: "설정 섹션", html: `
         <div class="stack" style="max-width:760px">
-          <div class="page-head"><div><h2 class="title">외부 USB 차단</h2><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06</p></div><div class="actions"><button type="button" class="btn md outline primary">복제</button><button type="button" class="btn md solid primary">배포</button></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <nav aria-label="현재 위치">
+              <ol class="breadcrumb">
+                <li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li>
+                <li><a href="#">정책</a></li>
+                <li><a href="#">USB 제어</a></li>
+                <li aria-current="page"><span>외부 USB 차단</span></li>
+              </ol>
+            </nav>
+            <div class="page-head"><div><h2 class="title">외부 USB 차단</h2><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06</p></div><div class="actions"><button type="button" class="btn md outline primary">복제</button><button type="button" class="btn md solid primary">배포</button></div></div>
+          </div>
           <div class="notice warning" role="status"><span class="ico">${I("alert-triangle",20)}</span><div><b>배포되지 않은 변경 2건</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>
           <div class="settings-section">
             <div class="section-head">탐지</div>
