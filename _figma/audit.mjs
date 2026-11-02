@@ -21,9 +21,10 @@
  *           Hover 헤더 면 ↔ summary:hover · 모서리, Disabled 글자 · 보조 정보 · 셰브론 ↔ .accordion.disabled, 기본 변형 ↔ props 기본값(2026-10-29 k21, accordionExpect),
  *           앞 아이콘 "Icon" 크기 ↔ .accordion summary>svg · .sm · .lg, 색 = 제목, 기본 숨김 · Icon(불리언 false) · 인스턴스 교체 속성 연결(2026-10-29 k22)
  *           헤더 줄 간격 ↔ .accordion summary gap · 왼쪽 정렬(Icon > Title(FILL · LEFT) > Meta > Chevron)(2026-10-30 k24)
- *   Breadcrumb 행(Type = Default · Collapsed) 높이 ↔ .breadcrumb min-height · figma.sizes.md.h, 간격 ↔ .breadcrumb · li gap, 첫 자식 = 홈 아이콘(예제 첫 li),
- *           구분자 ↔ li+li::before(아이콘 · 크기 · 색), 접힘 = 홈 + … + 끝 2개, 항목 세트 Breadcrumb Item 의 State ↔ figma.states,
- *           글자 · Hover(색 · 밑줄) · Current(색 · 굵기) · Focus 외곽선 ↔ .breadcrumb 규칙과 :focus-visible(2026-10-30 k25, breadcrumbExpect)
+ *   Breadcrumb 변형 표(Type × State) ↔ figma.variants × figma.states 중 current 를 뺀 것(current = 모든 변형의 마지막 항목), 높이 ↔ .breadcrumb min-height · figma.sizes.md.h,
+ *           간격 ↔ .breadcrumb · li gap, 첫 자식 = 홈 아이콘(예제 첫 li), 구분자 ↔ li+li::before(아이콘 · 크기 · 색), 접힘 = 홈 + … + 끝 2개,
+ *           글자 · 마지막 항목(색 · 굵기) ↔ .breadcrumb 규칙, State=Hover · Focus 는 받는 항목 하나(Default 첫 상위 링크 · Collapsed …)만 a:hover · .more:hover / :focus-visible 외곽선,
+ *           나머지 항목은 같은 Type 의 State=Default 와 같음. 항목 세트 Breadcrumb Item 이 남아 있으면 어긋남(2026-10-30 k25 · 2026-11-02 k26, breadcrumbExpect)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7) · Button 의 variant · color · size 기본값(k16)
  *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
  *   선택 컨트롤 선택된 Radio · 선택 + 비활성 Radio 의 면 · 테두리 · 점, 비활성 Slider 의 라벨 · 값 글자 칠(2026-10-27 k11) — controlsExpect
@@ -600,10 +601,13 @@ function accordionExpect() {
   } catch (e) { return { error: String(e.message || e) }; }
 }
 
-/* Breadcrumb(2026-10-30 k25 — 사람의 정의 2026-10-30) — 기대값을 저장소에서 읽는다. 손으로 적은 숫자는 없다.
+/* Breadcrumb(2026-10-30 k25 — 사람의 정의 2026-10-30 · 2026-11-02 k26 — 사람의 결정 2026-11-02) — 기대값을 저장소에서 읽는다. 손으로 적은 숫자는 없다.
      축     components.data.js 의 breadcrumb.figma — variants(default · collapsed → 세트 "Breadcrumb" 의 Type Default · Collapsed),
-            states(default · hover · focus · current → 세트 "Breadcrumb Item" 의 State). Figma 는 Pagination · Page Item 처럼 행 세트와 항목 세트 둘로 그린다 —
-            상태는 항목의 것이고(현재 페이지 · Hover 는 항목 하나에 걸린다) 행에는 상태 축이 없다. 기본 변형 = Type 의 첫 값
+            states(default · hover · focus · current → 같은 세트의 State 축). 다만 current 는 축 값이 아니라 **모든 변형의 마지막 항목**(현재 페이지)으로 그린다 —
+            그래서 State 축 = states 에서 current 를 뺀 것(axis), 변형 표 = variants × axis. k25 에는 상태를 항목 세트 "Breadcrumb Item" 에 따로 뒀으나
+            k26 에 사람의 결정으로 행 세트 하나로 모았다 — 항목 세트가 남아 있으면 어긋남. 기본 변형 = Type 의 첫 값 × State 의 첫 값
+     받는 항목 State=Hover · Focus 는 항목 하나에만 걸린다 — Type=Default 는 홈 다음 첫 글자 항목(첫 상위 링크), Type=Collapsed 는 …(.more) 버튼.
+            Hover = 글자는 a:hover 색 + 밑줄(…는 .more:hover 색), Focus = 그 항목 안 "Focus Ring". 나머지 항목은 같은 Type 의 State=Default 와 같아야 한다
      높이   figma.sizes.md.h 와 .breadcrumb 의 min-height 가 같아야 한다(다르면 기대값을 못 만든 것). 행 변형 높이 = 그 값(±0.5) · 가로 자동 배치 · 세로 가운데
      간격   .breadcrumb 의 gap(li 사이)과 .breadcrumb li 의 gap(구분자와 라벨 사이)이 같아야 하고, Figma 행은 항목과 구분자를 한 줄에 놓으므로 itemSpacing = 그 값
      첫 항목 components.data.js 의 default 예제 첫 li — a.icon 안의 아이콘 이름 · 크기(I(name) 의 기본 크기는 icons.gen.js 의 I 선언에서). 모든 행 변형의 첫 자식이 그 아이콘이고
@@ -611,8 +615,9 @@ function accordionExpect() {
      구분자 .breadcrumb li+li::before 의 width · height · background, 아이콘 이름은 _build/icons-css.js 의 같은 규칙 mask("…"). 항목 사이(홀수 자리)마다 하나
      접힘   collapsed 예제의 .more 아이콘 이름, 크기 = .breadcrumb .more svg width, 색 = .more color · :hover color. 접힌 행은 홈 + … + 끝 2개(항목 4)
      글자   .breadcrumb 의 font-size · line-height, 링크 색 = li color, Hover = a:hover color + text-decoration underline, 현재 = li[aria-current] color · font-weight(굵기 없는 규칙은 400).
-            Noto Sans KR 에는 SemiBold 가 없어 600 이 Bold 로 대체된 것은 NOTE(_figma/font-revert.md k25 — 되돌릴 목록)
-     Focus  :focus-visible 의 outline(굵기 · 색) · outline-offset — 항목 칸에서 offset 만큼 바깥의 "Focus Ring"(OUTSIDE 선, 면 없음). Focus 가 아닌 항목에는 고리가 없다 */
+            현재 굵기는 2026-11-02 사람의 결정으로 600 → 500(Medium — CSS 가 바뀌면 기대값도 따라온다). k25 에 Noto Sans KR 에 SemiBold 가 없어 600 을 Bold 로 둔 것은
+            k26 에 Noto Sans KR Medium 으로 고쳤다. 기대값이 600 인데 Noto Bold 면 NOTE 로만 알린다(_figma/font-revert.md k25 · k26 — 되돌릴 목록)
+     Focus  :focus-visible 의 outline(굵기 · 색) · outline-offset — 항목 칸에서 offset 만큼 바깥의 "Focus Ring"(OUTSIDE 선, 면 없음). Focus 가 아닌 항목 · 변형에는 고리가 없다 */
 function breadcrumbExpect() {
   try {
     const gen = read("_build/icons.gen.js"), dsz = +((/function I\(name, size = (\d+)/.exec(gen) || [])[1]);
@@ -651,7 +656,12 @@ function breadcrumbExpect() {
     };
     for (const [k, v] of [["링크 색", want.label], ["Hover 색", want.hover], ["현재 색", want.current.tok], ["구분자 색", want.sep.tok], ["… 색", want.more.tok], ["… Hover 색", want.more.hover], ["포커스 색", want.focus.tok]]) if (!v) throw new Error(k + " 토큰을 읽지 못했습니다");
     for (const [k, v] of [["font-size", want.fs], ["line-height", want.lh], ["구분자 크기", want.sep.w], ["… 크기", want.more.size], ["outline-offset", want.focus.offset]]) if (!(v >= 0)) throw new Error(k + " 를 읽지 못했습니다");
-    want.default = `Type=${variants[0]}`;
+    /* current 는 축 값이 아니다(k26) — 마지막 항목으로 본다. states 에 current 가 없으면 저장소 정의가 바뀐 것이니 기대값을 못 만든 것으로 */
+    const curState = states.find((s) => s.toLowerCase() === "current");
+    if (!curState) throw new Error("components.data.js breadcrumb.figma.states 에 current 가 없습니다 — k26 은 current 를 마지막 항목으로 해석합니다");
+    want.axis = states.filter((s) => s !== curState);
+    if (!want.axis.length) throw new Error("State 축 값이 없습니다(states 에서 current 를 빼면 빈 목록)");
+    want.default = `Type=${variants[0]}, State=${want.axis[0]}`;
     return want;
   } catch (e) { return { error: String(e.message || e) }; }
 }
@@ -916,25 +926,45 @@ function diffComponents(c, want, bad, notes) {
       if (rowOld) notes.push("덤프의 Accordion 변형에 헤더 줄 조사(row)가 없습니다 — 2026-10-30 k24 전 probe.js 로 만든 덤프입니다");
     }
   }
-  /* Breadcrumb(2026-10-30 k25) — 규칙은 breadcrumbExpect 머리 주석. probe 의 components.breadcrumb(행) · components.breadcrumbItem(항목)으로 본다.
-     옛 probe 덤프에는 두 필드가 없다 — 그때는 NOTE 로만 알린다 */
+  /* Breadcrumb(2026-10-30 k25 · 2026-11-02 k26) — 규칙은 breadcrumbExpect 머리 주석. probe 의 components.breadcrumb(행 세트 하나 — Type × State)로 본다.
+     components.breadcrumbItem 이 있으면 k25 의 항목 세트가 남은 것이라 어긋남(상태는 Breadcrumb 의 State 축에 — 사람의 결정 2026-11-02).
+     옛 probe 덤프 — k25 전에는 두 필드가 없고, k26 전에는 항목 글자 정보(tx) · 고리(ring)가 없다(out.k26 없음) — 그때는 NOTE 로만 알린다 */
   {
     const wb = want.breadcrumb, bc = c.breadcrumb, bi = c.breadcrumbItem;
     const ax = (name) => Object.fromEntries(String(name).split(", ").map((kv) => kv.split("=")).filter((x) => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
     const W = { Thin: 100, Light: 300, DemiLight: 350, Regular: 400, Medium: 500, SemiBold: 600, Bold: 700, Black: 900 };
     if (wb.error) bad.push(`Breadcrumb 기대값을 저장소에서 읽지 못했습니다 — ${wb.error}`);
     else if (bc === undefined) notes.push("덤프에 Breadcrumb 조사(components.breadcrumb)가 없습니다 — 2026-10-30 k25 전 probe.js 로 만든 덤프입니다");
+    else if (bc && !bc.k26) notes.push("덤프의 Breadcrumb 조사가 2026-11-02 k26 전 probe.js 로 만든 것입니다(항목 글자 정보 · 고리 없음) — Type × State 대조를 하지 않았습니다. probe.js 를 다시 돌리세요");
     else {
+      if (bi) bad.push(`Breadcrumb Item 세트${bi.id ? "(" + bi.id + ")" : ""}가 남아 있습니다(변형 ${(bi.variants || []).length}개) — 상태는 Breadcrumb 세트의 State 축(${wb.axis.join(" · ")})에 둡니다(사람의 결정 2026-11-02 k26). 인스턴스 수를 세어 0 이면 지우세요`);
       if (!bc) bad.push("Breadcrumb 세트가 없습니다");
       else {
-        const vs = bc.variants || [], types = vs.map((v) => ax(v.name).Type);
-        const miss = wb.variants.filter((t) => !types.includes(t)), stray = vs.filter((v) => { const o = ax(v.name); return !wb.variants.includes(o.Type) || Object.keys(o).length !== 1; });
-        if (miss.length) bad.push(`Breadcrumb 에 없는 변형 — ${miss.map((t) => "Type=" + t).join(" · ")}(components.data.js breadcrumb.figma.variants)`);
-        if (stray.length) bad.push(`Breadcrumb 에 표에 없는 변형 ${stray.length}개 — ${stray.map((v) => v.name + "(" + v.id + ")").join(" · ")}(Type = ${wb.variants.join(" · ")} 만 — 상태는 Breadcrumb Item 에)`);
+        const vs = bc.variants || [];
+        const lo = (x) => String(x).toLowerCase();
+        const sDef = wb.axis[0], sHover = wb.axis.find((x) => lo(x) === "hover"), sFocus = wb.axis.find((x) => lo(x) === "focus");
+        const ok = (o) => Object.keys(o).length === 2 && wb.variants.includes(o.Type) && wb.axis.includes(o.State);
+        const key = (t, st) => `Type=${t}, State=${st}`;
+        const table = wb.variants.flatMap((t) => wb.axis.map((st) => key(t, st)));
+        const have = new Map(), dup = [];
+        for (const v of vs) { const o = ax(v.name); if (!ok(o)) continue; const k = key(o.Type, o.State); if (have.has(k)) dup.push(v.name + "(" + v.id + ")"); else have.set(k, v); }
+        const miss = table.filter((k) => !have.has(k)), stray = vs.filter((v) => !ok(ax(v.name)));
+        if (miss.length) bad.push(`Breadcrumb 에 없는 변형 ${miss.length}개 — ${miss.join(" · ")}(components.data.js breadcrumb.figma.variants × states — current 는 축이 아니라 마지막 항목)`);
+        if (stray.length) bad.push(`Breadcrumb 에 표에 없는 변형 ${stray.length}개 — ${stray.map((v) => v.name + "(" + v.id + ")").join(" · ")}(Type = ${wb.variants.join(" · ")} × State = ${wb.axis.join(" · ")} 만)`);
+        if (dup.length) bad.push(`Breadcrumb 에 이름이 겹치는 변형 — ${dup.join(" · ")}`);
         if (bc.def !== wb.default) bad.push(`Breadcrumb 기본 변형 ${bc.def} ≠ ${wb.default}`);
-        for (const v of vs) {
-          const o = ax(v.name), at = `Breadcrumb ${v.name} (${v.id})`, ks = v.kids || [];
-          if (!wb.variants.includes(o.Type)) continue;
+        if (vs.some((v) => (v.kids || []).some((k) => k.set === "Breadcrumb Item"))) bad.push("Breadcrumb 변형 안에 Breadcrumb Item 인스턴스가 있습니다 — k26 부터 항목 세트를 쓰지 않습니다");
+        /* 변형마다 항목 · 구분자 · 받는 항목을 풀어 둔다 — State=Default 와 견줄 때 다시 쓴다 */
+        const parse = (v) => {
+          const ks = v.kids || [], items = ks.filter((_, i) => i % 2 === 0), seps = ks.filter((_, i) => i % 2 === 1);
+          const more = items.filter((k) => k.icon && k.icon.name === wb.more.icon);
+          const o = ax(v.name);
+          const target = o.Type === "Collapsed" ? more[0] || null : items.slice(1, -1).find((k) => k.tx) || null;
+          return { o, ks, items, seps, more, target, ti: target ? ks.indexOf(target) : -1 };
+        };
+        const sig = (k) => JSON.stringify([k.n, k.t, Math.round(k.w), Math.round(k.h), k.icon ? [k.icon.name, k.icon.w, k.icon.h, k.icon.ink] : null, k.tx ? [k.tx.fill, k.tx.deco, k.tx.font, k.tx.fs, k.tx.lh] : null]);
+        for (const [nm, v] of have) {
+          const P = parse(v), { o, ks, items, seps, more, target } = P, at = `Breadcrumb ${v.name} (${v.id})`;
           if (Math.abs(v.h - wb.h) > 0.5) bad.push(`${at} 높이 ${v.h} ≠ ${wb.h} — 사이트 .breadcrumb min-height(한 크기)`);
           if (v.lm !== "HORIZONTAL") bad.push(`${at} 가로 자동 배치가 아님(${v.lm}) — 사이트 .breadcrumb display:flex`);
           if (v.gap !== wb.gap) bad.push(`${at} 간격 ${v.gap} ≠ ${wb.gap} — 사이트 .breadcrumb · li gap`);
@@ -945,67 +975,74 @@ function diffComponents(c, want, bad, notes) {
             if (Math.abs(first.icon.w - wb.home.size) > 0.5 || Math.abs(first.icon.h - wb.home.size) > 0.5) bad.push(`${at} 홈 아이콘 ${first.icon.w}×${first.icon.h} ≠ ${wb.home.size}`);
             if (first.icon.ink !== "$" + wb.label) bad.push(`${at} 홈 아이콘 색 ${first.icon.ink} ≠ ${wb.label} — 링크 색(.breadcrumb li color)`);
           }
-          const items = ks.filter((_, i) => i % 2 === 0), seps = ks.filter((_, i) => i % 2 === 1);
           if (ks.length % 2 !== 1) bad.push(`${at} 자식 수 ${ks.length} — 항목과 구분자가 번갈아 와야 합니다(항목으로 시작 · 끝)`);
           for (const s of seps) {
             if (!s.icon || s.icon.name !== wb.sep.icon || s.set === "Breadcrumb Item") { bad.push(`${at} 항목 사이 ${s.n} 가 구분자(${wb.sep.icon})가 아님${s.icon ? " — " + s.icon.name : ""}(사이트 li+li::before)`); continue; }
             if (Math.abs(s.icon.w - wb.sep.w) > 0.5 || Math.abs(s.icon.h - wb.sep.h) > 0.5) bad.push(`${at} 구분자 ${s.icon.w}×${s.icon.h} ≠ ${wb.sep.w}×${wb.sep.h}`);
             if (s.icon.ink !== "$" + wb.sep.tok) bad.push(`${at} 구분자 색 ${s.icon.ink} ≠ ${wb.sep.tok}`);
           }
-          const st = (k) => (k.set === "Breadcrumb Item" ? ax(k.main).State : null), last = items[items.length - 1];
-          if (!last || !last.text || (last.set === "Breadcrumb Item" && st(last) !== "Current")) bad.push(`${at} 마지막 항목이 현재 페이지(Current)가 아님 — ${last ? last.n + (last.main ? "(" + last.main + ")" : "") : "없음"}`);
-          else if (last.text !== "$" + wb.current.tok) bad.push(`${at} 현재 페이지 글자 ${last.text} ≠ ${wb.current.tok}`);
-          for (const k of items.slice(1, -1)) {
-            if (st(k) === "Current") bad.push(`${at} 가운데 ${k.n} 가 Current — 현재 페이지는 마지막 하나입니다`);
-            if (k.text && k.text !== "$" + wb.label) bad.push(`${at} 상위 항목 ${k.n} 글자 ${k.text} ≠ ${wb.label} — 링크 · 페이지 없는 단계 모두 링크 색`);
+          /* 글자 항목 공통 — 크기 · 행간 · 서체(Body/2) */
+          const weightOk = (k, ww, what) => {
+            const t = k.tx, fam = /^(Pretendard|Noto Sans KR)\b/.exec(t.font), wt = W[String(t.font).split(" ").pop()];
+            if (!fam) bad.push(`${at} ${what} ${k.n} 서체 ${t.font}`);
+            if (wt !== ww) { if (fam && fam[1] === "Noto Sans KR" && ww === 600 && wt === 700) notes.push(`${at} ${what} 굵기 600 이 Noto Sans KR Bold(700)로 대체돼 있습니다 — 이 환경의 Noto 에 SemiBold 가 없음(되돌릴 목록 _figma/font-revert.md k25 · k26)`); else bad.push(`${at} ${what} ${k.n} 굵기 ${wt} ≠ ${ww}(${t.font})`); }
+          };
+          for (const k of items) if (k.tx && (k.tx.fs !== wb.fs || k.tx.lh !== wb.lh)) bad.push(`${at} ${k.n} 글자 ${k.tx.fs}/${k.tx.lh} ≠ ${wb.fs}/${wb.lh} — 사이트 .breadcrumb(Body/2)`);
+          /* 마지막 항목 = 현재 페이지(current 는 축이 아니라 마지막 항목 — k26) */
+          const last = items[items.length - 1];
+          if (!last || !last.tx) bad.push(`${at} 마지막 항목이 현재 페이지 글자가 아님 — ${last ? last.n : "없음"}(모든 변형의 마지막 항목이 현재 페이지입니다)`);
+          else {
+            if (last.tx.fill !== "$" + wb.current.tok) bad.push(`${at} 마지막 항목(현재 페이지) 글자 ${last.tx.fill} ≠ ${wb.current.tok} — 사이트 .breadcrumb li[aria-current]`);
+            if (last.tx.deco !== "NONE") bad.push(`${at} 마지막 항목(현재 페이지)에 밑줄 ${last.tx.deco} — 현재 페이지는 링크가 아닙니다`);
+            weightOk(last, wb.current.weight, "마지막 항목(현재 페이지)");
           }
-          const more = items.filter((k) => k.icon && k.icon.name === wb.more.icon);
+          /* 가운데 항목 — 링크 · 페이지 없는 단계 모두 링크 색 · 기본 굵기(받는 항목의 Hover 는 아래에서) */
+          for (const k of items.slice(1, -1)) {
+            if (!k.tx) continue;
+            const hov = o.State === sHover && k === target;
+            const ink = hov ? wb.hover : wb.label;
+            if (k.tx.fill !== "$" + ink) bad.push(`${at} 상위 항목 ${k.n} 글자 ${k.tx.fill} ≠ ${ink} — 사이트 ${hov ? ".breadcrumb a:hover" : ".breadcrumb li(링크 · 페이지 없는 단계 모두)"}`);
+            const deco = hov && wb.underline ? "UNDERLINE" : "NONE";
+            if (k.tx.deco !== deco) bad.push(`${at} 상위 항목 ${k.n} 밑줄 ${k.tx.deco} ≠ ${deco}${hov ? " — 사이트 .breadcrumb a:hover" : ""}`);
+            weightOk(k, wb.weight, "상위 항목");
+          }
+          for (const k of more) {
+            const hov = o.State === sHover && k === target, ink = hov ? wb.more.hover : wb.more.tok;
+            if (Math.abs(k.icon.w - wb.more.size) > 0.5 || Math.abs(k.icon.h - wb.more.size) > 0.5) bad.push(`${at} … 아이콘 ${k.icon.w}×${k.icon.h} ≠ ${wb.more.size}`);
+            if (k.icon.ink !== "$" + ink) bad.push(`${at} … 아이콘 색 ${k.icon.ink} ≠ ${ink} — 사이트 ${hov ? ".breadcrumb .more:hover" : ".breadcrumb .more"}`);
+          }
           if (o.Type === "Collapsed") { if (items.length !== 4 || items[1] !== more[0]) bad.push(`${at} 접힌 행은 홈 + …(${wb.more.icon}) + 끝 2개여야 합니다 — 항목 ${items.map((k) => k.icon ? k.icon.name : k.n).join(" · ")}`); }
           else if (more.length) bad.push(`${at} 접히지 않은 행에 …(${wb.more.icon})가 있습니다`);
-        }
-      }
-      if (bi === undefined) notes.push("덤프에 Breadcrumb Item 조사가 없습니다 — 2026-10-30 k25 전 probe.js 로 만든 덤프입니다");
-      else if (!bi) bad.push(`Breadcrumb Item 세트가 없습니다 — 항목 상태(${wb.states.join(" · ")})를 그릴 곳(components.data.js breadcrumb.figma.states)`);
-      else {
-        const vs = bi.variants || [], got = new Set(vs.map((v) => ax(v.name).State));
-        const miss = wb.states.filter((s) => !got.has(s)), stray = [...got].filter((s) => !wb.states.includes(s));
-        if (miss.length) bad.push(`Breadcrumb Item 에 없는 상태 — ${miss.join(" · ")}(components.data.js breadcrumb.figma.states)`);
-        if (stray.length) bad.push(`Breadcrumb Item 에 표에 없는 상태 — ${stray.join(" · ")}(State = ${wb.states.join(" · ")} 만 — Disabled 는 없습니다)`);
-        const textStates = new Set(vs.filter((v) => v.text).map((v) => ax(v.name).State)), tmiss = wb.states.filter((s) => !textStates.has(s));
-        if (tmiss.length) bad.push(`Breadcrumb Item 의 글자 항목에 없는 상태 — ${tmiss.join(" · ")}`);
-        /* 아이콘 항목(홈 링크 · … 버튼)도 사이트에서 Hover · 포커스를 받는다 — Type 마다 Current 를 뺀 상태가 모두 있어야 한다 */
-        const byType = new Map(); for (const v of vs) { const o = ax(v.name); if (!v.text) (byType.get(o.Type) || byType.set(o.Type, new Set()).get(o.Type)).add(o.State); }
-        for (const [ty, ss] of byType) { const m = wb.states.filter((s) => s !== "Current" && !ss.has(s)); if (m.length) bad.push(`Breadcrumb Item Type=${ty} 에 없는 상태 — ${m.join(" · ")}(홈 링크 · … 버튼도 Hover · Focus 를 받습니다)`); }
-        for (const v of vs) {
-          const s = ax(v.name).State, at = `Breadcrumb Item ${v.name} (${v.id})`;
-          if (!wb.states.includes(s)) continue;
-          if (v.text) {
-            const t = v.text, wt = W[String(t.font).split(" ").pop()], fam = /^(Pretendard|Noto Sans KR)\b/.exec(t.font);
-            if (t.fs !== wb.fs || t.lh !== wb.lh) bad.push(`${at} 글자 ${t.fs}/${t.lh} ≠ ${wb.fs}/${wb.lh} — 사이트 .breadcrumb(Body/2)`);
-            if (!fam) bad.push(`${at} 서체 ${t.font}`);
-            const ink = s === "Hover" ? wb.hover : s === "Current" ? wb.current.tok : wb.label, ww = s === "Current" ? wb.current.weight : wb.weight;
-            if (t.fill !== "$" + ink) bad.push(`${at} 글자 ${t.fill} ≠ ${ink} — 사이트 ${s === "Hover" ? ".breadcrumb a:hover" : s === "Current" ? ".breadcrumb li[aria-current]" : ".breadcrumb li"}`);
-            const deco = s === "Hover" && wb.underline ? "UNDERLINE" : "NONE";
-            if (t.deco !== deco) bad.push(`${at} 밑줄 ${t.deco} ≠ ${deco}`);
-            if (wt !== ww) { if (fam && fam[1] === "Noto Sans KR" && ww === 600 && wt === 700) notes.push(`${at} 굵기 600 이 Noto Sans KR Bold(700)로 대체돼 있습니다 — 이 환경의 Noto 에 SemiBold 가 없음(되돌릴 목록 _figma/font-revert.md k25)`); else bad.push(`${at} 굵기 ${wt} ≠ ${ww}(${t.font})`); }
-          } else if (v.icon) {
-            const isMore = v.icon.name === wb.more.icon, w = isMore ? wb.more : { icon: wb.home.icon, size: wb.home.size, tok: wb.label, hover: wb.hover };
-            if (!isMore && v.icon.name !== wb.home.icon) bad.push(`${at} 아이콘 ${v.icon.name} — 항목 아이콘은 홈(${wb.home.icon}) · 접힘(${wb.more.icon})뿐입니다`);
-            if (Math.abs(v.icon.w - w.size) > 0.5 || Math.abs(v.icon.h - w.size) > 0.5) bad.push(`${at} 아이콘 ${v.icon.w}×${v.icon.h} ≠ ${w.size}`);
-            if (s === "Current") bad.push(`${at} 아이콘 항목에 Current — 현재 페이지는 글자 항목입니다`);
-            const ink = s === "Hover" ? w.hover : w.tok;
-            if (v.icon.ink !== "$" + ink) bad.push(`${at} 아이콘 색 ${v.icon.ink} ≠ ${ink}`);
-          } else bad.push(`${at} 글자도 아이콘도 없습니다`);
-          const f = wb.focus, g = v.ring;
-          if (s === "Focus") {
-            if (!g) bad.push(`${at} Focus Ring 이 없습니다 — 사이트 :focus-visible outline ${f.width}px ${f.tok} · offset ${f.offset}`);
+          /* 받는 항목 · 고리 — Focus 의 받는 항목에만 고리, 나머지 어디에도 없음 */
+          if (!target) bad.push(`${at} Hover · Focus 를 받을 항목이 없습니다 — ${o.Type === "Collapsed" ? "…(" + wb.more.icon + ") 버튼" : "홈 다음 첫 글자 항목(첫 상위 링크)"}`);
+          for (const k of ks) {
+            if (!k.ring) continue;
+            if (!(o.State === sFocus && k === target)) bad.push(`${at} ${k.n} 에 Focus Ring 이 있습니다 — 고리는 State=${sFocus} 의 받는 항목에만`);
+          }
+          if (o.State === sFocus && target) {
+            const f = wb.focus, g = target.ring;
+            if (!g) bad.push(`${at} 받는 항목 ${target.n} 에 Focus Ring 이 없습니다 — 사이트 :focus-visible outline ${f.width}px ${f.tok} · offset ${f.offset}`);
             else {
+              if (g.vis === false) bad.push(`${at} ${target.n} 의 Focus Ring 이 숨겨져 있습니다`);
               if (g.stroke !== "$" + f.tok || g.sw !== f.width || g.align !== "OUTSIDE") bad.push(`${at} 고리 선 ${g.stroke} · ${g.sw}px · ${g.align} ≠ ${f.tok} · ${f.width}px · OUTSIDE`);
               if (g.fill !== "-") bad.push(`${at} 고리에 면 ${g.fill}`);
-              const e = { dx: -f.offset, dy: -f.offset, w: +(v.w + 2 * f.offset).toFixed(2), h: +(v.h + 2 * f.offset).toFixed(2) };
-              if (Math.abs(g.dx - e.dx) > 0.5 || Math.abs(g.dy - e.dy) > 0.5 || Math.abs(g.w - e.w) > 0.5 || Math.abs(g.h - e.h) > 0.5) bad.push(`${at} 고리 자리 ${g.dx},${g.dy} · ${g.w}×${g.h} ≠ ${e.dx},${e.dy} · ${e.w}×${e.h}(칸에서 offset ${f.offset})`);
+              const e = { dx: -f.offset, dy: -f.offset, w: +(target.w + 2 * f.offset).toFixed(2), h: +(target.h + 2 * f.offset).toFixed(2) };
+              if (Math.abs(g.dx - e.dx) > 0.5 || Math.abs(g.dy - e.dy) > 0.5 || Math.abs(g.w - e.w) > 0.5 || Math.abs(g.h - e.h) > 0.5) bad.push(`${at} 고리 자리 ${g.dx},${g.dy} · ${g.w}×${g.h} ≠ ${e.dx},${e.dy} · ${e.w}×${e.h}(항목 칸에서 offset ${f.offset})`);
             }
-          } else if (g) bad.push(`${at} Focus 가 아닌데 Focus Ring 이 있습니다`);
+          }
+          /* 나머지는 Default 와 같음 — 같은 Type 의 State=Default 와 자식을 하나씩 견준다(받는 항목 · 고리는 위에서 봤다) */
+          if (o.State !== sDef) {
+            const base = have.get(key(o.Type, sDef));
+            if (base) {
+              const B = parse(base);
+              if (B.ks.length !== ks.length) bad.push(`${at} 자식 수 ${ks.length} ≠ State=${sDef} ${B.ks.length} — 상태는 받는 항목 하나만 바꿉니다`);
+              else {
+                if (P.ti !== B.ti) bad.push(`${at} 받는 항목 자리 ${P.ti} ≠ State=${sDef} ${B.ti}`);
+                const diff = ks.map((k, i) => (i !== P.ti && sig(k) !== sig(B.ks[i]) ? k.n + "#" + i : null)).filter(Boolean);
+                if (diff.length) bad.push(`${at} 받는 항목 말고도 State=${sDef} 와 다른 자식 — ${diff.join(" · ")}(Hover · Focus 는 항목 하나에만 걸립니다)`);
+              }
+            }
+          }
         }
       }
     }

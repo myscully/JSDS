@@ -393,11 +393,13 @@ for (const p of figma.root.children) {
           tSz: t ? t.layoutSizingHorizontal : null, tAl: t ? t.textAlignHorizontal : null, mSz: m ? m.layoutSizingHorizontal : null } : null };
     });
     /* Breadcrumb(2026-10-30 k25 — 사람의 정의 2026-10-30: 경로는 언제나 홈 아이콘으로 시작 · 행 높이 24 한 크기 · 구분자 slash 12 · 상태 Default · Hover · Focus · Current).
-       Figma 는 Pagination · Page Item 처럼 두 세트다 — "Breadcrumb"(Type = Default · Collapsed, 행)과 "Breadcrumb Item"(Type Label · Home · More × State, 항목 하나).
+       2026-11-02 k26 — 사람의 결정(2026-11-02): 상태는 "Breadcrumb" 세트 자체의 State 축에 둔다 — Type(Default · Collapsed) × State(Default · Hover · Focus).
+       Current 는 축 값이 아니라 모든 변형의 마지막 항목(현재 페이지)이다. k25 의 항목 세트 "Breadcrumb Item" 은 지웠다 — 남아 있으면 audit 이 어긋남으로 알리도록
+       계속 덤프한다(components.breadcrumbItem — 없으면 null).
        행: 변형마다 높이 · 방향 · itemSpacing · 세로 정렬과 보이는 자식을 순서대로 — 이름 · 종류 · 크기, 인스턴스면 원본 이름(main)과 원본이 든 세트(set),
-       아이콘(자신이 icon/* 인스턴스이거나 그 안 첫 icon/* 인스턴스 — 이름 · 폭 · 높이 · 벡터 칠), 글자가 있으면 첫 글자 칠(text).
-       아이콘 이름은 원본 컴포넌트에서 읽는다 — 층 이름은 "Icon" · "Separator" 로 바꿔 두었다(k25).
-       항목: 변형마다 폭 · 높이, 글자(칠 · 밑줄 · 서체 · 크기 · 행간), 아이콘, "Focus Ring"(칸 기준 dx · dy · 크기 · 선 · 굵기 · 정렬 · 면). audit 이 사이트 .breadcrumb 규칙과 맞춘다(breadcrumbExpect) */
+       아이콘(자신이 icon/* 인스턴스이거나 그 안 첫 icon/* 인스턴스 — 이름 · 폭 · 높이 · 벡터 칠), 글자가 있으면 첫 글자 칠(text)과 글자 정보(tx — 칠 · 밑줄 · 서체 · 크기 · 행간),
+       항목 안 "Focus Ring"(ring — 항목 칸 기준 dx · dy · 크기 · 선 · 굵기 · 정렬 · 면). 아이콘 이름은 원본 컴포넌트에서 읽는다 — 층 이름은 "Icon" · "Separator" 로 바꿔 두었다(k25).
+       out.k26 = true 로 새 덤프임을 적는다(옛 덤프에는 tx · ring 이 없다). audit 이 사이트 .breadcrumb 규칙과 맞춘다(breadcrumbExpect) */
     if (set.name === "Breadcrumb" || set.name === "Breadcrumb Item") {
       const vecInk = (n) => [...new Set(n.findAll((x) => ["VECTOR", "ELLIPSE", "RECTANGLE", "LINE", "BOOLEAN_OPERATION"].includes(x.type) && x.visible !== false).flatMap((x) => [paint(x.strokes), paint(x.fills)]).filter((x) => x !== "-"))].sort().join("|");
       const iconOf = async (n) => {
@@ -407,7 +409,11 @@ for (const p of figma.root.children) {
       };
       const txt = (n) => { const t = n.type === "TEXT" ? n : "findOne" in n ? n.findOne((x) => x.type === "TEXT" && x.visible !== false) : null; return t; };
       const tinfo = (t) => (t ? { fill: paint(t.fills), deco: t.textDecoration === figma.mixed ? "mixed" : t.textDecoration, font: t.fontName === figma.mixed ? "mixed" : t.fontName.family + " " + t.fontName.style, fs: t.fontSize === figma.mixed ? "mixed" : t.fontSize, lh: t.lineHeight === figma.mixed ? "mixed" : t.lineHeight.unit === "PIXELS" ? t.lineHeight.value : t.lineHeight.unit } : null);
-      const out = { def: set.defaultVariant ? set.defaultVariant.name : null, variants: [] };
+      const ringOf = (n) => {
+        const r = "findOne" in n ? n.findOne((k) => k.name === "Focus Ring") : null;
+        return r ? { dx: +(r.absoluteTransform[0][2] - n.absoluteTransform[0][2]).toFixed(2), dy: +(r.absoluteTransform[1][2] - n.absoluteTransform[1][2]).toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2), stroke: paint(r.strokes), sw: r.strokeWeight === figma.mixed ? "mixed" : r.strokeWeight, align: r.strokeAlign, fill: paint(r.fills), vis: r.visible } : null;
+      };
+      const out = { def: set.defaultVariant ? set.defaultVariant.name : null, id: set.id, k26: true, variants: [] };
       for (const v of set.children) {
         const e = { name: v.name, id: v.id, w: +v.width.toFixed(2), h: +v.height.toFixed(2) };
         if (set.name === "Breadcrumb") {
@@ -417,14 +423,14 @@ for (const p of figma.root.children) {
             const kd = { n: k.name, t: k.type, w: +k.width.toFixed(2), h: +k.height.toFixed(2) };
             if (k.type === "INSTANCE") { const m = await k.getMainComponentAsync(); kd.main = m ? m.name : null; kd.set = m && m.parent && m.parent.type === "COMPONENT_SET" ? m.parent.name : null; }
             const ic = await iconOf(k); if (ic) kd.icon = ic;
-            const t = txt(k); if (t) kd.text = paint(t.fills);
+            const t = txt(k); if (t) { kd.text = paint(t.fills); kd.tx = tinfo(t); }
+            kd.ring = ringOf(k);
             e.kids.push(kd);
           }
         } else {
           e.text = tinfo(txt(v));
           e.icon = await iconOf(v);
-          const r = v.findOne((k) => k.name === "Focus Ring");
-          e.ring = r ? { dx: +(r.absoluteTransform[0][2] - v.absoluteTransform[0][2]).toFixed(2), dy: +(r.absoluteTransform[1][2] - v.absoluteTransform[1][2]).toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2), stroke: paint(r.strokes), sw: r.strokeWeight === figma.mixed ? "mixed" : r.strokeWeight, align: r.strokeAlign, fill: paint(r.fills) } : null;
+          e.ring = ringOf(v);
         }
         out.variants.push(e);
       }
