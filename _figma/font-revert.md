@@ -112,6 +112,16 @@
 >   지운 글자 노드 9개(옛 행의 "홈" 332:2309 · 332:2320, 링크 332:2312 · 332:2315 · 332:2330, 현재 332:2318 · 332:2333, 인스턴스 0개라 지운 Type=Icon 변형 635:3652 안의 635:3658 · 635:3660) —
 >   그래서 아래 굵기 표의 "Breadcrumb 현재" 행은 지운 노드 대신 901:4308 을 가리킨다. 복제라 Pretendard 그대로 늘어난 글자: Breadcrumb Item Label Default · Focus 라벨 2(Body/2),
 >   Properties 칩 Default(default) · Hover · Current 3(복제 원본의 서체 · 스타일 그대로 — Pretendard Medium · 'default' 표시는 Pretendard Regular). 행 · 항목의 높이 · 간격 · 구분자(아이콘 교체) · 칠 · 고리는 글자를 건드리지 않았다
+> - 2026-11-02 k26: Breadcrumb 구조 변경(사람의 결정 2026-11-02 — 상태는 Breadcrumb 세트 자체의 State 축에: Type Default · Collapsed × State Default · Hover · Focus,
+>   Current 는 축이 아니라 모든 변형의 마지막 항목)과 현재 항목 굵기 600 → **500(Medium)**(사람의 결정 2026-11-02 — 사이트 · Figma 모두)을 Figma 에 맞추며
+>   **10개가 새로 Noto** 가 됐다(3 Component) — 행 안의 Breadcrumb Item 인스턴스를 풀어(detach) 생긴 글자와 그 복제:
+>   첫 상위 링크 "정책" 3(918:4373 Default · 919:4364 Hover 밑줄 + primary · 919:4379 Focus — Noto Sans KR Regular, k25 의 인스턴스 덮어쓰기 I901:4347;901:4301 이 풀린 것),
+>   마지막 항목(현재 페이지) 6(918:4377 · 919:4370 · 919:4385 · 918:4391 · 919:4401 · 919:4419 — **Noto Sans KR Medium**, k25 의 Bold(700)를 500 으로),
+>   Card/Breadcrumb Properties 아래 Current 설명 줄 921:4469(332:2399 복제) 1.
+>   이미 Noto 였던 k25 노드의 글자만 바뀐 것: 902:4338 "Breadcrumb Item · State =" → "State ="(Noto Bold 그대로), 332:2402 Spec Label 값 "… 현재 primary SemiBold" → "… 현재 primary Medium".
+>   **지운 k25 노드**: 901:4303 · 901:4308(Breadcrumb Item 세트 901:4341 을 인스턴스 0 을 세고 지울 때 함께), I901:4347;901:4301(인스턴스를 풀어 918:4373 이 됨).
+>   Pretendard 그대로 복제된 글자(되돌릴 것 없음): "정보 유출 방지" 6(918:4375 · 919:4367 · 919:4382 · 918:4389 · 919:4398 · 919:4416 — Body/2 연결 유지).
+>   문서 인스턴스 속 글자(I332:2356;… · I921:4389;… 등)는 원본을 따를 뿐 덮어쓰기가 없다. `font-revert-nodes.tsv` 맨 아래 "2026-11-02 k26" 절(행마다 되돌릴 서체 `[→ …]`)
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
@@ -162,7 +172,7 @@ Figma 14단계는 20 · 22 · 16 · 18 이라 다르다 — 내비 말고는 줄
 | Menu Item 선택 · 힌트 | 320:365 …(3) · 320:348 …(9) | 500 · 500 | 600 · 400 |
 | Dropdown 그룹 라벨 | 320:418 | 500 · 자간 2.52%(Label/2) | 600 · .06em |
 | Tab 기본 · 선택 · 작은 선택 · 건수 | 331:2363 …(6) · 331:2367 …(3) · 331:2379 …(3) · 331:2365 …(18) | 400 · 500 · 500 · 500 | 500 · 700(pill 600) · 700 · 700 |
-| Breadcrumb 현재 | 901:4308(Breadcrumb Item Type=Label, State=Current — k25 에 옛 332:2318 · 332:2333 · 635:3660 을 지우고 이 하나로 모음. 행의 Current 는 이 원본의 인스턴스) | 700(k25 Noto Sans KR Bold — Noto 에 SemiBold 없음) · 14/22 | 600 · 14/22 — tsv k25 절에서 Pretendard SemiBold 로 |
+| Breadcrumb 현재 | 918:4377 · 919:4370 · 919:4385 · 918:4391 · 919:4401 · 919:4419(Breadcrumb 세트 여섯 변형의 마지막 항목 — 2026-11-02 k26 에 Breadcrumb Item 세트를 지우며 k25 의 901:4308 대신 각 변형에 직접 둠) | 500(k26 Noto Sans KR Medium) · 14/22 | 500 · 14/22(사람의 결정 2026-11-02 — 600 → 500) — tsv k26 절에서 Pretendard Medium 으로 |
 | Top Navigation 로고 · 아바타 | 332:3158 · 332:3184 · 332:3180 · 332:3215 | 500 | 700 |
 | Accordion 메타 | 320:1100 …(24 — k21 에 Hover · Small · Large 복제로 18 늘었다. 제목은 k22 에 Medium 8개도 Noto Bold 가 되어 이 표에서 빠졌다 — 제목 24개 모두 tsv k21 · k22 절에서 Pretendard SemiBold 로 되돌린다) | 500 | 400 |
 | Card 제목 | 326:1318 …(13 — k5 Flush 635:3104 포함) | 16 · 행간 24 / 500(Title/1, compact 도 같음) | 600 — compact 는 14 · 행간 20 |

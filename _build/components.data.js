@@ -700,7 +700,7 @@ const COMPONENTS = {
     desc: "지금 화면이 메뉴 계층의 어디인지 보여 주고 상위로 한 번에 돌아가게 합니다. 좌측 메뉴에 바로 있는 화면은 메뉴가 이미 위치를 보여 주므로 두지 않고, 그 아래로 들어간 상세 · 편집 · 하위 화면에만 둡니다.",
     thumb: `<ol class="breadcrumb"><li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li><li><a href="#">정책</a></li><li aria-current="page"><span>외부 저장장치 차단</span></li></ol>`,
     examples: [
-      { id: "default", title: "Default", desc: "홈 아이콘 › 메뉴 › … › 현재 페이지. 첫 항목은 항상 홈 아이콘이고 <code>aria-label=\"홈\"</code> 이 필수입니다. 마지막은 현재 페이지로, 링크 없이 SemiBold 이며 페이지 타이틀과 같은 이름입니다.", html: `
+      { id: "default", title: "Default", desc: "홈 아이콘 › 메뉴 › … › 현재 페이지. 첫 항목은 항상 홈 아이콘이고 <code>aria-label=\"홈\"</code> 이 필수입니다. 마지막은 현재 페이지로, 링크 없이 Medium 이며 페이지 타이틀과 같은 이름입니다.", html: `
         <nav aria-label="현재 위치">
           <ol class="breadcrumb">
             <li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li>
@@ -763,11 +763,11 @@ const COMPONENTS = {
       ["BreadcrumbHome / li > a.icon", "link", "—", "<b>필수 첫 항목</b> — 홈 아이콘 18 · <code>aria-label=\"홈\"</code>(React <code>label</code>). 클릭 영역 24×24"],
       ["BreadcrumbItem href / li > a", "link", "—", "상위 경로 링크. 220px 를 넘으면 말줄임 — 전체 문구는 <code>title</code> 로 함께. React <code>as</code> · <code>linkProps</code> 로 라우터 링크를 씁니다"],
       ["BreadcrumbItem / li > span", "text", "—", "페이지가 없는 상위 단계(href · current 없음). 링크 없이 텍스트로 — 비활성으로 칠하지 않습니다"],
-      ["current / li[aria-current=page] > span", "boolean", "false", "현재 페이지. 마지막 항목, 링크 없이 SemiBold · 페이지 타이틀과 같은 이름. 라벨을 <code>span</code> 으로 감싸야 말줄임이 걸립니다(React 가 감쌉니다)"],
+      ["current / li[aria-current=page] > span", "boolean", "false", "현재 페이지. 마지막 항목, 링크 없이 Medium · 페이지 타이틀과 같은 이름. 라벨을 <code>span</code> 으로 감싸야 말줄임이 걸립니다(React 가 감쌉니다)"],
       ["BreadcrumbMore / .more", "button", "—", "접힌 가운데 경로(…). 홈 포함 5단계 이상일 때 첫 항목과 끝 2개만 남기고 접습니다. 클릭 영역 24×24"],
       [".more[data-items]", "attribute", "—", "<b>HTML 필수</b> — 접은 경로를 <code>|</code> 로 이어 둡니다(<code>\"정책|USB 제어\"</code>). 누르면 그 자리에 링크로 펼치고 첫 링크로 포커스를 옮기며 <code>ds:expand</code> 를 발행합니다 — ds.js 담당. React 는 <code>BreadcrumbMore</code> 의 onClick 으로 직접 처리"],
     ],
-    spec: [["Size", "높이 24 한 크기 · 항목 간격 6 · 구분자 사선(slash) 12 · disable 색 · 홈 아이콘 18 · 라벨 최대 220"], ["Container", "없음(텍스트 행)"], ["Label", "Body/2 14/22 tertiary · Hover primary + 밑줄 · 현재 primary SemiBold"], ["Placement", "메뉴 아래 상세 · 편집 화면의 페이지 타이틀 위 8px · 모달 · 드로어 · 탭 패널 안 금지"]],
+    spec: [["Size", "높이 24 한 크기 · 항목 간격 6 · 구분자 사선(slash) 12 · disable 색 · 홈 아이콘 18 · 라벨 최대 220"], ["Container", "없음(텍스트 행)"], ["Label", "Body/2 14/22 tertiary · Hover primary + 밑줄 · 현재 primary Medium"], ["Placement", "메뉴 아래 상세 · 편집 화면의 페이지 타이틀 위 8px · 모달 · 드로어 · 탭 패널 안 금지"]],
     figma: { frame: "Breadcrumb", sizes: { md: { h: 24 } }, variants: { default: {}, collapsed: {} }, states: ["default", "hover", "focus", "current"] },
   },
 
