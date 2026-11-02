@@ -229,3 +229,17 @@ Accordion 정의를 다시 내렸습니다. 형태(`variant`: outline · flat)�
 헤더 안에는 버튼 · 체크박스 같은 조작 요소를 두지 않습니다 — 약관 동의(`Terms`)의 항목 체크박스만 예외입니다.
 새로 내보내는 타입: `AccordionVariant`.
 
+
+## Breadcrumb (2026-10-30)
+
+Breadcrumb 정의를 다시 내렸습니다. 경로는 **항상 홈 아이콘으로 시작**하고, 좌측 메뉴 아래로 들어간 상세 · 편집 · 하위 화면에만 둡니다.
+기존 API 는 그대로이고 바뀌는 동작은 없습니다 — 첫 항목을 쉽게 지키도록 `BreadcrumbHome` 을 더했습니다.
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| `BreadcrumbItem href linkProps={{ className: "icon", "aria-label": "홈" }}` + `<Icon name="home" />` | `BreadcrumbHome href` (`label` 기본 "홈") | `li > a.icon[aria-label="홈"]` |
+| `BreadcrumbItem` (href 없음) → 빈 `<a>` | `BreadcrumbItem` (href · current 없음) → `<span>` — 페이지가 없는 상위 단계 | `li > span` |
+| 행 높이 22.4 · 아이콘 행 24.4 | 24 한 크기 | `.breadcrumb{line-height:22px;min-height:24px}` · `a.icon{display:flex}` |
+
+`href` 없이 `as`(라우터 링크)만 주는 경우는 링크로 그대로 그립니다.
+새로 내보내는 컴포넌트 · 타입: `BreadcrumbHome` · `BreadcrumbHomeProps`.
