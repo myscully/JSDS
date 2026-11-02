@@ -18,10 +18,31 @@ export const Breadcrumb = forwardRef<HTMLElement, BreadcrumbProps>(function Brea
   );
 });
 
+export interface BreadcrumbHomeProps extends LiHTMLAttributes<HTMLLIElement> {
+  href?: string;
+  /** 아이콘 링크의 aria-label. 기본 "홈" — 없으면 이름 없는 링크로 읽힌다 */
+  label?: string;
+  /** 링크 요소 (예: react-router Link) */
+  as?: ElementType;
+  /** 링크에 전달할 추가 props (to 등) */
+  linkProps?: Record<string, unknown>;
+}
+/** 첫 항목 — 홈 아이콘 링크(li > a.icon). 정의상 모든 경로는 이것으로 시작한다 */
+export const BreadcrumbHome = forwardRef<HTMLLIElement, BreadcrumbHomeProps>(function BreadcrumbHome({ href, label = "홈", as, linkProps, ...rest }, ref) {
+  const Link: ElementType = as ?? "a";
+  const { className, ...link } = (linkProps ?? {}) as { className?: string } & Record<string, unknown>;
+  return (
+    <li ref={ref} {...rest}>
+      <Link href={href} {...link} className={cx("icon", className)} aria-label={label}><Icon name="home" /></Link>
+    </li>
+  );
+});
+
 export interface BreadcrumbItemProps extends LiHTMLAttributes<HTMLLIElement> {
   href?: string;
   /** 현재 페이지 — 링크 없이 aria-current */
   current?: boolean;
+  /* href 도 current 도 없으면 페이지가 없는 상위 단계 — 링크 없이 span 으로 그린다 */
   /** 링크 요소 (예: react-router Link) */
   as?: ElementType;
   /** 링크에 전달할 추가 props (to 등) */
@@ -33,7 +54,7 @@ export const BreadcrumbItem = forwardRef<HTMLLIElement, BreadcrumbItemProps>(fun
   return (
     <li ref={ref} aria-current={current ? "page" : undefined} {...rest}>
       {/* 현재 항목도 span 으로 — li 가 flex 라 맨 텍스트에는 말줄임(text-overflow)이 걸리지 않는다 */}
-      {current ? <span>{children}</span> : <Link href={href} {...linkProps}>{children}</Link>}
+      {current || (href === undefined && !as) ? <span>{children}</span> : <Link href={href} {...linkProps}>{children}</Link>}
     </li>
   );
 });

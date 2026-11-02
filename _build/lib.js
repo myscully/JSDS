@@ -43,7 +43,7 @@
   function demoStateCss(css) {
     const out = [];
     for (const m of samplesBlock(css).replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      const sels = splitSelectors(m[1]).filter(s => /^\.(btn|accordion)\b/.test(s) && /:(hover|active)\b/.test(s))   // 버튼 · 아코디언 헤더(2026-10-29)
+      const sels = splitSelectors(m[1]).filter(s => /^\.(btn|accordion|breadcrumb)\b/.test(s) && /:(hover|active)\b/.test(s))   // 버튼 · 아코디언 헤더(2026-10-29) · 브레드크럼 링크(2026-10-30)
         .map(s => s.replace(/:hover\b/g, '[data-state="hover"]').replace(/:active\b/g, '[data-state="pressed"]'));
       if (sels.length) out.push(sels.join(",") + "{" + m[2].trim() + "}");
     }

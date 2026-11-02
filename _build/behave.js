@@ -907,15 +907,32 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("breadcrumb icon link is named", bcA11y.homeLabel === "홈", JSON.stringify(bcA11y));
   ok("breadcrumb icon targets are 24x24", bcA11y.homeHit === "24px×24px" && bcA11y.moreHit === "24px×24px", JSON.stringify(bcA11y));
   const bcCut = await page.evaluate(() => {
-    const ol = document.querySelector("#ex-breadcrumb-basic .breadcrumb");
-    const a = ol.querySelector("li>a"), sp = ol.querySelector("[aria-current]>span");
+    const ol = document.querySelector("#ex-breadcrumb-default .breadcrumb");
+    const a = ol.querySelector("li>a:not(.icon)"), sp = ol.querySelector("[aria-current]>span");
     const short = Math.round(a.getBoundingClientRect().width);
     a.textContent = "외부 저장장치 차단 정책 본사 영업부 전체 적용 규칙 2026 그리고 더 길게";
     sp.textContent = "현재 페이지 이름도 아주 길어질 수 있습니다 예를 들면 이렇게요 정말로";
     const w = (e) => Math.round(e.getBoundingClientRect().width);
     return { short, longLink: w(a), longCurrent: w(sp), clipped: a.scrollWidth > a.clientWidth, row: Math.round(ol.getBoundingClientRect().height) };
   });
-  ok("breadcrumb truncates long labels at 220", bcCut.longLink === 220 && bcCut.longCurrent === 220 && bcCut.clipped && bcCut.short < 220 && bcCut.row === 22, JSON.stringify(bcCut));
+  ok("breadcrumb truncates long labels at 220", bcCut.longLink === 220 && bcCut.longCurrent === 220 && bcCut.clipped && bcCut.short < 220 && bcCut.row === 24, JSON.stringify(bcCut));
+  await go("components/breadcrumb.html");
+  const bcDef = await page.evaluate(() => [...document.querySelectorAll(".example-preview .breadcrumb")].map((ol) => {
+    const first = ol.querySelector("li:first-child > a.icon"), hit = first && first.querySelector("svg");
+    return { ex: (ol.closest("[id^=ex-breadcrumb-]") || {}).id, home: !!first && first.getAttribute("aria-label") === "홈" && !!hit && Math.round(hit.getBoundingClientRect().width) === 18, h: ol.getBoundingClientRect().height,
+      current: ol.querySelectorAll("li[aria-current=page]").length === 1 && ol.lastElementChild.matches("li[aria-current=page]") && !ol.lastElementChild.querySelector("a") };
+  }));
+  ok("every breadcrumb starts with a named 18px home icon and ends with one non-link current item", bcDef.length >= 6 && bcDef.every((b) => b.home && b.current), JSON.stringify(bcDef));
+  ok("breadcrumb row is exactly 24", bcDef.every((b) => b.h === 24), JSON.stringify(bcDef.map((b) => b.h)));
+  const bcLink = page.locator("#ex-breadcrumb-state .breadcrumb li > a:not(.icon):not([data-state])").first();
+  const bcRest = await bcLink.evaluate((e) => getComputedStyle(e).color);
+  await bcLink.hover(); await page.waitForTimeout(150);
+  const bcHov = await bcLink.evaluate((e) => { const c = getComputedStyle(e); return { color: c.color, line: c.textDecorationLine }; });
+  const bcFix = await page.evaluate(() => { const c = getComputedStyle(document.querySelector('#ex-breadcrumb-state a[data-state="hover"]')); return { color: c.color, line: c.textDecorationLine }; });
+  ok("breadcrumb hover turns primary with underline, and the fixed Hover example matches it", bcRest !== bcHov.color && bcHov.line === "underline" && bcFix.color === bcHov.color && bcFix.line === bcHov.line, JSON.stringify({ bcRest, bcHov, bcFix }));
+  const bcText = await page.evaluate(() => { const li = document.querySelectorAll("#ex-breadcrumb-text-parent .breadcrumb li")[1], c = getComputedStyle(li.firstElementChild);
+    return { tag: li.firstElementChild.tagName, link: !!li.querySelector("a"), color: c.color, tert: getComputedStyle(document.querySelector("#ex-breadcrumb-text-parent .breadcrumb li:nth-child(3) a")).color }; });
+  ok("breadcrumb parent without a page is plain text in the link colour (not disabled)", bcText.tag === "SPAN" && !bcText.link && bcText.color === bcText.tert, JSON.stringify(bcText));
   await go("patterns/onboarding.html");
   const ob = page.locator("#ex-onboarding-step .example-preview .onboard");
   await ob.locator('[data-step="next"]').click();

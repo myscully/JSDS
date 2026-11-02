@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Tab, TabList, TabPanel, Tabs } from "./tab/Tabs";
 import { Pagination, paginate } from "./pagination/Pagination";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbMore } from "./breadcrumb/Breadcrumb";
+import { Breadcrumb, BreadcrumbHome, BreadcrumbItem, BreadcrumbMore } from "./breadcrumb/Breadcrumb";
 import { SideNav, SideNavItem } from "./navigation/SideNav";
 
 /* 건수 톤 — 기본(미확인)은 진한 빨강 .count, 전체 개수처럼 중립인 건수는 countTone 으로 고른다 */
@@ -99,6 +99,31 @@ describe("Breadcrumb", () => {
     const a = container.querySelector("li > a")!;
     expect(a.className).toBe("icon");
     expect(a.getAttribute("aria-label")).toBe("홈");
+  });
+
+  /* 정의(2026-10-30): 첫 항목은 항상 홈 아이콘 — 이름 없는 아이콘 링크가 되지 않게 label 기본값 "홈" */
+  it("BreadcrumbHome 은 li > a.icon[aria-label=홈] 안에 홈 아이콘", () => {
+    const { container } = render(<Breadcrumb><BreadcrumbHome href="/" /></Breadcrumb>);
+    const a = container.querySelector("li > a.icon")!;
+    expect(a.getAttribute("href")).toBe("/");
+    expect(a.getAttribute("aria-label")).toBe("홈");
+    expect(a.querySelector("svg")).not.toBeNull();
+  });
+
+  it("BreadcrumbHome 은 label · linkProps 클래스를 받아도 icon 클래스와 이름을 지킨다", () => {
+    const { container } = render(<Breadcrumb><BreadcrumbHome href="/" label="대시보드" linkProps={{ className: "x", "data-k": "1" }} /></Breadcrumb>);
+    const a = container.querySelector("li > a")!;
+    expect(a.className).toBe("icon x");
+    expect(a.getAttribute("aria-label")).toBe("대시보드");
+    expect(a.getAttribute("data-k")).toBe("1");
+  });
+
+  it("href 도 current 도 없으면 페이지 없는 상위 — 링크 없이 span", () => {
+    const { container } = render(<Breadcrumb><BreadcrumbItem>리포트</BreadcrumbItem></Breadcrumb>);
+    const li = container.querySelector("li")!;
+    expect(li.querySelector("a")).toBeNull();
+    expect(li.getAttribute("aria-current")).toBeNull();
+    expect(li.querySelector("span")!.textContent).toBe("리포트");
   });
 
   it("BreadcrumbMore 는 li > button.more[aria-label]", async () => {

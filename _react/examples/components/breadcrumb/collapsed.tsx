@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbMore, Icon } from "@jiran/ds-react";
+import { Breadcrumb, BreadcrumbHome, BreadcrumbItem, BreadcrumbMore } from "@jiran/ds-react";
 
 const HIDDEN = ["정책", "USB 제어"];
 
@@ -12,7 +12,7 @@ export default function Example() {
   }, [open]);
   return (
     <Breadcrumb ref={nav}>
-      <BreadcrumbItem href="#" linkProps={{ className: "icon", "aria-label": "홈" }}><Icon name="home" /></BreadcrumbItem>
+      <BreadcrumbHome href="#" />
       {open
         ? HIDDEN.map((t) => <BreadcrumbItem key={t} href="#">{t}</BreadcrumbItem>)
         : <BreadcrumbMore onClick={() => setOpen(true)} />}
