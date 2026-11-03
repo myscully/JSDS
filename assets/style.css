@@ -607,7 +607,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .t-heading-2{font-size:24px;line-height:32px;font-weight:700;letter-spacing:-0.023em}
 .t-heading-3{font-size:20px;line-height:28px;font-weight:700;letter-spacing:-0.012em}
 .t-heading-4{font-size:18px;line-height:26px;font-weight:700;letter-spacing:-0.002em}
-.t-title-1{font-size:16px;line-height:24px;font-weight:500;letter-spacing:0.0057em}
+.t-title-1{font-size:16px;line-height:24px;font-weight:600;letter-spacing:0.0057em}   /* 참조 500 → 600(사람의 결정 2026-11-02, Card 정의). 카드 제목 · Chart Card 제목 · Accordion md 헤더가 이미 16/24 600 이었다 */
 .t-title-2{font-size:14px;line-height:20px;font-weight:500;letter-spacing:0.0145em}
 .t-body-1{font-size:16px;line-height:26px;font-weight:400;letter-spacing:0.0057em}
 .t-body-2{font-size:14px;line-height:22px;font-weight:400;letter-spacing:0.0145em}
@@ -1070,21 +1070,38 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
    .card .title 은 .skeleton.title 과도 겹친다(loading 예제) — 뒤에 오는 .skeleton.title 이 height·width 를 이겨 지금은 무해 */
 .card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:var(--card-pad);display:flex;flex-direction:column;gap:12px;min-width:260px;position:relative;line-height:1.6}
 .card .card-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.card .title{font-size:16px;line-height:24px;font-weight:600;margin:0}   /* Title/1 의 line-height — 빠지면 문맥에 따라 25.6(문서)·28(패턴)·26.4(패키지)로 흔들린다 */
+.card .title{font-size:16px;line-height:24px;font-weight:600;margin:0}   /* Title/1 16/24 600 — line-height 가 빠지면 문맥에 따라 25.6(문서)·28(패턴)·26.4(패키지)로 흔들린다 */
 .card .desc{font-size:14px;color:var(--foreground-neutral-secondary);margin:0;line-height:1.6}
 .card .card-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px;margin-top:auto;padding-top:4px}   /* wrap 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿지 않는다 */
+/* 상태 카드의 키-값 행(dl). 열 폭은 가장 긴 키에 맞춘다 */
+.card .card-meta{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0;font-size:14px;line-height:22px}
+.card .card-meta dt{color:var(--foreground-neutral-secondary)}   /* 키는 읽어야 하는 정보 — tertiary(3.66)가 아니라 secondary(사람의 결정 2026-11-03, .tbl.kv th 와 같은 색) */
+.card .card-meta dd{margin:0;min-width:0;color:var(--foreground-neutral-primary);overflow-wrap:anywhere}
+/* 크기 — md 는 기본값과 같다(크기를 명시한 마크업용). sm 제목은 Label/1 14/20 600. .compact 는 sm 의 옛 이름(호환) */
+.card.md{padding:var(--card-pad);gap:12px}
+.card.sm,.card.compact{padding:16px;gap:8px}
+.card.sm .title,.card.compact .title{font-size:14px;line-height:20px}
 /* button.card 는 UA 기본값(Arial·가운데 정렬·outset 보더)이 새므로 리셋한다. 보더는 .card 의 1px 이 덮으므로 border 는 리셋하지 않는다 */
 .card.clickable{appearance:none;font:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer;transition:box-shadow var(--motion-fast)}
+.card.clickable>svg{flex:none;color:var(--foreground-neutral-secondary)}   /* 선택 카드 앞 아이콘 */
 .card.bordered{box-shadow:none;border:1px solid var(--line-neutral-secondary)}   /* 호환용 — 기본 카드가 같은 1px 보더를 가져 효과가 없다. 문서에서는 내렸다 */
-.card.clickable:hover{box-shadow:var(--shadow-2)}
+.card.clickable:not(:disabled,[aria-disabled="true"]):hover{box-shadow:var(--shadow-2)}
 .card.on{box-shadow:inset 0 0 0 2px var(--surface-brand-primary);background:var(--surface-brand-subtle)}
-.card.clickable.on:hover{box-shadow:inset 0 0 0 2px var(--surface-brand-primary),var(--shadow-2)}
+.card.on>svg{color:var(--foreground-brand-primary)}
+.card.clickable.on:not(:disabled,[aria-disabled="true"]):hover{box-shadow:inset 0 0 0 2px var(--surface-brand-primary),var(--shadow-2)}
 .card.bordered.on{box-shadow:inset 0 0 0 2px var(--surface-brand-primary)}   /* 호환용 — 이제 .card.on 과 같다 */
-.card.compact{padding:16px;gap:8px}
-.card.compact .title{font-size:14px;line-height:20px}
+/* 고를 수 없는 선택 카드 — opacity 로 흐리지 않고 disable 토큰으로 칠한다(제목 · 아이콘). 이유는 설명 줄(.desc)에 적고 그 줄은 읽히게 둔다 */
+.card.clickable:is(:disabled,[aria-disabled="true"]){cursor:not-allowed;background:var(--surface-disable-primary);box-shadow:none}
+.card.clickable:is(:disabled,[aria-disabled="true"]) .title,.card.clickable:is(:disabled,[aria-disabled="true"])>svg{color:var(--foreground-disable-primary)}
+.card.clickable:is(:disabled,[aria-disabled="true"]) .desc{color:var(--foreground-neutral-tertiary)}   /* 고를 수 없는 이유는 읽혀야 한다 — disable(1.3) 대신 tertiary(사람의 결정 2026-11-03) */
+/* 빈 · 오류 — 카드 틀과 헤더는 두고 본문 자리만 .empty 로. 카드가 이미 보더 · 면 · 여백을 가지므로 .empty 의 점선 · 면을 끈다 */
+.card .empty{border:0;background:none;padding:24px 0}
+.card .empty b{font-size:14px}   /* 카드 제목(16)보다 커지지 않게 — .empty b 는 16 */
+.card .empty.error .ico{color:var(--foreground-negative-strong)}   /* 아이콘 면(surface/neutral/strong) 위 그래픽 3:1 — negative-primary 는 라이트 2.61 */
 /* 표·목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖는다 */
 .card.flush{padding:0;gap:0;overflow:hidden}
 .card.flush .card-head{padding:16px var(--card-pad)}
+.card.flush:is(.sm,.compact) .card-head{padding:12px 16px}
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--card-gap);width:100%;line-height:1.6}
 
 /* Popup */
@@ -1418,3 +1435,5 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .breadcrumb a[data-state="hover"]{color:var(--foreground-neutral-primary);text-decoration:underline}
 .breadcrumb .more[data-state="hover"]{color:var(--foreground-neutral-primary)}
 .accordion summary[data-state="hover"]{background:var(--surface-neutral-secondary)}
+.card.clickable:not(:disabled,[aria-disabled="true"])[data-state="hover"]{box-shadow:var(--shadow-2)}
+.card.clickable.on:not(:disabled,[aria-disabled="true"])[data-state="hover"]{box-shadow:inset 0 0 0 2px var(--surface-brand-primary),var(--shadow-2)}

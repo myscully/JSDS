@@ -2,7 +2,7 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DataTable } from "./data-table/DataTable";
 import { Accordion, AccordionGroup } from "./accordion/Accordion";
-import { Card, CardGrid, CardTitle } from "./card/Card";
+import { Card, CardGrid, CardMeta, CardTitle } from "./card/Card";
 import { Donut } from "./data-visual/DataVisual";
 import { Steps } from "./indicator/Indicator";
 
@@ -134,8 +134,42 @@ describe("Donut", () => {
 
 describe("Card", () => {
   it("변형이 클래스로 붙는다", () => {
-    const { container } = render(<Card bordered compact flush clickable selected>내용</Card>);
-    expect(container.firstElementChild!.className).toBe("card bordered compact flush clickable on");
+    const { container } = render(<Card size="sm" bordered flush clickable selected>내용</Card>);
+    expect(container.firstElementChild!.className).toBe("card sm bordered flush clickable on");
+  });
+
+  /* 2026-11-02 Card 정의 — 크기는 size(sm · md). compact 는 sm 의 옛 이름이라 sm 으로 내고 개발 모드에서 알린다 */
+  it("size 는 준 값만 클래스로, compact 는 sm 으로 내고 경고한다", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { container } = render(<><Card size="md">a</Card><Card>b</Card><Card compact>c</Card></>);
+    const [md, plain, legacy] = [...container.children];
+    expect(md.className).toBe("card md");
+    expect(plain.className).toBe("card");
+    expect(legacy.className).toBe("card sm");
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).toContain('size="sm"');
+    warn.mockRestore();
+  });
+
+  /* 고를 수 없는 선택 카드 — button 이면 disabled(눌리지 않음), 그 밖은 aria-disabled */
+  it("disabled 는 button 이면 disabled, 그 밖은 aria-disabled", async () => {
+    const onClick = vi.fn();
+    const { container } = render(<><Card as="button" type="button" clickable selected={false} disabled onClick={onClick}>a</Card><Card as="a" href="#" clickable disabled>b</Card></>);
+    const btn = container.querySelector("button")!, a = container.querySelector("a")!;
+    expect(btn.disabled).toBe(true);
+    expect(btn.hasAttribute("aria-disabled")).toBe(false);
+    expect(btn.getAttribute("aria-pressed")).toBe("false");
+    await userEvent.click(btn);
+    expect(onClick).not.toHaveBeenCalled();
+    expect(a.getAttribute("aria-disabled")).toBe("true");
+    expect(a.hasAttribute("disabled")).toBe(false);
+  });
+
+  it("CardMeta 는 items 를 dt · dd 쌍으로, 없으면 children 을 그대로", () => {
+    const { container } = render(<><CardMeta items={[{ label: "그룹", value: "개발팀" }, { label: "IP", value: "10.20.4.41" }]} /><CardMeta><dt>키</dt><dd>값</dd></CardMeta></>);
+    const [a, b] = [...container.querySelectorAll("dl.card-meta")];
+    expect([...a.children].map((e) => e.tagName + ":" + e.textContent)).toEqual(["DT:그룹", "DD:개발팀", "DT:IP", "DD:10.20.4.41"]);
+    expect(b.innerHTML).toBe("<dt>키</dt><dd>값</dd>");
   });
 
   it("기본은 div 에 .card 만", () => {

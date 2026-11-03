@@ -956,25 +956,46 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Card */
   "card": {
-    status: "ready", react: ["Card","CardHead","CardTitle","CardDesc","CardFoot","CardGrid"], css: [".card", ".card-grid"], borrows: [".tag", ".btn", ".select-btn", ".sparkline", ".skeleton", ".tbl"],
-    desc: "관련 정보와 액션을 한 덩어리로 묶는 컨테이너입니다. Surface 배경 + 1px line/neutral/secondary 보더로 구획합니다.",
-    thumb: `<div class="card compact" style="min-width:200px"><div class="card-head"><h3 class="title" style="font-size:14px">라이선스</h3><span class="tag ok sm">정상</span></div><p class="desc" style="font-size:12px">2026-12-31 만료</p></div>`,
+    status: "ready", react: ["Card","CardHead","CardTitle","CardDesc","CardMeta","CardFoot","CardGrid"], css: [".card", ".card-grid"], borrows: [".tag", ".btn", ".select-btn", ".sparkline", ".skeleton", ".tbl", ".indicator", ".empty"],
+    desc: "관련 정보와 그 정보에 대한 액션을 한 덩어리로 묶는 컨테이너입니다. 대시보드 위젯 · 상세 화면의 정보 블록 · 선택지 묶음에 씁니다. 숫자 하나는 KPI, 그래프는 Chart Card(<a href=\"data-visual.html\">Data Visual</a>)로 만들고, 화면 전체를 감싸는 틀로는 쓰지 않습니다.",
+    thumb: `<div class="card sm" style="min-width:200px"><div class="card-head"><h3 class="title" style="font-size:14px">라이선스</h3><span class="tag ok sm">정상</span></div><p class="desc" style="font-size:12px">2026-12-31 만료</p></div>`,
     examples: [
-      { id: "basic", title: "Default", desc: "head(제목 + 상태) · desc · foot(액션 우측). Surface 배경과 1px 보더로 구획하고 그림자는 두지 않습니다.", html: `
+      { id: "default", title: "Default", desc: "헤더(제목 + 오른쪽 요소 하나) · 본문 · 푸터 순서입니다. 푸터 액션은 오른쪽 정렬이고 강조 버튼은 하나만 둡니다. Surface 면과 1px 보더로 구획하고 그림자는 두지 않습니다.", html: `
         <div class="card" style="width:360px">
           <div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div>
           <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
           <div class="card-foot"><button type="button" class="btn sm outline assistive">상세</button><button type="button" class="btn sm solid primary">갱신</button></div>
         </div>` },
-      { id: "header", title: "Header Actions", desc: "헤더 우측에 기간 선택(Select Button) 또는 더 보기 메뉴. 패널이 없으니 탭이 아니라 role=group + aria-pressed 를 씁니다.", html: `
-        <div class="card" style="width:360px">
-          <div class="card-head"><h3 class="title">주간 탐지 추이</h3><div class="select-btn" role="group" aria-label="기간"><button type="button" class="on" aria-pressed="true">7일</button><button type="button" aria-pressed="false">30일</button></div></div>
-          <div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div>
-          <p class="desc">이번 주 탐지 <b>412</b>건, 지난주보다 18% 증가</p>
+      { id: "header", title: "Header", desc: "헤더 오른쪽에는 상태 Tag · 기간 선택(Select Button) · '전체 보기' 텍스트 버튼 중 <b>하나만</b> 둡니다. 기간 선택은 패널이 없으니 탭이 아니라 <code>role=group</code> + <code>aria-pressed</code> 입니다.", html: `
+        <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+          <div class="card" style="width:300px">
+            <div class="card-head"><h3 class="title">에이전트 연결</h3><span class="tag ok">정상</span></div>
+            <p class="desc">1,284대 중 1,247대 온라인</p>
+          </div>
+          <div class="card" style="width:300px">
+            <div class="card-head"><h3 class="title">주간 탐지 추이</h3><div class="select-btn" role="group" aria-label="기간"><button type="button" class="on" aria-pressed="true">7일</button><button type="button" aria-pressed="false">30일</button></div></div>
+            <div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div>
+            <p class="desc">이번 주 탐지 <b>412</b>건, 지난주보다 18% 증가</p>
+          </div>
+          <div class="card" style="width:300px">
+            <div class="card-head"><h3 class="title">정책 배포</h3><button type="button" class="btn sm text">전체 보기</button></div>
+            <p class="desc">대기 중인 배포 3건 · 마지막 배포 09:12</p>
+          </div>
         </div>` },
-      { id: "variant", title: "Compact", desc: "밀도 높은 그리드는 .compact. 카드 위에 카드를 겹쳐도 기본 카드의 1px 보더로 구분됩니다.", html: `
-        <div class="card compact" style="width:280px"><h3 class="title">Compact</h3><p class="desc">padding 16 · 제목 14</p></div>` },
-      { id: "flush", title: "Flush", desc: "표를 카드 폭까지 채울 때는 .flush — padding · gap 0, 머리만 16 · 24. 안에는 테두리 없는 표(.tbl)를 둡니다. .tbl-wrap 과 List 는 자체 테두리가 있어 두 겹이 됩니다.", html: `
+      { id: "status", title: "Status", desc: "자산 · 서버 · 에이전트 카드입니다. 제목 옆에 상태 Indicator, 본문은 키-값 행(<code>dl.card-meta</code> — 버전 · 그룹 · IP · 마지막 접속), 푸터에 액션을 둡니다.", html: `
+        <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+          <div class="card" style="width:320px">
+            <div class="card-head"><h3 class="title">PC-2041</h3><span class="indicator ok">온라인</span></div>
+            <dl class="card-meta"><dt>에이전트</dt><dd>6.2.1</dd><dt>그룹</dt><dd>개발팀</dd><dt>IP</dt><dd>10.20.4.41</dd><dt>마지막 접속</dt><dd>2026-11-02 09:41</dd></dl>
+            <div class="card-foot"><button type="button" class="btn sm outline assistive">로그</button><button type="button" class="btn sm solid primary">원격 점검</button></div>
+          </div>
+          <div class="card" style="width:320px">
+            <div class="card-head"><h3 class="title">SRV-DB-01</h3><span class="indicator warn">점검 필요</span></div>
+            <dl class="card-meta"><dt>에이전트</dt><dd>6.1.8 · 업데이트 필요</dd><dt>그룹</dt><dd>서버</dd><dt>IP</dt><dd>10.20.1.12</dd><dt>마지막 접속</dt><dd>2026-11-01 22:05</dd></dl>
+            <div class="card-foot"><button type="button" class="btn sm outline assistive">로그</button><button type="button" class="btn sm solid primary">업데이트</button></div>
+          </div>
+        </div>` },
+      { id: "list", title: "List", desc: "최근 이벤트 · 위협 Top 5 처럼 표 · 목록을 카드 폭까지 채울 때는 <code>.flush</code> — padding · gap 0, 헤더만 16 · 24. 헤더 오른쪽에 '전체 보기'. 안에는 테두리 없는 표(<code>.tbl</code>)를 둡니다. <code>.tbl-wrap</code> 과 List 는 자체 테두리가 있어 두 겹이 됩니다.", html: `
         <div class="card flush" style="width:400px">
           <div class="card-head"><h3 class="title">최근 이벤트</h3><button type="button" class="btn sm text">전체 보기</button></div>
           <table class="tbl compact">
@@ -986,12 +1007,30 @@ const COMPONENTS = {
             </tbody>
           </table>
         </div>` },
-      { id: "clickable", title: "Clickable / Selected", desc: "카드 전체가 눌리면 .clickable. 이동이면 a, 선택이면 button + aria-pressed 로 두고 선택된 것에 .on 을 줍니다.", html: `
+      { id: "selection", title: "Selection", desc: "정책 템플릿 · 검사 유형처럼 카드 전체를 눌러 고릅니다. 하나만 고르면 <code>button</code> + <code>aria-pressed</code>, 이동이면 <code>a</code>. 선택 · 이동 카드 안에는 버튼 · 링크를 두지 않습니다. 상태는 Normal · Hover · Selected · Disabled — Disabled 는 disable 토큰으로 칠하고(opacity 금지) 이유를 설명 줄에 적습니다 — 이유 줄만 tertiary 로 읽히게 둡니다.", html: `
         <div class="card-grid" style="max-width:600px">
-          <button type="button" class="card clickable" aria-pressed="false"><h3 class="title">USB 제어</h3><p class="desc">정책 12개</p></button>
-          <button type="button" class="card clickable on" aria-pressed="true"><h3 class="title">네트워크</h3><p class="desc">정책 8개 · 선택됨</p></button>
+          <button type="button" class="card clickable" aria-pressed="false">${I("scan",24)}<h3 class="title">빠른 검사</h3><p class="desc">실행 중인 프로세스 · 시작 프로그램</p></button>
+          <button type="button" class="card clickable" aria-pressed="false" data-state="hover">${I("file-search",24)}<h3 class="title">사용자 지정 검사</h3><p class="desc">폴더 · 확장자를 골라 검사</p></button>
+          <button type="button" class="card clickable on" aria-pressed="true">${I("shield-check",24)}<h3 class="title">정밀 검사</h3><p class="desc">모든 드라이브 · 압축 파일 포함</p></button>
+          <button type="button" class="card clickable" aria-pressed="false" disabled>${I("database",24)}<h3 class="title">메모리 포렌식</h3><p class="desc">EDR 라이선스가 필요합니다</p></button>
         </div>` },
-      { id: "loading", title: "Loading", desc: "데이터를 기다리는 동안 내용 자리에 Skeleton 을 넣고 컨테이너에 aria-busy 를 둡니다. 로드되면 같은 자리를 실제 내용으로 바꿥니다.", html: `
+      { id: "size", title: "Size", desc: "md(padding 24 · gap 12 · 제목 Title/1 16/24 SemiBold)와 sm(padding 16 · gap 8 · 제목 Label/1 14/20 SemiBold) 두 가지입니다. sm 은 밀도 높은 그리드에 씁니다. <code>.compact</code> 는 sm 의 옛 이름입니다.", html: `
+        <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+          <div class="card md" style="width:300px"><div class="card-head"><h3 class="title">md</h3><span class="tag ok">정상</span></div><p class="desc">padding 24 · gap 12 · 제목 16/24</p></div>
+          <div class="card sm" style="width:280px"><div class="card-head"><h3 class="title">sm</h3><span class="tag ok sm">정상</span></div><p class="desc">padding 16 · gap 8 · 제목 14/20</p></div>
+        </div>` },
+      { id: "empty", title: "Empty · Error", desc: "카드 틀과 헤더는 남기고 본문 자리만 바꿉니다. 빈 상태는 '데이터 없음' 문구, 오류는 negative 아이콘 · 문구와 '다시 시도' 버튼입니다. 카드가 이미 보더 · 면을 가지므로 안의 <code>.empty</code> 는 점선 · 면 없이 그려집니다.", html: `
+        <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+          <div class="card" style="width:320px">
+            <div class="card-head"><h3 class="title">최근 차단 이벤트</h3><button type="button" class="btn sm text">전체 보기</button></div>
+            <div class="empty"><span class="ico">${I("inbox",24)}</span><b>차단 이벤트 없음</b><span>최근 24시간 동안 차단된 이벤트가 없습니다.</span></div>
+          </div>
+          <div class="card" style="width:320px">
+            <div class="card-head"><h3 class="title">위협 탐지 추이</h3></div>
+            <div class="empty error"><span class="ico">${I("alert-triangle",24)}</span><b>데이터를 불러오지 못했습니다</b><span>잠시 후 다시 시도하세요.</span><button type="button" class="btn sm outline assistive">${I("refresh",16)}다시 시도</button></div>
+          </div>
+        </div>` },
+      { id: "loading", title: "Loading", desc: "데이터를 기다리는 동안 내용 자리에 Skeleton 을 넣고 컨테이너에 <code>aria-busy</code> 를 둡니다. 로드되면 같은 자리를 실제 내용으로 바꿉니다.", html: `
         <div class="card" style="width:360px" aria-busy="true">
           <span class="skeleton title"></span>
           <span class="skeleton text"></span>
@@ -999,19 +1038,23 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [
-      [".card", "container", "—", "flex column · gap 12 · padding 24 · 최소 폭 260. React <code>Card</code>"],
-      [".card-head / .title / .desc / .card-foot", "elements", "—", "헤더(양끝 정렬) / 제목 Title/1 16·24 / 설명 Body/2 14 / 푸터 우측 정렬 — React <code>CardHead</code>·<code>CardTitle</code>·<code>CardDesc</code>·<code>CardFoot</code>"],
-      [".bordered", "boolean", "false", "<b>호환용 — 효과 없음.</b> 기본 카드가 이미 1px 보더라 새 코드에서는 쓰지 않습니다"],
-      [".compact", "boolean", "false", "padding 16 · gap 8 · 제목 14(Title/2)"],
-      [".flush", "boolean", "false", "padding·gap 0 — 표를 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖습니다. 안에는 테두리 없는 .tbl 을 둡니다(.tbl-wrap · List 는 자체 테두리가 있어 두 겹)"],
-      [".clickable", "boolean", "false", "카드 전체가 눌림. <b>이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code></b>. hover 에 shadow/2. React <code>clickable</code> + <code>as</code>"],
-      [".card-grid .card.clickable", "behavior", "—", "ds.js 가 단일 선택으로 묶어 <code>.on</code> 과 <code>aria-pressed</code> 를 함께 갱신하고 <code>ds:select</code> 를 발행합니다"],
-      [".on", "boolean", "false", "선택됨 — 안쪽 2px brand 링 + <code>--surface-brand-subtle</code> 배경. 포커스 링(outline)과 겹치지 않아 둘이 동시에 보입니다. React <code>selected</code>"],
-      ["aria-busy", "attribute", "—", "불러오는 중 — 내용 대신 <code>.skeleton</code> 을 넣고 컨테이너에 둡니다. React <code>loading</code> 이 둘을 함께 처리합니다"],
-      [".card-grid", "container", "—", "auto-fill minmax(260px,1fr) 그리드 · gap 20. React <code>CardGrid</code>"],
+      ["Card / .card", "container", "—", "flex column · 최소 폭 260 · radius/lg · 1px line/neutral/secondary · surface/elevated/primary. 화면 전체를 감싸는 틀로 쓰지 않고, 카드 안에 카드를 겹치지 않습니다"],
+      ["size / .sm · .md", "\"sm\" | \"md\"", "\"md\"", "md padding 24 · gap 12 · 제목 Title/1 16/24 600 / sm padding 16 · gap 8 · 제목 Label/1 14/20 600 — 밀도 높은 그리드"],
+      ["CardHead · CardTitle / .card-head · .title", "element", "—", "제목 + 오른쪽 요소 하나(상태 Tag · Select Button · '전체 보기' 텍스트 버튼 중 하나). <code>CardTitle</code> 기본 h3"],
+      ["CardDesc / .desc", "element", "—", "Body/2 14 secondary"],
+      ["CardMeta / dl.card-meta", "element", "—", "상태 카드의 키-값 행 — dt secondary · dd primary · 14/22, 키 열은 가장 긴 키에 맞춤. React <code>items={[{ label, value }]}</code> 또는 dt · dd 자식"],
+      ["CardFoot / .card-foot", "element", "—", "액션 오른쪽 정렬 · 간격 12 · 강조 버튼은 하나"],
+      ["flush / .flush", "boolean", "false", "padding · gap 0 — 테두리 없는 표 · 목록을 카드 폭까지. 헤더만 자체 여백(md 16 · 24 / sm 12 · 16). 안의 Table 은 <code>wrap={false}</code> — <code>.tbl-wrap</code> · List 는 자체 테두리가 있어 두 겹"],
+      ["clickable / .clickable", "boolean", "false", "카드 전체가 눌림 — 이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code>(React <code>as</code>). hover shadow/2. 안에 버튼 · 링크를 두지 않습니다"],
+      ["selected / .on", "boolean", "false", "선택됨 — 안쪽 2px brand 링 + surface/brand/subtle, 앞 아이콘 brand. 포커스 외곽선과 함께 보입니다"],
+      ["disabled / :disabled · aria-disabled", "boolean", "false", "고를 수 없는 선택 카드 — surface/disable 면 · 제목과 아이콘 foreground/disable, hover 없음, 눌러도 선택되지 않음. 이유는 <code>.desc</code> 에 적고 그 줄은 tertiary 로 읽히게 둡니다. button 이면 <code>disabled</code>, 그 밖은 <code>aria-disabled</code>"],
+      ["loading / aria-busy", "boolean", "false", "내용 자리를 Skeleton 으로 바꾸고 <code>aria-busy</code> 를 켭니다"],
+      ["CardGrid / .card-grid", "container", "—", "auto-fill minmax(260px, 1fr) · gap 20. 안의 선택 카드는 ds.js 가 단일 선택으로 묶어 <code>.on</code> · <code>aria-pressed</code> 를 갱신하고 <code>ds:select</code> 를 발행합니다"],
+      ["compact / .compact", "boolean", "false", "<b>호환용</b> — sm 의 옛 이름. React 는 개발 모드에서 경고합니다"],
+      ["bordered / .bordered", "boolean", "false", "<b>호환용 — 효과 없음.</b> 기본 카드가 이미 1px 보더입니다"],
     ],
-    spec: [["Size", "최소 폭 260 · padding 24 (compact 16 · flush 0)"], ["Container", "radius/lg 8 · 1px line/neutral/secondary · surface/elevated/primary"], ["Label", "제목 16 SemiBold · 설명 Body/2 14 secondary"], ["Placement", "대시보드 그리드(gap 20), 상세 패널"], ["Motion", "clickable 은 --motion-fast 로 그림자 없음 → shadow/2"]],
-    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, compact: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-secondary" }, bordered: { stroke: "--line-neutral-secondary" } }, states: ["default", "hover", "selected", "focused", "loading"] },
+    spec: [["Size", "md padding 24 · gap 12 · sm padding 16 · gap 8 · flush 0 · 최소 폭 260"], ["Container", "radius/lg 8 · 1px line/neutral/secondary · surface/elevated/primary · 선택 2px brand 링 · Disabled surface/disable"], ["Label", "제목 md Title/1 16/24 SemiBold · sm Label/1 14/20 SemiBold · 설명 Body/2 14 secondary · 키 secondary · 값 primary"], ["Placement", "대시보드 그리드(minmax 260 · gap 20) · 상세 정보 블록 · 선택지 묶음 · 카드 안 카드 금지"], ["Motion", "선택 · 이동 카드 hover --motion-fast 로 그림자 없음 → shadow/2"]],
+    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, sm: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-secondary" }, status: {}, list: {}, selection: {}, empty: {}, error: {} }, states: ["default", "hover", "selected", "focused", "disabled", "loading"] },
   },
 
   /* ------------------------------------------------ Popup */

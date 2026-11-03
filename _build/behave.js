@@ -1001,7 +1001,23 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const h3Ls = await page.evaluate(() => { const ls = (e) => e && getComputedStyle(e).letterSpacing;
     return { preview: ls(document.querySelector(".example-preview h3")), doc: ls([...document.querySelectorAll("article h3")].find((h) => !h.closest(".example-preview"))) }; });
   ok("docs heading letter-spacing stays out of previews", h3Ls.preview === "normal" && !!h3Ls.doc && h3Ls.doc !== "normal", JSON.stringify(h3Ls));
-  const cg = page.locator("#ex-card-clickable .example-preview .card-grid");
+  const cg = page.locator("#ex-card-selection .example-preview .card-grid");
+  /* Card 정의(2026-11-02) — 선택 카드: 고정 Hover 가 실제 hover 와 같은 그림자, Disabled 는 disable 토큰 · hover 없음 · 선택 안 됨 */
+  await cg.locator(".card.clickable").first().hover(); await page.waitForTimeout(250);
+  const cardHov = await cg.evaluate((e) => { const c = [...e.querySelectorAll(".card.clickable")]; return { real: getComputedStyle(c[0]).boxShadow, fixed: getComputedStyle(c[1]).boxShadow, state: c[1].dataset.state }; });
+  ok("selection card fixed Hover matches real hover", cardHov.state === "hover" && cardHov.real !== "none" && cardHov.real === cardHov.fixed, JSON.stringify(cardHov));
+  await page.mouse.move(1, 1);
+  await cg.locator(".card.clickable").nth(3).hover({ force: true }); await page.waitForTimeout(250);
+  const cardDis = await cg.evaluate((e) => {
+    const c = e.querySelectorAll(".card.clickable")[3], cs = getComputedStyle(c), probe = document.createElement("i"); document.body.append(probe);
+    const tok = (v, p) => { probe.style[p] = "var(" + v + ")"; return getComputedStyle(probe)[p]; };
+    const r = { disabled: c.disabled, desc: c.querySelector(".desc").textContent, bg: cs.backgroundColor, wantBg: tok("--surface-disable-primary", "backgroundColor"), title: getComputedStyle(c.querySelector(".title")).color, descFg: getComputedStyle(c.querySelector(".desc")).color, wantDesc: tok("--foreground-neutral-tertiary", "color"), svg: getComputedStyle(c.querySelector("svg")).color, wantFg: tok("--foreground-disable-primary", "color"), shadow: cs.boxShadow, opacity: cs.opacity, cursor: cs.cursor };
+    probe.remove(); return r; });
+  ok("disabled selection card uses disable tokens without hover or opacity, reason stays readable", cardDis.disabled && !!cardDis.desc && cardDis.bg === cardDis.wantBg && cardDis.title === cardDis.wantFg && cardDis.svg === cardDis.wantFg && cardDis.descFg === cardDis.wantDesc && cardDis.shadow === "none" && cardDis.opacity === "1" && cardDis.cursor === "not-allowed", JSON.stringify(cardDis));
+  await page.mouse.move(1, 1);
+  await cg.locator(".card.clickable").nth(3).click({ force: true }); await page.waitForTimeout(150);
+  ok("disabled selection card is not selected", await cg.evaluate((e) => { const c = [...e.querySelectorAll(".card.clickable")]; return !c[3].classList.contains("on") && c[3].getAttribute("aria-pressed") === "false" && c[2].classList.contains("on"); }));
+  ok("selection and link cards hold no nested buttons or links", await page.evaluate(() => [...document.querySelectorAll(".example-preview .card.clickable")].every((c) => !c.querySelector("a,button,input,select,textarea"))));
   await cg.locator(".card.clickable").first().click();
   ok("clickable card single select", await cg.evaluate((e) => e.querySelectorAll(".card.on").length === 1 && e.querySelectorAll(".card")[0].classList.contains("on")));
   // .on 만으로는 선택이 보조기기에 전해지지 않는다 — aria-pressed 를 함께 갱신해야 한다
@@ -1021,13 +1037,22 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const on = e.querySelector(".card.on"); const c = getComputedStyle(on);
     return on.matches(":focus-visible") && c.boxShadow.includes("inset") && c.outlineStyle !== "none";
   }));
+  /* 제목 = 타이포 단계(md Title/1 16/24 600 · sm Label/1 14/20 600), .compact 는 sm 과 같은 값(호환 별칭) — 제목에 line-height 가 없으면 문맥에 따라 25.6·28·26.4 로 흔들렸다 */
   const cardType = await page.evaluate(() => {
-    const t = getComputedStyle(document.querySelector("#ex-card-basic .card .title"));
-    const ct = getComputedStyle(document.querySelector("#ex-card-variant .card.compact .title"));
-    return { title: t.fontSize + "/" + t.lineHeight, compact: ct.fontSize + "/" + ct.lineHeight, inline: document.querySelector("#ex-card-variant .card.compact .title").getAttribute("style") };
-  });
-  // 제목에 line-height 가 없으면 문맥에 따라 25.6·28·26.4 로 흔들렸다
-  ok("card title uses Title/1 and compact Title/2", cardType.title === "16px/24px" && cardType.compact === "14px/20px" && !cardType.inline, JSON.stringify(cardType));
+    const f = (e) => { const c = getComputedStyle(e); return c.fontSize + "/" + c.lineHeight + "/" + c.fontWeight; };
+    const box = (e) => { const c = getComputedStyle(e); return c.padding + "|" + c.rowGap; };
+    const host = document.querySelector("#ex-card-size .example-preview"), md = host.querySelector(".card.md"), sm = host.querySelector(".card.sm");
+    const tmp = document.createElement("div"); tmp.innerHTML = '<span class="t-title-1">a</span><span class="t-label-1">a</span><div class="card compact"><h3 class="title">a</h3></div>'; host.append(tmp);
+    const r = { md: f(md.querySelector(".title")), t1: f(tmp.children[0]), sm: f(sm.querySelector(".title")), l1: f(tmp.children[1]), compact: f(tmp.querySelector(".title")), mdBox: box(md), smBox: box(sm), compactBox: box(tmp.querySelector(".card")),
+      inline: [md, sm].some((c) => c.querySelector(".title").hasAttribute("style")) };
+    tmp.remove(); return r; });
+  ok("card titles match Title/1 · Label/1 and compact equals sm", cardType.md === "16px/24px/600" && cardType.md === cardType.t1 && cardType.sm === "14px/20px/600" && cardType.sm === cardType.l1 && cardType.compact === cardType.sm && cardType.mdBox === "24px|12px" && cardType.smBox === "16px|8px" && cardType.compactBox === cardType.smBox && !cardType.inline, JSON.stringify(cardType));
+  /* 상태 카드의 키-값 행 — 값 열이 한 줄로 맞고 키(secondary)와 값(primary)의 색이 다르다 */
+  const meta = await page.evaluate(() => [...document.querySelectorAll("#ex-card-status .card-meta")].map((dl) => ({ ddX: [...new Set([...dl.querySelectorAll("dd")].map((d) => Math.round(d.getBoundingClientRect().left)))].length, dt: getComputedStyle(dl.querySelector("dt")).color, dd: getComputedStyle(dl.querySelector("dd")).color, ind: !!dl.closest(".card").querySelector(".card-head .indicator") })));
+  ok("status card meta aligns values in one column under an indicator head", meta.length === 2 && meta.every((m) => m.ddX === 1 && m.dt !== m.dd && m.ind), JSON.stringify(meta));
+  /* 빈 · 오류 — 카드 안 .empty 는 점선 · 면 없이, 오류에는 다시 시도 */
+  const empt = await page.evaluate(() => [...document.querySelectorAll("#ex-card-empty .card .empty")].map((e) => ({ border: getComputedStyle(e).borderTopStyle, bg: getComputedStyle(e).backgroundColor, head: !!e.closest(".card").querySelector(".card-head .title"), error: e.classList.contains("error"), retry: [...e.querySelectorAll("button")].some((b) => b.textContent.includes("다시 시도")) })));
+  ok("empty and error cards keep the head and drop the empty frame, error offers retry", empt.length === 2 && empt.every((e) => e.border === "none" && e.bg === "rgba(0, 0, 0, 0)" && e.head) && empt.some((e) => e.error && e.retry), JSON.stringify(empt));
   // Radio Button 회귀 — label.radio.card 가 .card 의 column·그림자를 받으면 점이 라벨 위로 간다
   await go("components/radio-button.html");
   const radioCard = await page.evaluate(() => {
@@ -1056,7 +1081,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await go("components/card.html");
   // wrap 이 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿을 수 없다
   const footFit = async () => page.evaluate(() => {
-    const f = document.querySelector("#ex-card-basic .card-foot");
+    const f = document.querySelector("#ex-card-default .card-foot");
     f.innerHTML = ["정책 상세 보기", "라이선스 갱신 요청", "담당자에게 문의"].map((t) => `<button type="button" class="btn sm outline assistive">${t}</button>`).join("");
     const card = f.closest(".card"), cr = card.getBoundingClientRect();
     const pad = parseFloat(getComputedStyle(card).paddingLeft);
@@ -1071,7 +1096,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
   // 카드는 보더로 구획한다 — 선택돼도 shadow/1 이 붙으면 안 된다(호환용 .bordered 도 같다)
   const bOn = await page.evaluate(() => {
-    const prev = document.querySelector("#ex-card-variant .example-preview");
+    const prev = document.querySelector("#ex-card-size .example-preview");
     const mk = (cls) => { const c = prev.querySelector(".card").cloneNode(true); c.className = cls; prev.append(c); const st = getComputedStyle(c); return { shadow: st.boxShadow, border: st.borderWidth, bg: st.backgroundColor }; };
     return { on: mk("card bordered on"), plain: mk("card on") };
   });
@@ -1079,7 +1104,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   // loading 예제
   const ld = await page.evaluate(() => {
     const c = document.querySelector("#ex-card-loading .card");
-    const loaded = document.querySelector("#ex-card-basic .card");
+    const loaded = document.querySelector("#ex-card-default .card");
     return { busy: c.getAttribute("aria-busy"), 스켈레톤: c.querySelectorAll(".skeleton").length,
       애니메이션: getComputedStyle(c.querySelector(".skeleton")).animationName,
       높이: Math.round(c.getBoundingClientRect().height), 로드된높이: Math.round(loaded.getBoundingClientRect().height) };

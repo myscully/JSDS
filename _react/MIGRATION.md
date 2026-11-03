@@ -243,3 +243,18 @@ Breadcrumb 정의를 다시 내렸습니다. 경로는 **항상 홈 아이콘으
 
 `href` 없이 `as`(라우터 링크)만 주는 경우는 링크로 그대로 그립니다.
 새로 내보내는 컴포넌트 · 타입: `BreadcrumbHome` · `BreadcrumbHomeProps`.
+
+## Card (2026-11-02)
+
+Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목록 · 표 · 선택 · 빈/오류 · Loading 이고, 크기는 Button · Accordion 처럼 `size`(sm · md)로 고릅니다.
+숫자 하나는 `Kpi`, 그래프는 `ChartCard` 를 씁니다(Data Visual).
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| `compact` | `size="sm"` — 값은 같습니다(padding 16 · gap 8 · 제목 14/20 600). `compact` 는 `sm` 클래스로 그리고 개발 모드에서 경고합니다 | `.card.sm` (`.card.compact` 는 같은 값의 별칭) |
+| (기본) | `size="md"` 를 명시할 수 있습니다 — 기본값과 같습니다 | `.card.md` |
+| — | `disabled` — 고를 수 없는 선택 카드. `as="button"` 이면 `disabled`, 그 밖은 `aria-disabled`. 이유는 `CardDesc` 에 | `.card.clickable:disabled` · `[aria-disabled="true"]` |
+| 상태 카드의 키-값을 직접 마크업 | `CardMeta items={[{ label, value }]}` | `dl.card-meta` |
+
+타이포 Title/1 이 500 → **600** 이 됐습니다(카드 제목 · Chart Card 제목 · Accordion md 헤더와 같은 값). `.t-title-1` 을 쓰던 글자는 굵어집니다.
+새로 내보내는 컴포넌트 · 타입: `CardMeta` · `CardMetaProps` · `CardMetaItem`.

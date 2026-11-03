@@ -46,7 +46,7 @@ export { Calendar, DatePicker, formatDate, formatMonth, parseDate, parseMonth, t
 
 // E. containers & data
 export { Accordion, AccordionGroup, type AccordionProps, type AccordionGroupProps, type AccordionVariant } from "./components/accordion/Accordion";
-export { Card, CardHead, CardTitle, CardDesc, CardFoot, CardGrid, type CardProps, type CardTitleProps } from "./components/card/Card";
+export { Card, CardHead, CardTitle, CardDesc, CardMeta, CardFoot, CardGrid, type CardProps, type CardTitleProps, type CardMetaProps, type CardMetaItem } from "./components/card/Card";
 export { List, ListItem, type ListProps, type ListItemProps } from "./components/list/List";
 export { Tile, TileGrid, type TileProps } from "./components/item-tile/Tile";
 export { Table, TableHead, TableBody, TableRow, TableHeader, TableCell, type TableProps, type TableRowProps, type TableHeaderProps, type TableCellProps } from "./components/table/Table";

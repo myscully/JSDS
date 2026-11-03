@@ -162,7 +162,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, btnLoading: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null, accordion: null, accordionProps: null, breadcrumb: null, breadcrumbItem: null };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, btnLoading: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null, accordion: null, accordionProps: null, breadcrumb: null, breadcrumbItem: null, card: null };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다가 2026-10-28 k16 에 뺐다 — 사람의 정의로 버튼 포커스는 상태가 아니라
@@ -435,6 +435,50 @@ for (const p of figma.root.children) {
         out.variants.push(e);
       }
       components[set.name === "Breadcrumb" ? "breadcrumb" : "breadcrumbItem"] = out;
+    }
+    /* Card(2026-11-03 k29 — 사람의 정의 2026-11-02 ~ 11-03: 유형 기본 정보 · 상태 · 목록/표 · 선택 · 빈/오류 · Loading, 크기 md · sm, 선택 카드만 Hover · Selected · Disabled).
+       세트 축은 Type × Size × State(State 는 Type=Selection 에만 여럿). 변형마다 바깥 상자(폭 · 최소 폭 · 방향 · padding · gap 과 묶인 변수 · 면 · 테두리 · 모서리와 변수 ·
+       효과 스타일 · 안쪽 그림자[토큰, spread] · 바깥 그림자 수)와 부품을 이름으로 읽는다 — Head(padding · gap · 변수), Title · Description(텍스트 스타일 · 크기 · 행간 · 서체 · 칠 · 글 상자 높이 h — k29 마무리에 더함),
+       Icon(선택 카드 앞 아이콘 — 자리 · 크기 · 선 색), Meta(상태 카드 키-값 — 열 간격 · Keys/Values 행 간격 · 칠 · 스타일 · 행 수),
+       Empty(빈 · 오류 본문 — padding · gap · 면 · 테두리, Face 면 · 크기 · 모서리 변수, Icon 선, Message · Hint 글자, Action 안 Button 원본 이름),
+       Skeleton(Loading — 원본 이름). 자식 이름 순서(kids)도 낸다. audit 이 사이트 .card 규칙 · components.data.js card 와 맞춘다(cardExpect) */
+    if (set.name === "Card") {
+      const tsMap = new Map((await figma.getLocalTextStylesAsync()).map((s) => [s.id, s.name]));
+      const esMap = new Map((await figma.getLocalEffectStylesAsync()).map((s) => [s.id, s.name]));
+      const vb = (n, k) => { const b = n && n.boundVariables && n.boundVariables[k]; const x = b && byId.get(b.id); return x ? x.name : null; };
+      const box = (n) => (n ? { pad: [n.paddingTop, n.paddingRight, n.paddingBottom, n.paddingLeft], padV: ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"].map((k) => vb(n, k)), gap: n.itemSpacing, gapV: vb(n, "itemSpacing"), lm: n.layoutMode } : null);
+      const tx = (t) => (t ? { st: t.textStyleId === figma.mixed ? "mixed" : tsMap.get(t.textStyleId) || null, fs: t.fontSize === figma.mixed ? "mixed" : t.fontSize, lh: t.lineHeight === figma.mixed ? "mixed" : t.lineHeight.unit === "PIXELS" ? t.lineHeight.value : t.lineHeight.unit, font: t.fontName === figma.mixed ? "mixed" : t.fontName.family + " " + t.fontName.style, fill: paint(t.fills), vis: t.visible, h: +t.height.toFixed(2) } : null);
+      const ink = (n) => (n ? [...new Set(n.findAll((x) => ["VECTOR", "ELLIPSE", "LINE", "RECTANGLE", "POLYGON"].includes(x.type) && x.visible !== false).map((x) => paint(x.strokes)).filter((x) => x !== "-"))].sort().join("|") : null);
+      const kid = (p, nm) => (p && "children" in p ? p.children.find((k) => k.name === nm) || null : null);
+      const out = { def: set.defaultVariant ? set.defaultVariant.name : null, id: set.id, k29: true, variants: [] };
+      for (const v of set.children) {
+        const fx = v.effects.filter((e) => e.visible !== false);
+        const e = Object.assign({ name: v.name, id: v.id, w: +v.width.toFixed(2), minW: v.minWidth, kids: v.children.map((k) => k.name).join(">") }, box(v), {
+          fill: paint(v.fills), stroke: paint(v.strokes), sw: v.strokeWeight === figma.mixed ? "mixed" : v.strokeWeight, sa: v.strokeAlign,
+          r: [v.topLeftRadius, v.topRightRadius, v.bottomRightRadius, v.bottomLeftRadius], rv: vb(v, "topLeftRadius"),
+          fx: { style: v.effectStyleId ? esMap.get(v.effectStyleId) || "?" : null, inner: fx.filter((x) => x.type === "INNER_SHADOW").map((x) => [vname(x.boundVariables && x.boundVariables.color) || "raw", x.spread || 0]), drop: fx.filter((x) => x.type === "DROP_SHADOW").length } });
+        const head = kid(v, "Head");
+        if (head) e.head = Object.assign(box(head), { kids: head.children.map((k) => k.name).join(">") });
+        const title = v.findOne((k) => k.name === "Title" && k.type === "TEXT"), desc = v.findOne((k) => k.name === "Description" && k.type === "TEXT");
+        e.title = tx(title); e.desc = tx(desc);
+        const icon = kid(v, "Icon");
+        if (icon) e.icon = { idx: v.children.indexOf(icon), w: +icon.width.toFixed(2), h: +icon.height.toFixed(2), ink: ink(icon) };
+        const meta = kid(v, "Meta");
+        if (meta) { const ks = kid(meta, "Keys"), vs = kid(meta, "Values"), col = (c) => (c ? Object.assign(box(c), { n: c.children.length, fill: [...new Set(c.children.map((t) => paint(t.fills)))].join("|"), st: [...new Set(c.children.map((t) => (t.type === "TEXT" ? tsMap.get(t.textStyleId) || null : t.type)))].join("|") }) : null); e.meta = Object.assign(box(meta), { keys: col(ks), vals: col(vs) }); }
+        const em = kid(v, "Empty");
+        if (em) {
+          const face = em.findOne((k) => k.name === "Face"), act = kid(em, "Action"), btn = act && act.findOne((k) => k.type === "INSTANCE" && k.name === "Button");
+          const bm = btn ? await btn.getMainComponentAsync() : null;
+          e.empty = Object.assign(box(em), { fill: paint(em.fills), stroke: paint(em.strokes), kids: em.children.map((k) => k.name).join(">"),
+            face: face ? { w: +face.width.toFixed(2), h: +face.height.toFixed(2), fill: paint(face.fills), rv: vb(face, "topLeftRadius"), ink: ink(face.findOne((k) => k.name === "Icon")) } : null,
+            msg: tx(kid(em, "Message")), hint: tx(kid(em, "Hint")), btn: bm ? bm.name : null });
+        }
+        const sk = [];
+        for (const k of v.children) if (k.type === "INSTANCE" && /^Skeleton/.test(k.name)) { const m = await k.getMainComponentAsync(); sk.push(m ? m.name : null); }
+        if (sk.length) e.skel = sk;
+        out.variants.push(e);
+      }
+      components.card = out;
     }
     if (set.name === "Text Field") components.textField = set.children.map((v) => { const f = v.findOne((k) => k.name === "Input" && "strokes" in k); return { variant: v.name, id: v.id, h: f ? +f.height.toFixed(2) : null }; });   // 입력칸 높이(2026-10-28 k16) — audit 이 .field input 높이와 맞춘다
     if (set.name !== "Button") continue;

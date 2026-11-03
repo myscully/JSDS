@@ -25,6 +25,10 @@
  *           간격 ↔ .breadcrumb · li gap, 첫 자식 = 홈 아이콘(예제 첫 li), 구분자 ↔ li+li::before(아이콘 · 크기 · 색), 접힘 = 홈 + … + 끝 2개,
  *           글자 · 마지막 항목(색 · 굵기) ↔ .breadcrumb 규칙, State=Hover · Focus 는 받는 항목 하나(Default 첫 상위 링크 · Collapsed …)만 a:hover · .more:hover / :focus-visible 외곽선,
  *           나머지 항목은 같은 Type 의 State=Default 와 같음. 항목 세트 Breadcrumb Item 이 남아 있으면 어긋남(2026-10-30 k25 · 2026-11-02 k26, breadcrumbExpect)
+ *   Card   변형 표(Type × Size × State — State 는 Type=Selection 에만 여럿) ↔ components.data.js card.figma, padding · gap(md · sm · List=flush · Head) 과 묶인 변수 ↔ .card · .card.md · .card.sm ·
+ *           .card.flush · .card-head, 면 · 테두리 · 모서리 · 최소 폭 ↔ .card, 제목 크기 · 굵기 · 텍스트 스타일 ↔ .card .title · .card.sm .title · .t-*, 설명 · 키-값 ↔ .card .desc · .card-meta,
+ *           선택 카드 아이콘 · Hover(shadow/2) · Selected(안쪽 링 · 면) · Disabled(면 · 제목 · 아이콘 · 설명 줄 tertiary) ↔ .card.clickable · .card.on 규칙, 빈 · 오류 본문 ↔ .card .empty · .empty,
+ *           Loading ↔ loading 예제 Skeleton, 기본 변형 ↔ props size 기본값(2026-11-03 k29, cardExpect), 제목 행간 · 한 줄 글 상자 높이 ↔ CSS line-height(k29 마무리)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7) · Button 의 variant · color · size 기본값(k16)
  *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
  *   선택 컨트롤 선택된 Radio · 선택 + 비활성 Radio 의 면 · 테두리 · 점, 비활성 Slider 의 라벨 · 값 글자 칠(2026-10-27 k11) — controlsExpect
@@ -666,6 +670,101 @@ function breadcrumbExpect() {
   } catch (e) { return { error: String(e.message || e) }; }
 }
 
+/* Card(2026-11-03 k29 — 사람의 정의 2026-11-02 ~ 11-03) — 기대값을 저장소에서 읽는다. 손으로 적은 숫자는 없다.
+     축     components.data.js 의 card.figma — sizes(md · sm · flush), variants(default · status · list · selection · empty · error), states(default · hover · selected · focused · disabled · loading).
+            Figma 세트 "Card" 는 Type × Size × State 로 옮긴다:
+              Type  = variants 의 이름(첫 글자 대문자) + states 에 loading 이 있으면 "Loading" — Loading 은 상태가 아니라 내용 자리를 Skeleton 으로 바꾼 모양이라(loading 예제는 헤더도 없다) 유형으로 둔다.
+              Size  = sizes 에서 flush 를 뺀 것 — md → Medium · sm → Small(파일의 Button · Accordion 과 같은 이름). flush 는 크기가 아니라 Type=List 의 바깥 padding(figma.sizes.flush.pad)이다.
+              State = states 에서 focused · loading 을 뺀 것(Default · Hover · Selected · Disabled). focused 는 전역 :focus-visible 외곽선이라 변형으로 두지 않는다(Button k16 과 같은 결정).
+                      Hover · Selected · Disabled 는 .card.clickable(선택 카드) 규칙에만 있으므로 Type=Selection 에만 둔다 — 다른 Type 은 State=Default 하나.
+            기본 변형 = Type 첫 값 × props size 기본값(md → Medium) × State 첫 값
+     크기   md padding · gap = .card.md(padding 은 var(--card-pad) 를 :root 에서 푼다), sm = .card.sm. List = .card.flush padding · gap 이고 figma.sizes.flush.pad 와 같아야 한다.
+            List 헤더 padding = .card.flush .card-head(md) · .card.flush:is(.sm,.compact) .card-head(sm), 헤더 줄 간격 = .card .card-head gap. 값마다 Figma 변수에 묶였는지도 본다(묶인 변수의 값 = 기대 px)
+     상자   면 · 테두리(1px) · 모서리(var(--radius-lg) — 변수 radius/lg) · 최소 폭 = .card. 테두리는 Selected 에서도 그대로다(사이트 .card.on 은 border 를 두고 inset 링을 더한다)
+     제목   md = .card .title 의 font-size · line-height · font-weight, sm = .card.sm .title(굵기는 md 를 물려받음) — 텍스트 스타일은 .t-* 중 크기 · 행간 · 굵기가 같은 하나(Title/1 · Label/1)
+     설명   .card .desc — 크기 14 · 굵기 400 인 .t-* 하나(Body/2), 칠 = .desc color. 키-값 = .card .card-meta(gap 행 · 열, 크기 · 행간 → Body/2), dt · dd 칠
+     선택   앞 아이콘 크기 = selection 예제 첫 I(이름, 크기), 칠 = .card.clickable>svg · .card.on>svg · Disabled 의 >svg.
+            Hover = .card.clickable:not(:disabled,[aria-disabled="true"]):hover 의 box-shadow(var(--shadow-2) → 효과 스타일 Shadow/2).
+            Selected = .card.on 의 background · box-shadow inset 0 0 0 Npx 토큰(Figma 는 같은 토큰 · spread N 의 INNER_SHADOW 하나).
+            Disabled = .card.clickable:is(:disabled,[aria-disabled="true"]) 의 background · box-shadow none, 같은 규칙 .title · >svg color, .desc color(이유 줄 — tertiary, 사람의 결정 2026-11-03)
+     빈·오류 .card .empty(padding · 테두리 0 · 면 없음) · .empty gap · color(Hint), .card .empty b font-size · .empty b color(Message), .empty .ico 크기 · 면 · 모서리 · color, .card .empty.error .ico color,
+            '다시 시도' = empty 예제 .empty.error 안 .btn 의 클래스(sm · outline · assistive → Button Variant · Color · Size)
+     Loading loading 예제 .skeleton 의 클래스 순서(title · text · text short → Skeleton Type=Title · Text · Text Short) */
+const CARD_SIZES = { Medium: "md", Small: "sm" };
+function cardExpect() {
+  try {
+    const box = { I: (n, sz) => `⟦I:${n}:${sz || 0}⟧`, module: { exports: {} } };
+    vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
+    const c = box.module.exports.card || {}, fg = c.figma || {};
+    const cap = (x) => (x ? x[0].toUpperCase() + x.slice(1) : x);
+    const vkeys = Object.keys(fg.variants || {}), skeys = Object.keys(fg.sizes || {}), states = fg.states || [];
+    if (!vkeys.length || !skeys.length || !states.length) throw new Error("components.data.js card.figma 의 variants · sizes · states 를 읽지 못했습니다");
+    if (!vkeys.includes("selection") || !vkeys.includes("list") || !skeys.includes("flush")) throw new Error("card.figma 에 selection · list 유형이나 flush 크기가 없습니다 — k29 해석(선택 카드 = clickable, 목록 = flush)을 다시 정해야 합니다");
+    const types = vkeys.map(cap); if (states.includes("loading")) types.push("Loading");
+    const sizes = skeys.filter((k) => k !== "flush").map((k) => Object.keys(CARD_SIZES).find((z) => CARD_SIZES[z] === k));
+    if (sizes.some((z) => !z)) throw new Error("card.figma.sizes 에 md · sm · flush 밖의 크기가 있습니다(" + skeys.join(" · ") + ")");
+    const axis = states.filter((x) => x !== "focused" && x !== "loading").map(cap);
+    const table = []; for (const t of types) for (const z of sizes) for (const st of t === "Selection" ? axis : [axis[0]]) table.push(`Type=${t}, Size=${z}, State=${st}`);
+    const root = vars(block(read("_build/style.src.css"), ":root"));
+    const pv = (v) => { const m = /^var\(--([a-z0-9-]+)\)$/.exec(String(v || "").trim()); return m ? px(root["--" + m[1]]) : px(v); };
+    const pads = (v) => { const p = String(v || "").trim().split(/\s+/).map(pv); return [p[0], p[1] ?? p[0], p[2] ?? p[0], p[3] ?? p[1] ?? p[0]]; };
+    const base = cssRule(".card"), md = cssRule(".card.md"), sm = cssRule(".card.sm"), fl = cssRule(".card.flush");
+    const size = { Medium: { pad: pads(md.padding || base.padding), gap: px(md.gap || base.gap) }, Small: { pad: pads(sm.padding), gap: px(sm.gap) } };
+    const flush = { pad: pads(fl.padding), gap: px(fl.gap) };
+    if (fg.sizes.flush.pad !== flush.pad[0]) throw new Error(`card.figma.sizes.flush.pad(${fg.sizes.flush.pad})와 .card.flush padding(${fl.padding})이 다릅니다`);
+    for (const z of sizes) if (fg.sizes[CARD_SIZES[z]].pad !== size[z].pad[0]) throw new Error(`card.figma.sizes.${CARD_SIZES[z]}.pad 와 CSS padding 이 다릅니다`);
+    const headPad = { Medium: pads(cssRule(".card.flush .card-head").padding), Small: pads(cssRule(".card.flush:is(.sm,.compact) .card-head").padding) };
+    const rm = /^var\(--radius-([a-z0-9]+)\)$/.exec(String(base["border-radius"]).trim());
+    if (!rm) throw new Error(".card border-radius 가 var(--radius-*) 가 아닙니다");
+    const bm = /([\d.]+)px solid (var\(--[a-z0-9-]+\))/.exec(base.border || "");
+    if (!bm) throw new Error(".card border 를 읽지 못했습니다");
+    const tsAll = typeScale(), w400 = (x) => x.weight || 400;
+    const styleOf = (fs, lh, wt, what) => { const hit = Object.entries(tsAll).filter(([, x]) => x.size === fs && (lh === null || x.lineHeight === lh) && w400(x) === wt).map(([k]) => k); if (hit.length !== 1) throw new Error(`${what}(${fs}/${lh}/${wt})에 맞는 .t-* 가 ${hit.length}개입니다(${hit.join(" · ")})`); return hit[0]; };
+    const t = cssRule(".card .title"), ts = cssRule(".card.sm .title"), tw = parseInt(t["font-weight"], 10) || 400;
+    const title = { Medium: { fs: px(t["font-size"]), lh: px(t["line-height"]), wt: tw }, Small: { fs: px(ts["font-size"]), lh: px(ts["line-height"]), wt: parseInt(ts["font-weight"], 10) || tw } };
+    for (const z of sizes) title[z].st = styleOf(title[z].fs, title[z].lh, title[z].wt, `제목 ${z}`);
+    const d = cssRule(".card .desc"), mt = cssRule(".card .card-meta"), mg = String(mt.gap).trim().split(/\s+/).map(px);
+    const dis = '.card.clickable:is(:disabled,[aria-disabled="true"])';
+    const on = cssRule(".card.on"), ring = /inset 0 0 0 ([\d.]+)px (var\(--[a-z0-9-]+\))/.exec(on["box-shadow"] || "");
+    if (!ring) throw new Error(".card.on box-shadow 의 inset 링을 읽지 못했습니다");
+    const hov = /^var\(--shadow-(\d+)\)$/.exec(String(cssRule('.card.clickable:not(:disabled,[aria-disabled="true"]):hover')["box-shadow"]).trim());
+    if (!hov) throw new Error("선택 카드 hover box-shadow 가 var(--shadow-N) 이 아닙니다");
+    const ex = (id) => { const e = (c.examples || []).find((x) => x.id === id); if (!e) throw new Error("card 예제 없음: " + id); return e.html; };
+    const im = /⟦I:([a-z0-9-]+):(\d+)⟧/.exec(ex("selection"));
+    if (!im || !(+im[2] > 0)) throw new Error("selection 예제의 앞 아이콘 크기를 읽지 못했습니다");
+    const errBtn = /class="empty error"[\s\S]*?<button[^>]*class="btn ([^"]+)"/.exec(ex("empty"));
+    if (!errBtn) throw new Error("empty 예제의 .empty.error 안 버튼을 읽지 못했습니다");
+    const bc = errBtn[1].split(/\s+/), pick = (opts) => cap(bc.find((x) => opts.includes(x)) || "");
+    const BSZ = { sm: "Small", md: "Medium", lg: "Large" };
+    const skel = [...ex("loading").matchAll(/class="skeleton ([^"]+)"/g)].map((x) => x[1].split(/\s+/).map(cap).join(" "));
+    const ce = cssRule(".card .empty"), e0 = cssRule(".empty"), ico = cssRule(".empty .ico");
+    const want = {
+      types, sizes, axis, table, size, flush, headPad, headGap: px(cssRule(".card .card-head").gap),
+      face: figTok(base.background), stroke: figTok(bm[2]), sw: +bm[1], radius: { tok: "radius/" + rm[1], px: px(root["--radius-" + rm[1]]) }, minW: px(base["min-width"]),
+      title, desc: { st: styleOf(px(d["font-size"]), null, parseInt(d["font-weight"], 10) || 400, "설명"), fill: figTok(d.color) },
+      meta: { row: mg[0], col: mg[1] ?? mg[0], st: styleOf(px(mt["font-size"]), px(mt["line-height"]), 400, "키-값"), key: figTok(cssRule(".card .card-meta dt").color), val: figTok(cssRule(".card .card-meta dd").color) },
+      icon: { size: +im[2], ink: figTok(cssRule(".card.clickable>svg").color), on: figTok(cssRule(".card.on>svg").color), dis: figTok(cssRule(dis + ">svg").color) },
+      hover: "shadow/" + hov[1],
+      selected: { face: figTok(on.background), ring: { tok: figTok(ring[2]), w: +ring[1] } },
+      disabled: { face: figTok(cssRule(dis).background), shadowNone: String(cssRule(dis)["box-shadow"]).trim() === "none", title: figTok(cssRule(dis + " .title").color), desc: figTok(cssRule(dis + " .desc").color) },
+      empty: { pad: pads(ce.padding), noBorder: /^(0|none)$/.test(String(ce.border).trim()), noFace: /^(none|transparent)$/.test(String(ce.background).trim()), gap: px(e0.gap), hint: figTok(e0.color),
+        msg: { fs: px(cssRule(".card .empty b")["font-size"]), fill: figTok(cssRule(".empty b").color) },
+        ico: { w: px(ico.width), h: px(ico.height), face: figTok(ico.background), radius: "radius/" + ((/var\(--radius-([a-z0-9]+)\)/.exec(ico["border-radius"] || "") || [])[1]), ink: figTok(ico.color), err: figTok(cssRule(".card .empty.error .ico").color) },
+        btn: `Variant=${pick(["solid", "outline", "text"])}, Color=${pick(["primary", "assistive", "negative"])}, Size=${BSZ[bc.find((x) => BSZ[x])] || "?"}` },
+      skel,
+    };
+    for (const [k, v] of [["면", want.face], ["테두리", want.stroke], ["설명 칠", want.desc.fill], ["키 칠", want.meta.key], ["값 칠", want.meta.val], ["아이콘", want.icon.ink], ["선택 아이콘", want.icon.on], ["비활성 아이콘", want.icon.dis],
+      ["선택 면", want.selected.face], ["선택 링", want.selected.ring.tok], ["비활성 면", want.disabled.face], ["비활성 제목", want.disabled.title], ["비활성 설명", want.disabled.desc], ["빈 상태 Hint", want.empty.hint], ["빈 상태 Message", want.empty.msg.fill],
+      ["아이콘 면", want.empty.ico.face], ["빈 아이콘", want.empty.ico.ink], ["오류 아이콘", want.empty.ico.err]]) if (!v) throw new Error(k + " 토큰을 읽지 못했습니다");
+    if (!skel.length) throw new Error("loading 예제에 .skeleton 이 없습니다");
+    const props = c.props || [], sv = (props.find((r) => /^size\b/.test(String(r[0]))) || [])[2];
+    const dz = Object.keys(CARD_SIZES).find((z) => CARD_SIZES[z] === String(sv || "").replace(/"/g, "").trim());
+    if (!dz) throw new Error("props 의 size 기본값을 읽지 못했습니다");
+    want.default = `Type=${types[0]}, Size=${dz}, State=${axis[0]}`;
+    return want;
+  } catch (e) { return { error: String(e.message || e) }; }
+}
+
 /* Tag 기본 크기(2026-10-26 k7) — components.data.js 의 Tag props 에서 size 행의 기본값(md)을 읽어 Figma 크기 이름으로 */
 function tagDefaultSize() {
   const box = { I: () => "", module: { exports: {} } };
@@ -761,6 +860,8 @@ function componentsExpect() {
     accordion: accordionExpect(),
     /* Breadcrumb 행 · 항목 — 사이트 .breadcrumb 규칙 · :focus-visible · components.data.js(2026-10-30 k25) */
     breadcrumb: breadcrumbExpect(),
+    /* Card 변형 표 · 크기 · 상자 · 제목 · 선택 상태 · 빈/오류 · Loading — 사이트 .card 규칙 · components.data.js(2026-11-03 k29) */
+    card: cardExpect(),
     /* Text Field 입력칸 높이 — .field input · .field.sm input · .field.lg input(2026-10-28 k16) */
     textFieldH: (() => { try { const h = { Small: px(cssRule(".field.sm input").height), Medium: px(cssRule(".field input").height), Large: px(cssRule(".field.lg input").height) }; return Object.values(h).every((x) => x > 0) ? h : { error: "높이를 읽지 못했습니다 " + JSON.stringify(h) }; } catch (e) { return { error: String(e.message || e) }; } })(),
     /* 선택된 Radio · 비활성 Slider 글자의 칠 — 사이트 CSS (2026-10-27 k11) */
@@ -1581,6 +1682,126 @@ function expect_() {
   };
 }
 
+/* Card(2026-11-03 k29) — 규칙은 cardExpect 머리 주석. probe 의 components.card(변형마다 상자 · 부품)와 덤프의 변수 값(묶인 변수의 px)으로 본다.
+   기존 Card Foot 간격 · 보더 · 그림자 대조(diffComponents 의 surfaces)는 그대로 두고, 여기서는 k29 정의만 본다. 옛 덤프(k29 전 probe)에는 components.card 가 없다 — 그때는 NOTE */
+function diffCard(c, wc, variables, bad, notes) {
+  if (!c) return;
+  if (wc.error) { bad.push(`Card 기대값을 저장소에서 읽지 못했습니다 — ${wc.error}`); return; }
+  const cd = c.card;
+  if (cd === undefined) { notes.push("덤프에 Card 조사(components.card)가 없습니다 — 2026-11-03 k29 전 probe.js 로 만든 덤프입니다"); return; }
+  if (!cd || !cd.variants) { bad.push("Card 세트를 조사하지 못했습니다(components.card 비어 있음)"); return; }
+  const W = { Thin: 100, Light: 300, DemiLight: 350, Regular: 400, Medium: 500, SemiBold: 600, Bold: 700, Black: 900 };
+  const varPx = {}; for (const col of Object.values(variables || {})) for (const [k, v] of Object.entries(col.values || {})) if (/^N/.test(String(v).split("|")[0])) varPx[k] = +String(v).split("|")[0].slice(1);
+  const ax = (name) => Object.fromEntries(String(name).split(", ").map((kv) => kv.split("=")).filter((x) => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
+  const key = (o) => `Type=${o.Type}, Size=${o.Size}, State=${o.State}`;
+  const exp = new Set(wc.table), have = new Map(), dup = [];
+  for (const v of cd.variants) { const o = ax(v.name), k = key(o); if (Object.keys(o).length !== 3 || !exp.has(k)) continue; if (have.has(k)) dup.push(v.name + "(" + v.id + ")"); else have.set(k, v); }
+  const miss = wc.table.filter((k) => !have.has(k)), stray = cd.variants.filter((v) => { const o = ax(v.name); return Object.keys(o).length !== 3 || !exp.has(key(o)); });
+  if (miss.length) bad.push(`Card 에 없는 변형 ${miss.length}개(기대 ${wc.table.length}) — ${miss.slice(0, 4).join(" · ")}${miss.length > 4 ? " …" : ""}(components.data.js card.figma — cardExpect 머리 주석)`);
+  if (stray.length) bad.push(`Card 에 표에 없는 변형 ${stray.length}개 — ${stray.slice(0, 4).map((v) => v.name + "(" + v.id + ")").join(" · ")}${stray.length > 4 ? " …" : ""}(Type = ${wc.types.join(" · ")} × Size = ${wc.sizes.join(" · ")}, State ${wc.axis.slice(1).join(" · ")} 는 Selection 에만)`);
+  if (dup.length) bad.push(`Card 에 이름이 겹치는 변형 — ${dup.join(" · ")}`);
+  if (cd.def !== wc.default) bad.push(`Card 기본 변형 ${cd.def} ≠ ${wc.default} — props size 기본값`);
+  const T = (x) => (x === "-" ? "-" : "$" + x);
+  /* 묶인 변수 — 값마다 변수 이름이 있어야 하고 그 변수의 값이 기대 px 여야 한다 */
+  const bound = (at, what, got, gotV, want) => {
+    for (let i = 0; i < want.length; i++) {
+      if (got[i] !== want[i]) { bad.push(`${at} ${what} ${JSON.stringify(got)} ≠ ${JSON.stringify(want)}`); return; }
+      if (!gotV[i]) { bad.push(`${at} ${what} 값 ${got[i]} 이 변수에 묶이지 않음`); return; }
+      if (varPx[gotV[i]] !== undefined && varPx[gotV[i]] !== want[i]) { bad.push(`${at} ${what} 이 묶인 변수 ${gotV[i]}(${varPx[gotV[i]]}) ≠ ${want[i]}`); return; }
+    }
+  };
+  const font = (at, what, tx, w) => {
+    if (!tx) { bad.push(`${at} ${what} 글자 없음`); return; }
+    if (tx.st !== w.st) bad.push(`${at} ${what} 텍스트 스타일 ${tx.st || "없음"} ≠ ${w.st}`);
+    if (w.fs !== undefined && tx.fs !== w.fs) bad.push(`${at} ${what} 크기 ${tx.fs} ≠ ${w.fs}`);
+    if (w.wt !== undefined) { const wt = W[String(tx.font).split(" ").pop()]; if (wt !== w.wt) bad.push(`${at} ${what} 굵기 ${wt} ≠ ${w.wt}(${tx.font})`); }
+  };
+  for (const [k, v] of have) {
+    const o = ax(v.name), at = `Card ${v.name} (${v.id})`, list = o.Type === "List", sel = o.Type === "Selection";
+    const wantFace = o.State === "Selected" ? wc.selected.face : o.State === "Disabled" ? wc.disabled.face : wc.face;
+    if (v.fill !== T(wantFace)) bad.push(`${at} 면 ${v.fill} ≠ ${wantFace} — 사이트 ${o.State === "Selected" ? ".card.on" : o.State === "Disabled" ? ".card.clickable:disabled" : ".card"} background`);
+    if (v.stroke !== T(wc.stroke) || v.sw !== wc.sw) bad.push(`${at} 테두리 ${v.stroke} ${v.sw}px ≠ ${wc.sw}px ${wc.stroke} — 사이트 .card border(Selected 도 그대로)`);
+    if (!v.r || v.r.some((x) => Math.abs(x - wc.radius.px) > 0.01) || v.rv !== wc.radius.tok) bad.push(`${at} 모서리 ${JSON.stringify(v.r)}(${v.rv || "값만"}) ≠ ${wc.radius.px}(${wc.radius.tok})`);
+    if (v.minW !== wc.minW) bad.push(`${at} 최소 폭 ${v.minW} ≠ ${wc.minW} — 사이트 .card min-width`);
+    if (v.lm !== "VERTICAL") bad.push(`${at} 세로 자동 배치가 아님(${v.lm}) — 사이트 flex column`);
+    const sz = list ? wc.flush : wc.size[o.Size];
+    if (sz) { bound(at, list ? "padding(flush)" : "padding", v.pad, v.padV, sz.pad); bound(at, "gap", [v.gap], [v.gapV], [sz.gap]); }
+    /* 효과 — Hover 는 Shadow/2 스타일만, Selected 는 안쪽 링 하나만, 나머지는 없음 */
+    const fx = v.fx || {};
+    if (o.State === "Hover") { if (String(fx.style || "").toLowerCase() !== wc.hover || fx.inner.length) bad.push(`${at} Hover 효과 ${fx.style || "없음"}${fx.inner.length ? " + 안쪽 " + JSON.stringify(fx.inner) : ""} ≠ 효과 스타일 ${wc.hover} — 사이트 .card.clickable:hover`); }
+    else if (o.State === "Selected") { if (fx.style || fx.drop || fx.inner.length !== 1 || fx.inner[0][0] !== wc.selected.ring.tok || fx.inner[0][1] !== wc.selected.ring.w) bad.push(`${at} 선택 링 ${JSON.stringify(fx.inner)}${fx.style ? " + " + fx.style : ""}${fx.drop ? " + 그림자 " + fx.drop : ""} ≠ [${wc.selected.ring.tok}, ${wc.selected.ring.w}] 안쪽 그림자 하나 — 사이트 .card.on inset`); }
+    else if (fx.style || fx.drop || fx.inner.length) bad.push(`${at} 효과 ${fx.style || ""}${fx.drop ? " 그림자 " + fx.drop : ""}${fx.inner.length ? " 안쪽 " + JSON.stringify(fx.inner) : ""} — ${o.State === "Disabled" ? "Disabled 는 그림자 없음(사이트 box-shadow:none)" : "그림자 없는 카드입니다(사이트 .card)"}`);
+    /* 제목 · 설명 */
+    if (o.Type !== "Loading") {
+      font(at, "제목", v.title, wc.title[o.Size] || {});
+      /* 제목 글 상자(2026-11-03 k29 마무리) — 행간 = CSS line-height, 한 줄 제목의 상자 높이 = 그 행간. 플러그인이 Pretendard 없이 스타일만 바꾸면
+         행간 값은 바뀌어도 상자가 다시 배치되지 않아 높이가 옛 값(24)으로 남았다 — 그 모양을 여기서 잡는다. 옛 덤프에는 h 가 없다 */
+      const wt = wc.title[o.Size];
+      if (v.title && wt) {
+        if (v.title.lh !== wt.lh) bad.push(`${at} 제목 행간 ${v.title.lh} ≠ ${wt.lh} — 사이트 ${o.Size === "Small" ? ".card.sm .title" : ".card .title"} line-height`);
+        if (v.title.h !== undefined && Math.abs(v.title.h - wt.lh) > 0.5) bad.push(`${at} 제목 글 상자 높이 ${v.title.h} ≠ ${wt.lh}(한 줄 = line-height) — 스타일을 바꾼 뒤 다시 배치되지 않은 글 상자`);
+      }
+      if (v.title) { if (o.State === "Disabled") { if (v.title.fill !== T(wc.disabled.title)) bad.push(`${at} 제목 ${v.title.fill} ≠ ${wc.disabled.title} — 사이트 :disabled .title`); } else if (v.title.fill === T(wc.disabled.title)) bad.push(`${at} 제목이 비활성 색 — Disabled 가 아닙니다`); }
+    }
+    if (v.desc) {
+      font(at, "설명", v.desc, { st: wc.desc.st });
+      const wf = o.State === "Disabled" ? wc.disabled.desc : wc.desc.fill;
+      if (v.desc.fill !== T(wf)) bad.push(`${at} 설명 ${v.desc.fill} ≠ ${wf} — 사이트 ${o.State === "Disabled" ? ':disabled .desc(이유 줄은 읽혀야 함 — 사람의 결정 2026-11-03)' : ".card .desc"}`);
+    }
+    if (v.head) bound(at, "헤더 줄 간격", [v.head.gap], [v.head.gapV], [wc.headGap]);
+    if (list) { if (!v.head) bad.push(`${at} 헤더(Head) 없음`); else bound(at, "헤더 padding", v.head.pad, v.head.padV, wc.headPad[o.Size]); }
+    /* 유형별 부품 */
+    if (sel) {
+      if (/(^|>)(Head|Foot)(>|$)/.test(v.kids)) bad.push(`${at} 선택 카드 안에 ${v.kids} — 카드 전체가 버튼이라 헤더 · 푸터(버튼)를 두지 않습니다`);
+      if (!v.icon) bad.push(`${at} 앞 아이콘(Icon) 없음 — 사이트 selection 예제`);
+      else {
+        if (v.icon.idx !== 0) bad.push(`${at} 앞 아이콘이 맨 앞이 아님(${v.icon.idx})`);
+        if (Math.abs(v.icon.w - wc.icon.size) > 0.5 || Math.abs(v.icon.h - wc.icon.size) > 0.5) bad.push(`${at} 앞 아이콘 ${v.icon.w}×${v.icon.h} ≠ ${wc.icon.size}`);
+        const wi = o.State === "Selected" ? wc.icon.on : o.State === "Disabled" ? wc.icon.dis : wc.icon.ink;
+        if (v.icon.ink !== T(wi)) bad.push(`${at} 앞 아이콘 선 ${v.icon.ink} ≠ ${wi} — 사이트 ${o.State === "Selected" ? ".card.on>svg" : o.State === "Disabled" ? ":disabled>svg" : ".card.clickable>svg"}`);
+      }
+    }
+    if (o.Type === "Status") {
+      const m = v.meta;
+      if (!m) bad.push(`${at} 키-값(Meta) 없음 — 사이트 dl.card-meta`);
+      else if (!m.keys || !m.vals) bad.push(`${at} Meta 안에 Keys · Values 열이 없습니다`);
+      else {
+        bound(at, "키-값 열 간격", [m.gap], [m.gapV], [wc.meta.col]);
+        bound(at, "키 행 간격", [m.keys.gap], [m.keys.gapV], [wc.meta.row]); bound(at, "값 행 간격", [m.vals.gap], [m.vals.gapV], [wc.meta.row]);
+        if (m.keys.n !== m.vals.n) bad.push(`${at} 키 ${m.keys.n}개 · 값 ${m.vals.n}개 — 행 수가 다릅니다`);
+        if (m.keys.fill !== T(wc.meta.key)) bad.push(`${at} 키 ${m.keys.fill} ≠ ${wc.meta.key} — 사이트 .card-meta dt`);
+        if (m.vals.fill !== T(wc.meta.val)) bad.push(`${at} 값 ${m.vals.fill} ≠ ${wc.meta.val} — 사이트 .card-meta dd`);
+        if (m.keys.st !== wc.meta.st || m.vals.st !== wc.meta.st) bad.push(`${at} 키-값 텍스트 스타일 ${m.keys.st} / ${m.vals.st} ≠ ${wc.meta.st}`);
+      }
+    }
+    if (o.Type === "Empty" || o.Type === "Error") {
+      const e = v.empty, err = o.Type === "Error", we = wc.empty;
+      if (!e) bad.push(`${at} 본문 자리(Empty) 없음 — 사이트 .card .empty`);
+      else {
+        bound(at, "빈 상태 padding", e.pad, e.padV, we.pad); bound(at, "빈 상태 간격", [e.gap], [e.gapV], [we.gap]);
+        if (we.noFace && e.fill !== "-") bad.push(`${at} 빈 상태 면 ${e.fill} — 카드 안 .empty 는 면이 없습니다`);
+        if (we.noBorder && e.stroke !== "-") bad.push(`${at} 빈 상태 테두리 ${e.stroke} — 카드 안 .empty 는 점선을 끕니다`);
+        if (!e.face) bad.push(`${at} 아이콘 면(Face) 없음`);
+        else {
+          if (Math.abs(e.face.w - we.ico.w) > 0.5 || Math.abs(e.face.h - we.ico.h) > 0.5) bad.push(`${at} 아이콘 면 ${e.face.w}×${e.face.h} ≠ ${we.ico.w}×${we.ico.h}`);
+          if (e.face.fill !== T(we.ico.face)) bad.push(`${at} 아이콘 면 ${e.face.fill} ≠ ${we.ico.face}`);
+          if (e.face.rv !== we.ico.radius) bad.push(`${at} 아이콘 면 모서리 ${e.face.rv || "값만"} ≠ ${we.ico.radius}`);
+          const wi = err ? we.ico.err : we.ico.ink;
+          if (e.face.ink !== T(wi)) bad.push(`${at} 아이콘 ${e.face.ink} ≠ ${wi} — 사이트 ${err ? ".card .empty.error .ico" : ".empty .ico"}`);
+        }
+        if (!e.msg) bad.push(`${at} 문구(Message) 없음`); else { if (e.msg.fs !== we.msg.fs) bad.push(`${at} 문구 크기 ${e.msg.fs} ≠ ${we.msg.fs} — 사이트 .card .empty b`); if (e.msg.fill !== T(we.msg.fill)) bad.push(`${at} 문구 ${e.msg.fill} ≠ ${we.msg.fill}`); }
+        if (!e.hint) bad.push(`${at} 보조 문구(Hint) 없음`); else if (e.hint.fill !== T(we.hint)) bad.push(`${at} 보조 문구 ${e.hint.fill} ≠ ${we.hint} — 사이트 .empty color`);
+        if (err) { if (!e.btn || !e.btn.startsWith(we.btn)) bad.push(`${at} '다시 시도' 버튼 ${e.btn || "없음"} ≠ ${we.btn}… — 사이트 empty 예제`); }
+        else if (e.btn) bad.push(`${at} 빈 상태에 버튼(${e.btn}) — 버튼은 오류에만`);
+      }
+    }
+    if (o.Type === "Loading") {
+      const got = (v.skel || []).map((x) => String(x).replace(/^Type=/, ""));
+      if (JSON.stringify(got) !== JSON.stringify(wc.skel)) bad.push(`${at} Skeleton ${JSON.stringify(got)} ≠ ${JSON.stringify(wc.skel)} — 사이트 loading 예제`);
+    }
+  }
+}
+
 /* ---------- 대조 ---------- */
 function diff(dumpPath, site) {
   const want = expect_();
@@ -1628,7 +1849,7 @@ function diff(dumpPath, site) {
     const noto = (got.textStyles || []).filter((t) => /^Noto Sans KR/.test(t.font)).map((t) => t.name);
     notes.push(noto.length
       ? `Figma 에 Pretendard 가 없어 텍스트 스타일 ${noto.length}개가 Noto Sans KR 대체입니다(${noto.slice(0, 4).join(" · ")}${noto.length > 4 ? " …" : ""}) — 되돌리기는 _figma/font-revert.md`
-      : "텍스트 스타일은 Pretendard 지만 이 플러그인 환경에는 Pretendard 가 없습니다 — 글자 내용·스타일 연결 같은 텍스트 편집은 여기서 할 수 없습니다");
+      : "텍스트 스타일은 Pretendard 지만 이 플러그인 환경에는 Pretendard 가 없습니다 — Pretendard 글자를 직접 고칠 수는 없고, makeFont() 의 Noto 로 쓴 뒤 원래 텍스트 스타일에 다시 연결하는 우회만 됩니다(글 상자 재배치 · 옛 글리프 확인 — CLAUDE.md Figma 절)");
   }
 
   /* 대조 범위 — probe 는 현재 페이지를 id 로 고른다(2026-10-23 k2). 범위의 id 가 파일에 없으면(페이지를 지우고 다시 만들면)
@@ -1678,6 +1899,7 @@ function diff(dumpPath, site) {
     if (wrong.length) bad.push(`옛 변수가 아닌데 게시에서 숨긴 변수 ${wrong.length}개 — ${wrong.slice(0, 6).join(" · ")}${wrong.length > 6 ? " …" : ""}`);
   } else notes.push("덤프에 게시 숨김 조사가 없습니다 — 2026-10-27 k13 전 probe.js 로 만든 덤프입니다");
   diffComponents(got.components, want.components, bad, notes);
+  diffCard(got.components, want.components.card, got.variables, bad, notes);
 
   return { bad, notes, counts: want.counts };
 }
