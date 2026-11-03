@@ -111,7 +111,7 @@ const COMPONENTS = {
         <button type="button" class="btn md solid primary loading" aria-busy="true">저장 중</button>
         <button type="button" class="btn md outline assistive loading" aria-busy="true">불러오는 중</button>
         <button type="button" class="btn md solid negative loading" aria-busy="true">삭제 중</button>` },
-      { id: "text", title: "Text", desc: "카드 머리의 '전체 보기', 달력 하단의 '오늘 · 초기화'처럼 <b>문장 속 링크에 가까운 가벼운 행동</b>에만 씁니다.", html: `
+      { id: "text", title: "Text", desc: "카드 머리의 '전체 보기', 달력 하단의 '오늘 · 초기화'처럼 <b>문장 속 링크에 가까운 가벼운 행동</b>에만 씁니다. 카드 머리의 '전체 보기' 는 assistive 입니다(Card).", html: `
         <button type="button" class="btn sm text">전체 보기</button>
         <button type="button" class="btn md text">초기화</button>
         <button type="button" class="btn sm text assistive">전체 보기</button>
@@ -966,7 +966,7 @@ const COMPONENTS = {
           <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
           <div class="card-foot"><button type="button" class="btn sm outline assistive">상세</button><button type="button" class="btn sm solid primary">갱신</button></div>
         </div>` },
-      { id: "header", title: "Header", desc: "헤더 오른쪽에는 상태 Tag · 기간 선택(Select Button) · '전체 보기' 텍스트 버튼 중 <b>하나만</b> 둡니다. 기간 선택은 패널이 없으니 탭이 아니라 <code>role=group</code> + <code>aria-pressed</code> 입니다.", html: `
+      { id: "header", title: "Header", desc: "헤더 오른쪽에는 상태 Tag · 기간 선택(Select Button) · '전체 보기' 텍스트 버튼(assistive) 중 <b>하나만</b> 둡니다. 기간 선택은 패널이 없으니 탭이 아니라 <code>role=group</code> + <code>aria-pressed</code> 입니다.", html: `
         <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
           <div class="card" style="width:300px">
             <div class="card-head"><h3 class="title">에이전트 연결</h3><span class="tag ok">정상</span></div>
@@ -978,7 +978,7 @@ const COMPONENTS = {
             <p class="desc">이번 주 탐지 <b>412</b>건, 지난주보다 18% 증가</p>
           </div>
           <div class="card" style="width:300px">
-            <div class="card-head"><h3 class="title">정책 배포</h3><button type="button" class="btn sm text">전체 보기</button></div>
+            <div class="card-head"><h3 class="title">정책 배포</h3><button type="button" class="btn sm text assistive">전체 보기</button></div>
             <p class="desc">대기 중인 배포 3건 · 마지막 배포 09:12</p>
           </div>
         </div>` },
@@ -995,9 +995,9 @@ const COMPONENTS = {
             <div class="card-foot"><button type="button" class="btn sm outline assistive">로그</button><button type="button" class="btn sm solid primary">업데이트</button></div>
           </div>
         </div>` },
-      { id: "list", title: "List", desc: "최근 이벤트 · 위협 Top 5 처럼 표 · 목록을 카드 폭까지 채울 때는 <code>.flush</code> — padding · gap 0, 헤더만 16 · 24. 헤더 오른쪽에 '전체 보기'. 안에는 테두리 없는 표(<code>.tbl</code>)를 둡니다. <code>.tbl-wrap</code> 과 List 는 자체 테두리가 있어 두 겹이 됩니다.", html: `
+      { id: "list", title: "List", desc: "최근 이벤트 · 위협 Top 5 처럼 표 · 목록을 카드 폭까지 채울 때는 <code>.flush</code> — padding · gap 0, 헤더만 16 · 24. 헤더 오른쪽에 '전체 보기'(텍스트 assistive). 안에는 테두리 없는 표(<code>.tbl</code>)를 둡니다. <code>.tbl-wrap</code> 과 List 는 자체 테두리가 있어 두 겹이 됩니다.", html: `
         <div class="card flush" style="width:400px">
-          <div class="card-head"><h3 class="title">최근 이벤트</h3><button type="button" class="btn sm text">전체 보기</button></div>
+          <div class="card-head"><h3 class="title">최근 이벤트</h3><button type="button" class="btn sm text assistive">전체 보기</button></div>
           <table class="tbl compact">
             <thead><tr><th>시간</th><th>이벤트</th><th class="num">횟수</th></tr></thead>
             <tbody>
@@ -1019,10 +1019,10 @@ const COMPONENTS = {
           <div class="card md" style="width:300px"><div class="card-head"><h3 class="title">md</h3><span class="tag ok">정상</span></div><p class="desc">padding 24 · gap 12 · 제목 16/24</p></div>
           <div class="card sm" style="width:280px"><div class="card-head"><h3 class="title">sm</h3><span class="tag ok sm">정상</span></div><p class="desc">padding 16 · gap 8 · 제목 14/20</p></div>
         </div>` },
-      { id: "empty", title: "Empty · Error", desc: "카드 틀과 헤더는 남기고 본문 자리만 바꿉니다. 빈 상태는 '데이터 없음' 문구, 오류는 negative 아이콘 · 문구와 '다시 시도' 버튼입니다. 카드가 이미 보더 · 면을 가지므로 안의 <code>.empty</code> 는 점선 · 면 없이 그려집니다.", html: `
+      { id: "empty", title: "Empty · Error", desc: "카드 틀과 헤더는 남기고 본문 자리만 바꿉니다. 빈 상태는 '데이터 없음' 문구, 오류는 negative 아이콘 · 문구와 '다시 시도' 버튼입니다. 카드가 이미 보더 · 면을 가지므로 안의 <code>.empty</code> 는 점선 · 면 없이, 아이콘도 칸 없이 36 으로 그려집니다.", html: `
         <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
           <div class="card" style="width:320px">
-            <div class="card-head"><h3 class="title">최근 차단 이벤트</h3><button type="button" class="btn sm text">전체 보기</button></div>
+            <div class="card-head"><h3 class="title">최근 차단 이벤트</h3><button type="button" class="btn sm text assistive">전체 보기</button></div>
             <div class="empty"><span class="ico">${I("inbox",24)}</span><b>차단 이벤트 없음</b><span>최근 24시간 동안 차단된 이벤트가 없습니다.</span></div>
           </div>
           <div class="card" style="width:320px">
@@ -1040,7 +1040,7 @@ const COMPONENTS = {
     props: [
       ["Card / .card", "container", "—", "flex column · 최소 폭 260 · radius/lg · 1px line/neutral/secondary · surface/elevated/primary. 화면 전체를 감싸는 틀로 쓰지 않고, 카드 안에 카드를 겹치지 않습니다"],
       ["size / .sm · .md", "\"sm\" | \"md\"", "\"md\"", "md padding 24 · gap 12 · 제목 Title/1 16/24 600 / sm padding 16 · gap 8 · 제목 Label/1 14/20 600 — 밀도 높은 그리드"],
-      ["CardHead · CardTitle / .card-head · .title", "element", "—", "제목 + 오른쪽 요소 하나(상태 Tag · Select Button · '전체 보기' 텍스트 버튼 중 하나). <code>CardTitle</code> 기본 h3"],
+      ["CardHead · CardTitle / .card-head · .title", "element", "—", "제목 + 오른쪽 요소 하나(상태 Tag · Select Button · '전체 보기' 텍스트 assistive 버튼 중 하나). <code>CardTitle</code> 기본 h3"],
       ["CardDesc / .desc", "element", "—", "Body/2 14 secondary"],
       ["CardMeta / dl.card-meta", "element", "—", "상태 카드의 키-값 행 — dt secondary · dd primary · 14/22, 키 열은 가장 긴 키에 맞춤. React <code>items={[{ label, value }]}</code> 또는 dt · dd 자식"],
       ["CardFoot / .card-foot", "element", "—", "액션 오른쪽 정렬 · 간격 12 · 강조 버튼은 하나"],

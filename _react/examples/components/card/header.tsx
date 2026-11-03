@@ -23,7 +23,7 @@ export default function Example() {
       <Card style={{ width: 300 }}>
         <CardHead>
           <CardTitle>정책 배포</CardTitle>
-          <Button variant="text" size="sm">전체 보기</Button>
+          <Button variant="text" color="assistive" size="sm">전체 보기</Button>
         </CardHead>
         <CardDesc>대기 중인 배포 3건 · 마지막 배포 09:12</CardDesc>
       </Card>

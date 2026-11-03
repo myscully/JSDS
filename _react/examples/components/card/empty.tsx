@@ -7,7 +7,7 @@ export default function Example() {
       <Card style={{ width: 320 }}>
         <CardHead>
           <CardTitle>최근 차단 이벤트</CardTitle>
-          <Button variant="text" size="sm">전체 보기</Button>
+          <Button variant="text" color="assistive" size="sm">전체 보기</Button>
         </CardHead>
         <Empty icon="inbox" title="차단 이벤트 없음">최근 24시간 동안 차단된 이벤트가 없습니다.</Empty>
       </Card>

@@ -687,7 +687,8 @@ function breadcrumbExpect() {
             Hover = .card.clickable:not(:disabled,[aria-disabled="true"]):hover 의 box-shadow(var(--shadow-2) → 효과 스타일 Shadow/2).
             Selected = .card.on 의 background · box-shadow inset 0 0 0 Npx 토큰(Figma 는 같은 토큰 · spread N 의 INNER_SHADOW 하나).
             Disabled = .card.clickable:is(:disabled,[aria-disabled="true"]) 의 background · box-shadow none, 같은 규칙 .title · >svg color, .desc color(이유 줄 — tertiary, 사람의 결정 2026-11-03)
-     빈·오류 .card .empty(padding · 테두리 0 · 면 없음) · .empty gap · color(Hint), .card .empty b font-size · .empty b color(Message), .empty .ico 크기 · 면 · 모서리 · color, .card .empty.error .ico color,
+     빈·오류 .card .empty(padding · 테두리 0 · 면 없음) · .empty gap · color(Hint), .card .empty b font-size · .empty b color(Message), .empty .ico 위에 .card .empty .ico 를 덮은 크기 · 면 · 모서리(k31 — 칸 없이 36) · color,
+            .card .empty .ico svg 크기(아이콘 36), .card .empty.error .ico color, 헤더 오른쪽 버튼 = list · empty 예제 .card-head 안 .btn 클래스(k31 — '전체 보기' 텍스트 assistive · 오류 카드는 버튼 없음),
             '다시 시도' = empty 예제 .empty.error 안 .btn 의 클래스(sm · outline · assistive → Button Variant · Color · Size)
      Loading loading 예제 .skeleton 의 클래스 순서(title · text · text short → Skeleton Type=Title · Text · Text Short) */
 const CARD_SIZES = { Medium: "md", Small: "sm" };
@@ -737,9 +738,16 @@ function cardExpect() {
     const bc = errBtn[1].split(/\s+/), pick = (opts) => cap(bc.find((x) => opts.includes(x)) || "");
     const BSZ = { sm: "Small", md: "Medium", lg: "Large" };
     const skel = [...ex("loading").matchAll(/class="skeleton ([^"]+)"/g)].map((x) => x[1].split(/\s+/).map(cap).join(" "));
-    const ce = cssRule(".card .empty"), e0 = cssRule(".empty"), ico = cssRule(".empty .ico");
+    const ce = cssRule(".card .empty"), e0 = cssRule(".empty"), ico = Object.assign({}, cssRule(".empty .ico"), cssRule(".card .empty .ico"));   // 카드 안 아이콘 칸 = .empty .ico 위에 .card .empty .ico 를 덮은 값(k31 — 칸 없이 36)
+    const isvg = cssRule(".card .empty .ico svg"), noBg = (v) => /^(none|transparent)$/.test(String(v || "").trim());
+    /* 헤더 오른쪽 버튼(k31 — '전체 보기' = 텍스트 assistive) — 예제마다 .card-head 안 버튼 클래스를 읽어 유형별로 기대. 버튼이 없는 헤더(오류 카드)는 null */
+    const btnName = (cls) => { const b = cls.split(/\s+/), pk = (o) => cap(b.find((x) => o.includes(x)) || ""); return `Variant=${pk(["solid", "outline", "text"])}, Color=${pk(["primary", "assistive", "negative"])}, Size=${BSZ[b.find((x) => BSZ[x])] || "?"}`; };
+    const heads = (html) => [...html.matchAll(/class="card-head">([\s\S]*?)<\/div>/g)].map((x) => { const b = /<button[^>]*class="btn ([^"]+)"/.exec(x[1]); return b ? btnName(b[1]) : null; });
+    const lh = heads(ex("list")), eh = heads(ex("empty"));
+    if (lh.length !== 1 || eh.length !== 2) throw new Error(`list · empty 예제의 .card-head 수가 ${lh.length} · ${eh.length} 입니다(기대 1 · 2) — 헤더 버튼 기대를 다시 정해야 합니다`);
+    const headBtn = { List: lh[0], Empty: eh[0], Error: eh[1] };
     const want = {
-      types, sizes, axis, table, size, flush, headPad, headGap: px(cssRule(".card .card-head").gap),
+      types, sizes, axis, table, size, flush, headPad, headGap: px(cssRule(".card .card-head").gap), headBtn,
       face: figTok(base.background), stroke: figTok(bm[2]), sw: +bm[1], radius: { tok: "radius/" + rm[1], px: px(root["--radius-" + rm[1]]) }, minW: px(base["min-width"]),
       title, desc: { st: styleOf(px(d["font-size"]), null, parseInt(d["font-weight"], 10) || 400, "설명"), fill: figTok(d.color) },
       meta: { row: mg[0], col: mg[1] ?? mg[0], st: styleOf(px(mt["font-size"]), px(mt["line-height"]), 400, "키-값"), key: figTok(cssRule(".card .card-meta dt").color), val: figTok(cssRule(".card .card-meta dd").color) },
@@ -749,13 +757,15 @@ function cardExpect() {
       disabled: { face: figTok(cssRule(dis).background), shadowNone: String(cssRule(dis)["box-shadow"]).trim() === "none", title: figTok(cssRule(dis + " .title").color), desc: figTok(cssRule(dis + " .desc").color) },
       empty: { pad: pads(ce.padding), noBorder: /^(0|none)$/.test(String(ce.border).trim()), noFace: /^(none|transparent)$/.test(String(ce.background).trim()), gap: px(e0.gap), hint: figTok(e0.color),
         msg: { fs: px(cssRule(".card .empty b")["font-size"]), fill: figTok(cssRule(".empty b").color) },
-        ico: { w: px(ico.width), h: px(ico.height), face: figTok(ico.background), radius: "radius/" + ((/var\(--radius-([a-z0-9]+)\)/.exec(ico["border-radius"] || "") || [])[1]), ink: figTok(ico.color), err: figTok(cssRule(".card .empty.error .ico").color) },
+        ico: { w: px(ico.width), h: px(ico.height), noFace: noBg(ico.background), face: noBg(ico.background) ? "-" : figTok(ico.background),
+          radius: /^0(px)?$/.test(String(ico["border-radius"]).trim()) ? null : "radius/" + ((/var\(--radius-([a-z0-9]+)\)/.exec(ico["border-radius"] || "") || [])[1]), r0: /^0(px)?$/.test(String(ico["border-radius"]).trim()),
+          iw: px(isvg.width), ih: px(isvg.height), ink: figTok(ico.color), err: figTok(cssRule(".card .empty.error .ico").color) },
         btn: `Variant=${pick(["solid", "outline", "text"])}, Color=${pick(["primary", "assistive", "negative"])}, Size=${BSZ[bc.find((x) => BSZ[x])] || "?"}` },
       skel,
     };
     for (const [k, v] of [["면", want.face], ["테두리", want.stroke], ["설명 칠", want.desc.fill], ["키 칠", want.meta.key], ["값 칠", want.meta.val], ["아이콘", want.icon.ink], ["선택 아이콘", want.icon.on], ["비활성 아이콘", want.icon.dis],
       ["선택 면", want.selected.face], ["선택 링", want.selected.ring.tok], ["비활성 면", want.disabled.face], ["비활성 제목", want.disabled.title], ["비활성 설명", want.disabled.desc], ["빈 상태 Hint", want.empty.hint], ["빈 상태 Message", want.empty.msg.fill],
-      ["아이콘 면", want.empty.ico.face], ["빈 아이콘", want.empty.ico.ink], ["오류 아이콘", want.empty.ico.err]]) if (!v) throw new Error(k + " 토큰을 읽지 못했습니다");
+      ["아이콘 면", want.empty.ico.face], ["아이콘 크기", want.empty.ico.iw && want.empty.ico.ih], ["빈 아이콘", want.empty.ico.ink], ["오류 아이콘", want.empty.ico.err]]) if (!v) throw new Error(k + " 토큰을 읽지 못했습니다");
     if (!skel.length) throw new Error("loading 예제에 .skeleton 이 없습니다");
     const props = c.props || [], sv = (props.find((r) => /^size\b/.test(String(r[0]))) || [])[2];
     const dz = Object.keys(CARD_SIZES).find((z) => CARD_SIZES[z] === String(sv || "").replace(/"/g, "").trim());
@@ -1749,6 +1759,12 @@ function diffCard(c, wc, variables, bad, notes) {
       if (v.desc.fill !== T(wf)) bad.push(`${at} 설명 ${v.desc.fill} ≠ ${wf} — 사이트 ${o.State === "Disabled" ? ':disabled .desc(이유 줄은 읽혀야 함 — 사람의 결정 2026-11-03)' : ".card .desc"}`);
     }
     if (v.head) bound(at, "헤더 줄 간격", [v.head.gap], [v.head.gapV], [wc.headGap]);
+    if (v.head && o.Type in wc.headBtn) {   // 헤더 오른쪽 버튼(k31) — '전체 보기' 는 텍스트 assistive(사이트 btn sm text assistive)
+      const wb = wc.headBtn[o.Type];
+      if (v.head.btn === undefined) bad.push(`${at} 헤더 버튼 원본을 덤프에 내지 않았습니다 — probe.js(k31)로 다시 덤프`);
+      else if (wb && !String(v.head.btn || "").startsWith(wb)) bad.push(`${at} 헤더 버튼 ${v.head.btn || "없음"} ≠ ${wb}… — 사이트 ${o.Type === "List" ? "list" : "empty"} 예제 .card-head`);
+      else if (!wb && v.head.btn) bad.push(`${at} 헤더에 버튼(${v.head.btn}) — 사이트 empty 예제의 오류 카드 헤더는 제목만`);
+    }
     if (list) { if (!v.head) bad.push(`${at} 헤더(Head) 없음`); else bound(at, "헤더 padding", v.head.pad, v.head.padV, wc.headPad[o.Size]); }
     /* 유형별 부품 */
     if (sel) {
@@ -1783,9 +1799,13 @@ function diffCard(c, wc, variables, bad, notes) {
         if (we.noBorder && e.stroke !== "-") bad.push(`${at} 빈 상태 테두리 ${e.stroke} — 카드 안 .empty 는 점선을 끕니다`);
         if (!e.face) bad.push(`${at} 아이콘 면(Face) 없음`);
         else {
-          if (Math.abs(e.face.w - we.ico.w) > 0.5 || Math.abs(e.face.h - we.ico.h) > 0.5) bad.push(`${at} 아이콘 면 ${e.face.w}×${e.face.h} ≠ ${we.ico.w}×${we.ico.h}`);
-          if (e.face.fill !== T(we.ico.face)) bad.push(`${at} 아이콘 면 ${e.face.fill} ≠ ${we.ico.face}`);
-          if (e.face.rv !== we.ico.radius) bad.push(`${at} 아이콘 면 모서리 ${e.face.rv || "값만"} ≠ ${we.ico.radius}`);
+          const ico = ".card .empty .ico";
+          if (Math.abs(e.face.w - we.ico.w) > 0.5 || Math.abs(e.face.h - we.ico.h) > 0.5) bad.push(`${at} 아이콘 칸 ${e.face.w}×${e.face.h} ≠ ${we.ico.w}×${we.ico.h} — 사이트 ${ico}`);
+          if (e.face.fill !== T(we.ico.face)) bad.push(`${at} 아이콘 칸 면 ${e.face.fill} ≠ ${we.ico.face}${we.ico.noFace ? " — 카드 안에서는 칸 없이 아이콘만(사이트 " + ico + " background:none, 사람의 결정 2026-11-03)" : ""}`);
+          if (we.ico.r0) { if (e.face.rv || (e.face.r !== undefined && e.face.r !== 0)) bad.push(`${at} 아이콘 칸 모서리 ${e.face.rv || e.face.r} — 사이트 ${ico} border-radius 0`); }
+          else if (e.face.rv !== we.ico.radius) bad.push(`${at} 아이콘 칸 모서리 ${e.face.rv || "값만"} ≠ ${we.ico.radius}`);
+          if (e.face.iw === undefined) bad.push(`${at} 아이콘 크기를 덤프에 내지 않았습니다 — probe.js(k31)로 다시 덤프`);
+          else if (e.face.iw === null || Math.abs(e.face.iw - we.ico.iw) > 0.5 || Math.abs(e.face.ih - we.ico.ih) > 0.5) bad.push(`${at} 아이콘 ${e.face.iw}×${e.face.ih} ≠ ${we.ico.iw}×${we.ico.ih} — 사이트 ${ico} svg`);
           const wi = err ? we.ico.err : we.ico.ink;
           if (e.face.ink !== T(wi)) bad.push(`${at} 아이콘 ${e.face.ink} ≠ ${wi} — 사이트 ${err ? ".card .empty.error .ico" : ".empty .ico"}`);
         }

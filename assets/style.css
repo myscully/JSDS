@@ -1097,7 +1097,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 /* 빈 · 오류 — 카드 틀과 헤더는 두고 본문 자리만 .empty 로. 카드가 이미 보더 · 면 · 여백을 가지므로 .empty 의 점선 · 면을 끈다 */
 .card .empty{border:0;background:none;padding:24px 0}
 .card .empty b{font-size:14px}   /* 카드 제목(16)보다 커지지 않게 — .empty b 는 16 */
-.card .empty.error .ico{color:var(--foreground-negative-strong)}   /* 아이콘 면(surface/neutral/strong) 위 그래픽 3:1 — negative-primary 는 라이트 2.61 */
+.card .empty .ico{width:36px;height:36px;background:none;border-radius:0}   /* 카드 안에서는 아이콘 칸(48 · surface/neutral/strong) 없이 아이콘만 36(사람의 결정 2026-11-03) */
+.card .empty .ico svg{width:36px;height:36px}
+.card .empty.error .ico{color:var(--foreground-negative-strong)}   /* 카드 면 위 부정 아이콘 — 빈 상태 아이콘(tertiary)과 갈린다 */
 /* 표·목록을 카드 폭까지 꽉 채울 때. 헤더만 자체 여백을 갖는다 */
 .card.flush{padding:0;gap:0;overflow:hidden}
 .card.flush .card-head{padding:16px var(--card-pad)}

@@ -1051,8 +1051,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const meta = await page.evaluate(() => [...document.querySelectorAll("#ex-card-status .card-meta")].map((dl) => ({ ddX: [...new Set([...dl.querySelectorAll("dd")].map((d) => Math.round(d.getBoundingClientRect().left)))].length, dt: getComputedStyle(dl.querySelector("dt")).color, dd: getComputedStyle(dl.querySelector("dd")).color, ind: !!dl.closest(".card").querySelector(".card-head .indicator") })));
   ok("status card meta aligns values in one column under an indicator head", meta.length === 2 && meta.every((m) => m.ddX === 1 && m.dt !== m.dd && m.ind), JSON.stringify(meta));
   /* 빈 · 오류 — 카드 안 .empty 는 점선 · 면 없이, 오류에는 다시 시도 */
-  const empt = await page.evaluate(() => [...document.querySelectorAll("#ex-card-empty .card .empty")].map((e) => ({ border: getComputedStyle(e).borderTopStyle, bg: getComputedStyle(e).backgroundColor, head: !!e.closest(".card").querySelector(".card-head .title"), error: e.classList.contains("error"), retry: [...e.querySelectorAll("button")].some((b) => b.textContent.includes("다시 시도")) })));
-  ok("empty and error cards keep the head and drop the empty frame, error offers retry", empt.length === 2 && empt.every((e) => e.border === "none" && e.bg === "rgba(0, 0, 0, 0)" && e.head) && empt.some((e) => e.error && e.retry), JSON.stringify(empt));
+  const empt = await page.evaluate(() => [...document.querySelectorAll("#ex-card-empty .card .empty")].map((e) => ({ border: getComputedStyle(e).borderTopStyle, bg: getComputedStyle(e).backgroundColor, head: !!e.closest(".card").querySelector(".card-head .title"), error: e.classList.contains("error"), retry: [...e.querySelectorAll("button")].some((b) => b.textContent.includes("다시 시도")), icoBg: getComputedStyle(e.querySelector(".ico")).backgroundColor, svg: (() => { const r = e.querySelector(".ico svg").getBoundingClientRect(); return r.width + "x" + r.height; })() })));
+  ok("card head 'view all' buttons are text assistive", await page.evaluate(() => { const bs = [...document.querySelectorAll(".example-preview .card .card-head .btn.text")]; return bs.length === 3 && bs.every((b) => b.classList.contains("assistive")); }));
+  ok("empty and error cards keep the head, drop the empty frame and icon tile (icon 36), error offers retry", empt.length === 2 && empt.every((e) => e.border === "none" && e.bg === "rgba(0, 0, 0, 0)" && e.head && e.icoBg === "rgba(0, 0, 0, 0)" && e.svg === "36x36") && empt.some((e) => e.error && e.retry), JSON.stringify(empt));
   // Radio Button 회귀 — label.radio.card 가 .card 의 column·그림자를 받으면 점이 라벨 위로 간다
   await go("components/radio-button.html");
   const radioCard = await page.evaluate(() => {
@@ -1075,9 +1076,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const fl = await page.evaluate(() => {
     const c = document.querySelector(".card.flush");
     if (!c) return { 없음: true };
-    return { padding: getComputedStyle(c).padding, headPadding: getComputedStyle(c.querySelector(".card-head")).padding, inline: c.getAttribute("style") };
+    return { padding: getComputedStyle(c).padding, headPadding: getComputedStyle(c.querySelector(".card-head")).padding, inline: c.getAttribute("style"), viewAll: !!c.querySelector(".card-head .btn.text.assistive") };
   });
-  ok("flush card has no padding but its head does", fl.padding === "0px" && fl.headPadding === "16px 24px" && !fl.inline, JSON.stringify(fl));
+  ok("flush card has no padding but its head does, view-all is text assistive", fl.padding === "0px" && fl.headPadding === "16px 24px" && !fl.inline && fl.viewAll, JSON.stringify(fl));
   await go("components/card.html");
   // wrap 이 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿을 수 없다
   const footFit = async () => page.evaluate(() => {

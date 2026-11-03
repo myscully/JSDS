@@ -248,7 +248,7 @@ const PATTERNS = {
             <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="심각도 분포" data-label="1,054"></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div></div></div>
           </div>
           <div class="card flush">
-            <div class="card-head"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text">전체 보기 →</a></div>
+            <div class="card-head"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text assistive">전체 보기 →</a></div>
             <table class="tbl"><thead><tr><th>시간</th><th>이벤트</th><th>대상</th><th>상태</th></tr></thead><tbody>
               <tr><td>09:41:12</td><td>랜섬웨어 행위 탐지</td><td>PC-2041 · 김민준</td><td><span class="indicator danger">차단</span></td></tr>
               <tr><td>09:36:47</td><td>알려진 악성코드 차단</td><td>PC-0932 · 박지훈</td><td><span class="indicator danger">차단</span></td></tr>

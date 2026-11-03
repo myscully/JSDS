@@ -45,7 +45,7 @@ export default function Example() {
       <Card flush>
         <CardHead>
           <CardTitle>최근 Critical 이벤트</CardTitle>
-          <Button variant="text" as="a" href="#" size="sm">전체 보기 →</Button>
+          <Button variant="text" color="assistive" as="a" href="#" size="sm">전체 보기 →</Button>
         </CardHead>
         <Table wrap={false}>
           <TableHead><TableRow><TableHeader>시간</TableHeader><TableHeader>이벤트</TableHeader><TableHeader>대상</TableHeader><TableHeader>상태</TableHeader></TableRow></TableHead>

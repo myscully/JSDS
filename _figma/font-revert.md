@@ -154,6 +154,9 @@
 >   Noto 로 쓰고 Body/2 에 다시 묶었다. Selection 아이콘은 scan · file-search · shield-check · database 로 바꿨다. **새 Noto 노드 없음.**
 >   제목은 바꾸지 못했다 — 모든 변형이 TEXT 속성 Title#326:128 하나를 공유해 한 변형의 글을 바꾸면 18개 제목과 속성 기본값이 함께 바뀐다(실험으로 확인한 뒤 "정보 유출 방지 정책" 으로 되돌리고 18개 글 상자를 다시 배치).
 >   문서 카드의 Card 인스턴스 13개는 새 인스턴스로 바꿨다(옛 글리프 · 덮어쓰기 없이 원본을 따르게) — Status 인스턴스 제목 "PC-2041" 만 덮어씀(Title/1)
+> - 2026-11-03 k31: 카드 헤더 '전체 보기' = 텍스트 assistive, 카드 안 빈 · 오류 아이콘 = 칸 없이 36(사람의 결정). Card 세트의 헤더 버튼 4개는 변형 속성(Color)만 바꿔 글자를 건드리지 않았다.
+>   4 Pattern 대시보드 '최근 Critical 이벤트' 헤더의 '전체 보기 →' 는 맨 글자(339:181, Caption/1)였다 — 지우고 Button(Text · Assistive · Small) 인스턴스 975:5036 을 넣었다.
+>   라벨은 makeFont() 의 Noto Medium 으로 바꾸고 Label/2 의 크기 · 행간(12/16)을 먼저 준 뒤 속성 Label 을 "전체 보기 →" 로 쓰고 Label/2 에 다시 묶었다 → Pretendard Medium + 스타일 연결, 높이 16, 스크린샷 확인. **새 Noto 노드 없음.**
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
