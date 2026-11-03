@@ -258,3 +258,9 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 
 타이포 Title/1 이 500 → **600** 이 됐습니다(카드 제목 · Chart Card 제목 · Accordion md 헤더와 같은 값). `.t-title-1` 을 쓰던 글자는 굵어집니다.
 새로 내보내는 컴포넌트 · 타입: `CardMeta` · `CardMetaProps` · `CardMetaItem`.
+
+2026-11-03 — `variant`(outline · flat)를 더했습니다. 기본은 outline 이라 바꿀 것은 없습니다.
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| 회색 바탕 위에서도 1px 보더 | `Card` · `Kpi` · `ChartCard` 의 `variant="flat"` — 보더 색만 지웁니다(두께 1px 는 남아 크기 같음). `background/neutral/secondary` 위에서만 쓰고 흰 바탕 위에서는 쓰지 않습니다 | `.card.flat` · `.kpi.flat` · `.chart-card.flat` |

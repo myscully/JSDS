@@ -1019,6 +1019,17 @@ const COMPONENTS = {
           <div class="card md" style="width:300px"><div class="card-head"><h3 class="title">md</h3><span class="tag ok">정상</span></div><p class="desc">padding 24 · gap 12 · 제목 16/24</p></div>
           <div class="card sm" style="width:280px"><div class="card-head"><h3 class="title">sm</h3><span class="tag ok sm">정상</span></div><p class="desc">padding 16 · gap 8 · 제목 14/20</p></div>
         </div>` },
+      { id: "flat", title: "Flat", desc: "주변에 배경색(<code>background/neutral/secondary</code>)이 있을 때는 보더 없이 면 색 차이로만 가릅니다(<code>.flat</code>). 그림자는 두지 않습니다. 흰 바탕(<code>background/neutral/primary</code>) 위에서는 카드가 바탕과 같은 색이라 쓰지 않습니다. 보더 자리(1px)는 남아 outline 과 크기가 같습니다.", html: `
+        <div style="background:var(--background-neutral-secondary);padding:24px;border-radius:var(--radius-lg);display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+          <div class="card flat" style="width:300px">
+            <div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div>
+            <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
+          </div>
+          <div class="card flat" style="width:300px">
+            <div class="card-head"><h3 class="title">PC-2041</h3><span class="indicator ok">온라인</span></div>
+            <dl class="card-meta"><dt>에이전트</dt><dd>6.2.1</dd><dt>그룹</dt><dd>개발팀</dd><dt>IP</dt><dd>10.20.4.41</dd></dl>
+          </div>
+        </div>` },
       { id: "empty", title: "Empty · Error", desc: "카드 틀과 헤더는 남기고 본문 자리만 바꿉니다. 빈 상태는 '데이터 없음' 문구, 오류는 negative 아이콘 · 문구와 '다시 시도' 버튼입니다. 카드가 이미 보더 · 면을 가지므로 안의 <code>.empty</code> 는 점선 · 면 없이, 아이콘도 칸 없이 36 으로 그려집니다.", html: `
         <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
           <div class="card" style="width:320px">
@@ -1044,6 +1055,7 @@ const COMPONENTS = {
       ["CardDesc / .desc", "element", "—", "Body/2 14 secondary"],
       ["CardMeta / dl.card-meta", "element", "—", "상태 카드의 키-값 행 — dt secondary · dd primary · 14/22, 키 열은 가장 긴 키에 맞춤. React <code>items={[{ label, value }]}</code> 또는 dt · dd 자식"],
       ["CardFoot / .card-foot", "element", "—", "액션 오른쪽 정렬 · 간격 12 · 강조 버튼은 하나"],
+      ["variant / .flat", "\"outline\" | \"flat\"", "\"outline\"", "outline 1px line/neutral/secondary 보더 / flat 보더 색 없음(두께 1px 는 남아 크기 같음) — 주변에 배경색 <code>background/neutral/secondary</code> 이 있을 때만. 흰 바탕 위 금지 · 그림자 없음. KPI · Chart Card 도 같은 옵션"],
       ["flush / .flush", "boolean", "false", "padding · gap 0 — 테두리 없는 표 · 목록을 카드 폭까지. 헤더만 자체 여백(md 16 · 24 / sm 12 · 16). 안의 Table 은 <code>wrap={false}</code> — <code>.tbl-wrap</code> · List 는 자체 테두리가 있어 두 겹"],
       ["clickable / .clickable", "boolean", "false", "카드 전체가 눌림 — 이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code>(React <code>as</code>). hover shadow/2. 안에 버튼 · 링크를 두지 않습니다"],
       ["selected / .on", "boolean", "false", "선택됨 — 안쪽 2px brand 링 + surface/brand/subtle, 앞 아이콘 brand. 포커스 외곽선과 함께 보입니다"],
@@ -1053,8 +1065,8 @@ const COMPONENTS = {
       ["compact / .compact", "boolean", "false", "<b>호환용</b> — sm 의 옛 이름. React 는 개발 모드에서 경고합니다"],
       ["bordered / .bordered", "boolean", "false", "<b>호환용 — 효과 없음.</b> 기본 카드가 이미 1px 보더입니다"],
     ],
-    spec: [["Size", "md padding 24 · gap 12 · sm padding 16 · gap 8 · flush 0 · 최소 폭 260"], ["Container", "radius/lg 8 · 1px line/neutral/secondary · surface/elevated/primary · 선택 2px brand 링 · Disabled surface/disable"], ["Label", "제목 md Title/1 16/24 SemiBold · sm Label/1 14/20 SemiBold · 설명 Body/2 14 secondary · 키 secondary · 값 primary"], ["Placement", "대시보드 그리드(minmax 260 · gap 20) · 상세 정보 블록 · 선택지 묶음 · 카드 안 카드 금지"], ["Motion", "선택 · 이동 카드 hover --motion-fast 로 그림자 없음 → shadow/2"]],
-    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, sm: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-secondary" }, status: {}, list: {}, selection: {}, empty: {}, error: {} }, states: ["default", "hover", "selected", "focused", "disabled", "loading"] },
+    spec: [["Size", "md padding 24 · gap 12 · sm padding 16 · gap 8 · flush 0 · 최소 폭 260"], ["Container", "radius/lg 8 · 1px line/neutral/secondary · surface/elevated/primary · flat 은 보더 색 없음(background/neutral/secondary 위 전용) · 선택 2px brand 링 · Disabled surface/disable"], ["Label", "제목 md Title/1 16/24 SemiBold · sm Label/1 14/20 SemiBold · 설명 Body/2 14 secondary · 키 secondary · 값 primary"], ["Placement", "대시보드 그리드(minmax 260 · gap 20) · 상세 정보 블록 · 선택지 묶음 · 카드 안 카드 금지"], ["Motion", "선택 · 이동 카드 hover --motion-fast 로 그림자 없음 → shadow/2"]],
+    figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, sm: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-secondary" }, status: {}, list: {}, selection: {}, empty: {}, error: {} }, variant: { outline: { stroke: "--line-neutral-secondary" }, flat: { stroke: "transparent", canvas: "--background-neutral-secondary" } }, states: ["default", "hover", "selected", "focused", "disabled", "loading"] },
   },
 
   /* ------------------------------------------------ Popup */
@@ -1487,10 +1499,24 @@ const COMPONENTS = {
         </div>` },
       { id: "spark", title: "Sparkline", desc: "카드 안 소형 추이. 강조 막대는 .hi. KPI 안에 두면 값 오른쪽에 놓이고 밑변을 숫자 기준선에 맞춥니다. 자리가 모자라면 값 아래로 내려갑니다.", html: `
         <div class="kpi" style="min-width:min(320px, 100%)"><span class="label">일별 탐지</span><span class="value">412</span><div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div></div>` },
+      { id: "flat", title: "Flat", desc: "주변에 배경색(<code>background/neutral/secondary</code>)이 있는 대시보드에서는 KPI · Chart Card 도 Card 와 같이 <code>.flat</code> 으로 보더를 지웁니다. 흰 바탕 위에서는 쓰지 않습니다.", html: `
+        <div style="background:var(--background-neutral-secondary);padding:24px;border-radius:var(--radius-lg);display:flex;flex-direction:column;gap:16px;width:100%;max-width:800px">
+          <div class="kpi-grid">
+            <div class="kpi critical flat"><span class="label">Critical 이벤트</span><span class="value">1,284</span><span class="delta up">${I("arrow-up",12)} 12% 전주 대비</span></div>
+            <div class="kpi flat"><span class="label">연결 에이전트</span><span class="value">1,247<small>/ 1,284</small></span><span class="delta">37대 오프라인</span></div>
+          </div>
+          <div class="chart-card flat">
+            <h3 class="chart-title">유형별 탐지 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 7일</span></h3>
+            <div class="chart">
+              <div class="row"><span class="lbl">랜섬웨어</span><div class="bar critical"><i style="width:82%"></i></div><span class="num">412</span></div>
+              <div class="row"><span class="lbl">악성코드</span><div class="bar high"><i style="width:61%"></i></div><span class="num">306</span></div>
+            </div>
+          </div>
+        </div>` },
     ],
-    props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label. 조각 사이 1.2% 를 면 색으로 비운다(이웃 조각 밝기 대비가 낮아 색상만으로 갈리지 않게)"], [".donut-row", "div", "—", "도넛 + 범례 한 줄. 도넛은 왼쪽, 범례는 오른쪽 끝(space-between) — 카드가 넓으면 둘 사이가 벌어집니다"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".chart-card", "container", "—", "차트를 담는 카드. Card 와 같은 Surface·radius/lg·1px 보더이고 padding 20 24 · gap 16 입니다. React <code>ChartCard</code>"], [".sparkline", "div", "—", "i height% 막대, .hi 강조. .kpi 의 자식이면 값 오른쪽(밑변 = 숫자 기준선), 좁으면 값 아래"]],
-    spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·1px 보더, 다만 padding 20 24 · gap 16"], ["Label", "라벨 12 Medium tertiary · 값 32 Bold(일반 숫자)"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열"]],
-    figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, kpiSparkline: { layout: "라벨 한 줄 · 값 + 그래프 한 줄(밑변 = 숫자 기준선, 좁으면 그래프가 값 아래)" }, bar: {}, donut: { gap: "1.2% (양쪽 0.6%) --surface-elevated-primary" }, sparkline: { bar: "--line-brand-primary", hi: "--foreground-brand-primary" } }, states: ["default"] },
+    props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], ["variant / .flat", "\"outline\" | \"flat\"", "\"outline\"", ".kpi · .chart-card 의 보더 색을 지웁니다(두께 1px 는 남아 크기 같음). 주변에 배경색 <code>background/neutral/secondary</code> 이 있을 때만 — Card 의 flat 과 같은 규칙. React <code>variant</code>"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경, data-label 중앙 값, role=img aria-label. 조각 사이 1.2% 를 면 색으로 비운다(이웃 조각 밝기 대비가 낮아 색상만으로 갈리지 않게)"], [".donut-row", "div", "—", "도넛 + 범례 한 줄. 도넛은 왼쪽, 범례는 오른쪽 끝(space-between) — 카드가 넓으면 둘 사이가 벌어집니다"], [".chart-legend", "div", "—", "i 색 + 라벨 + b 값"], [".chart-card", "container", "—", "차트를 담는 카드. Card 와 같은 Surface·radius/lg·1px 보더이고 padding 20 24 · gap 16 입니다. React <code>ChartCard</code>"], [".sparkline", "div", "—", "i height% 막대, .hi 강조. .kpi 의 자식이면 값 오른쪽(밑변 = 숫자 기준선), 좁으면 값 아래"]],
+    spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·1px 보더, 다만 padding 20 24 · gap 16 · flat 은 보더 색 없음(background/neutral/secondary 위 전용)"], ["Label", "라벨 12 Medium tertiary · 값 32 Bold(일반 숫자)"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열"]],
+    figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, kpiSparkline: { layout: "라벨 한 줄 · 값 + 그래프 한 줄(밑변 = 숫자 기준선, 좁으면 그래프가 값 아래)" }, bar: {}, donut: { gap: "1.2% (양쪽 0.6%) --surface-elevated-primary" }, sparkline: { bar: "--line-brand-primary", hi: "--foreground-brand-primary" } }, variant: { outline: { stroke: "--line-neutral-secondary" }, flat: { stroke: "transparent", canvas: "--background-neutral-secondary" } }, states: ["default"] },
   },
 };
 

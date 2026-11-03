@@ -23,11 +23,13 @@ export interface KpiProps extends HTMLAttributes<HTMLDivElement> {
   deltaDir?: "up" | "down";
   /** 값 색 */
   tone?: "critical" | "high";
+  /** outline(1px 보더, 기본) · flat(보더 색 없음 — 주변에 배경색 background/neutral/secondary 이 있을 때만. Card 와 같은 규칙) */
+  variant?: "outline" | "flat";
 }
 /** 대시보드 수치 카드 */
-export const Kpi = forwardRef<HTMLDivElement, KpiProps>(function Kpi({ label, value, unit, delta, deltaDir, tone, className, children, ...rest }, ref) {
+export const Kpi = forwardRef<HTMLDivElement, KpiProps>(function Kpi({ label, value, unit, delta, deltaDir, tone, variant, className, children, ...rest }, ref) {
   return (
-    <div ref={ref} className={cx("kpi", tone, className)} {...rest}>
+    <div ref={ref} className={cx("kpi", tone, { flat: variant === "flat" }, className)} {...rest}>
       <span className="label">{label}</span>
       <span className="value">
         {value}
@@ -51,10 +53,12 @@ export interface ChartCardProps extends Omit<HTMLAttributes<HTMLDivElement>, "ti
   title: ReactNode;
   /** 제목 우측 보조 (기간 등) */
   extra?: ReactNode;
+  /** outline(1px 보더, 기본) · flat(보더 색 없음 — 주변에 배경색 background/neutral/secondary 이 있을 때만) */
+  variant?: "outline" | "flat";
 }
-export const ChartCard = forwardRef<HTMLDivElement, ChartCardProps>(function ChartCard({ title, extra, className, children, ...rest }, ref) {
+export const ChartCard = forwardRef<HTMLDivElement, ChartCardProps>(function ChartCard({ title, extra, variant, className, children, ...rest }, ref) {
   return (
-    <div ref={ref} className={cx("chart-card", className)} {...rest}>
+    <div ref={ref} className={cx("chart-card", { flat: variant === "flat" }, className)} {...rest}>
       <h3 className="chart-title">
         {title}
         {extra !== undefined && <span className="t-caption-1" style={{ color: "var(--foreground-neutral-tertiary)" }}>{extra}</span>}

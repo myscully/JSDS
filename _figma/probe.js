@@ -147,6 +147,7 @@ for (const p of figma.root.children) {
    덤프가 커지면 옮기다 틀리므로 정해 둔 세트만 짧게 읽는다. 기대값은 audit.mjs 가 저장소 CSS 에서 읽는다 */
 const SURVEY_SETS = ["Card", "Chart Card", "KPI", "Tab", "Tab Item", "Select Button", "Popup", "Button", "Accordion", "Accordion Group", "Tag", "Banner", "Menu Item",
   "Count", "Status Indicator", "Step", "Steps", "Navigation Item", "Navigation"];
+const FLAT_SETS = ["Card", "KPI", "Chart Card"];   // variant outline · flat 을 가진 세트(2026-11-03 k32 — 사람의 결정, components.data.js card · data-visual 의 figma.variant)
 const vname = (b) => { const v = b && byId.get(b.id); return v ? v.name.replace("color/semantic/", "") : null; };
 const paint = (arr) => {
   if (!arr || arr === figma.mixed) return "-";
@@ -242,6 +243,8 @@ for (const p of figma.root.children) {
         foot: foot ? foot.itemSpacing : null, actions: actions ? actions.itemSpacing : null,
         text: label ? paint(label.fills) : null, dot: dot ? paint(dot.fills) : null,
         count: count ? paint(count.fills) : null, countInstance: count ? count.type === "INSTANCE" : null, texts, ...parts, ...extra,
+        /* 크기(2026-11-03 k32) — variant outline · flat 을 가진 세 세트만. audit 이 Flat 과 같은 이름의 Outline 이 크기가 같은지 본다(사이트 .flat 은 보더 색만 지우고 1px 자리는 남긴다) */
+        ...(FLAT_SETS.includes(set.name) ? { w: +c.width.toFixed(2), h: +c.height.toFixed(2) } : {}),
       };
     });
   }
@@ -437,7 +440,7 @@ for (const p of figma.root.children) {
       components[set.name === "Breadcrumb" ? "breadcrumb" : "breadcrumbItem"] = out;
     }
     /* Card(2026-11-03 k29 — 사람의 정의 2026-11-02 ~ 11-03: 유형 기본 정보 · 상태 · 목록/표 · 선택 · 빈/오류 · Loading, 크기 md · sm, 선택 카드만 Hover · Selected · Disabled).
-       세트 축은 Type × Size × State(State 는 Type=Selection 에만 여럿). 변형마다 바깥 상자(폭 · 최소 폭 · 방향 · padding · gap 과 묶인 변수 · 면 · 테두리 · 모서리와 변수 ·
+       세트 축은 Type × Size × State(State 는 Type=Selection 에만 여럿) × Variant(2026-11-03 k32 — Outline · Flat, Flat 은 State=Default 만). 변형마다 바깥 상자(폭 · 높이(k32) · 최소 폭 · 방향 · padding · gap 과 묶인 변수 · 면 · 테두리 · 모서리와 변수 ·
        효과 스타일 · 안쪽 그림자[토큰, spread] · 바깥 그림자 수)와 부품을 이름으로 읽는다 — Head(padding · gap · 변수 · 오른쪽 Button 원본 이름 — k31), Title · Description(텍스트 스타일 · 크기 · 행간 · 서체 · 칠 · 글 상자 높이 h — k29 마무리에 더함),
        Icon(선택 카드 앞 아이콘 — 자리 · 크기 · 선 색), Meta(상태 카드 키-값 — 열 간격 · Keys/Values 행 간격 · 칠 · 스타일 · 행 수),
        Empty(빈 · 오류 본문 — padding · gap · 면 · 테두리, Face 면 · 크기 · 모서리 값과 변수, Icon 선 · 크기(k31), Message · Hint 글자, Action 안 Button 원본 이름),
@@ -453,7 +456,7 @@ for (const p of figma.root.children) {
       const out = { def: set.defaultVariant ? set.defaultVariant.name : null, id: set.id, k29: true, variants: [] };
       for (const v of set.children) {
         const fx = v.effects.filter((e) => e.visible !== false);
-        const e = Object.assign({ name: v.name, id: v.id, w: +v.width.toFixed(2), minW: v.minWidth, kids: v.children.map((k) => k.name).join(">") }, box(v), {
+        const e = Object.assign({ name: v.name, id: v.id, w: +v.width.toFixed(2), h: +v.height.toFixed(2), minW: v.minWidth, kids: v.children.map((k) => k.name).join(">") }, box(v), {
           fill: paint(v.fills), stroke: paint(v.strokes), sw: v.strokeWeight === figma.mixed ? "mixed" : v.strokeWeight, sa: v.strokeAlign,
           r: [v.topLeftRadius, v.topRightRadius, v.bottomRightRadius, v.bottomLeftRadius], rv: vb(v, "topLeftRadius"),
           fx: { style: v.effectStyleId ? esMap.get(v.effectStyleId) || "?" : null, inner: fx.filter((x) => x.type === "INNER_SHADOW").map((x) => [vname(x.boundVariables && x.boundVariables.color) || "raw", x.spread || 0]), drop: fx.filter((x) => x.type === "DROP_SHADOW").length } });
@@ -595,6 +598,20 @@ for (const p of figma.root.children) {
   }
 }
 for (const k of Object.keys(FOCUS_BOX)) if (!components.focus[k]) components.focus[k] = null;   // 세트가 없으면 null — audit 이 어긋남으로 낸다
+/* Flat 이 놓인 바탕(2026-11-03 k32) — 사람의 결정: flat 은 background/neutral/secondary 바탕 위에서만(흰 바탕 금지). 현재 페이지에서 Variant=Flat 인
+   Card · KPI · Chart Card 인스턴스마다 면이 보이는 가장 가까운 조상의 칠을 적는다. audit 이 figma.variant.flat.canvas 와 맞춘다 */
+components.flatCanvas = [];
+for (const p of figma.root.children) {
+  if (!isCurrent(p)) continue;
+  for (const n of p.findAllWithCriteria({ types: ["INSTANCE"] })) {
+    if (!FLAT_SETS.includes(n.name)) continue;
+    const vp = n.componentProperties && n.componentProperties.Variant;
+    if (!vp || vp.value !== "Flat") continue;
+    let a = n.parent, bg = null;
+    while (a && a.type !== "PAGE") { if ("fills" in a && Array.isArray(a.fills) && a.fills.some((f) => f.visible !== false && f.opacity !== 0)) { bg = paint(a.fills); break; } a = a.parent; }
+    components.flatCanvas.push({ page: p.name, id: n.id, set: n.name, bg });
+  }
+}
 components.effectColors = effectColors;
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
 

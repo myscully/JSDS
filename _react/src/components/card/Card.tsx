@@ -4,6 +4,8 @@ import { cx } from "../../utils/cx";
 export interface CardProps extends HTMLAttributes<HTMLElement> {
   /** @deprecated 효과 없음 — 기본 카드가 이미 1px 보더입니다. 호환을 위해서만 남깁니다 */
   bordered?: boolean;
+  /** outline(1px line/neutral/secondary 보더, 기본) · flat(보더 색 없음 — 주변에 배경색 background/neutral/secondary 이 있을 때만. 흰 바탕 금지) */
+  variant?: "outline" | "flat";
   /** md(padding 24 · gap 12 · 제목 Title/1 16/24 600, 기본) · sm(padding 16 · gap 8 · 제목 Label/1 14/20 600 — 밀도 높은 그리드) */
   size?: "sm" | "md";
   /** @deprecated sm 의 옛 이름 — size="sm" 을 쓰세요(MIGRATION.md). 값은 같습니다 */
@@ -26,7 +28,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   type?: "button" | "submit";
 }
 /** 관련 정보와 액션을 묶는 컨테이너. Surface + 1px line/neutral/secondary 보더, radius/lg */
-export const Card = forwardRef<HTMLElement, CardProps>(function Card({ bordered, size, compact, flush, clickable, selected, disabled, loading, as, className, children, ...rest }, ref) {
+export const Card = forwardRef<HTMLElement, CardProps>(function Card({ bordered, variant, size, compact, flush, clickable, selected, disabled, loading, as, className, children, ...rest }, ref) {
   const Comp: ElementType = as ?? "div";
   /* 2026-11-02 compact → size="sm". 같은 값이라 sm 클래스로 내고, 개발 모드에서 알린다 */
   if (process.env.NODE_ENV !== "production" && compact !== undefined) console.warn('[ds-react] Card compact prop 은 바뀌었습니다 — size="sm" (MIGRATION.md).');
@@ -43,7 +45,7 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card({ bordered,
     </>
   ) : children;
   return (
-    <Comp ref={ref} className={cx("card", sz, { bordered, flush, clickable, on: selected }, className)} aria-pressed={pressed} aria-busy={loading || undefined}
+    <Comp ref={ref} className={cx("card", sz, { flat: variant === "flat", bordered, flush, clickable, on: selected }, className)} aria-pressed={pressed} aria-busy={loading || undefined}
       disabled={isButton && disabled ? true : undefined} aria-disabled={!isButton && disabled ? true : undefined} {...rest}>
       {body}
     </Comp>

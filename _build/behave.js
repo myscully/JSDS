@@ -1111,6 +1111,31 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       높이: Math.round(c.getBoundingClientRect().height), 로드된높이: Math.round(loaded.getBoundingClientRect().height) };
   });
   ok("loading card is busy and shows skeletons", ld.busy === "true" && ld.스켈레톤 === 3 && ld.애니메이션 === "shimmer" && ld.높이 < ld.로드된높이, JSON.stringify(ld));
+  /* variant flat(사람의 결정 2026-11-03) — 보더 색만 지우고(두께 1px 는 남아 outline 과 크기 같음) 그림자는 두지 않는다.
+     면 색 차이(1.07 · 1.20)로만 갈리므로 background/neutral/secondary 위에서만 쓴다 — 흰 바탕 위에서는 카드가 사라진다 */
+  const flatCheck = (sel) => page.evaluate((sel) => {
+    const probe = document.createElement("i"); document.body.append(probe); probe.style.backgroundColor = "var(--background-neutral-secondary)";
+    const canvasWant = getComputedStyle(probe).backgroundColor; probe.remove();
+    const canvasOf = (el) => { for (let p = el.parentElement; p; p = p.parentElement) { const b = getComputedStyle(p).backgroundColor; if (b !== "rgba(0, 0, 0, 0)") return b; } return "none"; };
+    return [...document.querySelectorAll(sel)].map((c) => {
+      const cs = getComputedStyle(c), twin = c.cloneNode(true); twin.classList.remove("flat"); c.after(twin);
+      const a = c.getBoundingClientRect(), b = twin.getBoundingClientRect(), tc = getComputedStyle(twin).borderTopColor; twin.remove();
+      return { cls: c.className, color: cs.borderTopColor, width: cs.borderTopWidth, shadow: cs.boxShadow, outline: tc, same: Math.abs(a.width - b.width) < 0.5 && Math.abs(a.height - b.height) < 0.5, canvas: canvasOf(c) === canvasWant };
+    });
+  }, sel);
+  const flatCards = await flatCheck(".example-preview .card.flat");
+  ok("flat cards drop only the border colour and keep the outline size, no shadow", flatCards.length === 2 && flatCards.every((x) => x.color === "rgba(0, 0, 0, 0)" && x.width === "1px" && x.shadow === "none" && x.outline !== x.color && x.same), JSON.stringify(flatCards));
+  ok("flat cards sit only on background/neutral/secondary", flatCards.every((x) => x.canvas), JSON.stringify(flatCards.map((x) => x.canvas)));
+  const flatOn = await page.evaluate(() => { const c = document.querySelector("#ex-card-flat .card.flat").cloneNode(true); c.classList.add("on"); document.querySelector("#ex-card-flat .example-preview > div").append(c);
+    const cs = getComputedStyle(c), r = { shadow: cs.boxShadow, border: cs.borderTopColor }; c.remove(); return r; });
+  ok("flat card still shows the 2px selection ring", /0px 0px 0px 2px inset/.test(flatOn.shadow) && flatOn.border === "rgba(0, 0, 0, 0)", JSON.stringify(flatOn));
+  await go("components/data-visual.html");
+  const flatDv = await flatCheck(".example-preview :is(.kpi, .chart-card).flat");
+  ok("flat KPI and Chart Card drop only the border colour and keep the outline size", flatDv.length === 3 && flatDv.some((x) => x.cls.startsWith("chart-card")) && flatDv.every((x) => x.color === "rgba(0, 0, 0, 0)" && x.width === "1px" && x.shadow === "none" && x.outline !== x.color && x.same), JSON.stringify(flatDv));
+  ok("flat KPI and Chart Card sit only on background/neutral/secondary", flatDv.every((x) => x.canvas), JSON.stringify(flatDv.map((x) => x.canvas)));
+  /* 회색 바탕 래퍼가 내용 폭으로 줄면(미리보기는 가운데 정렬 flex) KPI 가 세로로 쌓이고 막대가 2px 로 눌렸다 — 래퍼는 폭을 채운다 */
+  const flatDvFit = await page.evaluate(() => ({ kpiRows: new Set([...document.querySelectorAll("#ex-data-visual-flat .kpi")].map((k) => Math.round(k.getBoundingClientRect().top))).size, bars: [...document.querySelectorAll("#ex-data-visual-flat .chart .bar")].map((b) => Math.round(b.getBoundingClientRect().width)) }));
+  ok("flat dashboard example keeps KPIs in one row and bars readable", flatDvFit.kpiRows === 1 && flatDvFit.bars.length === 2 && flatDvFit.bars.every((w) => w >= 200), JSON.stringify(flatDvFit));
 
   // Nav
   await go("components/navigation.html");

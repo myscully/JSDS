@@ -496,3 +496,9 @@ Patterns Overview	836:143	없음(새로 만듦)	Noto Sans KR Bold · 스타일 �
 3 Component	950:4431	없음(새 노드)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	차단 이벤트 없음	Card Type=Empty, Size=Small, State=Default(326:1522) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]
 3 Component	950:4440	없음(새 노드)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	데이터를 불러오지 못했습니다	Card Type=Error, Size=Medium, State=Default(326:1482) Empty > Message — 사이트 card empty 예제 .empty.error [→ Pretendard Bold 14 · 160% · 스타일 없음]
 3 Component	950:4460	없음(새 노드)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	데이터를 불러오지 못했습니다	Card Type=Error, Size=Small, State=Default(326:1542) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]
+# 2026-11-03 k32 — Card · KPI · Chart Card 에 Variant 축(Outline · Flat, 사람의 결정 2026-11-03). Flat 변형은 Outline 변형 복제라 k29 의 빈 · 오류 "Message" Noto 노드도 함께 복제됐다. 새로 Noto Sans KR 이 된 노드 4개(3 Component — 원본 컴포넌트). 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: k29 와 같다 — Pretendard Bold 14 · 행간 160% · 자간 0 · 스타일 연결 없음. Flat 변형은 Outline 과 별개 노드라 k29 의 950:4419 … 를 돌려도 따라오지 않으니 이 4개도 따로 돌린다. 문서 Flat 예제 인스턴스에는 빈 · 오류가 없다
+3 Component	981:4669	없음(복제 — 950:4419)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	차단 이벤트 없음	Card Variant=Flat, Type=Empty, Size=Medium, State=Default(981:4661) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]
+3 Component	981:4684	없음(복제 — 950:4431)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	차단 이벤트 없음	Card Variant=Flat, Type=Empty, Size=Small, State=Default(981:4676) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]
+3 Component	981:4698	없음(복제 — 950:4440)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	데이터를 불러오지 못했습니다	Card Variant=Flat, Type=Error, Size=Medium, State=Default(981:4691) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]
+3 Component	981:4717	없음(복제 — 950:4460)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	데이터를 불러오지 못했습니다	Card Variant=Flat, Type=Error, Size=Small, State=Default(981:4710) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]

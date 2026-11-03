@@ -29,6 +29,9 @@
  *           .card.flush · .card-head, 면 · 테두리 · 모서리 · 최소 폭 ↔ .card, 제목 크기 · 굵기 · 텍스트 스타일 ↔ .card .title · .card.sm .title · .t-*, 설명 · 키-값 ↔ .card .desc · .card-meta,
  *           선택 카드 아이콘 · Hover(shadow/2) · Selected(안쪽 링 · 면) · Disabled(면 · 제목 · 아이콘 · 설명 줄 tertiary) ↔ .card.clickable · .card.on 규칙, 빈 · 오류 본문 ↔ .card .empty · .empty,
  *           Loading ↔ loading 예제 Skeleton, 기본 변형 ↔ props size 기본값(2026-11-03 k29, cardExpect), 제목 행간 · 한 줄 글 상자 높이 ↔ CSS line-height(k29 마무리)
+ *   Variant(2026-11-03 k32 — 사람의 결정) Card · KPI · Chart Card 의 Variant 축(Outline · Flat) ↔ components.data.js card · data-visual 의 figma.variant 와 props variant 기본값,
+ *           Outline 보더 ↔ .card · .kpi · .chart-card border, Flat 보더 = 투명 · 두께는 Outline 과 같음 ↔ .card.flat · .kpi.flat · .chart-card.flat border-color(두께를 바꾸면 기대값을 읽다 멈춘다),
+ *           Flat 과 같은 이름의 Outline 크기 같음(±0.5) · 면 같음 · 그림자 없음. KPI · Chart Card 는 모든 변형이 두 Variant 로 짝, Card 의 Flat 은 State=Default 만(flatExpect · diffFlat)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7) · Button 의 variant · color · size 기본값(k16)
  *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
  *   선택 컨트롤 선택된 Radio · 선택 + 비활성 Radio 의 면 · 테두리 · 점, 비활성 Slider 의 라벨 · 값 글자 칠(2026-10-27 k11) — controlsExpect
@@ -691,6 +694,36 @@ function breadcrumbExpect() {
             .card .empty .ico svg 크기(아이콘 36), .card .empty.error .ico color, 헤더 오른쪽 버튼 = list · empty 예제 .card-head 안 .btn 클래스(k31 — '전체 보기' 텍스트 assistive · 오류 카드는 버튼 없음),
             '다시 시도' = empty 예제 .empty.error 안 .btn 의 클래스(sm · outline · assistive → Button Variant · Color · Size)
      Loading loading 예제 .skeleton 의 클래스 순서(title · text · text short → Skeleton Type=Title · Text · Text Short) */
+/* variant outline · flat(2026-11-03 k32 — 사람의 결정: 보더 색만 지우고 1px 자리는 남겨 크기가 같다 · 그림자 없음 · background/neutral/secondary 바탕 위 전용).
+   세트 → [components.data.js 키, 사이트 셀렉터]. 축 값은 figma.variant 의 키(outline · flat), 기본 값은 props 의 variant 행 기본값.
+   Outline 보더는 셀렉터의 border(두께 · 토큰 — figma.variant.outline.stroke 와 같아야 함), Flat 은 셀렉터.flat 의 border-color 가 figma.variant.flat.stroke(transparent)와 같아야 하고
+   .flat 이 border · border-width · box-shadow 를 바꾸면(크기 · 그림자가 달라짐) 기대값을 다시 정해야 하므로 멈춘다 */
+const FLAT_SETS = { "Card": ["card", ".card"], "KPI": ["data-visual", ".kpi"], "Chart Card": ["data-visual", ".chart-card"] };
+function flatExpect() {
+  try {
+    const box = { I: () => "", module: { exports: {} } };
+    vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
+    const cap = (x) => (x ? x[0].toUpperCase() + x.slice(1) : x);
+    const out = {};
+    for (const [set, [slug, sel]] of Object.entries(FLAT_SETS)) {
+      const c = box.module.exports[slug] || {}, fv = (c.figma || {}).variant;
+      if (!fv || !fv.outline || !fv.flat) throw new Error(`components.data.js ${slug}.figma.variant 에 outline · flat 이 없습니다`);
+      const row = (c.props || []).find((r) => /^variant\b/.test(String(r[0])));
+      if (!row) throw new Error(`components.data.js ${slug}.props 에 variant 행이 없습니다`);
+      const def = cap(String(row[2]).replace(/"/g, "").trim());
+      if (!Object.keys(fv).map(cap).includes(def)) throw new Error(`${slug} props variant 기본값 ${row[2]} 이 figma.variant 키에 없습니다`);
+      const base = cssRule(sel), fl = cssRule(sel + ".flat");
+      const bm = /([\d.]+)px solid (var\(--[a-z0-9-]+\))/.exec(base.border || "");
+      if (!bm) throw new Error(`${sel} border 를 읽지 못했습니다`);
+      if (figTok(bm[2]) !== figTok(`var(${fv.outline.stroke})`)) throw new Error(`${sel} border ${bm[2]} 와 ${slug}.figma.variant.outline.stroke ${fv.outline.stroke} 가 다릅니다`);
+      if (String(fl["border-color"] || "").trim() !== fv.flat.stroke) throw new Error(`${sel}.flat border-color ${fl["border-color"]} 와 ${slug}.figma.variant.flat.stroke ${fv.flat.stroke} 가 다릅니다`);
+      for (const k of ["border", "border-width", "box-shadow", "padding"]) if (fl[k] !== undefined) throw new Error(`${sel}.flat 이 ${k} 를 바꿉니다 — 크기 · 그림자가 Outline 과 같다는 기대(k32)를 다시 정해야 합니다`);
+      out[set] = { names: Object.keys(fv).map(cap), def, outline: figTok(bm[2]), sw: +bm[1], flat: fv.flat.stroke, canvas: figTok(`var(${fv.flat.canvas})`), css: sel + ".flat" };
+    }
+    return out;
+  } catch (e) { return { error: String(e.message || e) }; }
+}
+
 const CARD_SIZES = { Medium: "md", Small: "sm" };
 function cardExpect() {
   try {
@@ -705,7 +738,11 @@ function cardExpect() {
     const sizes = skeys.filter((k) => k !== "flush").map((k) => Object.keys(CARD_SIZES).find((z) => CARD_SIZES[z] === k));
     if (sizes.some((z) => !z)) throw new Error("card.figma.sizes 에 md · sm · flush 밖의 크기가 있습니다(" + skeys.join(" · ") + ")");
     const axis = states.filter((x) => x !== "focused" && x !== "loading").map(cap);
-    const table = []; for (const t of types) for (const z of sizes) for (const st of t === "Selection" ? axis : [axis[0]]) table.push(`Type=${t}, Size=${z}, State=${st}`);
+    /* Variant 축(2026-11-03 k32) — 기본 값(props variant 기본값 = Outline)은 전체 표, 그 밖(Flat)은 State=Default 만(상태 표현은 Outline 과 같아 되풀이하지 않는다 — k32 작업 지시) */
+    const fv = fg.variant || {}, vrow = (c.props || []).find((r) => /^variant\b/.test(String(r[0])));
+    if (!fv.outline || !fv.flat || !vrow) throw new Error("card.figma.variant(outline · flat) 이나 props 의 variant 행을 읽지 못했습니다");
+    const vdef = cap(String(vrow[2]).replace(/"/g, "").trim()), vnames = Object.keys(fv).map(cap);
+    const table = []; for (const vn of vnames) for (const t of types) for (const z of sizes) for (const st of t === "Selection" && vn === vdef ? axis : [axis[0]]) table.push(`Variant=${vn}, Type=${t}, Size=${z}, State=${st}`);
     const root = vars(block(read("_build/style.src.css"), ":root"));
     const pv = (v) => { const m = /^var\(--([a-z0-9-]+)\)$/.exec(String(v || "").trim()); return m ? px(root["--" + m[1]]) : px(v); };
     const pads = (v) => { const p = String(v || "").trim().split(/\s+/).map(pv); return [p[0], p[1] ?? p[0], p[2] ?? p[0], p[3] ?? p[1] ?? p[0]]; };
@@ -747,7 +784,7 @@ function cardExpect() {
     if (lh.length !== 1 || eh.length !== 2) throw new Error(`list · empty 예제의 .card-head 수가 ${lh.length} · ${eh.length} 입니다(기대 1 · 2) — 헤더 버튼 기대를 다시 정해야 합니다`);
     const headBtn = { List: lh[0], Empty: eh[0], Error: eh[1] };
     const want = {
-      types, sizes, axis, table, size, flush, headPad, headGap: px(cssRule(".card .card-head").gap), headBtn,
+      types, sizes, axis, table, vnames, vdef, size, flush, headPad, headGap: px(cssRule(".card .card-head").gap), headBtn,
       face: figTok(base.background), stroke: figTok(bm[2]), sw: +bm[1], radius: { tok: "radius/" + rm[1], px: px(root["--radius-" + rm[1]]) }, minW: px(base["min-width"]),
       title, desc: { st: styleOf(px(d["font-size"]), null, parseInt(d["font-weight"], 10) || 400, "설명"), fill: figTok(d.color) },
       meta: { row: mg[0], col: mg[1] ?? mg[0], st: styleOf(px(mt["font-size"]), px(mt["line-height"]), 400, "키-값"), key: figTok(cssRule(".card .card-meta dt").color), val: figTok(cssRule(".card .card-meta dd").color) },
@@ -770,7 +807,7 @@ function cardExpect() {
     const props = c.props || [], sv = (props.find((r) => /^size\b/.test(String(r[0]))) || [])[2];
     const dz = Object.keys(CARD_SIZES).find((z) => CARD_SIZES[z] === String(sv || "").replace(/"/g, "").trim());
     if (!dz) throw new Error("props 의 size 기본값을 읽지 못했습니다");
-    want.default = `Type=${types[0]}, Size=${dz}, State=${axis[0]}`;
+    want.default = `Variant=${vdef}, Type=${types[0]}, Size=${dz}, State=${axis[0]}`;
     return want;
   } catch (e) { return { error: String(e.message || e) }; }
 }
@@ -872,6 +909,8 @@ function componentsExpect() {
     breadcrumb: breadcrumbExpect(),
     /* Card 변형 표 · 크기 · 상자 · 제목 · 선택 상태 · 빈/오류 · Loading — 사이트 .card 규칙 · components.data.js(2026-11-03 k29) */
     card: cardExpect(),
+    /* Variant outline · flat — Card · KPI · Chart Card(2026-11-03 k32, flatExpect) */
+    flat: flatExpect(),
     /* Text Field 입력칸 높이 — .field input · .field.sm input · .field.lg input(2026-10-28 k16) */
     textFieldH: (() => { try { const h = { Small: px(cssRule(".field.sm input").height), Medium: px(cssRule(".field input").height), Large: px(cssRule(".field.lg input").height) }; return Object.values(h).every((x) => x > 0) ? h : { error: "높이를 읽지 못했습니다 " + JSON.stringify(h) }; } catch (e) { return { error: String(e.message || e) }; } })(),
     /* 선택된 Radio · 비활성 Slider 글자의 칠 — 사이트 CSS (2026-10-27 k11) */
@@ -921,7 +960,7 @@ function diffComponents(c, want, bad, notes) {
   for (const [set, w] of Object.entries(want.surfaces)) {
     for (const v of sets[set] || []) {
       if (!/Hover/.test(v.name) && w.shadow === false && v.shadow > 0) bad.push(`${set} 그림자 남음 — ${v.name} (${v.id})`);
-      if (!/Selected/.test(v.name) && w.stroke && !(v.stroke.includes("$" + w.stroke) && !v.stroke.includes(w.stroke + "-opaque") && v.sw === 1))
+      if (!/Selected/.test(v.name) && !/(?:^|, )Variant=Flat(?:,|$)/.test(v.name) && w.stroke && !(v.stroke.includes("$" + w.stroke) && !v.stroke.includes(w.stroke + "-opaque") && v.sw === 1))
         bad.push(`${set} 보더 다름 — ${v.name}: Figma[${v.stroke} ${v.sw}px] 저장소[1px ${w.stroke}] (${v.id})`);
       if (set === "Card" && v.foot !== null && v.foot !== want.gap.cardFoot) bad.push(`Card Foot 간격 ${v.foot} ≠ ${want.gap.cardFoot} — ${v.name} (${v.id})`);
     }
@@ -1692,6 +1731,39 @@ function expect_() {
   };
 }
 
+/* Variant outline · flat(2026-11-03 k32) — 규칙은 flatExpect 머리 주석. probe 의 components.sets(이름 · 테두리 · 두께 · 그림자 · 면 · 크기)로 Card · KPI · Chart Card 를 본다.
+   Card 의 변형 표(어느 Type × Size 에 Flat 이 있어야 하나)는 diffCard 가, 여기서는 세 세트 공통 — 축 값 · 기본 변형 · Flat 의 보더 · 크기 · 면 · 그림자 · (KPI · Chart Card) 짝 빠짐 */
+function diffFlat(c, wf, bad, notes) {
+  if (!c || !c.sets) return;
+  if (!wf || wf.error) { bad.push(`Variant(outline · flat) 기대값을 저장소에서 읽지 못했습니다 — ${wf ? wf.error : "없음"}`); return; }
+  const ax = (name) => Object.fromEntries(String(name).split(", ").map((kv) => kv.split("=")).filter((x) => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
+  const rest = (o) => Object.keys(o).filter((k) => k !== "Variant").sort().map((k) => k + "=" + o[k]).join(", ");
+  for (const [set, w] of Object.entries(wf)) {
+    const vs = c.sets[set]; if (!vs) continue;   // 세트가 없으면 missingSets 가 낸다
+    const by = new Map(), noAxis = [], odd = [];
+    for (const v of vs) { const o = ax(v.name); if (!o.Variant) { noAxis.push(v); continue; } if (!w.names.includes(o.Variant)) odd.push(v); by.set(o.Variant + "|" + rest(o), v); }
+    if (noAxis.length) bad.push(`${set} 에 Variant 축이 없는 변형 ${noAxis.length}개 — ${noAxis.slice(0, 3).map((v) => v.name + "(" + v.id + ")").join(" · ")}${noAxis.length > 3 ? " …" : ""}(Variant = ${w.names.join(" · ")} — components.data.js figma.variant)`);
+    if (odd.length) bad.push(`${set} 에 저장소에 없는 Variant 값 — ${odd.slice(0, 3).map((v) => v.name + "(" + v.id + ")").join(" · ")}(${w.names.join(" · ")})`);
+    const d = (c.defaults || {})[set];
+    if (c.defaults && ax(d || "").Variant !== w.def) bad.push(`${set} 기본 변형 ${d} 의 Variant ≠ ${w.def} — props variant 기본값`);
+    for (const v of vs) {
+      const o = ax(v.name); if (!o.Variant || o.Variant === w.def) continue;
+      const at = `${set} ${v.name} (${v.id})`, tw = by.get(w.def + "|" + rest(o));
+      if (v.stroke !== w.flat || v.sw !== w.sw) bad.push(`${at} 보더 ${v.stroke} ${v.sw}px ≠ ${w.sw}px ${w.flat} — 사이트 ${w.css} border-color(두께는 남김)`);
+      if (v.shadow) bad.push(`${at} 그림자 ${v.shadow}개 — flat 은 그림자를 두지 않습니다(사람의 결정 2026-11-03)`);
+      if (!tw) { bad.push(`${at} 짝(${w.def}) 변형이 없습니다`); continue; }
+      if (v.fill !== tw.fill) bad.push(`${at} 면 ${v.fill} ≠ ${w.def} ${tw.fill} — flat 은 보더만 다릅니다`);
+      if (v.w === undefined || tw.w === undefined) bad.push(`${at} 크기를 덤프에 내지 않았습니다 — probe.js(k32)로 다시 덤프`);
+      else if (Math.abs(v.w - tw.w) > 0.5 || Math.abs(v.h - tw.h) > 0.5) bad.push(`${at} 크기 ${v.w}×${v.h} ≠ ${w.def} ${tw.w}×${tw.h} — flat 은 보더 자리(1px)를 남겨 크기가 같다`);
+    }
+    /* Flat 인스턴스가 놓인 바탕 — 면이 보이는 가장 가까운 조상의 칠이 figma.variant.flat.canvas 여야 한다(흰 바탕 금지 — 사람의 결정 2026-11-03) */
+    if (c.flatCanvas === undefined) { if (set === "Card") notes.push("덤프에 Flat 바탕 조사(components.flatCanvas)가 없습니다 — 2026-11-03 k32 전 probe.js 로 만든 덤프입니다"); }
+    else for (const f of c.flatCanvas.filter((x) => x.set === set)) if (f.bg !== "$" + w.canvas) bad.push(`${set} Flat 인스턴스 ${f.id}(${f.page}) 의 바탕 ${f.bg || "없음"} ≠ ${w.canvas} — flat 은 회색 바탕 위에서만(사람의 결정 2026-11-03)`);
+    /* KPI · Chart Card 는 상태 축이 없어 모든 변형이 두 Variant 로 짝이다. Card 의 Flat 범위(State=Default 만)는 diffCard 의 변형 표가 본다 */
+    if (set !== "Card") for (const v of vs) { const o = ax(v.name); if (o.Variant !== w.def) continue; for (const n of w.names) if (n !== w.def && !by.has(n + "|" + rest(o))) bad.push(`${set} ${v.name} (${v.id}) 의 짝 Variant=${n} 변형이 없습니다`); }
+  }
+}
+
 /* Card(2026-11-03 k29) — 규칙은 cardExpect 머리 주석. probe 의 components.card(변형마다 상자 · 부품)와 덤프의 변수 값(묶인 변수의 px)으로 본다.
    기존 Card Foot 간격 · 보더 · 그림자 대조(diffComponents 의 surfaces)는 그대로 두고, 여기서는 k29 정의만 본다. 옛 덤프(k29 전 probe)에는 components.card 가 없다 — 그때는 NOTE */
 function diffCard(c, wc, variables, bad, notes) {
@@ -1703,14 +1775,14 @@ function diffCard(c, wc, variables, bad, notes) {
   const W = { Thin: 100, Light: 300, DemiLight: 350, Regular: 400, Medium: 500, SemiBold: 600, Bold: 700, Black: 900 };
   const varPx = {}; for (const col of Object.values(variables || {})) for (const [k, v] of Object.entries(col.values || {})) if (/^N/.test(String(v).split("|")[0])) varPx[k] = +String(v).split("|")[0].slice(1);
   const ax = (name) => Object.fromEntries(String(name).split(", ").map((kv) => kv.split("=")).filter((x) => x.length === 2).map(([k, v]) => [k.trim(), v.trim()]));
-  const key = (o) => `Type=${o.Type}, Size=${o.Size}, State=${o.State}`;
+  const key = (o) => `Variant=${o.Variant}, Type=${o.Type}, Size=${o.Size}, State=${o.State}`;   // Variant 축(k32) — 이름 안 순서와 상관없이 맞춘다
   const exp = new Set(wc.table), have = new Map(), dup = [];
-  for (const v of cd.variants) { const o = ax(v.name), k = key(o); if (Object.keys(o).length !== 3 || !exp.has(k)) continue; if (have.has(k)) dup.push(v.name + "(" + v.id + ")"); else have.set(k, v); }
-  const miss = wc.table.filter((k) => !have.has(k)), stray = cd.variants.filter((v) => { const o = ax(v.name); return Object.keys(o).length !== 3 || !exp.has(key(o)); });
+  for (const v of cd.variants) { const o = ax(v.name), k = key(o); if (Object.keys(o).length !== 4 || !exp.has(k)) continue; if (have.has(k)) dup.push(v.name + "(" + v.id + ")"); else have.set(k, v); }
+  const miss = wc.table.filter((k) => !have.has(k)), stray = cd.variants.filter((v) => { const o = ax(v.name); return Object.keys(o).length !== 4 || !exp.has(key(o)); });
   if (miss.length) bad.push(`Card 에 없는 변형 ${miss.length}개(기대 ${wc.table.length}) — ${miss.slice(0, 4).join(" · ")}${miss.length > 4 ? " …" : ""}(components.data.js card.figma — cardExpect 머리 주석)`);
-  if (stray.length) bad.push(`Card 에 표에 없는 변형 ${stray.length}개 — ${stray.slice(0, 4).map((v) => v.name + "(" + v.id + ")").join(" · ")}${stray.length > 4 ? " …" : ""}(Type = ${wc.types.join(" · ")} × Size = ${wc.sizes.join(" · ")}, State ${wc.axis.slice(1).join(" · ")} 는 Selection 에만)`);
+  if (stray.length) bad.push(`Card 에 표에 없는 변형 ${stray.length}개 — ${stray.slice(0, 4).map((v) => v.name + "(" + v.id + ")").join(" · ")}${stray.length > 4 ? " …" : ""}(Variant = ${wc.vnames.join(" · ")} × Type = ${wc.types.join(" · ")} × Size = ${wc.sizes.join(" · ")}, State ${wc.axis.slice(1).join(" · ")} 는 ${wc.vdef} Selection 에만)`);
   if (dup.length) bad.push(`Card 에 이름이 겹치는 변형 — ${dup.join(" · ")}`);
-  if (cd.def !== wc.default) bad.push(`Card 기본 변형 ${cd.def} ≠ ${wc.default} — props size 기본값`);
+  if (!cd.def || key(ax(cd.def)) !== key(ax(wc.default))) bad.push(`Card 기본 변형 ${cd.def} ≠ ${wc.default} — props variant · size 기본값`);
   const T = (x) => (x === "-" ? "-" : "$" + x);
   /* 묶인 변수 — 값마다 변수 이름이 있어야 하고 그 변수의 값이 기대 px 여야 한다 */
   const bound = (at, what, got, gotV, want) => {
@@ -1730,7 +1802,14 @@ function diffCard(c, wc, variables, bad, notes) {
     const o = ax(v.name), at = `Card ${v.name} (${v.id})`, list = o.Type === "List", sel = o.Type === "Selection";
     const wantFace = o.State === "Selected" ? wc.selected.face : o.State === "Disabled" ? wc.disabled.face : wc.face;
     if (v.fill !== T(wantFace)) bad.push(`${at} 면 ${v.fill} ≠ ${wantFace} — 사이트 ${o.State === "Selected" ? ".card.on" : o.State === "Disabled" ? ".card.clickable:disabled" : ".card"} background`);
-    if (v.stroke !== T(wc.stroke) || v.sw !== wc.sw) bad.push(`${at} 테두리 ${v.stroke} ${v.sw}px ≠ ${wc.sw}px ${wc.stroke} — 사이트 .card border(Selected 도 그대로)`);
+    if (o.Variant === wc.vdef) { if (v.stroke !== T(wc.stroke) || v.sw !== wc.sw) bad.push(`${at} 테두리 ${v.stroke} ${v.sw}px ≠ ${wc.sw}px ${wc.stroke} — 사이트 .card border(Selected 도 그대로)`); }
+    else {   // Flat(k32) — 보더 색만 투명, 두께 그대로, 크기 = 같은 이름의 Outline
+      if (v.stroke !== "transparent" || v.sw !== wc.sw) bad.push(`${at} 테두리 ${v.stroke} ${v.sw}px ≠ ${wc.sw}px transparent — 사이트 .card.flat border-color:transparent(두께는 남김)`);
+      const tw = have.get(key(Object.assign({}, o, { Variant: wc.vdef })));
+      if (!tw) bad.push(`${at} 짝(${wc.vdef}) 변형이 없어 크기를 대조하지 못했습니다`);
+      else if (v.h === undefined) bad.push(`${at} 높이를 덤프에 내지 않았습니다 — probe.js(k32)로 다시 덤프`);
+      else if (Math.abs(v.w - tw.w) > 0.5 || Math.abs(v.h - tw.h) > 0.5) bad.push(`${at} 크기 ${v.w}×${v.h} ≠ ${wc.vdef} ${tw.w}×${tw.h} — flat 은 보더 자리(1px)를 남겨 크기가 같다`);
+    }
     if (!v.r || v.r.some((x) => Math.abs(x - wc.radius.px) > 0.01) || v.rv !== wc.radius.tok) bad.push(`${at} 모서리 ${JSON.stringify(v.r)}(${v.rv || "값만"}) ≠ ${wc.radius.px}(${wc.radius.tok})`);
     if (v.minW !== wc.minW) bad.push(`${at} 최소 폭 ${v.minW} ≠ ${wc.minW} — 사이트 .card min-width`);
     if (v.lm !== "VERTICAL") bad.push(`${at} 세로 자동 배치가 아님(${v.lm}) — 사이트 flex column`);
@@ -1920,6 +1999,7 @@ function diff(dumpPath, site) {
   } else notes.push("덤프에 게시 숨김 조사가 없습니다 — 2026-10-27 k13 전 probe.js 로 만든 덤프입니다");
   diffComponents(got.components, want.components, bad, notes);
   diffCard(got.components, want.components.card, got.variables, bad, notes);
+  diffFlat(got.components, want.components.flat, bad, notes);
 
   return { bad, notes, counts: want.counts };
 }

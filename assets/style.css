@@ -1090,6 +1090,10 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .card.on>svg{color:var(--foreground-brand-primary)}
 .card.clickable.on:not(:disabled,[aria-disabled="true"]):hover{box-shadow:inset 0 0 0 2px var(--surface-brand-primary),var(--shadow-2)}
 .card.bordered.on{box-shadow:inset 0 0 0 2px var(--surface-brand-primary)}   /* 호환용 — 이제 .card.on 과 같다 */
+/* variant flat — 주변에 배경색이 있을 때 보더 없이 면 색 차이로만 가른다(사람의 결정 2026-11-03). 그림자는 두지 않는다.
+   background/neutral/secondary 위에서만 쓴다 — 카드 면과의 대비가 라이트 1.07 · 다크 1.20 이고, 흰 바탕(primary) 위에서는 라이트 1.00 이라 카드가 사라진다.
+   보더 두께는 남기고 색만 지운다 — outline ↔ flat 을 바꿔도 크기와 내용 위치가 같다. .kpi · .chart-card 도 같다 */
+.card.flat{border-color:transparent}
 /* 고를 수 없는 선택 카드 — opacity 로 흐리지 않고 disable 토큰으로 칠한다(제목 · 아이콘). 이유는 설명 줄(.desc)에 적고 그 줄은 읽히게 둔다 */
 .card.clickable:is(:disabled,[aria-disabled="true"]){cursor:not-allowed;background:var(--surface-disable-primary);box-shadow:none}
 .card.clickable:is(:disabled,[aria-disabled="true"]) .title,.card.clickable:is(:disabled,[aria-disabled="true"])>svg{color:var(--foreground-disable-primary)}
@@ -1304,6 +1308,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .kpi .delta.down{color:var(--foreground-positive-primary)}
 .kpi.critical .value{color:var(--foreground-negative-strong)}
 .kpi.high .value{color:var(--foreground-cautionary-primary)}
+.kpi.flat{border-color:transparent}   /* variant flat — .card.flat 과 같은 결정 · 같은 조건(회색 바탕 전용) */
 /* sparkline 을 품은 KPI — 라벨 한 줄, 그 아래 값과 그래프를 한 줄에 두고 그래프 밑변을 숫자 기준선에 맞춘다.
    자리가 모자라면 그래프가 값 아래로 내려가 넘치지 않는다(KpiGrid 의 좁은 칸). 남는 높이는 아래에 둔다(이웃 카드가 더 커도 줄이 벌어지지 않게).
    마크업 순서(label · value · delta · sparkline)는 그대로라 React Kpi 의 children 도 같다. 2열 grid 는 nowrap 값을 줄이지 못해 좁은 칸에서 보더 밖으로 넘쳤다 */
@@ -1324,6 +1329,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .chart .num{text-align:right;color:var(--foreground-neutral-secondary)}
 .chart-card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:20px 24px;display:flex;flex-direction:column;gap:16px;width:100%;line-height:1.6}
 .chart-card .chart-title{font-size:16px;font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center}
+.chart-card.flat{border-color:transparent}   /* variant flat — .card.flat 과 같은 결정 · 같은 조건(회색 바탕 전용) */
 /* 조각 사이를 1.2%(양쪽 0.6%) 만큼 면 색으로 비운다 — 이웃 조각의 밝기 대비가 라이트 1.23~1.53 · 다크 1.18~2.97 이라
    틈이 없으면 색상으로만 갈리고, 색각 이상에서는 한 덩어리로 읽힌다. React Donut 도 같은 식으로 그린다(190 · 285 · 316 · 263 기준 값) */
 .donut{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--surface-elevated-primary) 0 0.6%,var(--foreground-negative-primary) 0.6% 17.4%,var(--surface-elevated-primary) 17.4% 18.6%,var(--foreground-cautionary-primary) 18.6% 44.5%,var(--surface-elevated-primary) 44.5% 45.7%,var(--foreground-accent-cyan) 45.7% 74.4%,var(--surface-elevated-primary) 74.4% 75.6%,var(--foreground-inactive-primary) 75.6% 99.4%,var(--surface-elevated-primary) 99.4% 100%);line-height:1.6}

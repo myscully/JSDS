@@ -157,6 +157,13 @@
 > - 2026-11-03 k31: 카드 헤더 '전체 보기' = 텍스트 assistive, 카드 안 빈 · 오류 아이콘 = 칸 없이 36(사람의 결정). Card 세트의 헤더 버튼 4개는 변형 속성(Color)만 바꿔 글자를 건드리지 않았다.
 >   4 Pattern 대시보드 '최근 Critical 이벤트' 헤더의 '전체 보기 →' 는 맨 글자(339:181, Caption/1)였다 — 지우고 Button(Text · Assistive · Small) 인스턴스 975:5036 을 넣었다.
 >   라벨은 makeFont() 의 Noto Medium 으로 바꾸고 Label/2 의 크기 · 행간(12/16)을 먼저 준 뒤 속성 Label 을 "전체 보기 →" 로 쓰고 Label/2 에 다시 묶었다 → Pretendard Medium + 스타일 연결, 높이 16, 스크린샷 확인. **새 Noto 노드 없음.**
+> - 2026-11-03 k32: Card · KPI · Chart Card 에 `Variant` 축(Outline · Flat — 사람의 결정 2026-11-03: flat 은 보더 색만 비우고 두께 1px 은 남김 · 그림자 없음 · background/neutral/secondary 위에서만).
+  Flat 변형 24개(Card 14 · KPI 7 · Chart Card 3)는 Outline 변형을 복제해 만들었다 — 복제가 원본의 Noto 노드도 가져와 **4개가 새로 Noto** 다(3 Component — k29 의 빈 · 오류 "Message" 복제):
+  981:4669 · 981:4684 "차단 이벤트 없음"(Variant=Flat, Type=Empty Medium 981:4661 · Small 981:4676), 981:4698 · 981:4717 "데이터를 불러오지 못했습니다"(Type=Error Medium 981:4691 · Small 981:4710).
+  **되돌릴 때 k29 와 같이 Pretendard Bold 14 · 행간 160% · 스타일 연결 없이** — Flat 은 Outline 과 별개 노드라 Outline 쪽(950:4419 …)을 돌려도 따라오지 않는다.
+  Spec 값 2개(Card 326:1807 · Data Visual 330:2549 — variant outline · flat 을 더함)는 makeFont() 의 Noto 로 쓰고 Body/2 의 크기 · 행간을 준 뒤 Body/2 에 다시 묶었다(Pretendard + 스타일 연결, 높이 44 = 두 줄).
+  데스크톱에서 열면 다시 배치된다 — 두 줄 그대로인지 본다. 문서 카드의 Flat 예제 인스턴스(981:4949 · 981:4998 · 981:5101 · 981:5122 · 981:5143)는 덮어쓰기 없이 원본을 따른다.
+  k29 표의 원본 변형 이름은 이제 앞에 `Variant=Outline, ` 이 붙는다(id 는 그대로). `font-revert-nodes.tsv` 맨 아래 "2026-11-03 k32" 절
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)

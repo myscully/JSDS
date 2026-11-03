@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { DataTable } from "./data-table/DataTable";
 import { Accordion, AccordionGroup } from "./accordion/Accordion";
 import { Card, CardGrid, CardMeta, CardTitle } from "./card/Card";
-import { Donut } from "./data-visual/DataVisual";
+import { ChartCard, Donut, Kpi } from "./data-visual/DataVisual";
 import { Steps } from "./indicator/Indicator";
 
 /* 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다 — 숨김 문구로 알린다 */
@@ -149,6 +149,16 @@ describe("Card", () => {
     expect(warn).toHaveBeenCalledTimes(1);
     expect(String(warn.mock.calls[0][0])).toContain('size="sm"');
     warn.mockRestore();
+  });
+
+  /* 2026-11-03 variant flat — 주변에 배경색이 있을 때 보더 색만 지운다. Card · KPI · Chart Card 가 같은 옵션이고 flat 일 때만 클래스를 낸다 */
+  it("variant flat 은 Card · Kpi · ChartCard 에 .flat, outline · 기본값은 클래스 없음", () => {
+    const { container } = render(<>
+      <Card variant="flat" size="sm">a</Card><Card variant="outline">b</Card>
+      <Kpi variant="flat" tone="critical" label="l" value="1" /><Kpi label="l" value="2" />
+      <ChartCard variant="flat" title="t" /><ChartCard variant="outline" title="t" />
+    </>);
+    expect([...container.children].map((el) => el.className)).toEqual(["card sm flat", "card", "kpi critical flat", "kpi", "chart-card flat", "chart-card"]);
   });
 
   /* 고를 수 없는 선택 카드 — button 이면 disabled(눌리지 않음), 그 밖은 aria-disabled */
