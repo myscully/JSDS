@@ -124,11 +124,15 @@ describe("Donut", () => {
     expect(d).toHaveAttribute("aria-label", "A 25%, B 75%");
     expect(d.style.background).toContain("conic-gradient");
   });
-  /* 조각 사이 틈 — 밝기 대비가 낮아 틈이 없으면 색상으로만 갈린다(사이트 .donut 과 같은 계산) */
-  it("조각마다 양쪽에 면 색 틈을 둔다", () => {
+  /* 조각 사이 틈 — 밝기 대비가 낮아 틈이 없으면 색상으로만 갈린다. 조각은 이어 붙이고 경계마다 2px 구분선 i(--a = 경계 각도)를 둔다(사이트 .donut 과 같은 골격) */
+  it("조각은 이어 붙이고 경계마다 구분선을 둔다", () => {
     const { container } = render(<Donut segments={[{ label: "A", value: 1, tone: "critical" }, { label: "B", value: 3, tone: "low" }]} />);
-    const bg = (container.firstElementChild as HTMLElement).getAttribute("style") ?? "";
-    expect(bg.match(/--surface-elevated-primary/g)?.length).toBe(4);
+    const d = container.firstElementChild as HTMLElement;
+    expect(d.getAttribute("style") ?? "").not.toContain("--surface-elevated-primary");
+    expect(d.style.background).toContain("0.00% 25.00%");
+    expect([...d.querySelectorAll("i")].map((i) => i.style.getPropertyValue("--a"))).toEqual(["0deg", "90deg"]);
+    const one = render(<Donut segments={[{ label: "A", value: 1 }]} />).container.firstElementChild as HTMLElement;
+    expect(one.querySelectorAll("i")).toHaveLength(0);   // 조각 하나는 경계가 없다
   });
 });
 

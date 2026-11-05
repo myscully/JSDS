@@ -180,6 +180,9 @@
 >   **새 Noto 노드 없음.** 330:2381 은 2026-10-23 j 절의 되돌릴 행이었다 — 그 행도 이제 되돌릴 것이 없다(행 끝에 표시). `font-weight-todo.tsv` 머리의 "330:2381 도 700" 메모도 k34 로 끝났다.
 >   audit 이 이제 도넛 가운데 글 셋(Chart Card Donut 2 · Chart Donut 1)의 스타일 · 크기 · 행간 · 가로 가운데를 `.donut::after`(= ds-chart centerPlugin)에서 읽은 타입 스케일 스타일과 맞춘다.
 >   데스크톱에서 열면 다시 배치된다 — 네 글 상자의 높이 24 · 한 줄 · 가운데를 한 번 본다
+> - 2026-11-05 k35: Data Visual 차트 모양(막대 각짐 · stroke 없음, 도넛 2px 면 색 경계, 범례 원, series-1 subtle/strong)을 Figma 에 반영하며 문서 카드 Spec 행 글 2개를 저장소(components.data)대로 바꿨다 —
+>   996:4676(Chart 행) · 996:4679(Color 행). makeFont() 의 Noto 로 쓰고 Body/2 크기 · 행간으로 배치한 뒤 `setTextStyleIdAsync(Body/2)` — 둘 다 **Pretendard Regular + Body/2 연결**, 높이 44(2줄) · 66(3줄).
+>   **새 Noto 노드 없음.** 데스크톱에서 열면 다시 배치된다 — 두 행의 줄 수 · 높이를 한 번 본다(줄바꿈이 바뀌면 Spec 프레임 330:2542 높이도 따라 바뀐다)
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)

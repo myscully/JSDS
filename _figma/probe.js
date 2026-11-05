@@ -130,6 +130,16 @@ for (const p of figma.root.children) {
     let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
     for (const k of c.children) {
       if (k.visible === false) continue;
+      /* 회전한 자식은 x · y 가 회전 원점이고 width · height 는 회전 전 크기다 — 네 꼭짓점의 실제 외곽으로 본다
+         (2026-11-05 k35: 도넛 경계선 2×20 을 162° 돌리니 x · y + 높이만 보고 "넘침 +17" 로 냈다. 실제로는 도넛 안) */
+      const m = k.relativeTransform, W = k.width, H = k.height;
+      if (Math.abs(m[0][1]) > 1e-6 || Math.abs(m[1][0]) > 1e-6) {
+        for (const [u, v] of [[0, 0], [W, 0], [0, H], [W, H]]) {
+          const x = m[0][2] + m[0][0] * u + m[0][1] * v, y = m[1][2] + m[1][0] * u + m[1][1] * v;
+          l = Math.min(l, x); t = Math.min(t, y); r = Math.max(r, x); b = Math.max(b, y);
+        }
+        continue;
+      }
       l = Math.min(l, k.x);
       t = Math.min(t, k.y);
       r = Math.max(r, k.x + k.width);
@@ -153,6 +163,16 @@ const TS_NAME = new Map((await figma.getLocalTextStylesAsync()).map((s) => [s.id
 const centerTx = (t) => (t ? { st: t.textStyleId === figma.mixed ? "mixed" : TS_NAME.get(t.textStyleId) || null, fs: t.fontSize === figma.mixed ? "mixed" : t.fontSize,
   lh: t.lineHeight === figma.mixed ? "mixed" : t.lineHeight.unit === "PIXELS" ? t.lineHeight.value : t.lineHeight.unit, font: t.fontName === figma.mixed ? "mixed" : t.fontName.family + " " + t.fontName.style,
   h: +t.height.toFixed(2), dx: +(t.x + t.width / 2 - t.parent.width / 2).toFixed(2) } : null);
+/* 정적 차트 도우미(2026-11-05 k35) — 정적 도넛의 경계 구분선 · 모서리 · 범례 견본.
+   donutDiv: 도넛 바로 아래 RECTANGLE 마다 [경계 각도(위 = 0°, 시계 방향 — CSS --a 와 같은 기준), 중심에서 상자 가운데까지 거리, 폭, 높이, 칠, 긴 변과 반지름 방향의 어긋남(도)].
+   maxR: 노드와 그 아래 모서리 중 가장 큰 값. swatches: 범례 항목마다 첫 RECTANGLE · ELLIPSE 를 "종류|폭x높이|r가장 작은 모서리" 로 세어 둔다(ELLIPSE 는 r = 폭/2) */
+const donutDiv = (donut) => { const C = donut.width / 2;
+  return donut.children.filter((k) => k.type === "RECTANGLE").map((k) => { const m = k.relativeTransform, cx = m[0][2] + m[0][0] * k.width / 2 + m[0][1] * k.height / 2, cy = m[1][2] + m[1][0] * k.width / 2 + m[1][1] * k.height / 2;
+    const ang = ((Math.atan2(cx - C, -(cy - C)) * 180) / Math.PI + 360) % 360, axis = (Math.atan2(-m[0][1], m[1][1]) * 180) / Math.PI, off = Math.abs((((axis - ang) % 180) + 270) % 180 - 90);
+    return [+ang.toFixed(2), +Math.hypot(cx - C, cy - C).toFixed(2), +k.width.toFixed(2), +k.height.toFixed(2), paint(k.fills), +off.toFixed(2)]; }).sort((a, b) => a[0] - b[0]); };
+const cr = (k) => (k.type === "ELLIPSE" ? k.width / 2 : "cornerRadius" in k ? (k.cornerRadius === figma.mixed ? Math.min(k.topLeftRadius, k.topRightRadius, k.bottomRightRadius, k.bottomLeftRadius) : k.cornerRadius) : 0);
+const maxR = (n) => Math.max(0, ...[n].concat(n.findAll ? n.findAll((k) => "cornerRadius" in k && k.type !== "TEXT") : []).map((k) => (k.cornerRadius === figma.mixed ? Math.max(k.topLeftRadius, k.topRightRadius, k.bottomRightRadius, k.bottomLeftRadius) : k.cornerRadius || 0)));
+const swatches = (lg) => { const t = {}; for (const it of lg.children) { const s = it.findOne && it.findOne((k) => k.type === "RECTANGLE" || k.type === "ELLIPSE"); if (!s) continue; const key = s.type + "|" + +s.width.toFixed(2) + "x" + +s.height.toFixed(2) + "|r" + +cr(s).toFixed(2); t[key] = (t[key] || 0) + 1; } return t; };
 const FLAT_SETS = ["Card", "KPI", "Chart Card"];   // variant outline · flat 을 가진 세트(2026-11-03 k32 — 사람의 결정, components.data.js card · data-visual 의 figma.variant)
 const vname = (b) => { const v = b && byId.get(b.id); return v ? v.name.replace("color/semantic/", "") : null; };
 const paint = (arr) => {
@@ -210,7 +230,13 @@ for (const p of figma.root.children) {
         parts.donutStrokes = donut.findAll((k) => k.type === "ELLIPSE").reduce((n, e) => n + (e.strokes || []).filter((x) => x.visible !== false).length, 0);
         const row = donut.parent; if (row && "primaryAxisAlignItems" in row) parts.row = row.primaryAxisAlignItems + "/" + (row.layoutSizingHorizontal || "-");
         const ct = (donut.children || []).find((k) => k.type === "TEXT"); if (ct) parts.donutCenter = centerTx(ct);   // 가운데 합계(k34)
+        parts.donutDividers = donutDiv(donut);   // 경계 구분선(k35)
       }
+      /* 정적 막대 · 스파크라인 모서리, 범례 견본 모양(2026-11-05 k35 — 사람의 결정: 정적 막대 · 트랙 · 스파크라인 각짐, .chart-legend i 원형 10) */
+      const bar0 = c.findAll((k) => k.name === "Bar" && k.type === "FRAME");
+      if (bar0.length) parts.barR = Math.max(...bar0.map(maxR));
+      if (spark) parts.sparkR = maxR(spark);
+      const lg = named("Legend"); if (lg) parts.legendSw = swatches(lg);
       const kid = (nm) => c.findOne((k) => k.name === nm && "itemSpacing" in k);
       const foot = kid("Foot"), actions = kid("Actions");
       const label = c.findOne((k) => k.type === "TEXT" && k.visible !== false);
@@ -645,13 +671,15 @@ for (const p of figma.root.children) {
       const under = (n, nm) => { for (let q = n.parent; q && q !== canvas; q = q.parent) if (q.name === nm) return true; return false; };
       e.lines = all.filter((k) => k.type === "VECTOR" && k.strokes.some((s) => s.visible !== false) && k.name !== "Caret").map((k) => ({ name: k.name, sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight, stroke: paint(k.strokes) }));
       e.areas = all.filter((k) => k.type === "VECTOR" && k.fills !== figma.mixed && k.fills.some((f) => f.visible !== false) && k.name !== "Caret").map((k) => ({ name: k.name, fill: paint(k.fills), opacity: +k.opacity.toFixed(2) }));
-      e.bars = all.filter((k) => k.type === "RECTANGLE" && under(k, "Series")).map((k) => ({ name: k.name, fill: paint(k.fills), r: [k.topLeftRadius, k.topRightRadius, k.bottomRightRadius, k.bottomLeftRadius], w: +k.width.toFixed(2), h: +k.height.toFixed(2) }));
+      e.bars = all.filter((k) => k.type === "RECTANGLE" && under(k, "Series")).map((k) => ({ name: k.name, fill: paint(k.fills), r: [k.topLeftRadius, k.topRightRadius, k.bottomRightRadius, k.bottomLeftRadius], w: +k.width.toFixed(2), h: +k.height.toFixed(2),
+        /* 2026-11-05 k35 — stroke 수 · 굵기(막대는 stroke 없음), 자리(누적 세그먼트 사이 틈을 audit 이 잰다) */
+        st: k.strokes.filter((x) => x.visible !== false && x.opacity !== 0).length, sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight, x: +k.x.toFixed(2), y: +k.y.toFixed(2) }));
       e.arcs = all.filter((k) => k.type === "ELLIPSE" && k.arcData && k.arcData.innerRadius > 0).map((k) => ({ name: k.name, fill: paint(k.fills), inner: +k.arcData.innerRadius.toFixed(3), deg: [deg(k.arcData.startingAngle), deg(k.arcData.endingAngle)], stroke: paint(k.strokes), sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight, d: +k.width.toFixed(2) }));
       e.grid = all.filter((k) => k.type === "LINE").map((k) => ({ name: k.name, stroke: paint(k.strokes), sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight }));
       const ticks = all.filter((k) => k.type === "TEXT" && /^Tick /.test(k.name)).map(tx);
       e.ticks = { n: ticks.length, kinds: [...new Set(ticks.map((t) => t.st + "|" + t.fs + "|" + t.fill))], labels: ticks.map((t) => t.chars) };
       const legend = canvas.children.find((k) => k.name === "Legend");
-      e.legend = legend ? { dir: legend.layoutMode, gap: legend.itemSpacing, x: +legend.x.toFixed(2), y: +legend.y.toFixed(2), items: legend.children.map((it) => { const sw = it.findOne((k) => k.type === "RECTANGLE"), t = it.findOne((k) => k.type === "TEXT"); return { text: t ? t.characters : null, swatch: sw ? paint(sw.fills) : null, swW: sw ? +sw.width.toFixed(2) : null, fill: t ? paint(t.fills) : null, st: t ? tsMap.get(t.textStyleId) || null : null }; }) } : null;
+      e.legend = legend ? { dir: legend.layoutMode, gap: legend.itemSpacing, x: +legend.x.toFixed(2), y: +legend.y.toFixed(2), items: legend.children.map((it) => { const sw = it.findOne((k) => k.type === "RECTANGLE" || k.type === "ELLIPSE"), t = it.findOne((k) => k.type === "TEXT"); return { text: t ? t.characters : null, swatch: sw ? paint(sw.fills) : null, swW: sw ? +sw.width.toFixed(2) : null, swH: sw ? +sw.height.toFixed(2) : null, swT: sw ? sw.type : null, swR: sw ? +cr(sw).toFixed(2) : null, fill: t ? paint(t.fills) : null, st: t ? tsMap.get(t.textStyleId) || null : null }; }) } : null;
       const hover = canvas.children.find((k) => k.name === "Hover");
       e.points = hover ? hover.children.filter((k) => k.type === "ELLIPSE").map((k) => ({ name: k.name, d: +k.width.toFixed(2), fill: paint(k.fills), stroke: paint(k.strokes), sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight })) : [];
       const tip = hover ? hover.children.find((k) => k.name === "Tooltip") : null;
@@ -663,6 +691,34 @@ for (const p of figma.root.children) {
     out.variants.push(e);
   }
   components.chart = out;
+}
+/* 컴포넌트 밖 정적 차트(2026-11-05 k35) — 패턴 예시(대시보드)처럼 인스턴스가 아니라 프레임으로 그린 도넛 · 막대 트랙.
+   도넛 = 호(innerRadius > 0 인 ELLIPSE)를 둘 이상 가진 프레임: 호 각도 · 칠, 호 사이 틈, 호 테두리 수, 경계 구분선(donutDiv), 같은 행(도넛의 부모)의 범례 견본.
+   트랙 = 높이 12 인 프레임 중 앞뒤 형제가 TEXT 인 것(.chart .row 의 .lbl + .bar + .num): 모서리(maxR). audit 이 CSS .donut · .donut i · .chart-legend i · .chart .bar 와 patterns.data.js 의 --a 와 맞춘다 */
+components.staticCharts = { donuts: [], tracks: [] };
+for (const p of figma.root.children) {
+  if (!isCurrent(p)) continue;
+  const inComp = (n) => { for (let q = n.parent; q && q.type !== "PAGE"; q = q.parent) if (q.type === "COMPONENT" || q.type === "COMPONENT_SET" || q.type === "INSTANCE") return true; return false; };
+  for (const f of p.findAllWithCriteria({ types: ["FRAME"] })) {
+    if (f.height === 12 && f.parent && f.parent.layoutMode === "HORIZONTAL") { const sib = f.parent.children, i = sib.indexOf(f); if (i > 0 && i < sib.length - 1 && sib[i - 1].type === "TEXT" && sib[i + 1].type === "TEXT" && !inComp(f)) components.staticCharts.tracks.push({ page: p.name, id: f.id, r: maxR(f) }); }
+    const arcs = f.children.filter((k) => k.type === "ELLIPSE" && k.arcData && k.arcData.innerRadius > 0);
+    if (arcs.length < 2 || inComp(f)) continue;
+    const a = arcs.map((e) => [e.arcData.startingAngle, e.arcData.endingAngle].map((x) => +((x * 180) / Math.PI).toFixed(2)).concat(paint(e.fills))).sort((x, y) => x[0] - y[0]);
+    const lgs = f.parent ? f.parent.children.filter((k) => k !== f && "children" in k) : [];
+    const sw = {}; for (const g of lgs) for (const [k2, n2] of Object.entries(swatches(g))) sw[k2] = (sw[k2] || 0) + n2;
+    components.staticCharts.donuts.push({ page: p.name, id: f.id, path: [f.parent && f.parent.parent && f.parent.parent.parent ? f.parent.parent.parent.name : null].join(""), d: +f.width.toFixed(2), arcs: a,
+      gaps: a.map((x, i) => +((i + 1 < a.length ? a[i + 1][0] : a[0][0] + 360) - x[1]).toFixed(2)), strokes: arcs.reduce((n, e) => n + e.strokes.filter((x) => x.visible !== false).length, 0), dividers: donutDiv(f), legendSw: sw });
+  }
+}
+/* 문서 카드의 KPI 예제(2026-11-05 k35) — "Card/<figma.frame>"(Data Visual) 안 List 마다 머리 글과 KPI 인스턴스의 Label 글. audit 이 components.data.js kpi 예제의 카드 수 · 라벨과 맞춘다 */
+components.kpiDoc = null;
+for (const p of figma.root.children) {
+  if (!isCurrent(p)) continue;
+  const card = p.findAllWithCriteria({ types: ["FRAME"] }).find((f) => f.name === "Card/Data Visual");
+  if (!card) continue;
+  components.kpiDoc = card.findAll((k) => k.name === "List" && k.type === "FRAME").map((l) => { const h = l.findOne((k) => k.name === "Heading"), ht = h && h.findOne((k) => k.type === "TEXT");
+    const kp = l.findAll((k) => k.type === "INSTANCE" && k.mainComponent && k.mainComponent.parent && k.mainComponent.parent.name === "KPI");
+    return { heading: ht ? ht.characters : null, kpi: kp.map((k) => { const t = k.findOne((x) => x.name === "Label" && x.type === "TEXT"); return t ? t.characters : null; }) }; }).filter((l) => l.kpi.length);
 }
 components.effectColors = effectColors;
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);

@@ -8,8 +8,8 @@
    - presets.*      : timeseries(선/영역 · 누적) · bar(세로/가로 · 그룹/누적) · donut · mixed(막대 + 선, y 축 하나) — spec → Chart.js config
    - mount          : Chart 생성 + 라이트/다크 전환(data-theme · prefers-color-scheme)과 제품색 주입 때 다시 칠한다
    - auto           : canvas[data-chart] 를 찾아 data-spec(JSON) 으로 mount
-   마크 규격(사람의 결정 2026-11-03): 선 2px · 점은 hover 때만 지름 8 · 막대 끝 4px 둥글림 · 세그먼트 사이 2px 면 색 틈 ·
-   격자는 y 축만 · 범례는 2계열 이상일 때 아래 · y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정, 7번째부터는 '기타'로 묶는다
+   마크 규격(사람의 결정 2026-11-03, 막대 · 범례는 2026-11-05 개정): 선 2px · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음 · 누적 세그먼트 사이 2px 투명 틈 ·
+   도넛 조각 사이 2px 면 색 경계 · 격자는 y 축만 · 범례는 2계열 이상일 때 아래, 원형 아이콘 · y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정, 7번째부터는 '기타'로 묶는다
    ========================================================= */
 (function (root) {
   "use strict";
@@ -24,6 +24,8 @@
   var TONES = {
     critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--foreground-accent-cyan",
     low: "--foreground-inactive-primary", ok: "--foreground-positive-primary", brand: "--foreground-brand-primary",
+    /* 계열 1의 톤(사람의 결정 2026-11-05) — 비교 기간(지난 주 · 전월)은 옅은 톤, 막대 위를 지나는 선은 진한 톤. 같은 지표의 다른 기간 · 다른 값으로 읽힌다 */
+    "series-1": "--chart-series-1", "series-1-subtle": "--chart-series-1-subtle", "series-1-strong": "--chart-series-1-strong",
   };
 
   /* ---------- 토큰 읽기 ----------
@@ -79,9 +81,10 @@
       interaction: { mode: "index", intersect: false },
       color: t.axis,
       plugins: {
+        /* 원형 점의 지름 — 범례는 boxHeight × √2(7 이면 10, 정적 .chart-legend i 와 같음), 툴팁은 min(boxWidth, boxHeight)(6) — Chart.js 4.6.1 이 둘을 다른 식으로 그린다 */
         /* 범례는 데이터셋(도넛은 조각) 순서 — Chart.js 기본은 그리기 order 라 혼합 차트에서 선(위에 그림)이 먼저 왔다 */
-        legend: { display: n > 1, position: "bottom", align: "start", labels: { color: t.axis, boxWidth: 10, boxHeight: 10, usePointStyle: true, pointStyle: "rectRounded", padding: 16, font: font(t), sort: function (a, b) { return ((a.datasetIndex || 0) - (b.datasetIndex || 0)) || ((a.index || 0) - (b.index || 0)); } } },
-        tooltip: { backgroundColor: t.tipBg, titleColor: t.tipFg, bodyColor: t.tipFg, padding: 10, cornerRadius: 6, boxWidth: 8, boxHeight: 8, boxPadding: 4, usePointStyle: true, titleFont: font(t, 600), bodyFont: font(t) },
+        legend: { display: n > 1, position: "bottom", align: "start", labels: { color: t.axis, boxWidth: 7, boxHeight: 7, usePointStyle: true, pointStyle: "circle", padding: 16, font: font(t), sort: function (a, b) { return ((a.datasetIndex || 0) - (b.datasetIndex || 0)) || ((a.index || 0) - (b.index || 0)); } } },
+        tooltip: { backgroundColor: t.tipBg, titleColor: t.tipFg, bodyColor: t.tipFg, padding: 10, cornerRadius: 6, boxWidth: 6, boxHeight: 6, boxPadding: 4, usePointStyle: true, pointStyle: "circle", titleFont: font(t, 600), bodyFont: font(t) },
       },
       scales: {
         x: { grid: { display: false }, border: { color: t.grid }, ticks: { color: t.axis, font: font(t), maxRotation: 0, autoSkip: true, autoSkipPadding: 12 } },
@@ -114,7 +117,7 @@
       } else if (ds.type === "line" || kind === "timeseries") {
         ds.borderColor = c; ds.backgroundColor = ds.fill ? alpha(c, 0.24) : c; ds.pointBackgroundColor = c; ds.pointBorderColor = t.surface;
       } else {
-        ds.backgroundColor = c; ds.borderColor = t.surface;
+        ds.backgroundColor = c; ds.borderColor = "transparent";   // 막대는 stroke 없음 — 누적 틈의 테두리도 투명
       }
     });
     meta.text = t.text;
@@ -134,10 +137,13 @@
     },
     /* 막대 — horizontal 로 가로, stacked 로 누적. 끝 4px 둥글림, 세그먼트 · 이웃 사이 2px 면 색 틈 */
     bar: function (spec) {
-      var stacked = !!spec.stacked, list = seriesOf(spec), last = list.length - 1;
+      var stacked = !!spec.stacked, list = seriesOf(spec);
       return { type: "bar", _ds: { kind: "bar" },
         data: { labels: spec.labels, datasets: list.map(function (s, i) {
-          return deepAssign(s, { borderWidth: 2, borderSkipped: stacked ? false : "start", borderRadius: !stacked || i === last ? 4 : 0, maxBarThickness: 32 });
+          /* 막대는 각지고 stroke 가 없다(사람의 결정 2026-11-05). 누적의 세그먼트 사이 2px 틈은 두 번째 세그먼트부터 시작 변에 준 '투명' 테두리다 —
+             Chart.js 의 inflateAmount 는 테두리가 있는 변에만 작동해 음수로 틈을 낼 수 없다. 첫 세그먼트 · 막대 끝 길이는 줄지 않는다 */
+          var gap = stacked && i > 0 ? (spec.horizontal ? { left: 2 } : { bottom: 2 }) : 0;
+          return deepAssign(s, { borderWidth: gap, borderColor: "transparent", borderSkipped: false, borderRadius: 0, inflateAmount: stacked ? 0 : "auto", maxBarThickness: 32 });
         }) },
         /* 범주 축은 라벨을 건너뛰지 않는다(autoSkip 은 시계열용) — 좁으면 글자가 돌아가는 대신 maxRotation 0 이라 겹칠 수 있으니 카드 폭을 준다 */
         options: { indexAxis: spec.horizontal ? "y" : "x", scales: { x: { stacked: stacked, ticks: spec.horizontal ? {} : { autoSkip: false } }, y: { stacked: stacked, ticks: spec.horizontal ? { autoSkip: false } : {} } } } };
@@ -152,7 +158,7 @@
     },
     /* 혼합 — bars + lines, y 축은 하나(두 값의 단위가 다르면 차트를 둘로 나눈다) */
     mixed: function (spec) {
-      var bars = (spec.bars || []).map(function (s, i) { return { label: s.label, data: s.data, tone: s.tone, type: "bar", borderWidth: 2, borderSkipped: "start", borderRadius: 4, maxBarThickness: 32, order: 2 + i }; });
+      var bars = (spec.bars || []).map(function (s, i) { return { label: s.label, data: s.data, tone: s.tone, type: "bar", borderWidth: 0, borderRadius: 0, maxBarThickness: 32, order: 2 + i }; });
       var lines = (spec.lines || []).map(function (s, i) { return { label: s.label, data: s.data, tone: s.tone, type: "line", borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 12, pointBorderWidth: 2, fill: false, order: i }; });
       return { type: "bar", _ds: { kind: "mixed" }, data: { labels: spec.labels, datasets: bars.concat(lines) }, options: {} };
     },

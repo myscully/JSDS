@@ -1,4 +1,4 @@
-import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import type { Tone } from "../../types";
@@ -98,20 +98,24 @@ export interface DonutProps extends HTMLAttributes<HTMLDivElement> {
   /** 중앙 값 */
   label?: string;
 }
-/** conic-gradient 도넛. aria-label 은 세그먼트 비율로 자동 생성 */
+/** conic-gradient 도넛 + 경계마다 2px 구분선. aria-label 은 세그먼트 비율로 자동 생성 */
 export const Donut = forwardRef<HTMLDivElement, DonutProps>(function Donut({ segments, label, className, style, ...rest }, ref) {
   const total = segments.reduce((s, x) => s + x.value, 0) || 1;
-  /* 조각 사이 1.2%(양쪽 0.6%)를 면 색으로 비운다 — 이웃 조각의 밝기 대비가 낮아(라이트 1.23~1.53) 틈이 없으면 색상으로만 갈린다.
-     사이트 .donut 의 기본 그라데이션도 이 식으로 만든 값이다 */
-  const GAP = 0.6, gap = "var(--surface-elevated-primary)";
+  /* 조각은 이어 붙이고, 경계는 CSS .donut i(폭 2px 면 색 구분선)를 경계 각도(--a, 위 = 0° 시계 방향)로 돌려 낸다 — 탐색형 도넛과 같은 폭이 일정한 틈.
+     이웃 조각의 밝기 대비가 낮아(라이트 1.23~1.53) 틈이 없으면 색상으로만 갈린다. 종전 conic 각도 띠는 바깥으로 넓어지는 쐐기였다(2026-11-05) */
   let acc = 0;
-  const stops = segments.flatMap((s) => {
-    const from = (acc / total) * 100; acc += s.value; const to = (acc / total) * 100; const g = Math.min(GAP, (to - from) / 4);
-    const c = s.color ?? toneVar(s.tone);
-    return [`${gap} ${from.toFixed(1)}% ${(from + g).toFixed(1)}%`, `${c} ${(from + g).toFixed(1)}% ${(to - g).toFixed(1)}%`, `${gap} ${(to - g).toFixed(1)}% ${to.toFixed(1)}%`];
-  });
+  const stops: string[] = [], cuts: string[] = [];
+  for (const s of segments) {
+    const from = (acc / total) * 100; acc += s.value; const to = (acc / total) * 100;
+    stops.push(`${s.color ?? toneVar(s.tone)} ${from.toFixed(2)}% ${to.toFixed(2)}%`);
+    cuts.push(`${+(from * 3.6).toFixed(1)}deg`);
+  }
   const aria = segments.map((s) => `${s.label} ${Math.round((s.value / total) * 100)}%`).join(", ");
-  return <div ref={ref} className={cx("donut", className)} role="img" aria-label={aria} data-label={label} style={{ background: `conic-gradient(${stops.join(",")})`, ...style }} {...rest} />;
+  return (
+    <div ref={ref} className={cx("donut", className)} role="img" aria-label={aria} data-label={label} style={{ background: `conic-gradient(${stops.join(",")})`, ...style }} {...rest}>
+      {segments.length > 1 && cuts.map((a) => <i key={a} style={{ "--a": a } as CSSProperties} />)}
+    </div>
+  );
 });
 /** 도넛 + 범례 한 줄 — 도넛은 왼쪽, 범례는 오른쪽 끝(space-between). 카드가 넓으면 둘 사이가 벌어진다 */
 export const DonutRow = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(function DonutRow({ className, ...rest }, ref) {

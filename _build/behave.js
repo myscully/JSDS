@@ -1150,7 +1150,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         colors: kind === "donut" ? ds[0].backgroundColor : ds.map((d) => d.type === "line" || kind === "timeseries" ? d.borderColor : d.backgroundColor),
         want: kind === "donut" ? ds[0]._dsTones.map((t, i) => t ? tok(DSChart.TONES[t]) : seriesTok(i)) : ds.map((d, i) => d.tone ? tok(DSChart.TONES[d.tone]) : seriesTok(i)),
         grid: kind === "donut" ? null : ch.options.scales.y.grid.color, gridTok: tok(DSChart.TOKENS.grid), axis: ch.options.plugins.legend.labels.color, axisTok: tok(DSChart.TOKENS.axis),
-        line: ds[0].borderWidth, pr: ds[0].pointHoverRadius, radius: ds[0].borderRadius };
+        line: ds[0].borderWidth, pr: ds[0].pointHoverRadius, radius: ds[0].borderRadius,
+        /* 막대는 각지고 보이는 stroke 가 없다 — 누적 틈의 테두리는 투명(2026-11-05) */
+        bars: ds.filter((d) => d.type === "bar" || (kind === "bar" && !d.type)).map((d) => [d.borderRadius, typeof d.borderWidth === "object" ? JSON.stringify(d.borderWidth) : d.borderWidth, d.borderColor]),
+        point: [ch.options.plugins.legend.labels.pointStyle, ch.options.plugins.tooltip.pointStyle] };
     });
   });
   const ch1 = await chartProbe();
@@ -1159,25 +1162,44 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   /* 범주 축은 라벨을 건너뛰지 않는다 — paint 가 기본 옵션으로 프리셋 옵션을 덮어 5개 중 3개만 보였다(Figma 대조에서 발견, 2026-11-04) */
   const barTicks = await page.evaluate(() => [...document.querySelectorAll('canvas[data-chart="bar"]')].map((c) => { const ch = c.__dsChart.chart, ax = ch.options.indexAxis === "y" ? "y" : "x"; return { labels: ch.data.labels.length, ticks: ch.scales[ax].ticks.length, autoSkip: ch.options.scales[ax].ticks.autoSkip }; }));
   ok("bar charts show every category label", barTicks.length === 2 && barTicks.every((b) => b.ticks === b.labels && b.autoSkip === false), JSON.stringify(barTicks));
-  ok("chart legend only with 2+ series, mixed keeps one y axis, line 2 · hover point 8 · bar end radius 4", ch1.every((c) => c.legend === (c.kind === "donut" ? true : c.n > 1)) && ch1.filter((c) => c.kind !== "donut").every((c) => c.yAxes === 1) && ch1.filter((c) => c.kind === "timeseries").every((c) => c.line === 2 && c.pr === 4) && ch1.filter((c) => c.kind === "bar").every((c) => c.radius === 4 || c.radius === 0), JSON.stringify(ch1.map((c) => [c.kind, c.n, c.legend, c.yAxes, c.line, c.pr, c.radius])));
+  ok("chart legend only with 2+ series, mixed keeps one y axis, line 2 · hover point 8 · bar radius 0", ch1.every((c) => c.legend === (c.kind === "donut" ? true : c.n > 1)) && ch1.filter((c) => c.kind !== "donut").every((c) => c.yAxes === 1) && ch1.filter((c) => c.kind === "timeseries").every((c) => c.line === 2 && c.pr === 4) && ch1.filter((c) => c.kind === "bar").every((c) => c.radius === 0), JSON.stringify(ch1.map((c) => [c.kind, c.n, c.legend, c.yAxes, c.line, c.pr, c.radius])));
+  ok("chart bars are square with no visible stroke (bar · mixed), stacked gaps are transparent", ch1.filter((c) => c.bars.length).length === 3 && ch1.every((c) => c.bars.every(([r, w, col]) => r === 0 && (w === 0 || w === '{"left":2}' || w === '{"bottom":2}') && col === "transparent")), JSON.stringify(ch1.map((c) => [c.kind, c.bars])));
+  ok("chart legends and tooltips use circle markers", ch1.every((c) => c.point[0] === "circle" && c.point[1] === "circle"), JSON.stringify(ch1.map((c) => [c.kind, c.point])));
+  /* 비교 기간은 계열 1의 옅은 톤, 막대 위 선은 진한 톤(사람의 결정 2026-11-05) — tone 이 빠지면 계열 2(주황)로 칠해진다 */
+  const tones = await page.evaluate(() => { const tok = (n) => DSChart.resolve(document.body, n); const weeks = document.querySelectorAll('canvas[data-chart="bar"]')[0].__dsChart.chart.data.datasets, mixed = document.querySelector('canvas[data-chart="mixed"]').__dsChart.chart.data.datasets;
+    return { now: weeks[0].backgroundColor, prev: weeks[1].backgroundColor, line: mixed.find((d) => d.type === "line").borderColor, bar: mixed.find((d) => d.type === "bar").backgroundColor, s1: tok("--chart-series-1"), subtle: tok("--chart-series-1-subtle"), strong: tok("--chart-series-1-strong") }; });
+  ok("week comparison uses series 1 and its subtle tone, the mixed line its strong tone", tones.now === tones.s1 && tones.prev === tones.subtle && tones.bar === tones.s1 && tones.line === tones.strong && tones.subtle !== tones.s1 && tones.strong !== tones.s1, JSON.stringify(tones));
   await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(300);
   const ch2 = await chartProbe();
   ok("charts repaint on theme change with the dark token values", ch2.every((c) => JSON.stringify(c.colors) === JSON.stringify(c.want) && (c.grid === null || c.grid === c.gridTok)) && ch2.every((c, i) => JSON.stringify(c.colors) !== JSON.stringify(ch1[i].colors)), JSON.stringify(ch2.map((c, i) => [c.kind, ch1[i].colors[0], c.colors[0]])));
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(300);
-  /* 세그먼트 사이 2px 면 색 틈 — 누적 가로 막대의 첫 세그먼트 끝(x) 좌우 8px 를 막대 가운데 높이에서 읽어 면 색 픽셀이 있는지 센다 */
+  /* 세그먼트 사이 2px 투명 틈 — 누적 가로 막대의 첫 세그먼트 끝(x) 좌우 8px 를 막대 가운데 높이에서 읽어 비어 있는(알파 0) 픽셀을 센다.
+     종전에는 2px 면 색 stroke 가 사방을 둘러 틈이 약 4px 였다(2026-11-05, 1~2px 로 — 사람의 요청) */
   const gap = await page.evaluate(() => {
     const c = document.querySelectorAll('canvas[data-chart="bar"]')[1], ch = c.__dsChart.chart, b0 = ch.getDatasetMeta(0).data[0], dpr = c.width / c.getBoundingClientRect().width;
-    const surf = DSChart.resolve(c, "--surface-elevated-primary").match(/\d+/g).slice(0, 3).map(Number);
     const img = c.getContext("2d").getImageData(Math.round((b0.x - 4) * dpr), Math.round(b0.y * dpr), Math.round(8 * dpr), 1).data; let hit = 0;
-    for (let i = 0; i < img.length; i += 4) if (Math.abs(img[i] - surf[0]) <= 2 && Math.abs(img[i + 1] - surf[1]) <= 2 && Math.abs(img[i + 2] - surf[2]) <= 2) hit++;
-    return { hit, total: img.length / 4, horizontal: ch.options.indexAxis === "y", stacked: ch.options.scales.x.stacked };
+    for (let i = 3; i < img.length; i += 4) if (img[i] < 40) hit++;
+    return { css: +(hit / dpr).toFixed(1), dpr, horizontal: ch.options.indexAxis === "y", stacked: ch.options.scales.x.stacked };
   });
-  ok("stacked bar segments are separated by surface-coloured pixels", gap.horizontal && gap.stacked && gap.hit >= 2, JSON.stringify(gap));
+  ok("stacked bar segments are separated by a 1–3px transparent gap", gap.horizontal && gap.stacked && gap.css >= 1 && gap.css <= 3, JSON.stringify(gap));
   await go("patterns/dashboard.html");
   await page.waitForFunction(() => [...document.querySelectorAll("canvas[data-chart]")].every((c) => c.__dsChart && c.__dsChart.chart.ctx), null, { timeout: 5000 }).catch(() => {});
   const dash = await page.evaluate(() => ({ trend: !!(document.querySelector('.row-3 canvas[data-chart="timeseries"]') || {}).__dsChart, donut: document.querySelector(".row-3 .donut").getAttribute("aria-label"), script: !!document.querySelector('script[src$="assets/ds-chart.js"]') }));
   ok("dashboard pattern draws a timeseries trend and names donut shares", dash.trend && /%/.test(dash.donut) && dash.script, JSON.stringify(dash));
   await go("components/data-visual.html");
+  /* 정적 요약(2026-11-05) — 막대 · 트랙 · 스파크라인은 각지고, 범례 아이콘은 원형이며, 도넛 경계는 폭이 일정한 2px 구분선(i)이다.
+     구분선의 회전은 조각 경계 각도(위 = 0°, 시계 방향)와 같아야 한다 — 예제 값 190 · 285 · 316 · 263 에서 센다 */
+  const statics = await page.evaluate(() => {
+    const rad = (sel) => [...new Set([...document.querySelectorAll(sel)].map((e) => getComputedStyle(e).borderTopLeftRadius))];
+    const d = document.querySelector("#ex-data-visual-donut .donut"), ring = (d.getBoundingClientRect().width - parseFloat(getComputedStyle(d, "::after").width)) / 2;
+    const cuts = [...d.querySelectorAll("i")].map((i) => { const m = getComputedStyle(i).transform.match(/matrix\(([^,]+), ([^,]+)/); const deg = m ? (Math.atan2(+m[2], +m[1]) * 180 / Math.PI + 360) % 360 : 0; return { w: getComputedStyle(i).width, h: getComputedStyle(i).height, deg: +deg.toFixed(1) }; });
+    const vals = [190, 285, 316, 263], total = vals.reduce((a, b) => a + b, 0); let acc = 0; const want = vals.map((v) => { const a = +(acc / total * 360).toFixed(1); acc += v; return a; });
+    return { bars: rad(".example-preview .chart .bar, .example-preview .chart .bar i, .example-preview .sparkline i"), legend: rad(".example-preview .chart-legend i"), ring, cuts, want, kpis: document.querySelectorAll("#ex-data-visual-kpi .kpi").length };
+  });
+  ok("static bars, tracks and sparklines are square", statics.bars.length === 1 && statics.bars[0] === "0px", JSON.stringify(statics.bars));
+  ok("static legend markers are circles", statics.legend.length === 1 && statics.legend[0] === "50%", JSON.stringify(statics.legend));
+  ok("static donut boundaries are 2px straight separators spanning the ring at each slice edge", statics.cuts.length === 4 && statics.cuts.every((c, i) => c.w === "2px" && parseFloat(c.h) === statics.ring && Math.abs(c.deg - statics.want[i]) <= 0.2), JSON.stringify(statics));
+  ok("KPI example shows three cards", statics.kpis === 3, String(statics.kpis));
 
   // Nav
   await go("components/navigation.html");
@@ -1242,11 +1264,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const hi = bars.find((b) => b.classList.contains("hi")), lo = bars.find((b) => !b.classList.contains("hi"));
     return { hi: getComputedStyle(hi).backgroundColor, lo: getComputedStyle(lo).backgroundColor }; });
   ok("sparkline highlight bar differs from the others", sparkTone.hi !== sparkTone.lo, JSON.stringify(sparkTone));
-  /* 도넛 조각 사이 틈 — 이웃 조각의 밝기 대비가 낮아 틈이 없으면 색상으로만 갈린다(React Donut 과 같은 계산) */
-  const donutGap = await page.evaluate(() => { const bg = getComputedStyle(document.querySelector("#ex-data-visual-donut .donut")).backgroundImage;
+  /* 도넛 조각 사이 틈 — 이웃 조각의 밝기 대비가 낮아 틈이 없으면 색상으로만 갈린다. 조각은 이어 붙이고(그라데이션 색 4종) 틈은 면 색 구분선(i)이 낸다(React Donut 과 같은 골격, 2026-11-05) */
+  const donutGap = await page.evaluate(() => { const el = document.querySelector("#ex-data-visual-donut .donut"), bg = getComputedStyle(el).backgroundImage;
     const d = document.createElement("div"); d.style.color = "var(--surface-elevated-primary)"; document.body.append(d); const gap = getComputedStyle(d).color; d.remove();
-    return { gapInGradient: bg.includes(gap), colors: new Set(bg.match(/(rgba?|color)\([^)]*\)/g) || []).size }; });   // 브라우저는 색마다 시작·끝을 두 번 적는다 — 종류를 센다
-  ok("donut keeps a surface-coloured gap between segments", donutGap.gapInGradient && donutGap.colors === 5, JSON.stringify(donutGap));
+    return { gapInGradient: bg.includes(gap), colors: new Set(bg.match(/(rgba?|color)\([^)]*\)/g) || []).size, seps: [...el.querySelectorAll("i")].map((i) => getComputedStyle(i).backgroundColor === gap) }; });   // 브라우저는 색마다 시작·끝을 두 번 적는다 — 종류를 센다
+  ok("donut keeps a surface-coloured gap between segments (separators, not gradient bands)", !donutGap.gapInGradient && donutGap.colors === 4 && donutGap.seps.length === 4 && donutGap.seps.every(Boolean), JSON.stringify(donutGap));
 
   // Steps — 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다
   await go("components/indicator.html");

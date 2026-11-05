@@ -3,7 +3,7 @@
 /** Chart.js 의 Chart 생성자(chart.js 또는 chart.js/auto). chart.js 는 optional peer 라 타입을 직접 참조하지 않는다 */
 export type ChartLike = new (canvas: HTMLCanvasElement, config: object) => { update(mode?: string): void; destroy(): void; config: object; data: object; options: object };
 
-export type Tone = "critical" | "high" | "medium" | "low" | "ok" | "brand";
+export type Tone = "critical" | "high" | "medium" | "low" | "ok" | "brand" | "series-1" | "series-1-subtle" | "series-1-strong";
 export interface Series { label: string; data: number[]; tone?: Tone }
 export interface DonutSlice { label: string; value: number; tone?: Tone }
 export interface TimeseriesSpec { labels: string[]; series: Series[]; /** 누적 영역(심각도 누적 추이) */ stacked?: boolean }

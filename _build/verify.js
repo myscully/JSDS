@@ -40,7 +40,8 @@ for (const sec of ["components", "patterns"]) {
   }
 }
 // 사이트 전체
-const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.name.startsWith("_") || e.name === "node_modules" ? [] : e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
+/* 점(.) 폴더는 사이트가 아니다 — .claude/worktrees 의 다른 작업 트리 복사본까지 훑어 그쪽 옛 마크업을 잡았다(2026-11-05) */
+const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.name.startsWith("_") || e.name.startsWith(".") || e.name === "node_modules" ? [] : e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
 for (const f of walk(OUT).filter(f => f.endsWith(".html"))) { const n = count(fs.readFileSync(f, "utf8"), /class="ph"/g); if (n) { phTotal += n; phPages.push(path.relative(OUT, f)); } }
 if (phPages.length) warns.push(`플레이스홀더 남은 페이지: ${phPages.join(", ")}`);
 for (const n of ICONS_MOD.ICON_NAMES) if (!fs.existsSync(path.join(OUT, "assets/icons/outline", n + ".svg"))) fails.push(`assets/icons/outline/${n}.svg 없음`);
@@ -159,6 +160,8 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
   const rel = path.relative(OUT, f), html = article(read(rel));
   for (const [sel, re] of [[".donut", /<div class="donut"[^>]*>/g], [".sev-band", /<div class="sev-band"[^>]*>/g]])
     for (const m of html.match(re) || []) if (!/aria-label=|aria-hidden="true"/.test(m)) fails.push(`${rel}: ${sel} 에 접근 이름도 aria-hidden 도 없다 — 색만으로 심각도를 전달한다`);
+  /* 정적 도넛의 조각 경계는 2px 구분선(i)이다 — 빠지면 조각이 틈 없이 붙어 보인다(2026-11-05, conic 각도 띠를 구분선으로 바꿈) */
+  for (const m of html.matchAll(/<div class="donut"[^>]*>([\s\S]*?)<\/div>/g)) if ((m[1].match(/<i style="--a:[\d.]+deg"><\/i>/g) || []).length < 2) fails.push(`${rel}: .donut 에 경계 구분선 <i style="--a:…deg"> 가 없다 — 조각 사이 2px 틈이 사라진다`);
   /* .sev-cell 은 여는 태그부터 닫는 </td>/</div> 까지에 글자가 있어야 한다 */
   for (const m of html.matchAll(/<(td|div)([^>]*class="[^"]*sev-cell[^"]*"[^>]*)>([\s\S]*?)<\/\1>/g))
     if (!/[가-힣A-Za-z0-9]/.test(m[3].replace(/<[^>]*>/g, ""))) fails.push(`${rel}: .sev-cell 에 라벨 글자가 없다 — 3px 막대 색만 남는다`);
@@ -223,7 +226,8 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
   const cut = css.indexOf("*{box-sizing");
   const declared = new Set([...css.slice(0, cut).matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
   /* --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left"];
+  /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a"];
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);

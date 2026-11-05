@@ -242,7 +242,7 @@ const PATTERNS = {
           </div>
           <div class="row-3">
             <div class="chart-card"><h3 class="chart-title">탐지 추이 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 14일</span></h3><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div>
-            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%" data-label="1,054"></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div></div></div>
+            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:270.2deg"></i></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div></div></div>
           </div>
           <div class="card flush">
             <div class="card-head"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text assistive">전체 보기 →</a></div>

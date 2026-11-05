@@ -231,6 +231,8 @@ const ADDITIONS = {
   "chart-series-4": "탐색형 차트 계열 4(violet)",
   "chart-series-5": "탐색형 차트 계열 5(lime — positive 의 green 과 다른 색상)",
   "chart-series-6": "탐색형 차트 계열 6(pink)",
+  "chart-series-1-subtle": "계열 1의 옅은 톤 — 비교 기간(지난 주 · 전월) 막대. 라이트 blue-80 · 다크 blue-30, 바탕 대비 3:1 미만은 contrast.pairs 예외(사람의 결정 2026-11-05)",
+  "chart-series-1-strong": "계열 1의 진한 톤 — 막대 위를 지나는 선(Mixed). 라이트 blue-30 · 다크 blue-80(사람의 결정 2026-11-05)",
   "chart-grid-primary": "차트 격자선 — line/neutral/tertiary 를 참조(recessive)",
   "chart-axis-text": "축 눈금 · 범례 글자 — foreground/neutral/tertiary 를 참조",
   "chart-tooltip-surface": "툴팁 면 — surface/neutral/inverse 를 참조(Toast 와 같은 반전 면)",

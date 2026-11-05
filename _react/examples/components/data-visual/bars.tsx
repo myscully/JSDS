@@ -2,12 +2,12 @@ import { Chart } from "chart.js/auto";
 import { ChartCard } from "@jiran/ds-react";
 import { ChartCanvas, presets } from "@jiran/ds-react/chart";
 
-/* 막대 — 그룹(범주 계열 색 1 · 2)과 가로 누적(심각도 톤) */
+/* 막대 — 그룹(이번 주 = 계열 1, 지난 주 = 계열 1의 옅은 톤)과 가로 누적(심각도 톤) */
 const WEEKS = {
   labels: ["랜섬웨어", "악성코드", "USB 위반", "정책 위반", "피싱"],
   series: [
-    { label: "이번 주", data: [412, 306, 221, 115, 88] },
-    { label: "지난 주", data: [349, 331, 198, 142, 97] },
+    { label: "이번 주", tone: "series-1" as const, data: [412, 306, 221, 115, 88] },
+    { label: "지난 주", tone: "series-1-subtle" as const, data: [349, 331, 198, 142, 97] },
   ],
 };
 const DEPTS = {

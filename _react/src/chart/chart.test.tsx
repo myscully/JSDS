@@ -24,12 +24,13 @@ describe("presets", () => {
     expect((c.options as { scales: { y: { stacked: boolean } } }).scales.y.stacked).toBe(true);
     expect(presets.timeseries({ labels: ["a"], series }).data.datasets.every((d) => d.fill === false)).toBe(true);
   });
-  it("bar 는 끝 둥글림 4 — 누적이면 마지막 데이터셋만, horizontal 은 indexAxis y", () => {
+  it("bar 는 각지고 stroke 없음 — 누적은 두 번째 세그먼트부터 시작 변에 2px 투명 틈, horizontal 은 indexAxis y", () => {
     const g = presets.bar({ labels: ["a"], series });
-    expect(g.type).toBe("bar"); expect(g.data.datasets.map((d) => d.borderRadius)).toEqual([4, 4]); expect((g.options as { indexAxis: string }).indexAxis).toBe("x");
+    expect(g.type).toBe("bar"); expect(g.data.datasets.map((d) => [d.borderRadius, d.borderWidth])).toEqual([[0, 0], [0, 0]]); expect((g.options as { indexAxis: string }).indexAxis).toBe("x");
     const st = presets.bar({ labels: ["a"], series, stacked: true, horizontal: true });
-    expect(st.data.datasets.map((d) => d.borderRadius)).toEqual([0, 4]); expect((st.options as { indexAxis: string }).indexAxis).toBe("y");
-    expect(st.data.datasets.every((d) => d.borderWidth === 2 && d.maxBarThickness === 32)).toBe(true);
+    expect(st.data.datasets.map((d) => d.borderWidth)).toEqual([0, { left: 2 }]); expect((st.options as { indexAxis: string }).indexAxis).toBe("y");
+    expect(presets.bar({ labels: ["a"], series, stacked: true }).data.datasets.map((d) => d.borderWidth)).toEqual([0, { bottom: 2 }]);
+    expect(st.data.datasets.every((d) => d.borderRadius === 0 && d.borderColor === "transparent" && d.inflateAmount === 0 && d.maxBarThickness === 32)).toBe(true);
   });
   it("donut 은 doughnut, 구멍 67%, 조각 톤과 center 를 메타에", () => {
     const d = presets.donut({ series: [{ label: "A", value: 1, tone: "critical" }, { label: "B", value: 2 }], center: "3", legend: "right" });
@@ -41,6 +42,7 @@ describe("presets", () => {
     const m = presets.mixed({ labels: ["a"], bars: [{ label: "탐지", data: [1] }], lines: [{ label: "차단", data: [1] }] });
     expect(m.type).toBe("bar"); expect(m.data.datasets.map((d) => d.type)).toEqual(["bar", "line"]);
     expect(m.data.datasets.map((d) => d.order)).toEqual([2, 0]);
+    expect([m.data.datasets[0].borderWidth, m.data.datasets[0].borderRadius]).toEqual([0, 0]);   // 막대 stroke · 둥글림 없음
     expect(Object.keys((m.options as { scales?: Record<string, unknown> }).scales ?? {}).filter((k) => k.startsWith("y"))).toHaveLength(0);   // y2 를 만들지 않는다
   });
 });
