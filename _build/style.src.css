@@ -186,7 +186,8 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 /* * 는 가상 요소를 고르지 않는다 — Accordion 의 ::details-content 높이 전환을 따로 꺼야 한다 */
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::details-content{transition:none!important;animation:none!important}}
+/* 가상 요소도 멈춘다 — 종전 *, ::details-content 만 잡아 로딩 스피너(.btn.loading::after) · Indicator 맥박 · 셰브론 · 스위치 손잡이가 계속 움직였다(2026-11-05 실측) */
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}}
 html{height:100%}
 body{min-height:100%}
 body{margin:0;background:var(--background-neutral-primary);color:var(--foreground-neutral-primary);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -366,14 +367,14 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--company-mark)}
 /* display:flex 인 이유 — 버튼은 UA 가 내용을 세로 가운데에 둔다. block 으로 두면 이름이 두 줄인 칸과
    한 줄인 칸의 높이 차(19px)가 위아래로 나뉘어 바가 9px 어긋난다(Surface - Accent 에서 그랬다) */
 .sem-row>.val-cell{flex:1;min-width:0;cursor:pointer;display:flex;flex-direction:column;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:left}
-.sem-row .bar{height:32px;background:var(--checker-bg,transparent);position:relative;border-radius:0;box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary);transition:height var(--motion-slow) ease,margin-top var(--motion-slow) ease}
+.sem-row .bar{height:32px;background:var(--checker-bg,transparent);position:relative;border-radius:0;box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary);transition:height var(--motion-slow),margin-top var(--motion-slow)}
 .sem-row .bar i{position:absolute;inset:0;display:block}
 .sem-row>.val-cell:hover .bar,.sem-row>.val-cell[aria-expanded="true"] .bar{height:40px;margin-top:-8px}
 .sem-row .bar.faint::after{content:"";position:absolute;inset:0;border:1px solid var(--line-neutral-secondary);border-radius:inherit;pointer-events:none}  /* 바탕과 구분되지 않는 색 — app.js 가 .faint 를 붙인다 */
 .sem-row .name{font-size:12px;font-weight:700;color:var(--foreground-neutral-primary);margin-top:8px;text-align:center}
 .checker{--checker-bg:repeating-conic-gradient(var(--line-neutral-secondary) 0 25%,transparent 0 50%) 0 0/12px 12px}
 .pal{margin:0 0 var(--space-16)}.pal h3{margin:0 0 8px;font-size:16px}
-.pal .scale{margin:0;align-items:end;grid-auto-rows:32px}.pal .scale .val-cell{height:32px;border-radius:0;transition:height var(--motion-slow) ease;box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary)}
+.pal .scale{margin:0;align-items:end;grid-auto-rows:32px}.pal .scale .val-cell{height:32px;border-radius:0;transition:height var(--motion-slow);box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary)}
 .pal .scale .val-cell:hover,.pal .scale .val-cell[aria-expanded="true"]{height:40px}   /* 바닥이 고정이라 위로 자라고 숫자 라벨은 버튼 하단 기준이라 제자리 */.pal .scale .val-cell i{font-size:10px;line-height:1;left:0;right:0;bottom:-18px;text-align:center;mix-blend-mode:normal;color:var(--foreground-neutral-primary);font-weight:700}
 .pal .scale{margin-bottom:22px;gap:0;row-gap:24px}
 .elev-types{display:grid;grid-template-columns:1fr 1fr;gap:var(--card-gap);margin:var(--space-4) 0 var(--space-10)}
@@ -448,7 +449,7 @@ table.type-table td .smp{display:block;color:var(--foreground-neutral-primary)}
 
 /* Overview card grid */
 .ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--card-gap);margin:var(--space-6) 0}
-.ov-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);overflow:hidden;background:var(--surface-elevated-primary);transition:border-color .15s,box-shadow .15s}
+.ov-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);overflow:hidden;background:var(--surface-elevated-primary);transition:border-color var(--motion-fast),box-shadow var(--motion-fast)}
 .ov-card:hover{border-color:var(--line-neutral-primary);box-shadow:var(--shadow-2)}
 .ov-card .thumb{height:200px;background:var(--background-neutral-secondary);display:grid;place-items:center;color:var(--foreground-neutral-tertiary);border-bottom:1px solid var(--line-neutral-secondary);overflow:hidden;padding:16px}
 .ov-card .thumb>svg{width:96px;height:64px}
@@ -461,7 +462,7 @@ table.type-table td .smp{display:block;color:var(--foreground-neutral-primary)}
 .hero .sub{color:var(--foreground-neutral-secondary);margin:0 auto}
 .hero svg.wave{position:absolute;left:0;right:0;bottom:-10px;width:100%;height:160px;z-index:-1;opacity:.9;color:var(--line-neutral-secondary)}
 .home-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--card-gap);padding:var(--space-12) var(--space-16) var(--space-20);max-width:1120px;margin:0 auto}
-.home-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);overflow:hidden;background:var(--surface-elevated-primary);transition:box-shadow .15s,border-color .15s}
+.home-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);overflow:hidden;background:var(--surface-elevated-primary);transition:box-shadow var(--motion-fast),border-color var(--motion-fast)}
 .home-card:hover{border-color:var(--line-neutral-primary);box-shadow:var(--shadow-2)}
 .home-card .art{height:220px;background:var(--background-neutral-secondary);padding:var(--space-8);display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
 .home-card .art b{font-size:28px;line-height:1.25;letter-spacing:-.02em;font-weight:800;text-wrap:balance}
@@ -482,6 +483,7 @@ table.type-table td .smp{display:block;color:var(--foreground-neutral-primary)}
 .dodont>div .body::before{display:block;font-size:16px;font-weight:800;letter-spacing:.04em;margin-bottom:10px}
 .dodont .do .body::before{content:"DO";color:var(--foreground-positive-primary)}.dodont .dont .body::before{content:"DON'T";color:var(--foreground-negative-strong)}
 .dodont p{font-size:14px;margin:0}
+.dodont .shot{padding:var(--space-6) var(--card-pad) 0;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 /* Colors › 브랜드 역할 맵 표: 역할 열은 내용 폭(정렬은 다른 표와 같은 좌측) */
 table.roles th:first-child,table.roles td:first-child{white-space:nowrap;width:240px}
 table{width:100%;border-collapse:collapse;font-size:14px;margin:var(--space-4) 0 var(--space-6)}
@@ -545,7 +547,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 
 /* Iconography */
 .icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:12px;margin:var(--space-4) 0 var(--space-6)}
-.icon-tile{appearance:none;font:inherit;aspect-ratio:1;display:grid;place-items:center;padding:0;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);cursor:pointer;transition:border-color .12s,background .12s}
+.icon-tile{appearance:none;font:inherit;aspect-ratio:1;display:grid;place-items:center;padding:0;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);cursor:pointer;transition:border-color var(--motion-fast),background var(--motion-fast)}
 .icon-tile:hover{border-color:var(--surface-brand-primary);background:var(--surface-brand-subtle)}
 .icon-tile.on{border-color:var(--surface-brand-primary);background:var(--surface-brand-subtle)}
 .icon-tile svg{width:24px;height:24px;display:block}
@@ -1345,7 +1347,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .chart-card .chart-title{font-size:16px;font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center}
 .chart-card.flat{border-color:transparent}   /* variant flat — .card.flat 과 같은 결정 · 같은 조건(회색 바탕 전용) */
 /* 탐색형 차트(Chart.js) 캔버스 자리 — 높이는 CSS 가 정하고 Chart.js 가 responsive 로 채운다. canvas 에 width · height 를 직접 주지 않는다 */
-.chart-canvas{position:relative;width:100%;height:240px}
+/* contain:inline-size — Chart.js 캔버스의 첫 폭(300)이 그리드 · 플렉스 열의 최소 폭으로 잡혀 좁은 화면에서 넘쳤다(대시보드 768 에서 24px). 캔버스가 열 폭을 정하지 않게 한다 */
+.chart-canvas{position:relative;width:100%;height:240px;contain:inline-size}
 .chart-canvas>canvas{display:block}
 /* 조각 사이를 1.2%(양쪽 0.6%) 만큼 면 색으로 비운다 — 이웃 조각의 밝기 대비가 라이트 1.23~1.53 · 다크 1.18~2.97 이라
    틈이 없으면 색상으로만 갈리고, 색각 이상에서는 한 덩어리로 읽힌다. React Donut 도 같은 식으로 그린다(190 · 285 · 316 · 263 기준 값) */

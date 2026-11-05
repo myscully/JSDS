@@ -73,6 +73,45 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   }
 }
 
+/* 모션 — transition 은 --motion-* 토큰만, 반복 애니메이션은 상태 표시 셋(LOOPS)만, 줄인 모션은 가상 요소까지 멈춤.
+   taste-skill 2.5.0(MIT) references/motion.md 의 "모든 수치는 한 곳" 규칙을 옮겼다(2026-11-05). 이 검사 전에는
+   토큰 뒤에 이징을 하나 더 붙인 선언(var(--motion-slow) ease — 이징 둘이라 선언 전체가 무효)이 두 곳 조용히 죽어 있었고,
+   reduced-motion 규칙이 ::before/::after 를 빼 로딩 스피너 · Indicator 맥박이 계속 돌았다 */
+{
+  const src = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "));
+  const lineOf = (i) => src.slice(0, i).split("\n").length;
+  const LOOPS = ["spin .8s linear infinite", "shimmer 1.4s infinite", "pulse 1.6s infinite"];
+  for (const m of src.matchAll(/(?<![-\w])(transition|animation):([^;}]*)/g)) {
+    const [, prop, val] = m; const v = val.trim(), at = `style.src.css:${lineOf(m.index)}`;
+    if (v === "none!important") continue;
+    if (prop === "animation") { if (!LOOPS.includes(v) && !/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
+    for (const part of v.split(/,(?![^(]*\))/).map((x) => x.trim())) {
+      if (!/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(part)) fails.push(`${at}: transition "${part}" — 속성 하나 + var(--motion-*) 하나만(숫자 · 이징을 덧붙이면 무효가 되거나 토큰을 벗어난다)`);
+    }
+  }
+  const rm = /@media \(prefers-reduced-motion:reduce\)\{[^@]*?\*,\*::before,\*::after,\*::details-content\{transition:none!important;animation:none!important\}/.test(src);
+  if (!rm) fails.push("style.src.css: prefers-reduced-motion 규칙이 *, ::before, ::after, ::details-content 를 모두 멈추지 않는다");
+}
+
+/* 문구 — 예제 미리보기의 버튼 · 링크 글자와 자리 표시 글. 규칙과 예외는 foundations/writing(Writing 페이지)과 같다.
+   taste-skill 2.5.0(MIT) references/copy.md 를 한국어 콘솔에 맞게 옮겼다(2026-11-05) */
+{
+  const BANNED_LABELS = ["자세히", "자세히 보기", "여기", "이곳", "클릭", "바로가기", "더 보기", "더보기", "Learn more", "Read more", "Click here", "More"];
+  const PLACEHOLDER = /lorem|ipsum|\bTODO\b|\[\s*\]|샘플/i;
+  const text = (h) => h.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  for (const sec of ["components", "patterns"]) for (const k of LIB.allPages(DATA.SITE, sec).map((p) => p.key).filter((k) => k !== "overview")) {
+    const f = `${sec}/${k}.html`; if (!fs.existsSync(path.join(OUT, f))) continue;
+    for (const pv of read(f).split('class="example-preview').slice(1).map((s) => s.slice(0, s.indexOf('class="example-code') >>> 0))) {
+      for (const m of pv.matchAll(/<(button|a)\b([^>]*)>([\s\S]*?)<\/\1>/g)) {
+        const t = text(m[3]); if (BANNED_LABELS.includes(t)) fails.push(`${f}: 모호한 ${m[1]} 라벨 "${t}" — 열리는 것 · 일어날 동작으로(Writing › Vague labels)`);
+        const al = (/aria-label="([^"]*)"/.exec(m[2]) || [])[1];
+        if (al && BANNED_LABELS.includes(al) && !(al === "더 보기" && /icon-only/.test(m[2]))) fails.push(`${f}: 모호한 접근 이름 "${al}" — "더 보기" 는 ⋯ 아이콘 버튼(액션 메뉴)만 허용`);
+      }
+      const ph = PLACEHOLDER.exec(text(pv)); if (ph) fails.push(`${f}: 예제에 자리 표시 글 "${ph[0]}"(Writing › Placeholders)`);
+    }
+  }
+}
+
 /* 주석 열림·닫힘이 짝인지 — 선언을 지울 때 여러 줄 주석의 한쪽만 남기기 쉽고,
    열림 없는 닫힘 표시는 파서가 '다음 세미콜론까지'를 통째로 버려서 바로 뒤의 선언 하나가 조용히 사라진다.
    3차에서 다크 --shadow-xs 가 이렇게 유실됐고, 다크 블록 두 벌에 같은 고아가 있었던 탓에
@@ -98,10 +137,11 @@ if (!fs.existsSync(path.join(OUT, "resources/react.html"))) fails.push("resource
 if (!fs.existsSync(path.join(OUT, "home/getting-started.html"))) fails.push("home/getting-started.html 없음");
 else { const gs = article(read("home/getting-started.html")); for (const m of gs.matchAll(/data-copy="([^"]+)"/g)) if (!new RegExp(`id="${m[1]}"`).test(gs)) fails.push(`home/getting-started.html: data-copy 대상 #${m[1]} 없음`); if (/href="#\//.test(gs)) fails.push('home/getting-started.html: 변환되지 않은 href="#/"'); if (!/data-doctab="designer"/.test(gs) || !/class="guide-steps"/.test(gs)) fails.push("home/getting-started.html: 대상별 탭·단계 목록 없음"); if (!/id="platforms"/.test(gs) || !/1024–1279/.test(gs)) fails.push("home/getting-started.html: 지원 환경 표 없음"); }
 if (!/href="home\/getting-started\.html"/.test(read("index.html"))) fails.push("index.html: Getting started 링크 없음");
-// Foundations: 참조 구성(Overview + Base material 5) 그대로, 옛 페이지 없음
+// Foundations: 참조 구성(Overview + Base material 5) + Writing, 옛 페이지 없음
 const fnd = fs.readdirSync(path.join(OUT, "foundations")).filter(f => f.endsWith(".html")).sort().join(",");
-if (fnd !== "colors.html,elevation.html,grid.html,icons.html,index.html,overview.html,typography.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);
-for (const f of ["colors", "elevation", "grid", "icons", "typography"]) { const b = article(read(`foundations/${f}.html`)); if (!/<h2 /.test(b)) fails.push(`foundations/${f}.html: 섹션(h2) 없음`); if (/href="#\//.test(b)) fails.push(`foundations/${f}.html: 변환되지 않은 href="#/"`); }
+/* writing 은 우리가 더한 페이지(2026-11-05, taste-skill copy 규칙을 옮김) */
+if (fnd !== "colors.html,elevation.html,grid.html,icons.html,index.html,overview.html,typography.html,writing.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);
+for (const f of ["colors", "elevation", "grid", "icons", "typography", "writing"]) { const b = article(read(`foundations/${f}.html`)); if (!/<h2 /.test(b)) fails.push(`foundations/${f}.html: 섹션(h2) 없음`); if (/href="#\//.test(b)) fails.push(`foundations/${f}.html: 변환되지 않은 href="#/"`); }
 if (!/data-doctab="atomic"/.test(read("foundations/colors.html"))) fails.push("foundations/colors.html: Semantic/Atomic 탭 없음");
 if (!fs.existsSync(path.join(OUT, "resources/design-token.html"))) fails.push("resources/design-token.html 없음");
 if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overview.html 이 생성됨(첫 화면은 루트 index.html 만)");

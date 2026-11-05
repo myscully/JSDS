@@ -1,5 +1,5 @@
 /* =========================================================
-   foundations.js — Foundations 페이지 (Overview · Base material: Colors · Elevation · Grid · Icons · Typography, Web Desktop 만)
+   foundations.js — Foundations 페이지 (Overview · Base material: Colors · Elevation · Grid · Icons · Typography · Writing, Web Desktop 만)
    render.js 가 PAGES 에 병합한다: Object.assign(PAGES, FOUNDATION_PAGES(helpers))
    ========================================================= */
 window.FOUNDATION_PAGES = function (H) {
@@ -42,8 +42,50 @@ window.FOUNDATION_PAGES = function (H) {
     "foundations/overview": () => `<h1>Foundations</h1><p class="lead">모든 디자인 요소의 기반이 되는 가장 원자적인 단위입니다. 컬러, 타이포그래피, 간격·그리드, 아이콘, 엘리베이션처럼 시각 언어의 최소 단위로 구성되며, 컴포넌트는 이 단위(토큰)만 참조합니다.</p>
 <div class="fnd-hero" aria-hidden="true"><div style="background:conic-gradient(var(--surface-brand-primary) 0 25%,var(--company-mark) 0 50%,var(--foreground-positive-primary) 0 75%,var(--cool-neutral-90) 0)"></div><div style="background:var(--surface-elevated-primary);box-shadow:var(--shadow-md);font-size:44px;letter-spacing:-.03em">Aa</div><div style="background:repeating-linear-gradient(90deg,var(--surface-brand-subtle) 0 12px,transparent 12px 22px);border:1px solid var(--line-neutral-tertiary)"></div><div style="background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-tertiary);color:var(--surface-brand-primary)">${I("shield", 48)}</div><div style="background:var(--surface-elevated-primary);box-shadow:var(--shadow-xl)"><i style="display:block;width:48px;height:48px;border-radius:var(--radius-lg);background:var(--surface-elevated-primary);box-shadow:var(--shadow-md)"></i></div></div>
 <h2 id="base">Base material</h2>
-<div class="base-list">${[["colors", "Colors", "색상의 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다."], ["typography", "Typography", "화면의 텍스트를 읽기 쉽고 아름답게 표현하도록 돕습니다."], ["grid", "Grid", "일관된 간격 체계를 사용하여 조화로운 비율과 정렬을 만들어냅니다."], ["icons", "Icons", "아이콘을 사용하여 인터페이스를 빠르게 이해하고 탐색할 수 있도록 돕습니다."], ["elevation", "Elevation", "컴포넌트 간의 명확한 깊이감과 시각적 계층을 만들어냅니다."]].map(([k, t, d]) => `<a href="#/foundations/${k}"><b>${t}${nb("foundations", k)}</b><span>${d}</span>${I("chevron-right", 18)}</a>`).join("")}</div>
+<div class="base-list">${[["colors", "Colors", "색상의 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다."], ["typography", "Typography", "화면의 텍스트를 읽기 쉽고 아름답게 표현하도록 돕습니다."], ["writing", "Writing", "버튼 · 제목 · 오류 문구를 운영자가 바로 알아듣게 쓰도록 돕습니다."], ["grid", "Grid", "일관된 간격 체계를 사용하여 조화로운 비율과 정렬을 만들어냅니다."], ["icons", "Icons", "아이콘을 사용하여 인터페이스를 빠르게 이해하고 탐색할 수 있도록 돕습니다."], ["elevation", "Elevation", "컴포넌트 간의 명확한 깊이감과 시각적 계층을 만들어냅니다."]].map(([k, t, d]) => `<a href="#/foundations/${k}"><b>${t}${nb("foundations", k)}</b><span>${d}</span>${I("chevron-right", 18)}</a>`).join("")}</div>
 <p>색을 어느 축에 쓰는지는 <a href="#/foundations/colors">Colors</a> 의 브랜드 역할 맵, 토큰 원본(CSS 변수 전체 · Radius · Motion · Accessibility)은 <a href="#/resources/design-token">Resources › Design Token</a> 에 있습니다.</p>`,
+
+    /* ================= Writing =================
+       taste-skill 2.5.0(MIT, github.com/Leonxlnx/taste-skill) references/copy.md 의 규칙을 한국어 보안 콘솔에 맞게 옮겼다(2026-11-05, 사람의 결정 — 스킬은 설치하지 않음).
+       마케팅 페이지용 규칙(히어로 · 화면당 단어 수 · 주소 표기 등)은 뺐다. 예시 문구는 모두 사이트 예제에 실제로 있는 것이다.
+       금지 라벨 목록은 verify.js 의 BANNED_LABELS 와 같아야 한다 */
+    "foundations/writing": () => {
+      const dd = (doShot, doText, dontShot, dontText) => `<div class="dodont">
+  <div class="do"><div class="shot">${doShot}</div><div class="body"><p>${doText}</p></div></div>
+  <div class="dont"><div class="shot">${dontShot}</div><div class="body"><p>${dontText}</p></div></div>
+</div>`;
+      const b = (cls, t) => `<button type="button" class="btn md ${cls}">${t}</button>`;
+      return `<h1>Writing${nb("foundations", "writing")}</h1><p class="lead">화면의 문구는 처음 보는 운영자도 5초 안에 무엇을 하는지 알 수 있게 씁니다. 꾸미는 말 · 비유 · 만든 용어 없이, 운영자에게 소리 내어 말할 문장으로 씁니다.</p>
+<h2 id="buttons">Buttons</h2><p>버튼은 <b>누르면 일어날 동작</b>(+대상)으로 씁니다. 1~4 어절, 명사형 동작어로 끝냅니다 — 저장 · 정책 저장 · 다시 시도 · 내보내기 · 필터 초기화.</p>
+${dd(`<span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;gap:8px">${b("outline assistive", "취소")}${b("solid negative", "삭제")}</span>`,
+  "확인 대화상자의 버튼은 일어날 동작을 그대로 씁니다. 제목이 질문이면 버튼이 그 답입니다.",
+  `<span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;gap:8px">${b("outline assistive", "아니요")}${b("solid negative", "확인")}</span>`,
+  "'확인' · '예' 는 무엇이 일어나는지 말하지 않습니다. '확인' 은 정보만 알리고 닫는 대화상자에서만 씁니다.")}
+<h2 id="labels">Vague labels</h2><p>어디로 가는지 · 무엇이 열리는지 말하지 않는 라벨은 쓰지 않습니다. 빌드가 예제의 버튼 · 링크 글자를 검사합니다.</p>
+${tbl(["쓰지 않음", "대신", "예외"], [
+  ["자세히 · 자세히 보기", "열리는 것을 이름으로 — 점검 안내 보기 · 정책 상세", ""],
+  ["여기 · 클릭 · 이곳", "링크 글자 자체를 대상으로 — <a href=\"#/foundations/colors\">Colors</a> 에서 확인", ""],
+  ["바로가기(단독)", "가는 곳 — 로그 보기 · 에이전트 목록", ""],
+  ["더 보기", "펼쳐지는 것 — 이벤트 20건 더 보기", "⋯ 아이콘 버튼의 접근 이름(<code>aria-label=\"더 보기\"</code>)은 Dropdown 액션 메뉴 트리거로 허용"],
+  ["전체 보기", "", "Card 헤더에서 같은 목록 화면으로 가는 링크로 허용(사람의 결정 2026-11-03)"],
+])}
+${dd(`<div class="banner" role="status" style="flex:1">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button></div>`,
+  "버튼만 읽어도 무엇이 열리는지 압니다. 스크린 리더의 버튼 목록에서도 구분됩니다.",
+  `<div class="banner" role="status" style="flex:1">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">자세히</button></div>`,
+  "'자세히' 가 여러 개면 버튼 목록에서 구분되지 않고, 무엇이 열리는지 눌러 봐야 압니다.")}
+<h2 id="titles">Titles</h2><p>페이지 · 카드 · 섹션 제목에는 <b>대상을 가리키는 명사</b>가 있습니다 — 정책 목록 · 에이전트 연결 · 일별 탐지 추이. 질문(빈 화면 · 확인 대화상자 제외) · 명령 · 분위기 문구로 쓰지 않습니다.</p>
+<h2 id="numbers">Numbers</h2><ul><li>숫자와 단위는 붙여 쓰고 줄이 갈라지지 않게 합니다 — 1,054건 · 18% · 240px. 표 · KPI 숫자에는 <code style="white-space:nowrap">.t-num</code> 을 함께 씁니다</li><li>네 자리부터 쉼표 — 1,054. 날짜는 <code>2026-09-07</code>, 기간은 <code>2026-09-01 ~ 2026-09-07</code></li><li>예제 데이터도 실제처럼 고르지 않은 값으로 씁니다(100 · 50 · 25 대신 1,054 · 38 · 212)</li></ul>
+<h2 id="errors">Errors and empty states</h2><p>오류 문구는 <b>무엇이 일어났는지</b>와 <b>어떻게 하면 되는지</b> 두 부분입니다. 빈 화면은 <b>지금 상태</b>와 <b>다음 행동</b>입니다.</p>
+${tbl(["상황", "문구", "행동"], [
+  ["불러오기 실패", "불러오지 못했습니다", "다시 시도"],
+  ["에이전트 미응답", "10분 이상 체크인이 없습니다. 네트워크 상태를 확인하세요.", "—"],
+  ["되돌릴 수 없는 삭제", "삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.", "취소 · 삭제"],
+  ["검색 결과 없음", "'랜섬웨어 2025' 에 대한 결과가 없습니다", "필터 초기화"],
+  ["처음 쓰는 화면", "아직 정책이 없습니다", "정책 추가"],
+])}
+<h2 id="placeholders">Placeholders</h2><p>lorem ipsum · TODO · <code>[ ]</code> · "샘플" · "예시" 표시를 화면에 남기지 않습니다. 실제 문구를 쓰거나 그 요소를 뺍니다. 빌드가 예제 미리보기에서 찾아냅니다.</p>
+<h2 id="terms">One fact, one wording</h2><p>같은 사실은 화면 전체에서 한 표현으로 씁니다. 같은 동작을 '차단' 과 '블록' 으로 섞지 않습니다. 상태 이름은 <a href="#/patterns/severity">Severity</a> 패턴의 용어를 따릅니다.</p>`;
+    },
 
     /* ================= Colors ================= */
     "foundations/colors": () => {

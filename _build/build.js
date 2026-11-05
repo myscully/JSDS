@@ -180,7 +180,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 | \`icons.js\` | 사용 아이콘 목록(\`ICON_NAMES\`) + \`assets/icons\` SVG 를 읽어 \`I(name,size)\` 인라인 헬퍼 제공. 빌드 시 \`icons.gen.js\`(브라우저용, 생성물) 기록 |
 | \`icons-css.js\` | 체크박스 체크·마이너스, Chip 체크, Dropdown·Accordion 셰브론, Breadcrumb 슬래시, 표 정렬 화살표를 \`assets/icons\` SVG 의 data URI mask 로 \`style.src.css\` 에 삽입(빌드 시 자동) |
 | \`render.js\` | 페이지 렌더러(컴포넌트/패턴/Resources) + 해시 라우터 |
-| \`foundations.js\` | Foundations 페이지(Overview · Base material: Colors · Elevation · Grid · Icons · Typography, Web Desktop) |
+| \`foundations.js\` | Foundations 페이지(Overview · Base material: Colors · Elevation · Grid · Icons · Typography · Writing, Web Desktop) |
 | \`app.src.js\` | 런타임 원본 → \`assets/app.js\` |
 | \`ds.src.js\` | 컴포넌트 동작 스크립트 원본 → \`assets/ds.js\` (\`DS.toast()\` · \`DS.popup.open()\` · \`DS.init(root)\` · \`ds:*\` 커스텀 이벤트) |
 | \`ds-chart.src.js\` | 탐색형 차트 테마 어댑터 + 프리셋 원본 → \`assets/ds-chart.js\` (\`DSChart.theme/presets/mount/auto\`). Chart.js(MIT) 본체는 \`node_modules\` 에서 \`assets/vendor/chart.umd.js\` 로 복사되고, 차트가 있는 페이지에만 실린다 |

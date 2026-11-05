@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Writing · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="foundations" data-page="writing" data-root="../">
+<header class="header">
+  <a class="brand" href="../index.html"><span>JS Design System</span></a>
+  <span class="ver">v0.8</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/getting-started.html" class="">Home</a><a href="../foundations/overview.html" class="active">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../resources/react.html" class="">Resources</a></nav>
+  <div class="header-right">
+    <div class="hmenu">
+      <button class="hbtn" id="accentBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="제품 메인 컬러(Accent) 선택" title="Accent"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"/><path d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg><span class="dot"></span></button>
+      <div class="pop accent-pop" id="accentPop" role="menu" aria-label="Accent" hidden></div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="searchBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="검색 (/)" title="검색 (/)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg></button>
+      <div class="pop search-pop" id="searchPop" hidden>
+        <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="themeBtn" type="button" aria-label="테마 전환" title="테마 전환"><span class="i-sun"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656"/><path d="M6.343 17.657l-1.414 1.414"/><path d="M6.343 6.343l-1.414 -1.414"/><path d="M17.657 6.343l1.414 -1.414"/><path d="M17.657 17.657l1.414 1.414"/><path d="M4 12h-2"/><path d="M12 4v-2"/><path d="M20 12h2"/><path d="M12 20v2"/></svg></span><span class="i-moon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg></span></button>
+    </div>
+    <div class="hmenu hmenu-nav">
+      <button class="hbtn" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="메뉴" title="메뉴"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="drawer-dim" id="menuDim" hidden></div>
+<div class="drawer" id="menuPop" role="dialog" aria-label="메뉴" hidden></div>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><a href="../foundations/overview.html">Overview</a><h5>Base material</h5><a href="../foundations/colors.html">Colors<span class="n">N</span></a><a href="../foundations/elevation.html">Elevation</a><a href="../foundations/grid.html">Grid</a><a href="../foundations/icons.html">Icons<span class="n">N</span></a><a href="../foundations/typography.html">Typography</a><a href="../foundations/writing.html" class="active">Writing<span class="n">N</span></a></nav><div class="sidebar-foot">v0.8 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>Writing<span class="n">N</span></h1><p class="lead">화면의 문구는 처음 보는 운영자도 5초 안에 무엇을 하는지 알 수 있게 씁니다. 꾸미는 말 · 비유 · 만든 용어 없이, 운영자에게 소리 내어 말할 문장으로 씁니다.</p>
+<h2 id="buttons">Buttons</h2><p>버튼은 <b>누르면 일어날 동작</b>(+대상)으로 씁니다. 1~4 어절, 명사형 동작어로 끝냅니다 — 저장 · 정책 저장 · 다시 시도 · 내보내기 · 필터 초기화.</p>
+<div class="dodont">
+  <div class="do"><div class="shot"><span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;gap:8px"><button type="button" class="btn md outline assistive">취소</button><button type="button" class="btn md solid negative">삭제</button></span></div><div class="body"><p>확인 대화상자의 버튼은 일어날 동작을 그대로 씁니다. 제목이 질문이면 버튼이 그 답입니다.</p></div></div>
+  <div class="dont"><div class="shot"><span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;gap:8px"><button type="button" class="btn md outline assistive">아니요</button><button type="button" class="btn md solid negative">확인</button></span></div><div class="body"><p>'확인' · '예' 는 무엇이 일어나는지 말하지 않습니다. '확인' 은 정보만 알리고 닫는 대화상자에서만 씁니다.</p></div></div>
+</div>
+<h2 id="labels">Vague labels</h2><p>어디로 가는지 · 무엇이 열리는지 말하지 않는 라벨은 쓰지 않습니다. 빌드가 예제의 버튼 · 링크 글자를 검사합니다.</p>
+<div class="tablewrap"><table class=""><thead><tr><th>쓰지 않음</th><th>대신</th><th>예외</th></tr></thead><tbody><tr><td>자세히 · 자세히 보기</td><td>열리는 것을 이름으로 — 점검 안내 보기 · 정책 상세</td><td></td></tr><tr><td>여기 · 클릭 · 이곳</td><td>링크 글자 자체를 대상으로 — <a href="../foundations/colors.html">Colors</a> 에서 확인</td><td></td></tr><tr><td>바로가기(단독)</td><td>가는 곳 — 로그 보기 · 에이전트 목록</td><td></td></tr><tr><td>더 보기</td><td>펼쳐지는 것 — 이벤트 20건 더 보기</td><td>⋯ 아이콘 버튼의 접근 이름(<code>aria-label="더 보기"</code>)은 Dropdown 액션 메뉴 트리거로 허용</td></tr><tr><td>전체 보기</td><td></td><td>Card 헤더에서 같은 목록 화면으로 가는 링크로 허용(사람의 결정 2026-11-03)</td></tr></tbody></table></div>
+<div class="dodont">
+  <div class="do"><div class="shot"><div class="banner" role="status" style="flex:1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path><path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path></svg>9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button></div></div><div class="body"><p>버튼만 읽어도 무엇이 열리는지 압니다. 스크린 리더의 버튼 목록에서도 구분됩니다.</p></div></div>
+  <div class="dont"><div class="shot"><div class="banner" role="status" style="flex:1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"></path><path d="M12 9h.01"></path><path d="M11 12h1v4h1"></path></svg>9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">자세히</button></div></div><div class="body"><p>'자세히' 가 여러 개면 버튼 목록에서 구분되지 않고, 무엇이 열리는지 눌러 봐야 압니다.</p></div></div>
+</div>
+<h2 id="titles">Titles</h2><p>페이지 · 카드 · 섹션 제목에는 <b>대상을 가리키는 명사</b>가 있습니다 — 정책 목록 · 에이전트 연결 · 일별 탐지 추이. 질문(빈 화면 · 확인 대화상자 제외) · 명령 · 분위기 문구로 쓰지 않습니다.</p>
+<h2 id="numbers">Numbers</h2><ul><li>숫자와 단위는 붙여 쓰고 줄이 갈라지지 않게 합니다 — 1,054건 · 18% · 240px. 표 · KPI 숫자에는 <code style="white-space:nowrap">.t-num</code> 을 함께 씁니다</li><li>네 자리부터 쉼표 — 1,054. 날짜는 <code>2026-09-07</code>, 기간은 <code>2026-09-01 ~ 2026-09-07</code></li><li>예제 데이터도 실제처럼 고르지 않은 값으로 씁니다(100 · 50 · 25 대신 1,054 · 38 · 212)</li></ul>
+<h2 id="errors">Errors and empty states</h2><p>오류 문구는 <b>무엇이 일어났는지</b>와 <b>어떻게 하면 되는지</b> 두 부분입니다. 빈 화면은 <b>지금 상태</b>와 <b>다음 행동</b>입니다.</p>
+<div class="tablewrap"><table class=""><thead><tr><th>상황</th><th>문구</th><th>행동</th></tr></thead><tbody><tr><td>불러오기 실패</td><td>불러오지 못했습니다</td><td>다시 시도</td></tr><tr><td>에이전트 미응답</td><td>10분 이상 체크인이 없습니다. 네트워크 상태를 확인하세요.</td><td>—</td></tr><tr><td>되돌릴 수 없는 삭제</td><td>삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</td><td>취소 · 삭제</td></tr><tr><td>검색 결과 없음</td><td>'랜섬웨어 2025' 에 대한 결과가 없습니다</td><td>필터 초기화</td></tr><tr><td>처음 쓰는 화면</td><td>아직 정책이 없습니다</td><td>정책 추가</td></tr></tbody></table></div>
+<h2 id="placeholders">Placeholders</h2><p>lorem ipsum · TODO · <code>[ ]</code> · "샘플" · "예시" 표시를 화면에 남기지 않습니다. 실제 문구를 쓰거나 그 요소를 뺍니다. 빌드가 예제 미리보기에서 찾아냅니다.</p>
+<h2 id="terms">One fact, one wording</h2><p>같은 사실은 화면 전체에서 한 표현으로 씁니다. 같은 동작을 '차단' 과 '블록' 으로 섞지 않습니다. 상태 이름은 <a href="../patterns/severity.html">Severity</a> 패턴의 용어를 따릅니다.</p>
+    </article></div>
+  </div>
+  <aside class="toc" id="toc" aria-label="이 페이지 목차" hidden></aside>
+</div>
+</body>
+</html>
