@@ -264,3 +264,17 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 | 전 | 지금 (React) | 지금 (클래스) |
 | --- | --- | --- |
 | 회색 바탕 위에서도 1px 보더 | `Card` · `Kpi` · `ChartCard` 의 `variant="flat"` — 보더 색만 지웁니다(두께 1px 는 남아 크기 같음). `background/neutral/secondary` 위에서만 쓰고 흰 바탕 위에서는 쓰지 않습니다 | `.card.flat` · `.kpi.flat` · `.chart-card.flat` |
+
+## Data Visual — 탐색형 차트 (2026-11-03)
+
+정적 요약(`Kpi` · `Sparkline` · `BarChart` · `Donut`, CSS)은 그대로입니다. 축 · 툴팁 · 시계열이 필요한 **탐색형 차트**가 Chart.js(MIT) 위에 더해졌습니다.
+별도 진입점이라 차트를 안 쓰는 제품은 바뀌는 것이 없고 `dist/index.js` 는 chart.js 를 참조하지 않습니다.
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| 없음 | `npm i chart.js`(optional peer) → `import { ChartCanvas, presets } from "@jiran/ds-react/chart"` · `import { Chart } from "chart.js/auto"` | `.chart-canvas > canvas[data-chart][data-spec]` + `assets/vendor/chart.umd.js` · `assets/ds-chart.js` |
+| — | `<ChartCanvas chart={Chart} config={presets.timeseries(spec)} aria-label="…" />` — `aria-label` 은 필수 | `canvas[role=img][aria-label]` |
+| — | `presets.timeseries · bar · donut · mixed` · `chartTheme` · `mountChart` · `useDsChart` | `DSChart.presets · theme · mount · auto` |
+
+색은 `--chart-series-1~6`(순서 고정 · 제품색과 무관) 과 심각도 토큰(`tone`)만 쓰고, 라이트/다크 · 제품 색 전환 때 자동으로 다시 칠합니다. y 축은 하나입니다(이중 축 금지).
+

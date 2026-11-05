@@ -1136,6 +1136,48 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   /* 회색 바탕 래퍼가 내용 폭으로 줄면(미리보기는 가운데 정렬 flex) KPI 가 세로로 쌓이고 막대가 2px 로 눌렸다 — 래퍼는 폭을 채운다 */
   const flatDvFit = await page.evaluate(() => ({ kpiRows: new Set([...document.querySelectorAll("#ex-data-visual-flat .kpi")].map((k) => Math.round(k.getBoundingClientRect().top))).size, bars: [...document.querySelectorAll("#ex-data-visual-flat .chart .bar")].map((b) => Math.round(b.getBoundingClientRect().width)) }));
   ok("flat dashboard example keeps KPIs in one row and bars readable", flatDvFit.kpiRows === 1 && flatDvFit.bars.length === 2 && flatDvFit.bars.every((w) => w >= 200), JSON.stringify(flatDvFit));
+  /* 탐색형 차트(Chart.js, 사람의 결정 2026-11-03) — 예제 canvas 가 실제로 그려지고, 계열 · 격자 색이 토큰 계산값과 같으며, 테마를 바꾸면 다시 칠한다.
+     색은 ds-chart 가 읽은 토큰(DSChart.resolve)과 Chart.js 데이터셋의 실제 색을 대조한다 — 기억이 아니라 같은 페이지의 계산값이다 */
+  await page.waitForFunction(() => window.Chart && window.DSChart && [...document.querySelectorAll("canvas[data-chart]")].every((c) => c.__dsChart && c.__dsChart.chart.ctx), null, { timeout: 5000 }).catch(() => {});
+  const chartProbe = () => page.evaluate(() => {
+    const tok = (name) => DSChart.resolve(document.body, name);
+    return [...document.querySelectorAll("canvas[data-chart]")].map((c) => {
+      const h = c.__dsChart, ch = h && h.chart, kind = c.dataset.chart, ds = ch ? ch.data.datasets : [], r = c.getBoundingClientRect();
+      if (!ch) return { kind, mounted: false };
+      const seriesTok = (i) => tok(DSChart.TOKENS.series[Math.min(i, DSChart.SERIES_MAX - 1)]);
+      return { kind, mounted: true, label: c.getAttribute("aria-label"), h: Math.round(r.height), w: Math.round(r.width), n: ds.length, legend: ch.options.plugins.legend.display,
+        yAxes: Object.keys(ch.options.scales || {}).filter((k) => k.startsWith("y")).length,
+        colors: kind === "donut" ? ds[0].backgroundColor : ds.map((d) => d.type === "line" || kind === "timeseries" ? d.borderColor : d.backgroundColor),
+        want: kind === "donut" ? ds[0]._dsTones.map((t, i) => t ? tok(DSChart.TONES[t]) : seriesTok(i)) : ds.map((d, i) => d.tone ? tok(DSChart.TONES[d.tone]) : seriesTok(i)),
+        grid: kind === "donut" ? null : ch.options.scales.y.grid.color, gridTok: tok(DSChart.TOKENS.grid), axis: ch.options.plugins.legend.labels.color, axisTok: tok(DSChart.TOKENS.axis),
+        line: ds[0].borderWidth, pr: ds[0].pointHoverRadius, radius: ds[0].borderRadius };
+    });
+  });
+  const ch1 = await chartProbe();
+  ok("chart examples render with Chart.js at 240 high and carry an accessible name", ch1.length === 5 && ch1.every((c) => c.mounted && c.h === 240 && c.w > 200 && c.label), JSON.stringify(ch1.map((c) => [c.kind, c.mounted, c.h, c.w])));
+  ok("chart series · grid · axis colours equal the token values ds-chart resolved", ch1.every((c) => c.mounted && JSON.stringify(c.colors) === JSON.stringify(c.want) && (c.grid === null || c.grid === c.gridTok) && c.axis === c.axisTok), JSON.stringify(ch1.map((c) => [c.kind, c.colors, c.want, c.grid, c.gridTok])));
+  /* 범주 축은 라벨을 건너뛰지 않는다 — paint 가 기본 옵션으로 프리셋 옵션을 덮어 5개 중 3개만 보였다(Figma 대조에서 발견, 2026-11-04) */
+  const barTicks = await page.evaluate(() => [...document.querySelectorAll('canvas[data-chart="bar"]')].map((c) => { const ch = c.__dsChart.chart, ax = ch.options.indexAxis === "y" ? "y" : "x"; return { labels: ch.data.labels.length, ticks: ch.scales[ax].ticks.length, autoSkip: ch.options.scales[ax].ticks.autoSkip }; }));
+  ok("bar charts show every category label", barTicks.length === 2 && barTicks.every((b) => b.ticks === b.labels && b.autoSkip === false), JSON.stringify(barTicks));
+  ok("chart legend only with 2+ series, mixed keeps one y axis, line 2 · hover point 8 · bar end radius 4", ch1.every((c) => c.legend === (c.kind === "donut" ? true : c.n > 1)) && ch1.filter((c) => c.kind !== "donut").every((c) => c.yAxes === 1) && ch1.filter((c) => c.kind === "timeseries").every((c) => c.line === 2 && c.pr === 4) && ch1.filter((c) => c.kind === "bar").every((c) => c.radius === 4 || c.radius === 0), JSON.stringify(ch1.map((c) => [c.kind, c.n, c.legend, c.yAxes, c.line, c.pr, c.radius])));
+  await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(300);
+  const ch2 = await chartProbe();
+  ok("charts repaint on theme change with the dark token values", ch2.every((c) => JSON.stringify(c.colors) === JSON.stringify(c.want) && (c.grid === null || c.grid === c.gridTok)) && ch2.every((c, i) => JSON.stringify(c.colors) !== JSON.stringify(ch1[i].colors)), JSON.stringify(ch2.map((c, i) => [c.kind, ch1[i].colors[0], c.colors[0]])));
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(300);
+  /* 세그먼트 사이 2px 면 색 틈 — 누적 가로 막대의 첫 세그먼트 끝(x) 좌우 8px 를 막대 가운데 높이에서 읽어 면 색 픽셀이 있는지 센다 */
+  const gap = await page.evaluate(() => {
+    const c = document.querySelectorAll('canvas[data-chart="bar"]')[1], ch = c.__dsChart.chart, b0 = ch.getDatasetMeta(0).data[0], dpr = c.width / c.getBoundingClientRect().width;
+    const surf = DSChart.resolve(c, "--surface-elevated-primary").match(/\d+/g).slice(0, 3).map(Number);
+    const img = c.getContext("2d").getImageData(Math.round((b0.x - 4) * dpr), Math.round(b0.y * dpr), Math.round(8 * dpr), 1).data; let hit = 0;
+    for (let i = 0; i < img.length; i += 4) if (Math.abs(img[i] - surf[0]) <= 2 && Math.abs(img[i + 1] - surf[1]) <= 2 && Math.abs(img[i + 2] - surf[2]) <= 2) hit++;
+    return { hit, total: img.length / 4, horizontal: ch.options.indexAxis === "y", stacked: ch.options.scales.x.stacked };
+  });
+  ok("stacked bar segments are separated by surface-coloured pixels", gap.horizontal && gap.stacked && gap.hit >= 2, JSON.stringify(gap));
+  await go("patterns/dashboard.html");
+  await page.waitForFunction(() => [...document.querySelectorAll("canvas[data-chart]")].every((c) => c.__dsChart && c.__dsChart.chart.ctx), null, { timeout: 5000 }).catch(() => {});
+  const dash = await page.evaluate(() => ({ trend: !!(document.querySelector('.row-3 canvas[data-chart="timeseries"]') || {}).__dsChart, donut: document.querySelector(".row-3 .donut").getAttribute("aria-label"), script: !!document.querySelector('script[src$="assets/ds-chart.js"]') }));
+  ok("dashboard pattern draws a timeseries trend and names donut shares", dash.trend && /%/.test(dash.donut) && dash.script, JSON.stringify(dash));
+  await go("components/data-visual.html");
 
   // Nav
   await go("components/navigation.html");
@@ -1448,8 +1490,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       checker: pane.querySelectorAll(".sem-row.checker").length,
       titles: [...pane.querySelectorAll("h2")].slice(0, 3).map((h) => h.textContent) };
   });
-  ok("semantic tab is 27 sections, each a heading + one paragraph + a swatch row",
-    semPage.sections === 27 && semPage.paras === 27, JSON.stringify(semPage).slice(0, 220));
+  /* 27 → 28: 트리 밖 Chart 절(탐색형 차트 토큰, 2026-11-03) */
+  ok("semantic tab is 28 sections, each a heading + one paragraph + a swatch row",
+    semPage.sections === 28 && semPage.paras === 28, JSON.stringify(semPage).slice(0, 220));
   ok("no swatch is blank", semPage.blank.length === 0, semPage.blank.join(" ") || "없음");
   /* 알파가 든 절만 체커 바탕 — 솔리드 절에 체커가 깔리면 반투명으로 오독된다 */
   ok("only the alpha sections are checkered", semPage.checker === 14, String(semPage.checker));

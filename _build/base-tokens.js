@@ -221,6 +221,20 @@ const ADDITIONS = {
     "지란지교시큐리티 회사 마크 — 참조의 brand 는 제품 색이라 회사 정체성을 표기할 자리가 없다. 로고·헤더 마크 전용",
   "company-mark-subtle":
     "회사 마크의 옅은 배경 — 위와 같은 이유",
+  /* 탐색형 차트(Chart.js) 전용 — 기준 시스템에는 데이터 시각화 토큰이 없다(사람의 결정 2026-11-03).
+     계열 6색은 심각도 토큰과 섞지 않으려고 따로 둔다(빨강 = Critical 의 의미를 지킨다). 제품색(brand)과 무관한 고정 램프이고,
+     라이트/다크 각각 dataviz 검증기(색각 이상 분리 · 명도 띠 · 3:1)를 통과한 단계다 — 값과 검증 결과는 style.src.css 의 주석에 있다.
+     상태색과 같은 단계는 쓰지 않는다(cyan-40 은 Medium 이라 teal 자리는 light-blue-40). 캔버스는 CSS 변수를 못 읽어 ds-chart.js 가 계산값으로 읽는다 */
+  "chart-series-1": "탐색형 차트 계열 1(blue) — 순서 고정, 7번째부터는 '기타'로 묶는다",
+  "chart-series-2": "탐색형 차트 계열 2(orange-39/40 — cautionary 의 orange-50/60 과 다른 단계)",
+  "chart-series-3": "탐색형 차트 계열 3(light-blue-40 — Medium 의 cyan 과 다른 색상)",
+  "chart-series-4": "탐색형 차트 계열 4(violet)",
+  "chart-series-5": "탐색형 차트 계열 5(lime — positive 의 green 과 다른 색상)",
+  "chart-series-6": "탐색형 차트 계열 6(pink)",
+  "chart-grid-primary": "차트 격자선 — line/neutral/tertiary 를 참조(recessive)",
+  "chart-axis-text": "축 눈금 · 범례 글자 — foreground/neutral/tertiary 를 참조",
+  "chart-tooltip-surface": "툴팁 면 — surface/neutral/inverse 를 참조(Toast 와 같은 반전 면)",
+  "chart-tooltip-text": "툴팁 글자 — foreground/neutral/inverse 를 참조",
 };
 
 /* style.css 와 대조한다. 반환은 어긋난 자리의 설명 목록 */

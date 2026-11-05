@@ -61,7 +61,7 @@ function exampleBlock(sec, pageKey, ex, css, cssLabel) {
 <div class="${cls}"${ex.style ? ` style="${ex.style}"` : ""}>${html}</div>
 <div class="example-bar"><div class="code-tabs" role="tablist"><button type="button" class="on" data-tab="html" role="tab" aria-selected="true">HTML+CSS</button><button type="button" data-tab="react" role="tab" aria-selected="false">React</button></div><div class="example-actions"><button type="button" data-copy="${id}-html" data-label="복사">복사</button><button type="button" data-toggle aria-expanded="false">코드 보기</button></div></div>
 <div class="example-code" hidden>
-<div data-pane="html"><div class="code-head"><span>HTML</span></div><pre><code id="${id}-html">${hl(html, "html")}</code></pre><div class="code-head"><span>CSS · ${esc(cssLabel)}</span><button type="button" data-copy="${id}-css" data-label="CSS 복사">CSS 복사</button></div><pre><code id="${id}-css">${hl(css, "css")}</code></pre></div>
+<div data-pane="html"><div class="code-head"><span>HTML</span></div><pre><code id="${id}-html">${hl(html, "html")}</code></pre><div class="code-head"><span>CSS · ${esc(cssLabel)}</span><button type="button" data-copy="${id}-css" data-label="CSS 복사">CSS 복사</button></div><pre><code id="${id}-css">${hl(css, "css")}</code></pre>${ex.js ? `<div class="code-head"><span>JS · DSChart</span><button type="button" data-copy="${id}-js" data-label="JS 복사">JS 복사</button></div><pre><code id="${id}-js">${hl(dedent(ex.js), "tsx")}</code></pre>` : ""}</div>
 <div data-pane="react" hidden><div class="code-head"><span>${reactLabel}</span></div><pre><code id="${id}-react">${hl(react, "tsx")}</code></pre></div>
 </div>
 </section>`;
@@ -98,6 +98,8 @@ const baseCss = () => { const s = STYLE(); if (!s) return ""; const pick = (re) 
 /* 사이트 예제 수 — React 예제 파일과 1:1(examples-coverage 가 검사). 문서에 숫자를 손으로 적지 않는다 */
 const exampleCount = () => [...Object.values(COMPONENTS), ...Object.values(PATTERNS)].reduce((n, c) => n + (c.examples || []).length, 0);
 const semanticCount = () => new Set([...rootBlock(STYLE(), ":root").matchAll(/(--(?:foreground|background|surface|line|effect|static)-[a-z0-9-]+)\s*:/g)].map((m) => m[1])).size;
+/* 트리 밖 chart 토큰 수 — 손으로 적지 않는다 */
+const chartCount = () => new Set([...rootBlock(STYLE(), ":root").matchAll(/(--chart-[a-z0-9-]+)\s*:/g)].map((m) => m[1])).size;
 function usageBlock(key, css, label, names = []) {
   return `<h2 id="usage">Usage</h2><p><b>React</b>: <code>@jiran/ds-react</code> 패키지를 설치하고 <code>style.css</code> 를 한 번 import 하면 위 React 탭 코드를 그대로 쓸 수 있습니다(<a href="#/resources/react">React Package</a>). <b>HTML</b>: <code>assets/style.css</code> 를 연결하고(일부만 필요하면 아래 컴포넌트 CSS 복사), 동작이 필요하면 <code>assets/ds.js</code> 를 함께 넣습니다 — 이 페이지의 프리뷰가 그 스크립트로 동작합니다. 색은 전부 <a href="#/resources/design-token">토큰</a>(<code>var(--surface-brand-primary)</code> 등)을 참조하므로 <code>--accent-*</code> 만 제품 컬러로 바꾸면 됩니다.</p>
 <h3>React <small style="font-weight:400;color:var(--foreground-neutral-tertiary);font-size:12px">@jiran/ds-react</small></h3>${codeBlock(`react-${key}`, reactUsage(names), "tsx", "복사")}
@@ -106,6 +108,31 @@ function usageBlock(key, css, label, names = []) {
 <h3>Component CSS <small style="font-weight:400;color:var(--foreground-neutral-tertiary);font-size:12px">${esc(label)}</small></h3>${codeBlock(`css-${key}`, css, "css", "CSS 복사")}`;
 }
 const cssOf = c => typeof c.css === "string" ? c.css : cssFor(cssPrefixes(c, COMPONENTS), STYLE(), VERSION);
+/* Data Visual 의 탐색형 차트(Chart.js) 사용법 — 정적 요약(CSS)과 달리 스크립트 두 줄이 더 필요하다. Chart.js 본체는 번들하지 않는다(사람의 결정 2026-11-03) */
+const CHART_USAGE_HTML = `<!-- Chart.js(MIT) 본체 + 테마 어댑터. 차트가 있는 페이지에만 -->
+<script src="assets/vendor/chart.umd.js" defer></script>
+<script src="assets/ds-chart.js" defer></script>
+
+<!-- canvas[data-chart] + data-spec 은 DOMContentLoaded 때 자동으로 그려진다(이 페이지의 예제). 직접 그리려면: -->
+<script>
+  const handle = DSChart.mount(Chart, document.querySelector("#trend"), DSChart.presets.timeseries({
+    labels: ["10-28", "10-29", "10-30"],
+    series: [{ label: "Critical", tone: "critical", data: [12, 18, 9] }, { label: "High", tone: "high", data: [30, 24, 41] }],
+    stacked: true,
+  }));
+  // handle.chart(Chart.js 인스턴스) · handle.repaint() · handle.destroy() — 테마 · 제품 색 전환은 자동으로 다시 칠한다
+</script>`;
+const CHART_USAGE_REACT = `npm i chart.js   // optional peer — 차트를 쓰는 제품만 설치 (@jiran/ds-react 의 dist/index.js 는 chart.js 를 참조하지 않는다)
+
+import { Chart } from "chart.js/auto";   // 또는 필요한 컨트롤러 · 스케일만 register
+import { ChartCanvas, presets } from "@jiran/ds-react/chart";
+
+<ChartCard title="일별 탐지 추이">
+  <ChartCanvas chart={Chart} aria-label="일별 탐지 추이 — Critical · High 누적 영역"
+    config={presets.timeseries({ labels, series: [{ label: "Critical", tone: "critical", data }], stacked: true })} />
+</ChartCard>`;
+const chartUsageBlock = () => `<h3>탐색형 차트 — HTML <small style="font-weight:400;color:var(--foreground-neutral-tertiary);font-size:12px">assets/ds-chart.js + Chart.js</small></h3><p>축 · 툴팁 · 시계열이 필요한 차트는 <a href="https://www.chartjs.org/" target="_blank" rel="noopener">Chart.js</a>(MIT) 위에 토큰을 입혀 그립니다. <code>ds-chart.js</code> 가 <code>--chart-*</code> · 심각도 토큰을 계산값으로 읽어 Chart.js 옵션을 만들고, 라이트/다크 전환과 제품 색 주입 때 다시 칠합니다. 프리셋은 <code>timeseries</code> · <code>bar</code> · <code>donut</code> · <code>mixed</code> 넷이고 결과는 보통의 Chart.js config 라 옵션을 덧붙일 수 있습니다.</p>${codeBlock("usage-chart-html", CHART_USAGE_HTML, "html")}
+<h3>탐색형 차트 — React <small style="font-weight:400;color:var(--foreground-neutral-tertiary);font-size:12px">@jiran/ds-react/chart</small></h3>${codeBlock("usage-chart-react", CHART_USAGE_REACT, "tsx")}`;
 
 /* 예제 목록(컴포넌트 · 패턴 공용). 예제가 하나뿐이면 번호 제목을 두지 않는다 —
    나눠 가리킬 것이 없고 "대시보드" 아래 "1. 대시보드" 처럼 페이지 제목과 겹친다 */
@@ -121,7 +148,7 @@ function componentPage(key) {
   return `<h1>${t}${nb("components", key)}</h1><p class="lead">${c.desc}</p>
 ${examplesBlock("components", key, c)}
 <h2 id="props">Props</h2><p>HTML 에서는 클래스와 속성으로, React(<code>@jiran/ds-react</code>)에서는 같은 이름의 prop(<code>variant</code> · <code>size</code> …)으로 변형·상태를 지정합니다.</p>${propsTable(c.props)}
-${usageBlock(key, css, label, c.react || [])}`;
+${usageBlock(key, css, label, c.react || [])}${key === "data-visual" ? chartUsageBlock() : ""}`;
 }
 function patternPage(key) {
   const c = PATTERNS[key]; const t = titleOf("patterns", key);
@@ -246,7 +273,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
     const css = STYLE(); const root = css.slice(css.indexOf(":root{"), css.indexOf("*{box-sizing")).trim();
     return `<h1>Design Token${nb("resources", "design-token")}</h1><p class="lead">이 가이드가 쓰는 토큰 원본(CSS 변수 · Light/Dark)과 Radius · Motion · Accessibility 규칙입니다. <code>--accent-*</code> 만 제품 컬러로 바꾸면 나머지는 그대로 씁니다. 색의 의미와 사용 규칙은 <a href="#/foundations/colors">Foundations › Colors</a> 를 참고하세요.</p>
 <p><button class="btn sm outline assistive" type="button" data-copy="tokencss" data-label="전체 CSS 복사">전체 CSS 복사</button></p>
-<h2 id="layers">Token Layers</h2><div class="kv"><dt>Primitive</dt><dd><code>--cool-neutral-*</code> <code>--blue-*</code> <code>--red-*</code> <code>--orange-*</code>… 기준 시스템의 Atomic 램프 13개를 값과 번호까지 그대로. 숫자가 클수록 밝습니다. 컴포넌트에서 직접 쓰지 않음 (<a href="#/foundations/colors">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--{그룹}-{하위}-{이름}</code> — 그룹은 <code>foreground</code> · <code>background</code> · <code>surface</code> · <code>line</code> · <code>effect</code> · <code>static</code> 여섯입니다(<code>--foreground-neutral-primary</code> · <code>--surface-brand-heavy</code> · <code>--line-negative-focus</code> …). ${semanticCount()}개이고 Figma 변수 경로와 1:1 입니다. 컴포넌트는 이것만 참조하고, 프리미티브 직접 참조는 빌드가 막습니다 (<a href="#/foundations/colors">Colors › Semantic</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--prod-40~60</code> 다섯 단계를 생성해 주입 → 나머지 토큰은 공통. 면 위 글자가 늘 흰색이라 <b>제품 색 위에서 흰 글자가 4.5 를 넘어야</b> 합니다</dd></div>
+<h2 id="layers">Token Layers</h2><div class="kv"><dt>Primitive</dt><dd><code>--cool-neutral-*</code> <code>--blue-*</code> <code>--red-*</code> <code>--orange-*</code>… 기준 시스템의 Atomic 램프 13개를 값과 번호까지 그대로. 숫자가 클수록 밝습니다. 컴포넌트에서 직접 쓰지 않음 (<a href="#/foundations/colors">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--{그룹}-{하위}-{이름}</code> — 그룹은 <code>foreground</code> · <code>background</code> · <code>surface</code> · <code>line</code> · <code>effect</code> · <code>static</code> 여섯입니다(<code>--foreground-neutral-primary</code> · <code>--surface-brand-heavy</code> · <code>--line-negative-focus</code> …). ${semanticCount()}개이고 Figma 변수 경로와 1:1 입니다. 컴포넌트는 이것만 참조하고, 프리미티브 직접 참조는 빌드가 막습니다 (<a href="#/foundations/colors">Colors › Semantic</a>)</dd><dt>트리 밖</dt><dd><code>--brand-label</code> · <code>--company-mark</code> · <code>--company-mark-subtle</code>, 그리고 탐색형 차트의 <code>--chart-*</code> ${chartCount()}개(계열 6 · 격자 · 축 글자 · 툴팁 면 · 글자). 차트 토큰은 CSS 가 아니라 <code>ds-chart.js</code> 가 계산값으로 읽어 캔버스에 칠합니다 (<a href="#/components/data-visual">Data Visual</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--prod-40~60</code> 다섯 단계를 생성해 주입 → 나머지 토큰은 공통. 면 위 글자가 늘 흰색이라 <b>제품 색 위에서 흰 글자가 4.5 를 넘어야</b> 합니다</dd></div>
 <h2 id="css">CSS Variables</h2><p>Light 기본값 + Dark 오버라이드(<code>prefers-color-scheme</code> 및 <code>[data-theme="dark"]</code>)를 포함합니다.</p>${codeBlock("tokencss", root, "css", "CSS 복사")}
 <h2 id="radius">Radius</h2><p>역할별로 반경을 정해 두고, 모든 블록에 같은 반경을 찍지 않습니다. 타일을 클릭하면 토큰이 복사됩니다.</p>
 <div class="tiles radius">${RADII().map(([n, v]) => `<div style="border-radius:${v}px" data-copy-text="var(--radius-${n})" title="복사">${n} ${v === 999 ? "" : v}</div>`).join("")}</div>

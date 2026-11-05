@@ -27,7 +27,7 @@ Web / Home	214:58	Pretendard Medium · Caption/0	Noto Sans KR Medium · Caption/
 # 되돌릴 때: 서체를 '원래' 서체로 돌리고 원래 스타일에 다시 연결한다(글자는 그대로). 인스턴스 안 노드는 덮어쓰기라 원본을 고쳐도 따라오지 않는다
 # 이 덮어쓰기를 품은 컴포넌트의 문서용 인스턴스(Navigation 332:2900 · Steps 333:3344 · 333:3365 · Chart Card 330:2605)는 원본을 따르므로 따로 고칠 것이 없다
 # page	node	원래(서체/스타일)	지금	글자(이전 → 이후)	어디
-3 Component	330:2381	Pretendard Medium · Title/1 연결	Noto Sans KR Medium · 스타일 없음	1,284 → 1,054	Chart Card / Type=Donut · 도넛 가운데 값(위치를 가운데로 다시 맞춤)
+3 Component	330:2381	Pretendard Medium · Title/1 연결	Noto Sans KR Medium · 스타일 없음	1,284 → 1,054	Chart Card / Type=Donut · 도넛 가운데 값(위치를 가운데로 다시 맞춤) [2026-11-05 k34 — Title/1 에 묶임(Pretendard SemiBold, 폭 80 가운데 정렬) · 되돌릴 것 없음]
 3 Component	330:2386	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	234 → 190	Chart Card / Type=Donut · 범례 Critical 값
 3 Component	330:2390	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	351 → 285	Chart Card / Type=Donut · 범례 High 값
 3 Component	330:2394	Pretendard Medium · Label/2 연결	Noto Sans KR Medium · 스타일 없음	390 → 316	Chart Card / Type=Donut · 범례 Medium 값
@@ -502,3 +502,8 @@ Patterns Overview	836:143	없음(새로 만듦)	Noto Sans KR Bold · 스타일 �
 3 Component	981:4684	없음(복제 — 950:4431)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	차단 이벤트 없음	Card Variant=Flat, Type=Empty, Size=Small, State=Default(981:4676) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]
 3 Component	981:4698	없음(복제 — 950:4440)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	데이터를 불러오지 못했습니다	Card Variant=Flat, Type=Error, Size=Medium, State=Default(981:4691) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]
 3 Component	981:4717	없음(복제 — 950:4460)	Noto Sans KR Bold · 스타일 없음 · 14 · 행간 160%	데이터를 불러오지 못했습니다	Card Variant=Flat, Type=Error, Size=Small, State=Default(981:4710) Empty > Message [→ Pretendard Bold 14 · 160% · 스타일 없음]
+# 2026-11-04 k33 — Data Visual 탐색형 차트(Chart.js)를 Figma 에 반영하며 세트 Chart(992:4826)의 Donut 변형 가운데 합계를 새로 만들어 Noto Sans KR 이 된 노드 1개(3 Component — 원본 컴포넌트). 사람이 Pretendard 로 되돌릴 목록
+# 되돌릴 때: Pretendard Bold 16 · 행간 24 · 자간 0 · 스타일 연결 없음(14단계에 16/700 이 없음 — 사이트 ds-chart.js centerPlugin 은 "700 16px", CSS .donut::after 와 같은 값). 문서 카드의 Chart 인스턴스(996:4693 안 Type=Donut)는 덮어쓰기 없이 원본을 따른다. 나머지 Chart 세트 글자(제목 · 눈금 · 범례 · 툴팁)와 문서 카드 글자는 모두 원래 텍스트 스타일(Pretendard)에 다시 묶여 Noto 로 남지 않았다
+# 2026-11-05 k34 — 999:4862 를 이 목록에서 뺐다: 사람의 결정(2026-11-04)으로 도넛 가운데 합계를 Title/1(16/24/600)에 묶었다(makeFont() 의 Noto 로 배치한 뒤 setTextStyleIdAsync → Pretendard SemiBold + Title/1, 높이 24). 이 절에 남은 되돌릴 노드는 0개
+# 2026-11-05 k34 — 도넛 가운데 합계 = Title/1(사람의 결정 2026-11-04). 고친 노드 4개(999:4862 · 330:2381 · 981:4858 · 인스턴스 I330:2605;330:2381)는 모두 Pretendard SemiBold + Title/1 에 묶여 Noto 로 남지 않았다 — 되돌릴 노드 0개
+# 인스턴스 I330:2605;330:2381 에는 서체 · 크기 · 행간 · 자간 · 스타일 덮어쓰기가 생겼다(값은 원본과 같음 — 옛 폭 41 로 남은 글 상자를 다시 배치하느라). 원본을 다시 바꿀 일이 생기면 이 덮어쓰기를 지운다

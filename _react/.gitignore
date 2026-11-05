@@ -3,3 +3,4 @@ dist/
 .visual/
 src/icons/icons.data.ts
 demo/dist/
+src/chart/ds-chart.js

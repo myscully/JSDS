@@ -1,5 +1,18 @@
-import { BarChart, Button, Card, CardHead, CardTitle, ChartCard, ChartLegend, Donut, DonutRow, Icon, Indicator, Kpi, KpiGrid, PageHead, Row3, SelectButton, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
+import { Chart } from "chart.js/auto";
+import { Button, Card, CardHead, CardTitle, ChartCard, ChartLegend, Donut, DonutRow, Icon, Indicator, Kpi, KpiGrid, PageHead, Row3, SelectButton, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
 
+import { ChartCanvas, presets } from "@jiran/ds-react/chart";
+
+/* 추이 — 심각도 누적 영역(탐색형, Chart.js). 데이터는 사이트 예제(patterns.data.js)와 같다 */
+const TREND = {
+  labels: ["10-21", "10-22", "10-23", "10-24", "10-25", "10-26", "10-27", "10-28", "10-29", "10-30", "10-31", "11-01", "11-02", "11-03"],
+  series: [
+    { label: "Critical", tone: "critical" as const, data: [12, 18, 9, 14, 22, 17, 11, 8, 15, 19, 24, 13, 10, 16] },
+    { label: "High", tone: "high" as const, data: [30, 24, 41, 35, 28, 33, 39, 27, 31, 36, 44, 29, 25, 32] },
+    { label: "Medium", tone: "medium" as const, data: [52, 48, 61, 55, 47, 58, 64, 49, 53, 60, 66, 51, 46, 57] },
+  ],
+  stacked: true,
+};
 const SEGMENTS = [
   { label: "Critical", value: 190, tone: "critical" as const },
   { label: "High", value: 285, tone: "high" as const },
@@ -32,8 +45,8 @@ export default function Example() {
         <Kpi label="미처리 검토" value="5" delta="24시간 내 처리" />
       </KpiGrid>
       <Row3>
-        <ChartCard title="유형별 탐지">
-          <BarChart max={500} rows={[{ label: "랜섬웨어", value: 412, tone: "critical" }, { label: "악성코드", value: 306, tone: "high" }, { label: "USB 위반", value: 221, tone: "medium" }, { label: "정책 위반", value: 115, tone: "low" }]} />
+        <ChartCard title="탐지 추이" extra="최근 14일">
+          <ChartCanvas chart={Chart} config={presets.timeseries(TREND)} aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역" />
         </ChartCard>
         <ChartCard title="심각도 분포">
           <DonutRow>

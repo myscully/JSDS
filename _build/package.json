@@ -12,5 +12,8 @@
   "type": "commonjs",
   "dependencies": {
     "playwright": "^1.63.0"
+  },
+  "devDependencies": {
+    "chart.js": "4.6.1"
   }
 }

@@ -18,7 +18,8 @@
     "types": ["vitest/globals", "@testing-library/jest-dom", "vite/client", "node"],
     "baseUrl": ".",
     "paths": {
-      "@jiran/ds-react": ["src/index.ts"]
+      "@jiran/ds-react": ["src/index.ts"],
+      "@jiran/ds-react/chart": ["src/chart/index.tsx"]
     }
   },
   "include": ["src", "examples", "tests", "demo", "vitest.config.ts", "tsup.config.ts"]

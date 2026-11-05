@@ -11,3 +11,4 @@ _react/dist/
 _react/demo/dist/
 _build/contrast.json
 _build/.contrast-probe.html
+_react/src/chart/ds-chart.js

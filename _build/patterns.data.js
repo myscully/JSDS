@@ -23,6 +23,8 @@ const logTable = (rows) => `
           </table>
         </div>`;
 
+/* 대시보드의 탐색형 추이 차트 데이터 — React 예제(_react/examples/patterns/dashboard/full.tsx)와 같아야 한다 */
+const TREND = {"labels":["10-21","10-22","10-23","10-24","10-25","10-26","10-27","10-28","10-29","10-30","10-31","11-01","11-02","11-03"],"series":[{"label":"Critical","tone":"critical","data":[12,18,9,14,22,17,11,8,15,19,24,13,10,16]},{"label":"High","tone":"high","data":[30,24,41,35,28,33,39,27,31,36,44,29,25,32]},{"label":"Medium","tone":"medium","data":[52,48,61,55,47,58,64,49,53,60,66,51,46,57]}],"stacked":true};
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
@@ -224,7 +226,7 @@ const PATTERNS = {
 
   /* ------------------------------------------------ Security Console */
   "dashboard": {
-    status: "ready", react: ["PageHead","Stack","Row3"], uses: ["data-visual", "card", "tag", "data-table", "select-button", "button"], css: [".page-head", ".stack", ".row-2", ".row-3"],
+    status: "ready", react: ["PageHead","Stack","Row3"], uses: ["data-visual", "card", "tag", "data-table", "select-button", "button"], css: [".page-head", ".stack", ".row-2", ".row-3"], borrows: [".t-caption-1"],
     desc: "보안 관리자의 첫 화면. 상단 KPI 4개, 아래 추이·분포 차트, 최근 이벤트 표. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
     thumb: `<div class="kpi-grid" style="width:240px;gap:6px"><div class="kpi critical" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">Critical</span><span class="value" style="font-size:18px">1,284</span></div><div class="kpi" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">차단률</span><span class="value" style="font-size:18px">99.2%</span></div></div>`,
     principles: [["위계", "KPI(무슨 일) → 차트(어디서·얼마나) → 표(무엇을 할지)"], ["기간", "화면 우상단 Select Button 하나로 전체 기간을 바꿈"], ["밀도", "카드 gap 20, 카드 내부 24. 스크롤 없이 첫 화면에 KPI+차트"]],
@@ -239,13 +241,8 @@ const PATTERNS = {
             <div class="kpi"><span class="label">미처리 검토</span><span class="value">5</span><span class="delta">24시간 내 처리</span></div>
           </div>
           <div class="row-3">
-            <div class="chart-card"><h3 class="chart-title">유형별 탐지</h3><div class="chart">
-              <div class="row"><span class="lbl">랜섬웨어</span><div class="bar critical"><i style="width:82%"></i></div><span class="num">412</span></div>
-              <div class="row"><span class="lbl">악성코드</span><div class="bar high"><i style="width:61%"></i></div><span class="num">306</span></div>
-              <div class="row"><span class="lbl">USB 위반</span><div class="bar medium"><i style="width:44%"></i></div><span class="num">221</span></div>
-              <div class="row"><span class="lbl">정책 위반</span><div class="bar low"><i style="width:23%"></i></div><span class="num">115</span></div>
-            </div></div>
-            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="심각도 분포" data-label="1,054"></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div></div></div>
+            <div class="chart-card"><h3 class="chart-title">탐지 추이 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 14일</span></h3><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div>
+            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%" data-label="1,054"></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div></div></div>
           </div>
           <div class="card flush">
             <div class="card-head"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text assistive">전체 보기 →</a></div>

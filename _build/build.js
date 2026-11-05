@@ -38,11 +38,18 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   // 출력 폴더 초기화 + assets
   for (const d of ["home", "foundations", "components", "patterns", "resources"]) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
   // assets/ 는 통째로 지우지 않는다 (assets/icons 는 사용자가 관리하는 원본). 생성물만 교체
-  for (const f of ["assets/style.css", "assets/app.js", "assets/ds.js", "assets/fonts"]) fs.rmSync(path.join(OUT, f), { recursive: true, force: true });
+  for (const f of ["assets/style.css", "assets/app.js", "assets/ds.js", "assets/ds-chart.js", "assets/vendor", "assets/fonts"]) fs.rmSync(path.join(OUT, f), { recursive: true, force: true });
   fs.mkdirSync(path.join(OUT, "assets", "fonts"), { recursive: true });
   fs.copyFileSync(FONT, path.join(OUT, "assets", "fonts", "PretendardVariable.woff2"));
   fs.writeFileSync(path.join(OUT, "assets", "style.css"), LIB.siteCss(cssSrc));   // 폰트 URL + 예제 고정 상태 — pre-commit 검사도 같은 함수로 비교한다
   fs.writeFileSync(path.join(OUT, "assets", "ds.js"), fs.readFileSync(path.join(__dirname, "ds.src.js"), "utf8"));
+  /* 탐색형 차트 — Chart.js(MIT) 본체를 node_modules 에서 벤더로 복사하고, 테마 어댑터 원본 ds-chart.src.js 를 그대로 싣는다.
+     둘 다 차트(canvas[data-chart])가 있는 페이지에만 <head> 에 들어간다(아래 chartPage) — 나머지 페이지에 70KB 를 싣지 않는다 */
+  const CHART_PKG = path.join(__dirname, "node_modules", "chart.js");
+  fs.mkdirSync(path.join(OUT, "assets", "vendor"), { recursive: true });
+  fs.copyFileSync(path.join(CHART_PKG, "dist", "chart.umd.js"), path.join(OUT, "assets", "vendor", "chart.umd.js"));
+  fs.copyFileSync(path.join(CHART_PKG, "LICENSE.md"), path.join(OUT, "assets", "vendor", "chart.LICENSE.md"));
+  fs.writeFileSync(path.join(OUT, "assets", "ds-chart.js"), fs.readFileSync(path.join(__dirname, "ds-chart.src.js"), "utf8"));
   const index = routes.map(r => ({ t: r.title, s: r.secTitle, g: r.group, u: rel(r.sec, r.key, "") }));
   fs.writeFileSync(path.join(OUT, "assets", "app.js"),
     `// 공용 스크립트(생성됨): 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭. 원본은 _build/app.src.js\nconst SEARCH_INDEX=${JSON.stringify(index)};\nconst PRODUCTS=${JSON.stringify(PRODUCTS)};\nconst ROOT=document.body.dataset.root||'../';\n` + fs.readFileSync(path.join(__dirname, "app.src.js"), "utf8"));
@@ -68,6 +75,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
     await p.waitForFunction(rt => document.body.dataset.route === rt, route);
     const parts = await p.evaluate(() => ({ content: document.getElementById("content").innerHTML, nav: document.getElementById("nav").innerHTML, topnav: document.getElementById("topnav").innerHTML, title: document.title, foot: document.getElementById("foot").textContent }));
     const isHome = isOverview(r.sec, r.key);
+    const chartPage = /<canvas[^>]*\bdata-chart=/.test(parts.content);   // 탐색형 차트가 있는 페이지에만 Chart.js · ds-chart.js
     const topnavOf = root => rewrite(parts.topnav, root).replace(/href="([^"]*)index\.html"/, `href="$1home/${HOME_FIRST}.html"`);
     const navOf = root => rewrite(parts.nav, root).replace(/<a href="[^"]*index\.html"[^>]*>Overview(?:<span[^>]*>[^<]*<\/span>)?<\/a>/, "");
     const page = ({ root, full, topActive }) => `<!doctype html>
@@ -79,7 +87,9 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 <link rel="stylesheet" href="${root}assets/style.css">
 <script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <script src="${root}assets/app.js" defer></script>
-<script src="${root}assets/ds.js" defer></script>
+<script src="${root}assets/ds.js" defer></script>${chartPage ? `
+<script src="${root}assets/vendor/chart.umd.js" defer></script>
+<script src="${root}assets/ds-chart.js" defer></script>` : ""}
 </head>
 <body data-section="${r.sec}" data-page="${full ? "index" : r.key}" data-root="${root || "./"}">
 <header class="header">
@@ -173,6 +183,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 | \`foundations.js\` | Foundations 페이지(Overview · Base material: Colors · Elevation · Grid · Icons · Typography, Web Desktop) |
 | \`app.src.js\` | 런타임 원본 → \`assets/app.js\` |
 | \`ds.src.js\` | 컴포넌트 동작 스크립트 원본 → \`assets/ds.js\` (\`DS.toast()\` · \`DS.popup.open()\` · \`DS.init(root)\` · \`ds:*\` 커스텀 이벤트) |
+| \`ds-chart.src.js\` | 탐색형 차트 테마 어댑터 + 프리셋 원본 → \`assets/ds-chart.js\` (\`DSChart.theme/presets/mount/auto\`). Chart.js(MIT) 본체는 \`node_modules\` 에서 \`assets/vendor/chart.umd.js\` 로 복사되고, 차트가 있는 페이지에만 실린다 |
 | \`behave.js\` | 동작 검증(playwright): 빌드 후 \`node behave.js\` — 프리뷰를 실제 클릭해 105 케이스 확인, 스크린샷 \`.behave/\` |
 | \`jiran-design-system-guide.standalone.html\` | 위 파일을 로드하는 미리보기 셸. \`_build\` 에서 \`python3 -m http.server 8090\` 후 열기 |
 | \`components.json\` | 빌드 산출물. Figma 동기화 등 외부 도구용(토큰 · 컴포넌트 스펙 · 예제 코드) |

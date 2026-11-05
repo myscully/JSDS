@@ -42,6 +42,24 @@ createRoot(document.getElementById("root")!).render(
 | `scripts/` | `gen-icons` · `sync-css`(style.css 합성) · `check-version` · `visual-compare` |
 | `demo/` | Vite 데모 — 전체 예제 + 테마/Accent 토글 |
 
+
+## 탐색형 차트 (`@jiran/ds-react/chart`)
+
+Chart.js(MIT)는 optional peer 입니다 — 차트를 쓰는 제품만 `npm i chart.js` 하고, `Chart` 를 prop 으로 넘깁니다.
+
+```tsx
+import { Chart } from "chart.js/auto";
+import { ChartCard } from "@jiran/ds-react";
+import { ChartCanvas, presets } from "@jiran/ds-react/chart";
+
+<ChartCard title="일별 탐지 추이" extra="최근 14일">
+  <ChartCanvas chart={Chart} aria-label="일별 탐지 추이 — Critical · High 누적 영역"
+    config={presets.timeseries({ labels, series: [{ label: "Critical", tone: "critical", data }], stacked: true })} />
+</ChartCard>
+```
+
+프리셋은 `timeseries` · `bar` · `donut` · `mixed` 넷이고 결과는 보통의 Chart.js config 입니다. 색은 토큰(`--chart-series-1~6` · 심각도)을 계산값으로 읽어 칠하고, 테마 · 제품 색이 바뀌면 다시 칠합니다. 원본은 `_build/ds-chart.src.js` 하나이고 `scripts/sync-chart.mjs` 가 복사합니다.
+
 ## 스크립트
 
 ```bash

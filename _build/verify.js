@@ -22,6 +22,17 @@ for (const sec of ["components", "patterns"]) {
     if (/href="#\//.test(body)) fails.push(`${f}: 변환되지 않은 href="#/" 링크`);
     if (/onclick=/.test(body)) fails.push(`${f}: onclick 속성`);
     if (/<script/i.test(body)) fails.push(`${f}: article 안 <script>`);
+    /* 탐색형 차트(Chart.js) — canvas 는 그래픽이라 접근 이름이 있어야 하고, data-spec 은 ds-chart 가 JSON.parse 한다. 계열 색은 6 고정(--chart-series-1~6) */
+    for (const m of body.matchAll(/<canvas\b([^>]*)>/g)) {
+      const a = m[1]; if (!/data-chart="/.test(a)) continue;
+      if (!/role="img"/.test(a) || !/aria-label="[^"]+"/.test(a)) fails.push(`${f}: canvas[data-chart] 에 role="img" · aria-label 이 없다 — 차트가 색과 모양만으로 남는다`);
+      /* 원본은 data-spec='{…}' 이지만 Playwright 가 innerHTML 로 내보내며 "…&quot;…" 로 다시 쓴다 — 두 형식을 모두 읽는다 */
+      const rawSpec = /data-spec=(?:"([^"]*)"|'([^']*)')/.exec(a) || []; const specTxt = (rawSpec[1] ?? rawSpec[2] ?? "").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+      let spec = null; try { spec = JSON.parse(specTxt); } catch { fails.push(`${f}: canvas[data-chart] 의 data-spec 이 JSON 이 아니다`); }
+      const kind = (/data-chart="([^"]+)"/.exec(a) || [])[1];
+      if (spec && kind !== "donut") { const n = (spec.series || []).length + (spec.bars || []).length + (spec.lines || []).length; if (n > 6) fails.push(`${f}: ${kind} 차트 계열 ${n}개 — 계열 색은 6개 고정, 7번째부터는 '기타'로 묶는다`); }
+    }
+    if (/<canvas[^>]*data-chart=/.test(body) !== /<script src="[^"]*assets\/ds-chart\.js" defer>/.test(html)) fails.push(`${f}: 차트 canvas 와 ds-chart.js 스크립트가 함께 있어야 한다(한쪽만 있음)`);
     for (const m of body.matchAll(/data-copy="([^"]+)"/g)) if (!new RegExp(`id="${m[1]}"`).test(body)) fails.push(`${f}: data-copy 대상 #${m[1]} 없음`);
     for (const ex of body.split('<section class="example"').slice(1)) { if (!/data-pane="html"/.test(ex) || !/data-pane="react"/.test(ex)) fails.push(`${f}: example 에 html/react pane 누락`); if (!/@jiran\/ds-react/.test(ex)) (sec === "components" ? fails : warns).push(`${f}: React 탭이 패키지 코드가 아님(htmlToJsx 폴백)`); }
     if (!/<title>[^<]+<\/title>/.test(html)) fails.push(`${f}: title 없음`);

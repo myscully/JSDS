@@ -86,7 +86,11 @@ const pairs = [
   ["--foreground-accent-cyan", SURFACES, 3, "Medium 지표"],
   ["--foreground-inactive-primary", SURFACES, 3, "Low 지표 · 비활성 점", REF("기준 시스템 값 — 라이트 2.78 · 다크 2.55")],
   ["--foreground-positive-primary", SURFACES, 3, "긍정 지표", REF("기준 시스템 값 — 라이트 2.46")],
-  ["--foreground-brand-primary", SURFACES, 3, "제품색 지표 · 포커스 링"],   // 값 입력 필드의 포커스 테두리(1px)도 이 토큰. 바깥 4px --line-brand-focus 후광은 장식이라 쌍을 두지 않는다(라이트 1.19 · 다크 1.16)
+  ["--foreground-brand-primary", SURFACES, 3, "제품색 지표 · 포커스 링"],
+  /* 탐색형 차트 계열 — 글자 없는 마크(선 · 막대 · 조각)라 3:1. 라이트 · 다크 각각 세 바탕에서 넘기는 단계를 골랐다(dataviz 검증기 — style.src.css 주석) */
+  ...[1, 2, 3, 4, 5, 6].map((i) => [`--chart-series-${i}`, SURFACES, 3, `차트 계열 ${i}`]),
+  ["--chart-axis-text", SURFACES, 4.5, "차트 축 · 범례 글자", REF("foreground/neutral/tertiary 를 참조 — 기준 시스템 값(61% 알파)이라 글자 쌍과 같은 예외")],
+  ["--chart-tooltip-text", ["--chart-tooltip-surface"], 4.5, "차트 툴팁 글자"],   // 값 입력 필드의 포커스 테두리(1px)도 이 토큰. 바깥 4px --line-brand-focus 후광은 장식이라 쌍을 두지 않는다(라이트 1.19 · 다크 1.16)
   /* 컴포넌트 경계 — 기준 시스템의 line/neutral/primary 는 중립 50 의 22% 다 */
   ["--line-neutral-primary", SURFACES, 3, "컴포넌트 경계", REF("기준 시스템 값 — 아웃라인 경계의 식별은 라벨과 채운 면이 함께 맡는다(1.4.11)")],
 ];
@@ -142,6 +146,8 @@ const grammarOnly = [
   "--line-positive-primary",
   "--effect-transparent-primary", "--effect-transparent-secondary",
   "--company-mark-subtle",
+  /* 탐색형 차트 토큰은 CSS 가 아니라 ds-chart.js 가 계산값으로 읽는다(캔버스) — CSS 소비자가 0 이어도 살아 있는 토큰이다 */
+  ...[1, 2, 3, 4, 5, 6].map((i) => `--chart-series-${i}`), "--chart-grid-primary", "--chart-axis-text", "--chart-tooltip-surface", "--chart-tooltip-text",
   /* 램프는 의미 토큰이 고르는 재료라 단계별 소비자를 요구하지 않는다 */
 ];
 

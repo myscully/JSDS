@@ -14,7 +14,7 @@
 > - **글자 굵기**가 저장소와 다른 노드 112행(2026-10-23 k2 에 다시 셈 — j 에는 120행), 9종 — 건수 숫자(Count·Step·내비) → 700 47 · Step 라벨 Current → 600 6 · Done·Todo → 400 16 ·
 >   내비 Selected → 600 5 · Sub → 500 8 · 그룹 → 600 4 · KPI delta → 600 12 · Chart Card 제목 → 600 6 · 범례 값 → 700 8.
 >   `_figma/font-weight-todo.tsv`. "원본" 행을 고치면 인스턴스가 따라오고, "서체 덮어씀" 행은 따로 고친다. Pretendard 가 있어야 바꿀 수 있다.
->   목록 밖에 하나 더: 도넛 가운데 값 330:2381 도 700 이어야 한다(지금 Noto Sans KR Medium — 목록 머리 주석)
+>   목록 밖에 하나 더: 도넛 가운데 값 330:2381 도 700 이어야 한다(지금 Noto Sans KR Medium — 목록 머리 주석) — 2026-11-05 k34 에 끝남: 사람의 결정(2026-11-04)으로 700 이 아니라 Title/1(600)에 묶었다
 > - 2026-10-23 k: Properties 값 칩 3개(Pressed 582:3 · Pulse 582:5 · Sparkline 582:7)를 옆 칩을 복제해 만들며 Noto Sans KR Medium 으로 썼다(사람의 결정). 원래 서체·스타일은 Pretendard Medium · Caption/1 — `font-revert-nodes.tsv` "2026-10-23 k" 절
 > - 2026-10-23 k2: Steps · 내비를 사이트 예제(Indicator steps · Navigation basic)에 맞추며 글자 내용을 바꾼 노드 **10개가 새로 Noto** 가 됐다 —
 >   Steps 라벨·번호 8(559:3052 · 3057 · 3061 · 3069 · 3074 · 3078 안) · 그룹 라벨 '보호' 332:2809 · 새 foot 글자 589:105(되돌릴 서체 Pretendard Regular 12 · 행간 19.2px, 맞는 14단계 스타일 없음).
@@ -164,6 +164,22 @@
   Spec 값 2개(Card 326:1807 · Data Visual 330:2549 — variant outline · flat 을 더함)는 makeFont() 의 Noto 로 쓰고 Body/2 의 크기 · 행간을 준 뒤 Body/2 에 다시 묶었다(Pretendard + 스타일 연결, 높이 44 = 두 줄).
   데스크톱에서 열면 다시 배치된다 — 두 줄 그대로인지 본다. 문서 카드의 Flat 예제 인스턴스(981:4949 · 981:4998 · 981:5101 · 981:5122 · 981:5143)는 덮어쓰기 없이 원본을 따른다.
   k29 표의 원본 변형 이름은 이제 앞에 `Variant=Outline, ` 이 붙는다(id 는 그대로). `font-revert-nodes.tsv` 맨 아래 "2026-11-03 k32" 절
+> - 2026-11-04 k33: Data Visual 탐색형 차트(Chart.js — 사람의 결정 2026-11-03)를 Figma 에 반영. 변수 `color/semantic/chart/*` 10개(별칭), 3 Component 의 Data Visual 문서 카드 Component 프레임(330:2567)에
+>   세트 **Chart**(992:4826, Type = Timeseries 992:4674 · Bar 992:4729 · Donut 992:4766 · Mixed 992:4789 — 사이트 예제의 Chart.js 기하를 애니메이션 없이 실측해 그림), 문서 카드 머리 설명 · Spec 7행 · Properties 목록 2개 · 사용 가이드 3줄.
+>   글자는 모두 makeFont() 의 Noto 로 쓰고 Noto 가 올라가 있을 때 글 상자(크기 · 모드)를 정한 뒤 원래 텍스트 스타일에 묶었다(Pretendard + 스타일 연결) — 제목 Title/1, 보조 글 · 눈금 · 범례 Caption/1, 툴팁 Label/2, Spec Label/1 · Body/2, 머리 설명 Body/1.
+>   **새로 Noto 노드 1개**: 999:4862 도넛 가운데 합계 "1,054"(Donut 변형 Canvas > Donut > Center) — 사이트 ds-chart centerPlugin 은 "700 16px" 이고 14단계에 16/700 스타일이 없어(Title/1 은 600) 스타일 없이 Noto Sans KR Bold 16 · 행간 24 로 만들었다.
+>   **되돌릴 때 Pretendard Bold 16 · 행간 24 · 스타일 연결 없이.** 눈금 · 범례 글자는 Caption/1(500)인데 사이트는 400 이다 — k4 표의 "Chart Card 막대 · 범례 라벨" 과 같은 보류(font-weight-todo.tsv). 툴팁 제목은 사이트 600 · 행 400 인데 둘 다 Label/2(500)에 묶었다.
+>   `font-revert-nodes.tsv` 맨 아래 "2026-11-04 k33" 절.
+>   **2026-11-05 k34 에 999:4862 는 되돌릴 목록에서 빠졌다** — 사람의 결정(2026-11-04)으로 도넛 가운데 합계를 Title/1(16/24/600)에 묶었다(아래 k34)
+> - 2026-11-05 k34: 도넛 가운데 합계 = **Title/1**(사람의 결정 2026-11-04 — 저장소 `.donut::after` · ds-chart centerPlugin 도 700 → 600). makeFont() 로 Noto 를 먼저 주고
+>   Title/1 의 크기 · 행간 · 자간(16 · 24 · 0.57%)으로 글 상자를 배치한 뒤 `setTextStyleIdAsync(Title/1)` — 고친 원본 3개 · 문서 인스턴스 1개, 모두 **Pretendard SemiBold + Title/1 연결, 높이 24, 가로 가운데 어긋남 0**(probe dx):
+>   999:4862(Chart Type=Donut — k33 의 Noto Bold 16/24 · 스타일 없음이던 것), 330:2381 · 981:4858(Chart Card Variant=Outline · Flat, Type=Donut 의 정적 도넛 — Pretendard Medium 16/24 · 스타일 없음 · 폭 41 왼쪽 정렬이던 것),
+>   I330:2605;330:2381(문서 카드의 Chart Card 인스턴스 — 원본을 고친 뒤에도 옛 폭 41 로 남아 가운데에서 20px 왼쪽에 그려져 같은 방법으로 다시 배치. 이 노드에 서체 · 크기 · 행간 · 자간 · 스타일 덮어쓰기가 생겼고 값은 원본과 같다).
+>   정적 도넛 두 개는 글 상자를 폭 80(= `.donut::after` 80×80) · 가운데 정렬 · 자동 높이로 바꿔 x 20 에 두었다 — 글리프 폭이 데스크톱에서 달라져도 가운데에 남는다.
+>   4 Pattern 대시보드 도넛 339:160 은 이미 Pretendard SemiBold · Title/1 이라 건드리지 않았다. 문서 Chart 인스턴스 I996:4868;999:4862 는 덮어쓰기 없이 원본을 따른다(폭 80 · Title/1).
+>   **새 Noto 노드 없음.** 330:2381 은 2026-10-23 j 절의 되돌릴 행이었다 — 그 행도 이제 되돌릴 것이 없다(행 끝에 표시). `font-weight-todo.tsv` 머리의 "330:2381 도 700" 메모도 k34 로 끝났다.
+>   audit 이 이제 도넛 가운데 글 셋(Chart Card Donut 2 · Chart Donut 1)의 스타일 · 크기 · 행간 · 가로 가운데를 `.donut::after`(= ds-chart centerPlugin)에서 읽은 타입 스케일 스타일과 맞춘다.
+>   데스크톱에서 열면 다시 배치된다 — 네 글 상자의 높이 24 · 한 줄 · 가운데를 한 번 본다
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
