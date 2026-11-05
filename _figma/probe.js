@@ -710,7 +710,33 @@ for (const p of figma.root.children) {
       gaps: a.map((x, i) => +((i + 1 < a.length ? a[i + 1][0] : a[0][0] + 360) - x[1]).toFixed(2)), strokes: arcs.reduce((n, e) => n + e.strokes.filter((x) => x.visible !== false).length, 0), dividers: donutDiv(f), legendSw: sw });
   }
 }
-/* 문서 카드의 KPI 예제(2026-11-05 k35) — "Card/<figma.frame>"(Data Visual) 안 List 마다 머리 글과 KPI 인스턴스의 Label 글. audit 이 components.data.js kpi 예제의 카드 수 · 라벨과 맞춘다 */
+/* KPI 글(2026-11-05 k35 · k35b) — 라벨 / 값 줄(값 · 단위) / 증감 줄(화살표 아이콘 · 글)의 글 · 칠. 문서 카드의 KPI 인스턴스와 4 Pattern 대시보드의 raw 프레임이
+   같은 모양이라 하나로 읽는다. 인스턴스 안 숨긴 노드는 플러그인이 돌려주지 않기도 해 visible 로 거른다(숨긴 단위 · 화살표 = null).
+   audit 이 components.data.js data-visual 예제 kpi(문서 'KPI · 예제' 행) · patterns.data.js dashboard(대시보드 KPI)와 글 · 칠을 맞춘다 */
+const kpiRead = (n) => {
+  const kids = n.children.filter((k) => k.visible !== false);
+  const label = kids[0] && kids[0].type === "TEXT" ? kids[0] : null;
+  const vr = kids[1] && "children" in kids[1] ? kids[1].children.filter((k) => k.visible !== false && k.type === "TEXT") : [];
+  const dr = kids[2] && "children" in kids[2] ? kids[2] : null;
+  const dt = dr ? dr.children.find((k) => k.visible !== false && k.type === "TEXT") : null;
+  const ic = dr ? dr.children.find((k) => k.visible !== false && k.type === "INSTANCE") : null;
+  return { id: n.id, label: label ? label.characters : null, value: vr[0] ? vr[0].characters : null, unit: vr[1] ? vr[1].characters : null,
+    delta: dt ? dt.characters : null, arrow: ic ? ic.name.replace(/^icon\/(outline|filled)\//, "") : null,
+    lfill: label ? paint(label.fills) : null, vfill: vr[0] ? paint(vr[0].fills) : null, ufill: vr[1] ? paint(vr[1].fills) : null, dfill: dt ? paint(dt.fills) : null,
+    /* 단위 글자 모양(2026-11-05 k35c) — .kpi .value small 과 크기 · 굵기 · 행간 · 자간 대조. 맞는 텍스트 스타일이 없어 Noto 로 남은 노드는 font-revert 목록과 맞춘다 */
+    utype: vr[1] ? { id: vr[1].id, st: vr[1].textStyleId === figma.mixed ? "mixed" : TS_NAME.get(vr[1].textStyleId) || null, font: vr[1].fontName === figma.mixed ? "mixed" : vr[1].fontName.family + " " + vr[1].fontName.style,
+      fs: vr[1].fontSize === figma.mixed ? "mixed" : vr[1].fontSize, lh: vr[1].lineHeight === figma.mixed ? "mixed" : vr[1].lineHeight.unit === "PIXELS" ? +vr[1].lineHeight.value.toFixed(2) : vr[1].lineHeight.unit,
+      ls: vr[1].letterSpacing === figma.mixed ? "mixed" : vr[1].letterSpacing.unit === "PIXELS" ? +vr[1].letterSpacing.value.toFixed(2) + "px" : +vr[1].letterSpacing.value.toFixed(2) + "%" } : null };
+};
+/* KPI 세트 변형(2026-11-05 k35c) — 변형마다 단위 글자 모양 · 증감 줄(화살표 · 칠). Delta=None(class 없는 .kpi .delta)은 화살표 없음 · CSS 색 */
+components.kpiSet = null;
+for (const p of figma.root.children) {
+  if (!isCurrent(p)) continue;
+  const set = p.findAllWithCriteria({ types: ["COMPONENT_SET"] }).find((s) => s.name === "KPI");
+  if (!set) continue;
+  const d = set.componentPropertyDefinitions.Delta;
+  components.kpiSet = { id: set.id, deltaOptions: d ? d.variantOptions : null, variants: set.children.map((v) => ({ name: v.name, ...kpiRead(v) })) };
+}
 components.kpiDoc = null;
 for (const p of figma.root.children) {
   if (!isCurrent(p)) continue;
@@ -718,7 +744,19 @@ for (const p of figma.root.children) {
   if (!card) continue;
   components.kpiDoc = card.findAll((k) => k.name === "List" && k.type === "FRAME").map((l) => { const h = l.findOne((k) => k.name === "Heading"), ht = h && h.findOne((k) => k.type === "TEXT");
     const kp = l.findAll((k) => k.type === "INSTANCE" && k.mainComponent && k.mainComponent.parent && k.mainComponent.parent.name === "KPI");
-    return { heading: ht ? ht.characters : null, kpi: kp.map((k) => { const t = k.findOne((x) => x.name === "Label" && x.type === "TEXT"); return t ? t.characters : null; }) }; }).filter((l) => l.kpi.length);
+    return { heading: ht ? ht.characters : null, kpi: kp.map((k) => { const pr = k.componentProperties || {}; /* ov — 칠 · 보임 덮어쓰기(2026-11-05 k35c). 예제의 class 없는 증감 카드는 Delta=None 인스턴스여야 하고 덮어쓰기로 흉내 내면 안 된다.
+         숨긴 인스턴스 자식은 findOne 이 못 찾아 원본(mainComponent)에서 이름을 찾는다 — "Unit:visible" 처럼 */
+      const ov = (k.overrides || []).filter((o) => o.overriddenFields.some((f) => f === "fills" || f === "visible")).map((o) => { const src = o.id.split(";").pop(), n = o.id === k.id ? k : k.findOne((x) => x.id === o.id) || (k.mainComponent && k.mainComponent.findOne((x) => x.id === src)); return (n ? n.name : o.id) + ":" + o.overriddenFields.filter((f) => f === "fills" || f === "visible").join("|"); });
+      return { ...kpiRead(k), tone: pr.Tone ? pr.Tone.value : null, dir: pr.Delta ? pr.Delta.value : null, ov }; }) }; }).filter((l) => l.kpi.length);
+}
+/* 4 Pattern 대시보드 KPI(2026-11-05 k35b) — "Card/대시보드" 안에서 첫 자식이 글이고 둘째 자식(값 줄)에 Display/2 글이 있는 프레임 */
+components.kpiDash = null;
+for (const p of figma.root.children) {
+  if (!isCurrent(p)) continue;
+  const dash = p.findAllWithCriteria({ types: ["FRAME"] }).find((f) => f.name === "Card/대시보드");
+  if (!dash) continue;
+  components.kpiDash = dash.findAll((f) => (f.type === "FRAME" || f.type === "INSTANCE") && f.children && f.children.length >= 2 && f.children[0].type === "TEXT" && "children" in f.children[1] &&
+    f.children[1].children.some((t) => t.type === "TEXT" && TS_NAME.get(t.textStyleId) === "Display/2")).map(kpiRead);
 }
 components.effectColors = effectColors;
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);

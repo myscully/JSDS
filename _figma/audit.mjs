@@ -42,7 +42,10 @@
  *           계열 톤(series-1 · -subtle 지난 주 · -strong 혼합 선) ↔ ds-chart TONES(figma.chart.tones 와 다르면 멈춤) — 막대 · 선 · 범례 색의 변수 연결로 본다.
  *           정적: Chart Card 막대 · 대시보드 트랙 ↔ .chart .bar · .chart .bar i border-radius, 스파크라인(Chart Card · KPI) ↔ .sparkline i, 범례 견본 크기 · 원 ↔ .chart-legend i,
  *           도넛 경계선(Chart Card 의 Donut · 대시보드 도넛) 개수 · 각도 · 크기 · 칠 · 반지름 방향 ↔ .donut i 와 예제 donut · 대시보드의 --a, 호는 틈 0,
- *           Data Visual 문서 'KPI · Tone =' 카드 수 ↔ 예제 kpi 의 .kpi 수 · 대시보드에만 있는 KPI 라벨 없음(staticChartExpect · diffStatic). 새 변수 두 개의 별칭은 토큰 대조(--chart-*)가 본다
+ *           Data Visual 문서 'KPI · 예제 =' 카드 ↔ 예제 kpi 의 .kpi(라벨 · 값 · 단위 · 증감 · 화살표 · 칠 — k35b), 'KPI · Tone =' = Default + CSS 톤 · 라벨 하나,
+ *           4 Pattern 대시보드 KPI ↔ patterns.data.js dashboard 의 .kpi(같은 항목) · 대시보드에만 있는 KPI 라벨 없음(staticChartExpect · diffStatic). 새 변수 두 개의 별칭은 토큰 대조(--chart-*)가 본다,
+ *           KPI 단위(세트 변형 · 문서 · 대시보드) ↔ .kpi .value small 의 크기 · 굵기 + .kpi .value 에서 물려받는 행간 · 자간(맞는 타입 스케일 스타일이 있으면 그 스타일, 없으면 값 · Noto 면 font-revert-nodes.tsv 에 있어야 — k35c),
+ *           KPI Delta 변형에 None(class 없는 .kpi .delta — 화살표 없음 · 칠 .kpi .delta) · 예제의 증감 방향 = Delta 값 · 예제 카드에 칠 덮어쓰기 없음 · class 없는 증감 카드는 덮어쓰기 0(k35c)
  *   도넛 가운데(2026-11-05 k34 — 사람의 결정 2026-11-04: Title/1) Chart Card 의 Donut(정적)과 Chart Type=Donut 의 가운데 글 ↔ .donut::after 의 font-size · line-height · font-weight 와 같은
  *           타입 스케일 스타일 하나(스타일 이름 · 크기 · 행간) · 가로 가운데 ±1. ds-chart centerPlugin 의 ctx.font 가 .donut::after 와 다르면 기대값을 읽다 멈춘다(donutCenter)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7) · Button 의 variant · color · size 기본값(k16)
@@ -840,7 +843,13 @@ function chartExpect() {
    범례   CSS .chart-legend i 의 width · height · border-radius(50% = 원 — Figma 는 모서리 ≥ 짧은 변/2 이거나 ELLIPSE)
    도넛   CSS .donut 의 width(지름) · .donut i 의 width · height · background(경계선 크기 · 칠) · top 0(경계선이 바깥 끝에서 안쪽으로 = 중심에서 R − h/2 거리),
           경계 각도 = components.data.js data-visual 예제 donut 과 patterns.data.js dashboard 예제의 <i style="--a:…deg">(위 = 0°, 시계 방향). 둘 다 같은 .donut conic-gradient 를 쓰므로 다르면 기대값을 읽다 멈춘다
-   KPI    Data Visual 문서 카드의 "KPI · Tone =" 목록 인스턴스 수 = data-visual 예제 kpi 의 .kpi 수, 문서 KPI 라벨에 대시보드 패턴에만 있는 라벨(예제 kpi 에서 빠진 '미처리 검토' 등)이 없어야 한다 */
+   KPI    (2026-11-05 k35b — 사람의 결정: 문서 KPI 예제 = 저장소 예제) 문서 카드 "KPI · 예제 =" 행의 카드 = data-visual 예제 kpi 의 .kpi 들(순서 · 라벨 · 값 · <small> 단위 · 증감 글 · 화살표 I(이름) · 톤),
+          4 Pattern "Card/대시보드" 의 KPI = patterns.data.js dashboard 예제의 .kpi 들(같은 항목). 칠은 CSS .kpi .label · .kpi .value(.critical/.high) · .kpi .value small · .kpi .delta(.up/.down).
+          "KPI · Tone =" 행은 한 축(Tone)만 바꿔 보여 주는 행 — 라벨이 같은 것이 의도다. 카드의 Tone = Default + CSS .kpi.<톤> .value 가 있는 톤(순서대로)이고 라벨이 하나여야 한다.
+          문서 KPI 라벨에 예제 kpi 에 없고 대시보드에만 있는 라벨('미처리 검토' 등)이 없어야 한다.
+          (2026-11-05 k35c — 사람의 결정) 단위 = .kpi .value small 의 font-size · font-weight, 행간 · 자간은 small 에 없으면 .kpi .value 에서 물려받는다
+          (단위 없는 line-height 는 배수라 단위 크기에 곱하고, em 자간은 부모에서 계산된 길이로 물려받아 값 크기에 곱한다 — 헤드리스 Chromium 계산값 19.2px · -0.64px 와 같음).
+          Delta=None = class 없는 .kpi .delta(화살표 없음 · 그 color) — 예제에 class 없는 증감이 있으면 KPI 세트 Delta 속성에 None 이 있어야 한다 */
 function staticChartExpect() {
   try {
     const rad = (sel) => { const v = cssRule(sel)["border-radius"]; if (v == null) throw new Error(sel + " 에 border-radius 가 없습니다"); return /%$/.test(v) ? v : px(v); };
@@ -849,9 +858,10 @@ function staticChartExpect() {
     if (legend.d !== legend.h) throw new Error(`.chart-legend i ${leg.width} × ${leg.height} 가 정사각이 아닙니다`);
     const D = px(dn.width), dv = { w: px(di.width), h: px(di.height), tok: figTok(di.background), top: px(di.top) };
     if (dv.top !== 0) throw new Error(`.donut i top ${di.top} — 경계선이 바깥 끝에 붙어 있지 않습니다`);
-    const box = { I: () => "", module: { exports: {} } }; vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
+    const mark = (n) => `[[${n}]]`;   // 아이콘 이름을 남긴다 — KPI 증감의 화살표(I("arrow-up",12))를 대조하려고
+    const box = { I: mark, module: { exports: {} } }; vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
     const dvc = box.module.exports["data-visual"], ex = (id) => { const e = (dvc.examples || []).find((x) => x.id === id); if (!e) throw new Error(`data-visual 예제 ${id} 가 없습니다`); return e.html; };
-    const pb = { I: () => "", module: { exports: {} } }; vm.runInNewContext(read("_build/patterns.data.js"), pb, { filename: "patterns.data.js" });
+    const pb = { I: mark, module: { exports: {} } }; vm.runInNewContext(read("_build/patterns.data.js"), pb, { filename: "patterns.data.js" });
     const dash = (((pb.module.exports.dashboard || {}).examples || [])[0] || {}).html; if (!dash) throw new Error("patterns.data.js dashboard 예제를 읽지 못했습니다");
     const angles = (h) => [...h.matchAll(/--a:([\d.]+)deg/g)].map((m) => +m[1]);
     const aDoc = angles(ex("donut")), aDash = angles(dash);
@@ -859,7 +869,36 @@ function staticChartExpect() {
     if (aDoc.join() !== aDash.join()) throw new Error(`도넛 경계 각도 예제 [${aDoc}] ≠ 대시보드 [${aDash}]`);
     const labels = (h) => [...h.matchAll(/<div class="kpi[^"]*"><span class="label">([^<]*)<\/span>/g)].map((m) => m[1].trim());
     const kpiEx = labels(ex("kpi")), dashOnly = labels(dash).filter((l) => !kpiEx.includes(l));
-    return { barR: rad(".chart .bar"), fillR: rad(".chart .bar i"), sparkR: rad(".sparkline i"), legend, donut: { d: D, R: D / 2, divider: { ...dv, dist: D / 2 - dv.h / 2 }, angles: aDoc }, kpi: { n: kpiEx.length, labels: kpiEx, dashOnly } };
+    /* KPI 카드 하나 = .kpi(.critical|.high) 의 label · value(<small> 단위) · delta(.up|.down, 앞의 I(이름) = 화살표). class="kpi-grid" 는 고르지 않는다 */
+    const tok = (sel) => { const t = figTok(cssRule(sel).color); if (!t) throw new Error(sel + " 의 color 가 토큰이 아닙니다"); return t; };
+    const toneSel = { default: ".kpi .value", critical: ".kpi.critical .value", high: ".kpi.high .value" }, dirSel = { "": ".kpi .delta", up: ".kpi .delta.up", down: ".kpi .delta.down" };
+    const cards = (h, where) => [...h.matchAll(/<div class="kpi((?: [^"]*)?)"[^>]*>([\s\S]*?)<\/div>/g)].map((m) => {
+      const cls = m[1].trim().split(/\s+/).filter(Boolean), b = m[2];
+      if (/<div/.test(b)) throw new Error(where + " 의 .kpi 안에 div 가 있습니다(스파크라인?) — KPI 대조가 읽는 모양이 아닙니다");
+      const lab = /<span class="label">([^<]*)<\/span>/.exec(b), val = /<span class="value">([^<]*)(?:<small>([^<]*)<\/small>)?<\/span>/.exec(b), del = /<span class="delta([^"]*)">([\s\S]*?)<\/span>/.exec(b);
+      const tone = cls.includes("critical") ? "critical" : cls.includes("high") ? "high" : "default", dir = del ? del[1].trim() : null, ic = del && /\[\[([^\]]+)\]\]/.exec(del[2]);
+      if (dir != null && !(dir in dirSel)) throw new Error(`${where} 의 .delta 클래스 '${dir}' 를 모릅니다`);
+      return { label: lab ? lab[1].trim() : null, value: val ? val[1].trim() : null, unit: val && val[2] ? val[2].trim() : null,
+        delta: del ? del[2].replace(/\[\[[^\]]+\]\]/g, "").trim() : null, arrow: ic ? ic[1] : null, tone, dir,
+        lfill: tok(".kpi .label"), vfill: tok(toneSel[tone]), ufill: val && val[2] ? tok(".kpi .value small") : null, dfill: del ? tok(dirSel[dir]) : null };
+    });
+    const example = cards(ex("kpi"), "data-visual 예제 kpi"), dashK = cards(dash, "patterns.data.js dashboard");
+    if (!example.length || !dashK.length) throw new Error(`KPI 카드를 읽지 못했습니다(예제 ${example.length} · 대시보드 ${dashK.length})`);
+    /* 단위 글자 모양 — small 자신의 값이 없으면 .kpi .value 에서 물려받는다 */
+    const sm = cssRule(".kpi .value small"), vv = cssRule(".kpi .value"), vfs = px(vv["font-size"]), ufs = px(sm["font-size"]), uwt = parseInt(sm["font-weight"], 10);
+    if (!ufs || !uwt) throw new Error(".kpi .value small 에 font-size · font-weight 가 없습니다");
+    const len = (v, base) => v == null || v === "normal" ? 0 : /px$/.test(v) ? px(v) : /em$/.test(v) ? parseFloat(v) * base : /%$/.test(v) ? (parseFloat(v) / 100) * base : null;
+    const ulh = sm["line-height"] != null ? (/^[\d.]+$/.test(sm["line-height"]) ? parseFloat(sm["line-height"]) * ufs : len(sm["line-height"], ufs))
+      : vv["line-height"] != null ? (/^[\d.]+$/.test(vv["line-height"]) ? parseFloat(vv["line-height"]) * ufs : len(vv["line-height"], vfs)) : null;
+    const uls = sm["letter-spacing"] != null ? len(sm["letter-spacing"], ufs) : len(vv["letter-spacing"], vfs);
+    if (ulh == null || uls == null) throw new Error(`KPI 단위 행간 · 자간을 계산하지 못했습니다(${sm["line-height"] ?? vv["line-height"]} · ${sm["letter-spacing"] ?? vv["letter-spacing"]})`);
+    const ts = typeScale(), uStyle = Object.keys(ts).filter((n) => ts[n].size === ufs && (ts[n].weight || 400) === uwt && ts[n].lineHeight === +ulh.toFixed(2));
+    const unit = { fs: ufs, wt: uwt, lh: +ulh.toFixed(2), ls: +uls.toFixed(2), style: uStyle[0] || null, fill: tok(".kpi .value small") };
+    const dirFill = { None: tok(dirSel[""]), Up: tok(dirSel.up), Down: tok(dirSel.down) };
+    const needNone = example.concat(dashK).some((k) => k.dir === "");
+    const tones = ["Default"].concat(["critical", "high"].filter((t) => { try { cssRule(toneSel[t]); return true; } catch { return false; } }).map((t) => t[0].toUpperCase() + t.slice(1)));
+    return { barR: rad(".chart .bar"), fillR: rad(".chart .bar i"), sparkR: rad(".sparkline i"), legend, donut: { d: D, R: D / 2, divider: { ...dv, dist: D / 2 - dv.h / 2 }, angles: aDoc },
+      kpi: { n: kpiEx.length, labels: kpiEx, dashOnly, example, dash: dashK, tones, unit, dirFill, needNone } };
   } catch (e) { return { error: String(e.message || e) }; }
 }
 
@@ -2056,10 +2095,80 @@ function diffStatic(c, w, bad, notes) {
   if (!sc.donuts.length) notes.push("세트 밖 정적 도넛이 없습니다(4 Pattern 대시보드)");
   /* KPI 문서 목록 — 예제 kpi 의 카드 수, 대시보드에만 있는 라벨 없음 */
   if (c.kpiDoc === undefined || c.kpiDoc === null) notes.push("덤프에 Data Visual 문서 카드의 KPI 목록 조사(kpiDoc)가 없습니다");
-  else { const row = c.kpiDoc.find((l) => /^KPI · Tone/.test(l.heading || ""));
-    if (!row) bad.push("Data Visual 문서 카드에 'KPI · Tone =' 목록이 없습니다");
-    else if (row.kpi.length !== w.kpi.n) bad.push(`Data Visual 문서 'KPI · Tone =' 카드 ${row.kpi.length}개 ≠ ${w.kpi.n}(예제 kpi 의 .kpi — ${w.kpi.labels.join(" · ")})`);
-    for (const l of c.kpiDoc) for (const lab of l.kpi) if (w.kpi.dashOnly.includes(lab)) bad.push(`Data Visual 문서 '${l.heading}' 에 예제 kpi 에 없는 카드 '${lab}' — 대시보드 패턴에만 있는 라벨`); }
+  else if (c.kpiDoc.some((l) => l.kpi.some((k) => typeof k === "string"))) notes.push("덤프의 kpiDoc 이 라벨만 담고 있습니다 — 2026-11-05 k35b 전 probe.js 로 만든 덤프라 KPI 글 · 칠 대조를 건너뜁니다");
+  else {
+    /* KPI 단위 글자 모양(k35c) — 맞는 스타일이 있으면 그 스타일, 없으면 스타일 없이 값. Noto 로 남은 노드는 font-revert-nodes.tsv(사람이 되돌릴 목록)에 있어야 NOTE, 없으면 어긋남.
+       인스턴스 노드(I…;원본)는 원본 id 가 목록에 있어도 된다 — 덮어쓰지 않은 인스턴스는 원본을 따른다 */
+    const U = w.kpi.unit, WN = { 400: ["Regular"], 500: ["Medium"], 600: ["SemiBold", "Semi Bold"], 700: ["Bold"] }, notoUnits = [];
+    let revertIds = null;
+    const reverts = () => revertIds || (revertIds = new Set(read("_figma/font-revert-nodes.tsv").split("\n").filter((l) => l && !l.startsWith("#")).map((l) => (l.split("\t")[1] || "").trim())));
+    const unitCheck = (at, t) => {
+      if (!t) return;
+      const d = [];
+      if (U.style) { if (t.st !== U.style) d.push(`스타일 ${t.st} ≠ ${U.style}`); }
+      else {
+        if (t.st) d.push(`스타일 ${t.st} 에 묶임 — ${U.fs}/${U.wt} 에 맞는 타입 스케일 스타일이 없어 스타일 없이 값으로 둔다`);
+        if (t.fs !== U.fs) d.push(`크기 ${t.fs} ≠ ${U.fs}`);
+        if (!(WN[U.wt] || []).some((n) => String(t.font).endsWith(" " + n))) d.push(`굵기 ${t.font} ≠ ${U.wt}`);
+        if (typeof t.lh !== "number" || Math.abs(t.lh - U.lh) > 0.05) d.push(`행간 ${t.lh} ≠ ${U.lh}`);
+        if (!/px$/.test(String(t.ls)) || Math.abs(parseFloat(t.ls) - U.ls) > 0.02) d.push(`자간 ${t.ls} ≠ ${U.ls}px`);
+      }
+      if (/^Noto /.test(String(t.font))) { if (reverts().has(t.id) || reverts().has(t.id.split(";").pop())) notoUnits.push(t.id); else d.push(`${t.font} 인데 _figma/font-revert-nodes.tsv 에 없습니다`); }
+      if (d.length) bad.push(`${at} 단위 (${t.id}) ${d.join(" · ")} — .kpi .value small`);
+    };
+    /* 저장소 KPI 카드 목록과 Figma 카드 목록을 순서대로 — 글(라벨 · 값 · 단위 · 증감 · 화살표)과 칠 */
+    const kpiCompare = (where, got, want, src) => {
+      if (got.length !== want.length) bad.push(`${where} 카드 ${got.length}개 ≠ ${want.length}(${src} — ${want.map((k) => k.label).join(" · ")})`);
+      const F = { label: "라벨", value: "값", unit: "단위", delta: "증감 글", arrow: "화살표", lfill: "라벨 칠", vfill: "값 칠", ufill: "단위 칠", dfill: "증감 칠" };
+      for (let i = 0; i < Math.min(got.length, want.length); i++) {
+        const g = got[i], x = want[i], diffs = [];
+        for (const f of Object.keys(F)) { const gv = /fill$/.test(f) ? (g[f] ? String(g[f]).replace(/^\$/, "") : null) : g[f]; if ((gv ?? null) !== (x[f] ?? null)) diffs.push(`${F[f]} ${JSON.stringify(gv ?? null)} ≠ ${JSON.stringify(x[f] ?? null)}`); }
+        if (g.tone != null && g.tone.toLowerCase() !== x.tone) diffs.push(`Tone ${g.tone} ≠ ${x.tone}`);
+        /* 증감 방향 = Delta 값(class 없음 → None) · 칠은 변형이 정한다 — 덮어쓰기로 흉내 내지 않는다(k35c) */
+        const wd = x.dir == null ? null : { "": "None", up: "Up", down: "Down" }[x.dir];
+        if (g.dir != null && wd && g.dir !== wd) diffs.push(`Delta ${g.dir} ≠ ${wd}(.delta${x.dir ? "." + x.dir : " class 없음"})`);
+        if (Array.isArray(g.ov)) {
+          const fills = g.ov.filter((o) => /fills/.test(o.split(":").pop()));
+          if (fills.length) diffs.push(`칠 덮어쓰기 ${fills.join(" · ")} — 칠은 Tone · Delta 변형이 정한다`);
+          if (x.dir === "" && g.ov.length) diffs.push(`덮어쓰기 ${g.ov.join(" · ")} — class 없는 증감은 Delta=None 그대로`);
+        }
+        unitCheck(`${where} ${i + 1}번째 카드`, g.utype);
+        if (diffs.length) bad.push(`${where} ${i + 1}번째 카드 (${g.id}) ${diffs.join(" · ")} — ${src}`);
+      }
+    };
+    const exRow = c.kpiDoc.find((l) => /^KPI · 예제/.test(l.heading || ""));
+    if (!exRow) bad.push(`Data Visual 문서 카드에 'KPI · 예제 =' 목록이 없습니다(components.data.js data-visual 예제 kpi — ${w.kpi.example.map((k) => k.label).join(" · ")})`);
+    else kpiCompare("Data Visual 문서 'KPI · 예제'", exRow.kpi, w.kpi.example, "components.data.js data-visual 예제 kpi");
+    const toneRow = c.kpiDoc.find((l) => /^KPI · Tone/.test(l.heading || ""));
+    if (!toneRow) bad.push("Data Visual 문서 카드에 'KPI · Tone =' 목록이 없습니다");
+    else {
+      const got = toneRow.kpi.map((k) => k.tone).join(" · "), labs = [...new Set(toneRow.kpi.map((k) => k.label))];
+      if (got !== w.kpi.tones.join(" · ")) bad.push(`Data Visual 문서 'KPI · Tone =' 카드 Tone ${got} ≠ ${w.kpi.tones.join(" · ")}(Default + CSS .kpi.<톤> .value)`);
+      if (labs.length !== 1) bad.push(`Data Visual 문서 'KPI · Tone =' 라벨이 여럿입니다(${labs.join(" · ")}) — Tone 하나만 바꿔 보여 주는 행이라 라벨은 같아야 합니다`);
+    }
+    for (const l of c.kpiDoc) for (const k of l.kpi) if (w.kpi.dashOnly.includes(k.label)) bad.push(`Data Visual 문서 '${l.heading}' 에 예제 kpi 에 없는 카드 '${k.label}' — 대시보드 패턴에만 있는 라벨`);
+    if (c.kpiDash === undefined) notes.push("덤프에 4 Pattern 대시보드 KPI 조사(kpiDash)가 없습니다 — 2026-11-05 k35b 전 probe.js 로 만든 덤프입니다");
+    else if (!c.kpiDash) bad.push("4 Pattern 에 'Card/대시보드' 가 없습니다(patterns.data.js dashboard)");
+    else kpiCompare("4 Pattern 대시보드 KPI", c.kpiDash, w.kpi.dash, "patterns.data.js dashboard");
+    /* 문서의 다른 행(Tone · Delta · Variant) 카드도 단위 모양은 같다 */
+    for (const l of c.kpiDoc) if (!/^KPI · 예제/.test(l.heading || "")) l.kpi.forEach((k, i) => unitCheck(`Data Visual 문서 '${l.heading}' ${i + 1}번째 카드`, k.utype));
+    /* KPI 세트 — Delta 속성 값 · 변형마다 증감 줄 · 단위(k35c) */
+    if (c.kpiSet === undefined) notes.push("덤프에 KPI 세트 변형 조사(kpiSet)가 없습니다 — 2026-11-05 k35c 전 probe.js 로 만든 덤프라 Delta=None · 단위 모양 대조를 건너뜁니다");
+    else if (!c.kpiSet) bad.push("KPI 세트가 없습니다");
+    else {
+      const opts = c.kpiSet.deltaOptions || [];
+      if (w.kpi.needNone && !opts.includes("None")) bad.push(`KPI 세트 Delta 값 ${opts.join(" · ")} 에 None 이 없습니다 — 예제에 class 없는 .kpi .delta(화살표 없음)가 있습니다`);
+      for (const v of c.kpiSet.variants) {
+        const dm = /(?:^|, )Delta=([^,]+)/.exec(v.name), dv = dm && dm[1], wf = dv && w.kpi.dirFill[dv];
+        if (/Sparkline=On/.test(v.name)) { unitCheck(`KPI ${v.name}`, v.utype); continue; }   // 스파크라인 변형은 자식 순서가 달라 증감 줄은 보지 않는다
+        if (dv === "None" && v.arrow) bad.push(`KPI ${v.name} (${v.id}) 에 화살표 ${v.arrow} 가 있습니다 — class 없는 .kpi .delta 는 아이콘 없음`);
+        if ((dv === "Up" || dv === "Down") && !v.arrow) bad.push(`KPI ${v.name} (${v.id}) 에 화살표가 없습니다`);
+        if (wf && v.dfill && String(v.dfill).replace(/^\$/, "") !== wf) bad.push(`KPI ${v.name} (${v.id}) 증감 칠 ${v.dfill} ≠ ${wf}(.kpi .delta${dv === "None" ? "" : "." + dv.toLowerCase()})`);
+        unitCheck(`KPI ${v.name}`, v.utype);
+      }
+    }
+    if (notoUnits.length) notes.push(`KPI 단위 ${notoUnits.length}곳(원본 · 인스턴스 · 대시보드 — 인스턴스는 원본 id 로 목록과 맞춤)이 Noto Sans KR 로 남아 있습니다(${U.fs}/${U.wt} 에 맞는 텍스트 스타일 없음) — _figma/font-revert-nodes.tsv 의 '사람이 데스크톱에서 Pretendard Medium ${U.fs} 으로 되돌릴 노드'와 맞음`);
+  }
 }
 
 /* Card(2026-11-03 k29) — 규칙은 cardExpect 머리 주석. probe 의 components.card(변형마다 상자 · 부품)와 덤프의 변수 값(묶인 변수의 px)으로 본다.

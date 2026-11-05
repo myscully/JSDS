@@ -183,6 +183,17 @@
 > - 2026-11-05 k35: Data Visual 차트 모양(막대 각짐 · stroke 없음, 도넛 2px 면 색 경계, 범례 원, series-1 subtle/strong)을 Figma 에 반영하며 문서 카드 Spec 행 글 2개를 저장소(components.data)대로 바꿨다 —
 >   996:4676(Chart 행) · 996:4679(Color 행). makeFont() 의 Noto 로 쓰고 Body/2 크기 · 행간으로 배치한 뒤 `setTextStyleIdAsync(Body/2)` — 둘 다 **Pretendard Regular + Body/2 연결**, 높이 44(2줄) · 66(3줄).
 >   **새 Noto 노드 없음.** 데스크톱에서 열면 다시 배치된다 — 두 행의 줄 수 · 높이를 한 번 본다(줄바꿈이 바뀌면 Spec 프레임 330:2542 높이도 따라 바뀐다)
+> - 2026-11-05 k35b: Data Visual 문서 카드에 'KPI · 예제 =' 행 1031:4826 을 더했다(components.data.js 예제 kpi 의 세 카드). 글 13개를 makeFont() 의 Noto 로 쓰고
+>   스타일 크기 · 행간으로 배치한 뒤 원래 스타일에 다시 묶었다 — 제목 1031:4828(Label/1) · 칩 1031:4830(Caption/1), 카드 1031:4837 · 1031:4838 · 1031:4859 의
+>   라벨 · 증감(Label/2 높이 16) · 값(Display/2 높이 44) · 단위 '%' · '/ 1,284'(Title/1 높이 24). 모두 **Pretendard + 스타일 연결**, 높이 = 스타일 행간.
+>   **새 Noto 노드 없음.** 폭은 Noto 글리프로 잰 값이라(예: 'Critical 이벤트' 80, 같은 글의 대시보드 339:93 은 76) 데스크톱에서 열면 다시 배치된다 — 세 카드의 한 줄 · 폭을 한 번 본다
+> - 2026-11-05 k35c: **KPI 단위를 저장소에 맞추며 Noto 로 남긴 노드 22개 — 사람이 데스크톱에서 Pretendard Medium 16 으로 되돌릴 노드.**
+>   `.kpi .value small` 은 16 / 500 이고 행간 19.2px(`.value` 의 1.2 상속) · 자간 -0.64px(`.value` 의 -.02em 상속) · 색 tertiary 다(헤드리스 Chromium 계산값). 14단계 타입 스케일에 16/500 이 없어
+>   (Title/1 = 16/24/600 · Title/2 = 14/20/500) 새 스타일을 만들지 않고 Title/1 연결을 끊은 뒤 makeFont() 의 Noto Sans KR Medium 16 · 19.2px · -0.64px 로 값만 줬다(조정자 지시).
+>   대상: KPI 세트 330:2345 의 Unit 18개(원본 변형 12 + 새 Delta=None 변형 6 — Sparkline=On 2개에는 Unit 이 없음) · 4 Pattern 대시보드 339:107 · 339:118 · 글자 덮어쓰기가 있는 문서 인스턴스 2개
+>   (I1031:4838;330:2294 · I1039:4919;1039:4857). 덮어쓰기 없는 문서 인스턴스 8개는 원본을 따른다. 목록은 `font-revert-nodes.tsv` 의 k35c 절.
+>   되돌릴 때: Pretendard Medium · 16 · 행간 19.2px · 자간 -0.64px · 스타일 연결 없음(또는 사람이 16/500 스타일을 만들기로 하면 그 스타일). 플러그인에서 높이가 20 으로 읽힌다(19.2 반올림) — 데스크톱에서 한 번 본다.
+>   같은 날 'KPI · 예제' 3번째 카드 1031:4859(Delta=Up 에 화살표 숨김 · 칠 덮어쓰기)를 지우고 새 Delta=None 인스턴스 1039:4919 로 바꿨다 — 라벨 · 값 · 증감은 Pretendard + 원래 스타일(Label/2 · Display/2 · Label/2)
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)
