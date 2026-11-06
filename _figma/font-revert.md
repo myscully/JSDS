@@ -206,6 +206,8 @@
 >
 >   두 스타일은 기존 14개와 같은 폴더 · 규칙(행간 px · 자간 %)이고 순서는 Title/1 · Label/2 바로 뒤다. 증감 글자는 그전에 Label/2(Pretendard Medium 500)에 묶여 있었다 — CSS 600 과 달랐던 것(k4 굵기 표의 'KPI delta → 600')이 이 스타일로 풀린다.
 >   덮어쓰기 없는 문서 인스턴스는 원본을 따른다(플러그인에서 Title/1 Medium 높이 24 · Label/2 SemiBold 높이 16 확인). 서버 렌더러는 Noto 글리프로 그리므로 데스크톱에서 스타일 서체를 바꾼 뒤 단위 · 증감의 폭과 한 줄을 한 번 본다
+> - 2026-11-06 k36 덤프: 사람이 데스크톱에서 두 스타일을 Pretendard 로 바꿨다 — Title/1 Medium 은 **Pretendard Medium**(맞음), Label/2 SemiBold 는 **Pretendard Bold(700)** 로 들어가 audit 어긋남 1건(`굵기 700 ≠ 600`)이 남았다.
+>   **남은 일: 데스크톱에서 Label/2 SemiBold 의 서체를 Pretendard SemiBold 로.** 그 뒤 probe · audit 을 다시 돌려 어긋남 0 을 본다
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)

@@ -173,6 +173,15 @@ const donutDiv = (donut) => { const C = donut.width / 2;
 const cr = (k) => (k.type === "ELLIPSE" ? k.width / 2 : "cornerRadius" in k ? (k.cornerRadius === figma.mixed ? Math.min(k.topLeftRadius, k.topRightRadius, k.bottomRightRadius, k.bottomLeftRadius) : k.cornerRadius) : 0);
 const maxR = (n) => Math.max(0, ...[n].concat(n.findAll ? n.findAll((k) => "cornerRadius" in k && k.type !== "TEXT") : []).map((k) => (k.cornerRadius === figma.mixed ? Math.max(k.topLeftRadius, k.topRightRadius, k.bottomRightRadius, k.bottomLeftRadius) : k.cornerRadius || 0)));
 const swatches = (lg) => { const t = {}; for (const it of lg.children) { const s = it.findOne && it.findOne((k) => k.type === "RECTANGLE" || k.type === "ELLIPSE"); if (!s) continue; const key = s.type + "|" + +s.width.toFixed(2) + "x" + +s.height.toFixed(2) + "|r" + +cr(s).toFixed(2); t[key] = (t[key] || 0) + 1; } return t; };
+/* 카드 줄(2026-11-06 k36 — 대시보드 .row-3 2fr 1fr) — 도넛 → 행 → 카드 → 줄. 줄의 폭 · 좌우 padding · 간격, 보이는 카드 폭들, 도넛 카드의 자리 */
+const gridOf = (donut) => { const card = donut.parent && donut.parent.parent, line = card && card.parent; if (!line || line.layoutMode !== "HORIZONTAL") return null; const kids = line.children.filter((k) => k.visible !== false);
+  return { id: line.id, w: +line.width.toFixed(2), pad: (line.paddingLeft || 0) + (line.paddingRight || 0), gap: line.itemSpacing, ws: kids.map((k) => +k.width.toFixed(2)), idx: kids.findIndex((k) => k.id === card.id) }; };
+/* 도넛 + 범례 행(2026-11-06 k36 — .donut-row 가 flex-wrap: 한 줄에 안 들어가면 범례가 도넛 아래). 행의 방향 · 간격 · 정렬 · 크기,
+   행이 쓸 수 있는 폭 avail(행 부모의 안쪽 폭 — 부모가 auto layout 이 아니면 행 폭), 도넛 · 범례 폭과 위치. audit 이 .donut-row gap 과 폭으로 옆 · 아래를 판정한다 */
+const rowGeo = (donut) => { const row = donut.parent; if (!row || !("layoutMode" in row)) return null; const up = row.parent, lg = row.children.find((k) => k.id !== donut.id && "children" in k && k.visible !== false); /* id 로 비교 — 인스턴스 안 노드는 찾은 경로마다 다른 객체라 !== 가 자기 자신을 범례로 잡았다(k36 330:2605) */
+  const avail = up && "paddingLeft" in up && up.layoutMode && up.layoutMode !== "NONE" ? +(up.width - up.paddingLeft - up.paddingRight).toFixed(2) : +row.width.toFixed(2);
+  return { id: row.id, lm: row.layoutMode, gap: row.itemSpacing, pa: row.primaryAxisAlignItems, ca: row.counterAxisAlignItems, sh: row.layoutSizingHorizontal || "-", wrap: row.layoutWrap || "NO_WRAP", w: +row.width.toFixed(2), avail,
+    dw: +donut.width.toFixed(2), dx: +donut.x.toFixed(2), dy: +donut.y.toFixed(2), lw: lg ? +lg.width.toFixed(2) : null, lx: lg ? +lg.x.toFixed(2) : null, ly: lg ? +lg.y.toFixed(2) : null }; };
 const FLAT_SETS = ["Card", "KPI", "Chart Card"];   // variant outline · flat 을 가진 세트(2026-11-03 k32 — 사람의 결정, components.data.js card · data-visual 의 figma.variant)
 const vname = (b) => { const v = b && byId.get(b.id); return v ? v.name.replace("color/semantic/", "") : null; };
 const paint = (arr) => {
@@ -231,6 +240,7 @@ for (const p of figma.root.children) {
         const row = donut.parent; if (row && "primaryAxisAlignItems" in row) parts.row = row.primaryAxisAlignItems + "/" + (row.layoutSizingHorizontal || "-");
         const ct = (donut.children || []).find((k) => k.type === "TEXT"); if (ct) parts.donutCenter = centerTx(ct);   // 가운데 합계(k34)
         parts.donutDividers = donutDiv(donut);   // 경계 구분선(k35)
+        parts.rowGeo = rowGeo(donut);   // 도넛 + 범례 행 배치(k36)
       }
       /* 정적 막대 · 스파크라인 모서리, 범례 견본 모양(2026-11-05 k35 — 사람의 결정: 정적 막대 · 트랙 · 스파크라인 각짐, .chart-legend i 원형 10) */
       const bar0 = c.findAll((k) => k.name === "Bar" && k.type === "FRAME");
@@ -695,19 +705,30 @@ for (const p of figma.root.children) {
 /* 컴포넌트 밖 정적 차트(2026-11-05 k35) — 패턴 예시(대시보드)처럼 인스턴스가 아니라 프레임으로 그린 도넛 · 막대 트랙.
    도넛 = 호(innerRadius > 0 인 ELLIPSE)를 둘 이상 가진 프레임: 호 각도 · 칠, 호 사이 틈, 호 테두리 수, 경계 구분선(donutDiv), 같은 행(도넛의 부모)의 범례 견본.
    트랙 = 높이 12 인 프레임 중 앞뒤 형제가 TEXT 인 것(.chart .row 의 .lbl + .bar + .num): 모서리(maxR). audit 이 CSS .donut · .donut i · .chart-legend i · .chart .bar 와 patterns.data.js 의 --a 와 맞춘다 */
-components.staticCharts = { donuts: [], tracks: [] };
+/* Data Visual 문서의 Chart 인스턴스(2026-11-06 k36) — 문서 순서(위 → 아래, 같은 줄은 왼쪽 → 오른쪽 = 트리 순서)대로 원본 변형 이름 */
+components.chartDoc = null;
+for (const p of figma.root.children) {
+  if (!isCurrent(p)) continue;
+  const doc = p.findAllWithCriteria({ types: ["FRAME"] }).find((f) => f.name === "Card/Data Visual"); if (!doc) continue;
+  components.chartDoc = [];
+  for (const i of doc.findAllWithCriteria({ types: ["INSTANCE"] })) { const mc = await i.getMainComponentAsync(); if (mc && mc.parent && mc.parent.type === "COMPONENT_SET" && mc.parent.name === "Chart") components.chartDoc.push({ id: i.id, main: mc.name, w: +i.width.toFixed(2) }); }
+}
+components.staticCharts = { donuts: [], tracks: [], instRows: [] };   // instRows = 인스턴스 안의 도넛 + 범례 행(k36 — 인스턴스 폭을 바꾸면 자리 판정이 달라진다)
 for (const p of figma.root.children) {
   if (!isCurrent(p)) continue;
   const inComp = (n) => { for (let q = n.parent; q && q.type !== "PAGE"; q = q.parent) if (q.type === "COMPONENT" || q.type === "COMPONENT_SET" || q.type === "INSTANCE") return true; return false; };
   for (const f of p.findAllWithCriteria({ types: ["FRAME"] })) {
     if (f.height === 12 && f.parent && f.parent.layoutMode === "HORIZONTAL") { const sib = f.parent.children, i = sib.indexOf(f); if (i > 0 && i < sib.length - 1 && sib[i - 1].type === "TEXT" && sib[i + 1].type === "TEXT" && !inComp(f)) components.staticCharts.tracks.push({ page: p.name, id: f.id, r: maxR(f) }); }
     const arcs = f.children.filter((k) => k.type === "ELLIPSE" && k.arcData && k.arcData.innerRadius > 0);
+    if (arcs.length >= 2 && inComp(f) && f.parent && f.parent.layoutMode && f.parent.layoutMode !== "NONE") {
+      let q = f.parent, main = false, inst = null; for (; q && q.type !== "PAGE"; q = q.parent) { if (q.type === "COMPONENT" || q.type === "COMPONENT_SET") { main = true; break; } if (q.type === "INSTANCE") inst = q; }
+      if (!main && inst) components.staticCharts.instRows.push({ page: p.name, id: f.id, inst: inst.id, row: rowGeo(f) }); }
     if (arcs.length < 2 || inComp(f)) continue;
     const a = arcs.map((e) => [e.arcData.startingAngle, e.arcData.endingAngle].map((x) => +((x * 180) / Math.PI).toFixed(2)).concat(paint(e.fills))).sort((x, y) => x[0] - y[0]);
     const lgs = f.parent ? f.parent.children.filter((k) => k !== f && "children" in k) : [];
     const sw = {}; for (const g of lgs) for (const [k2, n2] of Object.entries(swatches(g))) sw[k2] = (sw[k2] || 0) + n2;
     components.staticCharts.donuts.push({ page: p.name, id: f.id, path: [f.parent && f.parent.parent && f.parent.parent.parent ? f.parent.parent.parent.name : null].join(""), d: +f.width.toFixed(2), arcs: a,
-      gaps: a.map((x, i) => +((i + 1 < a.length ? a[i + 1][0] : a[0][0] + 360) - x[1]).toFixed(2)), strokes: arcs.reduce((n, e) => n + e.strokes.filter((x) => x.visible !== false).length, 0), dividers: donutDiv(f), legendSw: sw });
+      gaps: a.map((x, i) => +((i + 1 < a.length ? a[i + 1][0] : a[0][0] + 360) - x[1]).toFixed(2)), strokes: arcs.reduce((n, e) => n + e.strokes.filter((x) => x.visible !== false).length, 0), dividers: donutDiv(f), legendSw: sw, row: rowGeo(f), grid: gridOf(f) });
   }
 }
 /* KPI 글(2026-11-05 k35 · k35b) — 라벨 / 값 줄(값 · 단위) / 증감 줄(화살표 아이콘 · 글)의 글 · 칠. 문서 카드의 KPI 인스턴스와 4 Pattern 대시보드의 raw 프레임이

@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react";
 import { ChartCanvas, presets, mountChart, type ChartLike, type DsChartConfig } from "./index";
+import DSChart from "./ds-chart.js";
 
 /* chart.js 는 optional peer 라 테스트에서 import 하지 않는다 — ctx 가 있는 가짜 Chart 로 mount · paint · destroy 흐름을 본다.
    jsdom 은 CSS 변수를 계산하지 못하므로 색 값 자체는 사이트 behave(헤드리스 Chromium)가 토큰 계산값과 대조한다 */
@@ -24,13 +25,13 @@ describe("presets", () => {
     expect((c.options as { scales: { y: { stacked: boolean } } }).scales.y.stacked).toBe(true);
     expect(presets.timeseries({ labels: ["a"], series }).data.datasets.every((d) => d.fill === false)).toBe(true);
   });
-  it("bar 는 각지고 stroke 없음 — 누적은 두 번째 세그먼트부터 시작 변에 2px 투명 틈, horizontal 은 indexAxis y", () => {
+  it("bar 는 각지고 stroke 없음 — 누적 세그먼트도 테두리 · 틈 없이 붙음, horizontal 은 indexAxis y", () => {
     const g = presets.bar({ labels: ["a"], series });
     expect(g.type).toBe("bar"); expect(g.data.datasets.map((d) => [d.borderRadius, d.borderWidth])).toEqual([[0, 0], [0, 0]]); expect((g.options as { indexAxis: string }).indexAxis).toBe("x");
     const st = presets.bar({ labels: ["a"], series, stacked: true, horizontal: true });
-    expect(st.data.datasets.map((d) => d.borderWidth)).toEqual([0, { left: 2 }]); expect((st.options as { indexAxis: string }).indexAxis).toBe("y");
-    expect(presets.bar({ labels: ["a"], series, stacked: true }).data.datasets.map((d) => d.borderWidth)).toEqual([0, { bottom: 2 }]);
-    expect(st.data.datasets.every((d) => d.borderRadius === 0 && d.borderColor === "transparent" && d.inflateAmount === 0 && d.maxBarThickness === 32)).toBe(true);
+    expect(st.data.datasets.map((d) => d.borderWidth)).toEqual([0, 0]); expect((st.options as { indexAxis: string }).indexAxis).toBe("y");
+    expect(presets.bar({ labels: ["a"], series, stacked: true }).data.datasets.map((d) => d.borderWidth)).toEqual([0, 0]);
+    expect(st.data.datasets.every((d) => d.borderRadius === 0 && d.inflateAmount === undefined && d.maxBarThickness === 32)).toBe(true);   // inflate 는 기본(auto) — 이웃 세그먼트 사이 실금 없음
   });
   it("donut 은 doughnut, 구멍 67%, 조각 톤과 center 를 메타에", () => {
     const d = presets.donut({ series: [{ label: "A", value: 1, tone: "critical" }, { label: "B", value: 2 }], center: "3", legend: "right" });
@@ -44,6 +45,23 @@ describe("presets", () => {
     expect(m.data.datasets.map((d) => d.order)).toEqual([2, 0]);
     expect([m.data.datasets[0].borderWidth, m.data.datasets[0].borderRadius]).toEqual([0, 0]);   // 막대 stroke · 둥글림 없음
     expect(Object.keys((m.options as { scales?: Record<string, unknown> }).scales ?? {}).filter((k) => k.startsWith("y"))).toHaveLength(0);   // y2 를 만들지 않는다
+  });
+});
+
+describe("옆 범례 — 자리가 좁고 세로로 길면 아래로", () => {
+  it("legendPosition: right · left 는 폭 < 높이 × 1.5 이면 bottom, 그 밖은 그대로", () => {
+    expect(DSChart.legendPosition("right", 360, 240)).toBe("right"); expect(DSChart.legendPosition("right", 359, 240)).toBe("bottom");
+    expect(DSChart.legendPosition("left", 200, 400)).toBe("bottom"); expect(DSChart.legendPosition("bottom", 900, 240)).toBe("bottom");
+    expect(DSChart.legendPosition(undefined, 900, 240)).toBe("bottom"); expect(DSChart.legendPosition("right", 0, 0)).toBe("right");   // 크기를 모르면 원하는 대로
+  });
+  it("도넛은 mount 때 캔버스 크기로 정하고, onResize 때 다시 정한다", () => {
+    class Sized extends FakeChart { width = 260; height = 240; }
+    const h = mountChart(Sized as unknown as ChartLike, document.createElement("canvas"), presets.donut({ series: [{ label: "A", value: 1 }, { label: "B", value: 2 }], legend: "right" }));
+    const opts = (h.chart as unknown as FakeChart).options as { plugins: { legend: { position: string } }; onResize: (c: unknown, s: { width: number; height: number }) => void };
+    expect(opts.plugins.legend.position).toBe("bottom");
+    opts.onResize(h.chart, { width: 600, height: 240 }); expect(opts.plugins.legend.position).toBe("right");
+    opts.onResize(h.chart, { width: 300, height: 240 }); expect(opts.plugins.legend.position).toBe("bottom");
+    h.destroy();
   });
 });
 

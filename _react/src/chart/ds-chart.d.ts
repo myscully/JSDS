@@ -8,7 +8,7 @@ export interface Series { label: string; data: number[]; tone?: Tone }
 export interface DonutSlice { label: string; value: number; tone?: Tone }
 export interface TimeseriesSpec { labels: string[]; series: Series[]; /** 누적 영역(심각도 누적 추이) */ stacked?: boolean }
 export interface BarSpec { labels: string[]; series: Series[]; stacked?: boolean; horizontal?: boolean }
-export interface DonutSpec { series: DonutSlice[]; /** 구멍 가운데 글자(합계 등) */ center?: string | number; legend?: "bottom" | "right" }
+export interface DonutSpec { series: DonutSlice[]; /** 구멍 가운데 글자(합계 등) */ center?: string | number; /** right 는 자리가 좁고 세로로 길면(폭 < 높이 × 1.5) 아래로 내려간다 */ legend?: "bottom" | "right" }
 export interface MixedSpec { labels: string[]; bars: Series[]; lines: Series[] }
 
 /** Chart.js config 에 ds-chart 메타(_ds)가 붙은 것. 보통의 Chart.js 옵션을 덧붙여도 된다 */
@@ -30,6 +30,8 @@ export interface DSChartApi {
   auto(Chart?: ChartLike, scope?: ParentNode): DsChartHandle[];
   paint(chart: InstanceType<ChartLike>, theme: DsTheme): void;
   resolve(el: Element, token: string): string;
+  /** 옆 범례(right · left)가 폭 w · 높이 h 의 자리에서 실제로 놓일 위치 — w < h × 1.5 이면 "bottom" */
+  legendPosition(want: string | undefined, w: number, h: number): string;
   SERIES_MAX: number;
   TOKENS: { series: string[]; grid: string; axis: string; tipBg: string; tipFg: string; surface: string; text: string };
   TONES: Record<Tone, string>;

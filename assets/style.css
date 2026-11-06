@@ -1362,7 +1362,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .donut{position:relative;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--foreground-negative-primary) 0 18.03%,var(--foreground-cautionary-primary) 18.03% 45.07%,var(--foreground-accent-cyan) 45.07% 75.05%,var(--foreground-inactive-primary) 75.05% 100%);line-height:1.6}
 .donut::after{content:attr(data-label);width:80px;height:80px;border-radius:50%;background:var(--surface-elevated-primary);display:grid;place-items:center;font-weight:600;font-size:16px;line-height:24px}   /* 가운데 합계 = Title/1 16/24/600 — 700 이던 것을 Figma 스타일 14단계에 맞춰 600 으로(사람의 결정 2026-11-04). 탐색형 도넛(ds-chart centerPlugin)도 같다 */
 .donut i{position:absolute;top:0;left:50%;width:2px;height:20px;margin-left:-1px;background:var(--surface-elevated-primary);transform-origin:50% 60px;transform:rotate(var(--a,0deg))}
-.donut-row{display:flex;align-items:center;justify-content:space-between;gap:24px;line-height:1.6}
+.donut-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;line-height:1.6}   /* 자리가 좁아 도넛 + 범례가 한 줄에 안 들어가면 범례가 도넛 아래로 내려간다(사람의 요청 2026-11-06 — 탐색형 도넛의 옆 범례와 같은 규칙). 줄 사이 16 = chart-card gap */
 .chart-legend{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:12px;color:var(--foreground-neutral-secondary);line-height:1.6}
 .chart-legend span{display:inline-flex;align-items:center;gap:6px}
 .chart-legend i{width:10px;height:10px;border-radius:50%;background:var(--foreground-inactive-primary);flex:none}

@@ -8,8 +8,8 @@
    - presets.*      : timeseries(선/영역 · 누적) · bar(세로/가로 · 그룹/누적) · donut · mixed(막대 + 선, y 축 하나) — spec → Chart.js config
    - mount          : Chart 생성 + 라이트/다크 전환(data-theme · prefers-color-scheme)과 제품색 주입 때 다시 칠한다
    - auto           : canvas[data-chart] 를 찾아 data-spec(JSON) 으로 mount
-   마크 규격(사람의 결정 2026-11-03, 막대 · 범례는 2026-11-05 개정): 선 2px · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음 · 누적 세그먼트 사이 2px 투명 틈 ·
-   도넛 조각 사이 2px 면 색 경계 · 격자는 y 축만 · 범례는 2계열 이상일 때 아래, 원형 아이콘 · y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정, 7번째부터는 '기타'로 묶는다
+   마크 규격(사람의 결정 2026-11-03, 막대 · 범례는 2026-11-05 · 11-06 개정): 선 2px · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음 · 누적 세그먼트는 틈 없이 이어 붙임 ·
+   도넛 조각 사이 2px 면 색 경계 · 격자는 y 축만 · 범례는 2계열 이상일 때 아래, 원형 아이콘(도넛의 옆 범례는 자리가 좁고 높으면 아래로) · y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정, 7번째부터는 '기타'로 묶는다
    ========================================================= */
 (function (root) {
   "use strict";
@@ -102,13 +102,25 @@
     });
     return dst;
   }
+  /* 옆 범례(right · left)는 자리가 좁고 세로로 길면 차트 아래로 내린다(사람의 요청 2026-11-06) — 옆에 두면 도넛 지름이 '폭 − 범례 폭'으로 줄어
+     좁은 카드에서 도넛이 점처럼 작아진다. 기준은 캔버스 폭 < 높이 × 1.5(높이 240 이면 폭 360 미만). 크기가 바뀔 때마다 다시 판정한다 */
+  var SIDE_LEGEND_RATIO = 1.5;
+  function legendPosition(want, w, h) {
+    if (want !== "left" && want !== "right") return want || "bottom";
+    return w > 0 && h > 0 && w < h * SIDE_LEGEND_RATIO ? "bottom" : want;
+  }
+  /* Chart.js 는 onResize 를 부른 뒤 다시 배치(update)하므로 여기서 위치만 바꾸면 된다 */
+  function relayout(chart, size) {
+    var meta = chart.$ds || {}; if (meta.kind !== "donut") return;
+    chart.options.plugins.legend.position = legendPosition(meta.legend, size.width, size.height);
+  }
   function paint(chart, t) {
     /* Chart.js 의 chart.config 는 Config 래퍼라 config 에 붙인 _ds 가 보이지 않는다 — mount 가 chart.$ds 로 옮겨 둔다 */
     var meta = chart.$ds || {}, kind = meta.kind, data = chart.data, n = data.datasets.length;
     deepAssign(chart.options, baseOptions(t, kind === "donut" ? data.labels.length : n));
     /* 프리셋 · 사용자가 config.options 에 준 것이 기본 옵션 위에 남아야 한다 — 종전에는 기본이 덮어 bar 의 autoSkip:false 가 사라졌다(Figma 대조에서 발견, 2026-11-04) */
     if (meta.options) deepAssign(chart.options, meta.options);
-    if (kind === "donut") { chart.options.scales = {}; chart.options.interaction = { mode: "nearest", intersect: true }; chart.options.plugins.legend.position = meta.legend || "bottom"; }
+    if (kind === "donut") { chart.options.scales = {}; chart.options.interaction = { mode: "nearest", intersect: true }; chart.options.plugins.legend.position = legendPosition(meta.legend, chart.width, chart.height); chart.options.onResize = relayout; }
     data.datasets.forEach(function (ds, i) {
       var c = seriesColor(t, ds, i);
       if (kind === "donut") {
@@ -117,7 +129,7 @@
       } else if (ds.type === "line" || kind === "timeseries") {
         ds.borderColor = c; ds.backgroundColor = ds.fill ? alpha(c, 0.24) : c; ds.pointBackgroundColor = c; ds.pointBorderColor = t.surface;
       } else {
-        ds.backgroundColor = c; ds.borderColor = "transparent";   // 막대는 stroke 없음 — 누적 틈의 테두리도 투명
+        ds.backgroundColor = c; ds.borderColor = "transparent";   // 막대는 stroke 없음
       }
     });
     meta.text = t.text;
@@ -135,15 +147,14 @@
         }) },
         options: { scales: { x: { stacked: stacked }, y: { stacked: stacked } } } };
     },
-    /* 막대 — horizontal 로 가로, stacked 로 누적. 끝 4px 둥글림, 세그먼트 · 이웃 사이 2px 면 색 틈 */
+    /* 막대 — horizontal 로 가로, stacked 로 누적. 각지고 stroke 없음, 누적 세그먼트는 틈 없이 이어 붙임 */
     bar: function (spec) {
       var stacked = !!spec.stacked, list = seriesOf(spec);
       return { type: "bar", _ds: { kind: "bar" },
         data: { labels: spec.labels, datasets: list.map(function (s, i) {
-          /* 막대는 각지고 stroke 가 없다(사람의 결정 2026-11-05). 누적의 세그먼트 사이 2px 틈은 두 번째 세그먼트부터 시작 변에 준 '투명' 테두리다 —
-             Chart.js 의 inflateAmount 는 테두리가 있는 변에만 작동해 음수로 틈을 낼 수 없다. 첫 세그먼트 · 막대 끝 길이는 줄지 않는다 */
-          var gap = stacked && i > 0 ? (spec.horizontal ? { left: 2 } : { bottom: 2 }) : 0;
-          return deepAssign(s, { borderWidth: gap, borderColor: "transparent", borderSkipped: false, borderRadius: 0, inflateAmount: stacked ? 0 : "auto", maxBarThickness: 32 });
+          /* 막대는 각지고 stroke 가 없다(사람의 결정 2026-11-05). 누적 세그먼트는 틈 없이 이어 붙인다(사람의 요청 2026-11-06 — 종전 2px 투명 틈을 지움).
+             inflateAmount 는 기본(auto)이라 이웃 세그먼트 사이에 안티에일리어싱 실금이 생기지 않는다 */
+          return deepAssign(s, { borderWidth: 0, borderRadius: 0, maxBarThickness: 32 });
         }) },
         /* 범주 축은 라벨을 건너뛰지 않는다(autoSkip 은 시계열용) — 좁으면 글자가 돌아가는 대신 maxRotation 0 이라 겹칠 수 있으니 카드 폭을 준다 */
         options: { indexAxis: spec.horizontal ? "y" : "x", scales: { x: { stacked: stacked, ticks: spec.horizontal ? {} : { autoSkip: false } }, y: { stacked: stacked, ticks: spec.horizontal ? { autoSkip: false } : {} } } } };
@@ -209,7 +220,7 @@
     });
   }
 
-  var DSChart = { theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, SERIES_MAX: SERIES_MAX, TOKENS: TOKENS, TONES: TONES };
+  var DSChart = { theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, legendPosition: legendPosition, SERIES_MAX: SERIES_MAX, TOKENS: TOKENS, TONES: TONES };
   if (typeof module !== "undefined" && module.exports) module.exports = DSChart;
   root.DSChart = DSChart;
   if (doc && root.Chart !== undefined) { /* 사이트 · 순수 JS: 벤더 스크립트가 먼저 defer 로 실려 있다 */
