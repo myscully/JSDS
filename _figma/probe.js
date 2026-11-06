@@ -175,7 +175,22 @@ const maxR = (n) => Math.max(0, ...[n].concat(n.findAll ? n.findAll((k) => "corn
 const swatches = (lg) => { const t = {}; for (const it of lg.children) { const s = it.findOne && it.findOne((k) => k.type === "RECTANGLE" || k.type === "ELLIPSE"); if (!s) continue; const key = s.type + "|" + +s.width.toFixed(2) + "x" + +s.height.toFixed(2) + "|r" + +cr(s).toFixed(2); t[key] = (t[key] || 0) + 1; } return t; };
 /* 카드 줄(2026-11-06 k36 — 대시보드 .row-3 2fr 1fr) — 도넛 → 행 → 카드 → 줄. 줄의 폭 · 좌우 padding · 간격, 보이는 카드 폭들, 도넛 카드의 자리 */
 const gridOf = (donut) => { const card = donut.parent && donut.parent.parent, line = card && card.parent; if (!line || line.layoutMode !== "HORIZONTAL") return null; const kids = line.children.filter((k) => k.visible !== false);
-  return { id: line.id, w: +line.width.toFixed(2), pad: (line.paddingLeft || 0) + (line.paddingRight || 0), gap: line.itemSpacing, ws: kids.map((k) => +k.width.toFixed(2)), idx: kids.findIndex((k) => k.id === card.id) }; };
+  return { id: line.id, w: +line.width.toFixed(2), pad: (line.paddingLeft || 0) + (line.paddingRight || 0), gap: line.itemSpacing, ws: kids.map((k) => +k.width.toFixed(2)), idx: kids.findIndex((k) => k.id === card.id), cards: kids.map(lineCard) }; };
+/* 줄의 카드 하나(2026-11-06 k37 — 대시보드 .row-3 의 카드 구성 · 순서). Chart 세트 인스턴스면 Type · 제목 · 기간 · 범례 글 · 선/영역 계열 · x 눈금 글 · Hover 표시,
+   프레임이면 도넛(호 2개 이상) · 막대(Bar) · 그 밖과 Head 의 글. 숨긴 레이어는 이 환경에서 인스턴스 children 에 안 나오므로(skipInvisibleInstanceChildren) visible 로도 거른다 */
+const lineCard = (k) => { const tx = (n) => (n ? n.characters : null), vis = (n) => n && n.visible !== false;
+  const main = k.type === "INSTANCE" ? k.mainComponent : null;
+  if (main && main.parent && main.parent.type === "COMPONENT_SET" && main.parent.name === "Chart") {
+    const cv = k.findOne((x) => x.name === "Canvas" && x.type === "FRAME"), lg = cv && cv.children.find((x) => x.name === "Legend" && vis(x)), hv = cv && cv.children.find((x) => x.name === "Hover");
+    const vecs = cv ? cv.findAll((x) => x.type === "VECTOR" && vis(x)) : [], meta = k.findOne((x) => x.name === "Meta" && x.type === "TEXT" && vis(x));
+    return { id: k.id, chart: true, kind: String(((k.componentProperties || {}).Type || {}).value || "").toLowerCase(), title: tx(k.findOne((x) => x.name === "Chart Title" && x.type === "TEXT")), meta: tx(meta),
+      hover: vis(hv), legend: lg ? lg.children.filter(vis).map((it) => tx(it.findOne((x) => x.type === "TEXT"))) : [],
+      lines: vecs.filter((x) => / Line$/.test(x.name)).map((x) => x.name.replace(/ Line$/, "")), areas: vecs.filter((x) => / Area$/.test(x.name)).map((x) => x.name.replace(/ Area$/, "")),
+      ticksX: cv ? cv.children.filter((x) => x.type === "TEXT" && /^Tick /.test(x.name) && vis(x) && !/^[\d.,\s]+$/.test(x.characters)).map((x) => x.characters) : [], cw: cv ? +cv.width.toFixed(2) : null }; }
+  const head = "children" in k ? k.children.find((x) => x.name === "Head" && vis(x)) : null, ht = head ? head.findAll((x) => x.type === "TEXT" && vis(x)) : [];
+  const donut = "findOne" in k && k.findOne((x) => x.type === "FRAME" && x.children.filter((e) => e.type === "ELLIPSE" && e.arcData && e.arcData.innerRadius > 0).length >= 2);
+  const bars = "findOne" in k && k.findOne((x) => x.name === "Bar" && x.type === "FRAME");
+  return { id: k.id, chart: false, kind: donut ? "donut" : bars ? "bars" : "other", title: ht[0] ? ht[0].characters : null, meta: ht[1] ? ht[1].characters : null }; };
 /* 도넛 + 범례 행(2026-11-06 k36 — .donut-row 가 flex-wrap: 한 줄에 안 들어가면 범례가 도넛 아래). 행의 방향 · 간격 · 정렬 · 크기,
    행이 쓸 수 있는 폭 avail(행 부모의 안쪽 폭 — 부모가 auto layout 이 아니면 행 폭), 도넛 · 범례 폭과 위치. audit 이 .donut-row gap 과 폭으로 옆 · 아래를 판정한다 */
 const rowGeo = (donut) => { const row = donut.parent; if (!row || !("layoutMode" in row)) return null; const up = row.parent, lg = row.children.find((k) => k.id !== donut.id && "children" in k && k.visible !== false); /* id 로 비교 — 인스턴스 안 노드는 찾은 경로마다 다른 객체라 !== 가 자기 자신을 범례로 잡았다(k36 330:2605) */

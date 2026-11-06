@@ -47,7 +47,10 @@
  *           정적: Chart Card 막대 · 대시보드 트랙 ↔ .chart .bar · .chart .bar i border-radius, 스파크라인(Chart Card · KPI) ↔ .sparkline i, 범례 견본 크기 · 원 ↔ .chart-legend i,
  *           도넛 경계선(Chart Card 의 Donut · 대시보드 도넛) 개수 · 각도 · 크기 · 칠 · 반지름 방향 ↔ .donut i 와 예제 donut · 대시보드의 --a, 호는 틈 0,
  *           Data Visual 문서 'KPI · 예제 =' 카드 ↔ 예제 kpi 의 .kpi(라벨 · 값 · 단위 · 증감 · 화살표 · 칠 — k35b), 'KPI · Tone =' = Default + CSS 톤 · 라벨 하나,
- *           4 Pattern 대시보드 KPI ↔ patterns.data.js dashboard 의 .kpi(같은 항목) · 대시보드에만 있는 KPI 라벨 없음(staticChartExpect · diffStatic). 새 변수 두 개의 별칭은 토큰 대조(--chart-*)가 본다,
+ *           4 Pattern 대시보드 KPI ↔ patterns.data.js dashboard 의 .kpi(같은 항목) · 대시보드에만 있는 KPI 라벨 없음(staticChartExpect · diffStatic).
+ *           대시보드 차트 줄 카드 구성(2026-11-06 k37 — 사람의 결정: 사이트처럼 '탐지 추이' 시계열 + '심각도 분포' 도넛) ↔ patterns.data.js dashboard 의 도넛 줄(.row-*) chart-card 들:
+ *           개수 · 순서 · 제목 · 기간(<span>) · 종류(canvas data-chart = Chart 세트 Type, .donut = 정적 도넛, .chart = 정적 막대). 탐색형 카드는 data-spec 이 같은 Type 의 예제 spec 과 같아야 하고
+ *           (Figma 변형은 예제 데이터를 그린다), 범례 글 = 계열(2개 이상일 때) · 선 = 계열 · 영역 = stacked 면 계열 · x 눈금 글 ⊂ labels · 쉬는 상태라 Hover 숨김. 새 변수 두 개의 별칭은 토큰 대조(--chart-*)가 본다,
  *           KPI 단위(세트 변형 · 문서 · 대시보드) ↔ .kpi .value small 의 크기 · 굵기 + .kpi .value 에서 물려받는 행간 · 자간(맞는 타입 스케일 스타일이 있으면 그 스타일, 없으면 값 · Noto 면 font-revert-nodes.tsv 에 있어야 — k35c),
  *           KPI Delta 변형에 None(class 없는 .kpi .delta — 화살표 없음 · 칠 .kpi .delta) · 예제의 증감 방향 = Delta 값 · 예제 카드에 칠 덮어쓰기 없음 · class 없는 증감 카드는 덮어쓰기 0(k35c)
  *   도넛 가운데(2026-11-05 k34 — 사람의 결정 2026-11-04: Title/1) Chart Card 의 Donut(정적)과 Chart Type=Donut 의 가운데 글 ↔ .donut::after 의 font-size · line-height · font-weight 와 같은
@@ -958,6 +961,24 @@ function staticChartExpect() {
     const grid = { cls: rowM[1], fr: frs.map(parseFloat), gap: px(gr.gap || gr["column-gap"] || "0"), idx: [...dash.slice(rowM.index, di0).matchAll(/class="chart-card"/g)].length - 1 };
     if (grid.idx < 0 || grid.idx >= grid.fr.length) throw new Error(`대시보드 도넛 카드 위치 ${grid.idx} 가 .${rowM[1]} 열 ${grid.fr.length}개 밖입니다`);
     if (!(row.rowGap >= 0) || !(row.colGap >= 0)) throw new Error(`.donut-row gap ${dr.gap} 를 읽지 못했습니다`);
+    /* 줄의 카드 구성(2026-11-06 k37) — 줄 div 를 짝 맞춰 잘라 그 안의 chart-card 들(카드끼리는 중첩되지 않는다)을 순서대로 읽는다.
+       탐색형(canvas data-chart)은 같은 Type 의 data-visual 예제(CHART_EX) spec 과 같은지 — Figma Chart 변형은 그 예제 데이터를 그리므로 다르면 변형을 쓸 수 없다 */
+    { let depth = 0, end = -1; const tagRe = /<div\b|<\/div>/g; tagRe.lastIndex = rowM.index;
+      for (let m; (m = tagRe.exec(dash)); ) { depth += m[0] === "</div>" ? -1 : 1; if (depth === 0) { end = tagRe.lastIndex; break; } }
+      if (end < 0) throw new Error(`patterns.data.js dashboard .${rowM[1]} 줄의 끝을 찾지 못했습니다`);
+      const rowHtml = dash.slice(rowM.index, end), ENT2 = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", apos: "'", nbsp: " " };
+      const txt = (h) => String(h).replace(/<[^>]+>/g, "").replace(/&(amp|lt|gt|quot|#39|apos|nbsp);/g, (_, e) => ENT2[e]).normalize("NFC").replace(/\s+/g, " ").trim();
+      const canon = (o) => JSON.stringify(o, (k, v) => (v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
+      grid.cards = rowHtml.split('<div class="chart-card"').slice(1).map((h, i) => {
+        const tm = /<h3 class="chart-title">([\s\S]*?)<\/h3>/.exec(h); if (!tm) throw new Error(`.${rowM[1]} ${i + 1}번째 chart-card 에 .chart-title 이 없습니다`);
+        const sm = /<span[^>]*>([\s\S]*?)<\/span>/.exec(tm[1]), card = { title: txt(tm[1].replace(/<span[\s\S]*?<\/span>/, "")), meta: sm ? txt(sm[1]) : null };
+        const cm = /data-chart="([a-z]+)" data-spec='([^']+)'/.exec(h);
+        if (cm) { const e = CHART_EX.find((x) => x[0] === cm[1]); if (!e) throw new Error(`대시보드 ${card.title} 의 data-chart ${cm[1]} 에 맞는 예제가 audit CHART_EX 에 없습니다`);
+          const eh = [...ex(e[1]).matchAll(/data-chart="([a-z]+)" data-spec='([^']+)'/g)][e[2]]; if (!eh) throw new Error(`data-visual 예제 ${e[1]} 의 canvas 를 찾지 못했습니다`);
+          const spec = JSON.parse(cm[2]); Object.assign(card, { kind: cm[1], spec, specEx: e[1], specSame: canon(spec) === canon(JSON.parse(eh[2])) }); }
+        else card.kind = /class="donut"/.test(h) ? "donut" : /class="chart"/.test(h) ? "bars" : "other";
+        return card; });
+      if (grid.cards.length !== grid.fr.length) throw new Error(`patterns.data.js dashboard .${rowM[1]} chart-card ${grid.cards.length}개 ≠ 열 ${grid.fr.length}개`); }
     return { barR: rad(".chart .bar"), fillR: rad(".chart .bar i"), sparkR: rad(".sparkline i"), legend, row, grid, donut: { d: D, R: D / 2, divider: { ...dv, dist: D / 2 - dv.h / 2 }, angles: aDoc },
       kpi: { n: kpiEx.length, labels: kpiEx, dashOnly, example, dash: dashK, tones, unit, delta, dirFill, needNone } };
   } catch (e) { return { error: String(e.message || e) }; }
@@ -2172,6 +2193,25 @@ function diffStatic(c, w, bad, notes) {
   }
   for (const v of kp) if (v.sparkR !== undefined && v.sparkR !== flatR(w.sparkR)) bad.push(`KPI ${v.name} (${v.id}) 스파크라인 모서리 ${v.sparkR} ≠ ${w.sparkR} — .sparkline i border-radius`);
   /* 세트 밖(4 Pattern 대시보드) — 도넛 · 트랙. 호 각도는 같은 .donut conic-gradient */
+  /* 대시보드 차트 줄 카드 구성(k37) — 개수 · 순서 · 제목 · 기간 · 종류, 탐색형은 spec = 예제 · 범례 · 선 · 영역 · x 눈금 · Hover */
+  const cardsCheck = (g, G) => { const at = `4 Pattern 차트 줄 (${g.id})`;
+    if (g.cards === undefined) { notes.push(`${at} 카드 구성 조사(cards)가 없습니다 — 2026-11-06 k37 전 probe.js 로 만든 덤프입니다`); return; }
+    const sig = (x) => `${x.title}(${x.kind})`;
+    if (g.cards.length !== G.cards.length || g.cards.some((x, i) => x.title !== G.cards[i].title || x.kind !== G.cards[i].kind)) {
+      bad.push(`${at} 카드 ${g.cards.map(sig).join(" · ")} ≠ ${G.cards.map(sig).join(" · ")} — patterns.data.js dashboard .${G.cls} 의 chart-card 순서 · 제목 · 종류`); return; }
+    G.cards.forEach((w, i) => { const x = g.cards[i], ct = `${at} ${i + 1}번째 '${w.title}' (${x.id})`;
+      if ((x.meta || null) !== w.meta) bad.push(`${ct} 기간 ${x.meta} ≠ ${w.meta} — .chart-title 의 <span>`);
+      if (!w.spec) return;
+      if (!x.chart) { bad.push(`${ct} Chart 세트 인스턴스가 아닙니다 — data-chart ${w.kind}`); return; }
+      if (!w.specSame) bad.push(`${ct} 대시보드 data-spec 이 예제 ${w.specEx} 의 spec 과 다릅니다 — Figma Chart 변형은 예제 데이터를 그리므로 그대로 쓸 수 없습니다`);
+      const ser = (w.spec.series || []).map((s2) => s2.label);
+      if (w.kind === "timeseries") {
+        if (x.lines.join() !== ser.join()) bad.push(`${ct} 선 ${x.lines.join(" · ") || "없음"} ≠ 계열 ${ser.join(" · ")}`);
+        const wa = w.spec.stacked ? ser : []; if (x.areas.join() !== wa.join()) bad.push(`${ct} 영역 ${x.areas.join(" · ") || "없음"} ≠ ${wa.join(" · ") || "없음"} — stacked ${!!w.spec.stacked}`);
+        const out = x.ticksX.filter((t) => !w.spec.labels.includes(t)); if (!x.ticksX.length || out.length) bad.push(`${ct} x 눈금 ${x.ticksX.join(" · ") || "없음"} — labels 밖 ${out.join(" · ") || "(없음)"}`);
+      }
+      const wl = ser.length > 1 ? ser : []; if (x.legend.join() !== wl.join()) bad.push(`${ct} 범례 ${x.legend.join(" · ") || "없음"} ≠ ${wl.join(" · ") || "없음"} — 계열 2개 이상일 때 범례`);
+      if (x.hover) bad.push(`${ct} Hover(점 · 툴팁)가 보입니다 — 대시보드는 쉬는 상태라 사이트에 툴팁이 없습니다`); }); };
   const sc = c.staticCharts;
   for (const d of sc.donuts) { const at = `${d.page} 도넛 ${d.path} (${d.id})`;
     if (!near(d.d, w.donut.d, 0.5)) bad.push(`${at} 지름 ${d.d} ≠ ${w.donut.d} — .donut width`);
@@ -2184,7 +2224,8 @@ function diffStatic(c, w, bad, notes) {
         if (g.ws.length !== G.fr.length) bad.push(`${at} 차트 줄 (${g.id}) 카드 ${g.ws.length}개 ≠ .${G.cls} 열 ${G.fr.length}개(${G.fr.join("fr ")}fr)`);
         else { if (g.ws.some((x, i) => Math.abs(x - want[i]) > 1)) bad.push(`${at} 차트 줄 (${g.id}) 카드 폭 ${g.ws.join(" · ")} ≠ ${want.join(" · ")} — .${G.cls} ${G.fr.join("fr ")}fr · gap ${G.gap}(줄 폭 ${g.w})`);
           if (g.gap !== G.gap) bad.push(`${at} 차트 줄 (${g.id}) 간격 ${g.gap} ≠ ${G.gap} — .${G.cls} gap`);
-          if (g.idx !== G.idx) bad.push(`${at} 도넛 카드가 차트 줄의 ${g.idx + 1}번째 ≠ ${G.idx + 1}번째(patterns.data.js dashboard)`); } } } }
+          if (g.idx !== G.idx) bad.push(`${at} 도넛 카드가 차트 줄의 ${g.idx + 1}번째 ≠ ${G.idx + 1}번째(patterns.data.js dashboard)`); }
+        cardsCheck(g, G); } } }
   for (const r of sc.instRows || []) rowCheck(`${r.page} 인스턴스 ${r.inst} 도넛 (${r.id})`, r.row);
   for (const t of sc.tracks) if (t.r !== barMax) bad.push(`${t.page} 막대 트랙 (${t.id}) 모서리 ${t.r} ≠ ${barMax} — .chart .bar · .chart .bar i border-radius`);
   if (!sc.donuts.length) notes.push("세트 밖 정적 도넛이 없습니다(4 Pattern 대시보드)");
