@@ -797,6 +797,112 @@ for (const p of figma.root.children) {
   components.kpiDash = dash.findAll((f) => (f.type === "FRAME" || f.type === "INSTANCE") && f.children && f.children.length >= 2 && f.children[0].type === "TEXT" && "children" in f.children[1] &&
     f.children[1].children.some((t) => t.type === "TEXT" && TS_NAME.get(t.textStyleId) === "Display/2")).map(kpiRead);
 }
+/* 문서 틀 색(2026-11-06 k38) — 사람의 결정: 4 Pattern 문서 틀(섹션 머리 글 · 카드 · 카드 머리 글 · Body · 패널 · 칩 · 예시 틀 · Do/Don't)의
+   칠 · 선 · 글자 색이 다크에서도 맞게 시멘틱 변수에 묶여야 한다. 다크 캡처에서 '사용 컴포넌트' · '사용 가이드' 패널이 static/white 라 흰 바탕에 흐린 글자로 남았다.
+   문서 카드 = 이름이 Card/ 로 시작하고 자식에 Header · Body 가 있는 프레임. 패널 = Body 의 자식.
+   4 Pattern 은 노드마다 역할 · 칠 · 선을 내보내 audit 이 사이트 셸 규칙(body · h1 · .lead · .panel · .example · .uses a · .dodont)과 대조하고,
+   다른 페이지는 고치지 않고 세기만 한다(사람이 범위를 정함) — 틀(카드 · 머리 글 · Body · 패널 프레임)과 패널 안(인스턴스 · 컴포넌트 · 예시 · Component 칸 내용은 뺌)을 따로.
+   static/* 은 모드마다 값이 같아 다크에서 바뀌지 않으므로 raw 와 함께 센다 */
+const docFrames = { pages: {}, others: {} };
+/* k39(2026-11-06 — 사람의 결정): 3 Component · 2 Element 도 같은 대조 대상. 역할은 패널 이름 · 프레임 이름으로 정한다 —
+   '사용 컴포넌트' 칩 · Do/Don't 상자(첫 글이 Do 면 doBox) · '개발 상태' 칩 · Table(첫 줄 = 머리) · Stage(그림자 무대)와 그 안 Surface ·
+   Layout demo 와 그 안 Side nav · Properties(List > Heading · 칩 · Content) · Spec 줄. 인스턴스 · 컴포넌트 · 세트 · Example 안과 Component 칸 안은 기록하지 않는다 */
+const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];
+{
+  const docCards = (p) => p.findAll((n) => n.type === "FRAME" && /^Card\//.test(n.name) && n.children.some((k) => k.name === "Header") && n.children.some((k) => k.name === "Body"));
+  const texts = (n) => (n && "children" in n ? n.children.filter((k) => k.type === "TEXT" && k.visible !== false) : []);
+  const tf = (t) => paint(t.fills);
+  const SKIP = (k) => k.visible === false || k.type === "INSTANCE" || k.type === "COMPONENT" || k.type === "COMPONENT_SET";
+  const frameRole = (k, pn, depth, up, idx) => {
+    if (pn.name === "개발 상태" && depth === 0) return "devChip";
+    if (pn.name === "사용 컴포넌트") return depth === 0 ? "wrap" : depth === 1 ? "useChip" : "other";
+    if (pn.name === "사용 가이드") { if (depth === 0) return "wrap"; if (depth === 1) { const t = texts(k)[0]; return t && /^do$/i.test(t.characters.trim()) ? "doBox" : "dontBox"; } return "other"; }
+    if (up === "table") return idx === 0 ? "tableHead" : "tableRow";
+    if (k.name === "Table") return "table";
+    if (k.name === "Stage") return "elevStage";
+    if (up === "elevStage" || up === "elevItem") return k.name === "Surface" ? "elevSurface" : "elevItem";
+    if (k.name === "Layout demo") return "shellDemo";
+    if (up === "shellDemo") return /^Side nav/.test(k.name) ? "shellSide" : "other";
+    if (pn.name === "Properties") return depth === 0 ? "propList" : k.name === "Heading" ? "propHead" : k.name === "Content" ? "propContent" : up === "propHead" ? "propChip" : "other";
+    if (pn.name === "Spec" && depth === 0) return "specRow";
+    return "other";
+  };
+  /* k40(2026-11-06 — 사람의 결정): 표 줄 바로 아래 글 = 표 칸 글(머리 줄 = tableHeadText, 나머지 = tableRowText) — audit 이 th · td 의 color 와 대조 */
+  const textRole = (up, ti) => up === "tableHead" ? "tableHeadText" : up === "tableRow" ? "tableRowText" : up === "devChip" ? "devChipText" : up === "useChip" ? "useChipText" : up === "doBox" ? (ti ? "guideText" : "doLabel") : up === "dontBox" ? (ti ? "guideText" : "dontLabel") : "text";
+  for (const p of figma.root.children) {
+    if (!isCurrent(p)) continue;
+    const pname = CURRENT_PAGES[p.id];
+    if (DOC_PAGES.includes(pname)) {
+      /* 덤프를 줄이려고 (역할 · 패널 이름 · 칠 · 선 · 글 여부)가 같은 노드를 묶어 개수와 id 3개만 적는다(k39 — 3 Component 만 2,000 노드가 넘는다) */
+      const groups = new Map(), out = (docFrames.pages[pname] = []);
+      const put = (n, role, extra) => {
+        const g = { role, name: role === "panel" && extra ? extra.name : undefined, t: n.type === "TEXT" ? 1 : undefined, f: n.type === "TEXT" ? tf(n) : paint(n.fills), s: n.type === "TEXT" ? undefined : paint(n.strokes) };
+        const key = JSON.stringify(g);
+        let e = groups.get(key);
+        if (!e) { e = Object.assign(g, { n: 0, ids: [] }); groups.set(key, e); out.push(e); }
+        e.n++; if (e.ids.length < 3) e.ids.push(n.id);
+      };
+      for (const sec of p.children) {
+        if (!("children" in sec)) continue;
+        put(sec, "section");
+        const sh = sec.children.find((k) => k.name === "Header");
+        if (sh) texts(sh).forEach((t, i) => put(t, i ? "secDesc" : "secTitle"));
+      }
+      for (const card of docCards(p)) {
+        put(card, "card");
+        texts(card.children.find((k) => k.name === "Header")).forEach((t, i) => put(t, i ? "cardDesc" : "cardTitle"));
+        const body = card.children.find((k) => k.name === "Body");
+        put(body, "body");
+        for (const pn of body.children) {
+          if (pn.visible === false) continue;
+          put(pn, "panel", { name: pn.name });
+          if (!("children" in pn)) continue;
+          const rec = (n, depth, up) => {
+            let ti = 0;
+            n.children.forEach((k, idx) => {
+              if (SKIP(k)) return;
+              if (k.type === "TEXT") { put(k, depth === 0 ? (k.characters === pn.name ? "panelTitle" : "panelDesc") : textRole(up, ti++), { panel: pn.name }); return; }
+              if (k.name === "Example") { put(k, "example"); return; }
+              if (pn.name === "Component") return;   // 실제 컴포넌트 칸 — 제목 글만
+              const role = frameRole(k, pn, depth, up, idx);
+              put(k, role, { panel: pn.name });
+              if ("children" in k && depth < 6) rec(k, depth + 1, role);
+            });
+          };
+          rec(pn, 0, "panel");
+        }
+      }
+      continue;
+    }
+    /* 다른 페이지 — 세기만. 틀: 섹션 머리 글 · 카드 · 카드 머리 글 · Body · 패널 프레임. 안: 패널 아래 노드(인스턴스 · 컴포넌트 · 세트 · Example · Component 칸 안은 뺌) */
+    const cnt = { cards: 0, frame: { nodes: 0, raw: 0, static: 0, ids: [] }, inside: { nodes: 0, raw: 0, static: 0, ids: [] } };
+    const tally = (bucket, n) => {
+      const vals = [n.type === "TEXT" ? tf(n) : paint(n.fills)].concat(n.type === "TEXT" || !("strokes" in n) ? [] : [paint(n.strokes)]).join(",").split(",").filter((x) => x && x !== "-" && x !== "transparent");
+      if (!vals.length) return;
+      bucket.nodes++;
+      const r = vals.some((x) => /^raw#/.test(x)), s = vals.some((x) => /^\$static\//.test(x));
+      if (r) bucket.raw++; if (s) bucket.static++;
+      if ((r || s) && bucket.ids.length < 6) bucket.ids.push(n.id + " " + n.name.slice(0, 20) + " " + vals.join("|"));
+    };
+    for (const sec of p.children) { const sh = sec.children && sec.children.find((k) => k.name === "Header"); if (sh) texts(sh).forEach((t) => tally(cnt.frame, t)); }
+    for (const card of docCards(p)) {
+      cnt.cards++;
+      tally(cnt.frame, card);
+      texts(card.children.find((k) => k.name === "Header")).forEach((t) => tally(cnt.frame, t));
+      const body = card.children.find((k) => k.name === "Body");
+      tally(cnt.frame, body);
+      for (const pn of body.children) {
+        tally(cnt.frame, pn);
+        if (pn.name === "Component" || !("children" in pn)) continue;
+        const walk = (n) => { for (const k of n.children) { if (k.visible === false || k.type === "INSTANCE" || k.type === "COMPONENT" || k.type === "COMPONENT_SET" || k.name === "Example") continue; tally(cnt.inside, k); if ("children" in k) walk(k); } };
+        walk(pn);
+      }
+    }
+    docFrames.others[CURRENT_PAGES[p.id]] = cnt;
+  }
+}
+components.docFrames = docFrames;
+
 components.effectColors = effectColors;
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);
 

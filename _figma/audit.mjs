@@ -55,6 +55,13 @@
  *           KPI Delta 변형에 None(class 없는 .kpi .delta — 화살표 없음 · 칠 .kpi .delta) · 예제의 증감 방향 = Delta 값 · 예제 카드에 칠 덮어쓰기 없음 · class 없는 증감 카드는 덮어쓰기 0(k35c)
  *   도넛 가운데(2026-11-05 k34 — 사람의 결정 2026-11-04: Title/1) Chart Card 의 Donut(정적)과 Chart Type=Donut 의 가운데 글 ↔ .donut::after 의 font-size · line-height · font-weight 와 같은
  *           타입 스케일 스타일 하나(스타일 이름 · 크기 · 행간) · 가로 가운데 ±1. ds-chart centerPlugin 의 ctx.font 가 .donut::after 와 다르면 기대값을 읽다 멈춘다(donutCenter)
+ *   문서 틀 색(2026-11-06 k38 — 사람의 결정: 다크에서도 맞게) 4 Pattern 문서 카드(Card/… = Header + Body)의 섹션 머리 글 · 카드 · 카드 머리 글 · 패널 · 패널 제목 · 예시 설명 · 예시 틀 ·
+ *           '사용 컴포넌트' 칩 · Do/Don't 상자 · 라벨 · 글의 칠 · 선 · 글자 ↔ 사이트 셸 규칙(body · h1 · h2 · p · .lead · .panel · .example · .uses a · .dodont)의 토큰과 같은 변수(DOC_ROLES 에 대응을 적음),
+ *           사이트 셸에 대응이 없는 것(Body 회색 면 · '개발 상태' 칩 · 감싼 프레임)은 시멘틱 변수에 묶였는지만. 어디서든 raw 색 · static/* · atomic 은 어긋남(static 은 모드마다 같아 다크에서 안 바뀜).
+ *           섹션 자체의 선(Figma 섹션 기본 선)은 사이트 대응이 없어 NOTE. 다른 페이지 문서 틀은 세기만 해 NOTE 로(사람이 범위를 정함 — diffDocFrames)
+ *           k39(2026-11-06 — 사람의 결정): 3 Component · 2 Element 도 대조(DOC_PAGES). 더한 대응 — Table 줄 ↔ th · td, Stage · Surface ↔ .elev-types .demo · .demo i,
+ *           Layout demo · Side nav ↔ .shell-demo · .side. Properties · Spec 은 사이트 대응이 없어 시멘틱인지만. 1 Theme · Resource 는 현황 NOTE
+ *           k40(2026-11-06 — 사람의 결정): 표 칸 글자 — 머리 줄 글 ↔ th color(tertiary), 나머지 줄 글 ↔ td color(없으면 table · .tablewrap · .page · .main · body 로 물려받음 = primary)
  *   기본 변형 Tag 세트의 기본 변형 크기 ↔ components.data.js 의 Tag props size 기본값(2026-10-26 k7) · Button 의 variant · color · size 기본값(k16)
  *   반투명 모든 컴포넌트 · 변형 · 세트의 자기 불투명도가 1 인지(2026-10-27 k10) — 비활성은 토큰으로 칠한다(CLAUDE.md). 예외는 OPACITY_OK
  *   선택 컨트롤 선택된 Radio · 선택 + 비활성 Radio 의 면 · 테두리 · 점, 비활성 Slider 의 라벨 · 값 글자 칠(2026-10-27 k11) — controlsExpect
@@ -2016,6 +2023,106 @@ function expect_() {
   };
 }
 
+/* 문서 틀 색(2026-11-06 k38) — 4 Pattern 문서 틀의 역할마다 사이트 셸의 어느 규칙과 같은 변수여야 하는지.
+   Figma 문서 카드는 사이트 패턴 페이지 한 장이다: 카드 = 페이지 바탕(body), 카드 머리 = h1 · .lead, 패널('사용 컴포넌트' · '예시' · '사용 가이드')은
+   사이트에서 h2 와 그 내용이 놓인 페이지 바탕이라 body 배경(사이트에 따로 칠한 상자가 없다 — 예시 패널은 처음부터 background/neutral/primary 였다),
+   예시 틀(Example) = .example 의 테두리 + 미리보기 .panel 의 면, '사용 컴포넌트' 칩 = .uses a(면 없음 · 테두리 · 글자),
+   Do/Don't 상자 = .dodont>div(면 · 테두리), 라벨 = .dodont .do/.dont .body::before, 글 = .dodont p(색이 없으면 물려받음).
+   패턴 페이지에는 Do/Don't 가 없어 Foundations 의 같은 셸 규칙(.dodont)을 쓴다. 'Do' · 'Don't' 글자 자체(사이트는 DO · DON'T)는 이 대조 밖이다.
+   null = 사이트 셸에 대응 없음 → 시멘틱 변수에 묶였는지만 본다(하드코딩하지 않는다) */
+const DOC_ROLES = {
+  section: { f: null, s: null },
+  secTitle: { f: ["color", "h1", "body"] }, secDesc: { f: ["color", ".lead", "body"] },
+  card: { f: ["bg", "body"], s: ["border", "body"] },
+  cardTitle: { f: ["color", "h1", "body"] }, cardDesc: { f: ["color", ".lead", "body"] },
+  body: { f: null, s: null },
+  panel: { f: ["bg", "body"], s: ["border", "body"] },   // '개발 상태' 는 면 없는 줄이라 아래에서 null 로
+  panelTitle: { f: ["color", "h2", "body"] }, panelDesc: { f: ["color", "p", "body"] },
+  example: { f: ["bg", ".panel"], s: ["border", ".example"] },
+  wrap: { f: null, s: null }, devChip: { f: null, s: null }, devChipText: { f: null }, other: { f: null, s: null },
+  useChip: { f: ["bg", ".uses a"], s: ["border", ".uses a"] }, useChipText: { f: ["color", ".uses a", "body"] },
+  doBox: { f: ["bg", ".dodont>div"], s: ["border", ".dodont>div"] }, dontBox: { f: ["bg", ".dodont>div"], s: ["border", ".dodont>div"] },
+  doLabel: { f: ["color", ".dodont .do .body::before"] }, dontLabel: { f: ["color", ".dodont .dont .body::before"] },
+  guideText: { f: ["color", ".dodont p", ".dodont>div", "body"] },
+  /* k39(2026-11-06) 3 Component · 2 Element — 컴포넌트 · Foundations 페이지 셸에서 찾은 대응.
+     Table 첫 줄 = th(면 · 아래 선), 나머지 줄 = td(면 없음 · 아래 선). Stage(그림자 무대) = .elev-types .demo, 그 안 Surface = .elev-types .demo i,
+     Layout demo = .shell-demo, Side nav = .shell-demo .side(오른쪽 선). 대응이 없는 것 — Properties(사이트 table.props 는 prop 이름 · 태그 표라 Figma 의
+     변형 목록 · 미리보기와 다르다), Spec 줄(사이트 컴포넌트 페이지에 spec 표가 없다 — .spec 은 resources/wbs 의 단계 카드), 기타 글 — 은 null.
+     k40(2026-11-06 — 사람의 결정) 표 칸 글자: 머리 줄 = th 의 color, 나머지 줄 = td 의 color. td 에는 color 가 없어 DOM 조상을 따라 물려받는다
+     (td → table → .tablewrap → .page → .main → body). 헤드리스 Chromium 으로 components · foundations 의 셸 표(th · td, 클래스 없는 table)를 재 보면
+     th 18칸 = tertiary, td 74칸 = primary 였다 */
+  table: { f: null, s: null },
+  tableHead: { f: ["bg", "th"], s: ["border", "th"] }, tableRow: { f: ["bg", "td"], s: ["border", "td"] },
+  tableHeadText: { f: ["color", "th", "table", ".tablewrap", ".page", ".main", "body"] }, tableRowText: { f: ["color", "td", "table", ".tablewrap", ".page", ".main", "body"] },
+  elevStage: { f: ["bg", ".elev-types .demo"], s: ["border", ".elev-types .demo"] }, elevItem: { f: null, s: null },
+  elevSurface: { f: ["bg", ".elev-types .demo i"], s: ["border", ".elev-types .demo i"] },
+  shellDemo: { f: ["bg", ".shell-demo"], s: ["border", ".shell-demo"] }, shellSide: { f: ["bg", ".shell-demo .side"], s: ["border", ".shell-demo .side"] },
+  propList: { f: null, s: null }, propHead: { f: null, s: null }, propChip: { f: null, s: null }, propContent: { f: null, s: null },
+  specRow: { f: null, s: null }, text: { f: null },
+};
+const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];   // 대조 대상(k38 4 Pattern, k39 + 3 Component · 2 Element). 나머지 현재 페이지는 현황 NOTE
+function docFrameExpect() {
+  /* @media 블록은 뺀다 — 좁은 화면 규칙이 색을 바꾸지 않고, 남기면 바깥 셀렉터로 섞인다. 같은 셀렉터의 규칙은 전부 합친다(body 는 두 규칙 — cssRule 은 첫 규칙만 준다) */
+  let css = read("_build/style.src.css").replace(/\/\*[\s\S]*?\*\//g, ""), top = "";
+  for (let i = 0; i < css.length; i++) {
+    if (css[i] === "@") { let d = 0; for (; i < css.length; i++) { if (css[i] === "{") d++; else if (css[i] === "}") { d--; if (d === 0) break; } else if (css[i] === ";" && d === 0) break; } continue; }
+    top += css[i];
+  }
+  const decl = (sel) => { const o = {}; let hit = false;
+    for (const r of top.matchAll(/([^{}]+)\{([^{}]*)\}/g)) if (splitSelectors(r[1]).includes(sel)) { hit = true; for (const x of r[2].split(";")) { const i = x.indexOf(":"); if (i > 0) o[x.slice(0, i).trim()] = x.slice(i + 1).trim(); } }
+    if (!hit) throw new Error("CSS 규칙 없음(문서 틀): " + sel); return o; };
+  const one = (spec) => {
+    const [kind, ...chain] = spec;
+    if (kind === "color") { for (const s of chain) { const v = decl(s).color; if (v) return { tok: figTok(v), raw: figTok(v) ? null : v, from: s + " color" }; } throw new Error("문서 틀 글자색을 못 찾음: " + chain.join(" → ")); }
+    /* 테두리는 border · border-color 외에 한 변(th · td 의 border-bottom, .shell-demo .side 의 border-right)도 본다 */
+    const d = decl(chain[0]), v = kind === "bg" ? d.background || d["background-color"] : ["border", "border-color", "border-bottom", "border-right", "border-top", "border-left"].map((k) => d[k]).find(Boolean);
+    if (!v) return { none: true, from: chain[0] + (kind === "bg" ? " 배경 없음" : " 테두리 없음") };
+    return { tok: figTok(v), raw: figTok(v) ? null : v, from: chain[0] + (kind === "bg" ? " background" : " border") };
+  };
+  const roles = {};
+  for (const [r, o] of Object.entries(DOC_ROLES)) roles[r] = { f: o.f ? one(o.f) : null, s: o.s ? one(o.s) : null };
+  return { roles };
+}
+function diffDocFrames(c, w, bad, notes) {
+  const d = c && c.docFrames;
+  if (!d) { notes.push("덤프에 문서 틀 조사(docFrames)가 없습니다 — 2026-11-06 k38 전 probe.js 입니다"); return; }
+  const pages = d.pages || { "4 Pattern": d.pattern || [] };   // k38 덤프는 pattern 하나
+  for (const pg of DOC_PAGES) if (!(pages[pg] || []).some((n) => n.role === "card")) bad.push(`${pg} 문서 카드(Card/… = Header + Body)를 하나도 찾지 못했습니다${d.pages ? "" : " — k39 전 probe 덤프"}`);
+  for (const [r, o] of Object.entries(w.roles)) for (const k of ["f", "s"]) if (o[k] && o[k].raw) notes.push(`문서 틀 ${r} 의 사이트 셸 값이 토큰이 아닙니다(${o[k].from}: ${o[k].raw}) — 대조하지 않고 알립니다. 하드코딩하지 않습니다`);
+  const groups = new Map(), secStroke = []; let secN = 0;
+  for (const [pg, nodes] of Object.entries(pages)) {
+  const push = (msg) => { if (!groups.has(msg)) groups.set(msg, { n: 0, ids: [] }); const g = groups.get(msg); g.n += cnt; for (const i of ids) if (g.ids.length < 3) g.ids.push(i); };
+  let cnt = 1, ids = [];
+  for (const n of nodes) {
+    /* k39 probe 는 같은 (역할 · 패널 · 칠 · 선 · 글 여부)를 묶어 n · ids 로 준다. k38 덤프는 노드마다(id · tx) */
+    const text = n.t ? true : n.tx !== undefined; ids = n.ids || [n.id]; cnt = n.n || 1;
+    const role = w.roles[n.role] || { f: null, s: null };
+    for (const k of ["f", "s"]) {
+      if (n[k] === undefined) continue;
+      const vals = n[k].split(",").filter((x) => x && x !== "-" && x !== "transparent");
+      const label = `${pg} ${n.role}${n.name ? "(" + n.name + ")" : ""} ${text ? "글자" : k === "f" ? "칠" : "선"}`;
+      if (n.role === "section" && k === "s") { if (vals.some((x) => /^raw#/.test(x))) { secN += cnt; secStroke.push(...ids.map((i) => pg + " " + i)); } continue; }
+      const raw = vals.filter((x) => /^raw#/.test(x)), stat = vals.filter((x) => /^\$static\//.test(x)), nonSem = vals.filter((x) => /^\$(color|site)\//.test(x));   // probe 의 vname 은 color/semantic/ 만 떼므로 atomic · 옛 site/* 는 앞마디가 남는다
+      if (raw.length) push(`${label} raw 색 ${raw.join(",")} — 변수에 묶여야 합니다`);
+      if (stat.length) push(`${label} ${stat.join(",")} — 모드마다 같은 값이라 다크에서 안 바뀝니다`);
+      if (nonSem.length) push(`${label} ${nonSem.join(",")} — 시멘틱 변수가 아닙니다`);
+      let exp = role[k];
+      if (n.role === "panel" && !vals.length) exp = null;   // 면 없는 패널('개발 상태' · Component 칸)은 부모 면이 비친다
+      if (!exp || exp.raw) continue;
+      if (exp.none) { if (vals.length) push(`${label} ${vals.join(",")} ≠ 없음 — ${exp.from}`); continue; }
+      if (vals.length !== 1 || vals[0] !== "$" + exp.tok) push(`${label} ${vals.join(",") || "없음"} ≠ $${exp.tok} — ${exp.from}`);
+    }
+  }
+  }
+  for (const [msg, g] of groups) bad.push(`문서 틀 ${msg} · ${g.n}개(${g.ids.join(" · ")}${g.n > g.ids.length ? " …" : ""})`);
+  if (secStroke.length) notes.push(`문서 틀 섹션 ${secN}개의 선이 raw 색(Figma 섹션 기본 선)입니다 — 사이트 셸에 대응이 없어 묶지 않았습니다(${secStroke.join(" · ")})`);
+  for (const [pg, o] of Object.entries(d.others || {})) {
+    const f = o.frame, i = o.inside;
+    if (!o.cards && !f.nodes) continue;
+    notes.push(`문서 틀 현황(보고만 — 사람이 범위를 정함) ${pg}: 문서 카드 ${o.cards} · 틀 노드 ${f.nodes} 중 raw ${f.raw} · static ${f.static} / 패널 안 ${i.nodes} 중 raw ${i.raw} · static ${i.static}`);
+  }
+}
+
 /* Variant outline · flat(2026-11-03 k32) — 규칙은 flatExpect 머리 주석. probe 의 components.sets(이름 · 테두리 · 두께 · 그림자 · 면 · 크기)로 Card · KPI · Chart Card 를 본다.
    Card 의 변형 표(어느 Type × Size 에 Flat 이 있어야 하나)는 diffCard 가, 여기서는 세 세트 공통 — 축 값 · 기본 변형 · Flat 의 보더 · 크기 · 면 · 그림자 · (KPI · Chart Card) 짝 빠짐 */
 function diffFlat(c, wf, bad, notes) {
@@ -2567,6 +2674,7 @@ function diff(dumpPath, site) {
   diffFlat(got.components, want.components.flat, bad, notes);
   diffChart(got.components, want.components.chart, got.variables, bad, notes);
   diffStatic(got.components, want.components.staticChart, bad, notes);
+  diffDocFrames(got.components, docFrameExpect(), bad, notes);
 
   return { bad, notes, counts: want.counts };
 }
