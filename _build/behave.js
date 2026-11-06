@@ -1200,6 +1200,14 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("static legend markers are circles", statics.legend.length === 1 && statics.legend[0] === "50%", JSON.stringify(statics.legend));
   ok("static donut boundaries are 2px straight separators spanning the ring at each slice edge", statics.cuts.length === 4 && statics.cuts.every((c, i) => c.w === "2px" && parseFloat(c.h) === statics.ring && Math.abs(c.deg - statics.want[i]) <= 0.2), JSON.stringify(statics));
   ok("KPI example shows three cards", statics.kpis === 3, String(statics.kpis));
+  /* KPI 단위 = Title 1 Medium · 증감 = Label 2 SemiBold(2026-11-06) — 종전엔 값 · 카드의 행간 · 자간을 물려받아 어느 텍스트 스타일과도 맞지 않았다 */
+  const kpiType = await page.evaluate(() => {
+    const f = (e) => { const c = getComputedStyle(e); return [c.fontSize, c.lineHeight, c.fontWeight, c.letterSpacing].join("/"); };
+    const host = document.querySelector("#ex-data-visual-kpi .example-preview");
+    const tmp = document.createElement("div"); tmp.innerHTML = '<span class="t-title-1-medium">a</span><span class="t-label-2-semibold">a</span>'; host.append(tmp);
+    const r = { unit: [...new Set([...host.querySelectorAll(".kpi .value small")].map(f))], delta: [...new Set([...host.querySelectorAll(".kpi .delta")].map(f))], t1m: f(tmp.children[0]), l2s: f(tmp.children[1]) };
+    tmp.remove(); return r; });
+  ok("KPI unit matches Title 1 Medium and delta matches Label 2 SemiBold", kpiType.unit.length === 1 && kpiType.unit[0] === kpiType.t1m && kpiType.t1m.startsWith("16px/24px/500/") && kpiType.delta.length === 1 && kpiType.delta[0] === kpiType.l2s && kpiType.l2s.startsWith("12px/16px/600/"), JSON.stringify(kpiType));
 
   // Nav
   await go("components/navigation.html");

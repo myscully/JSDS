@@ -194,6 +194,18 @@
 >   (I1031:4838;330:2294 · I1039:4919;1039:4857). 덮어쓰기 없는 문서 인스턴스 8개는 원본을 따른다. 목록은 `font-revert-nodes.tsv` 의 k35c 절.
 >   되돌릴 때: Pretendard Medium · 16 · 행간 19.2px · 자간 -0.64px · 스타일 연결 없음(또는 사람이 16/500 스타일을 만들기로 하면 그 스타일). 플러그인에서 높이가 20 으로 읽힌다(19.2 반올림) — 데스크톱에서 한 번 본다.
 >   같은 날 'KPI · 예제' 3번째 카드 1031:4859(Delta=Up 에 화살표 숨김 · 칠 덮어쓰기)를 지우고 새 Delta=None 인스턴스 1039:4919 로 바꿨다 — 라벨 · 값 · 증감은 Pretendard + 원래 스타일(Label/2 · Display/2 · Label/2)
+>   **2026-11-06 k35d 에 해결 — 위 22개는 노드별로 되돌리지 않는다**(아래 k35d). `font-revert-nodes.tsv` 의 k35c 절은 기록으로 남기려 주석(`# [k35d 해결]`)으로 돌렸다
+> - 2026-11-06 k35d: **사람이 데스크톱에서 스타일 서체를 Pretendard 로 바꿀 텍스트 스타일 2개.** 스타일 하나만 바꾸면 묶인 노드가 전부 따라오므로 노드별 되돌림 목록은 늘리지 않았다.
+>   저장소 타입 스케일이 14 → 16 단계가 됐다(사람의 결정 — `.t-title-1-medium` 16/24/500 · 0.0057em, `.t-label-2-semibold` 12/16/600 · 0.0252em, `.kpi .value small` = Title 1 Medium, `.kpi .delta` = Label 2 SemiBold).
+>   이 환경에 Pretendard 가 없어 makeFont() 의 Noto 로 값만 맞춰 만들었고, Noto Sans KR 에 SemiBold 가 없어 Label/2 SemiBold 는 **Bold(700)** 로 대체됐다(k25 · k26 과 같은 규칙):
+>
+>   | 스타일 | id | 지금 서체 | 바꿀 서체 | 크기 · 행간 · 자간 | 묶인 노드 |
+>   | --- | --- | --- | --- | --- | --- |
+>   | Title/1 Medium | `S:4adaa7bcd42e0230b17954ca0702b33aba6647fb,` | Noto Sans KR Medium | **Pretendard Medium** | 16 · 24px · 0.57% | KPI 단위 22(세트 변형 18 · 대시보드 339:107 · 339:118 · 덮어쓰기 있는 문서 인스턴스 2 — k35c 목록 전부) |
+>   | Label/2 SemiBold | `S:1bd5cd4b3a0b8445c916ce8eb20b7ab16089ae4e,` | Noto Sans KR **Bold** | **Pretendard SemiBold** | 12 · 16px · 2.52% | KPI 증감 27(세트 변형 20 — Delta=None 6 · Sparkline=On 2 포함, 대시보드 339:102 · 339:113 · 339:120 · 339:126, 덮어쓰기 있는 문서 인스턴스 3 — I1031:4837;330:2311 · I1031:4838;330:2300 · I1039:4919;1039:4860) |
+>
+>   두 스타일은 기존 14개와 같은 폴더 · 규칙(행간 px · 자간 %)이고 순서는 Title/1 · Label/2 바로 뒤다. 증감 글자는 그전에 Label/2(Pretendard Medium 500)에 묶여 있었다 — CSS 600 과 달랐던 것(k4 굵기 표의 'KPI delta → 600')이 이 스타일로 풀린다.
+>   덮어쓰기 없는 문서 인스턴스는 원본을 따른다(플러그인에서 Title/1 Medium 높이 24 · Label/2 SemiBold 높이 16 확인). 서버 렌더러는 Noto 글리프로 그리므로 데스크톱에서 스타일 서체를 바꾼 뒤 단위 · 증감의 폭과 한 줄을 한 번 본다
 > - 에이전트의 플러그인 환경에는 여전히 Pretendard 가 없어 이런 텍스트 편집은 거기서 Pretendard 로 할 수 없다
 
 ## Pretendard 가 생기면 할 일 — 글자 줄 상자 · 자간 · 굵기 (2026-10-26 k4)

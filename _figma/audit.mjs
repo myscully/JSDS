@@ -181,7 +181,12 @@ function typeScale() {
   for (const m of css.matchAll(/\.t-([a-z0-9-]+)\{([^}]*)\}/g)) {
     const d = Object.fromEntries(m[2].split(";").filter(Boolean).map((x) => x.split(":").map((s) => s.trim())));
     if (!d["font-size"]) continue;
-    const name = m[1].replace(/-(\d)$/, "/$1").replace(/^(\w)/, (c) => c.toUpperCase());
+    /* t-title-1 → Title/1. 굵기 변형(2026-11-06 k35d — 사람의 결정으로 타입 스케일 14 → 16): t-title-1-medium → "Title/1 Medium", t-label-2-semibold → "Label/2 SemiBold".
+       Figma 텍스트 스타일 이름이 굵기를 Pretendard 의 스타일 철자(SemiBold)로 적는다 */
+    const WS = { regular: "Regular", medium: "Medium", semibold: "SemiBold", bold: "Bold" };
+    const vm2 = /^([a-z]+)-(\d)-([a-z]+)$/.exec(m[1]);
+    if (vm2 && !WS[vm2[3]]) throw new Error(`.t-${m[1]} 의 굵기 접미사 '${vm2[3]}' 를 모릅니다 — audit.mjs typeScale 의 WS 에 더하세요`);
+    const name = vm2 ? `${vm2[1][0].toUpperCase()}${vm2[1].slice(1)}/${vm2[2]} ${WS[vm2[3]]}` : m[1].replace(/-(\d)$/, "/$1").replace(/^(\w)/, (c) => c.toUpperCase());
     out[name] = {
       size: parseFloat(d["font-size"]),
       lineHeight: d["line-height"] ? parseFloat(d["line-height"]) : null,
@@ -894,11 +899,16 @@ function staticChartExpect() {
     if (ulh == null || uls == null) throw new Error(`KPI 단위 행간 · 자간을 계산하지 못했습니다(${sm["line-height"] ?? vv["line-height"]} · ${sm["letter-spacing"] ?? vv["letter-spacing"]})`);
     const ts = typeScale(), uStyle = Object.keys(ts).filter((n) => ts[n].size === ufs && (ts[n].weight || 400) === uwt && ts[n].lineHeight === +ulh.toFixed(2));
     const unit = { fs: ufs, wt: uwt, lh: +ulh.toFixed(2), ls: +uls.toFixed(2), style: uStyle[0] || null, fill: tok(".kpi .value small") };
+    /* 증감 글자 모양(2026-11-06 k35d) — .kpi .delta 의 크기 · 행간 · 굵기와 셋이 같은 타입 스케일 스타일 하나(지금 Label/2 SemiBold) */
+    const dl = cssRule(".kpi .delta"), dfs = px(dl["font-size"]), dlh = px(dl["line-height"]), dwt = parseInt(dl["font-weight"], 10) || 400;
+    const dStyle = Object.keys(ts).filter((n) => ts[n].size === dfs && ts[n].lineHeight === dlh && (ts[n].weight || 400) === dwt);
+    if (dStyle.length !== 1) throw new Error(`.kpi .delta ${dfs}/${dlh}/${dwt} 에 맞는 타입 스케일 스타일이 ${dStyle.length}개입니다 — ${dStyle.join(" · ")}`);
+    const delta = { fs: dfs, lh: dlh, wt: dwt, style: dStyle[0] };
     const dirFill = { None: tok(dirSel[""]), Up: tok(dirSel.up), Down: tok(dirSel.down) };
     const needNone = example.concat(dashK).some((k) => k.dir === "");
     const tones = ["Default"].concat(["critical", "high"].filter((t) => { try { cssRule(toneSel[t]); return true; } catch { return false; } }).map((t) => t[0].toUpperCase() + t.slice(1)));
     return { barR: rad(".chart .bar"), fillR: rad(".chart .bar i"), sparkR: rad(".sparkline i"), legend, donut: { d: D, R: D / 2, divider: { ...dv, dist: D / 2 - dv.h / 2 }, angles: aDoc },
-      kpi: { n: kpiEx.length, labels: kpiEx, dashOnly, example, dash: dashK, tones, unit, dirFill, needNone } };
+      kpi: { n: kpiEx.length, labels: kpiEx, dashOnly, example, dash: dashK, tones, unit, delta, dirFill, needNone } };
   } catch (e) { return { error: String(e.message || e) }; }
 }
 
@@ -2113,8 +2123,20 @@ function diffStatic(c, w, bad, notes) {
         if (typeof t.lh !== "number" || Math.abs(t.lh - U.lh) > 0.05) d.push(`행간 ${t.lh} ≠ ${U.lh}`);
         if (!/px$/.test(String(t.ls)) || Math.abs(parseFloat(t.ls) - U.ls) > 0.02) d.push(`자간 ${t.ls} ≠ ${U.ls}px`);
       }
-      if (/^Noto /.test(String(t.font))) { if (reverts().has(t.id) || reverts().has(t.id.split(";").pop())) notoUnits.push(t.id); else d.push(`${t.font} 인데 _figma/font-revert-nodes.tsv 에 없습니다`); }
+      /* 스타일에 묶였으면 서체는 스타일이 정한다(k35d — Title/1 Medium 이 Noto 로 만들어져 있으면 텍스트 스타일 대조가 NOTE 로 알린다) */
+      if (/^Noto /.test(String(t.font)) && !(U.style && t.st === U.style)) { if (reverts().has(t.id) || reverts().has(t.id.split(";").pop())) notoUnits.push(t.id); else d.push(`${t.font} 인데 _figma/font-revert-nodes.tsv 에 없습니다`); }
       if (d.length) bad.push(`${at} 단위 (${t.id}) ${d.join(" · ")} — .kpi .value small`);
+    };
+    /* 증감 글자(k35d) — .kpi .delta 에 맞는 타입 스케일 스타일(Label/2 SemiBold)에 묶였는지. 옛 덤프(dtype 없음)는 한 번만 NOTE */
+    const DL = w.kpi.delta; let noDtype = 0, deltaN = 0;
+    const deltaCheck = (at, k) => {
+      if (!k || k.delta == null) return;
+      if (k.dtype === undefined) { noDtype++; return; }
+      deltaN++;
+      const t = k.dtype, d = [];
+      if (!t) d.push("증감 글자를 찾지 못함");
+      else { if (t.st !== DL.style) d.push(`스타일 ${t.st} ≠ ${DL.style}`); if (t.fs !== DL.fs) d.push(`크기 ${t.fs} ≠ ${DL.fs}`); if (typeof t.lh !== "number" || Math.abs(t.lh - DL.lh) > 0.05) d.push(`행간 ${t.lh} ≠ ${DL.lh}`); if (typeof t.h === "number" && Math.abs(t.h - DL.lh) > 0.5) d.push(`높이 ${t.h} ≠ ${DL.lh}`); }
+      if (d.length) bad.push(`${at} 증감 (${t ? t.id : k.id}) ${d.join(" · ")} — .kpi .delta ${DL.fs}/${DL.lh}/${DL.wt}`);
     };
     /* 저장소 KPI 카드 목록과 Figma 카드 목록을 순서대로 — 글(라벨 · 값 · 단위 · 증감 · 화살표)과 칠 */
     const kpiCompare = (where, got, want, src) => {
@@ -2133,6 +2155,7 @@ function diffStatic(c, w, bad, notes) {
           if (x.dir === "" && g.ov.length) diffs.push(`덮어쓰기 ${g.ov.join(" · ")} — class 없는 증감은 Delta=None 그대로`);
         }
         unitCheck(`${where} ${i + 1}번째 카드`, g.utype);
+        deltaCheck(`${where} ${i + 1}번째 카드`, g);
         if (diffs.length) bad.push(`${where} ${i + 1}번째 카드 (${g.id}) ${diffs.join(" · ")} — ${src}`);
       }
     };
@@ -2151,7 +2174,7 @@ function diffStatic(c, w, bad, notes) {
     else if (!c.kpiDash) bad.push("4 Pattern 에 'Card/대시보드' 가 없습니다(patterns.data.js dashboard)");
     else kpiCompare("4 Pattern 대시보드 KPI", c.kpiDash, w.kpi.dash, "patterns.data.js dashboard");
     /* 문서의 다른 행(Tone · Delta · Variant) 카드도 단위 모양은 같다 */
-    for (const l of c.kpiDoc) if (!/^KPI · 예제/.test(l.heading || "")) l.kpi.forEach((k, i) => unitCheck(`Data Visual 문서 '${l.heading}' ${i + 1}번째 카드`, k.utype));
+    for (const l of c.kpiDoc) if (!/^KPI · 예제/.test(l.heading || "")) l.kpi.forEach((k, i) => { unitCheck(`Data Visual 문서 '${l.heading}' ${i + 1}번째 카드`, k.utype); deltaCheck(`Data Visual 문서 '${l.heading}' ${i + 1}번째 카드`, k); });
     /* KPI 세트 — Delta 속성 값 · 변형마다 증감 줄 · 단위(k35c) */
     if (c.kpiSet === undefined) notes.push("덤프에 KPI 세트 변형 조사(kpiSet)가 없습니다 — 2026-11-05 k35c 전 probe.js 로 만든 덤프라 Delta=None · 단위 모양 대조를 건너뜁니다");
     else if (!c.kpiSet) bad.push("KPI 세트가 없습니다");
@@ -2160,13 +2183,15 @@ function diffStatic(c, w, bad, notes) {
       if (w.kpi.needNone && !opts.includes("None")) bad.push(`KPI 세트 Delta 값 ${opts.join(" · ")} 에 None 이 없습니다 — 예제에 class 없는 .kpi .delta(화살표 없음)가 있습니다`);
       for (const v of c.kpiSet.variants) {
         const dm = /(?:^|, )Delta=([^,]+)/.exec(v.name), dv = dm && dm[1], wf = dv && w.kpi.dirFill[dv];
-        if (/Sparkline=On/.test(v.name)) { unitCheck(`KPI ${v.name}`, v.utype); continue; }   // 스파크라인 변형은 자식 순서가 달라 증감 줄은 보지 않는다
+        if (/Sparkline=On/.test(v.name)) { unitCheck(`KPI ${v.name}`, v.utype); deltaCheck(`KPI ${v.name}`, v); continue; }   // 스파크라인 변형은 자식 순서가 달라 증감 줄은 보지 않는다
         if (dv === "None" && v.arrow) bad.push(`KPI ${v.name} (${v.id}) 에 화살표 ${v.arrow} 가 있습니다 — class 없는 .kpi .delta 는 아이콘 없음`);
         if ((dv === "Up" || dv === "Down") && !v.arrow) bad.push(`KPI ${v.name} (${v.id}) 에 화살표가 없습니다`);
         if (wf && v.dfill && String(v.dfill).replace(/^\$/, "") !== wf) bad.push(`KPI ${v.name} (${v.id}) 증감 칠 ${v.dfill} ≠ ${wf}(.kpi .delta${dv === "None" ? "" : "." + dv.toLowerCase()})`);
         unitCheck(`KPI ${v.name}`, v.utype);
+        deltaCheck(`KPI ${v.name}`, v);
       }
     }
+    if (noDtype) notes.push(`덤프에 KPI 증감 글자 모양(dtype)이 없습니다(${noDtype}곳) — 2026-11-06 k35d 전 probe.js 로 만든 덤프라 증감 스타일(${DL.style}) 대조를 건너뜁니다`);
     if (notoUnits.length) notes.push(`KPI 단위 ${notoUnits.length}곳(원본 · 인스턴스 · 대시보드 — 인스턴스는 원본 id 로 목록과 맞춤)이 Noto Sans KR 로 남아 있습니다(${U.fs}/${U.wt} 에 맞는 텍스트 스타일 없음) — _figma/font-revert-nodes.tsv 의 '사람이 데스크톱에서 Pretendard Medium ${U.fs} 으로 되돌릴 노드'와 맞음`);
   }
 }
@@ -2360,7 +2385,7 @@ function diff(dumpPath, site) {
   if (got.fonts && !got.fonts.pretendard) {
     const noto = (got.textStyles || []).filter((t) => /^Noto Sans KR/.test(t.font)).map((t) => t.name);
     notes.push(noto.length
-      ? `Figma 에 Pretendard 가 없어 텍스트 스타일 ${noto.length}개가 Noto Sans KR 대체입니다(${noto.slice(0, 4).join(" · ")}${noto.length > 4 ? " …" : ""}) — 되돌리기는 _figma/font-revert.md`
+      ? `Figma 에 Pretendard 가 없어 텍스트 스타일 ${noto.length}개가 Noto Sans KR 대체입니다(${noto.slice(0, 4).join(" · ")}${noto.length > 4 ? " …" : ""}) — 사람이 데스크톱에서 스타일 서체를 Pretendard 로 바꾸면 묶인 노드가 전부 따라옵니다(_figma/font-revert.md)`
       : "텍스트 스타일은 Pretendard 지만 이 플러그인 환경에는 Pretendard 가 없습니다 — Pretendard 글자를 직접 고칠 수는 없고, makeFont() 의 Noto 로 쓴 뒤 원래 텍스트 스타일에 다시 연결하는 우회만 됩니다(글 상자 재배치 · 옛 글리프 확인 — CLAUDE.md Figma 절)");
   }
 
@@ -2391,7 +2416,8 @@ function diff(dumpPath, site) {
     const ls = parseFloat(t.letterSpacing) * (/%$/.test(t.letterSpacing) ? 1 : 0);
     const off = [];
     if (!fam) off.push(`서체 ${t.font}`);
-    if (w.weight && wt !== w.weight) off.push(`굵기 ${wt} ≠ ${w.weight}`);
+    /* Noto Sans KR 에는 이 환경에서 SemiBold 가 없어 600 은 Bold(700)로 대체된다(font-revert.md k25 와 같은 규칙) — 그 경우만 NOTE */
+    if (w.weight && wt !== w.weight) { if (fam && fam[1] === "Noto Sans KR" && w.weight === 600 && wt === 700) notes.push(`텍스트 스타일 ${name} 굵기 600 이 Noto Sans KR Bold(700)로 대체돼 있습니다 — 이 환경의 Noto 에 SemiBold 가 없음. 데스크톱에서 스타일 서체를 Pretendard SemiBold 로 바꾸면 해결(_figma/font-revert.md k35d)`); else off.push(`굵기 ${wt} ≠ ${w.weight}`); }
     if (t.size !== w.size) off.push(`크기 ${t.size} ≠ ${w.size}`);
     if (w.lineHeight && t.lineHeight !== w.lineHeight) off.push(`행간 ${t.lineHeight} ≠ ${w.lineHeight}`);
     if (Math.abs(ls - em) > 0.01) off.push(`자간 ${+ls.toFixed(2)}% ≠ ${+em.toFixed(2)}%`);

@@ -726,7 +726,10 @@ const kpiRead = (n) => {
     /* 단위 글자 모양(2026-11-05 k35c) — .kpi .value small 과 크기 · 굵기 · 행간 · 자간 대조. 맞는 텍스트 스타일이 없어 Noto 로 남은 노드는 font-revert 목록과 맞춘다 */
     utype: vr[1] ? { id: vr[1].id, st: vr[1].textStyleId === figma.mixed ? "mixed" : TS_NAME.get(vr[1].textStyleId) || null, font: vr[1].fontName === figma.mixed ? "mixed" : vr[1].fontName.family + " " + vr[1].fontName.style,
       fs: vr[1].fontSize === figma.mixed ? "mixed" : vr[1].fontSize, lh: vr[1].lineHeight === figma.mixed ? "mixed" : vr[1].lineHeight.unit === "PIXELS" ? +vr[1].lineHeight.value.toFixed(2) : vr[1].lineHeight.unit,
-      ls: vr[1].letterSpacing === figma.mixed ? "mixed" : vr[1].letterSpacing.unit === "PIXELS" ? +vr[1].letterSpacing.value.toFixed(2) + "px" : +vr[1].letterSpacing.value.toFixed(2) + "%" } : null };
+      ls: vr[1].letterSpacing === figma.mixed ? "mixed" : vr[1].letterSpacing.unit === "PIXELS" ? +vr[1].letterSpacing.value.toFixed(2) + "px" : +vr[1].letterSpacing.value.toFixed(2) + "%" } : null,
+    /* 증감 글자 모양(2026-11-06 k35d) — .kpi .delta(12/16/600)에 맞는 텍스트 스타일(Label/2 SemiBold)에 묶였는지 · 높이 16 */
+    dtype: dt ? { id: dt.id, st: dt.textStyleId === figma.mixed ? "mixed" : TS_NAME.get(dt.textStyleId) || null, font: dt.fontName === figma.mixed ? "mixed" : dt.fontName.family + " " + dt.fontName.style,
+      fs: dt.fontSize === figma.mixed ? "mixed" : dt.fontSize, lh: dt.lineHeight === figma.mixed ? "mixed" : dt.lineHeight.unit === "PIXELS" ? +dt.lineHeight.value.toFixed(2) : dt.lineHeight.unit, h: +dt.height.toFixed(2) } : null };
 };
 /* KPI 세트 변형(2026-11-05 k35c) — 변형마다 단위 글자 모양 · 증감 줄(화살표 · 칠). Delta=None(class 없는 .kpi .delta)은 화살표 없음 · CSS 색 */
 components.kpiSet = null;
