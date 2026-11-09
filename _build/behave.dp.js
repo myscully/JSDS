@@ -341,7 +341,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await page.keyboard.press("Tab"); await page.keyboard.press("Tab");
     const r = await state(dp), ev = await last();
     ok("incomplete typing is an error only when you leave, and ds:date carries an Invalid Date",
-      !quiet.err && quiet.inv === null && r.err && r.inv === "true" && r.val === "incomplete" && !r.v && r.help === "날짜를 끝까지 입력하세요. 예: 2026. 09. 07" && ev.validity === "incomplete" && ev.date === "NaN" && ev.value === null,
+      !quiet.err && quiet.inv === null && r.err && r.inv === "true" && r.val === "incomplete" && !r.v && r.help === "날짜가 덜 입력됐습니다. 2026. 09. 07 처럼 끝까지 입력하세요." && ev.validity === "incomplete" && ev.date === "NaN" && ev.value === null,
       JSON.stringify({ quiet, r, ev }));
   });
   await step("an impossible date is invalid and never becomes another date", async () => {
@@ -349,7 +349,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await listen();
     const r = await typeInto(dp, "20260230"), ev = await last();
     const border = await dp.evaluate((e) => getComputedStyle(e.querySelector(".affix")).borderTopColor), want = await tok("--foreground-negative-primary");
-    ok("an impossible date is invalid and never becomes another date", r.t === "2026. 02. 30" && r.val === "invalid" && !r.v && r.err && r.help === "없는 날짜입니다. 예: 2026. 09. 07" && ev.date === "NaN" && border === want, JSON.stringify({ r, ev, border, want }));
+    ok("an impossible date is invalid and never becomes another date", r.t === "2026. 02. 30" && r.val === "invalid" && !r.v && r.err && r.help === "날짜가 달력에 없습니다. 달력에서 고르거나 2026. 09. 07 처럼 입력하세요." && ev.date === "NaN" && border === want, JSON.stringify({ r, ev, border, want }));
   });
   await step("↑↓ step the segment under the cursor and ignore max — the value stays", async () => {
     const dp = dpOf("min-max", 0), i = dp.locator(".affix input");
@@ -363,7 +363,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await page.keyboard.press("ArrowUp");
     const month = await state(dp);
     ok("↑↓ step the segment under the cursor and ignore max — the value stays",
-      up.t === "2027. 09. 07" && up.v === "2027-09-07" && up.val === "max" && up.err && up.help === "2026. 12. 31 이전 날짜를 입력하세요" && ev.value === "2027-09-07" && ev.validity === "max" &&
+      up.t === "2027. 09. 07" && up.v === "2027-09-07" && up.val === "max" && up.err && up.help === "날짜가 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다." && ev.value === "2027-09-07" && ev.validity === "max" &&
       down.t === "2026. 09. 07" && down.val === "valid" && !down.err && down.help === "2026년 안의 날짜" && month.t === "2026. 10. 07",
       JSON.stringify({ up, ev, down, month }));
   });
@@ -374,13 +374,24 @@ module.exports = async ({ b, ok, SITE, path }) => {
     const c = await dp.evaluate((e) => ({ title: e.querySelector(".cal-title").textContent, on: e.querySelector(".day.on")?.dataset.date, dis: e.querySelector('.day[data-date="2025-12-30"]').getAttribute("aria-disabled") }));
     await dp.locator('.calendar .day[data-date="2025-12-30"]').click({ force: true });
     const after = await dp.evaluate((e) => e.querySelector(".day.on")?.dataset.date);
-    ok("a typed date before min is kept, and the calendar shows it but can't pick around it", r.v === "2025-12-31" && r.val === "min" && r.help === "2026. 01. 01 이후 날짜를 입력하세요" && c.title === "2025년 12월" && c.on === "2025-12-31" && c.dis === "true" && after === "2025-12-31", JSON.stringify({ r, c, after }));
+    ok("a typed date before min is kept, and the calendar shows it but can't pick around it", r.v === "2025-12-31" && r.val === "min" && r.help === "날짜가 범위를 벗어났습니다. 2026. 01. 01 부터 입력할 수 있습니다." && c.title === "2025년 12월" && c.on === "2025-12-31" && c.dis === "true" && after === "2025-12-31", JSON.stringify({ r, c, after }));
     await page.keyboard.press("Escape");
   });
   await step("examples start in their validity — max, incomplete, invalid", async () => {
     await go("components/date-picker.html");
     const out = await state(dpOf("min-max", 1)), inc = await state(dpOf("invalid", 0)), inv = await state(dpOf("invalid", 1));
     ok("examples start in their validity — max, incomplete, invalid", out.val === "max" && out.v === "2027-01-05" && out.err && out.inv === "true" && inc.val === "incomplete" && !inc.v && inc.err && inv.val === "invalid" && !inv.v && inv.err, JSON.stringify({ out, inc, inv }));
+  });
+  /* 오류 문구는 필드 폭을 넓히지 않고 줄바꿈한다(사람의 결정 2026-11-09) — 문구가 길어져 폭 260 의 필드가 321 · 354 로 넓어졌었다 */
+  await step("an error message wraps inside the field instead of widening it", async () => {
+    await go("components/date-picker.html");
+    const w = (dp) => dp.evaluate((e) => { const h = e.querySelector(".help"); return { w: e.getBoundingClientRect().width, hw: h.getBoundingClientRect().width, lines: Math.round(h.getBoundingClientRect().height / parseFloat(getComputedStyle(h).lineHeight)) }; });
+    const fine = dpOf("min-max", 0), before = await w(fine);
+    await typeInto(fine, "20270105");
+    const typed = await w(fine), out = await w(dpOf("min-max", 1)), inv = await w(dpOf("invalid", 1));
+    ok("an error message wraps inside the field instead of widening it",
+      before.w === 260 && typed.w === 260 && out.w === 260 && inv.w === 260 && typed.hw === 260 && typed.lines === 2 && inv.lines === 2,
+      JSON.stringify({ before, typed, out, inv }));
   });
   await step("an invalid field opens on today and stays red while open", async () => {
     const dp = dpOf("invalid", 1);
@@ -394,13 +405,18 @@ module.exports = async ({ b, ok, SITE, path }) => {
     const dp = dpOf("range");
     await toTop(dp); await listen();
     const r = await typeInto(dp, "2026091220260910"), ev = await last();
-    ok("typing a range puts ~ after the start, a reversed range is order and keeps both dates", r.t === "2026. 09. 12 ~ 2026. 09. 10" && r.val === "order" && r.err && r.help === "종료일이 시작일보다 빠릅니다" && ev.start === "2026-09-12" && ev.end === "2026-09-10" && ev.validity === "order", JSON.stringify({ r, ev }));
+    ok("typing a range puts ~ after the start, a reversed range is order and keeps both dates", r.t === "2026. 09. 12 ~ 2026. 09. 10" && r.val === "order" && r.err && r.help === "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요." && ev.start === "2026-09-12" && ev.end === "2026-09-10" && ev.validity === "order", JSON.stringify({ r, ev }));
     const ok2 = await typeInto(dp, "2026091020260912");
     ok("typing a valid range commits both ends", ok2.s === "2026-09-10" && ok2.e === "2026-09-12" && ok2.val === "valid" && !ok2.err, JSON.stringify(ok2));
     /* 쪽마다의 상태(2026-11-09) — 비운 끝 empty · max(오늘) 넘은 끝 max · 순서는 validity 에만 */
-    await typeInto(dp, "20260910"); const half = await last();
-    await typeInto(dp, "2026091020261105"); const over = await last();
+    const halfS = await typeInto(dp, "20260910"), half = await last();
+    const overS = await typeInto(dp, "2026091020261105"), over = await last();
     ok("ds:date sides tell which end is wrong", ev.sides?.start === "valid" && ev.sides?.end === "valid" && half.validity === "incomplete" && half.sides?.start === "valid" && half.sides?.end === "empty" && over.validity === "max" && over.sides?.start === "valid" && over.sides?.end === "max", JSON.stringify({ ev: ev.sides, half, over }));
+    /* 오류 문구도 그 쪽 이름으로(2026-11-09) — 둘 다 틀리면 '날짜가' · 예시도 A ~ B */
+    const both = await typeInto(dp, "2026110520261106");
+    ok("the error names the wrong end — both wrong falls back to 날짜가",
+      halfS.help === "종료일이 덜 입력됐습니다. 2026. 09. 07 처럼 끝까지 입력하세요." && overS.help === "종료일이 범위를 벗어났습니다. 2026. 10. 27 까지 입력할 수 있습니다." &&
+      both.help === "날짜가 범위를 벗어났습니다. 2026. 10. 27 까지 입력할 수 있습니다.", JSON.stringify({ half: halfS.help, over: overS.help, both: both.help }));
   });
   await step("typed text is checked when focus leaves through the calendar button", async () => {
     const dp = dpOf("default");
@@ -435,6 +451,22 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("input focus rings: field halo for the input, own outline for the calendar button, red when in error",
       inp.border === brand && inp.shadow.includes(halo) && inp.shadow.includes("4px") && inp.inner === "none" && btn.shadow === "none" && btn.btnOutline === "solid 1px" && red.border === neg && red.shadow.includes(negHalo),
       JSON.stringify({ inp, btn, red }));
+  });
+
+  await step("data-messages templates set the word order; bad JSON warns and keeps the defaults", async () => {
+    await go("components/date-picker.html");
+    const dp = dpOf("min-max", 0);
+    await toTop(dp);
+    await dp.evaluate((e) => e.setAttribute("data-messages", JSON.stringify({ max: "Pick a date on or before {max}.", incomplete: "{subject} is incomplete. Type it like {example}.", subject: "The date" })));
+    const en = await typeInto(dp, "20270105"), enInc = await typeInto(dp, "202609");
+    await page.evaluate(() => { window.__warn = []; const w = console.warn; console.warn = (...a) => { window.__warn.push(a.join(" ")); w.apply(console, a); }; });
+    await dp.evaluate((e) => e.setAttribute("data-messages", "{max:"));
+    const bad = await typeInto(dp, "20270105"), warn = await page.evaluate(() => window.__warn);
+    await dp.evaluate((e) => e.removeAttribute("data-messages"));
+    ok("data-messages templates set the word order; bad JSON warns and keeps the defaults",
+      en.help === "Pick a date on or before 2026. 12. 31." && enInc.help === "The date is incomplete. Type it like 2026. 09. 07." &&
+      bad.help === "날짜가 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다." && warn.length === 1 && warn[0].includes("data-messages"),
+      JSON.stringify({ en: en.help, enInc: enInc.help, bad: bad.help, warn }));
   });
 
   // ── locale · timezone ──────────────────────────────────────

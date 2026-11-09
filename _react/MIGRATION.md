@@ -197,6 +197,7 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 | 환경 시간대 고정 | `timezone`(기본 사용자 환경, `"UTC"` · IANA 이름) — '오늘' 과 내보내는 순간(그 시간대의 0시)이 바뀝니다. 틀린 이름은 경고하고 환경 시간대로 | `data-timezone` + `assets/vendor/dayjs*.js`(Date Picker 페이지에 빌드가 붙임) |
 | `messages.format` | `messages.incomplete` · `messages.invalid` 로 나뉨(`format` 을 주면 둘 다에 씁니다) | — |
 | 라벨 `LABELS.dateFormatError` | `dateIncompleteError` · `dateInvalidError` | — |
+| 오류 문구 = 앞말 + 예시 · 날짜 + 꼬리말("2026. 12. 31 이전 날짜를 입력하세요") | **기본 문구가 바뀌었습니다** — 무엇이 일어났는지 + 고치는 법, 범위는 '부터 · 까지'("날짜가 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다."). `messages` 는 자리표시 `{subject}` `{example}` `{min}` `{max}` 템플릿이고 새 키 `subject` · `startSubject` · `endSubject` 로 주어를 정합니다 — 기간에서 한쪽만 틀리면 그 쪽 이름("종료일이 …"). **자리표시가 없는 옛 문자열은 예전처럼 이어 붙습니다.** 기본 문구 글자를 단정하던 테스트는 고쳐야 합니다 | `data-messages`(JSON, 같은 키 · 같은 기본값). 틀린 JSON 은 경고하고 기본 문구로 |
 | — | `defaultText` — 덜 친 글자를 처음부터 보일 때 | 입력의 `value` |
 | 선택 칸 | 둥근 사각형 | 지름 34 원. 기간 양끝은 칸 반쪽에 띠가 이어집니다(`.day.start` · `.day.end` 가 미리보기 끝에도 붙음) |
 

@@ -5,13 +5,17 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { Calendar, DatePicker, DateRangePicker, parseDate } from "./DatePicker";
 import { checkText, groups, pasteText, reformat, stepText, type DatePickerMessages } from "./format";
+import { LABELS } from "../../labels";
 
 const TODAY = new Date(2026, 8, 7);
 const ymd = (y: number, m: number, d: number) => new Date(y, m - 1, d);
 const cell = (k: string) => document.querySelector<HTMLElement>(`.calendar .day[data-date="${k}"]:not(.muted)`)!;
 const openField = async (host: ParentNode = document) => { await userEvent.click(host.querySelector<HTMLElement>(".datepicker .cal-btn, .cal-btn")!); };
 const lastCall = (fn: ReturnType<typeof vi.fn>) => fn.mock.calls[fn.mock.calls.length - 1];
+/* 옛 형식(자리표시 없음) — 2026-11-09 전 문구. 앞말 + 예시 · 날짜 + 꼬리말로 이어 붙는다 */
 const MSG: DatePickerMessages = { incomplete: "날짜를 끝까지 입력하세요. 예: ", invalid: "없는 날짜입니다. 예: ", min: " 이후 날짜를 입력하세요", max: " 이전 날짜를 입력하세요", order: "종료일이 시작일보다 빠릅니다" };
+/* 기본 문구(템플릿) — DatePicker 가 쓰는 것과 같은 묶음 */
+const DEF: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject };
 
 describe("글자 · 검사 (format)", () => {
   it("parseDate 는 로컬 날짜로 엄격하게 — 없는 날짜는 null, 구분자(- . / 공백) · 붙여 쓰기 허용", () => {
@@ -35,7 +39,30 @@ describe("글자 · 검사 (format)", () => {
     expect(reformat("2026. 09.", "2026. 09. ", 9, "deleteContentBackward", "day", false).text).toBe("2026. 0");
     expect(reformat("2026. 09. 0", "2026. 09. 07", 11, "deleteContentBackward", "day", false).text).toBe("2026. 09. 0");
   });
-  it("검사는 일곱 상태 — 빈 · 미완성 · 없는 날짜 · min · max · 순서 · 유효", () => {
+  it("기본 문구는 무엇이 일어났는지 + 고치는 법, 범위는 '부터 · 까지' — 기간은 틀린 쪽 이름(둘 다면 '날짜가' · 예시도 A ~ B)", () => {
+    const o = { unit: "day" as const, range: false, min: ymd(2026, 1, 1), max: ymd(2026, 12, 31), messages: DEF }, r = { ...o, range: true };
+    expect(checkText("2026. 09", o).message).toBe("날짜가 덜 입력됐습니다. 2026. 09. 07 처럼 끝까지 입력하세요.");
+    expect(checkText("2026. 02. 30", o).message).toBe("날짜가 달력에 없습니다. 달력에서 고르거나 2026. 09. 07 처럼 입력하세요.");
+    expect(checkText("2025. 12. 31", o).message).toBe("날짜가 범위를 벗어났습니다. 2026. 01. 01 부터 입력할 수 있습니다.");
+    expect(checkText("2027. 01. 05", o).message).toBe("날짜가 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다.");
+    expect(checkText("2026. 09. 12 ~ 2026. 09. 10", r).message).toBe("종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.");
+    expect(checkText("2026. 09. 10 ~ 2026. 09", r).message).toBe("종료일이 덜 입력됐습니다. 2026. 09. 07 처럼 끝까지 입력하세요.");
+    expect(checkText("2026. 09. 10 ~", r).message).toBe("종료일이 덜 입력됐습니다. 2026. 09. 07 처럼 끝까지 입력하세요.");
+    expect(checkText("2026. 02. 30 ~ 2026. 03. 01", r).message).toBe("시작일이 달력에 없습니다. 달력에서 고르거나 2026. 09. 07 처럼 입력하세요.");
+    expect(checkText("2026. 09 ~ 2026. 1", r).message).toBe("날짜가 덜 입력됐습니다. 2026. 09. 07 ~ 2026. 09. 07 처럼 끝까지 입력하세요.");
+    expect(checkText("2026. 09. 10 ~ 2027. 01. 05", r).message).toBe("종료일이 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다.");
+    expect(checkText("2025. 12. 01 ~ 2026. 09. 10", r).message).toBe("시작일이 범위를 벗어났습니다. 2026. 01. 01 부터 입력할 수 있습니다.");
+    expect(checkText("2027. 01. 01 ~ 2027. 01. 05", r).message).toBe("날짜가 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다.");
+    expect(checkText("2026", { ...o, unit: "month" }).message).toBe("날짜가 덜 입력됐습니다. 2026. 09 처럼 끝까지 입력하세요.");
+  });
+  it("자리표시로 어순을 정한다 — 다른 언어는 제품이 넣는다", () => {
+    const en: DatePickerMessages = { ...DEF, incomplete: "{subject} is incomplete. Type it like {example}.", max: "Pick a date on or before {max}.", subject: "The date", startSubject: "The start date", endSubject: "The end date" };
+    const o = { unit: "day" as const, range: true, max: ymd(2026, 12, 31), messages: en };
+    expect(checkText("2026. 09. 10 ~ 2026. 09", o).message).toBe("The end date is incomplete. Type it like 2026. 09. 07.");
+    expect(checkText("2026. 09. 10 ~ 2027. 01. 05", o).message).toBe("Pick a date on or before 2026. 12. 31.");
+    expect(checkText("2026. 09. 10 ~ 2026. 09. 08", o).message).toBe(DEF.order);
+  });
+  it("옛 형식(자리표시 없는 문자열)은 예전처럼 이어 붙는다 · 검사는 일곱 상태 — 빈 · 미완성 · 없는 날짜 · min · max · 순서 · 유효", () => {
     const o = { unit: "day" as const, range: false, min: ymd(2026, 1, 1), max: ymd(2026, 12, 31), messages: MSG };
     expect(checkText("", o).validity).toBe("empty");
     expect(checkText("2026. 09", o)).toMatchObject({ validity: "incomplete", start: null, message: "날짜를 끝까지 입력하세요. 예: 2026. 09. 07" });
@@ -85,7 +112,7 @@ describe("DatePicker — 입력", () => {
     expect(input.value).toBe("2027. 09. 07");
     expect(lastCall(onChange)).toEqual([ymd(2027, 9, 7), { text: "2027. 09. 07", validity: "max" }]);
     expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText("2026. 12. 31 이전 날짜를 입력하세요")).toHaveClass("help");
+    expect(screen.getByText("날짜가 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다.")).toHaveClass("help");
     expect(input.closest(".datepicker")).toHaveAttribute("data-validity", "max");
     await userEvent.keyboard("{ArrowDown}");
     expect(lastCall(onChange)[1].validity).toBe("valid");
@@ -116,10 +143,10 @@ describe("DatePicker — 입력", () => {
     expect(v).toBeInstanceOf(Date); expect(isNaN(v.getTime())).toBe(true);
     expect(info).toEqual({ text: "2026. 09", validity: "incomplete" });
     expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText("날짜를 끝까지 입력하세요. 예: 2026. 09. 07")).toBeInTheDocument();
+    expect(screen.getByText("날짜가 덜 입력됐습니다. 2026. 09. 07 처럼 끝까지 입력하세요.")).toBeInTheDocument();
     await userEvent.clear(input); await userEvent.type(input, "20260230{Enter}");
     expect(lastCall(onChange)[1].validity).toBe("invalid");
-    expect(screen.getByText("없는 날짜입니다. 예: 2026. 09. 07")).toBeInTheDocument();
+    expect(screen.getByText("날짜가 달력에 없습니다. 달력에서 고르거나 2026. 09. 07 처럼 입력하세요.")).toBeInTheDocument();
   });
 
   it("defaultText 로 덜 친 글자를 처음부터 보인다 — 오류와 함께", () => {
@@ -355,7 +382,7 @@ describe("DateRangePicker", () => {
     expect(input).toHaveValue("2026. 09. 12 ~ 2026. 09. 10");
     await userEvent.type(input, "{Enter}");
     expect(lastCall(onChange)).toEqual([{ start: ymd(2026, 9, 12), end: ymd(2026, 9, 10) }, { text: "2026. 09. 12 ~ 2026. 09. 10", validity: "order", sides: { start: "valid", end: "valid" } }]);
-    expect(screen.getByText("종료일이 시작일보다 빠릅니다")).toBeInTheDocument();
+    expect(screen.getByText("종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.")).toBeInTheDocument();
   });
 
   it("info.sides 는 시작 · 끝 각각의 상태 — 비운 쪽 empty, 덜 친 쪽 incomplete, 범위 밖인 쪽 max", async () => {
@@ -368,7 +395,18 @@ describe("DateRangePicker", () => {
     expect(lastCall(onChange)[1]).toEqual({ text: "2026. 09. 10 ~ 2027. 01", validity: "incomplete", sides: { start: "valid", end: "incomplete" } });
     await userEvent.type(input, "05{Enter}");
     expect(lastCall(onChange)[1]).toEqual({ text: "2026. 09. 10 ~ 2027. 01. 05", validity: "max", sides: { start: "valid", end: "max" } });
+    expect(screen.getByText("종료일이 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다.")).toHaveClass("help");
     expect(checkText("2026. 02. 30 ~ 2026. 03. 01", { unit: "day", range: true, messages: MSG }).sides).toEqual({ start: "invalid", end: "valid" });
+  });
+
+  it("messages 는 일부만 바꿔도 된다 — 나머지는 기본 문구, 자리표시는 같은 규칙", async () => {
+    render(<DateRangePicker label="기간" max={ymd(2026, 12, 31)} messages={{ max: "Pick a date on or before {max}.", endSubject: "The end date" }} />);
+    const input = screen.getByLabelText("기간");
+    await userEvent.type(input, "2027010520270106{Enter}");
+    expect(screen.getByText("Pick a date on or before 2026. 12. 31.")).toHaveClass("help");
+    await userEvent.clear(input);
+    await userEvent.type(input, "20260910202609{Enter}");
+    expect(screen.getByText("The end date 덜 입력됐습니다. 2026. 09. 07 처럼 끝까지 입력하세요.")).toHaveClass("help");
   });
 
   it("시작을 고른 뒤 올린 날까지 미리보기 · 프리셋은 min/max 밖이면 비활성", async () => {

@@ -107,7 +107,8 @@
      설정: data-unit(year · month · day) · data-range(기간 — 달력 기본 2개, data-calendars="1" 이나 767px 이하에서 1개) · data-locale(기본 ko-KR, Intl 표기)
            · data-timezone(기본 환경 시간대 — IANA 이름 · UTC 는 dayjs + utc · timezone 플러그인이 실렸을 때) · data-min/max(YYYY-MM-DD | today)
            · data-footer("today reset cancel apply" | none) · data-presets("7 30") · data-today(정적 데모의 오늘)
-           · data-labels(JSON — Intl 이 만들지 못하는 문구를 바꾼다. 키는 React labels 와 같고 recent 는 "최근 {n}일") */
+           · data-labels(JSON — Intl 이 만들지 못하는 문구를 바꾼다. 키는 React labels 와 같고 recent 는 "최근 {n}일")
+           · data-messages(JSON — 오류 문구. 키 · 자리표시는 React messages 와 같다) */
   var FOOT = { today: "text", reset: "text", cancel: "outline assistive", apply: "solid primary" };
   /* 문구 — 사람의 결정(2026-11-09): 다른 언어로 쓸 때 data-labels 로 바꾼다. '오늘' 의 기본은 Intl.RelativeTimeFormat */
   var LABELS = { dialog: "날짜 선택", reset: "초기화", cancel: "취소", apply: "적용", prevMonth: "이전 달", nextMonth: "다음 달", prevYear: "이전 연도", nextYear: "다음 연도", prevYears: "이전 12년", nextYears: "다음 12년", chooseYear: "연도 선택", yearGrid: "연도 목록", backToDays: "날짜로 돌아가기", backToMonths: "월 선택으로", recent: "최근 {n}일" };
@@ -120,7 +121,22 @@
     for (k in o) if (typeof o[k] === "string") out[k] = o[k];
     return out;
   }
-  var MSG = { incomplete: "날짜를 끝까지 입력하세요. 예: ", invalid: "없는 날짜입니다. 예: ", min: " 이후 날짜를 입력하세요", max: " 이전 날짜를 입력하세요", order: "종료일이 시작일보다 빠릅니다" };
+  /* 오류 문구 — Writing 규칙(무엇이 일어났는지 + 어떻게 하면 되는지), 범위는 '부터 · 까지'(그 날짜를 포함). 사람의 결정(2026-11-09).
+     자리표시 {subject} {example} {min} {max} — 어순이 다른 언어도 쓸 수 있게. 다른 언어 기본값은 두지 않고 data-messages 로 넣는다.
+     {subject} 는 기간에서 한쪽만 틀렸으면 그 쪽(startSubject · endSubject), 아니면 subject. 자리표시가 없는 문자열은 옛 조합(앞말 + 예시 · 날짜 + 꼬리말) */
+  var MSG = { incomplete: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.", invalid: "{subject} 달력에 없습니다. 달력에서 고르거나 {example} 처럼 입력하세요.", min: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.", max: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.", order: "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.", subject: "날짜가", startSubject: "시작일이", endSubject: "종료일이" };
+  function dpMessages(host) {
+    var raw = host.getAttribute("data-messages"), o = {}, out = {}, k;
+    if (raw) try { o = JSON.parse(raw) || {}; } catch (e) { if (!labelWarned[raw]) { labelWarned[raw] = 1; if (window.console) console.warn("[ds.js] data-messages 가 JSON 이 아닙니다 — 기본 문구를 씁니다: " + raw); } }
+    for (k in MSG) out[k] = MSG[k];
+    for (k in o) if (typeof o[k] === "string") out[k] = o[k];
+    return out;
+  }
+  function say(M, key, x) {
+    var t = M[key];
+    if (t.indexOf("{") < 0) return key === "order" ? t : key === "min" || key === "max" ? x[key] + t : t + x.example;
+    return t.replace(/\{(\w+)\}/g, function (m, k) { return x[k] != null ? x[k] : m; });
+  }
   var EXAMPLE = { day: "2026. 09. 07", month: "2026. 09", year: "2026" }, DIGITS = { day: 8, month: 6, year: 4 };
   var ymKey = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1); };
   var firstOf = function (d) { return new Date(d.getFullYear(), d.getMonth(), 1); };
@@ -222,12 +238,15 @@
     /* 기간의 쪽마다 상태(React info.sides 와 같다) — 비운 쪽 empty, 범위는 그 쪽 날짜만. 순서(order)는 두 쪽 사이의 일이라 validity 에만 */
     var side = function (p, x) { return !p.trim() ? "empty" : x.v !== "valid" ? x.v : lo && f(x.d) < f(lo) ? "min" : hi && f(x.d) > f(hi) ? "max" : "valid"; };
     var ss = rg ? { start: side(parts[0], sides[0]), end: side(parts[1], sides[1]) } : null;
+    /* 주어 — 기간에서 한쪽만 걸리면 그 쪽 이름, 둘 다면 '날짜가'(예시도 A ~ B) */
+    var M = dpMessages(host), x = { example: EXAMPLE[unit], min: lo && showOf(lo, unit), max: hi && showOf(hi, unit), subject: M.subject };
+    var who = function (hit) { var s0 = hit(ss.start), s1 = hit(ss.end); if (s0 !== s1) x.subject = s0 ? M.startSubject : M.endSubject; else if (s0) x.example = EXAMPLE[unit] + " ~ " + EXAMPLE[unit]; };
     var bad = sides.filter(function (x) { return x.v !== "valid"; })[0];
-    if (bad) return { validity: bad.v, a: null, b: null, sides: ss, msg: MSG[bad.v] + (rg ? EXAMPLE[unit] + " ~ " + EXAMPLE[unit] : EXAMPLE[unit]) };
+    if (bad) { if (rg) who(function (v) { return v === "incomplete" || v === "invalid" || v === "empty"; }); return { validity: bad.v, a: null, b: null, sides: ss, msg: say(M, bad.v, x) }; }
     var a = sides[0].d, b = rg ? sides[1].d : null, both = [a, b].filter(Boolean);
-    if (b && b < a) return { validity: "order", a: a, b: b, sides: ss, msg: MSG.order };
-    if (lo && both.some(function (d) { return f(d) < f(lo); })) return { validity: "min", a: a, b: b, sides: ss, msg: showOf(lo, unit) + MSG.min };
-    if (hi && both.some(function (d) { return f(d) > f(hi); })) return { validity: "max", a: a, b: b, sides: ss, msg: showOf(hi, unit) + MSG.max };
+    if (b && b < a) return { validity: "order", a: a, b: b, sides: ss, msg: say(M, "order", x) };
+    if (lo && both.some(function (d) { return f(d) < f(lo); })) { if (rg) who(function (v) { return v === "min"; }); return { validity: "min", a: a, b: b, sides: ss, msg: say(M, "min", x) }; }
+    if (hi && both.some(function (d) { return f(d) > f(hi); })) { if (rg) who(function (v) { return v === "max"; }); return { validity: "max", a: a, b: b, sides: ss, msg: say(M, "max", x) }; }
     return { validity: "valid", a: a, b: b, sides: ss };
   }
   /* host 의 상태. 처음 만질 때 마크업(입력 글자 · 정적 달력의 .on)에서 값을 읽어 data-* 로 옮긴다 */

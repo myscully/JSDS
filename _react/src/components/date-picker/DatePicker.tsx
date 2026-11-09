@@ -103,7 +103,7 @@ interface PickerProps extends PickerBaseProps {
   presets?: DateRangePickerProps["presets"];
   calendars?: 1 | 2;
 }
-const MESSAGES: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError };
+const MESSAGES: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject };
 const firstOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
 const keyOfPair = (p: Pair) => [p.a, p.b].map((d) => (d == null ? "" : isNaN(d.getTime()) ? "NaN" : String(d.getTime()))).join("|");
 const narrow = () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(max-width:767px)").matches;

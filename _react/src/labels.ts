@@ -29,12 +29,15 @@ export const LABELS = {
   yearGrid: "연도 목록",
   backToDays: "날짜로 돌아가기",
   backToMonths: "월 선택으로",
-  /* 날짜 직접 입력 검사 — 원인 + 고치는 법(Text Field 오류 문구 규칙) */
-  dateIncompleteError: "날짜를 끝까지 입력하세요. 예: ",
-  dateInvalidError: "없는 날짜입니다. 예: ",
-  dateMinError: " 이후 날짜를 입력하세요",
-  dateMaxError: " 이전 날짜를 입력하세요",
-  dateOrderError: "종료일이 시작일보다 빠릅니다",
+  /* 날짜 직접 입력 검사 — 무엇이 일어났는지 + 고치는 법(Writing 규칙), 범위는 '부터 · 까지'(그 날짜 포함). 사이트 ds.js MSG 와 같다 */
+  dateIncompleteError: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.",
+  dateInvalidError: "{subject} 달력에 없습니다. 달력에서 고르거나 {example} 처럼 입력하세요.",
+  dateMinError: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.",
+  dateMaxError: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.",
+  dateOrderError: "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.",
+  dateSubject: "날짜가",
+  dateStartSubject: "시작일이",
+  dateEndSubject: "종료일이",
   more: "더 보기",
   undo: "실행 취소",
 } as const;

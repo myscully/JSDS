@@ -95,23 +95,37 @@ export function stepText(value: string, caret: number, dir: 1 | -1, unit: DateUn
   return { text: parts.join(" ~ "), caret: base + [4, 8, 12][si] };
 }
 
+/** 오류 문구 — 자리표시 {subject} {example} {min} {max} 로 어순을 정한다(사이트 data-messages 와 같은 키).
+ *  자리표시가 없는 문자열은 옛 조합: incomplete · invalid 는 뒤에 예시, min · max 는 앞에 날짜 */
 export interface DatePickerMessages {
-  /** 덜 친 날짜 — 뒤에 예시가 붙는다 */
+  /** 덜 친 날짜 */
   incomplete: string;
-  /** 없는 날짜 — 뒤에 예시가 붙는다 */
+  /** 없는 날짜 */
   invalid: string;
-  /** min 표기 뒤에 붙는다 */
+  /** min 보다 앞 — {min} 은 필드 표기 */
   min: string;
-  /** max 표기 뒤에 붙는다 */
+  /** max 보다 뒤 — {max} 는 필드 표기 */
   max: string;
   /** 기간의 끝이 시작보다 앞 */
   order: string;
+  /** {subject} — 단일 필드 · 기간에서 두 쪽 다 틀렸을 때. 조사까지("날짜가") */
+  subject?: string;
+  /** {subject} — 기간에서 시작만 틀렸을 때 */
+  startSubject?: string;
+  /** {subject} — 기간에서 끝만 틀렸을 때 */
+  endSubject?: string;
   /** @deprecated incomplete · invalid 로 나뉘었다 — 주면 둘 다에 쓴다 */
   format?: string;
 }
 /** 기간의 한쪽 상태 — 순서(order)는 두 쪽 사이의 일이라 여기에는 없다. 비운 쪽은 empty */
 export type DateSideValidity = Exclude<DateValidity, "order">;
 export interface CheckResult { validity: DateValidity; start: Date | null; end: Date | null; message?: string; /** 기간일 때만 — 시작 · 끝 각각 */ sides?: { start: DateSideValidity; end: DateSideValidity } }
+type MessageKey = "incomplete" | "invalid" | "min" | "max" | "order";
+/** 문구 하나를 채운다 — 자리표시가 없으면 옛 조합 */
+function say(t: string, key: MessageKey, x: Record<string, string | undefined>) {
+  if (!t.includes("{")) return key === "order" ? t : key === "min" || key === "max" ? (x[key] ?? "") + t : t + x.example;
+  return t.replace(/\{(\w+)\}/g, (m, k: string) => x[k] ?? m);
+}
 /** 입력 검사 — 빈 · 미완성 · 없는 날짜 · 순서 · min · max · 유효. 미완성 · 없는 날짜는 값이 없고, 순서 · 범위 밖은 그 날짜가 남는다 */
 export function checkText(text: string, o: { unit: DateUnit; range: boolean; min?: Date | null; max?: Date | null; messages: DatePickerMessages }): CheckResult {
   const { unit, range, min, max, messages: msg } = o, s = String(text ?? "").trim();
@@ -126,12 +140,23 @@ export function checkText(text: string, o: { unit: DateUnit; range: boolean; min
   const k = (d: Date) => keyOf(d, unit);
   /* 쪽마다의 상태 — 비운 쪽 empty, 그 밖은 전체와 같은 규칙(범위는 그 쪽 날짜만 본다) */
   const sideOf = (p: string, x: (typeof sides)[number]): DateSideValidity => (!p.trim() ? "empty" : x.v !== "valid" ? x.v : min && k(x.d) < k(min) ? "min" : max && k(x.d) > k(max) ? "max" : "valid");
-  const ss = range ? { sides: { start: sideOf(parts[0], sides[0]), end: sideOf(parts[1], sides[1]) } } : {};
+  const ss: Pick<CheckResult, "sides"> = range ? { sides: { start: sideOf(parts[0], sides[0]), end: sideOf(parts[1], sides[1]) } } : {};
+  /* 주어 — 기간에서 한쪽만 걸리면 그 쪽 이름, 둘 다면 subject(예시도 A ~ B) */
+  const x: Record<string, string | undefined> = { example: EXAMPLE[unit], min: min ? showOf(min, unit) : undefined, max: max ? showOf(max, unit) : undefined, subject: msg.subject };
+  const who = (hit: (v: DateSideValidity) => boolean) => {
+    if (!ss.sides) return;
+    const s0 = hit(ss.sides.start), s1 = hit(ss.sides.end);
+    if (s0 !== s1) x.subject = s0 ? msg.startSubject : msg.endSubject;
+    else if (s0) x.example = `${EXAMPLE[unit]} ~ ${EXAMPLE[unit]}`;
+  };
   const bad = sides.find((x) => x.v !== "valid");
-  if (bad) return { validity: bad.v, start: null, end: null, message: (msg.format ?? msg[bad.v as "incomplete" | "invalid"]) + (range ? `${EXAMPLE[unit]} ~ ${EXAMPLE[unit]}` : EXAMPLE[unit]), ...ss };
+  if (bad) {
+    who((v) => v === "incomplete" || v === "invalid" || v === "empty");
+    return { validity: bad.v, start: null, end: null, message: say(msg.format ?? msg[bad.v], bad.v, x), ...ss };
+  }
   const a = sides[0].d!, b = range ? sides[1].d : null, both = [a, b].filter(Boolean) as Date[];
-  if (b && b < a) return { validity: "order", start: a, end: b, message: msg.order, ...ss };
-  if (min && both.some((d) => k(d) < k(min))) return { validity: "min", start: a, end: b, message: showOf(min, unit) + msg.min, ...ss };
-  if (max && both.some((d) => k(d) > k(max))) return { validity: "max", start: a, end: b, message: showOf(max, unit) + msg.max, ...ss };
+  if (b && b < a) return { validity: "order", start: a, end: b, message: say(msg.order, "order", x), ...ss };
+  if (min && both.some((d) => k(d) < k(min))) { who((v) => v === "min"); return { validity: "min", start: a, end: b, message: say(msg.min, "min", x), ...ss }; }
+  if (max && both.some((d) => k(d) > k(max))) { who((v) => v === "max"); return { validity: "max", start: a, end: b, message: say(msg.max, "max", x), ...ss }; }
   return { validity: "valid", start: a, end: b, ...ss };
 }
