@@ -64,6 +64,7 @@
   function inClipper(el) { for (var p = el.parentElement; p && p !== doc.body; p = p.parentElement) { var c = getComputedStyle(p); if (/auto|scroll|hidden|clip/.test(c.overflowX + c.overflowY)) return true; } return false; }
   /* 띄운 메뉴는 트리거를 따라가지 못하므로 스크롤 · 창 크기 변경에 닫는다. 메뉴 자신의 스크롤은 그대로 */
   function closeFloats(e) {
+    $$(".tooltip.float").forEach(function (tip) { tip.parentNode.classList.add("quiet"); });
     $$(".dropdown.float.open, .combobox.float.open").forEach(function (d) {
       if (e.type === "scroll" && $(".menu", d).contains(e.target)) return;
       if (d.matches(".combobox")) { cbOpen(d, false); return; }
@@ -643,7 +644,40 @@
   }
 
   /* ---------- Toast ---------- */
-  function scheduleToast(t) { var d = Number(t.dataset.duration || 4000); if (d > 0) setTimeout(function () { dismiss(t); }, d); }
+  /* Toast 타이머(사람의 결정 2026-11-10) — 묶음에 마우스가 있거나 포커스가 든 동안 남은 시간을 멈춘다. 오류는 닫을 때까지 남는다.
+     묶음 전체를 멈추는 이유: 다른 Toast 가 사라지면 보고 있던 Toast 가 밀려 내려간다 */
+  function toastHeld(s) { return s.matches(":hover") || s.contains(doc.activeElement); }
+  function toastSync(s) {
+    var held = toastHeld(s);
+    $$(":scope > .toast", s).forEach(function (t) {
+      if (!(t._tLeft > 0)) return;
+      if (held && t._t) { clearTimeout(t._t); t._t = 0; t._tLeft = Math.max(1, t._tLeft - (Date.now() - t._tAt)); }
+      else if (!held && !t._t) { t._tAt = Date.now(); t._t = setTimeout(function () { t._t = 0; closeToast(t); }, t._tLeft); }
+    });
+  }
+  function scheduleToast(t) {
+    var d = Number(t.dataset.duration || 4000), s = t.parentNode;
+    if (!s._dsHold) { s._dsHold = true;
+      s.addEventListener("mouseenter", function () { toastSync(s); });
+      s.addEventListener("mouseleave", function () { toastSync(s); });
+      s.addEventListener("focusin", function (e) { if (!s.contains(e.relatedTarget)) s._dsFrom = e.relatedTarget; toastSync(s); });
+      s.addEventListener("focusout", function () { setTimeout(function () { toastSync(s); }, 0); }); }
+    if (!(d > 0) || t.classList.contains("danger")) return;   // 오류만 있는 묶음도 위 리스너는 있어야 한다 — 닫은 뒤 돌아갈 자리를 기억한다
+    t._tLeft = d;
+    toastSync(s);
+  }
+  /* 키보드로 닫으면 포커스를 다음 Toast, 없으면 들어오기 전 자리로 — body 로 떨어지지 않게. 마우스로 닫을 때는 옮기지 않는다(옮기면 다음 Toast 의 타이머가 멈춘 채 남는다) */
+  function closeToast(t, byKey) {
+    var s = t.parentNode; if (!s) return;
+    if (byKey && t.contains(doc.activeElement)) { var to = $$("button", s).filter(function (b) { return !t.contains(b); })[0] || s._dsFrom; if (to && doc.contains(to)) to.focus({ preventScroll: true }); }
+    clearTimeout(t._t); t._t = 0; t._tLeft = 0; dismiss(t); setTimeout(function () { toastSync(s); }, 180);
+  }
+  /* 닫혀 사라지는 요소(Notice · Banner)에서 키보드 포커스를 다음 칸으로 */
+  function focusPast(el) {
+    if (!el.contains(doc.activeElement)) return;
+    var out = focusablesIn(doc.body).filter(function (x) { return !el.contains(x); }), to = out.filter(function (x) { return el.compareDocumentPosition(x) & 4; })[0] || out[out.length - 1];
+    if (to) to.focus({ preventScroll: true });
+  }
   function dismiss(el) { if (!el) return; el.style.transition = "opacity 160ms"; el.style.opacity = "0"; setTimeout(function () { el.remove(); }, 170); }
   /* Filter Chip — 켜진 칩이 있을 때만 '필터 초기화'를 보인다. 누르면 버튼이 사라지므로 포커스는 첫 칩으로 */
   function syncChipReset(g) { var b = $(":scope > [data-chip-reset]", g); if (b) b.hidden = !$(":scope > .chip.on[aria-pressed]", g); }
@@ -658,12 +692,19 @@
     o = o || {};
     var stack = $(".toast-stack.fixed");
     if (!stack) { stack = doc.createElement("div"); stack.className = "toast-stack fixed"; stack.setAttribute("aria-live", "polite"); doc.body.appendChild(stack); }
-    var t = doc.createElement("div"); t.className = "toast" + (o.tone === "danger" ? " danger" : ""); t.dataset.duration = String(o.duration == null ? 4000 : o.duration);
+    /* 오류는 닫을 때까지 · 동작이 있으면 10초 · 나머지 4초(사람의 결정 2026-11-10) */
+    var d = o.tone === "danger" ? 0 : o.duration != null ? o.duration : o.action ? 10000 : 4000;
+    /* 같은 알림이 연달아 오면 쌓지 않고 시간을 다시 잰다. 동작이 있는 Toast 는 합치지 않는다 — 실행 취소 대상이 서로 다르다 */
+    if (!o.action) { var same = $$(":scope > .toast", stack).filter(function (x) { return x._dsMsg === String(message) && !$(".action", x) && x.classList.contains("danger") === (o.tone === "danger") && x.style.opacity !== "0"; })[0];
+      if (same) { if (d > 0) { clearTimeout(same._t); same._t = 0; same._tLeft = d; toastSync(stack); } return same; } }
+    var t = doc.createElement("div"); t.className = "toast" + (o.tone === "danger" ? " danger" : ""); t.dataset.duration = String(d); t._dsMsg = String(message);
     var ic = o.tone === "danger" ? '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 8v4"/><path d="M12 16h.01"/>' : '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/>';
     t.innerHTML = '<span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ic + "</svg></span>";
     t.appendChild(doc.createTextNode(message));
-    if (o.action) { var b = doc.createElement("button"); b.type = "button"; b.className = "action"; b.textContent = o.action.label; b.addEventListener("click", function () { o.action.onClick && o.action.onClick(); dismiss(t); }); t.appendChild(b); }
-    while (stack.children.length >= (o.max || 3)) stack.firstElementChild.remove();
+    if (o.action) { var b = doc.createElement("button"); b.type = "button"; b.className = "action"; b.textContent = o.action.label; b.addEventListener("click", function () { o.action.onClick && o.action.onClick(); }); t.appendChild(b); }   // 닫기는 문서 클릭 처리가 한다
+    if (!(d > 0)) { var cb = doc.createElement("button"); cb.type = "button"; cb.className = "close"; cb.setAttribute("aria-label", "닫기"); cb.innerHTML = X_ICON; t.appendChild(cb); }
+    /* 넘치면 자동으로 사라지는 것부터 지운다. 닫을 때까지 남는 것(오류)은 밀리지 않아 3개를 넘어 쌓일 수 있다 */
+    while (stack.children.length >= (o.max || 3)) { var old = $$(":scope > .toast", stack).filter(function (x) { return Number(x.dataset.duration) > 0; })[0]; if (!old) break; clearTimeout(old._t); old.remove(); }
     stack.appendChild(t); scheduleToast(t); return t;
   }
 
@@ -676,11 +717,19 @@
   var popup = {
     open: function (sel) {
       var el = typeof sel === "string" ? $(sel) : sel; if (!el) return;
-      popup._prev = doc.activeElement;
+      if ($(".popup-backdrop[data-ds-popup]")) { console.warn("[DS.popup] 모달 위에 모달을 띄우지 않습니다 — 열려 있는 팝업을 먼저 닫으세요."); return; }
+      popup._prev = doc.activeElement; delete el.dataset.dsDirty;
       var bd = doc.createElement("div"); bd.className = "popup-backdrop"; bd.dataset.dsPopup = "1";
       el.dataset.dsHome = "1"; var ph = doc.createComment("popup"); el.parentNode.insertBefore(ph, el); el._dsPlaceholder = ph;
       bd.appendChild(el); doc.body.appendChild(bd); doc.body.style.overflow = "hidden";
-      var f = $("button,[href],input,select,textarea,[tabindex]:not([tabindex='-1'])", el); f && f.focus();
+      /* 첫 포커스는 닫기(X)와 위험 실행 버튼을 건너뛴다 — 입력칸이 있으면 입력칸, 없으면 취소 */
+      var fs = focusablesIn(el), f = fs.filter(function (x) { return !x.matches(".popup-close, .negative"); })[0] || fs[0]; f && f.focus();
+    },
+    /** 처리 중 — DS.popup.busy(true): 닫는 길(X · 취소 · Esc · 배경)을 막는다. 끝나면 DS.popup.busy(false) 후 close() 또는 안에 오류를 보인다 */
+    busy: function (on) {
+      var el = $(".popup-backdrop[data-ds-popup] .popup"); if (!el) return;
+      if (on) el.setAttribute("aria-busy", "true"); else el.removeAttribute("aria-busy");
+      $$("[data-popup-close]", el).forEach(function (b) { b.disabled = !!on; });
     },
     close: function () {
       var bd = $(".popup-backdrop[data-ds-popup]"); if (!bd) return;
@@ -689,6 +738,61 @@
       var prev = popup._prev; popup._prev = null; if (prev && prev.focus && doc.contains(prev)) prev.focus();
     },
   };
+
+  function popupKeeps(bd) { var el = $(".popup", bd); return !el || el.matches(".danger, [aria-busy='true']") || el.dataset.dsDirty === "1"; }
+  ["input", "change"].forEach(function (ev) { doc.addEventListener(ev, function (e) { var p = closest(e.target, ".popup-backdrop[data-ds-popup] .popup"); if (p) p.dataset.dsDirty = "1"; }, true); });
+  doc.addEventListener("click", function (e) { var it = closest(e.target, ".popup-backdrop[data-ds-popup] .menu-item, .popup-backdrop[data-ds-popup] [role=gridcell]"); if (it) closest(it, ".popup").dataset.dsDirty = "1"; }, true);   // Select · Date Picker 는 input 이벤트를 내지 않는다
+
+  /* ---------- Side Panel(사람의 결정 — 비모달 기본, 모달 옵션) ----------
+     DS.panel.open("#id") / DS.panel.close(). 비모달은 뒤 페이지를 그대로 쓸 수 있다 — 가두지 않고 스크롤도 잠그지 않으며, 패널 안에 포커스가 있을 때만 Esc 로 닫는다.
+     data-modal 이면 배경 · 가둠 · 스크롤 잠금. 한 번에 하나 — 열려 있는데 다른 패널을 열면 바꿔 끼운다 */
+  var panel = {
+    open: function (sel) {
+      var el = typeof sel === "string" ? $(sel) : sel; if (!el) return;
+      var cur = $(".side-panel.fixed:not([hidden])"), from = doc.activeElement;
+      if (cur && cur !== el) { from = cur._dsPrev || from; panel.close(cur, true); }
+      el._dsPrev = from;
+      if (cur !== el) { var ph = doc.createComment("side-panel"); el.parentNode.insertBefore(ph, el); el._dsPlaceholder = ph; doc.body.appendChild(el); }
+      el.hidden = false; el.classList.add("fixed");
+      if (el.hasAttribute("data-modal") && !$(".side-panel-dim")) { var dim = doc.createElement("div"); dim.className = "side-panel-dim"; doc.body.insertBefore(dim, el); doc.body.style.overflow = "hidden"; }
+      el.tabIndex = -1; el.focus({ preventScroll: true });
+    },
+    close: function (el, swapping) {
+      el = el || $(".side-panel.fixed:not([hidden])"); if (!el || !el.classList.contains("fixed")) return;   // 문서 예제처럼 띄우지 않은 패널은 닫을 것이 없다
+      var inside = el.contains(doc.activeElement), modal = el.hasAttribute("data-modal"), prev = el._dsPrev;
+      el.hidden = true; el.classList.remove("fixed");
+      if (el._dsPlaceholder) { el._dsPlaceholder.parentNode.replaceChild(el, el._dsPlaceholder); delete el._dsPlaceholder; }
+      var dim = $(".side-panel-dim"); if (dim) { dim.remove(); doc.body.style.overflow = ""; }
+      el._dsPrev = null;
+      if (swapping) return;
+      fire(el, "ds:panel-close");
+      if ((inside || modal) && prev && prev.focus && doc.contains(prev)) prev.focus();   // 사용자가 뒤 페이지로 옮겨 갔으면 포커스를 뺏지 않는다
+    },
+  };
+
+  /* ---------- Tooltip — 화면 끝 뒤집기 · 잘림 방지 · Esc ----------
+     보이고 숨는 것은 CSS(JS 없이도 뜬다). 올릴 때 재서, 화면을 넘으면 반대쪽으로, 스크롤 영역 안이거나 옆으로 넘치면 화면 기준으로 띄운다 */
+  var TIP_OPP = { top: "bottom", bottom: "top", left: "right", right: "left" };
+  function tipSide(tip, side) { ["bottom", "left", "right"].forEach(function (c) { tip.classList.toggle(c, c === side); }); }
+  function placeTip(w) {
+    var tip = $(":scope > .tooltip", w); if (!tip || w.classList.contains("show")) return;
+    var base = tip.dataset.side || (["bottom", "left", "right"].filter(function (c) { return tip.classList.contains(c); })[0] || "top"); tip.dataset.side = base;
+    var r = w.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight, gap = 8, vw = window.innerWidth, vh = window.innerHeight;
+    var room = { top: r.top, bottom: vh - r.bottom, left: r.left, right: vw - r.right }, vert = base === "top" || base === "bottom", need = (vert ? th : tw) + gap + 8, side = base;
+    if (room[base] < need && room[TIP_OPP[base]] > room[base]) side = TIP_OPP[base];
+    tipSide(tip, side);
+    var x = side === "left" ? r.left - gap - tw : side === "right" ? r.right + gap : r.left + r.width / 2 - tw / 2;
+    var y = side === "top" ? r.top - gap - th : side === "bottom" ? r.bottom + gap : r.top + r.height / 2 - th / 2;
+    var cx = Math.max(8, Math.min(x, vw - tw - 8)), cy = Math.max(8, Math.min(y, vh - th - 8));
+    if (inClipper(w) || cx !== x) {
+      tip.style.setProperty("--float-x", cx + "px"); tip.style.setProperty("--float-y", cy + "px"); tip.style.setProperty("--float-arrow", (r.left + r.width / 2 - cx) + "px");
+      tip.classList.add("float");
+    } else tip.classList.remove("float");
+  }
+  function tipEnter(e) { var w = closest(e.target, ".tooltip-wrap"); if (!w || w._dsTip) return; w._dsTip = true; placeTip(w); }
+  function tipLeave(e) { var w = closest(e.target, ".tooltip-wrap"); if (!w || w.contains(e.relatedTarget)) return; if (e.type === "mouseout" ? w.contains(doc.activeElement) : w.matches(":hover")) return; w._dsTip = false; w.classList.remove("quiet"); }
+  doc.addEventListener("mouseover", tipEnter); doc.addEventListener("focusin", tipEnter);
+  doc.addEventListener("mouseout", tipLeave); doc.addEventListener("focusout", tipLeave);
 
   /* ---------- Text Field 카운터 · Onboard 단계 ---------- */
   function syncCounter(input) {
@@ -908,11 +1012,16 @@
     if ((el = closest(t, ".datepicker .cal-btn")) && !el.disabled) { var dp = closest(el, ".datepicker"); if (dp.classList.contains("open")) closeDP(dp, false); else openDP(dp, el); return; }
     if ((el = closest(t, ".calendar")) && calClick(el, t)) return;
     // Notice · Toast
-    if ((el = closest(t, ".notice .close"))) { dismiss(closest(el, ".notice")); return; }
-    if ((el = closest(t, ".toast .action"))) { dismiss(closest(el, ".toast")); return; }
-    // Popup 배경
-    if (t.classList.contains("popup-backdrop")) { popup.close(); return; }
+    if ((el = closest(t, ".notice .close"))) { var ntc = closest(el, ".notice"); if (e.detail === 0) focusPast(ntc); dismiss(ntc); return; }
+    if ((el = closest(t, ".banner .close"))) { var bnr = closest(el, ".banner"); if (e.detail === 0) focusPast(bnr); fire(bnr, "ds:banner-close"); dismiss(bnr); return; }
+    if ((el = closest(t, ".toast .action, .toast .close"))) { closeToast(closest(el, ".toast"), e.detail === 0); return; }
+    // Popup — 입력 중 · 위험 확인 · 처리 중에는 배경을 눌러도 닫지 않는다(Interaction › Overlays)
+    if (t.classList.contains("popup-backdrop")) { if (!popupKeeps(t)) popup.close(); return; }
     if ((el = closest(t, ".popup [data-popup-close]"))) { popup.close(); return; }
+    // Side Panel
+    if (t.classList.contains("side-panel-dim")) { panel.close(); return; }
+    if ((el = closest(t, ".side-panel [data-panel-close]"))) { panel.close(closest(el, ".side-panel")); return; }
+    if ((el = closest(t, "[data-panel-open]"))) { panel.open(el.getAttribute("data-panel-open")); return; }
     if ((el = closest(t, "[data-popup-open]"))) { popup.open(el.getAttribute("data-popup-open")); return; }
     // Accordion disabled
     if ((el = closest(t, ".accordion.disabled summary"))) { e.preventDefault(); return; }
@@ -972,14 +1081,17 @@
       if ((e.key === "ArrowUp" || e.key === "ArrowDown") && !e.altKey && !di.readOnly && !di.disabled) { e.preventDefault(); stepSeg(dh, di, e.key === "ArrowUp" ? 1 : -1); return; } }
     if (e.key === "Escape") { var dpo = closest(e.target, ".datepicker.open"); if (dpo) { closeDP(dpo, true); return; }   // 포커스가 든 피커 하나만
       var ddo = $$(".dropdown.open[data-ds-opened]"); if (ddo.length) { ddo.forEach(function (d) { setOpen(d, false); var tr = $("[aria-haspopup]", d); tr && tr.focus(); }); return; }   // 가장 안쪽 것 하나만 — 대화상자는 다음 Esc 에
-      if ($(".popup-backdrop[data-ds-popup]")) popup.close(); return; }
+      var tips = $$(".tooltip-wrap:not(.show):not(.quiet)").filter(function (w) { var tip = $(".tooltip", w); return tip && (w.matches(":hover") || w.contains(doc.activeElement)) && Number(getComputedStyle(tip).opacity) > 0; });
+      if (tips.length) { tips.forEach(function (w) { w.classList.add("quiet"); }); return; }   // 보이는 툴팁이 가장 안쪽이다 — 대화상자는 다음 Esc 에
+      var pop = $(".popup-backdrop[data-ds-popup]"); if (pop) { if ($(".popup", pop).getAttribute("aria-busy") !== "true") popup.close(); return; }
+      var pn = $(".side-panel.fixed:not([hidden])"); if (pn && (pn.hasAttribute("data-modal") || pn.contains(doc.activeElement))) panel.close(pn); return; }
     var ctr = closest(e.target, ".dropdown:not(.open) [aria-haspopup]");
     if (ctr && !ctr.disabled && (e.key === "ArrowDown" || e.key === "ArrowUp")) { e.preventDefault(); setOpen(closest(ctr, ".dropdown"), true); return; }
     if (dd && e.key === "Tab") { var dtr = $("[aria-haspopup]", dd); if (dtr) dtr.focus(); setOpen(dd, false); dd = null; }   // 트리거에서 다음 칸으로 — 목록이 열린 채 포커스만 나가던 것
-    var pbd = e.key === "Tab" && $(".popup-backdrop[data-ds-popup]"), pel = pbd && $(".popup", pbd);
+    var pbd = e.key === "Tab" && $(".popup-backdrop[data-ds-popup]"), pel = e.key === "Tab" && (pbd ? $(".popup", pbd) : $(".side-panel.fixed[data-modal]:not([hidden])"));
     if (pel) { var fl = focusablesIn(pel), cur = doc.activeElement;
       if (!fl.length) { e.preventDefault(); return; }
-      if (e.shiftKey && (cur === fl[0] || !pel.contains(cur))) { e.preventDefault(); fl[fl.length - 1].focus(); return; }
+      if (e.shiftKey && (cur === fl[0] || cur === pel || !pel.contains(cur))) { e.preventDefault(); fl[fl.length - 1].focus(); return; }
       if (!e.shiftKey && (cur === fl[fl.length - 1] || !pel.contains(cur))) { e.preventDefault(); fl[0].focus(); return; } }
     if (dd && e.key.length === 1 && e.key !== " " && !e.ctrlKey && !e.metaKey && !e.altKey) { var hit = typeahead(dd, e.key); if (hit) { e.preventDefault(); hit.focus(); } return; }
     if (dd && ["ArrowDown", "ArrowUp", "Home", "End", "Enter", " "].indexOf(e.key) >= 0) {
@@ -1050,7 +1162,7 @@
     inp.setAttribute("aria-busy", "true"); inp.setAttribute("aria-disabled", "true");
     var settled = false, settle = function () { if (settled) return false; settled = true; inp.removeAttribute("aria-busy"); inp.removeAttribute("aria-disabled"); return true; };
     /* 클릭이 끝난 뒤에 알린다 — 브라우저가 취소된 클릭의 checked 를 되돌리므로, 처리기가 바로 resolve 하면 값이 지워진다 */
-    setTimeout(function () { fire(inp, "ds:switch", { checked: next, resolve: function () { if (settle()) inp.checked = next; }, cancel: settle, reject: function (msg) { if (settle()) toast(msg || SWITCH_FAIL, { tone: "danger", duration: 0, action: { label: "닫기" } }); } }); }, 0);
+    setTimeout(function () { fire(inp, "ds:switch", { checked: next, resolve: function () { if (settle()) inp.checked = next; }, cancel: settle, reject: function (msg) { if (settle()) toast(msg || SWITCH_FAIL, { tone: "danger" }); } }); }, 0);
   }, true);
   /* Select Button — 화살표로 옮기면 바로 고른다(Radio 와 같음). 비활성은 건너뛰고 끝에서 돌아온다 */
   doc.addEventListener("keydown", function (e) {
@@ -1075,5 +1187,5 @@
   });
 
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
-  window.DS = { init: init, toast: toast, popup: popup, validate: vRun, version: "0.5" };
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, validate: vRun, version: "0.5" };
 })();

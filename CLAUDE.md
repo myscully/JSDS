@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 64 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 640/640 · react 374+3 · tsc 0
+pages 65 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 712/712 · react 415+5 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -233,6 +233,17 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **Checkbox · Radio 필수 그룹** — `.field` 안 `fieldset[data-required]` · React `legend required`(`ChoiceGroup`)가 입력 폼 검증에 낀다. 고르면 바로 지우고 마지막을 풀면 바로 알리며, 지나가기만 하면 조용하다.
 - **측정에서 드러나 고친 것:** `.field input` · `.field label` 규칙이 그룹 안 체크박스 · 라디오에도 걸린다 — `:where(:not(...))` 로 뺐다(명시도 그대로, 쉼표를 넣으면 CSS 를 읽는 도구가 선택자를 잘못 끊어 Figma audit 3건이 '규칙 없음'이 됐다). 표의 행 체크박스 · Switch 접근 이름이 전부 '선택' · '사용' 이었다(React 는 `rowLabel`, 기본 첫 열 값). React Switch 예제 라벨이 켬/끔으로 바뀌었다.
 - 음성 시험: 사이트 43건 · React 24건. 첫 회 3건을 못 잡아(처리 중 재입력 · 옵션마다 aria-invalid · 앞 칸 포커스) 단정을 더했고 다시 깨서 모두 실패로 잡았다. 앞 칸 포커스는 fireEvent 가 포커스를 옮기지 않아 옮기지 않아도 통과하던 단정이었다. render.js 의 ds.js 크기 99KB → 104KB. Figma 미반영 127건(그대로).
+
+2026-11-10 피드백 · 오버레이 정비 · Side Panel 신규(사람의 결정 여섯) — pages 64 → 65 · 컴포넌트 32 → 33 · behave 640 → 712(`behave.feedback.js` 71 · 줄인 모션 1) · react 374+3 → 415+5(`tests/feedback.test.tsx` 37 · 예제 189 → 195 에 따른 구조 비교 4 · 트리거와 패널이 나뉘어 비교하지 않는 Side Panel 2). contrast · advisory 수는 그대로(새 색 쌍 없음).
+- **Toast** — 오류는 `duration` 을 줘도 닫을 때까지 유지 + 닫기 버튼, 동작이 있으면 10초(사람의 결정), 그 외 4초. 마우스 · 포커스가 묶음 안에 있는 동안 전체 타이머를 멈추고 남은 시간부터 잇는다. 동작 없는 같은 문구는 합치고 시간을 다시 잰다. 넘치면 자동 소멸 Toast 부터 지워 **오류는 밀리지 않는다**(사람의 결정 — 오류가 많으면 3개를 넘음).
+- **Banner 닫기**(사람의 결정 — 구현) — `ds:banner-close` · React `onClose`. 다시 띄울지는 제품 몫. 한 번에 하나(verify).
+- **Popup** — 헤더 X 필수(사람의 결정 — verify, 처리 중에는 함께 막음). 위험 확인은 `alertdialog`(+ `aria-describedby`). 첫 포커스는 X 와 `.negative` 를 건너뛴다. 위험 확인 · 입력 중 · 처리 중에는 배경 클릭으로 닫지 않는다. `DS.popup.busy()` · React `busy` 는 닫는 길을 모두 막는다. 본문만 스크롤. 주 버튼 = 제목의 동작 · 위험 확인은 취소가 앞(verify).
+- **Tooltip** — 마우스 0.3초 지연, 키보드 포커스는 바로, Esc, 뒤집기, 넘침을 자르는 영역에서는 화면 기준(`.float`). 포인터를 툴팁 위로 옮겨도 유지하는 일은 하지 않았다(목록의 위 항목을 가림). 트리거 · 내부 링크 · 라벨 되풀이는 verify.
+- **Loading** — 줄인 모션에서 Spinner · 버튼 loading · Switch 처리 중만 돈다(사람의 결정 — 멈춘 스피너는 고장으로 보임), Skeleton · 맥박은 멈춘다. '1초 미만' 은 제품 몫으로 문구를 고쳤고 **지연 옵션은 v1.0 완료 뒤 다시 제안한다(사람의 요청)**.
+- **Side Panel** — 비모달 기본, `data-modal` · `modal` 이면 배경 · 포커스 가둠 · 스크롤 잠금. 한 번에 하나(바꿔 끼움). 닫을 때 포커스가 안에 있었거나 모달이면 연 요소로 돌아간다. 콘텐츠를 미는 레이아웃은 제품 몫.
+- **측정에서 드러나 고친 것:** React Popup 을 상태로 열면 Portal 이 한 박자 늦어 포커스 이동 · Tab 가둠 · 복귀가 아예 동작하지 않았다(`activeElement=body`, 기존 버그) — 훅을 Portal 안 Layer 로 옮겼고, `useEscape` 는 바깥에 남겨야 Esc 순서가 맞다. 오류만 있는 Toast 묶음에 포커스 리스너가 안 붙어 복귀 자리를 못 기억했다. `.menu-item` 클릭이 앞 분기에서 return 되어 '입력 중' 표시가 안 됐다(캡처로). Esc 뒤 툴팁이 지연 규칙 때문에 300ms 남았다. `:not(.quiet):hover` 의 명시도가 포커스의 `0ms` 를 이겼다.
+- **Banner 안 버튼(사람의 결정 — 커밋 전에 고침):** 제품 색 면 위 `outline assistive` 의 글자가 neutral-primary 라 라이트 3.70 이었다. 글자 · 테두리를 `--brand-label` 로(라이트 · 다크 4.83), hover · 누름은 Solid Primary 와 같은 `--surface-brand-strong` · `heavy`, 스피너와 포커스 링도 라벨 색으로. 경고 · 위험 Banner 는 면이 틴트라 그대로다. 다크 hover 4.17 · 누름 3.54 는 Solid Primary 와 같은 쌍으로 이미 선언된 예외다(`--brand-label` 쌍의 REF) — 그래서 contrast 수는 그대로다.
+- 음성 시험: 사이트 76건 · React 49건. 첫 회 4건을 못 잡아(같은 Toast 시간 다시 재기 · 일반 Toast 와 동작 Toast 합침 · 페이지 안 패널 예제 닫힘 · 패널 본문 스크롤) 단정을 고쳤고 다시 깨서 모두 실패로 잡았다. render.js 의 ds.js 크기 104KB → 115KB. Figma 미반영 127 → 130건(Side Panel Spec 카드 없음 포함).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

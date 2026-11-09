@@ -39,7 +39,7 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
       if (alive.current && result !== false) { setOn(next); onChange?.(next, e); }
     } catch (err) {
       const message = typeof errorMessage === "function" ? errorMessage(err) : errorMessage ?? LABELS.switchFailed;
-      toast!.show({ message, tone: "danger", duration: 0, action: { label: LABELS.close, onClick: () => {} } });
+      toast!.show({ message, tone: "danger" });
     } finally {
       if (alive.current) setPending(false);
     }

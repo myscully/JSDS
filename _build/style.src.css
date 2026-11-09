@@ -189,7 +189,7 @@
 html{scroll-behavior:smooth}
 /* * 는 가상 요소를 고르지 않는다 — Accordion 의 ::details-content 높이 전환을 따로 꺼야 한다 */
 /* 가상 요소도 멈춘다 — 종전 *, ::details-content 만 잡아 로딩 스피너(.btn.loading::after) · Indicator 맥박 · 셰브론 · 스위치 손잡이가 계속 움직였다(2026-11-05 실측) */
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin .8s linear infinite!important}}
 html{height:100%}
 body{min-height:100%}
 body{margin:0;background:var(--background-neutral-primary);color:var(--foreground-neutral-primary);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -1191,15 +1191,26 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:var(--card-gap);width:100%;line-height:1.6}
 
 /* Popup */
-.popup-backdrop{position:fixed;inset:0;background:var(--effect-dimmer-primary);display:grid;place-items:center;z-index:100;line-height:1.6}
-.popup{position:relative;width:440px;max-width:100%;background:var(--surface-elevated-primary);border-radius:var(--radius-xl);box-shadow:var(--shadow-3);padding:24px;display:flex;flex-direction:column;gap:12px;line-height:1.6}
-.popup .popup-title{font-size:18px;font-weight:700;margin:0;display:flex;align-items:center;gap:10px}
-.popup .popup-body{font-size:14px;color:var(--foreground-neutral-secondary);margin:0;line-height:1.6}
-.popup .popup-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:12px}
-.popup .popup-close{position:absolute;top:16px;right:16px}
+.popup-backdrop{position:fixed;inset:0;padding:24px;background:var(--effect-dimmer-primary);display:grid;place-items:center;z-index:100;line-height:1.6}
+.popup{position:relative;width:440px;max-width:100%;background:var(--surface-elevated-primary);border-radius:var(--radius-xl);box-shadow:var(--shadow-3);padding:24px;display:flex;flex-direction:column;gap:12px;line-height:1.6;max-height:calc(100vh - 48px)}   /* 길면 본문만 스크롤 — 제목 · 버튼은 그 자리 */
+.popup .popup-title{font-size:18px;font-weight:700;margin:0;padding-right:36px;display:flex;align-items:center;gap:10px;flex:none}
+.popup .popup-body{font-size:14px;color:var(--foreground-neutral-secondary);margin:0;line-height:1.6;overflow-y:auto;min-height:0}
+.popup .popup-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:12px;flex:none}
+.popup .popup-close{position:absolute;top:22px;right:20px}   /* 제목 첫 줄과 세로 가운데 */
 .popup.lg{width:640px}
 .popup.danger .popup-title{color:var(--foreground-negative-strong)}
-.popup .popup-form{display:flex;flex-direction:column;gap:16px;margin-top:4px}
+.popup .popup-form{display:flex;flex-direction:column;gap:16px;overflow-y:auto;min-height:0;margin:0 -4px -4px;padding:4px}   /* 스크롤 영역이 입력 포커스 링(4px)을 자르지 않게 패딩을 두고 음수 여백으로 자리를 되돌린다 */
+
+/* Side Panel — 띄우지 않은 모습이 기본이고 .fixed 가 화면 오른쪽에 띄운다. 비모달이 기본(사람의 결정) */
+.side-panel{display:flex;flex-direction:column;width:400px;max-width:100%;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);overflow:hidden;font-size:14px;line-height:1.6;outline:none}
+.side-panel[hidden]{display:none}
+.side-panel.lg{width:560px}
+.side-panel.fixed{position:fixed;top:0;right:0;bottom:0;max-width:100vw;border-width:0 0 0 1px;border-radius:0;box-shadow:var(--shadow-3);z-index:91}
+.side-panel-dim{position:fixed;inset:0;background:var(--effect-dimmer-primary);z-index:90}
+.side-panel-header{flex:none;display:flex;align-items:center;gap:8px;min-height:56px;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line-neutral-secondary)}
+.side-panel-title{flex:1;min-width:0;margin:0;font-size:16px;font-weight:600;line-height:24px}
+.side-panel-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:20px}
+.side-panel-footer{flex:none;display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--line-neutral-secondary)}
 
 /* Tooltip */
 .tooltip-wrap{position:relative;display:inline-flex;line-height:1.6}
@@ -1211,8 +1222,12 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tooltip.left::after{left:100%;top:50%;transform:translateY(-50%);border-top-color:transparent;border-left-color:var(--surface-neutral-inverse)}
 .tooltip.right{left:calc(100% + 8px);bottom:50%;transform:translateY(50%)}
 .tooltip.right::after{left:auto;right:100%;top:50%;transform:translateY(-50%);border-top-color:transparent;border-right-color:var(--surface-neutral-inverse)}
-.tooltip-wrap:hover .tooltip,.tooltip-wrap:focus-within .tooltip,.tooltip-wrap.show .tooltip{opacity:1}
-.tooltip.multi{white-space:normal;width:220px;text-align:left}
+.tooltip-wrap:not(.quiet):hover .tooltip,.tooltip-wrap:not(.quiet):focus-within .tooltip,.tooltip-wrap.show .tooltip{opacity:1}
+.tooltip-wrap:not(.quiet):hover .tooltip{transition-delay:300ms}   /* 마우스가 지나가기만 하면 뜨지 않게. 키보드 포커스는 아래에서 바로 */
+.tooltip-wrap:not(.quiet):focus-within .tooltip{transition-delay:0ms}
+.tooltip.float{position:fixed;left:var(--float-x,0);top:var(--float-y,0);right:auto;bottom:auto;transform:none;z-index:120}   /* 스크롤 영역 안 · 화면 옆 끝 — 화면 기준 */
+.tooltip.float:not(.left):not(.right)::after{left:var(--float-arrow,50%)}
+.tooltip.multi{white-space:normal;width:220px;text-align:left;word-break:keep-all}
 
 /* Notification */
 .notice{display:flex;gap:12px;align-items:flex-start;border-radius:var(--radius-lg);padding:14px 18px;font-size:14px;border:1px solid var(--line-neutral-secondary);width:100%;background:var(--surface-elevated-primary);line-height:1.55}
@@ -1237,12 +1252,23 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .toast.danger .ico{color:var(--foreground-negative-primary)}
 .toast .action{margin-left:auto;background:none;border:0;color:var(--foreground-brand-inverse);font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
 .toast .action:hover{text-decoration:underline}
+.toast .close,.banner .close{flex:none;margin-left:auto;border:0;background:transparent;color:inherit;font:inherit;line-height:1;cursor:pointer;padding:2px;display:grid;place-items:center;border-radius:4px}
+.toast .close svg,.banner .close svg{width:14px;height:14px}
+.toast .action~.close,.banner .btn~.close{margin-left:0}
+.toast button:focus-visible,.banner .close:focus-visible{outline-color:currentColor}   /* 기본 외곽선(brand)은 어두운 Toast · 제품 색 Banner 면에서 보이지 않는다 */
 .toast-stack{display:flex;flex-direction:column;gap:8px;align-items:flex-end;line-height:1.6}
 .toast-stack.fixed{position:fixed;right:24px;bottom:24px;z-index:110}
 .banner{display:flex;align-items:center;gap:12px;width:100%;padding:10px 20px;background:var(--surface-brand-primary);color:var(--brand-label);font-size:14px;font-weight:500;line-height:1.6}
 .banner .btn{margin-left:auto}
 .banner.warning{background:var(--surface-cautionary-primary);color:var(--foreground-neutral-primary)}
 .banner.danger{background:var(--surface-negative-strong);color:var(--foreground-neutral-primary)}
+/* 제품 색 면 위의 Outline Assistive — 기본 글자(neutral-primary)는 라이트에서 3.70 이었다(2026-11-10 측정). 경고 · 위험 면은 글자가 neutral-primary 라 그대로 둔다.
+   상태는 Solid Primary 와 같은 두 토큰이다: 흰 글자 · 제품 색 쌍은 contrast.pairs 의 '제품 면 위 글자' 가 잰다 */
+.banner:not(.warning):not(.danger) .btn:where(.outline.assistive){color:var(--brand-label);border-color:var(--brand-label)}
+.banner:not(.warning):not(.danger) .btn:where(.outline.assistive):hover{background:var(--surface-brand-strong)}
+.banner:not(.warning):not(.danger) .btn:where(.outline.assistive):active{background:var(--surface-brand-heavy)}
+.banner:not(.warning):not(.danger) .btn:where(.outline.assistive).loading::after{color:var(--brand-label)}
+.banner .btn:focus-visible{outline-color:currentColor}
 
 /* Loading */
 .spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--line-neutral-secondary);border-top-color:var(--surface-brand-primary);border-radius:50%;animation:spin .8s linear infinite;line-height:1.6}

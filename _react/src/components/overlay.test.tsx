@@ -78,7 +78,8 @@ describe("Popup", () => {
 });
 
 describe("ToastProvider", () => {
-  function Demo() { const t = useToast(); return <button onClick={() => t.show({ message: "저장됨" })}>show</button>; }
+  let n = 0;
+  function Demo() { const t = useToast(); return <button onClick={() => t.show({ message: `저장됨 ${++n}` })}>show</button>; }
   it("표시 후 duration 뒤 사라지고 max 를 넘지 않는다", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     render(<ToastProvider duration={1000} max={2}><Demo /></ToastProvider>);

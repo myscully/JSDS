@@ -2,7 +2,7 @@ import { Button, Checkbox, PopupActions, PopupForm, PopupSurface, PopupTitle, Te
 
 export default function Example() {
   return (
-    <PopupSurface>
+    <PopupSurface onClose={() => {}}>
       <PopupTitle>예외 추가</PopupTitle>
       <PopupForm>
         <TextField id="hash" label="파일 해시(SHA-256)" placeholder="64자리 16진수" />

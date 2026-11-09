@@ -232,7 +232,7 @@ const PATTERNS = {
       { id: "agents", title: "에이전트 상태 요약", desc: "연결 상태 비율 + 진행 중 작업.", html: `
         <div class="row-2" style="max-width:800px">
           <div class="card"><div class="card-head"><h3 class="title">에이전트 연결</h3><span class="tag ok">정상</span></div><div class="progress-row"><div class="row"><span>온라인</span><span>1,247 / 1,284</span></div><div class="progress success" role="progressbar" aria-valuenow="97"><i style="width:97%"></i></div></div><p class="desc">오프라인 37대 · 10분 이상 미체크인 12대</p></div>
-          <div class="card"><div class="card-head"><h3 class="title">진행 중 작업</h3><span class="spinner sm" role="status" aria-label="진행 중"></span></div><div class="progress-row"><div class="row"><span>정책 rev 2041 배포</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66"><i style="width:66%"></i></div></div><p class="desc">842 / 1,284대 완료 · 예상 3분</p></div>
+          <div class="card"><div class="card-head"><h3 class="title">진행 중 작업</h3><span class="spinner sm" role="status" aria-label="작업 진행 중"></span></div><div class="progress-row"><div class="row"><span>정책 rev 2041 배포</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66"><i style="width:66%"></i></div></div><p class="desc">842 / 1,284대 완료 · 예상 3분</p></div>
         </div>` },
     ],
   },

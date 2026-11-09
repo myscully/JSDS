@@ -51,7 +51,9 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean
     if (!active || !ref.current) return;
     const root = ref.current;
     const prev = document.activeElement as HTMLElement | null;
-    const target = initial?.current ?? focusables(root)[0] ?? root;
+    /* 첫 포커스는 닫기(X)와 위험 실행 버튼을 건너뛴다 — 입력칸이 있으면 입력칸, 없으면 취소 */
+    const all = focusables(root);
+    const target = initial?.current ?? all.find((el) => !el.matches(".popup-close, .negative")) ?? all[0] ?? root;
     if (!root.hasAttribute("tabindex") && target === root) root.setAttribute("tabindex", "-1");
     const t = window.setTimeout(() => target.focus(), 0);
     const onKey = (e: KeyboardEvent) => {
@@ -60,7 +62,7 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean
       if (!list.length) { e.preventDefault(); root.focus(); return; }
       const first = list[0], last = list[list.length - 1];
       const cur = document.activeElement as HTMLElement | null;
-      if (e.shiftKey && (cur === first || !root.contains(cur))) { e.preventDefault(); last.focus(); }
+      if (e.shiftKey && (cur === first || cur === root || !root.contains(cur))) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && (cur === last || !root.contains(cur))) { e.preventDefault(); first.focus(); }
     };
     document.addEventListener("keydown", onKey);
@@ -70,6 +72,14 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean
       prev?.focus?.();
     };
   }, [active, ref, initial]);
+}
+
+/** 닫혀 사라지는 요소에서 키보드 포커스를 다음 칸으로 — body 로 떨어지지 않게 */
+export function focusPast(el: HTMLElement | null): void {
+  if (!el || !el.contains(document.activeElement)) return;
+  const out = focusables(document.body).filter((x) => !el.contains(x));
+  const to = out.find((x) => el.compareDocumentPosition(x) & Node.DOCUMENT_POSITION_FOLLOWING) ?? out[out.length - 1];
+  to?.focus({ preventScroll: true });
 }
 
 /** 여러 ref 를 하나로 */

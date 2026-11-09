@@ -1059,9 +1059,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     ok("async switch applies once on success and ignores presses while busy", s.c === false && s.b === null && s.d === null && s.focus, JSON.stringify(s));
     await failI.click(); await page.waitForTimeout(1000); s = await st(failI);
     const t = page.locator(".toast-stack.fixed .toast.danger");
-    const tt = await t.evaluate((e) => ({ text: e.textContent, d: e.dataset.duration, close: !!e.querySelector("button.action") }));
+    const tt = await t.evaluate((e) => ({ text: e.textContent, d: e.dataset.duration, close: !!e.querySelector("button.close") && !e.querySelector("button.action") }));
     ok("async switch failure keeps the state and raises a toast that stays", s.c === false && s.b === null && /정책 서버/.test(tt.text) && tt.d === "0" && tt.close, JSON.stringify({ s, tt }));
-    await t.locator("button.action").click(); await page.waitForTimeout(250);
+    await t.locator("button.close").click(); await page.waitForTimeout(250);
     ok("the failure toast closes by its button", (await t.count()) === 0);
     await page.evaluate(() => { window.__sw = (e) => e.detail.cancel(); document.addEventListener("ds:switch", window.__sw); });
     await okI.click(); await page.waitForTimeout(1000); s = await st(okI);
@@ -1830,6 +1830,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("popup Esc restores", await page.evaluate(() => !document.querySelector("body > .popup-backdrop[data-ds-popup]") && !!document.querySelector(".example-preview #test-popup")));
   ok("popup close returns focus to the opener", await page.evaluate(() => document.activeElement && document.activeElement.id === "popup-opener"));
   await page.evaluate(() => document.getElementById("popup-opener").remove());
+
+  await require("./behave.feedback.js")({ page, ok, go });
 
   // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
   await go("components/button.html");

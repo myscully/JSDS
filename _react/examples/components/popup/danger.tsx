@@ -4,7 +4,7 @@ import { Button, PopupActions, PopupBody, PopupSurface, PopupTitle, TextField } 
 export default function Example() {
   const [confirm, setConfirm] = useState("");
   return (
-    <PopupSurface danger>
+    <PopupSurface danger onClose={() => {}}>
       <PopupTitle>정책 12개를 삭제할까요?</PopupTitle>
       <PopupBody>삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</PopupBody>
       <TextField id="confirm" label='확인을 위해 "삭제" 를 입력하세요' placeholder="삭제" value={confirm} onChange={(e) => setConfirm(e.target.value)} />

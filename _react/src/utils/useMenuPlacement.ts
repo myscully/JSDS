@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type 
 
 /* 사이트 ds.js 의 placeMenu 와 같은 규칙 — 아래 자리가 모자라고 위가 더 넓으면 위로(.up),
    스크롤 영역 안이면 화면 기준으로 띄워(.float) 잘리지 않게 하고, 스크롤하면 닫는다(사람의 결정 2026-11-10) */
-function inClipper(el: Element) {
+export function inClipper(el: Element) {
   for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
     const c = getComputedStyle(p);
     if (/auto|scroll|hidden|clip/.test(c.overflowX + c.overflowY)) return true;

@@ -40,6 +40,7 @@ export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, type TopBarP
 
 // D. overlays & behavior
 export { Combobox, type ComboboxProps } from "./components/combobox/Combobox";
+export { SidePanel, SidePanelSurface, type SidePanelProps, type SidePanelSurfaceProps } from "./components/side-panel/SidePanel";
 export { Dropdown, DropdownTrigger, Menu, MenuItem, MenuSep, MenuLabel, MenuState, Select, type DropdownProps, type DropdownTriggerProps, type MenuProps, type MenuItemProps, type SelectProps, type SelectOption } from "./components/dropdown/Dropdown";
 export { Tooltip, type TooltipProps } from "./components/tooltip/Tooltip";
 export { Popup, PopupSurface, PopupTitle, PopupBody, PopupActions, PopupForm, type PopupProps, type PopupSurfaceProps } from "./components/popup/Popup";

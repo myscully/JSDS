@@ -7,7 +7,7 @@ const fs = require("fs");
 const PATTERNS = ["dashboard", "empty-state", "input-form", "log-viewer", "notes", "onboarding", "policy-settings", "search", "severity", "system-status", "terms-agreement"];
 const MOTION_MS = ["120ms", "200ms", "320ms"];   // --motion-fast · base · slow
 /* .btn 이 아닌 button 은 이 컴포넌트 안에서만 — 각자 정의된 모양이 있다 */
-const BUTTON_HOSTS = [".select-btn", ".chip-group", ".chip", ".pagination", ".dropdown", ".datepicker", ".tile-grid", ".terms .item"];
+const BUTTON_HOSTS = [".select-btn", ".chip-group", ".chip", ".toast", ".banner", ".pagination", ".dropdown", ".datepicker", ".tile-grid", ".terms .item"];
 /* Button 정의의 클래스. 무리마다 하나까지. left 는 폼 액션 줄의 배치 클래스(.form .form-actions .left) */
 const BTN_GROUPS = { size: ["sm", "md", "lg"], variant: ["solid", "outline", "text"], color: ["primary", "assistive", "negative"], mod: ["icon-only", "loading", "block", "left"] };
 
@@ -24,7 +24,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
         document.querySelectorAll("*").forEach((e) => { for (const pse of [null, "::before", "::after"]) { const s = getComputedStyle(e, pse);
           const tag = e.tagName.toLowerCase() + (e.classList[0] ? "." + e.classList[0] : "") + (pse || "");
           for (const d of s.transitionDuration.split(",").map((x) => x.trim())) if (d !== "0s" && (allowed === null || !allowed.includes(Math.round(parseFloat(d) * 1000) + "ms"))) out.push(`${tag} transition ${d}`);
-          if (allowed === null && s.animationName !== "none" && s.animationDuration !== "0s") out.push(`${tag} animation ${s.animationName}`); } });
+          if (allowed === null && s.animationName !== "none" && s.animationName !== "spin" && s.animationDuration !== "0s") out.push(`${tag} animation ${s.animationName}`); } });
         return [...new Set(out)].slice(0, 3); }, reducedMotion === "reduce" ? null : MOTION_MS);
       if (r.length) bad.push(`${p}: ${r.join(", ")}`);
     }
@@ -33,7 +33,16 @@ module.exports = async ({ b, ok, SITE, path }) => {
   const off = await durations("no-preference");
   ok("motion: every transition runs on a --motion-* duration (120 · 200 · 320ms)", off.length === 0, off.slice(0, 4).join(" | "));
   const still = await durations("reduce");
-  ok("motion: reduced motion stops every transition and animation, pseudo-elements included", still.length === 0, still.slice(0, 4).join(" | "));
+  ok("motion: reduced motion stops every transition and animation except the spinning loaders, pseudo-elements included", still.length === 0, still.slice(0, 4).join(" | "));
+  {  /* 줄인 모션의 예외(사람의 결정 2026-11-10) — 멈춘 스피너는 고장으로 보인다. Skeleton · 맥박은 멈춘다 */
+    const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" }); const page = await ctx.newPage(); const name = (sel, pse) => page.evaluate(([s, p]) => getComputedStyle(document.querySelector(s), p).animationName, [sel, pse || null]);
+    await page.goto(url("components/loading.html")); await page.waitForTimeout(100); const sp = await name(".example-preview .spinner"), sk = await name(".example-preview .skeleton");
+    await page.goto(url("components/button.html")); await page.waitForTimeout(100); const bt = await name(".example-preview .btn.loading", "::after");
+    await page.goto(url("components/switch.html")); await page.waitForTimeout(100); await page.evaluate(() => { const i = document.querySelector(".example-preview .switch input"); i.setAttribute("aria-busy", "true"); }); const sw = await name('.example-preview .switch input[aria-busy="true"]', "::before");
+    await page.goto(url("components/indicator.html")); await page.waitForTimeout(100); const pulse = await page.evaluate(() => { const hit = [...document.querySelectorAll(".example-preview *")].flatMap((e) => [getComputedStyle(e).animationName, getComputedStyle(e, "::before").animationName, getComputedStyle(e, "::after").animationName]); return hit.filter((x) => x !== "none"); });
+    ok("motion: reduced motion keeps the spinner, button loading and switch busy turning, and stops skeleton and pulse", sp === "spin" && bt === "spin" && sw === "spin" && sk === "none" && pulse.length === 0, JSON.stringify({ sp, bt, sw, sk, pulse }));
+    await ctx.close();
+  }
 
   {
     const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const page = await ctx.newPage(); const moved = [];

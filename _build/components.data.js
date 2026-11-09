@@ -24,6 +24,10 @@ const CHART_DATA = {
 };
 
 /* 아이콘: icons.gen.js 의 I(name, size, {style}) — assets/icons 의 Tabler 아이콘을 빌드 시 인라인 */
+const popX = () => `<button type="button" class="btn sm text assistive icon-only popup-close" aria-label="닫기" data-popup-close>${I("x")}</button>`;
+const spHead = (id, title) => `<div class="side-panel-header"><h3 class="side-panel-title" id="${id}">${title}</h3><button type="button" class="btn sm text assistive icon-only side-panel-close" aria-label="닫기" data-panel-close>${I("x")}</button></div>`;
+const spFacts = (rows) => `<table class="tbl compact"><tbody>${rows.map(([k, v]) => `<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join("")}</tbody></table>`;
+const SP_EVENT = [["시각", "2026-09-07 14:22:05"], ["호스트", "DESKTOP-7F3K"], ["IP", "10.0.0.12"], ["정책", "외부 USB 차단"], ["처리", "차단"]];
 const cb = (label, attrs = "", small = "") => `<label class="checkbox"><input type="checkbox"${attrs ? " " + attrs : ""}><span>${label}${small ? `<small>${small}</small>` : ""}</span></label>`;
 
 /* 정적 달력 — ds.js 가 그리는 마크업과 같다(behave 가 대조한다). 정적 데모도 클릭 · 키보드 · 달 이동이 그대로 동작한다.
@@ -1305,20 +1309,31 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Popup */
   "popup": {
-    status: "ready", react: ["Popup","PopupSurface","PopupTitle","PopupBody","PopupActions","PopupForm"], css: [".popup", ".popup-backdrop"], borrows: [".btn", ".field", ".checkbox"],
-    desc: "사용자의 확인이나 짧은 입력이 필요할 때 화면 위에 띄우는 모달입니다. 되돌리기 어려운 동작 앞에 반드시 둡니다.",
+    status: "ready", react: ["Popup","PopupSurface","PopupTitle","PopupBody","PopupActions","PopupForm"], css: [".popup", ".popup-backdrop"], borrows: [".btn", ".field", ".checkbox", ".notice"],
+    desc: "사용자의 확인이나 짧은 입력을 받아야 진행할 때 화면 위에 띄우는 모달입니다. 되돌리기 어려운 동작 앞에 둡니다. 목록을 보며 내용을 확인하려면 <a href=\"#/components/side-panel\">Side Panel</a> 을 씁니다.",
+    principles: [
+      ["언제", "응답을 받아야 진행할 때만 씁니다. 자주 띄우면 흐름을 끊습니다. 큰 표 · 가로 스크롤 · 여러 단계 이동은 넣지 않고 별도 페이지로 보냅니다."],
+      ["닫기", "헤더의 닫기(X)는 필수이고 빌드가 검사합니다. Esc · 취소로도 닫힙니다. 입력 중이거나 위험 확인이면 배경을 눌러도 닫지 않습니다."],
+      ["첫 포커스", "닫기(X)와 위험 실행 버튼을 건너뜁니다. 입력칸이 있으면 입력칸, 없으면 취소에 놓습니다."],
+      ["주 버튼", "제목의 동작을 그대로 씁니다. '정책을 배포할까요?' 의 주 버튼은 '확인' 이 아니라 '배포' 입니다. 빌드가 검사합니다."],
+      ["처리 중", "주 버튼을 loading 으로 두고 닫는 길(X · 취소 · Esc · 배경)을 모두 막습니다. 실패하면 팝업을 유지하고 안에 오류를 보입니다. 입력한 내용을 잃지 않게 하려는 것입니다."],
+      ["위험 확인", "<code>.danger</code> 와 <code>role=alertdialog</code> 를 씁니다. 확인 문구 입력은 복구할 수 없고 대량일 때만 둡니다. 모두 확인받으면 습관적으로 넘기게 됩니다."],
+      ["긴 본문", "본문만 스크롤하고 제목과 버튼은 그 자리에 둡니다."],
+      ["폭", "기본 440 입니다. lg 640 은 필드가 두 열이거나 미리보기를 함께 보여 줄 때만 씁니다."],
+      ["겹침", "모달 위에 모달을 띄우지 않습니다."],
+    ],
     thumb: `<div class="popup" style="width:220px;padding:14px;gap:6px"><h3 class="popup-title" style="font-size:12px">정책 삭제</h3><p class="popup-body" style="font-size:12px">되돌릴 수 없습니다.</p><div class="popup-actions" style="margin-top:4px"><button class="btn sm outline assistive" style="height:26px;font-size:12px">취소</button><button class="btn sm solid negative" style="height:26px;font-size:12px">삭제</button></div></div>`,
     examples: [
       { id: "default", title: "Default", desc: "제목 · 본문 · 액션으로 이루어진 기본 구성입니다.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="d-title">
-          <h3 class="popup-title" id="d-title">정책을 배포할까요?</h3>
+          <h3 class="popup-title" id="d-title">정책을 배포할까요?</h3>${popX()}
           <p class="popup-body">변경 사항이 1,284대에 적용됩니다.</p>
           <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid primary">배포</button></div>
         </div>
       ` },
       { id: "confirm", title: "Confirm", desc: "실제 화면에서는 .popup-backdrop 으로 감쌉니다(코드 참조). 예제는 팝업만 표시.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="c-title">
-          <h3 class="popup-title" id="c-title">정책을 배포할까요?</h3>
+          <h3 class="popup-title" id="c-title">정책을 배포할까요?</h3>${popX()}
           <p class="popup-body">변경 사항이 12개 그룹, 1,284대에 적용됩니다. 에이전트는 다음 체크인(최대 5분)에서 정책을 받습니다.</p>
           <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid primary">배포</button></div>
         </div>`, react: `
@@ -1343,16 +1358,16 @@ const COMPONENTS = {
             </>
           );
         }` },
-      { id: "danger", title: "Danger Confirm", desc: "삭제·초기화. 제목은 danger 색, 주 액션은 Negative 버튼, 필요하면 확인 입력.", html: `
-        <div class="popup danger" role="dialog" aria-modal="true" aria-labelledby="d-title">
-          <h3 class="popup-title" id="d-title">정책 12개를 삭제할까요?</h3>
-          <p class="popup-body">삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</p>
+      { id: "danger", title: "Danger Confirm", desc: "삭제 · 초기화. 제목은 danger 색, 주 액션은 Negative 버튼입니다. 복구할 수 없고 대량이면 확인 문구를 입력받습니다. 배경을 눌러도 닫히지 않습니다.", html: `
+        <div class="popup danger" role="alertdialog" aria-modal="true" aria-labelledby="dg-title" aria-describedby="dg-body">
+          <h3 class="popup-title" id="dg-title">정책 12개를 삭제할까요?</h3>${popX()}
+          <p class="popup-body" id="dg-body">삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</p>
           <div class="field"><label for="confirm">확인을 위해 "삭제" 를 입력하세요</label><input id="confirm" placeholder="삭제"></div>
           <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid negative" disabled>삭제</button></div>
         </div>` },
-      { id: "form", title: "Form", desc: "짧은 입력(필드 1~3개). 그 이상은 별도 페이지나 드로어.", html: `
+      { id: "form", title: "Form", desc: "짧은 입력(필드 1~3개). 그 이상은 별도 페이지로 보냅니다. 입력을 시작하면 배경을 눌러도 닫히지 않습니다.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="f-title">
-          <h3 class="popup-title" id="f-title">예외 추가</h3>
+          <h3 class="popup-title" id="f-title">예외 추가</h3>${popX()}
           <div class="popup-form">
             <div class="field"><label for="hash">파일 해시(SHA-256)</label><input id="hash" placeholder="64자리 16진수"></div>
             <div class="field"><label for="reason">사유</label><input id="reason" placeholder="예: 사내 배포 도구"></div>
@@ -1360,16 +1375,89 @@ const COMPONENTS = {
           </div>
           <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid primary">추가</button></div>
         </div>` },
+      { id: "busy", title: "처리 중", desc: "주 버튼은 loading, 닫기(X)와 취소는 비활성입니다. Esc · 배경으로도 닫히지 않습니다. 사이트 <code>DS.popup.busy(true)</code>, React <code>busy</code>.", html: `
+        <div class="popup" role="dialog" aria-modal="true" aria-labelledby="b-title" aria-busy="true">
+          <h3 class="popup-title" id="b-title">정책을 배포할까요?</h3>${popX().replace("data-popup-close", "data-popup-close disabled")}
+          <p class="popup-body">변경 사항이 1,284대에 적용됩니다.</p>
+          <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close disabled>취소</button><button type="button" class="btn md solid primary loading" aria-busy="true">배포</button></div>
+        </div>` },
+      { id: "failed", title: "실패", desc: "팝업을 닫지 않고 안에 오류를 보입니다. 원인과 다음 행동을 함께 적습니다.", html: `
+        <div class="popup" role="dialog" aria-modal="true" aria-labelledby="e-title">
+          <h3 class="popup-title" id="e-title">정책을 배포할까요?</h3>${popX()}
+          <p class="popup-body">변경 사항이 1,284대에 적용됩니다.</p>
+          <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20)}</span><div><b>배포하지 못했습니다</b>정책 서버에 연결하지 못했습니다. 다시 시도하세요.</div></div>
+          <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid primary">다시 배포</button></div>
+        </div>` },
     ],
-    props: [[".popup-backdrop", "overlay", "—", "fixed, rgba(15,23,42,.65), 중앙 정렬"], [".popup", "dialog", "—", "role=dialog aria-modal aria-labelledby. 폭 440 (lg 640)"], [".popup-title / .popup-body / .popup-actions", "elements", "—", "제목 18 / 본문 14 / 액션 우측"], [".danger", "boolean", "false", "제목 danger 색"], [".popup-form", "container", "—", "필드 세로 16px 간격"]],
-    spec: [["Size", "폭 440 (lg 640) · padding 24"], ["Container", "radius/xl 10 · shadow/3 · 배경 effect/dimmer/primary(라이트 52% · 다크 74%)"], ["Label", "제목 Heading/4 18 Bold · 본문 Body/2 14"], ["Placement", "화면 중앙. 열릴 때 포커스 이동, ESC 로 닫힘"]],
+    props: [[".popup-backdrop", "overlay", "—", "fixed · 중앙 정렬 · 바깥 여백 24"], [".popup", "dialog", "—", "role=dialog aria-modal aria-labelledby. 폭 440 (lg 640), 높이는 화면 안"], [".popup-title / .popup-body / .popup-actions", "elements", "—", "제목 18 / 본문 14 · 길면 스크롤 / 액션 우측"], [".popup-close", "button", "필수", "제목 바로 뒤. aria-label · data-popup-close"], [".danger", "boolean", "false", "제목 danger 색. role=alertdialog + aria-describedby 와 함께"], ["aria-busy", "\"true\"", "—", "처리 중. X · 취소 · Esc · 배경이 막힙니다(DS.popup.busy)"], [".popup-form", "container", "—", "필드 세로 16px 간격"]],
+    spec: [["Size", "폭 440 (lg 640) · padding 24"], ["Container", "radius/xl 10 · shadow/3 · 배경 effect/dimmer/primary(라이트 52% · 다크 74%)"], ["Label", "제목 Heading/4 18 Bold · 본문 Body/2 14"], ["Placement", "화면 중앙. 열리면 안으로 포커스를 옮기고, 닫으면 연 요소로 돌려보냅니다"]],
     figma: { frame: "Popup", radius: "radius/xl", sizes: { md: { w: 440 }, lg: { w: 640 } }, variants: { confirm: {}, danger: {}, form: {} }, states: ["default"] },
+  },
+
+  /* ------------------------------------------------ Side Panel */
+  "side-panel": {
+    status: "ready", react: ["SidePanel","SidePanelSurface"], css: [".side-panel", ".side-panel-dim", ".side-panel-header", ".side-panel-title", ".side-panel-body", ".side-panel-footer"], borrows: [".btn", ".tbl"],
+    desc: "목록이나 화면을 그대로 둔 채 상세를 오른쪽에서 보여 줍니다. 응답을 받아야 진행하면 <a href=\"#/components/popup\">Popup</a> 을 씁니다.",
+    principles: [
+      ["언제", "목록을 보면서 한 항목을 확인할 때 씁니다. 로그 · 이벤트 상세가 대표적입니다. 양식 전체를 채우는 일은 별도 페이지로 보냅니다."],
+      ["비모달이 기본", "뒤 페이지를 그대로 쓸 수 있습니다. 포커스를 가두지 않고 스크롤도 잠그지 않습니다. 다른 항목을 누르면 패널 내용을 바꿉니다."],
+      ["모달", "패널의 내용을 끝내기 전에 뒤 페이지를 건드리면 안 될 때만 <code>data-modal</code> · <code>modal</code> 을 씁니다. 배경 · 포커스 가둠 · 스크롤 잠금이 함께 켜집니다."],
+      ["포커스", "열면 패널로 옮깁니다. 닫을 때 포커스가 패널 안에 있었으면 연 요소로 돌려보냅니다. 사용자가 뒤 페이지로 옮겨 갔으면 뺏지 않습니다."],
+      ["닫기", "닫기(X)는 필수입니다. Esc 는 포커스가 패널 안에 있을 때 닫습니다. 비모달은 바깥을 눌러도 닫히지 않습니다."],
+      ["개수", "한 번에 하나입니다. 다른 패널을 열면 바꿔 끼웁니다."],
+      ["위에 띄우는 것", "패널 안에서 <a href=\"#/components/popup\">Popup</a> 을 띄울 수 있습니다. 모달 패널 위에는 띄우지 않습니다."],
+    ],
+    thumb: `<div class="side-panel" style="width:200px"><div class="side-panel-header" style="min-height:0;padding:8px 12px"><span class="side-panel-title" style="font-size:12px;line-height:16px">이벤트 상세</span></div><div class="side-panel-body" style="padding:12px;font-size:12px">외부 USB 차단</div></div>`,
+    examples: [
+      { id: "default", title: "Default", desc: "머리글 · 본문 · 바닥글로 이루어집니다. 예제는 띄우지 않은 모습입니다.", html: `
+        <section class="side-panel" role="dialog" aria-labelledby="sp-d">
+          ${spHead("sp-d", "이벤트 상세")}
+          <div class="side-panel-body">${spFacts(SP_EVENT)}</div>
+          <div class="side-panel-footer"><button type="button" class="btn md outline assistive" data-panel-close>닫기</button><button type="button" class="btn md solid primary">예외 추가</button></div>
+        </section>` },
+      { id: "long", title: "긴 본문", desc: "본문만 스크롤합니다. 머리글과 바닥글은 그 자리에 있습니다.", html: `
+        <section class="side-panel" role="dialog" aria-labelledby="sp-l" style="height:320px">
+          ${spHead("sp-l", "에이전트 상세")}
+          <div class="side-panel-body">${spFacts([...SP_EVENT, ["그룹", "본사 · 개발"], ["운영체제", "Windows 11"], ["버전", "4.2.1"], ["마지막 체크인", "2026-09-07 14:20"], ["정책 수", "12"], ["라이선스", "2027-03-31 까지"]])}</div>
+          <div class="side-panel-footer"><button type="button" class="btn md solid primary">격리</button></div>
+        </section>` },
+      { id: "live", title: "비모달", desc: "실제 동작입니다. 패널이 열려 있어도 뒤 페이지를 누르고 스크롤할 수 있습니다.", html: `
+        <button type="button" class="btn md outline assistive" data-panel-open="#sp-live">이벤트 상세 열기</button>
+        <section class="side-panel" id="sp-live" role="dialog" aria-labelledby="sp-live-t" hidden>
+          ${spHead("sp-live-t", "이벤트 상세")}
+          <div class="side-panel-body">${spFacts(SP_EVENT)}</div>
+        </section>` },
+      { id: "modal", title: "모달", desc: "실제 동작입니다. 배경을 누르거나 Esc 로 닫고, 포커스는 패널 안에 머뭅니다.", html: `
+        <button type="button" class="btn md outline assistive" data-panel-open="#sp-modal">격리 설정 열기</button>
+        <section class="side-panel lg" id="sp-modal" role="dialog" aria-modal="true" aria-labelledby="sp-modal-t" data-modal hidden>
+          ${spHead("sp-modal-t", "격리 설정")}
+          <div class="side-panel-body">${spFacts(SP_EVENT)}</div>
+          <div class="side-panel-footer"><button type="button" class="btn md outline assistive" data-panel-close>취소</button><button type="button" class="btn md solid primary" data-panel-close>격리</button></div>
+        </section>` },
+    ],
+    props: [
+      [".side-panel", "section", "—", "role=dialog · aria-labelledby. 폭 400 (.lg 560)"],
+      [".fixed", "boolean", "false", "화면 오른쪽에 띄웁니다. DS.panel.open 이 붙입니다"],
+      ["data-modal", "boolean", "false", "배경 · 포커스 가둠 · 스크롤 잠금. aria-modal=true 와 함께"],
+      ["data-panel-open / data-panel-close", "속성", "—", "여는 버튼(값은 선택자) / 닫는 버튼"],
+      ["DS.panel.open(sel) / close()", "API", "—", "닫으면 ds:panel-close 가 납니다"],
+      [".side-panel-header / -body / -footer", "elements", "—", "본문만 스크롤. 바닥글은 없어도 됩니다"],
+    ],
+    spec: [["Size", "폭 400 (lg 560) · 머리글 최소 높이 56 · 본문 padding 20 · 바닥글 padding 12 20"], ["Container", "surface/elevated/primary · 왼쪽 선 line/neutral/secondary · shadow/3"], ["Label", "제목 Title/1 16 SemiBold · 본문 Body/2 14"], ["Placement", "화면 오른쪽 끝 · 위아래 전체. Popup(100)과 Toast(110) 아래"]],
   },
 
   /* ------------------------------------------------ Tooltip */
   "tooltip": {
     status: "ready", react: ["Tooltip"], css: [".tooltip", ".tooltip-wrap"], borrows: [".btn", ".indicator"],
-    desc: "아이콘 버튼의 이름이나 짧은 보조 설명을 hover/focus 시 보여줍니다. 필수 정보를 툴팁에만 두지 않습니다.",
+    desc: "아이콘 버튼의 이름이나 짧은 보조 설명을 마우스를 올리거나 포커스할 때 보여 줍니다.",
+    principles: [
+      ["내용", "짧은 보조 설명과 아이콘 버튼의 이름만 넣습니다. 필수 정보는 넣지 않습니다. 툴팁을 못 봐도 작업을 끝낼 수 있어야 합니다."],
+      ["트리거", "포커스를 받을 수 있는 요소에만 답니다. 비활성 요소와 Tag 같은 비인터랙티브 요소에는 달지 않고, 빌드가 검사합니다."],
+      ["되풀이", "보이는 라벨을 되풀이하지 않습니다. 아이콘 전용 버튼은 이름이 곧 툴팁이므로 <code>aria-label</code> 만 두고 <code>aria-describedby</code> 를 잇지 않습니다."],
+      ["안에 넣지 않는 것", "링크 · 버튼을 넣지 않습니다. 포커스가 닿지 않습니다. 단축키를 툴팁에만 두지 않습니다."],
+      ["동작", "마우스는 0.3초 뒤, 키보드 포커스는 바로 보입니다. Esc 로 닫습니다. 화면 끝이면 반대쪽으로 뒤집고, 스크롤되는 영역 안에서도 잘리지 않습니다."],
+      ["차트 값", "차트의 값 표시는 <a href=\"#/components/data-visual\">Data Visual</a> 의 몫입니다. 이 컴포넌트를 쓰지 않습니다."],
+    ],
     thumb: `<span class="tooltip-wrap show"><button class="btn sm outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button><span class="tooltip" role="tooltip">새로 고침</span></span>`,
     examples: [
       { id: "default", title: "Default", desc: "요소 위쪽에 뜨는 기본 위치입니다.", html: `<span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">새로 고침</button><span class="tooltip" role="tooltip">목록을 다시 불러옵니다</span></span>` },
@@ -1378,15 +1466,15 @@ const COMPONENTS = {
         <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Bottom</button><span class="tooltip bottom" role="tooltip">아래</span></span>
         <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Left</button><span class="tooltip left" role="tooltip">왼쪽</span></span>
         <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Right</button><span class="tooltip right" role="tooltip">오른쪽</span></span>`, style: "gap:104px;padding:64px 40px" },
-      { id: "hover", title: "On Hover / Focus", desc: "실제 동작. 아이콘 버튼 위에 마우스를 올리거나 포커스하세요. aria-describedby 로 연결.", html: `
-        <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침" aria-describedby="tt1">${I("refresh")}</button><span class="tooltip" role="tooltip" id="tt1">새로 고침</span></span>
-        <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="필터" aria-describedby="tt2">${I("filter")}</button><span class="tooltip" role="tooltip" id="tt2">필터</span></span>
-        <span class="tooltip-wrap"><button type="button" class="btn md outline negative icon-only" aria-label="삭제" aria-describedby="tt3">${I("trash")}</button><span class="tooltip" role="tooltip" id="tt3">삭제</span></span>`, style: "padding-top:64px" },
+      { id: "hover", title: "On Hover / Focus", desc: "실제 동작입니다. 아이콘 버튼 위에 마우스를 올리거나 포커스하세요. 이름이 곧 툴팁이라 aria-describedby 는 잇지 않습니다.", html: `
+        <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button><span class="tooltip" role="tooltip" id="tt1">새로 고침</span></span>
+        <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="필터">${I("filter")}</button><span class="tooltip" role="tooltip" id="tt2">필터</span></span>
+        <span class="tooltip-wrap"><button type="button" class="btn md outline negative icon-only" aria-label="삭제">${I("trash")}</button><span class="tooltip" role="tooltip" id="tt3">삭제</span></span>`, style: "padding-top:64px" },
       { id: "multi", title: "Multiline", desc: "두 줄 이상은 .multi (폭 220). 그 이상 설명은 Popover/도움말 링크.", html: `
-        <span class="tooltip-wrap show"><span class="indicator warn">검토 필요</span><span class="tooltip multi" role="tooltip">서명이 확인되지 않은 실행 파일입니다. 24시간 내 처리하지 않으면 자동 차단됩니다.</span></span>`, style: "padding-top:96px" },
+        <span class="indicator warn">검토 필요</span><span class="tooltip-wrap show"><button type="button" class="btn sm text assistive icon-only" aria-label="검토 필요 이유" aria-describedby="tt-multi">${I("info-circle")}</button><span class="tooltip multi" role="tooltip" id="tt-multi">게시자 서명을 확인하지 못한 실행 파일입니다. 신뢰할 수 있는 파일이면 예외로 추가할 수 있습니다.</span></span>`, style: "padding-top:96px" },
     ],
-    props: [[".tooltip-wrap", "container", "—", "position:relative 트리거 래퍼"], [".tooltip", "span", "—", "role=tooltip. 기본 위치 위"], ["position", ".bottom | .left | .right", "top", "위치"], [".show", "boolean", "false", "강제 표시(문서·디버그)"], [".multi", "boolean", "false", "여러 줄, 폭 220"]],
-    spec: [["Size", "높이 30 · padding 6 10 · 트리거와 8px"], ["Container", "radius 6 · surface/neutral/inverse · shadow/2 · 화살표 5px"], ["Label", "Caption/1 12 · 행간 18 · Medium · inverse"], ["Placement", "아이콘 전용 버튼 필수, 잘린 텍스트, 차트 값"]],
+    props: [[".tooltip-wrap", "container", "—", "position:relative 트리거 래퍼"], [".tooltip", "span", "—", "role=tooltip. 기본 위치 위"], ["position", ".bottom | .left | .right", "top", "위치"], [".show", "boolean", "false", "강제 표시(문서·디버그)"], [".multi", "boolean", "false", "여러 줄, 폭 220"], [".quiet", "boolean", "false", "Esc 로 닫힌 상태. ds.js 가 붙이고, 마우스 · 포커스가 떠나면 뗍니다"], [".float", "boolean", "false", "화면 기준 위치. ds.js 가 스크롤 영역 안에서 붙입니다"]],
+    spec: [["Size", "높이 30 · padding 6 10 · 트리거와 8px"], ["Container", "radius 6 · surface/neutral/inverse · shadow/2 · 화살표 5px"], ["Label", "Caption/1 12 · 행간 18 · Medium · inverse"], ["Placement", "아이콘 전용 버튼의 이름, 잘린 글자의 전체 보기"]],
     figma: { frame: "Tooltip", radius: 6, sizes: { md: { h: 30 } }, variants: { top: {}, bottom: {}, left: {}, right: {} }, states: ["default", "multiline"] },
   },
 
@@ -1394,6 +1482,16 @@ const COMPONENTS = {
   "notification": {
     status: "ready", react: ["Notice","Toast","ToastStack","Banner","ToastProvider","useToast"], css: [".notice", ".toast", ".toast-stack", ".banner"], borrows: [".btn"],
     desc: "시스템 상태와 결과를 알립니다. 페이지 안에 머무는 Notice, 잠시 떴다 사라지는 Toast, 화면 상단 전체 공지 Banner 를 구분합니다.",
+    principles: [
+      ["고르기", "사용자가 언제까지 봐야 하는지로 고릅니다. 방금 한 동작의 결과는 Toast, 화면 일부의 지속 상태는 Notice, 제품 전체에 영향을 주는 공지는 Banner, 응답을 받아야 진행하면 <a href=\"#/components/popup\">Popup</a> 입니다. 기준표는 <a href=\"#/foundations/interaction\">Interaction</a> 에 있습니다."],
+      ["Toast 시간", "기본 4초, 실행 취소 같은 동작이 있으면 10초입니다. 마우스를 올리거나 포커스가 들어오면 묶음 전체의 시간이 멈춥니다."],
+      ["오류 Toast", "닫을 때까지 남고 닫기 버튼이 있습니다. <code>duration</code> 을 줘도 사라지지 않습니다."],
+      ["쌓임", "동시에 3개까지입니다. 넘치면 자동으로 사라지는 것부터 지웁니다. 닫을 때까지 남는 오류는 밀리지 않으므로 3개를 넘을 수 있습니다."],
+      ["같은 알림", "동작이 없는 같은 문구는 쌓지 않고 시간을 다시 잽니다. 동작이 있으면 실행 취소 대상이 서로 달라 합치지 않습니다."],
+      ["Banner", "한 번에 하나입니다. 닫으면 사이트는 <code>ds:banner-close</code>, React 는 <code>onClose</code> 가 납니다. 다시 띄울지는 제품이 정합니다."],
+      ["알리는 세기", "<code>role=alert</code> 는 바로 알아야 하는 위험에만 씁니다. Toast 묶음은 <code>aria-live=polite</code> 입니다."],
+      ["문구", "오류에는 원인과 다음 행동을 함께 적습니다. 폼 필드 오류는 Toast 로 알리지 않고 필드 아래에 적습니다."],
+    ],
     thumb: `<div class="notice warning" style="max-width:240px;padding:10px 12px;font-size:12px"><span class="ico">${I("alert-triangle",20)}</span><div><b>라이선스 만료 임박</b>3일 후 만료</div></div>`,
     examples: [
       { id: "default", title: "Default", desc: "본문 안에 머무는 기본 인라인 알림입니다.", html: `<div class="notice info" role="status" style="max-width:600px"><span class="ico">${I("info-circle")}</span><div><b>정책이 아직 배포되지 않았습니다</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>` },
@@ -1402,15 +1500,15 @@ const COMPONENTS = {
         <div class="notice success" role="status" style="max-width:600px"><span class="ico">${I("circle-check",20)}</span><div><b>배포 완료</b>1,284대 중 1,284대에 적용되었습니다.</div></div>
         <div class="notice warning" role="status" style="max-width:600px"><span class="ico">${I("alert-triangle",20)}</span><div><b>라이선스가 3일 후 만료됩니다</b>만료 시 신규 이벤트 수집이 중단됩니다.<div class="actions"><button type="button" class="btn sm solid primary">갱신 요청</button></div></div></div>
         <div class="notice danger" role="alert" style="max-width:600px"><span class="ico">${I("alert-circle",20)}</span><div><b>에이전트 37대 연결 끊김</b>10분 이상 체크인이 없습니다. 네트워크 상태를 확인하세요.</div></div>`, layout: "stack" },
-      { id: "toast", title: "Toast", desc: "짧은 결과 알림. 우측 하단, 3~5초 후 자동 소멸, 실행 취소 액션 가능. aria-live=polite.", html: `
+      { id: "toast", title: "Toast", desc: "짧은 결과 알림입니다. 우측 하단에 뜨고 4초 뒤 사라지며, 동작이 있으면 10초입니다. 오류는 닫을 때까지 남습니다.", html: `
         <div class="toast-stack" aria-live="polite">
           <div class="toast"><span class="ico">${I("circle-check",20)}</span>정책 'USB 차단' 이 저장되었습니다<button type="button" class="action">실행 취소</button></div>
-          <div class="toast danger"><span class="ico">${I("alert-circle",20)}</span>내보내기에 실패했습니다<button type="button" class="action">다시 시도</button></div>
+          <div class="toast danger"><span class="ico">${I("alert-circle",20)}</span>내보내기에 실패했습니다<button type="button" class="action">다시 시도</button><button type="button" class="close" aria-label="닫기">${I("x",14)}</button></div>
         </div>` },
-      { id: "banner", title: "Banner", desc: "시스템 전체 공지(점검·라이선스). 헤더 위 전체 폭, 닫기 가능.", html: `
-        <div class="banner" role="status">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다. 점검 중 콘솔 접속이 제한됩니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button></div>`, layout: "stack", style: "padding:24px 0;gap:8px" },
+      { id: "banner", title: "Banner", desc: "시스템 전체 공지(점검 · 라이선스)입니다. 헤더 위 전체 폭에 한 번에 하나만 둡니다.", html: `
+        <div class="banner" role="status">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다. 점검 중 콘솔 접속이 제한됩니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button><button type="button" class="close" aria-label="닫기">${I("x",14)}</button></div>`, layout: "stack", style: "padding:24px 0;gap:8px" },
     ],
-    props: [[".notice", "div", "—", "role=status | alert. .ico + div(b 제목 + 본문 + .actions) + .close"], ["tone", "info | success | warning | danger", "neutral", "톤별 subtle 배경 + 30% 보더"], [".toast", "div", "—", "폭 360, 어두운 배경. .action 하나"], [".toast-stack", "container", "—", "aria-live=polite, 우측 하단 고정"], [".banner", "div", "—", "전체 폭. accent / .warning / .danger"]],
+    props: [[".notice", "div", "—", "role=status | alert. .ico + div(b 제목 + 본문 + .actions) + .close"], ["tone", "info | success | warning | danger", "neutral", "톤별 subtle 배경 + 30% 보더"], [".toast", "div", "—", "폭 360, 어두운 배경. .action 하나, 닫을 때까지 남으면 .close"], ["data-duration", "ms", "4000", "자동 소멸 시간. 0 이면 닫을 때까지. DS.toast 는 동작이 있으면 10000, 오류는 늘 0"], [".toast-stack", "container", "—", "aria-live=polite, 우측 하단 고정"], [".banner", "div", "—", "전체 폭. accent / .warning / .danger. .close 는 ds:banner-close 를 냅니다"]],
     spec: [["Size", "Notice padding 14 18 · Toast 폭 360 · Banner padding 10 20"], ["Container", "Notice radius/lg 8 · 톤별 surface · line 토큰 · Toast surface/neutral/inverse"], ["Label", "제목 14 Bold · 본문 Body/2 14"], ["Placement", "Notice 는 페이지 헤더 아래, Toast 우측 하단, Banner 헤더 위"]],
     figma: { frame: "Notification", radius: "radius/lg", sizes: { notice: { minH: 56 }, toast: { w: 360 }, banner: { h: 44 } }, variants: { info: { bg: "--surface-accent-cyan", fg: "--surface-accent-cyan" }, success: { bg: "--surface-positive-primary", fg: "--surface-positive-primary" }, warning: { bg: "--surface-cautionary-primary", fg: "--surface-cautionary-primary" }, danger: { bg: "--surface-negative-primary", fg: "--surface-negative-strong" }, toast: { bg: "--surface-neutral-inverse", fg: "--foreground-neutral-inverse" } }, states: ["default", "with-action", "dismissible"] },
   },
@@ -1418,14 +1516,23 @@ const COMPONENTS = {
   /* ------------------------------------------------ Loading */
   "loading": {
     status: "ready", react: ["Spinner","Skeleton","SkeletonRow","Progress"], css: [".spinner", ".spinner-wrap", ".skeleton", ".skeleton-row", ".progress", ".progress-row"],
-    desc: "로딩 상태를 알립니다. 1초 미만은 표시하지 않고, 영역 로딩은 Skeleton, 짧은 동작은 Spinner, 진행률을 알면 Progress.",
+    desc: "기다리는 동안의 상태를 알립니다. 영역의 첫 로딩은 Skeleton, 짧은 동작은 Spinner, 진행률을 알면 Progress 를 씁니다.",
+    principles: [
+      ["고르기", "시간 기준은 <a href=\"#/foundations/interaction\">Interaction</a> 의 Loading 표를 따릅니다."],
+      ["1초 미만", "금방 끝나는 동작에 표시가 깜빡이지 않게, 1초쯤 기다렸다 보여 주는 일은 제품이 합니다. 컴포넌트에 지연 기능은 없습니다."],
+      ["Spinner 이름", "'불러오는 중' 만 쓰지 않고 실제 작업을 적습니다. 빌드가 검사합니다."],
+      ["Skeleton", "완성될 콘텐츠의 크기와 모양에 맞춥니다."],
+      ["Progress", "진행률을 알 때만 씁니다. <code>value</code> 는 필수이고, 끝을 알 수 없는 진행 막대는 제공하지 않습니다. 그때는 Spinner 를 씁니다."],
+      ["오래 걸리는 작업", "취소하거나 백그라운드로 돌릴 길을 제공합니다."],
+      ["줄인 모션", "Spinner · 버튼 loading · Switch 처리 중은 계속 돕니다. 멈춘 스피너는 고장으로 보입니다. Skeleton · 맥박은 멈춥니다."],
+    ],
     thumb: `<span class="spinner"></span><div style="width:120px;display:flex;flex-direction:column;gap:6px"><span class="skeleton title" style="width:60%"></span><span class="skeleton text"></span></div>`,
     examples: [
-      { id: "default", title: "Default", desc: "기본 크기(24px) 스피너입니다.", html: `<span class="spinner" role="status" aria-label="불러오는 중"></span>` },
+      { id: "default", title: "Default", desc: "기본 크기(24px) 스피너입니다.", html: `<span class="spinner" role="status" aria-label="이벤트 불러오는 중"></span>` },
       { id: "spinner", title: "Spinner", desc: "sm 16 · md 24 · lg 40. 버튼 안에서는 Button .loading 을 씁니다.", html: `
-        <span class="spinner sm" role="status" aria-label="불러오는 중"></span>
-        <span class="spinner" role="status" aria-label="불러오는 중"></span>
-        <span class="spinner lg" role="status" aria-label="불러오는 중"></span>
+        <span class="spinner sm" role="status" aria-label="목록 불러오는 중"></span>
+        <span class="spinner" role="status" aria-label="정책 불러오는 중"></span>
+        <span class="spinner lg" role="status" aria-label="보고서 만드는 중"></span>
         <div class="spinner-wrap" role="status"><span class="spinner"></span>이벤트를 불러오는 중…</div>` },
       { id: "skeleton", title: "Skeleton", desc: "콘텐츠 형태를 미리 보여줍니다. 목록·카드의 첫 로딩에.", html: `
         <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:14px" aria-busy="true">
@@ -1440,7 +1547,7 @@ const COMPONENTS = {
           <div class="progress-row"><div class="row"><span>업데이트 실패</span><span>38%</span></div><div class="progress danger" role="progressbar" aria-valuenow="38"><i style="width:38%"></i></div></div>
         </div>` },
     ],
-    props: [[".spinner", "span", "—", "role=status aria-label. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"]],
+    props: [[".spinner", "span", "—", "role=status · aria-label 은 실제 작업. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"]],
     spec: [["Size", "Spinner 16/24/40 · Skeleton 행 14 · Progress 8 (sm 4)"], ["Container", "Skeleton radius 6 · Progress radius/full"], ["Label", "문구 12 Regular — 스피너 tertiary · 진행 secondary"], ["Placement", "Skeleton 은 콘텐츠 자리 그대로, Spinner 는 영역 중앙"]],
     figma: { frame: "Loading", sizes: { spinner: { sm: 16, md: 24, lg: 40 }, progress: { h: 8 } }, variants: { spinner: {}, skeleton: { bg: "--surface-neutral-strong" }, progress: { fill: "--surface-brand-primary", track: "--surface-neutral-strong" } }, states: ["default", "success", "danger"] },
   },

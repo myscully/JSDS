@@ -181,7 +181,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 | 파일 | 내용 |
 |---|---|
 | \`data.js\` | 사이트 구조(SITE) · 제품 컬러(PRODUCTS) · 버전 · Changelog |
-| \`components.data.js\` | 컴포넌트 32개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
+| \`components.data.js\` | 컴포넌트 33개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
 | \`patterns.data.js\` | 패턴 11개: 사용 컴포넌트(uses) · 예제 · 가이드라인 |
 | \`style.src.css\` | 스타일 원본. 컴포넌트 CSS 는 \`/* ---------- Live component samples ---------- */\` 블록 안에 평면 규칙으로 작성(코드 패널 추출 대상) |
 | \`lib.js\` | cssFor(컴포넌트 CSS 추출) · htmlToJsx(React 코드 생성) · hl(구문 강조) · tokenBlock |

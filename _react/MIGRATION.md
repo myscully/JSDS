@@ -372,3 +372,14 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **CheckboxGroup · RadioGroup** — `legend` · `required` · `help` · `error` 가 생겼습니다. `<Form validate>` 안의 `legend` 그룹은 `.field` 로 감싸집니다. `CheckboxGroup` 의 ref 타입은 `HTMLElement` 입니다.
 - **DataTable** — 행 체크박스의 접근 이름이 '선택' 에서 '첫 열 값 선택' 으로 바뀌었습니다. `rowLabel` 로 바꿀 수 있습니다.
 - **Slider** — `valueText` 가 문자열을 돌려주면 `aria-valuetext` 로도 나갑니다.
+
+## 피드백 · 오버레이 (2026-11-10)
+
+- **Toast** — `tone="danger"` 는 `duration` 을 줘도 닫을 때까지 남고 닫기 버튼이 생깁니다. `action` 이 있으면 기본 10초입니다. 동작이 없는 같은 문구는 쌓지 않고 시간을 다시 잽니다. 넘치면 자동으로 사라지는 것부터 지우므로, 오류가 많으면 3개를 넘습니다.
+- **Banner** — `onClose` 를 주면 닫기 버튼이 생깁니다. 다시 띄울지는 제품이 정합니다.
+- **PopupSurface** — `onClose` 가 필수입니다. `PopupTitle` 이 헤더의 닫기(X)를 그립니다. `closeLabel` 로 이름을 바꿉니다.
+- **Popup** — `closeOnBackdrop` 의 기본값이 `true` 에서 '위험 확인이 아니고 입력하지 않았을 때' 로 바뀌었습니다. 예전처럼 늘 닫으려면 `closeOnBackdrop` 을 직접 주세요. `busy` 를 주면 X · Esc · 배경이 막힙니다(취소 버튼의 `disabled` 는 제품이 줍니다). `danger` 는 `role="alertdialog"` 입니다.
+- **Popup 포커스** — 상태로 열 때 포커스 이동 · Tab 가둠 · 복귀가 동작하지 않던 것을 고쳤습니다. 첫 포커스는 닫기(X)와 `.negative` 버튼을 건너뜁니다.
+- **Tooltip** — 아이콘 버튼의 `aria-label` 이 `content` 와 같으면 `aria-describedby` 를 잇지 않습니다. 마우스는 0.3초 뒤에 뜨고, Esc 로 닫힙니다. 화면 끝에서는 반대쪽으로 뒤집습니다.
+- **Spinner** — `label` 에 실제 작업을 적어 주세요(사이트 예제는 빌드가 검사합니다). 줄인 모션 설정에서도 돕니다.
+- **SidePanel** — 새 컴포넌트입니다(`open` · `onClose` · `title` · `footer` · `size` · `modal` · `closeLabel`). 사이트는 `.side-panel` · `DS.panel` · 이벤트 `ds:panel-close` 입니다.

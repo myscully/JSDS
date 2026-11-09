@@ -125,12 +125,12 @@ ${rules([
 ])}
 <h2 id="overlays">Overlays</h2><p>Popup · Dropdown · Select · Date Picker · Tooltip · Toast 가 함께 지키는 규칙입니다.</p>
 ${rules([
-  ["모달 위에 모달을 띄우지 않습니다", `아직 — 막는 코드가 없습니다. ${c("popup", "Popup")} 정비 때`],
-  ["Esc 는 가장 안쪽 것 하나만 닫습니다. Popup 안의 Select 가 열려 있으면 Select 만 닫습니다", `적용 — ${c("select", "Select")} · Dropdown · ${c("combobox", "Combobox")} · ${c("date-picker", "Date Picker")}`],
-  ["입력 중이거나 위험 확인이면 배경을 눌러도 닫지 않습니다", `아직 — 지금은 늘 닫힙니다. ${c("popup", "Popup")} 정비 때`],
-  ["열면 포커스를 안으로 옮기고, 닫으면 연 요소로 돌려보냅니다", `적용 — ${c("popup", "Popup")}, 동작 검사가 있습니다`],
+  ["모달 위에 모달을 띄우지 않습니다", `적용 — ${c("popup", "Popup")}: 사이트는 막고 경고, React 는 경고`],
+  ["Esc 는 가장 안쪽 것 하나만 닫습니다. Popup 안의 Select 가 열려 있으면 Select 만 닫습니다", `적용 — ${c("select", "Select")} · Dropdown · ${c("combobox", "Combobox")} · ${c("date-picker", "Date Picker")} · ${c("tooltip", "Tooltip")}`],
+  ["입력 중이거나 위험 확인이면 배경을 눌러도 닫지 않습니다", `적용 — ${c("popup", "Popup")}, 동작 검사가 있습니다`],
+  ["열면 포커스를 안으로 옮기고, 닫으면 연 요소로 돌려보냅니다", `적용 — ${c("popup", "Popup")} · ${c("side-panel", "Side Panel")}, 동작 검사가 있습니다`],
   ["Toast 는 모달 위에 보입니다", "적용 — Toast 110, 배경 100"],
-  ["<code>overflow</code> 안에 있어도 작은 오버레이가 잘리지 않습니다", `일부 — Dropdown · ${c("select", "Select")} · ${c("combobox", "Combobox")} 적용. ${c("tooltip", "Tooltip")} 은 정비 때`],
+  ["<code>overflow</code> 안에 있어도 작은 오버레이가 잘리지 않습니다", `적용 — Dropdown · ${c("select", "Select")} · ${c("combobox", "Combobox")} · ${c("tooltip", "Tooltip")}`],
 ])}
 <h2 id="feedback">Choosing feedback</h2><p>알릴 내용이 아니라 <b>사용자가 언제까지 봐야 하는지</b>로 고릅니다.</p>
 ${tbl(["상황", "쓸 것", "사라지는 때"], [
@@ -141,7 +141,6 @@ ${tbl(["상황", "쓸 것", "사라지는 때"], [
   ["제품 전체에 영향(점검 · 라이선스)", `${c("notification", "Banner")}, 한 번에 하나`, "해결될 때"],
   ["응답을 받아야 진행", c("popup", "Popup"), "사용자가 응답할 때"],
 ])}
-<p><b>아직:</b> 오류 Toast 는 지금 4초 뒤 사라지고, 마우스를 올리거나 포커스해도 타이머가 멈추지 않습니다. ${c("notification", "Notification")} 정비 때 고칩니다.</p>
 <h2 id="destructive">Destructive actions</h2><p>되돌릴 수 있는지에 따라 확인 단계를 고릅니다. 모두 확인받으면 습관적으로 넘기게 됩니다.</p>
 ${tbl(["영향", "흐름"], [
   ["되돌릴 수 있음", "바로 실행 → Toast 와 실행 취소"],
@@ -149,7 +148,7 @@ ${tbl(["영향", "흐름"], [
   ["복구할 수 없고 대량", "Popup 에 대상 수 표시 + 확인 문구 입력 → 실행 → 결과 알림"],
 ])}
 ${rules([
-  ["위험 확인의 첫 포커스는 취소에 둡니다. 확인 문구를 입력하는 대화상자는 입력칸에 둡니다", `적용 — ${c("popup", "Popup")}은 열 때 첫 요소로 포커스를 옮기고 취소가 앞에 있습니다. 검사는 Popup 정비 때`],
+  ["위험 확인의 첫 포커스는 취소에 둡니다. 확인 문구를 입력하는 대화상자는 입력칸에 둡니다", `적용 — ${c("popup", "Popup")}은 닫기(X)와 위험 실행 버튼을 건너뜁니다. 동작 검사가 있습니다`],
   ["보안 기능을 끄는 Switch 도 이 표를 따릅니다", `제품 — ${c("switch", "Switch")} 의 응답 후 반영(ds:switch · action) 안에서 확인을 띄웁니다`],
 ])}
 <h2 id="overflow">Overflow</h2>
@@ -160,7 +159,7 @@ ${rules([
 ])}
 <h2 id="loading">Loading</h2>
 ${tbl(["예상 시간", "표시"], [
-  ["1초 미만", "표시하지 않습니다"],
+  ["1초 미만", "표시하지 않습니다. 기다렸다 보여 주는 일은 제품이 합니다"],
   ["영역의 첫 로딩", `${c("loading", "Skeleton")}`],
   ["짧은 동작", `${c("loading", "Spinner")}, 페이지에 하나. 버튼이 시작했으면 ${c("button", "Button")} loading`],
   ["진행률을 앎", `${c("loading", "Progress")}`],

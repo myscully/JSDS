@@ -88,7 +88,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   for (const m of src.matchAll(/(?<![-\w])(transition|animation):([^;}]*)/g)) {
     const [, prop, val] = m; const v = val.trim(), at = `style.src.css:${lineOf(m.index)}`;
     if (v === "none!important") continue;
-    if (prop === "animation") { if (!LOOPS.includes(v) && !/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
+    if (prop === "animation") { if (!LOOPS.includes(v.replace(/!important$/, "")) && !/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
     for (const part of v.split(/,(?![^(]*\))/).map((x) => x.trim())) {
       if (!/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(part)) fails.push(`${at}: transition "${part}" — 속성 하나 + var(--motion-*) 하나만(숫자 · 이징을 덧붙이면 무효가 되거나 토큰을 벗어난다)`);
     }
@@ -120,6 +120,28 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       /* 비활성(Interaction › Disabled) — 패턴의 주 버튼은 제출 버튼이다. 비활성 요소에는 Tooltip 을 달지 않는다 */
       if (sec === "patterns") for (const m of pv.matchAll(/<button\b[^>]*class="[^"]*solid primary[^"]*"[^>]*>/g)) if (/\sdisabled\b/.test(m[0])) fails.push(`${f}: 주 버튼이 비활성이다 — 켜 두고 검증으로 안내한다(Interaction › Disabled)`);
       if (/class="tooltip-wrap[^"]*"[^>]*>\s*<[a-z]+\b[^>]*\sdisabled\b/.test(pv)) fails.push(`${f}: 비활성 요소에 Tooltip(Interaction › Disabled)`);
+      /* Popup · Side Panel — 닫기(X) 필수(사람의 결정 2026-11-10), 위험 확인은 alertdialog, 주 버튼은 제목의 동작(Popup 원칙) */
+      for (const m of pv.matchAll(/<div class="popup(?: [^"]*)?"[^>]*role="(dialog|alertdialog)"[^>]*>([\s\S]*?)<div class="popup-actions">([\s\S]*?)<\/div>/g)) {
+        const open = m[0].slice(0, m[0].indexOf(">") + 1), danger = /class="popup danger/.test(open), head = m[2], acts = m[3];
+        if (!/class="[^"]*\bpopup-close\b[^"]*"[^>]*aria-label="/.test(head)) fails.push(`${f}: Popup 에 이름 있는 닫기(X)가 없다(Popup › 닫기)`);
+        if (danger !== (m[1] === "alertdialog")) fails.push(`${f}: 위험 확인은 role=alertdialog, 그 밖은 role=dialog(Popup › 위험 확인)`);
+        if (danger && !/aria-describedby="/.test(open)) fails.push(`${f}: alertdialog 에 aria-describedby 가 없다(Popup › 위험 확인)`);
+        const title = text((/class="popup-title"[^>]*>([\s\S]*?)<\/h3>/.exec(head) || [])[1] || ""), main = /<button\b[^>]*class="[^"]*solid[^"]*"[^>]*>([\s\S]*?)<\/button>/.exec(acts);
+        if (main && !title.includes(text(main[1]).replace(/^다시 /, ""))) fails.push(`${f}: Popup 주 버튼 "${text(main[1])}" 이 제목 "${title}" 의 동작이 아니다(Popup › 주 버튼)`);
+        if (danger && acts.indexOf("data-popup-close") > acts.indexOf("negative")) fails.push(`${f}: 위험 확인은 취소가 위험 실행 버튼보다 앞(Popup › 첫 포커스)`);
+      }
+      for (const m of pv.matchAll(/<section class="side-panel[^"]*"[^>]*>([\s\S]*?)<\/section>/g)) {
+        if (!/role="dialog"/.test(m[0].slice(0, m[0].indexOf(">"))) || !/aria-labelledby="/.test(m[0].slice(0, m[0].indexOf(">")))) fails.push(`${f}: Side Panel 은 role=dialog + aria-labelledby`);
+        if (!/class="[^"]*\bside-panel-close\b[^"]*"[^>]*aria-label="/.test(m[1])) fails.push(`${f}: Side Panel 에 이름 있는 닫기(X)가 없다(Side Panel › 닫기)`);
+      }
+      /* Tooltip 원칙 — 트리거는 포커스를 받는 요소 · 안에 링크/버튼 없음 · 이름을 되풀이하지 않음 */
+      for (const m of pv.matchAll(/<span class="tooltip-wrap[^"]*"[^>]*>\s*<([a-z]+)\b([^>]*)>/g)) if (!/^(button|a|input|select|textarea)$/.test(m[1]) && !/tabindex="0"/.test(m[2])) fails.push(`${f}: 포커스를 받지 못하는 요소에 Tooltip <${m[1]}>(Tooltip › 트리거)`);
+      for (const m of pv.matchAll(/<span class="tooltip(?: [^"]*)?"[^>]*>([\s\S]*?)<\/span>/g)) if (/<(a|button)\b/.test(m[1])) fails.push(`${f}: Tooltip 안에 링크 · 버튼(Tooltip › 안에 넣지 않는 것)`);
+      for (const m of pv.matchAll(/aria-label="([^"]*)"[^>]*aria-describedby="([^"]*)"/g)) { const d = new RegExp(`id="${m[2]}"[^>]*>([^<]*)<`).exec(pv); if (d && text(d[1]) === m[1]) fails.push(`${f}: Tooltip 이 이름 "${m[1]}" 을 되풀이한다(Tooltip › 되풀이)`); }
+      /* Loading · Notification 원칙 */
+      for (const m of pv.matchAll(/<span class="spinner[^"]*"[^>]*aria-label="([^"]*)"/g)) if (["불러오는 중", "로딩", "로딩 중", "진행 중"].includes(m[1])) fails.push(`${f}: Spinner 이름 "${m[1]}" — 실제 작업으로(Loading › Spinner 이름)`);
+      for (const m of pv.matchAll(/<div class="toast danger"[^>]*>([\s\S]*?)<\/div>/g)) if (!/class="close"/.test(m[1])) fails.push(`${f}: 오류 Toast 에 닫기 버튼이 없다(Notification › 오류 Toast)`);
+      if ((pv.match(/class="banner[ "]/g) || []).length > 1) fails.push(`${f}: Banner 는 한 번에 하나(Notification › Banner)`);
       /* 라벨(Text Field 원칙) — placeholder 는 이름이 아니다. 글자 입력마다 label · aria-label 로 접근 이름이 있어야 한다 */
       for (const m of pv.matchAll(/<(?:input|textarea)\b[^>]*>/g)) {
         if (/\stype="(?:hidden|checkbox|radio)"/.test(m[0]) || /\saria-label(?:ledby)?="/.test(m[0])) continue;
@@ -214,7 +236,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 32) fails.push(`components.json 컴포넌트 ${j.components.length}개(32 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 33) fails.push(`components.json 컴포넌트 ${j.components.length}개(33 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 11) fails.push(`components.json 패턴 ${j.patterns.length}개(11 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }
@@ -293,7 +315,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
   /* --float-*: 스크롤 영역 안 메뉴의 자리 · 폭 — ds.js · React 가 열 때 재서 넣는다(2026-11-10) */
   /* --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
   /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a", "--float-x", "--float-y", "--float-w"];
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow"];
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);
