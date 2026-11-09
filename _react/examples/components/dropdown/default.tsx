@@ -8,6 +8,7 @@ export default function Example() {
       </DropdownTrigger>
       <Menu>
         <MenuItem icon="pencil" onSelect={() => {}}>편집</MenuItem>
+        <MenuItem icon="copy" onSelect={() => {}}>복제</MenuItem>
         <MenuItem icon="download" onSelect={() => {}}>내보내기</MenuItem>
       </Menu>
     </Dropdown>

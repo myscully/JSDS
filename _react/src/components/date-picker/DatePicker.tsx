@@ -5,6 +5,7 @@ import { useId } from "../../utils/useId";
 import { Icon } from "../../icons/Icon";
 import { Button } from "../button/Button";
 import { TextField } from "../text-field/TextField";
+import { FormValidationContext } from "../text-field/validation";
 import { LABELS } from "../../labels";
 import type { Size } from "../../types";
 import { Calendar, addMonths, baseView, isRange, labelsFor, outOf, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
@@ -290,6 +291,8 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   );
   const err = typeError ?? error;
   return (
+    /* 달력 입력은 스스로 잰다 — Form 은 .error 만 센다 */
+    <FormValidationContext.Provider value={null}>
     <TextField
       ref={input}
       id={id}
@@ -330,6 +333,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
       } as HTMLAttributes<HTMLDivElement>}
       after={calendar}
     />
+    </FormValidationContext.Provider>
   );
 });
 

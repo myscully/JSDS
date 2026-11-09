@@ -1,10 +1,11 @@
-import { Button, Checkbox, Field, Form, FormActions, FormRow, FormSection, Radio, RadioGroup, Select, TextArea, TextField } from "@jiran/ds-react";
+import { Button, Checkbox, Field, Form, FormActions, FormLegend, FormRow, FormSection, Radio, RadioGroup, Select, TextArea, TextField } from "@jiran/ds-react";
 
 const GROUPS = [{ value: "all", label: "전체" }, { value: "sales", label: "영업팀" }, { value: "dev", label: "개발팀" }];
 
 export default function Example() {
   return (
     <Form onSubmit={(e) => e.preventDefault()}>
+      <FormLegend />
       <FormSection>기본 정보</FormSection>
       <TextField id="pname" label="정책 이름" required placeholder="예: 외부 USB 차단" help="2~40자" />
       <TextArea id="pdesc" label="설명" placeholder="정책의 목적과 적용 범위" />

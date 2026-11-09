@@ -18,17 +18,24 @@ export function useOutsideClick(refs: Array<RefObject<Element | null>>, onOutsid
   }, [enabled, ...refs]);
 }
 
-/** Escape 키 */
+/* Esc 는 가장 안쪽 것 하나만 닫는다(Interaction) — 나중에 열린 것이 먼저 받는다. Popup 안의 Select 가 열려 있으면 Select 만 닫힌다 */
+const escapeStack: Array<{ current: (e: KeyboardEvent) => void }> = [];
+const onEscapeKey = (e: KeyboardEvent) => {
+  if (e.key === "Escape") escapeStack[escapeStack.length - 1]?.current(e);
+};
+
+/** Escape 키 — 켜진 것 중 가장 나중 것만 불린다 */
 export function useEscape(onEscape: (e: KeyboardEvent) => void, enabled = true): void {
   const cb = useRef(onEscape);
   cb.current = onEscape;
   useEffect(() => {
     if (!enabled) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") cb.current(e);
+    escapeStack.push(cb);
+    if (escapeStack.length === 1) document.addEventListener("keydown", onEscapeKey);
+    return () => {
+      escapeStack.splice(escapeStack.indexOf(cb), 1);
+      if (!escapeStack.length) document.removeEventListener("keydown", onEscapeKey);
     };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
   }, [enabled]);
 }
 

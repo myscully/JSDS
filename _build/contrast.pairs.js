@@ -40,8 +40,9 @@ const pairs = [
   ["--foreground-neutral-primary", ["--surface-accent-lime", "--surface-accent-light-blue", "--surface-accent-cyan"], 4.5, "태그 라벨 — Medium · Low · Pending 틴트"],
   ["--foreground-neutral-strong", SURFACES, 4.5, "가장 높은 대비가 필요할 때"],
   ["--foreground-neutral-secondary", [...SURFACES, "--surface-neutral-strong"], 4.5, "보조 본문 · 중립 칩 라벨"],
-  /* 라이트 3.67 · 다크 3.78 — 기준 시스템의 설명·캡션 단계다. 종전 우리 값(5.15)보다 연하다 */
-  ["--foreground-neutral-tertiary", [...SURFACES, "--surface-neutral-strong"], 4.5, "설명·캡션", REF("기준 시스템 값 — 라이트 3.67 · 다크 3.78")],
+  /* 라이트 3.67 · 다크 3.78 — 기준 시스템의 설명·캡션 단계다. 종전 우리 값(5.15)보다 연하다.
+     placeholder 도 이 단계다(사람의 결정 2026-11-09 — disable 1.33 은 보이지 않았고, secondary 9.09 는 입력한 값과 구분되지 않는다) */
+  ["--foreground-neutral-tertiary", [...SURFACES, "--surface-neutral-strong"], 4.5, "설명·캡션·placeholder", REF("기준 시스템 값 — 라이트 3.67 · 다크 3.78")],
   /* 1.68 — 네 번째 위계는 장식에 가깝다. 글자로 쓰면 읽히지 않는다 */
   ["--foreground-neutral-quaternary", SURFACES, 4.5, "네 번째 위계", REF("기준 시스템 값 — 장식 수준(1.68). 본문에 쓰지 않는다")],
   ["--foreground-neutral-inverse", ["--surface-neutral-inverse"], 4.5, "반전 표면 위 글자"],

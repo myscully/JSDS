@@ -22,6 +22,7 @@ export { Avatar, type AvatarProps } from "./components/avatar/Avatar";
 
 // B. form controls
 export { Field, TextField, TextArea, type FieldProps, type FieldOwnProps, type TextFieldProps, type TextAreaProps } from "./components/text-field/TextField";
+export { VALIDATION_MESSAGES, type ValidationMessages, type FormValidationResult } from "./components/text-field/validation";
 export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps } from "./components/checkbox/Checkbox";
 export { Radio, RadioGroup, type RadioProps, type RadioGroupProps } from "./components/radio-button/Radio";
 export { Switch, type SwitchProps } from "./components/switch/Switch";
@@ -38,7 +39,8 @@ export { SideNav, SideNavGroup, SideNavItem, type SideNavProps, type SideNavGrou
 export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, type TopBarProps, type TopBarLogoProps, type TopBarNavProps, type TopBarNavItemProps, type TopBarRightProps } from "./components/top-navigation/TopBar";
 
 // D. overlays & behavior
-export { Dropdown, DropdownTrigger, Menu, MenuItem, MenuSep, MenuLabel, Select, type DropdownProps, type DropdownTriggerProps, type MenuProps, type MenuItemProps, type SelectProps, type SelectOption } from "./components/dropdown/Dropdown";
+export { Combobox, type ComboboxProps } from "./components/combobox/Combobox";
+export { Dropdown, DropdownTrigger, Menu, MenuItem, MenuSep, MenuLabel, MenuState, Select, type DropdownProps, type DropdownTriggerProps, type MenuProps, type MenuItemProps, type SelectProps, type SelectOption } from "./components/dropdown/Dropdown";
 export { Tooltip, type TooltipProps } from "./components/tooltip/Tooltip";
 export { Popup, PopupSurface, PopupTitle, PopupBody, PopupActions, PopupForm, type PopupProps, type PopupSurfaceProps } from "./components/popup/Popup";
 export { Notice, Toast, ToastStack, Banner, ToastProvider, useToast, type NoticeProps, type ToastProps, type ToastStackProps, type BannerProps, type ToastProviderProps, type ToastOptions } from "./components/notification/Notification";
@@ -58,4 +60,4 @@ export { Kpi, KpiGrid, ChartCard, BarChart, Donut, DonutRow, ChartLegend, Sparkl
 
 // patterns (thin wrappers)
 export { SettingsSection, Setting, type SettingsSectionProps, type SettingProps } from "./patterns/Settings";
-export { Stack, Row2, Row3, Toolbar, Spacer, PageHead, Form, FormSection, FormRow, FormActions, Empty, Notes, StatusList, StatusItem, SevBand, SevCell, Onboard, Terms, TermsAll, TermsItem, type PageHeadProps, type EmptyProps, type NotesProps, type StatusItemProps, type SevBandProps, type SevCellProps, type TermsItemProps } from "./patterns/Patterns";
+export { Stack, Row2, Row3, Toolbar, Spacer, PageHead, Form, FormLegend, type FormProps, FormSection, FormRow, FormActions, Empty, Notes, StatusList, StatusItem, SevBand, SevCell, Onboard, Terms, TermsAll, TermsItem, TermsMessage, type PageHeadProps, type EmptyProps, type NotesProps, type StatusItemProps, type SevBandProps, type SevCellProps, type TermsItemProps } from "./patterns/Patterns";

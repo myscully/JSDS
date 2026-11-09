@@ -9,7 +9,7 @@ export default function Example() {
       </DropdownTrigger>
       <Menu>
         <MenuItem icon="pencil" onSelect={() => {}}>편집</MenuItem>
-        <MenuItem icon="list" selected onSelect={() => {}}>목록으로 보기</MenuItem>
+        <MenuItem icon="download" onSelect={() => {}}>내보내기</MenuItem>
         <MenuItem icon="share" disabled hint="권한 없음">공유</MenuItem>
         <MenuSep />
         <MenuItem icon="trash" danger onSelect={() => {}}>삭제</MenuItem>

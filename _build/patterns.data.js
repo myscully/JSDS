@@ -28,19 +28,20 @@ const TREND = {"labels":["10-21","10-22","10-23","10-24","10-25","10-26","10-27"
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
-    status: "ready", react: ["Form","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button", "notification"], css: [".form"], borrows: [".t-label-1"],
+    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button", "notification"], css: [".form", ".form-legend"], borrows: [".t-label-1"],
     desc: "정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.",
     thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
-    principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "포커스가 떠날 때 필드 단위로, 제출 시 첫 오류로 스크롤"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
+    principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "<code>data-validate</code> — 포커스가 떠날 때 필드 단위로, 제출하면 첫 오류로 이동, 오류 3개 이상이면 위에 요약. 고치면 바로 지웁니다"], ["필수", "필수 항목이 있으면 폼 위에 <code>.form-legend</code>"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
     examples: [
       { id: "basic", title: "기본 폼", desc: "섹션 제목(.form-section)으로 그룹을 나누고, 마지막에 .form-actions.", html: `
         <form class="form">
+          <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="form-section">기본 정보</div>
           <div class="field"><label for="pname">정책 이름 <em>*</em></label><input id="pname" placeholder="예: 외부 USB 차단" required><span class="help">2~40자</span></div>
           <div class="field"><label for="pdesc">설명</label><textarea id="pdesc" placeholder="정책의 목적과 적용 범위"></textarea></div>
           <div class="form-section">적용 대상</div>
           <div class="form-row">
-            <div class="field"><label>그룹</label><div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false">전체</button></div></div>
+            <div class="field"><label id="pgroup-l">그룹</label><div class="dropdown"><button type="button" id="pgroup" class="trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pgroup-l pgroup">전체</button></div></div>
             <div class="field"><label for="prio">우선순위</label><input id="prio" type="number" value="10" min="1" max="100"></div>
           </div>
           <fieldset class="radio-group" style="border:0;padding:0;margin:0"><legend class="t-label-1" style="margin-bottom:8px">탐지 시 동작</legend>
@@ -52,25 +53,37 @@ const PATTERNS = {
         </form>` },
       { id: "error", title: "오류 상태", desc: "제출 후 오류. 필드 오류 + 상단 요약 Notice(오류 3개 이상일 때).", html: `
         <form class="form" novalidate>
-          <div class="notice danger" role="alert" style="margin-bottom:-4px"><span class="ico">${I("alert-circle",20)}</span><div><b>입력값 2개를 확인해 주세요</b>정책 이름, 허용 IP</div></div>
+          <div class="notice danger" role="alert" style="margin-bottom:-4px"><span class="ico">${I("alert-circle",20)}</span><div><b>입력값 3개를 확인하세요</b>정책 이름, 허용 IP, 보관 기간</div></div>
+          <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field error"><label for="e1">정책 이름 <em>*</em></label><input id="e1" aria-invalid="true" aria-describedby="e1h"><span class="help" id="e1h">정책 이름을 입력하세요</span></div>
           <div class="field error"><label for="e2">허용 IP</label><input id="e2" value="10.0.0" aria-invalid="true" aria-describedby="e2h"><span class="help" id="e2h">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div>
+          <div class="field error"><label for="e3">보관 기간</label><input id="e3" type="number" value="500" aria-invalid="true" aria-describedby="e3h"><span class="help" id="e3h">값이 너무 큽니다. 365 이하 입력하세요.</span></div>
           <div class="form-actions"><button type="button" class="btn md outline negative left">삭제</button><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
+        </form>` },
+      { id: "validate", title: "제출 검증", desc: "폼에 data-validate 를 달면 포커스가 떠날 때 필드 단위로 검사합니다. 빈 채로 정책 저장을 누르면 막고, 첫 오류로 이동하며, 오류가 3개 이상이면 위에 요약합니다. 고치면 문구를 바로 지웁니다.", html: `
+        <form class="form" data-validate novalidate>
+          <p class="form-legend"><em>*</em> 필수 항목</p>
+          <div class="field"><label for="v1">정책 이름 <em>*</em></label><input id="v1" required minlength="2" data-maxlength="40"><span class="help" aria-live="polite">2~40자</span></div>
+          <div class="field mono"><label for="v2">허용 IP <em>*</em></label><input id="v2" required pattern="^([0-9]{1,3}[.]){3}[0-9]{1,3}$" data-messages='{"pattern":"올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12"}'><span class="help" aria-live="polite">IPv4 형식</span></div>
+          <div class="field"><label for="v3">보관 기간 <em>*</em></label><div class="affix"><input id="v3" type="number" required min="1" max="365"><span>일</span></div><span class="help" aria-live="polite">1~365일</span></div>
+          <div class="field"><label for="v4">알림 이메일 <em>*</em></label><input id="v4" type="email" required><span class="help" aria-live="polite"></span></div>
+          <div class="form-actions"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
     ],
   },
 
   "terms-agreement": {
-    status: "ready", react: ["Terms","TermsAll","TermsItem"], uses: ["checkbox", "accordion", "button"], css: [".terms"],
+    status: "ready", react: ["Terms","TermsAll","TermsItem","TermsMessage"], uses: ["checkbox", "accordion", "button"], css: [".terms"],
     desc: "약관·개인정보 처리 동의 화면입니다. 전체 동의 + 개별 항목, 필수/선택 표시, 전문 보기.",
     thumb: `<div class="terms" style="max-width:200px"><div class="all"><label class="checkbox"><input type="checkbox" class="mixed"><span style="font-size:12px">전체 동의</span></label></div><div class="item" style="padding:4px 8px"><label class="checkbox"><input type="checkbox" checked><span style="font-size:12px">이용약관</span></label><span class="req">필수</span></div></div>`,
     examples: [
-      { id: "basic", title: "전체 동의 + 개별 항목", desc: "전체 동의는 부분 선택 상태(.mixed)를 표현. 필수 미동의 시 다음 버튼 비활성.", html: `
+      { id: "basic", title: "전체 동의 + 개별 항목", desc: "전체 동의는 부분 선택 상태(.mixed)를 표현. '다음' 은 늘 켜 둡니다. 필수 항목을 비운 채 누르면 넘어가지 않고, 남은 개수를 알린 뒤 첫 항목으로 포커스를 옮깁니다. 체크하면 문구를 바로 줄이거나 지웁니다.", html: `
         <div class="terms">
           <div class="all"><label class="checkbox"><input type="checkbox" class="mixed" aria-label="전체 동의"><span>전체 동의</span></label></div>
           <div class="item"><label class="checkbox"><input type="checkbox" checked><span>서비스 이용약관</span></label><span class="req">필수</span><button type="button" class="view">보기</button></div>
           <div class="item"><label class="checkbox"><input type="checkbox" checked><span>개인정보 수집·이용</span></label><span class="req">필수</span><button type="button" class="view">보기</button></div>
           <div class="item"><label class="checkbox"><input type="checkbox"><span>보안 소식 이메일 수신</span></label><span class="opt">선택</span></div>
+          <div class="msg" aria-live="polite"></div>
           <div class="btn-group end" style="margin-top:16px"><button type="button" class="btn md solid primary">다음</button></div>
         </div>` },
       { id: "inline", title: "전문 펼쳐 보기", desc: "약관 전문은 Accordion 으로 같은 화면에서 펼칩니다.", html: `
@@ -265,7 +278,7 @@ const PATTERNS = {
       { id: "viewer", title: "로그 뷰어", html: `
         <div class="stack">
           <div class="toolbar">
-            <div class="searchbar" role="search" style="min-width:360px">${I("search")}<input type="search" placeholder='메시지 검색 · host:"PC-2041" level:crit' aria-label="로그 검색"></div>
+            <div class="searchbar" role="search" style="min-width:360px">${I("search")}<input type="search" placeholder="메시지, 단말, IP 검색" aria-label="로그 검색"></div>
             <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">LOW</button><button type="button" class="chip sm" aria-pressed="false">INFO</button></div>
             <span class="spacer"></span>
             <div class="select-btn outline" role="group" aria-label="갱신"><button type="button" class="on" aria-pressed="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" aria-pressed="false">일시정지</button></div>

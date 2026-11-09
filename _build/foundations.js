@@ -1,9 +1,13 @@
 /* =========================================================
-   foundations.js — Foundations 페이지 (Overview · Base material: Colors · Elevation · Grid · Icons · Typography · Writing, Web Desktop 만)
+   foundations.js — Foundations 페이지 (Overview · Base material: Colors · Elevation · Grid · Icons · Interaction · Typography · Writing, Web Desktop 만)
    render.js 가 PAGES 에 병합한다: Object.assign(PAGES, FOUNDATION_PAGES(helpers))
    ========================================================= */
 window.FOUNDATION_PAGES = function (H) {
-  const { codeBlock, tokenSection, sw, nb, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent } = H;
+  const { codeBlock, tokenSection, sw, nb, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent, tbl } = H;
+  const dodont = (doShot, doText, dontShot, dontText) => `<div class="dodont">
+  <div class="do"><div class="shot">${doShot}</div><div class="body"><p>${doText}</p></div></div>
+  <div class="dont"><div class="shot">${dontShot}</div><div class="body"><p>${dontText}</p></div></div>
+</div>`;
   const attr = s => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 
   /* ---------- 토큰 값 해석 (Light / Dark) ---------- */
@@ -35,14 +39,13 @@ window.FOUNDATION_PAGES = function (H) {
      repeat() 의 반복 횟수는 정수여야 해 CSS 에서 min() 을 못 쓰므로, 모바일 상한(7·5)도 여기서 계산한다(Common 2칸이 7칸으로 찢어지지 않게) */
   const pal = (title, steps, pre, note) => `<div class="pal"><h3>${title}${note ? ` <small style="font-weight:400;color:var(--foreground-neutral-tertiary);font-size:12px">${note}</small>` : ""}</h3><div class="scale" style="--cols:${steps.length};--cols-sm:${Math.min(steps.length, 7)};--cols-xs:${Math.min(steps.length, 5)}">${steps.map(s => sw(`--${pre}-${s}`, s, title)).join("")}</div></div>`;
   const tabset = (tabs, panes) => `<div class="doc-tabset"><div class="doc-tabs" role="tablist">${tabs.map(([k, t], i) => `<button type="button" role="tab" data-doctab="${k}" class="${i ? "" : "on"}" aria-selected="${i ? "false" : "true"}">${t}</button>`).join("")}</div>${tabs.map(([k], i) => `<div data-docpane="${k}"${i ? " hidden" : ""}>${panes[i]}</div>`).join("")}</div>`;
-  const tbl = (head, rows, cls = "") => `<div class="tablewrap"><table class="${cls}"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 
   return {
     /* ================= Overview ================= */
     "foundations/overview": () => `<h1>Foundations</h1><p class="lead">모든 디자인 요소의 기반이 되는 가장 원자적인 단위입니다. 컬러, 타이포그래피, 간격·그리드, 아이콘, 엘리베이션처럼 시각 언어의 최소 단위로 구성되며, 컴포넌트는 이 단위(토큰)만 참조합니다.</p>
 <div class="fnd-hero" aria-hidden="true"><div style="background:conic-gradient(var(--surface-brand-primary) 0 25%,var(--company-mark) 0 50%,var(--foreground-positive-primary) 0 75%,var(--cool-neutral-90) 0)"></div><div style="background:var(--surface-elevated-primary);box-shadow:var(--shadow-md);font-size:44px;letter-spacing:-.03em">Aa</div><div style="background:repeating-linear-gradient(90deg,var(--surface-brand-subtle) 0 12px,transparent 12px 22px);border:1px solid var(--line-neutral-tertiary)"></div><div style="background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-tertiary);color:var(--surface-brand-primary)">${I("shield", 48)}</div><div style="background:var(--surface-elevated-primary);box-shadow:var(--shadow-xl)"><i style="display:block;width:48px;height:48px;border-radius:var(--radius-lg);background:var(--surface-elevated-primary);box-shadow:var(--shadow-md)"></i></div></div>
 <h2 id="base">Base material</h2>
-<div class="base-list">${[["colors", "Colors", "색상의 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다."], ["typography", "Typography", "화면의 텍스트를 읽기 쉽고 아름답게 표현하도록 돕습니다."], ["writing", "Writing", "버튼 · 제목 · 오류 문구를 운영자가 바로 알아듣게 쓰도록 돕습니다."], ["grid", "Grid", "일관된 간격 체계를 사용하여 조화로운 비율과 정렬을 만들어냅니다."], ["icons", "Icons", "아이콘을 사용하여 인터페이스를 빠르게 이해하고 탐색할 수 있도록 돕습니다."], ["elevation", "Elevation", "컴포넌트 간의 명확한 깊이감과 시각적 계층을 만들어냅니다."]].map(([k, t, d]) => `<a href="#/foundations/${k}"><b>${t}${nb("foundations", k)}</b><span>${d}</span>${I("chevron-right", 18)}</a>`).join("")}</div>
+<div class="base-list">${[["colors", "Colors", "색상의 시각적 일관성을 유지하고 효율적인 디자인 작업을 돕습니다."], ["typography", "Typography", "화면의 텍스트를 읽기 쉽고 아름답게 표현하도록 돕습니다."], ["writing", "Writing", "버튼 · 제목 · 오류 문구를 운영자가 바로 알아듣게 쓰도록 돕습니다."], ["grid", "Grid", "일관된 간격 체계를 사용하여 조화로운 비율과 정렬을 만들어냅니다."], ["icons", "Icons", "아이콘을 사용하여 인터페이스를 빠르게 이해하고 탐색할 수 있도록 돕습니다."], ["interaction", "Interaction", "비활성 · 오류 · 오버레이 · 위험 동작처럼 여러 컴포넌트에 걸친 동작 규칙을 정합니다."], ["elevation", "Elevation", "컴포넌트 간의 명확한 깊이감과 시각적 계층을 만들어냅니다."]].map(([k, t, d]) => `<a href="#/foundations/${k}"><b>${t}${nb("foundations", k)}</b><span>${d}</span>${I("chevron-right", 18)}</a>`).join("")}</div>
 <p>색을 어느 축에 쓰는지는 <a href="#/foundations/colors">Colors</a> 의 브랜드 역할 맵, 토큰 원본(CSS 변수 전체 · Radius · Motion · Accessibility)은 <a href="#/resources/design-token">Resources › Design Token</a> 에 있습니다.</p>`,
 
     /* ================= Writing =================
@@ -50,12 +53,17 @@ window.FOUNDATION_PAGES = function (H) {
        마케팅 페이지용 규칙(히어로 · 화면당 단어 수 · 주소 표기 등)은 뺐다. 예시 문구는 모두 사이트 예제에 실제로 있는 것이다.
        금지 라벨 목록은 verify.js 의 BANNED_LABELS 와 같아야 한다 */
     "foundations/writing": () => {
-      const dd = (doShot, doText, dontShot, dontText) => `<div class="dodont">
-  <div class="do"><div class="shot">${doShot}</div><div class="body"><p>${doText}</p></div></div>
-  <div class="dont"><div class="shot">${dontShot}</div><div class="body"><p>${dontText}</p></div></div>
-</div>`;
+      const dd = dodont;
       const b = (cls, t) => `<button type="button" class="btn md ${cls}">${t}</button>`;
       return `<h1>Writing${nb("foundations", "writing")}</h1><p class="lead">화면의 문구는 처음 보는 운영자도 5초 안에 무엇을 하는지 알 수 있게 씁니다. 꾸미는 말 · 비유 · 만든 용어 없이, 운영자에게 소리 내어 말할 문장으로 씁니다.</p>
+<h2 id="endings">Sentence endings</h2><p>문장은 합니다체로 끝냅니다. 해요체는 쓰지 않습니다. 빌드가 예제 미리보기에서 찾아냅니다.</p>
+${tbl(["쓰는 자리", "끝맺음", "예"], [
+  ["상태 · 결과 설명", "~합니다", "삭제한 정책은 복구할 수 없습니다."],
+  ["사용자에게 하는 안내", "~하세요", "네트워크 상태를 확인하세요."],
+  ["확인 대화상자 · 빈 화면의 제목", "~할까요?", "정책 12개를 삭제할까요?"],
+  ["버튼 · 링크 · 라벨 · 표 머리글", "마침표 없음", "정책 저장"],
+  ["안내 목록", "완전한 문장이면 마침표", "격리 파일은 30일 보관됩니다."],
+])}
 <h2 id="buttons">Buttons</h2><p>버튼은 <b>누르면 일어날 동작</b>(+대상)으로 씁니다. 1~4 어절, 명사형 동작어로 끝냅니다 — 저장 · 정책 저장 · 다시 시도 · 내보내기 · 필터 초기화.</p>
 ${dd(`<span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;gap:8px">${b("outline assistive", "취소")}${b("solid negative", "삭제")}</span>`,
   "확인 대화상자의 버튼은 일어날 동작을 그대로 씁니다. 제목이 질문이면 버튼이 그 답입니다.",
@@ -85,6 +93,91 @@ ${tbl(["상황", "문구", "행동"], [
 ])}
 <h2 id="placeholders">Placeholders</h2><p>lorem ipsum · TODO · <code>[ ]</code> · "샘플" · "예시" 표시를 화면에 남기지 않습니다. 실제 문구를 쓰거나 그 요소를 뺍니다. 빌드가 예제 미리보기에서 찾아냅니다.</p>
 <h2 id="terms">One fact, one wording</h2><p>같은 사실은 화면 전체에서 한 표현으로 씁니다. 같은 동작을 '차단' 과 '블록' 으로 섞지 않습니다. 상태 이름은 <a href="#/patterns/severity">Severity</a> 패턴의 용어를 따릅니다.</p>`;
+    },
+
+    /* ================= Interaction =================
+       여러 컴포넌트에 걸친 동작 규칙(사람의 결정 2026-11-09 — _policy/component-policy-plan.md 2절 P1~P6 · P8 · P9).
+       문서가 코드보다 앞서 가지 않게 규칙마다 지금 상태를 적는다 — 컴포넌트를 정비해 동작이 바뀌면 그 줄을 '적용' 으로 고친다 */
+    "foundations/interaction": () => {
+      const c = (k, t) => `<a href="#/components/${k}">${t}</a>`;
+      const rules = rows => tbl(["규칙", "지금"], rows);
+      const form = (btn, help) => `<div class="form" style="flex:1"><div class="field${help ? " error" : ""}"><label>정책 이름 <em>*</em></label><input aria-label="정책 이름"${help ? ' aria-invalid="true"' : ""}>${help}</div><div class="form-actions"><button type="button" class="btn md solid primary"${btn}>저장</button></div></div>`;
+      return `<h1>Interaction${nb("foundations", "interaction")}</h1><p class="lead">여러 컴포넌트에 걸친 동작 규칙입니다. 컴포넌트마다 따로 정하면 어긋나는 것을 여기에 한 번 쓰고, 각 컴포넌트는 이 규칙을 따릅니다.</p>
+<p><b>지금</b> 칸은 현재 코드의 상태입니다. <b>적용</b>은 이미 들어가 있다는 뜻이고, <b>아직</b>은 규칙만 정했고 적힌 컴포넌트를 정비할 때 고친다는 뜻입니다. <b>제품</b>은 시스템이 대신할 수 없어 제품 화면을 만들 때 지키는 규칙입니다.</p>
+<h2 id="disabled">Disabled</h2><p>비활성 버튼은 포커스를 받지 못해 왜 누를 수 없는지 알 방법이 없습니다. 그래서 언제 비활성으로 두는지를 정합니다. 색은 <code>--surface-disable-primary</code> · <code>--foreground-disable-primary</code> 로 칠합니다.</p>
+${rules([
+  ["폼 제출 버튼은 비활성으로 두지 않습니다. 누르면 검증하고 오류로 안내합니다", `적용 — 패턴 예제의 주 버튼은 빌드가, <a href="#/patterns/terms-agreement">약관 동의</a>의 '다음' 은 동작 검사가 봅니다`],
+  ["권한이나 상태 때문에 할 수 없는 동작은 비활성으로 두고 이유를 화면에 적습니다", `아직 — ${c("card", "Card")} 선택 카드만 이유 줄이 있습니다. 나머지는 각 컴포넌트 정비 때`],
+  ["권한이 아예 없는 메뉴는 숨깁니다", "제품"],
+  ["비활성 요소에 Tooltip 을 달지 않습니다", "적용 — 예제를 빌드가 검사합니다"],
+  [`예외: 바뀐 것이 없어 누를 일이 없는 오버레이 안 '적용'(${c("date-picker", "Date Picker")}), 확인 문구를 입력해야 풀리는 위험 실행 버튼(${c("popup", "Popup")})은 비활성으로 둡니다`, "적용"],
+])}
+${dodont(form("", '<div class="help">정책 이름을 입력하세요.</div>'), "저장을 눌러 볼 수 있고, 무엇을 고쳐야 하는지 필드 아래에서 바로 읽습니다.", form(" disabled", ""), "저장이 왜 꺼져 있는지 알 수 없습니다. 키보드로는 버튼에 닿지도 못합니다.")}
+<h2 id="input-errors">Input errors</h2><p>오류 문구를 쓰는 법은 <a href="#/foundations/writing">Writing</a> 에 있습니다. 여기서는 언제 보여 주고 언제 지우는지를 정합니다.</p>
+${rules([
+  ["포커스가 떠날 때 필드 단위로 검증합니다. 건드리지 않은 빈 필드는 제출할 때 알립니다", `적용 — <a href="#/patterns/input-form">입력 폼</a>의 <code>data-validate</code>, 동작 검사가 있습니다`],
+  ["제출하면 첫 오류로 스크롤하고, 오류가 3개 이상이면 폼 위에 요약합니다", "적용 — 동작 검사가 있습니다"],
+  ["입력을 고치면 오류를 바로 지웁니다", "적용 — 동작 검사가 있습니다"],
+  ["오류가 나도 입력값을 지우지 않습니다", "적용 — 동작 검사가 있습니다"],
+  ["오류 문구 영역은 <code>aria-live=\"polite\"</code> 로 알립니다", "적용 — <code>data-validate</code> · <code>data-maxlength</code> 필드, 속성을 검사합니다"],
+  ["Select · Checkbox 그룹 · Radio 그룹도 오류 상태를 가집니다", `일부 — ${c("select", "Select")} · ${c("combobox", "Combobox")} 적용. ${c("checkbox", "Checkbox")} · ${c("radio-button", "Radio Button")} 은 정비 때`],
+  ["자주 나는 오류 문구는 사전으로 모아 기본값으로 씁니다", `아직 — 검증 기본 문구와 ${c("date-picker", "Date Picker")}의 <code>messages</code> 가 따로 있습니다`],
+])}
+<h2 id="overlays">Overlays</h2><p>Popup · Dropdown · Select · Date Picker · Tooltip · Toast 가 함께 지키는 규칙입니다.</p>
+${rules([
+  ["모달 위에 모달을 띄우지 않습니다", `아직 — 막는 코드가 없습니다. ${c("popup", "Popup")} 정비 때`],
+  ["Esc 는 가장 안쪽 것 하나만 닫습니다. Popup 안의 Select 가 열려 있으면 Select 만 닫습니다", `적용 — ${c("select", "Select")} · Dropdown · ${c("combobox", "Combobox")} · ${c("date-picker", "Date Picker")}`],
+  ["입력 중이거나 위험 확인이면 배경을 눌러도 닫지 않습니다", `아직 — 지금은 늘 닫힙니다. ${c("popup", "Popup")} 정비 때`],
+  ["열면 포커스를 안으로 옮기고, 닫으면 연 요소로 돌려보냅니다", `적용 — ${c("popup", "Popup")}, 동작 검사가 있습니다`],
+  ["Toast 는 모달 위에 보입니다", "적용 — Toast 110, 배경 100"],
+  ["<code>overflow</code> 안에 있어도 작은 오버레이가 잘리지 않습니다", `일부 — Dropdown · ${c("select", "Select")} · ${c("combobox", "Combobox")} 적용. ${c("tooltip", "Tooltip")} 은 정비 때`],
+])}
+<h2 id="feedback">Choosing feedback</h2><p>알릴 내용이 아니라 <b>사용자가 언제까지 봐야 하는지</b>로 고릅니다.</p>
+${tbl(["상황", "쓸 것", "사라지는 때"], [
+  ["방금 한 동작의 성공", c("notification", "Toast"), "자동"],
+  ["방금 한 동작의 실패", `${c("notification", "Toast")}(자동으로 사라지지 않음) 또는 Notice`, "사용자가 닫거나 해결될 때"],
+  ["필드 입력 오류", "필드 아래 문구", "고칠 때"],
+  ["화면 일부의 지속 상태", c("notification", "Notice"), "해결될 때"],
+  ["제품 전체에 영향(점검 · 라이선스)", `${c("notification", "Banner")}, 한 번에 하나`, "해결될 때"],
+  ["응답을 받아야 진행", c("popup", "Popup"), "사용자가 응답할 때"],
+])}
+<p><b>아직:</b> 오류 Toast 는 지금 4초 뒤 사라지고, 마우스를 올리거나 포커스해도 타이머가 멈추지 않습니다. ${c("notification", "Notification")} 정비 때 고칩니다.</p>
+<h2 id="destructive">Destructive actions</h2><p>되돌릴 수 있는지에 따라 확인 단계를 고릅니다. 모두 확인받으면 습관적으로 넘기게 됩니다.</p>
+${tbl(["영향", "흐름"], [
+  ["되돌릴 수 있음", "바로 실행 → Toast 와 실행 취소"],
+  ["되돌리기 어려움", "Popup 확인 → 실행 → 결과 알림"],
+  ["복구할 수 없고 대량", "Popup 에 대상 수 표시 + 확인 문구 입력 → 실행 → 결과 알림"],
+])}
+${rules([
+  ["위험 확인의 첫 포커스는 취소에 둡니다. 확인 문구를 입력하는 대화상자는 입력칸에 둡니다", `적용 — ${c("popup", "Popup")}은 열 때 첫 요소로 포커스를 옮기고 취소가 앞에 있습니다. 검사는 Popup 정비 때`],
+  ["보안 기능을 끄는 Switch 도 이 표를 따릅니다", `제품 — ${c("switch", "Switch")} 정비 때 예제를 더합니다`],
+])}
+<h2 id="overflow">Overflow</h2>
+${rules([
+  ["말줄임은 마지막 수단입니다. 먼저 줄바꿈이나 폭 조정을 씁니다", "제품"],
+  ["줄인 글자는 키보드로도 전체를 볼 수 있어야 합니다. <code>title</code> 속성은 키보드로 볼 수 없습니다", `아직 — ${c("breadcrumb", "Breadcrumb")} · ${c("navigation", "Navigation")}의 접힌 메뉴가 <code>title</code> 을 씁니다`],
+  ["포커스를 받을 수 없는 요소(Tag 등)는 말줄임이 필요 없게 길이를 제한합니다", `아직 — ${c("tag", "Tag")} 정비 때`],
+])}
+<h2 id="loading">Loading</h2>
+${tbl(["예상 시간", "표시"], [
+  ["1초 미만", "표시하지 않습니다"],
+  ["영역의 첫 로딩", `${c("loading", "Skeleton")}`],
+  ["짧은 동작", `${c("loading", "Spinner")}, 페이지에 하나. 버튼이 시작했으면 ${c("button", "Button")} loading`],
+  ["진행률을 앎", `${c("loading", "Progress")}`],
+])}
+<h2 id="selection">Choosing a selection control</h2><p>비슷해 보이는 선택 컴포넌트는 <b>값이 언제 반영되는지</b>와 <b>옵션이 몇 개인지</b>로 가릅니다.</p>
+${tbl(["상황", "쓸 것"], [
+  ["즉시 켜고 끔", c("switch", "Switch")],
+  ["저장 전까지 0개 이상 선택", c("checkbox", "Checkbox")],
+  ["2~5개 중 하나, 항상 보임", c("radio-button", "Radio Button")],
+  ["2~5개 중 하나, 같은 내용의 보기만 바뀜", c("select-button", "Select Button")],
+  ["값 고르기, 옵션 6개 이상", c("select", "Select")],
+  ["옵션이 많아 찾아야 하거나 여러 개 고르기", c("combobox", "Combobox")],
+  ["동작 실행", c("dropdown", "Dropdown")],
+  ["목록을 좁히는 조건", `${c("chip", "Filter Chip")}`],
+  ["내용이 달라지는 뷰 전환", c("tab", "Tab")],
+  ["설명이 필요한 큰 선택지", `${c("card", "Card")} · ${c("item-tile", "Item Tile")} · ${c("radio-button", "Radio Button")} — 셋의 경계는 Item Tile 정비 때 정합니다`],
+])}`;
     },
 
     /* ================= Colors ================= */
@@ -297,7 +390,7 @@ ${codeBlock("grid-css", `.grid{display:grid;grid-template-columns:repeat(12,minm
       const tile = n => { const m = ICONS[n]; const kw = [n, m.category, ...(m.tags || []), KO[n] || ""].join(" ").toLowerCase(); return `<button type="button" class="icon-tile${m.f ? "" : " no-f"}" data-name="${n}" data-cat="${attr(m.category || "")}" data-tags="${attr((m.tags || []).join("|"))}" data-ko="${attr(KO[n] || "")}" data-kw="${attr(kw)}" title="${n}" aria-label="${n} 상세 보기" aria-haspopup="dialog"><span class="o">${I(n, 24)}</span>${m.f ? `<span class="f">${I(n, 24, { style: "filled" })}</span>` : ""}</button>`; };
       return `<h1>Icons${nb("foundations", "icons")}</h1><p class="lead">아이콘은 기능이나 콘텐츠를 시각적으로 표현하는 요소로, 사용자가 인터페이스를 빠르게 탐색할 수 있도록 돕습니다. 24px 그리드 · 스트로크 2px · 라운드 캡의 단순하고 현대적인 형태(Tabler Icons · MIT)를 쓰며, 기본은 Outline 이고 선택·활성 상태 강조에만 Filled 를 씁니다.</p>
 <h2 id="search">Search icons</h2><p>관리자 콘솔에서 자주 쓰는 아이콘을 추린 세트입니다. 여기 있는 아이콘의 원본 SVG 만 <code>assets/icons/</code> 에 둡니다 — 더 필요하면 Tabler 에서 받아 그 폴더에 넣고 <code>_build/icons.js</code> 에 이름을 더합니다. 검색 시 이름뿐 아니라 연상되는 유사한 키워드(한글 포함)를 함께 검색합니다. 아이콘을 클릭하면 이름 · 스타일 · 키워드를 보고 SVG 를 복사·다운로드할 수 있습니다. 사용 코드는 아래 Usage 를 참고하세요.</p>
-<div class="icon-tools"><div class="searchbar" role="search">${I("search")}<input type="search" id="iconSearch" placeholder="아이콘을 검색해주세요" aria-label="아이콘 검색"></div><div class="select-btn" role="group" aria-label="아이콘 스타일" id="iconStyle"><button type="button" class="on" aria-pressed="true" data-style="outline">Outline</button><button type="button" aria-pressed="false" data-style="filled">Filled</button></div><span id="iconCount" style="font-size:12px;color:var(--foreground-neutral-tertiary)">${names.length}개</span></div>
+<div class="icon-tools"><div class="searchbar" role="search">${I("search")}<input type="search" id="iconSearch" placeholder="아이콘 이름 검색" aria-label="아이콘 검색"></div><div class="select-btn" role="group" aria-label="아이콘 스타일" id="iconStyle"><button type="button" class="on" aria-pressed="true" data-style="outline">Outline</button><button type="button" aria-pressed="false" data-style="filled">Filled</button></div><span id="iconCount" style="font-size:12px;color:var(--foreground-neutral-tertiary)">${names.length}개</span></div>
 <div class="icon-grid" id="iconGrid">${names.map(tile).join("")}</div><div class="icon-empty" id="iconEmpty" hidden>검색 결과가 없습니다. 세트 밖의 아이콘은 <code>assets/icons/</code> 에서 찾아 <code>_build/icons.js</code> 의 <code>ICON_NAMES</code> 에 추가하세요.</div>
 <h2 id="usage">Usage</h2><p>인라인 SVG 가 기본입니다(색 상속 <code>currentColor</code>, 크기 자유). 의미 색은 부모에 토큰(<code>color:var(--surface-negative-strong)</code>)으로 줍니다. 사용 크기: 14 배지 · 16 표/페이지네이션 · 18 버튼/입력 · 20 알림 · 24 빈 화면/타일. 정적 파일이 필요하면 <code>assets/icons/outline/{name}.svg</code> 를 img 로, 배경·가상 요소에는 CSS mask 로 씁니다.</p>
 ${codeBlock("icon-inline", I("search", 18).split("><").join(">\n  <").replace("\n  </svg>", "\n</svg>"), "html")}

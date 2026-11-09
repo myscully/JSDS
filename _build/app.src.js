@@ -185,6 +185,8 @@
     window.addEventListener("hashchange", () => closePop(menuBtn, menuPop));
     window.addEventListener("resize", () => { if (window.innerWidth >= 1200) closePop(menuBtn, menuPop); });
   }
+  /* 미리보기의 폼은 실제로 보내지 않는다 — 통과한 제출이 페이지를 새로 읽었다 */
+  document.addEventListener("submit", e => { if (e.target.closest(".example-preview")) e.preventDefault(); });
   document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });
   document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });
   window.addEventListener("hashchange", closeValPop);

@@ -6,9 +6,9 @@ import {
   isValidElement,
   useContext,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
+  type AnchorHTMLAttributes,
   type ButtonHTMLAttributes,
   type CSSProperties,
   type HTMLAttributes,
@@ -21,13 +21,20 @@ import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { useId } from "../../utils/useId";
 import { useEscape, useOutsideClick, mergeRefs } from "../../utils/hooks";
+import { useMenuPlacement } from "../../utils/useMenuPlacement";
+import { typeahead, type TypeaheadState } from "../../utils/typeahead";
 import { Icon } from "../../icons/Icon";
 import type { IconName } from "../../icons/icons.data";
+import { Button } from "../button/Button";
+import { FieldContext } from "../text-field/TextField";
+import { FormValidationContext } from "../text-field/validation";
 
 type Kind = "select" | "menu";
 interface DDCtx {
   open: boolean;
   setOpen: (o: boolean) => void;
+  /** 닫고 트리거로 포커스를 돌린다 */
+  closeToTrigger: () => void;
   kind: Kind;
   menuId: string;
   align: "start" | "end";
@@ -59,37 +66,28 @@ const ITEM_SEL = '[role="option"]:not([aria-disabled="true"]),[role="menuitem"]:
 
 /** 열림/닫힘 · 바깥 클릭 · Esc · 방향키를 관리하는 컨테이너(.dropdown) */
 export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropdown(
-  { open, defaultOpen = false, onOpenChange, kind = "select", align = "start", disabled, keepMounted, className, children, onKeyDown, ...rest },
+  { open, defaultOpen = false, onOpenChange, kind = "select", align = "start", disabled, keepMounted, className, style, children, onKeyDown, ...rest },
   ref,
 ) {
   const [isOpen, setOpen] = useControllable<boolean>({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
   const rootRef = useRef<HTMLDivElement>(null);
-  /* 트리거 아래에 자리가 없고 위가 더 넓으면 위로 뒤집어 연다(사이트의 ds.js placeMenu 와 같은 규칙) */
-  const [up, setUp] = useState(false);
   const menuId = useId(undefined, "menu");
+  const typing = useRef<TypeaheadState>({ s: "", t: 0 });
   useOutsideClick([rootRef], () => setOpen(false), isOpen);
-  useEscape(() => {
+  const closeToTrigger = () => {
     setOpen(false);
-    rootRef.current?.querySelector<HTMLElement>("[aria-haspopup]")?.focus();
-  }, isOpen);
+    rootRef.current?.querySelector<HTMLElement>("[aria-haspopup]")?.focus({ preventScroll: true });
+  };
+  const { up, floating, vars } = useMenuPlacement(rootRef, "[aria-haspopup]", isOpen, closeToTrigger);
+  useEscape(closeToTrigger, isOpen);
   useEffect(() => {
     if (!isOpen || !rootRef.current) return;
     const t = window.setTimeout(() => {
       const items = rootRef.current!.querySelectorAll<HTMLElement>(ITEM_SEL);
       const sel = Array.from(items).find((i) => i.getAttribute("aria-selected") === "true");
-      (sel ?? items[0])?.focus();
+      (sel ?? items[0] ?? rootRef.current!.querySelector<HTMLElement>(".menu-state button"))?.focus();
     }, 0);
     return () => window.clearTimeout(t);
-  }, [isOpen]);
-  useLayoutEffect(() => {
-    if (!isOpen) { setUp(false); return; }
-    const root = rootRef.current;
-    const menu = root?.querySelector<HTMLElement>(".menu");
-    const trigger = root?.querySelector<HTMLElement>("[aria-haspopup]");
-    if (!menu || !trigger) return;
-    const r = trigger.getBoundingClientRect(), gap = 4;
-    const below = window.innerHeight - r.bottom - gap, above = r.top - gap;
-    setUp(below < menu.offsetHeight && above > below);
   }, [isOpen]);
   const keyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(e);
@@ -97,8 +95,18 @@ export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropd
       if (["ArrowDown", "ArrowUp"].includes(e.key) && !disabled) { e.preventDefault(); setOpen(true); }
       return;
     }
+    if (e.key === "Tab") {   // 트리거에서 다음 칸으로 — 목록 안에서 Tab 하면 어디로 갈지 브라우저도 모른다
+      rootRef.current!.querySelector<HTMLElement>("[aria-haspopup]")?.focus();
+      setOpen(false);
+      return;
+    }
     const items = Array.from(rootRef.current!.querySelectorAll<HTMLElement>(ITEM_SEL));
     if (!items.length) return;
+    if (e.key.length === 1 && e.key !== " " && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const hit = typeahead(typing.current, e.key, items, document.activeElement);
+      if (hit) { e.preventDefault(); hit.focus(); }
+      return;
+    }
     const i = items.indexOf(document.activeElement as HTMLElement);
     let n: number | null = null;
     if (e.key === "ArrowDown") n = (i + 1) % items.length;
@@ -107,11 +115,10 @@ export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropd
     if (e.key === "End") n = items.length - 1;
     if (n !== null) { e.preventDefault(); items[n].focus(); }
     if ((e.key === "Enter" || e.key === " ") && i >= 0) { e.preventDefault(); items[i].click(); }
-    if (e.key === "Tab") setOpen(false);
   };
   return (
-    <Ctx.Provider value={{ open: isOpen, setOpen, kind, menuId, align, disabled, keepMounted, rootRef }}>
-      <div ref={mergeRefs(rootRef, ref)} className={cx("dropdown", isOpen && "open", up && "up", className)} onKeyDown={keyDown} {...rest}>
+    <Ctx.Provider value={{ open: isOpen, setOpen, closeToTrigger, kind, menuId, align, disabled, keepMounted, rootRef }}>
+      <div ref={mergeRefs(rootRef, ref)} className={cx("dropdown", isOpen && "open", up && "up", floating && "float", className)} style={{ ...vars, ...style }} onKeyDown={keyDown} {...rest}>
         {children}
       </div>
     </Ctx.Provider>
@@ -160,8 +167,12 @@ export const Menu = forwardRef<HTMLUListElement, MenuProps>(function Menu({ labe
 });
 
 export interface MenuItemProps extends Omit<LiHTMLAttributes<HTMLLIElement>, "onSelect"> {
-  /** 선택됨 (.on + aria-selected) — select 용 */
+  /** 선택됨 (.on + aria-selected) — Select 전용. 동작 메뉴에서는 그리지 않는다 */
   selected?: boolean;
+  /** 이동 항목 — li[role=none] 안의 진짜 링크 */
+  href?: string;
+  target?: string;
+  rel?: string;
   /** 위험 액션 (마지막에, 구분선 아래) */
   danger?: boolean;
   disabled?: boolean;
@@ -173,29 +184,46 @@ export interface MenuItemProps extends Omit<LiHTMLAttributes<HTMLLIElement>, "on
   closeOnSelect?: boolean;
 }
 export const MenuItem = forwardRef<HTMLLIElement, MenuItemProps>(function MenuItem(
-  { selected, danger, disabled, icon, hint, onSelect, closeOnSelect = true, className, children, onClick, ...rest },
+  { selected, danger, disabled, icon, hint, onSelect, closeOnSelect = true, href, target, rel, className, children, onClick, ...rest },
   ref,
 ) {
-  const { kind, setOpen } = useDD();
+  const { kind, closeToTrigger } = useDD();
+  if (process.env.NODE_ENV !== "production" && kind === "menu" && selected) console.warn("[ds-react] MenuItem selected 는 동작 메뉴에서 쓰지 않습니다 — 현재 값을 보여 주려면 Select · SelectButton (MIGRATION.md).");
+  const cls = cx("menu-item", kind === "select" && selected && "on", danger && "danger", className);
+  const body = (
+    <>
+      {icon && <Icon name={icon} size={16} />}
+      {children}
+      {hint !== undefined && <span className="hint">{hint}</span>}
+    </>
+  );
+  const handle = (e: React.MouseEvent<HTMLElement>) => {
+    onClick?.(e as React.MouseEvent<HTMLLIElement>);
+    if (disabled || e.defaultPrevented) return;
+    onSelect?.();
+    if (closeOnSelect) closeToTrigger();
+  };
+  if (href !== undefined) {
+    return (
+      <li ref={ref} role="none">
+        <a className={cls} role="menuitem" href={disabled ? undefined : href} target={target} rel={rel} aria-disabled={disabled ? true : undefined} tabIndex={-1} onClick={handle} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}>
+          {body}
+        </a>
+      </li>
+    );
+  }
   return (
     <li
       ref={ref}
       role={kind === "select" ? "option" : "menuitem"}
-      className={cx("menu-item", selected && "on", danger && "danger", className)}
+      className={cls}
       aria-selected={kind === "select" && selected ? true : undefined}
       aria-disabled={disabled ? true : undefined}
       tabIndex={disabled ? undefined : -1}
-      onClick={(e) => {
-        onClick?.(e);
-        if (disabled || e.defaultPrevented) return;
-        onSelect?.();
-        if (closeOnSelect) setOpen(false);
-      }}
+      onClick={handle}
       {...rest}
     >
-      {icon && <Icon name={icon} size={16} />}
-      {children}
-      {hint !== undefined && <span className="hint">{hint}</span>}
+      {body}
     </li>
   );
 });
@@ -222,25 +250,78 @@ export interface SelectProps<T extends string = string> extends Omit<DropdownPro
   label?: string;
   triggerClassName?: string;
   triggerStyle?: CSSProperties;
+  /** 제출할 이름 — 숨은 input */
+  name?: string;
+  /** <Form validate> 안에서 필수 검사 */
+  required?: boolean;
+  /** 목록 상태 — 있으면 항목 대신 한 줄. 옵션이 없으면 empty */
+  status?: MenuStatus;
+  statusText?: string;
+  onRetry?: () => void;
 }
+
+export type MenuStatus = "loading" | "error" | "empty";
+const MENU_STATUS_TEXT: Record<MenuStatus, string> = { loading: "불러오는 중입니다.", error: "목록을 불러오지 못했습니다.", empty: "선택할 수 있는 항목이 없습니다." };
+/** 메뉴 안 상태 한 줄 — Select · Combobox */
+export function MenuState({ status, text, onRetry }: { status: MenuStatus; text?: string; onRetry?: () => void }) {
+  return (
+    <li className="menu-state" role="presentation">
+      {status === "loading" && <span className="spinner sm" aria-hidden="true" />}
+      {text ?? MENU_STATUS_TEXT[status]}
+      {status === "error" && onRetry && <Button type="button" size="sm" variant="text" color="primary" onClick={onRetry}>다시 시도</Button>}
+    </li>
+  );
+}
+
 function SelectInner<T extends string>(
-  { options, value, defaultValue = null, onChange, placeholder, label, triggerClassName, triggerStyle, disabled, ...rest }: SelectProps<T>,
+  { options, value, defaultValue = null, onChange, placeholder, label, triggerClassName, triggerStyle, disabled, name, required, status, statusText, onRetry, onOpenChange, ...rest }: SelectProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [cur, set] = useControllable<T | null>({ value, defaultValue, onChange: onChange as (v: T | null) => void });
-  const current = options.find((o) => o.value === cur);
+  const field = useContext(FieldContext);
+  const form = useContext(FormValidationContext);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const [isOpen, track] = useState(Boolean(rest.open ?? rest.defaultOpen));
+  const hasValue = cur !== null && cur !== "";   // 값 "" 는 '선택 안 함' — placeholder 로 돌아간다
+  const current = hasValue ? options.find((o) => o.value === cur) : undefined;
+  const state = status ?? (options.length ? undefined : ("empty" as const));
+  /* 검증 — 닫힐 때 · 값이 바뀌었을 때. 고르면 바로 지운다 */
+  const seen = useRef({ cur, isOpen });
+  useEffect(() => {
+    if (seen.current.cur === cur && seen.current.isOpen === isOpen) return;
+    seen.current = { cur, isOpen };
+    if (!isOpen && trigger.current) form?.touch(trigger.current);
+  }, [cur, isOpen, form]);
   return (
-    <Dropdown ref={ref} kind="select" disabled={disabled} {...rest}>
-      <DropdownTrigger placeholder={placeholder} className={triggerClassName} style={triggerStyle}>
+    <Dropdown ref={ref} kind="select" disabled={disabled} onOpenChange={(o) => { track(o); onOpenChange?.(o); }} {...rest}>
+      <DropdownTrigger
+        ref={trigger}
+        placeholder={placeholder}
+        className={triggerClassName}
+        style={triggerStyle}
+        id={field?.controlId}
+        aria-labelledby={field?.labelId ? `${field.labelId} ${field.controlId}` : undefined}
+        aria-describedby={field?.helpId}
+        aria-invalid={field?.error || undefined}
+        data-ds-field={form ? "" : undefined}
+        data-ds-choice={form ? "" : undefined}
+        data-ds-required={required ? "" : undefined}
+        data-ds-empty={hasValue ? undefined : ""}
+      >
         {current ? current.label : undefined}
       </DropdownTrigger>
       <Menu label={label}>
-        {options.map((o) => (
-          <MenuItem key={o.value} selected={o.value === cur} disabled={o.disabled} onSelect={() => set(o.value)}>
-            {o.label}
-          </MenuItem>
-        ))}
+        {state ? (
+          <MenuState status={state} text={statusText} onRetry={onRetry} />
+        ) : (
+          options.map((o) => (
+            <MenuItem key={o.value} selected={hasValue && o.value === cur} disabled={o.disabled} data-value={o.value} onSelect={() => set(o.value)}>
+              {o.label}
+            </MenuItem>
+          ))
+        )}
       </Menu>
+      {name && <input type="hidden" name={name} value={cur ?? ""} />}
     </Dropdown>
   );
 }

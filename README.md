@@ -27,14 +27,14 @@
 | 파일 | 내용 |
 |---|---|
 | `data.js` | 사이트 구조(SITE) · 제품 컬러(PRODUCTS) · 버전 · Changelog |
-| `components.data.js` | 컴포넌트 31개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
+| `components.data.js` | 컴포넌트 32개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
 | `patterns.data.js` | 패턴 11개: 사용 컴포넌트(uses) · 예제 · 가이드라인 |
 | `style.src.css` | 스타일 원본. 컴포넌트 CSS 는 `/* ---------- Live component samples ---------- */` 블록 안에 평면 규칙으로 작성(코드 패널 추출 대상) |
 | `lib.js` | cssFor(컴포넌트 CSS 추출) · htmlToJsx(React 코드 생성) · hl(구문 강조) · tokenBlock |
 | `icons.js` | 사용 아이콘 목록(`ICON_NAMES`) + `assets/icons` SVG 를 읽어 `I(name,size)` 인라인 헬퍼 제공. 빌드 시 `icons.gen.js`(브라우저용, 생성물) 기록 |
 | `icons-css.js` | 체크박스 체크·마이너스, Chip 체크, Dropdown·Accordion 셰브론, Breadcrumb 슬래시, 표 정렬 화살표를 `assets/icons` SVG 의 data URI mask 로 `style.src.css` 에 삽입(빌드 시 자동) |
 | `render.js` | 페이지 렌더러(컴포넌트/패턴/Resources) + 해시 라우터 |
-| `foundations.js` | Foundations 페이지(Overview · Base material: Colors · Elevation · Grid · Icons · Typography · Writing, Web Desktop) |
+| `foundations.js` | Foundations 페이지(Overview · Base material: Colors · Elevation · Grid · Icons · Interaction · Typography · Writing, Web Desktop) |
 | `app.src.js` | 런타임 원본 → `assets/app.js` |
 | `ds.src.js` | 컴포넌트 동작 스크립트 원본 → `assets/ds.js` (`DS.toast()` · `DS.popup.open()` · `DS.init(root)` · `ds:*` 커스텀 이벤트) |
 | `ds-chart.src.js` | 탐색형 차트 테마 어댑터 + 프리셋 원본 → `assets/ds-chart.js` (`DSChart.theme/presets/mount/auto`). Chart.js(MIT) 본체는 `node_modules` 에서 `assets/vendor/chart.umd.js` 로 복사되고, 차트가 있는 페이지에만 실린다 |

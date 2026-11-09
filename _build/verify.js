@@ -102,9 +102,11 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
 {
   const BANNED_LABELS = ["자세히", "자세히 보기", "여기", "이곳", "클릭", "바로가기", "더 보기", "더보기", "Learn more", "Read more", "Click here", "More"];
   const PLACEHOLDER = /lorem|ipsum|\bTODO\b|\[\s*\]|샘플/i;
+  const HAEYO = /[가-힣]*(?:해요|했어요|있어요|없어요|돼요|됐어요|예요|이에요|네요)(?=[\s.!?,]|$)/;
   const text = (h) => h.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
   for (const sec of ["components", "patterns"]) for (const k of LIB.allPages(DATA.SITE, sec).map((p) => p.key).filter((k) => k !== "overview")) {
     const f = `${sec}/${k}.html`; if (!fs.existsSync(path.join(OUT, f))) continue;
+    if ((read(f).match(/class="searchbar[^>]*\sdata-hotkey/g) || []).length > 1) fails.push(`${f}: data-hotkey 는 화면에 하나(Search › 단축키)`);
     for (const pv of read(f).split('class="example-preview').slice(1).map((s) => s.slice(0, s.indexOf('class="example-code') >>> 0))) {
       for (const m of pv.matchAll(/<(button|a)\b([^>]*)>([\s\S]*?)<\/\1>/g)) {
         const t = text(m[3]); if (BANNED_LABELS.includes(t)) fails.push(`${f}: 모호한 ${m[1]} 라벨 "${t}" — 열리는 것 · 일어날 동작으로(Writing › Vague labels)`);
@@ -112,8 +114,41 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (al && BANNED_LABELS.includes(al) && !(al === "더 보기" && /icon-only/.test(m[2]))) fails.push(`${f}: 모호한 접근 이름 "${al}" — "더 보기" 는 ⋯ 아이콘 버튼(액션 메뉴)만 허용`);
       }
       const ph = PLACEHOLDER.exec(text(pv)); if (ph) fails.push(`${f}: 예제에 자리 표시 글 "${ph[0]}"(Writing › Placeholders)`);
+      /* 종결 · 마침표(Writing › Sentence endings, 2026-11-09). 안내 목록 li 는 완전한 문장이라 뺀다 — notes 패턴 8줄 */
+      const ending = HAEYO.exec(text(pv)); if (ending) fails.push(`${f}: 해요체 "${ending[0]}" — 합니다체로(Writing › Sentence endings)`);
+      for (const m of pv.matchAll(/<(button|a|label|th)\b[^>]*>([\s\S]*?)<\/\1>/g)) { const t = text(m[2].replace(/<svg[\s\S]*?<\/svg>/g, "")); if (/[가-힣]\.$/.test(t)) fails.push(`${f}: ${m[1]} 글자에 마침표 "${t}"(Writing › Sentence endings)`); }
+      /* 비활성(Interaction › Disabled) — 패턴의 주 버튼은 제출 버튼이다. 비활성 요소에는 Tooltip 을 달지 않는다 */
+      if (sec === "patterns") for (const m of pv.matchAll(/<button\b[^>]*class="[^"]*solid primary[^"]*"[^>]*>/g)) if (/\sdisabled\b/.test(m[0])) fails.push(`${f}: 주 버튼이 비활성이다 — 켜 두고 검증으로 안내한다(Interaction › Disabled)`);
+      if (/class="tooltip-wrap[^"]*"[^>]*>\s*<[a-z]+\b[^>]*\sdisabled\b/.test(pv)) fails.push(`${f}: 비활성 요소에 Tooltip(Interaction › Disabled)`);
+      /* 라벨(Text Field 원칙) — placeholder 는 이름이 아니다. 글자 입력마다 label · aria-label 로 접근 이름이 있어야 한다 */
+      for (const m of pv.matchAll(/<(?:input|textarea)\b[^>]*>/g)) {
+        if (/\stype="(?:hidden|checkbox|radio)"/.test(m[0]) || /\saria-label(?:ledby)?="/.test(m[0])) continue;
+        const id = (/\sid="([^"]+)"/.exec(m[0]) || [])[1], wrapped = pv.lastIndexOf("<label", m.index) > pv.lastIndexOf("</label>", m.index);
+        if (!wrapped && !(id && pv.includes(`for="${id}"`))) fails.push(`${f}: 접근 이름 없는 입력 ${m[0].slice(0, 80)}(Text Field › 라벨)`);
+      }
+      /* 폼의 Select 는 라벨을 트리거 이름에 잇는다 — 안 그러면 '전체' 처럼 값만 읽힌다(Select › 폼 안에서) */
+      for (const m of pv.matchAll(/<div class="field[^"]*"[^>]*>\s*<label[^>]*>[\s\S]*?<\/label>\s*<div class="dropdown[^"]*"[^>]*>\s*(<button\b[^>]*>)/g)) if (!/aria-labelledby="/.test(m[1])) fails.push(`${f}: 폼의 Select 트리거에 aria-labelledby 가 없다 ${m[1].slice(0, 80)}(Select › 폼 안에서)`);
+      /* 동작 메뉴(Dropdown 원칙) — 3~15개 · 선택 표시 없음 · 위험 항목은 맨 아래 구분선 뒤 */
+      for (const m of pv.matchAll(/<ul class="menu"[^>]*role="menu"[^>]*>([\s\S]*?)<\/ul>/g)) {
+        const items = [...m[1].matchAll(/<(?:li|a) class="menu-item([^"]*)"[^>]*role="menuitem"/g)].map((x) => x[1]);
+        if (items.length < 3 || items.length > 15) fails.push(`${f}: 동작 메뉴 항목 ${items.length}개 — 3~15개(Dropdown › 언제 쓰는가)`);
+        if (items.some((c) => /\bon\b/.test(c))) fails.push(`${f}: 동작 메뉴에 선택 표시 .on(Dropdown › 선택 표시)`);
+        const d = items.findIndex((c) => /\bdanger\b/.test(c));
+        if (d >= 0 && (d !== items.length - 1 || !/<li class="menu-sep"[^>]*><\/li>\s*<li class="menu-item danger"/.test(m[1]))) fails.push(`${f}: 위험 항목은 맨 아래 구분선 뒤(Dropdown › 위험 항목)`);
+      }
+      /* 단축키 표시는 동작과 같이 — kbd 만 있으면 눌러도 아무 일이 없다 */
+      for (const m of pv.matchAll(/<div class="searchbar\b[^>]*>[\s\S]*?<\/div>/g)) if (/<kbd\b/.test(m[0]) && !/data-hotkey/.test(m[0])) fails.push(`${f}: 검색창에 kbd 가 있는데 data-hotkey 가 없다(Search › 단축키)`);
+      /* 필수 표시가 있는 폼은 뜻을 적는다 */
+      if (/<form\b/.test(pv) && /<em>\*<\/em>/.test(pv) && !/class="form-legend"/.test(pv)) fails.push(`${f}: 필수 표시(*)가 있는 폼에 .form-legend 가 없다(Text Field › 필수)`);
     }
   }
+}
+
+/* 컴포넌트 페이지 구성(사람의 결정 2026-11-09) — 모든 컴포넌트에 Placement · Spec 절이 있다. spec 은 예전에 components.json 에만 있어 값이 낡아도 드러나지 않았다 */
+for (const [k, c] of Object.entries(COMPONENTS)) {
+  const f = `components/${k}.html`; if (!fs.existsSync(path.join(OUT, f))) continue; const b = read(f);
+  if (!(c.spec || []).some(([n]) => n === "Placement")) fails.push(`${k}: spec 에 Placement 가 없다`);
+  for (const id of ["placement", "spec", "props", "usage"]) if (!b.includes(`<h2 id="${id}">`)) fails.push(`${f}: ${id} 절이 없다`);
 }
 
 /* 주석 열림·닫힘이 짝인지 — 선언을 지울 때 여러 줄 주석의 한쪽만 남기기 쉽고,
@@ -141,18 +176,18 @@ if (!fs.existsSync(path.join(OUT, "resources/react.html"))) fails.push("resource
 if (!fs.existsSync(path.join(OUT, "home/getting-started.html"))) fails.push("home/getting-started.html 없음");
 else { const gs = article(read("home/getting-started.html")); for (const m of gs.matchAll(/data-copy="([^"]+)"/g)) if (!new RegExp(`id="${m[1]}"`).test(gs)) fails.push(`home/getting-started.html: data-copy 대상 #${m[1]} 없음`); if (/href="#\//.test(gs)) fails.push('home/getting-started.html: 변환되지 않은 href="#/"'); if (!/data-doctab="designer"/.test(gs) || !/class="guide-steps"/.test(gs)) fails.push("home/getting-started.html: 대상별 탭·단계 목록 없음"); if (!/id="platforms"/.test(gs) || !/1024–1279/.test(gs)) fails.push("home/getting-started.html: 지원 환경 표 없음"); }
 if (!/href="home\/getting-started\.html"/.test(read("index.html"))) fails.push("index.html: Getting started 링크 없음");
-// Foundations: 참조 구성(Overview + Base material 5) + Writing, 옛 페이지 없음
+// Foundations: 참조 구성(Overview + Base material 5) + Writing · Interaction, 옛 페이지 없음
 const fnd = fs.readdirSync(path.join(OUT, "foundations")).filter(f => f.endsWith(".html")).sort().join(",");
-/* writing 은 우리가 더한 페이지(2026-11-05, taste-skill copy 규칙을 옮김) */
-if (fnd !== "colors.html,elevation.html,grid.html,icons.html,index.html,overview.html,typography.html,writing.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);
-for (const f of ["colors", "elevation", "grid", "icons", "typography", "writing"]) { const b = article(read(`foundations/${f}.html`)); if (!/<h2 /.test(b)) fails.push(`foundations/${f}.html: 섹션(h2) 없음`); if (/href="#\//.test(b)) fails.push(`foundations/${f}.html: 변환되지 않은 href="#/"`); }
+/* writing · interaction 은 우리가 더한 페이지(2026-11-05 taste-skill copy 규칙을 옮김 · 2026-11-09 공통 동작 규칙) */
+if (fnd !== "colors.html,elevation.html,grid.html,icons.html,index.html,interaction.html,overview.html,typography.html,writing.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);
+for (const f of ["colors", "elevation", "grid", "icons", "interaction", "typography", "writing"]) { const b = article(read(`foundations/${f}.html`)); if (!/<h2 /.test(b)) fails.push(`foundations/${f}.html: 섹션(h2) 없음`); if (/href="#\//.test(b)) fails.push(`foundations/${f}.html: 변환되지 않은 href="#/"`); }
 if (!/data-doctab="atomic"/.test(read("foundations/colors.html"))) fails.push("foundations/colors.html: Semantic/Atomic 탭 없음");
 if (!fs.existsSync(path.join(OUT, "resources/design-token.html"))) fails.push("resources/design-token.html 없음");
 if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overview.html 이 생성됨(첫 화면은 루트 index.html 만)");
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 31) fails.push(`components.json 컴포넌트 ${j.components.length}개(31 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 32) fails.push(`components.json 컴포넌트 ${j.components.length}개(32 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 11) fails.push(`components.json 패턴 ${j.patterns.length}개(11 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }
@@ -228,9 +263,10 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
 {
   const cut = css.indexOf("*{box-sizing");
   const declared = new Set([...css.slice(0, cut).matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+  /* --float-*: 스크롤 영역 안 메뉴의 자리 · 폭 — ds.js · React 가 열 때 재서 넣는다(2026-11-10) */
   /* --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
   /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a"];
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a", "--float-x", "--float-y", "--float-w"];
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);

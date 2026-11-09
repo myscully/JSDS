@@ -303,3 +303,63 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 
 색은 `--chart-series-1~6`(순서 고정 · 제품색과 무관) 과 심각도 토큰(`tone`)만 쓰고, 라이트/다크 · 제품 색 전환 때 자동으로 다시 칠합니다. y 축은 하나입니다(이중 축 금지).
 
+## 약관 동의 (2026-11-09)
+
+'다음' 을 비활성으로 두지 않습니다(Foundations › Interaction › Disabled). 필수 항목을 비운 채 누르면 넘어가지 않고 남은 개수를 알립니다.
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| `<Button disabled={!requiredOk}>` | `<Button onClick={next}>` — `next` 에서 비운 필수 항목을 검사하고 첫 항목으로 포커스 | 그대로 `.btn-group .btn.primary` — ds.js 가 캡처에서 막아 버튼의 핸들러까지 가지 않음 |
+| 없음 | `<TermsMessage>`(`aria-live="polite"`) | `.terms > .msg[aria-live=polite]` — 없으면 ds.js 가 만듭니다. 스크린 리더가 읽도록 미리 두는 편이 낫습니다 |
+
+## Text Field · 입력 검증 (2026-11-09)
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| `maxLength` 가 네이티브 — 한도에서 입력이 멈추고 붙여넣은 값이 잘림 | 같은 이름이지만 **넘겨도 입력되고 오류로 알립니다.** 넘은 상태로는 `Form validate` 를 통과하지 못합니다 | `maxlength` → `data-maxlength` + `.counter`. 네이티브 `maxlength` 는 그대로 두면 예전처럼 잘립니다 |
+| 검증을 제품이 직접 | `<Form validate messages onValidate>` — 표준 제약(`required` · `pattern` · `min` · `max` · `minLength` · `type`) + 글자 수 | `form[data-validate]` · `data-messages`(JSON) · 이벤트 `ds:validate` · `DS.validate(form)` |
+| 없음 | `<TextField reveal>` | `.affix` 안 `button.reveal[aria-pressed]` |
+| 없음 | `<TextField mono>` | `.field.mono` |
+| 없음 | `<FormLegend />` | `.form-legend` |
+
+- 검증하는 폼에서 막히면 `onSubmit` 은 불리지 않습니다. `onValidate` 로 결과를 받습니다.
+- `error` prop 으로 넣은 오류(서버 응답 등)는 제출을 막지 않습니다. 사이트의 `.field.error` 는 다음 검증 때 지워집니다.
+- Select · Checkbox · Radio 는 아직 이 검증에 들어오지 않습니다(각 컴포넌트 정비 때).
+- placeholder 색이 `foreground/disable/primary` → `foreground/neutral/tertiary` 로 올라갔습니다(Text Field · Search · Select).
+
+## Search (2026-11-09)
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| 입력마다 `onChange` 뿐 | 그대로 + `debounce` · `onSearch(value, trigger)` | `.searchbar[data-debounce]` · 이벤트 `ds:search` {value, trigger} |
+| 없음 | `status`(숨긴 `role=status`) | `.sr-only[role=status]` — 글자는 제품이 넣습니다 |
+| `hotkey` | 그대로. `select` · contenteditable · 조합키 · 모달이 열린 동안에도 무시 | `.searchbar[data-hotkey]` — 전에는 `kbd` 가 보이기만 했습니다 |
+| Esc 는 `clearable` 일 때만 | 값이 있으면 언제나 지웁니다. 지운 Esc 는 부모로 가지 않아 대화상자가 닫히지 않습니다 | 같음 |
+| `onSubmit` 이 한글 조합을 끝내는 Enter 에도 불림 | 불리지 않습니다 | `ds:search` 도 같음 |
+
+## Select · Combobox (2026-11-09)
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| 폼에 값이 안 감 | `name`(숨은 input) · `required` — `<Form validate>` 에 참여 | `.dropdown[data-name][data-required]` + 안에 `input[type=hidden]` |
+| 값 비우기 없음 | 값 `""` 옵션을 고르면 placeholder 로 | `data-value=""` 항목 |
+| 불러오는 중 · 실패 · 없음이 메뉴에 없음 | `status` · `statusText` · `onRetry`, 옵션이 없으면 empty | `.menu-state` 한 줄 · `[data-retry]` · 이벤트 `ds:retry` |
+| 필드 라벨이 트리거 이름에 없음 | `<Field>` 안이면 자동 | 라벨 `id` + 트리거 `aria-labelledby="라벨 자기"` |
+| 트리거 폭 200 고정 | 필드 안에서는 필드 폭 | 같음(`.field .dropdown`) |
+| 사이트: 닫힌 트리거 ↑↓ 없음 · 열린 메뉴에서 Tab 하면 메뉴가 남음 | React 와 같게. Tab 은 트리거로 돌아와 다음 칸으로 | 같음 |
+| Esc 가 Dropdown 과 Popup 을 함께 닫음 | `useEscape` 는 켜진 것 중 가장 나중 것만 부릅니다 | 열린 Select 만 닫힘 |
+| — | 새 컴포넌트 `Combobox`(`multiple` · `filter` · `onQueryChange` · `status`) | `.combobox` · `data-multiple` · `data-filter` · 이벤트 `ds:select` · `ds:query` |
+
+주의: `useEscape` 를 직접 쓰는 제품은 이제 다른 열린 것이 뒤에 켜졌으면 불리지 않습니다.
+
+## Dropdown (2026-11-10)
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| 동작 메뉴의 선택 표시 `MenuItem selected` | 동작 메뉴(`kind="menu"`)에서는 그리지 않고 경고합니다. 현재 값은 `Select` · `SelectButton` | `role=menu` 안의 `.on` 을 쓰지 않습니다 |
+| 이동 항목 없음 | `MenuItem href` · `target` · `rel` | `li[role=none] > a.menu-item[role=menuitem]` |
+| 항목을 실행하면 포커스가 사라짐 | 닫고 트리거로 돌아옵니다(Select 도 같음) | 이미 그랬습니다 |
+| 스크롤 영역 안에서 메뉴가 잘림 | 자동으로 화면 기준으로 띄웁니다(`.float`). 스크롤 · 창 크기 변경에 닫힘 | 같음 — `ds.js` 가 열 때 잽니다 |
+
+주의: 띄운 메뉴는 트리거를 따라가지 않으므로 스크롤하면 닫힙니다. 스크롤 영역 안에서 메뉴를 열어 둔 채 다른 내용을 스크롤하는 흐름에는 쓰지 않습니다.
+

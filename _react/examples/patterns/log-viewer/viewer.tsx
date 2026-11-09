@@ -24,7 +24,7 @@ export default function Example() {
   return (
     <Stack>
       <Toolbar>
-        <SearchBar placeholder='메시지 검색 · host:"PC-2041" level:crit' label="로그 검색" wrapperStyle={{ minWidth: 360 }} />
+        <SearchBar placeholder="메시지, 단말, IP 검색" label="로그 검색" wrapperStyle={{ minWidth: 360 }} />
         <ChipGroup>
           <Chip size="sm" defaultSelected>CRIT</Chip>
           <Chip size="sm" defaultSelected>HIGH</Chip>

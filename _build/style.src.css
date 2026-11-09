@@ -517,8 +517,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .example{border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);overflow:hidden;margin:var(--space-4) 0 var(--space-8);background:var(--surface-elevated-primary)}
 .example-preview{margin:0;border-radius:0;overflow:auto}
 /* 사용자가 연 달력·드롭다운(ds.js 가 data-ds-opened 표시)은 섹션 밖으로 나가야 하므로 잘림 해제·위로 올림. 정적으로 열린 예제는 제외 */
-.example:has(.datepicker.open[data-ds-opened="1"],.dropdown.open[data-ds-opened="1"]){overflow:visible}
-.example:has(.datepicker.open[data-ds-opened="1"],.dropdown.open[data-ds-opened="1"]) .example-preview{overflow:visible;border-radius:var(--radius-lg) var(--radius-lg) 0 0;z-index:1}
+.example:has(.datepicker.open[data-ds-opened="1"],.dropdown.open[data-ds-opened="1"],.combobox.open[data-ds-opened="1"]){overflow:visible}
+.example:has(.datepicker.open[data-ds-opened="1"],.dropdown.open[data-ds-opened="1"],.combobox.open[data-ds-opened="1"]) .example-preview{overflow:visible;border-radius:var(--radius-lg) var(--radius-lg) 0 0;z-index:1}
 .example-preview.left{justify-content:flex-start}
 .example-preview.top{align-items:flex-start}
 .example-preview.stack{flex-direction:column;align-items:stretch;}
@@ -721,7 +721,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field label em{color:var(--foreground-negative-strong);font-style:normal;margin-left:2px}
 .field input,.field textarea{height:40px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);padding:0 14px;font:inherit;font-size:14px;background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);width:100%;transition:border-color var(--motion-fast),box-shadow var(--motion-fast)}
 .field textarea{height:auto;min-height:96px;padding:10px 14px;resize:vertical;line-height:1.5}
-.field input::placeholder,.field textarea::placeholder{color:var(--foreground-disable-primary)}
+.field input::placeholder,.field textarea::placeholder{color:var(--foreground-neutral-tertiary)}
 .field input:hover,.field textarea:hover{border-color:var(--line-neutral-primary)}
 .field input:focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 brand(대비 6.59 · 4.82) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로) */
 .field input:disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
@@ -730,6 +730,15 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field.error input,.field.error textarea,.field.error .affix{border-color:var(--foreground-negative-primary)}   /* 불투명 빨강 — 16% 틴트(--surface-negative-strong)는 필드 면 대비 1.23 · 1.34 라 테두리만으로 오류가 보이지 않았다. 3.44 · 5.47(사람의 결정 2026-10-26) */
 .field.error input:focus,.field.error textarea:focus-within,.field.error .affix:has(input:focus){border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}   /* 오류 필드의 포커스 — 빨강 테두리 1px(대비 3.44 · 5.47) + 빨강 후광(장식). brand 링이 오류 테두리를 덮지 않게(사람의 결정 2026-10-26) */
 .field.error .help{color:var(--foreground-negative-strong)}
+.field .help:empty{margin-top:-6px}   /* 비어 있어도 그려 둔다 — 라이브 영역은 글자가 들어오기 전에 있어야 읽힌다. 줄 간격 6 만 되돌린다 */
+.field.mono input,.field.mono textarea{font-family:var(--font-mono);font-variant-numeric:tabular-nums}   /* IP · URL · 해시 */
+.field .counter.over{color:var(--foreground-negative-strong)}
+.field .affix .reveal{display:grid;place-items:center;flex:none;width:28px;height:28px;margin-right:-6px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--foreground-neutral-tertiary);cursor:pointer}
+.field .affix .reveal:hover{background:var(--surface-neutral-secondary)}
+.field .affix .reveal:active{background:var(--surface-neutral-strong)}
+.field .affix .reveal span{display:grid}
+.field .affix .reveal svg{width:18px;height:18px}
+.field .affix .reveal[aria-pressed="true"] .i-show,.field .affix .reveal:not([aria-pressed="true"]) .i-hide{display:none}
 .field.sm input{height:32px;font-size:12px;padding:0 12px}
 .field.lg input{height:48px;font-size:16px;padding:0 16px}
 .field .affix{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary)}
@@ -738,6 +747,35 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field .affix:has(input:focus){border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 입력칸 포커스일 때 — 안의 달력 버튼에 Tab 으로만 오면 버튼 자기 외곽선만(검색창과 같은 결정 2026-10-26). 달력이 열린 동안은 .datepicker.open 이 같은 링을 준다(2026-11-09) */
 .field.sm .affix{height:32px;padding:0 10px}
 .field.lg .affix{height:48px;padding:0 14px}
+.field .dropdown{display:block}
+.field .dropdown .menu{min-width:100%}
+.field .dropdown .trigger{width:100%}   /* 폼의 선택 필드는 Text Field 와 같은 폭 — 트리거 200 이 287 필드 안에 떠 있었다 */
+.field.error .dropdown .trigger{border-color:var(--foreground-negative-primary)}
+.field.error .dropdown.open .trigger,.field.error .dropdown .trigger:focus-visible{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}
+/* Combobox — 검색해서 고르기 · 여러 개 고르기. 입력이 필드 셸 안에 있어 .field input 의 테두리 · 후광을 지운다 */
+.combobox{position:relative;display:block;min-width:260px;font-size:14px;line-height:1.6}
+.combobox .control{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:40px;padding:3px 36px 3px 12px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);cursor:text;transition:border-color var(--motion-fast)}
+.combobox .control input{flex:1 1 72px;min-width:72px;width:auto;height:32px;padding:0;border:0;background:transparent;outline:0;box-shadow:none;font:inherit;font-size:14px;color:var(--foreground-neutral-primary)}
+.combobox .control input::placeholder{color:var(--foreground-neutral-tertiary)}
+.combobox .control input:focus,.field.error .combobox .control input:focus{box-shadow:none;border:0}
+.combobox .control input:disabled{background:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
+.combobox .control::after{content:"";position:absolute;right:12px;top:calc(50% - 8px);content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
+.combobox.open .control::after{transform:rotate(180deg)}
+.combobox .control:has(input:focus),.combobox.open .control{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
+.field.error .combobox .control{border-color:var(--foreground-negative-primary)}
+.field.error .combobox .control:has(input:focus),.field.error .combobox.open .control{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}
+.combobox.disabled .control{background:var(--surface-disable-primary);cursor:not-allowed}
+.combobox.disabled .control::after{background:var(--foreground-disable-primary)}
+.field.sm .combobox .control{min-height:32px;padding-top:1px;padding-bottom:1px}
+.field.sm .combobox .control input{height:28px;font-size:12px}
+.field.lg .combobox .control{min-height:48px;padding-top:6px;padding-bottom:6px}
+.field.lg .combobox .control input{height:34px;font-size:16px}
+.combobox .menu{position:absolute;top:calc(100% + 4px);left:0;display:none;z-index:5;min-width:100%}
+.combobox.open .menu{display:block}
+.combobox.up .menu{top:auto;bottom:calc(100% + 4px)}
+.combobox .menu-item.active{background:var(--surface-neutral-tertiary);outline:1px solid var(--foreground-brand-primary);outline-offset:-1px}
+.combobox .menu-item.on.active{background:var(--surface-brand-subtle)}
+.combobox[data-multiple] .menu-item.on::after{content:"";margin-left:auto;width:16px;height:16px;flex:none;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12l5 5l10 -10%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12l5 5l10 -10%22/%3E%3C/svg%3E") center/contain no-repeat}
 .field .affix:has(input:disabled){background:var(--surface-disable-primary);cursor:not-allowed}
 .field .affix:has(input:read-only:not(:disabled)){background:var(--background-neutral-secondary)}
 .field .affix span{color:var(--foreground-neutral-tertiary);font-size:12px;white-space:nowrap}
@@ -748,11 +786,12 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .searchbar{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;min-width:280px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);transition:border-color var(--motion-fast),box-shadow var(--motion-fast);font-size:16px;line-height:1.6}
 .searchbar svg{width:18px;height:18px;color:var(--foreground-neutral-tertiary);flex:none}
 .searchbar input{flex:1;border:0;background:transparent;font:inherit;font-size:14px;color:var(--foreground-neutral-primary);outline:0;min-width:0}
-.searchbar input::placeholder{color:var(--foreground-disable-primary)}
+.searchbar input::placeholder{color:var(--foreground-neutral-tertiary)}
 .searchbar:has(input:focus){border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 함께 나왔다(사람의 결정 2026-10-26) */
 .searchbar .clear{border:0;padding:0;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);width:20px;height:20px;border-radius:50%;font:inherit;font-size:12px;line-height:0;cursor:pointer;display:grid;place-items:center;flex:none}
 .searchbar .clear svg{display:block;width:12px;height:12px}
 .searchbar kbd{font-size:12px;color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:4px;padding:1px 5px;background:var(--background-neutral-secondary)}
+.searchbar input::-webkit-search-cancel-button,.searchbar input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}   /* 브라우저 기본 ×가 .clear 와 나란히 두 개 떴다 */
 .searchbar.lg{height:48px}
 .searchbar.lg input{font-size:16px}
 .searchbar.block{width:100%}
@@ -951,7 +990,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .dropdown .trigger{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px 0 14px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:14px;color:var(--foreground-neutral-primary);cursor:pointer;min-width:200px;justify-content:space-between}
 .dropdown .trigger:hover{border-color:var(--line-neutral-primary)}
 .dropdown .trigger:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
-.dropdown .trigger .placeholder{color:var(--foreground-disable-primary)}
+.dropdown .trigger .placeholder{color:var(--foreground-neutral-tertiary)}
 .dropdown .trigger::after{content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
 .dropdown.open .trigger{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}   /* 목록이 열린 동안은 입력 포커스와 같은 링 — 마우스로 열면 :focus-visible 이 없어 테두리만 남았다(사람의 결정 2026-11-09) */
 .dropdown.open .trigger::after{transform:rotate(180deg)}
@@ -959,9 +998,12 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .dropdown .trigger[disabled]::after{background:var(--foreground-disable-primary)}
 .dropdown .menu{position:absolute;top:calc(100% + 4px);left:0;display:none;z-index:5;min-width:100%}
 .dropdown.open .menu{display:block}
+/* 스크롤 영역 안의 메뉴 — 화면 기준으로 띄워 잘리지 않게(사람의 결정 2026-11-10). 좌표는 ds.js 가 열 때 재서 넣고 스크롤하면 닫는다. 우측 정렬 인라인 left:auto · right:0 을 이겨야 해서 !important */
+.dropdown.float .menu,.combobox.float .menu{position:fixed;top:var(--float-y,0)!important;bottom:auto!important;left:var(--float-x,0)!important;right:auto!important;min-width:var(--float-w,0);z-index:30}
 .dropdown.up .menu{top:auto;bottom:calc(100% + 4px)}   /* 아래 공간이 모자라면 위로 뒤집어 연다(ds.js 가 열 때 계산) */
 .menu{min-width:200px;padding:6px;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);box-shadow:var(--shadow-2);list-style:none;margin:0;max-height:min(320px,60vh);overflow-y:auto;overscroll-behavior:contain;font-size:16px;line-height:1.6}   /* 항목 약 8개까지 보이고 그 뒤로는 메뉴 안에서 스크롤 */
 .menu-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:14px;cursor:pointer;color:var(--foreground-neutral-primary);white-space:nowrap;line-height:1.6}
+a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decoration:none}   /* 이동 항목 — 진짜 링크(사람의 결정 2026-11-10). 글 안 링크 모양을 입지 않는다 */
 .menu-item:hover{background:var(--surface-neutral-tertiary)}   /* 메뉴 항목 호버는 tertiary(사람의 결정 2026-10-27 — Figma 에서 바꾼 것을 저장소로). 눌림은 strong */
 .menu-item:active{background:var(--surface-neutral-strong)}
 .menu-item.on{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);font-weight:600}
@@ -970,6 +1012,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .menu-item .hint{margin-left:auto;font-size:12px;color:var(--foreground-neutral-tertiary)}
 .menu-item svg{width:16px;height:16px;flex:none;color:var(--foreground-neutral-tertiary)}
 .menu-item.on svg,.menu-item.danger svg,.menu-item[aria-disabled="true"] svg{color:currentColor}   /* 선택·위험·비활성은 글자색을 따른다 — 회색으로 고정하면 상태가 아이콘에서 사라졌다 */
+.menu-state{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:14px;color:var(--foreground-neutral-secondary);line-height:1.6;white-space:normal;word-break:keep-all;min-width:200px}
+.menu-state .btn{margin-left:auto;flex:none}
 .menu-sep{height:1px;background:var(--line-neutral-secondary);margin:6px 0;line-height:1.6}
 .menu-label{padding:6px 10px 2px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--foreground-neutral-tertiary);font-weight:600;line-height:1.6}
 
@@ -1404,11 +1448,15 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .form .form-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:16px;border-top:1px solid var(--line-neutral-secondary)}
 .form .form-actions .left{margin-right:auto}
 .form .field{min-width:0}
+.form-legend{margin:0;font-size:12px;color:var(--foreground-neutral-tertiary)}
+.form-legend em{color:var(--foreground-negative-strong);font-style:normal}
 .terms{display:flex;flex-direction:column;gap:4px;width:100%;max-width:560px;font-size:16px;line-height:1.6}
 .terms .all{padding:14px 16px;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);font-weight:600;margin-bottom:8px}
 .terms .item{display:flex;align-items:center;gap:8px;padding:10px 16px}
 .terms .item .req{font-size:12px;color:var(--foreground-brand-primary);font-weight:600}
 .terms .item .opt{font-size:12px;color:var(--foreground-neutral-tertiary)}
+.terms .msg{padding:4px 16px 0;font-size:12px;color:var(--foreground-negative-strong)}
+.terms .msg:empty{padding:0;margin-top:-4px}   /* 비어 있어도 그려 둔다 — 라이브 영역 */
 .terms .item .view{margin-left:auto;font-size:12px;color:var(--foreground-neutral-tertiary);text-decoration:underline;background:none;border:0;font-family:inherit;cursor:pointer}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:48px 24px;text-align:center;width:100%;color:var(--foreground-neutral-tertiary);font-size:14px;background:var(--surface-elevated-primary);border:1px dashed var(--line-neutral-primary);border-radius:var(--radius-lg);line-height:1.6}
 .empty b{font-size:16px;color:var(--foreground-neutral-primary)}

@@ -59,6 +59,142 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("keyboard nav selects next item", await dd2.evaluate((e) => e.querySelector(".menu-item.on").textContent === "인프라팀"));
   await dd2.locator(".trigger").click(); await page.keyboard.press("Escape");
   ok("Esc closes dropdown", await dd2.evaluate((e) => !e.classList.contains("open")));
+  // Select 정비(사람의 결정 2026-11-09) — 키보드 · Esc · 값 · 검증 · 목록 상태
+  {
+    await go("components/select.html");
+    const D = `${ex("select", "default")} .dropdown`, tr = page.locator(`${D} .trigger`), press = (key) => page.evaluate((k) => document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true })), key), act = () => page.evaluate(() => document.activeElement.textContent.trim());
+    await tr.focus(); await page.keyboard.press("ArrowDown");
+    ok("select: ArrowDown on a closed trigger opens it", await page.locator(D).evaluate((e) => e.classList.contains("open")) && (await act()) === "전체");
+    await press("ㅂ"); ok("select: typeahead matches initial consonants", (await act()) === "보안팀", await act());
+    await press("ㅇ"); ok("select: typeahead joins letters typed quickly", (await act()) === "보안팀", await act());
+    await page.waitForTimeout(550);
+    await press("ㄱ"); ok("select: a letter searches forward from the current item", (await act()) === "기획팀", await act());
+    await press("ㄱ"); ok("select: repeating one letter cycles", (await act()) === "고객지원팀", await act());
+    await page.waitForTimeout(550);
+    await press("q"); ok("select: typeahead is case-insensitive", (await act()) === "QA팀", await act());
+    ok("select: typeahead does not pick", await page.locator(D).evaluate((e) => e.classList.contains("open") && !e.querySelector(".menu-item.on")));
+    await page.keyboard.press("Tab");
+    ok("select: Tab closes the menu and leaves the control", await page.locator(D).evaluate((e) => !e.classList.contains("open") && !e.contains(document.activeElement)));
+    // Popup 안 Esc 는 Select 만
+    await page.evaluate(() => { const p = document.createElement("div"); p.className = "popup"; p.id = "sel-pop"; p.setAttribute("role", "dialog"); p.setAttribute("aria-modal", "true"); p.innerHTML = '<div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false">값</button><ul class="menu" role="listbox" aria-label="값"><li class="menu-item" role="option">가</li></ul></div>'; document.body.appendChild(p); window.DS.popup.open("#sel-pop"); });
+    await page.locator(".popup-backdrop .trigger").click(); await page.waitForTimeout(60);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(60);
+    ok("select: Esc inside a popup closes only the select", await page.evaluate(() => !document.querySelector(".popup-backdrop .dropdown.open") && !!document.querySelector(".popup-backdrop[data-ds-popup]")));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(250);
+    ok("select: the next Esc closes the popup", await page.evaluate(() => !document.querySelector(".popup-backdrop[data-ds-popup]")));
+    // 선택 안 함
+    await go("components/select.html");
+    const C = page.locator(`${ex("select", "clear")} .dropdown`).nth(1);
+    await page.evaluate(() => { window.__sel = []; document.addEventListener("ds:select", (e) => window.__sel.push(e.detail.value)); });
+    await C.locator(".trigger").click(); await C.locator(".menu-item").nth(1).click();
+    ok("select: picking replaces the placeholder", await C.evaluate((e) => e.querySelector(".trigger").textContent.trim() === "김보안" && !e.querySelector(".placeholder")));
+    await C.locator(".trigger").click(); await C.locator(".menu-item").nth(0).click();
+    ok("select: value '' returns to the placeholder", await C.evaluate((e) => e.querySelector(".trigger .placeholder")?.textContent === "승인자 선택" && !e.querySelector(".menu-item.on")));
+    ok("select: ds:select carries data-value, '' included", JSON.stringify(await page.evaluate(() => window.__sel)) === '["kim",""]', JSON.stringify(await page.evaluate(() => window.__sel)));
+    // 폼 안에서
+    const F = ex("select", "form"), f1 = page.locator(`${F} .field`).first(), f2 = page.locator(`${F} .field`).nth(1), t1 = page.locator("#sel-f1");
+    ok("select: untouched required field is quiet", !(await f1.evaluate((e) => e.classList.contains("error"))));
+    const w = await f1.evaluate((e) => [e.getBoundingClientRect().width, e.querySelector(".trigger").getBoundingClientRect().width, e.querySelector(".menu").offsetWidth || 0]);
+    ok("select: fills the field width", Math.abs(w[0] - w[1]) < 0.5, JSON.stringify(w));
+    await page.locator("#sel-f2").click(); await page.waitForTimeout(40); await page.keyboard.press("Escape"); await page.waitForTimeout(40);
+    ok("select: optional field stays quiet when closed empty", !(await f2.evaluate((e) => e.classList.contains("error"))));
+    await page.locator(`${F} button[type=submit]`).click(); await page.waitForTimeout(80);
+    ok("select: submit is blocked with the choose message", await f1.evaluate((e) => e.classList.contains("error") && e.querySelector(".help").textContent === "필수 항목입니다. 항목을 선택하세요." && e.querySelector(".trigger").getAttribute("aria-invalid") === "true"));
+    ok("select: submit moves focus to the first error", await page.evaluate(() => document.activeElement.id === "sel-f1"));
+    await t1.click(); await page.waitForTimeout(40);
+    ok("select: open errored field keeps the red ring", (await t1.evaluate((e) => getComputedStyle(e).boxShadow)).includes("4px"));
+    await page.locator(`${F} .field >> nth=0 >> .menu-item >> nth=2`).click(); await page.waitForTimeout(40);
+    ok("select: picking clears the error and fills the hidden value", await f1.evaluate((e) => !e.classList.contains("error") && e.querySelector("input[type=hidden]").value === "sec"));
+    await page.reload(); await page.waitForTimeout(150);
+    await t1.click(); await page.waitForTimeout(40); await page.keyboard.press("Escape"); await page.waitForTimeout(40);
+    ok("select: closing empty after opening reports the error", await f1.evaluate((e) => e.classList.contains("error")));
+    // 목록 상태
+    const St = page.locator(`${ex("select", "states")} .dropdown`);
+    ok("select: three menu states are visible", await St.evaluateAll((els) => els.length === 3 && els.every((e) => e.querySelector(".menu-state") && !e.querySelector(".menu-item") && getComputedStyle(e.querySelector(".menu")).display !== "none") && !!els[0].querySelector(".spinner")));
+    await page.evaluate(() => { window.__retry = 0; document.addEventListener("ds:retry", () => window.__retry++); });
+    await St.nth(1).locator("[data-retry]").click();
+    ok("select: retry fires ds:retry", (await page.evaluate(() => window.__retry)) === 1);
+    await go("components/select.html");
+  }
+  // Combobox(새 컴포넌트) — 포커스는 입력에, 필터 · 키보드 · 떠날 때 · 여러 개 · 검증
+  {
+    await go("components/combobox.html");
+    await page.evaluate(() => { window.__cb = []; document.addEventListener("ds:select", (e) => window.__cb.push(e.detail.value)); window.__q = []; document.addEventListener("ds:query", (e) => window.__q.push(e.detail.query)); window.__r = 0; document.addEventListener("ds:retry", () => window.__r++); });
+    const I = page.locator("#cb-d"), H = page.locator(`${ex("combobox", "default")} .combobox`), vis = (h) => h.evaluate((e) => [...e.querySelectorAll(".menu-item")].filter((i) => i.offsetParent).map((i) => i.textContent)), st = (h) => h.evaluate((e) => e.querySelector("[role=status]").textContent);
+    await I.click(); await page.waitForTimeout(30);
+    ok("combobox: click opens the list and keeps focus in the input", await H.evaluate((e) => e.classList.contains("open") && document.activeElement === e.querySelector("input[role=combobox]") && e.querySelector("input").getAttribute("aria-expanded") === "true"));
+    ok("combobox: a focused input has no second border or ring", await I.evaluate((e) => { const c = getComputedStyle(e), p = getComputedStyle(e.parentElement); return c.borderTopWidth === "0px" && c.boxShadow === "none" && p.boxShadow.includes("4px"); }));
+    ok("combobox: menu is as wide as the field", await H.evaluate((e) => Math.abs(e.querySelector(".menu").offsetWidth - e.querySelector(".control").offsetWidth) <= 1));
+    await page.keyboard.type("인"); await page.waitForTimeout(30);
+    ok("combobox: typing filters the list", JSON.stringify(await vis(H)) === '["인프라팀","디자인팀","인사팀"]', JSON.stringify(await vis(H)));
+    ok("combobox: first match becomes the active descendant", await H.evaluate((e) => { const a = e.querySelector(".menu-item.active"); return a.textContent === "인프라팀" && e.querySelector("input").getAttribute("aria-activedescendant") === a.id; }));
+    ok("combobox: result count is announced", (await st(H)) === "결과 3개", await st(H));
+    await page.keyboard.press("ArrowUp"); ok("combobox: ArrowUp wraps to the last match", await H.evaluate((e) => e.querySelector(".menu-item.active").textContent === "인사팀"));
+    await page.keyboard.press("ArrowDown"); await page.keyboard.press("Enter"); await page.waitForTimeout(30);
+    ok("combobox: Enter picks the active option and closes", (await I.inputValue()) === "인프라팀" && await H.evaluate((e) => !e.classList.contains("open") && e.querySelector(".menu-item.on").textContent === "인프라팀" && e.querySelector("input").getAttribute("aria-expanded") === "false"));
+    ok("combobox: ds:select carries the value", JSON.stringify(await page.evaluate(() => window.__cb)) === '["인프라팀"]', JSON.stringify(await page.evaluate(() => window.__cb)));
+    await I.click(); await page.waitForTimeout(30);
+    ok("combobox: reopening shows every option, not just the old filter", (await vis(H)).length === 11);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(30);
+    ok("combobox: Esc closes and keeps the value and focus", (await I.inputValue()) === "인프라팀" && await H.evaluate((e) => !e.classList.contains("open") && document.activeElement === e.querySelector("input")));
+    await H.evaluate((e) => [...e.querySelectorAll(".menu-item")].pop().setAttribute("aria-disabled", "true"));
+    await I.fill("법"); await page.waitForTimeout(30);
+    ok("combobox: a disabled match is shown but never the candidate", await H.evaluate((e) => !e.querySelector(".menu-item.active") && !e.querySelector(".menu-state[data-auto]") && e.querySelector("[role=status]").textContent === "결과 1개"));
+    await H.evaluate((e) => [...e.querySelectorAll(".menu-item")].pop().removeAttribute("aria-disabled"));
+    await I.fill("없는"); await page.waitForTimeout(30);
+    ok("combobox: no result shows the guidance line", await H.evaluate((e) => e.querySelector(".menu-state[data-auto]")?.textContent === "일치하는 항목이 없습니다. 다른 검색어를 입력하세요."));
+    await page.keyboard.press("Tab"); await page.waitForTimeout(30);
+    ok("combobox: leaving discards unpicked text", (await I.inputValue()) === "인프라팀" && await H.evaluate((e) => !e.classList.contains("open")));
+    await I.click(); await page.waitForTimeout(30); await page.keyboard.press("Tab"); await page.waitForTimeout(30);
+    ok("combobox: Tab skips the scrolling list and leaves the control", await H.evaluate((e) => !e.classList.contains("open") && !e.contains(document.activeElement)));
+    await I.fill(""); await page.keyboard.press("Tab"); await page.waitForTimeout(30);
+    ok("combobox: leaving with empty text clears the pick", await H.evaluate((e) => !e.querySelector(".menu-item.on")) && (await page.evaluate(() => window.__cb.at(-1))) === "");
+    const M = page.locator(`${ex("combobox", "multiple")} .combobox`), MI = page.locator("#cb-m"), chips = () => M.evaluate((e) => [...e.querySelectorAll(".chip")].map((c) => c.textContent.trim()));
+    await MI.click(); await page.waitForTimeout(30);
+    await M.locator(".menu-item").nth(1).click(); await page.waitForTimeout(30);
+    ok("combobox multi: picked item becomes a tag in option order", JSON.stringify(await chips()) === '["영업팀","개발팀","보안팀"]', JSON.stringify(await chips()));
+    ok("combobox multi: list stays open and focus stays in the input", await M.evaluate((e) => e.classList.contains("open") && document.activeElement === e.querySelector("input[role=combobox]")));
+    ok("combobox multi: ds:select carries an array", JSON.stringify(await page.evaluate(() => window.__cb.at(-1))) === '["영업팀","개발팀","보안팀"]');
+    await page.keyboard.type("재"); await page.waitForTimeout(30); await page.keyboard.press("Enter"); await page.waitForTimeout(30);
+    ok("combobox multi: Enter adds and clears the query", (await chips()).includes("재무팀") && (await MI.inputValue()) === "");
+    ok("combobox multi: selection is announced", (await st(M)) === "재무팀 선택됨", await st(M));
+    await page.keyboard.press("Backspace"); await page.waitForTimeout(30);
+    ok("combobox multi: Backspace on an empty input removes the last tag", !(await chips()).includes("재무팀"));
+    await M.locator(".chip .x").first().click(); await page.waitForTimeout(30);
+    ok("combobox multi: x removes that tag and keeps focus", !(await chips()).includes("영업팀") && await M.evaluate((e) => document.activeElement === e.querySelector("input[role=combobox]")));
+    await MI.click(); await page.waitForTimeout(30);
+    const mb = await M.locator(".menu-item").nth(2).boundingBox(); await page.mouse.move(mb.x + 20, mb.y + 10); await page.mouse.down(); await page.waitForTimeout(30);
+    ok("combobox: pressing an option does not take focus from the input", await M.evaluate((e) => document.activeElement === e.querySelector("input[role=combobox]")));
+    await page.mouse.up(); await page.keyboard.press("Escape"); await page.waitForTimeout(30);
+    const hs = await H.evaluate((e) => { const f = e.closest(".field"), c = e.querySelector(".control"), o = []; for (const s of ["sm", "", "lg"]) { if (s) f.classList.add(s); o.push(c.offsetHeight); if (s) f.classList.remove(s); } return o; });
+    ok("combobox: field heights match Text Field 32 · 40 · 48", JSON.stringify(hs) === "[32,40,48]", JSON.stringify(hs));
+    const dis = page.locator(`${ex("combobox", "disabled")} .combobox`);
+    await dis.locator(".control").click({ force: true }); await page.waitForTimeout(30);
+    ok("combobox: disabled does not open and uses the disable surface", await dis.evaluate((e) => { const v = getComputedStyle(document.documentElement).getPropertyValue("--surface-disable-primary"), p = document.createElement("i"); p.style.background = v; document.body.appendChild(p); const want = getComputedStyle(p).backgroundColor; p.remove(); return !e.classList.contains("open") && getComputedStyle(e.querySelector(".control")).backgroundColor === want; }));
+    const SS = page.locator(`${ex("combobox", "states")} .combobox`);
+    await SS.nth(1).locator("[data-retry]").click();
+    ok("combobox: retry fires ds:retry", (await page.evaluate(() => window.__r)) === 1);
+    await page.locator("#cb-s3").fill("영"); await page.waitForTimeout(360);
+    ok("combobox: data-filter=none only reports the query", JSON.stringify(await page.evaluate(() => window.__q)) === '["영"]' && await SS.nth(2).evaluate((e) => !e.querySelector(".menu-state[data-auto]") && !!e.querySelector(".menu-state")));
+    // 폼 검증
+    const F = ex("combobox", "form"), f1 = page.locator(`${F} .field`).first(), f2 = page.locator(`${F} .field`).nth(1);
+    await page.locator("#cb-f1").focus(); await page.keyboard.press("Tab"); await page.waitForTimeout(30);
+    ok("combobox: tabbing through without opening is quiet", !(await f1.evaluate((e) => e.classList.contains("error"))));
+    await page.locator(`${F} button[type=submit]`).click(); await page.waitForTimeout(60);
+    ok("combobox: submit is blocked on both fields", await page.locator(`${F} .field.error`).count() === 2 && (await f1.locator(".help").textContent()) === "필수 항목입니다. 항목을 선택하세요.");
+    ok("combobox: submit moves focus to the first input", await page.evaluate(() => document.activeElement.id === "cb-f1"));
+    ok("combobox: error field keeps the red ring", (await f1.locator(".control").evaluate((e) => getComputedStyle(e).boxShadow)).includes("4px"));
+    ok("combobox: the input inside an error field draws no ring of its own", (await page.locator("#cb-f1").evaluate((e) => document.activeElement === e && getComputedStyle(e).boxShadow)) === "none");
+    await page.locator("#cb-f1").click(); await f1.locator(".menu-item").nth(3).click(); await page.waitForTimeout(40);
+    ok("combobox: picking clears the error and fills the hidden value", await f1.evaluate((e) => !e.classList.contains("error") && e.querySelector("input[type=hidden]").value === "보안팀"));
+    await page.locator("#cb-f2").click(); await f2.locator(".menu-item").nth(0).click(); await f2.locator(".menu-item").nth(1).click(); await page.waitForTimeout(40);
+    ok("combobox multi: one hidden input per value, error cleared", await f2.evaluate((e) => !e.classList.contains("error") && [...e.querySelectorAll("input[type=hidden]")].map((x) => x.value).join() === "영업팀,개발팀"));
+    await page.evaluate(() => { const p = document.createElement("div"); p.className = "popup"; p.id = "cb-pop"; p.setAttribute("role", "dialog"); p.setAttribute("aria-modal", "true"); p.innerHTML = '<div class="combobox"><div class="control"><input role="combobox" aria-label="값" aria-expanded="false" id="cb-p"></div><ul class="menu" role="listbox" aria-label="값"><li class="menu-item" role="option">가</li></ul></div>'; document.body.appendChild(p); window.DS.popup.open("#cb-pop"); window.DS.init(p); });
+    await page.locator("#cb-p").click(); await page.waitForTimeout(40); await page.keyboard.press("Escape"); await page.waitForTimeout(60);
+    ok("combobox: Esc inside a popup closes only the list", await page.evaluate(() => !document.querySelector(".popup-backdrop .combobox.open") && !!document.querySelector(".popup-backdrop[data-ds-popup]")));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(250);
+    await go("components/select.html");
+  }
   // Select: 긴 목록(Default)은 메뉴 안에서 스크롤 (뒤 페이지는 따라 움직이지 않는다)
   const longMenu = page.locator(`${ex("select", "default")} .menu`);
   await page.locator(`${ex("select", "default")} .trigger`).click();
@@ -77,11 +213,13 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.keyboard.press("Escape");
 
   // Select: 아래 공간이 모자라면 위로 뒤집어 연다 (.up)
-  /* 트리거를 뷰포트 아래쪽으로 "스크롤"할 수는 없으므로(예제가 페이지 위쪽에 있다) 뷰포트 높이로 여유를 만든다 */
+  /* 트리거를 뷰포트의 정한 자리로 옮겨 잰다 — 예제 위쪽 내용(원칙 표 등)이 늘어도 조건이 바뀌지 않게 */
   const flip = async (h) => {
     await page.setViewportSize({ width: 1440, height: h });
     await page.waitForTimeout(120);
     const d = page.locator(`${ex("select", "default")} .dropdown`);
+    await d.evaluate((e, top) => window.scrollTo({ top: e.getBoundingClientRect().top + window.scrollY - top, behavior: "instant" }), h > 800 ? 120 : h - 120);
+    await page.waitForTimeout(60);
     await d.evaluate((e) => { if (e.classList.contains("open")) e.querySelector(".trigger").click(); });
     await d.evaluate((e) => e.querySelector(".trigger").click());
     await page.waitForTimeout(120);
@@ -111,6 +249,72 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const sliderOff = await page.evaluate(() => { const s = document.querySelector("#ex-slider-disabled .slider"), d = document.createElement("div"); d.style.color = "var(--foreground-disable-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove();
     return { label: getComputedStyle(s.querySelector("label")).color, val: getComputedStyle(s.querySelector(".val")).color, want }; });
   ok("a disabled slider dims its label and value", sliderOff.label === sliderOff.want && sliderOff.val === sliderOff.want, JSON.stringify(sliderOff));
+  // Dropdown 정비(사람의 결정 2026-11-10) — 포커스 · 이동 항목 · 스크롤 영역 안에서 띄우기
+  {
+    await go("components/dropdown.html");
+    const D = page.locator("#ex-dropdown-default .example-preview .dropdown"), T = D.locator("button");
+    await T.focus(); await page.keyboard.press("ArrowDown"); await page.waitForTimeout(30);
+    ok("dropdown: opening by keyboard focuses the first item", (await page.evaluate(() => document.activeElement.textContent.trim())) === "편집");
+    ok("dropdown: outside a scroll area the menu is not floated", !(await D.evaluate((e) => e.classList.contains("float"))));
+    await page.keyboard.press("Enter"); await page.waitForTimeout(30);
+    ok("dropdown: running an item closes and returns focus to the trigger", await D.evaluate((e) => !e.classList.contains("open") && document.activeElement === e.querySelector("button")));
+    const L = page.locator("#ex-dropdown-links .example-preview .dropdown");
+    await L.locator("button").first().click(); await page.waitForTimeout(40);
+    const lk = await L.evaluate((e) => { const a = e.querySelector("a.menu-item"), li = e.querySelector("li.menu-item"), ca = getComputedStyle(a), cl = getComputedStyle(li); return { color: ca.color === cl.color, line: ca.textDecorationLine, h: [a.getBoundingClientRect().height, li.getBoundingClientRect().height], fs: ca.fontSize === cl.fontSize, active: document.activeElement === a, parent: a.parentElement.getAttribute("role"), href: a.hasAttribute("href") }; });
+    ok("dropdown: a link item looks like any other item", lk.color && lk.line === "none" && lk.fs && Math.abs(lk.h[0] - lk.h[1]) < 0.5, JSON.stringify(lk));
+    ok("dropdown: a link item is a real link in a role=none list item and takes focus", lk.active && lk.parent === "none" && lk.href, JSON.stringify(lk));
+    await page.keyboard.press("ArrowDown"); await page.keyboard.press("ArrowDown"); await page.waitForTimeout(20);
+    ok("dropdown: arrow keys cross link and plain items", (await page.evaluate(() => document.activeElement.textContent.trim())) === "복제");
+    await page.keyboard.press("Escape"); await page.waitForTimeout(30);
+    // 표 안 — 잘리지 않고, 스크롤하면 닫힌다
+    await go("components/data-table.html");
+    const W = page.locator("#ex-data-table-row-actions .tbl-wrap"), R = page.locator("#ex-data-table-row-actions .dropdown").first(), RT = R.locator("button");
+    await RT.scrollIntoViewIfNeeded(); await page.evaluate(() => window.scrollBy({ top: -200, behavior: "instant" })); await page.waitForTimeout(60);
+    await RT.click(); await page.waitForTimeout(60);
+    const fl = await R.evaluate((e) => { const m = e.querySelector(".menu"), r = m.getBoundingClientRect(), t = e.querySelector("button").getBoundingClientRect(), w = e.closest(".tbl-wrap").getBoundingClientRect(), last = [...m.querySelectorAll(".menu-item")].pop().getBoundingClientRect(), hit = document.elementFromPoint(last.left + 20, last.top + last.height / 2); return { float: e.classList.contains("float"), pos: getComputedStyle(m).position, gap: Math.round(r.top - t.bottom), right: Math.abs(r.right - t.right) < 1, past: r.bottom > w.bottom, hit: m.contains(hit), width: r.width, focus: m.contains(document.activeElement) }; });
+    ok("dropdown: inside a scroll area the menu floats on the viewport", fl.float && fl.pos === "fixed" && fl.gap === 4, JSON.stringify(fl));
+    ok("dropdown: the floated menu passes the area edge and is not clipped", fl.past && fl.hit, JSON.stringify(fl));
+    ok("dropdown: a floated menu keeps its end alignment, width and focus", fl.right && fl.width < 400 && fl.focus, JSON.stringify(fl));
+    await R.locator(".menu-item").nth(1).click(); await page.waitForTimeout(40);
+    ok("dropdown: items in a floated menu run and clear .float", await R.evaluate((e) => !e.classList.contains("open") && !e.classList.contains("float") && document.activeElement === e.querySelector("button")));
+    await RT.click(); await page.waitForTimeout(60);
+    await R.evaluate((e) => { const m = e.querySelector(".menu"); for (let i = 0; i < 20; i++) m.insertAdjacentHTML("beforeend", '<li class="menu-item" role="menuitem" data-x>추가</li>'); m.scrollTop = 60; }); await page.waitForTimeout(80);
+    ok("dropdown: scrolling inside a floated menu keeps it open", await R.evaluate((e) => e.classList.contains("open")));
+    await R.evaluate((e) => e.querySelectorAll("[data-x]").forEach((x) => x.remove()));
+    const y0 = await page.evaluate(() => window.scrollY); await page.evaluate(() => window.scrollBy({ top: 900, behavior: "instant" })); await page.waitForTimeout(80);
+    ok("dropdown: page scroll closes a floated menu and returns focus without jumping", await R.evaluate((e) => !e.classList.contains("open") && document.activeElement === e.querySelector("button")) && (await page.evaluate(() => window.scrollY)) === y0 + 900, String(y0));
+    await RT.evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" })); await page.waitForTimeout(120);
+    await RT.click(); await page.waitForTimeout(120);
+    const wasOpen = await R.evaluate((e) => e.classList.contains("open"));
+    await page.evaluate(() => window.dispatchEvent(new Event("resize"))); await page.waitForTimeout(60);   // 실제로 창을 바꾸면 스크롤 이벤트도 나서 resize 를 따로 잴 수 없다
+    ok("dropdown: resizing closes a floated menu", wasOpen && await R.evaluate((e) => !e.classList.contains("open")), String(wasOpen));
+    await RT.evaluate((e) => { const t = e.getBoundingClientRect(); window.scrollBy({ top: t.top - (window.innerHeight - 90), behavior: "instant" }); }); await page.waitForTimeout(60);
+    await RT.click(); await page.waitForTimeout(60);
+    const fu = await R.evaluate((e) => { const r = e.querySelector(".menu").getBoundingClientRect(), t = e.querySelector("button").getBoundingClientRect(); return { up: e.classList.contains("up"), float: e.classList.contains("float"), gap: Math.round(t.top - r.bottom), inside: r.top >= 0 && r.bottom <= window.innerHeight }; });
+    ok("dropdown: a floated menu flips up near the viewport bottom", fu.up && fu.float && fu.gap === 4 && fu.inside, JSON.stringify(fu));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(30);
+    await page.evaluate(() => { const b = document.createElement("div"); b.id = "edge-box"; b.style = "position:fixed;right:4px;top:200px;width:60px;overflow:auto"; b.innerHTML = '<div class="dropdown"><button type="button" class="btn sm assistive" aria-haspopup="menu" aria-expanded="false">열기</button><ul class="menu" role="menu"><li class="menu-item" role="menuitem">아주 긴 동작 이름을 가진 항목입니다</li></ul></div>'; document.body.appendChild(b); });
+    await page.locator("#edge-box button").click(); await page.waitForTimeout(60);
+    const eg = await page.evaluate(() => { const r = document.querySelector("#edge-box .menu").getBoundingClientRect(); return [r.right, window.innerWidth - 8]; });
+    ok("dropdown: a floated menu stays 8px inside the viewport", eg[0] <= eg[1] + 0.5, JSON.stringify(eg));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(30);
+    // Select · Combobox 도 같은 규칙
+    await go("components/select.html");
+    const S1 = page.locator("#ex-select-default .example-preview .dropdown");
+    await S1.evaluate((e) => { const b = document.createElement("div"); b.style = "overflow:auto;height:60px"; e.replaceWith(b); b.appendChild(e); });
+    await S1.locator(".trigger").click(); await page.waitForTimeout(60);
+    const sf = await S1.evaluate((e) => { const m = e.querySelector(".menu").getBoundingClientRect(), t = e.querySelector(".trigger").getBoundingClientRect(); return { f: e.classList.contains("float"), w: Math.abs(m.width - t.width) < 1, x: Math.abs(m.left - t.left) < 1 }; });
+    ok("select: floats inside a scroll area at the trigger's width", sf.f && sf.w && sf.x, JSON.stringify(sf));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(30);
+    await go("components/combobox.html");
+    const C1 = page.locator("#ex-combobox-default .combobox");
+    await C1.evaluate((e) => { const b = document.createElement("div"); b.style = "overflow:auto;height:60px"; e.replaceWith(b); b.appendChild(e); });
+    await page.locator("#cb-d").click(); await page.waitForTimeout(60);
+    ok("combobox: floats inside a scroll area", await C1.evaluate((e) => e.classList.contains("float") && Math.abs(e.querySelector(".menu").offsetWidth - e.querySelector(".control").offsetWidth) <= 1));
+    await page.evaluate(() => window.scrollBy({ top: 20, behavior: "instant" })); await page.waitForTimeout(80);
+    ok("combobox: scrolling closes a floated list and keeps focus in the input", await C1.evaluate((e) => !e.classList.contains("open") && !e.classList.contains("float") && document.activeElement === e.querySelector("input[role=combobox]")));
+    await go("components/dropdown.html");
+  }
   await go("components/dropdown.html");   // 뒤의 Dropdown 단정으로 돌아간다
   const menuDd = page.locator(`#ex-dropdown-menu .example-preview .dropdown`).first();
   await menuDd.locator("[aria-haspopup]").click();
@@ -119,11 +323,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("menu dropdown re-opens", await menuDd.evaluate((e) => e.classList.contains("open") && e.querySelector("[aria-haspopup]").getAttribute("aria-expanded") === "true"));
   /* 메뉴 아이콘이 상태를 따르는지 — .menu-item svg 가 tertiary 로 고정해 선택·위험 아이콘이 회색이었다. 실제 예제(Item States)를 잰다 */
   const menuIcon = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll("#ex-dropdown-states .menu-item")].map((li) => {
-    const k = li.classList.contains("on") ? "on" : li.classList.contains("danger") ? "danger" : li.getAttribute("aria-disabled") === "true" ? "off" : "plain";
+    const k = li.classList.contains("danger") ? "danger" : li.getAttribute("aria-disabled") === "true" ? "off" : "plain";
     return [k, [getComputedStyle(li).color, getComputedStyle(li.querySelector("svg")).color]];
   })));
-  ok("menu icon follows the label colour when selected, dangerous or disabled",
-    ["on", "danger", "off", "plain"].every((k) => menuIcon[k]) && ["on", "danger", "off"].every((k) => menuIcon[k][0] === menuIcon[k][1]) && menuIcon.plain[0] !== menuIcon.plain[1], JSON.stringify(menuIcon));
+  ok("menu icon follows the label colour when dangerous or disabled",
+    ["danger", "off", "plain"].every((k) => menuIcon[k]) && ["danger", "off"].every((k) => menuIcon[k][0] === menuIcon[k][1]) && menuIcon.plain[0] !== menuIcon.plain[1], JSON.stringify(menuIcon));
   await page.screenshot({ path: SHOT + "/dropdown.png", clip: await menuDd.boundingBox().then((bb) => ({ x: bb.x - 10, y: bb.y - 10, width: bb.width + 200, height: bb.height + 260 })) });
 
   // Tabs
@@ -832,6 +1036,47 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const clr = page.locator(".example-preview .searchbar .clear").first();
   await clr.click();
   ok("search clear empties + hides", await clr.evaluate((e) => e.closest(".searchbar").querySelector("input").value === "" && e.hidden));
+  /* Search 정비(사람의 결정 2026-11-09) — 입력 지연 · Esc · 단축키 · 건수 알림 */
+  await go("components/search.html");
+  await page.evaluate(() => { window.__sv = []; document.addEventListener("ds:search", (e) => window.__sv.push({ ...e.detail, ex: (e.target.closest("[id^=ex-]") || {}).id })); });
+  const svDrain = () => page.evaluate(() => window.__sv.splice(0));
+  /* 기본 ×는 값이 있고 포커스가 있을 때만 그려지고 getComputedStyle 로는 읽히지 않는다 — 글자를 투명하게 둔 채 값이 있을 때와 없을 때 그림이 같은지 본다 */
+  const xBar = page.locator("#ex-search-extras .searchbar").nth(1), xShot = async (v) => { await xBar.locator("input").evaluate((i, v) => { i.style.color = "transparent"; i.value = v; i.focus(); i.closest(".searchbar").querySelector(".clear").style.visibility = "hidden"; }, v); await page.waitForTimeout(250); const r = await xBar.locator("input").boundingBox(); return page.screenshot({ animations: "disabled", clip: { x: r.x + r.width - 32, y: r.y, width: 32, height: r.height } }); };   // 포커스 링 전환이 끝난 뒤, ×가 그려지는 입력칸 오른쪽 끝만 — 아이콘 SVG 는 다시 그릴 때 안티앨리어싱이 ±3 흔들린다
+  await xShot("");   // 포커스가 자리잡기 전의 첫 캡처는 픽셀이 달라 간헐 실패했다(부하에서 2/20) — 한 번 찍어 버린다
+  const xWith = await xShot("랜섬웨어"), xEmpty = await xShot("");
+  await xBar.locator("input").evaluate((i) => { i.style.color = ""; i.value = "랜섬웨어"; i.closest(".searchbar").querySelector(".clear").style.visibility = ""; });
+  ok("search hides the native clear next to .clear", xWith.equals(xEmpty));
+  const fIn = page.locator("#ex-search-filters .searchbar input");
+  await fIn.focus(); await page.keyboard.type("ab", { delay: 30 }); await page.waitForTimeout(120);
+  const fEarly = await svDrain(); await page.waitForTimeout(350); const fLate = await svDrain();
+  ok("search filter waits for typing to stop, then fires once", fEarly.length === 0 && fLate.length === 1 && fLate[0].value === "ab" && fLate[0].trigger === "input", JSON.stringify({ fEarly, fLate }));
+  await page.keyboard.press("Enter"); const fEnter = await svDrain();
+  await page.keyboard.type("c"); await page.keyboard.press("Enter"); const fEnter2 = await svDrain(); await page.waitForTimeout(350); const fNoTrail = await svDrain();
+  ok("search Enter fires at once and cancels the pending one", fEnter.length === 1 && fEnter[0].trigger === "enter" && fEnter2.length === 1 && fEnter2[0].value === "abc" && fNoTrail.length === 0, JSON.stringify({ fEnter, fEnter2, fNoTrail }));
+  await page.keyboard.press("Escape"); const fEsc = await svDrain();
+  const fEscSt = await page.evaluate(() => { const i = document.querySelector("#ex-search-filters .searchbar input"); return { value: i.value, focus: document.activeElement === i }; });
+  await page.keyboard.press("Escape"); const fEsc2 = await svDrain(); await page.waitForTimeout(350); const fEscTrail = await svDrain();
+  ok("search Esc clears at once, keeps focus, then does nothing", fEsc.length === 1 && fEsc[0].trigger === "clear" && fEscSt.value === "" && fEscSt.focus && fEsc2.length === 0 && fEscTrail.length === 0 && (await page.evaluate(() => document.activeElement.type === "search")), JSON.stringify({ fEsc, fEscSt, fEsc2, fEscTrail }));
+  await page.evaluate(() => { const c = document.querySelectorAll("#ex-search-extras .searchbar")[1], i = c.querySelector("input"); c.setAttribute("data-debounce", ""); i.value = "x"; c.querySelector(".clear").hidden = false; });
+  await page.locator("#ex-search-extras .searchbar .clear").last().click(); const fClr = await svDrain(); await page.waitForTimeout(350); const fClrTrail = await svDrain();
+  ok("search clear button fires once with no trailing event", fClr.length === 1 && fClr[0].trigger === "clear" && fClrTrail.length === 0, JSON.stringify({ fClr, fClrTrail }));
+  const hkIn = page.locator("#ex-search-extras .searchbar[data-hotkey] input"), active = () => page.evaluate(() => { const a = document.activeElement; return a.closest("[data-hotkey]") ? "hotkey" : a.tagName + "#" + a.id; });
+  await page.evaluate(() => document.activeElement.blur()); await page.keyboard.press("/"); await page.waitForTimeout(80);
+  const hk1 = await active(), hkSitePop = await page.evaluate(() => { const q = document.querySelector("#q"); return !!q && q.getClientRects().length > 0; });
+  ok("search / focuses the hotkey input and not the site search", hk1 === "hotkey" && !hkSitePop && (await hkIn.inputValue()) === "", JSON.stringify({ hk1, hkSitePop }));
+  await hkIn.fill("랜섬"); const kbdOn = await page.locator("#ex-search-extras .searchbar kbd").isVisible(); await hkIn.fill(""); const kbdOff = await page.locator("#ex-search-extras .searchbar kbd").isVisible();
+  ok("search kbd hides while there is a value", !kbdOn && kbdOff, JSON.stringify({ kbdOn, kbdOff }));
+  await fIn.focus(); await page.keyboard.type("/"); const hkTyping = await active(), hkValue = await fIn.inputValue(); await page.keyboard.press("Escape"); await svDrain();
+  await page.evaluate(() => document.activeElement.blur()); await page.keyboard.press("Control+/"); const hkCtrl = await active(); await page.keyboard.press("Escape");
+  ok("search / is ignored while typing and with a modifier", hkTyping !== "hotkey" && hkValue === "/" && hkCtrl !== "hotkey", JSON.stringify({ hkTyping, hkValue, hkCtrl }));
+  await page.evaluate(() => { const m = document.createElement("div"); m.id = "fakeModal"; m.setAttribute("aria-modal", "true"); m.textContent = "x"; document.body.append(m); document.activeElement.blur(); }); await page.keyboard.press("/"); const hkModal = await active(); await page.evaluate(() => document.querySelector("#fakeModal").remove());
+  ok("search / is ignored while a modal is open", hkModal !== "hotkey", hkModal);
+  const stEl = await page.evaluate(() => { const s = document.querySelector("#ex-search-filters .searchbar .sr-only"), r = s.getBoundingClientRect(); return { role: s.getAttribute("role"), w: r.width, text: s.textContent }; });
+  ok("search result count is a hidden status", stEl.role === "status" && stEl.w <= 1 && stEl.text === "128건", JSON.stringify(stEl));
+  await page.evaluate(() => { const p = document.createElement("div"); p.className = "popup"; p.setAttribute("role", "dialog"); p.innerHTML = '<div class="searchbar" role="search"><input type="search" value="랜섬" aria-label="검색"></div>'; const h = document.createElement("div"); h.append(p); document.body.append(h); DS.popup.open(p); p.querySelector("input").focus(); });
+  await page.keyboard.press("Escape"); const pop1 = await page.evaluate(() => ({ open: !!document.querySelector(".popup-backdrop[data-ds-popup]"), value: document.querySelector(".popup-backdrop .searchbar input").value }));
+  await page.keyboard.press("Escape"); const pop2 = await page.evaluate(() => !!document.querySelector(".popup-backdrop[data-ds-popup]")); await svDrain();
+  ok("search Esc with a value leaves the dialog open, the next one closes it", pop1.open && pop1.value === "" && !pop2, JSON.stringify({ pop1, pop2 }));
 
   // Date picker — behave.dp.js(오늘을 고정한 별도 컨텍스트, 맨 끝에서 부른다)
 
@@ -848,9 +1093,27 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   } else ok("master group structure", false, "no adjacent .checkbox-group");
   await go("patterns/terms-agreement.html");
   const terms = page.locator(".example-preview .terms").first();
-  ok("terms next enabled initially (required checked)", await terms.locator(".btn.primary").isEnabled());
-  await terms.locator(".item input").first().click();
-  ok("terms next disabled when required unchecked", await terms.locator(".btn.primary").isDisabled());
+  /* '다음' 은 늘 켜 둔다(Interaction › Disabled, 사람의 결정 2026-11-09) — 비활성 대신 누르면 막고 안내한다 */
+  const termsNext = terms.locator(".btn.primary"), termsReq = terms.locator(".item input");
+  const termsState = () => terms.evaluate((e) => ({ msg: e.querySelector(":scope > .msg").textContent, shown: e.querySelector(":scope > .msg").getBoundingClientRect().height > 0, invalid: e.querySelectorAll('.item input[aria-invalid="true"]').length }));
+  ok("terms next enabled initially (required checked)", await termsNext.isEnabled());
+  await termsReq.nth(0).click(); await termsReq.nth(1).click();
+  const termsQuiet = await termsState();
+  ok("terms next stays enabled and quiet until pressed", await termsNext.isEnabled() && !termsQuiet.shown && termsQuiet.invalid === 0, JSON.stringify(termsQuiet));
+  await termsNext.evaluate((b) => { window.__termsHit = 0; b.addEventListener("click", () => window.__termsHit++); });
+  await termsNext.click();
+  const termsBlocked = await termsState();
+  ok("terms press with missing required names the count", /2개/.test(termsBlocked.msg) && termsBlocked.shown && termsBlocked.invalid === 2, JSON.stringify(termsBlocked));
+  ok("terms press moves focus to the first missing item", await termsReq.nth(0).evaluate((i) => i === document.activeElement));
+  ok("terms press does not reach the button's own listener", await page.evaluate(() => window.__termsHit === 0));
+  await termsReq.nth(0).click();
+  const termsPartial = await termsState();
+  ok("terms fixing one lowers the count at once", /1개/.test(termsPartial.msg) && termsPartial.invalid === 1, JSON.stringify(termsPartial));
+  await termsReq.nth(1).click();
+  const termsFixed = await termsState();
+  ok("terms fixing all clears the message", termsFixed.msg === "" && !termsFixed.shown && termsFixed.invalid === 0, JSON.stringify(termsFixed));
+  await termsNext.click();
+  ok("terms press with required checked reaches the listener", await page.evaluate(() => window.__termsHit === 1));
   await terms.locator(".all input").click();
   ok("terms all → all checked + enabled", await terms.evaluate((e) => [...e.querySelectorAll(".item input")].every((i) => i.checked) && !e.querySelector(".btn.primary").disabled));
 
@@ -969,6 +1232,63 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const cf = page.locator("#ex-text-field-affix .example-preview .field").filter({ has: page.locator(".counter") }).first();
   await cf.locator("input").fill("새 정책");
   ok("text field counter updates", (await cf.locator(".counter").textContent()) === "4 / 80");
+  /* Text Field 정비(사람의 결정 2026-11-09) — placeholder · 입력 검증 · 글자 수 한도 · 비밀번호 표시 */
+  const phColor = () => page.evaluate(() => { const p = document.createElement("i"); p.style.color = "var(--foreground-neutral-tertiary)"; document.body.append(p); const want = getComputedStyle(p).color; p.remove();
+    const inp = document.querySelector(".example-preview .field input[placeholder], .example-preview .searchbar input[placeholder]"), sel = document.querySelector(".example-preview .dropdown .trigger .placeholder");
+    return { want, got: inp ? getComputedStyle(inp, "::placeholder").color : getComputedStyle(sel).color }; });
+  const phs = [await phColor()]; for (const p of ["components/search.html", "components/select.html"]) { await go(p); phs.push(await phColor()); }
+  ok("placeholder is tertiary in text field, search, select", phs.every((x) => x.got === x.want), JSON.stringify(phs));
+  await go("patterns/input-form.html");
+  await page.evaluate(() => { window.__alive = true; window.__reached = 0; window.__ev = []; const f = document.querySelector("#ex-input-form-validate form"); f.addEventListener("submit", () => window.__reached++); f.addEventListener("ds:validate", (e) => window.__ev.push(e.detail)); });
+  const vf = page.locator("#ex-input-form-validate form"), vin = (id) => vf.locator("#" + id), vst = (id) => vf.evaluate((f, id) => { const i = f.querySelector("#" + id), fd = i.closest(".field"), h = fd.querySelector(":scope > .help"); return { err: fd.classList.contains("error"), help: h.textContent, live: h.getAttribute("aria-live"), described: (i.getAttribute("aria-describedby") || "").split(" ").includes(h.id), invalid: i.getAttribute("aria-invalid"), value: i.value }; }, id);
+  await vin("v1").focus(); await page.keyboard.press("Tab");
+  const vEmpty = await vst("v1");
+  ok("validate: tabbing past an untouched empty field says nothing", !vEmpty.err && vEmpty.help === "2~40자", JSON.stringify(vEmpty));
+  await vin("v2").fill("10.0.0"); await page.keyboard.press("Tab");
+  const vBad = await vst("v2");
+  ok("validate: leaving a wrong field shows its message and keeps the value", vBad.err && vBad.help === "올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12" && vBad.value === "10.0.0" && vBad.invalid === "true", JSON.stringify(vBad));
+  ok("validate: message region is aria-live and described by the input", vBad.live === "polite" && vBad.described, JSON.stringify(vBad));
+  await vin("v2").fill("10.0.0.12");
+  const vFix = await vst("v2");
+  ok("validate: fixing clears the error at once and restores the help", !vFix.err && vFix.help === "IPv4 형식" && vFix.invalid === null, JSON.stringify(vFix));
+  const vSubmit = () => vf.locator('button[type="submit"]').click();
+  await vSubmit();
+  const vBlocked = await page.evaluate(() => { const f = document.querySelector("#ex-input-form-validate form"), s = f.querySelector(":scope > [data-form-summary]"); return { reached: window.__reached, focus: document.activeElement.id, title: s && s.querySelector("b").textContent, labels: s && s.querySelector(":scope > div > span").textContent, icon: !!(s && s.querySelector(":scope > .ico > svg")), first: f.firstElementChild === s, role: s && s.getAttribute("role"), errs: f.querySelectorAll(".field.error").length, ev: window.__ev[window.__ev.length - 1] }; });
+  ok("validate: submit is blocked before product handlers, focus on first error", vBlocked.reached === 0 && vBlocked.focus === "v1" && vBlocked.errs === 3, JSON.stringify(vBlocked));
+  ok("validate: three or more errors get a summary on top", vBlocked.first && vBlocked.icon && vBlocked.role === "alert" && vBlocked.title === "입력값 3개를 확인하세요" && vBlocked.labels === "정책 이름, 보관 기간, 알림 이메일", JSON.stringify(vBlocked));
+  ok("validate: ds:validate reports the errors", vBlocked.ev && vBlocked.ev.valid === false && vBlocked.ev.errors.length === 3 && vBlocked.ev.errors[0].message === "필수 항목입니다. 값을 입력하세요.", JSON.stringify(vBlocked.ev));
+  await vin("v1").fill("외부 USB 차단");
+  ok("validate: summary goes away under three errors", (await vf.locator(":scope > [data-form-summary]").count()) === 0);
+  await vin("v3").fill("500"); await page.keyboard.press("Tab");
+  const vMax = await vst("v3");
+  ok("validate: range message carries the limit", vMax.help === "값이 너무 큽니다. 365 이하 입력하세요.", JSON.stringify(vMax));
+  await vin("v3").fill("90"); await vin("v4").fill("admin@example.com");
+  await vin("v1").fill("가".repeat(41));
+  const vOver = await vst("v1");
+  await vSubmit();
+  const vOverBlocked = await page.evaluate(() => window.__reached);
+  ok("validate: over the limit still types, says so, and blocks submit", vOver.value.length === 41 && vOver.err && vOver.help === "글자 수가 1자 넘었습니다. 40자 이하로 줄이세요." && vOverBlocked === 0, JSON.stringify({ vOver, vOverBlocked }));
+  await vin("v1").fill("외부 USB 차단"); await vSubmit();
+  const vPass = await page.evaluate(() => ({ reached: window.__reached, alive: window.__alive === true, valid: window.__ev[window.__ev.length - 1].valid, err: document.querySelectorAll("#ex-input-form-validate .field.error").length }));
+  ok("validate: a clean form reaches the handler and the preview does not reload", vPass.reached === 1 && vPass.alive && vPass.valid && vPass.err === 0, JSON.stringify(vPass));
+  const vGap = await vf.evaluate((f) => { const fd = f.querySelector("#v4").closest(".field"); return fd.getBoundingClientRect().bottom - f.querySelector("#v4").getBoundingClientRect().bottom; });
+  ok("empty help takes no room", Math.abs(vGap) < 0.5, String(vGap));
+  /* 도움말 칸을 적지 않은 폼도 ds.js 가 라이브 영역을 만들어 둔다 — 예제 마크업에는 이미 적혀 있어 따로 잰다 */
+  const vBare = await page.evaluate(() => { const box = document.createElement("div"); box.innerHTML = '<form data-validate class="form"><div class="field"><label for="bare">이름</label><input id="bare" required></div></form>'; document.querySelector("#ex-input-form-validate .example-preview").append(box); DS.init(box); const i = box.querySelector("input"), h = box.querySelector(".help"), r = { live: h && h.getAttribute("aria-live"), described: !!h && i.getAttribute("aria-describedby") === h.id, off: box.querySelector("form").noValidate }; box.remove(); return r; });
+  ok("validate: a field without help markup still gets a live region", vBare.live === "polite" && vBare.described && vBare.off, JSON.stringify(vBare));
+  await go("components/text-field.html");
+  const cf2 = page.locator("#ex-text-field-affix .example-preview .field").filter({ has: page.locator(".counter") }).first();
+  await cf2.locator("input").fill("가".repeat(81));
+  const over = await cf2.evaluate((f) => ({ len: f.querySelector("input").value.length, counter: f.querySelector(".counter").textContent, cOver: f.querySelector(".counter").classList.contains("over"), err: f.classList.contains("error"), help: f.querySelector(".help").textContent, c: getComputedStyle(f.querySelector(".counter")).color, h: getComputedStyle(f.querySelector(".help")).color }));
+  await cf2.locator("input").fill("가".repeat(80));
+  const under = await cf2.evaluate((f) => ({ cOver: f.querySelector(".counter").classList.contains("over"), err: f.classList.contains("error"), help: f.querySelector(".help").textContent }));
+  ok("soft limit outside a form: types past it, errors, counter turns red", over.len === 81 && over.counter === "81 / 80" && over.cOver && over.err && over.help === "글자 수가 1자 넘었습니다. 80자 이하로 줄이세요." && over.c === over.h, JSON.stringify(over));
+  ok("soft limit outside a form: back under clears it", !under.cOver && !under.err && under.help === "", JSON.stringify(under));
+  const rv = page.locator("#ex-text-field-password .example-preview"), rvState = () => rv.evaluate((p) => { const i = p.querySelector("input"), b = p.querySelector(".reveal"); return { type: i.type, pressed: b.getAttribute("aria-pressed"), value: i.value, show: getComputedStyle(b.querySelector(".i-show")).display, hide: getComputedStyle(b.querySelector(".i-hide")).display, focus: document.activeElement === b, name: b.getAttribute("aria-label"), w: b.getBoundingClientRect().width }; });
+  const rv0 = await rvState(); await rv.locator(".reveal").click(); const rv1 = await rvState(); await rv.locator(".reveal").click(); const rv2 = await rvState();
+  ok("password reveal: type, aria-pressed, icon swap, value and focus stay", rv0.type === "password" && rv0.pressed === "false" && rv0.hide === "none" && rv0.show !== "none" && rv0.name === "비밀번호 표시" && rv1.type === "text" && rv1.pressed === "true" && rv1.show === "none" && rv1.hide !== "none" && rv1.focus && rv1.value === rv0.value && rv2.type === "password" && rv2.pressed === "false", JSON.stringify([rv0, rv1, rv2]));
+  const monoF = await page.evaluate(() => { const a = document.querySelector("#ip1"), b = document.querySelector("#af-d"); return { a: getComputedStyle(a).fontFamily, b: getComputedStyle(b).fontFamily, field: a.closest(".field").classList.contains("mono") }; });
+  ok(".mono uses the mono stack", monoF.field && monoF.a !== monoF.b, JSON.stringify(monoF));
   /* 비활성 입력칸의 면은 비활성 토큰, 읽기 전용은 읽기 전용 면 — :read-only 가 disabled 에도 맞아 비활성 면을 덮었다(2026-10-27) */
   const tfState = await page.evaluate(() => { const box = document.querySelector("#ex-text-field-state .example-preview"), dis = box.querySelector("input:disabled"), ro = box.querySelector("input[readonly]:not(:disabled)"), tok = (v) => { const d = document.createElement("div"); d.style.background = `var(${v})`; document.body.append(d); const c = getComputedStyle(d).backgroundColor; d.remove(); return c; };
     return { dis: getComputedStyle(dis).backgroundColor, ro: getComputedStyle(ro).backgroundColor, wantDis: tok("--surface-disable-primary"), wantRo: tok("--background-neutral-secondary") }; });
@@ -1436,7 +1756,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     heads: [...document.querySelectorAll('#content h2[id^="ex-"]')].map((h) => h.textContent).join(" / "),
     toc: [...document.querySelectorAll("#toc a")].map((a) => a.textContent).join(" / "),
   }));
-  ok("pattern page matches the component layout", !pm.examplesH2 && pm.heads === "1. 기본 폼 / 2. 오류 상태", JSON.stringify(pm));
+  ok("pattern page matches the component layout", !pm.examplesH2 && pm.heads === "1. 기본 폼 / 2. 오류 상태 / 3. 제출 검증", JSON.stringify(pm));
   await go("patterns/dashboard.html");
   const one = await page.evaluate(() => ({
     heads: document.querySelectorAll('#content h2[id^="ex-"]').length,
