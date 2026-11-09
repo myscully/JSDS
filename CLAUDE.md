@@ -12,7 +12,7 @@
 | `_build/base-tokens.js` | 기준 시스템의 토큰 정의를 코드로 옮긴 대장. `DEVIATIONS`(값을 바꾼 것) · `ADDITIONS`(우리가 더한 것) |
 | `_build/ds-chart.src.js` | **원본.** 탐색형 차트(Chart.js) 테마 어댑터 + 프리셋. `assets/ds-chart.js` 로 복사되고 React 는 `_react/scripts/sync-chart.mjs` 가 `src/chart/ds-chart.js`(생성물)로 가져갑니다. Chart.js 본체는 `_build/node_modules` 에서 `assets/vendor/` 로 복사(MIT) |
 | `_react/` | **원본.** `@jiran/ds-react` 패키지. `dist/` 는 생성물이라 git 에 없습니다 |
-| `_figma/` | **원본.** Figma 작업 도구 — `font.js`(폰트 안전 로더) · `probe.js`(조사) · `audit.mjs`(대조) · `font-revert.md`(Noto 대체 경과 · 되돌릴 노드 · 굵기를 고칠 노드 — 목록은 같은 폴더의 `.tsv` 셋) |
+| `_figma/` | **원본.** Figma 작업 도구 — `font.js`(폰트 안전 로더) · `probe.js`(조사) · `audit.mjs`(대조) · `dumps/baseline.json`(audit 기준 덤프) · `font-revert.md`(Noto 대체 경과 · 되돌릴 노드 · 굵기를 고칠 노드 — 목록은 같은 폴더의 `.tsv` 셋) |
 | `assets/` `home/` `foundations/` `components/` `patterns/` `resources/` `index.html` | **전부 생성물.** 직접 고치지 말고 `_build/` 를 고친 뒤 빌드하세요. `assets/vendor/chart.umd.js` · `assets/ds-chart.js` 도 생성물 |
 
 ## 일하는 방식
@@ -145,6 +145,13 @@ taste-skill(github.com/Leonxlnx/taste-skill, MIT, 2.5.0)은 **설치하지 않�
   흐리게 하지 않습니다.
 
 ## Figma
+
+> **임시 규칙 — 2026-11-09 부터 사이트 완성 때까지 Figma 반영 보류(사람의 결정 — 일정).**
+> - `use_figma` 로 Figma 를 고치지 않습니다. 결정이 자주 뒤집히고 Figma 한 번이 10~34분이라, 사이트가 끝난 뒤 한 번에 검토 · 반영합니다.
+> - 대신 사이트를 고칠 때마다 기준 덤프로 audit 을 돌립니다: `node _figma/audit.mjs diff _figma/dumps/baseline.json`.
+>   알려진 `Label/2 SemiBold: 굵기 700 ≠ 600` 1건을 뺀 ✗ 수를 커밋 메시지에 **'Figma 미반영 n건'** 으로 적습니다. 기준선(2026-11-09, k42b 덤프)은 0건입니다.
+> - 기대값은 대부분 저장소에서 읽으므로 사이트를 고치면 audit 이 저절로 따라옵니다. 새 검사에 Figma 쪽 데이터가 필요하면 `audit.mjs` 만 고치고, `probe.js` 수정은 일괄 반영 때 합니다.
+> - **끝나는 조건:** 사이트가 완성되면 전체 probe → audit 목록 → figma-sync 로 고침 → 어긋남 0 → 데스크톱 검토 한 번 → `baseline.json` 을 새 덤프로 바꾸고 이 블록을 지웁니다.
 
 파일 `ngyAZOP9Icjzw9KWyl4RdV`. 현재 쓰는 페이지는 `Overview` · `1 Theme` · `2 Element` ·
 `3 Component` · `4 Pattern` · `Resource` 이고, 구분선 아래 v0.3 페이지들은 아카이브입니다.
