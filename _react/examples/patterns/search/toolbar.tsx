@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Chip, DataTable, DatePicker, Icon, Indicator, Pagination, PaginationBar, SearchBar, Select, Spacer, Stack, Tag, Toolbar, type DataTableColumn } from "@jiran/ds-react";
+import { Button, Chip, DataTable, DateRangePicker, Icon, Indicator, Pagination, PaginationBar, SearchBar, Select, Spacer, Stack, Tag, Toolbar, type DataTableColumn } from "@jiran/ds-react";
 
 type Row = { id: string; time: string; sev: "critical" | "high"; event: string; target: string; status: "blocked" | "review" };
 const ROWS: Row[] = [
@@ -27,7 +27,7 @@ export default function Example() {
       <Toolbar>
         <SearchBar placeholder="이벤트, 단말, IP 검색" wrapperStyle={{ minWidth: 320 }} />
         <Select options={[{ value: "2", label: "심각도: 2" }]} defaultValue="2" triggerStyle={{ minWidth: 140, height: 40 }} />
-        <DatePicker mode="range" max={today} presets={PRESETS} defaultValue={{ start: daysAgo(6), end: today }} displayText="최근 7일" triggerStyle={{ height: 40, minWidth: 200 }} />
+        <DateRangePicker aria-label="조회 기간" max={today} presets={PRESETS} defaultValue={{ start: daysAgo(6), end: today }} />
         <Spacer />
         <Button variant="outline" color="assistive" iconLeft={<Icon name="download" />}>내보내기</Button>
       </Toolbar>

@@ -33,6 +33,9 @@ for (const sec of ["components", "patterns"]) {
       if (spec && kind !== "donut") { const n = (spec.series || []).length + (spec.bars || []).length + (spec.lines || []).length; if (n > 6) fails.push(`${f}: ${kind} 차트 계열 ${n}개 — 계열 색은 6개 고정, 7번째부터는 '기타'로 묶는다`); }
     }
     if (/<canvas[^>]*data-chart=/.test(body) !== /<script src="[^"]*assets\/ds-chart\.js" defer>/.test(html)) fails.push(`${f}: 차트 canvas 와 ds-chart.js 스크립트가 함께 있어야 한다(한쪽만 있음)`);
+    /* Date Picker 의 기준 시간대(data-timezone)는 dayjs + utc · timezone 플러그인이 있어야 계산된다 — Date Picker 가 있는 페이지에만 셋이 함께 실린다 */
+    const dayjsTags = ["dayjs.min.js", "dayjs.utc.js", "dayjs.timezone.js"].filter((n) => html.includes(`assets/vendor/${n}" defer>`)).length;
+    if (LIB.hasDatePicker(body) ? dayjsTags !== 3 : dayjsTags !== 0) fails.push(`${f}: Date Picker 와 dayjs 스크립트 3개(dayjs · utc · timezone)가 함께 있어야 한다 — 마크업 ${LIB.hasDatePicker(body) ? "있음" : "없음"}, 스크립트 ${dayjsTags}개`);
     for (const m of body.matchAll(/data-copy="([^"]+)"/g)) if (!new RegExp(`id="${m[1]}"`).test(body)) fails.push(`${f}: data-copy 대상 #${m[1]} 없음`);
     for (const ex of body.split('<section class="example"').slice(1)) { if (!/data-pane="html"/.test(ex) || !/data-pane="react"/.test(ex)) fails.push(`${f}: example 에 html/react pane 누락`); if (!/@jiran\/ds-react/.test(ex)) (sec === "components" ? fails : warns).push(`${f}: React 탭이 패키지 코드가 아님(htmlToJsx 폴백)`); }
     if (!/<title>[^<]+<\/title>/.test(html)) fails.push(`${f}: title 없음`);

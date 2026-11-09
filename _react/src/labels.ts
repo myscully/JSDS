@@ -30,7 +30,8 @@ export const LABELS = {
   backToDays: "날짜로 돌아가기",
   backToMonths: "월 선택으로",
   /* 날짜 직접 입력 검사 — 원인 + 고치는 법(Text Field 오류 문구 규칙) */
-  dateFormatError: "날짜 형식이 올바르지 않습니다. 예: ",
+  dateIncompleteError: "날짜를 끝까지 입력하세요. 예: ",
+  dateInvalidError: "없는 날짜입니다. 예: ",
   dateMinError: " 이후 날짜를 입력하세요",
   dateMaxError: " 이전 날짜를 입력하세요",
   dateOrderError: "종료일이 시작일보다 빠릅니다",

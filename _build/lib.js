@@ -216,6 +216,9 @@
     return out;
   }
 
-  const api = { esc, dedent, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  /* Date Picker(.datepicker · 단독 .calendar)가 있는 마크업인가 — build 가 dayjs 를 실을 페이지를 고르고 verify 가 짝을 본다 */
+  function hasDatePicker(html) { return /\sclass="(?:[^"]*\s)?(?:datepicker|calendar)(?:\s[^"]*)?"/.test(html); }
+
+  const api = { esc, dedent, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);

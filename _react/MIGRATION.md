@@ -180,6 +180,28 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 새 props: `mode="month"` · `calendars={2}` · `footer={["today","reset","cancel","apply"] | false}` · `allowTyping` · `help` · `error` ·
 `messages` · `size` · `readOnly` · `required` · `inputId`. 새 함수: `parseDate` · `parseMonth` · `formatMonth`.
 
+## Date Picker (2026-11-09)
+
+필드가 **Text Field 입력 하나**가 됐습니다. 버튼형 필드(`.field-btn`)는 없어졌고, 숫자를 치면 `YYYY. MM. DD` 로 끊어 채웁니다(locale 과 무관하게 고정).
+값이 늘 유효한 날짜는 아니게 됐으므로 **`onChange` 를 받는 곳은 꼭 확인하세요.** 날짜 계산에는 dayjs(MIT, 1.11.13 고정)가 패키지 dependency 로 들어옵니다 — 쓰는 쪽에서 import 할 것은 없습니다.
+
+| 전 | 지금 (React) | 지금 (클래스) |
+| --- | --- | --- |
+| `onChange(value: Date \| null)` — 유효한 날짜만 | `onChange(value, { text, validity })`. `validity` 는 `empty · incomplete · invalid · min · max · order · valid`. 덜 친 · 없는 날짜면 `value` 가 **Invalid Date**(`isNaN(value.getTime())`), 범위 밖 · 순서가 뒤집힌 기간이면 그 날짜가 그대로 옵니다 | `ds:date` detail `{ value, start, end, date, text, validity }` · host 의 `data-validity` |
+| 범위 밖 입력은 거부하고 이전 값 유지 | 키보드 입력(직접 치기 · ↑↓)으로는 범위 밖도 들어가고 오류로 알립니다. 달력 칸은 지금처럼 고를 수 없습니다 | 같음 |
+| `mode="range"` | `<DateRangePicker>` — 값은 `{ start, end }`, 달력 **두 개**가 기본(`calendars={1}` 로 하나, 767px 이하는 자동으로 하나). `mode="range"` 는 경고하고 DateRangePicker 로 동작합니다 | `.datepicker.field[data-range]` · `data-calendars="1"` |
+| `mode="month"` | `unit="month"`(그리고 새 `unit="year"`). `mode="month"` 는 경고하고 `unit="month"` 로 동작합니다 | `data-unit="month"` · `"year"` |
+| `allowTyping` · `triggerStyle` · `displayText` | 없음 — 늘 입력형입니다. 주면 경고하고 무시합니다 | `.field-btn` 없음 → `.datepicker.field > .affix > input + .cal-btn` |
+| 값 표기 `YYYY-MM-DD` | 필드 `YYYY. MM. DD` · `YYYY. MM` · `YYYY`. 붙여 넣은 `2026-9-7` · `20260907` 도 형식으로 바꿉니다. ↑↓ 는 커서가 놓인 조각을 ±1 | 같음. `data-value` 등 속성은 기계 형식 그대로(`YYYY-MM-DD`) |
+| 한국어 고정 | `locale`(기본 `ko-KR`) — 제목 · 요일 · 월 이름 · 날짜 칸 이름 · '오늘' 을 Intl 로. 나머지 문구는 `labels` 로 바꿉니다 | `data-locale` |
+| 환경 시간대 고정 | `timezone`(기본 사용자 환경, `"UTC"` · IANA 이름) — '오늘' 과 내보내는 순간(그 시간대의 0시)이 바뀝니다. 틀린 이름은 경고하고 환경 시간대로 | `data-timezone` + `assets/vendor/dayjs*.js`(Date Picker 페이지에 빌드가 붙임) |
+| `messages.format` | `messages.incomplete` · `messages.invalid` 로 나뉨(`format` 을 주면 둘 다에 씁니다) | — |
+| 라벨 `LABELS.dateFormatError` | `dateIncompleteError` · `dateInvalidError` | — |
+| — | `defaultText` — 덜 친 글자를 처음부터 보일 때 | 입력의 `value` |
+| 선택 칸 | 둥근 사각형 | 지름 34 원. 기간 양끝은 칸 반쪽에 띠가 이어집니다(`.day.start` · `.day.end` 가 미리보기 끝에도 붙음) |
+
+새로 내보내는 컴포넌트 · 함수 · 타입: `DateRangePicker` · `parseYear` · `DateRangePickerProps` · `DateRangeValue` · `DateChangeInfo` · `DateUnit` · `DateValidity` · `DatePickerLabels`.
+
 ## Button (2026-10-28)
 
 Button 정의를 다시 내렸습니다. 형태(`variant`: solid · outline)와 색(`color`: primary · assistive · negative)을 나누고,

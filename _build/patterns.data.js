@@ -164,7 +164,7 @@ const PATTERNS = {
   },
 
   "search": {
-    status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "chip", "select", "date-picker", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack"],
+    status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "chip", "select", "date-picker", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack"], borrows: [".field"],
     desc: "검색 + 필터 + 결과 목록의 조회 화면 패턴입니다. 조건은 항상 보이고, 결과 수와 적용 중인 필터를 함께 보여줍니다.",
     thumb: `<div class="toolbar" style="width:240px"><div class="searchbar" style="min-width:0;flex:1;height:32px">${I("search")}<input placeholder="검색"></div><button class="chip sm on">Critical</button></div>`,
     principles: [["툴바", "검색(좌) · 필터 드롭다운 · 기간 · 여백 · 액션(우)"], ["필터 표시", "적용 중인 필터는 Chip 으로, 결과 수는 툴바 아래"], ["빈 결과", "빈 화면 패턴 + 필터 초기화"]],
@@ -174,7 +174,7 @@ const PATTERNS = {
           <div class="toolbar">
             <div class="searchbar" role="search" style="min-width:320px">${I("search")}<input type="search" placeholder="이벤트, 단말, IP 검색" aria-label="검색"></div>
             <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" style="min-width:140px;height:40px">심각도: 2</button></div>
-            <div class="datepicker" data-mode="range" data-max="today" data-presets="7 30" data-default-preset="7"><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false" style="height:40px;min-width:200px">2026-10-21 <span class="sep">~</span> 2026-10-27${I("calendar")}</button></div>
+            <div class="datepicker field" data-range data-max="today" data-presets="7 30" data-default-preset="7"><div class="affix"><input value="2026. 10. 21 ~ 2026. 10. 27" placeholder="YYYY. MM. DD ~ YYYY. MM. DD" inputmode="numeric" autocomplete="off" aria-label="조회 기간"><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div></div>
             <span class="spacer"></span>
             <button type="button" class="btn md outline assistive">${I("download")}내보내기</button>
           </div>

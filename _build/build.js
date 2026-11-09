@@ -50,6 +50,10 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   fs.copyFileSync(path.join(CHART_PKG, "dist", "chart.umd.js"), path.join(OUT, "assets", "vendor", "chart.umd.js"));
   fs.copyFileSync(path.join(CHART_PKG, "LICENSE.md"), path.join(OUT, "assets", "vendor", "chart.LICENSE.md"));
   fs.writeFileSync(path.join(OUT, "assets", "ds-chart.js"), fs.readFileSync(path.join(__dirname, "ds-chart.src.js"), "utf8"));
+  /* Date Picker 기준 시간대 — dayjs(MIT, 1.11.13 고정) + utc · timezone 플러그인. ds.js 는 data-timezone 이 있을 때 window.dayjs 를 쓴다(없으면 환경 시간대).
+     Date Picker(.datepicker · .calendar)가 있는 페이지에만 싣는다(아래 datePage) */
+  const DAYJS_PKG = path.join(__dirname, "node_modules", "dayjs");
+  for (const [from, to] of [["dayjs.min.js", "dayjs.min.js"], ["plugin/utc.js", "dayjs.utc.js"], ["plugin/timezone.js", "dayjs.timezone.js"], ["LICENSE", "dayjs.LICENSE"]]) fs.copyFileSync(path.join(DAYJS_PKG, from), path.join(OUT, "assets", "vendor", to));
   const index = routes.map(r => ({ t: r.title, s: r.secTitle, g: r.group, u: rel(r.sec, r.key, "") }));
   fs.writeFileSync(path.join(OUT, "assets", "app.js"),
     `// 공용 스크립트(생성됨): 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭. 원본은 _build/app.src.js\nconst SEARCH_INDEX=${JSON.stringify(index)};\nconst PRODUCTS=${JSON.stringify(PRODUCTS)};\nconst ROOT=document.body.dataset.root||'../';\n` + fs.readFileSync(path.join(__dirname, "app.src.js"), "utf8"));
@@ -76,6 +80,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
     const parts = await p.evaluate(() => ({ content: document.getElementById("content").innerHTML, nav: document.getElementById("nav").innerHTML, topnav: document.getElementById("topnav").innerHTML, title: document.title, foot: document.getElementById("foot").textContent }));
     const isHome = isOverview(r.sec, r.key);
     const chartPage = /<canvas[^>]*\bdata-chart=/.test(parts.content);   // 탐색형 차트가 있는 페이지에만 Chart.js · ds-chart.js
+    const datePage = LIB.hasDatePicker(parts.content);   // Date Picker 가 있는 페이지에만 dayjs(기준 시간대)
     const topnavOf = root => rewrite(parts.topnav, root).replace(/href="([^"]*)index\.html"/, `href="$1home/${HOME_FIRST}.html"`);
     const navOf = root => rewrite(parts.nav, root).replace(/<a href="[^"]*index\.html"[^>]*>Overview(?:<span[^>]*>[^<]*<\/span>)?<\/a>/, "");
     const page = ({ root, full, topActive }) => `<!doctype html>
@@ -89,7 +94,10 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 <script src="${root}assets/app.js" defer></script>
 <script src="${root}assets/ds.js" defer></script>${chartPage ? `
 <script src="${root}assets/vendor/chart.umd.js" defer></script>
-<script src="${root}assets/ds-chart.js" defer></script>` : ""}
+<script src="${root}assets/ds-chart.js" defer></script>` : ""}${datePage ? `
+<script src="${root}assets/vendor/dayjs.min.js" defer></script>
+<script src="${root}assets/vendor/dayjs.utc.js" defer></script>
+<script src="${root}assets/vendor/dayjs.timezone.js" defer></script>` : ""}
 </head>
 <body data-section="${r.sec}" data-page="${full ? "index" : r.key}" data-root="${root || "./"}">
 <header class="header">

@@ -1,4 +1,4 @@
-import { forwardRef, type CSSProperties, type HTMLAttributes, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from "react";
+import { forwardRef, type CSSProperties, type HTMLAttributes, type InputHTMLAttributes, type ReactNode, type Ref, type TextareaHTMLAttributes } from "react";
 import { cx } from "../../utils/cx";
 import { useId } from "../../utils/useId";
 import type { Size } from "../../types";
@@ -23,11 +23,13 @@ export interface FieldProps extends FieldOwnProps, Omit<HTMLAttributes<HTMLDivEl
   /** help 요소 id — 컨트롤의 aria-describedby 에 넣는다 */
   helpId?: string;
   children?: ReactNode;
+  /** 도움말 뒤에 둘 것 — 필드에 붙는 팝오버(Date Picker 의 달력) */
+  after?: ReactNode;
 }
 
 /** 라벨 · 컨트롤 · 도움말을 묶는 필드 셸. TextField/TextArea 가 사용하고, Dropdown 등 다른 컨트롤도 감쌀 수 있다 */
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
-  { label, required, help, error, size = "md", counter, htmlFor, helpId, className, children, ...rest },
+  { label, required, help, error, size = "md", counter, htmlFor, helpId, className, children, after, ...rest },
   ref,
 ) {
   const helpText = typeof error === "string" || (error && typeof error !== "boolean") ? error : help;
@@ -53,6 +55,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
           {helpText}
         </span>
       )}
+      {after}
     </div>
   );
 });
@@ -68,11 +71,17 @@ export interface TextFieldProps extends FieldOwnProps, InputBase {
   /** 래퍼(.field) 스타일 */
   wrapperStyle?: CSSProperties;
   wrapperClassName?: string;
+  /** .affix 안 입력 뒤에 그대로 둘 컨트롤(span 으로 감싸지 않는다) — Date Picker 의 달력 버튼 */
+  trailing?: ReactNode;
+  /** 래퍼(.field)에 줄 나머지 속성 · ref — 이벤트 · data-* */
+  wrapperProps?: Omit<HTMLAttributes<HTMLDivElement>, "className" | "style" | "children"> & { ref?: Ref<HTMLDivElement> };
+  /** 래퍼 안 도움말 뒤에 둘 것(팝오버) */
+  after?: ReactNode;
 }
 
 /** 한 줄 텍스트 입력 */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, required, help, error, size, prefix, suffix, showCount, wrapperStyle, wrapperClassName, id: idProp, className, maxLength, value, defaultValue, ...rest },
+  { label, required, help, error, size, prefix, suffix, showCount, wrapperStyle, wrapperClassName, trailing, wrapperProps, after, id: idProp, className, maxLength, value, defaultValue, ...rest },
   ref,
 ) {
   const id = useId(idProp);
@@ -95,12 +104,13 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
     />
   );
   return (
-    <Field label={label} required={required} help={help} error={error} size={size} counter={counter} htmlFor={id} helpId={helpId} style={wrapperStyle} className={wrapperClassName}>
-      {prefix !== undefined || suffix !== undefined ? (
+    <Field {...wrapperProps} label={label} required={required} help={help} error={error} size={size} counter={counter} htmlFor={id} helpId={helpId} style={wrapperStyle} className={wrapperClassName} after={after}>
+      {prefix !== undefined || suffix !== undefined || trailing !== undefined ? (
         <div className="affix">
           {prefix !== undefined && <span>{prefix}</span>}
           {input}
           {suffix !== undefined && <span>{suffix}</span>}
+          {trailing}
         </div>
       ) : (
         input

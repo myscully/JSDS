@@ -367,8 +367,9 @@ const FOCUS_CSS = [
   { set: "Text Field", state: "Error Focused", base: ".field input", rule: ".field.error input:focus" },
   { set: "Search", state: "Focused", base: ".searchbar", rule: ".searchbar:has(input:focus)" },
   { set: "Select", state: "Focused", base: ".dropdown .trigger", rule: ".dropdown .trigger:focus-visible" },
-  { set: "Date Picker", state: "Focused", base: ".datepicker .field-btn", rule: ".datepicker .field-btn:focus-visible" },
-  { set: "Date Picker", state: "Error Focused", base: ".datepicker .field-btn", rule: ".datepicker.error .field-btn:focus-visible" },   // k14 — 입력형(.affix)은 datePickerExpect 가 따로 본다
+  /* 2026-11-09 버튼형 필드(.field-btn)를 없앴다 — Date Picker 는 Text Field 셸(.affix) 하나 */
+  { set: "Date Picker", state: "Focused", base: ".field .affix", rule: ".field .affix:has(input:focus)" },
+  { set: "Date Picker", state: "Error Focused", base: ".field .affix", rule: ".field.error .affix:has(input:focus)" },
 ];
 /* Button 은 2026-10-28 k16 에 뺐다 — 사람의 정의로 포커스는 상태가 아니라 코드의 전역 :focus-visible 이고 Figma 에 Focused 변형을 두지 않는다(btnMatrix 가 남은 Focused 를 낸다) */
 const RING_SETS = ["Checkbox", "Radio Button", "Switch", "Slider"];
@@ -442,7 +443,10 @@ function chipTileExpect() {
    Read-only(입력형만 — 버튼형은 readonly 가 없다) · Error(.error) · Error Focused. 입력형 안쪽 입력칸에는 후광이 없어야 한다(.field .affix input:focus 의 box-shadow:none).
    날짜 칸 상태 — .calendar .day 와 상태 규칙. Start · End 는 .on 에 띠 쪽 모서리 0, In-range · Preview 는 같은 띠, Preview End 는 띠 + inset 1px 선(Figma 는 INSIDE 선),
    Muted(다른 달)는 띠 · 선택 없이 흐린 글자, Focused 는 전역 :focus-visible 외곽선(고리 "Focus Ring" — focusExpect 머리 주석의 표현) */
-const DP_STATES = { Button: ["Default", "Focused", "Open", "Disabled", "Error", "Error Focused"], Input: ["Default", "Focused", "Open", "Disabled", "Read-only", "Error", "Error Focused"] };
+/* 2026-11-09(사람의 요청) — 버튼형(Type=Button)을 없앴다. Figma 에 남은 Type=Button 변형은 '표에 없는 변형' 으로 나온다(지울 것).
+   날짜 칸의 선택은 원(.day.on::before 지름 34 · radius 50%)이고, 기간 양끝은 칸 반쪽만 띠(linear-gradient)다 — 기대값은 Selected · Start · End · Preview End 의
+   면 · 모서리를 원으로 본다(모서리 = 지름 / 2). 반쪽 띠는 probe 가 Figma 쪽 자료를 아직 모으지 않아 대조하지 못한다(probe.js 는 일괄 반영 때 고친다) */
+const DP_STATES = { Input: ["Default", "Focused", "Open", "Disabled", "Read-only", "Error", "Error Focused"] };
 const DP_SIZES = { Small: ".sm", Medium: "", Large: ".lg" };
 /* 달력 화면(2026-10-27 k15) — 사이트 예제의 화면: Calendar(단일 · 일 화면) · Range(기간) · 두 달(Range two, data-calendars=2) · 연 · 월(제목을 눌러 연 → 월).
    달력 안 날짜 칸은 "Day/<상태>" 프레임이고(Blank 는 두 달 보기의 빈 칸 — .day.blank visibility:hidden), 면 · 글자는 Calendar Day 상태 기대값과 같아야 한다.
@@ -457,7 +461,6 @@ function datePickerExpect() {
     const T = (sel, prop) => need(figTok(cssRule(sel)[prop]), sel + " " + prop);
     const fields = {};
     for (const [type, base, sz, rules] of [
-      ["Button", ".datepicker .field-btn", (k) => `.datepicker${k} .field-btn`, { Focused: ".datepicker .field-btn:focus-visible", Open: ".datepicker.open:not(.error) .field-btn", Disabled: ".datepicker .field-btn:disabled", Error: ".datepicker.error .field-btn", "Error Focused": ".datepicker.error .field-btn:focus-visible" }],
       ["Input", ".field .affix", (k) => `.field${k} .affix`, { Focused: ".field .affix:has(input:focus)", Open: ".datepicker.open:not(.error) .affix", Disabled: ".field .affix:has(input:disabled)", "Read-only": ".field .affix:has(input:read-only:not(:disabled))", Error: ".field.error .affix", "Error Focused": ".field.error .affix:has(input:focus)" }],
     ]) {
       const b = cssRule(base), bw = need(parseFloat((/([\d.]+)px\s+solid/.exec(b.border || "") || [])[1]), base + " border 굵기");
@@ -476,9 +479,11 @@ function datePickerExpect() {
     const inner = cssRule(".field .affix input:focus")["box-shadow"];
     if (inner !== "none") throw new Error(".field .affix input:focus 의 box-shadow 가 none 이 아닙니다(" + inner + ")");
     const d = cssRule(".calendar .day"), base = { fill: (d.background || "").trim() === "transparent" ? "-" : need(null, ".calendar .day background"), stroke: "-", radius: need(radius(d["border-radius"]), ".calendar .day border-radius"), text: T(".calendar .day", "color"), ring: null };
-    const on = { ...base, fill: T(".calendar .day.on", "background"), text: T(".calendar .day.on", "color") };
+    const dot = cssRule(".calendar .day.on::before"), r0 = need(px(dot.width), ".calendar .day.on::before width") / 2;
+    if ((dot["border-radius"] || "").trim() !== "50%") throw new Error(".calendar .day.on::before border-radius 가 50% 가 아닙니다(" + dot["border-radius"] + ")");
+    const on = { ...base, fill: T(".calendar .day.on::before", "background"), radius: [r0, r0, r0, r0], text: T(".calendar .day.on", "color") };
     const band = cssRule(".calendar .day.in-range"), bandE = { ...base, fill: T(".calendar .day.in-range", "background"), radius: need(radius(band["border-radius"]), ".calendar .day.in-range border-radius") };
-    const pe = cssRule(".calendar .day.preview-end"), peIn = /inset\s+0\s+0\s+0\s+([\d.]+)px\s+(var\(--[a-z0-9-]+\))/.exec(pe["box-shadow"] || "");
+    const pe = cssRule(".calendar .day.preview-end::before"), peIn = /inset\s+0\s+0\s+0\s+([\d.]+)px\s+(var\(--[a-z0-9-]+\))/.exec(pe["box-shadow"] || "");
     const ring = cssRule(":focus-visible"), rm = /([\d.]+)px\s+solid\s+(var\(--[a-z0-9-]+\))/.exec(ring.outline || "");
     const hov = '.calendar .day:hover:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"])';
     const days = {
@@ -486,10 +491,9 @@ function datePickerExpect() {
       Hover: { ...base, fill: T(hov, "background") },
       Today: { ...base, text: T(".calendar .day.today", "color") },
       Selected: on,
-      Start: { ...on, radius: need(radius(cssRule(".calendar .day.on.start:not(.end)")["border-radius"]), ".calendar .day.on.start:not(.end) border-radius") },
-      End: { ...on, radius: need(radius(cssRule(".calendar .day.on.end:not(.start)")["border-radius"]), ".calendar .day.on.end:not(.start) border-radius") },
+      Start: { ...on }, End: { ...on },   // 원은 Selected 와 같다 — 반쪽 띠는 머리 주석
       "In-range": bandE, Preview: { ...bandE },
-      "Preview End": { ...base, fill: T(".calendar .day.preview-end", "background"), stroke: need(peIn && figTok(peIn[2]), ".calendar .day.preview-end inset"), sw: peIn && +peIn[1] },
+      "Preview End": { ...base, fill: T(".calendar .day.preview-end::before", "background"), radius: [r0, r0, r0, r0], stroke: need(peIn && figTok(peIn[2]), ".calendar .day.preview-end::before inset"), sw: peIn && +peIn[1] },
       Muted: { ...base, text: T(".calendar .day.muted", "color") },
       Disabled: { ...base, text: T(".calendar .day[disabled]", "color") },
       Focused: { ...base, ring: need(rm && figTok(rm[2]) + "|" + +rm[1] + "|OUTSIDE", ":focus-visible outline") },
@@ -1996,7 +2000,7 @@ function diffComponents(c, want, bad, notes) {
         seen.add(`${t}|${z}|${s}`);
         const w = f.st[s], at = `Date Picker ${v.variant} (${v.id})`;
         if (v.h === null) { bad.push(`${at} — "Field" 칸을 찾지 못했습니다`); continue; }
-        if (Math.abs(v.h - f.h[z]) > 0.5) bad.push(`${at} 필드 높이 ${v.h} ≠ ${f.h[z]} — 사이트 ${t === "Button" ? ".datepicker" + DP_SIZES[z] + " .field-btn" : ".field" + DP_SIZES[z] + " .affix"}`);
+        if (Math.abs(v.h - f.h[z]) > 0.5) bad.push(`${at} 필드 높이 ${v.h} ≠ ${f.h[z]} — 사이트 .field${DP_SIZES[z]} .affix`);
         if (v.fill !== "$" + w.fill) bad.push(`${at} 면 ${v.fill} ≠ ${w.fill} — 사이트 ${w.css}`);
         if (v.stroke !== "$" + w.stroke || v.sw !== w.sw) bad.push(`${at} 테두리 ${v.stroke} · ${v.sw}px ≠ ${w.stroke} · ${w.sw}px — 사이트 ${w.css}`);
         if (JSON.stringify(v.drop) !== JSON.stringify(w.drop)) bad.push(`${at} 바깥 그림자 ${JSON.stringify(v.drop)} ≠ ${JSON.stringify(w.drop)} — 사이트 ${w.css}`);
@@ -2004,7 +2008,7 @@ function diffComponents(c, want, bad, notes) {
       }
       const miss = []; for (const [t, sts] of Object.entries(DP_STATES)) for (const z of Object.keys(DP_SIZES)) for (const s of sts) if (!seen.has(`${t}|${z}|${s}`)) miss.push(`Type=${t}, Size=${z}, State=${s}`);
       if (miss.length) bad.push(`Date Picker 에 없는 변형 ${miss.length}개(기대 ${Object.values(DP_STATES).reduce((n, a) => n + a.length, 0) * 3}) — ${miss.slice(0, 4).join(" · ")}${miss.length > 4 ? " …" : ""}`);
-      if (stray.length) bad.push(`Date Picker 에 표에 없는 변형 ${stray.length}개 — ${stray.slice(0, 4).join(" · ")}${stray.length > 4 ? " …" : ""}(Type=Button · Input × Size × State 로)`);
+      if (stray.length) bad.push(`Date Picker 에 표에 없는 변형 ${stray.length}개 — ${stray.slice(0, 4).join(" · ")}${stray.length > 4 ? " …" : ""}(Type=Input × Size × State 로 — 버튼형은 2026-11-09 에 없앴다)`);
       const days = c.calendarDay || [], dseen = new Set();
       if (!days.length) bad.push("Calendar Day 세트가 없어 날짜 칸을 대조하지 못했습니다");
       for (const v of days) {

@@ -1,70 +1,201 @@
-/* Date Picker · Calendar 동작(2026-10-27) — 사이트 ds.js 와 같은 규칙을 React 에서도 잰다 */
-import { act, fireEvent, render, screen } from "@testing-library/react";
+/* Date Picker · Calendar 동작 — 사이트 ds.js 와 같은 규칙을 React 에서도 잰다.
+   2026-11-09 개편(사람의 요청): TextField 입력 하나 · YYYY. MM. DD 자동 형식 · ↑↓ 조각 · 유효하지 않은 값 상태 · unit · 기간 두 달 · locale · timezone */
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { Calendar, DatePicker, parseDate, type DateValue } from "./DatePicker";
+import { Calendar, DatePicker, DateRangePicker, parseDate } from "./DatePicker";
+import { checkText, groups, pasteText, reformat, stepText, type DatePickerMessages } from "./format";
 
 const TODAY = new Date(2026, 8, 7);
 const ymd = (y: number, m: number, d: number) => new Date(y, m - 1, d);
 const cell = (k: string) => document.querySelector<HTMLElement>(`.calendar .day[data-date="${k}"]:not(.muted)`)!;
-const openField = async (name = /날짜 선택|~|\d{4}-\d{2}/) => { await userEvent.click(screen.getAllByRole("button", { name }).find((b) => b.classList.contains("field-btn"))!); };
+const openField = async (host: ParentNode = document) => { await userEvent.click(host.querySelector<HTMLElement>(".datepicker .cal-btn, .cal-btn")!); };
+const lastCall = (fn: ReturnType<typeof vi.fn>) => fn.mock.calls[fn.mock.calls.length - 1];
+const MSG: DatePickerMessages = { incomplete: "날짜를 끝까지 입력하세요. 예: ", invalid: "없는 날짜입니다. 예: ", min: " 이후 날짜를 입력하세요", max: " 이전 날짜를 입력하세요", order: "종료일이 시작일보다 빠릅니다" };
 
-describe("parseDate", () => {
-  it("로컬 날짜로 엄격하게 읽는다 — 없는 날짜는 null, 구분자 · 붙여 쓰기 허용", () => {
+describe("글자 · 검사 (format)", () => {
+  it("parseDate 는 로컬 날짜로 엄격하게 — 없는 날짜는 null, 구분자(- . / 공백) · 붙여 쓰기 허용", () => {
     expect(parseDate("2026-02-30")).toBeNull();
     expect(parseDate("2026-13-01")).toBeNull();
-    expect(parseDate("2026.09.07")?.getDate()).toBe(7);
+    expect(parseDate("2026. 09. 07")?.getDate()).toBe(7);
     expect(parseDate("20260907")?.getMonth()).toBe(8);
+  });
+  it("숫자를 YYYY. MM. DD 로 끊는다 — 월 2~9 · 일 4~9 는 앞에 0, 기간은 앞 날짜가 차면 ~ 뒤로", () => {
+    expect(groups("20260907", "day", false)).toBe("2026. 09. 07");
+    expect(groups("20269", "day", false)).toBe("2026. 09");
+    expect(groups("2026094", "day", false)).toBe("2026. 09. 04");
+    expect(groups("202609071", "day", false)).toBe("2026. 09. 07");   // 넘치는 숫자는 버린다
+    expect(groups("2026090120260907", "day", true)).toBe("2026. 09. 01 ~ 2026. 09. 07");
+    expect(groups("2026093", "month", false)).toBe("2026. 09");
+    expect(groups("202612", "year", false)).toBe("2026");
+    expect(pasteText("2026/9/7", "day", false)).toBe("2026. 09. 07");
+    expect(pasteText("2026-09-01 ~ 2026-09-07", "day", true)).toBe("2026. 09. 01 ~ 2026. 09. 07");
+  });
+  it("구분자만 지운 Backspace 는 그 앞 숫자를 지운다", () => {
+    expect(reformat("2026. 09.", "2026. 09. ", 9, "deleteContentBackward", "day", false).text).toBe("2026. 0");
+    expect(reformat("2026. 09. 0", "2026. 09. 07", 11, "deleteContentBackward", "day", false).text).toBe("2026. 09. 0");
+  });
+  it("검사는 일곱 상태 — 빈 · 미완성 · 없는 날짜 · min · max · 순서 · 유효", () => {
+    const o = { unit: "day" as const, range: false, min: ymd(2026, 1, 1), max: ymd(2026, 12, 31), messages: MSG };
+    expect(checkText("", o).validity).toBe("empty");
+    expect(checkText("2026. 09", o)).toMatchObject({ validity: "incomplete", start: null, message: "날짜를 끝까지 입력하세요. 예: 2026. 09. 07" });
+    expect(checkText("2026. 02. 30", o)).toMatchObject({ validity: "invalid", start: null, message: "없는 날짜입니다. 예: 2026. 09. 07" });
+    expect(checkText("2025. 12. 31", o)).toMatchObject({ validity: "min", start: ymd(2025, 12, 31), message: "2026. 01. 01 이후 날짜를 입력하세요" });
+    expect(checkText("2027. 01. 05", o)).toMatchObject({ validity: "max", start: ymd(2027, 1, 5), message: "2026. 12. 31 이전 날짜를 입력하세요" });
+    expect(checkText("2026. 09. 12 ~ 2026. 09. 10", { ...o, range: true })).toMatchObject({ validity: "order", start: ymd(2026, 9, 12), end: ymd(2026, 9, 10) });
+    expect(checkText("2026. 09. 07", o)).toMatchObject({ validity: "valid", start: ymd(2026, 9, 7) });
+  });
+  it("자릿수가 모자라면 미완성 — '2026. 11' 을 1월 1일로, '2026. 09. 3' 을 3일로 읽지 않는다", () => {
+    const o = { unit: "day" as const, range: false, messages: MSG };
+    expect(parseDate("2026. 11")).toBeNull();
+    expect(checkText("2026. 11", o).validity).toBe("incomplete");
+    expect(checkText("2026. 09. 3", o).validity).toBe("incomplete");
+    expect(checkText("2026. 1", { ...o, unit: "month" }).validity).toBe("incomplete");
+  });
+  it("↑↓ 는 커서 조각 ±1 — 월은 12 ↔ 1, 말일은 자르고, 빈 조각은 오늘로", () => {
+    expect(stepText("2026. 12. 15", 7, 1, "day", false, TODAY)).toEqual({ text: "2026. 01. 15", caret: 8 });
+    expect(stepText("2026. 01. 31", 7, 1, "day", false, TODAY).text).toBe("2026. 02. 28");
+    expect(stepText("2026. 09. 30", 11, 1, "day", false, TODAY).text).toBe("2026. 09. 01");
+    expect(stepText("2026. 09. 07", 2, -1, "day", false, TODAY).text).toBe("2025. 09. 07");
+    expect(stepText("", 0, 1, "day", false, TODAY).text).toBe("2026. 09. 07");
+    expect(stepText("2026. 09. 01 ~ 2026. 09. 07", 22, 1, "day", true, TODAY).text).toBe("2026. 09. 01 ~ 2026. 10. 07");
   });
 });
 
-describe("DatePicker", () => {
-  it("기간은 달을 넘겨도 시작이 남는다 — 9/10 → 다음 달 → 10/3 → 적용", async () => {
+describe("DatePicker — 입력", () => {
+  it("TextField 위에 그린다 — 숫자만 치면 YYYY. MM. DD, Enter 로 확정", async () => {
     const onChange = vi.fn();
-    render(<DatePicker label="기간" mode="range" today={TODAY} onChange={onChange} />);
+    render(<DatePicker label="점검일" onChange={onChange} />);
+    const input = screen.getByLabelText("점검일") as HTMLInputElement;
+    expect(input.closest(".field")).toHaveClass("datepicker");
+    expect(input).toHaveAttribute("placeholder", "YYYY. MM. DD");
+    await userEvent.type(input, "20269");
+    expect(input.value).toBe("2026. 09");
+    await userEvent.type(input, "7{Enter}");
+    expect(input.value).toBe("2026. 09. 07");
+    expect(lastCall(onChange)).toEqual([ymd(2026, 9, 7), { text: "2026. 09. 07", validity: "valid" }]);
+  });
+
+  it("키보드로는 범위 밖 값도 들어간다 — ↑ 로 연을 넘기면 값은 그 날짜, validity max · 오류 문구", async () => {
+    const onChange = vi.fn();
+    render(<DatePicker label="점검일" help="2026년 안의 날짜" min={ymd(2026, 1, 1)} max={ymd(2026, 12, 31)} defaultValue={ymd(2026, 9, 7)} onChange={onChange} />);
+    const input = screen.getByLabelText("점검일") as HTMLInputElement;
+    input.focus(); input.setSelectionRange(2, 2);
+    await userEvent.keyboard("{ArrowUp}");
+    expect(input.value).toBe("2027. 09. 07");
+    expect(lastCall(onChange)).toEqual([ymd(2027, 9, 7), { text: "2027. 09. 07", validity: "max" }]);
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("2026. 12. 31 이전 날짜를 입력하세요")).toHaveClass("help");
+    expect(input.closest(".datepicker")).toHaveAttribute("data-validity", "max");
+    await userEvent.keyboard("{ArrowDown}");
+    expect(lastCall(onChange)[1].validity).toBe("valid");
+    expect(screen.getByText("2026년 안의 날짜")).toHaveClass("help");
+  });
+
+  it("직접 쳐도 범위 밖이 들어가고, 달력은 그 달을 열어 선택을 보인다 — 칸은 고를 수 없다", async () => {
+    const onChange = vi.fn();
+    render(<DatePicker label="점검일" max={ymd(2026, 12, 31)} today={TODAY} onChange={onChange} />);
+    await userEvent.type(screen.getByLabelText("점검일"), "20270105{Enter}");
+    expect(lastCall(onChange)).toEqual([ymd(2027, 1, 5), { text: "2027. 01. 05", validity: "max" }]);
     await openField();
-    await userEvent.click(cell("2026-09-10"));
-    expect(screen.getByRole("button", { name: "적용" })).toBeDisabled();   // 끝이 없는 기간은 적용할 수 없다
-    await userEvent.click(screen.getByRole("button", { name: "다음 달" }));
-    await userEvent.click(cell("2026-10-03"));
+    expect(screen.getByRole("button", { name: /2027년 1월, 연도 선택/ })).toBeInTheDocument();
+    expect(cell("2027-01-05")).toHaveClass("on");
+    expect(cell("2027-01-06")).toHaveAttribute("aria-disabled", "true");
+    await userEvent.click(cell("2027-01-06"));
+    expect(cell("2027-01-06")).not.toHaveClass("on");
+  });
+
+  it("덜 친 · 없는 날짜는 Invalid Date — 오류는 Enter · 포커스가 떠날 때 보인다", async () => {
+    const onChange = vi.fn();
+    render(<><DatePicker label="시작일" onChange={onChange} /><button>다음</button></>);
+    const input = screen.getByLabelText("시작일");
+    await userEvent.type(input, "202609");
+    expect(input).not.toHaveAttribute("aria-invalid");   // 치는 동안은 조용하다
+    await userEvent.tab(); await userEvent.tab();
+    const [v, info] = lastCall(onChange);
+    expect(v).toBeInstanceOf(Date); expect(isNaN(v.getTime())).toBe(true);
+    expect(info).toEqual({ text: "2026. 09", validity: "incomplete" });
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("날짜를 끝까지 입력하세요. 예: 2026. 09. 07")).toBeInTheDocument();
+    await userEvent.clear(input); await userEvent.type(input, "20260230{Enter}");
+    expect(lastCall(onChange)[1].validity).toBe("invalid");
+    expect(screen.getByText("없는 날짜입니다. 예: 2026. 09. 07")).toBeInTheDocument();
+  });
+
+  it("defaultText 로 덜 친 글자를 처음부터 보인다 — 오류와 함께", () => {
+    render(<DatePicker label="시작일" defaultText="2026. 09" help="점검을 시작한 날" />);
+    expect(screen.getByLabelText("시작일")).toHaveValue("2026. 09");
+    expect(screen.getByLabelText("시작일")).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("붙여 넣은 2026-9-7 도 형식으로 바꾼다", async () => {
+    render(<DatePicker label="점검일" />);
+    const input = screen.getByLabelText("점검일");
+    input.focus();
+    await userEvent.paste("2026-9-7");
+    expect(input).toHaveValue("2026. 09. 07");
+  });
+
+  it("입력칸 → 달력 버튼 → 바깥으로 Tab 해도 친 글자를 검사한다", async () => {
+    const onChange = vi.fn();
+    render(<><DatePicker label="시작일" onChange={onChange} /><button>다음</button></>);
+    const input = screen.getByLabelText("시작일");
+    await userEvent.type(input, "20260303");
+    await userEvent.tab(); await userEvent.tab();
+    expect(lastCall(onChange)[0]).toEqual(ymd(2026, 3, 3));
+  });
+
+  it("연 채로 입력해 확정하면 적용이 그 값을 지킨다", async () => {
+    const onChange = vi.fn();
+    render(<DatePicker label="시작일" defaultValue={TODAY} today={TODAY} onChange={onChange} />);
+    const input = screen.getByLabelText("시작일");
+    await openField();
+    await userEvent.clear(input); await userEvent.type(input, "20260315{Enter}");
+    expect(screen.getByRole("button", { name: /2026년 3월, 연도 선택/ })).toBeInTheDocument();
+    expect(input).toHaveValue("2026. 03. 15");
+    expect(screen.getByRole("button", { name: "적용" })).toBeDisabled();   // 입력으로 이미 확정 — 같은 값이다
+    expect(lastCall(onChange)[0]).toEqual(ymd(2026, 3, 15));
+  });
+
+  it("크기 · 비활성 · 읽기 전용", async () => {
+    render(<><DatePicker label="s" size="sm" /><DatePicker label="d" disabled /><DatePicker readOnly label="r" defaultValue={TODAY} /></>);
+    const [s, d, r] = document.querySelectorAll<HTMLElement>(".datepicker");
+    expect(s).toHaveClass("sm");
+    expect(d.querySelector("input")).toBeDisabled(); expect(d.querySelector(".cal-btn")).toBeDisabled();
+    expect(r.querySelector("input")).toHaveAttribute("readonly");
+    expect(r.querySelector(".cal-btn")).toBeDisabled();   // 네이티브 disabled 라 클릭 · 키보드가 닿지 않는다
+  });
+});
+
+describe("DatePicker — 단위 · 달력", () => {
+  it("unit — year 는 YYYY 와 연도 목록(제목은 글자), month 는 YYYY. MM 과 월 목록", async () => {
+    const y = vi.fn(), m = vi.fn();
+    render(<><DatePicker label="연" unit="year" today={TODAY} onChange={y} /><DatePicker label="월" unit="month" today={TODAY} onChange={m} /></>);
+    const [a, b] = document.querySelectorAll<HTMLElement>(".datepicker");
+    expect(screen.getByLabelText("연")).toHaveAttribute("placeholder", "YYYY");
+    expect(screen.getByLabelText("월")).toHaveAttribute("placeholder", "YYYY. MM");
+    await openField(a);
+    expect(a.querySelectorAll(".cal-grid.years .cell")).toHaveLength(12);
+    expect(a.querySelector(".cal-title")!.tagName).toBe("SPAN");
+    await userEvent.click(a.querySelector('.cell[data-year="2025"]')!);
     await userEvent.click(screen.getByRole("button", { name: "적용" }));
-    expect(onChange).toHaveBeenCalledWith({ start: ymd(2026, 9, 10), end: ymd(2026, 10, 3) });
-    expect(document.querySelector(".field-btn")!.textContent).toMatch(/2026-09-10\s*~\s*2026-10-03/);
+    expect(lastCall(y)).toEqual([ymd(2025, 1, 1), { text: "2025", validity: "valid" }]);
+    await openField(b);
+    expect(b.querySelectorAll(".cal-grid.months .cell")).toHaveLength(12);
+    await userEvent.click(b.querySelector('.cell[data-ym="2026-05"]')!);
+    await userEvent.click(screen.getByRole("button", { name: "적용" }));
+    expect(lastCall(m)).toEqual([ymd(2026, 5, 1), { text: "2026. 05", validity: "valid" }]);
+    await userEvent.type(screen.getByLabelText("월"), "{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}{Backspace}2027{Enter}");
+    expect(lastCall(m)[1].validity).toBe("incomplete");
   });
 
-  it("다시 열면 달력이 값의 달에서 시작한다", async () => {
-    function Ctl() { const [v, setV] = useState<DateValue>(ymd(2027, 3, 5)); return <><button onClick={() => setV(ymd(2025, 1, 2))}>바꾸기</button><DatePicker value={v} onChange={setV} today={TODAY} /></>; }
-    render(<Ctl />);
-    await openField();
-    expect(screen.getByRole("button", { name: /2027년 3월, 연도 선택/ })).toBeInTheDocument();
-    await userEvent.keyboard("{Escape}");
-    await userEvent.click(screen.getByText("바꾸기"));
-    await openField();
-    expect(screen.getByRole("button", { name: /2025년 1월, 연도 선택/ })).toBeInTheDocument();
-  });
-
-  it("Esc 는 이 피커만 닫고 필드로 포커스, 초안은 버린다", async () => {
-    const onChange = vi.fn();
-    render(<><DatePicker label="A" today={TODAY} onChange={onChange} /><DatePicker label="B" today={TODAY} open /></>);   /* B 는 열림을 바깥에서 쥔다 — 바깥 클릭으로 닫히는 것은 맞는 동작이라 Esc 만 보려고 */
-    const [a] = document.querySelectorAll<HTMLElement>(".datepicker");
-    await userEvent.click(a.querySelector(".field-btn")!);
-    await userEvent.click(a.querySelector('.day[data-date="2026-09-10"]')!);
-    await userEvent.keyboard("{Escape}");
-    expect(a).not.toHaveClass("open");
-    expect(document.activeElement).toBe(a.querySelector(".field-btn"));
-    expect(document.querySelectorAll(".datepicker.open")).toHaveLength(1);   // B 는 그대로
-    expect(onChange).not.toHaveBeenCalled();
-    await userEvent.click(a.querySelector(".field-btn")!);
-    expect(a.querySelector(".day.on")).toBeNull();
-  });
-
-  it("팝오버는 이름 있는 모달 대화상자, 격자는 grid > row > gridcell", async () => {
+  it("팝오버는 이름 있는 모달 대화상자, 격자는 grid > row > gridcell — 단일은 달력 하나", async () => {
     render(<DatePicker today={TODAY} defaultValue={TODAY} />);
     await openField();
     const dlg = screen.getByRole("dialog", { name: "날짜 선택" });
     expect(dlg).toHaveAttribute("aria-modal", "true");
+    expect(dlg).not.toHaveClass("two");
     const seven = cell("2026-09-07");
-    expect(seven).toHaveAttribute("role", "gridcell");
     expect(seven).toHaveAttribute("aria-selected", "true");
     expect(seven).toHaveAttribute("aria-current", "date");
     expect(seven.closest('[role="row"]')!.parentElement).toHaveAttribute("role", "grid");
@@ -84,14 +215,22 @@ describe("DatePicker", () => {
     await userEvent.keyboard("{Home}"); expect(focused()).toBe("2026-02-22");
     await userEvent.keyboard("{Enter}");
     await userEvent.click(screen.getByRole("button", { name: "적용" }));
-    expect(onChange).toHaveBeenCalledWith(ymd(2026, 2, 22));
+    expect(lastCall(onChange)[0]).toEqual(ymd(2026, 2, 22));
   });
 
-  it("Tab 은 달력 안에서 돈다", async () => {
-    render(<DatePicker today={TODAY} />);
-    await openField();
-    const dlg = screen.getByRole("dialog");
-    for (let i = 0; i < 8; i++) { await userEvent.tab(); expect(dlg.contains(document.activeElement)).toBe(true); }
+  it("Tab 은 달력 안에서 돈다 · Esc 는 이 피커만 닫고 달력 버튼으로, 초안은 버린다", async () => {
+    const onChange = vi.fn();
+    render(<><DatePicker label="A" today={TODAY} onChange={onChange} /><DatePicker label="B" today={TODAY} open /></>);
+    const [a] = document.querySelectorAll<HTMLElement>(".datepicker");
+    await openField(a);
+    const dlg = a.querySelector(".calendar")!;
+    for (let i = 0; i < 6; i++) { await userEvent.tab(); expect(dlg.contains(document.activeElement)).toBe(true); }
+    await userEvent.click(a.querySelector('.day[data-date="2026-09-10"]')!);
+    await userEvent.keyboard("{Escape}");
+    expect(a).not.toHaveClass("open");
+    expect(document.activeElement).toBe(a.querySelector(".cal-btn"));
+    expect(document.querySelectorAll(".datepicker.open")).toHaveLength(1);   // B 는 그대로
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("제목 → 연 → 월 → 일", async () => {
@@ -100,166 +239,53 @@ describe("DatePicker", () => {
     await userEvent.click(screen.getByRole("button", { name: /2026년 9월, 연도 선택/ }));
     expect(document.querySelectorAll(".cal-grid.years .cell")).toHaveLength(12);
     await userEvent.click(document.querySelector('.cell[data-year="2027"]')!);
-    expect(document.querySelectorAll(".cal-grid.months .cell")).toHaveLength(12);
     await userEvent.click(document.querySelector('.cell[data-ym="2027-03"]')!);
     expect(screen.getByRole("button", { name: /2027년 3월, 연도 선택/ })).toBeInTheDocument();
   });
 
-  it("월 모드는 그 달 1일을 확정한다", async () => {
-    const onChange = vi.fn();
-    render(<DatePicker mode="month" today={TODAY} onChange={onChange} />);
-    await openField();
-    await userEvent.click(document.querySelector('.cell[data-ym="2026-05"]')!);
-    await userEvent.click(screen.getByRole("button", { name: "적용" }));
-    expect(onChange).toHaveBeenCalledWith(ymd(2026, 5, 1));
-    expect(document.querySelector(".field-btn")!.textContent).toContain("2026-05");
-  });
-
   it("footer={false} 는 고르는 순간 적용하고 닫는다 — 기간은 끝을 고를 때", async () => {
     const one = vi.fn(), rg = vi.fn();
-    render(<><DatePicker label="A" footer={false} today={TODAY} onChange={one} /><DatePicker label="B" mode="range" footer={false} today={TODAY} onChange={rg} /></>);
+    render(<><DatePicker label="A" footer={false} today={TODAY} onChange={one} /><DateRangePicker label="B" footer={false} today={TODAY} onChange={rg} /></>);
     const [a, b] = document.querySelectorAll<HTMLElement>(".datepicker");
-    await userEvent.click(a.querySelector(".field-btn")!);
+    await openField(a);
     expect(a.querySelector(".cal-foot")).toBeNull();
     await userEvent.click(a.querySelector('.day[data-date="2026-09-10"]')!);
-    expect(one).toHaveBeenCalledWith(ymd(2026, 9, 10)); expect(a).not.toHaveClass("open");
-    await userEvent.click(b.querySelector(".field-btn")!);
+    expect(lastCall(one)[0]).toEqual(ymd(2026, 9, 10)); expect(a).not.toHaveClass("open");
+    await openField(b);
     await userEvent.click(b.querySelector('.day[data-date="2026-09-03"]')!);
     expect(b).toHaveClass("open");
     await userEvent.click(b.querySelector('.day[data-date="2026-09-05"]')!);
-    expect(rg).toHaveBeenCalledWith({ start: ymd(2026, 9, 3), end: ymd(2026, 9, 5) }); expect(b).not.toHaveClass("open");
+    expect(lastCall(rg)).toEqual([{ start: ymd(2026, 9, 3), end: ymd(2026, 9, 5) }, { text: "2026. 09. 03 ~ 2026. 09. 05", validity: "valid" }]);
+    expect(b).not.toHaveClass("open");
   });
 
-  it("취소는 연기 전 값으로, 초기화는 값을 비운다, 오늘은 단일에만", async () => {
+  it("취소는 열기 전 값으로, 초기화는 값을 비운다, 오늘은 단일에만", async () => {
     const onChange = vi.fn();
-    render(<><DatePicker label="A" footer={["today", "reset", "cancel", "apply"]} defaultValue={TODAY} today={TODAY} onChange={onChange} /><DatePicker label="B" mode="range" footer={["today", "apply"]} today={TODAY} /></>);
+    render(<><DatePicker label="A" footer={["today", "reset", "cancel", "apply"]} defaultValue={TODAY} today={TODAY} onChange={onChange} /><DateRangePicker label="B" footer={["today", "apply"]} today={TODAY} /></>);
     const [a, b] = document.querySelectorAll<HTMLElement>(".datepicker");
-    await userEvent.click(a.querySelector(".field-btn")!);
+    await openField(a);
     await userEvent.click(a.querySelector('.day[data-date="2026-09-10"]')!);
     await userEvent.click(screen.getByRole("button", { name: "취소" }));
-    expect(onChange).not.toHaveBeenCalled(); expect(a.querySelector(".field-btn")!.textContent).toContain("2026-09-07");
-    await userEvent.click(a.querySelector(".field-btn")!);
+    expect(onChange).not.toHaveBeenCalled(); expect(screen.getByLabelText("A")).toHaveValue("2026. 09. 07");
+    await openField(a);
     await userEvent.click(screen.getByRole("button", { name: "초기화" }));
     await userEvent.click(screen.getByRole("button", { name: "적용" }));
-    expect(onChange).toHaveBeenCalledWith(null);
-    await userEvent.click(b.querySelector(".field-btn")!);
+    expect(lastCall(onChange)).toEqual([null, { text: "", validity: "empty" }]);
+    await openField(b);
     expect(b.querySelector('[data-cal="today"]')).toBeNull();
   });
 
-  it("프리셋은 min/max 밖이면 비활성", async () => {
-    render(<DatePicker mode="range" today={TODAY} max={TODAY} presets={[{ label: "다음 7일", range: () => [TODAY, ymd(2026, 9, 13)] }, { label: "최근 7일", range: () => [ymd(2026, 9, 1), TODAY] }]} />);
-    await openField();
-    expect(screen.getByRole("button", { name: "다음 7일" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "최근 7일" })).toBeEnabled();
-  });
-
-  it("두 달 보기 — 넓으면 두 달, 767px 이하면 한 달", async () => {
-    const { unmount } = render(<DatePicker mode="range" calendars={2} today={TODAY} />);
-    await openField();
-    expect(document.querySelectorAll(".cal-month")).toHaveLength(2);
-    expect(document.querySelector(".calendar")).toHaveClass("two");
-    unmount();
-    const mm = window.matchMedia;
-    window.matchMedia = ((q: string) => ({ matches: q.includes("767"), media: q, addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia;
-    render(<DatePicker mode="range" calendars={2} today={TODAY} />);
-    await openField();
-    expect(document.querySelectorAll(".cal-month")).toHaveLength(0);
-    window.matchMedia = mm;
-  });
-
-  it("시작을 고른 뒤 올린 날까지 미리보기", async () => {
-    render(<DatePicker mode="range" today={TODAY} />);
-    await openField();
-    await userEvent.click(cell("2026-09-10"));
-    fireEvent.pointerOver(cell("2026-09-14"));
-    expect(document.querySelectorAll(".day.preview")).toHaveLength(3);
-    expect(cell("2026-09-14")).toHaveClass("preview-end");
-    fireEvent.pointerLeave(document.querySelector(".calendar")!);
-    expect(document.querySelectorAll(".day.preview")).toHaveLength(0);
-  });
-
-  it("직접 입력 — Enter 로 확정, 틀리면 오류 문구 · aria-invalid 이고 값은 그대로", async () => {
-    const onChange = vi.fn();
-    render(<DatePicker allowTyping label="시작일" help="YYYY-MM-DD" min={ymd(2026, 1, 1)} max={ymd(2026, 12, 31)} onChange={onChange} />);
-    const input = screen.getByLabelText("시작일") as HTMLInputElement;
-    await userEvent.type(input, "20260915{Enter}");
-    expect(onChange).toHaveBeenLastCalledWith(ymd(2026, 9, 15)); expect(input.value).toBe("2026-09-15");
-    for (const [text, msg] of [["2026-02-30", "날짜 형식이 올바르지 않습니다. 예: 2026-09-07"], ["2025-12-31", "2026-01-01 이후 날짜를 입력하세요"], ["2027-01-01", "2026-12-31 이전 날짜를 입력하세요"]]) {
-      await userEvent.clear(input); await userEvent.type(input, `${text}{Enter}`);
-      expect(input).toHaveAttribute("aria-invalid", "true");
-      expect(screen.getByText(msg)).toHaveClass("help");
-    }
-    expect(onChange).toHaveBeenCalledTimes(1);
-    await userEvent.clear(input); await userEvent.type(input, "2026-09-20{Enter}");
-    expect(input).not.toHaveAttribute("aria-invalid"); expect(screen.getByText("YYYY-MM-DD")).toHaveClass("help");
-  });
-
-  it("기간 입력 — 뒤집힌 순서는 오류", async () => {
-    render(<DatePicker allowTyping mode="range" label="기간" />);
-    const input = screen.getByLabelText("기간");
-    await userEvent.type(input, "2026-09-12 ~ 2026-09-10{Enter}");
-    expect(screen.getByText("종료일이 시작일보다 빠릅니다")).toBeInTheDocument();
-  });
-
-  it("크기 · 비활성 · 읽기 전용", async () => {
-    render(<><DatePicker label="s" size="sm" /><DatePicker label="d" disabled /><DatePicker allowTyping readOnly label="r" defaultValue={TODAY} /></>);
-    const [s, d, r] = document.querySelectorAll<HTMLElement>(".datepicker");
-    expect(s).toHaveClass("sm");
-    expect(d.querySelector(".field-btn")).toBeDisabled();
-    expect(r.querySelector("input")).toHaveAttribute("readonly");
-    expect(r.querySelector(".cal-btn")).toBeDisabled();   // 네이티브 disabled 라 클릭 · 키보드가 닿지 않는다
-  });
-
-  it("displayText 는 값이 없을 때만", () => {
-    render(<><DatePicker mode="range" displayText="최근 24시간" /><DatePicker mode="range" displayText="최근 24시간" defaultValue={{ start: ymd(2026, 9, 1), end: TODAY }} /></>);
-    const [a, b] = document.querySelectorAll(".field-btn");
-    expect(a.textContent).toContain("최근 24시간");
-    expect(b.textContent).toMatch(/2026-09-01\s*~\s*2026-09-07/);
-  });
-  it("입력칸 → 달력 버튼 → 바깥으로 Tab 해도 친 글자를 검사한다", async () => {
-    const onChange = vi.fn();
-    render(<><DatePicker allowTyping label="시작일" onChange={onChange} /><button>다음</button></>);
-    const input = screen.getByLabelText("시작일");
-    await userEvent.type(input, "2026-99-99");
-    await userEvent.tab(); await userEvent.tab();
-    expect(input).toHaveAttribute("aria-invalid", "true");
-    await userEvent.clear(input); await userEvent.type(input, "2026-03-03");
-    await userEvent.tab(); await userEvent.tab();
-    expect(onChange).toHaveBeenCalledWith(ymd(2026, 3, 3));
-  });
-
-  it("연 채로 입력해 확정하면 적용이 그 값을 지킨다", async () => {
-    const onChange = vi.fn();
-    render(<DatePicker allowTyping label="시작일" defaultValue={TODAY} today={TODAY} onChange={onChange} />);
-    const input = screen.getByLabelText("시작일");
-    await userEvent.click(screen.getByRole("button", { name: "달력 열기" }));
-    await userEvent.clear(input); await userEvent.type(input, "2026-03-15{Enter}");
-    expect(screen.getByRole("button", { name: /2026년 3월, 연도 선택/ })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "적용" }));
-    expect(onChange).toHaveBeenLastCalledWith(ymd(2026, 3, 15));
-    expect(input).toHaveValue("2026-03-15");
-  });
-
-  it("바깥에서 open 을 쥐어도 열 때 지금 값을 보인다", async () => {
-    function Ctl() { const [v, setV] = useState<DateValue>(TODAY); const [o, setO] = useState(false); return <><button onClick={() => { setV(ymd(2025, 1, 15)); setO(true); }}>열기</button><DatePicker value={v} onChange={setV} open={o} onOpenChange={setO} today={TODAY} /></>; }
-    render(<Ctl />);
-    await userEvent.click(screen.getByText("열기"));
-    expect(screen.getByRole("button", { name: /2025년 1월, 연도 선택/ })).toBeInTheDocument();
-    expect(cell("2025-01-15")).toHaveClass("on");
-    await userEvent.click(screen.getByRole("button", { name: "적용" }));
-    expect(document.querySelector(".field-btn")!.textContent).toContain("2025-01-15");
-  });
-
-  it("다른 달(흐린) 날을 고르면 그 달로 넘어가고, 흐린 칸은 선택으로 칠하지 않는다", async () => {
+  it("적용은 값이 바뀌어야 켜진다 · 다른 달(흐린) 날을 고르면 그 달로", async () => {
     render(<DatePicker today={TODAY} />);
     await openField();
+    expect(screen.getByRole("button", { name: "적용" })).toBeDisabled();
     await userEvent.click(document.querySelector('.day.muted[data-date="2026-10-01"]')!);
     expect(screen.getByRole("button", { name: /2026년 10월, 연도 선택/ })).toBeInTheDocument();
     expect(cell("2026-10-01")).toHaveClass("on");
-    expect(document.querySelector(".day.muted.on")).toBeNull();
+    expect(screen.getByRole("button", { name: "적용" })).toBeEnabled();
   });
 
-  it("연 · 월 칸은 고른 값만 선택으로 — 값이 없으면 칠하지 않는다, 오늘은 일 화면으로 돌아간다", async () => {
+  it("연 · 월 칸은 고른 값만 선택으로, 오늘은 일 화면으로 돌아간다", async () => {
     render(<DatePicker today={TODAY} />);
     await openField();
     await userEvent.click(screen.getByRole("button", { name: /2026년 9월, 연도 선택/ }));
@@ -270,29 +296,148 @@ describe("DatePicker", () => {
     expect(cell("2026-09-07")).toHaveClass("on");
   });
 
-  it("적용은 값이 바뀌어야 켜진다", async () => {
-    render(<DatePicker today={TODAY} />);
-    await openField();
-    expect(screen.getByRole("button", { name: "적용" })).toBeDisabled();
-    await userEvent.click(cell("2026-09-10"));
-    expect(screen.getByRole("button", { name: "적용" })).toBeEnabled();
+  it("바깥에서 value · open 을 쥐어도 열 때 지금 값을 보인다", async () => {
+    function Ctl() { const [v, setV] = useState<Date | null>(TODAY); const [o, setO] = useState(false); return <><button onClick={() => { setV(ymd(2025, 1, 15)); setO(true); }}>열기</button><DatePicker label="값" value={v} onChange={setV} open={o} onOpenChange={setO} today={TODAY} /></>; }
+    render(<Ctl />);
+    expect(screen.getByLabelText("값")).toHaveValue("2026. 09. 07");
+    await userEvent.click(screen.getByText("열기"));
+    expect(screen.getByLabelText("값")).toHaveValue("2025. 01. 15");
+    expect(screen.getByRole("button", { name: /2025년 1월, 연도 선택/ })).toBeInTheDocument();
+    expect(cell("2025-01-15")).toHaveClass("on");
   });
 
-  it("버튼형 필드의 이름은 라벨 + 값", () => {
-    render(<DatePicker label="시작일" defaultValue={TODAY} />);
-    expect(screen.getByRole("button", { name: "시작일 2026-09-07" })).toBeInTheDocument();
+  it("labels 로 문구를 바꾼다", async () => {
+    render(<DatePicker today={TODAY} labels={{ apply: "확인", openCalendar: "달력" }} />);
+    await userEvent.click(screen.getByRole("button", { name: "달력" }));
+    expect(screen.getByRole("button", { name: "확인" })).toBeInTheDocument();
   });
+});
 
-  it("기간 격자는 여러 칸 선택(aria-multiselectable)", async () => {
-    render(<DatePicker mode="range" today={TODAY} defaultValue={{ start: ymd(2026, 9, 1), end: TODAY }} />);
+describe("DateRangePicker", () => {
+  it("달력 두 개가 기본 — 767px 이하면 하나, calendars={1} 이면 하나", async () => {
+    const { unmount } = render(<DateRangePicker label="기간" today={TODAY} />);
+    expect(screen.getByLabelText("기간")).toHaveAttribute("placeholder", "YYYY. MM. DD ~ YYYY. MM. DD");
     await openField();
+    expect(document.querySelectorAll(".cal-month")).toHaveLength(2);
+    expect(document.querySelector(".calendar")).toHaveClass("two");
     expect(document.querySelector(".cal-grid")).toHaveAttribute("aria-multiselectable", "true");
+    unmount();
+    const r1 = render(<DateRangePicker today={TODAY} calendars={1} />);
+    await openField();
+    expect(document.querySelectorAll(".cal-month")).toHaveLength(0);
+    r1.unmount();
+    const mm = window.matchMedia;
+    window.matchMedia = ((q: string) => ({ matches: q.includes("767"), media: q, addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia;
+    render(<DateRangePicker today={TODAY} />);
+    await openField();
+    expect(document.querySelectorAll(".cal-month")).toHaveLength(0);
+    window.matchMedia = mm;
+  });
+
+  it("기간은 달을 넘겨도 시작이 남는다 — 9/10 → 다음 달 → 10/3 → 적용", async () => {
+    const onChange = vi.fn();
+    render(<DateRangePicker label="기간" today={TODAY} calendars={1} onChange={onChange} />);
+    await openField();
+    await userEvent.click(cell("2026-09-10"));
+    expect(screen.getByRole("button", { name: "적용" })).toBeDisabled();   // 끝이 없는 기간은 적용할 수 없다
+    await userEvent.click(screen.getByRole("button", { name: "다음 달" }));
+    await userEvent.click(cell("2026-10-03"));
+    await userEvent.click(screen.getByRole("button", { name: "적용" }));
+    expect(lastCall(onChange)[0]).toEqual({ start: ymd(2026, 9, 10), end: ymd(2026, 10, 3) });
+    expect(screen.getByLabelText("기간")).toHaveValue("2026. 09. 10 ~ 2026. 10. 03");
+  });
+
+  it("입력 — 앞 날짜가 차면 ~ 뒤로, 뒤집힌 순서는 order(값은 남는다)", async () => {
+    const onChange = vi.fn();
+    render(<DateRangePicker label="기간" onChange={onChange} />);
+    const input = screen.getByLabelText("기간");
+    await userEvent.type(input, "2026091220260910");
+    expect(input).toHaveValue("2026. 09. 12 ~ 2026. 09. 10");
+    await userEvent.type(input, "{Enter}");
+    expect(lastCall(onChange)).toEqual([{ start: ymd(2026, 9, 12), end: ymd(2026, 9, 10) }, { text: "2026. 09. 12 ~ 2026. 09. 10", validity: "order" }]);
+    expect(screen.getByText("종료일이 시작일보다 빠릅니다")).toBeInTheDocument();
+  });
+
+  it("시작을 고른 뒤 올린 날까지 미리보기 · 프리셋은 min/max 밖이면 비활성", async () => {
+    render(<DateRangePicker today={TODAY} max={TODAY} presets={[{ label: "다음 7일", range: () => [TODAY, ymd(2026, 9, 13)] }, { label: "최근 7일", range: () => [ymd(2026, 9, 1), TODAY] }]} />);
+    await openField();
+    expect(screen.getByRole("button", { name: "다음 7일" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "최근 7일" })).toBeEnabled();
+    await userEvent.click(cell("2026-09-01"));
+    fireEvent.pointerOver(cell("2026-09-05"));
+    expect(document.querySelectorAll(".day.preview")).toHaveLength(3);
+    expect(cell("2026-09-05")).toHaveClass("preview-end");
+    fireEvent.pointerLeave(document.querySelector(".calendar")!);
+    expect(document.querySelectorAll(".day.preview")).toHaveLength(0);
+  });
+
+  it("월 단위 기간은 월 목록 하나 — 사이 칸은 .in-range", async () => {
+    const onChange = vi.fn();
+    render(<DateRangePicker unit="month" today={TODAY} onChange={onChange} />);
+    await openField();
+    expect(document.querySelectorAll(".cal-month")).toHaveLength(0);
+    await userEvent.click(document.querySelector('.cell[data-ym="2026-03"]')!);
+    await userEvent.click(document.querySelector('.cell[data-ym="2026-06"]')!);
+    expect(document.querySelectorAll(".cell.in-range")).toHaveLength(2);
+    await userEvent.click(screen.getByRole("button", { name: "적용" }));
+    expect(lastCall(onChange)).toEqual([{ start: ymd(2026, 3, 1), end: ymd(2026, 6, 1) }, { text: "2026. 03 ~ 2026. 06", validity: "valid" }]);
+  });
+});
+
+describe("locale · timezone", () => {
+  it("locale — 제목 · 요일 · 월 이름 · '오늘' 이 Intl 표기, 입력 형식은 그대로", async () => {
+    render(<DatePicker label="date" locale="en-US" today={TODAY} />);
+    expect(screen.getByLabelText("date")).toHaveAttribute("placeholder", "YYYY. MM. DD");
+    await openField();
+    expect(screen.getByRole("button", { name: /^September 2026, / })).toBeInTheDocument();
+    expect(Array.from(document.querySelectorAll(".dow")).map((d) => d.textContent).join("")).toBe("SMTWTFS");
+    expect(screen.getByRole("button", { name: "Today" })).toBeInTheDocument();
+    expect(cell("2026-09-07")).toHaveAttribute("aria-label", "Monday, September 7, 2026");
+  });
+
+  it("timezone — 같은 순간에도 오늘이 다르고, 값은 그 시간대의 0시", async () => {
+    const at = new Date("2026-10-27T01:00:00Z");   // 서울 10:00 · UTC 01:00 · 뉴욕 전날 21:00
+    const utc = vi.fn(), ny = vi.fn();
+    render(<><DatePicker label="utc" timezone="UTC" today={at} footer={["today"]} onChange={utc} /><DatePicker label="ny" timezone="America/New_York" today={at} footer={["today"]} onChange={ny} /></>);
+    const [a, b] = document.querySelectorAll<HTMLElement>(".datepicker");
+    await openField(a);
+    expect(a.querySelector(".day.today")).toHaveAttribute("data-date", "2026-10-27");
+    await userEvent.click(screen.getByRole("button", { name: "오늘" }));
+    expect(lastCall(utc)[0].toISOString()).toBe("2026-10-27T00:00:00.000Z");
+    await openField(b);
+    expect(b.querySelector(".day.today")).toHaveAttribute("data-date", "2026-10-26");
+    await userEvent.click(screen.getByRole("button", { name: "오늘" }));
+    expect(lastCall(ny)[0].toISOString()).toBe("2026-10-26T04:00:00.000Z");   // 뉴욕 0시(EDT)
+  });
+
+  it("값 Date 는 그 시간대의 날짜로 보인다 · 틀린 시간대 이름은 경고하고 환경 시간대로", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(<><DatePicker label="utc" timezone="UTC" defaultValue={new Date("2026-09-07T00:00:00Z")} /><DatePicker label="bad" timezone="Mars/Olympus" /></>);
+    expect(screen.getByLabelText("utc")).toHaveValue("2026. 09. 07");
+    expect(warn.mock.calls.some(([m]) => String(m).includes("Mars/Olympus"))).toBe(true);
+    warn.mockRestore();
+  });
+});
+
+describe("옛 prop", () => {
+  it("mode=\"month\" · mode=\"range\" · allowTyping · displayText 는 경고하고 새 방식으로 동작한다", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(<><DatePicker label="m" mode="month" today={TODAY} /><DatePicker label="r" mode="range" today={TODAY} /><DatePicker label="t" allowTyping displayText="최근 7일" /></>);
+    expect(screen.getByLabelText("m")).toHaveAttribute("placeholder", "YYYY. MM");
+    expect(screen.getByLabelText("r")).toHaveAttribute("placeholder", "YYYY. MM. DD ~ YYYY. MM. DD");
+    const msgs = warn.mock.calls.map(([m]) => String(m)).join("\n");
+    for (const k of ['mode="month"', 'mode="range"', "allowTyping", "displayText"]) expect(msgs).toContain(k);
+    warn.mockRestore();
   });
 });
 
 describe("Calendar (단독)", () => {
-  it("단독 달력은 role=group, aria-modal 없음", () => {
-    render(<Calendar month={TODAY} today={TODAY} />);
+  it("단독 달력은 role=group, aria-modal 없음 · 기간은 두 달이 기본", () => {
+    const { unmount } = render(<Calendar month={TODAY} today={TODAY} />);
     expect(screen.getByRole("group", { name: "날짜 선택" })).not.toHaveAttribute("aria-modal");
+    unmount();
+    render(<Calendar month={TODAY} today={TODAY} mode="range" value={{ start: ymd(2026, 9, 21), end: ymd(2026, 10, 7) }} />);
+    expect(document.querySelectorAll(".cal-month")).toHaveLength(2);
+    expect(document.querySelectorAll(".day.in-range")).toHaveLength(9 + 6);
   });
 });

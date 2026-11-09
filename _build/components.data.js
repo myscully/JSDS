@@ -26,31 +26,51 @@ const CHART_DATA = {
 const cb = (label, attrs = "", small = "") => `<label class="checkbox"><input type="checkbox"${attrs ? " " + attrs : ""}><span>${label}${small ? `<small>${small}</small>` : ""}</span></label>`;
 
 /* 정적 달력 — ds.js 가 그리는 마크업과 같다(behave 가 대조한다). 정적 데모도 클릭 · 키보드 · 달 이동이 그대로 동작한다.
-   React Calendar 도 같은 골격이다(site-consistency). opts: month "YYYY-MM", mode, value | start · end, today, min, max, footer, presets */
+   React Calendar 도 같은 골격이다(site-consistency). 표기는 Intl(locale, 기본 ko-KR) — ds.js · React 와 같은 식.
+   opts: month "YYYY-MM", mode("range" 면 두 달 — calendars:1 로 한 달), value | start · end, today, min, max, footer, presets, locale */
 const cal = (o) => {
-  const pad = (n) => String(n).padStart(2, "0"), fmt = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, DOW = ["일", "월", "화", "수", "목", "금", "토"];
-  const [y, m] = o.month.split("-").map(Number), mo = m - 1, off = new Date(y, mo, 1).getDay(), rows = Math.ceil((off + new Date(y, mo + 1, 0).getDate()) / 7);
-  const a = o.value || o.start, b = o.end, title = `${y}년 ${m}월`, out = (k) => (o.min && k < o.min) || (o.max && k > o.max);
+  const pad = (n) => String(n).padStart(2, "0"), fmt = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const loc = o.locale || "ko-KR", F = (opt) => new Intl.DateTimeFormat(loc, opt), titleF = F({ year: "numeric", month: "long" }), full = F({ dateStyle: "full" });
+  const DOW = Array.from({ length: 7 }, (_, i) => { const d = new Date(2024, 0, 7 + i); return [F({ weekday: "narrow" }).format(d), F({ weekday: "long" }).format(d)]; });   // 2024-01-07 은 일요일
+  const rg = o.mode === "range", two = rg && o.calendars !== 1, [y, m] = o.month.split("-").map(Number);
+  const a = o.value || o.start, b = o.end, out = (k) => (o.min && k < o.min) || (o.max && k > o.max);
   const list = (o.footer || "").split(/\s+/).filter(Boolean), presets = (o.presets || "").split(/\s+/).filter(Boolean);
-  const days = Array.from({ length: rows * 7 }, (_, i) => new Date(y, mo, i - off + 1));
-  const target = [a, o.today].find((k) => k && days.some((d) => fmt(d) === k && d.getMonth() === mo)) || fmt(new Date(y, mo, 1));
-  const cell = (d) => {
-    const k = fmt(d), muted = d.getMonth() !== mo, on = !muted && (k === a || k === b), mid = !muted && b && k > a && k < b, today = k === o.today;
+  const months = (two ? [0, 1] : [0]).map((i) => { const mo = m - 1 + i, off = new Date(y, mo, 1).getDay(), rows = Math.ceil((off + new Date(y, mo + 1, 0).getDate()) / 7); return { first: new Date(y, mo, 1), rows, days: Array.from({ length: rows * 7 }, (_, j) => new Date(y, mo, j - off + 1)) }; });
+  /* roving tabindex — ds.js renderMarks 와 같은 순서: 선택 · 오늘 · 고를 수 있는 첫 칸 */
+  const live = months.flatMap((M) => M.days.filter((d) => d.getMonth() === M.first.getMonth()).map(fmt));
+  const target = live.find((k) => k === a || k === b) || live.find((k) => k === o.today) || live.find((k) => !out(k)) || live[0];
+  const cell = (d, M) => {
+    const k = fmt(d), muted = d.getMonth() !== M.first.getMonth();
+    if (two && muted) return `<span class="day blank" role="gridcell"></span>`;   // 두 달 보기에서 다른 달 칸은 비운다
+    const on = !muted && (k === a || k === b), mid = !muted && b && k > a && k < b, today = k === o.today;
     const cls = ["day", muted && "muted", on && "on", on && b && k === a && "start", on && b && k === b && "end", mid && "in-range", today && "today"].filter(Boolean).join(" ");
-    return `<button type="button" class="${cls}" role="gridcell" data-date="${k}" aria-label="${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${DOW[d.getDay()]}요일" tabindex="${k === target && !muted ? 0 : -1}"${out(k) ? ' aria-disabled="true"' : ""}${on || mid ? ' aria-selected="true"' : ""}${today ? ' aria-current="date"' : ""}>${d.getDate()}</button>`;
+    return `<button type="button" class="${cls}" role="gridcell" data-date="${k}" aria-label="${full.format(d)}" tabindex="${k === target && !muted ? 0 : -1}"${out(k) ? ' aria-disabled="true"' : ""}${on || mid ? ' aria-selected="true"' : ""}${today ? ' aria-current="date"' : ""}>${d.getDate()}</button>`;
   };
-  const weeks = Array.from({ length: rows }, (_, r) => `<div class="cal-week" role="row">${days.slice(r * 7, r * 7 + 7).map(cell).join("")}</div>`).join("\n    ");
-  const btn = (cls, attr, label) => `<button type="button" class="btn sm ${cls}" ${attr}${attr === 'data-cal="apply"' ? " disabled" : ""}>${label}</button>`;   // 적용은 값이 바뀌어야 켜진다 — 정적 달력은 처음 값 그대로라 꺼져 있다
-  const foot = [...presets.map((n) => btn("text", `data-preset="${n}"`, `최근 ${n}일`)), ...[["today", "text", "오늘"], ["reset", "text", "초기화"], ["cancel", "outline assistive", "취소"], ["apply", "solid primary", "적용"]].filter(([k]) => list.includes(k)).map(([k, c, l]) => btn(c, `data-cal="${k}"`, l))].join("");
-  const data = [`data-mode="${o.mode || "single"}"`, o.mode === "range" ? `data-start="${a}" data-end="${b}"` : a ? `data-value="${a}"` : "", o.today && `data-today="${o.today}"`, o.min && `data-min="${o.min}"`, o.max && `data-max="${o.max}"`, `data-footer="${o.footer || "none"}"`, presets.length && `data-presets="${o.presets}"`].filter(Boolean).join(" ");
-  return `<div class="calendar" role="group" aria-label="날짜 선택" ${data}>
-  <div class="cal-head"><button type="button" class="cal-nav" data-nav="-1" aria-label="이전 달">${I("chevron-left", 16)}</button><button type="button" class="cal-title" aria-label="${title}, 연도 선택">${title}</button><button type="button" class="cal-nav" data-nav="1" aria-label="다음 달">${I("chevron-right", 16)}</button></div>
-  <div class="cal-grid" role="grid" aria-label="${title}"${o.mode === "range" ? ' aria-multiselectable="true"' : ""}>
-    <div class="cal-week" role="row">${DOW.map((d) => `<span class="dow" role="columnheader" aria-label="${d}요일">${d}</span>`).join("")}</div>
+  const nav = (d) => `<button type="button" class="cal-nav" data-nav="${d}" aria-label="${d < 0 ? "이전" : "다음"} 달">${I(d < 0 ? "chevron-left" : "chevron-right", 16)}</button>`, gap = `<span class="cal-nav-gap"></span>`;
+  const month = (M, i) => {
+    const t = titleF.format(M.first), weeks = Array.from({ length: M.rows }, (_, r) => `<div class="cal-week" role="row">${M.days.slice(r * 7, r * 7 + 7).map((d) => cell(d, M)).join("")}</div>`).join("\n    ");
+    const head = `<div class="cal-head">${two && i ? gap : nav(-1)}<button type="button" class="cal-title" aria-label="${t}, 연도 선택">${t}</button>${two && !i ? gap : nav(1)}</div>`;
+    const grid = `<div class="cal-grid" role="grid" aria-label="${t}"${rg ? ' aria-multiselectable="true"' : ""}>
+    <div class="cal-week" role="row">${DOW.map(([n, l]) => `<span class="dow" role="columnheader" aria-label="${l}">${n}</span>`).join("")}</div>
     ${weeks}
-  </div>${foot ? `\n  <div class="cal-foot">${foot}</div>` : ""}
+  </div>`;
+    return two ? `<div class="cal-month">${head}${grid}</div>` : `${head}\n  ${grid}`;
+  };
+  let todayLabel = "오늘"; try { const s = new Intl.RelativeTimeFormat(loc, { numeric: "auto" }).format(0, "day"); todayLabel = s.charAt(0).toUpperCase() + s.slice(1); } catch (e) { /* 오래된 엔진 */ }
+  const btn = (cls, attr, label) => `<button type="button" class="btn sm ${cls}" ${attr}${attr === 'data-cal="apply"' ? " disabled" : ""}>${label}</button>`;   // 적용은 값이 바뀌어야 켜진다 — 정적 달력은 처음 값 그대로라 꺼져 있다
+  const foot = [...presets.map((n) => btn("text", `data-preset="${n}"`, `최근 ${n}일`)), ...[["today", "text", todayLabel], ["reset", "text", "초기화"], ["cancel", "outline assistive", "취소"], ["apply", "solid primary", "적용"]].filter(([k]) => list.includes(k) && (k !== "today" || !rg)).map(([k, c, l]) => btn(c, `data-cal="${k}"`, l))].join("");
+  const data = [rg && "data-range", rg && o.calendars === 1 && 'data-calendars="1"', rg ? `data-start="${a}" data-end="${b}"` : a ? `data-value="${a}"` : "", `data-month="${o.month}"`, o.locale && `data-locale="${o.locale}"`, o.today && `data-today="${o.today}"`, o.min && `data-min="${o.min}"`, o.max && `data-max="${o.max}"`, `data-footer="${o.footer || "none"}"`, presets.length && `data-presets="${o.presets}"`].filter(Boolean).join(" ");
+  return `<div class="calendar${two ? " two" : ""}" role="group" aria-label="날짜 선택" ${data}>
+  ${two ? `<div class="cal-months">${months.map(month).join("")}</div>` : month(months[0], 0)}${foot ? `\n  <div class="cal-foot">${foot}</div>` : ""}
   <span class="sr-only" aria-live="polite"></span>
 </div>`;
+};
+/* Date Picker 필드 — Text Field 셸(.field + .affix) 위 입력 하나와 달력 버튼. 입력 형식은 단위마다 고정(YYYY. MM. DD · YYYY. MM · YYYY), locale 과 무관(사람의 결정 2026-11-09).
+   opts: id, label, value, help, attrs(data-* 문자열), cls(sm · lg · error), unit, range, invalid, disabled, readonly */
+const dpField = (o) => {
+  const one = o.unit === "year" ? "YYYY" : o.unit === "month" ? "YYYY. MM" : "YYYY. MM. DD", ph = o.range ? `${one} ~ ${one}` : one, off = o.disabled || o.readonly;
+  const attrs = [o.unit && o.unit !== "day" && `data-unit="${o.unit}"`, o.range && "data-range", o.attrs].filter(Boolean).join(" ");
+  return `<div class="datepicker field${o.cls ? " " + o.cls : ""}"${attrs ? " " + attrs : ""}><label for="${o.id}">${o.label}</label><div class="affix"><input id="${o.id}"${o.value ? ` value="${o.value}"` : ""} placeholder="${ph}" inputmode="numeric" autocomplete="off"${o.help ? ` aria-describedby="${o.id}-help"` : ""}${o.invalid ? ' aria-invalid="true"' : ""}${o.readonly ? " readonly" : ""}${o.disabled ? " disabled" : ""}><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false"${off ? " disabled" : ""}>${I("calendar")}</button></div>${o.help ? `<span class="help" id="${o.id}-help">${o.help}</span>` : ""}</div>`;
 };
 
 const COMPONENTS = {
@@ -315,39 +335,45 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Date Picker */
   "date-picker": {
-    status: "ready", react: ["Calendar","DatePicker","formatDate","parseDate"], css: [".datepicker", ".calendar"], borrows: [".btn", ".field", ".sr-only"],
-    desc: "날짜 · 기간 · 월을 고릅니다. 달력에서 고르거나 직접 입력하고, 로그 조회 · 리포트 기간처럼 '오늘 기준 최근 N일' 프리셋을 함께 둘 수 있습니다.",
-    thumb: `<div class="datepicker"><button class="field-btn" style="min-width:200px">2026-09-01 <span class="sep">~</span> 2026-09-07 ${I("calendar")}</button></div>`,
+    status: "ready", react: ["Calendar","DatePicker","DateRangePicker","formatDate","parseDate"], css: [".datepicker", ".calendar"], borrows: [".btn", ".field", ".sr-only"],
+    desc: "날짜를 YYYY. MM. DD 순서로 입력하거나 달력에서 고릅니다. Text Field 위에 만들어 숫자만 치면 형식이 채워지고, 단위(연 · 월 · 일) · 기간 · 표기 언어(locale) · 기준 시간대(timezone)를 정할 수 있습니다. 값이 늘 유효한 날짜는 아닙니다 — 덜 친 날짜 · 없는 날짜 · 범위 밖 날짜도 상태로 남습니다.",
+    thumb: dpField({ id: "dp-thumb", label: "조회 기간", range: true, value: "2026. 09. 01 ~ 2026. 09. 07" }),
     examples: [
-      { id: "default", title: "Default", desc: "날짜 하나를 고르는 기본 필드입니다. 달력에서 날짜를 고르고 적용합니다.", html: `<div class="datepicker"><label>시작일</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>` },
-      { id: "field", title: "Field", desc: "닫힌 상태. 값이 없으면 플레이스홀더, 기간은 ~ 로 구분합니다. 기간은 시작 → 끝 순서로 두 번 고르고, 달을 넘겨 끝을 골라도 시작이 남습니다.", html: `
-        <div class="datepicker"><label>시작일</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
-        <div class="datepicker" data-mode="range" data-start="2026-09-01" data-end="2026-09-07"><label>조회 기간</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false">2026-09-01 <span class="sep">~</span> 2026-09-07${I("calendar")}</button></div>`, layout: "top" },
+      { id: "default", title: "Default", desc: "날짜 하나를 입력하는 기본 필드입니다. 숫자만 치면 <code>YYYY. MM. DD</code> 로 끊어 채워집니다(20260907 → 2026. 09. 07, 월에 9 를 치면 09). ↑↓ 는 커서가 놓인 조각(연 · 월 · 일)을 하나씩 올리고 내립니다. 달력 버튼이나 Alt+↓ 로 달력을 열면 달력 하나에서 고릅니다.", html: dpField({ id: "dp-default", label: "점검일" }) },
+      { id: "range", title: "Date Range Picker", desc: "기간(조회 기간)은 <code>data-range</code> 입니다. 달력 두 개가 기본이라 달을 넘는 기간을 한 번에 고르고, 좁은 화면(767px 이하)이나 <code>data-calendars=\"1\"</code> 에서는 하나로 줄어듭니다. 입력은 <code>YYYY. MM. DD ~ YYYY. MM. DD</code> — 앞 날짜가 다 차면 ~ 뒤로 넘어갑니다. <code>data-max=\"today\"</code> 로 미래 날짜는 고를 수 없습니다.", html: dpField({ id: "dp-range", label: "조회 기간", range: true, value: "2026. 09. 01 ~ 2026. 09. 07", attrs: 'data-max="today" data-presets="7 30"' }), layout: "top" },
+      { id: "unit", title: "Unit", desc: "<code>data-unit</code> 으로 고르는 단위를 정합니다. <b>year</b> 는 <code>YYYY</code> 와 12년 연도 목록, <b>month</b> 는 <code>YYYY. MM</code> 과 월 목록, <b>day</b>(기본)는 <code>YYYY. MM. DD</code> 와 날짜 달력입니다. 확정 값(<code>data-value</code>)은 단위의 기계 형식(2026 · 2026-09 · 2026-09-07)입니다.", html: `
+        ${dpField({ id: "dp-year", label: "보고 연도", unit: "year", value: "2026" })}
+        ${dpField({ id: "dp-month", label: "보고서 월", unit: "month", value: "2026. 09" })}
+        ${dpField({ id: "dp-day", label: "점검일", value: "2026. 09. 07" })}`, layout: "top" },
       { id: "calendar", title: "Calendar", desc: "열린 상태의 달력. 오늘(.today · aria-current), 선택(.on · aria-selected), 다른 달(.muted), 선택 불가(data-max 밖 · aria-disabled). 제목을 누르면 연 → 월로 빠르게 옮깁니다.", html: cal({ month: "2026-09", value: "2026-09-07", today: "2026-09-07", max: "2026-09-30", footer: "today apply" }) },
-      { id: "range", title: "Range", desc: "기간 선택. 시작 · 끝은 .on(.start · .end), 사이는 .in-range. 시작만 고른 동안에는 포인터를 올린 날까지 미리 보여 줍니다. 적용은 끝을 고른 뒤에 켜집니다.", html: cal({ month: "2026-09", mode: "range", start: "2026-09-01", end: "2026-09-07", today: "2026-09-07", footer: "apply", presets: "7 30" }) },
-      { id: "two-months", title: "Two Months", desc: "기간은 data-calendars=\"2\" 로 두 달을 나란히 봅니다. 달을 넘는 기간을 한 번에 고르고, 좁은 화면(767px 이하)에서는 한 달로 줄어듭니다. data-max=\"today\" 로 미래 날짜는 고를 수 없습니다.", html: `
-        <div class="datepicker" data-mode="range" data-calendars="2" data-max="today" data-presets="7 30" data-start="2026-09-01" data-end="2026-09-07"><label>조회 기간</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false">2026-09-01 <span class="sep">~</span> 2026-09-07${I("calendar")}</button></div>`, layout: "top" },
-      { id: "month", title: "Month", desc: "월 단위(data-mode=\"month\"). 열면 월 목록이 나오고, 제목을 누르면 12년 단위 연도 목록으로 갑니다.", html: `
-        <div class="datepicker" data-mode="month" data-value="2026-09"><label>보고서 월</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false">2026-09 ${I("calendar")}</button></div>`, layout: "top" },
-      { id: "input", title: "Input / Error", desc: "직접 입력하는 필드(.datepicker.field — Text Field 셸). Enter 나 포커스가 떠날 때 검사하고, 틀리면 오류 테두리와 원인 · 고치는 법을 보입니다. 값은 바뀌지 않습니다. Alt+↓ 로 달력을 엽니다.", html: `
-        <div class="datepicker field" data-min="2026-01-01" data-max="2026-12-31"><label for="dp-start">시작일</label><div class="affix"><input id="dp-start" value="2026-09-07" placeholder="YYYY-MM-DD" autocomplete="off" aria-describedby="dp-start-help"><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div><span class="help" id="dp-start-help">2026년 안의 날짜 · YYYY-MM-DD</span></div>
-        <div class="datepicker field" data-mode="range"><label for="dp-period">조회 기간</label><div class="affix"><input id="dp-period" value="2026-09-01 ~ 2026-09-07" placeholder="YYYY-MM-DD ~ YYYY-MM-DD" autocomplete="off" aria-describedby="dp-period-help"><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div><span class="help" id="dp-period-help">시작 ~ 종료</span></div>
-        <div class="datepicker field error" data-help="YYYY-MM-DD"><label for="dp-end">종료일</label><div class="affix"><input id="dp-end" value="2026-13-01" placeholder="YYYY-MM-DD" autocomplete="off" aria-describedby="dp-end-help" aria-invalid="true"><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div><span class="help" id="dp-end-help">날짜 형식이 올바르지 않습니다. 예: 2026-09-07</span></div>`, layout: "top" },
+      { id: "range-calendar", title: "Range Calendar", desc: "기간 달력은 두 달을 나란히 봅니다. 시작 · 끝은 .on(.start · .end), 사이는 .in-range. 시작만 고른 동안에는 포인터를 올린 날까지 미리 보여 주고, 적용은 끝을 고른 뒤에 켜집니다. 두 달 보기에서 다른 달 칸은 비워 같은 날짜가 두 번 나오지 않습니다.", html: cal({ month: "2026-09", mode: "range", start: "2026-09-21", end: "2026-10-07", today: "2026-10-07", footer: "apply", presets: "7 30" }) },
+      { id: "min-max", title: "Min · Max", desc: "<code>data-min</code> · <code>data-max</code> 밖의 날짜는 달력에서 고를 수 없습니다(aria-disabled). 키보드로는 범위 밖 값도 들어갑니다 — 직접 치거나 ↑↓ 로 조각을 넘기면 값은 그 날짜로 남고, 오류 테두리와 원인 문구가 붙습니다(<code>data-validity=\"max\"</code>).", html: `
+        ${dpField({ id: "dp-in", label: "점검일", value: "2026. 09. 07", help: "2026년 안의 날짜", attrs: 'data-min="2026-01-01" data-max="2026-12-31"' })}
+        ${dpField({ id: "dp-out", label: "점검일", value: "2027. 01. 05", help: "2026. 12. 31 이전 날짜를 입력하세요", cls: "error", invalid: true, attrs: 'data-min="2026-01-01" data-max="2026-12-31" data-help="2026년 안의 날짜"' })}`, layout: "top" },
+      { id: "invalid", title: "Invalid Date", desc: "값이 늘 유효한 날짜는 아닙니다. 덜 친 날짜는 <b>incomplete</b>, 없는 날짜(2월 30일)는 <b>invalid</b> 로 남습니다 — 확정 값(<code>data-value</code>)은 비고 <code>ds:date</code> 의 <code>date</code> 는 Invalid Date 입니다. 오류는 Enter 를 누르거나 포커스가 필드를 떠날 때 보입니다.", html: `
+        ${dpField({ id: "dp-incomplete", label: "시작일", value: "2026. 09", help: "날짜를 끝까지 입력하세요. 예: 2026. 09. 07", cls: "error", invalid: true, attrs: 'data-help="점검을 시작한 날"' })}
+        ${dpField({ id: "dp-invalid", label: "종료일", value: "2026. 02. 30", help: "없는 날짜입니다. 예: 2026. 09. 07", cls: "error", invalid: true, attrs: 'data-help="점검을 끝낸 날"' })}`, layout: "top" },
+      { id: "locale", title: "Locale", desc: "<code>data-locale</code> 로 달력 표기 언어를 바꿉니다(기본 ko-KR). 제목 · 요일 · 월 이름 · 날짜 칸의 접근 이름 · '오늘' 버튼을 <code>Intl</code> 로 만들어, Intl 이 지원하는 언어는 따로 불러오지 않고 씁니다. 필드 입력 형식은 언어와 무관하게 YYYY. MM. DD 입니다.", html: `
+        ${cal({ month: "2026-09", value: "2026-09-07", today: "2026-09-07", locale: "en-US", footer: "today apply" })}
+        ${cal({ month: "2026-09", value: "2026-09-07", today: "2026-09-07", locale: "ja-JP", footer: "today apply" })}` },
+      { id: "timezone", title: "Timezone", desc: "<code>data-timezone</code> 으로 '오늘'과 값의 기준 시간대를 정합니다(기본은 사용자 환경). dayjs 가 지원하는 IANA 이름과 UTC 를 그대로 씁니다 — ds.js 는 dayjs · utc · timezone 플러그인이 실린 페이지에서 계산하고, 확정 때 <code>ds:date</code> 의 <code>date</code> 로 그 시간대의 0시를 줍니다. 같은 순간이라도 뉴욕은 서울보다 하루 늦을 수 있어, '오늘까지'가 가리키는 날이 다릅니다.", html: `
+        ${dpField({ id: "dp-utc", label: "UTC 기준", help: "UTC 의 오늘까지", attrs: 'data-timezone="UTC" data-max="today" data-footer="today apply"' })}
+        ${dpField({ id: "dp-ny", label: "뉴욕 기준", help: "America/New_York 의 오늘까지", attrs: 'data-timezone="America/New_York" data-max="today" data-footer="today apply"' })}`, layout: "top" },
       { id: "footer", title: "Footer", desc: "하단 버튼은 data-footer 로 고릅니다 — 오늘 · 초기화 · 취소(열기 전 값으로) · 적용. none 이면 버튼 없이 고르는 순간 적용하고 닫힙니다(기간은 끝을 고를 때).", html: `
-        <div class="datepicker" data-footer="today reset cancel apply" data-value="2026-09-07"><label>전체 버튼</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false">2026-09-07 ${I("calendar")}</button></div>
-        <div class="datepicker" data-footer="none"><label>바로 적용</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
-        <div class="datepicker" data-mode="range" data-footer="none"><label>기간 바로 적용</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>`, layout: "top" },
+        ${dpField({ id: "dp-foot-all", label: "전체 버튼", value: "2026. 09. 07", attrs: 'data-footer="today reset cancel apply"' })}
+        ${dpField({ id: "dp-foot-none", label: "바로 적용", attrs: 'data-footer="none"' })}
+        ${dpField({ id: "dp-foot-range", label: "기간 바로 적용", range: true, attrs: 'data-footer="none"' })}`, layout: "top" },
       { id: "size", title: "Size", desc: "높이 32 · 40 · 48 — Text Field · Button 과 같습니다(.sm · .lg).", html: `
-        <div class="datepicker sm"><label>Small</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
-        <div class="datepicker"><label>Medium</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>
-        <div class="datepicker lg"><label>Large</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false"><span class="placeholder">날짜 선택</span>${I("calendar")}</button></div>`, layout: "top" },
-      { id: "state", title: "State", desc: "비활성은 비활성 토큰으로 칠하고 열리지 않습니다. 읽기 전용은 입력형에서 값만 보이고 달력을 열지 않습니다.", html: `
-        <div class="datepicker" data-value="2026-09-07"><label>비활성</label><button type="button" class="field-btn" aria-haspopup="dialog" aria-expanded="false" disabled>2026-09-07 ${I("calendar")}</button></div>
-        <div class="datepicker field"><label for="dp-ro">읽기 전용</label><div class="affix"><input id="dp-ro" value="2026-09-07" placeholder="YYYY-MM-DD" autocomplete="off" aria-describedby="dp-ro-help" readonly><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false" disabled>${I("calendar")}</button></div><span class="help" id="dp-ro-help">정책이 정한 날짜</span></div>`, layout: "top" },
+        ${dpField({ id: "dp-sm", label: "Small", cls: "sm" })}
+        ${dpField({ id: "dp-md", label: "Medium" })}
+        ${dpField({ id: "dp-lg", label: "Large", cls: "lg" })}`, layout: "top" },
+      { id: "state", title: "State", desc: "비활성은 비활성 토큰으로 칠하고 달력을 열지 않습니다. 읽기 전용은 값만 보이고 달력을 열지 않습니다.", html: `
+        ${dpField({ id: "dp-off", label: "비활성", value: "2026. 09. 07", disabled: true })}
+        ${dpField({ id: "dp-ro", label: "읽기 전용", value: "2026. 09. 07", help: "정책이 정한 날짜", readonly: true })}`, layout: "top" },
     ],
-    props: [[".datepicker", "container", "—", "label + .field-btn(+ .calendar). 열림은 .open, 위로 펼침은 .up"], ["data-mode", "single | range | month", "single", "없으면 .field-btn 안 .sep 로 기간을 알아낸다"], ["data-value / data-start · data-end", "YYYY-MM-DD (월은 YYYY-MM)", "—", "확정 값. ds.js 가 이 값만 믿는다"], ["data-min / data-max", "YYYY-MM-DD | today", "—", "밖의 날짜 · 월 · 연은 aria-disabled"], ["data-footer", "today reset cancel apply | none", "single: today apply · 그 외: apply", "none 이면 고르는 순간 적용"], ["data-calendars", "1 | 2", "1", "기간을 두 달로. 767px 이하 1"], ["data-presets", "\"7 30\"", "—", "기간 프리셋(최근 N일). 누르는 즉시 확정한다(적용 버튼과 별개). min/max 밖이면 비활성"], ["data-default-preset", "N", "—", "값이 없으면 오늘 기준 최근 N일을 처음 값으로(기간)"], ["data-today", "YYYY-MM-DD", "오늘", "정적 데모용"], [".sm / .lg", "size", "md", "필드 높이 32 / 40 / 48"], [".field + .affix + input + .cal-btn", "입력형", "—", "직접 입력. 오류는 .error + aria-invalid + .help"], ["disabled / readonly", "attribute", "—", "버튼형 disabled, 입력형 readonly(+ .cal-btn disabled)"], [".calendar", "popover", "—", ".cal-head(.cal-nav · .cal-title) + .cal-grid[role=grid](.cal-week ×주 수 · .day 주 수×7, 28–42) + .cal-foot"], [".day.on · .start · .end · .in-range · .preview · .today · .muted", "state", "—", "선택 / 기간 양끝 / 사이 / 미리보기 / 오늘 / 다른 달"], ["ds:date", "event", "—", "확정 때만. {value} · 기간 {value:\"A ~ B\", start, end}"]],
-    spec: [["Size", "필드 32 · 40 · 48 · 달력 폭 296(두 달 590) · 날짜 셀 높이 34 · 연/월 셀 40"], ["Container", "달력 radius/lg 8 · shadow/2"], ["Label", "요일 12 SemiBold tertiary · 날짜 12 Regular · 필드 Body/2 14"], ["Placement", "필드 아래 4px. 아래 자리가 모자라고 위가 더 넓으면 필드 위 4px"]],
-    figma: { frame: "Date Picker", radius: "radius/lg", sizes: { sm: { h: 32 }, md: { h: 40 }, lg: { h: 48 }, calendar: { w: 296 }, day: { h: 34 }, cell: { h: 40 } }, variants: { single: {}, range: { band: "--surface-brand-subtle", endpoint: "--surface-brand-primary" }, month: {}, input: {}, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", ring: "--line-negative-focus" }, disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary" } }, states: ["closed", "focused", "open", "selected", "range", "preview", "error", "disabled", "read-only"] },
+    props: [[".datepicker.field", "container", "—", "Text Field 셸 — label + .affix(input + .cal-btn) + .help, 열면 .calendar. 열림은 .open, 위로 펼침은 .up"], ["data-unit", "day | month | year", "day", "입력 형식(YYYY. MM. DD · YYYY. MM · YYYY) · 달력 첫 화면 · 고르는 단위"], ["data-range", "boolean", "—", "기간(Date Range Picker). 달력 2개가 기본(일 단위). 월 · 연 단위는 칸 하나에 12개라 1개"], ["data-value / data-start · data-end", "YYYY-MM-DD · YYYY-MM · YYYY", "—", "확정 값(기계 형식). 미완성 · 없는 날짜면 비고, 범위 밖 · 순서 오류면 그 날짜가 남는다"], ["data-validity", "incomplete | invalid | min | max | order", "—", "ds.js 가 쓴다. 유효하거나 비어 있으면 없다"], ["data-locale", "BCP 47 태그", "ko-KR", "달력 제목 · 요일 · 월 이름 · 접근 이름 · '오늘'(Intl). 입력 형식은 바뀌지 않는다"], ["data-timezone", "IANA 이름 | UTC", "사용자 환경", "'오늘'과 ds:date 의 date(그 시간대 0시). dayjs + utc · timezone 플러그인이 실린 페이지에서 계산한다"], ["data-min / data-max", "YYYY-MM-DD | today", "—", "밖의 날짜 · 월 · 연은 달력에서 aria-disabled. 키보드 입력은 막지 않고 오류로 알린다"], ["data-footer", "today reset cancel apply | none", "단일: today apply · 기간: apply", "none 이면 고르는 순간 적용"], ["data-calendars", "1 | 2", "기간 2", "기간 달력 수. 767px 이하 1"], ["data-presets", "\"7 30\"", "—", "기간 프리셋(최근 N일). 누르는 즉시 확정한다(적용 버튼과 별개). min/max 밖이면 비활성"], ["data-default-preset", "N", "—", "값이 없으면 오늘 기준 최근 N일을 처음 값으로(기간)"], ["data-today", "YYYY-MM-DD", "오늘", "정적 데모용"], [".sm / .lg", "size", "md", "필드 높이 32 / 40 / 48"], ["disabled / readonly", "attribute", "—", "input 과 .cal-btn 에. 읽기 전용은 값만 보이고 달력을 열지 않는다"], ["↑ ↓ · Alt+↓ · Enter", "keyboard", "—", "입력에서: 커서 조각 ±1(min/max 무시) · 달력 열기 · 검사와 확정"], [".calendar", "popover", "—", ".cal-head(.cal-nav · .cal-title) + .cal-grid[role=grid](.cal-week ×주 수 · .day 주 수×7, 28–42) + .cal-foot. 두 달은 .two > .cal-months > .cal-month ×2"], [".day.on · .start · .end · .in-range · .preview · .today · .muted", "state", "—", "선택 / 기간 양끝 / 사이 / 미리보기 / 오늘 / 다른 달"], [".cell.on · .in-range", "state", "—", "월 · 연 단위의 선택 / 기간 사이"], ["ds:date", "event", "—", "값이 바뀔 때. {value, date, text, validity} · 기간 {value:\"A ~ B\", start, end, date:{start, end}, text, validity}"]],
+    spec: [["Size", "필드 32 · 40 · 48(Text Field 와 같다) · 기간 필드 최소 폭 300 · 달력 폭 296(두 달 606) · 패딩 20 · 날짜 셀 높이 34 · 선택 원 지름 34 · 연/월 셀 40"], ["Input", "YYYY. MM. DD — 숫자만 받아 끊어 채운다. 월 첫 자리 2~9 · 일 첫 자리 4~9 는 앞에 0"], ["Container", "달력 radius/lg 8 · shadow/2 · 기간 띠는 선택 원의 가운데까지 이어진다"], ["Label", "제목 16 SemiBold · 요일 12 SemiBold tertiary · 날짜 · 연/월 13 Regular · 필드 Body/2 14"], ["Placement", "필드 아래 4px. 아래 자리가 모자라고 위가 더 넓으면 필드 위 4px"]],
+    figma: { frame: "Date Picker", radius: "radius/lg", sizes: { sm: { h: 32 }, md: { h: 40 }, lg: { h: 48 }, calendar: { w: 296 }, day: { h: 34 }, cell: { h: 40 } }, variants: { single: {}, range: { band: "--surface-brand-subtle-strong", endpoint: "--surface-brand-primary" }, month: {}, year: {}, input: {}, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" }, error: { stroke: "--foreground-negative-primary", ring: "--line-negative-focus" }, disabled: { bg: "--surface-disable-primary", fg: "--foreground-disable-primary" } }, states: ["closed", "focused", "open", "selected", "range", "preview", "error", "disabled", "read-only"] },
   },
 
 

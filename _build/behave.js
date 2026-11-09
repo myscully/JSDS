@@ -474,9 +474,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const prev = document.querySelector("#ex-button-size .example-preview"), out = {};
     for (const z of ["sm", "md", "lg"]) {
       const box = document.createElement("div");
-      box.innerHTML = `<button type="button" class="btn ${z} solid primary">a</button><div class="field ${z}"><input></div><div class="field ${z}"><div class="affix"><input></div></div><div class="datepicker ${z}"><button type="button" class="field-btn">2026-10-28</button></div>`;
+      box.innerHTML = `<button type="button" class="btn ${z} solid primary">a</button><div class="field ${z}"><input></div><div class="field ${z}"><div class="affix"><input></div></div><div class="datepicker field ${z}"><div class="affix"><input value="2026. 10. 28"><button type="button" class="cal-btn" aria-label="달력 열기"></button></div></div>`;   /* 2026-11-09 버튼형 필드를 없앰 — 입력형 상자 */
       prev.append(box);
-      out[z] = [box.querySelector(".btn"), box.querySelector(".field > input"), box.querySelector(".affix"), box.querySelector(".field-btn")].map((e) => Math.round(e.getBoundingClientRect().height));
+      out[z] = [box.querySelector(".btn"), box.querySelector(".field > input"), box.querySelector(".field:not(.datepicker) .affix"), box.querySelector(".datepicker .affix")].map((e) => Math.round(e.getBoundingClientRect().height));
       box.remove();
     }
     return out;
@@ -983,7 +983,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const rings = { field: await fieldRing("components/text-field.html", "#ex-text-field-basic .field input"),
     search: await fieldRing("components/search.html", "#ex-search-basic .searchbar input", ".searchbar"),
     select: await fieldRing("components/select.html", "#ex-select-default .dropdown .trigger"),
-    date: await fieldRing("components/date-picker.html", "#ex-date-picker-default .field-btn") };
+    date: await fieldRing("components/date-picker.html", "#ex-date-picker-default .affix input", ".affix") };
   ok("value fields show a 1px brand border and 4px halo on focus", Object.values(rings).every((r) => !/inset/.test(r.shadow) && /0px 0px 0px 4px/.test(r.shadow) && r.outline === "none" && r.edge), JSON.stringify(rings));
   /* 검색창 링은 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 겹쳤다(사람의 결정 2026-10-26) */
   await go("components/search.html"); await page.locator("#ex-search-extras .searchbar .clear").first().evaluate((e) => e.focus());

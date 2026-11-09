@@ -786,24 +786,13 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .slider input[type=range]:disabled::-moz-range-thumb{background:var(--surface-elevated-primary);border-color:var(--surface-disable-primary)}
 .slider .ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--foreground-neutral-tertiary);padding:0 4px}
 
-/* Date Picker — 버튼형(.field-btn)과 입력형(.datepicker.field > .affix > input + .cal-btn, Text Field 셸을 그대로 쓴다).
-   상태는 ds.js 가 host 의 data-* 로 들고, 달력 자리는 --dp-top · --dp-left 로 준다(아래 자리가 모자라면 위로 .up) */
+/* Date Picker — Text Field 입력형 하나(.datepicker.field > .affix > input + .cal-btn, Text Field 셸을 그대로 쓴다).
+   버튼형 .field-btn 은 2026-11-09 에 없앴다(사람의 결정 — 기본이 입력형). 상태는 ds.js 가 host 의 data-* 로 들고,
+   달력 자리는 --dp-top · --dp-left 로 준다(아래 자리가 모자라면 위로 .up) */
 .datepicker{display:inline-flex;flex-direction:column;gap:6px;position:relative;font-size:14px;line-height:1.6}
 .datepicker label{font-weight:600}
-.datepicker .field-btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;min-width:240px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:14px;color:var(--foreground-neutral-primary);cursor:pointer;text-align:left}
-.datepicker .field-btn:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
-.datepicker .field-btn svg{width:18px;height:18px;color:var(--foreground-neutral-tertiary);margin-left:auto}
-.datepicker .field-btn .placeholder{color:var(--foreground-disable-primary)}
-.datepicker .field-btn .sep{color:var(--foreground-disable-primary)}
-.datepicker.open:not(.error) .field-btn,.datepicker.open:not(.error) .affix{border-color:var(--foreground-brand-primary)}   /* 오류 필드는 열어도 빨강 — 같은 우선순위라 뒤에 있는 이 규칙이 오류 테두리를 덮었다 */
-.datepicker.sm .field-btn{height:32px;padding:0 12px;font-size:12px}
-.datepicker.lg .field-btn{height:48px;padding:0 16px;font-size:16px}
-.datepicker.sm .field-btn svg{width:16px;height:16px}
-.datepicker.lg .field-btn svg{width:20px;height:20px}
-.datepicker .field-btn:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
-.datepicker .field-btn:disabled svg,.datepicker .field-btn:disabled .placeholder,.datepicker .field-btn:disabled .sep{color:var(--foreground-disable-primary)}
-.datepicker.error .field-btn{border-color:var(--foreground-negative-primary)}
-.datepicker.error .field-btn:focus-visible{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}
+.datepicker.field[data-range]{min-width:300px}   /* 'YYYY. MM. DD ~ YYYY. MM. DD' 가 Large(16px)에서도 잘리지 않게 */
+.datepicker.open:not(.error) .affix{border-color:var(--foreground-brand-primary)}   /* 오류 필드는 열어도 빨강 — 같은 우선순위라 뒤에 있는 이 규칙이 오류 테두리를 덮었다 */
 .datepicker .cal-btn{display:grid;place-items:center;flex:none;width:28px;height:28px;margin-right:-6px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--foreground-neutral-tertiary);cursor:pointer}
 .datepicker .cal-btn:hover{background:var(--surface-neutral-secondary)}
 .datepicker .cal-btn:active{background:var(--surface-neutral-strong)}
@@ -811,38 +800,41 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .datepicker .cal-btn:disabled{background:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
 .datepicker .calendar{position:absolute;top:var(--dp-top,calc(100% + 4px));left:var(--dp-left,0);z-index:5;display:none}
 .datepicker.open .calendar{display:block}
-.calendar{width:296px;padding:12px;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:12px;line-height:1.6}
+.calendar{width:296px;padding:20px;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:13px;line-height:1.6}   /* 패딩 20 · 글자 13(사람의 결정 2026-11-09) */
 .calendar .cal-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;padding:0 4px 8px}
 .calendar .cal-head button{border:0;background:transparent;font:inherit;cursor:pointer;width:28px;height:28px;border-radius:6px;color:var(--foreground-neutral-secondary)}
 .calendar .cal-head button:hover{background:var(--surface-neutral-secondary)}
 .calendar .cal-head button:active{background:var(--surface-neutral-strong)}
 .calendar .cal-head button{display:grid;place-items:center}
 .calendar .cal-head button svg{width:16px;height:16px}
-.calendar .cal-head .cal-title{width:auto;padding:0 8px;font-weight:600;color:var(--foreground-neutral-primary)}   /* 누르면 연 → 월 → 일 */
+.calendar .cal-head .cal-title{width:auto;padding:0 8px;font-size:16px;font-weight:600;color:var(--foreground-neutral-primary)}   /* 누르면 연 → 월 → 일 */
 .calendar .cal-nav-gap{width:28px;flex:none}
 .calendar .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px;text-align:center}   /* 열 간격 0 — 2px 틈이 기간 띠를 끊었다 */
 .calendar .cal-week{display:contents}   /* role=row 는 접근성 트리에만 — 칸은 바로 위 격자에 놓인다 */
 .calendar .dow{font-size:12px;color:var(--foreground-neutral-tertiary);padding:4px 0;font-weight:600}
-.calendar .day{height:34px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;color:var(--foreground-neutral-primary);cursor:pointer}
+.calendar .day{position:relative;isolation:isolate;height:34px;border:0;border-radius:6px;background:transparent;font:inherit;color:var(--foreground-neutral-primary);cursor:pointer}   /* isolation — 선택 원(::before, z-index -1)이 칸 면 위 · 글자 아래에 놓인다 */
 .calendar .day:hover:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"]){background:var(--surface-neutral-secondary)}   /* 선택 · 기간 · 선택 불가 칸은 호버 면을 얹지 않는다 */
 .calendar .day:active:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"]){background:var(--surface-neutral-strong)}
 .calendar .day.muted{color:var(--foreground-neutral-tertiary)}   /* 다른 달 날은 고를 수 있다 — 고를 수 없는 날(비활성 색)과 구분한다(사람의 결정 2026-10-27) */
 .calendar .day.today{font-weight:700;color:var(--foreground-brand-primary)}
 .calendar .day.in-range,.calendar .day.preview{background:var(--surface-brand-subtle-strong);border-radius:0}   /* subtle 은 달력 면과 1.07 이라 띠가 거의 안 보였다(사람의 결정 2026-10-27 한 단계 진하게) */
 .calendar .day.in-range:hover,.calendar .day.preview:hover{box-shadow:inset 0 0 0 1px var(--line-brand-primary)}   /* subtle-strong 과 primary 사이에 면 토큰이 없어 호버는 안쪽 선으로 */
-.calendar .day.on{background:var(--surface-brand-primary);color:var(--brand-label);font-weight:600}
-.calendar .day.on.start:not(.end){border-radius:6px 0 0 6px}   /* 기간 양끝이 띠에 붙는다 */
-.calendar .day.on.end:not(.start){border-radius:0 6px 6px 0}
-.calendar .day.preview-end{background:var(--surface-brand-subtle-strong);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary)}   /* 미리보기 끝 — 띠 색에 brand 테두리. 호버 면(회색)을 얹지 않는다 */
+.calendar .day.on{color:var(--brand-label);font-weight:600}
+.calendar .day.on::before,.calendar .day.preview-end::before{content:"";position:absolute;inset:0;z-index:-1;margin:auto;width:34px;height:34px;border-radius:50%;background:var(--surface-brand-primary)}   /* 선택은 원(사람의 결정 2026-11-09) — 지름 = 칸 높이 34 */
+.calendar .day.preview-end::before{background:var(--surface-brand-subtle-strong);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary)}   /* 미리보기 끝 — 띠 색 원에 brand 테두리. 호버 면(회색)을 얹지 않는다 */
+.calendar .day.start:not(.end){background:linear-gradient(to right,transparent 50%,var(--surface-brand-subtle-strong) 50%);border-radius:0}   /* 띠의 양끝 — 칸 반쪽만 띠를 칠해 원과 띠가 끊기지 않게 */
+.calendar .day.end:not(.start){background:linear-gradient(to left,transparent 50%,var(--surface-brand-subtle-strong) 50%);border-radius:0}
 .calendar .day[disabled],.calendar .day[aria-disabled="true"]{color:var(--foreground-disable-primary);cursor:not-allowed}
 .calendar .day.blank{visibility:hidden}
 .calendar .day:focus-visible,.calendar .cell:focus-visible{position:relative;z-index:1}   /* 다음 칸이 외곽선을 덮지 않게 */
 .calendar .cal-grid.years,.calendar .cal-grid.months{grid-template-columns:repeat(3,1fr);gap:4px}
-.calendar .cell{height:40px;border:0;border-radius:6px;background:transparent;font:inherit;font-size:12px;color:var(--foreground-neutral-primary);cursor:pointer}
-.calendar .cell:hover:not(.on,[aria-disabled="true"]){background:var(--surface-neutral-secondary)}
-.calendar .cell:active:not(.on,[aria-disabled="true"]){background:var(--surface-neutral-strong)}
+.calendar .cell{height:40px;border:0;border-radius:6px;background:transparent;font:inherit;color:var(--foreground-neutral-primary);cursor:pointer}
+.calendar .cell:hover:not(.on,.in-range,[aria-disabled="true"]){background:var(--surface-neutral-secondary)}
+.calendar .cell:active:not(.on,.in-range,[aria-disabled="true"]){background:var(--surface-neutral-strong)}
 .calendar .cell.today{font-weight:700;color:var(--foreground-brand-primary)}
 .calendar .cell.on{background:var(--surface-brand-primary);color:var(--brand-label);font-weight:600}
+.calendar .cell.in-range{background:var(--surface-brand-subtle-strong)}   /* 월 · 연 단위 기간의 사이 칸 — 날짜 띠와 같은 면 */
+.calendar .cell.in-range:hover{box-shadow:inset 0 0 0 1px var(--line-brand-primary)}
 .calendar .cell[aria-disabled="true"]{color:var(--foreground-disable-primary);cursor:not-allowed}
 .calendar.two{width:auto}
 .calendar .cal-months{display:flex;gap:24px}
