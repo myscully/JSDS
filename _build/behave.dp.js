@@ -123,10 +123,14 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await toTop(dp); await openCal(dp);
     await day(dp, "2026-09-10").click();
     await day(dp, "2026-09-14").hover();
+    const circle = (k) => dp.evaluate((e, k) => { const d = e.querySelector(`.day[data-date="${k}"]:not(.muted)`), b = getComputedStyle(d, "::before"); return { bg: b.backgroundColor, shadow: b.boxShadow, w: b.width, r: b.borderRadius, color: getComputedStyle(d).color }; }, k);
+    const pe = await circle("2026-09-14"), st = await circle("2026-09-10");
     const r = await dp.evaluate((e) => ({ pv: e.querySelectorAll(".day.preview").length, end: e.querySelector(".day.preview-end")?.dataset.date, endCls: e.querySelector(".day.preview-end")?.classList.contains("end"), startCls: e.querySelector('.day[data-date="2026-09-10"]').classList.contains("start"), band: e.querySelectorAll(".day.in-range").length }));
     await page.mouse.move(5, 300);
     const cleared = await dp.evaluate((e) => e.querySelectorAll(".day.preview, .day.preview-end").length);
     ok("hovering after a start previews the band", r.pv === 3 && r.end === "2026-09-14" && r.endCls && r.startCls && r.band === 0 && cleared === 0, JSON.stringify({ r, cleared }));
+    /* 끝을 고르려고 올린 칸은 시작과 같은 원(사람의 결정 2026-11-09) — 전에는 띠 색 원에 brand 테두리였다 */
+    ok("the hovered end wears the same circle as the start", pe.bg === st.bg && pe.color === st.color && pe.shadow === "none" && pe.w === "34px" && pe.r === "50%" && st.bg === await tok("--surface-brand-primary", "backgroundColor"), JSON.stringify({ pe, st }));
     await page.keyboard.press("Escape");
   });
   await step("apply waits for the range end", async () => {
@@ -164,6 +168,39 @@ module.exports = async ({ b, ok, SITE, path }) => {
     const r = await page.locator(`${ex("calendar")} .calendar`).evaluate((c) => { const g = (e) => getComputedStyle(e); return { pad: g(c).padding, fs: g(c).fontSize, title: g(c.querySelector(".cal-title")).fontSize, day: g(c.querySelector(".day")).fontSize }; });
     const y = await dpOf("unit", 0).evaluate(async (e) => { e.querySelector(".cal-btn").click(); await new Promise((r) => setTimeout(r, 50)); const out = getComputedStyle(e.querySelector(".calendar .cell")).fontSize; e.querySelector(".cal-btn").click(); return out; });
     ok("calendar padding 20, text 13, title 16", r.pad === "20px" && r.fs === "13px" && r.title === "16px" && r.day === "13px" && y === "13px", JSON.stringify({ r, y }));
+    const head = await page.locator(`${ex("calendar")} .calendar .cal-head`).evaluate((h) => getComputedStyle(h).padding);
+    ok("calendar header padding 0 4px 16px", head === "0px 4px 16px", head);
+  });
+  /* 칸의 면은 전부 원 — hover · 누름 · 오늘 · 키보드 포커스(사람의 결정 2026-11-09). 오늘 원 위 글자는 기본 색, 띠 안의 오늘만 brand 글자 */
+  await step("hover, press, today and keyboard focus are circles too", async () => {
+    await go("components/date-picker.html");
+    const dp = dpOf("default");
+    await toTop(dp); await openCal(dp); await page.waitForTimeout(800);   // toTop 의 스크롤이 끝난 뒤 — 도중에 누르면 칸이 포인터 밑에서 빠져 :active 가 안 걸렸다
+    const read = (k) => dp.evaluate((e, k) => { const d = e.querySelector(`.calendar .day[data-date="${k}"]:not(.muted)`), b = getComputedStyle(d, "::before"), cs = getComputedStyle(d); return { bg: b.backgroundColor, shadow: b.boxShadow, w: b.width, h: b.height, r: b.borderRadius, outline: b.outlineStyle + " " + b.outlineWidth + " " + b.outlineColor, own: cs.outlineStyle, cell: cs.backgroundColor, color: cs.color, weight: cs.fontWeight }; }, k);
+    const today = await read("2026-10-27");
+    await day(dp, "2026-10-13").hover(); await page.waitForTimeout(50);
+    const hover = await read("2026-10-13");
+    await page.mouse.down(); const press = await read("2026-10-13");
+    await page.mouse.move(5, 5); await page.mouse.up();
+    await day(dp, "2026-10-27").hover(); const todayHover = await read("2026-10-27");
+    await page.mouse.move(5, 5);
+    await page.keyboard.press("Escape"); await openCal(dp);
+    await page.keyboard.press("ArrowLeft"); const focusKey = await dp.evaluate((e) => document.activeElement.closest(".day")?.dataset.date);
+    const focus = await read(focusKey);
+    await page.keyboard.press("Escape");
+    const [grey, strong, todayBg, line, neutral, brandText] = [await tok("--surface-neutral-secondary", "backgroundColor"), await tok("--surface-neutral-strong", "backgroundColor"), await tok("--surface-brand-subtle-strong", "backgroundColor"), await tok("--line-brand-primary"), await tok("--foreground-neutral-primary"), await tok("--foreground-brand-primary")];
+    const round = (x) => x.w === "34px" && x.h === "34px" && x.r === "50%" && x.cell === "rgba(0, 0, 0, 0)";
+    ok("hover, press, today and keyboard focus are circles too",
+      round(hover) && hover.bg === grey && round(press) && press.bg === strong && round(today) && today.bg === todayBg && today.color === neutral && today.weight === "700" &&
+      todayHover.bg === todayBg && todayHover.shadow.includes(line) && todayHover.shadow.includes("inset") && focus.own === "none" && focus.outline === `solid 1px ${brandText}` && focus.r === "50%",
+      JSON.stringify({ hover, press, today, todayHover, focusKey, focus }));
+    /* 띠 안의 오늘 — 원이 띠와 같은 색이라 brand 글자로 갈린다. 최대 날짜가 없는 기간 필드에서 오늘을 넘겨 미리 본다 */
+    const rg = dpOf("footer", 2);
+    await toTop(rg); await openCal(rg);
+    await day(rg, "2026-10-20").click(); await day(rg, "2026-10-30").hover();
+    const inBand = await rg.evaluate((e) => { const d = e.querySelector('.calendar .day[data-date="2026-10-27"]:not(.muted)'); return { preview: d.classList.contains("preview"), today: d.classList.contains("today"), color: getComputedStyle(d).color, weight: getComputedStyle(d).fontWeight }; });
+    await page.mouse.move(5, 5); await page.keyboard.press("Escape");
+    ok("today inside the band keeps bold brand text", inBand.preview && inBand.today && inBand.color === brandText && inBand.weight === "700", JSON.stringify(inBand));
   });
 
   // ── 닫기 · 접근성 ──────────────────────────────────────────
@@ -435,6 +472,16 @@ module.exports = async ({ b, ok, SITE, path }) => {
     /* 입력의 Enter 가 이미 확정했으므로 초안 = 확정 값 — 적용은 꺼져 예전 값으로 되돌릴 길이 없다 */
     ok("typing while the calendar is open moves the calendar and apply keeps it", t.title === "2026년 3월" && t.on === "2026-03-15" && t.v === "2026-03-15" && t.i === "2026. 03. 15" && t.apply, JSON.stringify(t));
     await page.keyboard.press("Escape");
+  });
+  /* 오류 필드는 달력을 열어도 빨강 링(2026-11-09) — 열린 동안의 링이 오류 테두리를 덮지 않게 */
+  await step("an error field opened from its icon keeps a red ring", async () => {
+    await go("components/date-picker.html");
+    const er = dpOf("min-max", 1);
+    await toTop(er); await openCal(er); await page.waitForTimeout(250);
+    const r = await er.evaluate((e) => { const a = getComputedStyle(e.querySelector(".affix")); return { open: e.classList.contains("open"), border: a.borderTopColor, shadow: a.boxShadow }; });
+    await page.keyboard.press("Escape");
+    const neg = await tok("--foreground-negative-primary"), negHalo = await tok("--line-negative-focus");
+    ok("an error field opened from its icon keeps a red ring", r.open && r.border === neg && r.shadow.includes(negHalo) && r.shadow.includes("4px"), JSON.stringify({ r, neg, negHalo }));
   });
   await step("input focus rings: field halo for the input, own outline for the calendar button, red when in error", async () => {
     await go("components/date-picker.html");

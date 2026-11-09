@@ -735,7 +735,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field .affix{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary)}
 .field .affix input{border:0;height:auto;padding:0;flex:1;background:transparent;outline:0;min-width:0}
 .field .affix input:focus,.field.error .affix input:focus{box-shadow:none}   /* 고리는 .affix 가 그린다 — .field input:focus 의 후광이 입력칸에도 걸려 두 겹이었다(2026-10-27 실측, Text Field 접두 · 접미 필드도 같았다) */
-.field .affix:has(input:focus){border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 입력칸 포커스일 때만 — 안의 달력 버튼(Date Picker)은 자기 외곽선만(검색창과 같은 결정 2026-10-26) */
+.field .affix:has(input:focus){border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 입력칸 포커스일 때 — 안의 달력 버튼에 Tab 으로만 오면 버튼 자기 외곽선만(검색창과 같은 결정 2026-10-26). 달력이 열린 동안은 .datepicker.open 이 같은 링을 준다(2026-11-09) */
 .field.sm .affix{height:32px;padding:0 10px}
 .field.lg .affix{height:48px;padding:0 14px}
 .field .affix:has(input:disabled){background:var(--surface-disable-primary);cursor:not-allowed}
@@ -792,7 +792,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .datepicker{display:inline-flex;flex-direction:column;gap:6px;position:relative;font-size:14px;line-height:1.6}
 .datepicker label{font-weight:600}
 .datepicker.field[data-range]{min-width:300px}   /* 'YYYY. MM. DD ~ YYYY. MM. DD' 가 Large(16px)에서도 잘리지 않게 */
-.datepicker.open:not(.error) .affix{border-color:var(--foreground-brand-primary)}   /* 오류 필드는 열어도 빨강 — 같은 우선순위라 뒤에 있는 이 규칙이 오류 테두리를 덮었다 */
+.datepicker.open .affix{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}   /* 달력이 열린 동안은 어떻게 열었든 입력 포커스와 같은 링(사람의 결정 2026-11-09 — 모든 폼이 같은 포커스 모양) */
+.datepicker.field.error.open .affix{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}   /* 오류 필드는 열어도 빨강 링 */
 .datepicker .cal-btn{display:grid;place-items:center;flex:none;width:28px;height:28px;margin-right:-6px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--foreground-neutral-tertiary);cursor:pointer}
 .datepicker .cal-btn:hover{background:var(--surface-neutral-secondary)}
 .datepicker .cal-btn:active{background:var(--surface-neutral-strong)}
@@ -801,7 +802,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .datepicker .calendar{position:absolute;top:var(--dp-top,calc(100% + 4px));left:var(--dp-left,0);z-index:5;display:none}
 .datepicker.open .calendar{display:block}
 .calendar{width:296px;padding:20px;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:13px;line-height:1.6}   /* 패딩 20 · 글자 13(사람의 결정 2026-11-09) */
-.calendar .cal-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;padding:0 4px 8px}
+.calendar .cal-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;padding:0 4px 16px}   /* 아래 16(사람의 결정 2026-11-09) */
 .calendar .cal-head button{border:0;background:transparent;font:inherit;cursor:pointer;width:28px;height:28px;border-radius:6px;color:var(--foreground-neutral-secondary)}
 .calendar .cal-head button:hover{background:var(--surface-neutral-secondary)}
 .calendar .cal-head button:active{background:var(--surface-neutral-strong)}
@@ -812,21 +813,25 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .calendar .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px;text-align:center}   /* 열 간격 0 — 2px 틈이 기간 띠를 끊었다 */
 .calendar .cal-week{display:contents}   /* role=row 는 접근성 트리에만 — 칸은 바로 위 격자에 놓인다 */
 .calendar .dow{font-size:12px;color:var(--foreground-neutral-tertiary);padding:4px 0;font-weight:600}
-.calendar .day{position:relative;isolation:isolate;height:34px;border:0;border-radius:6px;background:transparent;font:inherit;color:var(--foreground-neutral-primary);cursor:pointer}   /* isolation — 선택 원(::before, z-index -1)이 칸 면 위 · 글자 아래에 놓인다 */
-.calendar .day:hover:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"]){background:var(--surface-neutral-secondary)}   /* 선택 · 기간 · 선택 불가 칸은 호버 면을 얹지 않는다 */
-.calendar .day:active:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"]){background:var(--surface-neutral-strong)}
+.calendar .day{position:relative;isolation:isolate;height:34px;border:0;background:transparent;font:inherit;color:var(--foreground-neutral-primary);cursor:pointer}   /* isolation — 원(::before, z-index -1)이 칸 면(기간 띠) 위 · 글자 아래에 놓인다 */
+.calendar .day::before{content:"";position:absolute;inset:0;z-index:-1;margin:auto;width:34px;height:34px;border-radius:50%}   /* 칸의 면은 전부 원(사람의 결정 2026-11-09 — 선택 · hover · 누름 · 오늘 · 포커스). 지름 = 칸 높이 34 */
+.calendar .day:hover:not(.on,.today,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"])::before{background:var(--surface-neutral-secondary)}   /* 선택 · 오늘 · 기간 · 선택 불가 칸은 회색 원을 얹지 않는다 */
+.calendar .day:active:not(.on,.today,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"])::before{background:var(--surface-neutral-strong)}
 .calendar .day.muted{color:var(--foreground-neutral-tertiary)}   /* 다른 달 날은 고를 수 있다 — 고를 수 없는 날(비활성 색)과 구분한다(사람의 결정 2026-10-27) */
-.calendar .day.today{font-weight:700;color:var(--foreground-brand-primary)}
-.calendar .day.in-range,.calendar .day.preview{background:var(--surface-brand-subtle-strong);border-radius:0}   /* subtle 은 달력 면과 1.07 이라 띠가 거의 안 보였다(사람의 결정 2026-10-27 한 단계 진하게) */
-.calendar .day.in-range:hover,.calendar .day.preview:hover{box-shadow:inset 0 0 0 1px var(--line-brand-primary)}   /* subtle-strong 과 primary 사이에 면 토큰이 없어 호버는 안쪽 선으로 */
-.calendar .day.on{color:var(--brand-label);font-weight:600}
-.calendar .day.on::before,.calendar .day.preview-end::before{content:"";position:absolute;inset:0;z-index:-1;margin:auto;width:34px;height:34px;border-radius:50%;background:var(--surface-brand-primary)}   /* 선택은 원(사람의 결정 2026-11-09) — 지름 = 칸 높이 34 */
-.calendar .day.preview-end::before{background:var(--surface-brand-subtle-strong);box-shadow:inset 0 0 0 1px var(--foreground-brand-primary)}   /* 미리보기 끝 — 띠 색 원에 brand 테두리. 호버 면(회색)을 얹지 않는다 */
-.calendar .day.start:not(.end){background:linear-gradient(to right,transparent 50%,var(--surface-brand-subtle-strong) 50%);border-radius:0}   /* 띠의 양끝 — 칸 반쪽만 띠를 칠해 원과 띠가 끊기지 않게 */
-.calendar .day.end:not(.start){background:linear-gradient(to left,transparent 50%,var(--surface-brand-subtle-strong) 50%);border-radius:0}
+.calendar .day.today{font-weight:700;color:var(--foreground-neutral-primary)}   /* 오늘은 원이 표시한다. 원 위 글자는 기본 색 — brand 글자는 다크 원 위 3.87 이라(사람의 결정 2026-11-09) */
+.calendar .day.today::before{background:var(--surface-brand-subtle-strong)}   /* 오늘 원(사람의 결정 2026-11-09) */
+.calendar .day.in-range,.calendar .day.preview{background:var(--surface-brand-subtle-strong)}   /* subtle 은 달력 면과 1.07 이라 띠가 거의 안 보였다(사람의 결정 2026-10-27 한 단계 진하게). 띠는 이어져야 해서 칸 전체에 칠한다 */
+.calendar .day.today.in-range,.calendar .day.today.preview{color:var(--foreground-brand-primary)}   /* 오늘 원은 띠와 같은 색이라 띠 안에서는 굵은 brand 글자로 갈린다 */
+.calendar .day.today:hover:not(.on,.preview-end,[disabled],[aria-disabled="true"])::before,.calendar .day.in-range:hover:not(.on)::before,.calendar .day.preview:hover::before{box-shadow:inset 0 0 0 1px var(--line-brand-primary)}   /* subtle-strong 과 primary 사이에 면 토큰이 없어 오늘 · 띠의 hover 는 원 안쪽 선으로 */
+.calendar .day.on,.calendar .day.preview-end{color:var(--brand-label);font-weight:600}
+.calendar .day.on::before,.calendar .day.preview-end::before{background:var(--surface-brand-primary)}   /* 선택 원. 기간에서 시작 뒤 끝을 고르려고 올린 칸(미리보기 끝)도 같은 색(사람의 결정 2026-11-09) */
+.calendar .day.start:not(.end){background:linear-gradient(to right,transparent 50%,var(--surface-brand-subtle-strong) 50%)}   /* 띠의 양끝 — 칸 반쪽만 띠를 칠해 원과 띠가 끊기지 않게 */
+.calendar .day.end:not(.start){background:linear-gradient(to left,transparent 50%,var(--surface-brand-subtle-strong) 50%)}
 .calendar .day[disabled],.calendar .day[aria-disabled="true"]{color:var(--foreground-disable-primary);cursor:not-allowed}
 .calendar .day.blank{visibility:hidden}
 .calendar .day:focus-visible,.calendar .cell:focus-visible{position:relative;z-index:1}   /* 다음 칸이 외곽선을 덮지 않게 */
+.calendar .day:focus-visible{outline:none}
+.calendar .day:focus-visible::before{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}   /* 포커스도 원을 따라(전역 외곽선과 같은 1px · 2px 띄움) */
 .calendar .cal-grid.years,.calendar .cal-grid.months{grid-template-columns:repeat(3,1fr);gap:4px}
 .calendar .cell{height:40px;border:0;border-radius:6px;background:transparent;font:inherit;color:var(--foreground-neutral-primary);cursor:pointer}
 .calendar .cell:hover:not(.on,.in-range,[aria-disabled="true"]){background:var(--surface-neutral-secondary)}
@@ -948,7 +953,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .dropdown .trigger:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
 .dropdown .trigger .placeholder{color:var(--foreground-disable-primary)}
 .dropdown .trigger::after{content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
-.dropdown.open .trigger{border-color:var(--foreground-brand-primary)}
+.dropdown.open .trigger{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}   /* 목록이 열린 동안은 입력 포커스와 같은 링 — 마우스로 열면 :focus-visible 이 없어 테두리만 남았다(사람의 결정 2026-11-09) */
 .dropdown.open .trigger::after{transform:rotate(180deg)}
 .dropdown .trigger[disabled]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
 .dropdown .trigger[disabled]::after{background:var(--foreground-disable-primary)}

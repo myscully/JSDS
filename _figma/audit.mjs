@@ -461,7 +461,7 @@ function datePickerExpect() {
     const T = (sel, prop) => need(figTok(cssRule(sel)[prop]), sel + " " + prop);
     const fields = {};
     for (const [type, base, sz, rules] of [
-      ["Input", ".field .affix", (k) => `.field${k} .affix`, { Focused: ".field .affix:has(input:focus)", Open: ".datepicker.open:not(.error) .affix", Disabled: ".field .affix:has(input:disabled)", "Read-only": ".field .affix:has(input:read-only:not(:disabled))", Error: ".field.error .affix", "Error Focused": ".field.error .affix:has(input:focus)" }],
+      ["Input", ".field .affix", (k) => `.field${k} .affix`, { Focused: ".field .affix:has(input:focus)", Open: ".datepicker.open .affix", Disabled: ".field .affix:has(input:disabled)", "Read-only": ".field .affix:has(input:read-only:not(:disabled))", Error: ".field.error .affix", "Error Focused": ".field.error .affix:has(input:focus)" }],
     ]) {
       const b = cssRule(base), bw = need(parseFloat((/([\d.]+)px\s+solid/.exec(b.border || "") || [])[1]), base + " border 굵기");
       const def = { fill: need(figTok(b.background), base + " background"), stroke: need(figTok(b.border), base + " border"), sw: bw, drop: [] };
@@ -478,25 +478,26 @@ function datePickerExpect() {
     }
     const inner = cssRule(".field .affix input:focus")["box-shadow"];
     if (inner !== "none") throw new Error(".field .affix input:focus 의 box-shadow 가 none 이 아닙니다(" + inner + ")");
-    const d = cssRule(".calendar .day"), base = { fill: (d.background || "").trim() === "transparent" ? "-" : need(null, ".calendar .day background"), stroke: "-", radius: need(radius(d["border-radius"]), ".calendar .day border-radius"), text: T(".calendar .day", "color"), ring: null };
-    const dot = cssRule(".calendar .day.on::before"), r0 = need(px(dot.width), ".calendar .day.on::before width") / 2;
-    if ((dot["border-radius"] || "").trim() !== "50%") throw new Error(".calendar .day.on::before border-radius 가 50% 가 아닙니다(" + dot["border-radius"] + ")");
-    const on = { ...base, fill: T(".calendar .day.on::before", "background"), radius: [r0, r0, r0, r0], text: T(".calendar .day.on", "color") };
-    const band = cssRule(".calendar .day.in-range"), bandE = { ...base, fill: T(".calendar .day.in-range", "background"), radius: need(radius(band["border-radius"]), ".calendar .day.in-range border-radius") };
-    const pe = cssRule(".calendar .day.preview-end::before"), peIn = /inset\s+0\s+0\s+0\s+([\d.]+)px\s+(var\(--[a-z0-9-]+\))/.exec(pe["box-shadow"] || "");
-    const ring = cssRule(":focus-visible"), rm = /([\d.]+)px\s+solid\s+(var\(--[a-z0-9-]+\))/.exec(ring.outline || "");
-    const hov = '.calendar .day:hover:not(.on,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"])';
+    /* 2026-11-09(사람의 결정): 칸의 면은 전부 ::before 원(지름 = 칸 높이 34) — 선택 · 미리보기 끝 · 오늘 · hover · 누름 · 포커스. 칸 자체는 각지고 면이 없다(기간 띠만 칸에 칠한다) */
+    const d = cssRule(".calendar .day"), dot = cssRule(".calendar .day::before"), r0 = need(px(dot.width), ".calendar .day::before width") / 2;
+    if ((d.background || "").trim() !== "transparent") throw new Error(".calendar .day background 가 transparent 가 아닙니다(" + d.background + ")");
+    if ((dot["border-radius"] || "").trim() !== "50%") throw new Error(".calendar .day::before border-radius 가 50% 가 아닙니다(" + dot["border-radius"] + ")");
+    const circle = [r0, r0, r0, r0], base = { fill: "-", stroke: "-", radius: circle, text: T(".calendar .day", "color"), ring: null };
+    const on = { ...base, fill: T(".calendar .day.on::before", "background"), text: T(".calendar .day.on", "color") };
+    const bandE = { ...base, fill: T(".calendar .day.in-range", "background"), radius: [0, 0, 0, 0] };   // 띠는 칸 전체 — 이어져야 한다
+    const ring = cssRule(".calendar .day:focus-visible::before"), rm = /([\d.]+)px\s+solid\s+(var\(--[a-z0-9-]+\))/.exec(ring.outline || "");
+    const hov = '.calendar .day:hover:not(.on,.today,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"])::before';
     const days = {
       Default: base,
       Hover: { ...base, fill: T(hov, "background") },
-      Today: { ...base, text: T(".calendar .day.today", "color") },
+      Today: { ...base, fill: T(".calendar .day.today::before", "background"), text: T(".calendar .day.today", "color") },
       Selected: on,
       Start: { ...on }, End: { ...on },   // 원은 Selected 와 같다 — 반쪽 띠는 머리 주석
       "In-range": bandE, Preview: { ...bandE },
-      "Preview End": { ...base, fill: T(".calendar .day.preview-end::before", "background"), radius: [r0, r0, r0, r0], stroke: need(peIn && figTok(peIn[2]), ".calendar .day.preview-end::before inset"), sw: peIn && +peIn[1] },
+      "Preview End": { ...on, fill: T(".calendar .day.preview-end::before", "background"), text: T(".calendar .day.preview-end", "color") },   // 시작과 같은 원(2026-11-09)
       Muted: { ...base, text: T(".calendar .day.muted", "color") },
       Disabled: { ...base, text: T(".calendar .day[disabled]", "color") },
-      Focused: { ...base, ring: need(rm && figTok(rm[2]) + "|" + +rm[1] + "|OUTSIDE", ":focus-visible outline") },
+      Focused: { ...base, ring: need(rm && figTok(rm[2]) + "|" + +rm[1] + "|OUTSIDE", ".calendar .day:focus-visible::before outline") },
     };
     return { fields, days };
   } catch (e) { return { error: String(e.message || e) }; }

@@ -200,6 +200,8 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 | 오류 문구 = 앞말 + 예시 · 날짜 + 꼬리말("2026. 12. 31 이전 날짜를 입력하세요") | **기본 문구가 바뀌었습니다** — 무엇이 일어났는지 + 고치는 법, 범위는 '부터 · 까지'("날짜가 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다."). `messages` 는 자리표시 `{subject}` `{example}` `{min}` `{max}` 템플릿이고 새 키 `subject` · `startSubject` · `endSubject` 로 주어를 정합니다 — 기간에서 한쪽만 틀리면 그 쪽 이름("종료일이 …"). **자리표시가 없는 옛 문자열은 예전처럼 이어 붙습니다.** 기본 문구 글자를 단정하던 테스트는 고쳐야 합니다 | `data-messages`(JSON, 같은 키 · 같은 기본값). 틀린 JSON 은 경고하고 기본 문구로 |
 | — | `defaultText` — 덜 친 글자를 처음부터 보일 때 | 입력의 `value` |
 | 선택 칸 | 둥근 사각형 | 지름 34 원. 기간 양끝은 칸 반쪽에 띠가 이어집니다(`.day.start` · `.day.end` 가 미리보기 끝에도 붙음) |
+| 날짜 칸 hover · 누름 · 오늘 · 키보드 포커스 · 기간 미리보기 끝 | 칸 사각 면 · 오늘은 brand 글자만 · 미리보기 끝은 띠 색 원에 brand 테두리 | 모두 지름 34 원(`.day::before`). 오늘은 `--surface-brand-subtle-strong` 원 + 기본 색 굵은 글자(띠 안에서만 brand 글자), 미리보기 끝은 선택과 같은 brand 원. 연 · 월 칸은 둥근 사각형 그대로. 달력 헤더 아래 8 → 16 |
+| 열린 Date Picker · Select 의 테두리 | 아이콘으로 연 Date Picker 는 링 없음, 열린 Select 는 brand 테두리만 | 입력 포커스와 같은 링(brand 1px + 후광 4px, 오류 Date Picker 는 빨강) — `.open` 이면 어떻게 열었든 |
 
 새로 내보내는 컴포넌트 · 함수 · 타입: `DateRangePicker` · `parseYear` · `DateRangePickerProps` · `DateRangeValue` · `DateChangeInfo` · `DateUnit` · `DateValidity` · `DatePickerLabels`.
 

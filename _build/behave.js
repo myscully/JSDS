@@ -985,6 +985,16 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     select: await fieldRing("components/select.html", "#ex-select-default .dropdown .trigger"),
     date: await fieldRing("components/date-picker.html", "#ex-date-picker-default .affix input", ".affix") };
   ok("value fields show a 1px brand border and 4px halo on focus", Object.values(rings).every((r) => !/inset/.test(r.shadow) && /0px 0px 0px 4px/.test(r.shadow) && r.outline === "none" && r.edge), JSON.stringify(rings));
+  /* 팝업이 열린 동안은 어떻게 열었든 같은 링(사람의 결정 2026-11-09) — 달력 아이콘 · Select 를 마우스로 열면 :focus-visible 이 없어 링이 없거나 테두리만 남았다 */
+  const openRing = async (pg, host, opener, boxSel) => { await go(pg); const h = page.locator(host).first(); await h.scrollIntoViewIfNeeded(); await h.locator(opener).click(); await page.waitForTimeout(250);
+    const r = await h.evaluate((e, b) => { const cs = getComputedStyle(e.querySelector(b)); return { open: e.classList.contains("open"), shadow: cs.boxShadow, border: cs.borderTopColor }; }, boxSel);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(250);
+    const closed = await h.evaluate((e, b) => ({ open: e.classList.contains("open"), shadow: getComputedStyle(e.querySelector(b)).boxShadow }), boxSel);
+    return { ...r, closed }; };
+  const opened = { date: await openRing("components/date-picker.html", "#ex-date-picker-default .datepicker", ".cal-btn", ".affix"), select: await openRing("components/select.html", "#ex-select-default .dropdown", ".trigger", ".trigger") };
+  ok("an open date picker or select shows the same ring as a focused input, whoever opened it",
+    ["date", "select"].every((k) => opened[k].open && opened[k].shadow === rings[k].shadow && opened[k].border === rings[k].border && !opened[k].closed.open) && opened.date.closed.shadow === "none",
+    JSON.stringify({ opened, want: { date: rings.date, select: rings.select } }));
   /* 검색창 링은 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 겹쳤다(사람의 결정 2026-10-26) */
   await go("components/search.html"); await page.locator("#ex-search-extras .searchbar .clear").first().evaluate((e) => e.focus());
   await page.keyboard.press("Tab"); await page.keyboard.press("Shift+Tab"); await page.waitForTimeout(250);
