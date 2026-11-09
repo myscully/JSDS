@@ -1,7 +1,10 @@
 /* _build/ds-chart.src.js 의 타입. 값은 sync-chart.mjs 가 복사한 ds-chart.js 에서 온다 — 둘을 함께 고친다 */
 
-/** Chart.js 의 Chart 생성자(chart.js 또는 chart.js/auto). chart.js 는 optional peer 라 타입을 직접 참조하지 않는다 */
-export type ChartLike = new (canvas: HTMLCanvasElement, config: object) => { update(mode?: string): void; destroy(): void; config: object; data: object; options: object };
+/** Chart.js 의 Chart 생성자(chart.js 또는 chart.js/auto). chart.js 는 optional peer 라 타입을 직접 참조하지 않는다.
+ *  config 는 never — 생성자 매개변수는 반대 방향으로 대조되어 `object` 로 두면 Chart.js 의 ChartConfiguration 을 받는 `typeof Chart` 가
+ *  맞지 않았다(문서대로 쓴 `<ChartCanvas chart={Chart}>` 가 타입 오류, 2026-11-09). 생성은 ds-chart.js 안에서만 하므로 TS 쪽에서 부를 일이 없다.
+ *  update 의 mode 도 같은 이유로 Chart.js UpdateMode 의 일부만 — ds-chart.js 는 "none" 만 쓴다 */
+export type ChartLike = new (canvas: HTMLCanvasElement, config: never) => { update(mode?: "none" | "default" | "resize" | "reset"): void; destroy(): void; config: object; data: object; options: object };
 
 export type Tone = "critical" | "high" | "medium" | "low" | "info" | "ok" | "brand" | "series-1" | "series-1-subtle" | "series-1-strong";
 export interface Series { label: string; data: number[]; tone?: Tone }

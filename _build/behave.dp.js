@@ -397,6 +397,10 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("typing a range puts ~ after the start, a reversed range is order and keeps both dates", r.t === "2026. 09. 12 ~ 2026. 09. 10" && r.val === "order" && r.err && r.help === "종료일이 시작일보다 빠릅니다" && ev.start === "2026-09-12" && ev.end === "2026-09-10" && ev.validity === "order", JSON.stringify({ r, ev }));
     const ok2 = await typeInto(dp, "2026091020260912");
     ok("typing a valid range commits both ends", ok2.s === "2026-09-10" && ok2.e === "2026-09-12" && ok2.val === "valid" && !ok2.err, JSON.stringify(ok2));
+    /* 쪽마다의 상태(2026-11-09) — 비운 끝 empty · max(오늘) 넘은 끝 max · 순서는 validity 에만 */
+    await typeInto(dp, "20260910"); const half = await last();
+    await typeInto(dp, "2026091020261105"); const over = await last();
+    ok("ds:date sides tell which end is wrong", ev.sides?.start === "valid" && ev.sides?.end === "valid" && half.validity === "incomplete" && half.sides?.start === "valid" && half.sides?.end === "empty" && over.validity === "max" && over.sides?.start === "valid" && over.sides?.end === "max", JSON.stringify({ ev: ev.sides, half, over }));
   });
   await step("typed text is checked when focus leaves through the calendar button", async () => {
     const dp = dpOf("default");
@@ -443,6 +447,23 @@ module.exports = async ({ b, ok, SITE, path }) => {
       en.title === "September 2026" && en.dow === "SMTWTFS" && en.today === "Today" && en.label === "Monday, September 7, 2026" && enNext === "October 2026" &&
       ja.title === "2026年9月" && ja.dow === "日月火水木金土" && ja.today === "今日",
       JSON.stringify({ en, ja, enNext }));
+  });
+  await step("data-labels replaces the words Intl can't make — static markup and ds.js render alike", async () => {
+    await go("components/date-picker.html");
+    const read = () => page.locator(`${ex("locale")} .calendar`).nth(0).evaluate((c) => ({ name: c.getAttribute("aria-label"), apply: c.querySelector('[data-cal="apply"]').textContent.trim(), prev: c.querySelector('[data-nav="-1"]').getAttribute("aria-label"), next: c.querySelector('[data-nav="1"]').getAttribute("aria-label"), title: c.querySelector(".cal-title").getAttribute("aria-label") }));
+    const before = await read();
+    await page.locator(`${ex("locale")} .calendar`).nth(0).evaluate((c) => c.querySelector('[data-nav="1"]').click());
+    const after = await read();
+    /* 기간 필드에 문구를 주면 프리셋({n}) · 적용 · 달력 이름이 바뀐다 */
+    const dp = dpOf("range");
+    await dp.evaluate((e) => e.setAttribute("data-labels", JSON.stringify({ recent: "Last {n} days", apply: "Apply", dialog: "Choose dates" })));
+    await toTop(dp); await openCal(dp);
+    const f = await dp.evaluate((e) => ({ presets: [...e.querySelectorAll("[data-preset]")].map((b) => b.textContent.trim()).join(), apply: e.querySelector('[data-cal="apply"]').textContent.trim() }));
+    await page.keyboard.press("Escape");
+    ok("data-labels replaces the words Intl can't make — static markup and ds.js render alike",
+      before.name === "Choose date" && before.apply === "Apply" && before.prev === "Previous month" && before.next === "Next month" && before.title === "September 2026, choose year" &&
+      after.next === "Next month" && after.title === "October 2026, choose year" && f.presets === "Last 7 days,Last 30 days" && f.apply === "Apply",
+      JSON.stringify({ before, after, f }));
   });
   await step("timezone decides today and the instant ds:date sends", async () => {
     const utc = dpOf("timezone", 0), ny = dpOf("timezone", 1);

@@ -7,7 +7,7 @@
    - Slider(--p·값 표시) · Search(지우기) · DatePicker/Calendar(입력 'YYYY. MM. DD' 자동 형식 · ↑↓ 조각 이동, 단위 연 · 월 · 일, 단일 · 기간(두 달), locale(Intl) · timezone(dayjs 가 있으면), 유효하지 않은 값 상태, 달 · 연 이동, 키보드, min/max, 하단 버튼 · 즉시 적용, 위로 펼침)
    - Checkbox 전체선택(indeterminate) · 약관 동의 · Data Table(정렬·행 선택·액션 바)
    - Notice 닫기 · Toast 액션/자동 소멸 · Popup 배경 클릭 닫기 · Accordion disabled
-   - Tabs 패널 텍스트 · Breadcrumb .more 펼치기(data-items) · Onboard 단계 이동([data-step]) · 달력 프리셋([data-preset]) — 확정은 ds:date {value, start, end, date, text, validity} · Text Field 글자 수(.counter) · 선택형 카드(.card-grid .card.clickable)
+   - Tabs 패널 텍스트 · Breadcrumb .more 펼치기(data-items) · Onboard 단계 이동([data-step]) · 달력 프리셋([data-preset]) — 확정은 ds:date {value, start, end, date, text, validity, 기간은 sides} · Text Field 글자 수(.counter) · 선택형 카드(.card-grid .card.clickable)
    ========================================================= */
 (function () {
   "use strict";
@@ -106,8 +106,20 @@
        값이 늘 유효하지는 않다 — 미완성 · 없는 날짜는 값을 비우고, 범위 밖 · 순서는 값을 그 날짜로 둔 채 data-validity 와 ds:date 의 validity 로 알린다.
      설정: data-unit(year · month · day) · data-range(기간 — 달력 기본 2개, data-calendars="1" 이나 767px 이하에서 1개) · data-locale(기본 ko-KR, Intl 표기)
            · data-timezone(기본 환경 시간대 — IANA 이름 · UTC 는 dayjs + utc · timezone 플러그인이 실렸을 때) · data-min/max(YYYY-MM-DD | today)
-           · data-footer("today reset cancel apply" | none) · data-presets("7 30") · data-today(정적 데모의 오늘) */
-  var FOOT = { today: ["text", null], reset: ["text", "초기화"], cancel: ["outline assistive", "취소"], apply: ["solid primary", "적용"] };
+           · data-footer("today reset cancel apply" | none) · data-presets("7 30") · data-today(정적 데모의 오늘)
+           · data-labels(JSON — Intl 이 만들지 못하는 문구를 바꾼다. 키는 React labels 와 같고 recent 는 "최근 {n}일") */
+  var FOOT = { today: "text", reset: "text", cancel: "outline assistive", apply: "solid primary" };
+  /* 문구 — 사람의 결정(2026-11-09): 다른 언어로 쓸 때 data-labels 로 바꾼다. '오늘' 의 기본은 Intl.RelativeTimeFormat */
+  var LABELS = { dialog: "날짜 선택", reset: "초기화", cancel: "취소", apply: "적용", prevMonth: "이전 달", nextMonth: "다음 달", prevYear: "이전 연도", nextYear: "다음 연도", prevYears: "이전 12년", nextYears: "다음 12년", chooseYear: "연도 선택", yearGrid: "연도 목록", backToDays: "날짜로 돌아가기", backToMonths: "월 선택으로", recent: "최근 {n}일" };
+  var labelWarned = {};
+  function dpLabels(host) {
+    var raw = host.getAttribute("data-labels"), o = {}, out = {}, k;
+    if (raw) try { o = JSON.parse(raw) || {}; } catch (e) { if (!labelWarned[raw]) { labelWarned[raw] = 1; if (window.console) console.warn("[ds.js] data-labels 가 JSON 이 아닙니다 — 기본 문구를 씁니다: " + raw); } }
+    for (k in LABELS) out[k] = LABELS[k];
+    out.today = todayLabel(host);
+    for (k in o) if (typeof o[k] === "string") out[k] = o[k];
+    return out;
+  }
   var MSG = { incomplete: "날짜를 끝까지 입력하세요. 예: ", invalid: "없는 날짜입니다. 예: ", min: " 이후 날짜를 입력하세요", max: " 이전 날짜를 입력하세요", order: "종료일이 시작일보다 빠릅니다" };
   var EXAMPLE = { day: "2026. 09. 07", month: "2026. 09", year: "2026" }, DIGITS = { day: 8, month: 6, year: 4 };
   var ymKey = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1); };
@@ -133,7 +145,7 @@
   function calOf(host) {
     if (!isPicker(host)) return host;
     var cal = $(".calendar", host);
-    if (!cal) { cal = doc.createElement("div"); cal.className = "calendar"; cal.setAttribute("role", "dialog"); cal.setAttribute("aria-modal", "true"); cal.setAttribute("aria-label", "날짜 선택"); host.appendChild(cal); }
+    if (!cal) { cal = doc.createElement("div"); cal.className = "calendar"; cal.setAttribute("role", "dialog"); cal.setAttribute("aria-modal", "true"); cal.setAttribute("aria-label", dpLabels(host).dialog); host.appendChild(cal); }
     return cal;
   }
   /* 표기 — Intl 이 지원하는 언어는 import 없이(사람의 요구 2026-11-09). 잘못된 태그는 ko-KR 로 */
@@ -206,13 +218,17 @@
     var parts = rg ? s.split(/\s*~\s*/) : [s]; if (rg && parts.length < 2) parts.push("");
     /* 자릿수가 모자라면 미완성 — 치는 중인 "2026. 09. 3" 을 3일로 확정하지 않는다 */
     var sides = parts.slice(0, rg ? 2 : 1).map(function (p) { if (p.replace(/\D/g, "").length < DIGITS[unit]) return { v: "incomplete" }; var d = parseUnit(p, unit); return d ? { v: "valid", d: d } : { v: "invalid" }; });
+    var f = function (d) { return keyOf(d, unit); }, lo = dpBound(host, "min"), hi = dpBound(host, "max");
+    /* 기간의 쪽마다 상태(React info.sides 와 같다) — 비운 쪽 empty, 범위는 그 쪽 날짜만. 순서(order)는 두 쪽 사이의 일이라 validity 에만 */
+    var side = function (p, x) { return !p.trim() ? "empty" : x.v !== "valid" ? x.v : lo && f(x.d) < f(lo) ? "min" : hi && f(x.d) > f(hi) ? "max" : "valid"; };
+    var ss = rg ? { start: side(parts[0], sides[0]), end: side(parts[1], sides[1]) } : null;
     var bad = sides.filter(function (x) { return x.v !== "valid"; })[0];
-    if (bad) return { validity: bad.v, a: null, b: null, msg: MSG[bad.v] + (rg ? EXAMPLE[unit] + " ~ " + EXAMPLE[unit] : EXAMPLE[unit]) };
-    var a = sides[0].d, b = rg ? sides[1].d : null, f = function (d) { return keyOf(d, unit); }, lo = dpBound(host, "min"), hi = dpBound(host, "max"), both = [a, b].filter(Boolean);
-    if (b && b < a) return { validity: "order", a: a, b: b, msg: MSG.order };
-    if (lo && both.some(function (d) { return f(d) < f(lo); })) return { validity: "min", a: a, b: b, msg: showOf(lo, unit) + MSG.min };
-    if (hi && both.some(function (d) { return f(d) > f(hi); })) return { validity: "max", a: a, b: b, msg: showOf(hi, unit) + MSG.max };
-    return { validity: "valid", a: a, b: b };
+    if (bad) return { validity: bad.v, a: null, b: null, sides: ss, msg: MSG[bad.v] + (rg ? EXAMPLE[unit] + " ~ " + EXAMPLE[unit] : EXAMPLE[unit]) };
+    var a = sides[0].d, b = rg ? sides[1].d : null, both = [a, b].filter(Boolean);
+    if (b && b < a) return { validity: "order", a: a, b: b, sides: ss, msg: MSG.order };
+    if (lo && both.some(function (d) { return f(d) < f(lo); })) return { validity: "min", a: a, b: b, sides: ss, msg: showOf(lo, unit) + MSG.min };
+    if (hi && both.some(function (d) { return f(d) > f(hi); })) return { validity: "max", a: a, b: b, sides: ss, msg: showOf(hi, unit) + MSG.max };
+    return { validity: "valid", a: a, b: b, sides: ss };
   }
   /* host 의 상태. 처음 만질 때 마크업(입력 글자 · 정적 달력의 .on)에서 값을 읽어 data-* 로 옮긴다 */
   function S(host) {
@@ -242,9 +258,10 @@
     return st.view === "year" ? y0 + "–" + (y0 + 11) : st.view === "month" ? intl(dpLocale(host), { year: "numeric" }).format(m) : dpMonths(host) === 2 ? monthTitle(host, m) + " – " + monthTitle(host, addMonths(m, 1)) : monthTitle(host, m);
   }
   /* 제목 버튼은 더 넓은 화면(연)으로 — 연 단위는 연 목록이 가장 넓어 제목이 글자일 뿐이다 */
-  function headHtml(which, title, unit, back) {
-    var nav = function (d) { return '<button type="button" class="cal-nav" data-nav="' + d + '" aria-label="' + (d < 0 ? "이전 " : "다음 ") + unit + '">' + ICON[d < 0 ? "chevron-left" : "chevron-right"] + "</button>"; }, gap = '<span class="cal-nav-gap"></span>';
-    var t = back === false ? '<span class="cal-title">' + title + "</span>" : '<button type="button" class="cal-title" aria-label="' + title + ", " + (back || "연도 선택") + '">' + title + "</button>";
+  /* nav = [이전, 다음] 이름, back = 제목 버튼 뒤 이름(false 면 누를 수 없는 제목) */
+  function headHtml(which, title, nav2, back) {
+    var nav = function (d) { return '<button type="button" class="cal-nav" data-nav="' + d + '" aria-label="' + nav2[d < 0 ? 0 : 1] + '">' + ICON[d < 0 ? "chevron-left" : "chevron-right"] + "</button>"; }, gap = '<span class="cal-nav-gap"></span>';
+    var t = back === false ? '<span class="cal-title">' + title + "</span>" : '<button type="button" class="cal-title" aria-label="' + title + ", " + back + '">' + title + "</button>";
     return '<div class="cal-head">' + (which === "next" ? gap : nav(-1)) + t + (which === "prev" ? gap : nav(1)) + "</div>";
   }
   function dayGrid(host, mo, two) {
@@ -263,7 +280,7 @@
   }
   function cellGrid(host, kind, mo) {
     var st = S(host), y = mo.getFullYear(), y0 = y - y % 12, own = st.mode === "range" && st.unit === (kind === "years" ? "year" : "month"), loc = dpLocale(host);
-    var h = '<div class="cal-grid ' + kind + '" role="grid" aria-label="' + (kind === "years" ? "연도 목록" : intl(loc, { year: "numeric" }).format(mo)) + '"' + (own ? ' aria-multiselectable="true"' : "") + ">";
+    var h = '<div class="cal-grid ' + kind + '" role="grid" aria-label="' + (kind === "years" ? dpLabels(host).yearGrid : intl(loc, { year: "numeric" }).format(mo)) + '"' + (own ? ' aria-multiselectable="true"' : "") + ">";
     for (var r = 0; r < 4; r++) {
       h += '<div class="cal-week" role="row">';
       for (var c = 0; c < 3; c++) {
@@ -276,9 +293,9 @@
     return h + "</div>";
   }
   function footHtml(host) {
-    var st = S(host), list = dpFoot(host), h = "", t = dpToday(host);
-    if (st.mode === "range" && st.unit === "day") (host.getAttribute("data-presets") || "").split(/\s+/).filter(Boolean).forEach(function (n) { var s = addDays(t, -(+n - 1)); h += '<button type="button" class="btn sm text" data-preset="' + n + '"' + (outOf(host, s) || outOf(host, t) ? " disabled" : "") + ">최근 " + n + "일</button>"; });
-    ["today", "reset", "cancel", "apply"].forEach(function (k) { if (list.indexOf(k) < 0 || (k === "today" && st.mode !== "single")) return; h += '<button type="button" class="btn sm ' + FOOT[k][0] + '" data-cal="' + k + '"' + (k === "today" && outOf(host, t, st.unit) ? " disabled" : "") + ">" + (FOOT[k][1] || todayLabel(host)) + "</button>"; });
+    var st = S(host), list = dpFoot(host), h = "", t = dpToday(host), L = dpLabels(host);
+    if (st.mode === "range" && st.unit === "day") (host.getAttribute("data-presets") || "").split(/\s+/).filter(Boolean).forEach(function (n) { var s = addDays(t, -(+n - 1)); h += '<button type="button" class="btn sm text" data-preset="' + n + '"' + (outOf(host, s) || outOf(host, t) ? " disabled" : "") + ">" + L.recent.replace("{n}", n) + "</button>"; });
+    ["today", "reset", "cancel", "apply"].forEach(function (k) { if (list.indexOf(k) < 0 || (k === "today" && st.mode !== "single")) return; h += '<button type="button" class="btn sm ' + FOOT[k] + '" data-cal="' + k + '"' + (k === "today" && outOf(host, t, st.unit) ? " disabled" : "") + ">" + L[k] + "</button>"; });
     return h ? '<div class="cal-foot">' + h + "</div>" : "";
   }
   /* 격자를 다시 그린다 — 달 · 뷰 · 달 수가 바뀔 때만. 고르기 · 미리보기 · 키 이동은 renderMarks 만 부른다(포인터 아래 DOM 을 갈지 않게) */
@@ -286,12 +303,12 @@
     var st = S(host), cal = calOf(host), act = doc.activeElement, key = cal.contains(act) ? focusKey(act) : null;
     var keep = !host.hasAttribute("data-footer") && !host.hasAttribute("data-presets") && $(":scope > .cal-foot", cal);   // data-footer 가 없으면 하단을 처음 그린(또는 옛 마크업이 직접 만든) 그대로 둔다
     var live = $(":scope > .sr-only[aria-live]", cal);   // 알림 영역은 같은 노드를 둔다 — 새로 넣은 live 영역은 대개 읽히지 않는다
-    var n = dpMonths(host), h = "";
+    var n = dpMonths(host), h = "", L = dpLabels(host);
     cal.classList.toggle("two", n === 2);
     if (st.view === "day") {
-      for (var i = 0; i < n; i++) { var mo = addMonths(st.month, i); h += (n === 2 ? '<div class="cal-month">' : "") + headHtml(n === 2 ? (i ? "next" : "prev") : "both", monthTitle(host, mo), "달") + dayGrid(host, mo, n === 2) + (n === 2 ? "</div>" : ""); }
+      for (var i = 0; i < n; i++) { var mo = addMonths(st.month, i); h += (n === 2 ? '<div class="cal-month">' : "") + headHtml(n === 2 ? (i ? "next" : "prev") : "both", monthTitle(host, mo), [L.prevMonth, L.nextMonth], L.chooseYear) + dayGrid(host, mo, n === 2) + (n === 2 ? "</div>" : ""); }
       if (n === 2) h = '<div class="cal-months">' + h + "</div>";
-    } else h += headHtml("both", titleOf(host), st.view === "month" ? "연도" : "12년", st.view === "year" ? (st.unit === "year" ? false : st.unit === "month" ? "월 선택으로" : "날짜로 돌아가기") : null) + cellGrid(host, st.view === "month" ? "months" : "years", st.month);
+    } else h += headHtml("both", titleOf(host), st.view === "month" ? [L.prevYear, L.nextYear] : [L.prevYears, L.nextYears], st.view === "year" ? (st.unit === "year" ? false : st.unit === "month" ? L.backToMonths : L.backToDays) : L.chooseYear) + cellGrid(host, st.view === "month" ? "months" : "years", st.month);
     h += keep ? "" : footHtml(host);
     if (!live) { live = doc.createElement("span"); live.className = "sr-only"; live.setAttribute("aria-live", "polite"); }
     cal.innerHTML = h;
@@ -361,11 +378,12 @@
     host.style.setProperty("--dp-top", (up ? r.top - hr.top - gap - h : r.bottom - hr.top + gap) + "px");
     host.style.setProperty("--dp-left", Math.max(8 - hr.left, Math.min(0, vw - 8 - w - hr.left)) + "px");
   }
-  /* ds:date — value · start · end 는 기계 형식, date 는 기준 시간대의 0시(미완성 · 없는 날짜는 Invalid Date, 빈 값은 null), text 는 필드 글자 */
-  function emit(host, v, validity) {
+  /* ds:date — value · start · end 는 기계 형식, date 는 기준 시간대의 0시(미완성 · 없는 날짜는 Invalid Date, 빈 값은 null), text 는 필드 글자,
+     기간은 sides {start, end} — 쪽마다의 상태(달력에서 고른 값은 늘 valid · 비운 쪽 empty) */
+  function emit(host, v, validity, sides) {
     var st = S(host), u = st.unit, k = function (d) { return d ? keyOf(d, u) : null; }, bad = validity === "incomplete" || validity === "invalid";
     var at = function (d) { return bad ? new Date(NaN) : d ? instant(host, d) : null; }, inp = $(".affix input", host), text = inp ? inp.value.trim() : valText(host, v);
-    fire(host, "ds:date", st.mode === "range" ? { value: v.a && v.b ? k(v.a) + " ~ " + k(v.b) : null, start: k(v.a), end: k(v.b), date: { start: at(v.a), end: at(v.b) }, text: text, validity: validity }
+    fire(host, "ds:date", st.mode === "range" ? { value: v.a && v.b ? k(v.a) + " ~ " + k(v.b) : null, start: k(v.a), end: k(v.b), date: { start: at(v.a), end: at(v.b) }, text: text, validity: validity, sides: sides || { start: v.a ? "valid" : "empty", end: v.b ? "valid" : "empty" } }
       : { value: k(v.a), date: at(v.a), text: text, validity: validity });
   }
   function commit(host) {
@@ -498,7 +516,7 @@
     if (r.msg) setError(host, r.msg); else clearError(host);
     if (r.a) { inp.value = valText(host, v) || inp.value; inp._dpPrev = inp.value; }
     st.text = inp.value.trim();
-    if (changed) emit(host, v, r.validity);
+    if (changed) emit(host, v, r.validity, r.sides);
     if (host.classList.contains("open")) { st.draft = v; st.focus = null; if (v.a) st.month = firstOf(v.a); st.view = baseView(st.unit); renderStructure(host); }   // 연 채로 입력해 확정하면 달력도 그 값으로
     return r.validity === "valid" || r.validity === "empty";
   }

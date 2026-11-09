@@ -255,7 +255,7 @@ describe("DatePicker — 단위 · 달력", () => {
     await userEvent.click(b.querySelector('.day[data-date="2026-09-03"]')!);
     expect(b).toHaveClass("open");
     await userEvent.click(b.querySelector('.day[data-date="2026-09-05"]')!);
-    expect(lastCall(rg)).toEqual([{ start: ymd(2026, 9, 3), end: ymd(2026, 9, 5) }, { text: "2026. 09. 03 ~ 2026. 09. 05", validity: "valid" }]);
+    expect(lastCall(rg)).toEqual([{ start: ymd(2026, 9, 3), end: ymd(2026, 9, 5) }, { text: "2026. 09. 03 ~ 2026. 09. 05", validity: "valid", sides: { start: "valid", end: "valid" } }]);
     expect(b).not.toHaveClass("open");
   });
 
@@ -354,8 +354,21 @@ describe("DateRangePicker", () => {
     await userEvent.type(input, "2026091220260910");
     expect(input).toHaveValue("2026. 09. 12 ~ 2026. 09. 10");
     await userEvent.type(input, "{Enter}");
-    expect(lastCall(onChange)).toEqual([{ start: ymd(2026, 9, 12), end: ymd(2026, 9, 10) }, { text: "2026. 09. 12 ~ 2026. 09. 10", validity: "order" }]);
+    expect(lastCall(onChange)).toEqual([{ start: ymd(2026, 9, 12), end: ymd(2026, 9, 10) }, { text: "2026. 09. 12 ~ 2026. 09. 10", validity: "order", sides: { start: "valid", end: "valid" } }]);
     expect(screen.getByText("종료일이 시작일보다 빠릅니다")).toBeInTheDocument();
+  });
+
+  it("info.sides 는 시작 · 끝 각각의 상태 — 비운 쪽 empty, 덜 친 쪽 incomplete, 범위 밖인 쪽 max", async () => {
+    const onChange = vi.fn();
+    render(<DateRangePicker label="기간" max={ymd(2026, 12, 31)} onChange={onChange} />);
+    const input = screen.getByLabelText("기간");
+    await userEvent.type(input, "20260910{Enter}");
+    expect(lastCall(onChange)[1]).toEqual({ text: "2026. 09. 10", validity: "incomplete", sides: { start: "valid", end: "empty" } });
+    await userEvent.type(input, "202701{Enter}");
+    expect(lastCall(onChange)[1]).toEqual({ text: "2026. 09. 10 ~ 2027. 01", validity: "incomplete", sides: { start: "valid", end: "incomplete" } });
+    await userEvent.type(input, "05{Enter}");
+    expect(lastCall(onChange)[1]).toEqual({ text: "2026. 09. 10 ~ 2027. 01. 05", validity: "max", sides: { start: "valid", end: "max" } });
+    expect(checkText("2026. 02. 30 ~ 2026. 03. 01", { unit: "day", range: true, messages: MSG }).sides).toEqual({ start: "invalid", end: "valid" });
   });
 
   it("시작을 고른 뒤 올린 날까지 미리보기 · 프리셋은 min/max 밖이면 비활성", async () => {
@@ -380,7 +393,7 @@ describe("DateRangePicker", () => {
     await userEvent.click(document.querySelector('.cell[data-ym="2026-06"]')!);
     expect(document.querySelectorAll(".cell.in-range")).toHaveLength(2);
     await userEvent.click(screen.getByRole("button", { name: "적용" }));
-    expect(lastCall(onChange)).toEqual([{ start: ymd(2026, 3, 1), end: ymd(2026, 6, 1) }, { text: "2026. 03 ~ 2026. 06", validity: "valid" }]);
+    expect(lastCall(onChange)).toEqual([{ start: ymd(2026, 3, 1), end: ymd(2026, 6, 1) }, { text: "2026. 03 ~ 2026. 06", validity: "valid", sides: { start: "valid", end: "valid" } }]);
   });
 });
 

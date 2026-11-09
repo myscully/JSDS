@@ -1,7 +1,7 @@
 /* 게이트를 한 번에 돌리고 한 줄로 보고한다.
  *
  *   node _build/gates.mjs            전부 돌리고 요약
- *   node _build/gates.mjs --quick    사이트만(build+verify+contrast) — React 테스트는 건너뜀
+ *   node _build/gates.mjs --quick    사이트만(build+verify+contrast · behave) — React 테스트 · tsc 는 건너뜀
  *
  * 왜 있나: 매번 같은 네 숫자를 손으로 긁어 옮겼다. 긁다가 틀리면 "통과했다"가 거짓이 된다.
  * 여기서 뽑으면 출력이 곧 근거다. 하나라도 어긋나면 exit 1.
@@ -57,6 +57,11 @@ if (!quick) {
     line.push(`react ${t[0]}${t[1] ? "+" + t[1] : ""}`);
     if (vt.code !== 0) fail.push("react 테스트 실패:\n" + vAll.split("\n").filter((l) => /FAIL|✗|AssertionError/.test(l)).slice(0, 12).join("\n"));
   } else fail.push("react 테스트 결과를 읽지 못했습니다\n" + vAll.trim().split("\n").slice(-8).join("\n"));
+  /* 4) React 타입 — 테스트(vitest)는 타입을 보지 않는다. 문서대로 쓴 <ChartCanvas chart={Chart}> 가 타입 오류인 채로 7건이 남아 있었다(2026-11-09) */
+  const tc = run("npx", ["tsc", "--noEmit", "-p", "."], path.join(ROOT, "_react"));
+  const tErr = ((tc.out + tc.err).match(/error TS\d+/g) || []).length;
+  line.push(`tsc ${tErr}`);
+  if (tc.code !== 0) fail.push(`tsc 오류 ${tErr}건:\n` + (tc.out + tc.err).split("\n").filter((l) => /error TS/.test(l)).slice(0, 8).join("\n"));
 }
 
 console.log(line.join(" · "));

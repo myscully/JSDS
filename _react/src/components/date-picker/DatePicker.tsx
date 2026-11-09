@@ -8,14 +8,19 @@ import { TextField } from "../text-field/TextField";
 import { LABELS } from "../../labels";
 import type { Size } from "../../types";
 import { Calendar, addMonths, baseView, isRange, labelsFor, outOf, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
-import { checkText, formatMonth, isValidDate, pasteText, placeholderOf, reformat, showOf, stepText, unitStart, type DatePickerMessages, type DateUnit, type DateValidity } from "./format";
+import { checkText, formatMonth, isValidDate, pasteText, placeholderOf, reformat, showOf, stepText, unitStart, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity } from "./format";
 import { calendarDateOf, instantOf, resolveZone, todayIn } from "./tz";
 
 export { Calendar, type CalendarProps, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
-export { formatDate, formatMonth, parseDate, parseMonth, parseYear, type DatePickerMessages, type DateUnit, type DateValidity } from "./format";
+export { formatDate, formatMonth, parseDate, parseMonth, parseYear, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity } from "./format";
 
 /** onChange 의 둘째 인자 — 필드 글자와 상태. 값이 Invalid Date 면 validity 가 incomplete · invalid 다 */
-export interface DateChangeInfo { text: string; validity: DateValidity }
+export interface DateChangeInfo {
+  text: string;
+  validity: DateValidity;
+  /** DateRangePicker 에서만 — 시작 · 끝 각각의 상태(어느 쪽이 틀렸는지). 순서(order)는 validity 에만 */
+  sides?: { start: DateSideValidity; end: DateSideValidity };
+}
 /** 기간 값 — 각 끝은 Date(그 시간대의 0시) · null · Invalid Date */
 export type DateRangeValue = { start: Date | null; end: Date | null };
 
@@ -177,7 +182,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
     setText(shown); setValidity(r.validity); setTypeError(r.message ?? null);
     const changed = shown !== committed.current;
     committed.current = shown;
-    if (changed) emit(p, { text: shown, validity: r.validity });
+    if (changed) emit(p, { text: shown, validity: r.validity, ...(r.sides && { sides: r.sides }) });
     if (isOpen) { const v = draftOf(shown); setDraft(v); setMonth(startMonth(v, months === 2)); setView(baseView(unit)); }   // 연 채로 입력해 확정하면 달력도 그 값으로 — 적용이 예전 값으로 되돌리지 않게
     return shown;
   }
@@ -185,7 +190,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   const commitDays = (v: DateValue) => {
     const a = isRange(v) ? v.start : v instanceof Date ? v : null, b = isRange(v) ? v.end : null, t = textOfDays(a, b);
     setText(t); setValidity(a ? "valid" : "empty"); setTypeError(null);
-    if (t !== committed.current) { committed.current = t; emit({ a: a && instantOf(a, tz), b: b && instantOf(b, tz) }, { text: t, validity: a ? "valid" : "empty" }); }
+    if (t !== committed.current) { committed.current = t; emit({ a: a && instantOf(a, tz), b: b && instantOf(b, tz) }, { text: t, validity: a ? "valid" : "empty", ...(range && { sides: { start: a ? "valid" : "empty", end: b ? "valid" : "empty" } }) }); }
   };
 
   /* 열릴 때마다(안에서 열든 바깥 open prop 이든) 초안 · 달 · 뷰를 지금 글자에 맞춘다 */

@@ -109,7 +109,9 @@ export interface DatePickerMessages {
   /** @deprecated incomplete · invalid 로 나뉘었다 — 주면 둘 다에 쓴다 */
   format?: string;
 }
-export interface CheckResult { validity: DateValidity; start: Date | null; end: Date | null; message?: string }
+/** 기간의 한쪽 상태 — 순서(order)는 두 쪽 사이의 일이라 여기에는 없다. 비운 쪽은 empty */
+export type DateSideValidity = Exclude<DateValidity, "order">;
+export interface CheckResult { validity: DateValidity; start: Date | null; end: Date | null; message?: string; /** 기간일 때만 — 시작 · 끝 각각 */ sides?: { start: DateSideValidity; end: DateSideValidity } }
 /** 입력 검사 — 빈 · 미완성 · 없는 날짜 · 순서 · min · max · 유효. 미완성 · 없는 날짜는 값이 없고, 순서 · 범위 밖은 그 날짜가 남는다 */
 export function checkText(text: string, o: { unit: DateUnit; range: boolean; min?: Date | null; max?: Date | null; messages: DatePickerMessages }): CheckResult {
   const { unit, range, min, max, messages: msg } = o, s = String(text ?? "").trim();
@@ -121,11 +123,15 @@ export function checkText(text: string, o: { unit: DateUnit; range: boolean; min
     const d = parseUnit(p, unit);
     return d ? { v: "valid" as const, d } : { v: "invalid" as const, d: null };
   });
+  const k = (d: Date) => keyOf(d, unit);
+  /* 쪽마다의 상태 — 비운 쪽 empty, 그 밖은 전체와 같은 규칙(범위는 그 쪽 날짜만 본다) */
+  const sideOf = (p: string, x: (typeof sides)[number]): DateSideValidity => (!p.trim() ? "empty" : x.v !== "valid" ? x.v : min && k(x.d) < k(min) ? "min" : max && k(x.d) > k(max) ? "max" : "valid");
+  const ss = range ? { sides: { start: sideOf(parts[0], sides[0]), end: sideOf(parts[1], sides[1]) } } : {};
   const bad = sides.find((x) => x.v !== "valid");
-  if (bad) return { validity: bad.v, start: null, end: null, message: (msg.format ?? msg[bad.v as "incomplete" | "invalid"]) + (range ? `${EXAMPLE[unit]} ~ ${EXAMPLE[unit]}` : EXAMPLE[unit]) };
-  const a = sides[0].d!, b = range ? sides[1].d : null, both = [a, b].filter(Boolean) as Date[], k = (d: Date) => keyOf(d, unit);
-  if (b && b < a) return { validity: "order", start: a, end: b, message: msg.order };
-  if (min && both.some((d) => k(d) < k(min))) return { validity: "min", start: a, end: b, message: showOf(min, unit) + msg.min };
-  if (max && both.some((d) => k(d) > k(max))) return { validity: "max", start: a, end: b, message: showOf(max, unit) + msg.max };
-  return { validity: "valid", start: a, end: b };
+  if (bad) return { validity: bad.v, start: null, end: null, message: (msg.format ?? msg[bad.v as "incomplete" | "invalid"]) + (range ? `${EXAMPLE[unit]} ~ ${EXAMPLE[unit]}` : EXAMPLE[unit]), ...ss };
+  const a = sides[0].d!, b = range ? sides[1].d : null, both = [a, b].filter(Boolean) as Date[];
+  if (b && b < a) return { validity: "order", start: a, end: b, message: msg.order, ...ss };
+  if (min && both.some((d) => k(d) < k(min))) return { validity: "min", start: a, end: b, message: showOf(min, unit) + msg.min, ...ss };
+  if (max && both.some((d) => k(d) > k(max))) return { validity: "max", start: a, end: b, message: showOf(max, unit) + msg.max, ...ss };
+  return { validity: "valid", start: a, end: b, ...ss };
 }
