@@ -260,6 +260,14 @@ for (const p of figma.root.children) {
       /* 정적 막대 · 스파크라인 모서리, 범례 견본 모양(2026-11-05 k35 — 사람의 결정: 정적 막대 · 트랙 · 스파크라인 각짐, .chart-legend i 원형 10) */
       const bar0 = c.findAll((k) => k.name === "Bar" && k.type === "FRAME");
       if (bar0.length) parts.barR = Math.max(...bar0.map(maxR));
+      /* 정적 막대 내용(2026-11-09 k42b — 사람의 결정: Chart Card Bar = 사이트 data-visual bar 예제) — 제목 · 캡션, 행마다 [라벨, 값, 채움 칠, 채움 폭, 트랙 폭].
+         행 = Bar 트랙의 부모, 라벨 = 행의 첫 TEXT, 값 = 마지막 TEXT, 채움 = 트랙 안 첫 RECTANGLE */
+      if (bar0.length && /Type=Bar\b/.test(c.name)) {
+        const tt = named("Title"), tx = tt ? tt.findAll((k) => k.type === "TEXT" && k.visible !== false) : [];
+        parts.barTitle = tx.map((k) => k.characters);
+        parts.barRows = bar0.map((b) => { const row = b.parent, ts = (row.children || []).filter((k) => k.type === "TEXT" && k.visible !== false), fill = b.findOne((k) => k.type === "RECTANGLE");
+          return [ts[0] ? ts[0].characters : null, ts.length > 1 ? ts[ts.length - 1].characters : null, fill ? paint(fill.fills) : null, fill ? +fill.width.toFixed(2) : null, +b.width.toFixed(2)]; });
+      }
       if (spark) parts.sparkR = maxR(spark);
       const lg = named("Legend"); if (lg) parts.legendSw = swatches(lg);
       const kid = (nm) => c.findOne((k) => k.name === nm && "itemSpacing" in k);
@@ -356,8 +364,9 @@ for (const p of figma.root.children) {
     if (/\$surface\//.test(f)) components.textOnSurface.push(t.id);   // 글자에 면 토큰 — 라이트는 같아 보여도 다크에서 갈린다
   }
   /* 컴포넌트가 써서는 안 되는 변수를 물고 있는 노드 — opaque 보더와 옛 변수 층(color/* · site/*)이 여기 걸린다.
-     opaque 토큰 자체는 저장소에 있다(참조 토큰). 다만 컴포넌트 CSS 가 쓰지 않으므로, 토큰 견본을 늘어놓는
-     1 Theme 에서만 허용한다 — 견본을 다른 토큰으로 묶으면 토큰 문서가 거짓이 된다 */
+     opaque 토큰 자체는 저장소에 있다(참조 토큰). 대개 컴포넌트 CSS 가 쓰지 않으므로, 토큰 견본을 늘어놓는
+     1 Theme 밖의 것은 모두 모아 보낸다 — 견본을 다른 토큰으로 묶으면 토큰 문서가 거짓이 된다.
+     저장소가 실제로 소비하는 opaque(k42: Medium 심각도 lime-opaque)는 audit 이 CSS · ds-chart 에서 세어 허용한다 */
   const swatchPage = p.name === "1 Theme";
   for (const n of p.findAll((k) => ("fills" in k || "strokes" in k) && !inInstance(k))) {
     for (const arr of [n.fills, n.strokes]) {
@@ -902,6 +911,49 @@ const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];
   }
 }
 components.docFrames = docFrames;
+
+/* 심각도(2026-11-09 k42 — 5단계 Critical · High · Medium · Low · Info, 사람의 결정 2026-11-06). 기대값은 audit 이 저장소에서 읽는다(severityExpect).
+   tags  = Tag 세트 변형의 인스턴스(현재 페이지만) [페이지, id, 원본 변형 이름, 보이는 라벨] — 라벨 ↔ 톤은 저장소 예제의 class="tag …" 와 맞춘다.
+           세트 변형마다 getInstancesAsync 로 모은다(페이지의 인스턴스를 전부 훑어 원본을 묻는 것보다 빠르다). 이 함수는 다른 인스턴스 속에 든 인스턴스(I…;… id)를
+           돌려주지 않는다(k42 에 셈: 70개 — 목록 · 표 문서 인스턴스 속 37개 빠짐). 그 글은 원본 컴포넌트 속 Tag 를 따르므로 원본 쪽이 대조된다(속 글을 덮어쓴 경우는 못 본다)
+   marks = 가로 프레임 중 지표 하나(≤12×16 의 RECTANGLE · ELLIPSE, 또는 "Bar" 프레임 안 RECTANGLE)와 심각도 이름으로 시작하는 글
+           (바로 아래 TEXT, 없으면 바로 아래 인스턴스 속 글)을 가진 것 [페이지, id, 이름, 종류 swatch · cell(폭 ≤ 4) · bar, 칠] — 범례 · 셀 막대 · 정적 막대 행 · 툴팁 행.
+           글이 대문자 로그 레벨(CRIT · WARN …)인 칩은 이름이 아니라 잡지 않는다
+   bands = 보이는 자식이 전부 같은 높이(≤16) · 같은 y 의 RECTANGLE 셋 이상이고 폭이 서로 다른 가로 프레임 [페이지, id, 칠[], 폭[]] — 분포 밴드.
+           스켈레톤 같은 다른 막대 줄도 잡힐 수 있어 audit 이 심각도 토큰이 둘 이상인 줄만 대조한다 */
+components.severity = { tags: [], marks: [], bands: [] };
+{
+  const SEV = /^(Critical|High|Medium|Low|Info)\b/;
+  const pageOf = (n) => { while (n && n.type !== "PAGE") n = n.parent; return n; };
+  let tagSet = null;
+  for (const p of figma.root.children) { if (!isCurrent(p) || tagSet) continue; tagSet = p.findAllWithCriteria({ types: ["COMPONENT_SET"] }).find((s) => s.name === "Tag") || null; }
+  if (tagSet) for (const v of tagSet.children) for (const i of await v.getInstancesAsync()) {
+    const pg = pageOf(i); if (!pg || !isCurrent(pg)) continue;
+    const t = i.findOne((k) => k.type === "TEXT" && k.visible !== false);
+    components.severity.tags.push([pg.name, i.id, v.name, t ? t.characters : null]);
+  }
+  for (const p of figma.root.children) {
+    if (!isCurrent(p)) continue;
+    for (const f of p.findAllWithCriteria({ types: ["FRAME"] })) {
+      if (f.layoutMode !== "HORIZONTAL" || f.visible === false) continue;
+      const kids = f.children.filter((k) => k.visible !== false);
+      const shapes = kids.filter((k) => k.type === "RECTANGLE" || k.type === "ELLIPSE");
+      if (kids.length >= 3 && kids.every((k) => k.type === "RECTANGLE" && Math.abs(k.height - kids[0].height) < 0.01 && Math.abs(k.y - kids[0].y) < 0.01) && kids[0].height <= 16 && new Set(kids.map((k) => k.width.toFixed(1))).size > 1) {
+        components.severity.bands.push([p.name, f.id, kids.map((k) => paint(k.fills)), kids.map((k) => +k.width.toFixed(2))]);
+        continue;
+      }
+      const bars = kids.filter((k) => k.type === "FRAME" && k.name === "Bar");
+      let mk = null;
+      if (shapes.length === 1 && !bars.length && shapes[0].width <= 12 && shapes[0].height <= 16) mk = [shapes[0].width <= 4 ? "cell" : "swatch", shapes[0]];
+      else if (bars.length === 1 && !shapes.length) { const r = bars[0].findOne((k) => k.type === "RECTANGLE"); if (r) mk = ["bar", r]; }
+      if (!mk) continue;
+      let lt = kids.find((k) => k.type === "TEXT");
+      if (!lt) { const ins = kids.find((k) => k.type === "INSTANCE"); lt = ins ? ins.findOne((k) => k.type === "TEXT" && k.visible !== false) : null; }
+      const m = lt ? SEV.exec(lt.characters) : null;
+      if (m) components.severity.marks.push([p.name, f.id, m[1], mk[0], paint(mk[1].fills)]);
+    }
+  }
+}
 
 components.effectColors = effectColors;
 components.missingSets = SURVEY_SETS.filter((s) => !components.sets[s]);

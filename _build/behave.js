@@ -136,7 +136,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   /* 제품 슬롯 — 기준 시스템의 brand 자리에 제품 컬러가 들어간다. 단계는 다섯(40·45·50·55·60)이고 50 이 제품 HEX 다.
      세 경우를 본다: 기본(주입 없음 = Blue 램프) · 밝은 제품(제품 C) · 상태색과 겹치는 제품(제품 A·B).
-     색상환 거리는 램프에서 실측한 네 각도(negative 0 · cautionary 34 · positive 140 · accent cyan 189)로 잰다 —
+     색상환 거리는 램프에서 실측한 여섯 각도(negative 0 · cautionary 34 · lime 95 · positive 140 · accent cyan 189 · light-blue 199)로 잰다 —
      종전 표 [0,38,160,199] 는 최대 20도 어긋나 있었고, 그래서 청록 제품(184도)이 Medium 과 5도 차이인데도 통과했다 */
   await go("components/button.html");
   const accent = async (key) => {
@@ -633,7 +633,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   // 심각도 — 면/글자/면 위 글자가 나뉘어 있어야 한다. 종전에는 .tag.solid{color:#fff} 한 줄이 다섯 색을 덮어 10 조합 중 8이 미달이었고,
   // 기본형 태그는 글자를 면 토큰으로 써서 라이트에서 다섯 중 넷이 미달이었다. 이 축에는 테스트가 아예 없었다
   await go("components/tag.html");
-  const LVL = ["critical", "high", "medium", "low"];
+  /* 심각도 다섯 등급(2026-11-06) + 상태 톤 pending — pending 은 등급이 아니라 '서로 다른 색' 단정에서는 뺀다 */
+  const LVL = ["critical", "high", "medium", "low", "info"], TAGS = [...LVL, "pending"];
   const tagSet = () => page.evaluate((lvl) => {
     const prev = document.querySelector("#ex-tag-severity .example-preview");
     const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
@@ -662,26 +663,26 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color, dot: getComputedStyle(e, "::before").backgroundColor }; e.remove(); return r; };
       out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid") };
       /* 심각도는 독립 축이 아니라 상태·강조 의도 매핑이다 —
-         Critical=negative · High=cautionary · Medium=accent cyan · Low=중립.
-         라벨은 네 등급 모두 중립 글자색이고(기준 시스템의 Chip 패턴), 색은 점과 틴트가 나른다.
+         Critical=negative · High=cautionary · Medium=accent lime(점은 채운 lime-opaque) · Low=accent light blue · Info=중립, 상태 Pending=accent cyan.
+         라벨은 다섯 등급 모두 중립 글자색이고(기준 시스템의 Chip 패턴), 색은 점과 틴트가 나른다.
          dot = ::before 의 실제 배경색이다 — 토큰이 아니라 렌더된 색을 본다 */
       const DOT = { critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary",
-        medium: "--foreground-accent-cyan", low: "--foreground-inactive-primary" }[l];
+        medium: "--surface-accent-lime-opaque", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary", pending: "--foreground-accent-cyan" }[l];
       const TINT = { critical: "--surface-negative-primary", high: "--surface-cautionary-primary",
-        medium: "--surface-accent-cyan", low: "--surface-neutral-strong" }[l];
+        medium: "--surface-accent-lime", low: "--surface-accent-light-blue", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
       const SOLID = { critical: "--surface-negative-strong", high: "--surface-cautionary-primary",
-        medium: "--surface-accent-cyan", low: "--surface-neutral-strong" }[l];
+        medium: "--surface-accent-lime", low: "--surface-accent-light-blue", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
       out.tok[l] = { dot: res("var(" + DOT + ")"), tint: res("var(" + TINT + ")"), surface: res("var(" + SOLID + ")"),
         label: res("var(--foreground-neutral-primary)") };
     }
     out.subtle = res("var(--background-neutral-secondary)"); out.canvas = res("var(--background-neutral-primary)"); out.surface = res("var(--surface-elevated-primary)");
     return out;
-  }, LVL);
+  }, TAGS);
   for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
     await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
     await page.waitForTimeout(250);
     const t = await tagSet();
-    for (const l of LVL) {
+    for (const l of TAGS) {
       // 기본형 태그 — 옅은 바탕 위의 글자
       ok(`${theme} ${l} tag label clears AA on its own background`, ratio(t.v[l].subtle.fg, t.v[l].subtle.bgEff) >= 4.5,
         `${ratio(t.v[l].subtle.fg, t.v[l].subtle.bgEff)} · ${t.v[l].subtle.fg} / ${t.v[l].subtle.bgEff}(합성)`);
@@ -696,18 +697,30 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         t.v[l].subtle.dot === t.tok[l].dot && t.v[l].subtle.fg === t.tok[l].label,
         `dot ${t.v[l].subtle.dot} / ${t.tok[l].dot} · label ${t.v[l].subtle.fg}`);
     }
-    /* 네 등급은 색조로만 갈린다(빨강·주황·청록·중립) — 휘도 분리는 요구하지 않는다.
+    /* 다섯 등급은 색조로만 갈린다(빨강·주황·라임·라이트 블루·중립) — 휘도 분리는 요구하지 않는다.
        그래서 "서로 다른 색인가" 와 "색 말고 다른 단서가 있는가" 를 묻는다.
        라벨 병기는 verify 가 검사하고, 여기서는 점·틴트가 등급마다 다른지를 본다 */
     {
       const dots = LVL.map((l) => t.tok[l].dot);
-      ok(`${theme} four severity ranks are four distinct colours`, new Set(dots).size === 4, dots.join(" · "));
+      ok(`${theme} five severity ranks are five distinct colours`, new Set(dots).size === 5, dots.join(" · "));
       const tints = LVL.map((l) => t.v[l].subtle.bgEff);
-      ok(`${theme} each rank has its own tint`, new Set(tints).size === 4, tints.join(" · "));
+      ok(`${theme} each rank has its own tint`, new Set(tints).size === 5, tints.join(" · "));
+      /* 상태 pending 은 어느 심각도 점과도 같은 색이면 안 된다 — 옛 Medium(청록)을 물려받았다 */
+      ok(`${theme} pending status tone differs from every severity dot`, !dots.includes(t.tok.pending.dot), t.tok.pending.dot);
     }
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
+  /* 상태와 심각도는 클래스를 나눠 쓰지 않는다(2026-11-06) — '검토 대기'는 pending(청록), 심각도 Medium 은 라임.
+     로그 레벨은 심각도라 INFO 는 info(중립) · LOW 는 low · WARN 은 medium 이다 */
+  const pend = await page.evaluate(() => { const t = [...document.querySelectorAll("#ex-tag-status .tag")].find((e) => e.textContent.trim() === "검토 대기");
+    return t ? { cls: t.className, dot: getComputedStyle(t, "::before").backgroundColor, cyan: (() => { const d = document.createElement("i"); d.style.color = "var(--foreground-accent-cyan)"; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; })() } : null; });
+  ok("status 'pending review' tag uses the pending tone, not a severity rank", !!pend && /\bpending\b/.test(pend.cls) && !/\bmedium\b/.test(pend.cls) && pend.dot === pend.cyan, JSON.stringify(pend));
+  await go("patterns/log-viewer.html");
+  const logLv = await page.evaluate(() => [...document.querySelectorAll("#ex-log-viewer-viewer .log-row .tag")].map((t) => [t.textContent.trim(), [...t.classList].filter((c) => !["tag", "sm"].includes(c)).join(" ")]));
+  const LV_WANT = { CRIT: "critical", HIGH: "high", WARN: "medium", LOW: "low", INFO: "info" };
+  ok("log levels map onto the five severity ranks (INFO = info, LOW = low)", logLv.length >= 5 && logLv.every(([lv, c]) => LV_WANT[lv] === c) && new Set(logLv.map(([, c]) => c)).size === 5, JSON.stringify(logLv));
+  await go("components/tag.html");
 
   // Accordion: disabled 는 마우스·키보드 양쪽을 막고 보조기기에도 알려야 한다 + name 그룹 단일 개방 + flat 마지막 줄
   await go("components/accordion.html");
@@ -1209,17 +1222,17 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("dashboard pattern draws a timeseries trend and names donut shares", dash.trend && /%/.test(dash.donut) && dash.script, JSON.stringify(dash));
   await go("components/data-visual.html");
   /* 정적 요약(2026-11-05) — 막대 · 트랙 · 스파크라인은 각지고, 범례 아이콘은 원형이며, 도넛 경계는 폭이 일정한 2px 구분선(i)이다.
-     구분선의 회전은 조각 경계 각도(위 = 0°, 시계 방향)와 같아야 한다 — 예제 값 190 · 285 · 316 · 263 에서 센다 */
+     구분선의 회전은 조각 경계 각도(위 = 0°, 시계 방향)와 같아야 한다 — 예제 값 190 · 285 · 196 · 120 · 263(5단계, 2026-11-06)에서 센다 */
   const statics = await page.evaluate(() => {
     const rad = (sel) => [...new Set([...document.querySelectorAll(sel)].map((e) => getComputedStyle(e).borderTopLeftRadius))];
     const d = document.querySelector("#ex-data-visual-donut .donut"), ring = (d.getBoundingClientRect().width - parseFloat(getComputedStyle(d, "::after").width)) / 2;
     const cuts = [...d.querySelectorAll("i")].map((i) => { const m = getComputedStyle(i).transform.match(/matrix\(([^,]+), ([^,]+)/); const deg = m ? (Math.atan2(+m[2], +m[1]) * 180 / Math.PI + 360) % 360 : 0; return { w: getComputedStyle(i).width, h: getComputedStyle(i).height, deg: +deg.toFixed(1) }; });
-    const vals = [190, 285, 316, 263], total = vals.reduce((a, b) => a + b, 0); let acc = 0; const want = vals.map((v) => { const a = +(acc / total * 360).toFixed(1); acc += v; return a; });
+    const vals = [190, 285, 196, 120, 263], total = vals.reduce((a, b) => a + b, 0); let acc = 0; const want = vals.map((v) => { const a = +(acc / total * 360).toFixed(1); acc += v; return a; });
     return { bars: rad(".example-preview .chart .bar, .example-preview .chart .bar i, .example-preview .sparkline i"), legend: rad(".example-preview .chart-legend i"), ring, cuts, want, kpis: document.querySelectorAll("#ex-data-visual-kpi .kpi").length };
   });
   ok("static bars, tracks and sparklines are square", statics.bars.length === 1 && statics.bars[0] === "0px", JSON.stringify(statics.bars));
   ok("static legend markers are circles", statics.legend.length === 1 && statics.legend[0] === "50%", JSON.stringify(statics.legend));
-  ok("static donut boundaries are 2px straight separators spanning the ring at each slice edge", statics.cuts.length === 4 && statics.cuts.every((c, i) => c.w === "2px" && parseFloat(c.h) === statics.ring && Math.abs(c.deg - statics.want[i]) <= 0.2), JSON.stringify(statics));
+  ok("static donut boundaries are 2px straight separators spanning the ring at each slice edge", statics.cuts.length === 5 && statics.cuts.every((c, i) => c.w === "2px" && parseFloat(c.h) === statics.ring && Math.abs(c.deg - statics.want[i]) <= 0.2), JSON.stringify(statics));
   ok("KPI example shows three cards", statics.kpis === 3, String(statics.kpis));
   /* KPI 단위 = Title 1 Medium · 증감 = Label 2 SemiBold(2026-11-06) — 종전엔 값 · 카드의 행간 · 자간을 물려받아 어느 텍스트 스타일과도 맞지 않았다 */
   const kpiType = await page.evaluate(() => {
@@ -1229,6 +1242,33 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const r = { unit: [...new Set([...host.querySelectorAll(".kpi .value small")].map(f))], delta: [...new Set([...host.querySelectorAll(".kpi .delta")].map(f))], t1m: f(tmp.children[0]), l2s: f(tmp.children[1]) };
     tmp.remove(); return r; });
   ok("KPI unit matches Title 1 Medium and delta matches Label 2 SemiBold", kpiType.unit.length === 1 && kpiType.unit[0] === kpiType.t1m && kpiType.t1m.startsWith("16px/24px/500/") && kpiType.delta.length === 1 && kpiType.delta[0] === kpiType.l2s && kpiType.l2s.startsWith("12px/16px/600/"), JSON.stringify(kpiType));
+
+  /* 심각도 5단계(사람의 결정 2026-11-06) — 정적 지표(막대 · 범례 · 밴드 · 행 막대) · 정적 도넛 조각 · 탐색형 차트 톤이 전부 같은 토큰을 집는지.
+     차트 색 단정은 DSChart.TONES 와 대조하므로 TONES 자체가 틀리면 함께 틀린다 — 여기서는 기대 토큰을 직접 적어 둘 다 잰다 */
+  const SEV_TOK = { critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--surface-accent-lime-opaque", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary" };
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate((t) => { t === "dark" ? document.documentElement.setAttribute("data-theme", "dark") : document.documentElement.removeAttribute("data-theme"); }, theme);
+    await page.waitForTimeout(200);
+    const sev = await page.evaluate((SEV) => {
+      const res = (n) => { const d = document.createElement("i"); d.style.color = "var(" + n + ")"; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
+      const host = document.createElement("div"); host.innerHTML = Object.keys(SEV).map((l) => `<div class="chart"><div class="bar ${l}"><i></i></div></div><div class="chart-legend"><i class="${l}"></i></div><div class="sev-band"><i class="${l}"></i></div><span class="sev-cell"><i class="${l}"></i></span>`).join("");
+      document.body.append(host);
+      const out = {};
+      for (const l of Object.keys(SEV)) {
+        const want = res(SEV[l]);
+        const got = [".chart .bar." + l + " i", ".chart-legend i." + l, ".sev-band i." + l, ".sev-cell i." + l].map((q) => getComputedStyle(host.querySelector(q)).backgroundColor);
+        out[l] = { want, got, chart: DSChart.resolve(document.body, DSChart.TONES[l]) };
+      }
+      host.remove();
+      /* 정적 도넛의 conic 조각 — 다섯 조각이 이 순서로 */
+      const bg = getComputedStyle(document.querySelector("#ex-data-visual-donut .donut")).backgroundImage;
+      out.donut = Object.keys(SEV).every((l, i, a) => { const at = bg.indexOf(out[l].want); return at >= 0 && (i === 0 || at > bg.indexOf(out[a[i - 1]].want)); });
+      return out;
+    }, SEV_TOK);
+    const bad = Object.keys(SEV_TOK).filter((l) => !(sev[l].got.every((c) => c === sev[l].want) && sev[l].chart === sev[l].want));
+    ok(`${theme} five severity ranks paint the same token in bars · legend · band · row bar · chart`, bad.length === 0 && sev.donut, JSON.stringify(bad.length ? bad.map((l) => [l, sev[l]]) : sev.donut));
+  }
+  await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
 
   // Nav
   await go("components/navigation.html");
@@ -1293,11 +1333,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const hi = bars.find((b) => b.classList.contains("hi")), lo = bars.find((b) => !b.classList.contains("hi"));
     return { hi: getComputedStyle(hi).backgroundColor, lo: getComputedStyle(lo).backgroundColor }; });
   ok("sparkline highlight bar differs from the others", sparkTone.hi !== sparkTone.lo, JSON.stringify(sparkTone));
-  /* 도넛 조각 사이 틈 — 이웃 조각의 밝기 대비가 낮아 틈이 없으면 색상으로만 갈린다. 조각은 이어 붙이고(그라데이션 색 4종) 틈은 면 색 구분선(i)이 낸다(React Donut 과 같은 골격, 2026-11-05) */
+  /* 도넛 조각 사이 틈 — 이웃 조각의 밝기 대비가 낮아 틈이 없으면 색상으로만 갈린다. 조각은 이어 붙이고(그라데이션 색 5종 — 심각도 5단계) 틈은 면 색 구분선(i)이 낸다(React Donut 과 같은 골격, 2026-11-05) */
   const donutGap = await page.evaluate(() => { const el = document.querySelector("#ex-data-visual-donut .donut"), bg = getComputedStyle(el).backgroundImage;
     const d = document.createElement("div"); d.style.color = "var(--surface-elevated-primary)"; document.body.append(d); const gap = getComputedStyle(d).color; d.remove();
     return { gapInGradient: bg.includes(gap), colors: new Set(bg.match(/(rgba?|color)\([^)]*\)/g) || []).size, seps: [...el.querySelectorAll("i")].map((i) => getComputedStyle(i).backgroundColor === gap) }; });   // 브라우저는 색마다 시작·끝을 두 번 적는다 — 종류를 센다
-  ok("donut keeps a surface-coloured gap between segments (separators, not gradient bands)", !donutGap.gapInGradient && donutGap.colors === 4 && donutGap.seps.length === 4 && donutGap.seps.every(Boolean), JSON.stringify(donutGap));
+  ok("donut keeps a surface-coloured gap between segments (separators, not gradient bands)", !donutGap.gapInGradient && donutGap.colors === 5 && donutGap.seps.length === 5 && donutGap.seps.every(Boolean), JSON.stringify(donutGap));
 
   // Steps — 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다
   await go("components/indicator.html");

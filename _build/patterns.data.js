@@ -8,10 +8,10 @@
 const LOG_ROWS = [
   ["09:41:12.031", "critical", "CRIT", "10.0.4.21", "PC-2041", "process.create blocked: rundll32.exe → cryptor.dll"],
   ["09:41:11.870", "medium", "WARN", "10.0.4.21", "PC-2041", "usb.attach vendor=0x0781 product=0x5583 (unapproved)"],
-  ["09:41:09.114", "low", "INFO", "10.0.0.3", "Server-03", "policy.sync ok (rev 2041)"],
+  ["09:41:09.114", "info", "INFO", "10.0.0.3", "Server-03", "policy.sync ok (rev 2041)"],
   ["09:40:58.552", "high", "HIGH", "10.0.4.33", "PC-1187", "malware.known blocked sha256=9f3a…c21e"],
   ["09:40:41.207", "low", "LOW", "10.0.0.3", "Server-03", "agent.checkin 1284/1284"],
-  ["09:39:57.980", "low", "INFO", "10.0.7.10", "PC-0932", "scan.scheduled completed files=48213 threats=0"],
+  ["09:39:57.980", "info", "INFO", "10.0.7.10", "PC-0932", "scan.scheduled completed files=48213 threats=0"],
 ];
 const logTable = (rows) => `
         <div class="tbl-wrap">
@@ -242,7 +242,7 @@ const PATTERNS = {
           </div>
           <div class="row-3">
             <div class="chart-card"><h3 class="chart-title">탐지 추이 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 14일</span></h3><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div>
-            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:270.2deg"></i></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div></div></div>
+            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:229.2deg"></i><i style="--a:270.2deg"></i></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>196</b></span><span><i class="low"></i>Low <b>120</b></span><span><i class="info"></i>Info <b>263</b></span></div></div></div>
           </div>
           <div class="card flush">
             <div class="card-head"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text assistive">전체 보기 →</a></div>
@@ -266,7 +266,7 @@ const PATTERNS = {
         <div class="stack">
           <div class="toolbar">
             <div class="searchbar" role="search" style="min-width:360px">${I("search")}<input type="search" placeholder='메시지 검색 · host:"PC-2041" level:crit' aria-label="로그 검색"></div>
-            <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">INFO</button></div>
+            <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">LOW</button><button type="button" class="chip sm" aria-pressed="false">INFO</button></div>
             <span class="spacer"></span>
             <div class="select-btn outline" role="group" aria-label="갱신"><button type="button" class="on" aria-pressed="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" aria-pressed="false">일시정지</button></div>
             <button type="button" class="btn md outline assistive">${I("download")}CSV</button>
@@ -314,20 +314,20 @@ const PATTERNS = {
 
   "severity": {
     status: "ready", react: ["SevBand","SevCell"], uses: ["tag", "indicator", "data-visual", "data-table"], css: [".sev-band", ".sev-cell", ".stack"],
-    desc: "위협 심각도 4단계(Critical · High · Medium · Low)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
-    thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>`,
-    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태·강조 의도 매핑</b>입니다 — Critical=<code>negative</code> · High=<code>cautionary</code> · Medium=<code>accent cyan</code> · Low=중립. 면은 틴트(<code>--surface-*</code>), 점·지표는 솔리드 전경(<code>--foreground-*</code>)을 씁니다. 토큰 전체는 <a href=\"#/foundations/colors\">Colors › Semantic</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조. .sev-cell 글자는 놓인 곳의 크기를 따른다(표 안 14)"], ["정렬", "항상 Critical → Low. <b>라벨을 반드시 함께</b> 둡니다 — 색조가 주된 단서이고, 색만으로 의미를 전달하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다"]],
+    desc: "위협 심각도 5단계(Critical · High · Medium · Low · Info)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
+    thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:19"></i><i class="low" style="flex:11"></i><i class="info" style="flex:25"></i></div>`,
+    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태·강조 의도 매핑</b>입니다 — Critical=<code>negative</code> · High=<code>cautionary</code> · Medium=<code>accent lime</code>(점 · 지표는 채운 <code>--surface-accent-lime-opaque</code>) · Low=<code>accent light blue</code> · Info=중립(사람의 결정 2026-11-06). 면은 틴트(<code>--surface-*</code>), 점·지표는 솔리드 전경(<code>--foreground-*</code>)을 씁니다. 토큰 전체는 <a href=\"#/foundations/colors\">Colors › Semantic</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조. .sev-cell 글자는 놓인 곳의 크기를 따른다(표 안 14)"], ["정렬", "항상 Critical → Info. <b>라벨을 반드시 함께</b> 둡니다 — 색조가 주된 단서이고, 색만으로 의미를 전달하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다"]],
     examples: [
-      { id: "scale", title: "4단계 스케일", desc: "Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.", html: `
+      { id: "scale", title: "5단계 스케일", desc: "Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.", html: `
         <div class="stack" style="max-width:640px;gap:20px">
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical solid">Critical</span><span class="tag high solid">High</span><span class="tag medium solid">Medium</span><span class="tag low solid">Low</span></div>
-          <div style="display:flex;gap:16px;flex-wrap:wrap"><span class="sev-cell"><i class="critical"></i>Critical</span><span class="sev-cell"><i class="high"></i>High</span><span class="sev-cell"><i class="medium"></i>Medium</span><span class="sev-cell"><i class="low"></i>Low</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical solid">Critical</span><span class="tag high solid">High</span><span class="tag medium solid">Medium</span><span class="tag low solid">Low</span><span class="tag info solid">Info</span></div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap"><span class="sev-cell"><i class="critical"></i>Critical</span><span class="sev-cell"><i class="high"></i>High</span><span class="sev-cell"><i class="medium"></i>Medium</span><span class="sev-cell"><i class="low"></i>Low</span><span class="sev-cell"><i class="info"></i>Info</span></div>
         </div>`, layout: "left" },
       { id: "band", title: "분포 밴드", desc: "전체 대비 비율. flex 값이 비율, 아래 범례로 수치.", html: `
         <div class="stack" style="max-width:640px;gap:10px">
-          <div class="sev-band" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:30"></i><i class="low" style="flex:25"></i></div>
-          <div class="chart-legend"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>316</b></span><span><i class="low"></i>Low <b>263</b></span></div>
+          <div class="sev-band" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:19"></i><i class="low" style="flex:11"></i><i class="info" style="flex:25"></i></div>
+          <div class="chart-legend"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>196</b></span><span><i class="low"></i>Low <b>120</b></span><span><i class="info"></i>Info <b>263</b></span></div>
         </div>` },
       { id: "table", title: "표 안의 심각도", desc: "행 좌측 색 막대(.sev-cell) + Tag. 정렬 기본값은 심각도 내림차순.", html: `
         <div class="tbl-wrap" style="max-width:720px">
@@ -338,7 +338,7 @@ const PATTERNS = {
               <tr><td><span class="sev-cell"><i class="high"></i><span class="tag high sm">High</span></span></td><td>알려진 악성코드 차단</td><td>PC-0932</td><td class="num">2</td></tr>
               <tr><td><span class="sev-cell"><i class="medium"></i><span class="tag medium sm">Medium</span></span></td><td>미승인 USB 연결</td><td>PC-1187</td><td class="num">1</td></tr>
               <tr><td><span class="sev-cell"><i class="low"></i><span class="tag low sm">Low</span></span></td><td>정책 동기화 지연</td><td>Server-03</td><td class="num">12</td></tr>
-              <tr><td><span class="sev-cell"><i class="low"></i><span class="tag low sm">Low</span></span></td><td>스케줄 검사 완료</td><td>PC-0411</td><td class="num">48</td></tr>
+              <tr><td><span class="sev-cell"><i class="info"></i><span class="tag info sm">Info</span></span></td><td>스케줄 검사 완료</td><td>PC-0411</td><td class="num">48</td></tr>
             </tbody>
           </table>
         </div>` },

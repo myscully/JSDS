@@ -986,7 +986,22 @@ function staticChartExpect() {
         else card.kind = /class="donut"/.test(h) ? "donut" : /class="chart"/.test(h) ? "bars" : "other";
         return card; });
       if (grid.cards.length !== grid.fr.length) throw new Error(`patterns.data.js dashboard .${rowM[1]} chart-card ${grid.cards.length}개 ≠ 열 ${grid.fr.length}개`); }
-    return { barR: rad(".chart .bar"), fillR: rad(".chart .bar i"), sparkR: rad(".sparkline i"), legend, row, grid, donut: { d: D, R: D / 2, divider: { ...dv, dist: D / 2 - dv.h / 2 }, angles: aDoc },
+    /* 정적 막대 내용(2026-11-09 k42b — 사람의 결정: Figma Chart Card Bar 두 변형 = 사이트 data-visual bar 예제) — 제목 · 캡션(<span>), 행 순서 · 라벨 · 값 · 톤 · 채움 폭(%).
+       톤 칠 = ds-chart TONES 의 토큰이고 .chart .bar.{톤} i 의 background 도 같아야 한다 */
+    const bar = (() => { const h = ex("bar"), ENT = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", apos: "'", nbsp: " " };
+      const tx = (v) => String(v).replace(/<[^>]+>/g, "").replace(/&(amp|lt|gt|quot|#39|apos|nbsp);/g, (_, e) => ENT[e]).normalize("NFC").replace(/\s+/g, " ").trim();
+      const tm = /<h3 class="chart-title">([\s\S]*?)<\/h3>/.exec(h); if (!tm) throw new Error("data-visual 예제 bar 에 .chart-title 이 없습니다");
+      const cm = /<span[^>]*>([\s\S]*?)<\/span>/.exec(tm[1]);
+      const tb = /var TONES = \{([\s\S]*?)\};/.exec(read("_build/ds-chart.src.js")); if (!tb) throw new Error("ds-chart.src.js 의 TONES 를 읽지 못했습니다");
+      const TONES = Object.fromEntries([...tb[1].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/"?([a-z0-9-]+)"?\s*:\s*"(--[a-z0-9-]+)"/g)].map((m) => [m[1], m[2]]));
+      const rows = [...h.matchAll(/<div class="row"><span class="lbl">([\s\S]*?)<\/span><div class="bar ([a-z0-9-]+)"><i style="width:([\d.]+)%"><\/i><\/div><span class="num">([\s\S]*?)<\/span><\/div>/g)].map((m) => {
+        const tone = m[2]; if (!TONES[tone]) throw new Error(`bar 예제의 톤 ${tone} 이 ds-chart TONES 에 없습니다`);
+        const t = figTok(`var(${TONES[tone]})`), r = cssRule(`.chart .bar.${tone} i`); if (figTok(r.background) !== t) throw new Error(`.chart .bar.${tone} i ${r.background} ≠ TONES.${tone} ${TONES[tone]}`);
+        return { lbl: tx(m[1]), tone, tok: t, pct: +m[3], num: tx(m[4]) }; });
+      const nRow = (h.match(/<div class="row">/g) || []).length;
+      if (!rows.length || rows.length !== nRow) throw new Error(`data-visual 예제 bar 의 행 ${nRow}개 중 ${rows.length}개만 읽었습니다(.row > .lbl · .bar.{톤} > i width% · .num)`);
+      return { title: tx(tm[1].replace(/<span[\s\S]*?<\/span>/, "")), caption: cm ? tx(cm[1]) : null, rows }; })();
+    return { barR: rad(".chart .bar"), fillR: rad(".chart .bar i"), sparkR: rad(".sparkline i"), bar, legend, row, grid, donut: { d: D, R: D / 2, divider: { ...dv, dist: D / 2 - dv.h / 2 }, angles: aDoc },
       kpi: { n: kpiEx.length, labels: kpiEx, dashOnly, example, dash: dashK, tones, unit, delta, dirFill, needNone } };
   } catch (e) { return { error: String(e.message || e) }; }
 }
@@ -1101,7 +1116,84 @@ function specExpect() {
   return out;
 }
 
+/* Tag 톤 · 심각도 지표(2026-11-09 k42 — 심각도 5단계 Critical · High · Medium · Low · Info + 상태 톤 Pending, 사람의 결정 2026-11-06).
+   하드코딩한 톤 목록을 두지 않는다 — 전에는 ["info","neutral","critical","high","medium","low","ok","accent"] 를 여기 적어 두어 톤이 늘면 소리 없이 빠졌다.
+   Tag  변형 표 = components.data.js tag.figma.variants 의 키(Figma 이름: ok → OK, 나머지는 첫 글자만 대문자) × figma.states(subtle · outline · solid) × figma.sizes(sm · md · lg).
+        바탕 = variants.bg, Solid 면 = solidBg, Solid 라벨 = solidFg — 셋 다 사이트 CSS(.tag.{톤} · .tag.solid.{톤} · .tag)와 같아야 하고 다르면 기대값을 읽다 멈춘다.
+        점(::before) · Solid 테두리는 figma.variants 에 없거나(테두리) 사이트와 어긋날 수 있어(fg) 사이트 CSS 가 기준이다 — fg 가 CSS 점과 다르면 NOTE 로 알린다.
+        neutral(톤 클래스 없는 .tag)은 Figma 에 따로 두지 않고 Info 가 맡는다 — 바탕 · 점 · Solid 가 CSS 에서 info 와 같을 때만(다르면 멈춤 — 그때는 Neutral 변형이 필요하다).
+   라벨 저장소 예제(components.data.js · patterns.data.js 의 examples html)의 <span class="tag 톤 …">라벨</span> 에서 라벨 → 톤. 한 라벨이 두 톤에 쓰이면 대조하지 않는다.
+   지표 단계 = patterns.data.js severity 의 band 예제 <i class="단계" style="flex:N"> 순서, 색 = ds-chart TONES[단계](캔버스 · 정적이 같은 표).
+        정적 CSS(.chart-legend i · .chart .bar i · .sev-band i · .sev-cell i · .donut conic-gradient 순서)가 TONES 와 다르면 기대값을 읽다 멈춘다 */
+function severityExpect() {
+  const box = { I: () => "", module: { exports: {} } };
+  vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
+  const pb = { I: () => "", module: { exports: {} } };
+  vm.runInNewContext(read("_build/patterns.data.js"), pb, { filename: "patterns.data.js" });
+  const C = box.module.exports, P = pb.module.exports, tf = (C.tag || {}).figma;
+  if (!tf || !tf.variants || !tf.states || !tf.sizes) throw new Error("components.data.js tag.figma(variants · states · sizes)를 읽지 못했습니다");
+  const has = (sel) => { try { return cssRule(sel); } catch { return null; } };
+  const tok = (v) => figTok(`var(${v})`), notes = [];
+  const base = cssRule(".tag"), solidBase = cssRule(".tag.solid"), dotBase = cssRule(".tag::before");
+  /* 톤 하나의 사이트 칠 — neutral 은 톤 클래스가 없다 */
+  const css = (k) => { const s = k === "neutral" ? "" : "." + k, face = k === "neutral" ? base : has(`.tag${s}`);
+    if (!face) throw new Error(`components.data.js tag.figma.variants.${k} 에 맞는 CSS .tag${s} 가 없습니다`);
+    const dot = figTok((has(`.tag${s}::before`) || dotBase).background), sc = has(`.tag.solid${s}`) || {}, sd = has(`.tag.solid${s}::before`);
+    return { fill: figTok(face.background || base.background), dot,
+      solid: { fill: figTok(sc.background || face.background || base.background), stroke: sc["box-shadow"] === "none" ? null : inset(sc["box-shadow"] || solidBase["box-shadow"]),
+        label: figTok(sc.color || base.color), dot: sd ? figTok(sd.background) : dot } }; };
+  const V = tf.variants, keys = Object.keys(V), alias = {};
+  if (V.neutral && V.info) { const n = css("neutral"), i = css("info");
+    if (JSON.stringify(n) !== JSON.stringify(i) || V.neutral.bg !== V.info.bg) throw new Error(`tag neutral(.tag)과 info(.tag.info)의 칠이 다릅니다 ${JSON.stringify(n)} ≠ ${JSON.stringify(i)} — Figma 에 Neutral 변형이 따로 필요합니다`);
+    alias.neutral = "info"; }
+  const NAME = (k) => (k === "ok" ? "OK" : k[0].toUpperCase() + k.slice(1));
+  const face = {}, tones = {}, names = [];
+  for (const k of keys) {
+    if (alias[k]) continue;
+    const v = V[k], c = css(k);
+    for (const [f, w] of [["bg", c.fill], ["solidBg", c.solid.fill], ["solidFg", c.solid.label]]) {
+      if (!v[f]) throw new Error(`components.data.js tag.figma.variants.${k}.${f} 가 없습니다 — Figma 는 ${tf.states.join(" · ")} 를 모두 그립니다`);
+      if (tok(v[f]) !== w) throw new Error(`tag.figma.variants.${k}.${f} ${v[f]} ≠ 사이트 CSS ${w}`);
+    }
+    if (v.fg && tok(v.fg) !== c.dot) notes.push(`components.data.js tag.figma.variants.${k}.fg ${v.fg} 가 사이트 점(.tag${k === "neutral" ? "" : "." + k}::before → ${c.dot})과 다릅니다 — Figma 는 사이트 화면(CSS)을 따릅니다. 저장소에서 어느 쪽이 맞는지 정해야 합니다`);
+    face[k] = c.fill; tones[k] = { dot: c.dot, solid: c.solid }; names.push(NAME(k));
+  }
+  for (const [k, to] of Object.entries(alias)) if (V[k].fg && tok(V[k].fg) !== css(k).dot) notes.push(`components.data.js tag.figma.variants.${k}.fg ${V[k].fg} 가 사이트 점(${css(k).dot})과 다릅니다 — ${k} 는 Figma 에서 ${NAME(to)} 가 맡습니다`);
+  const CAP = (s) => s[0].toUpperCase() + s.slice(1), SIZE = { sm: "Small", md: "Medium", lg: "Large" };
+  const tag = { label: figTok(base.color), face, outline: { stroke: inset(cssRule(".tag.outline")["box-shadow"]) }, tones, names, styles: tf.states.map(CAP),
+    sizes: Object.keys(tf.sizes).map((s) => { if (!SIZE[s]) throw new Error("tag.figma.sizes 의 " + s + " 에 맞는 Figma 크기 이름이 없습니다"); return SIZE[s]; }), alias, notes };
+  /* 라벨 → 톤 */
+  const htmls = [];
+  for (const M of [C, P]) for (const e of Object.values(M)) for (const x of (e && e.examples) || []) if (x.html) htmls.push(x.html);
+  const seen = {};
+  for (const h of htmls) for (const m of h.matchAll(/<span class="tag((?: [a-z0-9-]+)*)"[^>]*>([^<]+)<\/span>/g)) {
+    const cls = m[1].trim().split(/\s+/).filter(Boolean), t = cls.find((c) => keys.includes(c) && c !== "neutral") || "neutral", lb = m[2].trim();
+    (seen[lb] = seen[lb] || new Set()).add(t);
+  }
+  const labels = Object.fromEntries(Object.entries(seen).filter(([, s]) => s.size === 1).map(([k, s]) => [k, [...s][0]]));
+  const ambiguous = Object.entries(seen).filter(([, s]) => s.size > 1).map(([k, s]) => `${k}(${[...s].join("/")})`);
+  /* 심각도 지표 */
+  const js = read("_build/ds-chart.src.js"), tb = /var TONES = \{([\s\S]*?)\};/.exec(js); if (!tb) throw new Error("ds-chart.src.js 의 TONES 를 읽지 못했습니다");
+  const TONES = Object.fromEntries([...tb[1].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/"?([a-z0-9-]+)"?\s*:\s*"(--[a-z0-9-]+)"/g)].map((m) => [m[1], m[2]]));
+  const sev = P.severity || {}, exHtml = (id) => ((sev.examples || []).find((x) => x.id === id) || {}).html || "";
+  const band = (h) => [...h.matchAll(/<i class="([a-z]+)" style="flex:([\d.]+)"><\/i>/g)].map((m) => [m[1], +m[2]]);
+  const bandEx = band(exHtml("band")), bandThumb = band(sev.thumb || "");
+  if (!bandEx.length) throw new Error("patterns.data.js severity 의 band 예제에서 단계(<i class=… style=\"flex:N\">)를 읽지 못했습니다");
+  if (bandThumb.length && JSON.stringify(bandThumb) !== JSON.stringify(bandEx)) throw new Error(`severity thumb 밴드 ${JSON.stringify(bandThumb)} ≠ band 예제 ${JSON.stringify(bandEx)}`);
+  const levels = bandEx.map(([l]) => l), marks = {};
+  for (const l of levels) {
+    if (!TONES[l]) throw new Error(`심각도 단계 ${l} 가 ds-chart TONES 에 없습니다`);
+    const t = tok(TONES[l]);
+    for (const sel of [`.chart-legend i.${l}`, `.chart .bar.${l} i`, `.sev-band i.${l}`, `.sev-cell i.${l}`]) { const r = has(sel); if (!r || figTok(r.background) !== t) throw new Error(`${sel} ${r ? r.background : "없음"} ≠ ds-chart TONES.${l} ${TONES[l]}`); }
+    marks[CAP(l)] = t;
+  }
+  const conic = [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+[\d.]+%?\s+[\d.]+%/g)].map((x) => figTok("var(--" + x[1] + ")")).filter((x) => x !== "surface/elevated/primary");
+  if (conic.join() !== levels.map((l) => tok(TONES[l])).join()) throw new Error(`.donut conic-gradient 색 순서 ${conic.join(" · ")} ≠ 심각도 단계 ${levels.join(" · ")} 의 TONES`);
+  return { tag, labels, ambiguous, levels, marks, band: { tones: bandEx.map(([l]) => tok(TONES[l])), flex: bandEx.map(([, f]) => f), levels }, notes };
+}
+
 function componentsExpect() {
+  const sev = severityExpect();
   const surface = (sel) => { const r = cssRule(sel); const b = /1px solid (var\([^)]+\))/.exec(r.border || ""); return { shadow: !!r["box-shadow"] && r["box-shadow"] !== "none", stroke: b ? figTok(b[1]) : null }; };
   return {
     surfaces: { "Card": surface(".card"), "Chart Card": surface(".chart-card"), "KPI": surface(".kpi") },
@@ -1115,30 +1207,12 @@ function componentsExpect() {
     button: buttonExpect(),
     /* Figma 레이아웃 규칙 — CSS 에 없는 값이라 여기 상수로 둔다. 출처: .claude/agents/figma-sync.md "섹션 간격은 200px" */
     sectionGap: 200,
-    /* 태그 톤 — 라벨 글자는 톤과 상관없이 .tag 의 color 하나다. Figma 의 Info 는 저장소의 기본 .tag 가 맡는다 */
-    tag: {
-      label: figTok(cssRule(".tag").color),
-      face: Object.fromEntries([["info", ".tag"], ["neutral", ".tag"], ...["critical", "high", "medium", "low", "ok", "accent"].map((t) => [t, `.tag.${t}`])].map(([k, sel]) => [k, figTok(cssRule(sel).background)])),
-    },
+    /* 태그 톤 · 세 스타일 · 변형 표 — severityExpect(2026-11-09 k42). 라벨 글자는 톤과 상관없이 .tag 의 color 하나이고, neutral(.tag)은 Figma 의 Info 가 맡는다 */
+    tag: sev.tag,
     bannerWarning: figTok(cssRule(".banner.warning").background),
-    /* Tag 세 스타일 — 점(::before)·Outline·Solid 까지. 톤에 규칙이 없으면 기본 .tag / .tag.solid 를 따른다 */
-    tagStyle: (() => {
-      const has = (sel) => { try { return cssRule(sel); } catch { return null; } };
-      const tones = ["info", "neutral", "critical", "high", "medium", "low", "ok", "accent"];
-      const sel = (t) => (t === "info" || t === "neutral" ? "" : "." + t);
-      const base = cssRule(".tag"), solid = cssRule(".tag.solid");
-      return {
-        outline: { stroke: inset(cssRule(".tag.outline")["box-shadow"]) },
-        tones: Object.fromEntries(tones.map((t) => {
-          const dot = has(`.tag${sel(t)}::before`) || cssRule(".tag::before"), s = has(`.tag.solid${sel(t)}`) || {}, sd = has(`.tag.solid${sel(t)}::before`);
-          const sBg = s.background || (has(`.tag${sel(t)}`) || base).background;
-          return [t, {
-            dot: figTok(dot.background),
-            solid: { fill: figTok(sBg), stroke: s["box-shadow"] === "none" ? null : inset(s["box-shadow"] || solid["box-shadow"]), label: figTok(s.color || base.color), dot: figTok((sd || dot).background) },
-          }];
-        })),
-      };
-    })(),
+    tagStyle: { outline: sev.tag.outline, tones: sev.tag.tones },
+    /* 심각도 지표 · Tag 라벨 ↔ 톤 — severityExpect(2026-11-09 k42) */
+    severity: { labels: sev.labels, ambiguous: sev.ambiguous, levels: sev.levels, marks: sev.marks, band: sev.band, notes: sev.notes },
     kpiValue: { Default: figTok(cssRule(".kpi .value").color), Critical: figTok(cssRule(".kpi.critical .value").color), High: figTok(cssRule(".kpi.high .value").color) },   // Default 는 .kpi .value 에 색이 생긴 뒤(2026-10-23 k)부터 본다 — 색이 없으면 null 이라 건너뛴다
     banner: Object.fromEntries([["Accent", ".banner"], ["Warning", ".banner.warning"], ["Danger", ".banner.danger"]].map(([k, s]) => { const r = cssRule(s), b = cssRule(".banner"); return [k, { fill: figTok(r.background || b.background), label: figTok(r.color || b.color) }]; })),
     menuItem: { hover: figTok(cssRule(".menu-item:hover").background), selected: figTok(cssRule(".menu-item.on").background) },
@@ -1506,6 +1580,13 @@ function diffComponents(c, want, bad, notes) {
   for (const v of sets.Button || []) if (/Disabled/.test(v.name) && v.opacity !== undefined && v.opacity < 1) dimmed.add(v.id);   // Button 은 아래 Button 검사가 낸다
   /* 이름 전체를 훑으면 Size=Medium 을 Medium 톤으로 읽는다 — 속성 값을 직접 읽는다 */
   const prop = (name, k) => { const m = new RegExp("(?:^|, )" + k + "=([^,]+)").exec(name); return m ? m[1].trim() : null; };
+  /* Tag 변형 표(2026-11-09 k42) — figma.variants 의 톤 × states × sizes 가 모두 있어야 한다(severityExpect). 없으면 그 톤의 칠 대조가 소리 없이 빠진다 */
+  if (sets["Tag"]) {
+    const T = want.tag, got = new Set(sets["Tag"].map((v) => ["Tone", "Style", "Size"].map((k) => prop(v.name, k)).join("|"))), miss = [];
+    for (const t of T.names) for (const s of T.styles) for (const z of T.sizes) if (!got.has(`${t}|${s}|${z}`)) miss.push(`Tone=${t}, Style=${s}, Size=${z}`);
+    if (miss.length) bad.push(`Tag 에 없는 변형 ${miss.length}개 — ${miss.slice(0, 6).join(" · ")}${miss.length > 6 ? " …" : ""}(components.data.js tag.figma.variants ${T.names.join(" · ")} × ${T.styles.join(" · ")} × ${T.sizes.join(" · ")})`);
+    for (const n of T.notes || []) notes.push(n);
+  }
   for (const v of sets["Tag"] || []) {
     const tone = prop(v.name, "Tone"), style = prop(v.name, "Style");
     if (!tone || (style && style !== "Subtle")) continue;   // Outline·Solid 는 바탕 규칙이 달라 여기서 보지 않는다
@@ -1730,7 +1811,15 @@ function diffComponents(c, want, bad, notes) {
         if (Math.abs(t.dx) > 1) bad.push(`${at} 가운데 글이 가로 가운데에서 ${t.dx}px 어긋남 — .donut::after place-items:center`); } } }
   if (c.textOnSurface === undefined) notes.push("덤프에 글자 토큰·옛 변수·섹션 간격 조사가 없습니다 — 옛 probe.js 로 만든 덤프입니다");
   if ((c.textOnSurface || []).length) bad.push(`글자에 surface/* 토큰 ${c.textOnSurface.length}개 — 글자는 foreground (${c.textOnSurface.slice(0, 6).join(" ")}${c.textOnSurface.length > 6 ? " …" : ""})`);
-  for (const [name, e] of Object.entries(c.opaque || {})) bad.push(`컴포넌트 CSS 가 쓰지 않는 opaque 토큰 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
+  /* opaque 토큰은 대개 견본 전용이지만, 저장소가 실제로 소비하는 것은 허용한다(k42 — Medium 심각도 = surface/accent/lime-opaque).
+     허용 목록을 여기 적지 않고 소비자에서 센다: style.src.css 의 var(--…-opaque) 참조 + ds-chart.src.js 가 계산값으로 읽는 "--…-opaque" */
+  { const used = new Set();
+    for (const m of read("_build/style.src.css").replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/var\(--([a-z0-9-]+-opaque)\)/g)) used.add(m[1]);
+    for (const m of read("_build/ds-chart.src.js").matchAll(/["'`]--([a-z0-9-]+-opaque)["'`]/g)) used.add(m[1]);
+    for (const [name, e] of Object.entries(c.opaque || {})) {
+      const cssName = name.replace(/^color\/semantic\//, "").replace(/\//g, "-");
+      if (used.has(cssName)) { notes.push(`opaque 토큰 ${name} ×${e.n} — 저장소가 --${cssName} 를 소비하므로 허용(style.src.css · ds-chart)`); continue; }
+      bad.push(`컴포넌트 CSS 가 쓰지 않는 opaque 토큰 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`); } }
   for (const [name, e] of Object.entries(c.legacy || {})) bad.push(`현재 페이지에 옛 변수 ${name} ×${e.n} (${e.ids.join(" ")}${e.n > e.ids.length ? " …" : ""})`);
   for (const s of c.sections || []) if (s.gap !== want.sectionGap) bad.push(`섹션 간격 ${s.page}${s.pageId ? "(" + s.pageId + ")" : ""}: ${s.a} → ${s.b} ${s.gap} ≠ ${want.sectionGap}`);
   if ((c.negText || []).length) bad.push(`글자에 foreground/negative/primary ${c.negText.length}개 — 저장소는 글자에 strong (${c.negText.slice(0, 6).join(" ")}${c.negText.length > 6 ? " …" : ""})`);
@@ -2290,10 +2379,23 @@ function diffStatic(c, w, bad, notes) {
     if (g.wrap && g.wrap !== "NO_WRAP") bad.push(`${at} 도넛 + 범례 행 (${g.id}) 이 Figma 줄바꿈(${g.wrap})입니다 — 폭 판정으로 세로 · 가로를 정해 그립니다`);
     const placed = narrow ? g.ly >= g.dy + g.dw - 0.5 : g.lx >= g.dx + g.dw + R.colGap - 0.5;
     if (!placed) bad.push(`${at} 범례 (${g.lx}, ${g.ly}) 가 도넛 ${narrow ? "아래" : "오른쪽"}에 있지 않습니다 — ${why}`); };
+  /* 정적 막대 내용(k42b) — 제목 · 캡션, 행 수 · 순서 · 라벨 · 값 · 톤 칠 · 채움 폭 = 트랙 폭 × width%(±0.5px) */
+  const B = w.bar, barCheck = (at, v) => {
+    if (v.barRows === undefined) { notes.push(`${at} 막대 내용 조사(barRows)가 없습니다 — 2026-11-09 k42b 전 probe.js 로 만든 덤프입니다`); return; }
+    const src = "components.data.js data-visual bar 예제", want = [B.title, B.caption].filter((x) => x != null), got = (v.barTitle || []).map((x) => String(x).normalize("NFC").trim());
+    if (got.join("|") !== want.join("|")) bad.push(`${at} 제목 · 캡션 ${got.join(" · ") || "없음"} ≠ ${want.join(" · ")} — ${src} .chart-title`);
+    if (v.barRows.length !== B.rows.length) { bad.push(`${at} 막대 행 ${v.barRows.length}개(${v.barRows.map((r) => r[0]).join(" · ")}) ≠ ${B.rows.length}개(${B.rows.map((r) => r.lbl).join(" · ")}) — ${src}`); return; }
+    B.rows.forEach((r, i) => { const [lb, num, p, fw, tw] = v.barRows[i], ct = `${at} ${i + 1}번째 행`, ex = tw * r.pct / 100;
+      if (String(lb).normalize("NFC").trim() !== r.lbl) bad.push(`${ct} 라벨 '${lb}' ≠ '${r.lbl}' — ${src}`);
+      if (String(num).normalize("NFC").trim() !== r.num) bad.push(`${ct} '${r.lbl}' 값 '${num}' ≠ '${r.num}' — ${src}`);
+      if (p !== "$" + r.tok) bad.push(`${ct} '${r.lbl}' 막대 칠 ${p} ≠ ${r.tok} — .bar.${r.tone}(ds-chart TONES.${r.tone})`);
+      if (fw == null || !near(fw, ex, 0.5)) bad.push(`${ct} '${r.lbl}' 채움 폭 ${fw} ≠ 트랙 ${tw} × ${r.pct}% = ${+ex.toFixed(2)} — ${src} <i style="width:${r.pct}%">`); });
+  };
   for (const v of cc) {
     const at = `Chart Card ${v.name} (${v.id})`;
     if (v.donutGaps) { if (v.rowGeo === undefined) notes.push(`${at} 도넛 + 범례 행 배치 조사(rowGeo)가 없습니다 — 2026-11-06 k36 전 probe.js 로 만든 덤프입니다`); else rowCheck(at, v.rowGeo); }
     if (v.barR !== undefined && v.barR !== barMax) bad.push(`${at} 막대 · 트랙 모서리 ${v.barR} ≠ ${barMax} — .chart .bar · .chart .bar i border-radius`);
+    if (/Type=Bar\b/.test(v.name)) barCheck(at, v);
     if (v.sparkR !== undefined && v.sparkR !== flatR(w.sparkR)) bad.push(`${at} 스파크라인 모서리 ${v.sparkR} ≠ ${w.sparkR} — .sparkline i border-radius`);
     legendCheck(at, v.legendSw);
     if (v.donutGaps) donutCheck(`${at} 도넛`, null, null, v.donutDividers);   // 틈 · 테두리는 diffComponents 의 Donut 대조가 본다
@@ -2566,6 +2668,45 @@ function diffCard(c, wc, variables, bad, notes) {
   }
 }
 
+/* 심각도(2026-11-09 k42) — 규칙은 severityExpect 머리 주석. probe 의 components.severity(tags · marks · bands)와 staticCharts.donuts 의 호 칠로 본다.
+   Chart Card 세트의 도넛 호는 diffComponents 의 Donut 대조가, Chart 세트(탐색형)는 diffChart 가 이미 TONES 로 본다 */
+function diffSeverity(c, want, bad, notes) {
+  if (!c) return;
+  const w = want.severity;
+  /* 세트 밖 정적 도넛(4 Pattern 대시보드)의 호 — 같은 .donut conic-gradient(개수 · 각도 ±0.5° · 칠) */
+  const da = want.donutArcs, ang = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
+  for (const d of (c.staticCharts && c.staticCharts.donuts) || []) {
+    const at = `${d.page} 도넛 ${d.path} (${d.id})`;
+    if (d.arcs.length !== da.length) { bad.push(`${at} 호 ${d.arcs.length}개 ≠ ${da.length}개(.donut conic-gradient)`); continue; }
+    da.forEach((x, i) => { const [s, e, p] = d.arcs[i]; if (ang(s, x.from) > 0.5 || ang(e, x.to) > 0.5 || p !== "$" + x.tok) bad.push(`${at} 호 ${i + 1}: Figma ${s}°~${e}° ${p} ≠ 저장소 ${+x.from.toFixed(2)}°~${+x.to.toFixed(2)}° ${x.tok}`); });
+  }
+  if (!c.severity) { notes.push("덤프에 심각도 조사(components.severity)가 없습니다 — 2026-11-09 k42 전 probe.js 로 만든 덤프입니다"); return; }
+  const { tags, marks, bands } = c.severity, prop = (n, k) => (new RegExp("(?:^|, )" + k + "=([^,]+)").exec(n) || [])[1];
+  /* 라벨 ↔ 톤 — Figma Info 는 neutral(.tag)도 맡는다(alias) */
+  let checked = 0;
+  for (const [page, id, main, label] of tags) {
+    const tone = String(prop(main, "Tone") || "").toLowerCase(), wt = label == null ? null : w.labels[label.trim()];
+    if (!wt) continue; checked++;
+    if (tone !== wt && want.tag.alias[wt] !== tone) bad.push(`Tag 인스턴스 '${label}' 의 톤 ${prop(main, "Tone")} ≠ ${wt} — ${page} (${id}) — 저장소 예제는 class="tag ${wt === "neutral" ? "" : wt}"`);
+  }
+  if (w.ambiguous.length) notes.push(`Tag 라벨 중 저장소 예제에서 톤이 둘 이상인 것은 대조하지 않았습니다 — ${w.ambiguous.join(" · ")}`);
+  /* 지표 — 범례 견본 · 셀 막대 · 정적 막대 행 · 툴팁 견본 */
+  for (const [page, id, label, kind, p] of marks) { const t = w.marks[label]; if (t && p !== "$" + t) bad.push(`${page} 심각도 ${label} ${kind === "bar" ? "막대" : kind === "cell" ? "셀 막대" : "견본"} ${p} ≠ ${t} (${id}) — ds-chart TONES.${label.toLowerCase()}`); }
+  /* 분포 밴드 — 심각도 토큰이 둘 이상인 막대 줄만. 단계 수 · 순서 · 칠 · 폭 비율(flex, ±1px) */
+  const sevToks = new Set(Object.values(w.marks).concat(["foreground/accent/cyan"]));   // cyan = 4단계 때 Medium(옛 값이 남은 밴드를 놓치지 않으려고)
+  let nb = 0;
+  for (const [page, id, paints, ws] of bands) {
+    if (paints.filter((p) => sevToks.has(String(p).replace(/^\$/, ""))).length < 2) continue; nb++;
+    const B = w.band, at = `${page} 분포 밴드 (${id})`;
+    if (paints.length !== B.tones.length) { bad.push(`${at} 조각 ${paints.length}개 ≠ ${B.tones.length}(${B.levels.join(" · ")} — patterns.data.js severity band)`); continue; }
+    paints.forEach((p, i) => { if (p !== "$" + B.tones[i]) bad.push(`${at} ${i + 1}번째(${B.levels[i]}) ${p} ≠ ${B.tones[i]}`); });
+    const sum = ws.reduce((a, b) => a + b, 0), fs_ = B.flex.reduce((a, b) => a + b, 0);
+    const off = ws.map((x, i) => +(x - (sum * B.flex[i]) / fs_).toFixed(2));
+    if (off.some((d) => Math.abs(d) > 1)) bad.push(`${at} 폭 ${ws.join(" · ")} 이 flex ${B.flex.join(" · ")} 비율과 다릅니다(차이 ${off.join(" · ")})`);
+  }
+  notes.push(`심각도 대조(k42): Tag 인스턴스 ${tags.length}개 중 라벨 대조 ${checked} · 지표 ${marks.length} · 분포 밴드 ${nb} · 세트 밖 정적 도넛 ${((c.staticCharts && c.staticCharts.donuts) || []).length}`);
+}
+
 /* ---------- 대조 ---------- */
 function diff(dumpPath, site) {
   const want = expect_();
@@ -2674,6 +2815,7 @@ function diff(dumpPath, site) {
   diffFlat(got.components, want.components.flat, bad, notes);
   diffChart(got.components, want.components.chart, got.variables, bad, notes);
   diffStatic(got.components, want.components.staticChart, bad, notes);
+  diffSeverity(got.components, want.components, bad, notes);
   diffDocFrames(got.components, docFrameExpect(), bad, notes);
 
   return { bad, notes, counts: want.counts };

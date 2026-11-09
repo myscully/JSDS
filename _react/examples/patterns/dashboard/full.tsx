@@ -16,8 +16,9 @@ const TREND = {
 const SEGMENTS = [
   { label: "Critical", value: 190, tone: "critical" as const },
   { label: "High", value: 285, tone: "high" as const },
-  { label: "Medium", value: 316, tone: "medium" as const },
-  { label: "Low", value: 263, tone: "low" as const },
+  { label: "Medium", value: 196, tone: "medium" as const },
+  { label: "Low", value: 120, tone: "low" as const },
+  { label: "Info", value: 263, tone: "info" as const },
 ];
 const RECENT = [
   ["09:41:12", "랜섬웨어 행위 탐지", "PC-2041 · 김민준", "blocked"],

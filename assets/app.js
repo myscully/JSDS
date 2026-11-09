@@ -27,11 +27,12 @@ const ROOT=document.body.dataset.root||'../';
   }
   const STEPS = [40, 45, 50, 55, 60];
   /* 제품 메인 컬러가 상태색과 헷갈리는지 — 색상환에서 15도 미만이면 참.
-     각도는 램프에서 실측했다: negative #FF4242 = 0 · cautionary #FF9200 = 34 · positive #00BF40 = 140 · accent cyan #00BDDE = 189.
+     각도는 램프에서 실측했다: negative #FF4242 = 0 · cautionary #FF9200 = 34 · positive #00BF40 = 140 · accent cyan #00BDDE = 189(Pending · info 알림),
+     심각도 5단계(2026-11-06)의 Medium lime #58CF04 = 95 · Low light-blue #00AEFF = 199.
      종전 표 [0,38,160,199] 는 램프와 최대 20도 어긋나 있었다 — 초록이 160 으로 적혀 있었다.
      채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다.
      겹치면 --prod-* 를 넣지 않고 data-accent-neutral 만 켠다 — CSS 가 brand 다섯 단계를 중립으로 갈아끼운다 */
-  const STATUS_HUES = [0, 34, 140, 189];
+  const STATUS_HUES = [0, 34, 95, 140, 189, 199];
   /* 제품 색 제약 — 면 위 글자는 늘 흰색이므로, 제품 색이 흰 글자를 받칠 수 있어야 한다.
      종전에는 밝은 제품에 맞춰 글자를 어둡게 뒤집었지만(data-accent-light) 그 적응을 걷어냈다:
      면을 어둡게 내려 흰 글자를 세우는 길은 다크에서 버튼이 캔버스에 묻혀(분리 1.11) 막혀 있고,

@@ -10,6 +10,7 @@ export default function Example() {
           { label: "악성코드", value: 306, tone: "high" },
           { label: "USB 위반", value: 221, tone: "medium" },
           { label: "정책 위반", value: 115, tone: "low" },
+          { label: "피싱", value: 88, tone: "info" },
         ]}
       />
     </ChartCard>

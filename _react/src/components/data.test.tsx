@@ -5,6 +5,7 @@ import { Accordion, AccordionGroup } from "./accordion/Accordion";
 import { Card, CardGrid, CardMeta, CardTitle } from "./card/Card";
 import { ChartCard, Donut, Kpi } from "./data-visual/DataVisual";
 import { Steps } from "./indicator/Indicator";
+import { Tag } from "./tag/Tag";
 
 /* 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다 — 숨김 문구로 알린다 */
 describe("Steps", () => {
@@ -133,6 +134,25 @@ describe("Donut", () => {
     expect([...d.querySelectorAll("i")].map((i) => i.style.getPropertyValue("--a"))).toEqual(["0deg", "90deg"]);
     const one = render(<Donut segments={[{ label: "A", value: 1 }]} />).container.firstElementChild as HTMLElement;
     expect(one.querySelectorAll("i")).toHaveLength(0);   // 조각 하나는 경계가 없다
+  });
+});
+
+describe("Severity 5단계", () => {
+  /* 사람의 결정(2026-11-06) — Medium = 채운 라임, Low = 라이트 블루, Info = 중립. 사이트 CSS · ds-chart TONES 와 같은 토큰이어야 한다 */
+  it("Donut 조각이 다섯 등급 토큰을 쓴다", () => {
+    const tones = ["critical", "high", "medium", "low", "info"] as const;
+    const { container } = render(<Donut segments={tones.map((t) => ({ label: t, value: 1, tone: t }))} />);
+    const bg = (container.firstElementChild as HTMLElement).style.background;
+    const want = ["--foreground-negative-primary", "--foreground-cautionary-primary", "--surface-accent-lime-opaque", "--foreground-accent-light-blue", "--foreground-inactive-primary"];
+    expect(want.map((t) => bg.indexOf(`var(${t})`))).toEqual([...want.map((t) => bg.indexOf(`var(${t})`))].sort((a, b) => a - b));
+    expect(want.every((t) => bg.includes(`var(${t})`))).toBe(true);
+    expect(bg).not.toContain("--foreground-accent-cyan");
+  });
+  it("Tag info · pending 은 클래스로 붙는다", () => {
+    const { container } = render(<><Tag tone="info">Info</Tag><Tag tone="pending">검토 대기</Tag></>);
+    const [a, b] = [...container.querySelectorAll(".tag")];
+    expect(a).toHaveClass("tag", "info");
+    expect(b).toHaveClass("tag", "pending");
   });
 });
 

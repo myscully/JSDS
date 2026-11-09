@@ -3,8 +3,9 @@ import { ChartCard, ChartLegend, Donut, DonutRow } from "@jiran/ds-react";
 const SEGMENTS = [
   { label: "Critical", value: 190, tone: "critical" as const },
   { label: "High", value: 285, tone: "high" as const },
-  { label: "Medium", value: 316, tone: "medium" as const },
-  { label: "Low", value: 263, tone: "low" as const },
+  { label: "Medium", value: 196, tone: "medium" as const },
+  { label: "Low", value: 120, tone: "low" as const },
+  { label: "Info", value: 263, tone: "info" as const },
 ];
 
 export default function Example() {

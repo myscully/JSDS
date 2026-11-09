@@ -7,6 +7,7 @@ export default function Example() {
       <Chip defaultSelected>High</Chip>
       <Chip>Medium</Chip>
       <Chip>Low</Chip>
+      <Chip>Info</Chip>
     </ChipGroup>
   );
 }

@@ -7,8 +7,8 @@ import type { Tone } from "../../types";
    토큰 이름이 코드에 드러나야 개명이 타입·검색에 걸린다.
    도넛 조각·범례 칩·바는 글자가 올라가지 않으므로 전부 graphic 역할이다 */
 const TONE_VAR: Record<string, string> = {
-  critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--foreground-accent-cyan",
-  low: "--foreground-inactive-primary", ok: "--foreground-positive-primary", accent: "--foreground-brand-primary",
+  critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--surface-accent-lime-opaque",
+  low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary", pending: "--foreground-accent-cyan", ok: "--foreground-positive-primary", accent: "--foreground-brand-primary",
 };
 const toneVar = (t?: Tone | string) => (t ? (TONE_VAR[t] ? `var(${TONE_VAR[t]})` : t) : "var(--foreground-brand-primary)");
 

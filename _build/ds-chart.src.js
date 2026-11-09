@@ -22,8 +22,9 @@
   };
   /* 심각도 · 상태 톤 → 기존 토큰. 계열 색과 섞지 않는다(빨강 = Critical 의 의미를 지킨다) */
   var TONES = {
-    critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--foreground-accent-cyan",
-    low: "--foreground-inactive-primary", ok: "--foreground-positive-primary", brand: "--foreground-brand-primary",
+    /* 심각도 5단계(사람의 결정 2026-11-06) — Medium 은 채운 라임(surface/accent/lime-opaque), Low 는 라이트 블루, Info 는 중립 */
+    critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--surface-accent-lime-opaque",
+    low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary", ok: "--foreground-positive-primary", brand: "--foreground-brand-primary",
     /* 계열 1의 톤(사람의 결정 2026-11-05) — 비교 기간(지난 주 · 전월)은 옅은 톤, 막대 위를 지나는 선은 진한 톤. 같은 지표의 다른 기간 · 다른 값으로 읽힌다 */
     "series-1": "--chart-series-1", "series-1-subtle": "--chart-series-1-subtle", "series-1-strong": "--chart-series-1-strong",
   };

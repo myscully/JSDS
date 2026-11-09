@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Checkbox, CheckboxGroup } from "@jiran/ds-react";
 
-const LEVELS = ["Critical", "High", "Medium", "Low"];
+const LEVELS = ["Critical", "High", "Medium", "Low", "Info"];
 
 export default function Example() {
   const [sel, setSel] = useState<string[]>(["Critical", "High"]);

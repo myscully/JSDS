@@ -1,14 +1,14 @@
 import { DataTable, Indicator, Tag, type DataTableColumn } from "@jiran/ds-react";
 
-type Row = { id: string; time: string; sev: "critical" | "high" | "medium" | "low"; event: string; target: string; count: number; status: "blocked" | "review" | "ok" };
+type Row = { id: string; time: string; sev: "critical" | "high" | "medium" | "low" | "info"; event: string; target: string; count: number; status: "blocked" | "review" | "ok" };
 const ROWS: Row[] = [
   { id: "1", time: "09:41:12", sev: "critical", event: "랜섬웨어 행위 탐지", target: "PC-2041 · 김민준", count: 3, status: "blocked" },
   { id: "2", time: "09:40:58", sev: "medium", event: "미승인 USB 연결", target: "PC-1187 · 이서연", count: 1, status: "review" },
-  { id: "3", time: "09:38:03", sev: "low", event: "정책 동기화 완료", target: "Server-03", count: 12, status: "ok" },
+  { id: "3", time: "09:38:03", sev: "info", event: "정책 동기화 완료", target: "Server-03", count: 12, status: "ok" },
   { id: "4", time: "09:36:47", sev: "high", event: "알려진 악성코드 차단", target: "PC-0932 · 박지훈", count: 2, status: "blocked" },
 ];
-const SEV_LABEL = { critical: "Critical", high: "High", medium: "Medium", low: "Low" };
-const SEV_RANK = { critical: 4, high: 3, medium: 2, low: 1 };
+const SEV_LABEL = { critical: "Critical", high: "High", medium: "Medium", low: "Low", info: "Info" };
+const SEV_RANK = { critical: 5, high: 4, medium: 3, low: 2, info: 1 };
 const STATUS = { blocked: ["차단", "danger"], review: ["검토 필요", "warn"], ok: ["정상", "ok"] } as const;
 
 const COLUMNS: DataTableColumn<Row>[] = [

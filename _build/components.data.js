@@ -17,8 +17,8 @@ const handle = DSChart.mount(Chart, document.querySelector("${sel}"), DSChart.pr
 const CHART_DATA = {
   trend: {"labels":["10-21","10-22","10-23","10-24","10-25","10-26","10-27","10-28","10-29","10-30","10-31","11-01","11-02","11-03"],"series":[{"label":"Critical","tone":"critical","data":[12,18,9,14,22,17,11,8,15,19,24,13,10,16]},{"label":"High","tone":"high","data":[30,24,41,35,28,33,39,27,31,36,44,29,25,32]},{"label":"Medium","tone":"medium","data":[52,48,61,55,47,58,64,49,53,60,66,51,46,57]}],"stacked":true},
   weeks: {"labels":["랜섬웨어","악성코드","USB 위반","정책 위반","피싱"],"series":[{"label":"이번 주","tone":"series-1","data":[412,306,221,115,88]},{"label":"지난 주","tone":"series-1-subtle","data":[349,331,198,142,97]}]},
-  depts: {"labels":["개발팀","영업팀","운영팀","재무팀","인사팀"],"series":[{"label":"Critical","tone":"critical","data":[42,18,25,9,6]},{"label":"High","tone":"high","data":[88,51,64,23,17]},{"label":"Medium","tone":"medium","data":[120,96,101,48,39]},{"label":"Low","tone":"low","data":[64,70,58,41,33]}],"stacked":true,"horizontal":true},
-  severity: {"series":[{"label":"Critical","tone":"critical","value":190},{"label":"High","tone":"high","value":285},{"label":"Medium","tone":"medium","value":316},{"label":"Low","tone":"low","value":263}],"center":"1,054","legend":"right"},
+  depts: {"labels":["개발팀","영업팀","운영팀","재무팀","인사팀"],"series":[{"label":"Critical","tone":"critical","data":[42,18,25,9,6]},{"label":"High","tone":"high","data":[88,51,64,23,17]},{"label":"Medium","tone":"medium","data":[74,60,62,30,24]},{"label":"Low","tone":"low","data":[46,36,39,18,15]},{"label":"Info","tone":"info","data":[64,70,58,41,33]}],"stacked":true,"horizontal":true},
+  severity: {"series":[{"label":"Critical","tone":"critical","value":190},{"label":"High","tone":"high","value":285},{"label":"Medium","tone":"medium","value":196},{"label":"Low","tone":"low","value":120},{"label":"Info","tone":"info","value":263}],"center":"1,054","legend":"right"},
   daily: {"labels":["10-28","10-29","10-30","10-31","11-01","11-02","11-03"],"bars":[{"label":"탐지","data":[412,380,455,402,390,470,431]}],"lines":[{"label":"차단","tone":"series-1-strong","data":[398,372,440,391,377,462,420]}]},
 };
 
@@ -219,6 +219,7 @@ const COMPONENTS = {
             <button type="button" class="chip on" aria-pressed="true">High</button>
             <button type="button" class="chip" aria-pressed="false">Medium</button>
             <button type="button" class="chip" aria-pressed="false">Low</button>
+            <button type="button" class="chip" aria-pressed="false">Info</button>
             <button type="button" class="chip" aria-pressed="false">최근 24시간</button>
           </div>
         </div>`, layout: "left" },
@@ -381,7 +382,7 @@ const COMPONENTS = {
       { id: "group", title: "Group", desc: "세로 기본, 짧은 항목은 .row 로 가로 배치. 전체 선택은 Indeterminate 와 함께.", html: `
         <div class="checkbox-group">
           ${cb("<b>전체 선택</b>", 'class="mixed"')}
-          <div class="checkbox-group row" style="padding-left:24px">${cb("Critical", "checked")}${cb("High", "checked")}${cb("Medium")}${cb("Low")}</div>
+          <div class="checkbox-group row" style="padding-left:24px">${cb("Critical", "checked")}${cb("High", "checked")}${cb("Medium")}${cb("Low")}${cb("Info")}</div>
         </div>` },
     ],
     props: [[".checkbox", "label wrapper", "—", "input[type=checkbox] + span(라벨, small 설명)"], ["checked / disabled", "attribute", "—", "네이티브 상태"], [".mixed", "boolean", "false", "부분 선택 외형(JS indeterminate 대체)"], [".checkbox-group", "container", "—", "세로 12px 간격. .row 로 가로 24px"]],
@@ -402,9 +403,10 @@ const COMPONENTS = {
           <button type="button" class="chip on" aria-pressed="true">High</button>
           <button type="button" class="chip" aria-pressed="false">Medium</button>
           <button type="button" class="chip" aria-pressed="false">Low</button>
+          <button type="button" class="chip" aria-pressed="false">Info</button>
         </div>`, react: `
         import { useState } from "react";
-        const LEVELS = ["Critical", "High", "Medium", "Low"];
+        const LEVELS = ["Critical", "High", "Medium", "Low", "Info"];
         export function SeverityFilter() {
           const [sel, setSel] = useState<string[]>(["Critical", "High"]);
           const toggle = (l: string) => setSel(s => s.includes(l) ? s.filter(x => x !== l) : [...s, l]);
@@ -523,15 +525,16 @@ const COMPONENTS = {
     thumb: `<span class="tag critical">Critical</span><span class="tag medium">Medium</span><span class="tag ok">정상</span>`,
     examples: [
       { id: "default", title: "Default", desc: "의미 색을 지정하지 않은 중립 태그입니다.", html: `<span class="tag">Tag</span>` },
-      { id: "severity", title: "Severity", desc: "위협 심각도 4단계. 색은 상태·강조 의도 매핑입니다 — Critical=negative · High=cautionary · Medium=accent cyan · Low=중립. 라벨은 중립 글자색이고 색은 점과 틴트가 나릅니다.", html: `
+      { id: "severity", title: "Severity", desc: "위협 심각도 5단계. 색은 상태·강조 의도 매핑입니다 — Critical=negative · High=cautionary · Medium=accent lime · Low=accent light blue · Info=중립. 라벨은 중립 글자색이고 색은 점과 틴트가 나릅니다.", html: `
         <span class="tag critical">Critical</span>
         <span class="tag high">High</span>
         <span class="tag medium">Medium</span>
         <span class="tag low">Low</span>
+        <span class="tag info">Info</span>
         ` },
-      { id: "status", title: "Status", desc: "작업·시스템 상태. 성공 ok, 대기 medium, 실패 high, 중립 기본.", html: `
+      { id: "status", title: "Status", desc: "작업·시스템 상태. 성공 ok, 대기 pending(청록 — 심각도 Medium 과 나눠 쓰지 않습니다), 실패 high, 중립 기본.", html: `
         <span class="tag ok">승인</span>
-        <span class="tag medium">검토 대기</span>
+        <span class="tag pending">검토 대기</span>
         <span class="tag high">반려</span>
         <span class="tag">보관</span>
         <span class="tag accent">신규</span>` },
@@ -547,9 +550,9 @@ const COMPONENTS = {
         <span class="tag high">High</span>
         <span class="tag high lg">High</span>` },
     ],
-    props: [["tone", "critical | high | medium | low | ok | accent | (neutral)", "neutral", "의미별 색. 바탕은 틴트(<code>--surface-{negative|cautionary|…}-primary</code>)이고 <b>라벨은 중립 글자색</b>입니다 — 색은 점(<code>::before</code>)과 테두리가 나릅니다. <code>.solid</code> 는 한 단계 강한 틴트 + 테두리입니다(기준 시스템에 솔리드 상태 면이 없습니다). 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
+    props: [["tone", "critical | high | medium | low | info | ok | pending | accent | (neutral)", "neutral", "의미별 색. 심각도 5단계는 critical · high · medium · low · info, pending 은 상태 톤(검토 대기)입니다. 바탕은 틴트(<code>--surface-{negative|cautionary|…}-primary</code>)이고 <b>라벨은 중립 글자색</b>입니다 — 색은 점(<code>::before</code>)과 테두리가 나릅니다. <code>.solid</code> 는 한 단계 강한 틴트 + 테두리입니다(기준 시스템에 솔리드 상태 면이 없습니다). 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
     spec: [["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--surface-{…}-primary</code> 틴트, <code>.solid</code> 는 같은 틴트 + <code>--line-{…}</code> 테두리(Critical 만 <code>--surface-negative-strong</code>)"], ["Label", "12 SemiBold (세 사이즈 공통)"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
-    figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--surface-negative-primary", fg: "--foreground-negative-primary", solidBg: "--surface-negative-strong", solidFg: "--foreground-neutral-primary" }, high: { bg: "--surface-cautionary-primary", fg: "--foreground-cautionary-primary", solidBg: "--surface-cautionary-primary", solidFg: "--foreground-neutral-primary" }, medium: { bg: "--surface-accent-cyan", fg: "--foreground-accent-cyan", solidBg: "--surface-accent-cyan", solidFg: "--foreground-neutral-primary" }, low: { bg: "--surface-neutral-strong", fg: "--foreground-neutral-tertiary", solidBg: "--surface-neutral-strong", solidFg: "--foreground-neutral-primary" }, ok: { bg: "--surface-positive-primary", fg: "--foreground-positive-primary", solidBg: "--surface-positive-primary", solidFg: "--foreground-neutral-primary" }, accent: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary", solidBg: "--surface-brand-primary", solidFg: "--brand-label" }, neutral: { bg: "--surface-neutral-strong", fg: "--foreground-neutral-secondary" } }, states: ["subtle", "outline", "solid"] },
+    figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--surface-negative-primary", fg: "--foreground-negative-primary", solidBg: "--surface-negative-strong", solidFg: "--foreground-neutral-primary" }, high: { bg: "--surface-cautionary-primary", fg: "--foreground-cautionary-primary", solidBg: "--surface-cautionary-primary", solidFg: "--foreground-neutral-primary" }, medium: { bg: "--surface-accent-lime", fg: "--surface-accent-lime-opaque", solidBg: "--surface-accent-lime", solidFg: "--foreground-neutral-primary" }, low: { bg: "--surface-accent-light-blue", fg: "--foreground-accent-light-blue", solidBg: "--surface-accent-light-blue", solidFg: "--foreground-neutral-primary" }, info: { bg: "--surface-neutral-strong", fg: "--foreground-inactive-primary", solidBg: "--surface-neutral-strong", solidFg: "--foreground-neutral-primary" }, pending: { bg: "--surface-accent-cyan", fg: "--foreground-accent-cyan", solidBg: "--surface-accent-cyan", solidFg: "--foreground-neutral-primary" }, ok: { bg: "--surface-positive-primary", fg: "--foreground-positive-primary", solidBg: "--surface-positive-primary", solidFg: "--foreground-neutral-primary" }, accent: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary", solidBg: "--surface-brand-primary", solidFg: "--brand-label" }, neutral: { bg: "--surface-neutral-strong", fg: "--foreground-inactive-primary" } }, states: ["subtle", "outline", "solid"] },
   },
 
   /* ------------------------------------------------ Dropdown (액션 메뉴) · Select (값 선택) — 같은 .dropdown CSS 를 쓰지만 용도가 달라 페이지를 나눈다 */
@@ -1316,7 +1319,7 @@ const COMPONENTS = {
             <tbody>
               <tr><td>09:41:12</td><td><span class="tag critical">Critical</span></td><td><a href="#" class="link">랜섬웨어 행위 탐지</a></td><td>PC-2041 · 김민준</td><td class="num">3</td><td><span class="indicator danger">차단</span></td></tr>
               <tr><td>09:40:58</td><td><span class="tag medium">Medium</span></td><td><a href="#" class="link">미승인 USB 연결</a></td><td>PC-1187 · 이서연</td><td class="num">1</td><td><span class="indicator warn">검토 필요</span></td></tr>
-              <tr><td>09:38:03</td><td><span class="tag low">Low</span></td><td><a href="#" class="link">정책 동기화 완료</a></td><td>Server-03</td><td class="num">12</td><td><span class="indicator ok">정상</span></td></tr>
+              <tr><td>09:38:03</td><td><span class="tag info">Info</span></td><td><a href="#" class="link">정책 동기화 완료</a></td><td>Server-03</td><td class="num">12</td><td><span class="indicator ok">정상</span></td></tr>
               <tr class="disabled" inert><td>09:36:47</td><td><span class="tag high">High</span></td><td><a href="#" class="link">알려진 악성코드 차단</a></td><td>PC-0932 · 박지훈</td><td class="num">2</td><td><span class="indicator danger">차단</span></td></tr>
             </tbody>
           </table>
@@ -1340,8 +1343,8 @@ const COMPONENTS = {
             <tbody>
               <tr class="log-row"><td>2026-09-07 09:41:12.031</td><td><span class="tag critical sm">CRIT</span></td><td>10.0.4.21</td><td>process.create blocked: rundll32.exe → cryptor.dll</td></tr>
               <tr class="log-row"><td>2026-09-07 09:41:11.870</td><td><span class="tag medium sm">WARN</span></td><td>10.0.4.21</td><td>usb.attach vendor=0x0781 product=0x5583</td></tr>
-              <tr class="log-row"><td>2026-09-07 09:41:09.114</td><td><span class="tag low sm">INFO</span></td><td>10.0.0.3</td><td>policy.sync ok (rev 2041)</td></tr>
-              <tr class="log-row"><td>2026-09-07 09:41:08.552</td><td><span class="tag low sm">INFO</span></td><td>10.0.0.3</td><td>agent.checkin 1284/1284</td></tr>
+              <tr class="log-row"><td>2026-09-07 09:41:09.114</td><td><span class="tag info sm">INFO</span></td><td>10.0.0.3</td><td>policy.sync ok (rev 2041)</td></tr>
+              <tr class="log-row"><td>2026-09-07 09:41:08.552</td><td><span class="tag info sm">INFO</span></td><td>10.0.0.3</td><td>agent.checkin 1284/1284</td></tr>
             </tbody>
           </table>
         </div>` },
@@ -1498,18 +1501,20 @@ const COMPONENTS = {
             <div class="row"><span class="lbl">악성코드</span><div class="bar high"><i style="width:61%"></i></div><span class="num">306</span></div>
             <div class="row"><span class="lbl">USB 위반</span><div class="bar medium"><i style="width:44%"></i></div><span class="num">221</span></div>
             <div class="row"><span class="lbl">정책 위반</span><div class="bar low"><i style="width:23%"></i></div><span class="num">115</span></div>
+            <div class="row"><span class="lbl">피싱</span><div class="bar info"><i style="width:18%"></i></div><span class="num">88</span></div>
           </div>
         </div>` },
       { id: "donut", title: "Donut + Legend", desc: "구성 비율. 조각은 conic-gradient 로 이어 그리고, 경계마다 2px 구분선 <code>&lt;i style=\"--a:각도\"&gt;</code>(위 = 0°, 시계 방향)를 둡니다 — 탐색형 도넛과 같은 폭이 일정한 틈입니다. 중앙 값은 data-label.", html: `
         <div class="chart-card" style="max-width:320px">
           <h3 class="chart-title">심각도 분포</h3>
           <div class="donut-row">
-            <div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 30%, Low 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:270.2deg"></i></div>
+            <div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:229.2deg"></i><i style="--a:270.2deg"></i></div>
             <div class="chart-legend" style="flex-direction:column">
               <span><i class="critical"></i>Critical <b>190</b></span>
               <span><i class="high"></i>High <b>285</b></span>
-              <span><i class="medium"></i>Medium <b>316</b></span>
-              <span><i class="low"></i>Low <b>263</b></span>
+              <span><i class="medium"></i>Medium <b>196</b></span>
+              <span><i class="low"></i>Low <b>120</b></span>
+              <span><i class="info"></i>Info <b>263</b></span>
             </div>
           </div>
         </div>` },
@@ -1542,18 +1547,18 @@ const COMPONENTS = {
           </div>
           <div class="chart-card">
             <h3 class="chart-title">부서별 심각도</h3>
-            ${chartCanvas("bar", CHART_DATA.depts, "부서별 심각도 — Critical · High · Medium · Low 누적")}
+            ${chartCanvas("bar", CHART_DATA.depts, "부서별 심각도 — Critical · High · Medium · Low · Info 누적")}
           </div>
         </div>`, js: chartJs("bar", CHART_DATA.depts, ".chart-canvas canvas") },
       { id: "donut-live", title: "Donut · 탐색형", desc: "비율을 툴팁 · 범례 토글과 함께 볼 때는 탐색형 도넛(<code>donut</code>)입니다. 조각 사이 2px 면 색 틈과 구멍 67% 는 CSS 도넛과 같은 모양이고, <code>center</code> 가 가운데 합계를 그립니다. <code>legend: \"right\"</code> 는 차트 자리가 좁고 세로로 길면(폭 &lt; 높이 × 1.5) 범례를 아래로 내려 도넛 크기를 지킵니다. 값 네 개를 요약만 하면 위의 CSS Donut + Legend 를 씁니다.", html: `
         <div class="chart-card" style="max-width:420px">
           <h3 class="chart-title">심각도 분포</h3>
-          ${chartCanvas("donut", CHART_DATA.severity, "심각도 분포 — Critical 190, High 285, Medium 316, Low 263, 합계 1,054")}
+          ${chartCanvas("donut", CHART_DATA.severity, "심각도 분포 — Critical 190, High 285, Medium 196, Low 120, Info 263, 합계 1,054")}
         </div>`, js: chartJs("donut", CHART_DATA.severity, ".chart-canvas canvas") },
       { id: "donut-narrow", title: "Donut · 좁은 자리", desc: "위와 같은 spec(<code>legend: \"right\"</code>)을 폭 300 카드에 넣은 모습입니다. 캔버스 폭이 높이 × 1.5 보다 좁으면 범례가 차트 아래로 내려가 도넛 지름을 지킵니다 — 대시보드의 좁은 열 · 사이드 패널이 이 경우입니다. 창 크기가 바뀌면 다시 판정합니다.", html: `
         <div class="chart-card" style="max-width:300px">
           <h3 class="chart-title">심각도 분포</h3>
-          ${chartCanvas("donut", CHART_DATA.severity, "심각도 분포 — Critical 190, High 285, Medium 316, Low 263, 합계 1,054")}
+          ${chartCanvas("donut", CHART_DATA.severity, "심각도 분포 — Critical 190, High 285, Medium 196, Low 120, Info 263, 합계 1,054")}
         </div>`, js: chartJs("donut", CHART_DATA.severity, ".chart-canvas canvas") },
       { id: "mixed", title: "Mixed · 혼합", desc: "막대(<code>bars</code>)와 선(<code>lines</code>)을 한 차트에 둘 때는 <b>y 축이 하나</b>여야 합니다 — 탐지와 차단은 단위가 같은 건수라 함께 그립니다. 단위가 다른 두 값(건수와 %)은 이중 축으로 겹치지 말고 차트를 둘로 나눕니다. 선이 막대 위에 그려집니다.", html: `
         <div class="chart-card" style="max-width:640px">
@@ -1562,10 +1567,10 @@ const COMPONENTS = {
         </div>`, js: chartJs("mixed", CHART_DATA.daily, ".chart-canvas canvas") },
     ],
     props: [[".kpi", "div", "—", ".label + .value(small 단위) + .delta(.up/.down). .critical/.high 로 값 색"], ["variant / .flat", "\"outline\" | \"flat\"", "\"outline\"", ".kpi · .chart-card 의 보더 색을 지웁니다(두께 1px 는 남아 크기 같음). 주변에 배경색 <code>background/neutral/secondary</code> 이 있을 때만 — Card 의 flat 과 같은 규칙. React <code>variant</code>"], [".kpi-grid", "container", "—", "auto-fit 180px"], [".chart .row", "row", "—", ".lbl + .bar(i width%) + .num. bar 톤 critical|high|medium|low"], [".donut", "div", "—", "conic-gradient 배경(조각을 이어 붙임) + 경계마다 <code>&lt;i style=\"--a:각도\"&gt;</code> 2px 면 색 구분선(위 = 0°, 시계 방향), data-label 중앙 값, role=img aria-label. 이웃 조각 밝기 대비가 낮아 틈 없이는 색상만으로 갈린다"], [".donut-row", "div", "—", "도넛 + 범례 한 줄. 도넛은 왼쪽, 범례는 오른쪽 끝(space-between) — 카드가 넓으면 둘 사이가 벌어지고, 한 줄에 안 들어가면 범례가 도넛 아래로 내려갑니다(줄 사이 16)"], [".chart-legend", "div", "—", "i 색(원형 10) + 라벨 + b 값"], [".chart-card", "container", "—", "차트를 담는 카드. Card 와 같은 Surface·radius/lg·1px 보더이고 padding 20 24 · gap 16 입니다. React <code>ChartCard</code>"], [".sparkline", "div", "—", "i height% 막대, .hi 강조. .kpi 의 자식이면 값 오른쪽(밑변 = 숫자 기준선), 좁으면 값 아래"], ["canvas[data-chart] / ChartCanvas", "\"timeseries\" | \"bar\" | \"donut\" | \"mixed\"", "—", "탐색형 차트(Chart.js) 자리 — <code>.chart-canvas</code>(높이 240) 안의 canvas. HTML 은 <code>data-spec</code>(JSON) 으로 <code>ds-chart.js</code> 가 자동으로 그리고, React 는 <code>chart</code>(Chart.js 생성자) · <code>config</code>(presets.*) · <code>aria-label</code>(필수) prop 입니다"], ["DSChart.presets.* / presets", "timeseries · bar · donut · mixed (spec) → config", "—", "<code>series[{label, data, tone?}]</code> · <code>labels</code> · <code>stacked</code> · <code>horizontal</code> · 도넛은 <code>{label, value, tone?}</code> · <code>center</code> · <code>legend</code>(\"bottom\" | \"right\" — right 는 폭 &lt; 높이 × 1.5 이면 아래로) · 혼합은 <code>bars</code> · <code>lines</code>. tone 은 심각도 · 상태 토큰(critical · high · medium · low · ok · brand) 또는 계열 1의 톤(series-1 · series-1-subtle 비교 기간 · series-1-strong 막대 위 선), 없으면 계열 색 1~6 순서. 결과는 보통의 Chart.js config"], ["DSChart.theme · mount · auto / chartTheme · useDsChart · mountChart", "(el) → theme · (Chart, canvas, config) → handle", "—", "theme 은 <code>--chart-*</code> · 심각도 · 면 · 글꼴 토큰을 계산값으로 읽은 것(캔버스는 CSS 변수를 못 읽습니다). mount 는 Chart 를 만들고 라이트/다크 · 제품 색 전환 때 다시 칠하며 <code>destroy()</code> 를 돌려줍니다. auto 는 <code>canvas[data-chart]</code> 를 모두 mount"]],
-    spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120 · 탐색형 캔버스 높이 240"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·1px 보더, 다만 padding 20 24 · gap 16 · flat 은 보더 색 없음(background/neutral/secondary 위 전용)"], ["Label", "라벨 12 Medium tertiary · 값 32 Bold(일반 숫자) · 차트 축 · 범례 · 툴팁 글자 12"], ["Chart", "선 2 · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음(정적 막대 · 트랙 · 스파크라인도 각짐) · 누적 세그먼트는 틈 없이 이어 붙임 · 도넛 조각 사이 2px 면 색 경계 · 막대 두께 최대 32 · 격자는 y 축만 · y 축 하나(이중 축 금지) · 범례는 2계열 이상, 원형 아이콘 · 옆 범례(탐색형 도넛 right · 정적 .donut-row)는 자리가 좁고 세로로 길면 아래로 · 7번째 계열부터 '기타'"], ["Color", "계열 --chart-series-1~6 순서 고정(제품색과 무관 · 라이트/다크 각각 색각 분리 검증) · 같은 지표의 비교 기간(지난 주 · 전월)은 색이 아니라 계열 1의 옅은 톤 --chart-series-1-subtle, 막대 위를 지나는 선은 진한 톤 --chart-series-1-strong · 심각도는 negative · cautionary · accent-cyan · inactive 토큰 · 격자 --chart-grid-primary · 축 글자 --chart-axis-text · 툴팁 --chart-tooltip-*"], ["A11y", "canvas 는 role=img + aria-label(제목 · 요약) 필수 · 범례 · 툴팁으로 값을 읽고, 표 대체를 권장"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열(추이 · 분포)"]],
+    spec: [["Size", "KPI 값 Display/2 32 · 막대 12 · 도넛 120 · 탐색형 캔버스 높이 240"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·1px 보더, 다만 padding 20 24 · gap 16 · flat 은 보더 색 없음(background/neutral/secondary 위 전용)"], ["Label", "라벨 12 Medium tertiary · 값 32 Bold(일반 숫자) · 차트 축 · 범례 · 툴팁 글자 12"], ["Chart", "선 2 · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음(정적 막대 · 트랙 · 스파크라인도 각짐) · 누적 세그먼트는 틈 없이 이어 붙임 · 도넛 조각 사이 2px 면 색 경계 · 막대 두께 최대 32 · 격자는 y 축만 · y 축 하나(이중 축 금지) · 범례는 2계열 이상, 원형 아이콘 · 옆 범례(탐색형 도넛 right · 정적 .donut-row)는 자리가 좁고 세로로 길면 아래로 · 7번째 계열부터 '기타'"], ["Color", "계열 --chart-series-1~6 순서 고정(제품색과 무관 · 라이트/다크 각각 색각 분리 검증) · 같은 지표의 비교 기간(지난 주 · 전월)은 색이 아니라 계열 1의 옅은 톤 --chart-series-1-subtle, 막대 위를 지나는 선은 진한 톤 --chart-series-1-strong · 심각도 5단계는 negative · cautionary · accent-lime-opaque · accent-light-blue · inactive 토큰 · 격자 --chart-grid-primary · 축 글자 --chart-axis-text · 툴팁 --chart-tooltip-*"], ["A11y", "canvas 는 role=img + aria-label(제목 · 요약) 필수 · 범례 · 툴팁으로 값을 읽고, 표 대체를 권장"], ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열(추이 · 분포)"]],
     figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, kpiSparkline: { layout: "라벨 한 줄 · 값 + 그래프 한 줄(밑변 = 숫자 기준선, 좁으면 그래프가 값 아래)" }, bar: {}, donut: { gap: "경계마다 2px 직선 --surface-elevated-primary(폭 일정)" }, sparkline: { bar: "--line-brand-primary", hi: "--foreground-brand-primary" } }, variant: { outline: { stroke: "--line-neutral-secondary" }, flat: { stroke: "transparent", canvas: "--background-neutral-secondary" } }, states: ["default"],
       /* 탐색형 차트(Chart.js) — Figma 의 Chart 세트가 따르는 마크 규격과 색 */
-      chart: { types: ["timeseries", "bar", "donut", "mixed"], canvasH: 240, line: 2, point: 8, barRadius: 0, barStroke: 0, barMax: 32, gap: 0, legend: "circle", cutout: "67%", series: ["--chart-series-1", "--chart-series-2", "--chart-series-3", "--chart-series-4", "--chart-series-5", "--chart-series-6"], grid: "--chart-grid-primary", axis: "--chart-axis-text", tooltip: { bg: "--chart-tooltip-surface", fg: "--chart-tooltip-text" }, tones: { critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--foreground-accent-cyan", low: "--foreground-inactive-primary", "series-1": "--chart-series-1", "series-1-subtle": "--chart-series-1-subtle", "series-1-strong": "--chart-series-1-strong" } } },
+      chart: { types: ["timeseries", "bar", "donut", "mixed"], canvasH: 240, line: 2, point: 8, barRadius: 0, barStroke: 0, barMax: 32, gap: 0, legend: "circle", cutout: "67%", series: ["--chart-series-1", "--chart-series-2", "--chart-series-3", "--chart-series-4", "--chart-series-5", "--chart-series-6"], grid: "--chart-grid-primary", axis: "--chart-axis-text", tooltip: { bg: "--chart-tooltip-surface", fg: "--chart-tooltip-text" }, tones: { critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--surface-accent-lime-opaque", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary", "series-1": "--chart-series-1", "series-1-subtle": "--chart-series-1-subtle", "series-1-strong": "--chart-series-1-strong" } } },
   },
 };
 
