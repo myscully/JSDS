@@ -9,6 +9,9 @@ export default function Example() {
       <Setting title="USB 자동 검사" description="연결된 저장장치를 검사합니다">
         <Switch aria-label="USB 자동 검사" />
       </Setting>
+      <Setting title="원격 제어" description="보안 관리자만 바꿀 수 있습니다">
+        <Switch disabled aria-label="원격 제어" />
+      </Setting>
     </SettingsSection>
   );
 }

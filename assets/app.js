@@ -191,6 +191,8 @@ const ROOT=document.body.dataset.root||'../';
   }
   /* 미리보기의 폼은 실제로 보내지 않는다 — 통과한 제출이 페이지를 새로 읽었다 */
   document.addEventListener("submit", e => { if (e.target.closest(".example-preview")) e.preventDefault(); });
+  /* Switch 예제 — 서버 대신 0.9초 뒤 응답한다. data-demo-fail 은 실패를 보여 주는 문서 전용 표시 */
+  document.addEventListener("ds:switch", e => { if (!e.target.closest(".example-preview")) return; setTimeout(() => e.target.closest("[data-demo-fail]") ? e.detail.reject("정책 서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.") : e.detail.resolve(), 900); });
   document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });
   document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });
   window.addEventListener("hashchange", closeValPop);

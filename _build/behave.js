@@ -986,7 +986,23 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await go("components/select-button.html");
   const sb = page.locator(".example-preview .select-btn").first();
   await sb.locator("button").nth(1).click();
-  ok("select-btn switches", await sb.evaluate((e) => e.querySelectorAll("button.on").length === 1 && e.querySelectorAll("button")[1].getAttribute("aria-pressed") === "true"));
+  ok("select-btn switches", await sb.evaluate((e) => e.querySelectorAll("button.on").length === 1 && e.querySelectorAll("button")[1].getAttribute("aria-checked") === "true"));
+  /* Select Button 정비(사람의 결정 2026-11-10) — radiogroup, Tab 한 번, 화살표로 옮기면 바로 고름 */
+  {
+    const B = page.locator(ex("select-button", "basic") + " .select-btn"), btns = B.locator("button");
+    const st = () => B.evaluate((e) => { const k = [...e.querySelectorAll("button")]; return { on: k.findIndex((b) => b.classList.contains("on")), checked: k.findIndex((b) => b.getAttribute("aria-checked") === "true"), stops: k.filter((b) => b.tabIndex === 0).length, stop: k.findIndex((b) => b.tabIndex === 0), focus: k.indexOf(document.activeElement) }; });
+    ok("select button keeps one tab stop on the selected item", await page.evaluate(() => [...document.querySelectorAll(".select-btn")].every((g) => { const k = [...g.children]; return g.getAttribute("role") === "radiogroup" && k.every((b) => b.getAttribute("role") === "radio" && !b.hasAttribute("aria-pressed")) && k.filter((b) => b.tabIndex === 0).length === 1; })));
+    await btns.nth(1).focus(); await page.keyboard.press("ArrowRight"); let s = await st();
+    ok("select button arrow moves focus and selects", s.on === 2 && s.checked === 2 && s.focus === 2 && s.stop === 2 && s.stops === 1, JSON.stringify(s));
+    await B.evaluate((e) => { window.__sb = 0; e.addEventListener("ds:select", () => window.__sb++); });
+    await page.keyboard.press("ArrowRight"); s = await st();
+    ok("select button arrow wraps and reports the change", s.on === 0 && s.focus === 0 && (await page.evaluate(() => window.__sb)) === 1, JSON.stringify(s));
+    await page.keyboard.press("Tab");
+    ok("select button leaves the group with one Tab", await B.evaluate((e) => !e.contains(document.activeElement)));
+    const D = page.locator(ex("select-button", "disabled") + " .select-btn button");
+    await D.nth(1).click(); await page.keyboard.press("ArrowRight");
+    ok("select button skips a disabled option", await D.evaluateAll((k) => k[0].classList.contains("on") && document.activeElement === k[0]));
+  }
   await go("components/chip.html");
   const chip = page.locator(".example-preview button.chip[aria-pressed]").first();
   const before = await chip.getAttribute("aria-pressed");
@@ -1001,6 +1017,99 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.evaluate(() => document.querySelector("#ex-chip-size .example-preview .chip[aria-disabled=true] .x").click()); await page.waitForTimeout(250);   // dismiss 는 170ms 뒤에 지운다
   chipOff.kept = await page.evaluate(() => !!document.querySelector("#ex-chip-size .example-preview .chip[aria-disabled=true]"));
   ok("a disabled input chip dims its remove button and keeps the chip", chipOff.bg === "rgba(0, 0, 0, 0)" && chipOff.color === chipOff.want && chipOff.kept, JSON.stringify(chipOff));
+  /* Chip 정비(사람의 결정 2026-11-10) — 지운 뒤 포커스 · 필터 초기화 · 줄바꿈 · 긴 값 */
+  {
+    await go("components/chip.html");
+    const P = ex("chip", "input"), xs = page.locator(P + " .chip .x"), fx = () => page.evaluate(() => { const a = document.activeElement; return (a.getAttribute("aria-label") || a.textContent || a.tagName).trim(); });
+    ok("input chip remove is a named real button", await xs.evaluateAll((k) => k.length === 3 && k.every((x) => x.tagName === "BUTTON" && x.tabIndex === 0) && new Set(k.map((x) => x.getAttribute("aria-label"))).size === 3));
+    await xs.first().focus(); await page.keyboard.press("Enter"); await page.waitForTimeout(250);
+    ok("removing a chip moves focus to the next chip", (await fx()) === "10.0.0.13 삭제" && (await xs.count()) === 2, await fx());
+    await xs.nth(1).focus(); await xs.nth(1).click(); await page.waitForTimeout(250);
+    const lastTo = await fx(); await page.keyboard.press("Enter"); await page.waitForTimeout(250);
+    ok("removing a middle chip goes to the next spot, the add button once chips are gone", lastTo === "추가" && (await xs.count()) === 1, lastTo);
+    const L = ex("chip", "long"), lb = page.locator(L + " .lbl").first(), lx = page.locator(L + " .x").first();
+    const m = () => lb.evaluate((e) => ({ w: e.clientWidth, sw: e.scrollWidth }));
+    const closed = await m(); await lx.focus(); const open = await m();
+    ok("a long chip value truncates at 240 and opens on keyboard focus", closed.w === 240 && closed.sw > 240 && open.w >= closed.sw && open.sw === open.w, JSON.stringify({ closed, open }));
+    await lx.blur();
+    await page.locator(L + " .x").nth(1).click(); await page.waitForTimeout(250);
+    ok("removing the last chip moves focus to the one before it", (await fx()).endsWith("corp.example.com 삭제"), await fx());
+    await page.locator(L + " .x").first().click(); await page.waitForTimeout(250);
+    ok("removing the only chip leaves focus on the group, not the page", await page.evaluate((sel) => document.activeElement === document.querySelector(sel + " .chip-group"), L));
+    const F = page.locator(ex("chip", "filter") + " .chip-group"), R = F.locator("[data-chip-reset]");
+    const fs0 = await F.evaluate((e) => { const c = e.querySelector(".chip").getBoundingClientRect(), r = e.querySelector("[data-chip-reset]").getBoundingClientRect(); return { c: c.height, r: r.height, hidden: e.querySelector("[data-chip-reset]").hidden }; });
+    ok("filter reset shows while a chip is on and matches the chip height", !fs0.hidden && fs0.c === fs0.r, JSON.stringify(fs0));
+    await F.evaluate((e) => { window.__cr = 0; e.addEventListener("ds:chip-reset", () => window.__cr++); });
+    await R.click();
+    const fs1 = await F.evaluate((e) => ({ on: e.querySelectorAll(".chip.on").length, pressed: e.querySelectorAll('[aria-pressed="true"]').length, hidden: e.querySelector("[data-chip-reset]").hidden, first: document.activeElement === e.querySelector(".chip") }));
+    ok("filter reset clears every chip, hides itself and focuses the first chip", fs1.on === 0 && fs1.pressed === 0 && fs1.hidden && fs1.first && (await page.evaluate(() => window.__cr)) === 1, JSON.stringify(fs1));
+    await F.locator(".chip").nth(1).click();
+    ok("filter reset returns when a chip is turned on", !(await R.evaluate((e) => e.hidden)));
+    const wrap = await F.evaluate((e) => { e.style.width = "200px"; const o = { h: e.getBoundingClientRect().height, sw: e.scrollWidth, cw: e.clientWidth }; e.style.width = ""; return o; });
+    ok("chips wrap to the next line instead of overflowing", wrap.h > 32 && wrap.sw <= wrap.cw, JSON.stringify(wrap));
+  }
+  /* Switch 정비(사람의 결정 2026-11-10) — 응답 후 반영 */
+  {
+    await go("components/switch.html");
+    const A = ex("switch", "async"), okI = page.locator(A + " .switch input").nth(0), failI = page.locator(A + " .switch input").nth(1), busyI = page.locator(A + " .switch input").nth(2);
+    const st = (l) => l.evaluate((e) => ({ c: e.checked, b: e.getAttribute("aria-busy"), d: e.getAttribute("aria-disabled"), dis: e.disabled, focus: document.activeElement === e, anim: getComputedStyle(e, "::before").animationName }));
+    await okI.focus(); await page.keyboard.press("Space"); await page.waitForTimeout(50); let s = await st(okI);
+    ok("async switch stays put and shows busy while waiting", s.c === true && s.b === "true" && s.d === "true" && !s.dis && s.focus && s.anim === "spin", JSON.stringify(s));
+    await page.keyboard.press("Space"); await page.waitForTimeout(1000); s = await st(okI);
+    ok("async switch applies once on success and ignores presses while busy", s.c === false && s.b === null && s.d === null && s.focus, JSON.stringify(s));
+    await failI.click(); await page.waitForTimeout(1000); s = await st(failI);
+    const t = page.locator(".toast-stack.fixed .toast.danger");
+    const tt = await t.evaluate((e) => ({ text: e.textContent, d: e.dataset.duration, close: !!e.querySelector("button.action") }));
+    ok("async switch failure keeps the state and raises a toast that stays", s.c === false && s.b === null && /정책 서버/.test(tt.text) && tt.d === "0" && tt.close, JSON.stringify({ s, tt }));
+    await t.locator("button.action").click(); await page.waitForTimeout(250);
+    ok("the failure toast closes by its button", (await t.count()) === 0);
+    await page.evaluate(() => { window.__sw = (e) => e.detail.cancel(); document.addEventListener("ds:switch", window.__sw); });
+    await okI.click(); await page.waitForTimeout(1000); s = await st(okI);
+    ok("async switch cancel leaves it unchanged without a toast", s.c === false && s.b === null && (await t.count()) === 0, JSON.stringify(s));
+    await page.evaluate(() => { document.removeEventListener("ds:switch", window.__sw); window.__sw = (e) => e.detail.resolve(); document.addEventListener("ds:switch", window.__sw); });
+    await okI.click(); await page.waitForTimeout(60); s = await st(okI);
+    ok("async switch resolved in the handler still applies", s.c === true && s.b === null, JSON.stringify(s));
+    await page.evaluate(() => document.removeEventListener("ds:switch", window.__sw));
+    await page.evaluate(() => { window.__swn = 0; window.__sw = () => window.__swn++; document.addEventListener("ds:switch", window.__sw); });
+    await busyI.evaluate((e) => e.click()); await page.waitForTimeout(40); s = await st(busyI);
+    const pressedBusy = await page.evaluate(() => window.__swn);
+    ok("a busy switch cannot be pressed", s.c === true && s.b === "true" && pressedBusy === 0, JSON.stringify({ s, pressedBusy }));
+    await okI.click(); await okI.evaluate((e) => e.click()); await page.waitForTimeout(1000);
+    const once = await page.evaluate(() => window.__swn); await page.evaluate(() => document.removeEventListener("ds:switch", window.__sw));
+    ok("a second press while busy starts nothing", once === 1, String(once));
+    const geo = await page.evaluate(() => { const out = []; for (const cls of ["", "sm"]) for (const on of [false, true]) { const l = document.createElement("label"); l.className = "switch " + cls; l.innerHTML = '<input type="checkbox" role="switch" aria-busy="true"' + (on ? " checked" : "") + ">"; document.querySelector(".example-preview").append(l); const i = l.firstChild, a = getComputedStyle(i, "::after"), b = getComputedStyle(i, "::before"); const c = (s2) => parseFloat(s2.left) + parseFloat(s2.width) / 2; const m = (s2) => parseFloat(s2.top) + parseFloat(s2.height) / 2; out.push({ dx: c(a) - c(b), dy: m(a) - m(b) }); l.remove(); } return out; });
+    ok("the busy spinner sits at the knob center on both sizes", geo.every((g) => Math.abs(g.dx) < 0.5 && Math.abs(g.dy) < 0.5), JSON.stringify(geo));
+    const P = page.locator(ex("switch", "state") + " .switch input").first(), b4 = await P.isChecked(); await P.click();
+    ok("a plain switch still applies at once", (await P.isChecked()) !== b4);
+  }
+  /* 필수 그룹(P2, 2026-11-10) — Checkbox · Radio 가 입력 폼 검증의 같은 흐름에 낀다 */
+  for (const [pg, msgHelp] of [["checkbox", "하나 이상 선택합니다."], ["radio-button", ""]]) {
+    await go(`components/${pg}.html`);
+    const P = ex(pg, "form"), F = page.locator(P + " .field"), G = page.locator(P + " fieldset"), I = page.locator(P + " fieldset input"), S = page.locator(P + ' button[type="submit"]');
+    const st = () => F.evaluate((f) => { const g = f.querySelector("fieldset"), h = f.querySelector(":scope > .help"); return { err: f.classList.contains("error"), help: h.textContent, inv: g.getAttribute("aria-invalid"), linked: (g.getAttribute("aria-describedby") || "").split(/\s+/).includes(h.id), focus: f.querySelector("input") === document.activeElement }; });
+    const look = await I.first().evaluate((e) => { const c = getComputedStyle(e), r = e.getBoundingClientRect(), l = getComputedStyle(e.closest("label")); return { w: r.width, h: r.height, pad: c.paddingLeft, bw: c.borderTopWidth, weight: l.fontWeight }; });
+    ok(`${pg}: an option inside a field keeps its own look, not the input's`, look.w === 16 && look.h === 16 && look.pad === "0px" && look.bw === "0px" && look.weight === "400", JSON.stringify(look));
+    await I.first().focus(); await page.keyboard.press("Tab"); await page.keyboard.press("Tab"); await page.waitForTimeout(30);
+    let s = await st(); ok(`${pg}: passing through a required group stays quiet`, !s.err && s.help === msgHelp, JSON.stringify(s));
+    await S.evaluate((b) => { window.__v = null; b.form.addEventListener("ds:validate", (e) => { window.__v = e.detail; }); });
+    await S.click(); await page.waitForTimeout(40); s = await st();
+    const v = await page.evaluate(() => window.__v), optInvalid = await I.evaluateAll((k) => k.filter((x) => x.hasAttribute("aria-invalid") || x.hasAttribute("aria-describedby")).length);
+    ok(`${pg}: submit flags the empty group, links the message and focuses the first option`, optInvalid === 0 && s.err && s.help === "필수 항목입니다. 항목을 선택하세요." && s.inv === "true" && s.linked && s.focus && v.valid === false && v.errors[0].label === (pg === "checkbox" ? "알림 채널" : "격리 해제 권한"), JSON.stringify({ s, v, optInvalid }));
+    const ring = await I.evaluateAll((k) => { const d = document.createElement("div"); d.style.color = "var(--foreground-negative-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove(); return { want, shadow: getComputedStyle(k[1]).boxShadow }; });
+    ok(`${pg}: an empty option in an error group gets the error line`, ring.shadow.includes(ring.want), JSON.stringify(ring));
+    await I.nth(1).check(); await page.waitForTimeout(30); s = await st();
+    ok(`${pg}: choosing clears the error at once and restores help`, !s.err && s.help === msgHelp && s.inv === null, JSON.stringify(s));
+    if (pg === "checkbox") { await I.nth(1).uncheck(); await page.waitForTimeout(30); s = await st(); ok("checkbox: unchecking the last option in a required group flags it", s.err && s.inv === "true", JSON.stringify(s)); }
+  }
+  /* Slider 단위 — 값과 함께 읽힌다 */
+  {
+    await go("components/slider.html");
+    const R = page.locator(ex("slider", "ticks") + " input[type=range]");
+    const a0 = await R.getAttribute("aria-valuetext");
+    await R.focus(); await page.keyboard.press("ArrowRight");
+    ok("slider reads its unit with the value", a0 === "90일" && (await R.getAttribute("aria-valuetext")) === "120일" && (await page.locator(ex("slider", "ticks") + " .val").textContent()) === "120일", String(a0));
+    ok("slider without a unit has no value text", (await page.locator(ex("slider", "basic") + " input[type=range]").getAttribute("aria-valuetext")) === null);
+  }
   await go("components/item-tile.html");
   const tile = page.locator(".example-preview .tile[aria-pressed]").first();
   const tb = await tile.getAttribute("aria-pressed"); await tile.click();
@@ -1405,14 +1514,14 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { 세로차: Math.round(Math.abs(sp.top - i.top)), shadow: getComputedStyle(lbl).boxShadow, dir: getComputedStyle(lbl).flexDirection };
   });
   ok("radio card stays a row without card shadow", radioCard.세로차 < 6 && radioCard.shadow === "none" && radioCard.dir === "row", JSON.stringify(radioCard));
-  // 카드 안 기간 선택은 패널 없는 tablist 가 아니라 role=group + aria-pressed
+  // 카드 안 기간 선택은 패널 없는 tablist 가 아니라 Select Button(radiogroup)
   await go("components/card.html");
   const cardSb = page.locator("#ex-card-header .select-btn");
-  ok("card header uses a select button group", await cardSb.evaluate((e) => e.getAttribute("role") === "group" && !!e.getAttribute("aria-label") && !e.closest(".card").querySelector("[role=tablist]")));
+  ok("card header uses a select button group", await cardSb.evaluate((e) => e.getAttribute("role") === "radiogroup" && !!e.getAttribute("aria-label") && !e.closest(".card").querySelector("[role=tablist]")));
   await cardSb.locator("button").nth(1).click(); await page.waitForTimeout(150);
   ok("card header select button toggles", await cardSb.evaluate((e) => {
     const b2 = [...e.querySelectorAll("button")];
-    return b2[1].getAttribute("aria-pressed") === "true" && b2[0].getAttribute("aria-pressed") === "false";
+    return b2[1].getAttribute("aria-checked") === "true" && b2[0].getAttribute("aria-checked") === "false";
   }));
   // .flush — 표를 카드 폭까지 채우는 관용구를 변형으로
   await go("patterns/dashboard.html");

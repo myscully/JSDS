@@ -1,7 +1,8 @@
-import { createContext, forwardRef, useContext, type ChangeEvent, type HTMLAttributes, type InputHTMLAttributes, type ReactNode } from "react";
+import { createContext, forwardRef, useContext, type ChangeEvent, type InputHTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { useId } from "../../utils/useId";
+import { ChoiceGroup, type ChoiceGroupProps } from "../text-field/ChoiceGroup";
 
 interface RadioCtx {
   name: string;
@@ -9,16 +10,15 @@ interface RadioCtx {
   set: (v: string) => void;
   card?: boolean;
   disabled?: boolean;
+  required?: boolean;
 }
 const Ctx = createContext<RadioCtx | null>(null);
 
-export interface RadioGroupProps extends Omit<HTMLAttributes<HTMLElement>, "onChange" | "defaultValue"> {
+export interface RadioGroupProps extends ChoiceGroupProps {
   name?: string;
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
-  /** 그룹 질문. 있으면 fieldset/legend 로 렌더 */
-  legend?: ReactNode;
   /** 가로 배치 */
   row?: boolean;
   /** 자식 Radio 를 카드형으로 */
@@ -28,23 +28,15 @@ export interface RadioGroupProps extends Omit<HTMLAttributes<HTMLElement>, "onCh
 
 /** 라디오 그룹. 같은 name 을 자동 부여하고 선택 상태를 관리한다 */
 export const RadioGroup = forwardRef<HTMLElement, RadioGroupProps>(function RadioGroup(
-  { name: nameProp, value, defaultValue, onChange, legend, row, card, disabled, className, children, ...rest },
+  { name: nameProp, value, defaultValue, onChange, row, card, disabled, required, className, children, ...rest },
   ref,
 ) {
   const name = useId(nameProp, "radio");
   const [cur, set] = useControllable<string | undefined>({ value, defaultValue, onChange: onChange as (v: string | undefined) => void });
-  const ctx: RadioCtx = { name, value: cur, set: (v) => set(v), card, disabled };
-  const cls = cx("radio-group", { row }, className);
+  const ctx: RadioCtx = { name, value: cur, set: (v) => set(v), card, disabled, required };
   return (
     <Ctx.Provider value={ctx}>
-      {legend !== undefined ? (
-        <fieldset ref={ref as React.Ref<HTMLFieldSetElement>} className={cls} style={{ border: 0, padding: 0, margin: 0 }} {...rest}>
-          <legend className="t-label-1" style={{ marginBottom: 8 }}>{legend}</legend>
-          {children}
-        </fieldset>
-      ) : (
-        <div ref={ref as React.Ref<HTMLDivElement>} className={cls} {...rest}>{children}</div>
-      )}
+      <ChoiceGroup ref={ref} base="radio-group" className={cx({ row }, className)} required={required} {...rest}>{children}</ChoiceGroup>
     </Ctx.Provider>
   );
 });
@@ -60,7 +52,7 @@ export interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 }
 
 export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
-  { value, children, description, card, onChange, checked, defaultChecked, name, disabled, className, wrapperClassName, ...rest },
+  { value, children, description, card, onChange, checked, defaultChecked, name, disabled, required, className, wrapperClassName, ...rest },
   ref,
 ) {
   const g = useContext(Ctx);
@@ -74,6 +66,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>(function Radio(
         name={name ?? g?.name}
         value={value}
         disabled={disabled ?? g?.disabled}
+        required={required ?? g?.required}
         className={className}
         onChange={(e) => {
           if (value !== undefined) g?.set(value);

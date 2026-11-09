@@ -147,6 +147,10 @@ export function ToastProvider({ duration = 4000, max = 3, container, children }:
     </ToastCtx.Provider>
   );
 }
+/** Toast 를 띄울 수 있으면 — Provider 없이도 그려지는 컴포넌트(Switch)가 쓴다 */
+export function useOptionalToast(): ToastApi | null {
+  return useContext(ToastCtx);
+}
 export function useToast(): ToastApi {
   const c = useContext(ToastCtx);
   if (!c) throw new Error("[ds-react] useToast 는 <ToastProvider> 안에서 사용하세요.");

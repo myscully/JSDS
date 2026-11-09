@@ -28,6 +28,8 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   onSortChange?: (sort: SortState | null) => void;
   /** 체크박스 열 */
   selectable?: boolean;
+  /** 행 이름 — 체크박스의 접근 이름(… 선택). 기본은 첫 열의 값 */
+  rowLabel?: (row: T) => string;
   selected?: ReadonlySet<string>;
   defaultSelected?: ReadonlySet<string>;
   onSelectedChange?: (selected: Set<string>) => void;
@@ -50,7 +52,7 @@ function defaultSortValue<T>(row: T, key: string): string | number {
 }
 
 function DataTableInner<T>(
-  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, selectable, selected, defaultSelected, onSelectedChange, actionBar, rowProps, actions, empty, compact, zebra, className, wrapStyle, ...rest }: DataTableProps<T>,
+  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, rowProps, actions, empty, compact, zebra, className, wrapStyle, ...rest }: DataTableProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [curSort, setSort] = useControllable<SortState | null>({ value: sort, defaultValue: defaultSort, onChange: onSortChange });
@@ -113,7 +115,7 @@ function DataTableInner<T>(
                 <TableRow key={k} selected={isSel} disabled={rp.disabled} log={rp.log} className={rp.className} onClick={rp.onClick}>
                   {selectable && (
                     <TableCell check>
-                      <Checkbox checked={sel.has(k)} onChange={(on) => toggleOne(k, on)} aria-label={LABELS.select} />
+                      <Checkbox checked={sel.has(k)} onChange={(on) => toggleOne(k, on)} aria-label={`${rowLabel ? rowLabel(row) : String((row as Record<string, unknown>)[columns[0]?.key] ?? k)} ${LABELS.select}`} />
                     </TableCell>
                   )}
                   {columns.map((c) => (

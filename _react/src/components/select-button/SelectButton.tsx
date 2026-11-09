@@ -1,4 +1,4 @@
-import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { Icon } from "../../icons/Icon";
@@ -27,12 +27,24 @@ function SelectButtonInner<T extends string>(
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [cur, set] = useControllable<T | undefined>({ value, defaultValue: defaultValue ?? options[0]?.value, onChange: onChange as (v: T | undefined) => void });
+  /* Tab 은 묶음에 한 번 — 고른 항목, 고른 것이 비활성이면 첫 활성 항목 */
+  const live = options.filter((o) => !o.disabled);
+  const stop = live.find((o) => o.value === cur) ?? live[0];
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const d = ({ ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 } as Record<string, number>)[e.key];
+    const at = live.findIndex((o) => o.value === (e.target as HTMLElement).dataset.value);
+    if (!d || at < 0 || e.ctrlKey || e.metaKey || e.altKey) return;
+    e.preventDefault();
+    const to = live[(at + d + live.length) % live.length];
+    set(to.value);
+    e.currentTarget.querySelector<HTMLElement>(`[data-value="${to.value}"]`)?.focus();
+  };
   return (
-    <div ref={ref} className={cx("select-btn", { outline }, className)} role="group" aria-label={label} {...rest}>
+    <div ref={ref} className={cx("select-btn", { outline }, className)} role="radiogroup" aria-label={label} onKeyDown={onKeyDown} {...rest}>
       {options.map((o) => {
         const on = o.value === cur;
         return (
-          <button key={o.value} type="button" className={on ? "on" : undefined} aria-pressed={on} disabled={o.disabled} onClick={() => set(o.value)}>
+          <button key={o.value} type="button" role="radio" className={on ? "on" : undefined} aria-checked={on} tabIndex={o === stop ? 0 : -1} data-value={o.value} disabled={o.disabled} onClick={() => set(o.value)}>
             {o.icon && <Icon name={o.icon} />}
             {o.label}
           </button>
@@ -42,7 +54,7 @@ function SelectButtonInner<T extends string>(
   );
 }
 
-/** 2~5개 중 하나를 즉시 선택하는 세그먼트 컨트롤 */
+/** 2~5개 중 하나를 즉시 선택하는 세그먼트 컨트롤. Tab 은 한 번, 화살표로 옮기면 바로 고른다 */
 export const SelectButton = forwardRef(SelectButtonInner) as <T extends string = string>(
   props: SelectButtonProps<T> & { ref?: React.Ref<HTMLDivElement> },
 ) => ReturnType<typeof SelectButtonInner>;

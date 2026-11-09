@@ -30,14 +30,14 @@ describe("form controls", () => {
     expect(onChange).toHaveBeenCalledWith("b");
     expect(b.checked).toBe(true);
   });
-  it("SelectButton 은 aria-pressed 로 선택을 표시하고 변경을 알린다", async () => {
+  it("SelectButton 은 radio · aria-checked 로 선택을 표시하고 변경을 알린다", async () => {
     const onChange = vi.fn();
     render(<SelectButton options={[{ value: "x", label: "X" }, { value: "y", label: "Y" }]} onChange={onChange} />);
-    const y = screen.getByRole("button", { name: "Y" });
-    expect(y).toHaveAttribute("aria-pressed", "false");
+    const y = screen.getByRole("radio", { name: "Y" });
+    expect(y).toHaveAttribute("aria-checked", "false");
     await userEvent.click(y);
     expect(onChange).toHaveBeenCalledWith("y");
-    expect(y).toHaveAttribute("aria-pressed", "true");
+    expect(y).toHaveAttribute("aria-checked", "true");
     expect(y).toHaveClass("on");
   });
   it("SearchBar clearable 은 값이 있을 때만 지우기 버튼", async () => {
@@ -69,16 +69,16 @@ describe("form controls", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "A" }));
     expect(onSel).toHaveBeenCalledWith(true);
-    await userEvent.click(screen.getByRole("button", { name: "삭제" }));
+    await userEvent.click(screen.getByRole("button", { name: "B 삭제" }));
     expect(onRemove).toHaveBeenCalled();
   });
   /* 입력값 칩은 span 이라 disabled 속성 대신 aria-disabled — 넘기지 않아 비활성 칩이 활성처럼 그려지고 x 가 눌렸다 */
-  it("비활성 입력값 칩은 칩과 x 에 aria-disabled 를 달고 삭제하지 않는다", () => {
+  it("비활성 입력값 칩은 칩에 aria-disabled, x 는 disabled 로 삭제하지 않는다", () => {
     const onRemove = vi.fn();
     render(<Chip disabled onRemove={onRemove}>B</Chip>);
-    const x = screen.getByRole("button", { name: "삭제" });
+    const x = screen.getByRole("button", { name: "B 삭제" });
     expect(x.closest(".chip")).toHaveAttribute("aria-disabled", "true");
-    expect(x).toHaveAttribute("aria-disabled", "true");
+    expect(x).toBeDisabled();
     fireEvent.click(x);
     expect(onRemove).not.toHaveBeenCalled();
   });

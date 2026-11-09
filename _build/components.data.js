@@ -85,7 +85,7 @@ const MENU_STATE = {
 };
 const CB_DEPTS = ["영업팀", "개발팀", "인프라팀", "보안팀", "기획팀", "디자인팀", "QA팀", "고객지원팀", "재무팀", "인사팀", "법무팀"];
 const CB_LIVE = `<span class="sr-only" role="status"></span>`;
-const cbChip = (l) => `<span class="chip sm" data-value="${l}">${l}<i class="x" role="button" tabindex="0" aria-label="${l} 제거">${I("x", 10)}</i></span>`;
+const cbChip = (l) => `<span class="chip sm" data-value="${l}"><span class="lbl">${l}</span><button type="button" class="x" aria-label="${l} 제거">${I("x", 10)}</button></span>`;
 const cbCtl = ({ id, label, placeholder, value = "", chips = "", expanded = false, disabled = false, field = false }) => `<div class="control">${chips}<input type="text" id="${id}" role="combobox" aria-autocomplete="list" aria-expanded="${expanded}" aria-controls="${id}-list" autocomplete="off" placeholder="${placeholder}"${value ? ` value="${value}"` : ""}${field ? "" : ` aria-label="${label}"`}${disabled ? " disabled" : ""}></div>`;
 const cbMenu = (label, inner, id, multi) => `<ul class="menu" role="listbox" id="${id}-list" aria-label="${label}"${multi ? ' aria-multiselectable="true"' : ""}>${inner}</ul>`;
 const cbOpts = (on) => CB_DEPTS.map((l) => `<li class="menu-item${on.includes(l) ? " on" : ""}" role="option" data-value="${l}" aria-selected="${on.includes(l)}">${l}</li>`).join("");
@@ -257,7 +257,7 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Search */
   "search": {
-    status: "ready", react: ["SearchBar"], css: [".searchbar", ".chip", ".chip-group"], borrows: [".sr-only"],
+    status: "ready", react: ["SearchBar"], css: [".searchbar", ".chip", ".chip-group"], borrows: [".sr-only", ".btn"],
     desc: "목록·로그를 빠르게 필터링하는 검색 입력입니다. 입력이 멈추면 결과가 바뀌는 '필터형'과 Enter 로 조회하는 '조회형'을 구분합니다.",
     principles: [
       ["필터형 · 조회형", "이미 불러온 목록을 좁히면 필터형입니다. <code>data-debounce</code> 로 입력이 멈추고 300ms 뒤에 결과를 바꿉니다. 서버에 새로 묻거나 비용이 크면 조회형으로 Enter 에 맡깁니다"],
@@ -287,6 +287,7 @@ const COMPONENTS = {
             <button type="button" class="chip" aria-pressed="false">Low</button>
             <button type="button" class="chip" aria-pressed="false">Info</button>
             <button type="button" class="chip" aria-pressed="false">최근 24시간</button>
+            <button type="button" class="btn sm text assistive" data-chip-reset>필터 초기화</button>
           </div>
         </div>`, layout: "left" },
     ],
@@ -308,47 +309,54 @@ const COMPONENTS = {
   "select-button": {
     status: "ready", react: ["SelectButton"], css: [".select-btn"],
     desc: "2~5개 옵션 중 하나를 고르는 세그먼트 컨트롤입니다. 뷰 전환(목록/카드), 기간(24시간/7일/30일)처럼 즉시 반영되는 선택에 씁니다.",
+    principles: [
+      ["언제 쓰는가", "2~5개 중 하나이고 같은 내용의 보기 · 기간만 바뀔 때입니다. 내용이 달라지면 <a href=\"#/components/tab\">Tab</a>, 저장해야 반영되면 <a href=\"#/components/radio-button\">Radio Button</a>, 6개 이상이면 <a href=\"#/components/select\">Select</a> 입니다"],
+      ["항상 하나", "언제나 하나가 선택되어 있습니다. 선택을 푸는 동작은 없습니다"],
+      ["라벨", "1~2단어로 쓰고 항목끼리 길이를 비슷하게 맞춥니다"],
+      ["키보드", "Tab 은 묶음에 한 번만 멈춥니다. 좌우 · 상하 화살표로 옮기면 바로 고르고, 비활성은 건너뛰며 끝에서 처음으로 돌아옵니다"],
+    ],
     thumb: `<div class="select-btn"><button class="on">24시간</button><button>7일</button><button>30일</button></div>`,
     examples: [
-      { id: "basic", title: "Default", desc: "선택된 항목에 .on. 컨테이너에 role=group, 버튼에 aria-pressed.", html: `
-        <div class="select-btn" role="group" aria-label="기간">
-          <button type="button" class="on" aria-pressed="true">24시간</button>
-          <button type="button" aria-pressed="false">7일</button>
-          <button type="button" aria-pressed="false">30일</button>
+      { id: "basic", title: "Default", desc: "선택된 항목에 .on. 컨테이너에 role=radiogroup, 버튼에 role=radio · aria-checked. Tab 은 한 번만 멈추고 화살표로 옮깁니다.", html: `
+        <div class="select-btn" role="radiogroup" aria-label="기간">
+          <button type="button" class="on" role="radio" aria-checked="true">24시간</button>
+          <button type="button" role="radio" aria-checked="false">7일</button>
+          <button type="button" role="radio" aria-checked="false">30일</button>
         </div>`, react: `
         import { useState } from "react";
-        const OPTIONS = ["24시간", "7일", "30일"];
+        import { SelectButton } from "@jiran/ds-react";
+        const OPTIONS = [{ value: "24h", label: "24시간" }, { value: "7d", label: "7일" }, { value: "30d", label: "30일" }];
         export function PeriodSelect() {
-          const [value, setValue] = useState(OPTIONS[0]);
-          return (
-            <div className="select-btn" role="group" aria-label="기간">
-              {OPTIONS.map(o => (
-                <button key={o} type="button" className={o === value ? "on" : ""} aria-pressed={o === value} onClick={() => setValue(o)}>{o}</button>
-              ))}
-            </div>
-          );
+          const [value, setValue] = useState("24h");
+          return <SelectButton label="기간" options={OPTIONS} value={value} onChange={setValue} />;
         }` },
       { id: "outline", title: "Outline", desc: "툴바에서 다른 버튼과 나란히 둘 때 아웃라인형.", html: `
-        <div class="select-btn outline" role="group" aria-label="보기">
-          <button type="button" class="on" aria-pressed="true">${I("list")}목록</button>
-          <button type="button" aria-pressed="false">${I("chart-bar")}차트</button>
+        <div class="select-btn outline" role="radiogroup" aria-label="보기">
+          <button type="button" class="on" role="radio" aria-checked="true">${I("list")}목록</button>
+          <button type="button" role="radio" aria-checked="false">${I("chart-bar")}차트</button>
         </div>` },
       { id: "disabled", title: "Disabled", desc: "개별 옵션 비활성.", html: `
-        <div class="select-btn" role="group">
-          <button type="button" class="on" aria-pressed="true">전체</button>
-          <button type="button" aria-pressed="false">차단</button>
-          <button type="button" aria-pressed="false" disabled>허용</button>
+        <div class="select-btn" role="radiogroup" aria-label="판정">
+          <button type="button" class="on" role="radio" aria-checked="true">전체</button>
+          <button type="button" role="radio" aria-checked="false">차단</button>
+          <button type="button" role="radio" aria-checked="false" disabled>허용</button>
         </div>` },
     ],
-    props: [[".select-btn", "container", "—", "role=group. 버튼 2~5개"], [".outline", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-pressed=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
+    props: [[".select-btn", "container", "—", "role=radiogroup + aria-label. 버튼 2~5개, 버튼마다 role=radio"], [".outline", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-checked=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
     spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 38 (버튼 36 + 테두리 1)"], ["Container", "radius/md 6 · surface/neutral/secondary"], ["Label", "Label/1 14 · 선택 14 SemiBold"], ["Placement", "카드 헤더 우측, 툴바"]],
     figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--surface-neutral-secondary" }, outline: { stroke: "--line-neutral-primary" } }, states: ["default", "selected", "disabled"] },
   },
 
   /* ------------------------------------------------ Slider */
   "slider": {
-    status: "ready", react: ["Slider"], css: [".slider"],
-    desc: "범위 안의 값을 드래그로 고릅니다. 정확한 값이 중요하면 Text Field 를 함께 둡니다.",
+    status: "ready", react: ["Slider"], css: [".slider"], borrows: [".field", ".affix", ".help"],
+    desc: "범위 안의 값을 드래그로 고릅니다. 정확한 값이 중요하면 <a href=\"#/components/text-field\">Text Field</a> 를 씁니다.",
+    principles: [
+      ["언제 쓰는가", "대략적인 값일 때입니다. 정책 임계치처럼 숫자가 정확해야 하면 Text Field 를 먼저 씁니다"],
+      ["숫자 입력을 함께 둘 때", "두 칸을 값 하나로 묶습니다. Slider 를 움직이면 입력칸이 바로 바뀝니다. 입력칸에 범위를 벗어난 값을 쓰면 글자는 지우지 않고 오류로 알리며, Slider 는 가까운 끝에 둡니다"],
+      ["단위", "현재 값에 단위를 붙여 보이고 읽히게 합니다. <code>.val</code> 의 단위는 <code>aria-valuetext</code> 로도 나갑니다"],
+      ["범위", "값은 하나입니다. 두 끝을 고르는 범위 슬라이더는 지원하지 않습니다. 시작 · 끝 값을 Text Field 둘로 받습니다"],
+    ],
     thumb: `<div class="slider" style="min-width:200px"><input type="range" value="60" style="--p:60%"></div>`,
     examples: [
       { id: "basic", title: "Default", desc: "채워진 트랙은 --p 커스텀 속성(현재 %)으로 그립니다. JS 로 value 변경 시 --p 도 함께 갱신합니다.", html: `
@@ -366,19 +374,21 @@ const COMPONENTS = {
             </div>
           );
         }` },
-      { id: "ticks", title: "With Ticks", desc: "단계가 정해진 값은 step 과 눈금을 보여줍니다.", html: `
+      { id: "ticks", title: "With Ticks", desc: "단계가 정해진 값은 step 과 눈금을 보여줍니다. 단위는 현재 값과 함께 aria-valuetext 로 읽힙니다.", html: `
         <div class="slider">
           <div class="row"><label for="s2">로그 보관</label><span class="val">90일</span></div>
           <input id="s2" type="range" min="30" max="180" step="30" value="90" style="--p:40%">
           <div class="ticks"><span>30</span><span>180</span></div>
         </div>` },
+      { id: "exact", title: "정확한 값", desc: "숫자가 정확해야 하면 Slider 대신 단위가 붙은 Text Field 를 씁니다.", html: `
+        <div class="field" style="width:280px"><label for="s4">세션 만료</label><div class="affix"><input id="s4" type="number" value="30" min="5" max="1440"><span>분</span></div><span class="help">5분부터 1440분까지 입력할 수 있습니다.</span></div>` },
       { id: "disabled", title: "Disabled", html: `
         <div class="slider">
           <div class="row"><label for="s3">대역폭 제한</label><span class="val">—</span></div>
           <input id="s3" type="range" value="40" style="--p:40%" disabled>
         </div>` },
     ],
-    props: [[".slider", "container", "—", ".row(라벨·값) + input[type=range](+ .ticks)"], ["--p", "css var (%)", "50%", "채워진 트랙 비율. value 와 동기화"], ["min / max / step", "attribute", "0 / 100 / 1", "네이티브 속성"], ["disabled", "attribute", "—", "비활성"]],
+    props: [[".slider", "container", "—", ".row(라벨·값) + input[type=range](+ .ticks)"], [".val", "element", "—", "현재 값. 숫자 뒤 글자가 단위(90일) — 움직여도 유지되고 aria-valuetext 로 나간다"], ["--p", "css var (%)", "50%", "채워진 트랙 비율. value 와 동기화"], ["min / max / step", "attribute", "0 / 100 / 1", "네이티브 속성"], ["disabled", "attribute", "—", "비활성"]],
     spec: [["Size", "트랙 6 · 썸 20 · 최소 폭 280"], ["Container", "트랙 radius/full · 썸 border 2px brand"], ["Label", "라벨 12 Regular · 현재 값 12 SemiBold · 눈금 12 tertiary"], ["Placement", "정책 설정의 수치 항목. 정확 입력이 필요하면 Text Field 병행"]],
     figma: { frame: "Slider", sizes: { md: { track: 6, thumb: 20 } }, variants: { default: { fill: "--surface-brand-primary", track: "--surface-neutral-strong" } }, states: ["default", "hover", "focused", "disabled"] },
   },
@@ -429,8 +439,15 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Checkbox */
   "checkbox": {
-    status: "ready", react: ["Checkbox","CheckboxGroup"], css: [".checkbox", ".checkbox-group"],
+    status: "ready", react: ["Checkbox","CheckboxGroup"], css: [".checkbox", ".checkbox-group"], borrows: [".t-label-1", ".field", ".help", ".form", ".form-legend", ".form-actions", ".btn"],
     desc: "여러 항목 중 0개 이상을 선택합니다. 네이티브 input 을 그대로 쓰고 외형만 CSS 로 바꿔 키보드·스크린리더가 동작합니다.",
+    principles: [
+      ["언제 쓰는가", "저장 전까지 반영되지 않는 선택입니다. 누르는 즉시 적용되면 <a href=\"#/components/switch\">Switch</a> 입니다"],
+      ["전체 선택", "자식이 전부 선택이면 체크, 일부면 부분 선택, 하나도 없으면 해제입니다. 부분 선택에서 누르면 전부 선택합니다"],
+      ["필수 그룹", "<code>fieldset[data-required]</code> 는 하나 이상 골라야 합니다. 제출할 때 알리고, 고르면 바로 지웁니다. 지나가기만 하면 알리지 않고, 마지막 하나를 풀면 바로 알립니다"],
+      ["라벨", "끝에 마침표를 찍지 않습니다. 선택하면 일어날 일을 긍정형으로 씁니다"],
+      ["표의 행 선택", "행마다 다른 접근 이름을 줍니다(외부 USB 차단 선택). 전부 '선택' 이면 어느 행인지 들리지 않습니다"],
+    ],
     thumb: `${cb("이메일 알림", "checked")}${cb("SMS 알림")}`,
     examples: [
       { id: "default", title: "Default", desc: "선택하지 않은 기본 상태입니다.", html: `<label class="checkbox"><input type="checkbox"><span>정책 배포 시 알림</span></label>` },
@@ -460,62 +477,86 @@ const COMPONENTS = {
           ${cb("<b>전체 선택</b>", 'class="mixed"')}
           <div class="checkbox-group row" style="padding-left:24px">${cb("Critical", "checked")}${cb("High", "checked")}${cb("Medium")}${cb("Low")}${cb("Info")}</div>
         </div>` },
+      { id: "form", title: "필수 그룹", desc: "<code>.field</code> 안 <code>fieldset.checkbox-group[data-required]</code>. 저장을 누르면 첫 칸으로 포커스가 가고, 고르면 바로 지웁니다.", html: `
+        <form class="form" data-validate novalidate style="width:360px"><p class="form-legend"><em>*</em> 필수 항목</p>
+          <div class="field"><fieldset class="checkbox-group" data-required><legend class="t-label-1">알림 채널 <em>*</em></legend>${cb("이메일")}${cb("SMS")}${cb("콘솔 알림")}</fieldset><span class="help" aria-live="polite">하나 이상 선택합니다.</span></div>
+          <div class="form-actions"><button type="submit" class="btn md solid primary">저장</button></div>
+        </form>`, layout: "tall top" },
     ],
-    props: [[".checkbox", "label wrapper", "—", "input[type=checkbox] + span(라벨, small 설명)"], ["checked / disabled", "attribute", "—", "네이티브 상태"], [".mixed", "boolean", "false", "부분 선택 외형(JS indeterminate 대체)"], [".checkbox-group", "container", "—", "세로 12px 간격. .row 로 가로 24px"]],
+    props: [[".checkbox", "label wrapper", "—", "input[type=checkbox] + span(라벨, small 설명)"], ["checked / disabled", "attribute", "—", "네이티브 상태"], [".mixed", "boolean", "false", "부분 선택 외형(JS indeterminate 대체)"], [".checkbox-group", "container", "—", "세로 12px 간격. .row 로 가로 24px. fieldset + legend 로 질문을 붙인다"], ["data-required", "attribute", "—", ".field 안 fieldset.checkbox-group — 하나 이상 골라야 한다(form[data-validate])"]],
     spec: [["Size", "박스 16 · 라벨 Body/2 14 · 클릭 영역 라벨 포함"], ["Container", "radius/sm 4 · line/neutral/primary 1.5px · 선택 brand"], ["Label", "Body/2 14 · 설명 12 Regular tertiary"], ["Placement", "폼 옵션, 테이블 행 선택(.tbl .check)"]],
     figma: { frame: "Checkbox", radius: "radius/sm", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--line-neutral-primary" }, checked: { bg: "--surface-brand-primary" } }, states: ["unchecked", "checked", "indeterminate", "disabled", "focused"] },
   },
 
   /* ------------------------------------------------ Chip */
   "chip": {
-    status: "ready", react: ["Chip","ChipGroup"], css: [".chip", ".chip-group"],
+    status: "ready", react: ["Chip","ChipGroup"], css: [".chip", ".chip-group"], borrows: [".btn"],
     desc: "필터 조건이나 입력된 값을 작은 캡슐로 보여줍니다. 선택 가능한 Filter Chip 과 삭제 가능한 Input Chip 을 구분합니다. 상태 표시는 Tag 를 씁니다.",
+    principles: [
+      ["언제 쓰는가", "Filter Chip 은 목록을 좁히는 조건, Input Chip 은 입력한 값입니다. 상태 · 분류 표시는 <a href=\"#/components/tag\">Tag</a> 입니다"],
+      ["넘칠 때", "한 줄을 넘으면 다음 줄로 내려갑니다. <code>+N</code> 으로 접지 않아 조건이 전부 보입니다"],
+      ["필터 초기화", "필터 칩이 2개 이상이면 묶음 끝에 '필터 초기화'를 둡니다. 켜진 칩이 있을 때만 보이고, 누르면 포커스는 첫 칩으로 갑니다"],
+      ["지운 뒤 포커스", "다음 칸으로, 없으면 앞 칸으로 옮깁니다. 칸이 하나도 남지 않으면 묶음 자신입니다"],
+      ["긴 값", "값은 240px 에서 말줄임합니다. 지우기 버튼에 포커스가 오면 펼치고, 접근 이름에 전체 값이 들어갑니다"],
+    ],
     thumb: `<button class="chip on" aria-pressed="true">Critical</button><button class="chip" aria-pressed="false">High</button><button class="chip" aria-pressed="false">Medium</button>`,
     examples: [
       { id: "default", title: "Default", desc: "선택하지 않은 기본 칩입니다.", html: `<button type="button" class="chip" aria-pressed="false">Critical</button>` },
-      { id: "filter", title: "Filter Chip", desc: "토글 선택. aria-pressed 가 있는 칩은 체크 아이콘을 항상 두고(비활성 색), 선택되면 .on 으로 색만 바뀌어 폭이 흔들리지 않습니다.", html: `
+      { id: "filter", title: "Filter Chip", desc: "토글 선택. 묶음 끝의 필터 초기화는 켜진 칩이 있을 때만 보입니다. aria-pressed 가 있는 칩은 체크 아이콘을 항상 두고(비활성 색), 선택되면 .on 으로 색만 바뀌어 폭이 흔들리지 않습니다.", html: `
         <div class="chip-group">
           <button type="button" class="chip on" aria-pressed="true">Critical</button>
           <button type="button" class="chip on" aria-pressed="true">High</button>
           <button type="button" class="chip" aria-pressed="false">Medium</button>
           <button type="button" class="chip" aria-pressed="false">Low</button>
           <button type="button" class="chip" aria-pressed="false">Info</button>
+          <button type="button" class="btn sm text assistive" data-chip-reset>필터 초기화</button>
         </div>`, react: `
         import { useState } from "react";
+        import { Chip, ChipGroup } from "@jiran/ds-react";
         const LEVELS = ["Critical", "High", "Medium", "Low", "Info"];
         export function SeverityFilter() {
           const [sel, setSel] = useState<string[]>(["Critical", "High"]);
           const toggle = (l: string) => setSel(s => s.includes(l) ? s.filter(x => x !== l) : [...s, l]);
           return (
-            <div className="chip-group">
-              {LEVELS.map(l => (
-                <button key={l} type="button" className={"chip" + (sel.includes(l) ? " on" : "")} aria-pressed={sel.includes(l)} onClick={() => toggle(l)}>{l}</button>
-              ))}
-            </div>
+            <ChipGroup clearable={sel.length > 0} onClear={() => setSel([])}>
+              {LEVELS.map(l => <Chip key={l} selected={sel.includes(l)} onSelectedChange={() => toggle(l)}>{l}</Chip>)}
+            </ChipGroup>
           );
         }` },
-      { id: "input", title: "Input Chip", desc: "입력된 값(IP, 태그, 수신자). .x 로 삭제.", html: `
+      { id: "input", title: "Input Chip", desc: "입력된 값(IP, 태그, 수신자). .x 는 진짜 버튼이고 접근 이름에 값이 들어갑니다. 지우면 다음 칸으로 포커스가 갑니다.", html: `
         <div class="chip-group">
-          <span class="chip">10.0.0.12<i class="x" role="button" aria-label="삭제">${I("x",10)}</i></span>
-          <span class="chip">10.0.0.13<i class="x" role="button" aria-label="삭제">${I("x",10)}</i></span>
-          <span class="chip">192.168.1.0/24<i class="x" role="button" aria-label="삭제">${I("x",10)}</i></span>
+          <span class="chip"><span class="lbl">10.0.0.12</span><button type="button" class="x" aria-label="10.0.0.12 삭제">${I("x",10)}</button></span>
+          <span class="chip"><span class="lbl">10.0.0.13</span><button type="button" class="x" aria-label="10.0.0.13 삭제">${I("x",10)}</button></span>
+          <span class="chip"><span class="lbl">192.168.1.0/24</span><button type="button" class="x" aria-label="192.168.1.0/24 삭제">${I("x",10)}</button></span>
           <button type="button" class="chip">${I("plus")}추가</button>
         </div>` },
-      { id: "size", title: "Size / Disabled", desc: "비활성. 입력값 칩(span)은 disabled 속성을 못 가져 aria-disabled=\"true\" 로 씁니다 — 삭제(x)도 함께 흐려집니다.", html: `
+      { id: "size", title: "Size / Disabled", desc: "비활성. 입력값 칩(span)은 disabled 속성을 못 가져 aria-disabled=\"true\" 로 쓰고, 삭제(x)는 disabled 입니다.", html: `
         <button type="button" class="chip sm on" aria-pressed="true">Small</button>
         <button type="button" class="chip on" aria-pressed="true">Default</button>
         <button type="button" class="chip" aria-pressed="false" disabled>Disabled</button>
-        <span class="chip" aria-disabled="true">10.0.0.12<i class="x" role="button" aria-label="삭제" aria-disabled="true">${I("x",10)}</i></span>` },
+        <span class="chip" aria-disabled="true"><span class="lbl">10.0.0.12</span><button type="button" class="x" aria-label="10.0.0.12 삭제" disabled>${I("x",10)}</button></span>` },
+      { id: "long", title: "긴 값", desc: "값은 240px 에서 말줄임합니다. 지우기 버튼에 포커스가 오면 펼쳐지고, 마우스는 title 로 전체를 봅니다.", html: `
+        <div class="chip-group">
+          <span class="chip"><span class="lbl" title="security-audit-notification@corp.example.com">security-audit-notification@corp.example.com</span><button type="button" class="x" aria-label="security-audit-notification@corp.example.com 삭제">${I("x",10)}</button></span>
+          <span class="chip"><span class="lbl">admin@example.com</span><button type="button" class="x" aria-label="admin@example.com 삭제">${I("x",10)}</button></span>
+        </div>` },
     ],
-    props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(brand subtle + 체크)"], [".x", "element", "—", "삭제 아이콘(Input Chip)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성. 입력값 칩(span)은 aria-disabled=\"true\""]],
+    props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(brand subtle + 체크)"], [".lbl", "element", "—", "Input Chip 의 값. 240px 에서 말줄임"], [".x", "button", "—", "삭제 버튼(Input Chip). aria-label 에 값을 넣는다"], ["data-chip-reset", "attribute", "—", ".chip-group 끝 버튼 — 켜진 칩이 있을 때만 보이고 누르면 모두 끈다(ds:chip-reset)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성. 입력값 칩(span)은 aria-disabled=\"true\""]],
     spec: [["Size", "높이 32 (sm 26) · padding 0 12"], ["Container", "radius/full · line/neutral/primary · 선택 brand subtle"], ["Label", "Label/2 12"], ["Placement", "검색 아래 필터 행, 입력 필드 안 값 목록"]],
     figma: { frame: "Chip", radius: "radius/full", sizes: { md: { h: 32 }, sm: { h: 26 } }, variants: { filter: { stroke: "--line-neutral-primary" }, selected: { bg: "--surface-brand-subtle", stroke: "--surface-brand-primary", fg: "--surface-brand-primary" }, input: {} }, states: ["default", "selected", "hover", "disabled"] },
   },
 
   /* ------------------------------------------------ Radio Button */
   "radio-button": {
-    status: "ready", react: ["Radio","RadioGroup"], css: [".radio", ".radio-group"], borrows: [".t-label-1", ".card"],
+    status: "ready", react: ["Radio","RadioGroup"], css: [".radio", ".radio-group"], borrows: [".t-label-1", ".card", ".field", ".help", ".form", ".form-legend", ".form-actions", ".btn"],
     desc: "여러 항목 중 정확히 하나를 고릅니다. 옵션이 5개를 넘으면 <a href=\"#/components/select\">Select</a> 를 씁니다.",
+    principles: [
+      ["언제 쓰는가", "2~5개 중 하나이고 모두 보여야 할 때입니다. 6개 이상이면 <a href=\"#/components/select\">Select</a>, 즉시 보기만 바뀌면 <a href=\"#/components/select-button\">Select Button</a> 입니다"],
+      ["기본값", "가장 안전한 쪽을 미리 고릅니다. 보안 · 개인정보 · 결제가 걸린 고위험 옵션은 미리 선택하지 않습니다. 안전한 기본값이 없으면 비워 두고 필수로 받습니다"],
+      ["순서", "가능성이 높은 것, 단순한 것, 위험이 낮은 것부터 놓습니다"],
+      ["범위 옵션", "겹치거나 빠지는 구간이 없어야 합니다. 전부 나열할 수 없으면 '기타'를 둡니다"],
+      ["필수 그룹", "<code>fieldset[data-required]</code> 는 제출할 때 알리고, 고르면 바로 지웁니다"],
+    ],
     thumb: `<label class="radio"><input type="radio" name="t" checked><span>차단</span></label><label class="radio"><input type="radio" name="t"><span>허용</span></label>`,
     examples: [
       { id: "default", title: "Default", desc: "선택하지 않은 기본 상태입니다.", html: `<label class="radio"><input type="radio" name="rd"><span>표준 모드</span></label>` },
@@ -525,8 +566,8 @@ const COMPONENTS = {
         <label class="radio"><input type="radio" name="r2" disabled><span>Disabled</span></label>
         <label class="radio"><input type="radio" name="r3" checked disabled><span>Disabled checked</span></label>` },
       { id: "group", title: "Group", desc: "같은 name 으로 묶고 fieldset/legend 로 질문을 붙입니다. 설명은 small.", html: `
-        <fieldset class="radio-group" style="border:0;padding:0;margin:0">
-          <legend class="t-label-1" style="margin-bottom:8px">탐지 시 동작</legend>
+        <fieldset class="radio-group">
+          <legend class="t-label-1">탐지 시 동작</legend>
           <label class="radio"><input type="radio" name="act" checked><span>차단 후 알림<small>실행을 즉시 중단하고 관리자에게 알립니다</small></span></label>
           <label class="radio"><input type="radio" name="act"><span>알림만<small>기록과 알림만, 실행은 허용</small></span></label>
           <label class="radio"><input type="radio" name="act"><span>기록만</span></label>
@@ -536,8 +577,8 @@ const COMPONENTS = {
         export function ActionRadio() {
           const [v, setV] = useState("block");
           return (
-            <fieldset className="radio-group" style={{ border: 0, padding: 0, margin: 0 }}>
-              <legend className="t-label-1" style={{ marginBottom: 8 }}>탐지 시 동작</legend>
+            <fieldset className="radio-group">
+              <legend className="t-label-1">탐지 시 동작</legend>
               {ACTIONS.map(([k, label]) => (
                 <label key={k} className="radio">
                   <input type="radio" name="act" value={k} checked={v === k} onChange={() => setV(k)} />
@@ -552,8 +593,17 @@ const COMPONENTS = {
           <label class="radio card"><input type="radio" name="plan" checked><span>표준 모드<small>권장. 알려진 위협 차단</small></span></label>
           <label class="radio card"><input type="radio" name="plan"><span>강화 모드<small>의심 행위까지 차단, 오탐 증가</small></span></label>
         </div>` },
+      { id: "form", title: "필수 그룹", desc: "권한이 걸린 선택이라 미리 고르지 않았습니다. 저장을 누르면 첫 칸으로 포커스가 가고, 고르면 바로 지웁니다.", html: `
+        <form class="form" data-validate novalidate style="width:360px"><p class="form-legend"><em>*</em> 필수 항목</p>
+          <div class="field"><fieldset class="radio-group" data-required><legend class="t-label-1">격리 해제 권한 <em>*</em></legend>
+            <label class="radio"><input type="radio" name="rf" required><span>보안 관리자만</span></label>
+            <label class="radio"><input type="radio" name="rf" required><span>보안 · 운영 관리자</span></label>
+            <label class="radio"><input type="radio" name="rf" required><span>모든 관리자</span></label>
+          </fieldset><span class="help" aria-live="polite"></span></div>
+          <div class="form-actions"><button type="submit" class="btn md solid primary">저장</button></div>
+        </form>`, layout: "tall top" },
     ],
-    props: [[".radio", "label wrapper", "—", "input[type=radio] + span(라벨, small)"], ["name", "attribute", "—", "같은 그룹은 같은 name"], [".card", "boolean", "false", "카드형(보더 + 선택 시 brand)"], [".radio-group", "container", "—", "세로 12px. .row 로 가로"]],
+    props: [[".radio", "label wrapper", "—", "input[type=radio] + span(라벨, small)"], ["name", "attribute", "—", "같은 그룹은 같은 name"], [".card", "boolean", "false", "카드형(보더 + 선택 시 brand)"], [".radio-group", "container", "—", "세로 12px. .row 로 가로. fieldset + legend 로 질문을 붙인다"], ["data-required", "attribute", "—", ".field 안 fieldset.radio-group — 하나를 골라야 한다(form[data-validate])"]],
     spec: [["Size", "원 16 · 선택 내부 점 8"], ["Container", "radius/full · line/neutral/primary 1.5px"], ["Label", "Body/2 14 · 설명 12 Regular tertiary"], ["Placement", "폼의 배타 옵션, 설정의 동작 선택"]],
     figma: { frame: "Radio Button", radius: "radius/full", sizes: { md: { box: 16 } }, variants: { default: { stroke: "--line-neutral-primary" }, checked: { stroke: "--surface-brand-primary" }, card: { stroke: "--line-neutral-secondary" } }, states: ["unchecked", "checked", "disabled", "focused"] },
   },
@@ -562,6 +612,16 @@ const COMPONENTS = {
   "switch": {
     status: "ready", react: ["Switch"], css: [".switch"], borrows: [".settings-section", ".setting"],
     desc: "설정을 켜고 끕니다. 토글 즉시 적용되며 저장 버튼이 없습니다. 저장이 필요한 폼 안에서는 Checkbox 를 씁니다.",
+    principles: [
+      ["언제 쓰는가", "누르면 바로 적용되는 켜기 · 끄기입니다. 저장 버튼이 있는 폼에서는 <a href=\"#/components/checkbox\">Checkbox</a> 입니다"],
+      ["언제 바뀌는가", "서버를 거치면 응답을 받은 뒤에 바뀝니다. 보안 설정이 실제와 다르게 보이는 순간을 만들지 않습니다"],
+      ["처리 중", "노브에 스피너를 띄우고 다시 누를 수 없게 막습니다. 포커스는 그 자리에 남습니다"],
+      ["실패", "상태를 바꾸지 않고 이유를 닫을 때까지 남는 Toast 로 알립니다"],
+      ["보안 기능을 끌 때", "<a href=\"#/foundations/interaction\">Interaction</a> 의 위험 동작 표대로 Popup 으로 확인한 뒤 처리합니다. 취소하면 조용히 그대로 둡니다"],
+      ["라벨", "켜짐 · 꺼짐에 따라 바꾸지 않습니다. 상태를 말하지 않고 켜지는 대상을 씁니다(실시간 보호)"],
+      ["비활성", "왜 바꿀 수 없는지 설명 자리에 적습니다. 비활성 요소에는 Tooltip 을 달지 않습니다"],
+      ["표 안", "'사용' 열의 Switch 는 행마다 다른 접근 이름을 줍니다(외부 USB 차단 사용)"],
+    ],
     thumb: `<label class="switch"><input type="checkbox" role="switch" checked><span>실시간 보호</span></label>`,
     examples: [
       { id: "default", title: "Default", desc: "꺼진 기본 상태입니다.", html: `<label class="switch"><input type="checkbox" role="switch"><span>실시간 보호</span></label>` },
@@ -576,20 +636,25 @@ const COMPONENTS = {
           return (
             <label className="switch">
               <input type="checkbox" role="switch" checked={on} onChange={e => setOn(e.target.checked)} />
-              <span>실시간 보호 {on ? "켬" : "끔"}</span>
+              <span>실시간 보호</span>
             </label>
           );
         }` },
+      { id: "async", title: "처리 중 · 실패", desc: "<code>data-async</code> 는 눌러도 바로 바뀌지 않고 처리 중이 됩니다. 제품이 <code>ds:switch</code> 의 <code>resolve()</code> · <code>reject(문구)</code> · <code>cancel()</code> 중 하나를 부릅니다. 이 예제는 0.9초 뒤 응답하고, 둘째는 실패를 보여 줍니다(<code>data-demo-fail</code> 은 문서 전용).", html: `
+        <label class="switch" data-async><input type="checkbox" role="switch" checked><span>실시간 보호</span></label>
+        <label class="switch" data-async data-demo-fail><input type="checkbox" role="switch"><span>USB 자동 검사</span></label>
+        <label class="switch" data-async><input type="checkbox" role="switch" checked aria-busy="true" aria-disabled="true"><span>웹 필터</span></label>` },
       { id: "size", title: "Size / Label Position", desc: "테이블 셀·밀도 높은 목록은 .sm. 설정 행에서는 라벨을 왼쪽에(.label-left).", html: `
         <label class="switch sm"><input type="checkbox" role="switch" checked><span>Small</span></label>
         <label class="switch label-left"><input type="checkbox" role="switch" checked><span>라벨 왼쪽</span></label>` },
-      { id: "settings", title: "In Settings", desc: "정책 설정 행. 라벨·설명은 왼쪽, 스위치는 오른쪽 끝.", html: `
+      { id: "settings", title: "In Settings", desc: "정책 설정 행. 라벨·설명은 왼쪽, 스위치는 오른쪽 끝. 바꿀 수 없으면 이유를 설명 자리에 적습니다.", html: `
         <div class="settings-section" style="max-width:560px">
           <div class="setting"><div class="info"><b>실시간 보호</b><span>파일 실행 시 즉시 검사합니다</span></div><div class="ctrl"><label class="switch"><input type="checkbox" role="switch" checked aria-label="실시간 보호"></label></div></div>
           <div class="setting"><div class="info"><b>USB 자동 검사</b><span>연결된 저장장치를 검사합니다</span></div><div class="ctrl"><label class="switch"><input type="checkbox" role="switch" aria-label="USB 자동 검사"></label></div></div>
+          <div class="setting"><div class="info"><b>원격 제어</b><span>보안 관리자만 바꿀 수 있습니다</span></div><div class="ctrl"><label class="switch"><input type="checkbox" role="switch" disabled aria-label="원격 제어"></label></div></div>
         </div>`, layout: "left" },
     ],
-    props: [[".switch", "label wrapper", "—", "input[type=checkbox][role=switch] + span"], ["checked / disabled", "attribute", "—", "네이티브 상태"], ["size", "(md) | sm", "md", "44×24 / 36×20"], [".label-left", "boolean", "false", "라벨을 왼쪽에"]],
+    props: [[".switch", "label wrapper", "—", "input[type=checkbox][role=switch] + span"], ["checked / disabled", "attribute", "—", "네이티브 상태"], ["size", "(md) | sm", "md", "44×24 / 36×20"], [".label-left", "boolean", "false", "라벨을 왼쪽에"], ["data-async", "attribute", "—", "응답 후 반영. 눌러도 바뀌지 않고 처리 중이 되며 ds:switch 를 낸다 — 제품이 resolve() · reject(문구) · cancel() 중 하나를 불러야 끝난다"], ["aria-busy", "attribute", "—", "처리 중(ds.js 가 넣는다). 노브 스피너, 조작 막음"]],
     spec: [["Size", "트랙 44×24 (sm 36×20) · 노브 20"], ["Container", "radius/full · off line/neutral/primary · on brand"], ["Label", "Body/2 14"], ["Placement", "설정 행 우측 끝, 테이블 '사용' 열"]],
     figma: { frame: "Switch", radius: "radius/full", sizes: { md: { w: 44, h: 24 }, sm: { w: 36, h: 20 } }, variants: { off: { bg: "--line-neutral-primary" }, on: { bg: "--surface-brand-primary" } }, states: ["off", "on", "disabled", "focused"] },
   },
@@ -1142,7 +1207,7 @@ const COMPONENTS = {
             <p class="desc">1,284대 중 1,247대 온라인</p>
           </div>
           <div class="card" style="width:300px">
-            <div class="card-head"><h3 class="title">주간 탐지 추이</h3><div class="select-btn" role="group" aria-label="기간"><button type="button" class="on" aria-pressed="true">7일</button><button type="button" aria-pressed="false">30일</button></div></div>
+            <div class="card-head"><h3 class="title">주간 탐지 추이</h3><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div></div>
             <div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div>
             <p class="desc">이번 주 탐지 <b>412</b>건, 지난주보다 18% 증가</p>
           </div>
@@ -1479,9 +1544,9 @@ const COMPONENTS = {
           <table class="tbl">
             <thead><tr><th class="check"><label class="checkbox"><input type="checkbox" class="mixed" aria-label="전체 선택"></label></th><th>정책</th><th>적용 그룹</th><th class="num">대상</th><th>수정</th><th>사용</th></tr></thead>
             <tbody>
-              <tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="선택"></label></td><td>외부 USB 차단</td><td>전체</td><td class="num">1,284</td><td>2026-09-06</td><td><label class="switch sm"><input type="checkbox" role="switch" checked aria-label="사용"></label></td></tr>
-              <tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="선택"></label></td><td>스크립트 실행 제한</td><td>개발팀 제외</td><td class="num">1,102</td><td>2026-09-02</td><td><label class="switch sm"><input type="checkbox" role="switch" checked aria-label="사용"></label></td></tr>
-              <tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="선택"></label></td><td>원격 접속 허용 목록</td><td>인프라팀</td><td class="num">48</td><td>2026-08-21</td><td><label class="switch sm"><input type="checkbox" role="switch" aria-label="사용"></label></td></tr>
+              <tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="외부 USB 차단 선택"></label></td><td>외부 USB 차단</td><td>전체</td><td class="num">1,284</td><td>2026-09-06</td><td><label class="switch sm"><input type="checkbox" role="switch" checked aria-label="외부 USB 차단 사용"></label></td></tr>
+              <tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="스크립트 실행 제한 선택"></label></td><td>스크립트 실행 제한</td><td>개발팀 제외</td><td class="num">1,102</td><td>2026-09-02</td><td><label class="switch sm"><input type="checkbox" role="switch" checked aria-label="스크립트 실행 제한 사용"></label></td></tr>
+              <tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="원격 접속 허용 목록 선택"></label></td><td>원격 접속 허용 목록</td><td>인프라팀</td><td class="num">48</td><td>2026-08-21</td><td><label class="switch sm"><input type="checkbox" role="switch" aria-label="원격 접속 허용 목록 사용"></label></td></tr>
             </tbody>
           </table>
         </div>` },

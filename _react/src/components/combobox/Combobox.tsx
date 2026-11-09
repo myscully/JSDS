@@ -183,7 +183,7 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
     <div ref={root} className={cx("combobox", open && "open", up && "up", floating && "float", disabled && "disabled", className)} style={{ ...vars, ...style }} data-multiple={multiple ? "" : undefined} onBlur={onBlur}>
       <div className="control" onClick={onControlClick} onMouseDown={(e) => { if (e.target !== input.current) e.preventDefault(); }}>
         {multiple && selected.map((v) => (
-          <Chip key={v} size="sm" removeLabel={`${labelOf(v)} 제거`} onRemove={() => { if (!disabled) remove(v); }}>{labelOf(v)}</Chip>
+          <Chip key={v} size="sm" removeLabel="제거" onRemove={() => { if (!disabled) remove(v); }}>{labelOf(v)}</Chip>
         ))}
         <input
           ref={input}

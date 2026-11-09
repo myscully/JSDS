@@ -12,7 +12,7 @@ const COLUMNS: DataTableColumn<Policy>[] = [
   { key: "group", header: "적용 그룹" },
   { key: "targets", header: "대상", num: true, render: (r) => r.targets.toLocaleString() },
   { key: "updated", header: "수정" },
-  { key: "enabled", header: "사용", render: (r) => <Switch size="sm" defaultChecked={r.enabled} aria-label="사용" /> },
+  { key: "enabled", header: "사용", render: (r) => <Switch size="sm" defaultChecked={r.enabled} aria-label={`${r.name} 사용`} /> },
 ];
 
 export default function Example() {

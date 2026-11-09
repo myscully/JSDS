@@ -25,7 +25,7 @@ export interface FormValidationResult {
 export const FormValidationContext = createContext<{ errors: Record<string, string>; touch: (el: HTMLElement) => void } | null>(null);
 
 type TextControl = HTMLInputElement | HTMLTextAreaElement;
-/** 고르는 컨트롤(Select 트리거 · Combobox 입력) — 값이 DOM 값이 아니라 data-ds-empty 로 온다 */
+/** 고르는 컨트롤(Select 트리거 · Combobox 입력 · Checkbox/Radio 그룹) — 값이 DOM 값이 아니라 data-ds-empty 나 그룹 안 체크로 온다 */
 const isChoice = (el: Element) => el.hasAttribute("data-ds-choice");
 const fill = (t: string, data: Record<string, unknown>) => t.replace(/\{(\w+)\}/g, (_, k) => String(data[k]));
 
@@ -39,7 +39,7 @@ function ownMessages(el: Element): ValidationMessages {
 
 /** 표준 제약과 글자 수 한도 — 맞으면 "" */
 export function validationMessage(el: TextControl, messages?: ValidationMessages): string {
-  if (isChoice(el)) return el.hasAttribute("data-ds-required") && el.hasAttribute("data-ds-empty") ? { ...VALIDATION_MESSAGES, ...messages }.choose : "";
+  if (isChoice(el)) return el.hasAttribute("data-ds-required") && (el.hasAttribute("data-ds-group") ? !el.querySelector("input:checked") : el.hasAttribute("data-ds-empty")) ? { ...VALIDATION_MESSAGES, ...messages }.choose : "";
   const v = el.validity;
   const limit = Number(el.getAttribute("data-maxlength")) || 0;
   const over = limit ? el.value.length - limit : 0;
@@ -49,7 +49,7 @@ export function validationMessage(el: TextControl, messages?: ValidationMessages
   return fill({ ...VALIDATION_MESSAGES, ...messages, ...ownMessages(el) }[key], { min: input.min, max: input.max, minlength: el.minLength, step: input.step, over, limit });
 }
 
-const labelOf = (field: Element) => (field.querySelector("label")?.textContent ?? "").replace(/\*\s*$/, "").trim();
+const labelOf = (field: Element) => ((field.querySelector("legend") ?? field.querySelector("label"))?.textContent ?? "").replace(/\*\s*$/, "").trim();
 const isField = (t: EventTarget): t is TextControl => t instanceof Element && t.matches("[data-ds-field]") && ((t as TextControl).willValidate || isChoice(t));
 
 interface Options {

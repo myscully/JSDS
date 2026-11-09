@@ -6,6 +6,8 @@ export const LABELS = {
   nextMonth: "다음 달",
   close: "닫기",
   remove: "삭제",
+  clearFilters: "필터 초기화",
+  switchFailed: "설정을 바꾸지 못했습니다. 다시 시도하세요.",
   clear: "지우기",
   search: "검색",
   loading: "불러오는 중",

@@ -136,6 +136,33 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         const d = items.findIndex((c) => /\bdanger\b/.test(c));
         if (d >= 0 && (d !== items.length - 1 || !/<li class="menu-sep"[^>]*><\/li>\s*<li class="menu-item danger"/.test(m[1]))) fails.push(`${f}: 위험 항목은 맨 아래 구분선 뒤(Dropdown › 위험 항목)`);
       }
+      /* Select Button — 항상 하나, radiogroup(2026-11-10). 토글 묶음(aria-pressed)으로 돌아가면 막는다 */
+      for (const m of pv.matchAll(/<div class="select-btn[^"]*"([^>]*)>([\s\S]*?)<\/div>/g)) {
+        const btns = [...m[2].matchAll(/<button\b([^>]*)>/g)].map((x) => x[1]);
+        if (!/role="radiogroup"/.test(m[1])) fails.push(`${f}: Select Button 은 role=radiogroup(Select Button › 키보드)`);
+        if (!/aria-label(?:ledby)?="/.test(m[1])) fails.push(`${f}: Select Button 에 묶음 이름이 없다`);
+        if (btns.length < 2 || btns.length > 5) fails.push(`${f}: Select Button 항목 ${btns.length}개 — 2~5개(Select Button › 언제 쓰는가)`);
+        if (btns.some((b) => !/role="radio"/.test(b) || !/aria-checked="(true|false)"/.test(b))) fails.push(`${f}: Select Button 항목은 role=radio + aria-checked`);
+        if (btns.filter((b) => /aria-checked="true"/.test(b) && /class="[^"]*\bon\b/.test(b)).length !== 1) fails.push(`${f}: Select Button 은 언제나 하나가 선택되어 있다(.on + aria-checked=true)`);
+      }
+      /* Chip — 지우기는 진짜 버튼 · 값이 든 이름, 필터 칩 2개 이상이면 필터 초기화 */
+      { const names = new Set();
+        for (const m of pv.matchAll(/<span class="chip[^"]*"[^>]*>([\s\S]*?<\/(?:button|i)>)\s*<\/span>/g)) {
+          if (!/class="lbl"/.test(m[1]) || !/<button type="button" class="x"/.test(m[1])) { fails.push(`${f}: Input Chip 은 .lbl + button.x(Chip › 긴 값)`); continue; }
+          const n = (/aria-label="([^"]+)"/.exec(m[1]) || [])[1];
+          if (!n || names.has(n)) fails.push(`${f}: Input Chip 지우기 버튼의 이름이 없거나 겹친다 "${n}" — 값을 넣는다`); names.add(n);
+        } }
+      for (const m of pv.matchAll(/<div class="chip-group"[^>]*>([\s\S]*?)<\/div>/g)) if ((m[1].match(/aria-pressed=/g) || []).length >= 2 && !/data-chip-reset/.test(m[1])) fails.push(`${f}: 필터 칩이 2개 이상인데 필터 초기화가 없다(Chip › 필터 초기화)`);
+      /* 표의 행 — 체크박스 · Switch 는 행마다 다른 이름(Checkbox · Switch 원칙) */
+      for (const m of pv.matchAll(/<tbody>([\s\S]*?)<\/tbody>/g)) {
+        const seen = new Set();
+        for (const x of m[1].matchAll(/<input\b[^>]*(?:type="checkbox"|role="switch")[^>]*>/g)) {
+          const n = (/aria-label="([^"]+)"/.exec(x[0]) || [])[1]; if (!n) continue;
+          if (seen.has(n)) fails.push(`${f}: 표의 행마다 같은 접근 이름 "${n}" — 행 이름을 넣는다`); seen.add(n);
+        }
+      }
+      /* Radio — 2~5개(Radio Button › 언제 쓰는가) */
+      for (const m of pv.matchAll(/<(fieldset|div) class="radio-group[^"]*"[^>]*>([\s\S]*?)<\/\1>/g)) { const n = (m[2].match(/<label class="radio/g) || []).length; if (n < 2 || n > 5) fails.push(`${f}: Radio 그룹 ${n}개 — 2~5개, 6개 이상은 Select`); }
       /* 단축키 표시는 동작과 같이 — kbd 만 있으면 눌러도 아무 일이 없다 */
       for (const m of pv.matchAll(/<div class="searchbar\b[^>]*>[\s\S]*?<\/div>/g)) if (/<kbd\b/.test(m[0]) && !/data-hotkey/.test(m[0])) fails.push(`${f}: 검색창에 kbd 가 있는데 data-hotkey 가 없다(Search › 단축키)`);
       /* 필수 표시가 있는 폼은 뜻을 적는다 */

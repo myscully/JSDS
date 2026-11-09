@@ -363,8 +363,8 @@ async function siteMeasure() {
    칸에는 그림자가 남지 않아야 한다. Slider 칸(Track = range 280×20)은 사이트 range 처럼 바탕이 없어야 한다(.slider input[type=range] 의 background).
    Button 은 변형 자신이 칸이다(k8). 사이트에서 외곽선을 쓰지만 Figma 에 Focused 변형이 없는 것(Tab · Pagination · Chip …)은 대조할 것이 없다 */
 const FOCUS_CSS = [
-  { set: "Text Field", state: "Focused", base: ".field input", rule: ".field input:focus" },
-  { set: "Text Field", state: "Error Focused", base: ".field input", rule: ".field.error input:focus" },
+  { set: "Text Field", state: "Focused", base: ".field input:where(:not([type=checkbox]):not([type=radio]))", rule: ".field input:where(:not([type=checkbox]):not([type=radio])):focus" },
+  { set: "Text Field", state: "Error Focused", base: ".field input:where(:not([type=checkbox]):not([type=radio]))", rule: ".field.error input:where(:not([type=checkbox]):not([type=radio])):focus" },
   { set: "Search", state: "Focused", base: ".searchbar", rule: ".searchbar:has(input:focus)" },
   { set: "Select", state: "Focused", base: ".dropdown .trigger", rule: ".dropdown .trigger:focus-visible" },
   /* 2026-11-09 버튼형 필드(.field-btn)를 없앴다 — Date Picker 는 Text Field 셸(.affix) 하나 */
@@ -1262,7 +1262,7 @@ function componentsExpect() {
     /* 정적 차트 — 막대 · 트랙 · 스파크라인 모서리, 도넛 경계선, 범례 견본, KPI 예제 수(2026-11-05 k35, staticChartExpect) */
     staticChart: staticChartExpect(),
     /* Text Field 입력칸 높이 — .field input · .field.sm input · .field.lg input(2026-10-28 k16) */
-    textFieldH: (() => { try { const h = { Small: px(cssRule(".field.sm input").height), Medium: px(cssRule(".field input").height), Large: px(cssRule(".field.lg input").height) }; return Object.values(h).every((x) => x > 0) ? h : { error: "높이를 읽지 못했습니다 " + JSON.stringify(h) }; } catch (e) { return { error: String(e.message || e) }; } })(),
+    textFieldH: (() => { try { const h = { Small: px(cssRule(".field.sm input:where(:not([type=checkbox]):not([type=radio]))").height), Medium: px(cssRule(".field input:where(:not([type=checkbox]):not([type=radio]))").height), Large: px(cssRule(".field.lg input:where(:not([type=checkbox]):not([type=radio]))").height) }; return Object.values(h).every((x) => x > 0) ? h : { error: "높이를 읽지 못했습니다 " + JSON.stringify(h) }; } catch (e) { return { error: String(e.message || e) }; } })(),
     /* 선택된 Radio · 비활성 Slider 글자의 칠 — 사이트 CSS (2026-10-27 k11) */
     controls: controlsExpect(),
     /* Chip 삭제(x) · 비활성 Item Tile — 사이트 CSS (2026-10-27 k12) */

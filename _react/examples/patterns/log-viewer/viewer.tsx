@@ -18,19 +18,20 @@ const COLUMNS: DataTableColumn<Log>[] = [
   { key: "msg", header: "메시지" },
 ];
 
+const LEVELS = ["CRIT", "HIGH", "WARN", "LOW", "INFO"];
+
 export default function Example() {
   const [live, setLive] = useState("live");
+  const [levels, setLevels] = useState(["CRIT", "HIGH", "WARN"]);
   const [page, setPage] = useState(1);
   return (
     <Stack>
       <Toolbar>
         <SearchBar placeholder="메시지, 단말, IP 검색" label="로그 검색" wrapperStyle={{ minWidth: 360 }} />
-        <ChipGroup>
-          <Chip size="sm" defaultSelected>CRIT</Chip>
-          <Chip size="sm" defaultSelected>HIGH</Chip>
-          <Chip size="sm" defaultSelected>WARN</Chip>
-          <Chip size="sm">LOW</Chip>
-          <Chip size="sm">INFO</Chip>
+        <ChipGroup clearable={levels.length > 0} onClear={() => setLevels([])}>
+          {LEVELS.map((l) => (
+            <Chip key={l} size="sm" selected={levels.includes(l)} onSelectedChange={(on) => setLevels((s) => (on ? [...s, l] : s.filter((x) => x !== l)))}>{l}</Chip>
+          ))}
         </ChipGroup>
         <Spacer />
         <SelectButton outline label="갱신" value={live} onChange={setLive} options={[{ value: "live", label: <Indicator tone="danger" pulse style={{ gap: 6 }}>실시간</Indicator> }, { value: "pause", label: "일시정지" }]} />

@@ -43,6 +43,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
         step={step}
         value={cur}
         disabled={disabled}
+        aria-valuetext={valueText && typeof text === "string" ? text : undefined}
         onChange={(e) => set(Number(e.target.value))}
         style={{ "--p": `${pct}%`, ...style } as CSSProperties}
         {...rest}

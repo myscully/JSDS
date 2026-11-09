@@ -28,6 +28,8 @@
     root = root || doc;
     $$("input.mixed", root).forEach(function (i) { i.indeterminate = true; });
     $$(".slider input[type=range]", root).forEach(syncSlider);
+    $$(".select-btn[role=radiogroup]", root).forEach(function (g) { var kids = $$(":scope > button", g), live = kids.filter(function (b) { return !b.disabled; }), cur = live.filter(function (b) { return b.classList.contains("on"); })[0] || live[0]; kids.forEach(function (b) { b.tabIndex = b === cur ? 0 : -1; }); });
+    $$(".chip-group", root).forEach(syncChipReset);
     $$(".tbl th.check input, .checkbox-group > .checkbox:first-child input", root).forEach(syncMaster);
     $$(".terms", root).forEach(syncTerms);
     $$(".searchbar .clear", root).forEach(function (c) { var i = $("input", closest(c, ".searchbar")); if (i) c.hidden = !i.value; });
@@ -99,7 +101,7 @@
 
   /* ---------- Tabs · Select Button · Chip · Tile · List ---------- */
   function activate(group, itemSel, target, attr) {
-    $$(itemSel, group).forEach(function (i) { var on = i === target; i.classList.toggle("on", on); if (attr) i.setAttribute(attr, String(on)); if (attr === "aria-selected") i.tabIndex = on ? 0 : -1; });
+    $$(itemSel, group).forEach(function (i) { var on = i === target; i.classList.toggle("on", on); if (attr) i.setAttribute(attr, String(on)); if (attr === "aria-selected" || attr === "aria-checked") i.tabIndex = on ? 0 : -1; });
   }
 
   /* ---------- Pagination ---------- */
@@ -125,7 +127,7 @@
     var p = max > min ? ((v - min) / (max - min)) * 100 : 0;
     input.style.setProperty("--p", p + "%");
     var wrap = closest(input, ".slider"), val = wrap && $(".val", wrap);
-    if (val && !input.disabled) { var unit = val.dataset.unit || (val.textContent.match(/[^\d,.\s]+$/) || [""])[0]; val.dataset.unit = unit; val.textContent = v + unit; }
+    if (val && !input.disabled) { var unit = val.dataset.unit || (val.textContent.match(/[^\d,.\s]+$/) || [""])[0]; val.dataset.unit = unit; val.textContent = v + unit; if (unit) input.setAttribute("aria-valuetext", v + unit); }
   }
 
   /* ---------- Date Picker · Calendar ----------
@@ -643,6 +645,14 @@
   /* ---------- Toast ---------- */
   function scheduleToast(t) { var d = Number(t.dataset.duration || 4000); if (d > 0) setTimeout(function () { dismiss(t); }, d); }
   function dismiss(el) { if (!el) return; el.style.transition = "opacity 160ms"; el.style.opacity = "0"; setTimeout(function () { el.remove(); }, 170); }
+  /* Filter Chip — 켜진 칩이 있을 때만 '필터 초기화'를 보인다. 누르면 버튼이 사라지므로 포커스는 첫 칩으로 */
+  function syncChipReset(g) { var b = $(":scope > [data-chip-reset]", g); if (b) b.hidden = !$(":scope > .chip.on[aria-pressed]", g); }
+  /* Input Chip — 지운 뒤 포커스는 다음 칸, 없으면 앞 칸, 칸이 하나도 없으면 묶음 자신. body 로 떨어지지 않게 */
+  function chipFocusAfter(chip) {
+    var box = chip.parentNode, spots = $$(":scope > button:not([disabled]), :scope > .chip > .x:not([disabled])", box).filter(function (el) { return !el.hidden; }), i = spots.indexOf($(".x", chip)), to = spots[i + 1] || spots[i - 1];
+    if (!to) { box.tabIndex = -1; to = box; }
+    to.focus({ preventScroll: true });
+  }
   /** 프로그램에서 토스트 띄우기: DS.toast("저장됨", {tone:"danger", action:{label, onClick}, duration}) */
   function toast(message, o) {
     o = o || {};
@@ -714,7 +724,7 @@
     var on = cbOn(h), name = h.getAttribute("data-name"), multi = cbMulti(h), inp = cbInput(h), ctrl = $(".control", h);
     if (multi) {
       $$(".chip", ctrl).forEach(function (c) { c.remove(); });
-      on.forEach(function (i) { var c = doc.createElement("span"), x = doc.createElement("i"); c.className = "chip sm"; c.dataset.value = cbValue(i); c.textContent = cbLabel(i); x.className = "x"; x.setAttribute("role", "button"); x.tabIndex = 0; x.setAttribute("aria-label", cbLabel(i) + " 제거"); x.innerHTML = X_ICON; c.appendChild(x); ctrl.insertBefore(c, inp); });
+      on.forEach(function (i) { var c = doc.createElement("span"), l = doc.createElement("span"), x = doc.createElement("button"); c.className = "chip sm"; c.dataset.value = cbValue(i); l.className = "lbl"; l.textContent = cbLabel(i); x.type = "button"; x.className = "x"; x.setAttribute("aria-label", cbLabel(i) + " 제거"); x.innerHTML = X_ICON; c.appendChild(l); c.appendChild(x); ctrl.insertBefore(c, inp); });
     }
     if (name) { $$("input[type=hidden]", h).forEach(function (x) { x.remove(); }); (multi ? on.map(cbValue) : [on[0] ? cbValue(on[0]) : ""]).forEach(function (v) { var x = doc.createElement("input"); x.type = "hidden"; x.name = name; x.value = v; h.appendChild(x); }); }
   }
@@ -768,12 +778,12 @@
      Interaction › Input errors(사람의 결정 2026-11-09). 표준 제약(required · pattern · min · max · minlength · type)과 글자 수 한도(data-maxlength), Select · Combobox 의 data-required 를 본다.
      포커스가 떠날 때 필드 단위 — 건드리지 않은 빈 필드는 탭으로 지나가도 오류를 내지 않는다. 오류가 있는 필드는 입력할 때마다 다시 재 바로 지운다.
      제출하면 전부 재고, 막으면 첫 오류로 포커스 · 스크롤, 3개 이상이면 폼 위에 요약. Date Picker 는 스스로 재므로 .error 만 센다.
-     Checkbox · Radio 는 오류 상태가 생기면 더한다(각 컴포넌트 정비 때). 문구는 React validation.ts 와 같아야 한다 */
+     Checkbox · Radio 그룹은 .field 안 fieldset 의 data-required — 하나 이상 고른다. 문구는 React validation.ts 와 같아야 한다 */
   var V_MSG = { required: "필수 항목입니다. 값을 입력하세요.", choose: "필수 항목입니다. 항목을 선택하세요.", number: "숫자가 아닙니다. 숫자를 입력하세요.", email: "이메일 형식이 아닙니다. 예: admin@example.com", url: "URL 형식이 아닙니다. 예: https://example.com", pattern: "형식이 맞지 않습니다. 도움말을 확인하세요.", min: "값이 너무 작습니다. {min} 이상 입력하세요.", max: "값이 너무 큽니다. {max} 이하 입력하세요.", minlength: "글자 수가 모자랍니다. {minlength}자 이상 입력하세요.", step: "입력할 수 없는 값입니다. {step} 단위로 입력하세요.", length: "글자 수가 {over}자 넘었습니다. {limit}자 이하로 줄이세요." };
   function vIsField(t) { return !!(t && t.matches && t.matches(".field input, .field textarea") && !closest(t, ".datepicker") && ["checkbox", "radio", "hidden"].indexOf(t.type) < 0); }
-  function vChoice(el) { return closest(el, ".dropdown[data-required], .combobox[data-required]"); }
-  function vEmpty(host) { if (host.matches(".combobox")) return !cbOn(host).length; var on = $(".menu-item.on", host); return !on || on.dataset.value === ""; }
-  function vFields(form) { return $$(".field input, .field textarea, .field .dropdown[data-required] .trigger", form).filter(function (i) { return !i.disabled && ((vIsField(i) && i.willValidate) || vChoice(i)); }); }
+  function vChoice(el) { return closest(el, ".dropdown[data-required], .combobox[data-required], .checkbox-group[data-required], .radio-group[data-required]"); }
+  function vEmpty(host) { if (host.matches(".combobox")) return !cbOn(host).length; if (host.matches(".checkbox-group, .radio-group")) return !$("input:checked", host); var on = $(".menu-item.on", host); return !on || on.dataset.value === ""; }
+  function vFields(form) { return $$(".field input, .field textarea, .field .dropdown[data-required] .trigger, .field .checkbox-group[data-required], .field .radio-group[data-required]", form).filter(function (i) { return !i.disabled && i.type !== "checkbox" && i.type !== "radio" && ((vIsField(i) && i.willValidate) || vChoice(i)); }); }
   function vMsgs(inp) {
     var out = {}, k; for (k in V_MSG) out[k] = V_MSG[k];
     [closest(inp, "form[data-validate]"), inp].forEach(function (el) {
@@ -807,7 +817,7 @@
     else if (on) { f.classList.remove("error"); help.textContent = help._orig || ""; inp.removeAttribute("aria-invalid"); }
   }
   var V_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>';
-  function vLabel(f) { var l = $("label", f); return l ? l.textContent.replace(/\*\s*$/, "").trim() : ""; }
+  function vLabel(f) { var l = $("legend", f) || $("label", f); return l ? l.textContent.replace(/\*\s*$/, "").trim() : ""; }
   function vSummary(form) {
     if (!form._tried) return;
     var bad = $$(".field.error", form), box = $(":scope > [data-form-summary]", form);
@@ -874,10 +884,11 @@
     // 선택형 카드 (데모 링크)
     if ((el = closest(t, ".card-grid .card.clickable")) && !el.disabled && el.getAttribute("aria-disabled") !== "true") {   /* 고를 수 없는 선택 카드(Card 정의 2026-11-02) — button 은 disabled, 그 밖은 aria-disabled */ $$(".card.clickable", closest(el, ".card-grid")).forEach(function (c) { var on = c === el; c.classList.toggle("on", on); /* 선택은 .on 만으로는 보조기기에 전해지지 않는다 */ if (c.tagName === "BUTTON") c.setAttribute("aria-pressed", on ? "true" : "false"); }); fire(el, "ds:select", { value: (el.querySelector(".title") || el).textContent.trim() }); return; }
     // Select Button
-    if ((el = closest(t, ".select-btn > button")) && !el.disabled) { activate(closest(el, ".select-btn"), "button", el, "aria-pressed"); fire(el, "ds:select"); return; }
+    if ((el = closest(t, ".select-btn > button")) && !el.disabled) { activate(closest(el, ".select-btn"), "button", el, "aria-checked"); fire(el, "ds:select"); return; }
     // Chip
-    if ((el = closest(t, ".chip .x"))) { if (el.getAttribute("aria-disabled") !== "true") dismiss(closest(el, ".chip")); return; }   // 비활성 입력값 칩은 지우지 않는다 — CSS pointer-events 만 믿으면 보조기술의 클릭이 지운다
-    if ((el = closest(t, "button.chip[aria-pressed]")) && !el.disabled) { var on = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", on); el.setAttribute("aria-pressed", String(on)); return; }
+    if ((el = closest(t, ".chip .x"))) { if (!el.disabled) { var gone = closest(el, ".chip"); chipFocusAfter(gone); dismiss(gone); } return; }   // 비활성 입력값 칩은 지우지 않는다 — CSS pointer-events 만 믿으면 보조기술의 클릭이 지운다
+    if ((el = closest(t, "button.chip[aria-pressed]")) && !el.disabled) { var on = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", on); el.setAttribute("aria-pressed", String(on)); syncChipReset(el.parentNode); return; }
+    if ((el = closest(t, "[data-chip-reset]"))) { var cg = closest(el, ".chip-group"); $$(":scope > .chip.on[aria-pressed]", cg).forEach(function (c) { c.classList.remove("on"); c.setAttribute("aria-pressed", "false"); }); syncChipReset(cg); var c1 = $(":scope > button.chip:not([disabled])", cg); if (c1) c1.focus(); fire(cg, "ds:chip-reset"); return; }
     // Tile
     if ((el = closest(t, ".tile[aria-pressed]")) && !el.disabled) { var grid = closest(el, ".tile-grid"), single = grid && grid.dataset.single !== undefined; if (single) activate(grid, ".tile", el, "aria-pressed"); else { var o2 = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", o2); el.setAttribute("aria-pressed", String(o2)); } return; }
     // List listbox
@@ -1029,7 +1040,29 @@
   window.addEventListener("scroll", closeFloats, true);
   window.addEventListener("resize", closeFloats);
   doc.addEventListener("mousedown", function (e) { var t = e.target; if (t instanceof Element && (closest(t, ".combobox .menu") || (closest(t, ".combobox .control") && !t.matches("input")))) e.preventDefault(); });   // 목록 · 빈 자리를 눌러도 입력의 포커스를 잃지 않는다
+  /* Switch 응답 후 반영(사람의 결정 2026-11-10) — .switch[data-async] 는 눌러도 바뀌지 않고 처리 중이 된다. 제품이 ds:switch 의 resolve() 를 불러야 바뀌고,
+     reject(문구) 는 그대로 두고 닫을 때까지 남는 Toast 로 알리며, cancel() 은 조용히 그대로 둔다(보안 기능을 끄는 확인 Popup 의 취소). 포커스를 잃지 않게 disabled 대신 aria-disabled */
+  var SWITCH_FAIL = "설정을 바꾸지 못했습니다. 다시 시도하세요.";
+  doc.addEventListener("click", function (e) {
+    var inp = e.target; if (!(inp instanceof Element) || !inp.matches(".switch[data-async] input")) return;
+    var next = inp.checked; e.preventDefault();
+    if (inp.disabled || inp.getAttribute("aria-busy") === "true") return;
+    inp.setAttribute("aria-busy", "true"); inp.setAttribute("aria-disabled", "true");
+    var settled = false, settle = function () { if (settled) return false; settled = true; inp.removeAttribute("aria-busy"); inp.removeAttribute("aria-disabled"); return true; };
+    /* 클릭이 끝난 뒤에 알린다 — 브라우저가 취소된 클릭의 checked 를 되돌리므로, 처리기가 바로 resolve 하면 값이 지워진다 */
+    setTimeout(function () { fire(inp, "ds:switch", { checked: next, resolve: function () { if (settle()) inp.checked = next; }, cancel: settle, reject: function (msg) { if (settle()) toast(msg || SWITCH_FAIL, { tone: "danger", duration: 0, action: { label: "닫기" } }); } }); }, 0);
+  }, true);
+  /* Select Button — 화살표로 옮기면 바로 고른다(Radio 와 같음). 비활성은 건너뛰고 끝에서 돌아온다 */
+  doc.addEventListener("keydown", function (e) {
+    var b = closest(e.target, ".select-btn[role=radiogroup] > button"), d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!b || !d || e.ctrlKey || e.metaKey || e.altKey) return;
+    e.preventDefault();
+    var g = b.parentNode, live = $$(":scope > button:not([disabled])", g), to = live[(live.indexOf(b) + d + live.length) % live.length];
+    if (to !== b) { activate(g, "button", to, "aria-checked"); to.focus(); fire(to, "ds:select"); }
+  });
   doc.addEventListener("change", function (e) {
+    var vg = e.target instanceof Element && closest(e.target, ".field .checkbox-group[data-required], .field .radio-group[data-required]"), vf = vg && closest(vg, "form[data-validate]");
+    if (vf) { vShow(vg, vMessage(vg)); vChanged(vf); }   // 그룹은 고르면 바로 지우고, 마지막 하나를 풀면 바로 알린다. 지나가기만 하면 조용하다
     var t = e.target; if (!(t instanceof Element) || t.type !== "checkbox") return;
     var kids = childrenOf(t);
     if (kids.length) { kids.forEach(function (c) { c.checked = t.checked; var tr = closest(c, "tr"); if (tr) tr.classList.toggle("on", c.checked); }); t.indeterminate = false; t.classList.remove("mixed"); }

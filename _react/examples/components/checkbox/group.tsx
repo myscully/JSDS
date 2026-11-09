@@ -11,7 +11,7 @@ export default function Example() {
       <Checkbox checked={all} indeterminate={some} onChange={(on) => setSel(on ? LEVELS : [])}>
         <b>전체 선택</b>
       </Checkbox>
-      <CheckboxGroup row style={{ paddingLeft: 28 }}>
+      <CheckboxGroup row style={{ paddingLeft: 24 }}>
         {LEVELS.map((l) => (
           <Checkbox key={l} checked={sel.includes(l)} onChange={(on) => setSel((s) => (on ? [...s, l] : s.filter((x) => x !== l)))}>
             {l}

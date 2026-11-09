@@ -44,7 +44,7 @@ const PATTERNS = {
             <div class="field"><label id="pgroup-l">그룹</label><div class="dropdown"><button type="button" id="pgroup" class="trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pgroup-l pgroup">전체</button></div></div>
             <div class="field"><label for="prio">우선순위</label><input id="prio" type="number" value="10" min="1" max="100"></div>
           </div>
-          <fieldset class="radio-group" style="border:0;padding:0;margin:0"><legend class="t-label-1" style="margin-bottom:8px">탐지 시 동작</legend>
+          <fieldset class="radio-group"><legend class="t-label-1">탐지 시 동작</legend>
             <label class="radio"><input type="radio" name="fa" checked><span>차단 후 알림</span></label>
             <label class="radio"><input type="radio" name="fa"><span>알림만</span></label>
           </fieldset>
@@ -193,8 +193,8 @@ const PATTERNS = {
           </div>
           <div class="toolbar" style="font-size:12px;color:var(--foreground-neutral-secondary)">
             <span>결과 <b style="color:var(--foreground-neutral-primary)">128</b>건</span>
-            <span class="chip sm on">Critical<i class="x" role="button" aria-label="제거">${I("x",10)}</i></span>
-            <span class="chip sm on">High<i class="x" role="button" aria-label="제거">${I("x",10)}</i></span>
+            <span class="chip sm on"><span class="lbl">Critical</span><button type="button" class="x" aria-label="Critical 제거">${I("x",10)}</button></span>
+            <span class="chip sm on"><span class="lbl">High</span><button type="button" class="x" aria-label="High 제거">${I("x",10)}</button></span>
             <button type="button" class="btn sm text">필터 초기화</button>
           </div>
           <div class="tbl-wrap">
@@ -246,7 +246,7 @@ const PATTERNS = {
     examples: [
       { id: "full", title: "대시보드", html: `
         <div class="stack">
-          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="group" aria-label="기간"><button type="button" class="on" aria-pressed="true">24시간</button><button type="button" aria-pressed="false">7일</button><button type="button" aria-pressed="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
+          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">24시간</button><button type="button" role="radio" aria-checked="false">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
           <div class="kpi-grid">
             <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><span class="delta up">${I("arrow-up",12)} 12% 전일 대비</span></div>
             <div class="kpi"><span class="label">차단률</span><span class="value">99.2<small>%</small></span><span class="delta down">${I("arrow-down",12)} 0.3%p</span></div>
@@ -279,9 +279,9 @@ const PATTERNS = {
         <div class="stack">
           <div class="toolbar">
             <div class="searchbar" role="search" style="min-width:360px">${I("search")}<input type="search" placeholder="메시지, 단말, IP 검색" aria-label="로그 검색"></div>
-            <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">LOW</button><button type="button" class="chip sm" aria-pressed="false">INFO</button></div>
+            <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">LOW</button><button type="button" class="chip sm" aria-pressed="false">INFO</button><button type="button" class="btn sm text assistive" data-chip-reset>필터 초기화</button></div>
             <span class="spacer"></span>
-            <div class="select-btn outline" role="group" aria-label="갱신"><button type="button" class="on" aria-pressed="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" aria-pressed="false">일시정지</button></div>
+            <div class="select-btn outline" role="radiogroup" aria-label="갱신"><button type="button" class="on" role="radio" aria-checked="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" role="radio" aria-checked="false">일시정지</button></div>
             <button type="button" class="btn md outline assistive">${I("download")}CSV</button>
           </div>
           ${logTable(LOG_ROWS)}

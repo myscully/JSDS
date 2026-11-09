@@ -363,3 +363,12 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 
 주의: 띄운 메뉴는 트리거를 따라가지 않으므로 스크롤하면 닫힙니다. 스크롤 영역 안에서 메뉴를 열어 둔 채 다른 내용을 스크롤하는 흐름에는 쓰지 않습니다.
 
+## 선택 컨트롤 (2026-11-10)
+
+- **Select Button** — 토글 묶음에서 라디오 묶음으로 바뀌었습니다. `role="group"` → `radiogroup`, 버튼 `aria-pressed` → `role="radio"` `aria-checked`. `SelectButton` 의 props 는 그대로입니다. `getByRole("button")` 으로 찾던 테스트는 `getByRole("radio")` 로 고칩니다. 직접 쓴 마크업은 ds.js 의 화살표 이동을 받으려면 역할을 바꿔야 합니다.
+- **Chip** — Input Chip 의 지우기가 `<i role="button">` 에서 `<button class="x">` 로, 값은 `.lbl` 안으로 옮겼습니다. 접근 이름은 값을 포함합니다(`10.0.0.12 삭제`). 글자가 문자열이 아니면 `removeLabel` 그대로입니다. 비활성은 `aria-disabled` 대신 `disabled` 입니다. 사이트 마크업도 같습니다.
+- **ChipGroup** — `clearable` · `onClear` · `clearLabel` 이 생겼습니다. 사이트는 `[data-chip-reset]` 버튼입니다.
+- **Switch** — `action` 을 주면 응답 후 반영입니다(`false` 를 돌려주면 그대로, 던지면 Toast). `<ToastProvider>` 안에서 써야 합니다. `action` 이 없으면 동작이 그대로입니다. 사이트는 `.switch[data-async]` + `ds:switch` 이며, 제품이 `resolve()` · `reject(문구)` · `cancel()` 중 하나를 부르지 않으면 처리 중으로 남습니다.
+- **CheckboxGroup · RadioGroup** — `legend` · `required` · `help` · `error` 가 생겼습니다. `<Form validate>` 안의 `legend` 그룹은 `.field` 로 감싸집니다. `CheckboxGroup` 의 ref 타입은 `HTMLElement` 입니다.
+- **DataTable** — 행 체크박스의 접근 이름이 '선택' 에서 '첫 열 값 선택' 으로 바뀌었습니다. `rowLabel` 로 바꿀 수 있습니다.
+- **Slider** — `valueText` 가 문자열을 돌려주면 `aria-valuetext` 로도 나갑니다.

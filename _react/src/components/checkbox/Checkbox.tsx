@@ -1,6 +1,7 @@
-import { forwardRef, useEffect, useRef, type ChangeEvent, type HTMLAttributes, type InputHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useEffect, useRef, type ChangeEvent, type InputHTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { mergeRefs } from "../../utils/hooks";
+import { ChoiceGroup, type ChoiceGroupProps } from "../text-field/ChoiceGroup";
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "onChange" | "children"> {
   /** 라벨. 없으면 aria-label 을 넣는다(테이블 행 선택 등) */
@@ -42,10 +43,11 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
   );
 });
 
-export interface CheckboxGroupProps extends HTMLAttributes<HTMLDivElement> {
+export interface CheckboxGroupProps extends ChoiceGroupProps {
   /** 가로 배치 (24px 간격) */
   row?: boolean;
 }
-export const CheckboxGroup = forwardRef<HTMLDivElement, CheckboxGroupProps>(function CheckboxGroup({ row, className, ...rest }, ref) {
-  return <div ref={ref} className={cx("checkbox-group", { row }, className)} {...rest} />;
+/** legend 를 주면 fieldset. required 는 하나 이상 골라야 한다(<Form validate>) */
+export const CheckboxGroup = forwardRef<HTMLElement, CheckboxGroupProps>(function CheckboxGroup({ row, className, ...rest }, ref) {
+  return <ChoiceGroup ref={ref} base="checkbox-group" className={cx({ row }, className)} {...rest} />;
 });

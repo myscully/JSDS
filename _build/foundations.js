@@ -120,7 +120,7 @@ ${rules([
   ["입력을 고치면 오류를 바로 지웁니다", "적용 — 동작 검사가 있습니다"],
   ["오류가 나도 입력값을 지우지 않습니다", "적용 — 동작 검사가 있습니다"],
   ["오류 문구 영역은 <code>aria-live=\"polite\"</code> 로 알립니다", "적용 — <code>data-validate</code> · <code>data-maxlength</code> 필드, 속성을 검사합니다"],
-  ["Select · Checkbox 그룹 · Radio 그룹도 오류 상태를 가집니다", `일부 — ${c("select", "Select")} · ${c("combobox", "Combobox")} 적용. ${c("checkbox", "Checkbox")} · ${c("radio-button", "Radio Button")} 은 정비 때`],
+  ["Select · Checkbox 그룹 · Radio 그룹도 오류 상태를 가집니다", `적용 — ${c("select", "Select")} · ${c("combobox", "Combobox")} · ${c("checkbox", "Checkbox")} · ${c("radio-button", "Radio Button")}`],
   ["자주 나는 오류 문구는 사전으로 모아 기본값으로 씁니다", `아직 — 검증 기본 문구와 ${c("date-picker", "Date Picker")}의 <code>messages</code> 가 따로 있습니다`],
 ])}
 <h2 id="overlays">Overlays</h2><p>Popup · Dropdown · Select · Date Picker · Tooltip · Toast 가 함께 지키는 규칙입니다.</p>
@@ -150,7 +150,7 @@ ${tbl(["영향", "흐름"], [
 ])}
 ${rules([
   ["위험 확인의 첫 포커스는 취소에 둡니다. 확인 문구를 입력하는 대화상자는 입력칸에 둡니다", `적용 — ${c("popup", "Popup")}은 열 때 첫 요소로 포커스를 옮기고 취소가 앞에 있습니다. 검사는 Popup 정비 때`],
-  ["보안 기능을 끄는 Switch 도 이 표를 따릅니다", `제품 — ${c("switch", "Switch")} 정비 때 예제를 더합니다`],
+  ["보안 기능을 끄는 Switch 도 이 표를 따릅니다", `제품 — ${c("switch", "Switch")} 의 응답 후 반영(ds:switch · action) 안에서 확인을 띄웁니다`],
 ])}
 <h2 id="overflow">Overflow</h2>
 ${rules([
@@ -390,7 +390,7 @@ ${codeBlock("grid-css", `.grid{display:grid;grid-template-columns:repeat(12,minm
       const tile = n => { const m = ICONS[n]; const kw = [n, m.category, ...(m.tags || []), KO[n] || ""].join(" ").toLowerCase(); return `<button type="button" class="icon-tile${m.f ? "" : " no-f"}" data-name="${n}" data-cat="${attr(m.category || "")}" data-tags="${attr((m.tags || []).join("|"))}" data-ko="${attr(KO[n] || "")}" data-kw="${attr(kw)}" title="${n}" aria-label="${n} 상세 보기" aria-haspopup="dialog"><span class="o">${I(n, 24)}</span>${m.f ? `<span class="f">${I(n, 24, { style: "filled" })}</span>` : ""}</button>`; };
       return `<h1>Icons${nb("foundations", "icons")}</h1><p class="lead">아이콘은 기능이나 콘텐츠를 시각적으로 표현하는 요소로, 사용자가 인터페이스를 빠르게 탐색할 수 있도록 돕습니다. 24px 그리드 · 스트로크 2px · 라운드 캡의 단순하고 현대적인 형태(Tabler Icons · MIT)를 쓰며, 기본은 Outline 이고 선택·활성 상태 강조에만 Filled 를 씁니다.</p>
 <h2 id="search">Search icons</h2><p>관리자 콘솔에서 자주 쓰는 아이콘을 추린 세트입니다. 여기 있는 아이콘의 원본 SVG 만 <code>assets/icons/</code> 에 둡니다 — 더 필요하면 Tabler 에서 받아 그 폴더에 넣고 <code>_build/icons.js</code> 에 이름을 더합니다. 검색 시 이름뿐 아니라 연상되는 유사한 키워드(한글 포함)를 함께 검색합니다. 아이콘을 클릭하면 이름 · 스타일 · 키워드를 보고 SVG 를 복사·다운로드할 수 있습니다. 사용 코드는 아래 Usage 를 참고하세요.</p>
-<div class="icon-tools"><div class="searchbar" role="search">${I("search")}<input type="search" id="iconSearch" placeholder="아이콘 이름 검색" aria-label="아이콘 검색"></div><div class="select-btn" role="group" aria-label="아이콘 스타일" id="iconStyle"><button type="button" class="on" aria-pressed="true" data-style="outline">Outline</button><button type="button" aria-pressed="false" data-style="filled">Filled</button></div><span id="iconCount" style="font-size:12px;color:var(--foreground-neutral-tertiary)">${names.length}개</span></div>
+<div class="icon-tools"><div class="searchbar" role="search">${I("search")}<input type="search" id="iconSearch" placeholder="아이콘 이름 검색" aria-label="아이콘 검색"></div><div class="select-btn" role="radiogroup" aria-label="아이콘 스타일" id="iconStyle"><button type="button" class="on" role="radio" aria-checked="true" data-style="outline">Outline</button><button type="button" role="radio" aria-checked="false" data-style="filled">Filled</button></div><span id="iconCount" style="font-size:12px;color:var(--foreground-neutral-tertiary)">${names.length}개</span></div>
 <div class="icon-grid" id="iconGrid">${names.map(tile).join("")}</div><div class="icon-empty" id="iconEmpty" hidden>검색 결과가 없습니다. 세트 밖의 아이콘은 <code>assets/icons/</code> 에서 찾아 <code>_build/icons.js</code> 의 <code>ICON_NAMES</code> 에 추가하세요.</div>
 <h2 id="usage">Usage</h2><p>인라인 SVG 가 기본입니다(색 상속 <code>currentColor</code>, 크기 자유). 의미 색은 부모에 토큰(<code>color:var(--surface-negative-strong)</code>)으로 줍니다. 사용 크기: 14 배지 · 16 표/페이지네이션 · 18 버튼/입력 · 20 알림 · 24 빈 화면/타일. 정적 파일이 필요하면 <code>assets/icons/outline/{name}.svg</code> 를 img 로, 배경·가상 요소에는 CSS mask 로 씁니다.</p>
 ${codeBlock("icon-inline", I("search", 18).split("><").join(">\n  <").replace("\n  </svg>", "\n</svg>"), "html")}
