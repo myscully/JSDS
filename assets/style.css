@@ -44,7 +44,7 @@
   --foreground-negative-primary:var(--red-50);--foreground-negative-strong:var(--red-40);
   --foreground-disable-primary:color-mix(in srgb,var(--cool-neutral-25) 16%,transparent);
   --foreground-inactive-primary:var(--cool-neutral-70);
-  --foreground-accent-lime:var(--lime-37);--foreground-accent-cyan:var(--cyan-40);--foreground-accent-light-blue:var(--light-blue-40);--foreground-accent-violet:var(--violet-45);--foreground-accent-purple:var(--purple-40);--foreground-accent-pink:var(--pink-46);
+  --foreground-accent-lime:var(--lime-40);--foreground-accent-cyan:var(--cyan-40);--foreground-accent-light-blue:var(--light-blue-40);--foreground-accent-violet:var(--violet-45);--foreground-accent-purple:var(--purple-40);--foreground-accent-pink:var(--pink-46);
   --background-neutral-primary:var(--static-white);--background-neutral-secondary:var(--cool-neutral-99);
   --surface-neutral-primary:var(--static-white);--surface-neutral-secondary:color-mix(in srgb,var(--cool-neutral-50) 12%,transparent);--surface-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-50) 8%,transparent);--surface-neutral-strong:color-mix(in srgb,var(--cool-neutral-50) 22%,transparent);--surface-neutral-inverse:var(--cool-neutral-15);
   --surface-elevated-primary:var(--static-white);--surface-elevated-secondary:var(--cool-neutral-99);
@@ -67,7 +67,7 @@
   /* ── Chart(트리 밖) · 탐색형 차트(Chart.js) 전용 — 기준 시스템에 없어 우리가 더했다(base-tokens.js ADDITIONS, 사람의 결정 2026-11-03).
      계열 6색은 제품색(brand)과 무관한 고정 램프이고 순서가 고정이다. 상태색과 같은 단계는 피했다(orange-39 ≠ cautionary orange-50 · light-blue ≠ Medium cyan · lime ≠ positive green).
      dataviz 검증기(validate_palette.js) 라이트, 바탕 #FFFFFF · #F7F7F8: 명도 띠 PASS · 채도 PASS · 색각 분리 worst 13.1(violet↔light-blue, deutan) PASS · 정상 시각 20.4 PASS · 3:1 전부 PASS.
-     캔버스는 CSS 변수를 못 읽는다 — ds-chart.js 가 계산값으로 읽어 칠한다. 심각도 계열은 negative · cautionary · accent-lime-opaque · accent-light-blue · inactive 토큰을 그대로 쓴다(5단계, 2026-11-06)
+     캔버스는 CSS 변수를 못 읽는다 — ds-chart.js 가 계산값으로 읽어 칠한다. 심각도 계열은 negative-strong · cautionary · accent-lime · accent-light-blue · inactive 토큰을 그대로 쓴다(5단계, 2026-11-06 · Critical · Medium 톤 2026-11-09)
      계열 1의 톤 둘(사람의 결정 2026-11-05) — subtle 은 비교 기간(지난 주 · 전월) 막대, strong 은 막대 위를 지나는 선. 같은 색상에서 톤만 다르게 해 '같은 지표의 다른 기간'으로 읽힌다.
      실측 대비: subtle 라이트 blue-80 / 흰 1.77 · 계열 1 과 2.74, 다크 blue-30 / #212225 1.64 · 계열 1 과 2.74 — 3:1 아래라 contrast.pairs 에 예외로 선언. strong 라이트 blue-30 · 다크 blue-80 은 3:1 통과 */
   --chart-series-1:var(--blue-50);--chart-series-2:var(--orange-39);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-45);--chart-series-5:var(--lime-37);--chart-series-6:var(--pink-40);--chart-series-1-subtle:var(--blue-80);--chart-series-1-strong:var(--blue-30);
@@ -913,18 +913,18 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
    기준 시스템도 그 색을 배너의 제목·아이콘에만 쓰고 칩 라벨에는 쓰지 않는다 — 밀도 높은 표가 기본 화면이라 그 구분을 따른다.
    색은 점(::before)과 테두리가 나른다. 심각도 다섯 등급은 Critical=negative · High=cautionary · Medium=accent lime · Low=accent light blue · Info=중립이고
    (사람의 결정 2026-11-06 — 4단계의 Medium 청록 자리를 라임 · 라이트 블루 두 단계가 대신하고, 옛 Low 의 회색은 Info 가 됐다),
-   마크업은 그대로다(class="tag critical" · React tone="critical"). Medium 점은 요청대로 surface/accent/lime-opaque(채운 라임)이고 라이트 3:1 미달은 contrast.pairs 에 선언했다.
+   마크업은 그대로다(class="tag critical" · React tone="critical"). 점 · 지표 색은 Critical=foreground/negative/strong · Medium=foreground/accent/lime(라이트 lime-40)이다(사람의 결정 2026-11-09 — 진한 빨강 · 진한 라임).
    pending 은 심각도가 아니라 상태 톤이다('검토 대기' — 옛 Medium 의 청록을 물려받는다. 심각도와 상태가 한 클래스를 나눠 쓰지 않게 갈랐다)
    solid 는 '채운 태그'였다 — 기준 시스템에 솔리드 상태 면이 없어 같은 틴트 + 테두리로 한 단계 강조하도록 다시 디자인했다.
    색만으로 의미를 전달하지 않는다(1.4.1)는 라벨 병기가 담당하고 verify 가 그것을 검사한다 */
 .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--radius-full);line-height:1.6;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);white-space:nowrap}
 .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--foreground-inactive-primary);flex:none}
 .tag.critical{background:var(--surface-negative-primary)}
-.tag.critical::before{background:var(--foreground-negative-primary)}
+.tag.critical::before{background:var(--foreground-negative-strong)}
 .tag.high{background:var(--surface-cautionary-primary)}
 .tag.high::before{background:var(--foreground-cautionary-primary)}
 .tag.medium{background:var(--surface-accent-lime)}
-.tag.medium::before{background:var(--surface-accent-lime-opaque)}
+.tag.medium::before{background:var(--foreground-accent-lime)}
 .tag.low{background:var(--surface-accent-light-blue)}
 .tag.low::before{background:var(--foreground-accent-light-blue)}
 .tag.info{background:var(--surface-neutral-strong)}
@@ -1351,9 +1351,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 /* 막대는 각지게(트랙 · 채움 · 스파크라인, 사람의 결정 2026-11-05 — 탐색형 막대와 같다) */
 .chart .bar{height:12px;border-radius:0;background:var(--surface-neutral-strong);overflow:hidden}
 .chart .bar i{display:block;height:100%;background:var(--foreground-brand-primary);border-radius:0}
-.chart .bar.critical i{background:var(--foreground-negative-primary)}
+.chart .bar.critical i{background:var(--foreground-negative-strong)}
 .chart .bar.high i{background:var(--foreground-cautionary-primary)}
-.chart .bar.medium i{background:var(--surface-accent-lime-opaque)}
+.chart .bar.medium i{background:var(--foreground-accent-lime)}
 .chart .bar.low i{background:var(--foreground-accent-light-blue)}
 .chart .bar.info i{background:var(--foreground-inactive-primary)}
 .chart .num{text-align:right;color:var(--foreground-neutral-secondary)}
@@ -1368,7 +1368,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
    색각 이상에서는 한 덩어리로 읽힌다(190 · 285 · 196 · 120 · 263 기준 값). React Donut 도 같은 식으로 그린다 */
 /* 조각은 이어 붙이고, 경계는 폭이 일정한 2px 구분선(i)으로 낸다 — 탐색형 도넛(Chart.js 2px 면 색 경계)과 같은 모양(2026-11-05).
    종전에는 conic-gradient 의 각도 띠(1.2%)라 바깥으로 갈수록 넓어지는 쐐기가 되고 경계가 계단처럼 깨졌다. --a 는 경계 각도(위 = 0, 시계 방향) */
-.donut{position:relative;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--foreground-negative-primary) 0 18.03%,var(--foreground-cautionary-primary) 18.03% 45.07%,var(--surface-accent-lime-opaque) 45.07% 63.66%,var(--foreground-accent-light-blue) 63.66% 75.05%,var(--foreground-inactive-primary) 75.05% 100%);line-height:1.6}
+.donut{position:relative;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--foreground-negative-strong) 0 18.03%,var(--foreground-cautionary-primary) 18.03% 45.07%,var(--foreground-accent-lime) 45.07% 63.66%,var(--foreground-accent-light-blue) 63.66% 75.05%,var(--foreground-inactive-primary) 75.05% 100%);line-height:1.6}
 .donut::after{content:attr(data-label);width:80px;height:80px;border-radius:50%;background:var(--surface-elevated-primary);display:grid;place-items:center;font-weight:600;font-size:16px;line-height:24px}   /* 가운데 합계 = Title/1 16/24/600 — 700 이던 것을 Figma 스타일 14단계에 맞춰 600 으로(사람의 결정 2026-11-04). 탐색형 도넛(ds-chart centerPlugin)도 같다 */
 .donut i{position:absolute;top:0;left:50%;width:2px;height:20px;margin-left:-1px;background:var(--surface-elevated-primary);transform-origin:50% 60px;transform:rotate(var(--a,0deg))}
 .donut-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;line-height:1.6}   /* 자리가 좁아 도넛 + 범례가 한 줄에 안 들어가면 범례가 도넛 아래로 내려간다(사람의 요청 2026-11-06 — 탐색형 도넛의 옆 범례와 같은 규칙). 줄 사이 16 = chart-card gap */
@@ -1377,9 +1377,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .chart-legend i{width:10px;height:10px;border-radius:50%;background:var(--foreground-inactive-primary);flex:none}
 /* 범례 스와치는 클래스로 고른다 — 예제 HTML 이 인라인 style 로 토큰을 참조하면
    소비자 0 검사(assets/style.css 만 본다)가 그 참조를 세지 못하고, 데이터 파일에 토큰 이름이 흩어진다 */
-.chart-legend i.critical{background:var(--foreground-negative-primary)}
+.chart-legend i.critical{background:var(--foreground-negative-strong)}
 .chart-legend i.high{background:var(--foreground-cautionary-primary)}
-.chart-legend i.medium{background:var(--surface-accent-lime-opaque)}
+.chart-legend i.medium{background:var(--foreground-accent-lime)}
 .chart-legend i.low{background:var(--foreground-accent-light-blue)}
 .chart-legend i.info{background:var(--foreground-inactive-primary)}
 
@@ -1439,17 +1439,17 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .sev-band{display:flex;height:10px;border-radius:var(--radius-full);overflow:hidden;width:100%;line-height:1.6}
 .sev-band i{display:block;height:100%;box-shadow:inset -1px 0 0 var(--surface-elevated-primary)}
 .sev-band i:last-child{box-shadow:none}
-.sev-band i.critical{background:var(--foreground-negative-primary)}
+.sev-band i.critical{background:var(--foreground-negative-strong)}
 .sev-band i.high{background:var(--foreground-cautionary-primary)}
-.sev-band i.medium{background:var(--surface-accent-lime-opaque)}
+.sev-band i.medium{background:var(--foreground-accent-lime)}
 .sev-band i.low{background:var(--foreground-accent-light-blue)}
 .sev-band i.info{background:var(--foreground-inactive-primary)}
 
 .sev-cell{display:inline-flex;align-items:center;gap:8px;line-height:1.6}
 .sev-cell i{width:3px;height:16px;border-radius:2px;background:var(--foreground-inactive-primary)}
-.sev-cell i.critical{background:var(--foreground-negative-primary)}
+.sev-cell i.critical{background:var(--foreground-negative-strong)}
 .sev-cell i.high{background:var(--foreground-cautionary-primary)}
-.sev-cell i.medium{background:var(--surface-accent-lime-opaque)}
+.sev-cell i.medium{background:var(--foreground-accent-lime)}
 .sev-cell i.low{background:var(--foreground-accent-light-blue)}
 .sev-cell i.info{background:var(--foreground-inactive-primary)}
 .onboard{display:flex;flex-direction:column;gap:24px;align-items:center;align-items:safe center;width:100%;max-width:560px;margin:0 auto;line-height:1.6}   /* safe — Steps 가 넘치면 왼쪽부터(390 에서 양끝이 잘렸다). 앞의 center 는 safe 를 모르는 엔진용 */

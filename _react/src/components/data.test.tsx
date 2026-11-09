@@ -138,12 +138,12 @@ describe("Donut", () => {
 });
 
 describe("Severity 5단계", () => {
-  /* 사람의 결정(2026-11-06) — Medium = 채운 라임, Low = 라이트 블루, Info = 중립. 사이트 CSS · ds-chart TONES 와 같은 토큰이어야 한다 */
+  /* 사람의 결정(2026-11-06) — Critical = negative-strong · Medium = accent lime(2026-11-09), Low = 라이트 블루, Info = 중립. 사이트 CSS · ds-chart TONES 와 같은 토큰이어야 한다 */
   it("Donut 조각이 다섯 등급 토큰을 쓴다", () => {
     const tones = ["critical", "high", "medium", "low", "info"] as const;
     const { container } = render(<Donut segments={tones.map((t) => ({ label: t, value: 1, tone: t }))} />);
     const bg = (container.firstElementChild as HTMLElement).style.background;
-    const want = ["--foreground-negative-primary", "--foreground-cautionary-primary", "--surface-accent-lime-opaque", "--foreground-accent-light-blue", "--foreground-inactive-primary"];
+    const want = ["--foreground-negative-strong", "--foreground-cautionary-primary", "--foreground-accent-lime", "--foreground-accent-light-blue", "--foreground-inactive-primary"];
     expect(want.map((t) => bg.indexOf(`var(${t})`))).toEqual([...want.map((t) => bg.indexOf(`var(${t})`))].sort((a, b) => a - b));
     expect(want.every((t) => bg.includes(`var(${t})`))).toBe(true);
     expect(bg).not.toContain("--foreground-accent-cyan");

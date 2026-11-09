@@ -663,11 +663,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color, dot: getComputedStyle(e, "::before").backgroundColor }; e.remove(); return r; };
       out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid") };
       /* 심각도는 독립 축이 아니라 상태·강조 의도 매핑이다 —
-         Critical=negative · High=cautionary · Medium=accent lime(점은 채운 lime-opaque) · Low=accent light blue · Info=중립, 상태 Pending=accent cyan.
+         Critical=negative · High=cautionary · Critical 점=negative-strong · Medium=accent lime(점 foreground/accent/lime, 2026-11-09) · Low=accent light blue · Info=중립, 상태 Pending=accent cyan.
          라벨은 다섯 등급 모두 중립 글자색이고(기준 시스템의 Chip 패턴), 색은 점과 틴트가 나른다.
          dot = ::before 의 실제 배경색이다 — 토큰이 아니라 렌더된 색을 본다 */
-      const DOT = { critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary",
-        medium: "--surface-accent-lime-opaque", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary", pending: "--foreground-accent-cyan" }[l];
+      const DOT = { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary",
+        medium: "--foreground-accent-lime", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary", pending: "--foreground-accent-cyan" }[l];
       const TINT = { critical: "--surface-negative-primary", high: "--surface-cautionary-primary",
         medium: "--surface-accent-lime", low: "--surface-accent-light-blue", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
       const SOLID = { critical: "--surface-negative-strong", high: "--surface-cautionary-primary",
@@ -1245,7 +1245,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   /* 심각도 5단계(사람의 결정 2026-11-06) — 정적 지표(막대 · 범례 · 밴드 · 행 막대) · 정적 도넛 조각 · 탐색형 차트 톤이 전부 같은 토큰을 집는지.
      차트 색 단정은 DSChart.TONES 와 대조하므로 TONES 자체가 틀리면 함께 틀린다 — 여기서는 기대 토큰을 직접 적어 둘 다 잰다 */
-  const SEV_TOK = { critical: "--foreground-negative-primary", high: "--foreground-cautionary-primary", medium: "--surface-accent-lime-opaque", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary" };
+  const SEV_TOK = { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary", medium: "--foreground-accent-lime", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary" };
   for (const theme of ["light", "dark"]) {
     await page.evaluate((t) => { t === "dark" ? document.documentElement.setAttribute("data-theme", "dark") : document.documentElement.removeAttribute("data-theme"); }, theme);
     await page.waitForTimeout(200);

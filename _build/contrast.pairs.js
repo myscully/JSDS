@@ -83,11 +83,12 @@ const pairs = [
   ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자", REF("다크는 rest 가 제품 HEX(brand-50)라 제품 색 제약이 받치고, 상태가 밝아지는 쪽(55 → 60)이라 hover·pressed 만 4.5 아래다 — #0066FF 4.13 · 3.54, 밝은 제품 #008760 3.31 · 2.51")],
 
   /* 글자 없는 지표(점·바·밴드·도넛) — 1.4.11 의 3:1 */
-  ["--foreground-negative-primary", SURFACES, 3, "Critical 지표"],   // 오류 필드의 테두리(포커스 때도 1px)도 이 토큰. 바깥 4px --line-negative-focus 후광은 장식(1.17)
+  ["--foreground-negative-primary", SURFACES, 3, "부정 지표 — danger 점 · 진행 막대"],   // 오류 필드의 테두리(포커스 때도 1px)도 이 토큰. 바깥 4px --line-negative-focus 후광은 장식(1.17)
   ["--foreground-cautionary-primary", SURFACES, 3, "High 지표", REF("기준 시스템 값 — 라이트 2.24")],
-  /* 심각도 5단계(사람의 결정 2026-11-06) — Medium 은 요청대로 채운 라임(surface/accent/lime-opaque)이다. 라이트 lime-50 은 흰 바탕에서 2.03 이라
-     3:1 을 못 넘는다 — High 주황(2.24)과 같은 처지이고, 등급 라벨 병기가 제약이라(verify) 색이 유일한 단서가 아니다 */
-  ["--surface-accent-lime-opaque", SURFACES, 3, "Medium 지표", REF("사람의 결정(2026-11-06) — 요청한 토큰 그대로. 라이트 lime-50 이 흰 바탕 2.03 · 회색 바탕 1.90, 다크 lime-60 은 9.32~11.22")],
+  /* 심각도 5단계(사람의 결정 2026-11-06), Critical · Medium 톤(2026-11-09) — Critical 은 진한 빨강 negative-strong, Medium 은 foreground/accent/lime(라이트 lime-40).
+     Medium 라이트는 3:1 을 못 넘는다 — High 주황(2.24)과 같은 처지이고, 등급 라벨 병기가 제약이라(verify) 색이 유일한 단서가 아니다 */
+  ["--foreground-negative-strong", SURFACES, 3, "Critical 지표"],
+  ["--foreground-accent-lime", SURFACES, 3, "Medium 지표", REF("사람의 결정(2026-11-09) — 라이트 lime-40 이 흰 바탕 2.90 · 회색 바탕 2.70, 다크 lime-50 은 통과")],
   ["--foreground-accent-light-blue", SURFACES, 3, "Low 지표"],
   ["--foreground-inactive-primary", SURFACES, 3, "Info 지표 · 비활성 점", REF("기준 시스템 값 — 라이트 2.78 · 다크 2.55")],
   ["--foreground-accent-cyan", SURFACES, 3, "Pending 상태 점(태그) · info 알림 아이콘"],
@@ -133,14 +134,15 @@ const separation = [
 
 /* 심각도 다섯 등급은 서로 다른 값이어야 한다. 휘도 분리는 요구하지 않는다 —
    다섯 색의 색조가 모두 다르고(빨강·주황·라임·라이트 블루·중립, 2026-11-06) 대비 비율은 색조 차이를 보지 못한다.
-   색각 분리 실측(dataviz validate_palette.js --pairs all, 2026-11-06): Medium 라임 ↔ High 주황이 적록(deutan) 색각에서
-   라이트 ΔE 2.2(#58CF04 ↔ #FF9200) · 다크 0.3(#6BE016 ↔ #FFA938) — 사실상 같은 색으로 보인다(목표 8 · 하한 6).
+   색각 분리 실측(dataviz validate_palette.js --pairs all, 2026-11-09 Critical = negative-strong · Medium = accent-lime 기준): Medium 라임 ↔ High 주황이 적록 색각에서
+   라이트 ΔE 0.3(protan, #48AD00 ↔ #FF9200) · 다크 4.4(protan, #58CF04 ↔ #FFA938) — 라이트는 사실상 같은 색으로 보인다(목표 8 · 하한 6).
+   (2026-11-06 의 lime-opaque 때는 라이트 2.2 · 다크 0.3)
    옛 4단계(청록 Medium)는 최악 쌍이 10.5 로 통과했다. 정상 시각 하한(15)은 라이트 16.3 · 다크 15.8 로 통과한다.
    이 쌍은 등급 라벨 · 고정 순서(Critical → Info) · 조각 사이 구분선이 대신 갈라 준다 — 색 말고 단서가 있어야 하는 이유다
    색만으로 의미를 전달하지 않는다(1.4.1)는 라벨 병기와 구분선이 담당하고 verify 가 그것을 검사한다 */
 const severityRanks = [
-  "--foreground-negative-primary", "--foreground-cautionary-primary",
-  "--surface-accent-lime-opaque", "--foreground-accent-light-blue", "--foreground-inactive-primary",
+  "--foreground-negative-strong", "--foreground-cautionary-primary",
+  "--foreground-accent-lime", "--foreground-accent-light-blue", "--foreground-inactive-primary",
 ];
 
 /* 소비자가 없어도 허용하는 토큰 — 기준 시스템과 1:1 이 목적이므로, 우리 화면이 아직 안 쓰는 것이 남는다.
@@ -151,9 +153,9 @@ const grammarOnly = [
   "--surface-neutral-primary", "--surface-elevated-secondary",
   "--surface-brand-heavy",
   ...ACCENTS.flatMap((c) => [`--surface-accent-${c}-opaque`, `--line-accent-${c}`, `--foreground-accent-${c}`])
-    /* 심각도가 쓰는 것은 뺀다 — cyan(Pending · info 알림), lime(Medium: 면 · 점 lime-opaque · solid 테두리), light-blue(Low: 면 · 점 · 테두리) */
+    /* 심각도가 쓰는 것은 뺀다 — cyan(Pending · info 알림), lime(Medium: 면 · 점 foreground-accent-lime · solid 테두리), light-blue(Low: 면 · 점 · 테두리) */
     .filter((t) => !/cyan$/.test(t) || /opaque|line/.test(t))
-    .filter((t) => !["--surface-accent-lime-opaque", "--line-accent-lime", "--line-accent-cyan", "--foreground-accent-light-blue", "--line-accent-light-blue"].includes(t)),
+    .filter((t) => !["--foreground-accent-lime", "--line-accent-lime", "--line-accent-cyan", "--foreground-accent-light-blue", "--line-accent-light-blue"].includes(t)),
   ...ACCENTS.filter((c) => !["cyan", "lime", "light-blue"].includes(c)).map((c) => `--surface-accent-${c}`),
   "--line-neutral-primary-opaque", "--line-neutral-secondary-opaque", "--line-neutral-tertiary-opaque",
   "--line-negative-strong",   // --line-brand-focus · --line-negative-focus 는 값 입력 필드 포커스 후광으로, --line-brand-strong 은 Outline Primary 버튼 테두리로(2026-10-29) 쓰기 시작해 뺐다
