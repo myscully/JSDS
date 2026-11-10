@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 65 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 712/712 · react 415+5 · tsc 0
+pages 65 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 744/744 · react 449+5 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -244,6 +244,16 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **측정에서 드러나 고친 것:** React Popup 을 상태로 열면 Portal 이 한 박자 늦어 포커스 이동 · Tab 가둠 · 복귀가 아예 동작하지 않았다(`activeElement=body`, 기존 버그) — 훅을 Portal 안 Layer 로 옮겼고, `useEscape` 는 바깥에 남겨야 Esc 순서가 맞다. 오류만 있는 Toast 묶음에 포커스 리스너가 안 붙어 복귀 자리를 못 기억했다. `.menu-item` 클릭이 앞 분기에서 return 되어 '입력 중' 표시가 안 됐다(캡처로). Esc 뒤 툴팁이 지연 규칙 때문에 300ms 남았다. `:not(.quiet):hover` 의 명시도가 포커스의 `0ms` 를 이겼다.
 - **Banner 안 버튼(사람의 결정 — 커밋 전에 고침):** 제품 색 면 위 `outline assistive` 의 글자가 neutral-primary 라 라이트 3.70 이었다. 글자 · 테두리를 `--brand-label` 로(라이트 · 다크 4.83), hover · 누름은 Solid Primary 와 같은 `--surface-brand-strong` · `heavy`, 스피너와 포커스 링도 라벨 색으로. 경고 · 위험 Banner 는 면이 틴트라 그대로다. 다크 hover 4.17 · 누름 3.54 는 Solid Primary 와 같은 쌍으로 이미 선언된 예외다(`--brand-label` 쌍의 REF) — 그래서 contrast 수는 그대로다.
 - 음성 시험: 사이트 76건 · React 49건. 첫 회 4건을 못 잡아(같은 Toast 시간 다시 재기 · 일반 Toast 와 동작 Toast 합침 · 페이지 안 패널 예제 닫힘 · 패널 본문 스크롤) 단정을 고쳤고 다시 깨서 모두 실패로 잡았다. render.js 의 ds.js 크기 104KB → 115KB. Figma 미반영 127 → 130건(Side Panel Spec 카드 없음 포함).
+
+2026-11-10 데이터 정비(Data Table · Table · Pagination · List · Item Tile, 사람의 결정 넷) — behave 712 → 744(`behave.data.js` 32) · react 415+5 → 449+5(`tests/data-bundle.test.tsx` 27 · 예제 195 → 202 에 따른 구조 비교 7). contrast · advisory · pages 수는 그대로(새 색 쌍 없음).
+- **v1.0 범위는 고정 헤더만**(사람의 결정) — `.tbl-wrap.sticky` · React `stickyHeader` + `maxHeight`. **열 표시 설정 · 행 펼침은 v1.0 완료 뒤 넣을지 다시 묻는다(사람의 요청).**
+- **전체 선택 = 페이지 + 전체 안내, 유지**(사람의 결정) — 머리글 체크박스는 이 페이지의 켜진 행만. 페이지를 다 고르면 '전체 n건 선택' 안내(`.tbl-wrap[data-total]` · `ds:select-all` · React `totalCount` · `allMatching`). 비활성 행은 말없이 뺀다(사람의 결정). 페이지를 옮겨도 선택은 남고 필터가 바뀌면 지운다(React `selectionScope`, 사이트는 제품 몫). 전체 실행은 제품 서버.
+- **Pagination 커서 = 이전 · 다음**(사람의 결정) — `.pagination.cursor` + `ds:page {direction}` · React `CursorPagination`. 표시 개수 20 · 50 · 100(`PAGE_SIZES`), 번호 칸 9칸 이하(verify · React 경고), 표시 개수를 바꾸면 1페이지, 한 페이지뿐이면 번호를 숨기고 건수는 유지, 이동 후 `data-target` · `target` 으로 포커스 · 스크롤. 표시 개수 · 칸 상한은 제안을 사람이 확인했다(사람의 결정).
+- **큰 선택지 셋 유지, 경계 적기**(사람의 결정) — Tile = 아이콘 위주 다중 선택 · 바로 이동, Card Selection = 내용 많은 카드, Card Radio = 하나만. `data-single` 을 없앴고(verify) 온보딩 패턴을 Card Radio 로 옮겼다(사람의 결정).
+- **그 밖에** 서버 정렬(`data-sort="server"` + `ds:sort` · `manualSort`), 로딩 · 오류 · 첫 사용 상태, 말줄임, 행 삭제 후 포커스(`DS.table.removeRow`). 규칙만 적고 구현은 제품 몫: 로그 표 자동 갱신 · 일시 정지 · 새 행 표시, 현재 페이지 URL 저장. `principles` 를 다섯 컴포넌트에 더했다.
+- **verify 더함:** 표 머리글 필수 · `th.sortable` 는 `button.sort` · 머리글 안 다른 조작 금지 · 행 버튼 이름 중복 · 고정 헤더 영역의 tabindex + 이름 · listbox 항목 규칙 · 번호 칸 · `data-single` 금지.
+- **측정에서 드러나 고친 것:** 정렬 머리글이 `th` 클릭뿐이라 키보드로 닿지 않았다(버튼으로). 사이트 listbox 에 키보드가 없었다. List 의 안쪽 버튼 Enter 를 행이 가로챘다. React 머리글 체크박스를 끄면 다른 페이지 선택까지 지웠고 비활성 행까지 골랐다. 끝에 닿아 꺼진 화살표에서 포커스가 사라졌다. 행 버튼 이름이 행마다 같았다(List '더 보기' · 로그 '상세'). 커서의 범위 글자가 크기 지정이 없어 본문 16 을 물려받았다(14 로 — 전체 behave 의 15px 기본 글자 검사가 잡음).
+- 음성 시험: 사이트 46건 · React 45건. 첫 회 CSS 2건을 못 잡아(정렬 버튼 면 리셋 · 커서 버튼의 아이콘 가로 배치) 단정을 더했고 다시 깨서 모두 실패로 잡았다. 1건은 변형이 없던 시험이라 고쳤다. `.tbl-wrap.sticky{overflow:auto}` 는 지워도 통과해 재 보니 `overflow-x:auto` 로 이미 계산되는 쓸모없는 선언이라 지웠다. render.js 의 ds.js 크기 115KB → 119KB. Figma 미반영 130 → 133건.
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

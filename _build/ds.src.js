@@ -119,7 +119,10 @@
     var i = nums.indexOf(next), arrows = $$("button[aria-label]", nav);
     if (arrows[0]) arrows[0].disabled = i === 0;
     if (arrows[1]) arrows[1].disabled = i === nums.length - 1;
+    if (btn.disabled) next.focus();   // 끝에 닿아 꺼진 화살표에 포커스가 남으면 키보드가 갈 곳을 잃는다
     fire(nav, "ds:page", { page: Number(next.textContent) });
+    var tg = nav.dataset.target && $(nav.dataset.target);
+    if (tg) { if (!tg.hasAttribute("tabindex")) tg.tabIndex = -1; tg.focus({ preventScroll: true }); tg.scrollIntoView({ block: "start" }); }
   }
 
   /* ---------- Slider ---------- */
@@ -605,7 +608,7 @@
   }
   function childrenOf(master) {
     var th = closest(master, "th.check");
-    if (th) { var tbl = closest(th, "table"); return $$("tbody td.check input", tbl); }
+    if (th) { var tbl = closest(th, "table"); return $$("tbody tr:not(.disabled) td.check input", tbl); }
     var lab = closest(master, ".checkbox"), sib = lab && lab.nextElementSibling;
     if (sib && sib.classList.contains("checkbox-group")) return $$("input[type=checkbox]", sib);
     return [];
@@ -615,7 +618,30 @@
     var wrap = closest(input, ".tbl-wrap"), tbl = closest(input, "table");
     var master = tbl && $("th.check input", tbl); if (master) syncMaster(master);
     var bar = wrap && $(".action-bar", wrap);
-    if (bar) { var n = $$("tbody td.check input:checked", tbl).length; var b = $("b", bar); if (b) b.textContent = n + "개 선택"; bar.hidden = n === 0; }
+    var n = tbl ? $$("tbody td.check input:checked", tbl).length : 0;
+    var total = wrap ? Number(wrap.dataset.total) || 0 : 0, note = wrap && $(":scope > .select-notice", wrap);
+    var pageAll = !!(master && master.checked), wasAll = wrap && wrap._dsAll;
+    if (wrap && !pageAll) wrap._dsAll = false;
+    if (note) selectNotice(wrap, note, n, total, pageAll);
+    if (wrap && wasAll && !wrap._dsAll) fire(wrap, "ds:select-all", { all: false, total: total });
+    if (bar) { var shown = wrap._dsAll ? total : n; var b = $("b", bar); if (b) b.textContent = shown.toLocaleString("ko-KR") + "개 선택"; bar.hidden = n === 0; }
+  }
+  /* 머리글 체크박스는 이 페이지만 고른다. 건수를 아는 표(data-total)는 전체 결과까지 넓힐 길을 안내한다 — 실행은 제품 서버가 한다(ds:select-all) */
+  function selectNotice(wrap, note, n, total, pageAll) {
+    var f = function (v) { return Number(v).toLocaleString("ko-KR"); }, html = "";
+    if (wrap._dsAll) html = '<span>전체 ' + f(total) + '건을 선택했습니다.</span><button type="button" class="btn sm text" data-select-clear>선택 해제</button>';
+    else if (pageAll && total > n) html = '<span>이 페이지의 ' + f(n) + '건을 모두 선택했습니다.</span><button type="button" class="btn sm text" data-select-all>전체 ' + f(total) + '건 선택</button>';
+    if (note.innerHTML !== html) note.innerHTML = html;
+  }
+  /* 행을 지운 뒤 포커스 — 지운 행의 다음(없으면 이전) 행의 첫 조작 요소로, 행이 없으면 표 영역으로 */
+  function removeRow(tr) {
+    tr = typeof tr === "string" ? $(tr) : tr; if (!tr || !tr.parentNode) return;
+    var tbl = closest(tr, "table"), wrap = closest(tr, ".tbl-wrap"), to = tr.nextElementSibling || tr.previousElementSibling, had = tr.contains(doc.activeElement);
+    tr.remove();
+    var master = tbl && $("th.check input", tbl); if (master) syncRow(master);
+    if (!had) return;
+    var f = to && $(FOCUSABLE, to);
+    if (f) f.focus(); else if (wrap) { wrap.tabIndex = wrap.tabIndex >= 0 ? wrap.tabIndex : -1; wrap.focus(); }
   }
   function syncTerms(terms) {
     var all = $(".all input", terms), items = $$(".item input[type=checkbox]", terms); if (!items.length) return;
@@ -637,6 +663,8 @@
     var desc = th.classList.contains("sorted") && !th.classList.contains("desc");
     ths.forEach(function (h) { h.classList.remove("sorted", "desc"); h.removeAttribute("aria-sort"); });
     th.classList.add("sorted"); if (desc) th.classList.add("desc"); th.setAttribute("aria-sort", desc ? "descending" : "ascending");
+    fire(th, "ds:sort", { key: th.dataset.key || th.textContent.trim(), dir: desc ? "desc" : "asc" });
+    if (table.dataset.sort === "server") return;   // 서버가 정렬한 페이지를 다시 정렬하면 현재 페이지만 뒤섞여 틀려 보인다
     var rows = $$("tr", tbody).filter(function (r) { return !$("td.empty", r); });
     var val = function (r) { var c = r.children[col]; var t = c ? c.textContent.trim() : ""; var n = parseFloat(t.replace(/[,\s%]/g, "")); return isNaN(n) || !/^-?[\d,.]+\s*%?$/.test(t) ? t : n; };
     rows.sort(function (a, b) { var x = val(a), y = val(b); var c = typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y), "ko"); return desc ? -c : c; });
@@ -974,6 +1002,7 @@
     // Dropdown 트리거
     if ((el = closest(t, ".dropdown [aria-haspopup]")) && !el.disabled) { var dd = closest(el, ".dropdown"); setOpen(dd, !dd.classList.contains("open")); return; }
     if ((el = closest(t, ".menu-state [data-retry]"))) { fire(closest(el, ".dropdown, .combobox"), "ds:retry"); return; }
+    if ((el = closest(t, ".tbl [data-retry]"))) { fire(closest(el, ".tbl-wrap"), "ds:retry"); return; }
     if ((el = closest(t, ".combobox .x"))) { var cbh = closest(el, ".combobox"); if (!cbInput(cbh).disabled) cbRemove(cbh, closest(el, ".chip")); return; }
     if ((el = closest(t, ".combobox .menu-item"))) { if (el.getAttribute("aria-disabled") !== "true") cbPick(closest(el, ".combobox"), el); return; }
     if ((el = closest(t, ".combobox .control"))) { var cbc = closest(el, ".combobox"), cbi = cbInput(cbc); if (!cbi.disabled) { cbi.focus(); cbOpen(cbc, t === cbi || !cbc.classList.contains("open")); } return; }
@@ -994,11 +1023,14 @@
     if ((el = closest(t, "button.chip[aria-pressed]")) && !el.disabled) { var on = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", on); el.setAttribute("aria-pressed", String(on)); syncChipReset(el.parentNode); return; }
     if ((el = closest(t, "[data-chip-reset]"))) { var cg = closest(el, ".chip-group"); $$(":scope > .chip.on[aria-pressed]", cg).forEach(function (c) { c.classList.remove("on"); c.setAttribute("aria-pressed", "false"); }); syncChipReset(cg); var c1 = $(":scope > button.chip:not([disabled])", cg); if (c1) c1.focus(); fire(cg, "ds:chip-reset"); return; }
     // Tile
-    if ((el = closest(t, ".tile[aria-pressed]")) && !el.disabled) { var grid = closest(el, ".tile-grid"), single = grid && grid.dataset.single !== undefined; if (single) activate(grid, ".tile", el, "aria-pressed"); else { var o2 = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", o2); el.setAttribute("aria-pressed", String(o2)); } return; }
+    if ((el = closest(t, ".tile[aria-pressed]")) && !el.disabled) { var o2 = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", o2); el.setAttribute("aria-pressed", String(o2)); return; }
     // List listbox
     if ((el = closest(t, '.list[role=listbox] > li[role=option]'))) { activate(closest(el, ".list"), "li", el, "aria-selected"); return; }
     // Pagination
+    if ((el = closest(t, ".pagination.cursor button")) && !el.disabled) { fire(closest(el, ".pagination"), "ds:page", { direction: el.dataset.cursor }); return; }
     if ((el = closest(t, ".pagination button")) && !el.disabled) { paginate(closest(el, ".pagination"), el); return; }
+    if ((el = closest(t, ".select-notice [data-select-all]"))) { var aw = closest(el, ".tbl-wrap"); aw._dsAll = true; var am = $("th.check input", aw); syncRow(am); var at = $("[data-select-clear]", aw); if (at) at.focus(); fire(aw, "ds:select-all", { all: true, total: Number(aw.dataset.total) }); return; }
+    if ((el = closest(t, ".select-notice [data-select-clear]"))) { var cw = closest(el, ".tbl-wrap"), cm = $("th.check input", cw); cw._dsAll = false; $$("tbody td.check input:checked", cw).forEach(function (c) { c.checked = false; syncRow(c); }); if (cm) cm.focus(); fire(cw, "ds:select-all", { all: false, total: Number(cw.dataset.total) }); return; }
     // SideNav · TopBar 활성
     if ((el = closest(t, ".sidenav a, .topbar nav a"))) { var nav = closest(el, ".sidenav, .topbar nav"); $$("a", nav).forEach(function (x) { x.classList.toggle("on", x === el); x.classList.remove("has-on"); x === el ? x.setAttribute("aria-current", "page") : x.removeAttribute("aria-current"); });
       // 하위 항목을 고르면 바로 위 부모가 .has-on — 접힌 레일은 하위 항목을 숨기므로 부모가 선택 모양과 aria-current="true" 를 이어받는다
@@ -1164,6 +1196,11 @@
     /* 클릭이 끝난 뒤에 알린다 — 브라우저가 취소된 클릭의 checked 를 되돌리므로, 처리기가 바로 resolve 하면 값이 지워진다 */
     setTimeout(function () { fire(inp, "ds:switch", { checked: next, resolve: function () { if (settle()) inp.checked = next; }, cancel: settle, reject: function (msg) { if (settle()) toast(msg || SWITCH_FAIL, { tone: "danger" }); } }); }, 0);
   }, true);
+  doc.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var li = closest(e.target, ".list[role=listbox] > li[role=option]"); if (!li || li !== e.target) return;
+    e.preventDefault(); activate(closest(li, ".list"), "li", li, "aria-selected");
+  });
   /* Select Button — 화살표로 옮기면 바로 고른다(Radio 와 같음). 비활성은 건너뛰고 끝에서 돌아온다 */
   doc.addEventListener("keydown", function (e) {
     var b = closest(e.target, ".select-btn[role=radiogroup] > button"), d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
@@ -1185,7 +1222,14 @@
   doc.addEventListener("click", function (e) {
     var th = closest(e.target, ".tbl th.sortable"); if (th) sortTable(th);
   });
+  doc.addEventListener("ds:select", function (e) {
+    var bar = closest(e.target, ".pagination-bar"); if (!bar || !closest(e.target, ".dropdown")) return;
+    var nav = $(".pagination", bar), nums = nav ? $$("button:not([aria-label])", nav) : [], arrows = nav ? $$("button[aria-label]", nav) : [];
+    nums.forEach(function (b, i) { b.classList.toggle("on", i === 0); if (i === 0) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+    if (arrows[0]) arrows[0].disabled = true; if (arrows[1]) arrows[1].disabled = nums.length < 2;
+    fire(nav || bar, "ds:page", { page: 1, pageSize: Number(e.detail && e.detail.value) });
+  });
 
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
-  window.DS = { init: init, toast: toast, popup: popup, panel: panel, validate: vRun, version: "0.5" };
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, validate: vRun, version: "0.5" };
 })();

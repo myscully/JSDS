@@ -16,9 +16,9 @@ const LOG_ROWS = [
 const logTable = (rows) => `
         <div class="tbl-wrap">
           <table class="tbl compact">
-            <thead><tr><th class="sortable sorted desc" aria-sort="descending">시간</th><th>심각도</th><th>소스 IP</th><th>단말</th><th>메시지</th><th class="actions"></th></tr></thead>
+            <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>심각도</th><th>소스 IP</th><th>단말</th><th>메시지</th><th class="actions"></th></tr></thead>
             <tbody>
-              ${rows.map(([t, tone, lv, ip, host, msg]) => `<tr class="log-row"><td>2026-09-07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td>${msg}</td><td class="actions"><button type="button" class="btn sm assistive icon-only" aria-label="상세">${I("dots")}</button></td></tr>`).join("\n              ")}
+              ${rows.map(([t, tone, lv, ip, host, msg]) => `<tr class="log-row"><td>2026-09-07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td>${msg}</td><td class="actions"><button type="button" class="btn sm assistive icon-only" aria-label="${t} 로그 상세">${I("dots")}</button></td></tr>`).join("\n              ")}
             </tbody>
           </table>
         </div>`;
@@ -147,7 +147,7 @@ const PATTERNS = {
 
   /* ------------------------------------------------ Service Pattern */
   "onboarding": {
-    status: "ready", react: ["Onboard","Steps"], uses: ["indicator", "card", "item-tile", "button"], css: [".onboard"], borrows: [".keep-all"],
+    status: "ready", react: ["Onboard","Steps"], uses: ["indicator", "card", "radio-button", "button"], css: [".onboard"], borrows: [".keep-all"],
     desc: "첫 사용자가 콘솔을 설정하는 단계형 흐름입니다. 진행 단계 표시, 한 단계 한 결정, 건너뛰기 허용.",
     thumb: `<ol class="steps" style="font-size:12px"><li class="done"><i style="width:18px;height:18px;font-size:10px">${I("check",10)}</i>1</li><li class="on"><i style="width:18px;height:18px;font-size:10px">2</i>2</li><li><i style="width:18px;height:18px;font-size:10px">3</i>3</li></ol>`,
     examples: [
@@ -157,9 +157,9 @@ const PATTERNS = {
           <div class="card">
             <h3 class="title">보호 수준을 선택하세요</h3>
             <p class="desc">나중에 정책 › 기본 정책에서 바꿀 수 있습니다.</p>
-            <div class="tile-grid" data-single style="grid-template-columns:1fr 1fr">
-              <button type="button" class="tile on" aria-pressed="true"><span class="ico">S</span><b>표준</b><span>알려진 위협 차단. 권장</span></button>
-              <button type="button" class="tile" aria-pressed="false"><span class="ico">E</span><b>강화</b><span>의심 행위까지 차단</span></button>
+            <div class="radio-group row" role="radiogroup" aria-label="보호 수준">
+              <label class="radio card"><input type="radio" name="ob-level" checked><span>표준<small>알려진 위협 차단. 권장</small></span></label>
+              <label class="radio card"><input type="radio" name="ob-level"><span>강화<small>의심 행위까지 차단</small></span></label>
             </div>
             <div class="card-foot"><button type="button" class="btn md text">건너뛰기</button><button type="button" class="btn md outline assistive" data-step="prev">이전</button><button type="button" class="btn md solid primary" data-step="next">다음</button></div>
           </div>
@@ -199,7 +199,7 @@ const PATTERNS = {
           </div>
           <div class="tbl-wrap">
             <table class="tbl">
-              <thead><tr><th class="sortable sorted desc" aria-sort="descending">시간</th><th>심각도</th><th>이벤트</th><th>대상</th><th>상태</th></tr></thead>
+              <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>심각도</th><th>이벤트</th><th>대상</th><th>상태</th></tr></thead>
               <tbody>
                 <tr><td>09:41:12</td><td><span class="tag critical">Critical</span></td><td><a href="#" class="link">랜섬웨어 행위 탐지</a></td><td>PC-2041 · 김민준</td><td><span class="indicator danger">차단</span></td></tr>
                 <tr><td>09:36:47</td><td><span class="tag high">High</span></td><td><a href="#" class="link">알려진 악성코드 차단</a></td><td>PC-0932 · 박지훈</td><td><span class="indicator danger">차단</span></td></tr>
@@ -345,7 +345,7 @@ const PATTERNS = {
       { id: "table", title: "표 안의 심각도", desc: "행 좌측 색 막대(.sev-cell) + Tag. 정렬 기본값은 심각도 내림차순.", html: `
         <div class="tbl-wrap" style="max-width:720px">
           <table class="tbl compact">
-            <thead><tr><th class="sortable sorted desc" aria-sort="descending">심각도</th><th>이벤트</th><th>대상</th><th class="num">건수</th></tr></thead>
+            <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">심각도</button></th><th>이벤트</th><th>대상</th><th class="num">건수</th></tr></thead>
             <tbody>
               <tr><td><span class="sev-cell"><i class="critical"></i><span class="tag critical sm">Critical</span></span></td><td>랜섬웨어 행위 탐지</td><td>PC-2041</td><td class="num">3</td></tr>
               <tr><td><span class="sev-cell"><i class="high"></i><span class="tag high sm">High</span></span></td><td>알려진 악성코드 차단</td><td>PC-0932</td><td class="num">2</td></tr>

@@ -1,7 +1,9 @@
-import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import { LABELS } from "../../labels";
+import { mergeRefs } from "../../utils/hooks";
+import { Select } from "../dropdown/Dropdown";
 
 export type PageItem = number | "gap";
 
@@ -27,6 +29,11 @@ export function paginate(page: number, total: number, opts: { siblings?: number;
   return [...out, ...right];
 }
 
+/** 번호 칸 상한(화살표 제외). 앞뒤 경계 1 + 양옆 2 + 생략 2 가 9칸이다 */
+const MAX_SLOTS = 9;
+/** 표시 개수 표준 */
+export const PAGE_SIZES = [20, 50, 100];
+
 export interface PaginationProps extends Omit<HTMLAttributes<HTMLElement>, "onChange"> {
   page: number;
   total: number;
@@ -50,8 +57,16 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
 ) {
   const items = paginate(page, total, { siblings, boundaries });
   const go = (p: number) => { if (p >= 1 && p <= total && p !== page) onChange?.(p); };
+  const slots = boundaries === 0 ? siblings * 2 + 1 : boundaries * 2 + siblings * 2 + 3;
+  useEffect(() => { if (slots > MAX_SLOTS) console.warn(`[ds-react] Pagination 번호 칸은 ${MAX_SLOTS}칸 이하입니다(지금 ${slots}칸) — siblings · boundaries 를 줄이세요.`); }, [slots]);
+  const navEl = useRef<HTMLElement | null>(null);
+  /* 끝에 닿아 꺼진 화살표에 포커스가 남으면 키보드가 갈 곳을 잃는다 */
+  useLayoutEffect(() => {
+    const a = document.activeElement as HTMLButtonElement | null;
+    if (a?.disabled && navEl.current?.contains(a)) navEl.current.querySelector<HTMLElement>("button.on")?.focus();
+  }, [page]);
   return (
-    <nav ref={ref} className={cx("pagination", { compact, outline }, className)} aria-label={label} {...rest}>
+    <nav ref={mergeRefs(ref, navEl)} className={cx("pagination", { compact, outline }, className)} aria-label={label} {...rest}>
       <button type="button" aria-label={prevLabel} disabled={page <= 1} onClick={() => go(page - 1)}>
         <Icon name="chevron-left" size={16} />
       </button>
@@ -72,17 +87,80 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
 });
 
 export interface PaginationBarProps extends HTMLAttributes<HTMLDivElement> {
-  /** 좌측 요약 (총 n건 · 범위) */
+  /** 좌측 요약 (총 n건 · 범위). total 을 주면 기본 문구 */
   summary?: ReactNode;
   /** 우측: Pagination (페이지 크기 선택을 함께 두려면 flex 컨테이너로 묶는다) */
   children?: ReactNode;
+  /** 전체 건수 — 주면 요약 · 표시 개수 · 번호를 이 컴포넌트가 그린다. 개수를 바꾸면 1페이지로 */
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  pageSizes?: number[];
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
+  /** 이동한 뒤 맨 위로 스크롤하고 포커스할 표 */
+  target?: RefObject<HTMLElement | null>;
 }
 /** 테이블 하단 바: 좌측 요약 · 우측 페이지 */
-export const PaginationBar = forwardRef<HTMLDivElement, PaginationBarProps>(function PaginationBar({ summary, className, children, ...rest }, ref) {
+export const PaginationBar = forwardRef<HTMLDivElement, PaginationBarProps>(function PaginationBar({ summary, className, children, total, page = 1, pageSize = PAGE_SIZES[0], pageSizes = PAGE_SIZES, onPageChange, onPageSizeChange, target, ...rest }, ref) {
+  if (total === undefined) {
+    return (
+      <div ref={ref} className={cx("pagination-bar", className)} {...rest}>
+        <span>{summary}</span>
+        {children}
+      </div>
+    );
+  }
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const from = (page - 1) * pageSize + 1, to = Math.min(page * pageSize, total);
+  const fmt = (n: number) => n.toLocaleString("ko-KR");
+  const moved = (p: number) => {
+    onPageChange?.(p);
+    const el = target?.current; if (!el) return;
+    if (!el.hasAttribute("tabindex")) el.tabIndex = -1;
+    el.focus({ preventScroll: true }); el.scrollIntoView?.({ block: "start" });
+  };
+  const showSize = total > Math.min(...pageSizes);
   return (
     <div ref={ref} className={cx("pagination-bar", className)} {...rest}>
-      <span>{summary}</span>
-      {children}
+      <span>{summary ?? <>총 <b>{fmt(total)}</b>건{pages > 1 && <> · {fmt(from)}–{fmt(to)}</>}</>}</span>
+      {(showSize || pages > 1) && (
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {showSize && <Select keepMounted options={pageSizes.map((n) => ({ value: String(n), label: `${n}개씩` }))} value={String(pageSize)} onChange={(v) => { if (v) { onPageSizeChange?.(Number(v)); if (page !== 1) moved(1); } }} />}
+          {pages > 1 && <Pagination compact page={page} total={pages} siblings={2} onChange={moved} />}
+        </div>
+      )}
     </div>
+  );
+});
+
+export interface CursorPaginationProps extends Omit<HTMLAttributes<HTMLElement>, "onChange"> {
+  hasPrev: boolean;
+  hasNext: boolean;
+  onPrev?: () => void;
+  onNext?: () => void;
+  /** 현재 범위. 예) 1–100 */
+  range?: ReactNode;
+  compact?: boolean;
+  label?: string;
+  prevLabel?: string;
+  nextLabel?: string;
+}
+/** 전체 쪽수를 모르는 목록의 이전 · 다음 */
+export const CursorPagination = forwardRef<HTMLElement, CursorPaginationProps>(function CursorPagination(
+  { hasPrev, hasNext, onPrev, onNext, range, compact, label = LABELS.pagination, prevLabel = LABELS.prev, nextLabel = LABELS.next, className, ...rest },
+  ref,
+) {
+  const navEl = useRef<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    const a = document.activeElement as HTMLButtonElement | null;
+    if (a?.disabled && navEl.current?.contains(a)) navEl.current.querySelector<HTMLElement>("button:not(:disabled)")?.focus();
+  }, [hasPrev, hasNext]);
+  return (
+    <nav ref={mergeRefs(ref, navEl)} className={cx("pagination", "cursor", { compact }, className)} aria-label={label} {...rest}>
+      <button type="button" data-cursor="prev" disabled={!hasPrev} onClick={onPrev}><Icon name="chevron-left" size={16} />{prevLabel}</button>
+      {range !== undefined && <span className="range">{range}</span>}
+      <button type="button" data-cursor="next" disabled={!hasNext} onClick={onNext}>{nextLabel}<Icon name="chevron-right" size={16} /></button>
+    </nav>
   );
 });

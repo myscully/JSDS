@@ -34,7 +34,7 @@ export { SearchBar, type SearchBarProps } from "./components/search/SearchBar";
 // C. navigation
 export { Tabs, TabList, Tab, TabPanel, type TabsProps, type TabListProps, type TabProps, type TabPanelProps } from "./components/tab/Tabs";
 export { Breadcrumb, BreadcrumbHome, BreadcrumbItem, BreadcrumbMore, type BreadcrumbProps, type BreadcrumbHomeProps, type BreadcrumbItemProps, type BreadcrumbMoreProps } from "./components/breadcrumb/Breadcrumb";
-export { Pagination, PaginationBar, paginate, type PaginationProps, type PaginationBarProps, type PageItem } from "./components/pagination/Pagination";
+export { Pagination, PaginationBar, CursorPagination, PAGE_SIZES, paginate, type CursorPaginationProps, type PaginationProps, type PaginationBarProps, type PageItem } from "./components/pagination/Pagination";
 export { SideNav, SideNavGroup, SideNavItem, type SideNavProps, type SideNavGroupProps, type SideNavItemProps } from "./components/navigation/SideNav";
 export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, type TopBarProps, type TopBarLogoProps, type TopBarNavProps, type TopBarNavItemProps, type TopBarRightProps } from "./components/top-navigation/TopBar";
 

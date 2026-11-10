@@ -50,14 +50,17 @@ export interface TableHeaderProps extends ThHTMLAttributes<HTMLTableCellElement>
   /** 행 액션 열 */
   actions?: boolean;
 }
-export const TableHeader = forwardRef<HTMLTableCellElement, TableHeaderProps>(function TableHeader({ num, sortable, sorted, check, actions, className, ...rest }, ref) {
+export const TableHeader = forwardRef<HTMLTableCellElement, TableHeaderProps>(function TableHeader({ num, sortable, sorted, check, actions, className, children, ...rest }, ref) {
   return (
     <th
       ref={ref}
       className={cx({ num, sortable, sorted: Boolean(sorted), desc: sorted === "desc", check, actions }, className) || undefined}
       aria-sort={sorted ? (sorted === "asc" ? "ascending" : "descending") : undefined}
       {...rest}
-    />
+    >
+      {/* 정렬은 키보드로 닿아야 한다. 클릭은 버블링으로 th 의 onClick 이 받는다 */}
+      {sortable ? <button type="button" className="sort">{children}</button> : children}
+    </th>
   );
 });
 
@@ -67,7 +70,9 @@ export interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement> {
   actions?: boolean;
   /** 빈 상태 셀 (colSpan 과 함께) */
   empty?: boolean;
+  /** 말줄임. 전체 값은 title 로 */
+  truncate?: boolean;
 }
-export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(function TableCell({ num, check, actions, empty, className, ...rest }, ref) {
-  return <td ref={ref} className={cx({ num, check, actions, empty }, className) || undefined} {...rest} />;
+export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(function TableCell({ num, check, actions, empty, truncate, className, ...rest }, ref) {
+  return <td ref={ref} className={cx({ num, check, actions, empty, truncate }, className) || undefined} {...rest} />;
 });

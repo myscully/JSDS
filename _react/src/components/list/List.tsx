@@ -33,7 +33,7 @@ export const ListItem = forwardRef<HTMLLIElement, ListItemProps>(function ListIt
   const interactive = Boolean(onClick);
   const keyDown = (e: KeyboardEvent<HTMLLIElement>) => {
     onKeyDown?.(e);
-    if (interactive && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.currentTarget.click(); }
+    if (interactive && e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.currentTarget.click(); }   // 안쪽 버튼의 Enter 를 가로채지 않는다
   };
   return (
     <li
@@ -42,7 +42,7 @@ export const ListItem = forwardRef<HTMLLIElement, ListItemProps>(function ListIt
       role={role}
       aria-selected={role === "option" && selected ? true : undefined}
       tabIndex={tabIndex ?? (interactive ? 0 : undefined)}
-      onClick={onClick}
+      onClick={onClick && ((e) => { if (e.target !== e.currentTarget && (e.target as Element).closest("a,button,input,select,textarea,label,[role=button]")) return; onClick(e); })}
       onKeyDown={keyDown}
       {...rest}
     >

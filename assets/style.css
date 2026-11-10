@@ -1070,6 +1070,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .pagination button svg{width:16px;height:16px;display:block}
 .pagination .gap{min-width:36px;text-align:center;color:var(--foreground-disable-primary)}
 .pagination.compact button{min-width:32px;height:32px;font-size:12px}
+.pagination.cursor button{display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.pagination.cursor .range{padding:0 8px;font-size:14px;color:var(--foreground-neutral-secondary);font-variant-numeric:tabular-nums}
 .pagination.outline button{border-color:var(--line-neutral-secondary);background:var(--surface-elevated-primary)}
 .pagination.outline button.on{border-color:var(--surface-brand-primary); color:var(--foreground-brand-primary);}
 .pagination-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;font-size:12px;color:var(--foreground-neutral-secondary);line-height:1.6}
@@ -1352,6 +1354,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl.zebra tbody tr:nth-child(even) td{background:var(--background-neutral-secondary)}
 .tbl th.sortable{cursor:pointer;user-select:none}
 .tbl th.sortable::after{content:"";display:inline-block;width:14px;height:14px;margin-left:6px;vertical-align:-3px;opacity:.45;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M3 9l4 -4l4 4m-4 -4v14%22 /%3E%3Cpath d=%22M21 15l-4 4l-4 -4m4 4v-14%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M3 9l4 -4l4 4m-4 -4v14%22 /%3E%3Cpath d=%22M21 15l-4 4l-4 -4m4 4v-14%22 /%3E%3C/svg%3E") center/contain no-repeat}
+/* 정렬은 버튼 — th 에 클릭만 달려 있어 키보드로 닿지 않았다(2026-11-10). 누를 자리는 th 전체(화살표 포함)이고 버튼은 포커스와 이름을 맡는다 */
+.tbl th.sortable .sort{appearance:none;border:0;background:transparent;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;border-radius:2px}
 .tbl th.sortable:hover{color:var(--foreground-neutral-primary)}
 .tbl th.sorted{color:var(--foreground-brand-primary)}
 .tbl th.sorted::after{opacity:1;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 11l-6 -6%22 /%3E%3Cpath d=%22M6 11l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 11l-6 -6%22 /%3E%3Cpath d=%22M6 11l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat}
@@ -1364,6 +1368,16 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl.kv th{width:200px;height:auto;padding:12px 16px;font-size:14px;color:var(--foreground-neutral-secondary);font-weight:500;border-right:1px solid var(--line-neutral-secondary);white-space:normal;vertical-align:top}
 .tbl.kv td{height:auto}
 .tbl td.empty{display:table-cell;text-align:center;color:var(--foreground-neutral-tertiary);height:auto;padding:24px 16px;font-size:14px;border:none;border-radius:0;background:transparent}
+.tbl td.truncate{max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}   /* 남는 폭을 차지하고 그 안에서 자른다. 전체 값은 title 과 상세에서 */
+/* 고정 헤더 — 표 영역 안에서 세로로 스크롤한다. collapse 표의 th 보더는 스크롤하면 사라져 아래 선을 그림자로 그린다.
+   스크롤 영역이라 키보드로 닿도록 tabindex=0 + 이름(verify). 선택 막대가 있으면 그 아래(10+32+10+1)에 붙는다 */
+.tbl-wrap.sticky{scroll-padding-top:44px}
+.tbl-wrap.sticky .tbl th{position:sticky;top:0;z-index:1;box-shadow:inset 0 -1px 0 var(--line-neutral-secondary)}
+.tbl-wrap.sticky > .action-bar{position:sticky;top:0;left:0;z-index:2}
+.tbl-wrap.sticky:has(> .action-bar:not([hidden])) .tbl th{top:53px}
+.tbl-wrap.sticky:has(> .action-bar:not([hidden])){scroll-padding-top:97px}
+.select-notice{display:flex;align-items:center;justify-content:center;gap:8px;padding:4px 16px;background:var(--surface-brand-subtle);border-bottom:1px solid var(--line-neutral-secondary);font-size:14px;line-height:1.6}
+.select-notice:empty{display:none}
 .tbl .link{color:var(--foreground-brand-primary);text-decoration:none;font-weight:500}
 .tbl .link:hover{text-decoration:underline}
 .action-bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface-brand-subtle);border-bottom:1px solid var(--line-neutral-secondary);font-size:14px;line-height:1.6}

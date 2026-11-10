@@ -11,6 +11,8 @@ export const LABELS = {
   clear: "지우기",
   search: "검색",
   loading: "불러오는 중",
+  retry: "다시 시도",
+  tableError: "목록을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.",
   pagination: "페이지",
   breadcrumb: "현재 위치",
   mainMenu: "주 메뉴",

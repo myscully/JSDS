@@ -1324,8 +1324,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("onboarding next moves step", await ob.evaluate((e) => { const li = e.querySelectorAll(".steps li"); return li[2].classList.contains("on") && li[2].getAttribute("aria-current") === "step" && li[1].classList.contains("done") && !li[1].classList.contains("on"); }));
   await ob.locator('[data-step="prev"]').click(); await ob.locator('[data-step="prev"]').click();
   ok("onboarding prev disabled at first step", await ob.evaluate((e) => e.querySelectorAll(".steps li")[0].classList.contains("on") && e.querySelector('[data-step="prev"]').disabled && e.querySelectorAll(".steps li")[1].querySelector("i").textContent.trim() === "2"));
-  await ob.locator(".tile").nth(1).click();
-  ok("onboarding tiles single select", await ob.evaluate((e) => e.querySelectorAll(".tile.on").length === 1 && e.querySelectorAll(".tile")[1].getAttribute("aria-pressed") === "true"));
+  await ob.locator(".radio.card").nth(1).click();
+  ok("onboarding card radios choose one", await ob.evaluate((e) => e.querySelectorAll(".radio.card input:checked").length === 1 && e.querySelectorAll(".radio.card input")[1].checked));
   /* 완료 문단 — 한국어 기본 줄바꿈은 음절 사이에서 끊겨 1440 에서 "…있습니 / 다." 로 한 글자 줄이 남았다. .keep-all 로 어절째 넘긴다 */
   const obLast = await page.evaluate(() => { const p = document.querySelector("#ex-onboarding-done .desc"), r = document.createRange(); r.selectNodeContents(p);
     const rows = {}; for (const x of r.getClientRects()) { const k = Math.round(x.top); rows[k] = (rows[k] || 0) + x.width; }
@@ -1832,6 +1832,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await page.evaluate(() => document.getElementById("popup-opener").remove());
 
   await require("./behave.feedback.js")({ page, ok, go });
+  await require("./behave.data.js")({ page, ok, go });
 
   // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
   await go("components/button.html");

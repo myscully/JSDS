@@ -16,10 +16,10 @@ export default function Example() {
       columns={COLUMNS}
       rows={ROWS}
       rowKey={(r) => r.id}
-      actions={() => (
+      actions={(r) => (
         <Dropdown kind="menu" align="end" keepMounted>
           <DropdownTrigger asChild>
-            <Button size="sm" color="assistive" iconOnly aria-label="더 보기"><Icon name="dots" /></Button>
+            <Button size="sm" color="assistive" iconOnly aria-label={`${r.name} 더 보기`}><Icon name="dots" /></Button>
           </DropdownTrigger>
           <Menu>
             <MenuItem icon="pencil" onSelect={() => {}}>편집</MenuItem>

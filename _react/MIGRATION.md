@@ -383,3 +383,18 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **Tooltip** — 아이콘 버튼의 `aria-label` 이 `content` 와 같으면 `aria-describedby` 를 잇지 않습니다. 마우스는 0.3초 뒤에 뜨고, Esc 로 닫힙니다. 화면 끝에서는 반대쪽으로 뒤집습니다.
 - **Spinner** — `label` 에 실제 작업을 적어 주세요(사이트 예제는 빌드가 검사합니다). 줄인 모션 설정에서도 돕니다.
 - **SidePanel** — 새 컴포넌트입니다(`open` · `onClose` · `title` · `footer` · `size` · `modal` · `closeLabel`). 사이트는 `.side-panel` · `DS.panel` · 이벤트 `ds:panel-close` 입니다.
+
+## 데이터 (2026-11-10)
+
+- **TableHeader** — `sortable` 이면 글자를 `<button class="sort">` 로 감쌉니다(전에는 `th` 클릭뿐이라 키보드로 닿지 않았습니다). `getByRole("columnheader")` 를 눌러 정렬하던 시험은 `getByRole("button")` 으로 바꿔야 합니다. 사이트 마크업도 `<th class="sortable"><button type="button" class="sort">…</button></th>` 입니다(빌드가 검사).
+- **TableCell** — `truncate` 가 생겼습니다.
+- **DataTable 머리글 체크박스** — **이 페이지의 켜진 행만** 고르고 끕니다. 전에는 끌 때 다른 페이지의 선택까지 지웠고 비활성 행까지 골랐습니다.
+- **DataTable `actionBar`** — 둘째 인자 `{ allMatching, count }` 가 생겼습니다. 첫째 인자는 그대로입니다. 전체 결과를 고른 상태의 실행은 제품 서버가 합니다.
+- **DataTable 행 클릭** — 안쪽 버튼 · 링크 · 입력을 누르거나 글자를 드래그해 선택하면 `rowProps` 의 `onClick` 이 불리지 않습니다.
+- **DataTable 새 props** — `manualSort`(서버 정렬 — 줄을 움직이지 않음) · `selectionScope`(값이 바뀌면 선택을 지움) · `totalCount` · `allMatching` · `defaultAllMatching` · `onAllMatchingChange` · `selectNoticeText` · `status` · `statusLabel` · `loadingRows` · `errorText` · `onRetry` · `retryLabel` · `stickyHeader` · `maxHeight` · `caption`, column `truncate`.
+- **List** — 안쪽 조작을 누르면 행의 `onClick` 이 불리지 않습니다. Enter 는 행 자신에 포커스가 있을 때만 행을 누릅니다(전에는 안쪽 버튼의 Enter 를 행이 가로챘습니다).
+- **PaginationBar** — `summary` + `children` 은 그대로이고, `total` · `page` · `pageSize` · `pageSizes` · `onPageChange` · `onPageSizeChange` · `target` 을 주면 건수 · 표시 개수 · 번호를 스스로 그립니다. 표시 개수를 바꾸면 1페이지로 돌아가고, 한 페이지뿐이면 번호를 숨깁니다. 표준 표시 개수는 `PAGE_SIZES`(20 · 50 · 100)입니다.
+- **Pagination** — 번호 칸이 9칸을 넘으면 경고합니다. 끝에 닿아 꺼진 화살표의 포커스는 켜져 있는 쪽으로 옮깁니다.
+- **CursorPagination** — 새 컴포넌트입니다. 사이트는 `.pagination.cursor` · 이벤트 `ds:page {direction}` 입니다.
+- **사이트 Item Tile** — `data-single` 을 없앴습니다. Tile 은 다중 선택이고, 하나만 고르면 Card Radio 입니다(빌드가 검사). 온보딩 패턴의 보호 수준이 Card Radio 로 바뀌었습니다.
+- **사이트 Data Table** — `ds:sort` · `ds:select-all` · `ds:retry` 이벤트, `table[data-sort="server"]`, `.tbl-wrap[data-total]`, `DS.table.removeRow(tr)` 가 생겼습니다.

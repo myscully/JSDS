@@ -142,6 +142,26 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       for (const m of pv.matchAll(/<span class="spinner[^"]*"[^>]*aria-label="([^"]*)"/g)) if (["불러오는 중", "로딩", "로딩 중", "진행 중"].includes(m[1])) fails.push(`${f}: Spinner 이름 "${m[1]}" — 실제 작업으로(Loading › Spinner 이름)`);
       for (const m of pv.matchAll(/<div class="toast danger"[^>]*>([\s\S]*?)<\/div>/g)) if (!/class="close"/.test(m[1])) fails.push(`${f}: 오류 Toast 에 닫기 버튼이 없다(Notification › 오류 Toast)`);
       if ((pv.match(/class="banner[ "]/g) || []).length > 1) fails.push(`${f}: Banner 는 한 번에 하나(Notification › Banner)`);
+      /* 표 · 목록 원칙(2026-11-10) — 머리글 필수 · 정렬은 버튼 · 머리글 안에 다른 조작 없음 · 행 버튼 이름은 행마다 다름 */
+      const sameNames = (body, where) => { const names = [...body.matchAll(/<(?:button|a)\b[^>]*aria-label="([^"]*)"/g)].map((x) => x[1]), dup = names.filter((n, i) => names.indexOf(n) !== i); if (dup.length) fails.push(`${f}: 행마다 같은 버튼 이름 "${dup[0]}"(${where} › 행 버튼 이름)`); };
+      for (const m of pv.matchAll(/<table\b[^>]*class="tbl[^"]*"[^>]*>([\s\S]*?)<\/table>/g)) {
+        if (!/<th\b/.test(m[1])) fails.push(`${f}: 머리글 없는 표(Table › 머리글)`);
+        for (const h of (/<thead>([\s\S]*?)<\/thead>/.exec(m[1]) || ["", ""])[1].matchAll(/<th\b([^>]*)>([\s\S]*?)<\/th>/g)) {
+          const sortable = /\bsortable\b/.test(h[1]);
+          if (sortable && !/^<button type="button" class="sort">/.test(h[2])) fails.push(`${f}: 정렬 머리글은 button.sort(Data Table › 머리글)`);
+          if (/<a\b/.test(h[2]) || (!sortable && /<button\b/.test(h[2]))) fails.push(`${f}: 머리글 안에 정렬 말고 다른 조작(Data Table › 머리글)`);
+        }
+        sameNames((/<tbody>([\s\S]*?)<\/tbody>/.exec(m[1]) || ["", ""])[1], "Data Table");
+      }
+      for (const m of pv.matchAll(/<div class="tbl-wrap sticky"([^>]*)>/g)) if (!/tabindex="0"/.test(m[1]) || !/aria-label="/.test(m[1])) fails.push(`${f}: 고정 헤더 영역은 tabindex=0 + 이름(Data Table › 고정 헤더)`);
+      for (const m of pv.matchAll(/<ul class="list[^"]*"([^>]*)>([\s\S]*?)<\/ul>/g)) {
+        sameNames(m[2], "List");
+        if (!/role="option"/.test(m[2])) continue;
+        if (!/role="listbox"/.test(m[1])) fails.push(`${f}: role=option 은 listbox 안에서만(List › listbox)`);
+        for (const li of m[2].matchAll(/<li\b([^>]*)>([\s\S]*?)<\/li>/g)) { if (!/tabindex="0"/.test(li[1])) fails.push(`${f}: 고르는 목록의 항목은 tabindex=0(List › listbox)`); if (/<(a|button)\b/.test(li[2])) fails.push(`${f}: listbox 항목 안에 버튼 · 링크(List › listbox)`); }
+      }
+      for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
+      if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
       /* 라벨(Text Field 원칙) — placeholder 는 이름이 아니다. 글자 입력마다 label · aria-label 로 접근 이름이 있어야 한다 */
       for (const m of pv.matchAll(/<(?:input|textarea)\b[^>]*>/g)) {
         if (/\stype="(?:hidden|checkbox|radio)"/.test(m[0]) || /\saria-label(?:ledby)?="/.test(m[0])) continue;

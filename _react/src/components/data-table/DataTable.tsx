@@ -1,7 +1,10 @@
-import { forwardRef, useMemo, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, type CSSProperties, type HTMLAttributes, type MouseEvent, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
+import { mergeRefs } from "../../utils/hooks";
+import { Button } from "../button/Button";
 import { Checkbox } from "../checkbox/Checkbox";
+import { Skeleton } from "../loading/Loading";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../table/Table";
 import { LABELS } from "../../labels";
 
@@ -16,6 +19,8 @@ export interface DataTableColumn<T> {
   render?: (row: T, index: number) => ReactNode;
   /** 정렬 기준 값 (기본 row[key]) */
   sortValue?: (row: T) => string | number;
+  /** 말줄임. 값이 문자열이면 title 로 전체 값을 둔다 */
+  truncate?: boolean;
 }
 export interface SortState { key: string; dir: "asc" | "desc" }
 
@@ -26,6 +31,8 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   sort?: SortState | null;
   defaultSort?: SortState | null;
   onSortChange?: (sort: SortState | null) => void;
+  /** 서버 정렬 — 표시만 바꾸고 rows 를 다시 정렬하지 않는다 */
+  manualSort?: boolean;
   /** 체크박스 열 */
   selectable?: boolean;
   /** 행 이름 — 체크박스의 접근 이름(… 선택). 기본은 첫 열의 값 */
@@ -33,18 +40,49 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   selected?: ReadonlySet<string>;
   defaultSelected?: ReadonlySet<string>;
   onSelectedChange?: (selected: Set<string>) => void;
-  /** 선택이 있을 때 표 위에 표시 (ActionBar) */
-  actionBar?: (selected: Set<string>) => ReactNode;
+  /** 선택이 있을 때 표 위에 표시 (ActionBar). count 는 전체 결과를 골랐으면 totalCount */
+  actionBar?: (selected: Set<string>, info: { allMatching: boolean; count: number }) => ReactNode;
+  /** 필터 · 검색 · 기간처럼 이 값이 바뀌면 선택을 지운다 */
+  selectionScope?: unknown;
+  /** 조건에 맞는 전체 건수. 주면 이 페이지를 다 골랐을 때 전체 결과 선택을 안내한다 */
+  totalCount?: number;
+  allMatching?: boolean;
+  defaultAllMatching?: boolean;
+  onAllMatchingChange?: (all: boolean) => void;
+  selectNoticeText?: Partial<typeof NOTICE>;
   /** 행 속성 */
   rowProps?: (row: T, index: number) => { selected?: boolean; disabled?: boolean; log?: boolean; className?: string; onClick?: () => void };
   /** 행 액션 셀 (td.actions) */
   actions?: (row: T) => ReactNode;
   /** rows 가 비었을 때 */
   empty?: ReactNode;
+  /** 불러오는 중이면 Skeleton 행, 실패면 오류 행으로 rows 를 대신한다 */
+  status?: "loading" | "error";
+  /** 실제 작업으로. 예) 이벤트 불러오는 중 */
+  statusLabel?: string;
+  loadingRows?: number;
+  /** 원인과 다음 행동 */
+  errorText?: ReactNode;
+  onRetry?: () => void;
+  retryLabel?: string;
+  /** 고정 헤더. maxHeight 와 이름(aria-label 또는 caption)을 함께 준다 */
+  stickyHeader?: boolean;
+  maxHeight?: number | string;
+  /** 표 이름. 화면에는 보이지 않는다 */
+  caption?: string;
   compact?: boolean;
   zebra?: boolean;
   wrapStyle?: CSSProperties;
 }
+
+const NOTICE = {
+  page: (n: number) => `이 페이지의 ${n.toLocaleString("ko-KR")}건을 모두 선택했습니다.`,
+  all: (n: number) => `전체 ${n.toLocaleString("ko-KR")}건을 선택했습니다.`,
+  selectAll: (n: number) => `전체 ${n.toLocaleString("ko-KR")}건 선택`,
+  clear: "선택 해제",
+};
+const INNER_CONTROL = "a,button,input,select,textarea,label,[role=button],[role=menu],[role=menuitem],.dropdown";
+const FOCUS_IN_ROW = "a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex='0']";
 
 function defaultSortValue<T>(row: T, key: string): string | number {
   const v = (row as Record<string, unknown>)[key];
@@ -52,32 +90,77 @@ function defaultSortValue<T>(row: T, key: string): string | number {
 }
 
 function DataTableInner<T>(
-  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, rowProps, actions, empty, compact, zebra, className, wrapStyle, ...rest }: DataTableProps<T>,
+  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, empty, status, statusLabel = LABELS.loading, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, maxHeight, caption, compact, zebra, className, wrapStyle, ...rest }: DataTableProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [curSort, setSort] = useControllable<SortState | null>({ value: sort, defaultValue: defaultSort, onChange: onSortChange });
   const [sel, setSel] = useControllable<ReadonlySet<string>>({ value: selected, defaultValue: defaultSelected ?? new Set(), onChange: onSelectedChange as (s: ReadonlySet<string>) => void });
   const sortedRows = useMemo(() => {
-    if (!curSort) return rows;
+    if (!curSort || manualSort) return rows;
     const col = columns.find((c) => c.key === curSort.key);
     const val = (r: T) => (col?.sortValue ? col.sortValue(r) : defaultSortValue(r, curSort.key));
     const dir = curSort.dir === "asc" ? 1 : -1;
     return [...rows].sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * dir; });
-  }, [rows, curSort, columns]);
+  }, [rows, curSort, columns, manualSort]);
   const toggleSort = (key: string) => {
     if (!curSort || curSort.key !== key) setSort({ key, dir: "asc" });
     else setSort({ key, dir: curSort.dir === "asc" ? "desc" : "asc" });
   };
-  const allKeys = rows.map(rowKey);
+  const [isAll, setAll] = useControllable<boolean>({ value: allMatching, defaultValue: defaultAllMatching ?? false, onChange: onAllMatchingChange });
+  /* 머리글 체크박스는 이 페이지만 — 처리할 수 없는 행은 빼고, 다른 페이지에서 고른 것은 남긴다 */
+  const allKeys = rows.filter((r, i) => !rowProps?.(r, i)?.disabled).map(rowKey);
   const allChecked = allKeys.length > 0 && allKeys.every((k) => sel.has(k));
   const someChecked = allKeys.some((k) => sel.has(k)) && !allChecked;
-  const toggleAll = (on: boolean) => setSel(new Set(on ? allKeys : []));
-  const toggleOne = (k: string, on: boolean) => { const n = new Set(sel); if (on) n.add(k); else n.delete(k); setSel(n); };
+  const toggleAll = (on: boolean) => { const n = new Set(sel); allKeys.forEach((k) => { if (on) n.add(k); else n.delete(k); }); setSel(n); if (!on && isAll) setAll(false); };
+  const toggleOne = (k: string, on: boolean) => { const n = new Set(sel); if (on) n.add(k); else n.delete(k); setSel(n); if (!on && isAll) setAll(false); };
+  const clearAll = () => { setSel(new Set()); setAll(false); };
+  /* 필터가 바뀌면 고른 것의 뜻이 달라진다. 첫 렌더는 건너뛴다 */
+  const scopeSeen = useRef(selectionScope);
+  useEffect(() => { if (scopeSeen.current !== selectionScope) { scopeSeen.current = selectionScope; clearAll(); } });   // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* 행을 지운 뒤 포커스 — 포커스가 있던 행이 사라져 body 로 떨어지면 같은 자리의 행으로 옮긴다 */
+  const wrapEl = useRef<HTMLDivElement | null>(null);
+  const lastRow = useRef<{ key: string; index: number } | null>(null);
+  const orderKeys = sortedRows.map(rowKey);
+  useLayoutEffect(() => {
+    const last = lastRow.current; if (!last) return;
+    const now = orderKeys.indexOf(last.key);
+    if (now >= 0) { last.index = now; return; }
+    lastRow.current = null;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    const trs = wrapEl.current?.querySelectorAll<HTMLElement>("tbody tr") ?? [];
+    const target = (trs[Math.min(last.index, trs.length - 1)] as HTMLElement | undefined)?.querySelector<HTMLElement>(FOCUS_IN_ROW);
+    if (target) target.focus();
+    else if (wrapEl.current) { if (wrapEl.current.tabIndex < 0) wrapEl.current.tabIndex = -1; wrapEl.current.focus(); }
+  });
+  const noteRow = (e: { target: EventTarget }) => {
+    const tr = (e.target as Element).closest?.("tr");
+    if (tr && (tr as HTMLTableRowElement).sectionRowIndex < orderKeys.length) lastRow.current = { key: orderKeys[(tr as HTMLTableRowElement).sectionRowIndex], index: (tr as HTMLTableRowElement).sectionRowIndex };
+  };
+  const rowClick = (fn: (() => void) | undefined) => fn && ((e: MouseEvent) => {
+    /* 안쪽 버튼 · 링크 · 체크박스는 자기 일만 한다. 글자를 끌어 고른 것도 클릭이 아니다 */
+    if ((e.target as Element).closest(INNER_CONTROL) || window.getSelection()?.toString()) return;
+    fn();
+  });
+  const text = { ...NOTICE, ...selectNoticeText };
+  const noticeBody = totalCount === undefined ? null
+    : isAll ? <><span>{text.all(totalCount)}</span><Button variant="text" size="sm" onClick={clearAll}>{text.clear}</Button></>
+    : allChecked && totalCount > allKeys.length ? <><span>{text.page(allKeys.length)}</span><Button variant="text" size="sm" onClick={() => setAll(true)}>{text.selectAll(totalCount)}</Button></>
+    : null;
   const colCount = columns.length + (selectable ? 1 : 0) + (actions ? 1 : 0);
   return (
-    <div ref={ref} className={cx("tbl-wrap", className)} style={wrapStyle} {...rest}>
-      {actionBar && sel.size > 0 && actionBar(new Set(sel))}
-      <Table compact={compact} zebra={zebra} wrap={false}>
+    <div
+      ref={mergeRefs(ref, wrapEl)}
+      className={cx("tbl-wrap", stickyHeader && "sticky", className)}
+      style={maxHeight !== undefined ? { ...wrapStyle, maxHeight } : wrapStyle}
+      {...(stickyHeader ? { tabIndex: 0, role: "region", "aria-label": caption } : null)}
+      {...rest}
+    >
+      {actionBar && sel.size > 0 && actionBar(new Set(sel), { allMatching: !!isAll, count: isAll && totalCount !== undefined ? totalCount : sel.size })}
+      {selectable && totalCount !== undefined && <div className="select-notice" aria-live="polite">{noticeBody}</div>}
+      {status === "loading" && <span className="sr-only" role="status">{statusLabel}</span>}
+      <Table compact={compact} zebra={zebra} wrap={false} aria-busy={status === "loading" || undefined}>
+        {caption && <caption className="sr-only">{caption}</caption>}
         <TableHead>
           <TableRow>
             {selectable && (
@@ -93,6 +176,7 @@ function DataTableInner<T>(
                 sorted={curSort?.key === c.key ? curSort.dir : undefined}
                 className={c.className}
                 style={c.width !== undefined ? { width: c.width } : undefined}
+                data-key={c.sortable ? c.key : undefined}
                 onClick={c.sortable ? () => toggleSort(c.key) : undefined}
               >
                 {c.header}
@@ -101,8 +185,20 @@ function DataTableInner<T>(
             {actions && <TableHeader actions />}
           </TableRow>
         </TableHead>
-        <TableBody>
-          {sortedRows.length === 0 ? (
+        <TableBody onFocusCapture={noteRow}>
+          {status === "loading" ? (
+            Array.from({ length: loadingRows }, (_, i) => (
+              <TableRow key={i}>
+                {Array.from({ length: colCount }, (_, j) => <TableCell key={j}><Skeleton /></TableCell>)}
+              </TableRow>
+            ))
+          ) : status === "error" ? (
+            <TableRow>
+              <TableCell empty colSpan={colCount}>
+                <div className="empty" role="alert">{errorText}{onRetry && <>{" "}<Button variant="outline" color="assistive" size="sm" onClick={onRetry}>{retryLabel}</Button></>}</div>
+              </TableCell>
+            </TableRow>
+          ) : sortedRows.length === 0 ? (
             <TableRow>
               <TableCell empty colSpan={colCount}>{empty ?? "데이터가 없습니다."}</TableCell>
             </TableRow>
@@ -112,17 +208,20 @@ function DataTableInner<T>(
               const rp = rowProps?.(row, i) ?? {};
               const isSel = selectable ? sel.has(k) : rp.selected;
               return (
-                <TableRow key={k} selected={isSel} disabled={rp.disabled} log={rp.log} className={rp.className} onClick={rp.onClick}>
+                <TableRow key={k} selected={isSel} disabled={rp.disabled} log={rp.log} className={rp.className} onClick={rowClick(rp.onClick)}>
                   {selectable && (
                     <TableCell check>
                       <Checkbox checked={sel.has(k)} onChange={(on) => toggleOne(k, on)} aria-label={`${rowLabel ? rowLabel(row) : String((row as Record<string, unknown>)[columns[0]?.key] ?? k)} ${LABELS.select}`} />
                     </TableCell>
                   )}
-                  {columns.map((c) => (
-                    <TableCell key={c.key} num={c.num} className={c.className}>
-                      {c.render ? c.render(row, i) : ((row as Record<string, unknown>)[c.key] as ReactNode)}
-                    </TableCell>
-                  ))}
+                  {columns.map((c) => {
+                    const raw = (row as Record<string, unknown>)[c.key];
+                    return (
+                      <TableCell key={c.key} num={c.num} truncate={c.truncate} title={c.truncate && typeof raw === "string" ? raw : undefined} className={c.className}>
+                        {c.render ? c.render(row, i) : (raw as ReactNode)}
+                      </TableCell>
+                    );
+                  })}
                   {actions && <TableCell actions>{actions(row)}</TableCell>}
                 </TableRow>
               );

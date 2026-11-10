@@ -91,6 +91,16 @@ const CB_DEPTS = ["영업팀", "개발팀", "인프라팀", "보안팀", "기획
 const CB_LIVE = `<span class="sr-only" role="status"></span>`;
 const cbChip = (l) => `<span class="chip sm" data-value="${l}"><span class="lbl">${l}</span><button type="button" class="x" aria-label="${l} 제거">${I("x", 10)}</button></span>`;
 const cbCtl = ({ id, label, placeholder, value = "", chips = "", expanded = false, disabled = false, field = false }) => `<div class="control">${chips}<input type="text" id="${id}" role="combobox" aria-autocomplete="list" aria-expanded="${expanded}" aria-controls="${id}-list" autocomplete="off" placeholder="${placeholder}"${value ? ` value="${value}"` : ""}${field ? "" : ` aria-label="${label}"`}${disabled ? " disabled" : ""}></div>`;
+const LOG_SAMPLE = [
+  ["09:41:12.031","critical","CRIT","10.0.4.21","process.create blocked: rundll32.exe → cryptor.dll (parent=winword.exe, user=corp\\kim, sha256=9f2c…)"],
+  ["09:41:11.870","medium","WARN","10.0.4.21","usb.attach vendor=0x0781 product=0x5583"],
+  ["09:41:09.114","info","INFO","10.0.0.3","policy.sync ok (rev 2041)"],
+  ["09:41:08.552","info","INFO","10.0.0.3","agent.checkin 1284/1284"],
+  ["09:41:05.207","high","HIGH","10.0.4.33","network.block dst=185.220.101.4:443"],
+  ["09:41:03.118","info","INFO","10.0.0.3","policy.sync ok (rev 2040)"],
+  ["09:41:01.640","low","LOW","10.0.4.12","agent.update 3.8.1 → 3.8.2"],
+  ["09:40:58.902","medium","WARN","10.0.4.33","usb.attach vendor=0x13fe product=0x4200"],
+];
 const cbMenu = (label, inner, id, multi) => `<ul class="menu" role="listbox" id="${id}-list" aria-label="${label}"${multi ? ' aria-multiselectable="true"' : ""}>${inner}</ul>`;
 const cbOpts = (on) => CB_DEPTS.map((l) => `<li class="menu-item${on.includes(l) ? " on" : ""}" role="option" data-value="${l}" aria-selected="${on.includes(l)}">${l}</li>`).join("");
 const cbBox = ({ id, name, placeholder, multi = false, on = [], field = "", required = false }) => `<div class="combobox"${multi ? " data-multiple" : ""}${field ? ` data-name="${field}"` : ""}${required ? " data-required" : ""}>${cbCtl({ id, label: name, placeholder, chips: multi ? on.map(cbChip).join("") : "", value: multi ? "" : on[0], field: true })}${cbMenu(name, cbOpts(on), id, multi)}${CB_LIVE}${field && !multi ? `<input type="hidden" name="${field}" value="">` : ""}</div>`;
@@ -1011,9 +1021,16 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Pagination */
   "pagination": {
-    status: "ready", react: ["Pagination","PaginationBar","paginate"], css: [".pagination", ".pagination-bar", ".dropdown", ".menu", ".menu-item"],
+    status: "ready", react: ["Pagination","PaginationBar","CursorPagination","paginate","PAGE_SIZES"], css: [".pagination", ".pagination-bar", ".dropdown", ".menu", ".menu-item"],
     desc: "긴 목록을 페이지로 나누어 이동합니다. 총 건수와 페이지 크기 선택을 함께 둡니다.",
     thumb: `<div class="pagination compact"><button>${I("chevron-left",16)}</button><button class="on">1</button><button>2</button><button>3</button><button>${I("chevron-right",16)}</button></div>`,
+    principles: [
+      ["표시 개수", "20 · 50 · 100 중에서 고릅니다. 개수나 필터가 바뀌면 1페이지로 돌아갑니다"],
+      ["번호 칸", "화살표를 빼고 9칸 이하입니다. 빌드가 검사하고, React 는 넘으면 경고합니다"],
+      ["한 페이지뿐일 때", "번호를 숨기고 건수는 남깁니다"],
+      ["이동한 뒤", "<code>data-target</code> · <code>target</code> 을 주면 표 맨 위로 스크롤하고 포커스를 옮깁니다. 현재 페이지는 제품이 URL 에 남깁니다"],
+      ["끝을 모르는 목록", "수십만 건 로그처럼 전체 쪽수를 세지 못하면 커서 방식(이전 · 다음)입니다. 끝이 확인되면 버튼을 끕니다"],
+    ],
     examples: [
       { id: "basic", title: "Default", desc: "이전/다음 + 번호. 현재 .on + aria-current. 첫 페이지에서는 이전 비활성.", html: `
         <nav class="pagination" aria-label="페이지">
@@ -1054,13 +1071,17 @@ const COMPONENTS = {
         <div class="pagination-bar">
           <span>총 <b>1,284</b>건 · 1–50</span>
           <div style="display:flex;align-items:center;gap:12px">
-            <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false">50개씩</button></div>
+            <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false">50개씩</button><ul class="menu" role="listbox" aria-label="페이지당 개수"><li class="menu-item" role="option" data-value="20">20개씩</li><li class="menu-item on" role="option" data-value="50" aria-selected="true">50개씩</li><li class="menu-item" role="option" data-value="100">100개씩</li></ul></div>
             <nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><span class="gap">…</span><button type="button">26</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav>
           </div>
         </div>` },
+      { id: "single", title: "한 페이지뿐일 때", desc: "번호를 숨기고 건수는 남깁니다.", html: `
+        <div class="pagination-bar"><span>총 <b>12</b>건</span></div>` },
+      { id: "cursor", title: "커서 방식", desc: "전체 쪽수를 모르는 목록입니다. 누르면 ds:page {direction}. 끝이 확인되면 제품이 버튼을 끕니다.", html: `
+        <nav class="pagination cursor" aria-label="페이지"><button type="button" data-cursor="prev" disabled>${I("chevron-left",16)}이전</button><span class="range">1–100</span><button type="button" data-cursor="next">다음${I("chevron-right",16)}</button></nav>` },
     ],
     props: [[".pagination", "nav", "—", "aria-label=페이지. 버튼 36 (compact 32)"], ["button.on", "current", "—", "현재 페이지 + aria-current=page"], [".gap", "span", "—", "생략(…). 글자 크기는 놓인 곳을 따른다 — 단독이면 앱 기본 글자, .pagination-bar 안이면 12(번호 버튼은 14 · compact 12 로 정해져 있다)"], [".compact / .outline", "boolean", "false", "작은 크기 / 보더형"], [".pagination-bar", "container", "—", "총 건수 + 페이지 크기 + 페이지네이션"]],
-    spec: [["Size", "버튼 36 (compact 32) · 간격 4"], ["Container", "radius/md · 현재 brand"], ["Label", "Body/2 14 · 현재 Semibold"], ["Placement", "테이블 하단 우측, 총 건수는 좌측"]],
+    spec: [["Size", "버튼 36 (compact 32) · 간격 4"], ["Container", "radius/md · 현재 brand"], ["Label", "Body/2 14 · 현재 Semibold"], ["Placement", "테이블 하단 우측, 총 건수는 좌측. 표시 개수 20 · 50 · 100"]],
     figma: { frame: "Pagination", radius: "radius/md", sizes: { md: { h: 36 }, compact: { h: 32 } }, variants: { default: {}, outline: { stroke: "--line-neutral-secondary" } }, states: ["default", "current", "hover", "disabled"] },
   },
 
@@ -1629,14 +1650,29 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Data Table */
   "data-table": {
-    status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".tag", ".checkbox", ".indicator"], borrows: [".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep"],
+    status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".select-notice", ".tag", ".checkbox", ".indicator"], borrows: [".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep", ".skeleton", ".sr-only"],
     desc: "로그·이벤트·정책 목록처럼 대량의 행 데이터를 다룹니다. 정렬·선택·행 액션을 갖춘 콘솔의 핵심 컴포넌트입니다. 단순 표는 Table 을 씁니다.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><thead><tr><th>시간</th><th>심각도</th></tr></thead><tbody><tr><td>09:41</td><td><span class="tag critical sm">Critical</span></td></tr><tr><td>09:40</td><td><span class="tag medium sm">Medium</span></td></tr></tbody></table></div>`,
+    principles: [
+      ["언제 쓰는가", "정렬 · 선택 · 행 동작이 필요한 목록입니다. 몇 줄을 읽기만 하면 <a href=\"#/components/table\">Table</a>, 열이 2~3개이고 항목마다 제목 · 부제가 있으면 <a href=\"#/components/list\">List</a> 입니다"],
+      ["상태", "불러오는 중은 Skeleton 행, 실패는 원인과 '다시 시도', 처음 비어 있으면 만드는 동작, 조건에 맞는 결과가 없으면 조건 초기화를 둡니다"],
+      ["서버 정렬", "서버가 페이지를 나눠 주면 <code>data-sort=\"server\"</code> · <code>manualSort</code> 로 다시 정렬하지 않게 합니다. 현재 페이지만 뒤섞이면 결과가 틀려 보입니다"],
+      ["전체 선택", "머리글 체크박스는 이 페이지만 고릅니다. 건수를 알면 '전체 n건 선택' 안내를 띄우고, 전체 실행은 제품 서버가 합니다"],
+      ["선택 유지", "페이지를 옮겨도 선택은 남고, 필터 · 검색 · 기간이 바뀌면 지웁니다"],
+      ["행 전체 클릭", "안쪽 버튼 · 링크 · 체크박스를 누르면 행 클릭이 일어나지 않습니다. 키보드로 닿도록 같은 목적지의 링크를 첫 열에 둡니다"],
+      ["행 버튼 이름", "행마다 달라야 합니다. '수정' 이 아니라 'USB 차단 정책 수정' 입니다. 빌드가 검사합니다"],
+      ["머리글", "정렬 말고는 링크 · 버튼을 넣지 않습니다. 정렬은 머리글 안의 버튼이라 키보드로 닿습니다"],
+      ["정렬 방향", "글자 · 상태는 왼쪽, 숫자는 오른쪽, 행 동작은 맨 오른쪽입니다. 말줄임은 긴 메시지 열 하나에만 쓰고 전체 값은 상세에서 보여 줍니다"],
+      ["고정 헤더", "세로로 긴 로그 표에 씁니다. 표 영역에 높이를 주고 이름과 <code>tabindex=0</code> 을 둡니다. 복잡한 표에는 <code>caption</code> 을 둡니다"],
+      ["행을 지운 뒤", "포커스를 다음 행으로 옮깁니다. 사이트는 <code>DS.table.removeRow</code>, React 는 행이 사라지면 자동입니다"],
+      ["강조", "색만으로 의미를 전하지 않습니다. 심각도 · 상태는 글자를 함께 둡니다"],
+      ["로그 표", "자동 갱신에는 일시 정지를 둡니다. 읽는 중에 행이 밀리지 않게 새 행은 건수로 알립니다. 조회 범위(최신 100건 등)를 건수 옆에 적습니다. 제품이 구현합니다"],
+    ],
     examples: [
       { id: "basic", title: "Default (Sortable)", desc: "헤더 클릭 정렬. 정렬 중인 열은 .sorted(.desc). 숫자 열은 .num. 처리할 수 없는 행은 tr.disabled + inert — 글자 · 태그 · 링크 · 상태 점이 모두 비활성 색이 되고, 행 안 링크는 마우스·키보드 모두 닿지 않습니다(React TableRow disabled 가 inert 를 함께 넣습니다).", html: `
         <div class="tbl-wrap">
           <table class="tbl">
-            <thead><tr><th class="sortable sorted desc" aria-sort="descending">시간</th><th class="sortable">심각도</th><th>이벤트</th><th class="sortable">대상</th><th class="num sortable">횟수</th><th>상태</th></tr></thead>
+            <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th class="sortable"><button type="button" class="sort">심각도</button></th><th>이벤트</th><th class="sortable"><button type="button" class="sort">대상</button></th><th class="num sortable"><button type="button" class="sort">횟수</button></th><th>상태</th></tr></thead>
             <tbody>
               <tr><td>09:41:12</td><td><span class="tag critical">Critical</span></td><td><a href="#" class="link">랜섬웨어 행위 탐지</a></td><td>PC-2041 · 김민준</td><td class="num">3</td><td><span class="indicator danger">차단</span></td></tr>
               <tr><td>09:40:58</td><td><span class="tag medium">Medium</span></td><td><a href="#" class="link">미승인 USB 연결</a></td><td>PC-1187 · 이서연</td><td class="num">1</td><td><span class="indicator warn">검토 필요</span></td></tr>
@@ -1681,13 +1717,52 @@ const COMPONENTS = {
           <table class="tbl">
             <thead><tr><th>정책</th><th>대상</th><th class="actions"></th></tr></thead>
             <tbody>${[["외부 USB 차단", "전체"], ["랜섬웨어 행위 차단", "영업팀"]].map(([n, t]) => `
-              <tr><td>${n}</td><td>${t}</td><td class="actions"><div class="dropdown"><button type="button" class="btn sm assistive icon-only" aria-label="더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button><ul class="menu" role="menu" style="left:auto;right:0"><li class="menu-item" role="menuitem">${I("pencil")}편집</li><li class="menu-item" role="menuitem">${I("download")}내보내기</li><li class="menu-sep" role="separator"></li><li class="menu-item danger" role="menuitem">${I("trash")}삭제</li></ul></div></td></tr>`).join("")}
+              <tr><td>${n}</td><td>${t}</td><td class="actions"><div class="dropdown"><button type="button" class="btn sm assistive icon-only" aria-label="${n} 더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button><ul class="menu" role="menu" style="left:auto;right:0"><li class="menu-item" role="menuitem">${I("pencil")}편집</li><li class="menu-item" role="menuitem">${I("download")}내보내기</li><li class="menu-sep" role="separator"></li><li class="menu-item danger" role="menuitem">${I("trash")}삭제</li></ul></div></td></tr>`).join("")}
             </tbody>
           </table>
         </div>`, layout: "top" },
+      { id: "loading", title: "불러오는 중", desc: "완성될 행과 같은 크기의 Skeleton 행입니다. 표에 aria-busy 를 답니다.", html: `
+        <div class="tbl-wrap">
+          <span class="sr-only" role="status">이벤트 불러오는 중</span>
+          <table class="tbl" aria-busy="true">
+            <thead><tr><th>시간</th><th>심각도</th><th>이벤트</th><th>대상</th></tr></thead>
+            <tbody>${[1, 2, 3].map(() => `<tr>${[1, 2, 3, 4].map(() => '<td><span class="skeleton text"></span></td>').join("")}</tr>`).join("")}</tbody>
+          </table>
+        </div>` },
+      { id: "error", title: "불러오지 못함", desc: "원인과 다음 행동을 함께 적습니다. 다시 시도는 ds:retry 입니다.", html: `
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>시간</th><th>심각도</th><th>이벤트</th><th>대상</th></tr></thead>
+            <tbody><tr><td colspan="4" class="empty"><div class="empty" role="alert">이벤트를 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요. <button type="button" class="btn sm outline assistive" data-retry>다시 시도</button></div></td></tr></tbody>
+          </table>
+        </div>` },
+      { id: "first-use", title: "처음 비어 있음", desc: "아직 만든 것이 없으면 만드는 동작을 둡니다. 조건에 맞는 결과가 없을 때와 구분합니다.", html: `
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>정책</th><th>적용 그룹</th><th class="num">대상</th></tr></thead>
+            <tbody><tr><td colspan="3" class="empty"><div class="empty">아직 만든 정책이 없습니다. <button type="button" class="btn sm solid primary">정책 만들기</button></div></td></tr></tbody>
+          </table>
+        </div>` },
+      { id: "select-all", title: "전체 결과 선택", desc: "머리글 체크박스는 이 페이지만 고릅니다. 건수를 알면(data-total) 전체 결과로 넓힐 길을 안내합니다. ds:select-all 로 제품 서버에 넘깁니다.", html: `
+        <div class="tbl-wrap" data-total="1054">
+          <div class="action-bar"><b>3개 선택</b><span class="spacer"></span><button type="button" class="btn sm outline assistive">${I("download")}내보내기</button></div>
+          <div class="select-notice" aria-live="polite"><span>이 페이지의 3건을 모두 선택했습니다.</span><button type="button" class="btn sm text" data-select-all>전체 1,054건 선택</button></div>
+          <table class="tbl">
+            <thead><tr><th class="check"><label class="checkbox"><input type="checkbox" checked aria-label="전체 선택"></label></th><th>단말</th><th>그룹</th></tr></thead>
+            <tbody>${[["PC-2041", "영업팀"], ["PC-1187", "개발팀"], ["PC-0932", "인프라팀"]].map(([n, g]) => `<tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="${n} 선택"></label></td><td>${n}</td><td>${g}</td></tr>`).join("")}</tbody>
+          </table>
+        </div>` },
+      { id: "sticky", title: "고정 헤더", desc: "표 영역에 높이를 주면 안에서 스크롤하고 머리글이 남습니다. 긴 메시지 열은 말줄임(td.truncate)입니다.", html: `
+        <div class="tbl-wrap sticky" tabindex="0" role="region" aria-label="최근 로그" style="max-height:240px">
+          <table class="tbl compact">
+            <caption class="sr-only">최근 로그</caption>
+            <thead><tr><th style="width:120px">시간</th><th style="width:96px">레벨</th><th style="width:120px">소스</th><th>메시지</th></tr></thead>
+            <tbody>${LOG_SAMPLE.map(([t, c, l, ip, m]) => `<tr class="log-row"><td>${t}</td><td><span class="tag ${c} sm">${l}</span></td><td>${ip}</td><td class="truncate" title="${m}">${m}</td></tr>`).join("")}</tbody>
+          </table>
+        </div>`, layout: "top" },
     ],
-    props: [[".tbl-wrap", "container", "—", "보더 + radius/lg + 가로 스크롤. 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 52. .compact 44 · .zebra 줄무늬"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["tr.on / .disabled", "row", "—", "선택 / 비활성. 비활성 행 안의 태그도 disable 토큰으로 칠해져 심각도 색이 활성처럼 남지 않습니다"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션"]],
-    spec: [["Size", "행 높이 52 (compact 44) · 헤더 44"], ["Container", "radius/lg 8 · line/neutral/secondary 1px · 셀 격자선 없음"], ["Label", "헤더 12 SemiBold tertiary · 셀 Body/2 14 · 숫자 tabular · 오른쪽 정렬(.num)"], ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래"]],
+    props: [[".tbl-wrap", "container", "—", "보더 + radius/lg + 가로 스크롤. 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 52. .compact 44 · .zebra 줄무늬"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["table[data-sort=server]", "attribute", "—", "서버 정렬. 표시만 바꾸고 다시 정렬하지 않는다. 정렬하면 언제나 ds:sort {key, dir}"], [".tbl-wrap[data-total]", "attribute", "—", "전체 건수. .select-notice 에 전체 결과 선택을 안내하고 ds:select-all {all, total}"], [".tbl-wrap.sticky", "class", "—", "고정 헤더. max-height · tabindex=0 · 이름을 함께"], ["td.truncate", "class", "—", "말줄임. title 에 전체 값"], ["DS.table.removeRow(tr)", "function", "—", "행을 지우고 다음 행으로 포커스"], ["[data-retry]", "attribute", "—", "오류 행의 다시 시도. ds:retry"], ["tr.on / .disabled", "row", "—", "선택 / 비활성. 비활성 행 안의 태그도 disable 토큰으로 칠해져 심각도 색이 활성처럼 남지 않습니다"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션"]],
+    spec: [["Size", "행 높이 52 (compact 44) · 헤더 44"], ["Container", "radius/lg 8 · line/neutral/secondary 1px · 셀 격자선 없음"], ["Label", "헤더 12 SemiBold tertiary · 셀 Body/2 14 · 숫자 tabular · 오른쪽 정렬(.num) · 말줄임은 긴 메시지 열 하나"], ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래"]],
     figma: { frame: "Data Table", radius: "radius/lg", sizes: { row: { h: 52 }, compact: { h: 44 }, header: { h: 44 } }, variants: { default: {}, selectable: {}, compact: {} }, states: ["default", "hover", "selected", "sorted", "empty"] },
   },
 
@@ -1696,6 +1771,12 @@ const COMPONENTS = {
     status: "ready", react: ["Table","TableHead","TableBody","TableRow","TableHeader","TableCell"], css: [".tbl-wrap", ".tbl"], borrows: [".indicator"],
     desc: "정렬·선택이 필요 없는 단순 표입니다. 상세 정보(키-값), 비교표, 요약 통계에 씁니다.",
     thumb: `<div class="tbl-wrap" style="width:220px"><table class="tbl compact kv"><tbody><tr><th style="width:80px">이름</th><td>USB 차단</td></tr><tr><th>상태</th><td>사용</td></tr></tbody></table></div>`,
+    principles: [
+      ["용도", "데이터 전용입니다. 레이아웃에 쓰지 않습니다"],
+      ["머리글", "머리글 없는 표를 만들지 않습니다. 키-값 표는 <code>th</code> 가 머리글입니다. 빌드가 검사합니다"],
+      ["옮기는 기준", "행이 많아 정렬 · 선택 · 페이지가 필요해지면 <a href=\"#/components/data-table\">Data Table</a> 입니다"],
+      ["비슷한 것", "한 대상의 속성은 키-값 표, 카드 안의 짧은 속성 몇 줄은 Card Meta, 같은 종류의 항목을 나열하면 <a href=\"#/components/list\">List</a> 입니다"],
+    ],
     examples: [
       { id: "default", title: "Default", desc: "머리글과 본문만 둔 기본 표입니다.", html: `
         <div class="tbl-wrap" style="max-width:480px">
@@ -1755,6 +1836,12 @@ const COMPONENTS = {
     status: "ready", react: ["List","ListItem"], css: [".list", ".avatar", ".tag", ".indicator"], borrows: [".btn"],
     desc: "동질한 항목을 세로로 나열합니다. 열이 2~3개 이하이고 항목마다 제목·부제·액션이 있으면 표 대신 List.",
     thumb: `<ul class="list dense" style="width:220px"><li><span class="primary">PC-2041</span><span class="end"><span class="tag ok sm">정상</span></span></li><li><span class="primary">PC-1187</span><span class="end"><span class="tag medium sm">주의</span></span></li></ul>`,
+    principles: [
+      ["고르기", "열이 2~3개이고 항목마다 제목 · 부제 · 동작이 있으면 List, 값을 열로 비교하면 표, 항목이 독립된 묶음이면 Card 입니다"],
+      ["행 전체 클릭", "안쪽 버튼 · 링크를 누르면 행 클릭이 일어나지 않습니다. <a href=\"#/components/data-table\">Data Table</a> 과 같습니다"],
+      ["행 버튼 이름", "행마다 달라야 합니다. '편집' 이 아니라 '김민준 편집' 입니다. 빌드가 검사합니다"],
+      ["listbox", "<code>role=listbox</code> 는 하나를 고르는 목록에만 씁니다. 안에 버튼 · 링크를 넣지 않고, 항목은 Tab 으로 닿아야 합니다. 빌드가 검사합니다"],
+    ],
     examples: [
       { id: "basic", title: "Default", desc: "제목(.primary) + 부제(.meta) + 우측 영역(.end).", html: `
         <ul class="list" style="max-width:560px">
@@ -1764,14 +1851,14 @@ const COMPONENTS = {
         </ul>` },
       { id: "media", title: "With Avatar / Actions", desc: "선행 아이콘·아바타와 후행 액션 버튼.", html: `
         <ul class="list" style="max-width:560px">
-          <li><span class="avatar">김</span><div><span class="primary">김민준</span><span class="meta">보안팀 · 관리자</span></div><span class="end"><button type="button" class="btn sm assistive icon-only" aria-label="편집">${I("pencil")}</button><button type="button" class="btn sm assistive icon-only" aria-label="더 보기">${I("dots")}</button></span></li>
-          <li><span class="avatar">이</span><div><span class="primary">이서연</span><span class="meta">인프라팀 · 운영자</span></div><span class="end"><button type="button" class="btn sm assistive icon-only" aria-label="편집">${I("pencil")}</button><button type="button" class="btn sm assistive icon-only" aria-label="더 보기">${I("dots")}</button></span></li>
+          <li><span class="avatar">김</span><div><span class="primary">김민준</span><span class="meta">보안팀 · 관리자</span></div><span class="end"><button type="button" class="btn sm assistive icon-only" aria-label="김민준 편집">${I("pencil")}</button><button type="button" class="btn sm assistive icon-only" aria-label="김민준 더 보기">${I("dots")}</button></span></li>
+          <li><span class="avatar">이</span><div><span class="primary">이서연</span><span class="meta">인프라팀 · 운영자</span></div><span class="end"><button type="button" class="btn sm assistive icon-only" aria-label="이서연 편집">${I("pencil")}</button><button type="button" class="btn sm assistive icon-only" aria-label="이서연 더 보기">${I("dots")}</button></span></li>
         </ul>` },
       { id: "select", title: "Selectable / Dense", desc: "행 클릭 선택(.hover + .on). 밀도 높은 목록은 .dense.", html: `
         <ul class="list hover dense" style="max-width:480px" role="listbox">
-          <li role="option"><span class="indicator ok">PC-2041</span><span class="end meta">10.0.4.21</span></li>
-          <li role="option" class="on" aria-selected="true"><span class="indicator danger">PC-1187</span><span class="end meta">10.0.4.33</span></li>
-          <li role="option"><span class="indicator">PC-0932</span><span class="end meta">오프라인</span></li>
+          <li role="option" tabindex="0"><span class="indicator ok">PC-2041</span><span class="end meta">10.0.4.21</span></li>
+          <li role="option" tabindex="0" class="on" aria-selected="true"><span class="indicator danger">PC-1187</span><span class="end meta">10.0.4.33</span></li>
+          <li role="option" tabindex="0"><span class="indicator">PC-0932</span><span class="end meta">오프라인</span></li>
         </ul>` },
     ],
     props: [[".list", "ul", "—", "보더 + radius/lg. li 는 flex row"], [".primary / .meta / .end", "elements", "—", "제목 / 부제 / 우측 영역"], [".hover / li.on", "boolean", "false", "행 hover 배경 / 선택"], [".dense / .plain", "boolean", "false", "행 40 / 보더 없음"]],
@@ -1782,8 +1869,13 @@ const COMPONENTS = {
   /* ------------------------------------------------ Item Tile */
   "item-tile": {
     status: "ready", react: ["Tile","TileGrid"], css: [".tile", ".tile-grid", ".tag"],
-    desc: "아이콘·제목·설명으로 항목을 카드 형태로 고르는 타일입니다. 정책 템플릿, 연동 모듈, 보고서 유형 선택에 씁니다.",
+    desc: "아이콘·제목·설명을 담은 작은 선택지입니다. 연동 모듈이나 보호 기능처럼 여러 개를 고르거나, 눌러서 바로 이동할 때 씁니다.",
     thumb: `<div class="tile-grid" style="width:240px;grid-template-columns:1fr 1fr"><button class="tile on"><span class="ico">U</span><b>USB</b></button><button class="tile"><span class="ico">N</span><b>네트워크</b></button></div>`,
+    principles: [
+      ["언제 쓰는가", "아이콘이 앞서는 작은 선택지를 여러 개 고르거나, 눌러서 바로 이동할 때 씁니다"],
+      ["비슷한 것", "하나만 고르면 <a href=\"#/components/radio-button\">Card Radio</a>, 내용이 많은 카드를 고르면 <a href=\"#/components/card\">Card Selection</a> 입니다"],
+      ["선택의 뜻", "<code>aria-pressed</code> 는 켜고 끄는 다중 선택입니다. 하나만 고르는 묶음에 쓰지 않습니다"],
+    ],
     examples: [
       { id: "default", title: "Default", desc: "선택하지 않은 기본 타일입니다.", html: `<button type="button" class="tile"><span class="ico">${I("shield")}</span><b>USB 제어</b><span>저장장치 차단·읽기 전용</span></button>` },
       { id: "grid", title: "Grid", desc: "button.tile 그리드. 선택은 .on + aria-pressed.", html: `
@@ -1806,7 +1898,7 @@ const COMPONENTS = {
         </div>` },
     ],
     props: [[".tile", "button", "—", ".ico + b(제목) + span(설명). aria-pressed"], [".on", "boolean", "false", "선택(brand 보더·배경)"], [".horizontal", "boolean", "false", "가로 배치"], ["disabled", "attribute", "—", "선택 불가"], [".tile-grid", "container", "—", "auto-fill 180px 그리드"]],
-    spec: [["Size", "최소 폭 180 · padding 16 · 아이콘 36"], ["Container", "radius/lg 8 · line/neutral/secondary · 선택 brand"], ["Label", "제목 14 Bold · 설명 12 Regular tertiary"], ["Placement", "마법사의 유형 선택, 연동 목록"]],
+    spec: [["Size", "최소 폭 180 · padding 16 · 아이콘 36"], ["Container", "radius/lg 8 · line/neutral/secondary · 선택 brand"], ["Label", "제목 14 Bold · 설명 12 Regular tertiary"], ["Placement", "연동 목록, 여러 개를 고르는 모듈 선택"]],
     figma: { frame: "Item Tile", radius: "radius/lg", sizes: { md: { minW: 180, pad: 16 } }, variants: { default: { stroke: "--line-neutral-secondary" }, selected: { stroke: "--surface-brand-primary", bg: "--surface-brand-subtle" } }, states: ["default", "hover", "selected", "disabled"] },
   },
 
