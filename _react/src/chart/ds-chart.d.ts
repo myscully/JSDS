@@ -6,6 +6,10 @@
  *  update 의 mode 도 같은 이유로 Chart.js UpdateMode 의 일부만 — ds-chart.js 는 "none" 만 쓴다 */
 export type ChartLike = new (canvas: HTMLCanvasElement, config: never) => { update(mode?: "none" | "default" | "resize" | "reset"): void; destroy(): void; config: object; data: object; options: object };
 
+/** 표로 보기의 문구 */
+export interface ChartTableLabels { table: string; chart: string; head: string; value: string; /** 빈 칸의 숨긴 문구(보이는 것은 '—') */ empty: string }
+/** 빈 칸은 null — 그리는 쪽이 보이는 '—' 와 숨긴 labels.empty 를 넣는다 */
+export interface ChartTableData { head: string[]; rows: Array<Array<string | null>> }
 export type Tone = "critical" | "high" | "medium" | "low" | "info" | "ok" | "brand" | "series-1" | "series-1-subtle" | "series-1-strong";
 export interface Series { label: string; data: number[]; tone?: Tone }
 export interface DonutSlice { label: string; value: number; tone?: Tone }
@@ -35,6 +39,9 @@ export interface DSChartApi {
   resolve(el: Element, token: string): string;
   /** 옆 범례(right · left)가 폭 w · 높이 h 의 자리에서 실제로 놓일 위치 — w < h × 1.5 이면 "bottom" */
   legendPosition(want: string | undefined, w: number, h: number): string;
+  /** 차트의 data 를 표의 머리글 · 행으로 — 표로 보기가 쓴다 */
+  tableData(data: { labels?: unknown[]; datasets?: Array<Record<string, unknown>> }, labels?: Partial<ChartTableLabels>): ChartTableData;
+  TABLE_LABELS: ChartTableLabels;
   SERIES_MAX: number;
   TOKENS: { series: string[]; grid: string; axis: string; tipBg: string; tipFg: string; surface: string; text: string };
   TONES: Record<Tone, string>;

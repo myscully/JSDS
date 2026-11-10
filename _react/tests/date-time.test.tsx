@@ -7,7 +7,7 @@ import { checkText, clockOf, groups, keyOf, parseDateTime, pasteText, placeholde
 import { LABELS } from "../src/labels";
 
 const at = (y: number, mo: number, d: number, h = 0, mi = 0, s = 0) => new Date(y, mo - 1, d, h, mi, s);
-const MSG: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject, invalidTime: LABELS.dateTimeInvalidError, orderTime: LABELS.dateTimeOrderError, timeSubject: LABELS.dateTimeSubject, startTimeSubject: LABELS.dateStartTimeSubject, endTimeSubject: LABELS.dateEndTimeSubject };
+const MSG: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, long: LABELS.dateLongError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject, invalidTime: LABELS.dateTimeInvalidError, orderTime: LABELS.dateTimeOrderError, timeSubject: LABELS.dateTimeSubject, startTimeSubject: LABELS.dateStartTimeSubject, endTimeSubject: LABELS.dateEndTimeSubject };
 const field = () => document.querySelector<HTMLInputElement>(".datepicker .affix input")!;
 const openCal = () => userEvent.click(document.querySelector<HTMLElement>(".cal-btn")!);
 const cell = (k: string) => document.querySelector<HTMLElement>(`.calendar .day[data-date="${k}"]:not(.muted)`)!;

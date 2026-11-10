@@ -1066,7 +1066,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .breadcrumb .more:hover{color:var(--foreground-neutral-primary)}
 .breadcrumb .more svg{width:14px;height:14px;display:block}
 /* 라벨이 길면 220 에서 말줄임. 현재 항목의 라벨은 span 으로 감싼다 — li 가 flex 라 맨 텍스트(익명 flex 항목)에는 ellipsis 가 적용되지 않는다 */
-.breadcrumb li>a:not(.icon),.breadcrumb li>span{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.breadcrumb li>a:not(.icon),.breadcrumb li>span:not(.tooltip-wrap),.breadcrumb .tooltip-wrap>a,.breadcrumb .tooltip-wrap>span:not(.tooltip){max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.breadcrumb .tooltip-wrap{line-height:inherit}   /* 줄 높이 22 — 잘린 항목만 20.8 이 되어 글자 위치가 어긋나지 않게 */
 /* 아이콘만 있는 링크와 … 버튼은 클릭 영역을 24x24 로(WCAG 2.5.8). 보이는 모양과 행 높이는 그대로 — 말줄임 쪽에 overflow:hidden 이 있어 같은 요소에 겹치면 안 된다 */
 .breadcrumb li>a.icon,.breadcrumb .more{position:relative}
 .breadcrumb li>a.icon{display:flex}   /* 아이콘 18 만 — 인라인이면 줄 상자(strut)가 붙어 행이 24.4 가 된다 */
@@ -1480,6 +1481,10 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .chart-card.flat{border-color:transparent}   /* variant flat — .card.flat 과 같은 결정 · 같은 조건(회색 바탕 전용) */
 /* 탐색형 차트(Chart.js) 캔버스 자리 — 높이는 CSS 가 정하고 Chart.js 가 responsive 로 채운다. canvas 에 width · height 를 직접 주지 않는다 */
 /* contain:inline-size — Chart.js 캔버스의 첫 폭(300)이 그리드 · 플렉스 열의 최소 폭으로 잡혀 좁은 화면에서 넘쳤다(대시보드 768 에서 24px). 캔버스가 열 폭을 정하지 않게 한다 */
+/* 표로 보기 — 캔버스의 값을 읽을 대안. 같은 높이라 전환해도 카드가 흔들리지 않는다(사람의 결정 2026-11-10) */
+.chart-view{display:flex;flex-direction:column;gap:8px}
+.chart-tools{display:flex;justify-content:flex-end}
+.chart-table{height:240px}
 .chart-canvas{position:relative;width:100%;height:240px;contain:inline-size}
 .chart-canvas>canvas{display:block}
 /* 조각 사이에 틈이 필요하다 — 이웃 조각의 밝기 대비가 라이트 1.23~1.53 · 다크 1.18~2.97 이라 틈이 없으면 색상으로만 갈리고,

@@ -162,6 +162,16 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
       if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
+      /* Date Picker 기간 상한 · Breadcrumb 잘림 · 차트 표로 보기(2026-11-10) */
+      for (const m of pv.matchAll(/<div class="datepicker field[^"]*"([^>]*\bdata-max-days="([^"]*)"[^>]*)>/g)) {
+        const at = m[1], n = Number(m[2]), input = /<input\b[^>]*>/.exec(pv.slice(m.index)), preset = /data-default-preset="(\d+)"/.exec(at);
+        if (!(Number.isInteger(n) && n > 0)) fails.push(`${f}: data-max-days 는 1 이상의 정수입니다(Date Picker › Max Days)`);
+        if (!/\bdata-range\b/.test(at) || /data-unit="/.test(at)) fails.push(`${f}: data-max-days 는 일 단위 기간에만 씁니다(Date Picker › Max Days)`);
+        if (preset && +preset[1] > n) fails.push(`${f}: data-default-preset 이 data-max-days 보다 깁니다(Date Picker › Max Days)`);
+        if (!input || !/aria-describedby=/.test(input[0])) fails.push(`${f}: 기간 상한은 도움말에 적습니다(Date Picker › Max Days)`);
+      }
+      for (const m of pv.matchAll(/<ol class="breadcrumb[^"]*">[\s\S]*?<\/ol>/g)) if (/\btitle="/.test(m[0])) fails.push(`${f}: Breadcrumb 에 title 금지 — 키보드로 볼 수 없습니다. 잘린 항목의 Tooltip 은 ds.js 가 답니다(Breadcrumb › Long label)`);
+      { const charts = (pv.match(/<canvas\b[^>]*\bdata-chart=/g) || []).length, views = (pv.match(/<div class="chart-view"[^>]*><div class="chart-tools"><button\b[^>]*\bdata-chart-table\b/g) || []).length; if (charts !== views) fails.push(`${f}: 탐색형 차트는 .chart-view 와 표로 보기 버튼을 함께 씁니다(차트 ${charts} · 버튼 ${views}, Data Visual)`); }
       /* Date Picker 시각 옵션(2026-11-10) */
       for (const m of pv.matchAll(/<div class="datepicker field[^"]*"([^>]*\bdata-time\b[^>]*)>/g)) {
         const at = m[1], sec = /data-time="seconds"/.test(at), input = /<input\b[^>]*>/.exec(pv.slice(m.index));

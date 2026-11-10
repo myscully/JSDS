@@ -154,7 +154,7 @@ ${rules([
 <h2 id="overflow">Overflow</h2>
 ${rules([
   ["말줄임은 마지막 수단입니다. 먼저 줄바꿈이나 폭 조정을 씁니다", "제품"],
-  ["줄인 글자는 키보드로도 전체를 볼 수 있어야 합니다. <code>title</code> 속성은 키보드로 볼 수 없습니다", `아직 — ${c("breadcrumb", "Breadcrumb")} · ${c("navigation", "Navigation")}의 접힌 메뉴가 <code>title</code> 을 씁니다`],
+  ["줄인 글자는 키보드로도 전체를 볼 수 있어야 합니다. <code>title</code> 속성은 키보드로 볼 수 없습니다", `적용 — ${c("breadcrumb", "Breadcrumb")} 의 잘린 항목과 ${c("navigation", "Navigation")} 의 접힌 메뉴는 Tooltip 을 씁니다`],
   ["포커스를 받을 수 없는 요소(Tag 등)는 말줄임이 필요 없게 길이를 제한합니다", `아직 — ${c("tag", "Tag")} 정비 때`],
 ])}
 <h2 id="loading">Loading</h2>

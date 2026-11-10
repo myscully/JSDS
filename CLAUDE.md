@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1068/1068 · react 623+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1101/1101 · react 646+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -309,6 +309,15 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함:** `data-time` 값은 없거나 seconds · 일 단위에만 · placeholder 는 형식 그대로. **구조 비교(`skeleton.ts`)에 `data-time` 을 더했다** — React 예제에서 `time` 만 빠져도 통과하던 것을 음성 시험이 찾았다.
 - **측정에서 드러나 고친 것(캡처 · 계산값):** id 없는 입력(툴바의 aria-label 필드)이 여럿이면 시각 칸 id 가 겹쳤다(`dpUid`). 달력이 피커 `.field` 안에 있어 바깥의 Large · 오류(빨강)가 시각 칸으로 내려온다 — `.calendar .cal-time .field input` 으로 되돌렸다. 기간 필드 최소 폭 300 에서 값이 잘렸다(Large 자리표시 343 — 410, 초까지 450).
 - 음성 시험: 사이트 75건 · React 55건. 첫 회 18건을 못 잡아(타이핑으로는 만들 수 없는 60분 · 조각 수 · 빈 시각의 끝쪽 채우기 · 열린 채 필드를 고칠 때 시각 칸 · 시각 칸이 마지막 칸일 때의 Tab · 연속 ↑ 의 커서 · 초 칸 형식 · 월 단위 무시 · 칸 나란히 · Enter 의 폼 제출 등) 단정을 더했고 다시 깨서 모두 잡았다. render.js 의 ds.js 크기 140KB → 144KB. Figma 미반영 148 → 149건(Date Picker Spec 의 Time 행).
+
+2026-11-10 이미 정비한 컴포넌트 보강(Date Picker 기간 상한 · Breadcrumb · Data Visual · Button, 사람의 결정 셋) — behave 1068 → 1101(`behave.polish.js` 33) · react 623+6 → 646+6(`tests/polish.test.tsx` 22 · 예제 242 → 243 에 따른 구조 비교 1). contrast · advisory · pages 수는 그대로(새 색 쌍 없음).
+- **기간 상한은 시스템이 제공**(사람의 결정) — 사이트 `data-max-days` · React `maxDays`. 양끝을 넣어 세고 시각은 보지 않는다. 시작을 고르면 달력의 양쪽 상한 밖 날짜와 상한보다 긴 프리셋을 막고, 키보드 입력은 받아서 validity `long` 으로 알린다(min · max 와 같은 방식). 순서 · 범위 오류가 먼저다. 일 단위 기간만.
+- **Breadcrumb 은 잘린 항목에만 Tooltip**(사람의 결정) — `title` 을 없앴다(키보드로 볼 수 없다). 링크가 아닌 항목은 잘렸을 때만 포커스를 받는다. 글자와 같은 문구라 `aria-describedby` 로 잇지 않는다(React `Tooltip describe={false}`). 글꼴이 늦게 오면 폭이 바뀌어 `fonts.ready` 뒤에 잰다.
+- **탐색형 차트에 '표로 보기' 버튼**(사람의 결정) — 차트가 그리는 data 그대로 표를 만든다(`DSChart.tableData`, 사이트 · React 같은 함수). 표는 고정 헤더 · 같은 높이라 전환해도 카드가 흔들리지 않는다. 버튼은 차트 오른쪽 위(차트 카드가 40 높아짐) · 이름 없는 단일 계열의 머리글 '값'(제안을 사람이 확인). 빈 값은 보이는 '—' + 숨긴 '값 없음'(사람의 결정 — '—' 만 두면 스크린 리더가 읽지 않거나 '대시'로 읽는다, 문구 `empty`, `tableData` 는 빈 칸을 null 로). `ChartCanvas` 바깥 요소가 `.chart-view` 로 바뀌었다(MIGRATION).
+- **Button** 원칙 표에 링크와 버튼 · 비활성(P1) · 주 버튼. 동작은 바꾸지 않았다.
+- **verify 더함:** `data-max-days` 는 1 이상 정수 · 일 단위 기간만 · 기본 프리셋 ≤ 상한 · 도움말 필수, Breadcrumb 의 `title` 금지, 탐색형 차트의 `.chart-view` + 표로 보기 버튼.
+- **측정에서 드러나 고친 것:** Tooltip 틀의 줄 높이 1.6 이 잘린 항목만 20.8 로 만들어 글자가 옆 항목과 어긋났다(`line-height:inherit`). Breadcrumb 의 복사용 CSS 범위에 Tooltip 을 더했다(`borrows` — ds.js 가 실행 중에 붙이는 클래스라 복사용 CSS 검사가 잡지 못한다).
+- 음성 시험: 사이트 47건 · React 36건, 모두 잡혔다(작성 중에 min · max 유지 · 표 칸 재사용 · 마운트 실패 · 버튼 자리 단정을 미리 더했다). render.js 의 ds.js 크기 144KB → 150KB. Figma 미반영 149건(그대로).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

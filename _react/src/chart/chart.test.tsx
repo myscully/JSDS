@@ -69,7 +69,7 @@ describe("ChartCanvas · mount", () => {
   it(".chart-canvas > canvas[role=img][aria-label] 골격, Chart 를 만들고 칠한 뒤 언마운트 때 destroy", () => {
     const config = presets.bar({ labels: ["a"], series: [{ label: "x", data: [1] }, { label: "y", data: [2] }] });
     const { container, unmount } = render(<ChartCanvas chart={Chart} config={config} aria-label="x · y 비교" height={200} />);
-    const wrap = container.firstElementChild as HTMLDivElement, canvas = wrap.firstElementChild as HTMLCanvasElement;
+    const wrap = container.querySelector(".chart-view > .chart-canvas") as HTMLDivElement, canvas = wrap.firstElementChild as HTMLCanvasElement;
     expect(wrap.className).toBe("chart-canvas"); expect(wrap.style.height).toBe("200px");
     expect(canvas.tagName).toBe("CANVAS"); expect(canvas.getAttribute("role")).toBe("img"); expect(canvas.getAttribute("aria-label")).toBe("x · y 비교");
     expect(FakeChart.instances).toHaveLength(1);

@@ -229,7 +229,7 @@ const PATTERNS = {
             <div class="kpi"><span class="label">미처리 검토</span><span class="value">5</span><span class="delta">24시간 내 처리</span></div>
           </div>
           <div class="row-3">
-            <div class="chart-card"><h3 class="chart-title">탐지 추이 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 14일</span></h3><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div>
+            <div class="chart-card"><h3 class="chart-title">탐지 추이 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 14일</span></h3><div class="chart-view"><div class="chart-tools"><button type="button" class="btn sm text assistive" data-chart-table>표로 보기</button></div><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div></div>
             <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:229.2deg"></i><i style="--a:270.2deg"></i></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>196</b></span><span><i class="low"></i>Low <b>120</b></span><span><i class="info"></i>Info <b>263</b></span></div></div></div>
           </div>
           <div class="card flush">

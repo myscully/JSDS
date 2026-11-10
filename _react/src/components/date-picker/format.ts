@@ -7,7 +7,9 @@ export type TextUnit = DateUnit | "minute" | "second";
 /** 끊어 채우기의 단위 — clock 은 달력 아래 시각 칸 */
 type GroupUnit = TextUnit | "clock" | "clockS";
 /** 입력의 상태 — 값이 늘 유효한 날짜는 아니다(사람의 요구 2026-11-09) */
-export type DateValidity = "empty" | "incomplete" | "invalid" | "min" | "max" | "order" | "valid";
+export type DateValidity = "empty" | "incomplete" | "invalid" | "min" | "max" | "order" | "long" | "valid";
+/** 양끝을 포함한 일수 — 시각은 보지 않는다(같은 날이면 1). UTC 로 재서 일광 절약 시간의 23 · 25시간 날에 흔들리지 않게 */
+export const spanDays = (a: Date, b: Date) => Math.abs(Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 864e5 + 1;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 /** YYYY-MM-DD */
@@ -144,6 +146,8 @@ export interface DatePickerMessages {
   startSubject?: string;
   /** {subject} — 기간에서 끝만 틀렸을 때 */
   endSubject?: string;
+  /** 기간이 maxDays 를 넘음 — 자리표시 {days} */
+  long: string;
   /** 시각 옵션 — 없는 시각(25:00) */
   invalidTime?: string;
   /** 시각 옵션 — 같은 날인데 끝 시각이 시작보다 앞 */
@@ -156,17 +160,17 @@ export interface DatePickerMessages {
   format?: string;
 }
 /** 기간의 한쪽 상태 — 순서(order)는 두 쪽 사이의 일이라 여기에는 없다. 비운 쪽은 empty */
-export type DateSideValidity = Exclude<DateValidity, "order">;
+export type DateSideValidity = Exclude<DateValidity, "order" | "long">;
 export interface CheckResult { validity: DateValidity; start: Date | null; end: Date | null; message?: string; /** 기간일 때만 — 시작 · 끝 각각 */ sides?: { start: DateSideValidity; end: DateSideValidity } }
-type MessageKey = "incomplete" | "invalid" | "min" | "max" | "order" | "invalidTime" | "orderTime";
+type MessageKey = "incomplete" | "invalid" | "min" | "max" | "order" | "long" | "invalidTime" | "orderTime";
 /** 문구 하나를 채운다 — 자리표시가 없으면 옛 조합 */
 function say(t: string, key: MessageKey, x: Record<string, string | undefined>) {
-  if (!t.includes("{")) return key === "order" || key === "orderTime" ? t : key === "min" || key === "max" ? (x[key] ?? "") + t : t + x.example;
+  if (!t.includes("{")) return key === "order" || key === "orderTime" || key === "long" ? t : key === "min" || key === "max" ? (x[key] ?? "") + t : t + x.example;
   return t.replace(/\{(\w+)\}/g, (m, k: string) => x[k] ?? m);
 }
 /** 입력 검사 — 빈 · 미완성 · 없는 날짜 · 순서 · min · max · 유효. 미완성 · 없는 날짜는 값이 없고, 순서 · 범위 밖은 그 날짜가 남는다 */
-export function checkText(text: string, o: { unit: TextUnit; range: boolean; min?: Date | null; max?: Date | null; messages: DatePickerMessages }): CheckResult {
-  const { unit, range, min, max, messages: msg } = o, s = String(text ?? "").trim(), isTime = unit === "minute" || unit === "second";
+export function checkText(text: string, o: { unit: TextUnit; range: boolean; min?: Date | null; max?: Date | null; maxDays?: number; messages: DatePickerMessages }): CheckResult {
+  const { unit, range, min, max, maxDays, messages: msg } = o, s = String(text ?? "").trim(), isTime = unit === "minute" || unit === "second";
   if (!s) return { validity: "empty", start: null, end: null };
   const parts = range ? s.split(/\s*~\s*/) : [s];
   if (range && parts.length < 2) parts.push("");
@@ -198,5 +202,6 @@ export function checkText(text: string, o: { unit: TextUnit; range: boolean; min
   if (b && b < a) { const sameDay = isTime && formatDate(a) === formatDate(b); return { validity: "order", start: a, end: b, message: sameDay ? say(msg.orderTime ?? msg.order, "orderTime", x) : say(msg.order, "order", x), ...ss }; }   // 같은 날이면 틀린 것은 시각이다
   if (min && both.some((d) => k(d) < k(min))) { who((v) => v === "min"); return { validity: "min", start: a, end: b, message: say(msg.min, "min", x), ...ss }; }
   if (max && both.some((d) => k(d) > k(max))) { who((v) => v === "max"); return { validity: "max", start: a, end: b, message: say(msg.max, "max", x), ...ss }; }
+  if (maxDays && maxDays > 0 && b && spanDays(a, b) > maxDays) return { validity: "long", start: a, end: b, message: say(msg.long, "long", { ...x, days: String(maxDays) }), ...ss };
   return { validity: "valid", start: a, end: b, ...ss };
 }

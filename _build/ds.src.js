@@ -24,7 +24,19 @@
   var fmt = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
 
   /* ---------- 초기화 ---------- */
+  /* 잘린 경로만 Tooltip 을 단다 — title 은 키보드로 볼 수 없다(P6, 사람의 결정 2026-11-10). 글자가 전부 보이는 항목에는 달지 않고, 링크가 아닌 항목은 잘렸을 때만 포커스를 받는다.
+     문구는 화면 글자와 같아 aria-describedby 로 잇지 않는다(두 번 읽힘). 글꼴이 늦게 와 폭이 바뀌므로 fonts.ready 뒤에 다시 잰다 */
+  function fitCrumbs(root) {
+    $$(".breadcrumb li>a:not(.icon), .breadcrumb li>span:not(.tooltip-wrap)", root || doc).forEach(function (el) {
+      if (el.scrollWidth <= el.clientWidth) return;
+      var w = doc.createElement("span"), tip = doc.createElement("span");
+      w.className = "tooltip-wrap"; tip.className = "tooltip multi"; tip.setAttribute("role", "tooltip"); tip.textContent = el.textContent;
+      el.parentNode.insertBefore(w, el); w.appendChild(el); w.appendChild(tip);
+      if (el.tagName !== "A") el.tabIndex = 0;
+    });
+  }
   function init(root) {
+    doc.fonts.ready.then(function () { fitCrumbs(root); });
     $$(".number-field input", root || doc).forEach(numSync);
     dsLive();   // 알림 영역은 미리 — 복사하는 순간 새로 넣으면 대개 읽히지 않는다
     root = root || doc;
@@ -170,6 +182,7 @@
            · data-footer("today reset cancel apply" | none) · data-presets("7 30") · data-today(정적 데모의 오늘)
            · data-labels(JSON — Intl 이 만들지 못하는 문구를 바꾼다. 키는 React labels 와 같고 recent 는 "최근 {n}일")
            · data-messages(JSON — 오류 문구. 키 · 자리표시는 React messages 와 같다)
+           · data-max-days(기간의 최대 길이 — 양끝 포함 일수, 일 단위 기간만. 달력은 시작을 고르면 그 밖의 날짜를 막고 키보드 입력은 받아서 validity "long" 으로 알린다)
            · data-time(시각까지 — 일 단위 피커만. 값 'YYYY-MM-DD HH:mm', 필드 'YYYY. MM. DD HH:mm', 24시간제. data-time="seconds" 면 초까지) */
   var FOOT = { today: "text", reset: "text", cancel: "outline assistive", apply: "solid primary" };
   /* 문구 — 사람의 결정(2026-11-09): 다른 언어로 쓸 때 data-labels 로 바꾼다. '오늘' 의 기본은 Intl.RelativeTimeFormat */
@@ -186,7 +199,7 @@
   /* 오류 문구 — Writing 규칙(무엇이 일어났는지 + 어떻게 하면 되는지), 범위는 '부터 · 까지'(그 날짜를 포함). 사람의 결정(2026-11-09).
      자리표시 {subject} {example} {min} {max} — 어순이 다른 언어도 쓸 수 있게. 다른 언어 기본값은 두지 않고 data-messages 로 넣는다.
      {subject} 는 기간에서 한쪽만 틀렸으면 그 쪽(startSubject · endSubject), 아니면 subject. 자리표시가 없는 문자열은 옛 조합(앞말 + 예시 · 날짜 + 꼬리말) */
-  var MSG = { incomplete: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.", invalid: "{subject} 달력에 없습니다. 달력에서 고르거나 {example} 처럼 입력하세요.", min: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.", max: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.", order: "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.", subject: "날짜가", startSubject: "시작일이", endSubject: "종료일이", invalidTime: "{subject} 잘못됐습니다. {example} 처럼 24시간제로 입력하세요.", orderTime: "종료 시각이 시작 시각보다 빠릅니다. 시작과 같거나 늦은 시각으로 바꾸세요.", timeSubject: "시각이", startTimeSubject: "시작 시각이", endTimeSubject: "종료 시각이" };
+  var MSG = { incomplete: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.", invalid: "{subject} 달력에 없습니다. 달력에서 고르거나 {example} 처럼 입력하세요.", min: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.", max: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.", order: "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.", subject: "날짜가", startSubject: "시작일이", endSubject: "종료일이", long: "기간이 {days}일을 넘습니다. {days}일 이내로 고르세요.", invalidTime: "{subject} 잘못됐습니다. {example} 처럼 24시간제로 입력하세요.", orderTime: "종료 시각이 시작 시각보다 빠릅니다. 시작과 같거나 늦은 시각으로 바꾸세요.", timeSubject: "시각이", startTimeSubject: "시작 시각이", endTimeSubject: "종료 시각이" };
   function dpMessages(host) {
     var raw = host.getAttribute("data-messages"), o = {}, out = {}, k;
     if (raw) try { o = JSON.parse(raw) || {}; } catch (e) { if (!labelWarned[raw]) { labelWarned[raw] = 1; if (window.console) console.warn("[ds.js] data-messages 가 JSON 이 아닙니다 — 기본 문구를 씁니다: " + raw); } }
@@ -196,7 +209,7 @@
   }
   function say(M, key, x) {
     var t = M[key];
-    if (t.indexOf("{") < 0) return key.indexOf("order") === 0 ? t : key === "min" || key === "max" ? x[key] + t : t + x.example;
+    if (t.indexOf("{") < 0) return key.indexOf("order") === 0 || key === "long" ? t : key === "min" || key === "max" ? x[key] + t : t + x.example;
     return t.replace(/\{(\w+)\}/g, function (m, k) { return x[k] != null ? x[k] : m; });
   }
   var EXAMPLE = { second: "2026. 09. 07 14:30:05", minute: "2026. 09. 07 14:30", day: "2026. 09. 07", month: "2026. 09", year: "2026" }, DIGITS = { second: 14, minute: 12, day: 8, month: 6, year: 4 };
@@ -207,6 +220,9 @@
   var clockOf = function (d, unit) { return pad(d.getHours()) + ":" + pad(d.getMinutes()) + (unit === "second" ? ":" + pad(d.getSeconds()) : ""); };
   var keyOf = function (d, unit) { return unit === "year" ? String(d.getFullYear()) : unit === "month" ? ymKey(d) : unit === "minute" || unit === "second" ? fmt(d) + " " + clockOf(d, unit) : fmt(d); };
   var showOf = function (d, unit) { return unit === "year" ? String(d.getFullYear()) : unit === "minute" || unit === "second" ? showOf(d, "day") + " " + clockOf(d, unit) : d.getFullYear() + ". " + pad(d.getMonth() + 1) + (unit === "month" ? "" : ". " + pad(d.getDate())); };
+  /* 양끝을 포함한 일수 — 시각은 보지 않는다(같은 날이면 1). UTC 로 재서 일광 절약 시간의 23 · 25시간 날에 흔들리지 않게 */
+  function spanDays(a, b) { return Math.abs(Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 864e5 + 1; }
+  function dpMaxDays(host) { var st = S(host), n = Number(host.getAttribute("data-max-days")); return n > 0 && st.mode === "range" && st.unit === "day" ? n : 0; }
   /* 글자의 단위 — 달력은 st.unit(일)로 일하고, 필드 글자 · 값은 시각까지 */
   function tu(st) { return st.time || st.unit; }
   var unitStart = function (d, unit) { return unit === "year" ? new Date(d.getFullYear(), 0, 1) : unit === "month" ? firstOf(d) : d; };
@@ -332,6 +348,8 @@
     if (b && b < a) return { validity: "order", a: a, b: b, sides: ss, msg: say(M, st.time && fmt(a) === fmt(b) ? "orderTime" : "order", x) };   // 같은 날이면 틀린 것은 시각이다
     if (lo && both.some(function (d) { return f(d) < f(lo); })) { if (rg) who(function (v) { return v === "min"; }); return { validity: "min", a: a, b: b, sides: ss, msg: say(M, "min", x) }; }
     if (hi && both.some(function (d) { return f(d) > f(hi); })) { if (rg) who(function (v) { return v === "max"; }); return { validity: "max", a: a, b: b, sides: ss, msg: say(M, "max", x) }; }
+    var md = dpMaxDays(host);
+    if (md && b && spanDays(a, b) > md) { x.days = md; return { validity: "long", a: a, b: b, sides: ss, msg: say(M, "long", x) }; }
     return { validity: "valid", a: a, b: b, sides: ss };
   }
   /* host 의 상태. 처음 만질 때 마크업(입력 글자 · 정적 달력의 .on)에서 값을 읽어 data-* 로 옮긴다 */
@@ -419,7 +437,7 @@
   }
   function footHtml(host) {
     var st = S(host), list = dpFoot(host), h = "", t = dpToday(host), L = dpLabels(host);
-    if (st.mode === "range" && st.unit === "day") (host.getAttribute("data-presets") || "").split(/\s+/).filter(Boolean).forEach(function (n) { var s = addDays(t, -(+n - 1)); h += '<button type="button" class="btn sm text" data-preset="' + n + '"' + (outOf(host, s) || outOf(host, t) ? " disabled" : "") + ">" + L.recent.replace("{n}", n) + "</button>"; });
+    if (st.mode === "range" && st.unit === "day") (host.getAttribute("data-presets") || "").split(/\s+/).filter(Boolean).forEach(function (n) { var s = addDays(t, -(+n - 1)); h += '<button type="button" class="btn sm text" data-preset="' + n + '"' + (outOf(host, s) || outOf(host, t) || (dpMaxDays(host) && +n > dpMaxDays(host)) ? " disabled" : "") + ">" + L.recent.replace("{n}", n) + "</button>"; });
     ["today", "reset", "cancel", "apply"].forEach(function (k) { if (list.indexOf(k) < 0 || (k === "today" && st.mode !== "single")) return; h += '<button type="button" class="btn sm ' + FOOT[k] + '" data-cal="' + k + '"' + (k === "today" && outOf(host, t, st.unit) ? " disabled" : "") + ">" + L[k] + "</button>"; });
     return h ? '<div class="cal-foot">' + h + "</div>" : "";
   }
@@ -454,8 +472,9 @@
   function renderMarks(host) {
     var st = S(host), cal = calOf(host), v = st.draft || {}, rg = st.mode === "range", today = fmt(dpToday(host));
     var a = v.a ? fmt(v.a) : null, b = rg && v.b ? fmt(v.b) : null, hv = rg && a && !b && st.hover && st.hover !== a ? st.hover : null;
-    var lo = b ? a : hv ? (hv < a ? hv : a) : null, hi = b ? b : hv ? (hv < a ? a : hv) : null;
+    var lo = b ? a : hv ? (hv < a ? hv : a) : null, hi = b ? b : hv ? (hv < a ? a : hv) : null, md = rg && a && !b ? dpMaxDays(host) : 0;   // 시작만 고른 동안 — 상한 밖의 날짜는 끝으로 고를 수 없다
     $$(".day[data-date]", cal).forEach(function (d) {
+      var dd = parseYMD(d.dataset.date); if (outOf(host, dd) || (md && spanDays(v.a, dd) > md)) d.setAttribute("aria-disabled", "true"); else d.removeAttribute("aria-disabled");
       var k = d.dataset.date, muted = d.classList.contains("muted"), on = !muted && (k === a || k === b), mid = !muted && !!lo && k > lo && k < hi;   // 다른 달(흐린) 칸은 선택 · 띠를 칠하지 않는다(사람의 결정 2026-10-27)
       d.classList.toggle("on", on); d.classList.toggle("start", (on || k === hv) && k === lo); d.classList.toggle("end", (on || k === hv) && k === hi);   // 띠의 양끝(선택 · 미리보기 끝) — CSS 가 반쪽 띠를 칠한다
       d.classList.toggle("in-range", !!b && mid); d.classList.toggle("preview", !!hv && mid); d.classList.toggle("preview-end", k === hv); d.classList.toggle("today", k === today);
@@ -1097,7 +1116,7 @@
     if ((el = closest(t, ".tabs .tab")) && !el.disabled) { tabPick(el); return; }
     if ((el = closest(t, ".steps .step-btn"))) { var stepLi = closest(el, "li"); fire(el, "ds:step", { index: $$(":scope > li", stepLi.parentNode).indexOf(stepLi) }); return; }
     // Breadcrumb 펼치기
-    if ((el = closest(t, ".breadcrumb .more"))) { var li = closest(el, "li"), items = (el.dataset.items || "").split("|").map(function (s) { return s.trim(); }).filter(Boolean); if (li && items.length) { var first = null; items.forEach(function (s) { var n = doc.createElement("li"); var a2 = doc.createElement("a"); a2.href = "#"; a2.textContent = s; n.appendChild(a2); li.parentNode.insertBefore(n, li); if (!first) first = a2; }); var ol = li.parentNode; li.remove(); /* 버튼이 사라지니 포커스를 펼친 첫 링크로 — 안 옮기면 body 로 떨어진다 */ if (first) first.focus(); fire(ol, "ds:expand", { items: items }); } return; }
+    if ((el = closest(t, ".breadcrumb .more"))) { setTimeout(fitCrumbs, 0); var li = closest(el, "li"), items = (el.dataset.items || "").split("|").map(function (s) { return s.trim(); }).filter(Boolean); if (li && items.length) { var first = null; items.forEach(function (s) { var n = doc.createElement("li"); var a2 = doc.createElement("a"); a2.href = "#"; a2.textContent = s; n.appendChild(a2); li.parentNode.insertBefore(n, li); if (!first) first = a2; }); var ol = li.parentNode; li.remove(); /* 버튼이 사라지니 포커스를 펼친 첫 링크로 — 안 옮기면 body 로 떨어진다 */ if (first) first.focus(); fire(ol, "ds:expand", { items: items }); } return; }
     // Onboard 단계
     if ((el = closest(t, ".onboard [data-step]")) && !el.disabled) { stepTo(closest(el, ".onboard"), el.dataset.step === "prev" ? -1 : 1); return; }
     // 선택형 카드 (데모 링크)

@@ -1,7 +1,9 @@
-import { forwardRef, type ButtonHTMLAttributes, type ElementType, type HTMLAttributes, type LiHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes, type ElementType, type HTMLAttributes, type LiHTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import { LABELS } from "../../labels";
+import { mergeRefs } from "../../utils/hooks";
+import { Tooltip } from "../tooltip/Tooltip";
 
 export interface BreadcrumbProps extends HTMLAttributes<HTMLElement> {
   /** nav aria-label. 기본 "현재 위치" */
@@ -51,10 +53,21 @@ export interface BreadcrumbItemProps extends LiHTMLAttributes<HTMLLIElement> {
 }
 export const BreadcrumbItem = forwardRef<HTMLLIElement, BreadcrumbItemProps>(function BreadcrumbItem({ href, current, as, linkProps, children, ...rest }, ref) {
   const Link: ElementType = as ?? "a";
+  const li = useRef<HTMLLIElement>(null), [cut, setCut] = useState(false);
+  /* 잘린 항목만 Tooltip — title 은 키보드로 볼 수 없다(사람의 결정 2026-11-10). 글꼴이 늦게 와 폭이 바뀌므로 fonts.ready 뒤에 다시 잰다 */
+  useLayoutEffect(() => {
+    let alive = true;
+    const measure = () => { const el = alive ? li.current?.querySelector<HTMLElement>("a, span:not(.tooltip-wrap):not(.tooltip)") : null; if (el) setCut(el.scrollWidth > el.clientWidth); };
+    measure();
+    document.fonts?.ready.then(measure);
+    return () => { alive = false; };
+  }, [children]);
+  /* 현재 항목도 span 으로 — li 가 flex 라 맨 텍스트에는 말줄임(text-overflow)이 걸리지 않는다. 링크가 아닌 항목은 잘렸을 때만 포커스를 받는다 */
+  const plain = current || (href === undefined && !as);
+  const label = plain ? <span tabIndex={cut ? 0 : undefined}>{children}</span> : <Link href={href} {...linkProps}>{children}</Link>;
   return (
-    <li ref={ref} aria-current={current ? "page" : undefined} {...rest}>
-      {/* 현재 항목도 span 으로 — li 가 flex 라 맨 텍스트에는 말줄임(text-overflow)이 걸리지 않는다 */}
-      {current || (href === undefined && !as) ? <span>{children}</span> : <Link href={href} {...linkProps}>{children}</Link>}
+    <li ref={mergeRefs(li, ref)} aria-current={current ? "page" : undefined} {...rest}>
+      {cut ? <Tooltip content={children} multi describe={false}>{label}</Tooltip> : label}
     </li>
   );
 });

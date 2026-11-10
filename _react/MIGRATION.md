@@ -420,3 +420,11 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **.link** — 전에는 표 안에서만 스타일이 있었습니다. 표 밖의 `.link` 는 이제 제품 색 · 밑줄로 그려집니다. 그 줄 자체가 링크이면 `.standalone` 을 더하세요.
 - **Empty** — `compact` 의 제목 · 설명 크기가 인라인 스타일에서 CSS 로 옮겨 갔습니다. CSS 를 함께 올려 주세요.
 - **문서 주소** — 빈 화면이 `#/patterns/empty-state` 에서 `#/components/empty-state` 로 옮겨 갔습니다.
+
+## 기간 상한 · Breadcrumb · 차트 표로 보기 (2026-11-10)
+
+- **DateRangePicker `maxDays`** — 새 prop 입니다. `DateValidity` 에 `"long"` 이 더해졌습니다. validity 를 빠짐없이 나누는 제품 코드는 확인하세요. `DatePickerMessages` 를 통째로 넘기는 코드에는 `long` 이 필요합니다(`Partial` 로 넘기는 `messages` 는 그대로입니다).
+- **BreadcrumbItem** — 잘린 항목에만 Tooltip 이 붙습니다. `linkProps={{ title }}` 와 `title` 은 지워 주세요(키보드로 볼 수 없습니다).
+- **Tooltip `describe`** — 새 prop 입니다. 기본 `true` 는 전과 같습니다.
+- **ChartCanvas** — 바깥 요소가 `.chart-canvas` 에서 `.chart-view` 로 바뀌었고 그 안에 표로 보기 버튼이 있습니다. `className` · `style` · `height` 는 그대로 `.chart-canvas` 로 갑니다. 버튼을 포함해 차트가 40 높아집니다. 문구는 `labels` 입니다(빈 칸의 숨긴 문구 `empty` 포함). `DSChart.tableData` 는 빈 칸을 `null` 로 돌려줍니다.
+- **사이트 마크업** — 탐색형 차트는 `.chart-view > .chart-tools > button[data-chart-table]` 과 `.chart-canvas` 를 함께 씁니다. CSS 와 `ds-chart.js` 를 함께 올려 주세요.

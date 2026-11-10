@@ -44,6 +44,7 @@ export const LABELS = {
   dateSubject: "날짜가",
   dateStartSubject: "시작일이",
   dateEndSubject: "종료일이",
+  dateLongError: "기간이 {days}일을 넘습니다. {days}일 이내로 고르세요.",
   dateTimeInvalidError: "{subject} 잘못됐습니다. {example} 처럼 24시간제로 입력하세요.",
   dateTimeOrderError: "종료 시각이 시작 시각보다 빠릅니다. 시작과 같거나 늦은 시각으로 바꾸세요.",
   dateTimeSubject: "시각이",

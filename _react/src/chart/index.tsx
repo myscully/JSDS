@@ -1,13 +1,13 @@
 /* @jiran/ds-react/chart — 탐색형 차트(Chart.js) 테마 어댑터 + 캔버스.
    사이트 assets/ds-chart.js 와 같은 원본(_build/ds-chart.src.js)을 쓴다. chart.js 는 optional peer 라 여기서 import 하지 않고
    제품이 설치한 Chart(chart.js/auto 또는 register 한 Chart)를 prop 으로 받는다 — 차트를 안 쓰는 제품의 번들에는 아무것도 들어가지 않는다 */
-import { forwardRef, useEffect, useRef, type HTMLAttributes, type RefObject } from "react";
+import { forwardRef, useEffect, useRef, useState, type HTMLAttributes, type RefObject } from "react";
 import { cx } from "../utils/cx";
 import { mergeRefs } from "../utils/hooks";
 import DSChart from "./ds-chart.js";
-import type { ChartLike, DsChartConfig, DsChartHandle } from "./ds-chart.js";
+import type { ChartLike, ChartTableData, ChartTableLabels, DsChartConfig, DsChartHandle } from "./ds-chart.js";
 
-export type { ChartLike, DsChartConfig, DsChartHandle, DsTheme, Presets, Series, DonutSlice, Tone, TimeseriesSpec, BarSpec, DonutSpec, MixedSpec } from "./ds-chart.js";
+export type { ChartTableLabels, ChartTableData, ChartLike, DsChartConfig, DsChartHandle, DsTheme, Presets, Series, DonutSlice, Tone, TimeseriesSpec, BarSpec, DonutSpec, MixedSpec } from "./ds-chart.js";
 /** 프리셋 — spec → Chart.js config. timeseries(선 · 누적 영역) · bar(세로/가로 · 그룹/누적) · donut · mixed(막대 + 선, y 축 하나) */
 export const presets = DSChart.presets;
 /** 토큰(--chart-* · 심각도 · 면 · 글꼴)을 계산값으로 읽은 테마 */
@@ -34,16 +34,33 @@ export interface ChartCanvasProps extends Omit<HTMLAttributes<HTMLDivElement>, "
   config: DsChartConfig;
   /** 차트는 그래픽이라 접근 이름이 필수다 — 제목과 요약(예: "일별 탐지 추이 — Critical · High 누적") */
   "aria-label": string;
-  /** 캔버스 높이(px). 기본은 CSS .chart-canvas 의 240 */
+  /** 캔버스 높이(px). 기본은 CSS .chart-canvas 의 240. 표로 볼 때도 같은 높이 */
   height?: number;
+  /** 표로 보기의 문구 — table · chart · head · value · empty(빈 칸의 숨긴 문구) */
+  labels?: Partial<ChartTableLabels>;
 }
-/** .chart-canvas 래퍼 + canvas[role=img]. 사이트의 canvas[data-chart] 와 같은 골격 */
-export const ChartCanvas = forwardRef<HTMLCanvasElement, ChartCanvasProps>(function ChartCanvas({ chart, config, "aria-label": label, height, className, style, ...rest }, ref) {
+/** .chart-view > 표로 보기 버튼 + .chart-canvas + canvas[role=img]. 사이트의 canvas[data-chart] 와 같은 골격.
+ *  캔버스의 값은 스크린 리더 · 키보드로 읽을 수 없어 같은 data 를 표로 바꿔 보여 준다(사람의 결정 2026-11-10) */
+export const ChartCanvas = forwardRef<HTMLCanvasElement, ChartCanvasProps>(function ChartCanvas({ chart, config, "aria-label": label, height, labels, className, style, ...rest }, ref) {
   const inner = useRef<HTMLCanvasElement>(null);
+  const [asTable, setAsTable] = useState(false);
   useDsChart(inner, chart, config);
+  const L = { ...DSChart.TABLE_LABELS, ...labels };
+  const t: ChartTableData | null = asTable ? DSChart.tableData(config.data, L) : null;
   return (
-    <div className={cx("chart-canvas", className)} style={height ? { height, ...style } : style} {...rest}>
-      <canvas ref={mergeRefs(inner, ref)} role="img" aria-label={label} />
+    <div className="chart-view">
+      <div className="chart-tools"><button type="button" className="btn sm text assistive" data-chart-table onClick={() => setAsTable((v) => !v)}>{asTable ? L.chart : L.table}</button></div>
+      <div className={cx("chart-canvas", className)} style={height ? { height, ...style } : style} hidden={asTable} {...rest}>
+        <canvas ref={mergeRefs(inner, ref)} role="img" aria-label={label} />
+      </div>
+      {t && (
+        <div className="tbl-wrap sticky chart-table" tabIndex={0} role="region" aria-label={label} style={height ? { height } : undefined}>
+          <table className="tbl compact">
+            <thead><tr>{t.head.map((h, i) => <th key={i} scope="col" className={i ? "num" : undefined}>{h}</th>)}</tr></thead>
+            <tbody>{t.rows.map((r, ri) => <tr key={ri}>{r.map((c, i) => <td key={i} className={i ? "num" : undefined}>{c == null ? <><span aria-hidden="true">—</span><span className="sr-only">{L.empty}</span></> : c}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 });

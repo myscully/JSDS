@@ -9,7 +9,7 @@ import { FormValidationContext } from "../text-field/validation";
 import { LABELS } from "../../labels";
 import type { Size } from "../../types";
 import { Calendar, addMonths, baseView, isRange, labelsFor, outOf, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
-import { checkText, clockOf, formatMonth, isValidDate, pasteText, placeholderOf, reformat, showOf, stepClock, stepText, unitStart, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity, type TextUnit } from "./format";
+import { checkText, clockOf, formatMonth, spanDays, isValidDate, pasteText, placeholderOf, reformat, showOf, stepClock, stepText, unitStart, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity, type TextUnit } from "./format";
 import { calendarDateOf, clockDateOf, instantOf, resolveZone, todayIn } from "./tz";
 
 export { Calendar, type CalendarProps, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
@@ -34,6 +34,8 @@ interface PickerBaseProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange
   onOpenChange?: (open: boolean) => void;
   /** 입력 자리 표시. 기본은 형식(YYYY. MM. DD) */
   placeholder?: string;
+  /** 기간의 최대 길이(양끝 포함 일수, 일 단위 기간만). 시작을 고르면 밖의 날짜를 막고 긴 프리셋을 끈다. 키보드 입력은 받아서 validity "long" 으로 알린다 */
+  maxDays?: number;
   /** 시각까지 입력(일 단위만) — YYYY. MM. DD HH:mm, 24시간제. "seconds" 면 초까지. 달력 아래 시각 칸이 생기고 적용 버튼은 늘 있다. 값 Date 는 그 시간대의 그 시각이다 */
   time?: boolean | "seconds";
   /** 달력에서 이보다 앞은 고를 수 없다. 키보드 입력은 막지 않고 validity "min" 으로 알린다. time 에서 max 가 0시면 그 하루 끝까지 */
@@ -106,13 +108,13 @@ interface PickerProps extends PickerBaseProps {
   presets?: DateRangePickerProps["presets"];
   calendars?: 1 | 2;
 }
-const MESSAGES: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject, invalidTime: LABELS.dateTimeInvalidError, orderTime: LABELS.dateTimeOrderError, timeSubject: LABELS.dateTimeSubject, startTimeSubject: LABELS.dateStartTimeSubject, endTimeSubject: LABELS.dateEndTimeSubject };
+const MESSAGES: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject, long: LABELS.dateLongError, invalidTime: LABELS.dateTimeInvalidError, orderTime: LABELS.dateTimeOrderError, timeSubject: LABELS.dateTimeSubject, startTimeSubject: LABELS.dateStartTimeSubject, endTimeSubject: LABELS.dateEndTimeSubject };
 const firstOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
 const keyOfPair = (p: Pair) => [p.a, p.b].map((d) => (d == null ? "" : isNaN(d.getTime()) ? "NaN" : String(d.getTime()))).join("|");
 const narrow = () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(max-width:767px)").matches;
 
 const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
-  { range, pair, defaultPair, onPair, label, unit = "day", time, open, defaultOpen = false, onOpenChange, placeholder, min, max, today, locale = "ko-KR", timezone, presets, footer, calendars, help, error, messages, labels, size = "md", disabled, readOnly, required, inputId, defaultText, className, style, onKeyDown, onBlur, "aria-label": ariaLabel, ...rest },
+  { range, pair, defaultPair, onPair, label, unit = "day", time, maxDays: maxDaysProp, open, defaultOpen = false, onOpenChange, placeholder, min, max, today, locale = "ko-KR", timezone, presets, footer, calendars, help, error, messages, labels, size = "md", disabled, readOnly, required, inputId, defaultText, className, style, onKeyDown, onBlur, "aria-label": ariaLabel, ...rest },
   ref,
 ) {
   const tz = resolveZone(timezone);
@@ -130,7 +132,9 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   let maxD = cd(max);
   if (isTime && maxD && !maxD.getHours() && !maxD.getMinutes() && !maxD.getSeconds()) maxD = new Date(maxD.getFullYear(), maxD.getMonth(), maxD.getDate(), 23, 59, 59);   // 사이트 data-max 의 날짜만 적은 값과 같다 — 그 하루 전체
   const textOfDays = (a: Date | null, b: Date | null) => (!a ? "" : range ? (b ? `${showOf(a, tu)} ~ ${showOf(b, tu)}` : "") : showOf(a, tu));
-  const check = (t: string) => checkText(t, { unit: tu, range, min: minD, max: maxD, messages: msg });
+  const maxDays = range && unit === "day" && maxDaysProp && maxDaysProp > 0 ? maxDaysProp : undefined;
+  useEffect(() => { if (maxDaysProp && (!range || unit !== "day")) console.warn("[ds-react] maxDays 는 일 단위 기간(DateRangePicker)에만 씁니다 — 무시합니다."); }, [maxDaysProp, range, unit]);
+  const check = (t: string) => checkText(t, { unit: tu, range, min: minD, max: maxD, maxDays, messages: msg });
   /* 달력 아래 시각 칸 — 친 글자는 적용할 때 날짜와 합쳐 필드와 같은 검사를 지난다(사람의 결정 2026-11-10 — 처음 값 00:00 · 기간 끝 23:59) */
   type Clock = { a: string; b: string };
   const clockDefaults = (): Clock => (tu === "second" ? { a: "00:00:00", b: "23:59:59" } : { a: "00:00", b: "23:59" });
@@ -252,11 +256,16 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   const draftA = isRange(draft) ? draft.start : (draft as Date | null), draftB = isRange(draft) ? draft.end : null;
   const draftText = isTime && draftA ? withClock(draftA, draftB, clock) : textOfDays(draftA, draftB);
   const canApply = !halfRange && draftText !== committed.current;
+  /* 시작만 고른 동안 — 상한 밖의 날짜는 끝으로 고를 수 없다 */
+  const shift = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const half = maxDays && draftA && !draftB ? draftA : null;
+  const spanMin = half ? [minD, shift(half, 1 - maxDays!)].filter(Boolean).sort((x, y) => y!.getTime() - x!.getTime())[0] : minD;
+  const spanMax = half ? [maxD, shift(half, maxDays! - 1)].filter(Boolean).sort((x, y) => x!.getTime() - y!.getTime())[0] : maxD;
   const foot = (
     <>
       {range && unit === "day" && presets?.map((p, i) => {
         const [s, e] = p.range().map((x) => calendarDateOf(x, tz));
-        return <Button variant="text" key={`p${i}`} size="sm" data-preset={i} disabled={outOf(s, minD, maxD) || outOf(e, minD, maxD)} onClick={() => done({ start: s, end: e }, clockDefaults())}>{p.label}</Button>;
+        return <Button variant="text" key={`p${i}`} size="sm" data-preset={i} disabled={outOf(s, minD, maxD) || outOf(e, minD, maxD) || (!!maxDays && spanDays(s, e) > maxDays)} onClick={() => done({ start: s, end: e }, clockDefaults())}>{p.label}</Button>;
       })}
       {items.includes("today") && !range && (
         <Button variant="text" size="sm" data-cal="today" disabled={outOf(todayD, minD, maxD, unit)} onClick={() => { const t = unitStart(todayD, unit); setMonth(firstOf(t)); setView(baseView(unit)); setDraft(t); if (instant) done(t); }}>{L.today}</Button>
@@ -330,8 +339,8 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
       unit={unit}
       value={draft}
       onSelect={pick}
-      min={minD ?? undefined}
-      max={maxD ?? undefined}
+      min={spanMin ?? undefined}
+      max={spanMax ?? undefined}
       today={todayD}
       locale={locale}
       calendars={months}

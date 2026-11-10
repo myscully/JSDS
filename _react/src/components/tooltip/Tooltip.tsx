@@ -26,6 +26,8 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLSpanElement>, "con
   position?: Side;
   /** 두 줄 이상 (폭 220) */
   multi?: boolean;
+  /** false 면 aria-describedby 를 잇지 않는다 — 툴팁이 화면 글자와 같아 두 번 읽히는 자리(잘린 글자) */
+  describe?: boolean;
   /** 항상 표시 (문서·디버그) */
   show?: boolean;
   /** 트리거 요소 하나. 포커스를 받을 수 있어야 한다. 이름(aria-label)이 곧 툴팁이 아니면 aria-describedby 가 주입된다 */
@@ -36,7 +38,7 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLSpanElement>, "con
  * 보이고 숨는 것은 CSS(마우스 0.3초 뒤 · 키보드 바로). 올릴 때 재서 자리를 정하고, Esc 로 닫는다.
  * 아이콘 전용 버튼에는 항상 툴팁(= aria-label)을 둔다.
  */
-export const Tooltip = forwardRef<HTMLSpanElement, TooltipProps>(function Tooltip({ content, position = "top", multi, show, className, children, onMouseEnter, onMouseLeave, onFocus, onBlur, ...rest }, ref) {
+export const Tooltip = forwardRef<HTMLSpanElement, TooltipProps>(function Tooltip({ content, position = "top", multi, show, describe = true, className, children, onMouseEnter, onMouseLeave, onFocus, onBlur, ...rest }, ref) {
   const id = useId(undefined, "tt");
   const wrap = useRef<HTMLSpanElement>(null), tip = useRef<HTMLSpanElement>(null);
   const over = useRef(false), inside = useRef(false);
@@ -61,7 +63,7 @@ export const Tooltip = forwardRef<HTMLSpanElement, TooltipProps>(function Toolti
   }, [active, floating, position]);
   const side = show ? position : spot?.side ?? position;
   const named = isValidElement(children) && children.props["aria-label"] === content;   // 이름을 되풀이해 읽지 않게
-  const trigger = isValidElement(children) && !named ? cloneElement(children, { "aria-describedby": id }) : children;
+  const trigger = isValidElement(children) && !named && describe ? cloneElement(children, { "aria-describedby": id }) : children;
   return (
     <span
       ref={mergeRefs(wrap, ref)}

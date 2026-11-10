@@ -221,10 +221,41 @@
     });
   }
 
-  var DSChart = { theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, legendPosition: legendPosition, SERIES_MAX: SERIES_MAX, TOKENS: TOKENS, TONES: TONES };
+  /* ---------- 표로 보기 ----------
+     캔버스의 값은 스크린 리더 · 키보드로 읽을 수 없다(사람의 결정 2026-11-10). 차트가 그리는 data 그대로 표를 만든다 — 사이트와 React 가 같은 함수 */
+  /* 빈 값은 보이는 '—' + 숨긴 '값 없음'(사람의 결정 2026-11-11) — '—' 만 두면 스크린 리더가 읽지 않거나 '대시'로 읽는다. tableData 는 빈 칸을 null 로 돌려주고 그리는 쪽이 둘을 넣는다 */
+  var TABLE_LABELS = { table: "표로 보기", chart: "차트로 보기", head: "구분", value: "값", empty: "값 없음" };
+  function tableData(data, labels) {
+    var L = Object.assign({}, TABLE_LABELS, labels), ds = data.datasets || [];
+    return {
+      head: [L.head].concat(ds.map(function (d, i) { return d.label || (ds.length === 1 ? L.value : L.value + " " + (i + 1)); })),
+      rows: (data.labels || []).map(function (l, r) {
+        return [String(l)].concat(ds.map(function (d) { var v = d.data[r]; return v == null ? null : typeof v === "number" ? v.toLocaleString("ko-KR") : String(v); }));
+      }),
+    };
+  }
+  function cellHtml(c, L) { return c == null ? '<span aria-hidden="true">—</span><span class="sr-only">' + esc(L.empty) + "</span>" : esc(c); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function viewLabels(view) { try { return Object.assign({}, TABLE_LABELS, JSON.parse(view.getAttribute("data-labels") || "{}")); } catch (e) { console.warn("[ds-chart] data-labels 는 JSON 입니다"); return TABLE_LABELS; } }
+  function toggleTable(btn) {
+    var view = btn.closest(".chart-view"), wrap = view.querySelector(".chart-canvas"), canvas = wrap.querySelector("canvas"), box = view.querySelector(".chart-table"), L = viewLabels(view);
+    if (!canvas.__dsChart) return;
+    var show = !wrap.hidden;
+    if (show) {
+      if (!box) { box = doc.createElement("div"); box.className = "tbl-wrap sticky chart-table"; box.tabIndex = 0; box.setAttribute("role", "region"); box.setAttribute("aria-label", canvas.getAttribute("aria-label") || ""); view.appendChild(box); }
+      var t = tableData(canvas.__dsChart.chart.data, L);
+      box.innerHTML = '<table class="tbl compact"><thead><tr>' + t.head.map(function (h, i) { return '<th scope="col"' + (i ? ' class="num"' : "") + ">" + esc(h) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+        t.rows.map(function (r) { return "<tr>" + r.map(function (c, i) { return "<td" + (i ? ' class="num"' : "") + ">" + cellHtml(c, L) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>";
+    }
+    wrap.hidden = show; if (box) box.hidden = !show;
+    btn.textContent = show ? L.chart : L.table;
+  }
+
+  var DSChart = { tableData: tableData, TABLE_LABELS: TABLE_LABELS, theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, legendPosition: legendPosition, SERIES_MAX: SERIES_MAX, TOKENS: TOKENS, TONES: TONES };
   if (typeof module !== "undefined" && module.exports) module.exports = DSChart;
   root.DSChart = DSChart;
   if (doc && root.Chart !== undefined) { /* 사이트 · 순수 JS: 벤더 스크립트가 먼저 defer 로 실려 있다 */
+    doc.addEventListener("click", function (e) { var b = e.target.closest && e.target.closest("[data-chart-table]"); if (b) toggleTable(b); });
     if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { auto(root.Chart, doc); });
     else auto(root.Chart, doc);
   }

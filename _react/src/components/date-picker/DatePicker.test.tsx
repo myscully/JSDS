@@ -13,9 +13,9 @@ const cell = (k: string) => document.querySelector<HTMLElement>(`.calendar .day[
 const openField = async (host: ParentNode = document) => { await userEvent.click(host.querySelector<HTMLElement>(".datepicker .cal-btn, .cal-btn")!); };
 const lastCall = (fn: ReturnType<typeof vi.fn>) => fn.mock.calls[fn.mock.calls.length - 1];
 /* 옛 형식(자리표시 없음) — 2026-11-09 전 문구. 앞말 + 예시 · 날짜 + 꼬리말로 이어 붙는다 */
-const MSG: DatePickerMessages = { incomplete: "날짜를 끝까지 입력하세요. 예: ", invalid: "없는 날짜입니다. 예: ", min: " 이후 날짜를 입력하세요", max: " 이전 날짜를 입력하세요", order: "종료일이 시작일보다 빠릅니다" };
+const MSG: DatePickerMessages = { incomplete: "날짜를 끝까지 입력하세요. 예: ", invalid: "없는 날짜입니다. 예: ", min: " 이후 날짜를 입력하세요", max: " 이전 날짜를 입력하세요", long: "기간이 너무 깁니다.", order: "종료일이 시작일보다 빠릅니다" };
 /* 기본 문구(템플릿) — DatePicker 가 쓰는 것과 같은 묶음 */
-const DEF: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject };
+const DEF: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, long: LABELS.dateLongError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject };
 
 describe("글자 · 검사 (format)", () => {
   it("parseDate 는 로컬 날짜로 엄격하게 — 없는 날짜는 null, 구분자(- . / 공백) · 붙여 쓰기 허용", () => {
