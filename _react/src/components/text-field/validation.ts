@@ -4,6 +4,18 @@ import { createContext, useRef, useState, type FocusEvent, type FormEvent } from
 export const VALIDATION_MESSAGES = {
   required: "필수 항목입니다. 값을 입력하세요.",
   choose: "필수 항목입니다. 항목을 선택하세요.",
+  fileRequired: "필수 항목입니다. 파일을 선택하세요.",
+  fileBusy: "파일을 전송하고 있습니다. 끝난 뒤 다시 저장하세요.",
+  fileFailed: "올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.",
+  fileType: "올릴 수 없는 형식입니다. {types} 파일을 고르세요.",
+  fileSize: "파일이 너무 큽니다. {max} 이하 파일을 고르세요.",
+  fileEmpty: "빈 파일입니다. 내용이 있는 파일을 고르세요.",
+  fileDuplicate: "이미 추가한 파일입니다. 다른 파일을 고르세요.",
+  fileCount: "파일이 너무 많습니다. {max}개까지 올릴 수 있습니다.",
+  fileSend: "전송하지 못했습니다. 다시 시도하세요.",
+  fileAdded: "파일 {ok}개를 추가했습니다.",
+  fileRejected: "{bad}개는 올릴 수 없습니다.",
+  fileRemoved: "{name} 파일을 지웠습니다.",
   number: "숫자가 아닙니다. 숫자를 입력하세요.",
   email: "이메일 형식이 아닙니다. 예: admin@example.com",
   url: "URL 형식이 아닙니다. 예: https://example.com",
@@ -22,7 +34,7 @@ export interface FormValidationResult {
 }
 
 /** 검증하는 Form 안이면 필드별 오류(id → 문구). Date Picker 는 스스로 재므로 null 로 막는다 */
-export const FormValidationContext = createContext<{ errors: Record<string, string>; touch: (el: HTMLElement) => void } | null>(null);
+export const FormValidationContext = createContext<{ errors: Record<string, string>; touch: (el: HTMLElement) => void; refresh: (el: HTMLElement, show?: boolean) => void } | null>(null);
 
 type TextControl = HTMLInputElement | HTMLTextAreaElement;
 /** 고르는 컨트롤(Select 트리거 · Combobox 입력 · Checkbox/Radio 그룹) — 값이 DOM 값이 아니라 data-ds-empty 나 그룹 안 체크로 온다 */
@@ -39,6 +51,10 @@ function ownMessages(el: Element): ValidationMessages {
 
 /** 표준 제약과 글자 수 한도 — 맞으면 "" */
 export function validationMessage(el: TextControl, messages?: ValidationMessages): string {
+  if (el.hasAttribute("data-ds-upload")) {
+    const s = el.getAttribute("data-ds-upload"), m = { ...VALIDATION_MESSAGES, ...messages, ...ownMessages(el) };
+    return s === "busy" ? m.fileBusy : s === "failed" ? m.fileFailed : el.hasAttribute("data-ds-required") && el.hasAttribute("data-ds-empty") ? m.fileRequired : "";
+  }
   if (isChoice(el)) return el.hasAttribute("data-ds-required") && (el.hasAttribute("data-ds-group") ? !el.querySelector("input:checked") : el.hasAttribute("data-ds-empty")) ? { ...VALIDATION_MESSAGES, ...messages }.choose : "";
   const v = el.validity;
   const limit = Number(el.getAttribute("data-maxlength")) || 0;
@@ -116,5 +132,14 @@ export function useFormValidation({ enabled, messages, onValidate }: Options) {
   const touch = (el: HTMLElement) => {
     if (enabled) commit(measured(el as TextControl, latest.current));
   };
-  return { form, errors, summary, handleBlur, handleInput, validateAll, touch };
+  /** File Upload — 제출을 시도했거나 이미 오류일 때만 다시 잰다. 전송 중으로 바뀐 것은 실패가 아니라 앞선 오류만 지운다(제출이 막혀 띄운 안내는 끝날 때까지 둔다) */
+  const refresh = (el: HTMLElement, show?: boolean) => {
+    const shown = latest.current[el.id];
+    if (!enabled || !(show || tried.current || shown)) return;
+    if (el.getAttribute("data-ds-upload") !== "busy") return commit(measured(el as TextControl, latest.current));
+    if (!shown || shown === validationMessage(el as TextControl, messages)) return;
+    const { [el.id]: _old, ...next } = latest.current;
+    commit(next);
+  };
+  return { form, errors, summary, handleBlur, handleInput, validateAll, touch, refresh };
 }

@@ -120,7 +120,7 @@ ${rules([
   ["입력을 고치면 오류를 바로 지웁니다", "적용 — 동작 검사가 있습니다"],
   ["오류가 나도 입력값을 지우지 않습니다", "적용 — 동작 검사가 있습니다"],
   ["오류 문구 영역은 <code>aria-live=\"polite\"</code> 로 알립니다", "적용 — <code>data-validate</code> · <code>data-maxlength</code> 필드, 속성을 검사합니다"],
-  ["Select · Checkbox 그룹 · Radio 그룹도 오류 상태를 가집니다", `적용 — ${c("select", "Select")} · ${c("combobox", "Combobox")} · ${c("checkbox", "Checkbox")} · ${c("radio-button", "Radio Button")}`],
+  ["Select · Checkbox 그룹 · Radio 그룹도 오류 상태를 가집니다", `적용 — ${c("select", "Select")} · ${c("combobox", "Combobox")} · ${c("checkbox", "Checkbox")} · ${c("radio-button", "Radio Button")} · ${c("file-upload", "File Upload")}`],
   ["자주 나는 오류 문구는 사전으로 모아 기본값으로 씁니다", `아직 — 검증 기본 문구와 ${c("date-picker", "Date Picker")}의 <code>messages</code> 가 따로 있습니다`],
 ])}
 <h2 id="overlays">Overlays</h2><p>Popup · Dropdown · Select · Date Picker · Tooltip · Toast 가 함께 지키는 규칙입니다.</p>

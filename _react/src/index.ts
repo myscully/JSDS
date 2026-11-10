@@ -40,6 +40,7 @@ export { Pagination, PaginationBar, CursorPagination, PAGE_SIZES, paginate, type
 export { SideNav, SideNavGroup, SideNavItem, type SideNavProps, type SideNavGroupProps, type SideNavItemProps } from "./components/navigation/SideNav";
 export { SkipLink, type SkipLinkProps } from "./components/navigation/SideNav";
 export { Link, type LinkProps } from "./components/link/Link";
+export { FileUpload, type FileUploadProps, type UploadItem, type UploadAdded, type UploadStatus } from "./components/file-upload/FileUpload";
 export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, type TopBarProps, type TopBarLogoProps, type TopBarNavProps, type TopBarNavItemProps, type TopBarRightProps } from "./components/top-navigation/TopBar";
 
 // D. overlays & behavior

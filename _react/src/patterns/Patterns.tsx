@@ -85,7 +85,7 @@ export const Form = forwardRef<HTMLFormElement, FormProps>(function Form({ class
     else if (ref) ref.current = el;
   };
   return (
-    <FormValidationContext.Provider value={validate ? { errors: v.errors, touch: v.touch } : null}>
+    <FormValidationContext.Provider value={validate ? { errors: v.errors, touch: v.touch, refresh: v.refresh } : null}>
       <form
         ref={setRef}
         className={cx("form", className)}

@@ -1519,6 +1519,32 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .form .form-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:16px;border-top:1px solid var(--line-neutral-secondary)}
 .form .form-actions .left{margin-right:auto}
 .form .field{min-width:0}
+/* File Upload — 영역 전체가 눌리고(마우스) 키보드는 안의 버튼으로. 면 · 글자는 기존 쌍만 쓴다 */
+.upload{display:flex;flex-direction:column;gap:8px;width:100%;font-size:14px;line-height:1.6}
+.upload-zone{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;border:1px dashed var(--line-neutral-primary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);color:var(--foreground-neutral-secondary);text-align:center;cursor:pointer;transition:border-color var(--motion-fast)}
+.upload-zone:hover,.upload.dragging .upload-zone{border-color:var(--foreground-brand-primary)}
+.upload.dragging .upload-zone{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
+.upload-zone .ico{display:grid;place-items:center;color:var(--foreground-neutral-tertiary)}
+.upload-zone .ico svg{width:24px;height:24px}
+.upload.dragging .upload-zone .ico{color:inherit}
+.upload.compact .upload-zone{flex-direction:row;padding:0;border:0;background:none;cursor:default}
+.upload.compact.dragging .upload-zone{background:none;outline:1px dashed var(--foreground-brand-primary);outline-offset:4px}
+.upload.disabled .upload-zone{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);border-color:var(--line-neutral-secondary);cursor:default}
+.upload.disabled .upload-zone .ico{color:inherit}
+.upload.compact.disabled .upload-zone{background:none}
+.field.error .upload:not(.compact) .upload-zone{border-color:var(--foreground-negative-primary)}
+.upload-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.upload-item{display:flex;align-items:flex-start;gap:8px;padding:8px 8px 8px 12px;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);background:var(--surface-elevated-primary)}
+.upload-item.error{border-color:var(--foreground-negative-primary)}
+.upload-item .ico{flex:none;display:grid;place-items:center;width:20px;height:20px;margin-top:6px;color:var(--foreground-neutral-tertiary)}
+.upload-item .ico svg{width:20px;height:20px}
+.upload-item.done .ico{color:var(--foreground-positive-primary)}
+.upload-item.error .ico{color:var(--foreground-negative-strong)}
+.upload-item .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding:4px 0}
+.upload-item .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.upload-item .name{min-width:0;overflow-wrap:anywhere}   /* 긴 파일 이름은 줄바꿈 — 말줄임은 키보드로 읽을 길이 없다 */
+.upload-item .size{flex:none;font-size:12px;color:var(--foreground-neutral-tertiary)}
+.upload-item .msg{font-size:12px;color:var(--foreground-negative-strong);word-break:keep-all;overflow-wrap:anywhere}
 .form-legend{margin:0;font-size:12px;color:var(--foreground-neutral-tertiary)}
 .form-legend em{color:var(--foreground-negative-strong);font-style:normal}
 .form-summary{margin-bottom:-4px}   /* 폼 간격 20 에서 요약과 다음 줄 사이만 16 */

@@ -2250,6 +2250,138 @@ const COMPONENTS = {
     props: [["a.link", "a", "—", "<code>href</code> 필수"], [".standalone", "boolean", "false", "밑줄은 hover 때만, 500. React <code>standalone</code>"], ["target=_blank", "attr", "—", "아이콘 + sr-only + <code>rel</code>. React <code>external</code>"], ["React as", "ElementType", "a", "라우터 링크"]],
     spec: [["Label", "주변 글자 크기 · foreground/brand/primary"], ["Underline", "위치 2 · hover 두께 2"], ["Icon", "14"], ["Placement", "문장 안 · 표 · 목록 행"]],
   },
+  /* ------------------------------------------------ File Upload (2026-11-10) */
+  "file-upload": {
+    status: "ready", react: ["FileUpload"], css: [".upload", ".upload-zone", ".upload-list", ".upload-item"], borrows: [".field", ".btn", ".progress", ".sr-only", ".form", ".form-legend", ".form-actions"],
+    desc: "파일을 고르거나 끌어다 놓아 올립니다. 형식 · 용량 검사와 진행 표시까지 시스템이 맡고, 실제 전송은 제품이 합니다.",
+    principles: [
+      ["안내", "받는 형식과 용량을 도움말에 미리 적습니다. 빌드가 검사합니다."],
+      ["거절", "형식 · 용량 · 개수가 맞지 않으면 목록에 이름과 이유를 남깁니다. 통과한 파일은 그대로 받습니다."],
+      ["전송 실패", "다시 시도와 지우기를 둡니다. 거절된 파일은 다시 보내도 같으므로 지우기만 둡니다."],
+      ["하나만 받을 때", "새 파일을 고르면 바로 교체합니다."],
+      ["폼", "전송 중이거나 오류가 있으면 제출을 막고 그 필드로 옮깁니다. 저장 버튼은 켜 둡니다."],
+      ["모양", "기본은 드롭 영역입니다. 파일 하나를 받는 좁은 폼 칸은 <code>.compact</code> 입니다. 버튼형도 드롭은 받습니다."],
+      ["보안", "화면의 형식 검사는 안내입니다. 서버에서 다시 검사합니다."],
+    ],
+    thumb: `<div class="upload" style="width:180px"><div class="upload-zone" style="padding:12px"><span class="ico">${I("upload",24)}</span><span class="btn sm outline assistive">파일 선택</span></div></div>`,
+    examples: [
+      { id: "default", title: "Default", desc: "파일 하나를 받습니다. 영역을 누르거나 끌어다 놓습니다. 이 예제의 전송은 흉내입니다.", html: `
+        <div class="field" style="width:100%;max-width:480px">
+          <label id="fu1-l">인증서</label>
+          <div class="upload" data-demo data-max-size="5MB">
+            <div class="upload-zone">
+            <span class="ico">${I("upload",24)}</span>
+            <span class="upload-msg">파일을 끌어다 놓거나</span>
+            <button type="button" id="fu1-p" class="btn sm outline assistive upload-pick" aria-labelledby="fu1-l fu1-p">파일 선택</button>
+              <input type="file" hidden accept=".pem,.crt">
+            </div>
+            <span class="sr-only upload-status" role="status"></span>
+          </div>
+          <span class="help">PEM · CRT, 5MB 이하</span>
+        </div>` },
+      { id: "compact", title: "Compact", desc: "좁은 폼 칸은 .compact. 드롭도 받습니다.", html: `
+        <div class="field" style="width:100%;max-width:480px">
+          <label id="fu2-l">서명 파일</label>
+          <div class="upload compact" data-demo data-max-size="1MB">
+            <div class="upload-zone">
+              <button type="button" id="fu2-p" class="btn sm outline assistive upload-pick" aria-labelledby="fu2-l fu2-p">파일 선택</button>
+              <input type="file" hidden accept=".sig">
+            </div>
+            <span class="sr-only upload-status" role="status"></span>
+          </div>
+          <span class="help">SIG, 1MB 이하</span>
+        </div>` },
+      { id: "multiple", title: "Multiple", desc: "여러 개를 받습니다. 첫 전송이 실패하는 흉내입니다. 다시 시도하면 끝납니다.", html: `
+        <div class="field" style="width:100%;max-width:480px">
+          <label id="fu3-l">예외 목록</label>
+          <div class="upload" data-demo data-demo-fail data-max-size="10MB" data-max-files="5">
+            <div class="upload-zone">
+            <span class="ico">${I("upload",24)}</span>
+            <span class="upload-msg">파일을 끌어다 놓거나</span>
+            <button type="button" id="fu3-p" class="btn sm outline assistive upload-pick" aria-labelledby="fu3-l fu3-p">파일 선택</button>
+              <input type="file" hidden accept=".csv,.txt" multiple>
+            </div>
+            <span class="sr-only upload-status" role="status"></span>
+          </div>
+          <span class="help">CSV · TXT, 10MB 이하, 5개까지</span>
+        </div>` },
+      { id: "states", title: "States", desc: "대기 · 전송 중 · 완료 · 전송 실패 · 거절.", html: `
+        <div class="field" style="width:100%;max-width:480px">
+          <label id="fu4-l">로그 가져오기</label>
+          <div class="upload" data-max-size="10MB">
+            <div class="upload-zone">
+            <span class="ico">${I("upload",24)}</span>
+            <span class="upload-msg">파일을 끌어다 놓거나</span>
+            <button type="button" id="fu4-p" class="btn sm outline assistive upload-pick" aria-labelledby="fu4-l fu4-p">파일 선택</button>
+              <input type="file" hidden multiple>
+            </div>
+            <span class="sr-only upload-status" role="status"></span>
+            <ul class="upload-list" aria-label="첨부 파일">
+            <li class="upload-item" data-id="s1">
+              <span class="ico">${I("file",20)}</span>
+              <div class="body"><div class="row"><span class="name">agent-2026-11.log</span><span class="size">820 KB</span></div></div>
+              <button type="button" class="btn sm text assistive icon-only remove" aria-label="agent-2026-11.log 지우기">${I("x",16)}</button>
+            </li>
+            <li class="upload-item uploading" data-id="s2">
+              <span class="ico">${I("file",20)}</span>
+              <div class="body"><div class="row"><span class="name">server-audit.log</span><span class="size">4.2 MB</span></div><div class="progress sm" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" aria-label="server-audit.log 전송"><i style="width:60%"></i></div></div>
+              <button type="button" class="btn sm text assistive icon-only remove" aria-label="server-audit.log 지우기">${I("x",16)}</button>
+            </li>
+            <li class="upload-item done" data-id="s3">
+              <span class="ico">${I("circle-check",20)}</span>
+              <div class="body"><div class="row"><span class="name">firewall.log</span><span class="size">1.1 MB</span><span class="sr-only"> (완료)</span></div></div>
+              <button type="button" class="btn sm text assistive icon-only remove" aria-label="firewall.log 지우기">${I("x",16)}</button>
+            </li>
+            <li class="upload-item error" data-id="s4">
+              <span class="ico">${I("alert-circle",20)}</span>
+              <div class="body"><div class="row"><span class="name">gateway.log</span><span class="size">2.4 MB</span></div><span class="msg">전송하지 못했습니다. 다시 시도하세요.</span></div>
+              <button type="button" class="btn sm text assistive icon-only retry" aria-label="gateway.log 다시 시도">${I("refresh",16)}</button>
+              <button type="button" class="btn sm text assistive icon-only remove" aria-label="gateway.log 지우기">${I("x",16)}</button>
+            </li>
+            <li class="upload-item error" data-id="s5" data-rejected>
+              <span class="ico">${I("alert-circle",20)}</span>
+              <div class="body"><div class="row"><span class="name">dump.bin</span><span class="size">48 MB</span></div><span class="msg">파일이 너무 큽니다. 10MB 이하 파일을 고르세요.</span></div>
+              <button type="button" class="btn sm text assistive icon-only remove" aria-label="dump.bin 지우기">${I("x",16)}</button>
+            </li>
+            </ul>
+          </div>
+          <span class="help">10MB 이하</span>
+        </div>` },
+      { id: "form", title: "In Form", desc: "빈 채로 저장하면 막고 알립니다. 전송 중 · 오류일 때도 막습니다.", html: `
+        <form class="form" data-validate novalidate><p class="form-legend"><em>*</em> 필수 항목</p>
+          <div class="field">
+            <label id="fu5-l">인증서 <em>*</em></label>
+            <div class="upload" data-demo data-required data-max-size="5MB">
+              <div class="upload-zone">
+            <span class="ico">${I("upload",24)}</span>
+            <span class="upload-msg">파일을 끌어다 놓거나</span>
+            <button type="button" id="fu5-p" class="btn sm outline assistive upload-pick" aria-labelledby="fu5-l fu5-p">파일 선택</button>
+                <input type="file" hidden accept=".pem,.crt">
+              </div>
+              <span class="sr-only upload-status" role="status"></span>
+            </div>
+            <span class="help" aria-live="polite">PEM · CRT, 5MB 이하</span>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn md solid primary">저장</button></div>
+        </form>` },
+      { id: "disabled", title: "Disabled", desc: "받을 수 없는 동안에는 .disabled 와 버튼의 disabled.", html: `
+        <div class="field" style="width:100%;max-width:480px">
+          <label id="fu6-l">인증서</label>
+          <div class="upload disabled" data-max-size="5MB">
+            <div class="upload-zone">
+            <span class="ico">${I("upload",24)}</span>
+            <span class="upload-msg">파일을 끌어다 놓거나</span>
+            <button type="button" id="fu6-p" class="btn sm outline assistive upload-pick" aria-labelledby="fu6-l fu6-p" disabled>파일 선택</button>
+              <input type="file" hidden disabled>
+            </div>
+            <span class="sr-only upload-status" role="status"></span>
+          </div>
+          <span class="help">라이선스를 등록한 뒤 올릴 수 있습니다</span>
+        </div>` },
+    ],
+    props: [[".upload", "div", "—", "React <code>FileUpload</code>"], ["input[type=file]", "accept · multiple", "—", "받는 형식과 여러 개. React <code>accept</code> · <code>multiple</code>"], ["data-max-size", "attr", "—", "예: 5MB. React <code>maxSize</code>(바이트)"], ["data-max-files", "attr", "—", "여러 개일 때 상한. React <code>maxFiles</code>"], ["data-required", "attr", "—", "폼 검증에 낍니다. React <code>required</code>"], [".compact", "boolean", "false", "버튼형"], [".upload-item", "li", "—", ".uploading · .done · .error, 거절은 data-rejected"], ["ds:upload", "event", "—", "<code>detail.files</code> = [{id, file}]. 전송은 제품이. React <code>onAdd</code>"], ["DS.upload", "API", "—", "<code>progress(el, id, n)</code> · <code>done(el, id)</code> · <code>fail(el, id, 문구)</code>. React 는 <code>items</code> 의 status · progress · error"], ["ds:upload-retry · ds:upload-remove", "event", "—", "<code>detail.id</code> · <code>detail.file</code>. React <code>onRetry</code> · <code>onRemove</code>"], ["data-messages · data-labels", "JSON", "—", "문구 바꾸기. React <code>messages</code> · <code>labels</code>"]],
+    spec: [["Size", "영역 패딩 24 · 목록 간격 4 · 줄 패딩 8/12"], ["Container", "1px dashed line/neutral/primary · radius/lg"], ["Icon", "영역 24 · 줄 20"], ["Label", "14 · 크기와 오류 문구 12"], ["Placement", "폼의 필드 자리 · 가져오기 대화상자"]],
+  },
 };
 
 if (typeof module !== "undefined" && module.exports) module.exports = COMPONENTS;

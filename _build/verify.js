@@ -162,6 +162,27 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
       if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
+      /* File Upload 원칙(2026-11-10) */
+      {
+        const fieldBlock = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };
+        for (const m of pv.matchAll(/<div class="field[^"]*"[^>]*>\s*<label\b[^>]*>[\s\S]*?<\/label>\s*<div class="upload[ "]/g)) {
+          const b = fieldBlock(m.index);
+          if (!/<span class="help"[^>]*>[^<]+<\/span>/.test(b)) fails.push(`${f}: File Upload 는 형식과 용량을 도움말에(File Upload › 안내)`);
+          if (!/<button\b[^>]*upload-pick[^>]*aria-labelledby="/.test(b)) fails.push(`${f}: 필드의 File Upload 버튼에 aria-labelledby 없음`);
+        }
+        for (const m of pv.matchAll(/<div class="upload[ "][^>]*>/g)) {
+          const b = fieldBlock(m.index);
+          if (!/<input type="file" hidden/.test(b)) fails.push(`${f}: File Upload 의 input 은 hidden(버튼이 포커스를 받는다)`);
+          if (!/<button\b[^>]*upload-pick/.test(b)) fails.push(`${f}: File Upload 에 .upload-pick 버튼 없음(키보드)`);
+          if (!/class="sr-only upload-status" role="status"/.test(b)) fails.push(`${f}: File Upload 에 .upload-status 없음`);
+        }
+        for (const m of pv.matchAll(/<li class="upload-item[^"]*"[^>]*>([\s\S]*?)<\/li>/g)) {
+          const n = /<span class="name">([^<]*)</.exec(m[1]); if (!n) { fails.push(`${f}: .upload-item 에 .name 없음`); continue; }
+          for (const b of m[1].matchAll(/<button\b[^>]*>/g)) if (!b[0].includes(`aria-label="${n[1]} `)) fails.push(`${f}: 파일 줄 버튼 이름에 파일 이름이 없음 ${n[1]}`);
+          if (!/class="[^"]*remove/.test(m[1])) fails.push(`${f}: 파일 줄에 지우기 없음 ${n[1]}`);
+          if (/data-rejected/.test(m[0]) && /class="[^"]*retry/.test(m[1])) fails.push(`${f}: 거절된 파일에 다시 시도(File Upload › 전송 실패)`);
+        }
+      }
       /* Form · Empty State · Page Header · Avatar · Link 원칙(2026-11-10) */
       const blockAt = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };
       const each = (re, fn) => { for (const m of pv.matchAll(re)) fn(blockAt(m.index), m); };
@@ -214,7 +235,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       if (/<(?:ul class="(?:menu|list)|table)[^>]*>(?:(?!<\/(?:ul|table)>)[\s\S])*?<hr class="divider/.test(pv)) fails.push(`${f}: 구분선이 이미 있는 컴포넌트 안에 Divider(Divider › 중복 금지)`);
       /* 라벨(Text Field 원칙) — placeholder 는 이름이 아니다. 글자 입력마다 label · aria-label 로 접근 이름이 있어야 한다 */
       for (const m of pv.matchAll(/<(?:input|textarea)\b[^>]*>/g)) {
-        if (/\stype="(?:hidden|checkbox|radio)"/.test(m[0]) || /\saria-label(?:ledby)?="/.test(m[0])) continue;
+        if (/\stype="(?:hidden|checkbox|radio)"/.test(m[0]) || /\stype="file" hidden/.test(m[0]) || /\saria-label(?:ledby)?="/.test(m[0])) continue;
         const id = (/\sid="([^"]+)"/.exec(m[0]) || [])[1], wrapped = pv.lastIndexOf("<label", m.index) > pv.lastIndexOf("</label>", m.index);
         if (!wrapped && !(id && pv.includes(`for="${id}"`))) fails.push(`${f}: 접근 이름 없는 입력 ${m[0].slice(0, 80)}(Text Field › 라벨)`);
       }
@@ -306,7 +327,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 39) fails.push(`components.json 컴포넌트 ${j.components.length}개(39 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 40) fails.push(`components.json 컴포넌트 ${j.components.length}개(40 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 10) fails.push(`components.json 패턴 ${j.patterns.length}개(10 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }

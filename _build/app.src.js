@@ -187,6 +187,10 @@
   }
   /* 미리보기의 폼은 실제로 보내지 않는다 — 통과한 제출이 페이지를 새로 읽었다 */
   document.addEventListener("submit", e => { if (e.target.closest(".example-preview")) e.preventDefault(); });
+  /* File Upload 예제 — 서버 대신 0.8초에 걸쳐 진행한다. data-demo-fail 은 첫 전송 실패를 보여 주는 문서 전용 표시 */
+  const uploadDemo = (h, id, retried) => { let p = 0; const fail = h.hasAttribute("data-demo-fail") && !retried, t = setInterval(() => { p += 20; if (!h.querySelector('.upload-item[data-id="' + id + '"]')) return clearInterval(t); if (fail && p >= 60) { clearInterval(t); return window.DS.upload.fail(h, id); } if (p >= 100) { clearInterval(t); return window.DS.upload.done(h, id); } window.DS.upload.progress(h, id, p); }, 160); };
+  document.addEventListener("ds:upload", e => { if (e.target.closest(".example-preview") && e.target.hasAttribute("data-demo")) e.detail.files.forEach(f => uploadDemo(e.target, f.id)); });
+  document.addEventListener("ds:upload-retry", e => { if (e.target.closest(".example-preview") && e.target.hasAttribute("data-demo")) uploadDemo(e.target, e.detail.id, true); });
   /* Switch 예제 — 서버 대신 0.9초 뒤 응답한다. data-demo-fail 은 실패를 보여 주는 문서 전용 표시 */
   document.addEventListener("ds:switch", e => { if (!e.target.closest(".example-preview")) return; setTimeout(() => e.target.closest("[data-demo-fail]") ? e.detail.reject("정책 서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.") : e.detail.resolve(), 900); });
   document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });

@@ -934,11 +934,11 @@
      포커스가 떠날 때 필드 단위 — 건드리지 않은 빈 필드는 탭으로 지나가도 오류를 내지 않는다. 오류가 있는 필드는 입력할 때마다 다시 재 바로 지운다.
      제출하면 전부 재고, 막으면 첫 오류로 포커스 · 스크롤, 3개 이상이면 폼 위에 요약. Date Picker 는 스스로 재므로 .error 만 센다.
      Checkbox · Radio 그룹은 .field 안 fieldset 의 data-required — 하나 이상 고른다. 문구는 React validation.ts 와 같아야 한다 */
-  var V_MSG = { required: "필수 항목입니다. 값을 입력하세요.", choose: "필수 항목입니다. 항목을 선택하세요.", number: "숫자가 아닙니다. 숫자를 입력하세요.", email: "이메일 형식이 아닙니다. 예: admin@example.com", url: "URL 형식이 아닙니다. 예: https://example.com", pattern: "형식이 맞지 않습니다. 도움말을 확인하세요.", min: "값이 너무 작습니다. {min} 이상 입력하세요.", max: "값이 너무 큽니다. {max} 이하 입력하세요.", minlength: "글자 수가 모자랍니다. {minlength}자 이상 입력하세요.", step: "입력할 수 없는 값입니다. {step} 단위로 입력하세요.", length: "글자 수가 {over}자 넘었습니다. {limit}자 이하로 줄이세요." };
-  function vIsField(t) { return !!(t && t.matches && t.matches(".field input, .field textarea") && !closest(t, ".datepicker") && ["checkbox", "radio", "hidden"].indexOf(t.type) < 0); }
-  function vChoice(el) { return closest(el, ".dropdown[data-required], .combobox[data-required], .checkbox-group[data-required], .radio-group[data-required]"); }
+  var V_MSG = { fileRequired: "필수 항목입니다. 파일을 선택하세요.", fileBusy: "파일을 전송하고 있습니다. 끝난 뒤 다시 저장하세요.", fileFailed: "올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.", fileType: "올릴 수 없는 형식입니다. {types} 파일을 고르세요.", fileSize: "파일이 너무 큽니다. {max} 이하 파일을 고르세요.", fileEmpty: "빈 파일입니다. 내용이 있는 파일을 고르세요.", fileDuplicate: "이미 추가한 파일입니다. 다른 파일을 고르세요.", fileCount: "파일이 너무 많습니다. {max}개까지 올릴 수 있습니다.", fileSend: "전송하지 못했습니다. 다시 시도하세요.", fileAdded: "파일 {ok}개를 추가했습니다.", fileRejected: "{bad}개는 올릴 수 없습니다.", fileRemoved: "{name} 파일을 지웠습니다.", required: "필수 항목입니다. 값을 입력하세요.", choose: "필수 항목입니다. 항목을 선택하세요.", number: "숫자가 아닙니다. 숫자를 입력하세요.", email: "이메일 형식이 아닙니다. 예: admin@example.com", url: "URL 형식이 아닙니다. 예: https://example.com", pattern: "형식이 맞지 않습니다. 도움말을 확인하세요.", min: "값이 너무 작습니다. {min} 이상 입력하세요.", max: "값이 너무 큽니다. {max} 이하 입력하세요.", minlength: "글자 수가 모자랍니다. {minlength}자 이상 입력하세요.", step: "입력할 수 없는 값입니다. {step} 단위로 입력하세요.", length: "글자 수가 {over}자 넘었습니다. {limit}자 이하로 줄이세요." };
+  function vIsField(t) { return !!(t && t.matches && t.matches(".field input, .field textarea") && !closest(t, ".datepicker") && ["checkbox", "radio", "hidden", "file"].indexOf(t.type) < 0); }
+  function vChoice(el) { return closest(el, ".dropdown[data-required], .combobox[data-required], .checkbox-group[data-required], .radio-group[data-required], .upload"); }
   function vEmpty(host) { if (host.matches(".combobox")) return !cbOn(host).length; if (host.matches(".checkbox-group, .radio-group")) return !$("input:checked", host); var on = $(".menu-item.on", host); return !on || on.dataset.value === ""; }
-  function vFields(form) { return $$(".field input, .field textarea, .field .dropdown[data-required] .trigger, .field .checkbox-group[data-required], .field .radio-group[data-required]", form).filter(function (i) { return !i.disabled && i.type !== "checkbox" && i.type !== "radio" && ((vIsField(i) && i.willValidate) || vChoice(i)); }); }
+  function vFields(form) { return $$(".field input, .field textarea, .field .dropdown[data-required] .trigger, .field .checkbox-group[data-required], .field .radio-group[data-required], .field .upload .upload-pick", form).filter(function (i) { return !i.disabled && i.type !== "checkbox" && i.type !== "radio" && i.type !== "file" && ((vIsField(i) && i.willValidate) || vChoice(i)); }); }
   function vMsgs(inp) {
     var out = {}, k; for (k in V_MSG) out[k] = V_MSG[k];
     [closest(inp, "form[data-validate]"), inp].forEach(function (el) {
@@ -950,7 +950,7 @@
   }
   function vLimit(inp) { return Number(inp.getAttribute("data-maxlength")) || 0; }
   function vMessage(inp) {
-    var host = vChoice(inp); if (host) return vEmpty(host) ? vMsgs(inp).choose : "";
+    var host = vChoice(inp); if (host) return host.matches(".upload") ? upMessage(host) : vEmpty(host) ? vMsgs(inp).choose : "";
     var v = inp.validity, limit = vLimit(inp), over = limit ? inp.value.length - limit : 0;
     var key = v.valueMissing ? "required" : v.badInput ? "number" : v.typeMismatch ? (inp.type === "email" ? "email" : "url") : v.patternMismatch ? "pattern" : v.rangeUnderflow ? "min" : v.rangeOverflow ? "max" : v.tooShort ? "minlength" : v.stepMismatch ? "step" : over > 0 ? "length" : "";
     if (!key) return "";
@@ -1255,5 +1255,113 @@
   });
 
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
-  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, validate: vRun, version: "0.5" };
+  /* ---------- File Upload — .upload ----------
+     화면과 검증까지 맡는다(사람의 결정 2026-11-10). 실제 전송은 제품이 ds:upload 를 받아 하고 DS.upload.progress · done · fail 로 알린다.
+     거절(형식 · 용량 · 개수 · 중복)은 목록에 오류 줄로 남기고 통과한 파일은 받는다. 하나만 받는 자리는 새 파일로 교체.
+     폼에서는 전송 중 · 오류가 있으면 제출을 막는다. 문구는 React validation.ts 와 같아야 한다 */
+  var UP_ICON = { file: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 3v4a1 1 0 0 0 1 1h4\"/><path d=\"M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2\"/></svg>", done: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0\"/><path d=\"M9 12l2 2l4 -4\"/></svg>", retry: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4\"/><path d=\"M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4\"/></svg>", remove: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6l-12 12\"/><path d=\"M6 6l12 12\"/></svg>" };
+  var UP_LABEL = { list: "첨부 파일", retry: "다시 시도", remove: "지우기", done: "완료", progress: "전송" };
+  var upSeq = 0;
+  function upL(h, k) { var raw = h.getAttribute("data-labels"), o = {}; if (raw) { try { o = JSON.parse(raw) || {}; } catch (e) { o = {}; } } return o[k] || UP_LABEL[k]; }
+  function upItems(h) { return $$(".upload-item", h); }
+  function upFill(t, d) { return t.replace(/\{(\w+)\}/g, function (m, k) { return d[k]; }); }
+  function upSizeText(n) { if (n < 1024) return n + " B"; var u = n < 1048576 ? [1024, "KB"] : n < 1073741824 ? [1048576, "MB"] : [1073741824, "GB"]; return Math.round(n / u[0] * 10) / 10 + " " + u[1]; }
+  function upParseSize(s) { var m = /^([\d.]+)\s*(B|KB|MB|GB)?$/i.exec(String(s || "").trim()); return m ? Number(m[1]) * { B: 1, KB: 1024, MB: 1048576, GB: 1073741824 }[(m[2] || "B").toUpperCase()] : 0; }
+  function upTypeOk(file, accept) {
+    if (!accept) return true;
+    var name = file.name.toLowerCase(), type = (file.type || "").toLowerCase();
+    return accept.split(",").some(function (a) { a = a.trim().toLowerCase(); if (!a) return false; if (a[0] === ".") return name.slice(-a.length) === a; if (a.slice(-2) === "/*") return type.indexOf(a.slice(0, -1)) === 0; return type === a; });
+  }
+  function upButton(cls, icon, label) { var b = doc.createElement("button"); b.type = "button"; b.className = "btn sm text assistive icon-only " + cls; b.innerHTML = icon; b.setAttribute("aria-label", label); return b; }
+  /* 줄의 상태를 바꾼다 — 지우기 버튼은 그대로 두어 포커스를 잃지 않는다 */
+  function upState(h, li, status, pct, msg, retry) {
+    li.classList.remove("uploading", "done", "error"); if (status !== "ready") li.classList.add(status);
+    $(".ico", li).innerHTML = status === "done" ? UP_ICON.done : status === "error" ? V_ICON : UP_ICON.file;
+    var body = $(".body", li), row = $(".row", li), nm = $(".name", li).textContent;
+    var bar = $(":scope > .progress", body), m = $(":scope > .msg", body), sr = $(":scope > .sr-only", row), rt = $(".retry", li), rm = $(".remove", li);
+    if (status === "uploading") {
+      if (!bar) { bar = doc.createElement("div"); bar.className = "progress sm"; bar.setAttribute("role", "progressbar"); bar.setAttribute("aria-valuemin", "0"); bar.setAttribute("aria-valuemax", "100"); bar.setAttribute("aria-label", nm + " " + upL(h, "progress")); bar.innerHTML = "<i></i>"; body.appendChild(bar); }
+      var v = Math.max(0, Math.min(100, pct || 0)); bar.setAttribute("aria-valuenow", String(Math.round(v))); $("i", bar).style.width = v + "%";
+    } else if (bar) bar.remove();
+    if (status === "error") { if (!m) { m = doc.createElement("span"); m.className = "msg"; body.appendChild(m); } m.textContent = msg; } else if (m) m.remove();
+    if (status === "done") { if (!sr) { sr = doc.createElement("span"); sr.className = "sr-only"; sr.textContent = " (" + upL(h, "done") + ")"; row.appendChild(sr); } } else if (sr) sr.remove();
+    if (retry && !rt) li.insertBefore(upButton("retry", UP_ICON.retry, nm + " " + upL(h, "retry")), rm); else if (!retry && rt) { if (rt === doc.activeElement) rm.focus(); rt.remove(); }
+  }
+  function upRow(h, id, name, size) {
+    var ul = $(".upload-list", h);
+    if (!ul) { ul = doc.createElement("ul"); ul.className = "upload-list"; ul.setAttribute("aria-label", upL(h, "list")); h.appendChild(ul); }
+    var li = doc.createElement("li"); li.className = "upload-item"; li.dataset.id = id;
+    li.innerHTML = '<span class="ico"></span><div class="body"><div class="row"><span class="name"></span><span class="size"></span></div></div>';
+    $(".name", li).textContent = name; $(".size", li).textContent = upSizeText(size);
+    li.appendChild(upButton("remove", UP_ICON.remove, name + " " + upL(h, "remove")));
+    return { ul: ul, li: li };
+  }
+  function upTell(h, text) { var s = $(":scope > .upload-status", h); if (s) s.textContent = text; }
+  function upMessage(h) {
+    var msgs = vMsgs(h), rows = upItems(h);
+    if (rows.some(function (li) { return li.classList.contains("uploading"); })) return msgs.fileBusy;
+    if (rows.some(function (li) { return li.classList.contains("error"); })) return msgs.fileFailed;
+    return h.hasAttribute("data-required") && !rows.length ? msgs.fileRequired : "";
+  }
+  function upTouch(h, show) {
+    var pick = $(".upload-pick", h), form = closest(h, "form[data-validate]"), f = closest(h, ".field");
+    if (!pick || !form || !f || !(show || form._tried || f.classList.contains("error"))) return;
+    /* 전송 중으로 바뀐 것은 실패가 아니다 — 앞선 오류만 지운다. 제출이 막혀 띄운 안내는 끝날 때까지 둔다 */
+    var msg = vMessage(pick), busy = msg && msg === vMsgs(h).fileBusy, help = $(":scope > .help", f);
+    if (busy && f.classList.contains("error") && help && help.textContent === msg) return;
+    vShow(pick, busy ? "" : msg); vChanged(form);
+  }
+  function upDrop(h, li) {
+    if (!li.hasAttribute("data-rejected")) fire(h, "ds:upload-remove", { id: li.dataset.id, file: (h._dsFiles || {})[li.dataset.id] });
+    if (h._dsFiles) delete h._dsFiles[li.dataset.id];
+    var ul = li.parentNode; li.remove(); if (!ul.children.length) ul.remove();
+  }
+  function upCheck(h, input, f, rows, ok, limit) {
+    var msgs = vMsgs(h), max = upParseSize(h.getAttribute("data-max-size")), accept = input.getAttribute("accept") || "";
+    if (!upTypeOk(f, accept)) return upFill(msgs.fileType, { types: accept.split(",").map(function (a) { return a.trim(); }).join(", ") });
+    if (!f.size) return msgs.fileEmpty;
+    if (max && f.size > max) return upFill(msgs.fileSize, { max: h.getAttribute("data-max-size") });
+    if (rows.some(function (r) { return r.name === f.name && r.size === f.size; }) || ok.some(function (o) { return o.file.name === f.name && o.file.size === f.size; })) return msgs.fileDuplicate;
+    if (limit && rows.length + ok.length >= limit) return upFill(msgs.fileCount, { max: limit });
+    return "";
+  }
+  function upAdd(h, files) {
+    var input = $("input[type=file]", h); if (!files.length || h.classList.contains("disabled")) return;
+    if (!input.multiple) upItems(h).forEach(function (li) { upDrop(h, li); });
+    var limit = input.multiple ? Number(h.getAttribute("data-max-files")) || 0 : 1, msgs = vMsgs(h), ok = [], bad = 0, files0 = h._dsFiles || (h._dsFiles = {});
+    var rows = upItems(h).filter(function (li) { return !li.hasAttribute("data-rejected"); }).map(function (li) { var f = files0[li.dataset.id]; return { name: f ? f.name : $(".name", li).textContent, size: f ? f.size : -1 }; });
+    files.forEach(function (f) {
+      var msg = upCheck(h, input, f, rows, ok, limit), id = "up-" + (++upSeq), r = upRow(h, id, f.name, f.size);
+      if (msg) { bad++; r.li.setAttribute("data-rejected", ""); r.ul.appendChild(r.li); upState(h, r.li, "error", 0, msg, false); return; }
+      r.ul.insertBefore(r.li, $(".upload-item[data-rejected]", r.ul)); upState(h, r.li, "ready"); files0[id] = f; ok.push({ id: id, file: f });
+    });
+    upTell(h, (ok.length ? upFill(msgs.fileAdded, { ok: ok.length }) : "") + (bad ? (ok.length ? " " : "") + upFill(msgs.fileRejected, { bad: bad }) : ""));
+    if (ok.length) fire(h, "ds:upload", { files: ok });
+    upTouch(h, false);
+  }
+  function upFind(h, id) { return upItems(h).filter(function (li) { return li.dataset.id === String(id); })[0]; }
+  var upload = {
+    progress: function (h, id, pct) { var li = upFind(h, id); if (li) upState(h, li, "uploading", pct); },
+    done: function (h, id) { var li = upFind(h, id); if (li) { upState(h, li, "done"); upTouch(h, false); } },
+    fail: function (h, id, msg) { var li = upFind(h, id); if (li) { upState(h, li, "error", 0, msg || vMsgs(h).fileSend, true); upTouch(h, false); } },
+  };
+  function upZone(e) { var t = e.target && e.target.nodeType === 1 ? e.target : e.target && e.target.parentNode, z = t && closest(t, ".upload-zone"), h = z && z.parentNode; return h && !h.classList.contains("disabled") && e.dataTransfer && [].indexOf.call(e.dataTransfer.types || [], "Files") > -1 ? h : null; }
+  ["dragenter", "dragover"].forEach(function (n) { doc.addEventListener(n, function (e) { var h = upZone(e); if (h) { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; h.classList.add("dragging"); } }); });
+  doc.addEventListener("dragleave", function (e) { var h = upZone(e); if (h && !$(".upload-zone", h).contains(e.relatedTarget)) h.classList.remove("dragging"); });
+  doc.addEventListener("drop", function (e) { var h = upZone(e); if (h) { e.preventDefault(); h.classList.remove("dragging"); upAdd(h, [].slice.call(e.dataTransfer.files)); } });
+  doc.addEventListener("change", function (e) { var t = e.target; if (t.matches && t.matches(".upload input[type=file]")) { var list = [].slice.call(t.files); t.value = ""; upAdd(closest(t, ".upload"), list); } });
+  doc.addEventListener("click", function (e) {
+    var t = e.target; if (!(t instanceof Element) || t.matches("input[type=file]")) return;
+    var li = closest(t, ".upload-item"), h = li && closest(li, ".upload"), rm = closest(t, ".upload-item .remove"), rt = closest(t, ".upload-item .retry"), z = closest(t, ".upload-zone");
+    if (rm) {
+      var all = upItems(h), i = all.indexOf(li), go = all[i + 1] || all[i - 1], name = $(".name", li).textContent;
+      upDrop(h, li); (go ? $(".remove", go) : $(".upload-pick", h)).focus();
+      upTell(h, upFill(vMsgs(h).fileRemoved, { name: name })); upTouch(h, h.hasAttribute("data-required") && !upItems(h).length);
+    } else if (rt) {
+      upState(h, li, "ready"); upTouch(h, false);   // 다시 시도 버튼이 사라지며 포커스는 upState 가 지우기로 옮긴다
+      fire(h, "ds:upload-retry", { id: li.dataset.id, file: (h._dsFiles || {})[li.dataset.id] });
+    } else if (z && !z.parentNode.classList.contains("disabled")) $("input[type=file]", z).click();
+  });
+
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, version: "0.5" };
 })();
