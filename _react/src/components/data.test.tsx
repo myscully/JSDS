@@ -4,7 +4,7 @@ import { DataTable } from "./data-table/DataTable";
 import { Accordion, AccordionGroup } from "./accordion/Accordion";
 import { Card, CardGrid, CardMeta, CardTitle } from "./card/Card";
 import { ChartCard, Donut, Kpi } from "./data-visual/DataVisual";
-import { Steps } from "./indicator/Indicator";
+import { Steps } from "./steps/Steps";
 import { Tag } from "./tag/Tag";
 
 /* 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다 — 숨김 문구로 알린다 */

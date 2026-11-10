@@ -51,11 +51,14 @@ export const Tooltip = forwardRef<HTMLSpanElement, TooltipProps>(function Toolti
   const floating = !!spot?.vars;
   useEffect(() => {
     if (!active || !floating) return;
-    const hide = () => setQuiet(true);   // 띄운 툴팁은 트리거를 따라가지 못한다
+    const hide = (e: Event) => {   // 띄운 툴팁은 트리거를 따라가지 못한다. 포커스로 온 것은 다시 잰다 — 포커스가 일으킨 스크롤에 사라지면 키보드로는 볼 수 없다
+      if (e.type === "scroll" && wrap.current && tip.current && wrap.current.contains(document.activeElement)) setSpot(place(wrap.current, tip.current, position));
+      else setQuiet(true);
+    };
     window.addEventListener("scroll", hide, true);
     window.addEventListener("resize", hide);
     return () => { window.removeEventListener("scroll", hide, true); window.removeEventListener("resize", hide); };
-  }, [active, floating]);
+  }, [active, floating, position]);
   const side = show ? position : spot?.side ?? position;
   const named = isValidElement(children) && children.props["aria-label"] === content;   // 이름을 되풀이해 읽지 않게
   const trigger = isValidElement(children) && !named ? cloneElement(children, { "aria-describedby": id }) : children;

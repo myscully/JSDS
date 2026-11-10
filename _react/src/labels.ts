@@ -16,6 +16,7 @@ export const LABELS = {
   pagination: "페이지",
   breadcrumb: "현재 위치",
   mainMenu: "주 메뉴",
+  skipToMain: "본문 바로가기",
   selectAll: "전체 선택",
   select: "선택",
   datePlaceholder: "날짜 선택",

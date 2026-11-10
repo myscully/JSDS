@@ -147,13 +147,13 @@ const PATTERNS = {
 
   /* ------------------------------------------------ Service Pattern */
   "onboarding": {
-    status: "ready", react: ["Onboard","Steps"], uses: ["indicator", "card", "radio-button", "button"], css: [".onboard"], borrows: [".keep-all"],
+    status: "ready", react: ["Onboard","Steps"], uses: ["steps", "indicator", "card", "radio-button", "button"], css: [".onboard"], borrows: [".keep-all"],
     desc: "첫 사용자가 콘솔을 설정하는 단계형 흐름입니다. 진행 단계 표시, 한 단계 한 결정, 건너뛰기 허용.",
     thumb: `<ol class="steps" style="font-size:12px"><li class="done"><i style="width:18px;height:18px;font-size:10px">${I("check",10)}</i>1</li><li class="on"><i style="width:18px;height:18px;font-size:10px">2</i>2</li><li><i style="width:18px;height:18px;font-size:10px">3</i>3</li></ol>`,
     examples: [
       { id: "step", title: "단계 화면", desc: "상단 Steps + 카드 한 장 + 하단 이전/다음. 선택형 단계는 Item Tile.", html: `
         <div class="onboard">
-          <ol class="steps"><li class="done"><i>${I("check",12)}</i>조직 정보<span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>2</i>보호 수준</li><li><i>3</i>에이전트 배포</li><li><i>4</i>완료</li></ol>
+          <ol class="steps" aria-label="진행 단계"><li class="done"><i>${I("check",12)}</i>조직 정보<span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>2</i>보호 수준</li><li><i>3</i>에이전트 배포</li><li><i>4</i>완료</li></ol>
           <div class="card">
             <h3 class="title">보호 수준을 선택하세요</h3>
             <p class="desc">나중에 정책 › 기본 정책에서 바꿀 수 있습니다.</p>
@@ -166,7 +166,7 @@ const PATTERNS = {
         </div>` },
       { id: "done", title: "완료", desc: "요약 + 첫 행동으로 이어지는 Primary.", html: `
         <div class="onboard">
-          <ol class="steps"><li class="done"><i>${I("check",12)}</i>조직 정보<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>보호 수준<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>에이전트 배포<span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>4</i>완료</li></ol>
+          <ol class="steps" aria-label="진행 단계"><li class="done"><i>${I("check",12)}</i>조직 정보<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>보호 수준<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>에이전트 배포<span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>4</i>완료</li></ol>
           <div class="card" style="align-items:center;text-align:center">
             <span class="indicator ok" style="font-size:16px;font-weight:600">설정이 완료되었습니다</span>
             <p class="desc keep-all">표준 보호 · 에이전트 12대 연결 대기 중. 첫 이벤트가 들어오면 대시보드에서 확인할 수 있습니다.</p>

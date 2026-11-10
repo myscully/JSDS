@@ -1,4 +1,4 @@
-import { Avatar, Button, Count, Divider, Icon, TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, WithCount } from "@jiran/ds-react";
+import { Avatar, Button, Count, Divider, Icon, Tooltip, TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, WithCount } from "@jiran/ds-react";
 
 export default function Example() {
   return (
@@ -12,9 +12,9 @@ export default function Example() {
       </TopBarNav>
       <TopBarRight>
         <WithCount count={<Count value={3} />}>
-          <Button color="assistive" iconOnly size="sm" aria-label="알림 3건"><Icon name="bell" /></Button>
+          <Tooltip content="알림 3건" position="bottom"><Button color="assistive" iconOnly size="sm" aria-label="알림 3건"><Icon name="bell" /></Button></Tooltip>
         </WithCount>
-        <Button color="assistive" iconOnly size="sm" aria-label="설정"><Icon name="settings" /></Button>
+        <Tooltip content="설정" position="bottom"><Button color="assistive" iconOnly size="sm" aria-label="설정"><Icon name="settings" /></Button></Tooltip>
         <Divider orientation="vertical" />
         <Avatar initials="JH" title="정희 · 관리자" />
       </TopBarRight>

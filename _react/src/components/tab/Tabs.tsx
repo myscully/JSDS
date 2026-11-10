@@ -1,7 +1,18 @@
-import { createContext, forwardRef, useContext, type ButtonHTMLAttributes, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
+import { createContext, forwardRef, useContext, useEffect, useRef, type ButtonHTMLAttributes, type HTMLAttributes, type KeyboardEvent, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { useId } from "../../utils/useId";
+import { mergeRefs } from "../../utils/hooks";
+
+/* 탭 줄만 옮긴다 — scrollIntoView 는 페이지까지 움직인다. 사이트 ds.js 의 tabReveal 과 같은 규칙 */
+const EDGE = 16;
+export function revealTab(tab: HTMLElement) {
+  const bar = tab.closest<HTMLElement>(".tabs");
+  if (!bar || bar.scrollWidth <= bar.clientWidth) return;
+  const b = bar.getBoundingClientRect(), r = tab.getBoundingClientRect();
+  if (r.left < b.left + EDGE) bar.scrollLeft -= b.left + EDGE - r.left;
+  else if (r.right > b.right - EDGE) bar.scrollLeft += r.right - b.right + EDGE;
+}
 
 interface TabsCtx {
   value: string | undefined;
@@ -69,9 +80,11 @@ export interface TabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 
 export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab({ value, count, className, children, onClick, disabled, ...rest }, ref) {
   const { value: cur, set, baseId } = useTabs();
   const on = cur === value;
+  const self = useRef<HTMLButtonElement>(null);
+  useEffect(() => { if (on && self.current) revealTab(self.current); }, [on]);
   return (
     <button
-      ref={ref}
+      ref={mergeRefs(ref, self)}
       type="button"
       role="tab"
       id={`${baseId}-tab-${value}`}
@@ -95,12 +108,12 @@ export const Tab = forwardRef<HTMLButtonElement, TabProps>(function Tab({ value,
 
 export interface TabPanelProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
-  /** 비활성일 때도 DOM 유지(hidden) */
+  /** 비활성일 때도 DOM 유지(hidden). 기본 true — 탭을 옮겨도 입력이 남는다. 무거운 패널만 false */
   keepMounted?: boolean;
 }
-export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPanel({ value, keepMounted, className, ...rest }, ref) {
+export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPanel({ value, keepMounted = true, className, ...rest }, ref) {
   const { value: cur, baseId } = useTabs();
   const on = cur === value;
   if (!on && !keepMounted) return null;
-  return <div ref={ref} role="tabpanel" id={`${baseId}-panel-${value}`} aria-labelledby={`${baseId}-tab-${value}`} hidden={!on} className={cx("tab-panel", className)} {...rest} />;
+  return <div ref={ref} role="tabpanel" id={`${baseId}-panel-${value}`} aria-labelledby={`${baseId}-tab-${value}`} hidden={!on} tabIndex={0} className={cx("tab-panel", className)} {...rest} />;
 });

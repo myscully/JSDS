@@ -3,6 +3,7 @@ import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import type { IconName } from "../../icons/icons.data";
 import { LABELS } from "../../labels";
+import { Tooltip } from "../tooltip/Tooltip";
 
 const Ctx = createContext<{ collapsed: boolean }>({ collapsed: false });
 
@@ -51,13 +52,21 @@ export interface SideNavItemProps extends AnchorHTMLAttributes<HTMLAnchorElement
 export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem({ icon, active, count, countTone, sub, hasActiveChild, as, className, children, title, ...rest }, ref) {
   const { collapsed } = useContext(Ctx);
   const Link: ElementType = as ?? "a";
-  const autoTitle = collapsed && typeof children === "string" ? children : undefined;
+  /* 접힌 레일은 이름이 안 보인다 — title 은 키보드로 볼 수 없어 Tooltip 으로 */
+  const railName = collapsed && !sub && typeof children === "string" ? children : undefined;
   const current = active ? "page" : collapsed && hasActiveChild ? "true" : undefined;
-  return (
-    <Link ref={ref} className={cx(active && "on", hasActiveChild && "has-on", sub && "sub", className) || undefined} aria-current={current} title={title ?? autoTitle} {...rest}>
+  const link = (
+    <Link ref={ref} className={cx(active && "on", hasActiveChild && "has-on", sub && "sub", className) || undefined} aria-current={current} aria-label={railName} title={title} {...rest}>
       {icon && <Icon name={icon} />}
       {sub ? children : <span>{children}</span>}
       {count !== undefined && <span className={cx("count", countTone)}>{count}</span>}
     </Link>
   );
+  return railName ? <Tooltip content={railName} position="right">{link}</Tooltip> : link;
+});
+
+export type SkipLinkProps = AnchorHTMLAttributes<HTMLAnchorElement>;
+/** 본문 바로가기. 페이지의 첫 포커스에 둔다 */
+export const SkipLink = forwardRef<HTMLAnchorElement, SkipLinkProps>(function SkipLink({ href = "#main", className, children = LABELS.skipToMain, ...rest }, ref) {
+  return <a ref={ref} href={href} className={cx("skip-link", className)} {...rest}>{children}</a>;
 });

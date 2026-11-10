@@ -502,7 +502,7 @@ table.props th:nth-child(3){width:15%}
 table.props th:nth-child(4){width:40%}
 table.props td:nth-child(2){overflow-wrap:anywhere}
 table.props .prop-tags{display:flex;flex-wrap:wrap;gap:6px}   /* 태그끼리 6 띄우고, 칸을 넘으면 태그째 다음 줄로 — 흐름 안 inline 태그는 줄 끝에서 태그 안쪽이 꺾이고 위아래가 붙었다(사람의 결정 2026-10-29) */
-table.props .prop-tags .tag{white-space:normal;overflow-wrap:anywhere}   /* 태그 하나가 칸보다 길 때만 그 안에서 꺾인다 — nowrap 이면 고정 폭 칸을 넘친다 */
+table.props .prop-tags .tag{width:auto;max-width:none;white-space:normal;overflow-wrap:anywhere}   /* 태그 하나가 칸보다 길 때만 그 안에서 꺾인다 — nowrap 이면 고정 폭 칸을 넘친다 */
 table.props td:nth-child(4){color:var(--foreground-neutral-secondary)}
 pre{background:var(--code-bg);color:var(--code-chip-fg);padding:var(--space-5);border-radius:var(--radius-lg);overflow-x:auto;font-size:12px;line-height:1.6;margin:var(--space-4) 0 var(--space-6);tab-size:2}
 pre code{font-size:inherit}
@@ -964,7 +964,10 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
    pending 은 심각도가 아니라 상태 톤이다('검토 대기' — 옛 Medium 의 청록을 물려받는다. 심각도와 상태가 한 클래스를 나눠 쓰지 않게 갈랐다)
    solid 는 '채운 태그'였다 — 기준 시스템에 솔리드 상태 면이 없어 같은 틴트 + 테두리로 한 단계 강조하도록 다시 디자인했다.
    색만으로 의미를 전달하지 않는다(1.4.1)는 라벨 병기가 담당하고 verify 가 그것을 검사한다 */
-.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--radius-full);line-height:1.6;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);white-space:nowrap}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--radius-full);line-height:1.6;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);flex:none;width:max-content;max-width:160px;word-break:keep-all}   /* 160 을 넘는 라벨만 줄바꿈 — 포커스를 받지 않아 잘라 내면 읽을 길이 없다 */
+.tag-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;max-width:100%;line-height:1.6}
+td .tag-group{flex-wrap:nowrap}
+.tag-more{border:0;font-family:inherit}
 .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--foreground-inactive-primary);flex:none}
 .tag.critical{background:var(--surface-negative-primary)}
 .tag.critical::before{background:var(--foreground-negative-strong)}
@@ -1029,15 +1032,16 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .menu-label{padding:6px 10px 2px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--foreground-neutral-tertiary);font-weight:600;line-height:1.6}
 
 /* Tab */
-.tabs{display:flex;gap:24px;border-bottom:1px solid var(--line-neutral-secondary);width:100%;line-height:1.6}
-.tabs .tab{display:inline-flex;align-items:center;gap:4px;padding:10px 2px;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;font:inherit;font-size:14px;font-weight:500;color:var(--foreground-neutral-tertiary);cursor:pointer;white-space:nowrap;transition:color var(--motion-fast)}
+.tabs{display:flex;gap:24px;box-shadow:inset 0 -1px 0 var(--line-neutral-secondary);width:100%;line-height:1.6;overflow:auto hidden;scrollbar-width:thin}   /* 넘치면 탭 줄만 옆으로(사람의 결정 2026-11-10). 스크롤 영역은 테두리 밖을 자르므로 아랫줄을 안쪽 그림자로 — 활성 탭의 2px 밑줄이 그 위에 놓인다 */
+.tabs .tab{display:inline-flex;align-items:center;gap:4px;padding:10px 2px;border:0;border-bottom:2px solid transparent;background:transparent;font:inherit;font-size:14px;font-weight:500;color:var(--foreground-neutral-tertiary);cursor:pointer;white-space:nowrap;transition:color var(--motion-fast)}
+.tabs .tab:focus-visible{outline-offset:-2px}   /* 스크롤 영역이 바깥 외곽선을 자른다 */
 .tabs .tab:hover{color:var(--foreground-neutral-primary)}
 .tabs .tab.on{color:var(--foreground-neutral-primary);font-weight:700;border-bottom-color:var(--foreground-neutral-primary)}
 .tabs .tab[disabled]{color:var(--foreground-disable-primary);cursor:not-allowed}
 .tabs .tab .count{font-size:12px;font-weight:700;padding:1px 6px;border-radius:var(--radius-full);background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);min-width:0;height:auto}
 .tabs .tab.on .count{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
 .tabs.accent .tab.on{color:var(--foreground-brand-primary);border-bottom-color:var(--foreground-brand-primary)}
-.tabs.pill{display:inline-flex;gap:4px;border:0;background:var(--surface-neutral-secondary);padding:3px;border-radius:var(--radius-md);width:auto}
+.tabs.pill{display:inline-flex;gap:4px;box-shadow:none;background:var(--surface-neutral-secondary);padding:3px;border-radius:var(--radius-md);width:auto;max-width:100%}
 .tabs.pill .tab{padding:6px 14px;border:0;border-radius:6px;margin:0;font-size:14px}
 .tabs.pill .tab.on{background:var(--surface-elevated-primary);box-shadow:var(--shadow-1);font-weight:600}
 .tabs.sm .tab{font-size:12px;padding:8px 12px}
@@ -1089,6 +1093,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .sidenav a .count{margin-left:auto}
 .sidenav a.sub{padding-left:40px;font-size:14px;color:var(--foreground-neutral-secondary)}
 .sidenav a.sub.on{color:var(--foreground-brand-primary)}   /* .sub 가 .on 과 특정도가 같고 뒤에 있어, 하위 항목을 골라도 회색이 이겼다 */
+.sidenav .tooltip-wrap > a{flex:1;min-width:0}
+.sidenav:not(.collapsed) .tooltip{display:none}
 .sidenav.collapsed{width:64px;padding:12px 10px}
 .sidenav.collapsed a{justify-content:center;padding:10px 0}
 .sidenav.collapsed a span,.sidenav.collapsed .group,.sidenav.collapsed a .count,.sidenav.collapsed a.sub,.sidenav.collapsed .foot{display:none}   /* 하위 항목은 아이콘이 없어 레일에서 글자만 남았다 — 항목째 숨긴다. .foot 은 64 폭에서 한 글자씩 세로로 쪼개졌다(React 는 접히면 그리지 않는다) */
@@ -1108,6 +1114,10 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .topbar .right{margin-left:auto;display:flex;align-items:center;gap:8px}
 .topbar .searchbar{min-width:220px;height:36px}
 .topbar .divider.vertical{height:20px}
+.topbar-user{display:inline-flex;padding:0;border:0;background:transparent;border-radius:var(--radius-full);cursor:pointer}
+.skip-link{position:absolute;top:8px;left:8px;z-index:130;padding:8px 12px;border-radius:var(--radius-md);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:14px;font-weight:600;line-height:1.6;text-decoration:none;transform:translateY(calc(-100% - 16px))}   /* 키보드의 첫 칸. 포커스가 오기 전에는 화면 밖 */
+.skip-link:focus,.skip-link.show{transform:none}
+.skip-link:focus-visible{outline-color:currentColor}
 .avatar{width:32px;height:32px;border-radius:50%;background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);display:inline-grid;place-items:center;font-size:12px;font-weight:700;flex:none;line-height:1.6}
 .avatar.sm{width:24px;height:24px;font-size:10px}
 
@@ -1321,6 +1331,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .steps li.on{color:var(--foreground-neutral-primary);font-weight:600}
 .steps li.on i{background:var(--surface-brand-primary);color:var(--brand-label)}
 .steps li+li::before{content:"";width:32px;height:1px;background:var(--line-neutral-primary)}
+.steps .step-btn{display:inline-flex;align-items:center;gap:8px;padding:0;border:0;background:transparent;font:inherit;color:inherit;cursor:pointer;border-radius:var(--radius-xs)}
+.steps .step-btn:hover{color:var(--foreground-neutral-primary)}
 .steps.vertical{flex-direction:column;align-items:flex-start}
 .steps.vertical li+li::before{display:none}
 

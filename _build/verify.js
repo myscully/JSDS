@@ -162,6 +162,25 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
       if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
+      /* 탐색 · 표시 원칙(2026-11-10) */
+      for (const m of pv.matchAll(/<div class="tabs[^"]*"([^>]*)>([\s\S]*?)<\/div>/g)) {
+        if (/role="tablist"/.test(m[1]) && !/aria-label="/.test(m[1])) fails.push(`${f}: tablist 이름 없음(Tab › 키보드)`);
+        if (/<a\b/.test(m[2])) fails.push(`${f}: Tab 은 페이지 이동에 쓰지 않음(Tab › 언제)`);
+        for (const t of m[2].matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)) { const w = t[1].replace(/<span class="count">[\s\S]*?<\/span>/, "").replace(/<[^>]+>/g, " ").trim().split(/\s+/); if (w.length > 2) fails.push(`${f}: 탭 라벨은 1~2단어 "${w.join(" ")}"(Tab › 라벨)`); }
+      }
+      for (const m of pv.matchAll(/<nav class="sidenav collapsed"[^>]*>([\s\S]*?)<\/nav>/g)) { if (/<a\b[^>]*\stitle=/.test(m[1])) fails.push(`${f}: 접힌 내비의 이름을 title 로(Navigation › 접힘)`); if ([...m[1].matchAll(/<a\b/g)].length !== [...m[1].matchAll(/<span class="tooltip-wrap"><a\b[^>]*aria-label="/g)].length) fails.push(`${f}: 접힌 내비 항목은 Tooltip + aria-label(Navigation › 접힘)`); }
+      if (/class="topbar"[\s\S]*?<nav\b/.test(pv) && /class="sidenav/.test(pv) && /<header class="topbar"[\s\S]*?<nav aria-label/.test(pv)) fails.push(`${f}: 상단 메뉴와 Navigation 을 함께(Top Navigation › 1차 메뉴)`);
+      for (const m of pv.matchAll(/<div class="right">([\s\S]*?)<\/header>/g)) {
+        for (const b of m[1].matchAll(/<button\b[^>]*class="btn[^"]*icon-only[^"]*"[^>]*>/g)) { if (!/aria-label="/.test(b[0])) fails.push(`${f}: 상단 아이콘 버튼 이름 없음(Top Navigation › 아이콘 버튼)`); if (!m[1].slice(0, b.index).endsWith('<span class="tooltip-wrap">')) fails.push(`${f}: 상단 아이콘 버튼에 Tooltip 없음(Top Navigation › 아이콘 버튼)`); }
+        const av = m[1].search(/class="(?:avatar|topbar-user)/), bell = m[1].indexOf('name="bell"') >= 0 ? m[1].indexOf('name="bell"') : m[1].search(/aria-label="알림/);
+        if (av >= 0 && bell > av) fails.push(`${f}: 사용자는 오른쪽 맨 끝(Top Navigation › 오른쪽 순서)`);
+      }
+      for (const m of pv.matchAll(/<span class="tag (critical|medium|low|info)\b[^"]*"[^>]*>([^<]*)</g)) if (!/^(Critical|High|Medium|Low|Info|CRIT|HIGH|WARN|LOW|INFO|심각|높음|중간|낮음|정보)$/.test(m[2].trim())) fails.push(`${f}: 심각도 색은 심각도 어휘에만 "${m[2]}"(Tag › 톤)`);
+      for (const m of pv.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)) { const n = [...m[1].matchAll(/class="tag[ "](?![^"]*tag-more)/g)].length; if (n > 3) fails.push(`${f}: 표 칸의 Tag ${n}개 — 앞 2개 + +N(Tag › 여러 개)`); }
+      for (const m of pv.matchAll(/class="tag[^"]*tag-more[^"]*"/g)) { const before = pv.slice(Math.max(0, m.index - 40), m.index); if (!/<button type="button" $/.test(before)) fails.push(`${f}: +N 은 버튼(Tag › 여러 개)`); }
+      for (const m of pv.matchAll(/<span class="count(?! neutral)(?: [^"]*)?"[^>]*>([^<]+)<\/span>/g)) { const t = m[1].trim(); if (/^\d+$/.test(t) && (+t === 0 || +t > 99) && !/class="tab\b/.test(pv.slice(Math.max(0, m.index - 120), m.index))) fails.push(`${f}: Count "${t}" — 0 은 숨기고 99 초과는 99+(Indicator › Count)`); }
+      for (const m of pv.matchAll(/<ol class="steps[^"]*"([^>]*)>([\s\S]*?)<\/ol>/g)) { const n = [...m[2].matchAll(/<li\b/g)].length; if (n < 3 || n > 6) fails.push(`${f}: Steps ${n}단계 — 3~6(Steps › 단계 수)`); if (!/aria-label="/.test(m[1])) fails.push(`${f}: Steps 이름 없음(Steps)`); if (/<li(?![^>]*class="done")[^>]*>\s*<button/.test(m[2])) fails.push(`${f}: 완료한 단계로만 돌아감(Steps › 돌아가기)`); }
+      if (/<(?:ul class="(?:menu|list)|table)[^>]*>(?:(?!<\/(?:ul|table)>)[\s\S])*?<hr class="divider/.test(pv)) fails.push(`${f}: 구분선이 이미 있는 컴포넌트 안에 Divider(Divider › 중복 금지)`);
       /* 라벨(Text Field 원칙) — placeholder 는 이름이 아니다. 글자 입력마다 label · aria-label 로 접근 이름이 있어야 한다 */
       for (const m of pv.matchAll(/<(?:input|textarea)\b[^>]*>/g)) {
         if (/\stype="(?:hidden|checkbox|radio)"/.test(m[0]) || /\saria-label(?:ledby)?="/.test(m[0])) continue;
@@ -256,7 +275,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 33) fails.push(`components.json 컴포넌트 ${j.components.length}개(33 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 34) fails.push(`components.json 컴포넌트 ${j.components.length}개(34 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 11) fails.push(`components.json 패턴 ${j.patterns.length}개(11 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }

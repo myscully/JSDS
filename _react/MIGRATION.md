@@ -398,3 +398,14 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **CursorPagination** — 새 컴포넌트입니다. 사이트는 `.pagination.cursor` · 이벤트 `ds:page {direction}` 입니다.
 - **사이트 Item Tile** — `data-single` 을 없앴습니다. Tile 은 다중 선택이고, 하나만 고르면 Card Radio 입니다(빌드가 검사). 온보딩 패턴의 보호 수준이 Card Radio 로 바뀌었습니다.
 - **사이트 Data Table** — `ds:sort` · `ds:select-all` · `ds:retry` 이벤트, `table[data-sort="server"]`, `.tbl-wrap[data-total]`, `DS.table.removeRow(tr)` 가 생겼습니다.
+
+## 탐색 · 표시 (2026-11-10)
+
+- **TabPanel** — `keepMounted` 기본값이 `false` 에서 `true` 로 바뀌었습니다. 탭을 옮겨도 입력이 남습니다. 숨은 패널도 처음부터 그려지므로, 무거운 패널이나 열 때 불러오는 패널은 `keepMounted={false}` 를 주세요. 패널은 `tabIndex=0` 입니다.
+- **TabList** — 넘치면 탭 줄만 옆으로 스크롤합니다. `.tabs` 의 아랫줄이 `border-bottom` 에서 안쪽 그림자로 바뀌어 높이는 같습니다. `.tabs` 에 `border` 를 덧씌운 제품 CSS 는 확인하세요.
+- **SideNavItem** — 접힌 레일의 이름이 `title` 에서 `aria-label` + Tooltip 으로 바뀌었습니다. 항목이 `.tooltip-wrap` 으로 한 겹 감싸입니다. 직접 준 `title` 은 그대로입니다.
+- **SkipLink** — 새 컴포넌트입니다. 페이지의 첫 포커스에 둡니다. 사이트는 `.skip-link` 입니다.
+- **Steps** — `components/steps/Steps` 로 옮겼습니다. `@jiran/ds-react` 에서 가져오는 코드는 그대로입니다. `onStepClick` 을 주면 완료 단계가 버튼이 됩니다. 3~6단계를 벗어나면 경고합니다. 사이트는 `.step-btn` · 이벤트 `ds:step {index}` 입니다.
+- **TagGroup** — 새 컴포넌트입니다(`max` · `moreLabel`). 사이트는 `.tag-group` · `.tag-more` 입니다.
+- **Tag** — 폭 160 에서 줄바꿈합니다. 전에는 `white-space:nowrap` 으로 끝없이 늘어났습니다.
+- **Tooltip** — 키보드 포커스로 뜬 툴팁은 스크롤해도 닫히지 않고 다시 재서 따라갑니다. 마우스로 뜬 것은 전처럼 닫힙니다.

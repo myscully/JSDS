@@ -28,6 +28,7 @@
     root = root || doc;
     $$("input.mixed", root).forEach(function (i) { i.indeterminate = true; });
     $$(".slider input[type=range]", root).forEach(syncSlider);
+    $$(".tabs[role=tablist]", root).forEach(function (b) { tabSync(b); var on = $(".tab.on", b); if (on) tabReveal(on); });
     $$(".select-btn[role=radiogroup]", root).forEach(function (g) { var kids = $$(":scope > button", g), live = kids.filter(function (b) { return !b.disabled; }), cur = live.filter(function (b) { return b.classList.contains("on"); })[0] || live[0]; kids.forEach(function (b) { b.tabIndex = b === cur ? 0 : -1; }); });
     $$(".chip-group", root).forEach(syncChipReset);
     $$(".tbl th.check input, .checkbox-group > .checkbox:first-child input", root).forEach(syncMaster);
@@ -64,7 +65,7 @@
   function inClipper(el) { for (var p = el.parentElement; p && p !== doc.body; p = p.parentElement) { var c = getComputedStyle(p); if (/auto|scroll|hidden|clip/.test(c.overflowX + c.overflowY)) return true; } return false; }
   /* 띄운 메뉴는 트리거를 따라가지 못하므로 스크롤 · 창 크기 변경에 닫는다. 메뉴 자신의 스크롤은 그대로 */
   function closeFloats(e) {
-    $$(".tooltip.float").forEach(function (tip) { tip.parentNode.classList.add("quiet"); });
+    $$(".tooltip.float").forEach(function (tip) { var w = tip.parentNode; if (e.type === "scroll" && w.contains(doc.activeElement)) placeTip(w); else w.classList.add("quiet"); });   // 포커스로 온 툴팁은 따라간다 — 포커스가 일으킨 스크롤에 사라지면 키보드로는 볼 수 없다
     $$(".dropdown.float.open, .combobox.float.open").forEach(function (d) {
       if (e.type === "scroll" && $(".menu", d).contains(e.target)) return;
       if (d.matches(".combobox")) { cbOpen(d, false); return; }
@@ -103,6 +104,28 @@
   /* ---------- Tabs · Select Button · Chip · Tile · List ---------- */
   function activate(group, itemSel, target, attr) {
     $$(itemSel, group).forEach(function (i) { var on = i === target; i.classList.toggle("on", on); if (attr) i.setAttribute(attr, String(on)); if (attr === "aria-selected" || attr === "aria-checked") i.tabIndex = on ? 0 : -1; });
+  }
+
+  /* ---------- Tabs ---------- */
+  var tabUid = 0;
+  function tabReveal(tab) {   // 탭 줄만 옮긴다 — scrollIntoView 는 페이지까지 움직인다
+    var bar = closest(tab, ".tabs"); if (bar.scrollWidth <= bar.clientWidth) return;
+    var b = bar.getBoundingClientRect(), r = tab.getBoundingClientRect(), edge = 16;
+    if (r.left < b.left + edge) bar.scrollLeft -= b.left + edge - r.left; else if (r.right > b.right - edge) bar.scrollLeft += r.right - b.right + edge;
+  }
+  function tabSync(bar) {   // Tab 키 멈춤은 고른 탭 하나 + 패널 — 다음 탭으로 가지 않는다
+    var all = $$(".tab", bar), on = $(".tab.on", bar) || all.filter(function (x) { return !x.disabled; })[0]; if (!on) return;
+    all.forEach(function (x) { x.tabIndex = x === on ? 0 : -1; });
+    var linked = false;
+    all.forEach(function (x) { var p = doc.getElementById(x.getAttribute("aria-controls") || ""); if (p) { linked = true; p.hidden = x !== on; p.tabIndex = 0; } });   // 숨기기만 한다 — 안의 입력은 남는다
+    if (linked) return;
+    var pn = bar.nextElementSibling;
+    if (pn && pn.classList.contains("tab-panel")) { if (!on.id) on.id = "ds-tab-" + (++tabUid); pn.setAttribute("aria-labelledby", on.id); pn.tabIndex = 0; }
+  }
+  function tabPick(el) {
+    var bar = closest(el, ".tabs"), pn = bar.nextElementSibling; activate(bar, ".tab", el, "aria-selected");
+    if (!el.hasAttribute("aria-controls") && pn && pn.classList.contains("tab-panel") && !pn.hasAttribute("data-static")) pn.textContent = el.textContent.trim().replace(/\s*\d+$/, "") + " 탭의 내용이 여기에 표시됩니다.";
+    tabSync(bar); tabReveal(el); fire(el, "ds:tab");
   }
 
   /* ---------- Pagination ---------- */
@@ -1009,7 +1032,8 @@
     if ((el = closest(t, ".menu-item"))) { if (el.getAttribute("aria-disabled") === "true") return; selectItem(el); return; }
 
     // Tabs
-    if ((el = closest(t, ".tabs .tab")) && !el.disabled) { var tabs = closest(el, ".tabs"); activate(tabs, ".tab", el, "aria-selected"); var pn = tabs.nextElementSibling; if (pn && pn.classList.contains("tab-panel") && !pn.hasAttribute("data-static")) pn.textContent = el.textContent.trim().replace(/\s*\d+$/, "") + " 탭의 내용이 여기에 표시됩니다."; fire(el, "ds:tab"); return; }
+    if ((el = closest(t, ".tabs .tab")) && !el.disabled) { tabPick(el); return; }
+    if ((el = closest(t, ".steps .step-btn"))) { var stepLi = closest(el, "li"); fire(el, "ds:step", { index: $$(":scope > li", stepLi.parentNode).indexOf(stepLi) }); return; }
     // Breadcrumb 펼치기
     if ((el = closest(t, ".breadcrumb .more"))) { var li = closest(el, "li"), items = (el.dataset.items || "").split("|").map(function (s) { return s.trim(); }).filter(Boolean); if (li && items.length) { var first = null; items.forEach(function (s) { var n = doc.createElement("li"); var a2 = doc.createElement("a"); a2.href = "#"; a2.textContent = s; n.appendChild(a2); li.parentNode.insertBefore(n, li); if (!first) first = a2; }); var ol = li.parentNode; li.remove(); /* 버튼이 사라지니 포커스를 펼친 첫 링크로 — 안 옮기면 body 로 떨어진다 */ if (first) first.focus(); fire(ol, "ds:expand", { items: items }); } return; }
     // Onboard 단계
@@ -1138,7 +1162,7 @@
     if (tab && ["ArrowLeft", "ArrowRight", "Home", "End"].indexOf(e.key) >= 0) {
       var tabs = $$(".tab:not([disabled])", closest(tab, ".tabs")), ti = tabs.indexOf(tab);
       var tn = e.key === "ArrowLeft" ? (ti - 1 + tabs.length) % tabs.length : e.key === "ArrowRight" ? (ti + 1) % tabs.length : e.key === "Home" ? 0 : tabs.length - 1;
-      e.preventDefault(); tabs[tn].focus(); activate(closest(tab, ".tabs"), ".tab", tabs[tn], "aria-selected");
+      e.preventDefault(); tabs[tn].focus(); tabPick(tabs[tn]);
     }
   });
 

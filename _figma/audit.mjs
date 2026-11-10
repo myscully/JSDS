@@ -252,7 +252,7 @@ function exampleHtml(comp, id) {
 }
 const strip = (s) => s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 function stepsExample() {
-  return [...exampleHtml("indicator", "steps").matchAll(/<li([^>]*)>([\s\S]*?)<\/li>/g)].map((m) => {
+  return [...exampleHtml("steps", "default").matchAll(/<li([^>]*)>([\s\S]*?)<\/li>/g)].map((m) => {
     const cls = ((/class="([^"]*)"/.exec(m[1]) || [])[1] || "").split(/\s+/);
     const i = /<i>([\s\S]*?)<\/i>/.exec(m[2]), ic = i && /\$\{I\("([a-z0-9-]+)"/.exec(i[1]);
     return { state: cls.includes("done") ? "Done" : cls.includes("on") ? "Current" : "Todo", mark: ic ? ic[1] : i ? strip(i[1]) : null,

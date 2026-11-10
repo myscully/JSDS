@@ -1,6 +1,5 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
-import { Icon } from "../../icons/Icon";
 import type { StatusTone } from "../../types";
 
 export interface IndicatorProps extends HTMLAttributes<HTMLSpanElement> {
@@ -47,30 +46,5 @@ export const WithCount = forwardRef<HTMLSpanElement, WithCountProps>(function Wi
       {children}
       {count}
     </span>
-  );
-});
-
-export interface StepsProps extends Omit<HTMLAttributes<HTMLOListElement>, "children"> {
-  /** 단계 라벨 */
-  items: ReactNode[];
-  /** 현재 단계 인덱스(0부터). 그 앞은 완료 */
-  current: number;
-  vertical?: boolean;
-}
-/** 온보딩·마법사 진행 단계 */
-export const Steps = forwardRef<HTMLOListElement, StepsProps>(function Steps({ items, current, vertical, className, ...rest }, ref) {
-  return (
-    <ol ref={ref} className={cx("steps", { vertical }, className)} {...rest}>
-      {items.map((label, i) => {
-        const done = i < current, on = i === current;
-        return (
-          <li key={i} className={cx({ done, on })} aria-current={on ? "step" : undefined}>
-            <i>{done ? <Icon name="check" size={12} /> : i + 1}</i>
-            {label}
-            {done && <span className="sr-only"> (완료)</span>}
-          </li>
-        );
-      })}
-    </ol>
   );
 });

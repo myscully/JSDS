@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 65 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 744/744 · react 449+5 · tsc 0
+pages 66 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 782/782 · react 476+5 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -254,6 +254,16 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함:** 표 머리글 필수 · `th.sortable` 는 `button.sort` · 머리글 안 다른 조작 금지 · 행 버튼 이름 중복 · 고정 헤더 영역의 tabindex + 이름 · listbox 항목 규칙 · 번호 칸 · `data-single` 금지.
 - **측정에서 드러나 고친 것:** 정렬 머리글이 `th` 클릭뿐이라 키보드로 닿지 않았다(버튼으로). 사이트 listbox 에 키보드가 없었다. List 의 안쪽 버튼 Enter 를 행이 가로챘다. React 머리글 체크박스를 끄면 다른 페이지 선택까지 지웠고 비활성 행까지 골랐다. 끝에 닿아 꺼진 화살표에서 포커스가 사라졌다. 행 버튼 이름이 행마다 같았다(List '더 보기' · 로그 '상세'). 커서의 범위 글자가 크기 지정이 없어 본문 16 을 물려받았다(14 로 — 전체 behave 의 15px 기본 글자 검사가 잡음).
 - 음성 시험: 사이트 46건 · React 45건. 첫 회 CSS 2건을 못 잡아(정렬 버튼 면 리셋 · 커서 버튼의 아이콘 가로 배치) 단정을 더했고 다시 깨서 모두 실패로 잡았다. 1건은 변형이 없던 시험이라 고쳤다. `.tbl-wrap.sticky{overflow:auto}` 는 지워도 통과해 재 보니 `overflow-x:auto` 로 이미 계산되는 쓸모없는 선언이라 지웠다. render.js 의 ds.js 크기 115KB → 119KB. Figma 미반영 130 → 133건.
+
+2026-11-10 탐색 · 표시 정비 · Steps 분리(Tab · Navigation · Top Navigation · Tag · Indicator · Divider, 사람의 결정 넷) — pages 65 → 66 · 컴포넌트 33 → 34 · behave 744 → 782(`behave.nav.js` 38) · react 449+5 → 476+5(`tests/nav-display.test.tsx` 19 · 예제 202 → 210 에 따른 구조 비교 8). contrast · advisory 수는 그대로(새 색 쌍 없음 — 기존 토큰만 씀).
+- **Tab 넘침 = 가로 스크롤**(사람의 결정) — 탭 줄만 스크롤하고 고른 탭을 보이는 자리로(사이트 `tabReveal` · React `revealTab`, 페이지는 움직이지 않음). 스크롤 영역이 테두리 밖을 잘라 아랫줄을 `border-bottom` 에서 안쪽 그림자로 바꿨다(높이 44.4 그대로), 포커스 외곽선은 안쪽으로.
+- **탭을 옮겨도 입력을 남긴다**(사람의 결정) — 패널은 숨기기만 한다. 사이트 `aria-controls`, React `keepMounted` 기본 true(MIGRATION). Tab 키는 패널로 간다(고른 탭만 멈춤 · 패널 tabIndex 0). 활성 탭의 URL 저장은 규칙만(제품 몫).
+- **Steps 를 별도 컴포넌트로**(사람의 결정) — Indicator 에서 뺐다. 3~6단계(verify · React 경고), 완료 단계로 돌아가기(`.step-btn` + `ds:step {index}` · React `onStepClick`). audit 은 `steps/default` 예제를 본다. `figma` 필드는 Indicator 에 그대로다(Figma 프레임이 그 안에 있음).
+- **표 칸의 Tag = 앞 2개 + `+N`, 그 외 줄바꿈**(사람의 결정) — `.tag-group` · `.tag-more` · React `TagGroup max`. `+N` 은 포커스를 받는 버튼이고 나머지는 Tooltip. Tag 최대 폭 160 은 사람이 정하지 않은 기본값이고 넘으면 줄바꿈한다(잘라 내면 키보드로 읽을 길이 없다). 짧은 Tag 는 좁은 자리에서도 줄바꿈하지 않는다(`width:max-content`).
+- **Navigation** — 접힌 레일의 이름을 `title` 에서 `aria-label` + Tooltip 으로(키보드로 볼 수 있음). 본문 바로가기 `.skip-link` · React `SkipLink`, 이 사이트의 모든 페이지에도 넣었다. 접은 상태 기억은 규칙만(제품 몫).
+- **Top Navigation** — 사용자 메뉴 예제, 아이콘 버튼 Tooltip. **verify 더함:** tablist 이름 · Tab 안 링크 금지 · 탭 라벨 1~2단어 · 접힌 내비의 title 금지 · 상단 메뉴와 Navigation 중복 · 오른쪽 순서 · 상단 아이콘 버튼 이름과 Tooltip · 심각도 색 어휘 · 표 칸 Tag 개수 · `+N` 은 버튼 · Count 0 과 99 초과(`.neutral` · 탭 건수 제외) · Steps 단계 수와 이름과 돌아가기 · 구분선 중복.
+- **측정에서 드러나 고친 것:** 사이트 방향키가 패널 글자 · `ds:tab` 을 건너뛰었다(클릭과 같은 길로). 사이트 탭에 roving tabindex 가 처음 그릴 때 없어 Tab 이 다음 탭으로 갔다. 표 안처럼 화면 기준으로 띄운 Tooltip 이 포커스가 일으킨 스크롤에 사라져 키보드로 볼 수 없었다 — 포커스로 뜬 것은 다시 재서 따라간다(사이트 · React, 마우스로 뜬 것은 전처럼 닫힘).
+- 음성 시험: 사이트 53건 · React 22건. 첫 회 사이트 3건은 지워도 같은 쓸모없는 선언이라 코드에서 지웠고(`.tab{flex:none}` · `.sidenav .tooltip-wrap{display:flex}` · `.tag-more{cursor:default}`), React 1건은 jsdom 이 CSS 를 안 읽어 이름 단정이 비어 있던 것을 고쳤다. 1건은 동작이 같은 변형이라 뺐다. 기준선에서 시험 하나가 실패한 채 돌아 React 를 다시 돌렸다. render.js 의 ds.js 크기 119KB → 121KB. Figma 미반영 133 → 139건.
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

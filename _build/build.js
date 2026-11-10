@@ -100,6 +100,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 <script src="${root}assets/vendor/dayjs.timezone.js" defer></script>` : ""}
 </head>
 <body data-section="${r.sec}" data-page="${full ? "index" : r.key}" data-root="${root || "./"}">
+<a class="skip-link" href="#content">본문 바로가기</a>
 <header class="header">
   <a class="brand" href="${root}index.html"><span>JS Design System</span></a>
   <span class="ver">${VERSION}</span>

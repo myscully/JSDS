@@ -5,7 +5,7 @@ export default function Example() {
   const [level, setLevel] = useState("standard");
   return (
     <Onboard>
-      <Steps items={["조직 정보", "보호 수준", "에이전트 배포", "완료"]} current={1} />
+      <Steps aria-label="진행 단계" items={["조직 정보", "보호 수준", "에이전트 배포", "완료"]} current={1} />
       <Card>
         <CardTitle>보호 수준을 선택하세요</CardTitle>
         <CardDesc>나중에 정책 › 기본 정책에서 바꿀 수 있습니다.</CardDesc>

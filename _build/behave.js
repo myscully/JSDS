@@ -1779,13 +1779,13 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("donut keeps a surface-coloured gap between segments (separators, not gradient bands)", !donutGap.gapInGradient && donutGap.colors === 5 && donutGap.seps.length === 5 && donutGap.seps.every(Boolean), JSON.stringify(donutGap));
 
   // Steps — 완료 단계는 체크 아이콘만 있어 보조기기에 상태가 전해지지 않았다
-  await go("components/indicator.html");
-  const stepSr = await page.evaluate(() => { const li = document.querySelector("#ex-indicator-steps li.done"), sr = li && li.querySelector(".sr-only");
+  await go("components/steps.html");
+  const stepSr = await page.evaluate(() => { const li = document.querySelector("#ex-steps-default li.done"), sr = li && li.querySelector(".sr-only");
     if (!sr) return null; const r = sr.getBoundingClientRect();
-    return { text: sr.textContent, w: r.width, h: r.height, onHasSr: !!document.querySelector("#ex-indicator-steps li.on .sr-only") }; });
+    return { text: sr.textContent, w: r.width, h: r.height, onHasSr: !!document.querySelector("#ex-steps-default li.on .sr-only") }; });
   ok("done steps carry a screen-reader-only label", !!stepSr && /완료/.test(stepSr.text) && stepSr.w <= 1 && stepSr.h <= 1 && !stepSr.onHasSr, JSON.stringify(stepSr));
   /* 390 — 미리보기(.panel)가 가운데 정렬이라 넘친 예제는 왼쪽이 잘려 스크롤로도 못 봤다("기본 정보" → "정보"). safe center 는 넘칠 때만 왼쪽부터 놓는다 */
-  const stepFit = () => page.evaluate(() => { const pv = document.querySelector("#ex-indicator-steps .example-preview"), s = pv.querySelector(".steps").getBoundingClientRect(), p = pv.getBoundingClientRect();
+  const stepFit = () => page.evaluate(() => { const pv = document.querySelector("#ex-steps-default .example-preview"), s = pv.querySelector(".steps").getBoundingClientRect(), p = pv.getBoundingClientRect();
     return { left: Math.round(s.left - p.left), right: Math.round(p.right - s.right), scrolls: pv.scrollWidth > pv.clientWidth }; });
   const step1440 = await stepFit();
   await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(250);
@@ -1833,6 +1833,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   await require("./behave.feedback.js")({ page, ok, go });
   await require("./behave.data.js")({ page, ok, go });
+  await require("./behave.nav.js")({ page, ok, go });
 
   // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
   await go("components/button.html");

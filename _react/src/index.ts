@@ -16,7 +16,9 @@ export { ICONS, ICON_NAMES, type IconName } from "./icons/icons.data";
 // A. primitives
 export { Button, ButtonGroup, type ButtonProps, type ButtonGroupProps, type ButtonVariant, type ButtonColor } from "./components/button/Button";
 export { Tag, type TagProps, type TagVariant } from "./components/tag/Tag";
-export { Indicator, Count, WithCount, Steps, type IndicatorProps, type CountProps, type WithCountProps, type StepsProps } from "./components/indicator/Indicator";
+export { TagGroup, type TagGroupProps } from "./components/tag/Tag";
+export { Indicator, Count, WithCount, type IndicatorProps, type CountProps, type WithCountProps } from "./components/indicator/Indicator";
+export { Steps, type StepsProps } from "./components/steps/Steps";
 export { Divider, type DividerProps } from "./components/divider/Divider";
 export { Avatar, type AvatarProps } from "./components/avatar/Avatar";
 
@@ -36,6 +38,7 @@ export { Tabs, TabList, Tab, TabPanel, type TabsProps, type TabListProps, type T
 export { Breadcrumb, BreadcrumbHome, BreadcrumbItem, BreadcrumbMore, type BreadcrumbProps, type BreadcrumbHomeProps, type BreadcrumbItemProps, type BreadcrumbMoreProps } from "./components/breadcrumb/Breadcrumb";
 export { Pagination, PaginationBar, CursorPagination, PAGE_SIZES, paginate, type CursorPaginationProps, type PaginationProps, type PaginationBarProps, type PageItem } from "./components/pagination/Pagination";
 export { SideNav, SideNavGroup, SideNavItem, type SideNavProps, type SideNavGroupProps, type SideNavItemProps } from "./components/navigation/SideNav";
+export { SkipLink, type SkipLinkProps } from "./components/navigation/SideNav";
 export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, type TopBarProps, type TopBarLogoProps, type TopBarNavProps, type TopBarNavItemProps, type TopBarRightProps } from "./components/top-navigation/TopBar";
 
 // D. overlays & behavior

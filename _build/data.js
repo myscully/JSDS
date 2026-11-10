@@ -12,7 +12,7 @@ const SITE = {
   components: { title: "Components", desc: "사용자 인터페이스를 구성하는 재사용 가능한 요소", isNew: true, pages: { overview: "Overview" }, groups: [
     ["", [["accordion", "Accordion"], ["breadcrumb", "Breadcrumb"], ["button", "Button"], ["card", "Card"], ["data-visual", "Data Visual"], ["date-picker", "Date Picker"], ["divider", "Divider"], ["dropdown", "Dropdown"], ["indicator", "Indicator"], ["item-tile", "Item Tile"], ["list", "List"], ["loading", "Loading"], ["navigation", "Navigation"], ["notification", "Notification"], ["pagination", "Pagination"], ["popup", "Popup"]]],
     ["Selection Controls", [["checkbox", "Checkbox"], ["chip", "Chip"], ["combobox", "Combobox"], ["radio-button", "Radio Button"], ["select-button", "Select Button"]]],
-    ["", [["search", "Search"], ["select", "Select"], ["side-panel", "Side Panel"], ["slider", "Slider"], ["switch", "Switch"], ["tab", "Tab"]]],
+    ["", [["search", "Search"], ["select", "Select"], ["side-panel", "Side Panel"], ["slider", "Slider"], ["steps", "Steps"], ["switch", "Switch"], ["tab", "Tab"]]],
     ["Table", [["data-table", "Data Table"], ["table", "Table"]]],
     ["", [["tag", "Tag"], ["text-field", "Text Field"], ["tooltip", "Tooltip"], ["top-navigation", "Top Navigation"]]],
   ] },
