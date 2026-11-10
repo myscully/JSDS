@@ -279,7 +279,7 @@ const COMPONENTS = {
       ["지우기", "값이 있을 때만 보입니다. Esc 도 같은 동작입니다. 값이 없으면 검색창은 Esc 에 반응하지 않습니다"],
       ["단축키", "<code>/</code> 는 화면에 하나뿐인 주 검색에만 답니다. 입력 중 · 조합키 · 모달이 열린 동안에는 무시합니다"],
       ["결과 건수", "결과가 바뀌면 숨긴 라이브 영역으로 건수를 알립니다. 보이는 건수는 목록 툴바에 둡니다"],
-      ["결과 없음", "<a href=\"#/patterns/empty-state\">빈 화면</a> 패턴의 검색 결과 없음으로 잇습니다. 조건을 보여 주고 초기화 · 완화를 제안합니다"],
+      ["결과 없음", "<a href=\"#/components/empty-state\">Empty State</a> 의 검색 결과 없음으로 잇습니다. 조건을 보여 주고 초기화 · 완화를 제안합니다"],
       ["조건 유지", "검색어와 필터를 URL 에 남겨 공유 · 새로고침해도 유지합니다. 제품이 구현합니다"],
     ],
     thumb: `<div class="searchbar" style="min-width:220px">${I("search")}<input placeholder="검색"></div>`,
@@ -1028,8 +1028,8 @@ const COMPONENTS = {
             <li aria-current="page"><span>이벤트 #48213</span></li>
           </ol>
         </nav>` },
-      { id: "placement", title: "Placement", desc: "페이지 타이틀 바로 위에 8px 간격으로, 한 화면에 하나만 둡니다. 모달 · 탭 패널 안에는 두지 않습니다.", html: `
-        <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+      { id: "placement", title: "Placement", desc: "<a href=\"#/components/page-header\">Page Header</a> 첫 칸에 넣어 타이틀 바로 위 8px 에 둡니다. 한 화면에 하나만 둡니다. 모달 · 탭 패널 안에는 두지 않습니다.", html: `
+        <div class="page-head">
           <nav aria-label="현재 위치">
             <ol class="breadcrumb">
               <li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li>
@@ -1038,7 +1038,7 @@ const COMPONENTS = {
               <li aria-current="page"><span>외부 저장장치 차단</span></li>
             </ol>
           </nav>
-          <div class="page-head"><div><h2 class="title">외부 저장장치 차단</h2><p class="sub">POL-2041 · 전체 그룹</p></div><div class="actions"><button type="button" class="btn md outline assistive">취소</button><button type="button" class="btn md solid primary">저장</button></div></div>
+          <div><h1 class="title">외부 저장장치 차단</h1><p class="sub">POL-2041 · 전체 그룹</p></div><div class="actions"><button type="button" class="btn md outline assistive">취소</button><button type="button" class="btn md solid primary">저장</button></div>
         </div>` },
     ],
     props: [
@@ -1747,7 +1747,7 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Data Table */
   "data-table": {
-    status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".select-notice", ".tag", ".checkbox", ".indicator"], borrows: [".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep", ".skeleton", ".sr-only"],
+    status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".select-notice", ".tag", ".checkbox", ".indicator"], borrows: [".link", ".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep", ".skeleton", ".sr-only"],
     desc: "로그·이벤트·정책 목록처럼 대량의 행 데이터를 다룹니다. 정렬·선택·행 액션을 갖춘 콘솔의 핵심 컴포넌트입니다. 단순 표는 Table 을 씁니다.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><thead><tr><th>시간</th><th>심각도</th></tr></thead><tbody><tr><td>09:41</td><td><span class="tag critical sm">Critical</span></td></tr><tr><td>09:40</td><td><span class="tag medium sm">Medium</span></td></tr></tbody></table></div>`,
     principles: [
@@ -2090,6 +2090,165 @@ const COMPONENTS = {
     figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, kpiSparkline: { layout: "라벨 한 줄 · 값 + 그래프 한 줄(밑변 = 숫자 기준선, 좁으면 그래프가 값 아래)" }, bar: {}, donut: { gap: "경계마다 2px 직선 --surface-elevated-primary(폭 일정)" }, sparkline: { bar: "--line-brand-primary", hi: "--foreground-brand-primary" } }, variant: { outline: { stroke: "--line-neutral-secondary" }, flat: { stroke: "transparent", canvas: "--background-neutral-secondary" } }, states: ["default"],
       /* 탐색형 차트(Chart.js) — Figma 의 Chart 세트가 따르는 마크 규격과 색 */
       chart: { types: ["timeseries", "bar", "donut", "mixed"], canvasH: 240, line: 2, point: 8, barRadius: 0, barStroke: 0, barMax: 32, gap: 0, legend: "circle", cutout: "67%", series: ["--chart-series-1", "--chart-series-2", "--chart-series-3", "--chart-series-4", "--chart-series-5", "--chart-series-6"], grid: "--chart-grid-primary", axis: "--chart-axis-text", tooltip: { bg: "--chart-tooltip-surface", fg: "--chart-tooltip-text" }, tones: { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary", medium: "--foreground-accent-lime", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary", "series-1": "--chart-series-1", "series-1-subtle": "--chart-series-1-subtle", "series-1-strong": "--chart-series-1-strong" } } },
+  },
+  /* ------------------------------------------------ Empty State (패턴에서 올림 2026-11-10) */
+  "empty-state": {
+    status: "ready", react: ["Empty"], css: [".empty"], borrows: [".btn", ".btn-group"],
+    desc: "데이터가 없거나 검색 결과가 없을 때 이유와 다음 행동을 보여 줍니다. 불러오지 못한 경우는 빈 화면이 아니라 오류입니다.",
+    principles: [
+      ["첫 사용", "무엇을 할 수 있는지 설명하고 시작 동작을 Solid Primary 로 둡니다."],
+      ["검색 결과 없음", "찾은 조건을 보여 주고 초기화 · 완화를 제안합니다. 만들기 동작을 주 버튼으로 두지 않습니다."],
+      ["오류와 구분", "불러오지 못했으면 <a href=\"#/components/notification\">Notification</a>(danger)이나 카드의 <code>.empty.error</code> 와 다시 시도를 씁니다. '없습니다' 로 보여 주지 않습니다."],
+      ["구성", "제목은 필수입니다. 동작은 2개까지, Solid Primary 는 하나입니다. 빌드가 검사합니다."],
+      ["좁은 자리", "카드 · 사이드 패널은 <code>.compact</code> 입니다. 표 안은 <code>td.empty</code>, 카드 본문은 <a href=\"#/components/card\">Card</a> 의 빈 상태를 따릅니다."],
+    ],
+    thumb: `<div class="empty" style="padding:16px;gap:2px"><span class="ico" style="width:28px;height:28px;font-size:12px">${I("inbox")}</span><b style="font-size:12px">이벤트 없음</b></div>`,
+    examples: [
+      { id: "first", title: "첫 사용", html: `
+        <div class="empty" style="max-width:560px">
+          <span class="ico">${I("shield")}</span>
+          <b>아직 정책이 없습니다</b>
+          <span>템플릿에서 시작하거나 새 정책을 만들어 에이전트에 배포하세요.</span>
+          <div class="btn-group"><button type="button" class="btn md outline primary">템플릿 보기</button><button type="button" class="btn md solid primary">${I("plus")}정책 만들기</button></div>
+        </div>` },
+      { id: "nores", title: "검색 결과 없음", html: `
+        <div class="empty" style="max-width:560px">
+          <span class="ico">${I("search")}</span>
+          <b>'랜섬웨어 2025' 에 대한 결과가 없습니다</b>
+          <span>검색어를 줄이거나 기간 필터(최근 24시간)를 넓혀 보세요.</span>
+          <button type="button" class="btn md outline assistive">필터 초기화</button>
+        </div>` },
+      { id: "compact", title: "패널 안 빈 상태", desc: "카드 · 사이드 패널처럼 좁은 영역은 .compact.", html: `
+        <div class="empty compact" style="max-width:480px"><span class="ico">${I("inbox")}</span><div><b>연결된 알림 채널이 없습니다</b><span>Slack 또는 이메일을 연결하세요.</span></div><button type="button" class="btn sm outline assistive">연결</button></div>` },
+    ],
+    props: [[".empty", "div", "—", "세로 가운데 정렬 · 점선 테두리"], [".ico", "span", "—", "아이콘 칸 48"], ["b", "제목", "—", "필수"], ["span", "설명", "—", "이유와 다음 행동"], [".compact", "boolean", "false", "가로형"], ["React actions", "ReactNode", "—", "Button 또는 ButtonGroup"]],
+    spec: [["Size", "위아래 여백 48 · compact 24"], ["Container", "1px dashed · radius/lg"], ["Icon", "칸 48 · compact 36"], ["Title", "16 SemiBold · compact 14"], ["Placement", "목록 · 표 · 패널의 내용 자리"]],
+  },
+
+  /* ------------------------------------------------ Form (2026-11-10) */
+  "form": {
+    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions","ErrorSummary"], css: [".form", ".form-legend", ".form-summary"], borrows: [".field", ".btn", ".notice"],
+    desc: "입력 필드를 묶고 저장 동작을 놓는 틀입니다. 실제 화면 조합은 <a href=\"#/patterns/input-form\">입력 폼</a> 패턴을 봅니다.",
+    principles: [
+      ["열", "한 열이 기본입니다. 시작 · 종료처럼 짝이 되는 짧은 필드만 <code>.form-row</code> 로 2열에 둡니다. 빌드가 검사합니다."],
+      ["필수", "필수 입력이 있으면 맨 위에 <code>.form-legend</code> 를 둡니다."],
+      ["검증", "폼에 <code>data-validate</code> 를 달면 시스템이 합니다. 규칙은 <a href=\"#/foundations/interaction\">Interaction</a> › Input errors 입니다."],
+      ["오류 요약", "오류가 3개 이상이면 폼 맨 위에 둡니다. <code>data-validate</code> 는 자동으로 그리고, 서버 응답의 오류는 ErrorSummary 로 직접 넣습니다. 빌드가 위치를 검사합니다."],
+      ["동작", "<code>.form-actions</code> 는 폼 맨 아래, 주 버튼은 오른쪽 끝입니다. 삭제는 <code>.left</code> 로 왼쪽에 떼어 둡니다."],
+    ],
+    thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
+    examples: [
+      { id: "default", title: "Default", desc: "범례 · 필드 · 2열 · 동작.", html: `
+        <form class="form">
+          <p class="form-legend"><em>*</em> 필수 항목</p>
+          <div class="field"><label for="fm-name">정책 이름 <em>*</em></label><input id="fm-name" required><span class="help">2~40자</span></div>
+          <div class="form-row">
+            <div class="field"><label for="fm-from">시작 IP</label><input id="fm-from"></div>
+            <div class="field"><label for="fm-to">종료 IP</label><input id="fm-to"></div>
+          </div>
+          <div class="form-actions"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">저장</button></div>
+        </form>` },
+      { id: "sections", title: "Sections", desc: "필드가 많으면 .form-section 으로 나눕니다.", html: `
+        <form class="form">
+          <div class="form-section">기본 정보</div>
+          <div class="field"><label for="fs-name">정책 이름</label><input id="fs-name"></div>
+          <div class="form-section">알림</div>
+          <div class="field"><label for="fs-mail">알림 이메일</label><input id="fs-mail" type="email"></div>
+          <div class="form-actions"><button type="submit" class="btn md solid primary">저장</button></div>
+        </form>` },
+      { id: "actions", title: "Delete", desc: "삭제는 .left 로 왼쪽에 떼어 둡니다.", html: `
+        <form class="form">
+          <div class="field"><label for="fa-name">정책 이름</label><input id="fa-name" value="외부 USB 차단"></div>
+          <div class="form-actions"><button type="button" class="btn md outline negative left">삭제</button><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">저장</button></div>
+        </form>` },
+      { id: "summary", title: "Error Summary", desc: "서버가 돌려준 오류처럼 제품이 직접 넣을 때입니다. 폼 맨 위에 둡니다.", html: `
+        <form class="form" novalidate>
+          <div class="notice danger form-summary" role="alert" data-form-summary><span class="ico">${I("alert-circle",20)}</span><div><b>입력값 3개를 확인하세요</b>정책 이름, 허용 IP, 보관 기간</div></div>
+          <div class="field error"><label for="fe-a">정책 이름</label><input id="fe-a" value="외부 USB" aria-invalid="true" aria-describedby="fe-ah"><span class="help" id="fe-ah">같은 이름의 정책이 있습니다. 다른 이름을 입력하세요.</span></div>
+          <div class="field error"><label for="fe-b">허용 IP</label><input id="fe-b" value="10.0.0.1" aria-invalid="true" aria-describedby="fe-bh"><span class="help" id="fe-bh">다른 정책이 쓰는 주소입니다. 다른 주소를 입력하세요.</span></div>
+          <div class="field error"><label for="fe-c">보관 기간</label><input id="fe-c" value="400" aria-invalid="true" aria-describedby="fe-ch"><span class="help" id="fe-ch">라이선스 한도를 넘었습니다. 365 이하로 입력하세요.</span></div>
+          <div class="form-actions"><button type="submit" class="btn md solid primary">저장</button></div>
+        </form>` },
+    ],
+    props: [["form.form", "form", "—", "카드 형태의 틀. 최대 폭 640"], ["data-validate", "attr", "—", "입력 검증을 켭니다. React <code>validate</code>"], [".form-legend", "p", "—", "필수 범례. React <code>FormLegend</code>"], [".form-section", "div", "—", "섹션 제목. React <code>FormSection</code>"], [".form-row", "div", "—", "2열. React <code>FormRow</code>"], [".form-actions", "div", "—", "하단 동작, .left 는 왼쪽. React <code>FormActions</code>"], [".form-summary", "div.notice.danger", "—", "오류 요약. <code>role=alert</code> · <code>data-form-summary</code>"], ["React ErrorSummary", "items · count · title", "—", "<code>items</code> 는 필드 이름, <code>count</code> 기본은 items 수"]],
+    spec: [["Size", "최대 폭 640 · 패딩 24 · 필드 간격 20"], ["Container", "surface/elevated/primary · 1px · radius/lg"], ["Section", "16 SemiBold"], ["Actions", "위 패딩 16 · 위 테두리 1px · 버튼 간격 12"], ["Placement", "페이지 본문 · Side Panel"]],
+  },
+
+  /* ------------------------------------------------ Page Header (2026-11-10) */
+  "page-header": {
+    status: "ready", react: ["PageHead"], css: [".page-head"], borrows: [".btn", ".breadcrumb"],
+    desc: "페이지 맨 위에서 이 화면이 무엇인지와 주요 동작을 보여 줍니다.",
+    principles: [
+      ["제목", "페이지 제목은 <code>h1</code> 이고 화면에 하나입니다. 하나인지는 빌드가 검사합니다. 메뉴 이름과 같게 씁니다."],
+      ["Breadcrumb", "첫 칸에 넣습니다. 제목 바로 위 8px 입니다."],
+      ["설명", "<code>.sub</code> 는 ID · 범위 · 갱신 시각처럼 짧은 정보 한 줄입니다."],
+      ["동작", "3개까지입니다. 주 버튼은 하나이고 오른쪽 끝입니다. 나머지는 <a href=\"#/components/dropdown\">Dropdown</a> 으로 묶습니다. 빌드가 검사합니다."],
+      ["긴 제목", "제목 칸에서 줄바꿈합니다. 동작은 오른쪽 위에 남습니다."],
+    ],
+    thumb: `<div class="page-head" style="width:200px"><div><span class="title" style="font-size:14px">정책</span></div><div class="actions"><span class="btn sm solid primary">저장</span></div></div>`,
+    examples: [
+      { id: "default", title: "Default", desc: "제목 · 설명 · 동작.", html: `
+        <div class="page-head"><div><h1 class="title">정책</h1><p class="sub">전체 24개 · 최근 배포 09:41</p></div><div class="actions"><button type="button" class="btn md outline assistive">내보내기</button><button type="button" class="btn md solid primary">정책 만들기</button></div></div>` },
+      { id: "breadcrumb", title: "Breadcrumb", desc: "하위 페이지는 첫 칸에 Breadcrumb 를 넣습니다.", html: `
+        <div class="page-head">
+          <nav aria-label="현재 위치">
+            <ol class="breadcrumb">
+              <li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li>
+              <li><a href="#">정책</a></li>
+              <li aria-current="page"><span>외부 USB 차단</span></li>
+            </ol>
+          </nav>
+          <div><h1 class="title">외부 USB 차단</h1><p class="sub">POL-2041 · 전체 그룹</p></div><div class="actions"><button type="button" class="btn md solid primary">배포</button></div>
+        </div>` },
+      { id: "long", title: "Long Title", desc: "긴 제목은 줄바꿈하고 동작은 오른쪽 위에 남습니다.", html: `
+        <div class="page-head" style="max-width:520px"><div><h1 class="title">외부 저장장치 차단 및 예외 승인 정책의 부서별 적용 현황</h1><p class="sub">POL-2041</p></div><div class="actions"><button type="button" class="btn md solid primary">저장</button></div></div>` },
+    ],
+    props: [[".page-head", "div", "—", "2열 격자. 줄 간격 8 · 열 간격 16"], ["nav", "Breadcrumb", "—", "첫 칸. React <code>breadcrumb</code>"], [".title", "h1", "—", "React <code>title</code> · 태그는 <code>as</code>(기본 h1)"], [".sub", "p", "—", "React <code>sub</code>"], [".actions", "div", "—", "동작 3개까지. React <code>actions</code>"]],
+    spec: [["Title", "24 Bold · 행간 1.3"], ["Description", "14 · foreground/neutral/secondary · 위 4"], ["Actions", "버튼 간격 8 · 오른쪽 위"], ["Placement", "페이지 본문 맨 위, 한 화면에 하나"]],
+  },
+
+  /* ------------------------------------------------ Avatar (문서화 2026-11-10) */
+  "avatar": {
+    status: "ready", react: ["Avatar"], css: [".avatar"], borrows: [".t-body-2"],
+    desc: "사용자를 이니셜로 표시합니다. 사진은 지원하지 않습니다.",
+    principles: [
+      ["글자", "이니셜 1~2자입니다. 빌드가 검사합니다."],
+      ["이름", "옆에 이름이 보이면 <code>aria-hidden</code> 입니다. 혼자 있으면 <code>role=\"img\"</code> 와 <code>aria-label</code> 로 이름을 줍니다."],
+      ["누를 때", "그 자체로는 버튼이 아닙니다. 사용자 메뉴는 <a href=\"#/components/top-navigation\">Top Navigation</a> 의 <code>.topbar-user</code> 를 씁니다."],
+    ],
+    thumb: `<span style="display:flex;gap:8px;align-items:center"><span class="avatar">JH</span><span class="avatar sm">JH</span></span>`,
+    examples: [
+      { id: "sizes", title: "Size", desc: "32 와 .sm 24.", html: `
+        <div style="display:flex;gap:12px;align-items:center"><span class="avatar" role="img" aria-label="김민준">김</span><span class="avatar sm" role="img" aria-label="김민준">김</span></div>` },
+      { id: "name", title: "With Name", desc: "이름이 옆에 있으면 아바타는 숨깁니다.", html: `
+        <div style="display:flex;gap:8px;align-items:center"><span class="avatar" aria-hidden="true">이</span><span class="t-body-2">이서연</span></div>` },
+    ],
+    props: [[".avatar", "span", "—", "32. React <code>initials</code>"], [".sm", "boolean", "false", "24. React <code>size=\"sm\"</code>"]],
+    spec: [["Size", "32 · sm 24"], ["Container", "surface/brand/subtle · radius/full"], ["Label", "12 Bold · sm 10 Bold · foreground/brand/primary"], ["Placement", "Top Navigation 오른쪽 끝 · List 행 앞"]],
+  },
+
+  /* ------------------------------------------------ Link (2026-11-10) */
+  "link": {
+    status: "ready", react: ["Link"], css: [".link", ".sr-only"], borrows: [".t-body-2"],
+    desc: "다른 페이지로 옮겨 갑니다. 같은 화면에서 일을 실행하면 <a href=\"#/components/button\">Button</a> 입니다.",
+    principles: [
+      ["Button 과의 경계", "주소가 바뀌면 Link, 그 자리에서 실행하면 Button 입니다. <code>&lt;a&gt;</code> 에 <code>href</code> 가 없으면 빌드가 막습니다."],
+      ["밑줄", "문장 안 링크는 늘 밑줄입니다. 색만으로 구분하지 않습니다. 표 · 목록처럼 그 줄 자체가 링크인 자리는 <code>.standalone</code> 이고 hover 때만 긋습니다."],
+      ["라벨", "도착할 곳의 이름을 씁니다. '자세히' · '여기' 는 쓰지 않습니다. 빌드가 검사합니다."],
+      ["새 창", "되도록 같은 창에서 엽니다. 새 창이면 아이콘과 숨긴 '(새 창)' 문구를 둡니다. 빌드가 검사합니다."],
+      ["비활성", "링크는 비활성으로 두지 않습니다. 갈 곳이 없으면 글자로 둡니다."],
+    ],
+    thumb: `<a class="link" href="#" tabindex="-1">배포 상태</a>`,
+    examples: [
+      { id: "inline", title: "Inline", desc: "문장 안 링크는 늘 밑줄입니다.", html: `
+        <p class="t-body-2" style="margin:0">에이전트가 오프라인이면 <a href="#" class="link">배포 상태</a> 에서 다시 배포하세요.</p>` },
+      { id: "standalone", title: "Standalone", desc: "그 줄 자체가 링크인 자리는 .standalone. 표의 .link 도 같은 모양입니다.", html: `
+        <div class="t-body-2" style="display:flex;flex-direction:column;gap:8px;align-items:flex-start"><a href="#" class="link standalone">랜섬웨어 행위 탐지</a><a href="#" class="link standalone">미승인 USB 연결</a></div>` },
+      { id: "external", title: "New Window", desc: "새 창이면 아이콘과 숨긴 문구를 둡니다.", html: `
+        <p class="t-body-2" style="margin:0"><a href="#" class="link" target="_blank" rel="noopener noreferrer">제품 문서${I("external-link",14)}<span class="sr-only"> (새 창)</span></a> 에서 설치 방법을 확인하세요.</p>` },
+    ],
+    props: [["a.link", "a", "—", "<code>href</code> 필수"], [".standalone", "boolean", "false", "밑줄은 hover 때만, 500. React <code>standalone</code>"], ["target=_blank", "attr", "—", "아이콘 + sr-only + <code>rel</code>. React <code>external</code>"], ["React as", "ElementType", "a", "라우터 링크"]],
+    spec: [["Label", "주변 글자 크기 · foreground/brand/primary"], ["Underline", "위치 2 · hover 두께 2"], ["Icon", "14"], ["Placement", "문장 안 · 표 · 목록 행"]],
   },
 };
 

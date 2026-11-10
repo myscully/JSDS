@@ -17,6 +17,7 @@ export const LABELS = {
   breadcrumb: "현재 위치",
   mainMenu: "주 메뉴",
   skipToMain: "본문 바로가기",
+  newWindow: "새 창",
   selectAll: "전체 선택",
   select: "선택",
   datePlaceholder: "날짜 선택",

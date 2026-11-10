@@ -1,5 +1,5 @@
 /* =========================================================
-   patterns.data.js — 패턴 11개. 컴포넌트를 조합한 화면 단위 예시
+   patterns.data.js — 패턴 10개. 컴포넌트를 조합한 화면 단위 예시
    shape: { status, desc, uses:[컴포넌트 key…], css:[패턴 전용 접두어…], thumb, principles:[[k,v]], examples:[…] }
    코드 패널의 CSS 는 uses 컴포넌트의 CSS + css 접두어의 합집합으로 추출됩니다.
    ========================================================= */
@@ -28,7 +28,7 @@ const TREND = {"labels":["10-21","10-22","10-23","10-24","10-25","10-26","10-27"
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
-    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button", "notification"], css: [".form", ".form-legend"], borrows: [".t-label-1"],
+    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button", "notification"], css: [".form", ".form-legend", ".form-summary"], borrows: [".t-label-1"],
     desc: "정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.",
     thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
     principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "<code>data-validate</code> — 포커스가 떠날 때 필드 단위로, 제출하면 첫 오류로 이동, 오류 3개 이상이면 위에 요약. 고치면 바로 지웁니다"], ["필수", "필수 항목이 있으면 폼 위에 <code>.form-legend</code>"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
@@ -53,7 +53,7 @@ const PATTERNS = {
         </form>` },
       { id: "error", title: "오류 상태", desc: "제출 후 오류. 필드 오류 + 상단 요약 Notice(오류 3개 이상일 때).", html: `
         <form class="form" novalidate>
-          <div class="notice danger" role="alert" style="margin-bottom:-4px"><span class="ico">${I("alert-circle",20)}</span><div><b>입력값 3개를 확인하세요</b>정책 이름, 허용 IP, 보관 기간</div></div>
+          <div class="notice danger form-summary" role="alert" data-form-summary><span class="ico">${I("alert-circle",20)}</span><div><b>입력값 3개를 확인하세요</b>정책 이름, 허용 IP, 보관 기간</div></div>
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field error"><label for="e1">정책 이름 <em>*</em></label><input id="e1" aria-invalid="true" aria-describedby="e1h"><span class="help" id="e1h">정책 이름을 입력하세요</span></div>
           <div class="field error"><label for="e2">허용 IP</label><input id="e2" value="10.0.0" aria-invalid="true" aria-describedby="e2h"><span class="help" id="e2h">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div>
@@ -90,31 +90,6 @@ const PATTERNS = {
         <div class="terms">
           <details class="accordion md outline" open style="max-width:560px"><summary><label class="checkbox" style="font-weight:600"><input type="checkbox" checked><span>서비스 이용약관 <span class="req">필수</span></span></label></summary><div class="body" style="max-height:120px;overflow:auto">제1조(목적) 이 약관은 지란지교시큐리티가 제공하는 서비스의 이용 조건과 절차를 규정합니다. 제2조(정의) … 제3조(약관의 효력) …</div></details>
         </div>` },
-    ],
-  },
-
-  "empty-state": {
-    status: "ready", react: ["Empty"], uses: ["button", "search"], css: [".empty"],
-    desc: "데이터가 없거나 검색 결과가 없을 때 이유와 다음 행동을 제시합니다. 오류 상태와 구분합니다.",
-    thumb: `<div class="empty" style="padding:16px;gap:2px"><span class="ico" style="width:28px;height:28px;font-size:12px">${I("inbox")}</span><b style="font-size:12px">이벤트 없음</b></div>`,
-    principles: [["첫 사용", "무엇을 할 수 있는지 + 시작 액션(Primary)"], ["검색 결과 없음", "조건을 보여주고 초기화·완화 제안"], ["오류", "Notification(danger) 으로, 빈 화면과 섞지 않음"]],
-    examples: [
-      { id: "first", title: "첫 사용", html: `
-        <div class="empty" style="max-width:560px">
-          <span class="ico">${I("shield")}</span>
-          <b>아직 정책이 없습니다</b>
-          <span>템플릿에서 시작하거나 새 정책을 만들어 에이전트에 배포하세요.</span>
-          <div class="btn-group"><button type="button" class="btn md outline primary">템플릿 보기</button><button type="button" class="btn md solid primary">${I("plus")}정책 만들기</button></div>
-        </div>` },
-      { id: "nores", title: "검색 결과 없음", html: `
-        <div class="empty" style="max-width:560px">
-          <span class="ico">${I("search")}</span>
-          <b>'랜섬웨어 2025' 에 대한 결과가 없습니다</b>
-          <span>검색어를 줄이거나 기간 필터(최근 24시간)를 넓혀 보세요.</span>
-          <button type="button" class="btn md outline assistive">필터 초기화</button>
-        </div>` },
-      { id: "compact", title: "패널 안 빈 상태", desc: "카드·사이드 패널처럼 좁은 영역은 .compact.", html: `
-        <div class="empty compact" style="max-width:480px"><span class="ico">${I("inbox")}</span><div><b style="font-size:14px">연결된 알림 채널이 없습니다</b><span style="display:block">Slack 또는 이메일을 연결하세요.</span></div><button type="button" class="btn sm outline assistive" style="margin:0 0 0 auto">연결</button></div>` },
     ],
   },
 
@@ -177,7 +152,7 @@ const PATTERNS = {
   },
 
   "search": {
-    status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "chip", "select", "date-picker", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack"], borrows: [".field"],
+    status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "chip", "select", "date-picker", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack"], borrows: [".field", ".link"],
     desc: "검색 + 필터 + 결과 목록의 조회 화면 패턴입니다. 조건은 항상 보이고, 결과 수와 적용 중인 필터를 함께 보여줍니다.",
     thumb: `<div class="toolbar" style="width:240px"><div class="searchbar" style="min-width:0;flex:1;height:32px">${I("search")}<input placeholder="검색"></div><button class="chip sm on">Critical</button></div>`,
     principles: [["툴바", "검색(좌) · 필터 드롭다운 · 기간 · 여백 · 액션(우)"], ["필터 표시", "적용 중인 필터는 Chip 으로, 결과 수는 툴바 아래"], ["빈 결과", "빈 화면 패턴 + 필터 초기화"]],
@@ -246,7 +221,7 @@ const PATTERNS = {
     examples: [
       { id: "full", title: "대시보드", html: `
         <div class="stack">
-          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">24시간</button><button type="button" role="radio" aria-checked="false">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
+          <div class="page-head"><div><h1 class="title">대시보드</h1><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">24시간</button><button type="button" role="radio" aria-checked="false">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
           <div class="kpi-grid">
             <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><span class="delta up">${I("arrow-up",12)} 12% 전일 대비</span></div>
             <div class="kpi"><span class="label">차단률</span><span class="value">99.2<small>%</small></span><span class="delta down">${I("arrow-down",12)} 0.3%p</span></div>
@@ -297,8 +272,8 @@ const PATTERNS = {
     examples: [
       { id: "sections", title: "설정 섹션", html: `
         <div class="stack" style="max-width:760px">
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <nav aria-label="현재 위치">
+          <div class="page-head">
+          <nav aria-label="현재 위치">
               <ol class="breadcrumb">
                 <li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li>
                 <li><a href="#">정책</a></li>
@@ -306,8 +281,7 @@ const PATTERNS = {
                 <li aria-current="page"><span>외부 USB 차단</span></li>
               </ol>
             </nav>
-            <div class="page-head"><div><h2 class="title">외부 USB 차단</h2><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06</p></div><div class="actions"><button type="button" class="btn md outline primary">복제</button><button type="button" class="btn md solid primary">배포</button></div></div>
-          </div>
+          <div><h1 class="title">외부 USB 차단</h1><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06</p></div><div class="actions"><button type="button" class="btn md outline primary">복제</button><button type="button" class="btn md solid primary">배포</button></div></div>
           <div class="notice warning" role="status"><span class="ico">${I("alert-triangle",20)}</span><div><b>배포되지 않은 변경 2건</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>
           <div class="settings-section">
             <div class="section-head">탐지</div>

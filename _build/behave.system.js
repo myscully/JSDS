@@ -4,7 +4,7 @@
    가져오지 않은 것(무작위 토큰 · 보라 금지 · 아코디언 금지 · 13px · 44px · 사진 · 효과 · 한 섹션 한 화면)과 이유는 CLAUDE.md 에 있다 */
 const fs = require("fs");
 
-const PATTERNS = ["dashboard", "empty-state", "input-form", "log-viewer", "notes", "onboarding", "policy-settings", "search", "severity", "system-status", "terms-agreement"];
+const PATTERNS = ["dashboard", "input-form", "log-viewer", "notes", "onboarding", "policy-settings", "search", "severity", "system-status", "terms-agreement"];
 const MOTION_MS = ["120ms", "200ms", "320ms"];   // --motion-fast · base · slow
 /* .btn 이 아닌 button 은 이 컴포넌트 안에서만 — 각자 정의된 모양이 있다 */
 const BUTTON_HOSTS = ["th.sortable", ".select-btn", ".chip-group", ".chip", ".toast", ".banner", ".pagination", ".dropdown", ".datepicker", ".tile-grid", ".terms .item"];

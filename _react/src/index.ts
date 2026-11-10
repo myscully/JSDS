@@ -39,6 +39,7 @@ export { Breadcrumb, BreadcrumbHome, BreadcrumbItem, BreadcrumbMore, type Breadc
 export { Pagination, PaginationBar, CursorPagination, PAGE_SIZES, paginate, type CursorPaginationProps, type PaginationProps, type PaginationBarProps, type PageItem } from "./components/pagination/Pagination";
 export { SideNav, SideNavGroup, SideNavItem, type SideNavProps, type SideNavGroupProps, type SideNavItemProps } from "./components/navigation/SideNav";
 export { SkipLink, type SkipLinkProps } from "./components/navigation/SideNav";
+export { Link, type LinkProps } from "./components/link/Link";
 export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, type TopBarProps, type TopBarLogoProps, type TopBarNavProps, type TopBarNavItemProps, type TopBarRightProps } from "./components/top-navigation/TopBar";
 
 // D. overlays & behavior
@@ -64,4 +65,4 @@ export { Kpi, KpiGrid, ChartCard, BarChart, Donut, DonutRow, ChartLegend, Sparkl
 
 // patterns (thin wrappers)
 export { SettingsSection, Setting, type SettingsSectionProps, type SettingProps } from "./patterns/Settings";
-export { Stack, Row2, Row3, Toolbar, Spacer, PageHead, Form, FormLegend, type FormProps, FormSection, FormRow, FormActions, Empty, Notes, StatusList, StatusItem, SevBand, SevCell, Onboard, Terms, TermsAll, TermsItem, TermsMessage, type PageHeadProps, type EmptyProps, type NotesProps, type StatusItemProps, type SevBandProps, type SevCellProps, type TermsItemProps } from "./patterns/Patterns";
+export { Stack, Row2, Row3, Toolbar, Spacer, PageHead, Form, FormLegend, type FormProps, ErrorSummary, type ErrorSummaryProps, FormSection, FormRow, FormActions, Empty, Notes, StatusList, StatusItem, SevBand, SevCell, Onboard, Terms, TermsAll, TermsItem, TermsMessage, type PageHeadProps, type EmptyProps, type NotesProps, type StatusItemProps, type SevBandProps, type SevCellProps, type TermsItemProps } from "./patterns/Patterns";

@@ -65,7 +65,7 @@
   function inClipper(el) { for (var p = el.parentElement; p && p !== doc.body; p = p.parentElement) { var c = getComputedStyle(p); if (/auto|scroll|hidden|clip/.test(c.overflowX + c.overflowY)) return true; } return false; }
   /* 띄운 메뉴는 트리거를 따라가지 못하므로 스크롤 · 창 크기 변경에 닫는다. 메뉴 자신의 스크롤은 그대로 */
   function closeFloats(e) {
-    $$(".tooltip.float").forEach(function (tip) { var w = tip.parentNode; if (e.type === "scroll" && w.contains(doc.activeElement)) placeTip(w); else w.classList.add("quiet"); });   // 포커스로 온 툴팁은 따라간다 — 포커스가 일으킨 스크롤에 사라지면 키보드로는 볼 수 없다
+    $$(".tooltip.float").forEach(function (tip) { var w = tip.parentNode; if (!w._dsTip) return; if (e.type === "scroll" && w.contains(doc.activeElement)) placeTip(w); else w.classList.add("quiet"); });   // 포커스로 온 툴팁은 따라간다 — 포커스가 일으킨 스크롤에 사라지면 키보드로는 볼 수 없다
     $$(".dropdown.float.open, .combobox.float.open").forEach(function (d) {
       if (e.type === "scroll" && $(".menu", d).contains(e.target)) return;
       if (d.matches(".combobox")) { cbOpen(d, false); return; }
@@ -977,7 +977,7 @@
     if (!form._tried) return;
     var bad = $$(".field.error", form), box = $(":scope > [data-form-summary]", form);
     if (bad.length < 3) { if (box) box.remove(); return; }
-    if (!box) { box = doc.createElement("div"); box.className = "notice danger"; box.setAttribute("role", "alert"); box.setAttribute("data-form-summary", ""); box.style.marginBottom = "-4px"; box.innerHTML = '<span class="ico">' + V_ICON + '</span><div><b></b><span></span></div>'; form.insertBefore(box, form.firstChild); }
+    if (!box) { box = doc.createElement("div"); box.className = "notice danger form-summary"; box.setAttribute("role", "alert"); box.setAttribute("data-form-summary", ""); box.innerHTML = '<span class="ico">' + V_ICON + '</span><div><b></b><span></span></div>'; form.insertBefore(box, form.firstChild); }
     $("b", box).textContent = "입력값 " + bad.length + "개를 확인하세요"; $(":scope > div > span", box).textContent = bad.map(vLabel).filter(Boolean).join(", ");
   }
   /** 폼 전체 검증 — 통과하면 true. 제출 버튼이 아닌 곳에서 부를 때 DS.validate(form) */

@@ -65,7 +65,7 @@ export function useFormValidation({ enabled, messages, onValidate }: Options) {
   const tried = useRef(false);
   const latest = useRef<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [summary, setSummary] = useState<{ count: number; labels: string } | null>(null);
+  const [summary, setSummary] = useState<{ count: number; items: string[] } | null>(null);
 
   /* 틀린 필드를 화면 순서로 — 시스템이 재는 필드는 새 결과로, Date Picker 처럼 스스로 재는 필드는 .error 로 본다 */
   const collect = (next: Record<string, string>) =>
@@ -79,7 +79,7 @@ export function useFormValidation({ enabled, messages, onValidate }: Options) {
     setErrors(next);
     if (!tried.current) return;
     const bad = collect(next);
-    setSummary(bad.length >= 3 ? { count: bad.length, labels: bad.map((b) => b.label).filter(Boolean).join(", ") } : null);
+    setSummary(bad.length >= 3 ? { count: bad.length, items: bad.map((b) => b.label).filter(Boolean) } : null);
   };
   const measured = (el: TextControl, base: Record<string, string>) => {
     const { [el.id]: _old, ...next } = base;

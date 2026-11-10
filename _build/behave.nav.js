@@ -111,6 +111,13 @@ module.exports = async function nav({ page, ok, go }) {
   const followed = await cell.evaluate(async (r) => { const t = r.querySelector(".tooltip"), b = r.querySelector(".tag-more"), a = t.getBoundingClientRect().top - b.getBoundingClientRect().top; document.documentElement.style.scrollBehavior = "auto"; window.scrollBy(0, 40); await new Promise((x) => setTimeout(x, 120)); document.documentElement.style.scrollBehavior = ""; return { before: Math.round(a), after: Math.round(t.getBoundingClientRect().top - b.getBoundingClientRect().top), op: getComputedStyle(t).opacity, quiet: t.parentNode.classList.contains("quiet") }; });
   ok("a tooltip reached by keyboard follows its trigger through scrolling", followed.before === followed.after && followed.op === "1" && !followed.quiet, JSON.stringify(followed));
 
+  await cell.locator(".tag-more").focus(); await wait(30);
+  await page.locator("h1").first().evaluate((h) => { h.tabIndex = -1; h.focus({ preventScroll: true }); }); await wait(30);
+  await page.evaluate(() => window.dispatchEvent(new Event("scroll"))); await wait(30);
+  await cell.locator(".tag-more").focus(); await wait(250);
+  const again = await cell.evaluate((r) => ({ op: getComputedStyle(r.querySelector(".tooltip")).opacity, quiet: r.querySelector(".tooltip-wrap").classList.contains("quiet") }));
+  ok("a scroll while nobody is on a floated tooltip does not silence it for the next visit", again.op === "1" && !again.quiet, JSON.stringify(again));
+
   /* ── Steps ── */
   await go("components/indicator.html");
   ok("Indicator no longer documents Steps as an example", (await page.locator("#ex-indicator-steps").count()) === 0);

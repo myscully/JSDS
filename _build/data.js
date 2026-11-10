@@ -10,14 +10,14 @@ const SITE = {
   home: { title: "Home", desc: "지란지교시큐리티 디자인 시스템 소개", pages: { overview: "Overview", "getting-started": "Getting started", about: "About", principles: "UX Principles" } },
   foundations: { title: "Foundations", desc: "모든 디자인 요소의 기반이 되는 가장 원자적인 단위", pages: { overview: "Overview" }, groups: [["Base material", [["colors", "Colors"], ["elevation", "Elevation"], ["grid", "Grid"], ["icons", "Icons"], ["interaction", "Interaction"], ["typography", "Typography"], ["writing", "Writing"]]]] },
   components: { title: "Components", desc: "사용자 인터페이스를 구성하는 재사용 가능한 요소", isNew: true, pages: { overview: "Overview" }, groups: [
-    ["", [["accordion", "Accordion"], ["breadcrumb", "Breadcrumb"], ["button", "Button"], ["card", "Card"], ["data-visual", "Data Visual"], ["date-picker", "Date Picker"], ["divider", "Divider"], ["dropdown", "Dropdown"], ["indicator", "Indicator"], ["item-tile", "Item Tile"], ["list", "List"], ["loading", "Loading"], ["navigation", "Navigation"], ["notification", "Notification"], ["pagination", "Pagination"], ["popup", "Popup"]]],
+    ["", [["accordion", "Accordion"], ["avatar", "Avatar"], ["breadcrumb", "Breadcrumb"], ["button", "Button"], ["card", "Card"], ["data-visual", "Data Visual"], ["date-picker", "Date Picker"], ["divider", "Divider"], ["dropdown", "Dropdown"], ["empty-state", "Empty State"], ["form", "Form"], ["indicator", "Indicator"], ["item-tile", "Item Tile"], ["link", "Link"], ["list", "List"], ["loading", "Loading"], ["navigation", "Navigation"], ["notification", "Notification"], ["page-header", "Page Header"], ["pagination", "Pagination"], ["popup", "Popup"]]],
     ["Selection Controls", [["checkbox", "Checkbox"], ["chip", "Chip"], ["combobox", "Combobox"], ["radio-button", "Radio Button"], ["select-button", "Select Button"]]],
     ["", [["search", "Search"], ["select", "Select"], ["side-panel", "Side Panel"], ["slider", "Slider"], ["steps", "Steps"], ["switch", "Switch"], ["tab", "Tab"]]],
     ["Table", [["data-table", "Data Table"], ["table", "Table"]]],
     ["", [["tag", "Tag"], ["text-field", "Text Field"], ["tooltip", "Tooltip"], ["top-navigation", "Top Navigation"]]],
   ] },
   patterns: { title: "Patterns", desc: "반복되는 업무 단위와 문제를 해결하는 가이드라인", isNew: true, pages: { overview: "Overview" }, groups: [
-    ["Common UI", [["input-form", "입력 폼"], ["terms-agreement", "약관 동의"], ["empty-state", "빈 화면"], ["notes", "유의사항"]]],
+    ["Common UI", [["input-form", "입력 폼"], ["terms-agreement", "약관 동의"], ["notes", "유의사항"]]],
     ["Service Pattern", [["onboarding", "온보딩"], ["search", "검색"], ["system-status", "시스템 상태"]]],
     ["Security Console", [["dashboard", "대시보드"], ["log-viewer", "로그 뷰어"], ["policy-settings", "정책 설정"], ["severity", "심각도 표시"]]],
   ] },

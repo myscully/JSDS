@@ -4,7 +4,7 @@ import { cx } from "../utils/cx";
 import { Icon } from "../icons/Icon";
 import { ICONS, type IconName } from "../icons/icons.data";
 import { Indicator } from "../components/indicator/Indicator";
-import { Notice } from "../components/notification/Notification";
+import { Notice, type NoticeProps } from "../components/notification/Notification";
 import { FormValidationContext, useFormValidation, type FormValidationResult, type ValidationMessages } from "../components/text-field/validation";
 import type { StatusTone, Tone } from "../types";
 
@@ -46,15 +46,20 @@ export interface PageHeadProps extends Omit<HTMLAttributes<HTMLDivElement>, "tit
   title: ReactNode;
   /** 메타 (p.sub) */
   sub?: ReactNode;
-  /** 우측 액션 */
+  /** 우측 액션 — 3개까지 */
   actions?: ReactNode;
+  /** 제목 위 Breadcrumb */
+  breadcrumb?: ReactNode;
+  /** 제목 태그. 페이지 제목은 h1 */
+  as?: "h1" | "h2" | "h3";
 }
-/** 페이지 헤더: 제목·메타 | 액션 */
-export const PageHead = forwardRef<HTMLDivElement, PageHeadProps>(function PageHead({ title, sub, actions, className, ...rest }, ref) {
+/** 페이지 헤더: Breadcrumb | 제목·메타 | 액션 */
+export const PageHead = forwardRef<HTMLDivElement, PageHeadProps>(function PageHead({ title, sub, actions, breadcrumb, as: Title = "h1", className, ...rest }, ref) {
   return (
     <div ref={ref} className={cx("page-head", className)} {...rest}>
+      {breadcrumb}
       <div>
-        <h2 className="title">{title}</h2>
+        <Title className="title">{title}</Title>
         {sub !== undefined && <p className="sub">{sub}</p>}
       </div>
       {actions !== undefined && <div className="actions">{actions}</div>}
@@ -94,10 +99,28 @@ export const Form = forwardRef<HTMLFormElement, FormProps>(function Form({ class
         }}
         {...rest}
       >
-        {v.summary && <Notice tone="danger" title={`입력값 ${v.summary.count}개를 확인하세요`} data-form-summary="" style={{ marginBottom: -4 }}>{v.summary.labels}</Notice>}
+        {v.summary && <ErrorSummary count={v.summary.count} items={v.summary.items} />}
         {children}
       </form>
     </FormValidationContext.Provider>
+  );
+});
+
+export interface ErrorSummaryProps extends Omit<NoticeProps, "tone" | "title" | "children" | "icon" | "actions" | "onClose"> {
+  /** 오류가 난 필드 이름 */
+  items: ReactNode[];
+  /** 오류 수. 기본은 items 수 */
+  count?: number;
+  /** 제목. 기본 '입력값 n개를 확인하세요' */
+  title?: ReactNode;
+}
+/** 폼 맨 위 오류 요약 — 오류 3개 이상일 때. Form validate 는 자동으로 그린다 */
+export const ErrorSummary = forwardRef<HTMLDivElement, ErrorSummaryProps>(function ErrorSummary({ items, count = items.length, title, className, ...rest }, ref) {
+  if (process.env.NODE_ENV !== "production" && count < 3) console.warn("[ds] ErrorSummary 는 오류가 3개 이상일 때 씁니다. 그보다 적으면 필드 아래 문구로 충분합니다.");
+  return (
+    <Notice ref={ref} tone="danger" title={title ?? `입력값 ${count}개를 확인하세요`} className={cx("form-summary", className)} data-form-summary="" {...rest}>
+      {items.map((it, i) => (i ? [", ", it] : it))}
+    </Notice>
   );
 });
 
@@ -125,8 +148,8 @@ export const Empty = forwardRef<HTMLDivElement, EmptyProps>(function Empty({ ico
       {ico !== undefined && <span className="ico">{ico}</span>}
       {compact ? (
         <div>
-          <b style={{ fontSize: 14 }}>{title}</b>
-          {children !== undefined && <span style={{ display: "block" }}>{children}</span>}
+          <b>{title}</b>
+          {children !== undefined && <span>{children}</span>}
         </div>
       ) : (
         <>

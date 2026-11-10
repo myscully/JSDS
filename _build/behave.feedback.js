@@ -226,8 +226,9 @@ module.exports = async function feedback({ page, ok, go }) {
   const clip = await hov("tp-clip");
   const boxTop = await page.evaluate(() => document.getElementById("tp-box").getBoundingClientRect().top);
   ok("a tooltip inside a scroll area escapes the clipping", /\bfloat\b/.test(clip.cls) && clip.top < boxTop, JSON.stringify({ clip, boxTop }));
-  await page.locator("#tp-box").evaluate((e) => { e.scrollTop = 20; }); await wait(80);
-  ok("scrolling hides a floating tooltip", (await page.locator("#tp-clip .tooltip-wrap").evaluate((w) => w.classList.contains("quiet"))));
+  await page.locator("#tp-box").evaluate((e) => { e.scrollTop = 2; }); await wait(250);   // 트리거가 포인터 아래에 남을 만큼만 — 더 밀면 hover 가 풀려 스크롤이 숨긴 것인지 잴 수 없다
+  const scrolled = await page.locator("#tp-clip .tooltip-wrap").evaluate((w) => ({ hover: w.matches(":hover"), quiet: w.classList.contains("quiet"), op: getComputedStyle(w.querySelector(".tooltip")).opacity }));
+  ok("scrolling hides a floating tooltip", scrolled.hover && scrolled.quiet && scrolled.op === "0", JSON.stringify(scrolled));
   await away();
   await page.evaluate(() => { for (const id of ["tp-top", "tp-left", "tp-edge", "tp-box"]) document.getElementById(id).remove(); });
 

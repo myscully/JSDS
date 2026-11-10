@@ -162,6 +162,37 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
       if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
+      /* Form · Empty State · Page Header · Avatar · Link 원칙(2026-11-10) */
+      const blockAt = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };
+      const each = (re, fn) => { for (const m of pv.matchAll(re)) fn(blockAt(m.index), m); };
+      for (const m of pv.matchAll(/<([a-z]+)\b([^>]*\bclass="link(?:\s[^"]*)?"[^>]*)>([\s\S]*?)<\/\1>/g)) {
+        if (m[1] !== "a") fails.push(`${f}: .link 는 a 에만(Link › Button 과의 경계)`);
+        else if (!/\shref="/.test(m[2])) fails.push(`${f}: 링크에 href 없음 — 실행이면 Button(Link › Button 과의 경계)`);
+        if (/target="_blank"/.test(m[2]) && (!/rel="[^"]*noopener/.test(m[2]) || !/<svg/.test(m[3]) || !/class="sr-only"/.test(m[3]))) fails.push(`${f}: 새 창 링크는 rel · 아이콘 · 숨긴 문구(Link › 새 창)`);
+      }
+      for (const m of pv.matchAll(/<span class="avatar(?: sm)?"[^>]*>([^<]*)<\/span>/g)) if ([...m[1].trim()].length < 1 || [...m[1].trim()].length > 2) fails.push(`${f}: Avatar 이니셜은 1~2자 "${m[1]}"`);
+      if ((pv.match(/class="page-head"/g) || []).length > 1) fails.push(`${f}: Page Header 는 화면에 하나`);
+      each(/<div class="page-head"[^>]*>/g, (b) => {
+        if (!/<h[1-3] class="title">/.test(b)) { if (!/<span class="title"/.test(b)) fails.push(`${f}: Page Header 제목은 h1(as 로 h2 · h3)`); }
+        const nav = b.indexOf("<nav"); if (nav > -1 && nav > b.indexOf("<div", 5)) fails.push(`${f}: Breadcrumb 는 Page Header 첫 칸(Page Header › Breadcrumb)`);
+        const a = b.indexOf('<div class="actions">'); if (a > -1) { const n = (b.slice(a).match(/class="btn /g) || []).length, p = (b.slice(a).match(/class="btn [^"]*solid primary/g) || []).length; if (n > 3) fails.push(`${f}: Page Header 동작은 3개까지(${n}개)`); if (p > 1) fails.push(`${f}: Page Header 주 버튼은 하나`); }
+      });
+      each(/<div class="empty(?: compact)?"[^>]*>/g, (b) => {
+        if (!/<span class="ico"/.test(b)) return;
+        if (!/<b\b/.test(b)) fails.push(`${f}: Empty State 제목 없음`);
+        if ((b.match(/class="btn /g) || []).length > 2) fails.push(`${f}: Empty State 동작은 2개까지`);
+        if ((b.match(/class="btn [^"]*solid primary/g) || []).length > 1) fails.push(`${f}: Empty State 주 버튼은 하나`);
+      });
+      each(/<div class="form-row"[^>]*>/g, (b) => { const n = (b.match(/class="field[ "]/g) || []).length; if (n !== 2) fails.push(`${f}: .form-row 는 필드 2개(${n}개)`); });
+      for (const m of pv.matchAll(/<form\b[^>]*>([\s\S]*?)<\/form>/g)) {
+        const s = m[1].indexOf("data-form-summary");
+        if (s > -1) {
+          if (!/^\s*<div class="notice danger form-summary" role="alert" data-form-summary/.test(m[1])) fails.push(`${f}: 오류 요약은 폼 맨 위 · role=alert(Form › 오류 요약)`);
+          const c = /입력값 (\d+)개/.exec(m[1]); if (c && +c[1] < 3) fails.push(`${f}: 오류 요약은 3개 이상일 때(Form › 오류 요약)`);
+        }
+        const fa = m[1].lastIndexOf('<div class="form-actions"');
+        if (fa > -1 && m[1].slice(fa + blockAt(m.index + m[0].indexOf(">") + 1 + fa).length).trim()) fails.push(`${f}: .form-actions 는 폼 맨 아래(Form › 동작)`);
+      }
       /* 탐색 · 표시 원칙(2026-11-10) */
       for (const m of pv.matchAll(/<div class="tabs[^"]*"([^>]*)>([\s\S]*?)<\/div>/g)) {
         if (/role="tablist"/.test(m[1]) && !/aria-label="/.test(m[1])) fails.push(`${f}: tablist 이름 없음(Tab › 키보드)`);
@@ -275,8 +306,8 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 34) fails.push(`components.json 컴포넌트 ${j.components.length}개(34 기대)`);
-  if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 11) fails.push(`components.json 패턴 ${j.patterns.length}개(11 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 39) fails.push(`components.json 컴포넌트 ${j.components.length}개(39 기대)`);
+  if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 10) fails.push(`components.json 패턴 ${j.patterns.length}개(10 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }
 /* 색만으로 의미를 전달하지 않는다 — 심각도 다섯 색은 회색조로 분리할 수 없으므로(상태색 램프를 공유하는 한

@@ -409,3 +409,14 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **TagGroup** — 새 컴포넌트입니다(`max` · `moreLabel`). 사이트는 `.tag-group` · `.tag-more` 입니다.
 - **Tag** — 폭 160 에서 줄바꿈합니다. 전에는 `white-space:nowrap` 으로 끝없이 늘어났습니다.
 - **Tooltip** — 키보드 포커스로 뜬 툴팁은 스크롤해도 닫히지 않고 다시 재서 따라갑니다. 마우스로 뜬 것은 전처럼 닫힙니다.
+
+## Form · Empty State · Page Header · Avatar · Link (2026-11-10)
+
+- **PageHead** — 제목 태그의 기본값이 `h2` 에서 `h1` 로 바뀌었습니다. 화면에 다른 `h1` 이 있으면 `as="h2"` 를 주세요. `breadcrumb` 를 더했습니다. Breadcrumb 를 PageHead 바깥에 둔 코드는 그대로 동작하지만, 8px 간격을 직접 맞출 필요가 없어졌습니다.
+- **.page-head** — `display:flex` 에서 2열 grid 로 바뀌었습니다. `.page-head` 에 자식을 더 넣은 제품 코드는 확인하세요.
+- **ErrorSummary** — 새 컴포넌트입니다(`items` · `count` · `title`). 서버가 돌려준 오류를 폼 맨 위에 넣을 때 씁니다. 오류가 3개 미만이면 경고합니다.
+- **Form validate** — 자동 요약이 인라인 `margin-bottom` 대신 `.form-summary` 를 씁니다. CSS 를 함께 올려 주세요.
+- **Link** — 새 컴포넌트입니다(`standalone` · `external` · `as`). 사이트는 `.link` 입니다.
+- **.link** — 전에는 표 안에서만 스타일이 있었습니다. 표 밖의 `.link` 는 이제 제품 색 · 밑줄로 그려집니다. 그 줄 자체가 링크이면 `.standalone` 을 더하세요.
+- **Empty** — `compact` 의 제목 · 설명 크기가 인라인 스타일에서 CSS 로 옮겨 갔습니다. CSS 를 함께 올려 주세요.
+- **문서 주소** — 빈 화면이 `#/patterns/empty-state` 에서 `#/components/empty-state` 로 옮겨 갔습니다.

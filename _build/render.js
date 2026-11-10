@@ -269,7 +269,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
 <h2 id="why">왜 만드나</h2><p>제품마다 메인 컬러가 다르고 출시 시기도 다르지만, 사용자는 같은 회사의 제품을 씁니다. 리뉴얼이나 신규 제품을 시작할 때마다 무채색·서체·간격·컴포넌트를 새로 정하지 않도록, <b>메인 컬러를 제외한 나머지 기본 구성</b>을 이 시스템이 제공합니다.</p>
 <h2 id="how">어떻게 쓰나</h2><div class="kv"><dt>디자이너</dt><dd>Figma 라이브러리의 컴포넌트를 쓰고, 이 가이드의 예제·Props 로 변형과 상태를 확인합니다</dd><dt>개발자</dt><dd>React 제품은 <a href="#/resources/react"><code>@jiran/ds-react</code></a> 패키지를 설치하고 각 페이지 React 탭 코드를 그대로 씁니다. 그 외에는 HTML+CSS 탭 코드에 <code>assets/style.css</code> + <code>assets/ds.js</code>(동작)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--prod-40~60</code> 다섯 단계를 만들어 주입 → <code>--brand-*</code> 가 받고 <code>surface/foreground/line</code> 의 brand 계열이 전부 따라옵니다. 지정하지 않으면 Blue 램프 값이 그대로 쓰입니다</dd></div>
 <p>역할별 단계 안내는 <a href="#/home/getting-started">Getting started</a>를 참고하세요.</p>
-<h2 id="scope">범위</h2><div class="kv"><dt>제공하는 것</dt><dd>중립 램프, 타이포그래피, 간격·반경·엘리베이션, 아이콘 규칙, 컴포넌트 34개(Desktop, 코드 포함), 패턴 11개, 토큰</dd><dt>제품이 정하는 것</dt><dd>Accent Primary(제품 메인 컬러). 헤더의 Accent 선택으로 각 제품 컬러가 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd><code>#FF7F00</code>은 제품 UI 의 Accent 로 쓰지 않습니다. 이 시스템은 관리자 웹 제품 기준이며, 브랜드 디자인 시스템은 별도로 제작합니다</dd><dt>플랫폼</dt><dd>Desktop 웹 (관리 콘솔) 우선</dd></div>
+<h2 id="scope">범위</h2><div class="kv"><dt>제공하는 것</dt><dd>중립 램프, 타이포그래피, 간격·반경·엘리베이션, 아이콘 규칙, 컴포넌트 39개(Desktop, 코드 포함), 패턴 11개, 토큰</dd><dt>제품이 정하는 것</dt><dd>Accent Primary(제품 메인 컬러). 헤더의 Accent 선택으로 각 제품 컬러가 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd><code>#FF7F00</code>은 제품 UI 의 Accent 로 쓰지 않습니다. 이 시스템은 관리자 웹 제품 기준이며, 브랜드 디자인 시스템은 별도로 제작합니다</dd><dt>플랫폼</dt><dd>Desktop 웹 (관리 콘솔) 우선</dd></div>
 <h2 id="team">운영</h2><p>기획팀 디자인파트가 운영하며, Figma 라이브러리와 이 가이드를 함께 갱신합니다. 제안·기여 절차는 <a href="#/resources/contribution">Contribution</a>을 참고하세요.</p>`,
   "home/principles": () => `<h1>UX Principles</h1><p class="lead">보안 관리자는 하루 종일 콘솔을 봅니다. 화려함보다 정확함, 밀도, 예측 가능성이 우선입니다.</p>
 <h2 id="p1">1. 위험은 한눈에</h2><p>심각도·상태는 색과 형태(태그·점·밴드)로 동시에 인코딩합니다. 색만으로 의미를 전달하지 않습니다.</p>
@@ -347,7 +347,7 @@ ${codeBlock("tok-json", `{\n  "color": {\n    "atomic": { "blue": { "50": { "val
 <div><b>P3 탐색 · 표시 · W6 · 7</b><span>${chips(["Tab", "Breadcrumb", "Pagination", "Navigation", "Top Navigation", "Dropdown", "Tag"])}</span></div>
 <div><b>P3 컨테이너 · 피드백 · W7 · 8</b><span>${chips(["Accordion", "Card", "Popup", "Tooltip", "Notification", "Loading", "Indicator", "Divider"])}</span></div>
 <div><b>P3 데이터 · W8 · 5</b><span>${chips(["Data Table", "Table", "List", "Item Tile", "Data Visual"])}</span></div>
-<div><b>P4 Patterns · W9–10 · 11</b><span>Common UI: ${chips(["입력 폼", "약관 동의", "빈 화면", "유의사항"])}<br>Service: ${chips(["온보딩", "검색", "시스템 상태"])}<br>Security Console: ${chips(["대시보드", "로그 뷰어", "정책 설정", "심각도 표시"])}</span></div>
+<div><b>P4 Patterns · W9–10 · 10</b><span>Common UI: ${chips(["입력 폼", "약관 동의", "유의사항"])}<br>Service: ${chips(["온보딩", "검색", "시스템 상태"])}<br>Security Console: ${chips(["대시보드", "로그 뷰어", "정책 설정", "심각도 표시"])}</span></div>
 <div><b>P5 Resources · W10 · 6</b><span>${chips(["React Package", "Design Token", "Figma Library", "Token Download", "Changelog", "Contribution"])}</span></div>
 <div><b>P6 마무리 · W11 → 11.30</b><span>${chips(["빌드 검증 · 동작 테스트", "라이트 · 다크 시각 점검", "Figma 최종 동기화", "Changelog · v1.0", "공개 · 공유"])}</span></div>
 </div>

@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 66 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 782/782 · react 476+5 · tsc 0
+pages 70 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 802/802 · react 505+5 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -264,6 +264,16 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **Top Navigation** — 사용자 메뉴 예제, 아이콘 버튼 Tooltip. **verify 더함:** tablist 이름 · Tab 안 링크 금지 · 탭 라벨 1~2단어 · 접힌 내비의 title 금지 · 상단 메뉴와 Navigation 중복 · 오른쪽 순서 · 상단 아이콘 버튼 이름과 Tooltip · 심각도 색 어휘 · 표 칸 Tag 개수 · `+N` 은 버튼 · Count 0 과 99 초과(`.neutral` · 탭 건수 제외) · Steps 단계 수와 이름과 돌아가기 · 구분선 중복.
 - **측정에서 드러나 고친 것:** 사이트 방향키가 패널 글자 · `ds:tab` 을 건너뛰었다(클릭과 같은 길로). 사이트 탭에 roving tabindex 가 처음 그릴 때 없어 Tab 이 다음 탭으로 갔다. 표 안처럼 화면 기준으로 띄운 Tooltip 이 포커스가 일으킨 스크롤에 사라져 키보드로 볼 수 없었다 — 포커스로 뜬 것은 다시 재서 따라간다(사이트 · React, 마우스로 뜬 것은 전처럼 닫힘).
 - 음성 시험: 사이트 53건 · React 22건. 첫 회 사이트 3건은 지워도 같은 쓸모없는 선언이라 코드에서 지웠고(`.tab{flex:none}` · `.sidenav .tooltip-wrap{display:flex}` · `.tag-more{cursor:default}`), React 1건은 jsdom 이 CSS 를 안 읽어 이름 단정이 비어 있던 것을 고쳤다. 1건은 동작이 같은 변형이라 뺐다. 기준선에서 시험 하나가 실패한 채 돌아 React 를 다시 돌렸다. render.js 의 ds.js 크기 119KB → 121KB. Figma 미반영 133 → 139건.
+
+2026-11-10 추가 컴포넌트 승격 묶음(Form · Empty State · Page Header · Avatar · Link, 사람의 결정 넷) — pages 66 → 70 · 컴포넌트 34 → 39 · 패턴 11 → 10 · behave 782 → 802(`behave.promote.js` 19 · Tooltip 1) · react 476+5 → 505+5(`tests/promote.test.tsx` 17 · 예제 210 → 222 에 따른 구조 비교 12). contrast · advisory 수는 그대로(새 색 쌍 없음).
+- **빈 화면은 컴포넌트로 옮기고 입력 폼 패턴은 남긴다**(사람의 결정) — Empty State 는 내용이 컴포넌트와 같아 패턴 페이지를 지웠다. 입력 폼은 조합 화면 예로 남기고 Form 페이지는 구조 · Props · 규칙만. `compact` 의 인라인 스타일을 CSS 로.
+- **ErrorSummary 를 꺼냈다**(사람의 결정) — 서버 오류를 폼 맨 위에 직접 넣는 자리. 자동 요약(`form[data-validate]` · `<Form validate>`)도 같은 `.form-summary` 를 쓴다. 3개 미만이면 React 경고 · verify.
+- **Page Header 는 h1 기본 + Breadcrumb 첫 칸**(사람의 결정) — `.page-head` 를 2열 grid 로(Breadcrumb 는 윗줄 전체, 제목 위 8), React `as`(기본 h1 — MIGRATION) · `breadcrumb`. 동작 3개까지 · 주 버튼 하나 · 화면에 하나는 verify.
+- **Link 는 문장 안은 늘 밑줄**(사람의 결정) — 그 줄 자체가 링크인 자리(`.standalone` · 표의 `.link`)는 hover 때만. 전에는 표 안에서만 스타일이 있었다. Avatar 는 문서화만(이니셜, 계획대로).
+- **사람이 정하지 않은 기본값:** 문장 안 링크의 hover 는 밑줄 두께 2 · 새 창 링크는 아이콘 + 숨긴 '(새 창)' · Page Header 동작 3개 상한.
+- **verify 더함:** `.link` 는 a · href 필수 · 새 창의 rel · 아이콘 · 숨긴 문구, Avatar 1~2자, Page Header 제목 · 하나 · Breadcrumb 위치 · 동작 수, Empty State 제목 · 동작 수, `.form-row` 필드 2개, 오류 요약 맨 위 · 3개 이상, `.form-actions` 맨 아래.
+- **측정에서 드러나 고친 것:** 긴 제목이 낱말 가운데서 끊겼다(캡처에서 발견, `.page-head .title` 에 `word-break:keep-all`). **Tooltip 기존 결함** — 표 안 Tooltip 의 `.float` 표식이 떠난 뒤에도 남아, 그 사이 스크롤이 나면 `quiet` 가 붙어 다음에 와도 뜨지 않았다(탐색 묶음 단정이 12회에 1회 실패해 재 보니 원인). 켜져 있는 Tooltip 만 처리한다(`_dsTip`, React 는 원래 그렇다). 기존 'scrolling hides' 단정은 포인터가 이미 벗어난 Tooltip 에 이 결함 경로로 붙는 `quiet` 를 재고 있어, 트리거가 포인터 아래에 남을 만큼만 스크롤해 실제로 숨는지 재게 고쳤다. 고친 뒤 탐색 단정 20회 · 피드백 단정 8회 모두 통과.
+- 음성 시험: 사이트 42건 · React 26건에 Tooltip 2건. 첫 회 verify 1건을 못 잡아(`.form-actions` 맨 아래 정규식이 뒤따르는 내용까지 통과시켰다) 블록 경계로 고쳤고 다시 깨서 잡았다. 전체 게이트에서만 도는 15px 기본 글자 검사가 새 예제 4개를 잡아 `.t-body-2` 를 지정했다. Figma 미반영 139 → 144건.
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

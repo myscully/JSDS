@@ -530,24 +530,26 @@ UX 원칙 3 "되돌릴 수 있게" 를 규칙으로 구체화합니다.
 
 ## 5. 추가 제안 컴포넌트
 
+> **v1.0 범위(사람의 결정 2026-11-10).** 넣는 것: Form · Empty State · Page Header · File Upload · Avatar · Link · Code · Copy Field · Number Input · Time 입력. 넣지 않는 것: Inline Edit · Tree · 알림 센터(v1.0 완료 뒤 다시 묻습니다). 승격 묶음(Form · Empty State · Page Header · Avatar · Link)을 먼저, 새로 만드는 묶음(File Upload · Code · Copy Field · Number Input · Time 입력)을 다음에 진행합니다.
+
 ### 먼저 필요한 것
 
 | 후보 | 이유 | 형태 | 출처 |
 | --- | --- | --- | --- |
 | **Side Panel** (추가 결정, **만듦 2026-11-10** — 비모달 기본 · `modal` 옵션) | Tag · Table · List 의 Placement 와 Popup · Breadcrumb 설명이 패널 · 드로어를 전제하는데 없습니다. 로그 상세를 목록을 보며 확인하는 흐름에 필요합니다. | 비모달 기본, 모달 옵션. Popup 작업 때 함께 | [A] Panel. Drawer 는 [A] 에서 폐지 예정이라 모달 전용으로 만들지 않습니다 |
-| **Form** | 필드 묶음 · 필수 범례 · 오류 요약이 패턴 CSS 에만 있습니다. | Field 위의 `Form` · `FormSection` · `ErrorSummary` | [A] |
+| **Form** (**페이지로 올림 2026-11-10**, 사람의 결정: `ErrorSummary` 를 꺼냄 · 입력 폼 패턴은 남김) | 필드 묶음 · 필수 범례 · 오류 요약이 패턴 CSS 에만 있습니다. | Field 위의 `Form` · `FormSection` · `ErrorSummary` | [A] |
 | **Combobox** | 에이전트 그룹 · 사용자처럼 옵션이 많은 다중 선택. | **만듦(2026-11-09, 사람의 결정 — 단일 · 다중)** | [A] |
 | **File Upload** | 인증서 · 예외 목록 · 로그 가져오기. 드롭, 형식 · 용량 오류, 진행, 재시도. | 신규 | [K] |
-| **Empty State** | 패턴에 있고 React `Empty` 가 이미 있어 승격만 하면 됩니다. | 패턴 → 컴포넌트 | [A][W] |
-| **Page Header** | Breadcrumb 규칙이 "페이지 타이틀 위 8px" 를 정하는데 그 타이틀 영역의 정의가 없습니다. | 제목 · 설명 · 동작 · Breadcrumb 슬롯 | [A] |
+| **Empty State** (**페이지로 올림 2026-11-10**, 사람의 결정: 패턴에서 옮김) | 패턴에 있고 React `Empty` 가 이미 있어 승격만 하면 됩니다. | 패턴 → 컴포넌트 | [A][W] |
+| **Page Header** (**페이지로 올림 2026-11-10**, 사람의 결정: 제목 h1 기본 · Breadcrumb 는 첫 칸) | Breadcrumb 규칙이 "페이지 타이틀 위 8px" 를 정하는데 그 타이틀 영역의 정의가 없습니다. | 제목 · 설명 · 동작 · Breadcrumb 슬롯 | [A] |
 | **Steps** (**만듦 2026-11-10**, 사람의 결정) | Indicator 안의 진행 표시를 분리. 3~6단계, 완료 단계로 돌아가기. | Indicator 에서 분리 | [A] Progress tracker |
 
 ### 다음 순서
 
 | 후보 | 이유 | 출처 |
 | --- | --- | --- |
-| **Avatar** | React 에만 있고 페이지가 없습니다. 문서화만 필요합니다. | [A][W] |
-| **Link** | 본문 링크 규칙은 검사 중인데 페이지가 없습니다. 버튼과의 경계를 적을 자리입니다. | [A] |
+| **Avatar** (**문서화 2026-11-10**, 이니셜만) | React 에만 있고 페이지가 없습니다. 문서화만 필요합니다. | [A][W] |
+| **Link** (**만듦 2026-11-10**, 사람의 결정: 문장 안은 늘 밑줄 · 그 줄 자체가 링크면 hover 때만) | 본문 링크 규칙은 검사 중인데 페이지가 없습니다. 버튼과의 경계를 적을 자리입니다. | [A] |
 | **Code · Copy Field** | 해시 · IP · API 키 · 로그 원문. 보안 콘솔에서 자주 쓰입니다. 복사와 마스킹. | [A] Code |
 | **Number Input** | 임계치 · 세션 시간 등. 증감 버튼 · 단위 · 범위. | [T][W] |
 | **Inline Edit** | 목록에서 이름 · 메모 고치기. Enter 저장, Esc 취소. 폼 안에서는 금지. | [A] |
