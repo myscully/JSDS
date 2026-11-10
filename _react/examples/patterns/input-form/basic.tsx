@@ -1,4 +1,4 @@
-import { Button, Checkbox, Field, Form, FormActions, FormLegend, FormRow, FormSection, Radio, RadioGroup, Select, TextArea, TextField } from "@jiran/ds-react";
+import { Button, Checkbox, Field, Form, FormActions, FormLegend, FormRow, FormSection, Radio, RadioGroup, Select, TextArea, TextField, NumberInput } from "@jiran/ds-react";
 
 const GROUPS = [{ value: "all", label: "전체" }, { value: "sales", label: "영업팀" }, { value: "dev", label: "개발팀" }];
 
@@ -14,7 +14,7 @@ export default function Example() {
         <Field label="그룹">
           <Select options={GROUPS} defaultValue="all" label="그룹" />
         </Field>
-        <TextField id="prio" label="우선순위" type="number" defaultValue="10" min={1} max={100} />
+        <NumberInput id="prio" label="우선순위" defaultValue="10" min={1} max={100} help="1~100" />
       </FormRow>
       <RadioGroup legend="탐지 시 동작" name="fa" defaultValue="block">
         <Radio value="block">차단 후 알림</Radio>

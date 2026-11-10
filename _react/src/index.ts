@@ -40,6 +40,7 @@ export { Pagination, PaginationBar, CursorPagination, PAGE_SIZES, paginate, type
 export { SideNav, SideNavGroup, SideNavItem, type SideNavProps, type SideNavGroupProps, type SideNavItemProps } from "./components/navigation/SideNav";
 export { SkipLink, type SkipLinkProps } from "./components/navigation/SideNav";
 export { Link, type LinkProps } from "./components/link/Link";
+export { NumberInput, type NumberInputProps } from "./components/number-input/NumberInput";
 export { CodeBlock, InlineCode, type CodeBlockProps } from "./components/code/Code";
 export { CopyField, type CopyFieldProps } from "./components/copy-field/CopyField";
 export { FileUpload, type FileUploadProps, type UploadItem, type UploadAdded, type UploadStatus } from "./components/file-upload/FileUpload";

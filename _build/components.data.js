@@ -73,6 +73,9 @@ const cal = (o) => {
   <span class="sr-only" aria-live="polite"></span>
 </div>`;
 };
+/* Number Input 의 증감 버튼 */
+const numBtns = (name, downOff, upOff) => `<button type="button" class="num-btn down" tabindex="-1" aria-label="${name} 줄이기"${downOff ? " disabled" : ""}>${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="${name} 늘리기"${upOff ? " disabled" : ""}>${I("plus",16)}</button>`;
+
 /* Code · Copy Field 의 복사 버튼 — 이름에 값의 이름을 넣는다 */
 const copyBtn = (name, iconOnly) => `<button type="button" class="btn sm text assistive${iconOnly ? " icon-only" : ""} copy" aria-label="${name} 복사"><span class="ico">${I("copy",16)}</span>${iconOnly ? "" : '<span class="t">복사</span>'}</button>`;
 
@@ -366,7 +369,7 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Slider */
   "slider": {
-    status: "ready", react: ["Slider"], css: [".slider"], borrows: [".field", ".affix", ".help"],
+    status: "ready", react: ["Slider"], css: [".slider"], borrows: [".number-field", ".num-btn", ".field", ".affix", ".help"],
     desc: "범위 안의 값을 드래그로 고릅니다. 정확한 값이 중요하면 <a href=\"#/components/text-field\">Text Field</a> 를 씁니다.",
     principles: [
       ["언제 쓰는가", "대략적인 값일 때입니다. 정책 임계치처럼 숫자가 정확해야 하면 Text Field 를 먼저 씁니다"],
@@ -397,8 +400,8 @@ const COMPONENTS = {
           <input id="s2" type="range" min="30" max="180" step="30" value="90" style="--p:40%">
           <div class="ticks"><span>30</span><span>180</span></div>
         </div>` },
-      { id: "exact", title: "정확한 값", desc: "숫자가 정확해야 하면 Slider 대신 단위가 붙은 Text Field 를 씁니다.", html: `
-        <div class="field" style="width:280px"><label for="s4">세션 만료</label><div class="affix"><input id="s4" type="number" value="30" min="5" max="1440"><span>분</span></div><span class="help">5분부터 1440분까지 입력할 수 있습니다.</span></div>` },
+      { id: "exact", title: "정확한 값", desc: "숫자가 정확해야 하면 Slider 대신 Number Input 을 씁니다.", html: `
+        <div class="field number-field" style="width:280px"><label for="s4">세션 만료</label><div class="affix"><input id="s4" type="number" value="30" min="5" max="1440"><span>분</span>${numBtns("세션 만료")}</div><span class="help">5분부터 1440분까지 입력할 수 있습니다.</span></div>` },
       { id: "disabled", title: "Disabled", html: `
         <div class="slider">
           <div class="row"><label for="s3">대역폭 제한</label><span class="val">—</span></div>
@@ -2460,6 +2463,41 @@ sudo systemctl enable --now js-agent</code></pre>
     ],
     props: [[".copy-field", "class", "—", "React <code>CopyField</code>. <code>.field.mono</code> 와 함께"], ["input", "readonly · value", "—", "React <code>value</code> · <code>label</code>"], ["type=password", "attr", "text", "가리기. <code>.reveal</code> 필수. React <code>secret</code>"], [".inline", "boolean", "false", "표 · 키-값 목록. React <code>inline</code>"], ["ds:copy", "event", "—", "<code>detail.ok</code>. 값은 싣지 않습니다. React <code>onCopy(ok)</code>"], ["ds:reveal", "event", "—", "<code>detail.shown</code>. 감사 로그용. React <code>onReveal(shown)</code>"], ["data-labels", "JSON", "—", "복사 결과 문구. React <code>labels</code>"]],
     spec: [["Size", "Text Field 와 같음 · 높이 40"], ["Value", "고정폭 · 읽기 전용 면 background/neutral/secondary"], ["Actions", "보기 28 · 복사 Button sm · Inline 복사 24"], ["Placement", "폼의 값 자리 · 표 칸 · 키-값 목록"]],
+  },
+  /* ------------------------------------------------ Number Input (2026-11-10) */
+  "number-input": {
+    status: "ready", react: ["NumberInput"], css: [".number-field", ".num-btn"], borrows: [".field", ".affix", ".help", ".form", ".form-legend", ".form-actions", ".btn"],
+    desc: "임계치 · 세션 시간처럼 정확한 수를 입력합니다. 입력칸 안에 단위와 증감 버튼이 있고 위 · 아래 화살표로도 바꿉니다.",
+    principles: [
+      ["언제 쓰는가", "크기를 비교하거나 더하는 수에 씁니다. 사번 · 포트 목록 · 전화번호처럼 이름에 가까운 숫자는 Text Field 입니다. 대략의 값을 빠르게 정하는 자리는 Slider 입니다."],
+      ["범위 안내", "받을 수 있는 범위를 도움말에 미리 적습니다. 빌드가 검사합니다."],
+      ["범위 밖", "입력을 막거나 값을 몰래 고치지 않습니다. 입력을 받고 떠날 때 오류로 알립니다. 폼에서는 저장을 막습니다."],
+      ["단위", "입력칸 안쪽 뒤에 둡니다. 스크린 리더도 값과 함께 읽습니다."],
+      ["증감", "버튼과 위 · 아래 화살표는 <code>step</code> 만큼 움직이고 범위 끝에서 멈춥니다. 끝에 닿은 쪽 버튼은 꺼집니다."],
+      ["키보드", "증감 버튼은 Tab 에서 뺍니다. 화살표 키가 같은 일을 합니다."],
+      ["표준 입력", "<code>type=number</code> 입니다. 숫자 입력은 전부 이 컴포넌트를 씁니다. 빌드가 검사합니다."],
+    ],
+    thumb: `<div class="field number-field" style="width:180px;min-width:0"><div class="affix"><input type="number" value="30" aria-label="값"><span>분</span>${numBtns("값")}</div></div>`,
+    examples: [
+      { id: "default", title: "Default", desc: "단위 · 범위가 있는 기본 입력입니다. 범위 밖 값은 떠날 때 오류로 알립니다.", html: `
+        <div class="field number-field" style="width:280px"><label for="n1">세션 만료</label><div class="affix"><input id="n1" type="number" value="30" min="5" max="1440"><span>분</span>${numBtns("세션 만료")}</div><span class="help">5분부터 1440분까지 입력할 수 있습니다.</span></div>` },
+      { id: "step", title: "Step", desc: "step 만큼 움직입니다. 소수도 됩니다.", html: `
+        <div style="display:flex;flex-wrap:wrap;gap:16px">
+          <div class="field number-field" style="width:240px"><label for="n2">재시도 간격</label><div class="affix"><input id="n2" type="number" value="10" min="0" max="60" step="5"><span>초</span>${numBtns("재시도 간격")}</div><span class="help">0~60초, 5초 단위</span></div>
+          <div class="field number-field" style="width:240px"><label for="n3">CPU 임계치</label><div class="affix"><input id="n3" type="number" value="80" min="0" max="100" step="0.5"><span>%</span>${numBtns("CPU 임계치")}</div><span class="help">0~100%, 0.5 단위</span></div>
+        </div>` },
+      { id: "error", title: "Error", desc: "범위를 벗어난 값을 그대로 두고 알립니다.", html: `
+        <div class="field number-field error" style="width:280px"><label for="n4">보관 기간</label><div class="affix"><input id="n4" type="number" value="500" min="1" max="365" aria-invalid="true" aria-describedby="n4h"><span>일</span>${numBtns("보관 기간", false, true)}</div><span class="help" id="n4h">값이 너무 큽니다. 365 이하 입력하세요.</span></div>` },
+      { id: "form", title: "In Form", desc: "빈 값 · 범위 밖 값은 저장할 때 막습니다.", html: `
+        <form class="form" data-validate novalidate style="width:360px"><p class="form-legend"><em>*</em> 필수 항목</p>
+          <div class="field number-field"><label for="n5">동시 접속 수 <em>*</em></label><div class="affix"><input id="n5" type="number" required min="1" max="500"><span>명</span>${numBtns("동시 접속 수")}</div><span class="help" aria-live="polite">1~500명</span></div>
+          <div class="form-actions"><button type="submit" class="btn md solid primary">저장</button></div>
+        </form>` },
+      { id: "disabled", title: "Disabled", desc: "입력과 버튼이 함께 꺼집니다.", html: `
+        <div class="field number-field" style="width:280px"><label for="n6">세션 만료</label><div class="affix"><input id="n6" type="number" value="30" min="5" max="1440" disabled><span>분</span>${numBtns("세션 만료", true, true)}</div><span class="help">관리자만 바꿀 수 있습니다</span></div>` },
+    ],
+    props: [[".number-field", "class", "—", ".field 와 함께. React <code>NumberInput</code>"], ["min · max · step", "attr", "—", "범위와 간격. <code>step=any</code> 는 쓰지 않습니다"], ["단위", "span", "—", "입력 뒤 <code>span</code>. React <code>unit</code>"], [".num-btn.down · .up", "button", "—", "tabindex=-1, 이름에 값의 이름. React 는 자동(문구는 <code>labels</code>)"], ["input · change", "event", "—", "버튼 · 화살표로 바꿔도 표준 이벤트가 납니다. React <code>onChange</code>"], ["data-messages", "JSON", "—", "오류 문구. React <code>messages</code>"]],
+    spec: [["Size", "Text Field 와 같음 · sm 32 · md 40 · lg 48"], ["Stepper", "28 × 28 · 아이콘 16 · 사이 2"], ["Unit", "12 · foreground/neutral/tertiary"], ["Placement", "폼의 값 자리 · 정책 임계치"]],
   },
 };
 

@@ -28,7 +28,7 @@ const TREND = {"labels":["10-21","10-22","10-23","10-24","10-25","10-26","10-27"
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
-    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["text-field", "select", "checkbox", "radio-button", "button", "notification"], css: [".form", ".form-legend", ".form-summary"], borrows: [".t-label-1"],
+    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["text-field", "number-input", "select", "checkbox", "radio-button", "button", "notification"], css: [".form", ".form-legend", ".form-summary"], borrows: [".t-label-1"],
     desc: "정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.",
     thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
     principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "<code>data-validate</code> — 포커스가 떠날 때 필드 단위로, 제출하면 첫 오류로 이동, 오류 3개 이상이면 위에 요약. 고치면 바로 지웁니다"], ["필수", "필수 항목이 있으면 폼 위에 <code>.form-legend</code>"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
@@ -42,7 +42,7 @@ const PATTERNS = {
           <div class="form-section">적용 대상</div>
           <div class="form-row">
             <div class="field"><label id="pgroup-l">그룹</label><div class="dropdown"><button type="button" id="pgroup" class="trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pgroup-l pgroup">전체</button></div></div>
-            <div class="field"><label for="prio">우선순위</label><input id="prio" type="number" value="10" min="1" max="100"></div>
+            <div class="field number-field"><label for="prio">우선순위</label><div class="affix"><input id="prio" type="number" value="10" min="1" max="100"><button type="button" class="num-btn down" tabindex="-1" aria-label="우선순위 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="우선순위 늘리기">${I("plus",16)}</button></div><span class="help">1~100</span></div>
           </div>
           <fieldset class="radio-group"><legend class="t-label-1">탐지 시 동작</legend>
             <label class="radio"><input type="radio" name="fa" checked><span>차단 후 알림</span></label>
@@ -57,7 +57,7 @@ const PATTERNS = {
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field error"><label for="e1">정책 이름 <em>*</em></label><input id="e1" aria-invalid="true" aria-describedby="e1h"><span class="help" id="e1h">정책 이름을 입력하세요</span></div>
           <div class="field error"><label for="e2">허용 IP</label><input id="e2" value="10.0.0" aria-invalid="true" aria-describedby="e2h"><span class="help" id="e2h">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div>
-          <div class="field error"><label for="e3">보관 기간</label><input id="e3" type="number" value="500" aria-invalid="true" aria-describedby="e3h"><span class="help" id="e3h">값이 너무 큽니다. 365 이하 입력하세요.</span></div>
+          <div class="field number-field error"><label for="e3">보관 기간</label><div class="affix"><input id="e3" type="number" value="500" min="1" max="365" aria-invalid="true" aria-describedby="e3h"><span>일</span><button type="button" class="num-btn down" tabindex="-1" aria-label="보관 기간 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="보관 기간 늘리기" disabled>${I("plus",16)}</button></div><span class="help" id="e3h">값이 너무 큽니다. 365 이하 입력하세요.</span></div>
           <div class="form-actions"><button type="button" class="btn md outline negative left">삭제</button><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
       { id: "validate", title: "제출 검증", desc: "폼에 data-validate 를 달면 포커스가 떠날 때 필드 단위로 검사합니다. 빈 채로 정책 저장을 누르면 막고, 첫 오류로 이동하며, 오류가 3개 이상이면 위에 요약합니다. 고치면 문구를 바로 지웁니다.", html: `
@@ -65,7 +65,7 @@ const PATTERNS = {
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field"><label for="v1">정책 이름 <em>*</em></label><input id="v1" required minlength="2" data-maxlength="40"><span class="help" aria-live="polite">2~40자</span></div>
           <div class="field mono"><label for="v2">허용 IP <em>*</em></label><input id="v2" required pattern="^([0-9]{1,3}[.]){3}[0-9]{1,3}$" data-messages='{"pattern":"올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12"}'><span class="help" aria-live="polite">IPv4 형식</span></div>
-          <div class="field"><label for="v3">보관 기간 <em>*</em></label><div class="affix"><input id="v3" type="number" required min="1" max="365"><span>일</span></div><span class="help" aria-live="polite">1~365일</span></div>
+          <div class="field number-field"><label for="v3">보관 기간 <em>*</em></label><div class="affix"><input id="v3" type="number" required min="1" max="365"><span>일</span><button type="button" class="num-btn down" tabindex="-1" aria-label="보관 기간 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="보관 기간 늘리기">${I("plus",16)}</button></div><span class="help" aria-live="polite">1~365일</span></div>
           <div class="field"><label for="v4">알림 이메일 <em>*</em></label><input id="v4" type="email" required><span class="help" aria-live="polite"></span></div>
           <div class="form-actions"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },

@@ -1519,6 +1519,14 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .form .form-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:16px;border-top:1px solid var(--line-neutral-secondary)}
 .form .form-actions .left{margin-right:auto}
 .form .field{min-width:0}
+/* Number Input — 브라우저의 숫자 입력 위에 증감 버튼과 단위. 범위 검증은 표준 제약 그대로 */
+.number-field input{appearance:textfield;font-variant-numeric:tabular-nums}
+.number-field input::-webkit-outer-spin-button,.number-field input::-webkit-inner-spin-button{appearance:none;margin:0}
+.field .affix .num-btn{display:grid;place-items:center;flex:none;width:28px;height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--foreground-neutral-secondary);cursor:pointer}
+.field .affix .num-btn.down,.field .affix .num-btn.up{margin-right:-6px}   /* 버튼 사이 2 · 끝은 .reveal 처럼 패딩 안으로 */
+.field .affix .num-btn:hover:not(:disabled){background:var(--surface-neutral-secondary)}
+.field .affix .num-btn:active:not(:disabled){background:var(--surface-neutral-strong)}
+.field .affix .num-btn:disabled{color:var(--foreground-disable-primary);cursor:default}
 /* Code · Copy Field — 새 색 쌍 없이 기존 토큰만. 복사 결과는 버튼 자리에서 2초 */
 .code-inline{font-family:var(--font-mono);font-size:.9em;font-variant-numeric:tabular-nums;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);padding:1px 6px;border-radius:4px;overflow-wrap:anywhere}
 .code-view{display:flex;flex-direction:column;width:100%;min-width:0;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);overflow:hidden}

@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 73 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 923/923 · react 556+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 974/974 · react 582+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -291,6 +291,14 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함:** Code 의 제목 · `pre` tabindex 와 제목과 같은 이름 · 구문 강조 금지 · 복사 버튼 이름, Copy Field 의 readonly · 버튼 이름에 값의 이름 · 가린 값의 보기 버튼 · 인라인 복사 이름.
 - **측정에서 드러나 고친 것(캡처):** 사이트 셸의 `.copied{outline:2px … !important}` 가 복사한 버튼에 마우스로도 외곽선을 입혔다 — 상태 클래스를 `.copy-done` · `.copy-failed` 로. `.field .affix span`(접두 · 접미 글자용)이 복사 글자를 12px · tertiary 로 흐렸다. 임시 textarea 에 `select()` 만 해서는 포커스가 안 옮겨 와 `focus` 를 더했다.
 - 음성 시험: 사이트 42건 · React 28건. 첫 회 3건을 못 잡아(긴 줄이 그리드 열을 넓히는 경로 · 2초 뒤 아이콘 복귀 · 알림 영역이 앞 테스트에서 남아 있던 것) 단정을 고쳐 다시 깨서 잡았다. 실제 클립보드는 쓰지 않고 `navigator.clipboard` · `execCommand` 를 바꿔 쟀다. render.js 의 ds.js 크기 134KB → 138KB. Figma 미반영 145 → 147건(Spec 카드 둘 없음).
+
+2026-11-10 Number Input 신규(사람의 결정) — pages 73 → 74 · 컴포넌트 42 → 43 · behave 923 → 974(`behave.number.js` 51) · react 556+6 → 582+6(`tests/number-input.test.tsx` 21 · 예제 235 → 240 에 따른 구조 비교 5). contrast · advisory 수는 그대로(새 색 쌍 없음).
+- **입력칸 안에 증감 버튼과 단위, 위 · 아래 화살표로도 바꿈, 범위 밖 값은 받고 오류로 알림**(사람의 결정) — 사이트 `.field.number-field` + `.num-btn`, React `NumberInput`. 네이티브 `type=number` 위에 만들어 `stepUp` · `stepDown` · 표준 제약 · 기존 검증 문구를 그대로 쓴다. 버튼 · 화살표로 바꿔도 `input` · `change` 가 난다.
+- **기존 숫자 입력을 옮겼다** — 입력 폼 패턴 셋(우선순위 · 보관 기간 둘) · Slider '정확한 값' 예제(사이트 · React). 안 옮기면 브라우저 스피너가 그대로 보인다. 예제의 `type=number` 는 `.number-field` 안에만 있어야 한다(verify).
+- **사람이 정하지 않은 기본값:** 누르고 있어도 한 칸씩(반복 없음), 천 단위 구분 없음, 'e' 같은 입력은 막지 않고 오류로 알림, 증감 버튼은 Tab 에서 뺌, 오류는 포커스가 떠날 때, 폼 밖의 빈 값은 조용함(필수 여부는 폼이 잰다).
+- **verify 더함:** 숫자 입력은 `.number-field` · 범위가 있으면 도움말 · 버튼의 tabindex=-1 과 이름에 값의 이름 · `step=any` 금지.
+- 정적 예제에도 끝에 닿은 버튼의 `disabled` 를 적는다(구조 비교가 잡음 — ds.js 가 켜기 전 · 복사한 HTML 이 같은 모양이게). `BUTTON_HOSTS` 에 `.number-field` 를 더했다.
+- 음성 시험: 사이트 32건 · React 34건. 첫 회 8건을 못 잡았다 — 쓸모없는 코드 3건은 지웠고(아이콘 크기 규칙 · 폼 안을 가르는 조건 둘 — 폼 흐름과 결과가 같다), 5건은 단정을 고쳐 다시 깨서 잡았다(호버 때 보이는 브라우저 스피너는 계산값으로 안 보여 픽셀로 잰다 · 좁은 칸의 버튼 폭 · 폼 밖 빈 필수 값 · 제품이 바꾼 값 따라가기 · 폼 안 지역 오류). render.js 의 ds.js 크기 138KB → 140KB. Figma 미반영 147 → 148건(Number Input Spec 카드 없음).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

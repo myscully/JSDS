@@ -25,6 +25,7 @@
 
   /* ---------- 초기화 ---------- */
   function init(root) {
+    $$(".number-field input", root || doc).forEach(numSync);
     dsLive();   // 알림 영역은 미리 — 복사하는 순간 새로 넣으면 대개 읽히지 않는다
     root = root || doc;
     $$("input.mixed", root).forEach(function (i) { i.indeterminate = true; });
@@ -1062,6 +1063,7 @@
       if (el.classList.contains("sub")) { var par = el.previousElementSibling; while (par && par.matches("a.sub")) par = par.previousElementSibling; if (par && par.tagName === "A") { par.classList.add("has-on"); if (nav.classList.contains("collapsed")) par.setAttribute("aria-current", "true"); } }
       return; }
     // Text Field 비밀번호 표시 — 포커스는 버튼에 남는다
+    if ((el = closest(t, ".number-field .num-btn"))) { numStep(el); return; }
     if ((el = closest(t, ".code-view .copy, .copy-field .copy"))) { copyRun(el); return; }
     if ((el = closest(t, ".field .reveal"))) { var pw = $("input", closest(el, ".affix")); if (pw) { var showPw = pw.type === "password"; pw.type = showPw ? "text" : "password"; el.setAttribute("aria-pressed", String(showPw)); var cfHost = closest(el, ".copy-field"); if (cfHost) fire(cfHost, "ds:reveal", { shown: showPw }); } return; }
     // Search 지우기
@@ -1257,6 +1259,27 @@
   });
 
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
+  /* ---------- Number Input — .number-field ----------
+     브라우저의 stepUp · stepDown · 표준 제약을 쓴다. 범위 밖 값은 고치지 않고 받아서 오류로 알린다(사람의 결정 2026-11-10).
+     버튼은 Tab 에서 뺀다 — 키보드는 위 · 아래 화살표가 같은 일을 한다 */
+  function numSync(inp) {
+    var f = closest(inp, ".number-field"); if (!f) return;
+    var dn = $(".num-btn.down", f), up = $(".num-btn.up", f), unit = $(".affix > span", f), v = inp.valueAsNumber, off = inp.disabled || inp.readOnly;
+    var lo = inp.min === "" ? -Infinity : Number(inp.min), hi = inp.max === "" ? Infinity : Number(inp.max);
+    if (dn) dn.disabled = off || v <= lo;
+    if (up) up.disabled = off || v >= hi;
+    if (unit && inp.value !== "") inp.setAttribute("aria-valuetext", inp.value + unit.textContent); else inp.removeAttribute("aria-valuetext");
+  }
+  function numStep(btn) {
+    var inp = $("input", closest(btn, ".affix"));
+    if (btn.classList.contains("up")) inp.stepUp(); else inp.stepDown();
+    inp.focus({ preventScroll: true });   // 끝에 닿아 버튼이 꺼져도 포커스를 잃지 않게
+    inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  /* 폼 밖에서도 범위를 알린다 — 빈 값은 조용하다(필수 여부는 폼이 잰다) */
+  doc.addEventListener("input", function (e) { var t = e.target; if (!t.matches || !t.matches(".number-field input")) return; numSync(t); if (closest(t, ".field").classList.contains("error")) vShow(t, vMessage(t)); });
+  doc.addEventListener("focusout", function (e) { var t = e.target; if (t.matches && t.matches(".number-field input") && (t.value || t.validity.badInput)) vShow(t, vMessage(t)); });
+
   /* ---------- Code · Copy Field — 복사 ----------
      결과는 버튼 자리에서 2초(Toast 를 쓰지 않음). 값은 이벤트에 싣지 않는다 — 민감한 값이 로그로 새지 않게.
      임시 textarea 는 버튼 옆에 둔다 — body 에 두면 바깥을 감지하는 팝오버가 닫힌다 */

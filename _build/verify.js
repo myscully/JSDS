@@ -162,6 +162,18 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
       if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
+      /* Number Input 원칙(2026-11-10) */
+      {
+        const divBlock = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };
+        for (const m of pv.matchAll(/<input\b[^>]*type="number"[^>]*>/g)) { const before = pv.slice(0, m.index), at = before.lastIndexOf('<div class="field'); if (at < 0 || !/number-field/.test(pv.slice(at, pv.indexOf(">", at)))) fails.push(`${f}: 숫자 입력은 Number Input(.number-field) ${m[0].slice(0, 60)}(Number Input › 표준 입력)`); }
+        for (const m of pv.matchAll(/<div class="field[^"]*number-field[^"]*"[^>]*>/g)) {
+          const b = divBlock(m.index), name = ((/<label\b[^>]*>([^<*]+)/.exec(b) || [])[1] || "").trim();
+          if (!name) continue;   // 썸네일
+          if (/step="any"/.test(b)) fails.push(`${f}: Number Input 에 step=any — 증감 버튼이 움직이지 못합니다`);
+          if (/min="/.test(b) && !/<span class="help"[^>]*>[^<]+<\/span>/.test(b)) fails.push(`${f}: Number Input 범위를 도움말에(Number Input › 범위 안내)`);
+          for (const [cls, word] of [["down", "줄이기"], ["up", "늘리기"]]) if (!b.includes(`class="num-btn ${cls}" tabindex="-1" aria-label="${name} ${word}"`)) fails.push(`${f}: Number Input ${word} 버튼 — tabindex=-1 · 이름에 값의 이름(Number Input › 키보드)`);
+        }
+      }
       /* Code · Copy Field 원칙(2026-11-10) */
       {
         const divBlock = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };
@@ -348,7 +360,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 42) fails.push(`components.json 컴포넌트 ${j.components.length}개(42 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 43) fails.push(`components.json 컴포넌트 ${j.components.length}개(43 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 10) fails.push(`components.json 패턴 ${j.patterns.length}개(10 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }

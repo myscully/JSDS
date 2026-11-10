@@ -9,7 +9,7 @@ const type = (el: HTMLInputElement, value: string) => fireEvent.input(el, { targ
 const help = (el: HTMLInputElement) => el.closest(".field")!.querySelector(":scope > .help")!;
 const save = () => fireEvent.click(screen.getByRole("button", { name: "정책 저장" }));
 const fillRest = () => {
-  type(input("보관 기간"), "90");
+  type(screen.getByRole("spinbutton", { name: /보관 기간/ }) as HTMLInputElement, "90");   // Number Input 의 증감 버튼 이름에도 값의 이름이 있다
   type(input("알림 이메일"), "admin@example.com");
 };
 
