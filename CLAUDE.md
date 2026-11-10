@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 974/974 · react 582+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1068/1068 · react 623+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -299,6 +299,16 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함:** 숫자 입력은 `.number-field` · 범위가 있으면 도움말 · 버튼의 tabindex=-1 과 이름에 값의 이름 · `step=any` 금지.
 - 정적 예제에도 끝에 닿은 버튼의 `disabled` 를 적는다(구조 비교가 잡음 — ds.js 가 켜기 전 · 복사한 HTML 이 같은 모양이게). `BUTTON_HOSTS` 에 `.number-field` 를 더했다.
 - 음성 시험: 사이트 32건 · React 34건. 첫 회 8건을 못 잡았다 — 쓸모없는 코드 3건은 지웠고(아이콘 크기 규칙 · 폼 안을 가르는 조건 둘 — 폼 흐름과 결과가 같다), 5건은 단정을 고쳐 다시 깨서 잡았다(호버 때 보이는 브라우저 스피너는 계산값으로 안 보여 픽셀로 잰다 · 좁은 칸의 버튼 폭 · 폼 밖 빈 필수 값 · 제품이 바꾼 값 따라가기 · 폼 안 지역 오류). render.js 의 ds.js 크기 138KB → 140KB. Figma 미반영 147 → 148건(Number Input Spec 카드 없음).
+
+2026-11-10 Date Picker 시각 옵션(Time 입력, 사람의 결정 넷) — behave 974 → 1068(`behave.dptime.js` 94) · react 582+6 → 623+6(`tests/date-time.test.tsx` 39 · 예제 240 → 242 에 따른 구조 비교 2). contrast · advisory · pages 수는 그대로(새 색 쌍 없음 · 별도 컴포넌트가 아니다).
+- **값 하나 `YYYY. MM. DD HH:mm`, 24시간제, 초는 옵션**(사람의 결정) — 사이트 `.datepicker[data-time]` · `data-time="seconds"`, React `time` · `time="seconds"`. 일 단위만(React 는 다른 단위에서 경고하고 무시). 달력은 일 단위로 일하고 글자 · 값만 시각까지 간다(사이트 `tu(st)` · React `TextUnit`).
+- **달력 아래 입력칸 · 단일과 기간 둘 다 · 시각을 치지 않으면 덜 입력됨 · 처음 시각 00:00 · 기간 끝 23:59**(사람의 결정 넷). 이미 시각이 있으면 날짜만 바꾸고 시각은 남긴다. 프리셋과 초기화는 처음 시각으로.
+- **문구** — 없는 시각은 `invalidTime`(주어 `timeSubject` · `startTimeSubject` · `endTimeSubject`), 같은 날의 뒤집힌 순서는 `orderTime`, 다른 날이면 기존 `order`. `data-labels` · `labels` 에 time · startTime · endTime.
+- **사람이 정하지 않은 기본값:** 시각 칸의 잘못된 글자는 적용할 때 필드 오류로 알림(달력을 닫는다), 시 · 분 · 초 ↑↓ 는 올림 없이 돎, 시각을 쓰면 적용 버튼은 `footer` 와 무관하게 늘 있음, `data-max` 에 날짜만 적으면 그 하루 끝까지(React `max` 가 정확히 0시인 Date 도 같다), `data-max` 에 `now` 없음.
+- **로그 뷰어 패턴에 조회 구간을 더했다**(사람의 요청) — 이 패턴에는 원래 기간 필터가 없었다. `data-time` 기간 · `data-max="today"` · 프리셋 7 · 30 · 처음 값 최근 7일(사이트 · React). 한 줄에 들어가게 검색창 최소 폭을 360 → 320 으로 줄였다(검색 패턴과 같음). 검색 패턴의 기간은 날짜 단위 그대로다. React `max` 는 오늘 0시로 둔다 — 지금 시각이면 오늘 23:59 가 범위 밖이 된다.
+- **verify 더함:** `data-time` 값은 없거나 seconds · 일 단위에만 · placeholder 는 형식 그대로. **구조 비교(`skeleton.ts`)에 `data-time` 을 더했다** — React 예제에서 `time` 만 빠져도 통과하던 것을 음성 시험이 찾았다.
+- **측정에서 드러나 고친 것(캡처 · 계산값):** id 없는 입력(툴바의 aria-label 필드)이 여럿이면 시각 칸 id 가 겹쳤다(`dpUid`). 달력이 피커 `.field` 안에 있어 바깥의 Large · 오류(빨강)가 시각 칸으로 내려온다 — `.calendar .cal-time .field input` 으로 되돌렸다. 기간 필드 최소 폭 300 에서 값이 잘렸다(Large 자리표시 343 — 410, 초까지 450).
+- 음성 시험: 사이트 75건 · React 55건. 첫 회 18건을 못 잡아(타이핑으로는 만들 수 없는 60분 · 조각 수 · 빈 시각의 끝쪽 채우기 · 열린 채 필드를 고칠 때 시각 칸 · 시각 칸이 마지막 칸일 때의 Tab · 연속 ↑ 의 커서 · 초 칸 형식 · 월 단위 무시 · 칸 나란히 · Enter 의 폼 제출 등) 단정을 더했고 다시 깨서 모두 잡았다. render.js 의 ds.js 크기 140KB → 144KB. Figma 미반영 148 → 149건(Date Picker Spec 의 Time 행).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

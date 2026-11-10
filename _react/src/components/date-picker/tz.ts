@@ -24,11 +24,18 @@ export function calendarDateOf(at: Date, tz: string | undefined): Date {
   const d = dayjs(at).tz(tz);
   return new Date(d.year(), d.month(), d.date());
 }
-/** 달력 날짜를 시간대의 그 날 0시(순간)로 */
-export function instantOf(day: Date, tz: string | undefined): Date {
-  if (!tz) return new Date(day.getFullYear(), day.getMonth(), day.getDate());
+/** 그 순간이 시간대에서 몇 시인지 — 그 벽시계를 로컬 Date 로(시각 옵션) */
+export function clockDateOf(at: Date, tz: string | undefined): Date {
+  if (!tz) return new Date(at.getTime());
+  const d = dayjs(at).tz(tz);
+  return new Date(d.year(), d.month(), d.date(), d.hour(), d.minute(), d.second());
+}
+/** 달력 날짜를 시간대의 그 날 0시(순간)로. withTime 이면 그 벽시계의 순간으로 */
+export function instantOf(day: Date, tz: string | undefined, withTime = false): Date {
+  if (!tz) return withTime ? new Date(day.getTime()) : new Date(day.getFullYear(), day.getMonth(), day.getDate());
   const p = (n: number) => String(n).padStart(2, "0");
-  return dayjs.tz(`${day.getFullYear()}-${p(day.getMonth() + 1)}-${p(day.getDate())}`, tz).toDate();
+  const ymd = `${day.getFullYear()}-${p(day.getMonth() + 1)}-${p(day.getDate())}`;
+  return dayjs.tz(withTime ? `${ymd} ${p(day.getHours())}:${p(day.getMinutes())}:${p(day.getSeconds())}` : ymd, tz).toDate();
 }
 /** 시간대의 오늘 — 달력 날짜 */
 export const todayIn = (tz: string | undefined, now: Date = new Date()) => calendarDateOf(now, tz);

@@ -169,10 +169,11 @@
            · data-timezone(기본 환경 시간대 — IANA 이름 · UTC 는 dayjs + utc · timezone 플러그인이 실렸을 때) · data-min/max(YYYY-MM-DD | today)
            · data-footer("today reset cancel apply" | none) · data-presets("7 30") · data-today(정적 데모의 오늘)
            · data-labels(JSON — Intl 이 만들지 못하는 문구를 바꾼다. 키는 React labels 와 같고 recent 는 "최근 {n}일")
-           · data-messages(JSON — 오류 문구. 키 · 자리표시는 React messages 와 같다) */
+           · data-messages(JSON — 오류 문구. 키 · 자리표시는 React messages 와 같다)
+           · data-time(시각까지 — 일 단위 피커만. 값 'YYYY-MM-DD HH:mm', 필드 'YYYY. MM. DD HH:mm', 24시간제. data-time="seconds" 면 초까지) */
   var FOOT = { today: "text", reset: "text", cancel: "outline assistive", apply: "solid primary" };
   /* 문구 — 사람의 결정(2026-11-09): 다른 언어로 쓸 때 data-labels 로 바꾼다. '오늘' 의 기본은 Intl.RelativeTimeFormat */
-  var LABELS = { dialog: "날짜 선택", reset: "초기화", cancel: "취소", apply: "적용", prevMonth: "이전 달", nextMonth: "다음 달", prevYear: "이전 연도", nextYear: "다음 연도", prevYears: "이전 12년", nextYears: "다음 12년", chooseYear: "연도 선택", yearGrid: "연도 목록", backToDays: "날짜로 돌아가기", backToMonths: "월 선택으로", recent: "최근 {n}일" };
+  var LABELS = { dialog: "날짜 선택", reset: "초기화", cancel: "취소", apply: "적용", prevMonth: "이전 달", nextMonth: "다음 달", prevYear: "이전 연도", nextYear: "다음 연도", prevYears: "이전 12년", nextYears: "다음 12년", chooseYear: "연도 선택", yearGrid: "연도 목록", backToDays: "날짜로 돌아가기", backToMonths: "월 선택으로", recent: "최근 {n}일", time: "시각", startTime: "시작 시각", endTime: "종료 시각" };
   var labelWarned = {};
   function dpLabels(host) {
     var raw = host.getAttribute("data-labels"), o = {}, out = {}, k;
@@ -185,7 +186,7 @@
   /* 오류 문구 — Writing 규칙(무엇이 일어났는지 + 어떻게 하면 되는지), 범위는 '부터 · 까지'(그 날짜를 포함). 사람의 결정(2026-11-09).
      자리표시 {subject} {example} {min} {max} — 어순이 다른 언어도 쓸 수 있게. 다른 언어 기본값은 두지 않고 data-messages 로 넣는다.
      {subject} 는 기간에서 한쪽만 틀렸으면 그 쪽(startSubject · endSubject), 아니면 subject. 자리표시가 없는 문자열은 옛 조합(앞말 + 예시 · 날짜 + 꼬리말) */
-  var MSG = { incomplete: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.", invalid: "{subject} 달력에 없습니다. 달력에서 고르거나 {example} 처럼 입력하세요.", min: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.", max: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.", order: "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.", subject: "날짜가", startSubject: "시작일이", endSubject: "종료일이" };
+  var MSG = { incomplete: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.", invalid: "{subject} 달력에 없습니다. 달력에서 고르거나 {example} 처럼 입력하세요.", min: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.", max: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.", order: "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.", subject: "날짜가", startSubject: "시작일이", endSubject: "종료일이", invalidTime: "{subject} 잘못됐습니다. {example} 처럼 24시간제로 입력하세요.", orderTime: "종료 시각이 시작 시각보다 빠릅니다. 시작과 같거나 늦은 시각으로 바꾸세요.", timeSubject: "시각이", startTimeSubject: "시작 시각이", endTimeSubject: "종료 시각이" };
   function dpMessages(host) {
     var raw = host.getAttribute("data-messages"), o = {}, out = {}, k;
     if (raw) try { o = JSON.parse(raw) || {}; } catch (e) { if (!labelWarned[raw]) { labelWarned[raw] = 1; if (window.console) console.warn("[ds.js] data-messages 가 JSON 이 아닙니다 — 기본 문구를 씁니다: " + raw); } }
@@ -195,16 +196,19 @@
   }
   function say(M, key, x) {
     var t = M[key];
-    if (t.indexOf("{") < 0) return key === "order" ? t : key === "min" || key === "max" ? x[key] + t : t + x.example;
+    if (t.indexOf("{") < 0) return key.indexOf("order") === 0 ? t : key === "min" || key === "max" ? x[key] + t : t + x.example;
     return t.replace(/\{(\w+)\}/g, function (m, k) { return x[k] != null ? x[k] : m; });
   }
-  var EXAMPLE = { day: "2026. 09. 07", month: "2026. 09", year: "2026" }, DIGITS = { day: 8, month: 6, year: 4 };
+  var EXAMPLE = { second: "2026. 09. 07 14:30:05", minute: "2026. 09. 07 14:30", day: "2026. 09. 07", month: "2026. 09", year: "2026" }, DIGITS = { second: 14, minute: 12, day: 8, month: 6, year: 4 };
   var ymKey = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1); };
   var firstOf = function (d) { return new Date(d.getFullYear(), d.getMonth(), 1); };
   var addDays = function (d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); };
   /* 단위의 키(기계 형식)와 필드 표기 — 표기는 locale 과 무관하게 연 · 월 · 일 순서(사람의 결정 2026-11-09) */
-  var keyOf = function (d, unit) { return unit === "year" ? String(d.getFullYear()) : unit === "month" ? ymKey(d) : fmt(d); };
-  var showOf = function (d, unit) { return unit === "year" ? String(d.getFullYear()) : d.getFullYear() + ". " + pad(d.getMonth() + 1) + (unit === "month" ? "" : ". " + pad(d.getDate())); };
+  var clockOf = function (d, unit) { return pad(d.getHours()) + ":" + pad(d.getMinutes()) + (unit === "second" ? ":" + pad(d.getSeconds()) : ""); };
+  var keyOf = function (d, unit) { return unit === "year" ? String(d.getFullYear()) : unit === "month" ? ymKey(d) : unit === "minute" || unit === "second" ? fmt(d) + " " + clockOf(d, unit) : fmt(d); };
+  var showOf = function (d, unit) { return unit === "year" ? String(d.getFullYear()) : unit === "minute" || unit === "second" ? showOf(d, "day") + " " + clockOf(d, unit) : d.getFullYear() + ". " + pad(d.getMonth() + 1) + (unit === "month" ? "" : ". " + pad(d.getDate())); };
+  /* 글자의 단위 — 달력은 st.unit(일)로 일하고, 필드 글자 · 값은 시각까지 */
+  function tu(st) { return st.time || st.unit; }
   var unitStart = function (d, unit) { return unit === "year" ? new Date(d.getFullYear(), 0, 1) : unit === "month" ? firstOf(d) : d; };
   var baseView = function (unit) { return unit === "year" ? "year" : unit === "month" ? "month" : "day"; };
   /* 로컬 시간으로 엄격하게 읽는다 — new Date("YYYY-MM-DD") 는 UTC 라 음수 시간대에서 하루 앞으로 밀렸다. 2026-02-30 은 거부.
@@ -213,7 +217,16 @@
   function parseYMD(s) { var m = /^(\d{4})(?:[-./\s]+(\d{1,2})[-./\s]+(\d{1,2})|(\d{2})(\d{2}))\.?$/.exec(String(s || "").trim()); if (!m) return null; if (m[4]) { m[2] = m[4]; m[3] = m[5]; } var d = new Date(+m[1], +m[2] - 1, +m[3]); return d.getMonth() === +m[2] - 1 && d.getDate() === +m[3] ? d : null; }
   function parseYM(s) { var m = /^(\d{4})(?:[-./\s]+(\d{1,2})|(\d{2}))\.?$/.exec(String(s || "").trim()); if (m && m[3]) m[2] = m[3]; return m && +m[2] >= 1 && +m[2] <= 12 ? new Date(+m[1], +m[2] - 1, 1) : null; }
   function parseY(s) { var m = /^(\d{4})\.?$/.exec(String(s || "").trim()); return m ? new Date(+m[1], 0, 1) : null; }
-  function parseUnit(s, unit) { return unit === "year" ? parseY(s) : unit === "month" ? parseYM(s) : parseYMD(s); }
+  /* 날짜 + 시각 — 조각 수가 정확해야 한다(시각 없는 날짜는 값이 아니다 — 사람의 결정 2026-11-10) */
+  function parseDT(s, sec) {
+    var g = String(s || "").match(/\d+/g) || [];
+    if (g.length === 1) { var x = g[0]; if (x.length !== (sec ? 14 : 12)) return null; g = [x.slice(0, 4), x.slice(4, 6), x.slice(6, 8), x.slice(8, 10), x.slice(10, 12)].concat(sec ? [x.slice(12)] : []); }
+    if (g.length !== (sec ? 6 : 5) || g[0].length !== 4) return null;
+    var d = parseYMD(g[0] + "-" + g[1] + "-" + g[2]), h = +g[3], m = +g[4], c = sec ? +g[5] : 0;
+    if (!d || h > 23 || m > 59 || c > 59) return null;
+    d.setHours(h, m, c, 0); return d;
+  }
+  function parseUnit(s, unit) { return unit === "year" ? parseY(s) : unit === "month" ? parseYM(s) : unit === "minute" ? parseDT(s, false) : unit === "second" ? parseDT(s, true) : parseYMD(s); }
   function parseAny(s) { return parseYMD(s) || parseYM(s) || parseY(s); }
   /* 달을 옮기며 일은 그 달의 마지막 날로 자른다(1월 31일 → 2월 28일) */
   function addMonths(d, n) { var t = new Date(d.getFullYear(), d.getMonth() + n, 1); t.setDate(Math.min(d.getDate(), new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate())); return t; }
@@ -243,43 +256,54 @@
     if (!ok && !tzWarned[z]) { tzWarned[z] = 1; if (window.console) console.warn("[ds.js] data-timezone=\"" + z + "\" 을 쓸 수 없어 환경 시간대로 계산합니다 — dayjs · utc · timezone 플러그인이 실렸는지, IANA 이름인지 보세요."); }
     return ok ? z : null;
   }
-  function instant(host, d) { var z = dpZone(host); return z ? dj().tz(fmt(d), z).toDate() : new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function instant(host, d) { var z = dpZone(host), t = S(host).time; return z ? dj().tz(keyOf(d, t || "day"), z).toDate() : t ? new Date(d.getTime()) : new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
   function dpToday(host) {
     var t = parseYMD(host.getAttribute("data-today")); if (t) return t;
     var z = dpZone(host); if (z) return parseYMD(dj()().tz(z).format("YYYY-MM-DD"));
     var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate());
   }
   function dpUnit(host) { var u = host.getAttribute("data-unit"); return u === "year" || u === "month" ? u : "day"; }
-  function dpBound(host, k) { var v = host.getAttribute("data-" + k); return !v ? null : v === "today" ? dpToday(host) : parseAny(v); }
+  /* 시각까지 쓰는 피커의 범위 — 시각을 적었으면 그 순간, 날짜만이면 그 하루 전체(max 는 그날 끝까지) */
+  function dpBound(host, k) {
+    var v = host.getAttribute("data-" + k); if (!v) return null;
+    if (v.indexOf(":") >= 0) return parseDT(v, v.split(":").length > 2);
+    var d = v === "today" ? dpToday(host) : parseAny(v);
+    if (d && k === "max" && S(host).time) { d = new Date(d.getTime()); d.setHours(23, 59, 59, 0); }
+    return d;
+  }
   /* min · max 밖인가 — 달 · 연 칸은 그 단위로 비교한다 */
   function outOf(host, d, unit) {
     var lo = dpBound(host, "min"), hi = dpBound(host, "max"), f = function (x) { return keyOf(x, unit || "day"); };
     return !!((lo && f(d) < f(lo)) || (hi && f(d) > f(hi)));
   }
   function isOff(el) { return el.disabled || el.getAttribute("aria-disabled") === "true"; }
-  function valText(host, v) { var st = S(host); if (!v || !v.a) return ""; return st.mode === "range" ? (v.b ? showOf(v.a, st.unit) + " ~ " + showOf(v.b, st.unit) : "") : showOf(v.a, st.unit); }
-  function readValue(host) { var ds = host.dataset, u = S(host).unit; return S(host).mode === "range" ? { a: parseUnit(ds.start, u), b: parseUnit(ds.end, u) } : { a: parseUnit(ds.value, u), b: null }; }
+  function valText(host, v) { var st = S(host); if (!v || !v.a) return ""; var u = tu(st); return st.mode === "range" ? (v.b ? showOf(v.a, u) + " ~ " + showOf(v.b, u) : "") : showOf(v.a, u); }
+  function readValue(host) { var ds = host.dataset, u = tu(S(host)); return S(host).mode === "range" ? { a: parseUnit(ds.start, u), b: parseUnit(ds.end, u) } : { a: parseUnit(ds.value, u), b: null }; }
   function writeValue(host, v) {
     var st = S(host);
     host.removeAttribute("data-value"); host.removeAttribute("data-start"); host.removeAttribute("data-end");
-    if (st.mode === "range") { if (v.a && v.b) { host.dataset.start = keyOf(v.a, st.unit); host.dataset.end = keyOf(v.b, st.unit); } }
-    else if (v.a) host.dataset.value = keyOf(v.a, st.unit);
+    var u = tu(st);
+    if (st.mode === "range") { if (v.a && v.b) { host.dataset.start = keyOf(v.a, u); host.dataset.end = keyOf(v.b, u); } }
+    else if (v.a) host.dataset.value = keyOf(v.a, u);
   }
   function setValidity(host, validity) { var st = S(host); st.validity = validity; host.dataset.validity = validity; }   // 유효 · 빈 값도 적는다 — React 와 같다
 
   /* 입력 글자 — 숫자열을 조각으로(연 4 · 월 2 · 일 2). 월 첫 자리가 2~9 · 일 첫 자리가 4~9 면 앞에 0 을 붙여 그 조각을 끝낸다(9 → 09).
      기간은 앞 날짜가 다 차면 ' ~ ' 뒤로 넘어간다 */
+  var LENS = { year: [4], month: [4, 2], day: [4, 2, 2], minute: [4, 2, 2, 2, 2], second: [4, 2, 2, 2, 2, 2], clock: [2, 2], clockS: [2, 2, 2] };
+  var isClock = function (unit) { return unit === "clock" || unit === "clockS"; };
+  function joinSeg(s, unit) { return isClock(unit) ? s.join(":") : s.slice(0, 3).join(". ") + (s.length > 3 ? " " + s.slice(3).join(":") : ""); }
   function groups(dg, unit, range) {
-    var lens = unit === "year" ? [4] : unit === "month" ? [4, 2] : [4, 2, 2], max = range ? 2 : 1, sides = [], cur = [], g = "", gi = 0;
+    var lens = LENS[unit], off = isClock(unit) ? 3 : 0, lim = ["", "1", "3", "2", "5", "5"], max = range ? 2 : 1, sides = [], cur = [], g = "", gi = 0;   // lim — 그 칸의 첫 자리로 쓸 수 있는 가장 큰 숫자(월 · 일 · 시 · 분 · 초)
     for (var i = 0; i < dg.length && sides.length < max; i++) {
       var c = dg.charAt(i);
-      if (g === "" && ((gi === 1 && c > "1") || (gi === 2 && c > "3"))) g = "0";
+      if (g === "" && lim[gi + off] && c > lim[gi + off]) g = "0";
       g += c;
       if (g.length === lens[gi]) { cur.push(g); g = ""; gi++; if (gi === lens.length) { sides.push(cur); cur = []; gi = 0; } }
     }
     if (g) cur.push(g);
     if (cur.length && sides.length < max) sides.push(cur);
-    return sides.map(function (s) { return s.join(". "); }).join(" ~ ");
+    return sides.map(function (s) { return joinSeg(s, unit); }).join(" ~ ");
   }
   /* 붙여넣기 · 마크업 값 — 구분자로 나뉜 조각은 자리를 채운다(2026/9/7 → 2026. 09. 07). 친 글자에는 쓰지 않는다: 치는 중인 '2026. 09. 3' 을 3일로 확정하지 않게 */
   function pasteText(s, unit, range) {
@@ -290,22 +314,22 @@
   }
   /* 입력 검사 — 빈 · 미완성 · 없는 날짜 · 순서 · min · max · 유효 */
   function check(host, text) {
-    var st = S(host), unit = st.unit, rg = st.mode === "range", s = String(text || "").trim();
+    var st = S(host), unit = tu(st), rg = st.mode === "range", s = String(text || "").trim();
     if (!s) return { validity: "empty", a: null, b: null };
     var parts = rg ? s.split(/\s*~\s*/) : [s]; if (rg && parts.length < 2) parts.push("");
     /* 자릿수가 모자라면 미완성 — 치는 중인 "2026. 09. 3" 을 3일로 확정하지 않는다 */
-    var sides = parts.slice(0, rg ? 2 : 1).map(function (p) { if (p.replace(/\D/g, "").length < DIGITS[unit]) return { v: "incomplete" }; var d = parseUnit(p, unit); return d ? { v: "valid", d: d } : { v: "invalid" }; });
+    var sides = parts.slice(0, rg ? 2 : 1).map(function (p) { var dg = p.replace(/\D/g, ""); if (dg.length < DIGITS[unit]) return { v: "incomplete" }; var d = parseUnit(p, unit); return d ? { v: "valid", d: d } : { v: "invalid", t: !!st.time && !!parseYMD(dg.slice(0, 8)) }; });   // t — 날짜는 있는데 시각이 없는 값(25:00)
     var f = function (d) { return keyOf(d, unit); }, lo = dpBound(host, "min"), hi = dpBound(host, "max");
     /* 기간의 쪽마다 상태(React info.sides 와 같다) — 비운 쪽 empty, 범위는 그 쪽 날짜만. 순서(order)는 두 쪽 사이의 일이라 validity 에만 */
     var side = function (p, x) { return !p.trim() ? "empty" : x.v !== "valid" ? x.v : lo && f(x.d) < f(lo) ? "min" : hi && f(x.d) > f(hi) ? "max" : "valid"; };
     var ss = rg ? { start: side(parts[0], sides[0]), end: side(parts[1], sides[1]) } : null;
     /* 주어 — 기간에서 한쪽만 걸리면 그 쪽 이름, 둘 다면 '날짜가'(예시도 A ~ B) */
     var M = dpMessages(host), x = { example: EXAMPLE[unit], min: lo && showOf(lo, unit), max: hi && showOf(hi, unit), subject: M.subject };
-    var who = function (hit) { var s0 = hit(ss.start), s1 = hit(ss.end); if (s0 !== s1) x.subject = s0 ? M.startSubject : M.endSubject; else if (s0) x.example = EXAMPLE[unit] + " ~ " + EXAMPLE[unit]; };
+    var who = function (hit, t) { var s0 = hit(ss.start), s1 = hit(ss.end); if (s0 !== s1) x.subject = t ? (s0 ? M.startTimeSubject : M.endTimeSubject) : s0 ? M.startSubject : M.endSubject; else if (s0) x.example = EXAMPLE[unit] + " ~ " + EXAMPLE[unit]; };
     var bad = sides.filter(function (x) { return x.v !== "valid"; })[0];
-    if (bad) { if (rg) who(function (v) { return v === "incomplete" || v === "invalid" || v === "empty"; }); return { validity: bad.v, a: null, b: null, sides: ss, msg: say(M, bad.v, x) }; }
+    if (bad) { if (bad.t) x.subject = M.timeSubject; if (rg) who(function (v) { return v === "incomplete" || v === "invalid" || v === "empty"; }, bad.t); return { validity: bad.v, a: null, b: null, sides: ss, msg: say(M, bad.t ? "invalidTime" : bad.v, x) }; }
     var a = sides[0].d, b = rg ? sides[1].d : null, both = [a, b].filter(Boolean);
-    if (b && b < a) return { validity: "order", a: a, b: b, sides: ss, msg: say(M, "order", x) };
+    if (b && b < a) return { validity: "order", a: a, b: b, sides: ss, msg: say(M, st.time && fmt(a) === fmt(b) ? "orderTime" : "order", x) };   // 같은 날이면 틀린 것은 시각이다
     if (lo && both.some(function (d) { return f(d) < f(lo); })) { if (rg) who(function (v) { return v === "min"; }); return { validity: "min", a: a, b: b, sides: ss, msg: say(M, "min", x) }; }
     if (hi && both.some(function (d) { return f(d) > f(hi); })) { if (rg) who(function (v) { return v === "max"; }); return { validity: "max", a: a, b: b, sides: ss, msg: say(M, "max", x) }; }
     return { validity: "valid", a: a, b: b, sides: ss };
@@ -314,14 +338,15 @@
   function S(host) {
     if (host._dp) return host._dp;
     var inp = $(".affix input", host), cal = isPicker(host) ? $(".calendar", host) : host, help = $(":scope > .help", host), unit = dpUnit(host);
+    var time = isPicker(host) && unit === "day" && host.hasAttribute("data-time") ? (host.getAttribute("data-time") === "seconds" ? "second" : "minute") : null;
     var mode = host.hasAttribute("data-range") || (!isPicker(host) && ($(".day.in-range", host) || $$(".day.on", host).length > 1)) ? "range" : "single";
-    var st = host._dp = { mode: mode, unit: unit, view: baseView(unit), draft: null, month: null, focus: null, hover: null, opener: null, live: "", validity: "empty", text: "" };
+    var st = host._dp = { mode: mode, unit: unit, time: time, clock: null, view: baseView(unit), draft: null, month: null, focus: null, hover: null, opener: null, live: "", validity: "empty", text: "" };
     st.help = host.getAttribute("data-help") || (help && !host.classList.contains("error") ? help.textContent : "");
     /* data-default-preset="7": 값이 없으면 오늘 기준 최근 N일을 처음 값으로 — 검색 툴바의 조회 기간(사람의 결정 2026-10-27) */
     var dfp = Number(host.getAttribute("data-default-preset"));
-    if (mode === "range" && dfp > 0 && !host.hasAttribute("data-start")) { var te = dpToday(host); writeValue(host, { a: addDays(te, -(dfp - 1)), b: te }); }
+    if (mode === "range" && dfp > 0 && !host.hasAttribute("data-start")) { var te = dpToday(host), tb = addDays(te, -(dfp - 1)); if (time) { te = new Date(te.getTime()); te.setHours(23, 59, 59, 0); } writeValue(host, { a: tb, b: te }); }
     if (host.hasAttribute("data-value") || host.hasAttribute("data-start")) { if (inp) display(host); }
-    else if (inp) { var txt = pasteText(inp.value, unit, mode === "range"), r = check(host, txt); if (inp.value.trim()) inp.value = txt; writeValue(host, r); }   // 없는 날짜(2026. 02. 30)는 다른 날로 넘기지 않고 값을 비운다
+    else if (inp) { var txt = pasteText(inp.value, tu(st), mode === "range"), r = check(host, txt); if (inp.value.trim()) inp.value = txt; writeValue(host, r); }   // 없는 날짜(2026. 02. 30)는 다른 날로 넘기지 않고 값을 비운다
     else if (cal) { var ds = $$(".day.on[data-date]", cal).map(function (d) { return parseYMD(d.dataset.date); }); writeValue(host, { a: ds[0] || null, b: ds[1] || null }); }
     if (inp) { st.text = inp.value.trim(); inp._dpPrev = inp.value; setValidity(host, check(host, inp.value).validity); }
     if (!isPicker(host)) {
@@ -332,7 +357,27 @@
     return st;
   }
   function dpMonths(host) { var st = S(host); return st.view === "day" && st.unit === "day" && st.mode === "range" && host.getAttribute("data-calendars") !== "1" && !(window.matchMedia && window.matchMedia("(max-width:767px)").matches) ? 2 : 1; }
-  function dpFoot(host) { var f = host.getAttribute("data-footer"); return f ? (f === "none" ? [] : f.split(/\s+/)) : S(host).mode === "single" ? ["today", "apply"] : ["apply"]; }
+  function dpFoot(host) {
+    var f = host.getAttribute("data-footer"), st = S(host), list = f ? (f === "none" ? [] : f.split(/\s+/)) : st.mode === "single" ? ["today", "apply"] : ["apply"];
+    if (st.time && list.indexOf("apply") < 0) list.push("apply");   // 시각을 고를 틈이 있어야 한다 — 날짜를 누르는 순간 닫히면 시각을 못 고친다
+    return list;
+  }
+  /* 달력 아래 시각 칸 — 친 글자(st.clock)는 적용할 때 날짜와 합쳐 필드와 같은 검사를 지난다(사람의 결정 2026-11-10 — 처음 값 00:00 · 기간 끝 23:59) */
+  function clockDefaults(st) { var s = st.time === "second"; return { a: s ? "00:00:00" : "00:00", b: s ? "23:59:59" : "23:59" }; }
+  function clockSync(st, v) { var c = clockDefaults(st); if (v.a) c.a = clockOf(v.a, st.time); if (v.b) c.b = clockOf(v.b, st.time); st.clock = c; }
+  function clockPaint(host) { var st = S(host); $$(".cal-time input", calOf(host)).forEach(function (i) { i.value = st.clock[i.dataset.side]; i._dpPrev = i.value; }); }
+  var dpUid = 0;   // id 없는 입력(aria-label 만 쓰는 툴바)이 여럿이어도 시각 칸의 id 가 겹치지 않게
+  function timeHtml(host) {
+    var st = S(host), L = dpLabels(host), base = $(".affix input", host).id || (st.uid = st.uid || "dp-" + (++dpUid)), ph = st.time === "second" ? "HH:mm:ss" : "HH:mm";
+    var one = function (side, label) { var id = base + "-time-" + side; return '<div class="field sm"><label for="' + id + '">' + label + '</label><input id="' + id + '" data-side="' + side + '" value="' + st.clock[side] + '" placeholder="' + ph + '" inputmode="numeric" autocomplete="off"></div>'; };
+    return '<div class="cal-time">' + (st.mode === "range" ? one("a", L.startTime) + one("b", L.endTime) : one("a", L.time)) + "</div>";
+  }
+  /* 적용하면 필드에 들어갈 글자 — 시각 칸의 글자를 날짜 뒤에 그대로 붙인다(덜 친 시각은 필드 검사가 알린다) */
+  function pendingText(host, v) {
+    var st = S(host); if (!st.time || !v.a) return valText(host, v);
+    var s = showOf(v.a, "day") + " " + st.clock.a;
+    return st.mode === "range" ? (v.b ? s + " ~ " + showOf(v.b, "day") + " " + st.clock.b : "") : s;
+  }
   function titleOf(host) {
     var st = S(host), m = st.month, y0 = m.getFullYear() - m.getFullYear() % 12;
     return st.view === "year" ? y0 + "–" + (y0 + 11) : st.view === "month" ? intl(dpLocale(host), { year: "numeric" }).format(m) : dpMonths(host) === 2 ? monthTitle(host, m) + " – " + monthTitle(host, addMonths(m, 1)) : monthTitle(host, m);
@@ -389,6 +434,7 @@
       for (var i = 0; i < n; i++) { var mo = addMonths(st.month, i); h += (n === 2 ? '<div class="cal-month">' : "") + headHtml(n === 2 ? (i ? "next" : "prev") : "both", monthTitle(host, mo), [L.prevMonth, L.nextMonth], L.chooseYear) + dayGrid(host, mo, n === 2) + (n === 2 ? "</div>" : ""); }
       if (n === 2) h = '<div class="cal-months">' + h + "</div>";
     } else h += headHtml("both", titleOf(host), st.view === "month" ? [L.prevYear, L.nextYear] : [L.prevYears, L.nextYears], st.view === "year" ? (st.unit === "year" ? false : st.unit === "month" ? L.backToMonths : L.backToDays) : L.chooseYear) + cellGrid(host, st.view === "month" ? "months" : "years", st.month);
+    if (st.time && st.view === "day") h += timeHtml(host);
     h += keep ? "" : footHtml(host);
     if (!live) { live = doc.createElement("span"); live.className = "sr-only"; live.setAttribute("aria-live", "polite"); }
     cal.innerHTML = h;
@@ -429,13 +475,14 @@
     var pickCell = function (sel) { return cells.filter(function (c) { return c.matches(sel); })[0]; };
     var target = (f && pickCell('[data-date="' + f + '"],[data-ym="' + f + '"],[data-year="' + f + '"]')) || pickCell(".on") || pickCell(".today") || pickCell(':not([aria-disabled="true"])') || cells[0];
     $$(".cal-grid .day[data-date], .cal-grid .cell", cal).forEach(function (c) { c.tabIndex = c === target ? 0 : -1; });
-    var ap = $('[data-cal="apply"]', cal); if (ap) ap.disabled = !!(rg && v.a && !v.b) || valText(host, v) === valText(host, readValue(host));   // 끝이 없는 기간, 열기 전과 같은 값은 적용할 수 없다(사람의 결정 2026-10-27 — 값 지우기는 초기화의 일)
+    var ap = $('[data-cal="apply"]', cal); if (ap) ap.disabled = !!(rg && v.a && !v.b) || pendingText(host, v) === valText(host, readValue(host));   // 끝이 없는 기간, 열기 전과 같은 값은 적용할 수 없다(사람의 결정 2026-10-27 — 값 지우기는 초기화의 일)
   }
   function setExpanded(host, open) { $$(".cal-btn", host).forEach(function (b) { b.setAttribute("aria-expanded", String(open)); }); }
   function openDP(host, opener) {
     var st = S(host), inp = $(".affix input", host);
     if (inp && inp.value.trim() !== st.text) typed(host);   // 열기 전에 친 글자를 먼저 반영한다
     st.draft = readValue(host); st.view = baseView(st.unit); st.hover = null; st.focus = null; st.opener = opener; st.live = "";
+    if (st.time) clockSync(st, st.draft);
     var base = st.draft.a, lo = dpBound(host, "min"), hi = dpBound(host, "max");
     if (!base) { base = dpToday(host); if (hi && base > hi) base = hi; if (lo && base < lo) base = lo; }   // 값이 범위 밖이면 그 값의 달을 연다 — 고른 것이 보이게
     st.month = firstOf(base);
@@ -458,10 +505,10 @@
     host.style.setProperty("--dp-top", (up ? r.top - hr.top - gap - h : r.bottom - hr.top + gap) + "px");
     host.style.setProperty("--dp-left", Math.max(8 - hr.left, Math.min(0, vw - 8 - w - hr.left)) + "px");
   }
-  /* ds:date — value · start · end 는 기계 형식, date 는 기준 시간대의 0시(미완성 · 없는 날짜는 Invalid Date, 빈 값은 null), text 는 필드 글자,
+  /* ds:date — value · start · end 는 기계 형식, date 는 기준 시간대의 0시 · data-time 이면 그 시각(미완성 · 없는 날짜는 Invalid Date, 빈 값은 null), text 는 필드 글자,
      기간은 sides {start, end} — 쪽마다의 상태(달력에서 고른 값은 늘 valid · 비운 쪽 empty) */
   function emit(host, v, validity, sides) {
-    var st = S(host), u = st.unit, k = function (d) { return d ? keyOf(d, u) : null; }, bad = validity === "incomplete" || validity === "invalid";
+    var st = S(host), u = tu(st), k = function (d) { return d ? keyOf(d, u) : null; }, bad = validity === "incomplete" || validity === "invalid";
     var at = function (d) { return bad ? new Date(NaN) : d ? instant(host, d) : null; }, inp = $(".affix input", host), text = inp ? inp.value.trim() : valText(host, v);
     fire(host, "ds:date", st.mode === "range" ? { value: v.a && v.b ? k(v.a) + " ~ " + k(v.b) : null, start: k(v.a), end: k(v.b), date: { start: at(v.a), end: at(v.b) }, text: text, validity: validity, sides: sides || { start: v.a ? "valid" : "empty", end: v.b ? "valid" : "empty" } }
       : { value: k(v.a), date: at(v.a), text: text, validity: validity });
@@ -469,6 +516,7 @@
   function commit(host) {
     var st = S(host), v = st.draft || { a: null, b: null };
     if (st.mode === "range" && v.a && !v.b) return false;
+    if (st.time && v.a) { var ti = $(".affix input", host); ti.value = pendingText(host, v); ti._dpPrev = ti.value; typed(host); return true; }   // 달력은 날짜만 막는다 — 시각의 범위 · 순서는 필드 검사가 잰다
     writeValue(host, v); display(host); clearError(host); setValidity(host, v.a ? "valid" : "empty");
     emit(host, v, st.validity);
     return true;
@@ -507,7 +555,7 @@
   }
   function preset(host, n) {
     var st = S(host), e = dpToday(host);
-    st.draft = { a: addDays(e, -(n - 1)), b: e }; st.hover = null; commit(host);
+    st.draft = { a: addDays(e, -(n - 1)), b: e }; st.hover = null; if (st.time) st.clock = clockDefaults(st); commit(host);
     if (isPicker(host)) { closeDP(host, true); return; }
     st.month = firstOf(e); st.focus = fmt(e); st.view = "day"; renderStructure(host);
   }
@@ -516,7 +564,7 @@
     if (kind === "apply") { if (commit(host) && isPicker(host)) closeDP(host, true); return; }
     if (kind === "cancel") { if (isPicker(host)) closeDP(host, true); else { st.draft = readValue(host); renderMarks(host); } return; }
     if (kind === "today") { var t = unitStart(dpToday(host), st.unit); st.draft = { a: t, b: null }; st.focus = keyOf(t, st.unit); st.view = baseView(st.unit); st.month = firstOf(t); renderStructure(host); }
-    if (kind === "reset") { st.draft = { a: null, b: null }; st.hover = null; renderMarks(host); }
+    if (kind === "reset") { st.draft = { a: null, b: null }; st.hover = null; if (st.time) { st.clock = clockDefaults(st); clockPaint(host); } renderMarks(host); }
     if (dpFoot(host).indexOf("apply") < 0) { commit(host); if (isPicker(host)) closeDP(host, true); }
   }
   /* 키보드(WAI-ARIA 날짜 선택 대화상자): ←→ 하루 · ↑↓ 일주일 · PageUp/Down 달(Shift 연) · Home/End 주의 처음 · 끝 · Esc 닫고 필드로 · Tab 은 달력 안에서 돈다 */
@@ -524,7 +572,7 @@
     var st = S(host), cal = calOf(host), k = e.key, open = isPicker(host) && host.classList.contains("open");
     if (k === "Escape") { if (!open) return false; e.preventDefault(); closeDP(host, true); return true; }
     if (k === "Tab" && open) {
-      var f = $$("button", cal).filter(function (b) { return !b.disabled && b.tabIndex >= 0 && b.offsetParent !== null; }), i = f.indexOf(doc.activeElement);
+      var f = $$("button, input", cal).filter(function (b) { return !b.disabled && b.tabIndex >= 0 && b.offsetParent !== null; }), i = f.indexOf(doc.activeElement);
       if (e.shiftKey ? i <= 0 : i === f.length - 1) { e.preventDefault(); f[e.shiftKey ? f.length - 1 : 0].focus(); }
       return true;
     }
@@ -558,11 +606,13 @@
     var el = $('.cal-grid [data-date="' + key + '"]:not(.muted), .cal-grid [data-ym="' + key + '"], .cal-grid [data-year="' + key + '"]', cal); if (el) el.focus();
   }
   /* 직접 입력 — 치는 동안 'YYYY. MM. DD' 로 끊어 채운다. 구분자 하나만 지운 Backspace 는 그 앞 숫자를 지운다(구분자는 다시 생기므로) */
-  function dpInput(inp, e) {
-    var host = closest(inp, ".datepicker"), st = S(host), rg = st.mode === "range", v = inp.value, prev = inp._dpPrev || "";
+  function dpInput(inp, e) { var st = S(closest(inp, ".datepicker")); reflow(inp, e, tu(st), st.mode === "range"); }
+  function clockInput(inp, e) { var host = closest(inp, ".datepicker"), st = S(host); reflow(inp, e, st.time === "second" ? "clockS" : "clock", false); st.clock[inp.dataset.side] = inp.value; renderMarks(host); }
+  function reflow(inp, e, unit, rg) {
+    var v = inp.value, prev = inp._dpPrev == null ? inp.defaultValue : inp._dpPrev;
     var caret = inp.selectionStart == null ? v.length : inp.selectionStart, atEnd = caret >= v.length, dg = v.replace(/\D/g, ""), before = v.slice(0, caret).replace(/\D/g, "").length;
     if (e.inputType === "deleteContentBackward" && dg === prev.replace(/\D/g, "") && before > 0) { dg = dg.slice(0, before - 1) + dg.slice(before); before--; }
-    var text = e.inputType === "insertFromPaste" || e.inputType === "insertFromDrop" ? pasteText(v, st.unit, rg) : groups(dg, st.unit, rg), pos = text.length;
+    var text = e.inputType === "insertFromPaste" || e.inputType === "insertFromDrop" ? pasteText(v, unit, rg) : groups(dg, unit, rg), pos = text.length;
     if (!atEnd && e.inputType !== "insertFromPaste") { var n = 0; for (pos = 0; pos < text.length && n < before; pos++) if (/\d/.test(text.charAt(pos))) n++; }
     inp.value = text; inp._dpPrev = text;
     try { inp.setSelectionRange(pos, pos); } catch (x) { /* 포커스 없는 입력 */ }
@@ -570,22 +620,32 @@
   /* ↑↓ — 커서가 놓인 조각(연 · 월 · 일)을 ±1 하고 바로 확정한다. min/max 는 보지 않는다(사람의 요구 2026-11-09 — 키보드로는 범위 밖 값도 넣는다).
      빈 조각은 오늘 값으로 채운다. 월은 12 ↔ 1, 일은 그 달의 끝 ↔ 1 로 돈다 */
   function stepSeg(host, inp, dir) {
-    var st = S(host), unit = st.unit, rg = st.mode === "range", v = inp.value, caret = inp.selectionStart || 0;
+    var st = S(host), unit = tu(st), rg = st.mode === "range", v = inp.value, caret = inp.selectionStart || 0;
     var parts = rg ? v.split(" ~ ") : [v], side = rg && parts.length > 1 && caret > parts[0].length ? 1 : 0, base = side ? parts[0].length + 3 : 0, local = caret - base;
-    var segs = (parts[side] || "").split(". "), n = unit === "year" ? 1 : unit === "month" ? 2 : 3, si = Math.min(local <= 4 ? 0 : local <= 8 ? 1 : 2, n - 1);
-    var t = dpToday(host), now = [t.getFullYear(), t.getMonth() + 1, t.getDate()], num = [], empty = !segs[si] || segs[si].length < (si ? 2 : 4);
+    var segs = (parts[side] || "").split(/\. | |:/), n = LENS[unit].length, si = Math.min(local <= 4 ? 0 : local <= 8 ? 1 : local <= 12 ? 2 : local <= 15 ? 3 : local <= 18 ? 4 : 5, n - 1);
+    var t = dpToday(host), now = [t.getFullYear(), t.getMonth() + 1, t.getDate()].concat(side ? [23, 59, 59] : [0, 0, 0]), num = [], empty = !segs[si] || segs[si].length < (si ? 2 : 4);
     for (var i = 0; i < n; i++) num.push(segs[i] && segs[i].length === (i ? 2 : 4) ? +segs[i] : now[i]);
     if (!empty) {
       if (si === 0) num[0] = Math.max(1, Math.min(9999, num[0] + dir));
       else if (si === 1) num[1] = (num[1] - 1 + dir + 12) % 12 + 1;
-      else { var dim = new Date(num[0], num[1], 0).getDate(); num[2] = (Math.min(num[2], dim) - 1 + dir + dim) % dim + 1; }
+      else if (si === 2) { var dim = new Date(num[0], num[1], 0).getDate(); num[2] = (Math.min(num[2], dim) - 1 + dir + dim) % dim + 1; }
+      else { var wrap = si === 3 ? 24 : 60; num[si] = (num[si] + dir + wrap) % wrap; }   // 시 23 ↔ 0, 분 · 초 59 ↔ 0
     }
-    if (n === 3) num[2] = Math.min(num[2], new Date(num[0], num[1], 0).getDate());   // 1월 31일에서 월을 올리면 2월 28일
-    parts[side] = num.map(function (x, j) { return j ? pad(x) : String(x); }).join(". ");
+    if (n >= 3) num[2] = Math.min(num[2], new Date(num[0], num[1], 0).getDate());   // 1월 31일에서 월을 올리면 2월 28일
+    parts[side] = joinSeg(num.map(function (x, j) { return j ? pad(x) : String(x); }), unit);
     if (rg && side === 0 && parts.length < 2) parts.length = 1;
     inp.value = parts.join(" ~ "); inp._dpPrev = inp.value;
-    var end = base + [4, 8, 12][si]; try { inp.setSelectionRange(end, end); } catch (x) { /* 포커스 없는 입력 */ }
+    var end = base + [4, 8, 12, 15, 18, 21][si]; try { inp.setSelectionRange(end, end); } catch (x) { /* 포커스 없는 입력 */ }
     typed(host);
+  }
+  /* 시각 칸의 ↑↓ — 커서 조각 ±1(시 23 ↔ 0, 분 · 초 59 ↔ 0). 적용하기 전이라 값은 아직 바뀌지 않는다 */
+  function clockStep(host, inp, dir) {
+    var st = S(host), n = st.time === "second" ? 3 : 2, segs = inp.value.split(":"), caret = inp.selectionStart || 0, si = Math.min(caret <= 2 ? 0 : caret <= 5 ? 1 : 2, n - 1), num = [];
+    for (var i = 0; i < n; i++) num.push(segs[i] && segs[i].length === 2 ? +segs[i] : 0);
+    if (segs[si] && segs[si].length === 2) { var w = si ? 60 : 24; num[si] = (num[si] + dir + w) % w; }
+    inp.value = num.map(pad).join(":"); inp._dpPrev = inp.value; st.clock[inp.dataset.side] = inp.value;
+    var end = [2, 5, 8][si]; try { inp.setSelectionRange(end, end); } catch (x) { /* 포커스 없는 입력 */ }
+    renderMarks(host);
   }
   /* 검사 · 확정 — Enter · 포커스가 필드를 떠날 때 · ↑↓. 값이 늘 유효하지는 않다(사람의 요구 2026-11-09):
      미완성 · 없는 날짜는 값을 비우고, 범위 밖 · 순서는 값을 그 날짜로 둔 채 data-validity 와 오류 테두리 · 원인 문구로 알린다 */
@@ -597,7 +657,7 @@
     if (r.a) { inp.value = valText(host, v) || inp.value; inp._dpPrev = inp.value; }
     st.text = inp.value.trim();
     if (changed) emit(host, v, r.validity, r.sides);
-    if (host.classList.contains("open")) { st.draft = v; st.focus = null; if (v.a) st.month = firstOf(v.a); st.view = baseView(st.unit); renderStructure(host); }   // 연 채로 입력해 확정하면 달력도 그 값으로
+    if (host.classList.contains("open")) { st.draft = v; st.focus = null; if (st.time && v.a) clockSync(st, v); if (v.a) st.month = firstOf(v.a); st.view = baseView(st.unit); renderStructure(host); }   // 연 채로 입력해 확정하면 달력도 그 값으로
     return r.validity === "valid" || r.validity === "empty";
   }
   function setError(host, msg) {
@@ -1134,6 +1194,10 @@
     // Date Picker · Calendar — 달력 안 키보드, 입력형 필드의 Enter(확정) · Alt+↓(열기)
     var kc = closest(e.target, ".calendar");
     if (kc && calKey(e, dpHost(kc))) return;
+    var cti = closest(e.target, ".cal-time input");
+    if (cti) { var cdh = closest(cti, ".datepicker");
+      if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); var cap = $('[data-cal="apply"]', calOf(cdh)); if (cap && !cap.disabled) foot(cdh, "apply"); return; }
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); clockStep(cdh, cti, e.key === "ArrowUp" ? 1 : -1); return; } }
     var di = closest(e.target, ".datepicker .affix input");
     if (di) { var dh = closest(di, ".datepicker");
       if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); typed(dh); return; }   // 한글 조합 중 Enter 는 조합 확정이다
@@ -1203,6 +1267,7 @@
     var t = e.target; if (!(t instanceof Element)) return;
     if (t.matches(".slider input[type=range]")) { syncSlider(t); fire(t, "ds:slide", { value: Number(t.value) }); }
     if (t.matches(".datepicker .affix input") && !e.isComposing) dpInput(t, e);
+    if (t.matches(".cal-time input") && !e.isComposing) clockInput(t, e);
     if (t.matches(".field input[maxlength], .field textarea[maxlength]")) syncCounter(t);
     if (t.matches(".combobox input[role=combobox]")) { var cbh = closest(t, ".combobox"), rm = cbh.getAttribute("data-filter") === "none"; cbh._dsTyped = true; cbOpen(cbh, true); cbFilter(cbh);
       if (rm) { clearTimeout(t._dsQuery); t._dsQuery = setTimeout(function () { fire(cbh, "ds:query", { query: t.value }); }, 300); } }

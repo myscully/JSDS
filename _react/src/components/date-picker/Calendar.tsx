@@ -19,8 +19,10 @@ export interface DatePickerLabels {
   today: string; reset: string; cancel: string; apply: string; openCalendar: string; dialog: string;
   prevMonth: string; nextMonth: string; prevYear: string; nextYear: string; prevYears: string; nextYears: string;
   chooseYear: string; yearGrid: string; backToDays: string; backToMonths: string;
+  /** 시각 옵션의 칸 이름 */
+  time: string; startTime: string; endTime: string;
 }
-const BASE_LABELS = { reset: LABELS.reset, cancel: LABELS.cancel, apply: LABELS.apply, openCalendar: LABELS.openCalendar, dialog: LABELS.dateDialog, prevMonth: LABELS.prevMonth, nextMonth: LABELS.nextMonth, prevYear: LABELS.prevYear, nextYear: LABELS.nextYear, prevYears: LABELS.prevYears, nextYears: LABELS.nextYears, chooseYear: LABELS.chooseYear, yearGrid: LABELS.yearGrid, backToDays: LABELS.backToDays, backToMonths: LABELS.backToMonths };
+const BASE_LABELS = { reset: LABELS.reset, cancel: LABELS.cancel, apply: LABELS.apply, openCalendar: LABELS.openCalendar, dialog: LABELS.dateDialog, prevMonth: LABELS.prevMonth, nextMonth: LABELS.nextMonth, prevYear: LABELS.prevYear, nextYear: LABELS.nextYear, prevYears: LABELS.prevYears, nextYears: LABELS.nextYears, chooseYear: LABELS.chooseYear, yearGrid: LABELS.yearGrid, backToDays: LABELS.backToDays, backToMonths: LABELS.backToMonths, time: LABELS.time, startTime: LABELS.startTime, endTime: LABELS.endTime };
 /** '오늘' — Intl.RelativeTimeFormat(locale) 로(ko 오늘 · en Today · ja 今日) */
 export function todayLabel(locale: string): string {
   try { const s = new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(0, "day"); return s.charAt(0).toUpperCase() + s.slice(1); } catch { return LABELS.today; }
@@ -60,6 +62,8 @@ export interface CalendarProps extends Omit<HTMLAttributes<HTMLDivElement>, "onS
   timezone?: string;
   /** 0 일요일 시작 · 1 월요일 시작 */
   weekStart?: 0 | 1;
+  /** 달력과 하단 사이 — DatePicker 의 시각 칸 */
+  extra?: ReactNode;
   /** .cal-foot 내용 */
   footer?: ReactNode;
   /** 달력 이름(aria-label) */
@@ -79,7 +83,7 @@ export interface CalendarProps extends Omit<HTMLAttributes<HTMLDivElement>, "onS
 
 /** 달력. 일 · 월 · 연 뷰, 기간과 미리보기, WAI-ARIA 날짜 격자 키보드(←→ 하루 · ↑↓ 일주일 · PageUp/Down 달 · Home/End). 요일 · 월 · 제목 표기는 Intl(locale) */
 export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calendar(
-  { month, onMonthChange, mode = "single", unit: unitProp, value, onSelect, min, max, today, locale = "ko-KR", timezone, weekStart = 0, footer, label, calendars, view: viewProp, defaultView, onViewChange, dialog, autoFocus, labels, className, onKeyDown, onPointerOver, onPointerLeave, ...rest },
+  { month, onMonthChange, mode = "single", unit: unitProp, value, onSelect, min, max, today, locale = "ko-KR", timezone, weekStart = 0, extra, footer, label, calendars, view: viewProp, defaultView, onViewChange, dialog, autoFocus, labels, className, onKeyDown, onPointerOver, onPointerLeave, ...rest },
   ref,
 ) {
   const unit: DateUnit = unitProp ?? (mode === "month" ? "month" : "day"), rangeMode = mode === "range";
@@ -139,7 +143,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
     if (e.defaultPrevented) return;
     const el = root.current!;
     if (e.key === "Tab" && dialog) {
-      const list = Array.from(el.querySelectorAll<HTMLButtonElement>("button")).filter((x) => !x.disabled && x.tabIndex >= 0);
+      const list = Array.from(el.querySelectorAll<HTMLButtonElement>("button, input")).filter((x) => !x.disabled && x.tabIndex >= 0);
       const i = list.indexOf(document.activeElement as HTMLButtonElement);
       if (e.shiftKey ? i <= 0 : i === list.length - 1) { e.preventDefault(); list[e.shiftKey ? list.length - 1 : 0]?.focus(); }
       return;
@@ -293,6 +297,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
       {...rest}
     >
       {body}
+      {extra}
       {footer !== undefined && footer !== null && footer !== false && <div className="cal-foot">{footer}</div>}
       <span className="sr-only" aria-live="polite">{live}</span>
     </div>

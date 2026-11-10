@@ -162,6 +162,13 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
       if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
+      /* Date Picker 시각 옵션(2026-11-10) */
+      for (const m of pv.matchAll(/<div class="datepicker field[^"]*"([^>]*\bdata-time\b[^>]*)>/g)) {
+        const at = m[1], sec = /data-time="seconds"/.test(at), input = /<input\b[^>]*>/.exec(pv.slice(m.index));
+        if (/data-time="[^"]/.test(at) && !sec) fails.push(`${f}: data-time 값은 없거나 seconds 입니다(Date Picker › Time)`);
+        if (/data-unit="/.test(at)) fails.push(`${f}: data-time 은 일 단위 Date Picker 에만 씁니다(Date Picker › Time)`);
+        if (!input || !new RegExp(`placeholder="YYYY\\. MM\\. DD HH:mm${sec ? ":ss" : ""}(?: ~ [^"]*)?"`).test(input[0])) fails.push(`${f}: 시각까지 받는 Date Picker 의 placeholder 는 형식 그대로(Date Picker › Time)`);
+      }
       /* Number Input 원칙(2026-11-10) */
       {
         const divBlock = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };

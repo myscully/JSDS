@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Chip, ChipGroup, DataTable, Icon, Indicator, Pagination, PaginationBar, SearchBar, SelectButton, Spacer, Stack, Tag, Toolbar, type DataTableColumn } from "@jiran/ds-react";
+import { Button, Chip, ChipGroup, DataTable, DateRangePicker, Icon, Indicator, Pagination, PaginationBar, SearchBar, SelectButton, Spacer, Stack, Tag, Toolbar, type DataTableColumn } from "@jiran/ds-react";
 
 type Log = { id: number; time: string; level: "critical" | "medium" | "high" | "low" | "info"; lv: string; ip: string; host: string; msg: string };
 const ROWS: Log[] = [
@@ -20,6 +20,13 @@ const COLUMNS: DataTableColumn<Log>[] = [
 
 const LEVELS = ["CRIT", "HIGH", "WARN", "LOW", "INFO"];
 
+/* max 를 0시로 두면 그 하루 끝까지다 — 지금 시각으로 두면 오늘 23:59 가 범위 밖이 된다 */
+const now = new Date();
+const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+const daysAgo = (n: number) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - n);
+const PRESETS = [{ label: "최근 7일", range: (): [Date, Date] => [daysAgo(6), today] }, { label: "최근 30일", range: (): [Date, Date] => [daysAgo(29), today] }];
+const END_OF_TODAY = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59);
+
 export default function Example() {
   const [live, setLive] = useState("live");
   const [levels, setLevels] = useState(["CRIT", "HIGH", "WARN"]);
@@ -27,7 +34,8 @@ export default function Example() {
   return (
     <Stack>
       <Toolbar>
-        <SearchBar placeholder="메시지, 단말, IP 검색" label="로그 검색" wrapperStyle={{ minWidth: 360 }} />
+        <SearchBar placeholder="메시지, 단말, IP 검색" label="로그 검색" wrapperStyle={{ minWidth: 320 }} />
+        <DateRangePicker aria-label="조회 구간" time max={today} presets={PRESETS} defaultValue={{ start: daysAgo(6), end: END_OF_TODAY }} />
         <ChipGroup clearable={levels.length > 0} onClear={() => setLevels([])}>
           {LEVELS.map((l) => (
             <Chip key={l} size="sm" selected={levels.includes(l)} onSelectedChange={(on) => setLevels((s) => (on ? [...s, l] : s.filter((x) => x !== l)))}>{l}</Chip>

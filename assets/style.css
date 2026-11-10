@@ -830,6 +830,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
    달력 자리는 --dp-top · --dp-left 로 준다(아래 자리가 모자라면 위로 .up) */
 .datepicker{display:inline-flex;flex-direction:column;gap:6px;position:relative;font-size:14px;line-height:1.6}
 .datepicker label{font-weight:600}
+.datepicker.field[data-range][data-time]{min-width:410px}   /* 시각까지 쓰면 'YYYY. MM. DD HH:mm ~ …' 가 Large 에서 343 */
+.datepicker.field[data-range][data-time="seconds"]{min-width:450px}   /* 초까지 383 */
 .datepicker.field[data-range]{min-width:300px}   /* 'YYYY. MM. DD ~ YYYY. MM. DD' 가 Large(16px)에서도 잘리지 않게 */
 .datepicker.open .affix{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}   /* 달력이 열린 동안은 어떻게 열었든 입력 포커스와 같은 링(사람의 결정 2026-11-09 — 모든 폼이 같은 포커스 모양) */
 .datepicker.field.error.open .affix{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}   /* 오류 필드는 열어도 빨강 링 */
@@ -883,6 +885,12 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .calendar.two{width:auto}
 .calendar .cal-months{display:flex;gap:24px}
 .calendar .cal-month{width:270px}
+/* 시각 — 달력 아래 입력칸 하나(기간은 둘). 칸 자체는 Text Field sm */
+.calendar .cal-time{display:flex;gap:12px;margin-top:12px}
+.calendar .cal-time .field{flex:1;min-width:0}
+/* 달력은 피커 .field 안에 있다 — 바깥 필드의 크기(lg) · 오류(빨강)가 시각 칸으로 내려오지 않게 sm · 기본 테두리로 되돌린다 */
+.calendar .cal-time .field input{height:32px;font-size:12px;padding:0 12px;border-color:var(--line-neutral-primary);font-variant-numeric:tabular-nums}
+.calendar .cal-time .field input:focus{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}
 .calendar .cal-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;padding-top:10px;margin-top:6px;border-top:1px solid var(--line-neutral-secondary)}
 .calendar .cal-foot .btn.text+.btn:not(.text){margin-left:auto}   /* 오늘 · 초기화 · 프리셋은 왼쪽, 취소 · 적용은 오른쪽 */
 

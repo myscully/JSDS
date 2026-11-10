@@ -9,8 +9,8 @@ import { FormValidationContext } from "../text-field/validation";
 import { LABELS } from "../../labels";
 import type { Size } from "../../types";
 import { Calendar, addMonths, baseView, isRange, labelsFor, outOf, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
-import { checkText, formatMonth, isValidDate, pasteText, placeholderOf, reformat, showOf, stepText, unitStart, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity } from "./format";
-import { calendarDateOf, instantOf, resolveZone, todayIn } from "./tz";
+import { checkText, clockOf, formatMonth, isValidDate, pasteText, placeholderOf, reformat, showOf, stepClock, stepText, unitStart, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity, type TextUnit } from "./format";
+import { calendarDateOf, clockDateOf, instantOf, resolveZone, todayIn } from "./tz";
 
 export { Calendar, type CalendarProps, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
 export { formatDate, formatMonth, parseDate, parseMonth, parseYear, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity } from "./format";
@@ -34,16 +34,18 @@ interface PickerBaseProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange
   onOpenChange?: (open: boolean) => void;
   /** 입력 자리 표시. 기본은 형식(YYYY. MM. DD) */
   placeholder?: string;
-  /** 달력에서 이보다 앞은 고를 수 없다. 키보드 입력은 막지 않고 validity "min" 으로 알린다 */
+  /** 시각까지 입력(일 단위만) — YYYY. MM. DD HH:mm, 24시간제. "seconds" 면 초까지. 달력 아래 시각 칸이 생기고 적용 버튼은 늘 있다. 값 Date 는 그 시간대의 그 시각이다 */
+  time?: boolean | "seconds";
+  /** 달력에서 이보다 앞은 고를 수 없다. 키보드 입력은 막지 않고 validity "min" 으로 알린다. time 에서 max 가 0시면 그 하루 끝까지 */
   min?: Date;
   max?: Date;
   /** 오늘(데모 고정용). 기본: timezone 의 오늘 */
   today?: Date;
   /** 달력 표기 언어(Intl). 기본 ko-KR. 입력 형식은 바뀌지 않는다 */
   locale?: string;
-  /** 기준 시간대 — IANA 이름 · "UTC". 기본 사용자 환경. 값 Date 는 이 시간대의 0시다 */
+  /** 기준 시간대 — IANA 이름 · "UTC". 기본 사용자 환경. 값 Date 는 이 시간대의 0시다(time 이면 그 시각) */
   timezone?: string;
-  /** 하단 버튼. 기본 단일 ["today","apply"] · 기간 ["apply"]. false 또는 apply 가 없으면 고르는 순간 적용하고 닫는다 */
+  /** 하단 버튼. 기본 단일 ["today","apply"] · 기간 ["apply"]. false 또는 apply 가 없으면 고르는 순간 적용하고 닫는다. time 이면 apply 는 늘 있다 */
   footer?: DatePickerFooterItem[] | false;
   /** 필드 아래 도움말 */
   help?: ReactNode;
@@ -104,13 +106,13 @@ interface PickerProps extends PickerBaseProps {
   presets?: DateRangePickerProps["presets"];
   calendars?: 1 | 2;
 }
-const MESSAGES: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject };
+const MESSAGES: DatePickerMessages = { incomplete: LABELS.dateIncompleteError, invalid: LABELS.dateInvalidError, min: LABELS.dateMinError, max: LABELS.dateMaxError, order: LABELS.dateOrderError, subject: LABELS.dateSubject, startSubject: LABELS.dateStartSubject, endSubject: LABELS.dateEndSubject, invalidTime: LABELS.dateTimeInvalidError, orderTime: LABELS.dateTimeOrderError, timeSubject: LABELS.dateTimeSubject, startTimeSubject: LABELS.dateStartTimeSubject, endTimeSubject: LABELS.dateEndTimeSubject };
 const firstOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
 const keyOfPair = (p: Pair) => [p.a, p.b].map((d) => (d == null ? "" : isNaN(d.getTime()) ? "NaN" : String(d.getTime()))).join("|");
 const narrow = () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(max-width:767px)").matches;
 
 const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
-  { range, pair, defaultPair, onPair, label, unit = "day", open, defaultOpen = false, onOpenChange, placeholder, min, max, today, locale = "ko-KR", timezone, presets, footer, calendars, help, error, messages, labels, size = "md", disabled, readOnly, required, inputId, defaultText, className, style, onKeyDown, onBlur, "aria-label": ariaLabel, ...rest },
+  { range, pair, defaultPair, onPair, label, unit = "day", time, open, defaultOpen = false, onOpenChange, placeholder, min, max, today, locale = "ko-KR", timezone, presets, footer, calendars, help, error, messages, labels, size = "md", disabled, readOnly, required, inputId, defaultText, className, style, onKeyDown, onBlur, "aria-label": ariaLabel, ...rest },
   ref,
 ) {
   const tz = resolveZone(timezone);
@@ -120,13 +122,28 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   const [inner, setInner] = useState<Pair>(defaultPair);
   const cur = controlled ? pair! : inner;
   /* 달력은 달력 날짜(로컬 연 · 월 · 일)로 일한다 — 바깥 Date(순간)는 기준 시간대에서 무슨 날인지로 바꾼다 */
-  const cd = (d: Date | null | undefined) => (isValidDate(d) ? calendarDateOf(d, tz) : null);
+  const tu: TextUnit = time && unit === "day" ? (time === "seconds" ? "second" : "minute") : unit, isTime = tu === "minute" || tu === "second";
+  useEffect(() => { if (time && unit !== "day") console.warn(`[ds-react] DatePicker time 은 일 단위에만 씁니다 — unit="${unit}" 에서는 무시합니다.`); }, [time, unit]);
+  const cd = (d: Date | null | undefined) => (isValidDate(d) ? (isTime ? clockDateOf(d, tz) : calendarDateOf(d, tz)) : null);
   const todayD = today ? calendarDateOf(today, tz) : todayIn(tz);
-  const minD = cd(min), maxD = cd(max);
-  const textOfDays = (a: Date | null, b: Date | null) => (!a ? "" : range ? (b ? `${showOf(a, unit)} ~ ${showOf(b, unit)}` : "") : showOf(a, unit));
-  const check = (t: string) => checkText(t, { unit, range, min: minD, max: maxD, messages: msg });
+  const minD = cd(min);
+  let maxD = cd(max);
+  if (isTime && maxD && !maxD.getHours() && !maxD.getMinutes() && !maxD.getSeconds()) maxD = new Date(maxD.getFullYear(), maxD.getMonth(), maxD.getDate(), 23, 59, 59);   // 사이트 data-max 의 날짜만 적은 값과 같다 — 그 하루 전체
+  const textOfDays = (a: Date | null, b: Date | null) => (!a ? "" : range ? (b ? `${showOf(a, tu)} ~ ${showOf(b, tu)}` : "") : showOf(a, tu));
+  const check = (t: string) => checkText(t, { unit: tu, range, min: minD, max: maxD, messages: msg });
+  /* 달력 아래 시각 칸 — 친 글자는 적용할 때 날짜와 합쳐 필드와 같은 검사를 지난다(사람의 결정 2026-11-10 — 처음 값 00:00 · 기간 끝 23:59) */
+  type Clock = { a: string; b: string };
+  const clockDefaults = (): Clock => (tu === "second" ? { a: "00:00:00", b: "23:59:59" } : { a: "00:00", b: "23:59" });
+  const [clock, setClock] = useState<Clock>(clockDefaults);
+  const clockFrom = (v: DateValue): Clock => {
+    const c = clockDefaults(), s = isRange(v) ? v.start : v instanceof Date ? v : null, e = isRange(v) ? v.end : null;
+    if (s) c.a = clockOf(s, tu);
+    if (e) c.b = clockOf(e, tu);
+    return c;
+  };
+  const withClock = (a: Date | null, b: Date | null, c: Clock) => (!a ? "" : range ? (b ? `${showOf(a, "day")} ${c.a} ~ ${showOf(b, "day")} ${c.b}` : "") : `${showOf(a, "day")} ${c.a}`);
 
-  const [text, setText] = useState(() => (defaultText !== undefined ? pasteText(defaultText, unit, range) : textOfDays(cd(cur.a), cd(cur.b))));
+  const [text, setText] = useState(() => (defaultText !== undefined ? pasteText(defaultText, tu, range) : textOfDays(cd(cur.a), cd(cur.b))));
   const committed = useRef(text);   // 마지막으로 검사 · 확정한 글자 — 이것과 다를 때만 onChange
   const [validity, setValidity] = useState<DateValidity>(() => check(text).validity);
   const [typeError, setTypeError] = useState<string | null>(() => check(text).message ?? null);
@@ -143,8 +160,10 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   const input = useRef<HTMLInputElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const caret = useRef<number | null>(null);
+  const clockCaret = useRef<{ side: keyof Clock; at: number } | null>(null);
   const id = useId(inputId);
-  const items = footer === false ? [] : footer ?? (range ? ["apply"] : ["today", "apply"]);
+  const footItems = footer === false ? [] : footer ?? (range ? ["apply"] : ["today", "apply"]);
+  const items = isTime && !footItems.includes("apply") ? [...footItems, "apply" as const] : footItems;   // 시각을 고를 틈이 있어야 한다 — 날짜를 누르는 순간 닫히면 시각을 못 고친다
   const instant = !items.includes("apply");
   const wantMonths = (): 1 | 2 => (range && unit === "day" && (calendars ?? 2) === 2 && !narrow() ? 2 : 1);
 
@@ -163,6 +182,9 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   useLayoutEffect(() => {   // 다시 끊은 글자에서 커서를 같은 숫자 뒤에
     if (caret.current !== null && input.current && document.activeElement === input.current) input.current.setSelectionRange(caret.current, caret.current);
     caret.current = null;
+    const c = clockCaret.current;
+    if (c) { const el = document.getElementById(`${id}-time-${c.side}`) as HTMLInputElement | null; if (el && document.activeElement === el) el.setSelectionRange(c.at, c.at); }
+    clockCaret.current = null;
   });
 
   const emit = (p: Pair, info: DateChangeInfo) => { if (!controlled) setInner(p); onPair?.(p, info); };
@@ -179,17 +201,19 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   function commitText(raw: string): string {
     const r = check(raw), bad = r.validity === "incomplete" || r.validity === "invalid";
     const shown = r.start ? textOfDays(r.start, r.end) : raw.trim();
-    const p: Pair = bad ? { a: new Date(NaN), b: range ? new Date(NaN) : null } : { a: r.start && instantOf(r.start, tz), b: r.end && instantOf(r.end, tz) };
+    const p: Pair = bad ? { a: new Date(NaN), b: range ? new Date(NaN) : null } : { a: r.start && instantOf(r.start, tz, isTime), b: r.end && instantOf(r.end, tz, isTime) };
     setText(shown); setValidity(r.validity); setTypeError(r.message ?? null);
     const changed = shown !== committed.current;
     committed.current = shown;
     if (changed) emit(p, { text: shown, validity: r.validity, ...(r.sides && { sides: r.sides }) });
-    if (isOpen) { const v = draftOf(shown); setDraft(v); setMonth(startMonth(v, months === 2)); setView(baseView(unit)); }   // 연 채로 입력해 확정하면 달력도 그 값으로 — 적용이 예전 값으로 되돌리지 않게
+    if (isOpen) { const v = draftOf(shown); setDraft(v); if (isTime && v) setClock(clockFrom(v)); setMonth(startMonth(v, months === 2)); setView(baseView(unit)); }   // 연 채로 입력해 확정하면 달력도 그 값으로 — 적용이 예전 값으로 되돌리지 않게
     return shown;
   }
   /* 달력에서 확정 — 달력은 범위 밖을 고를 수 없으니 늘 유효하다 */
-  const commitDays = (v: DateValue) => {
-    const a = isRange(v) ? v.start : v instanceof Date ? v : null, b = isRange(v) ? v.end : null, t = textOfDays(a, b);
+  const commitDays = (v: DateValue, c: Clock = clock) => {
+    const a = isRange(v) ? v.start : v instanceof Date ? v : null, b = isRange(v) ? v.end : null;
+    if (isTime && a) { commitText(withClock(a, b, c)); return; }   // 달력은 날짜만 막는다 — 시각의 범위 · 순서는 필드 검사가 잰다
+    const t = textOfDays(a, b);
     setText(t); setValidity(a ? "valid" : "empty"); setTypeError(null);
     if (t !== committed.current) { committed.current = t; emit({ a: a && instantOf(a, tz), b: b && instantOf(b, tz) }, { text: t, validity: a ? "valid" : "empty", ...(range && { sides: { start: a ? "valid" : "empty", end: b ? "valid" : "empty" } }) }); }
   };
@@ -201,7 +225,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
     if (isOpen && !wasOpen.current) {
       const two = wantMonths(), v = draftOf(pending.current ?? committed.current);
       pending.current = null;
-      setMonths(two); setDraft(v); setMonth(startMonth(v, two === 2)); setView(baseView(unit)); setSession((s) => s + 1);
+      setMonths(two); setDraft(v); if (isTime) setClock(clockFrom(v)); setMonth(startMonth(v, two === 2)); setView(baseView(unit)); setSession((s) => s + 1);
     }
     wasOpen.current = isOpen;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -212,7 +236,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
     if (!o && restore) trigger.current?.focus();
   };
   useOutsideClick([root], () => setOpen(false), isOpen);
-  const done = (v: DateValue) => { commitDays(v); setOpen(false, true); };
+  const done = (v: DateValue, c?: Clock) => { commitDays(v, c); setOpen(false, true); };
 
   const pick = (d: Date) => {
     let next: DateValue;
@@ -225,19 +249,21 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
     if (instant && (!isRange(next) || next.end)) done(next);
   };
   const halfRange = isRange(draft) && !draft.end;
-  const draftText = textOfDays(isRange(draft) ? draft.start : (draft as Date | null), isRange(draft) ? draft.end : null);
+  const draftA = isRange(draft) ? draft.start : (draft as Date | null), draftB = isRange(draft) ? draft.end : null;
+  const draftText = isTime && draftA ? withClock(draftA, draftB, clock) : textOfDays(draftA, draftB);
+  const canApply = !halfRange && draftText !== committed.current;
   const foot = (
     <>
       {range && unit === "day" && presets?.map((p, i) => {
         const [s, e] = p.range().map((x) => calendarDateOf(x, tz));
-        return <Button variant="text" key={`p${i}`} size="sm" data-preset={i} disabled={outOf(s, minD, maxD) || outOf(e, minD, maxD)} onClick={() => done({ start: s, end: e })}>{p.label}</Button>;
+        return <Button variant="text" key={`p${i}`} size="sm" data-preset={i} disabled={outOf(s, minD, maxD) || outOf(e, minD, maxD)} onClick={() => done({ start: s, end: e }, clockDefaults())}>{p.label}</Button>;
       })}
       {items.includes("today") && !range && (
         <Button variant="text" size="sm" data-cal="today" disabled={outOf(todayD, minD, maxD, unit)} onClick={() => { const t = unitStart(todayD, unit); setMonth(firstOf(t)); setView(baseView(unit)); setDraft(t); if (instant) done(t); }}>{L.today}</Button>
       )}
-      {items.includes("reset") && <Button variant="text" size="sm" data-cal="reset" onClick={() => { setDraft(null); if (instant) done(null); }}>{L.reset}</Button>}
+      {items.includes("reset") && <Button variant="text" size="sm" data-cal="reset" onClick={() => { setDraft(null); setClock(clockDefaults()); if (instant) done(null); }}>{L.reset}</Button>}
       {items.includes("cancel") && <Button variant="outline" color="assistive" size="sm" data-cal="cancel" onClick={() => setOpen(false, true)}>{L.cancel}</Button>}
-      {items.includes("apply") && <Button size="sm" data-cal="apply" disabled={halfRange || draftText === committed.current} onClick={() => done(draft)}>{L.apply}</Button>}
+      {items.includes("apply") && <Button size="sm" data-cal="apply" disabled={!canApply} onClick={() => done(draft)}>{L.apply}</Button>}
     </>
   );
   const hasFoot = (range && unit === "day" && !!presets?.length) || items.some((k) => k !== "today" || !range);
@@ -262,10 +288,36 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
     else if ((e.key === "ArrowUp" || e.key === "ArrowDown") && !readOnly && !disabled) {
       /* ↑↓ — 커서 조각 ±1 하고 바로 확정. min/max 는 보지 않는다(사람의 요구 2026-11-09 — 키보드로는 범위 밖 값도 넣는다) */
       e.preventDefault();
-      const r = stepText(text, e.currentTarget.selectionStart ?? text.length, e.key === "ArrowUp" ? 1 : -1, unit, range, todayD);
+      const r = stepText(text, e.currentTarget.selectionStart ?? text.length, e.key === "ArrowUp" ? 1 : -1, tu, range, todayD);
       caret.current = r.caret; commitText(r.text);
     }
   };
+  const clockField = (side: keyof Clock, name: string) => (
+    <TextField
+      key={side}
+      id={`${id}-time-${side}`}
+      size="sm"
+      label={name}
+      value={clock[side]}
+      placeholder={tu === "second" ? "HH:mm:ss" : "HH:mm"}
+      inputMode="numeric"
+      autoComplete="off"
+      onChange={(e) => {
+        const ne = e.nativeEvent as InputEvent, r = reformat(e.target.value, clock[side], e.target.selectionStart ?? e.target.value.length, ne.inputType, tu === "second" ? "clockS" : "clock", false);
+        clockCaret.current = { side, at: r.caret };
+        setClock((c) => ({ ...c, [side]: r.text }));
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (canApply) done(draft); }
+        else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          e.preventDefault();
+          const r = stepClock(clock[side], e.currentTarget.selectionStart ?? 0, e.key === "ArrowUp" ? 1 : -1, tu === "second");
+          clockCaret.current = { side, at: r.caret };
+          setClock((c) => ({ ...c, [side]: r.text }));
+        }
+      }}
+    />
+  );
   const rootStyle = place ? ({ ...style, "--dp-top": `${place.top}px`, "--dp-left": `${place.left}px` } as CSSProperties) : style;
   const calendar = isOpen && (
     <Calendar
@@ -286,6 +338,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
       view={view}
       onViewChange={setView}
       labels={labels}
+      extra={isTime && view === "day" ? <div className="cal-time">{range ? [clockField("a", L.startTime), clockField("b", L.endTime)] : clockField("a", L.time)}</div> : undefined}
       footer={hasFoot ? foot : undefined}
     />
   );
@@ -302,7 +355,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
       error={err || undefined}
       size={size}
       value={text}
-      placeholder={placeholder ?? placeholderOf(unit, range)}
+      placeholder={placeholder ?? placeholderOf(tu, range)}
       inputMode="numeric"
       autoComplete="off"
       disabled={disabled}
@@ -311,7 +364,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
       onChange={(e) => {
         const ne = e.nativeEvent as InputEvent;
         if (ne.isComposing) { setText(e.target.value); return; }
-        const r = reformat(e.target.value, text, e.target.selectionStart ?? e.target.value.length, ne.inputType, unit, range);
+        const r = reformat(e.target.value, text, e.target.selectionStart ?? e.target.value.length, ne.inputType, tu, range);
         caret.current = r.caret; setText(r.text);
       }}
       onKeyDown={inputKeyDown}
@@ -326,6 +379,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
         ...rest,
         ref: mergeRefs(root, ref),
         "data-range": range ? "" : undefined,
+        "data-time": isTime ? (time === "seconds" ? "seconds" : "") : undefined,
         "data-validity": validity === "valid" || validity === "empty" ? undefined : validity,
         onKeyDown: rootKeyDown,
         /* 포커스가 필드(입력칸 · 달력 버튼 · 달력) 밖으로 나갈 때, 확정 뒤 바뀐 글자가 있으면 검사한다 */

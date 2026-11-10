@@ -245,15 +245,16 @@ const PATTERNS = {
   },
 
   "log-viewer": {
-    status: "ready", react: ["Toolbar","Stack"], uses: ["search", "chip", "select-button", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack", ".log-row"],
+    status: "ready", react: ["Toolbar","Stack"], uses: ["search", "date-picker", "chip", "select-button", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack", ".log-row"], borrows: [".field"],
     desc: "대량 로그를 빠르게 훑고 필터링하는 화면입니다. Compact 표 + 모노스페이스 시간/IP + 심각도 태그 + 실시간/일시정지 전환.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><tbody><tr class="log-row"><td style="height:32px">09:41:12</td><td><span class="tag critical sm">CRIT</span></td></tr><tr class="log-row"><td style="height:32px">09:41:11</td><td><span class="tag medium sm">WARN</span></td></tr></tbody></table></div>`,
-    principles: [["밀도", ".tbl.compact 44px 행, 시간·IP 는 .log-row 모노스페이스"], ["필터", "심각도 Chip 다중 선택 + 검색 + 실시간/일시정지"], ["상세", "행 클릭 → 우측 패널(표는 그대로)"]],
+    principles: [["밀도", ".tbl.compact 44px 행, 시간·IP 는 .log-row 모노스페이스"], ["필터", "심각도 Chip 다중 선택 + 검색 + 실시간/일시정지"], ["조회 구간", "시각까지 입력합니다. 달력이나 프리셋으로 고른 날짜는 첫날 00:00 부터 마지막 날 23:59 까지입니다"], ["상세", "행 클릭 → 우측 패널(표는 그대로)"]],
     examples: [
       { id: "viewer", title: "로그 뷰어", html: `
         <div class="stack">
           <div class="toolbar">
-            <div class="searchbar" role="search" style="min-width:360px">${I("search")}<input type="search" placeholder="메시지, 단말, IP 검색" aria-label="로그 검색"></div>
+            <div class="searchbar" role="search" style="min-width:320px">${I("search")}<input type="search" placeholder="메시지, 단말, IP 검색" aria-label="로그 검색"></div>
+            <div class="datepicker field" data-range data-time data-max="today" data-presets="7 30" data-default-preset="7"><div class="affix"><input value="2026. 10. 21 00:00 ~ 2026. 10. 27 23:59" placeholder="YYYY. MM. DD HH:mm ~ YYYY. MM. DD HH:mm" inputmode="numeric" autocomplete="off" aria-label="조회 구간"><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div></div>
             <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">LOW</button><button type="button" class="chip sm" aria-pressed="false">INFO</button><button type="button" class="btn sm text assistive" data-chip-reset>필터 초기화</button></div>
             <span class="spacer"></span>
             <div class="select-btn outline" role="radiogroup" aria-label="갱신"><button type="button" class="on" role="radio" aria-checked="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" role="radio" aria-checked="false">일시정지</button></div>
