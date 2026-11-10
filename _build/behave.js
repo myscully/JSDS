@@ -1836,6 +1836,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await require("./behave.nav.js")({ page, ok, go });
   await require("./behave.promote.js")({ page, ok, go });
     await require("./behave.upload.js")({ page, ok, go });
+    await require("./behave.code.js")({ page, ok, go });
 
   // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
   await go("components/button.html");

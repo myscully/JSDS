@@ -162,6 +162,27 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
       if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
+      /* Code · Copy Field 원칙(2026-11-10) */
+      {
+        const divBlock = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };
+        for (const m of pv.matchAll(/<div class="code-view[ "][^>]*>/g)) {
+          const b = divBlock(m.index), title = (/<span class="title">([^<]+)</.exec(b) || [])[1];
+          if (!b.includes('class="head"') && /<button/.test(b)) fails.push(`${f}: Code 복사 버튼은 .head 안`);
+          if (!/<div class="head">/.test(b)) continue;   // 썸네일처럼 머리글 없는 틀
+          if (!title) { fails.push(`${f}: Code 블록에 제목 없음`); continue; }
+          if (!new RegExp(`<pre tabindex="0" aria-label="${title}"`).test(b)) fails.push(`${f}: Code 의 pre 에 tabindex · 제목과 같은 이름이 없음(Code › 키보드)`);
+          if (/<pre[\s\S]*<span/.test(b.slice(0, b.lastIndexOf("</pre>")))) fails.push(`${f}: Code 안에 구문 강조(Code › 강조)`);
+          if (!b.includes(`aria-label="${title} 복사"`)) fails.push(`${f}: Code 복사 버튼 이름에 제목이 없음`);
+        }
+        for (const m of pv.matchAll(/<div class="field[^"]*copy-field[^"]*"[^>]*>/g)) {
+          const b = divBlock(m.index), name = (/<label\b[^>]*>([^<]+)</.exec(b) || [])[1];
+          if (!name) continue;   // 썸네일
+          if (!/<input\b[^>]*\sreadonly/.test(b)) fails.push(`${f}: Copy Field 값은 readonly`);
+          if (!b.includes(`aria-label="${name} 복사"`)) fails.push(`${f}: Copy Field 복사 버튼 이름에 값의 이름이 없음(Copy Field › 버튼 이름)`);
+          if (/type="password"/.test(b) && !b.includes(`class="reveal" aria-label="${name} 보기"`)) fails.push(`${f}: 가린 Copy Field 에 보기 버튼 없음(Copy Field › 민감한 값)`);
+        }
+        for (const m of pv.matchAll(/<span class="copy-field inline"[^>]*>([\s\S]*?)<\/button>/g)) if (!/aria-label="[^"]+ 복사"/.test(m[1])) fails.push(`${f}: 인라인 복사 버튼에 이름 없음`);
+      }
       /* File Upload 원칙(2026-11-10) */
       {
         const fieldBlock = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };
@@ -327,7 +348,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 40) fails.push(`components.json 컴포넌트 ${j.components.length}개(40 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 42) fails.push(`components.json 컴포넌트 ${j.components.length}개(42 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 10) fails.push(`components.json 패턴 ${j.patterns.length}개(10 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }

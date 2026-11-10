@@ -73,6 +73,9 @@ const cal = (o) => {
   <span class="sr-only" aria-live="polite"></span>
 </div>`;
 };
+/* Code · Copy Field 의 복사 버튼 — 이름에 값의 이름을 넣는다 */
+const copyBtn = (name, iconOnly) => `<button type="button" class="btn sm text assistive${iconOnly ? " icon-only" : ""} copy" aria-label="${name} 복사"><span class="ico">${I("copy",16)}</span>${iconOnly ? "" : '<span class="t">복사</span>'}</button>`;
+
 /* Date Picker 필드 — Text Field 셸(.field + .affix) 위 입력 하나와 달력 버튼. 입력 형식은 단위마다 고정(YYYY. MM. DD · YYYY. MM · YYYY), locale 과 무관(사람의 결정 2026-11-09).
    opts: id, label, value, help, attrs(data-* 문자열), cls(sm · lg · error), unit, range, invalid, disabled, readonly */
 const dpField = (o) => {
@@ -2381,6 +2384,82 @@ const COMPONENTS = {
     ],
     props: [[".upload", "div", "—", "React <code>FileUpload</code>"], ["input[type=file]", "accept · multiple", "—", "받는 형식과 여러 개. React <code>accept</code> · <code>multiple</code>"], ["data-max-size", "attr", "—", "예: 5MB. React <code>maxSize</code>(바이트)"], ["data-max-files", "attr", "—", "여러 개일 때 상한. React <code>maxFiles</code>"], ["data-required", "attr", "—", "폼 검증에 낍니다. React <code>required</code>"], [".compact", "boolean", "false", "버튼형"], [".upload-item", "li", "—", ".uploading · .done · .error, 거절은 data-rejected"], ["ds:upload", "event", "—", "<code>detail.files</code> = [{id, file}]. 전송은 제품이. React <code>onAdd</code>"], ["DS.upload", "API", "—", "<code>progress(el, id, n)</code> · <code>done(el, id)</code> · <code>fail(el, id, 문구)</code>. React 는 <code>items</code> 의 status · progress · error"], ["ds:upload-retry · ds:upload-remove", "event", "—", "<code>detail.id</code> · <code>detail.file</code>. React <code>onRetry</code> · <code>onRemove</code>"], ["data-messages · data-labels", "JSON", "—", "문구 바꾸기. React <code>messages</code> · <code>labels</code>"]],
     spec: [["Size", "영역 패딩 24 · 목록 간격 4 · 줄 패딩 8/12"], ["Container", "1px dashed line/neutral/primary · radius/lg"], ["Icon", "영역 24 · 줄 20"], ["Label", "14 · 크기와 오류 문구 12"], ["Placement", "폼의 필드 자리 · 가져오기 대화상자"]],
+  },
+  /* ------------------------------------------------ Code · Copy Field (2026-11-10) */
+  "code": {
+    status: "ready", react: ["CodeBlock", "InlineCode"], css: [".code-view", ".code-inline"], borrows: [".btn", ".t-body-2"],
+    desc: "명령 · 설정 · 로그 원문을 고정폭 글자로 보여 줍니다. 여러 줄은 복사 버튼이 있는 블록, 문장 안의 값은 인라인입니다.",
+    principles: [
+      ["언제 쓰는가", "명령과 설정처럼 그대로 옮겨 쓰는 글자, 고치면 안 되는 로그 원문에 씁니다. 값 하나를 옮겨 쓰는 자리는 Copy Field 입니다."],
+      ["강조", "구문 강조는 하지 않습니다. 빌드가 검사합니다."],
+      ["긴 줄", "명령과 설정은 가로로 스크롤합니다. 줄을 끊으면 뜻이 바뀌기 때문입니다. 긴 한 줄 로그는 <code>.wrap</code> 으로 줄바꿈합니다."],
+      ["긴 내용", "높이를 정해 안에서 스크롤합니다."],
+      ["복사", "블록에는 복사 버튼을 둡니다. 결과는 버튼 자리에서 2초 동안 보이고 스크린 리더에도 읽힙니다. Toast 를 띄우지 않습니다."],
+      ["키보드", "넘친 내용은 키보드로 스크롤합니다. <code>pre</code> 는 포커스를 받고 제목과 같은 이름을 가집니다. 빌드가 검사합니다."],
+      ["민감한 값", "API 키 · 토큰은 Code 에 넣지 않습니다. 가릴 수 있는 Copy Field 를 씁니다."],
+    ],
+    thumb: `<div class="code-view" style="width:180px"><pre style="padding:8px 12px"><code>sudo sh install.sh</code></pre></div>`,
+    examples: [
+      { id: "block", title: "Block", desc: "제목과 복사 버튼이 있는 블록입니다. 긴 줄은 가로로 스크롤합니다.", html: `
+        <div class="code-view">
+          <div class="head"><span class="title">에이전트 설치</span>${copyBtn("에이전트 설치")}</div>
+          <pre tabindex="0" aria-label="에이전트 설치"><code>curl -fsSL https://agent.example.com/install.sh -o install.sh
+sudo sh install.sh --group default
+sudo systemctl enable --now js-agent</code></pre>
+        </div>` },
+      { id: "wrap", title: "Wrap", desc: "긴 한 줄 로그는 .wrap 으로 줄바꿈합니다.", html: `
+        <div class="code-view wrap">
+          <div class="head"><span class="title">원본 로그</span>${copyBtn("원본 로그")}</div>
+          <pre tabindex="0" aria-label="원본 로그"><code>2026-11-10T09:14:22+09:00 gw-01 kernel: [UFW BLOCK] IN=eth0 OUT= MAC=52:54:00:12:34:56 SRC=203.0.113.24 DST=198.51.100.7 LEN=60 TOS=0x00 PREC=0x00 TTL=52 ID=41021 DF PROTO=TCP SPT=51544 DPT=22 WINDOW=64240 RES=0x00 SYN URGP=0</code></pre>
+        </div>` },
+      { id: "height", title: "Max Height", desc: "긴 내용은 높이를 정해 안에서 스크롤합니다. 포커스를 준 뒤 화살표 키로도 움직입니다.", html: `
+        <div class="code-view">
+          <div class="head"><span class="title">차단 로그</span>${copyBtn("차단 로그")}</div>
+          <pre tabindex="0" aria-label="차단 로그" style="max-height:200px"><code>2026-11-10T09:14:10 gw-01 ips: rule=2041 action=block src=203.0.113.20 dst=198.51.100.7 port=22
+2026-11-10T09:14:13 gw-01 ips: rule=2041 action=block src=203.0.113.21 dst=198.51.100.7 port=443
+2026-11-10T09:14:16 gw-01 ips: rule=2041 action=block src=203.0.113.22 dst=198.51.100.7 port=22
+2026-11-10T09:14:19 gw-01 ips: rule=2041 action=block src=203.0.113.23 dst=198.51.100.7 port=443
+2026-11-10T09:14:22 gw-01 ips: rule=2041 action=block src=203.0.113.24 dst=198.51.100.7 port=22
+2026-11-10T09:14:25 gw-01 ips: rule=2041 action=block src=203.0.113.25 dst=198.51.100.7 port=443
+2026-11-10T09:14:28 gw-01 ips: rule=2041 action=block src=203.0.113.26 dst=198.51.100.7 port=22
+2026-11-10T09:14:31 gw-01 ips: rule=2041 action=block src=203.0.113.27 dst=198.51.100.7 port=443
+2026-11-10T09:14:34 gw-01 ips: rule=2041 action=block src=203.0.113.28 dst=198.51.100.7 port=22
+2026-11-10T09:14:37 gw-01 ips: rule=2041 action=block src=203.0.113.29 dst=198.51.100.7 port=443
+2026-11-10T09:14:40 gw-01 ips: rule=2041 action=block src=203.0.113.30 dst=198.51.100.7 port=22
+2026-11-10T09:14:43 gw-01 ips: rule=2041 action=block src=203.0.113.31 dst=198.51.100.7 port=443</code></pre>
+        </div>` },
+      { id: "inline", title: "Inline", desc: "문장 안의 경로 · 명령은 .code-inline 입니다.", html: `
+        <p class="t-body-2" style="margin:0">설정 파일은 <code class="code-inline">/etc/js-agent/agent.conf</code> 에 있습니다. 바꾼 뒤 <code class="code-inline">systemctl restart js-agent</code> 를 실행하세요.</p>` },
+    ],
+    props: [[".code-view", "div", "—", "React <code>CodeBlock</code>. <code>title</code> 필수"], [".wrap", "boolean", "false", "줄바꿈. React <code>wrap</code>"], ["pre", "tabindex · aria-label", "—", "키보드 스크롤과 이름. React 는 자동"], ["max-height", "style", "—", "pre 에. React <code>maxHeight</code>"], [".code-inline", "code", "—", "문장 안의 값. React <code>InlineCode</code>"], ["ds:copy", "event", "—", "<code>detail.ok</code>. 값은 싣지 않습니다. React <code>onCopy(ok)</code>"], ["data-labels", "JSON", "—", "복사 결과 문구. React <code>labels</code>"]],
+    spec: [["Header", "패딩 4/8/4/16 · 아래 선 line/neutral/secondary"], ["Body", "패딩 12/16 · 13/20 고정폭"], ["Container", "1px line/neutral/secondary · radius/lg"], ["Inline", "0.9em 고정폭 · 면 surface/neutral/strong · 반경 4"], ["Placement", "설치 안내 · 설정 화면 · 로그 상세"]],
+  },
+  "copy-field": {
+    status: "ready", react: ["CopyField"], css: [".copy-field"], borrows: [".field", ".affix", ".reveal", ".btn", ".help", ".t-label-1"],
+    desc: "해시 · IP · API 키처럼 옮겨 쓰는 값을 읽기 전용으로 보여 주고 복사 버튼을 둡니다. 민감한 값은 가립니다.",
+    principles: [
+      ["언제 쓰는가", "값을 다른 곳으로 옮겨 쓰는 자리에 씁니다. 사용자가 고치는 값은 Text Field, 여러 줄은 Code 입니다."],
+      ["민감한 값", "API 키 · 토큰은 기본으로 가리고 보기 버튼을 둡니다. 빌드가 검사합니다."],
+      ["복사", "가린 채로도 전체 값을 복사합니다. 복사해도 가림은 풀리지 않습니다."],
+      ["결과 알림", "버튼 자리에서 2초 동안 보이고 스크린 리더에도 읽힙니다. Toast 를 띄우지 않습니다."],
+      ["버튼 이름", "보기와 복사 버튼 이름에 값의 이름을 넣습니다. 빌드가 검사합니다."],
+      ["표 안", "표 · 키-값 목록은 <code>.inline</code> 입니다. 가리는 기능이 없어 민감한 값에는 쓰지 않습니다."],
+      ["보안", "가려도 값은 브라우저에 있습니다. 한 번만 보여 줄 키는 화면에 내려보낼지 제품이 정합니다."],
+    ],
+    thumb: `<div class="field mono copy-field" style="width:180px;min-width:0"><div class="affix"><input readonly value="9f86d081" aria-label="해시"></div></div>`,
+    examples: [
+      { id: "default", title: "Default", desc: "읽기 전용 값과 복사 버튼입니다.", html: `
+        <div class="field mono copy-field" style="width:100%;max-width:480px"><label for="cf1">SHA-256</label><div class="affix"><input id="cf1" readonly autocomplete="off" value="9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08">${copyBtn("SHA-256")}</div></div>` },
+      { id: "secret", title: "Secret", desc: "민감한 값은 가리고 보기 버튼을 둡니다. 가린 채로 복사해도 전체 값이 복사됩니다.", html: `
+        <div class="field mono copy-field" style="width:100%;max-width:480px"><label for="cf2">API 키</label><div class="affix"><input id="cf2" type="password" readonly autocomplete="off" value="jsk_demo_4f7a91c2e8b3d605"><button type="button" class="reveal" aria-label="API 키 보기" aria-pressed="false"><span class="i-show">${I("eye",18)}</span><span class="i-hide">${I("eye-off",18)}</span></button>${copyBtn("API 키")}</div><span class="help">외부에 공유하지 마세요</span></div>` },
+      { id: "inline", title: "Inline", desc: "표 · 키-값 목록의 값은 .inline 입니다. 민감한 값에는 쓰지 않습니다.", html: `
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:center">
+          <span class="t-label-1">에이전트 IP</span><span class="copy-field inline"><span class="value">203.0.113.24</span>${copyBtn("에이전트 IP", true)}</span>
+          <span class="t-label-1">파일 해시</span><span class="copy-field inline"><span class="value">9f86d081884c7d65</span>${copyBtn("파일 해시", true)}</span>
+        </div>` },
+    ],
+    props: [[".copy-field", "class", "—", "React <code>CopyField</code>. <code>.field.mono</code> 와 함께"], ["input", "readonly · value", "—", "React <code>value</code> · <code>label</code>"], ["type=password", "attr", "text", "가리기. <code>.reveal</code> 필수. React <code>secret</code>"], [".inline", "boolean", "false", "표 · 키-값 목록. React <code>inline</code>"], ["ds:copy", "event", "—", "<code>detail.ok</code>. 값은 싣지 않습니다. React <code>onCopy(ok)</code>"], ["ds:reveal", "event", "—", "<code>detail.shown</code>. 감사 로그용. React <code>onReveal(shown)</code>"], ["data-labels", "JSON", "—", "복사 결과 문구. React <code>labels</code>"]],
+    spec: [["Size", "Text Field 와 같음 · 높이 40"], ["Value", "고정폭 · 읽기 전용 면 background/neutral/secondary"], ["Actions", "보기 28 · 복사 Button sm · Inline 복사 24"], ["Placement", "폼의 값 자리 · 표 칸 · 키-값 목록"]],
   },
 };
 

@@ -1519,6 +1519,25 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .form .form-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:16px;border-top:1px solid var(--line-neutral-secondary)}
 .form .form-actions .left{margin-right:auto}
 .form .field{min-width:0}
+/* Code · Copy Field — 새 색 쌍 없이 기존 토큰만. 복사 결과는 버튼 자리에서 2초 */
+.code-inline{font-family:var(--font-mono);font-size:.9em;font-variant-numeric:tabular-nums;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);padding:1px 6px;border-radius:4px;overflow-wrap:anywhere}
+.code-view{display:flex;flex-direction:column;width:100%;min-width:0;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);overflow:hidden}
+.code-view .head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 8px 4px 16px;border-bottom:1px solid var(--line-neutral-secondary)}
+.code-view .title{min-width:0;font-size:14px;line-height:1.6;font-weight:500;color:var(--foreground-neutral-secondary)}
+.code-view pre{contain:inline-size;margin:0;padding:12px 16px;border-radius:0;background:none;color:var(--foreground-neutral-primary);font-size:13px;line-height:20px;tab-size:2;overflow:auto}   /* contain — 긴 줄이 그리드 칸을 넓히지 않게 */
+.code-view pre:focus-visible{outline-offset:-1px}   /* 틀의 overflow 가 바깥 외곽선을 자른다 */
+.code-view.wrap pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.code-view .copy .ico,.copy-field .copy .ico{display:grid;place-items:center}
+.code-view .copy .ico svg,.copy-field .copy .ico svg{width:16px;height:16px}
+.code-view .copy .t,.copy-field .copy .t{display:inline-block;min-width:3em;text-align:left}   /* 복사 → 복사됨 에도 옆 칸이 움직이지 않게 */
+.code-view .copy.copy-done .ico,.copy-field .copy.copy-done .ico{color:var(--foreground-positive-primary)}
+.code-view .copy.copy-failed .ico,.copy-field .copy.copy-failed .ico{color:var(--foreground-negative-strong)}
+.copy-field .affix .reveal{margin-right:0}
+.copy-field .affix .copy span{color:inherit;font-size:inherit}   /* .field .affix span 은 접두 · 접미 글자용 */
+.copy-field .affix .copy{flex:none;margin-right:-6px}
+.copy-field.inline{display:inline-flex;align-items:center;gap:4px;max-width:100%;font-size:14px;line-height:1.6}
+.copy-field.inline .value{min-width:0;font-family:var(--font-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.copy-field.inline .copy{flex:none;width:24px;height:24px}
 /* File Upload — 영역 전체가 눌리고(마우스) 키보드는 안의 버튼으로. 면 · 글자는 기존 쌍만 쓴다 */
 .upload{display:flex;flex-direction:column;gap:8px;width:100%;font-size:14px;line-height:1.6}
 .upload-zone{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;border:1px dashed var(--line-neutral-primary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);color:var(--foreground-neutral-secondary);text-align:center;cursor:pointer;transition:border-color var(--motion-fast)}

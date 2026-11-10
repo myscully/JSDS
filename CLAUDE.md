@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 71 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 871/871 · react 532+6 · tsc 0
+pages 73 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 923/923 · react 556+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -282,6 +282,15 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **오류 표시 시점:** 전송 중으로 바뀌는 것만으로는 필드가 빨개지지 않고, 제출이 막혀 띄운 '전송 중' 안내는 끝날 때까지 둔다. 전송 실패는 제출을 시도했거나 이미 오류일 때만 필드에 올린다(줄에는 늘 보임). 마지막 필수 파일을 지우면 제출 전에도 바로 알린다. React 는 `FormValidationContext.refresh` 를 더했다.
 - **verify 더함:** 도움말(형식 · 용량) · 버튼의 aria-labelledby · `.upload-pick` · 숨긴 input · `.upload-status` · 파일 줄 버튼 이름에 파일 이름 · 거절 줄에 다시 시도 금지. 라벨 검사는 숨긴 file input 을 뺀다(버튼이 이름을 갖는다).
 - 음성 시험: 사이트 52건 · React 35건. 첫 회 14건을 못 잡았다 — 13건은 단정의 전제가 틀렸다(하이픈에서 줄이 나뉘어 긴 이름 줄바꿈을 못 잼 · 앞선 제출로 '필수 파일 지우기' 경로를 못 탐 · 파일 줄이 하나라 '다른 파일 전송 중' 을 못 만듦 등). 고쳐 다시 깨서 모두 잡았고, 1건(재시도 후 포커스 이동)은 `upState` 가 이미 해서 코드를 지웠다. 파일 대화상자 단정은 가로채기를 매번 켜고 끄면 부하에서 한 번 어긋나 켜 둔 채 세게 고쳤다(부하 6회 통과). 파일 대화상자는 Playwright 가로채기로, 끌어다 놓기는 합성 DragEvent 로 쟀다. render.js 의 ds.js 크기 121KB → 134KB. Figma 미반영 144 → 145건(File Upload Spec 카드 없음).
+
+2026-11-10 Code · Copy Field 신규(사람의 결정 둘) — pages 71 → 73 · 컴포넌트 40 → 42 · behave 871 → 923(`behave.code.js` 52) · react 532+6 → 556+6(`tests/code-copy.test.tsx` 17 · 예제 228 → 235 에 따른 구조 비교 7). contrast · advisory 수는 그대로(새 색 쌍 없음).
+- **Code 는 구문 강조 없이 고정폭 · 복사 · 줄바꿈 또는 가로 스크롤**(사람의 결정) — 사이트 `.code-view`(`.wrap`) · `.code-inline`, React `CodeBlock` · `InlineCode`. 넘친 내용은 `pre` 가 포커스를 받아 키보드로 스크롤한다.
+- **Copy Field 는 민감한 값을 기본으로 가리고 보기 버튼, 복사는 가린 채로도 전체 값**(사람의 결정) — `.field.mono.copy-field`(읽기 전용 입력 + `type=password` + 기존 `.reveal`), 표 · 키-값은 `.copy-field.inline`(가리는 기능 없음). React `CopyField`.
+- **사람이 정하지 않은 기본값:** 복사 결과는 버튼 자리에서 2초(Toast 없음), 기본은 가로 스크롤, 보기로 펼친 값은 다시 누를 때까지 그대로(자동으로 다시 가리지 않음), `ds:copy` · `onCopy` 는 성공 여부만 싣고 값은 싣지 않음(로그로 새지 않게), 감사 로그용 `ds:reveal` · `onReveal`, 인라인 복사 버튼 24.
+- **복사 공통** — 클립보드 API 가 거부되면 임시 textarea + `execCommand` 로 한 번 더 시도하고, 그것도 실패하면 버튼에 '복사 실패' 로 알린다. 임시 textarea 는 버튼 옆에 둔다(body 에 두면 바깥을 감지하는 팝오버가 닫힌다). 알림 영역은 페이지에 하나 `body > .ds-live` 를 미리 만들어 쓴다(표의 행마다 만들지 않게).
+- **verify 더함:** Code 의 제목 · `pre` tabindex 와 제목과 같은 이름 · 구문 강조 금지 · 복사 버튼 이름, Copy Field 의 readonly · 버튼 이름에 값의 이름 · 가린 값의 보기 버튼 · 인라인 복사 이름.
+- **측정에서 드러나 고친 것(캡처):** 사이트 셸의 `.copied{outline:2px … !important}` 가 복사한 버튼에 마우스로도 외곽선을 입혔다 — 상태 클래스를 `.copy-done` · `.copy-failed` 로. `.field .affix span`(접두 · 접미 글자용)이 복사 글자를 12px · tertiary 로 흐렸다. 임시 textarea 에 `select()` 만 해서는 포커스가 안 옮겨 와 `focus` 를 더했다.
+- 음성 시험: 사이트 42건 · React 28건. 첫 회 3건을 못 잡아(긴 줄이 그리드 열을 넓히는 경로 · 2초 뒤 아이콘 복귀 · 알림 영역이 앞 테스트에서 남아 있던 것) 단정을 고쳐 다시 깨서 잡았다. 실제 클립보드는 쓰지 않고 `navigator.clipboard` · `execCommand` 를 바꿔 쟀다. render.js 의 ds.js 크기 134KB → 138KB. Figma 미반영 145 → 147건(Spec 카드 둘 없음).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

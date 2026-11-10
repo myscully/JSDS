@@ -25,6 +25,7 @@
 
   /* ---------- 초기화 ---------- */
   function init(root) {
+    dsLive();   // 알림 영역은 미리 — 복사하는 순간 새로 넣으면 대개 읽히지 않는다
     root = root || doc;
     $$("input.mixed", root).forEach(function (i) { i.indeterminate = true; });
     $$(".slider input[type=range]", root).forEach(syncSlider);
@@ -1061,7 +1062,8 @@
       if (el.classList.contains("sub")) { var par = el.previousElementSibling; while (par && par.matches("a.sub")) par = par.previousElementSibling; if (par && par.tagName === "A") { par.classList.add("has-on"); if (nav.classList.contains("collapsed")) par.setAttribute("aria-current", "true"); } }
       return; }
     // Text Field 비밀번호 표시 — 포커스는 버튼에 남는다
-    if ((el = closest(t, ".field .reveal"))) { var pw = $("input", closest(el, ".affix")); if (pw) { var showPw = pw.type === "password"; pw.type = showPw ? "text" : "password"; el.setAttribute("aria-pressed", String(showPw)); } return; }
+    if ((el = closest(t, ".code-view .copy, .copy-field .copy"))) { copyRun(el); return; }
+    if ((el = closest(t, ".field .reveal"))) { var pw = $("input", closest(el, ".affix")); if (pw) { var showPw = pw.type === "password"; pw.type = showPw ? "text" : "password"; el.setAttribute("aria-pressed", String(showPw)); var cfHost = closest(el, ".copy-field"); if (cfHost) fire(cfHost, "ds:reveal", { shown: showPw }); } return; }
     // Search 지우기
     if ((el = closest(t, ".searchbar .clear"))) { var sbc = closest(el, ".searchbar"), inp = $("input", sbc); if (inp) searchClear(sbc, inp); return; }
     // DatePicker · Calendar
@@ -1255,6 +1257,38 @@
   });
 
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
+  /* ---------- Code · Copy Field — 복사 ----------
+     결과는 버튼 자리에서 2초(Toast 를 쓰지 않음). 값은 이벤트에 싣지 않는다 — 민감한 값이 로그로 새지 않게.
+     임시 textarea 는 버튼 옆에 둔다 — body 에 두면 바깥을 감지하는 팝오버가 닫힌다 */
+  var COPY_ICON = { idle: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 9.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667l0 -8.666\"/><path d=\"M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1\"/></svg>", done: "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12l5 5l10 -10\"/></svg>" };
+  var COPY_LABEL = { copied: "복사됨", failed: "복사 실패", copiedStatus: "복사했습니다.", failedStatus: "복사하지 못했습니다. 값을 직접 선택해 복사하세요." };
+  function dsLive() { var l = $("body > .ds-live"); if (!l) { l = doc.createElement("div"); l.className = "sr-only ds-live"; l.setAttribute("role", "status"); doc.body.appendChild(l); } return l; }
+  function dsSay(msg) { var l = dsLive(); l.textContent = ""; setTimeout(function () { l.textContent = msg; }, 50); }   // 같은 문구를 또 읽게 비웠다가 넣는다
+  function copyL(host, k) { var raw = host.getAttribute("data-labels"), o = {}; if (raw) { try { o = JSON.parse(raw) || {}; } catch (e) { o = {}; } } return o[k] || COPY_LABEL[k]; }
+  function copyLegacy(text, near, done) {
+    var a = doc.activeElement, ta = doc.createElement("textarea"), ok = false;
+    ta.value = text; ta.readOnly = true; ta.tabIndex = -1; ta.className = "sr-only"; ta.setAttribute("aria-hidden", "true"); near.appendChild(ta); ta.focus({ preventScroll: true }); ta.select();
+    try { ok = doc.execCommand("copy"); } catch (e) { ok = false; }
+    ta.remove(); if (a && a.focus) a.focus(); done(ok);
+  }
+  function copyText(text, near, done) {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { copyLegacy(text, near, done); });
+    else copyLegacy(text, near, done);
+  }
+  function copyMark(btn, host, state) {
+    clearTimeout(btn._copyT);
+    var t = $(".t", btn); if (t && btn._copyLabel === undefined) btn._copyLabel = t.textContent;
+    btn.classList.toggle("copy-done", state === "done"); btn.classList.toggle("copy-failed", state === "fail");
+    $(".ico", btn).innerHTML = state === "done" ? COPY_ICON.done : state === "fail" ? V_ICON : COPY_ICON.idle;
+    if (t) t.textContent = state === "done" ? copyL(host, "copied") : state === "fail" ? copyL(host, "failed") : btn._copyLabel;
+    if (state) btn._copyT = setTimeout(function () { copyMark(btn, host, ""); }, 2000);
+  }
+  function copyRun(btn) {
+    var host = closest(btn, ".code-view, .copy-field"), pre = $("pre", host), inp = $("input", host), val = $(".value", host);
+    var text = pre ? pre.textContent : inp ? inp.value : val ? val.textContent : "";
+    copyText(text, btn.parentNode, function (ok) { copyMark(btn, host, ok ? "done" : "fail"); dsSay(copyL(host, ok ? "copiedStatus" : "failedStatus")); fire(host, "ds:copy", { ok: ok }); });
+  }
+
   /* ---------- File Upload — .upload ----------
      화면과 검증까지 맡는다(사람의 결정 2026-11-10). 실제 전송은 제품이 ds:upload 를 받아 하고 DS.upload.progress · done · fail 로 알린다.
      거절(형식 · 용량 · 개수 · 중복)은 목록에 오류 줄로 남기고 통과한 파일은 받는다. 하나만 받는 자리는 새 파일로 교체.
