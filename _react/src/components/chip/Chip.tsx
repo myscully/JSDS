@@ -56,7 +56,7 @@ export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
     const name = typeof children === "string" ? `${children} ${removeLabel}` : removeLabel;
     /* span 은 disabled 속성을 못 가진다 — aria-disabled 로 비활성을 알리고 CSS 가 칩과 x 를 흐린다(.btn 과 같게) */
     return (
-      <span className={cls} aria-disabled={disabled || undefined} {...(rest as HTMLAttributes<HTMLSpanElement>)}>
+      <span className={cls} aria-disabled={disabled || undefined} {...(rest as HTMLAttributes<HTMLSpanElement>)} onClickCapture={disabled ? (e) => { e.preventDefault(); e.stopPropagation(); } : (rest as HTMLAttributes<HTMLSpanElement>).onClickCapture}>
         {icon && <Icon name={icon} size={14} />}
         <span className="lbl" title={typeof children === "string" ? children : undefined}>{children}</span>
         <button type="button" className="x" aria-label={name} disabled={disabled} onClick={remove}>

@@ -172,6 +172,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       for (const m of pv.matchAll(/<span class="spinner[^"]*"[^>]*aria-label="([^"]*)"/g)) if (["불러오는 중", "로딩", "로딩 중", "진행 중"].includes(m[1])) fails.push(`${f}: Spinner 이름 "${m[1]}" — 실제 작업으로(Loading › Spinner 이름)`);
       for (const m of pv.matchAll(/<div class="toast danger"[^>]*>([\s\S]*?)<\/div>/g)) if (!/class="close"/.test(m[1])) fails.push(`${f}: 오류 Toast 에 닫기 버튼이 없다(Notification › 오류 Toast)`);
       if ((pv.match(/class="banner[ "]/g) || []).length > 1) fails.push(`${f}: Banner 는 한 번에 하나(Notification › Banner)`);
+      /* Banner 안 버튼은 끄지 않는다(사람의 결정 2026-11-12) — 제품 색 면 위 비활성 글자 대비 1.32 */
+      for (const m of pv.matchAll(/<div class="banner[^"]*"[^>]*>([\s\S]*?)<\/div>/g)) if (/<(?:button|a)\b[^>]*class="btn\b[^"]*"[^>]*(?:\sdisabled\b|aria-disabled="true")/.test(m[1])) fails.push(`${f}: Banner 안의 끈 버튼 — 할 수 없는 동작이면 버튼을 빼고 문구로(Notification › Banner)`);
       /* 표 · 목록 원칙(2026-11-10) — 머리글 필수 · 정렬은 버튼 · 머리글 안에 다른 조작 없음 · 행 버튼 이름은 행마다 다름 */
       const sameNames = (body, where) => { const names = [...body.matchAll(/<(?:button|a)\b[^>]*aria-label="([^"]*)"/g)].map((x) => x[1]), dup = names.filter((n, i) => names.indexOf(n) !== i); if (dup.length) fails.push(`${f}: 행마다 같은 버튼 이름 "${dup[0]}"(${where} › 행 버튼 이름)`); };
       for (const m of pv.matchAll(/<table\b[^>]*class="tbl[^"]*"[^>]*>([\s\S]*?)<\/table>/g)) {

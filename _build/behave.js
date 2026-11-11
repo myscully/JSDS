@@ -695,6 +695,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return out;
   });
   ok("button and field heights match at 32 · 40 · 48", ["sm", "md", "lg"].every((z, i) => heights[z].every((h) => h === [32, 40, 48][i])), JSON.stringify(heights));
+  /* 버튼 반경 — sm 은 radius/sm 4, md · lg 는 radius/md 6(사람의 결정 2026-11-12). 형태 · 아이콘 전용 · text 모두 */
+  const radii = await page.evaluate(() => { const out = {}; document.querySelectorAll(".example-preview .btn").forEach((b) => { const z = ["sm", "md", "lg"].find((k) => b.classList.contains(k)) || "md"; (out[z] = out[z] || new Set()).add(getComputedStyle(b).borderTopLeftRadius); }); return Object.fromEntries(Object.entries(out).map(([k, v]) => [k, [...v]])); });
+  ok("button radius is 4 at sm and 6 at md · lg, for every form", JSON.stringify(radii.sm) === '["4px"]' && JSON.stringify(radii.md) === '["6px"]' && JSON.stringify(radii.lg) === '["6px"]', JSON.stringify(radii));
   const plainRest = await page.evaluate(() => { const c = getComputedStyle(document.querySelector("#ex-button-icon-only .btn.assistive.icon-only:not(.outline)")); return c.backgroundColor + " / " + c.borderTopColor; });
   ok("plain icon-only button has no fill or border at rest", plainRest === "rgba(0, 0, 0, 0) / rgba(0, 0, 0, 0)", plainRest);
   // 링크는 disabled 속성을 못 가진다 — React as="a" + disabled 는 aria-disabled 로만 나왔고 CSS·JS 가 그걸 몰랐다
@@ -710,12 +713,13 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { opacity: c.opacity, pointerEvents: c.pointerEvents, focusable: e.tabIndex >= 0,
       bg: c.backgroundColor, fg: c.color, wantBg: res("var(--surface-disable-primary)"), wantFg: res("var(--foreground-disable-primary)") };
   });
+  // pointer-events 는 auto — none 이면 클릭이 뒤의 행 · 카드로 떨어졌다(2026-11-12). 클릭은 ds.js 캡처가 막는다(아래 navHit)
   // 비활성은 더 이상 opacity 를 쓰지 않는다 — 전용 토큰이라 opacity 는 1 이고 면·라벨이 회색으로 바뀐다
-  ok("disabled link button looks disabled", disLink.opacity === "1" && disLink.bg === disLink.wantBg && disLink.fg === disLink.wantFg && disLink.pointerEvents === "none" && disLink.focusable, JSON.stringify(disLink));
+  ok("disabled link button looks disabled", disLink.opacity === "1" && disLink.bg === disLink.wantBg && disLink.fg === disLink.wantFg && disLink.pointerEvents === "auto" && disLink.focusable, JSON.stringify(disLink));
   await page.locator("#dis-link").evaluate((e) => e.click());
   await page.waitForTimeout(120);
   ok("disabled link button ignores a mouse click", (await page.evaluate(() => location.hash)) !== "#dead");
-  // pointer-events:none 는 마우스만 막는다 — 이 케이스가 ds.js 캡처 가드를 밟는 유일한 경로
+  // 키보드 Enter 도 click 을 쏜다 — 마우스와 같은 ds.js 캡처 가드가 막는다
   await page.locator("#dis-link").evaluate((e) => e.focus());
   await page.keyboard.press("Enter"); await page.waitForTimeout(150);
   ok("disabled link button ignores Enter", (await page.evaluate(() => location.hash)) !== "#dead", await page.evaluate(() => location.hash || "(없음)"));
@@ -1866,6 +1870,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await require("./behave.feedback.js")({ page, ok, go });
   await require("./behave.data.js")({ page, ok, go });
   await require("./behave.table.js")({ page, ok, go });
+  await require("./behave.button.js")({ page, ok, go });   // Button 오류 정리(2026-11-12)
   await require("./behave.nav.js")({ page, ok, go });
   await require("./behave.promote.js")({ page, ok, go });
     await require("./behave.upload.js")({ page, ok, go });

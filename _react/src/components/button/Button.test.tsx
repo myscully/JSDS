@@ -90,6 +90,24 @@ describe("Button", () => {
     expect(onLink).not.toHaveBeenCalled();
   });
 
+  it("제품이 aria-disabled 를 직접 넘기면 포커스는 남고 클릭은 핸들러 · 부모로 가지 않는다", async () => {
+    const onClick = vi.fn(), onParent = vi.fn();
+    render(<div onClick={onParent}><Button aria-disabled="true" onClick={onClick}>끔</Button><Button aria-disabled={true} onClick={onClick}>끔2</Button></div>);
+    for (const name of ["끔", "끔2"]) {
+      const b = screen.getByRole("button", { name });
+      expect(b).not.toBeDisabled();
+      b.focus();
+      expect(document.activeElement).toBe(b);
+      await userEvent.click(b);
+    }
+    expect(onClick).not.toHaveBeenCalled();
+    expect(onParent).not.toHaveBeenCalled();
+    /* "false" 는 막지 않는다 */
+    render(<Button aria-disabled="false" onClick={onClick}>켬</Button>);
+    await userEvent.click(screen.getByRole("button", { name: "켬" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
   it("block · iconLeft / iconRight 는 라벨 왼쪽 · 오른쪽", () => {
     const { container } = render(<><Button block iconLeft={<i data-testid="L" />}>저장</Button><Button iconRight={<i data-testid="R" />}>다음</Button></>);
     const [a, b] = [...container.children];

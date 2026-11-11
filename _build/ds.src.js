@@ -1201,7 +1201,8 @@
     $$(".datepicker.open[data-ds-opened]").forEach(function (dp) { if (!dp.contains(e.target)) closeDP(dp, false); });   // 바깥 클릭은 초안을 버리고 포커스는 옮기지 않는다
   }, true);
 
-  /* Loading 버튼과 비활성 링크 버튼: 비활성 링크의 pointer-events:none 는 마우스만 막고 키보드 Enter/Space 는 그대로 click 을 쏜다.
+  /* Loading 버튼과 aria-disabled 버튼(비활성 링크 포함): 둘 다 포커스를 받으므로 키보드 Enter/Space 가 그대로 click 을 쏜다.
+     끈 버튼에도 pointer-events:none 을 두지 않는다 — 두면 마우스 클릭이 뒤의 행 · 카드로 떨어진다(2026-11-12).
      버튼 자신에 달린 핸들러가 타깃 단계에서 먼저 실행되므로 버블이 아니라 캡처 단계에서 막아야 한다.
      Loading 은 disabled 와 달리 포커스를 남기고 click · mousedown · pointerdown · keydown 넷을 막는다(사람의 정의 2026-10-28).
      loading 에는 pointer-events:none 이 없다 — 있으면 마우스 클릭이 버튼을 지나 뒤의 행 · 카드에서 실행된다.
@@ -1209,7 +1210,8 @@
      loading 동안 멈춘다. 그래서 버튼 자신의 리스너도 이 키들은 받는다(React 는 onKeyDown 을 아예 부르지 않는다). 기본 동작은 Enter/Space 만 막는다 */
   var NAV = ["Tab", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"];
   doc.addEventListener("click", function (e) {
-    if (closest(e.target, '.btn.loading,.btn[aria-disabled="true"]')) { e.preventDefault(); e.stopPropagation(); return; }
+    /* 끈 칩(span) · 메뉴 항목도 같다 — pointer-events:none 을 지운 뒤(2026-11-12) 클릭이 그 요소에 오므로 제품 핸들러 · 링크 이동을 여기서 막는다 */
+    if (closest(e.target, '.btn.loading,.btn[aria-disabled="true"],.chip[aria-disabled="true"],.menu-item[aria-disabled="true"]')) { e.preventDefault(); e.stopPropagation(); return; }
     /* 필수 약관이 비었으면 버튼에 달린 제품 핸들러까지 가지 않게 캡처에서 막는다 — disabled 일 때 클릭이 가지 않던 약속을 그대로 지킨다 */
     var nx = closest(e.target, ".terms .btn-group .btn.primary"), terms = nx && closest(nx, ".terms"), miss = terms && !nx.disabled ? termsMissing(terms) : [];
     if (miss.length) { e.preventDefault(); e.stopPropagation(); terms._tried = true; termsNotice(terms); miss[0].focus(); }

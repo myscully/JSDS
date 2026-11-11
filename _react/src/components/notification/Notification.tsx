@@ -3,7 +3,7 @@ import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import type { IconName } from "../../icons/icons.data";
 import { Portal } from "../../utils/Portal";
-import { focusPast } from "../../utils/hooks";
+import { focusPast, mergeRefs } from "../../utils/hooks";
 import { LABELS } from "../../labels";
 import type { FeedbackTone } from "../../types";
 
@@ -87,10 +87,17 @@ export interface BannerProps extends HTMLAttributes<HTMLDivElement> {
   onClose?: () => void;
   closeLabel?: string;
 }
+let bannerWarned = false;
 /** 시스템 전체 공지 (헤더 위 전체 폭) */
 export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner({ tone, icon = "info-circle", action, onClose, closeLabel = LABELS.close, className, children, role, ...rest }, ref) {
+  /* Banner 안 버튼은 끄지 않는다(사람의 결정 2026-11-12) — 제품 색 면 위의 비활성 글자는 대비 1.32 라 보이지 않는다. 할 수 없으면 버튼을 빼고 문구로 알린다. loading 은 괜찮다 */
+  const self = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "production" && !bannerWarned && self.current?.querySelector('.btn[disabled],.btn[aria-disabled="true"]') && (bannerWarned = true))
+      console.warn("[ds-react] Banner 안 버튼은 끄지 않습니다 — 할 수 없는 동작이면 버튼을 빼고 문구로 알립니다(Notification › Banner).");
+  });
   return (
-    <div ref={ref} className={cx("banner", tone, className)} role={role ?? (tone ? "alert" : "status")} {...rest}>
+    <div ref={mergeRefs(ref, self)} className={cx("banner", tone, className)} role={role ?? (tone ? "alert" : "status")} {...rest}>
       {icon && <Icon name={icon} size={18} />}
       {children}
       {action}

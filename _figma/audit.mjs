@@ -561,12 +561,16 @@ function buttonExpect() {
       [(v, c) => (v === "Outline" && c === "Primary") || (v === "Text" && c !== "Assistive") || (v === "Plain" && c === "Primary"), spinTop(cssRule(".btn:where(.outline.primary,.text:not(.assistive),.icon-only:not(.solid,.outline).primary).loading::after")), ".btn:where(.outline.primary,.text:not(.assistive),.icon-only:not(.solid,.outline).primary).loading::after"],
       [(v, c) => c === "Negative" && v !== "Text", spinTop(cssRule(".btn:where(.negative:not(.text)).loading::after")), ".btn:where(.negative:not(.text)).loading::after"],
     ];
-    const spinSize = px(la.width);
-    if (!(spinSize > 0) || px(la.height) !== spinSize) throw new Error(".btn.loading::after 의 크기를 읽지 못했습니다(" + la.width + " × " + la.height + ")");
+    /* 스피너 크기는 버튼 크기마다(2026-11-12 — 아이콘 크기 16 · 18 · 20). 기본(md)은 .btn.loading::after, sm · lg 는 .btn.sm/.lg.loading::after */
+    const spinRule = (z) => z === "md" ? la : cssRule(`.btn.${z}.loading::after`);
+    const spinSize = Object.fromEntries(Object.values(BTN_SIZES).map((z) => { const r = spinRule(z), w = px(r.width); if (!(w > 0) || px(r.height) !== w) throw new Error(`.btn.${z}.loading::after 의 크기를 읽지 못했습니다(${r.width} × ${r.height})`); return [z, w]; }));
+    if (!/border-box/.test(la["box-sizing"] || "")) throw new Error(".btn.loading::after 에 box-sizing:border-box 가 없습니다 — 테두리 2px 가 바깥에 붙어 실제 크기가 +4 된다");
     for (const [v, c] of BTN_COMBOS) {
       const ss = BTN_SEL(v, c), s = ss[ss.length - 1], n = ss.reduce((p, x) => step(cssRule(x), p), root);
       const has = (x) => { try { return cssRule(x); } catch { return {}; } };
-      const h = ss.reduce((p, x) => step(has(x + ":hover"), p), n), a = ss.reduce((p, x) => step(has(x + ":active"), p), n);
+      /* hover · 눌림 규칙은 loading · 끈 버튼을 :where 안에서 뺀다(2026-11-12) — 셀렉터가 x + LIVE + ":hover" 다 */
+      const LIVE = ':where(:not(.loading,[disabled],[aria-disabled="true"]))';
+      const h = ss.reduce((p, x) => step(has(x + LIVE + ":hover"), p), n), a = ss.reduce((p, x) => step(has(x + LIVE + ":active"), p), n);
       let d = step(dBase, n);
       if (v === "Outline") d = step(dOut, d);
       if (v === "Text" || v === "Plain") d = step(dFlat, d);
@@ -1222,7 +1226,7 @@ function componentsExpect() {
     severity: { labels: sev.labels, ambiguous: sev.ambiguous, levels: sev.levels, marks: sev.marks, band: sev.band, notes: sev.notes },
     kpiValue: { Default: figTok(cssRule(".kpi .value").color), Critical: figTok(cssRule(".kpi.critical .value").color), High: figTok(cssRule(".kpi.high .value").color) },   // Default 는 .kpi .value 에 색이 생긴 뒤(2026-10-23 k)부터 본다 — 색이 없으면 null 이라 건너뛴다
     banner: Object.fromEntries([["Accent", ".banner"], ["Warning", ".banner.warning"], ["Danger", ".banner.danger"]].map(([k, s]) => { const r = cssRule(s), b = cssRule(".banner"); return [k, { fill: figTok(r.background || b.background), label: figTok(r.color || b.color) }]; })),
-    menuItem: { hover: figTok(cssRule(".menu-item:hover").background), selected: figTok(cssRule(".menu-item.on").background) },
+    menuItem: { hover: figTok(cssRule('.menu-item:where(:not([aria-disabled="true"])):hover').background), selected: figTok(cssRule(".menu-item.on").background) },
     tabCount: { base: figTok(cssRule(".tabs .tab .count").background), on: figTok(cssRule(".tabs .tab.on .count").background) },
     /* 저장소에 있고 Figma 에도 있어야 하는 세트 — 없으면 어긋남 */
     /* Count · Status Indicator · Step · Navigation Item · Sparkline · Donut — 기대값은 전부 CSS 에서 */
@@ -1573,7 +1577,8 @@ function diffComponents(c, want, bad, notes) {
       const sp = L.spinner;
       if (!sp) { bad.push(`${at} 스피너(이름 "Spinner") 없음 — 사이트 ${w.spinCss}`); continue; }
       if (sp.abs !== "ABSOLUTE" || Math.abs(sp.dx) > 0.5 || Math.abs(sp.dy) > 0.5) bad.push(`${at} 스피너가 가운데 절대 배치가 아님(${sp.abs} · 중심 어긋남 ${sp.dx}, ${sp.dy})`);
-      if (Math.abs(sp.w - w.spinSize) > 0.5 || Math.abs(sp.h - w.spinSize) > 0.5) bad.push(`${at} 스피너 ${sp.w}×${sp.h} ≠ ${w.spinSize} — 사이트 .btn.loading::after`);
+      const wz = w.spinSize[BTN_SIZES[o.Size]];
+      if (Math.abs(sp.w - wz) > 0.5 || Math.abs(sp.h - wz) > 0.5) bad.push(`${at} 스피너 ${sp.w}×${sp.h} ≠ ${wz} — 사이트 .btn${o.Size === "Medium" ? "" : "." + BTN_SIZES[o.Size]}.loading::after`);
       if (sp.stroke !== "$" + w.spin) bad.push(`${at} 스피너 선 ${sp.stroke} ≠ ${w.spin} — 사이트 ${w.spinCss}`);
       if (L.leak && L.leak.length) bad.push(`${at} 스피너 말고 보이는 층 ${L.leak.join(" · ")} — 사이트는 라벨 · 아이콘을 투명하게 둔다`);
     }

@@ -198,8 +198,10 @@ export const MenuItem = forwardRef<HTMLLIElement, MenuItemProps>(function MenuIt
     </>
   );
   const handle = (e: React.MouseEvent<HTMLElement>) => {
+    /* 끈 항목은 제품 onClick 도 부르지 않고 부모로도 보내지 않는다 — CSS 의 pointer-events:none 이 마우스를 막던 것을 지웠다(2026-11-12) */
+    if (disabled) { e.preventDefault(); e.stopPropagation(); return; }
     onClick?.(e as React.MouseEvent<HTMLLIElement>);
-    if (disabled || e.defaultPrevented) return;
+    if (e.defaultPrevented) return;
     onSelect?.();
     if (closeOnSelect) closeToTrigger();
   };

@@ -66,7 +66,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
      as="a" 처럼 button 이 아닐 때는 disabled 속성이 먹지 않아 aria-disabled 만 나가므로 클릭도 여기서 막는다.
      가드는 rest 뒤에 둬서 사용자의 핸들러가 덮지 못한다. keydown 은 탐색 키(NAV)와 수정 키 조합(단축키)을 부모로 올려 보낸다
      — Esc 닫기 · 화살표 이동 · 전역 단축키가 loading 동안 멈추지 않게. 사용자 onKeyDown 은 어느 키에도 부르지 않는다 */
-  const inert = loading || off || (Comp !== "button" && disabled);
+  /* 제품이 aria-disabled 를 직접 넘겨도(rest 가 extra 를 덮는다) 클릭을 막는다 — 사이트 ds.js 의 .btn[aria-disabled="true"] 캡처 차단과 같게(2026-11-12) */
+  const ariaOff = rest["aria-disabled"] === true || rest["aria-disabled"] === "true";
+  const inert = loading || off || ariaOff || (Comp !== "button" && disabled);
   const swallow = (e: MouseEvent<HTMLButtonElement> | PointerEvent<HTMLButtonElement>) => { e.preventDefault(); e.stopPropagation(); };
   const guard = {
     onClickCapture: (e: MouseEvent<HTMLButtonElement>) => { if (inert) swallow(e); else onClickCapture?.(e); },

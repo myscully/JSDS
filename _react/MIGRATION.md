@@ -485,3 +485,15 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **`ActionBar count={0}`** 이면 안의 `Button` 이 `aria-disabled="true"` 로 꺼집니다(포커스는 남고 `onClick` 은 부르지 않습니다). 제품이 준 `disabled` 는 그대로입니다. 바 안에 `Button` 이 아닌 버튼을 넣었다면 직접 꺼야 합니다.
 - 액션 바의 면(brand subtle)이 없어졌습니다. 정렬된 머리글은 brand → `--foreground-neutral-primary`, 표 칸의 `.link` 는 brand → 칸 글자색(hover 밑줄)입니다.
 - 사이트: `.tbl-wrap > .action-bar` 는 숨기지 않습니다. 0개면 ds.js 가 바 안 `.btn` 에 `aria-disabled` 와 `data-ds-off` 를 답니다(제품이 직접 단 `aria-disabled` 는 그대로 둡니다).
+
+## Button 오류 정리 · 32 높이 반경 (2026-11-12)
+
+- **`size="sm"` 버튼의 반경이 6 → 4**(radius/sm)입니다. md · lg 는 6 그대로입니다. 같은 32 높이인 sm 필드(Text Field · Date Picker · Combobox · Number Input 의 `size="sm"`, 필드 안 28 버튼 포함), Select Button 안쪽 버튼, 페이지당 행 수 Select 도 4 가 됐습니다.
+- **loading 스피너 크기가 그 크기의 아이콘과 같아졌습니다** — sm 16 · md 18 · lg 20(전에는 크기와 상관없이 테두리까지 20). assistive 스피너 색은 `--surface-brand-primary` → `--foreground-brand-primary`(다크 대비).
+- **끈 버튼(`disabled` · `aria-disabled="true"`)에 `pointer-events:none` 이 없어졌습니다** — 있으면 클릭이 버튼을 지나 뒤의 행 · 카드에서 실행됐습니다. 이제 버튼이 클릭을 받고, `disabled` 는 브라우저가, `aria-disabled` 는 ds.js · `Button` 이 막습니다. 끈 버튼 아래 요소가 클릭을 받는 데 기대던 제품 코드는 없어야 합니다.
+- **`<Button aria-disabled="true">` 처럼 직접 넘긴 aria-disabled 도 클릭을 막습니다**(`onClick` 을 부르지 않고 부모로도 올리지 않음). 전에는 aria-disabled 만 나가고 클릭은 그대로 불렸습니다. `"false"` 는 막지 않습니다.
+- loading · 끈 버튼은 hover · 눌림 색이 바뀌지 않습니다. 정보 Banner 안 버튼의 loading 라벨이 보이던 것 · disabled 가 흰 글자로 남던 것을 고쳤습니다(포커스 링은 loading · aria-disabled 에서도 Banner 라벨 색).
+- **끈 Chip · Item Tile · Pagination 버튼 · 메뉴 항목에서도 `pointer-events:none` 이 없어졌습니다** — 버튼과 같은 이유입니다(클릭이 뒤로 떨어지고 not-allowed 커서가 보이지 않았다). hover · 눌림 모양은 없습니다.
+  - `MenuItem disabled` 는 이제 제품 `onClick` 을 부르지 않고 클릭을 부모로 올리지 않습니다. 전에는 `onClick` 이 먼저 불리고 `onSelect` 만 막혔습니다(마우스는 CSS 가 막았지만 키보드 · 프로그램 클릭은 지나갔다).
+  - 입력값 칩(`Chip onRemove disabled`, span)은 클릭을 부모로 올리지 않습니다. 나머지(button)는 브라우저의 `disabled` 가 막습니다.
+- **`Banner` 안 버튼은 끄지 않습니다**(사람의 결정) — 제품 색 면 위의 비활성 글자는 대비 1.32 로 보이지 않습니다. 할 수 없는 동작이면 버튼을 빼고 문구로 알립니다. `action` 에 끈 `Button` 이 있으면 개발 모드에서 한 번 경고합니다. loading 은 괜찮습니다.

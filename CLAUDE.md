@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1177/1177 · react 702+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1186/1186 · react 706+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -432,6 +432,26 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **측정에서 드러나 지운 것:** 0개일 때 키보드 클릭을 막으려 더한 캡처 리스너는 음성 시험에서 지워도 통과했다 — ds.js 에 이미 `.btn[aria-disabled="true"]` 클릭을 캡처에서 막는 규칙(10-28 Button)이 있었다. 제품이 `disabled` 로 끈 버튼을 건너뛰는 조건도 결과가 같아 지웠다(aria-disabled 를 달았다 풀어도 disabled 는 남음).
 - 음성 시험: 사이트 7건(정렬 색 · 링크 색 · 바 면 · 바 숨김으로 되돌림 · 제품 aria-disabled 보존 · 처음 그릴 때 · 고정 바 면) · React 5건(Provider · 늘 부름 · 클릭 차단 · 제품 disabled · aria-disabled) 모두 실패로 잡혔다.
 - 바의 'n개 선택' 글자는 brand 그대로다(요청 밖). Figma 미반영 226건(그대로 — Data Table Spec Label 문구가 바뀌었을 뿐 이미 어긋난 행).
+
+2026-11-12 Button 오류 정리 · 32 높이 반경(사람의 요청 — 'sm 반경을 sm 으로 · 버튼 시스템 오류 검토', 결정 넷) — behave 1177 → 1185(`behave.button.js` 7 · behave.js 1 · 기존 단정 고침 1) · react 702 → 703(`Button.test` 1). contrast · advisory · pages 수는 그대로(스피너는 글자 쌍 밖).
+- **sm 버튼 반경 6 → 4**(radius/sm) — md · lg 는 6. **같은 32 높이 컨트롤도 4**(사람의 결정): `.field.sm` 입력 · affix(Date Picker · Number Input · 비밀번호) · 그 안 28 버튼 · Combobox sm · Select Button 안쪽 버튼(하드코딩 0.375rem 이던 것) · 페이지당 행 수 Select. 필드 안 28 버튼의 하드코딩 0.375rem 은 토큰으로(값 같음).
+- **버그 셋(사람의 결정 — 셋 다)** — ① 정보 Banner 안 버튼 규칙(명시도 0,4,0)이 `.btn.loading` 의 투명 라벨과 `.btn[disabled]` 를 이겨 loading 중 라벨이 스피너와 겹쳐 보이고 끈 버튼이 흰 글자로 남았다 — `:where` 안에서 loading · 끈 상태를 뺐고, 포커스 링(currentColor)이 사라지던 loading · aria-disabled 에 Banner 라벨 색 링. ② 끈 버튼의 `pointer-events:none` 이 클릭을 뒤의 행 · 카드로 떨어뜨렸다(elementFromPoint = 부모, 부모 클릭 1) — 지웠다. disabled 는 브라우저가, aria-disabled 는 기존 ds.js 캡처 가드가 막는다. ③ 스피너가 의사 요소라 `*` 의 border-box 를 받지 않아 16 + 테두리 4 = 20 이었다 — **아이콘 크기 sm 16 · md 18 · lg 20**(사람의 결정).
+- **작은 것 넷(사람의 결정)** — loading · 끈 버튼은 hover · 눌림 색 없음(22개 규칙에 `:where(:not(.loading,[disabled],[aria-disabled="true"]))`, 명시도 그대로), assistive 스피너 `--surface-brand-primary` → `--foreground-brand-primary`(다크 투명 바탕 3.53 · solid assistive 3.02 였다), React `<Button aria-disabled="true">` 가 rest 로 extra 를 덮어 클릭이 그대로 불리던 것을 막음, 문서 어긋남(Props 기본값은 React 의 것 · HTML 은 클래스를 늘 적음, Size 예제의 '빈 화면은 Large' → 실제 Medium, loading 키 처리의 사이트 · React 차이, Spec 스피너 크기 · Banner 포커스 예외).
+- **기존 단정 고침 1:** '비활성 링크 버튼' 의 `pointerEvents === "none"` → `"auto"`(클릭 차단은 다음 단정이 잰다).
+- 음성 시험: 사이트 10건(pointer-events 되돌림 · hover · active LIVE 없음 · 스피너 box-sizing · lg 크기 · assistive 면 토큰 · sm affix · Select Button 6 · Banner loading 라벨 · Banner 링) · React 1건 모두 실패로 잡혔다. 단정을 처음 쓸 때 Banner 끈 outline 버튼의 기대값을 '회색 면' 으로 잘못 적었다 — outline 비활성은 원래 면 없음 + 회색 테두리라 단정을 고쳤다.
+- **보이는 것(캡처):** 정보 Banner 안 끈 outline 버튼은 회색 라벨(16%)이 제품 색 면 위에서 거의 보이지 않는다 — 시스템의 outline 비활성 표현 그대로라 고치지 않았다.
+- **고치지 않은 것:** `.chip[disabled]` · `.tile[disabled]` · `.pagination button[disabled]` · `.menu-item[aria-disabled]` 에도 같은 `pointer-events:none` 이 있다(요청 밖).
+- Figma 미반영 226 → 282건 — loading 스피너 크기 16 ≠ 18 · 20 과 assistive 스피너 색 52 · Spec 문구 4(이번에 고친 Button State · Size · Container · Text Field Container · Select Button Container 다섯 행 중 새로 어긋난 것). sm 버튼 · 필드의 반경 4 는 audit 대조 밖 — 일괄 반영 때 함께 바꾼다.
+
+2026-11-12 끈 컨트롤 클릭 · Banner 안 비활성 금지(위 Button 정리에서 남긴 둘, 사람의 결정) — behave 1185 → 1186(`behave.button.js` 1) · react 703 → 706(`tests/disabled-controls.test.tsx` 3). contrast · advisory · pages 수는 그대로.
+- **끈 Chip · Tile · Pagination 버튼 · 메뉴 항목의 `pointer-events:none` 을 지웠다** — 버튼과 같은 이유(클릭이 뒤의 행 · 카드로 떨어짐)에 더해 `cursor:not-allowed` 가 한 번도 보이지 않던 죽은 선언이었다.
+  button 은 브라우저의 `disabled` 가, span 칩 · 메뉴 항목(li · 링크)은 ds.js 의 `.btn[aria-disabled]` 클릭 캡처에 더한 두 선택자가 막는다(제품 핸들러 · 부모 · 링크 이동 없음).
+  hover · 눌림은 메뉴 항목 · Pagination · Tile 에서 `:where(:not(…))` 로 뺐다(명시도 그대로 — audit 의 메뉴 hover 조회도 새 선택자로). React `MenuItem disabled` 는 전에 제품 `onClick` 을 먼저 불렀다 — 이제 부르지 않고 부모로도 올리지 않으며, 입력값 칩(span)은 클릭을 캡처에서 삼킨다(MIGRATION).
+- **Banner 안 버튼은 끄지 않는다**(사람의 결정 — '전용 비활성 색'(라벨 50% · 2.25) · '그대로' 대신). 제품 색 면 위의 비활성 글자는 1.32 였다. Notification 원칙 'Banner' 행 · Button Spec State 에 적고 verify 가 예제를 막으며, React `Banner` 는 `action` 안 끈 버튼에 개발 모드 경고 한 번.
+  만일 끈 버튼이 들어와도 보이는 모양(outline 비활성 · Banner 라벨 색 링)은 앞 커밋의 CSS 를 그대로 둔다(behave.button 의 Banner 단정도 그대로).
+- 음성 시험: 사이트 11건 · verify 1건 · React 4건. 첫 회 2건(칩 hover · 눌림에서 끈 칩 빼기)을 못 잡아 재 보니 `.chip[disabled]` 가 뒤에서 면 색을 이미 이기는 쓸모없는 선언이라 지웠다(칩은 hover 가 면만 바꾼다). Tile 은 hover 그림자가 끈 규칙에 없어 필요했다.
+- **남긴 것:** `.accordion.disabled{pointer-events:none}`(summary 는 tabindex -1 + ds.js 가 막고 behave 가 none 을 단정 — 요청 밖), `.tbl tr.disabled .link`(행이 `inert` 라 마우스 · 키보드 모두 닿지 않음).
+- Figma 미반영 282건(그대로).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
