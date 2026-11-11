@@ -96,6 +96,16 @@
     }
     return css.slice(start, j - 1);
   }
+  /* rem · 글자 크기 토큰 → 기준 화면(루트 16px)의 px 문자열(2026-11-11 글자 크기 체계).
+     CSS 는 rem 으로 적지만 문서의 값 표시 · Figma audit 의 기대값은 기준 화면의 px 로 읽는다 — Figma 는 1280~1919 기준(px)이다.
+     max(Xrem,Ypx) 는 기준에서 둘이 같으니 Ypx(최소 크기 토큰). 글자 크기 토큰 var(--font-size-N) 은 Npx */
+  function toPx(css) {
+    const n = (x) => +(parseFloat(x) * 16).toFixed(4) + "px";
+    return String(css)
+      .replace(/max\(\s*(\d*\.?\d+)rem\s*,\s*(\d*\.?\d+px)\s*\)/g, (m, r, p) => p)
+      .replace(/var\(--font-size-(\d+)\)/g, "$1px")
+      .replace(/(^|[^\w.-])(-?)(\d*\.?\d+)rem\b/g, (m, pre, sign, r) => pre + sign + n(r));
+  }
   function parseVars(block) {
     const out = {};
     block.replace(/\/\*[\s\S]*?\*\//g, "").split(";").map(s => s.trim()).filter(s => s.startsWith("--")).forEach(d => { const k = d.indexOf(":"); out[d.slice(0, k).trim()] = d.slice(k + 1).trim(); });
@@ -219,6 +229,6 @@
   /* Date Picker(.datepicker · 단독 .calendar)가 있는 마크업인가 — build 가 dayjs 를 실을 페이지를 고르고 verify 가 짝을 본다 */
   function hasDatePicker(html) { return /\sclass="(?:[^"]*\s)?(?:datepicker|calendar)(?:\s[^"]*)?"/.test(html); }
 
-  const api = { esc, dedent, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  const api = { esc, dedent, toPx, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);

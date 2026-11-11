@@ -25,7 +25,7 @@ const base = `/* ---------- Base (패키지용 최소 규칙) ---------- */
 :focus-visible{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}
 [hidden]{display:none!important}
 /* 앱 루트(또는 body)에 .ds-root 를 붙이면 서체·색·배경 토큰이 적용됩니다 */
-.ds-root{font-family:var(--font-sans);font-size:15px;line-height:1.65;color:var(--foreground-neutral-primary);background:var(--background-neutral-primary);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.ds-root{font-family:var(--font-sans);font-size:0.9375rem;line-height:1.65;color:var(--foreground-neutral-primary);background:var(--background-neutral-primary);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .ds-root pre,.ds-root pre code{font-family:var(--font-mono)}.ds-root code,.ds-root kbd{font-family:var(--font-sans)}
 /* 링크 기본색만 지운다 — :where 로 우선순위를 0,0,1 에 둔다. .ds-root a(0,1,1)는 .btn:where(.solid.primary) 같은 단일 클래스 색을 이겨, 링크형 주 버튼 글자가 면과 같은 색이 됐다(대비 1.05) */
 :where(.ds-root) a{color:inherit}`;

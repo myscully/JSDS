@@ -125,7 +125,7 @@ export const PaginationBar = forwardRef<HTMLDivElement, PaginationBarProps>(func
     <div ref={ref} className={cx("pagination-bar", className)} {...rest}>
       <span>{summary ?? <>총 <b>{fmt(total)}</b>건{pages > 1 && <> · {fmt(from)}–{fmt(to)}</>}</>}</span>
       {(showSize || pages > 1) && (
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
           {showSize && <Select keepMounted options={pageSizes.map((n) => ({ value: String(n), label: `${n}개씩` }))} value={String(pageSize)} onChange={(v) => { if (v) { onPageSizeChange?.(Number(v)); if (page !== 1) moved(1); } }} />}
           {pages > 1 && <Pagination compact page={page} total={pages} siblings={2} onChange={moved} />}
         </div>

@@ -69,7 +69,10 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await page.goto(url(`patterns/${name}.html`)); await page.waitForTimeout(150);
     const r = await page.evaluate(({ hosts, groups }) => {
       const root = getComputedStyle(document.documentElement);
-      const tok = ["xs", "sm", "md", "lg", "xl", "full"].map((k) => parseFloat(root.getPropertyValue("--radius-" + k)));
+      /* 토큰은 rem 으로 적는다(2026-11-11) — 사용자 속성 글자를 parseFloat 하면 0.375rem 이 0.375 가 된다. 탐침 요소에 흘려 계산된 px 를 읽는다 */
+      const probe = document.body.appendChild(document.createElement("i"));
+      const tok = ["xs", "sm", "md", "lg", "xl", "full"].map((k) => { probe.style.borderRadius = `var(--radius-${k})`; return parseFloat(getComputedStyle(probe).borderTopLeftRadius); });
+      probe.remove();
       /* 토큰 − 보더 두께는 보더 있는 둥근 조상 바로 안쪽 면에만 허용한다(Accordion 의 summary 7 = 8 − 1). 그냥 '토큰 − 1' 을 허용하면 5(= 6 − 1)가 통과한다 */
       const inner = (v, e) => { for (let a = e.parentElement; a; a = a.parentElement) { const s = getComputedStyle(a), r = parseFloat(s.borderTopLeftRadius); if (r) return tok.includes(r) && Math.abs(r - parseFloat(s.borderTopWidth) - v) < 0.01; } return false; };
       const okR = (v, e) => v === 0 || v >= 900 || tok.some((t) => Math.abs(v - t) < 0.01) || inner(v, e);

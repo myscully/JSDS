@@ -98,6 +98,35 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   if (!rm) fails.push("style.src.css: prefers-reduced-motion 규칙이 *, ::before, ::after, ::details-content 를 모두 멈추지 않는다");
 }
 
+/* 크기 단위(2026-11-11 글자 크기 체계, 사람의 결정 — 토큰 + rem + 화면 폭 단계).
+   화면 폭 단계에서 루트 크기가 바뀌면 rem 으로 적은 글자 · 간격 · 높이가 같은 비율로 따라간다. px 로 남은 크기는 따라가지 않아 그 자리만 어긋난다.
+   - 크기 속성의 px(2 초과)는 금지. 테두리 · 외곽선 · 그림자 · 밑줄 · stroke · filter 와 2px 이하는 선이 흐려지지 않게 px 그대로 둔다
+   - 컴포넌트 블록의 font-size 는 var(--font-size-N) · inherit 만. 인라인 코드의 .9em 은 둘레 글자를 따라가야 해서 예외,
+     단계 밖 13px(0.8125rem — Date Picker 달력 · Breadcrumb · Code)은 어느 단계로 묶을지 사람이 정하기 전까지 FONT_STRAY 로 둔다 */
+{
+  const raw = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8");
+  const src = raw.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/url\((?:"[^"]*"|'[^']*'|[^)]*)\)/g, (m) => m.replace(/[^\n]/g, " "));
+  const lineOf = (i) => src.slice(0, i).split("\n").length;
+  const a = raw.indexOf(LIB.SAMPLES_START), b = raw.indexOf(LIB.SAMPLES_END);   // 표식은 주석이라 지우기 전 글에서 찾는다(지워도 자리는 같다)
+  if (a < 0 || b < 0) fails.push("style.src.css: 컴포넌트 블록 표식을 찾지 못했다 — 글자 크기 토큰 검사를 못 함");
+  const SKIP = (p) => (/^border/.test(p) && !/radius|spacing/.test(p)) || /^(outline|box-shadow|text-shadow|text-decoration|text-underline-offset|stroke|filter|backdrop-filter|-webkit-text-stroke|column-rule)/.test(p) || /^--(shadow|checker|radius-full|float)/.test(p);
+  const tokens = new Set([...src.matchAll(/--font-size-(\d+):/g)].map((m) => m[1]));
+  const FONT_STRAY = { "0.8125rem": ".calendar · .breadcrumb · .code-view pre — 13px, 단계 밖" , ".9em": ".code-inline — 둘레 글자를 따라감" };
+  let bad = 0;
+  for (const blk of src.matchAll(/\{([^{}]*)\}/g)) {
+    const inSamples = blk.index > a && blk.index < b;
+    for (const d of blk[1].split(";")) {
+      const i = d.indexOf(":"); if (i < 0) continue;
+      const prop = d.slice(0, i).trim().toLowerCase(), val = d.slice(i + 1).trim().replace(/\s*!important$/, ""), at = `style.src.css:${lineOf(blk.index + 1 + blk[1].indexOf(d))}`;
+      if (!SKIP(prop)) for (const m of val.matchAll(/(\d*\.?\d+)px\b/g)) if (+m[1] > 2 && !/^max\(\s*\d*\.?\d+rem\s*,\s*\d*\.?\d+px\s*\)$/.test(val)) { if (bad++ < 20) fails.push(`${at}: ${prop}:${val} — 크기는 rem(px 는 테두리 · 그림자 · 2px 이하만)`); break; }
+      if (inSamples && prop === "font-size") {
+        const tm = /^var\(--font-size-(\d+)\)$/.exec(val);
+        if (tm ? !tokens.has(tm[1]) : !(val === "inherit" || FONT_STRAY[val])) fails.push(`${at}: font-size:${val} — 컴포넌트 글자 크기는 var(--font-size-N) 토큰만`);
+      }
+    }
+  }
+}
+
 /* 문구 — 예제 미리보기의 버튼 · 링크 글자와 자리 표시 글. 규칙과 예외는 foundations/writing(Writing 페이지)과 같다.
    taste-skill 2.5.0(MIT) references/copy.md 를 한국어 콘솔에 맞게 옮겼다(2026-11-05) */
 {

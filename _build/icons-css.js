@@ -15,25 +15,25 @@ const mask = (name, style, opt = {}) => { const u = `url("${dataUri(name, style,
 /* [셀렉터(정확히 일치), 새 선언부, (없으면 이 셀렉터 규칙 뒤에 삽입)]. 아이콘: check(굵게) · minus · circle(스위치 손잡이) · chevron-down · slash · arrows-sort · arrow-up · arrow-down
    라디오 점은 글리프가 아니라 단순 원이므로 마스크를 쓰지 않는다 — style.src.css 의 .radio input:checked::after 에 직접 둔다(마스크로 그리면 Safari 에서 0.4~0.75px 어긋남). */
 const RULES = [
-  [".checkbox input:checked::after", `content:"";width:12px;height:12px;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })}`],
+  [".checkbox input:checked::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })}`],
   [".radio input:checked", "box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary);background:var(--surface-brand-primary)"],   // 테두리는 안쪽 그림자(1.5px)로 그린다 — border-color 로 두면 선택된 Radio 의 brand 면 위에 기본 회색 띠가 남는다
-  [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;background:var(--static-white);${mask("circle", "filled", { size: "120%" })};transition:left var(--motion-fast)`],
-  [".switch input:checked::after", "left:22px"],
-  [".switch.sm input::after", "width:16px;height:16px"],
-  [".switch.sm input:checked::after", "left:18px"],
-  [".checkbox input:indeterminate::after,.checkbox input.mixed::after", `content:"";width:12px;height:12px;background:var(--brand-label);${mask("minus", "outline", { strokeWidth: 3.5 })}`],
-  [".chip[aria-pressed]::before", `content:"";width:14px;height:14px;flex:none;background:var(--foreground-disable-primary);${mask("check")}`],
-  [".dropdown .trigger::after", `content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast)`],
+  [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:1.25rem;height:1.25rem;background:var(--static-white);${mask("circle", "filled", { size: "120%" })};transition:left var(--motion-fast)`],
+  [".switch input:checked::after", "left:1.375rem"],
+  [".switch.sm input::after", "width:1rem;height:1rem"],
+  [".switch.sm input:checked::after", "left:1.125rem"],
+  [".checkbox input:indeterminate::after,.checkbox input.mixed::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("minus", "outline", { strokeWidth: 3.5 })}`],
+  [".chip[aria-pressed]::before", `content:"";width:0.875rem;height:0.875rem;flex:none;background:var(--foreground-disable-primary);${mask("check")}`],
+  [".dropdown .trigger::after", `content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast)`],
   [".dropdown.open .trigger::after", "transform:rotate(180deg)"],
-  [".accordion summary::after", `content:"";width:16px;height:16px;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast);margin-left:auto`],   // 셰브론만 오른쪽 끝 — 앞 아이콘 뒤에 제목이 붙는다,
+  [".accordion summary::after", `content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast);margin-left:auto`],   // 셰브론만 오른쪽 끝 — 앞 아이콘 뒤에 제목이 붙는다,
   [".accordion[open] summary::after", "transform:rotate(180deg)"],
-  [".breadcrumb li+li::before", `content:"";width:12px;height:12px;flex:none;background:var(--foreground-disable-primary);${mask("slash")}`],
-  [".tbl th.sortable::after", `content:"";display:inline-block;width:14px;height:14px;margin-left:6px;vertical-align:-3px;opacity:.45;background:currentColor;${mask("arrows-sort")}`],
+  [".breadcrumb li+li::before", `content:"";width:0.75rem;height:0.75rem;flex:none;background:var(--foreground-disable-primary);${mask("slash")}`],
+  [".tbl th.sortable::after", `content:"";display:inline-block;width:0.875rem;height:0.875rem;margin-left:0.375rem;vertical-align:-0.1875rem;opacity:.45;background:currentColor;${mask("arrows-sort")}`],
   [".tbl th.sorted::after", `opacity:1;${mask("arrow-up")}`],
   [".tbl th.sorted.desc::after", mask("arrow-down")],
   /* 좌측 메뉴: 활성 항목 박스의 맨 오른쪽 화살표. 마크업이 아니라 ::after 인 이유는 build.js 의 navOf() 정규식이 nav <a> 의 내부 구조에 의존하기 때문 */
-  [".drawer .d-item.on::after", `content:"";width:16px;height:16px;flex:none;margin-left:auto;opacity:.45;background:currentColor;${mask("arrow-right")}`, ".drawer .d-item.on"],
-  [".nav a.active::after", `content:"";width:16px;height:16px;flex:none;margin-left:auto;opacity:.45;background:currentColor;${mask("arrow-right")}`, ".nav a.active"],
+  [".drawer .d-item.on::after", `content:"";width:1rem;height:1rem;flex:none;margin-left:auto;opacity:.45;background:currentColor;${mask("arrow-right")}`, ".drawer .d-item.on"],
+  [".nav a.active::after", `content:"";width:1rem;height:1rem;flex:none;margin-left:auto;opacity:.45;background:currentColor;${mask("arrow-right")}`, ".nav a.active"],
 ];
 
 function apply() {

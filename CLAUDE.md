@@ -336,6 +336,16 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함:** 맨 앞 머리글 `th.expand` + 숨긴 이름, 버튼의 aria-expanded · aria-controls · aria-label, aria-controls 가 바로 뒤 `tr.row-detail`, 펼침 상태와 hidden 일치, colspan = 열 수.
 - **측정에서 드러나 고친 것:** 셰브론 칸의 `padding-right:0` 이 `.tbl.compact td{padding:8px 16px}`(명시도 0,2,1)에 져 칸이 56 이 되고 상세 글자가 첫 칸과 24 어긋났다 — `th.expand` · `td.expand` 로 적어 이기게 했다(칸 40). 숨긴 상세 행도 `nth-child` 에 들어가 줄무늬가 어긋나고, 상세 행에 행 hover 가 칠해졌다 — `:where(:not(.row-detail))` 로 뺐다(명시도 그대로). React 의 행 위치 계산(`sectionRowIndex`)과 지운 뒤 포커스 복귀가 상세 행을 세고 있었다. **캡처에서 발견:** 사이트 셸의 `td code`(인라인 칩 면 · 12px)가 표 칸 안 Code 블록의 `pre code` 에 걸려 원본 로그가 줄마다 회색으로 칠해졌다 — `.code-view pre code` 로 되돌렸다(behave 단정 · 음성 시험으로 잡음).
 - 음성 시험: 사이트 26건 · React 16건. 첫 회 2건을 못 잡았다 — 마지막 행 삭제 때 앞 상세 건너뛰기는 단정을 더해 잡았고, `.row-detail-body{contain:inline-size}` 는 재 보니 줄바꿈하는 Code 에도 · 긴 낱말에도 소용없어 지웠다. React 1건(`rowLabel` 기본 이름의 리팩터 되돌림)은 동작이 같은 변형이다. render.js 의 ds.js 크기 152KB → 154KB. Figma 미반영 149건(그대로 — 새 예제는 Figma 대조 밖).
+- 같은 날 행 펼침 이벤트를 `ds:row-expand` 로 나눴다(사람의 결정 — Breadcrumb 의 `ds:expand` 와 같은 이름이라 문서 전체에서 듣는 제품이 둘 다 받았다).
+
+2026-11-11 글자 크기 체계 A — 토큰화 + rem 전환(사람의 결정 셋: 토큰 + rem + 화면 폭 단계 · em 은 시스템 단위로 쓰지 않음 · 줄일 때 최소 글자 크기) — 게이트 수는 그대로. 화면 폭 단계(B)는 다음 커밋.
+- **글자 크기 토큰** `--font-size-10 · 12 · 14 · 16 · 18 · 20 · 24 · 28 · 32 · 40 · 48`(rem). 12 이하는 `max(0.75rem,12px)` 처럼 최소 크기를 지킨다. 줄 높이는 토큰 없이 rem(18 이하는 같은 max). 색 토큰이 아니라 수 94 는 그대로(`verify` 의 `isScalar` 가 `--font-` 를 이미 받는다).
+- **크기 · 간격은 전부 rem** — `style.src.css` 의 px 930곳(간격 토큰 · padding · gap · 높이 · 폭 · 반경 · 위치)과 `font-size` 251곳(토큰 236 · 단계 밖 15), `icons-css.js` 가 써 넣는 글리프 26곳, 패키지 `.ds-root` 기본 글자, React Pagination 인라인 gap. **px 그대로:** 테두리 · 외곽선 · 그림자 · 밑줄 · stroke · filter, 2px 이하, `--radius-full`, 미디어 쿼리.
+- **변화 0 을 픽셀로 쟀다** — 74페이지 × 라이트 · 다크를 1440 에서 전후 캡처(코드 패널 글자는 숨김 — CSS 글자가 바뀌므로). 다른 것은 Design Token 코드 패널에 토큰 줄이 늘어난 것 하나, 그리고 대시보드 1장(같은 빌드를 5번 찍어도 2가지 결과가 나오는 캡처 잡음).
+- **읽는 쪽을 한 곳에서** — `lib.js toPx()`(rem · `max()` · 글자 크기 토큰 → 기준 화면 px). Figma audit 의 `read()` 가 CSS 파일을 이것으로 풀어 읽고(끄면 어긋남 150 → 286), 문서의 토큰 값 표시(`foundations.js vars()`)도 쓴다.
+- **verify 더함:** 크기 속성의 px(2 초과) 금지, 컴포넌트 블록의 `font-size` 는 `var(--font-size-N)` · `inherit` 만 — 예외는 인라인 코드의 `.9em`(둘레 글자를 따라감)과 단계 밖 13px 셋(Date Picker 달력 · Breadcrumb · Code — C 에서 사람이 정함). 사이트 셸의 9 · 11 · 15px 은 rem 그대로.
+- **측정에서 드러나 고친 것:** Design Token 페이지가 반경 토큰을 px 로 읽어 'sm 0' · `border-radius:0px` 를 그렸고 Grid 페이지는 간격 토큰 이름을 잃었다(`vars()` 에 `toPx`). behave 의 패턴 반경 검사가 토큰 글자를 parseFloat 해 0.375 로 읽었다(탐침 요소의 계산값으로). verify 새 검사가 처음에 주석인 블록 표식을 지운 글에서 찾아 글자 크기 검사가 아무것도 보지 않았다(음성 시험으로 발견).
+- 음성 시험: verify 6건(px 글자 · 없는 토큰 · 토큰 대신 rem · 간격 토큰 px · 글리프 px · 블록 표식) · audit 1건. Figma 미반영 149건(그대로).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
@@ -351,6 +361,8 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
   **제품 색 위의 흰 글자가 4.5 를 넘어야 하고 빌드가 검사합니다**(`verify.js`).
 - 비활성은 `--surface-disable-primary` · `--foreground-disable-primary` 로 칠합니다. `opacity` 로
   흐리게 하지 않습니다.
+- **크기는 rem**(2026-11-11) — 글자는 `--font-size-N` 토큰(12 이하는 최소 크기를 지키는 `max()`), 간격 · 높이 · 반경은 rem 이고
+  테두리 · 그림자 · 2px 이하만 px 입니다(`verify`). 기준 화면(루트 16px)에서 px 와 같으므로 Figma 수치는 그대로 읽습니다(`lib.js toPx`).
 
 ## Figma
 

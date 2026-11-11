@@ -77,8 +77,10 @@ const require = createRequire(import.meta.url);
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(here, "..");
-const read = (p) => fs.readFileSync(path.join(ROOT, p), "utf8");
-const { splitSelectors } = require(path.join(ROOT, "_build/lib.js"));
+const { splitSelectors, toPx } = require(path.join(ROOT, "_build/lib.js"));
+/* CSS 는 rem · 글자 크기 토큰으로 적는다(2026-11-11). Figma 는 기준 화면(루트 16px)의 px 이므로 CSS 파일은 px 로 풀어 읽는다 —
+   기대값을 읽는 자리마다 고치지 않고 여기 한 곳에서 */
+const read = (p) => { const t = fs.readFileSync(path.join(ROOT, p), "utf8"); return /\.css$/.test(p) ? toPx(t) : t; };
 
 /* ---------- 토큰 ---------- */
 const GROUPS = ["foreground", "background", "surface", "line", "effect", "static"];

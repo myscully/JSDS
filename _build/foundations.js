@@ -12,7 +12,8 @@ window.FOUNDATION_PAGES = function (H) {
 
   /* ---------- 토큰 값 해석 (Light / Dark) ---------- */
   function vars() {
-    const css = STYLE(); const L = LIB.parseVars(LIB.rootBlock(css, ":root")); const D = Object.assign({}, L, LIB.parseVars(LIB.rootBlock(css, ':root[data-theme="dark"]')));
+    const css = STYLE(); const px = (o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, LIB.toPx(v)]));   // 값 표시는 기준 화면 px(2026-11-11 rem 전환)
+    const L = px(LIB.parseVars(LIB.rootBlock(css, ":root"))); const D = Object.assign({}, L, px(LIB.parseVars(LIB.rootBlock(css, ':root[data-theme="dark"]'))));
     return { L, D };
   }
 
