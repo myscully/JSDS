@@ -153,6 +153,19 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
           if (/<a\b/.test(h[2]) || (!sortable && /<button\b/.test(h[2]))) fails.push(`${f}: 머리글 안에 정렬 말고 다른 조작(Data Table › 머리글)`);
         }
         sameNames((/<tbody>([\s\S]*?)<\/tbody>/.exec(m[1]) || ["", ""])[1], "Data Table");
+        /* 행 펼침(2026-11-11) — 버튼은 맨 앞 칸 · aria-expanded · 행마다 다른 이름 · 바로 뒤 tr.row-detail 을 가리킴, 상세 칸은 전체 열을 덮고 펼침 상태와 hidden 이 맞는다 */
+        if (/class="expand-btn"/.test(m[1])) {
+          const cols = ((/<thead>[\s\S]*?<tr>([\s\S]*?)<\/tr>/.exec(m[1]) || ["", ""])[1].match(/<th\b/g) || []).length;
+          if (!/<thead>[\s\S]*?<tr><th class="expand"><span class="sr-only">[^<]+<\/span><\/th>/.test(m[1])) fails.push(`${f}: 펼침 표의 맨 앞 머리글은 th.expand + 숨긴 이름(Data Table › 행 펼침)`);
+          for (const r of m[1].matchAll(/<tr\b[^>]*>\s*<td class="expand">([\s\S]*?)<\/td>[\s\S]*?<\/tr>\s*(<tr\b[^>]*>)?/g)) {
+            const btn = /<button type="button" class="expand-btn" aria-expanded="(true|false)" aria-controls="([^"]+)" aria-label="[^"]+">/.exec(r[1]);
+            if (!btn) { if (/<button/.test(r[1])) fails.push(`${f}: 펼침 버튼 — button.expand-btn[aria-expanded][aria-controls][aria-label](Data Table › 행 펼침)`); continue; }
+            const det = r[2] || "", detTd = new RegExp(`<tr class="row-detail" id="${btn[2]}"( hidden(?:="")?)?><td colspan="(\\d+)">`).exec(m[1].slice(r.index + r[0].length - det.length));
+            if (!detTd) { fails.push(`${f}: 펼침 버튼의 aria-controls 가 바로 뒤 tr.row-detail 이 아니다 — ${btn[2]}(Data Table › 행 펼침)`); continue; }
+            if ((btn[1] === "true") === !!detTd[1]) fails.push(`${f}: 펼침 상태와 상세 행 hidden 이 어긋남 — ${btn[2]}`);
+            if (Number(detTd[2]) !== cols) fails.push(`${f}: 상세 칸 colspan ${detTd[2]} ≠ 열 ${cols}(Data Table › 행 펼침)`);
+          }
+        }
       }
       for (const m of pv.matchAll(/<div class="tbl-wrap sticky"([^>]*)>/g)) if (!/tabindex="0"/.test(m[1]) || !/aria-label="/.test(m[1])) fails.push(`${f}: 고정 헤더 영역은 tabindex=0 + 이름(Data Table › 고정 헤더)`);
       for (const m of pv.matchAll(/<ul class="list[^"]*"([^>]*)>([\s\S]*?)<\/ul>/g)) {

@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1123/1123 · react 667+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1136/1136 · react 682+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -327,6 +327,15 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함:** `.slider-field` 의 라벨 · 트랙 이름 · 두 칸의 min · max · step 같음 · `.val` 금지 · 트랙 name 금지, `data-delay` 자리. 구조 비교(`skeleton.ts`)에 `data-delay` 를 더했다.
 - **측정에서 드러나 고친 것:** `.field input:where(…)` 규칙 9개가 필드 안 range 에도 걸려 트랙이 높이 40 · 테두리를 받았다 — `:not([type=range])` 를 :where 안에 더했다(명시도 그대로, audit 선택자도 같이). **패키지 CSS 의 줄인 모션 base 에 11-10 의 Spinner 예외가 빠져 있었다**(사이트만 돌고 패키지는 멈춤) — 사이트와 같게 하고 `sync-css.mjs` 가 막는다. 도는 Spinner 의 `getBoundingClientRect` 는 기울어진 상자라 크기는 offsetWidth 로 잰다. 줄인 모션 검사(behave.system)는 애니메이션 이름마다 길이를 보게 고쳤다(0s 인 ds-delay 는 움직임이 아니다).
 - 음성 시험: 사이트 31건 · React 16건. 첫 회 1건을 못 잡아(DS.loading 을 보인 채 다시 시작하면 한 번 숨었다 나타남 — 400ms 뒤에만 쟀다) 다시 시작한 순간을 재게 고쳐 잡았다. 쓸모없는 코드 2건은 지웠다(`.number-field input[type=number]` 한정 — 트랙은 `.slider input[type=range]` 가 이미 이김, 트랙 onChange 의 setText — effect 가 따라감). render.js 의 ds.js 크기 150KB → 152KB. Figma 미반영 149건(그대로 — 새 예제 둘은 Figma 대조 밖).
+
+2026-11-11 Data Table 행 펼침 — 1.0 뒤로 미뤘던 것을 앞당김(사람의 결정 넷) — behave 1123 → 1136(`behave.expand.js` 13) · react 667+6 → 682+6(`tests/row-expand.test.tsx` 14 · 예제 245 → 246 에 따른 구조 비교 1). contrast · advisory · pages 수는 그대로(새 색 쌍 없음). 열 표시 설정은 여전히 1.0 뒤.
+- **맨 앞 셰브론 칸 · 여러 행 함께**(사람의 결정) — `th.expand`(숨긴 이름 '상세') · `td.expand > button.expand-btn[aria-expanded][aria-controls][aria-label]` 이 바로 뒤 `tr.row-detail[hidden] > td[colspan] > .row-detail-body` 를 연다. 행 클릭은 펼침에 쓰지 않는다. 사이트 `ds:row-expand {expanded}`(행 tr 에서 — Breadcrumb 의 `ds:expand` 와 이름을 나눔, 사람의 결정) · React `renderExpanded` · `expanded` · `defaultExpanded` · `onExpandedChange(set, {key, expanded})` · `expandable` · `expandLabel`.
+- **정렬은 펼침을 남기고 페이지 · 필터 · 검색 · 기간은 접음**(사람의 결정) — 사이트 정렬 · `DS.table.removeRow` 가 상세 행을 함께 옮기고 지운다(마지막 행을 지우면 앞 행의 상세를 건너뛰어 앞 행으로). React 는 지금 rows 에 없는 키를 지우고(페이지 이동) `expandScope` 가 바뀌면 모두 접는다. 사이트의 필터 변경 접기는 제품 몫.
+- **자유 자리 + 권장 구성**(사람의 결정) — 키-값 `.detail-meta`(dl) + 원본 로그 Code(`.wrap`), 불러오는 동안 그 자리에 Spinner. 상세 글자는 셰브론 뒤 첫 칸의 글자와 같은 선(56)에서 시작하고 회색 면(`--background-neutral-secondary`)이다.
+- **사람이 정하지 않은 기본값:** React 는 접힌 행의 상세도 그려 둔다(사이트 마크업 · 구조 비교와 같게) — 불러와야 하는 내용은 `renderExpanded(row, {expanded})` 의 expanded 일 때만 돌려준다. 셰브론은 오른쪽 → 펼치면 아래(90° 회전, `--motion-fast`), 버튼 24 · hover 는 `--surface-neutral-strong`.
+- **verify 더함:** 맨 앞 머리글 `th.expand` + 숨긴 이름, 버튼의 aria-expanded · aria-controls · aria-label, aria-controls 가 바로 뒤 `tr.row-detail`, 펼침 상태와 hidden 일치, colspan = 열 수.
+- **측정에서 드러나 고친 것:** 셰브론 칸의 `padding-right:0` 이 `.tbl.compact td{padding:8px 16px}`(명시도 0,2,1)에 져 칸이 56 이 되고 상세 글자가 첫 칸과 24 어긋났다 — `th.expand` · `td.expand` 로 적어 이기게 했다(칸 40). 숨긴 상세 행도 `nth-child` 에 들어가 줄무늬가 어긋나고, 상세 행에 행 hover 가 칠해졌다 — `:where(:not(.row-detail))` 로 뺐다(명시도 그대로). React 의 행 위치 계산(`sectionRowIndex`)과 지운 뒤 포커스 복귀가 상세 행을 세고 있었다. **캡처에서 발견:** 사이트 셸의 `td code`(인라인 칩 면 · 12px)가 표 칸 안 Code 블록의 `pre code` 에 걸려 원본 로그가 줄마다 회색으로 칠해졌다 — `.code-view pre code` 로 되돌렸다(behave 단정 · 음성 시험으로 잡음).
+- 음성 시험: 사이트 26건 · React 16건. 첫 회 2건을 못 잡았다 — 마지막 행 삭제 때 앞 상세 건너뛰기는 단정을 더해 잡았고, `.row-detail-body{contain:inline-size}` 는 재 보니 줄바꿈하는 Code 에도 · 긴 낱말에도 소용없어 지웠다. React 1건(`rowLabel` 기본 이름의 리팩터 되돌림)은 동작이 같은 변형이다. render.js 의 ds.js 크기 152KB → 154KB. Figma 미반영 149건(그대로 — 새 예제는 Figma 대조 밖).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

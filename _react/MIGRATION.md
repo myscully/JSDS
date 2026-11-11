@@ -436,3 +436,10 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **TextField `wrapControl`** — 새 prop 입니다. 입력(.affix)을 감싸 옆에 다른 컨트롤을 둡니다.
 - **줄인 모션** — 패키지 CSS 의 base 가 사이트와 같아졌습니다. 전에는 패키지에서 Spinner · 버튼 loading · Switch 처리 중이 줄인 모션에서 멈췄습니다(2026-11-10 결정이 패키지에 빠져 있었음).
 - **`.field input` 규칙** — range 입력을 빼도록 바뀌었습니다(`:not([type=range])`, 명시도는 그대로). 제품 CSS 가 이 선택자 문자열에 기대고 있으면 확인하세요.
+
+## Data Table 행 펼침 (2026-11-11)
+
+- **DataTable `renderExpanded` · `expandable` · `expanded` · `defaultExpanded` · `onExpandedChange` · `expandScope` · `expandLabel`** — 새 prop 입니다. `renderExpanded` 를 주지 않으면 전과 같습니다. 주면 맨 앞에 셰브론 칸(`th.expand` · `td.expand`)이 생겨 열 수가 하나 늘고, 각 행 바로 뒤에 `tr.row-detail` 이 붙습니다.
+- **`tbody tr` 를 세는 제품 코드** — 펼침을 켜면 상세 행이 섞입니다. 행만 셀 때는 `tbody > tr:not(.row-detail)` 로 고르세요.
+- **사이트 마크업** — `th.expand`(숨긴 이름) · `td.expand > button.expand-btn[aria-expanded][aria-controls][aria-label]` · 바로 뒤 `tr.row-detail[hidden] > td[colspan] > .row-detail-body`. `ds:row-expand` 는 행(tr)에서 납니다(Breadcrumb 의 `ds:expand` 와 이름을 나눔). 정렬 · `DS.table.removeRow` 는 상세 행을 함께 옮기고 지웁니다.
+- **줄무늬 · hover** — `.zebra` 와 행 hover 가 상세 행을 세지 않도록 선택자가 바뀌었습니다(`:where(:not(.row-detail))`, 명시도는 그대로).

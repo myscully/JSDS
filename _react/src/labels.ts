@@ -20,6 +20,7 @@ export const LABELS = {
   newWindow: "새 창",
   selectAll: "전체 선택",
   select: "선택",
+  detail: "상세",
   datePlaceholder: "날짜 선택",
   dateDialog: "날짜 선택",
   today: "오늘",

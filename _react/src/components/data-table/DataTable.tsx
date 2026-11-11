@@ -1,10 +1,11 @@
-import { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, type CSSProperties, type HTMLAttributes, type MouseEvent, type ReactNode } from "react";
+import { Fragment, forwardRef, useEffect, useId, useLayoutEffect, useMemo, useRef, type CSSProperties, type HTMLAttributes, type MouseEvent, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { mergeRefs } from "../../utils/hooks";
 import { Button } from "../button/Button";
 import { Checkbox } from "../checkbox/Checkbox";
 import { Skeleton } from "../loading/Loading";
+import { Icon } from "../../icons/Icon";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../table/Table";
 import { LABELS } from "../../labels";
 
@@ -54,6 +55,19 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   rowProps?: (row: T, index: number) => { selected?: boolean; disabled?: boolean; log?: boolean; className?: string; onClick?: () => void };
   /** 행 액션 셀 (td.actions) */
   actions?: (row: T) => ReactNode;
+  /** 행 펼침 — 주면 맨 앞에 셰브론 칸이 생기고 그 행 아래 tr.row-detail 에 그린다. 접힌 행도 그려 두므로(사이트 마크업과 같다) 불러와야 하는 내용은 expanded 일 때만 돌려준다 */
+  renderExpanded?: (row: T, info: { expanded: boolean }) => ReactNode;
+  /** 펼칠 내용이 없는 행은 false — 셰브론 없이 빈 칸 */
+  expandable?: (row: T) => boolean;
+  /** 펼친 행의 rowKey. 지금 rows 에 없는 키는 지운다(페이지를 옮기면 접힘) */
+  expanded?: ReadonlySet<string>;
+  defaultExpanded?: ReadonlySet<string>;
+  /** key 는 바꾼 행, 한꺼번에 접었으면 null */
+  onExpandedChange?: (expanded: Set<string>, info: { key: string | null; expanded: boolean }) => void;
+  /** 필터 · 검색 · 기간처럼 이 값이 바뀌면 모두 접는다. 정렬은 펼침을 남긴다 */
+  expandScope?: unknown;
+  /** 셰브론 버튼의 접근 이름. 기본 '{행 이름} 상세' */
+  expandLabel?: (row: T) => string;
   /** rows 가 비었을 때 */
   empty?: ReactNode;
   /** 불러오는 중이면 Skeleton 행, 실패면 오류 행으로 rows 를 대신한다 */
@@ -90,7 +104,7 @@ function defaultSortValue<T>(row: T, key: string): string | number {
 }
 
 function DataTableInner<T>(
-  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, empty, status, statusLabel = LABELS.loading, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, maxHeight, caption, compact, zebra, className, wrapStyle, ...rest }: DataTableProps<T>,
+  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel = LABELS.loading, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, maxHeight, caption, compact, zebra, className, wrapStyle, ...rest }: DataTableProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [curSort, setSort] = useControllable<SortState | null>({ value: sort, defaultValue: defaultSort, onChange: onSortChange });
@@ -118,6 +132,20 @@ function DataTableInner<T>(
   const scopeSeen = useRef(selectionScope);
   useEffect(() => { if (scopeSeen.current !== selectionScope) { scopeSeen.current = selectionScope; clearAll(); } });   // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* 행 펼침 — 여러 행을 함께. 정렬은 키로 따라가고, 지금 rows 에 없는 키 · 범위가 바뀌면 접는다 */
+  const expOn = !!renderExpanded;
+  const [exp, setExpRaw] = useControllable<ReadonlySet<string>>({ value: expanded, defaultValue: defaultExpanded ?? new Set() });
+  const setExp = (n: Set<string>, info: { key: string | null; expanded: boolean }) => { setExpRaw(n); onExpandedChange?.(new Set(n), info); };
+  const rowKeys = rows.map(rowKey);
+  const expGone = expOn && Array.from(exp).some((k) => !rowKeys.includes(k));
+  useEffect(() => { if (expGone) setExp(new Set(Array.from(exp).filter((k) => rowKeys.includes(k))), { key: null, expanded: false }); });   // eslint-disable-line react-hooks/exhaustive-deps
+  const expScopeSeen = useRef(expandScope);
+  useEffect(() => { if (expScopeSeen.current !== expandScope) { expScopeSeen.current = expandScope; if (exp.size) setExp(new Set(), { key: null, expanded: false }); } });   // eslint-disable-line react-hooks/exhaustive-deps
+  const toggleExp = (k: string) => { const n = new Set(exp); const on = !n.has(k); if (on) n.add(k); else n.delete(k); setExp(n, { key: k, expanded: on }); };
+  const baseId = useId().replace(/[^a-zA-Z0-9_-]/g, "");
+  const origIndex = useMemo(() => new Map(rowKeys.map((k, i) => [k, i])), [rowKeys.join("\u0000")]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const nameOf = (row: T, k: string) => (rowLabel ? rowLabel(row) : String((row as Record<string, unknown>)[columns[0]?.key] ?? k));
+
   /* 행을 지운 뒤 포커스 — 포커스가 있던 행이 사라져 body 로 떨어지면 같은 자리의 행으로 옮긴다 */
   const wrapEl = useRef<HTMLDivElement | null>(null);
   const lastRow = useRef<{ key: string; index: number } | null>(null);
@@ -128,14 +156,18 @@ function DataTableInner<T>(
     if (now >= 0) { last.index = now; return; }
     lastRow.current = null;
     if (document.activeElement && document.activeElement !== document.body) return;
-    const trs = wrapEl.current?.querySelectorAll<HTMLElement>("tbody tr") ?? [];
+    const trs = mainRows();
     const target = (trs[Math.min(last.index, trs.length - 1)] as HTMLElement | undefined)?.querySelector<HTMLElement>(FOCUS_IN_ROW);
     if (target) target.focus();
     else if (wrapEl.current) { if (wrapEl.current.tabIndex < 0) wrapEl.current.tabIndex = -1; wrapEl.current.focus(); }
   });
+  /* 펼친 상세 행은 행 순서에 세지 않는다 — 상세 안의 포커스는 그 위 행의 것 */
+  const mainRows = () => Array.from(wrapEl.current?.querySelector("table")?.tBodies[0]?.rows ?? []).filter((tr) => !tr.classList.contains("row-detail"));
   const noteRow = (e: { target: EventTarget }) => {
-    const tr = (e.target as Element).closest?.("tr");
-    if (tr && (tr as HTMLTableRowElement).sectionRowIndex < orderKeys.length) lastRow.current = { key: orderKeys[(tr as HTMLTableRowElement).sectionRowIndex], index: (tr as HTMLTableRowElement).sectionRowIndex };
+    let tr = (e.target as Element).closest?.("tr") as HTMLTableRowElement | null;
+    if (tr?.classList.contains("row-detail")) tr = tr.previousElementSibling as HTMLTableRowElement | null;
+    const i = tr ? mainRows().indexOf(tr) : -1;
+    if (i >= 0 && i < orderKeys.length) lastRow.current = { key: orderKeys[i], index: i };
   };
   const rowClick = (fn: (() => void) | undefined) => fn && ((e: MouseEvent) => {
     /* 안쪽 버튼 · 링크 · 체크박스는 자기 일만 한다. 글자를 끌어 고른 것도 클릭이 아니다 */
@@ -147,7 +179,7 @@ function DataTableInner<T>(
     : isAll ? <><span>{text.all(totalCount)}</span><Button variant="text" size="sm" onClick={clearAll}>{text.clear}</Button></>
     : allChecked && totalCount > allKeys.length ? <><span>{text.page(allKeys.length)}</span><Button variant="text" size="sm" onClick={() => setAll(true)}>{text.selectAll(totalCount)}</Button></>
     : null;
-  const colCount = columns.length + (selectable ? 1 : 0) + (actions ? 1 : 0);
+  const colCount = columns.length + (expOn ? 1 : 0) + (selectable ? 1 : 0) + (actions ? 1 : 0);
   return (
     <div
       ref={mergeRefs(ref, wrapEl)}
@@ -163,6 +195,7 @@ function DataTableInner<T>(
         {caption && <caption className="sr-only">{caption}</caption>}
         <TableHead>
           <TableRow>
+            {expOn && <TableHeader className="expand"><span className="sr-only">{LABELS.detail}</span></TableHeader>}
             {selectable && (
               <TableHeader check>
                 <Checkbox checked={allChecked} indeterminate={someChecked} onChange={toggleAll} aria-label={LABELS.selectAll} />
@@ -207,11 +240,23 @@ function DataTableInner<T>(
               const k = rowKey(row);
               const rp = rowProps?.(row, i) ?? {};
               const isSel = selectable ? sel.has(k) : rp.selected;
-              return (
+              const canExp = expOn && (expandable ? expandable(row) : true);
+              const open = canExp && exp.has(k);
+              const detailId = `${baseId}-row-${origIndex.get(k) ?? i}`;
+              const main = (
                 <TableRow key={k} selected={isSel} disabled={rp.disabled} log={rp.log} className={rp.className} onClick={rowClick(rp.onClick)}>
+                  {expOn && (
+                    <TableCell className="expand">
+                      {canExp && (
+                        <button type="button" className="expand-btn" aria-expanded={open} aria-controls={detailId} aria-label={expandLabel ? expandLabel(row) : `${nameOf(row, k)} ${LABELS.detail}`} onClick={() => toggleExp(k)}>
+                          <Icon name="chevron-right" size={16} />
+                        </button>
+                      )}
+                    </TableCell>
+                  )}
                   {selectable && (
                     <TableCell check>
-                      <Checkbox checked={sel.has(k)} onChange={(on) => toggleOne(k, on)} aria-label={`${rowLabel ? rowLabel(row) : String((row as Record<string, unknown>)[columns[0]?.key] ?? k)} ${LABELS.select}`} />
+                      <Checkbox checked={sel.has(k)} onChange={(on) => toggleOne(k, on)} aria-label={`${nameOf(row, k)} ${LABELS.select}`} />
                     </TableCell>
                   )}
                   {columns.map((c) => {
@@ -224,6 +269,15 @@ function DataTableInner<T>(
                   })}
                   {actions && <TableCell actions>{actions(row)}</TableCell>}
                 </TableRow>
+              );
+              if (!canExp) return main;
+              return (
+                <Fragment key={k}>
+                  {main}
+                  <TableRow className="row-detail" id={detailId} hidden={!open}>
+                    <TableCell colSpan={colCount}><div className="row-detail-body">{renderExpanded!(row, { expanded: open })}</div></TableCell>
+                  </TableRow>
+                </Fragment>
               );
             })
           )}

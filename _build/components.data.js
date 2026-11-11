@@ -74,6 +74,14 @@ const cal = (o) => {
 </div>`;
 };
 /* Number Input 의 증감 버튼 */
+const EXP_ROWS = [
+  ["lg1", "09:41:12.031", "critical", "CRIT", "10.0.4.21", "process.create blocked: rundll32.exe → cryptor.dll", "open"],
+  ["lg2", "09:41:11.870", "medium", "WARN", "10.0.4.21", "usb.attach vendor=0x0781 product=0x5583", "loading"],
+  ["lg3", "09:41:09.114", "info", "INFO", "10.0.0.3", "policy.sync ok (rev 2041)", ""],
+];
+const expBtn = (id, t, open) => `<button type="button" class="expand-btn" aria-expanded="${open ? "true" : "false"}" aria-controls="${id}-d" aria-label="${t} 로그 상세">${I("chevron-right",16)}</button>`;
+const expDetail = (id, t, ip, m, st) => `<tr class="row-detail" id="${id}-d"${st ? "" : " hidden"}><td colspan="5"><div class="row-detail-body">${st === "loading" ? `<div class="spinner-wrap" role="status"><span class="spinner sm"></span>상세 불러오는 중…</div>` : `<dl class="detail-meta"><dt>탐지 정책</dt><dd>랜섬웨어 행위 차단</dd><dt>사용자</dt><dd>corp\\kim</dd><dt>상위 프로세스</dt><dd>winword.exe</dd></dl>
+        <div class="code-view wrap"><div class="head"><span class="title">${t} 원본 로그</span>${copyBtn(t + " 원본 로그")}</div><pre tabindex="0" aria-label="${t} 원본 로그"><code>${t} ${ip} CRIT ${m} parent=winword.exe user=corp\\kim sha256=9f2c41d07be3a8f6e1c2d4b5a6978e0f1d2c3b4a5968778695a4b3c2d1e0f9a8</code></pre></div>`}</div></td></tr>`;
 const numBtns = (name, downOff, upOff) => `<button type="button" class="num-btn down" tabindex="-1" aria-label="${name} 줄이기"${downOff ? " disabled" : ""}>${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="${name} 늘리기"${upOff ? " disabled" : ""}>${I("plus",16)}</button>`;
 
 /* Code · Copy Field 의 복사 버튼 — 이름에 값의 이름을 넣는다 */
@@ -1778,7 +1786,7 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Data Table */
   "data-table": {
-    status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".select-notice", ".tag", ".checkbox", ".indicator"], borrows: [".link", ".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep", ".skeleton", ".sr-only"],
+    status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".select-notice", ".tag", ".checkbox", ".indicator"], borrows: [".link", ".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep", ".skeleton", ".sr-only", ".code-view", ".spinner", ".spinner-wrap"],
     desc: "로그·이벤트·정책 목록처럼 대량의 행 데이터를 다룹니다. 정렬·선택·행 액션을 갖춘 콘솔의 핵심 컴포넌트입니다. 단순 표는 Table 을 씁니다.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><thead><tr><th>시간</th><th>심각도</th></tr></thead><tbody><tr><td>09:41</td><td><span class="tag critical sm">Critical</span></td></tr><tr><td>09:40</td><td><span class="tag medium sm">Medium</span></td></tr></tbody></table></div>`,
     principles: [
@@ -1794,6 +1802,8 @@ const COMPONENTS = {
       ["고정 헤더", "세로로 긴 로그 표에 씁니다. 표 영역에 높이를 주고 이름과 <code>tabindex=0</code> 을 둡니다. 복잡한 표에는 <code>caption</code> 을 둡니다"],
       ["행을 지운 뒤", "포커스를 다음 행으로 옮깁니다. 사이트는 <code>DS.table.removeRow</code>, React 는 행이 사라지면 자동입니다"],
       ["강조", "색만으로 의미를 전하지 않습니다. 심각도 · 상태는 글자를 함께 둡니다"],
+      ["행 펼침", "한 행의 상세(원본 로그 · 탐지 근거)를 페이지를 옮기지 않고 봅니다. 맨 앞 칸의 셰브론 버튼으로 열고 여러 행을 함께 펼칩니다. 행 클릭은 펼침에 쓰지 않습니다(상세 이동에 남김). 정렬하면 펼친 상세가 제 행을 따라가고, 페이지 · 필터 · 검색 · 기간이 바뀌면 모두 접습니다"],
+      ["펼친 내용", "제품이 채웁니다. 키-값(<code>.detail-meta</code>)과 원본 로그(<a href=\"#/components/code\">Code</a>)를 권합니다. 서버에서 불러오면 그 자리에 Spinner 를, 실패하면 원인과 다시 시도를 둡니다"],
       ["로그 표", "자동 갱신에는 일시 정지를 둡니다. 읽는 중에 행이 밀리지 않게 새 행은 건수로 알립니다. 조회 범위(최신 100건 등)를 건수 옆에 적습니다. 제품이 구현합니다"],
     ],
     examples: [
@@ -1880,6 +1890,13 @@ const COMPONENTS = {
             <tbody>${[["PC-2041", "영업팀"], ["PC-1187", "개발팀"], ["PC-0932", "인프라팀"]].map(([n, g]) => `<tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="${n} 선택"></label></td><td>${n}</td><td>${g}</td></tr>`).join("")}</tbody>
           </table>
         </div>` },
+      { id: "expandable", title: "행 펼침", desc: "맨 앞 셰브론으로 한 행의 상세를 펼칩니다. 여러 행을 함께 펼칠 수 있고, 정렬하면 상세가 제 행을 따라갑니다. 서버에서 불러오는 동안은 그 자리에 Spinner 를 둡니다(두 번째 행).", html: `
+        <div class="tbl-wrap">
+          <table class="tbl compact">
+            <thead><tr><th class="expand"><span class="sr-only">상세</span></th><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>레벨</th><th>소스</th><th>메시지</th></tr></thead>
+            <tbody>${EXP_ROWS.map(([id, t, c, l, ip, m, st]) => `<tr class="log-row"><td class="expand">${expBtn(id, t, !!st)}</td><td>${t}</td><td><span class="tag ${c} sm">${l}</span></td><td>${ip}</td><td>${m}</td></tr>${expDetail(id, t, ip, m, st)}`).join("")}</tbody>
+          </table>
+        </div>`, layout: "top" },
       { id: "sticky", title: "고정 헤더", desc: "표 영역에 높이를 주면 안에서 스크롤하고 머리글이 남습니다. 긴 메시지 열은 말줄임(td.truncate)입니다.", html: `
         <div class="tbl-wrap sticky" tabindex="0" role="region" aria-label="최근 로그" style="max-height:240px">
           <table class="tbl compact">
@@ -1889,7 +1906,7 @@ const COMPONENTS = {
           </table>
         </div>`, layout: "top" },
     ],
-    props: [[".tbl-wrap", "container", "—", "보더 + radius/lg + 가로 스크롤. 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 52. .compact 44 · .zebra 줄무늬"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["table[data-sort=server]", "attribute", "—", "서버 정렬. 표시만 바꾸고 다시 정렬하지 않는다. 정렬하면 언제나 ds:sort {key, dir}"], [".tbl-wrap[data-total]", "attribute", "—", "전체 건수. .select-notice 에 전체 결과 선택을 안내하고 ds:select-all {all, total}"], [".tbl-wrap.sticky", "class", "—", "고정 헤더. max-height · tabindex=0 · 이름을 함께"], ["td.truncate", "class", "—", "말줄임. title 에 전체 값"], ["DS.table.removeRow(tr)", "function", "—", "행을 지우고 다음 행으로 포커스"], ["[data-retry]", "attribute", "—", "오류 행의 다시 시도. ds:retry"], ["tr.on / .disabled", "row", "—", "선택 / 비활성. 비활성 행 안의 태그도 disable 토큰으로 칠해져 심각도 색이 활성처럼 남지 않습니다"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션"]],
+    props: [[".tbl-wrap", "container", "—", "보더 + radius/lg + 가로 스크롤. 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 52. .compact 44 · .zebra 줄무늬"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["table[data-sort=server]", "attribute", "—", "서버 정렬. 표시만 바꾸고 다시 정렬하지 않는다. 정렬하면 언제나 ds:sort {key, dir}"], [".tbl-wrap[data-total]", "attribute", "—", "전체 건수. .select-notice 에 전체 결과 선택을 안내하고 ds:select-all {all, total}"], [".tbl-wrap.sticky", "class", "—", "고정 헤더. max-height · tabindex=0 · 이름을 함께"], ["td.truncate", "class", "—", "말줄임. title 에 전체 값"], ["DS.table.removeRow(tr)", "function", "—", "행을 지우고 다음 행으로 포커스. 펼친 상세 행도 함께 지운다"], ["th.expand / td.expand > .expand-btn", "cell", "—", "행 펼침 — 맨 앞 칸. 머리글에는 숨긴 이름(.sr-only), 버튼은 aria-expanded · aria-controls(상세 행 id) · 행마다 다른 aria-label. React <code>renderExpanded</code>"], ["tr.row-detail[hidden] > td[colspan] > .row-detail-body", "row", "—", "바로 앞 행의 상세. colspan = 열 수. 글자는 셰브론 뒤 첫 칸의 글자와 같은 선(왼쪽 56)에서 시작합니다. 안에 .detail-meta(dl) · Code · 불러오는 중 .spinner-wrap. React 는 <code>renderExpanded(row, {expanded})</code> — 접힌 행도 그려 두므로 불러와야 하는 내용은 expanded 일 때만 돌려줍니다. 펼칠 내용이 없는 행은 <code>expandable</code> 로 빼면 셰브론 없이 빈 칸"], ["ds:row-expand", "event", "—", "행(tr)에서 {expanded}. 상세를 불러올 때 쓴다. React <code>expanded</code> · <code>defaultExpanded</code> · <code>onExpandedChange(set, {key, expanded})</code> — 지금 rows 에 없는 키는 지우고(페이지를 옮기면 접힘), <code>expandScope</code> 가 바뀌면 모두 접습니다(key null)"], ["[data-retry]", "attribute", "—", "오류 행의 다시 시도. ds:retry"], ["tr.on / .disabled", "row", "—", "선택 / 비활성. 비활성 행 안의 태그도 disable 토큰으로 칠해져 심각도 색이 활성처럼 남지 않습니다"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션"]],
     spec: [["Size", "행 높이 52 (compact 44) · 헤더 44"], ["Container", "radius/lg 8 · line/neutral/secondary 1px · 셀 격자선 없음"], ["Label", "헤더 12 SemiBold tertiary · 셀 Body/2 14 · 숫자 tabular · 오른쪽 정렬(.num) · 말줄임은 긴 메시지 열 하나"], ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래"]],
     figma: { frame: "Data Table", radius: "radius/lg", sizes: { row: { h: 52 }, compact: { h: 44 }, header: { h: 44 } }, variants: { default: {}, selectable: {}, compact: {} }, states: ["default", "hover", "selected", "sorted", "empty"] },
   },

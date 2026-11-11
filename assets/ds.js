@@ -749,8 +749,9 @@
   /* 행을 지운 뒤 포커스 — 지운 행의 다음(없으면 이전) 행의 첫 조작 요소로, 행이 없으면 표 영역으로 */
   function removeRow(tr) {
     tr = typeof tr === "string" ? $(tr) : tr; if (!tr || !tr.parentNode) return;
-    var tbl = closest(tr, "table"), wrap = closest(tr, ".tbl-wrap"), to = tr.nextElementSibling || tr.previousElementSibling, had = tr.contains(doc.activeElement);
-    tr.remove();
+    var det = detailOf(tr), sib = function (el, k) { el = el && el[k]; while (el && el.classList.contains("row-detail")) el = el[k]; return el; };
+    var tbl = closest(tr, "table"), wrap = closest(tr, ".tbl-wrap"), to = sib(det || tr, "nextElementSibling") || sib(tr, "previousElementSibling"), had = tr.contains(doc.activeElement) || !!(det && det.contains(doc.activeElement));
+    tr.remove(); if (det) det.remove();
     var master = tbl && $("th.check input", tbl); if (master) syncRow(master);
     if (!had) return;
     var f = to && $(FOCUSABLE, to);
@@ -770,6 +771,15 @@
     $$(".item input[type=checkbox]", terms).forEach(function (i) { if (miss.indexOf(i) >= 0) i.setAttribute("aria-invalid", "true"); else i.removeAttribute("aria-invalid"); });
     if (!miss.length) terms._tried = false;
   }
+  /* 행 펼침(사람의 결정 2026-11-11) — 버튼이 aria-controls 의 상세 행을 열고 닫는다. 여러 개를 함께 펼친다. 포커스는 버튼에 남는다.
+     상세를 서버에서 불러오면 ds:row-expand {expanded} 를 받은 제품이 그 행의 .row-detail-body 를 채운다 */
+  function detailOf(tr) { var b = tr && $(":scope > td.expand .expand-btn", tr); return b ? doc.getElementById(b.getAttribute("aria-controls")) : null; }
+  function toggleDetail(btn) {
+    var det = doc.getElementById(btn.getAttribute("aria-controls")); if (!det) return;
+    var open = btn.getAttribute("aria-expanded") !== "true";
+    btn.setAttribute("aria-expanded", String(open)); det.hidden = !open;
+    fire(closest(btn, "tr"), "ds:row-expand", { expanded: open });
+  }
   function sortTable(th) {
     var table = closest(th, "table"), tbody = $("tbody", table); if (!tbody) return;
     var ths = $$("thead th", table), col = ths.indexOf(th);
@@ -778,10 +788,10 @@
     th.classList.add("sorted"); if (desc) th.classList.add("desc"); th.setAttribute("aria-sort", desc ? "descending" : "ascending");
     fire(th, "ds:sort", { key: th.dataset.key || th.textContent.trim(), dir: desc ? "desc" : "asc" });
     if (table.dataset.sort === "server") return;   // 서버가 정렬한 페이지를 다시 정렬하면 현재 페이지만 뒤섞여 틀려 보인다
-    var rows = $$("tr", tbody).filter(function (r) { return !$("td.empty", r); });
+    var rows = $$(":scope > tr", tbody).filter(function (r) { return !$("td.empty", r) && !r.classList.contains("row-detail"); });
     var val = function (r) { var c = r.children[col]; var t = c ? c.textContent.trim() : ""; var n = parseFloat(t.replace(/[,\s%]/g, "")); return isNaN(n) || !/^-?[\d,.]+\s*%?$/.test(t) ? t : n; };
     rows.sort(function (a, b) { var x = val(a), y = val(b); var c = typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y), "ko"); return desc ? -c : c; });
-    rows.forEach(function (r) { tbody.appendChild(r); });
+    rows.forEach(function (r) { var d = detailOf(r); tbody.appendChild(r); if (d) tbody.appendChild(d); });   // 펼친 상세는 제 행을 따라간다
   }
 
   /* ---------- Toast ---------- */
@@ -1116,6 +1126,7 @@
     if ((el = closest(t, ".dropdown [aria-haspopup]")) && !el.disabled) { var dd = closest(el, ".dropdown"); setOpen(dd, !dd.classList.contains("open")); return; }
     if ((el = closest(t, ".menu-state [data-retry]"))) { fire(closest(el, ".dropdown, .combobox"), "ds:retry"); return; }
     if ((el = closest(t, ".tbl [data-retry]"))) { fire(closest(el, ".tbl-wrap"), "ds:retry"); return; }
+    if ((el = closest(t, ".tbl .expand-btn"))) { toggleDetail(el); return; }
     if ((el = closest(t, ".combobox .x"))) { var cbh = closest(el, ".combobox"); if (!cbInput(cbh).disabled) cbRemove(cbh, closest(el, ".chip")); return; }
     if ((el = closest(t, ".combobox .menu-item"))) { if (el.getAttribute("aria-disabled") !== "true") cbPick(closest(el, ".combobox"), el); return; }
     if ((el = closest(t, ".combobox .control"))) { var cbc = closest(el, ".combobox"), cbi = cbInput(cbc); if (!cbi.disabled) { cbi.focus(); cbOpen(cbc, t === cbi || !cbc.classList.contains("open")); } return; }

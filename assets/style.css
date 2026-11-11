@@ -1371,8 +1371,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font-size:12px;height:44px;padding:0 16px;border-bottom:1px solid var(--line-neutral-secondary);white-space:nowrap;background:var(--background-neutral-secondary)}
 .tbl td{height:52px;padding:12px 16px;border-bottom:1px solid var(--line-neutral-secondary);vertical-align:middle}
 .tbl tbody tr:last-child td{border-bottom:0}
-.tbl tbody tr:hover td{background:var(--surface-neutral-secondary)}
-.tbl tbody tr:active td{background:var(--surface-neutral-strong)}
+.tbl tbody tr:where(:not(.row-detail)):hover td{background:var(--surface-neutral-secondary)}
+.tbl tbody tr:where(:not(.row-detail)):active td{background:var(--surface-neutral-strong)}
 .tbl tr.on td{background:var(--surface-brand-subtle)}
 .tbl tr.disabled td{color:var(--foreground-disable-primary)}
 /* 비활성 행의 태그도 비활성 — 태그는 자기 바탕·글자를 쥐고 있어 td 의 color 만으로는 심각도 색이 활성처럼 남았다.
@@ -1384,7 +1384,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl tr.disabled .indicator::before{background:var(--foreground-disable-primary)}
 .tbl.compact td{height:44px;padding:8px 16px;font-size:14px}
 .tbl.compact th{height:40px}
-.tbl.zebra tbody tr:nth-child(even) td{background:var(--background-neutral-secondary)}
+.tbl.zebra tbody tr:nth-child(even of :where(:not(.row-detail))) td{background:var(--background-neutral-secondary)}   /* 펼친 행(.row-detail)은 줄무늬를 세지 않는다 — 숨긴 상세 행도 nth-child 에 들어가 줄무늬가 어긋났다. :where 로 명시도는 그대로 */
 .tbl th.sortable{cursor:pointer;user-select:none}
 .tbl th.sortable::after{content:"";display:inline-block;width:14px;height:14px;margin-left:6px;vertical-align:-3px;opacity:.45;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M3 9l4 -4l4 4m-4 -4v14%22 /%3E%3Cpath d=%22M21 15l-4 4l-4 -4m4 4v-14%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M3 9l4 -4l4 4m-4 -4v14%22 /%3E%3Cpath d=%22M21 15l-4 4l-4 -4m4 4v-14%22 /%3E%3C/svg%3E") center/contain no-repeat}
 /* 정렬은 버튼 — th 에 클릭만 달려 있어 키보드로 닿지 않았다(2026-11-10). 누를 자리는 th 전체(화살표 포함)이고 버튼은 포커스와 이름을 맡는다 */
@@ -1398,6 +1398,22 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl .check{width:44px;padding-right:0}
 .tbl .check .checkbox{vertical-align:middle}
 .tbl .actions{text-align:right;white-space:nowrap}
+/* 행 펼침(사람의 결정 2026-11-11) — 맨 앞 칸의 셰브론 버튼(aria-expanded · aria-controls)이 바로 뒤의 tr.row-detail 을 연다. 여러 개를 함께 펼친다.
+   상세는 첫 데이터 열에 맞춰 들여 쓰고 회색 면으로 행과 가른다. 긴 원본 로그는 Code(.wrap)가 줄바꿈한다 — contain 은 재 보니 소용없어 두지 않았다 */
+/* 셰브론 칸 = 왼쪽 16 + 버튼 24. td 로 적어 .tbl.compact td 의 padding 을 이긴다 — 상세 글자가 그 뒤 첫 칸 글자와 같은 선(56)에서 시작한다 */
+.tbl th.expand,.tbl td.expand{width:24px;padding-left:16px;padding-right:0}
+.tbl th.expand + .check,.tbl td.expand + .check{padding-left:8px}
+.tbl .expand-btn{display:grid;place-items:center;width:24px;height:24px;padding:0;border:0;border-radius:var(--radius-sm);background:transparent;color:var(--foreground-neutral-secondary);cursor:pointer}
+.tbl .expand-btn:hover{background:var(--surface-neutral-strong)}
+.tbl .expand-btn svg{transition:transform var(--motion-fast)}
+.tbl .expand-btn[aria-expanded="true"] svg{transform:rotate(90deg)}
+.tbl tr.row-detail > td{height:auto;padding:16px 16px 20px 56px;background:var(--background-neutral-secondary);font-size:14px}
+.tbl.compact tr.row-detail > td{height:auto;padding:12px 16px 16px 56px}
+.tbl .row-detail-body{display:flex;flex-direction:column;gap:12px}
+.tbl .detail-meta{display:grid;grid-template-columns:max-content 1fr;gap:4px 24px;margin:0}
+.tbl .detail-meta dt{color:var(--foreground-neutral-secondary)}
+.tbl .detail-meta dd{margin:0;overflow-wrap:anywhere}
+.tbl .row-detail .spinner-wrap{flex-direction:row;font-size:14px}
 .tbl.kv th{width:200px;height:auto;padding:12px 16px;font-size:14px;color:var(--foreground-neutral-secondary);font-weight:500;border-right:1px solid var(--line-neutral-secondary);white-space:normal;vertical-align:top}
 .tbl.kv td{height:auto}
 .tbl td.empty{display:table-cell;text-align:center;color:var(--foreground-neutral-tertiary);height:auto;padding:24px 16px;font-size:14px;border:none;border-radius:0;background:transparent}
@@ -1558,6 +1574,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .code-view .head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 8px 4px 16px;border-bottom:1px solid var(--line-neutral-secondary)}
 .code-view .title{min-width:0;font-size:14px;line-height:1.6;font-weight:500;color:var(--foreground-neutral-secondary)}
 .code-view pre{contain:inline-size;margin:0;padding:12px 16px;border-radius:0;background:none;color:var(--foreground-neutral-primary);font-size:13px;line-height:20px;tab-size:2;overflow:auto}   /* contain — 긴 줄이 그리드 칸을 넓히지 않게 */
+.code-view pre code{padding:0;border-radius:0;background:none;font-size:inherit}   /* 표 칸 안(행 펼침)에서 td code 의 인라인 칩 면 · 12px 가 줄마다 칠해졌다 */
 .code-view pre:focus-visible{outline-offset:-1px}   /* 틀의 overflow 가 바깥 외곽선을 자른다 */
 .code-view.wrap pre{white-space:pre-wrap;overflow-wrap:anywhere}
 .code-view .copy .ico,.copy-field .copy .ico{display:grid;place-items:center}
