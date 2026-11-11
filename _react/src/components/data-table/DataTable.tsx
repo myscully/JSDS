@@ -2,7 +2,7 @@ import { Fragment, forwardRef, useEffect, useId, useLayoutEffect, useMemo, useRe
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { mergeRefs } from "../../utils/hooks";
-import { Button } from "../button/Button";
+import { Button, ButtonOffContext } from "../button/Button";
 import { Checkbox } from "../checkbox/Checkbox";
 import { Skeleton } from "../loading/Loading";
 import { Icon } from "../../icons/Icon";
@@ -43,7 +43,7 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   selected?: ReadonlySet<string>;
   defaultSelected?: ReadonlySet<string>;
   onSelectedChange?: (selected: Set<string>) => void;
-  /** 선택이 있을 때 표 위에 표시 (ActionBar). count 는 전체 결과를 골랐으면 totalCount */
+  /** 표 위에 늘 표시 (ActionBar — 선택이 없으면 count 0 이고 버튼이 꺼진다). count 는 전체 결과를 골랐으면 totalCount */
   actionBar?: (selected: Set<string>, info: { allMatching: boolean; count: number }) => ReactNode;
   /** 필터 · 검색 · 기간처럼 이 값이 바뀌면 선택을 지운다 */
   selectionScope?: unknown;
@@ -200,7 +200,7 @@ function DataTableInner<T>(
       {...(stickyHeader || stickyColumn ? { tabIndex: 0, role: "region", "aria-label": caption } : null)}
       {...rest}
     >
-      {actionBar && sel.size > 0 && actionBar(new Set(sel), { allMatching: !!isAll, count: isAll && totalCount !== undefined ? totalCount : sel.size })}
+      {actionBar && actionBar(new Set(sel), { allMatching: !!isAll, count: isAll && totalCount !== undefined ? totalCount : sel.size })}
       {selectable && totalCount !== undefined && <div className="select-notice" aria-live="polite">{noticeBody}</div>}
       {status === "loading" && <span className="sr-only" role="status">{statusLabel}</span>}
       <Table compact={compact} density={density} zebra={zebra} rowStyle={rowStyle} wrap={false} aria-busy={status === "loading" || undefined}>
@@ -317,13 +317,13 @@ export interface ActionBarProps extends HTMLAttributes<HTMLDivElement> {
   /** 선택 문구 커스텀 */
   label?: (count: number) => ReactNode;
 }
-/** 선택 건수 + 일괄 액션 (DataTable actionBar 에 사용) */
+/** 선택 건수 + 일괄 액션 (DataTable actionBar 에 사용). count 가 0 이면 안의 Button 이 aria-disabled 로 꺼진다(포커스는 남음) */
 export const ActionBar = forwardRef<HTMLDivElement, ActionBarProps>(function ActionBar({ count, label, className, children, ...rest }, ref) {
   return (
     <div ref={ref} className={cx("action-bar", className)} {...rest}>
       <b>{label ? label(count) : `${count}개 선택`}</b>
       <span className="spacer" />
-      {children}
+      <ButtonOffContext.Provider value={count === 0}>{children}</ButtonOffContext.Provider>
     </div>
   );
 });

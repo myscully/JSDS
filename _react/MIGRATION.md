@@ -478,3 +478,10 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **숫자는 표 전체가 고정폭**(`font-variant-numeric:tabular-nums` 가 `.tbl` 에)입니다. `.num` 은 오른쪽 정렬만 남았습니다 — 크기를 견주는 숫자(건수 · % · 용량)에만 쓰고 날짜 · ID · IP 는 왼쪽에 둡니다.
 - **사이트 마크업** — `.tbl.relaxed` · `.tbl.grid` · `.tbl.plain` · `.tbl-wrap.sticky-col`(tabindex + 이름, 빌드가 검사) · `tfoot tr.total` · `td > .cell-sub`, 밀도 전환 `.select-btn[data-density-for="표 id"]` 의 `button[data-density]`. `.plain` 은 `.zebra` · `.grid` 와, `.compact` 는 `.relaxed` 와 함께 쓰지 않습니다(빌드가 검사).
 - 런타임 변수 `--tbl-tint`(행 상태 면) · `--tbl-surface`(고정 칸의 불투명 면)가 생겼습니다. 제품 CSS 가 `.tbl td` 의 `background` 를 직접 칠하던 곳은 고정 열에서 덮일 수 있으니 `--tbl-tint` 로 바꾸세요.
+
+## 표 안의 brand 덜기 · 늘 있는 액션 바 (2026-11-12)
+
+- **`DataTable actionBar` 는 선택이 없어도 불립니다**(첫째 인자가 빈 Set, `count` 0). 전에는 고른 것이 있을 때만 불렸습니다. `sel.size > 0` 일 때만 그리던 제품 코드는 그 조건을 빼면 됩니다.
+- **`ActionBar count={0}`** 이면 안의 `Button` 이 `aria-disabled="true"` 로 꺼집니다(포커스는 남고 `onClick` 은 부르지 않습니다). 제품이 준 `disabled` 는 그대로입니다. 바 안에 `Button` 이 아닌 버튼을 넣었다면 직접 꺼야 합니다.
+- 액션 바의 면(brand subtle)이 없어졌습니다. 정렬된 머리글은 brand → `--foreground-neutral-primary`, 표 칸의 `.link` 는 brand → 칸 글자색(hover 밑줄)입니다.
+- 사이트: `.tbl-wrap > .action-bar` 는 숨기지 않습니다. 0개면 ds.js 가 바 안 `.btn` 에 `aria-disabled` 와 `data-ds-off` 를 답니다(제품이 직접 단 `aria-disabled` 는 그대로 둡니다).

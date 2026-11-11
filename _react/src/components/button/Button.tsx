@@ -1,4 +1,4 @@
-import { forwardRef, type KeyboardEvent, type MouseEvent, type PointerEvent, type ComponentPropsWithoutRef, type ElementType, type HTMLAttributes, type ReactNode } from "react";
+import { createContext, forwardRef, useContext, type KeyboardEvent, type MouseEvent, type PointerEvent, type ComponentPropsWithoutRef, type ElementType, type HTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import type { Size } from "../../types";
 
@@ -37,6 +37,8 @@ const VARIANTS: readonly string[] = ["solid", "outline", "text"], COLORS: readon
    icon · leading · trailing 은 DOM 속성으로 새어 나갔다. 개발 모드에서 알리고 DOM 에는 내지 않는다 */
 const LEGACY_PROPS = ["icon", "leading", "trailing"] as const;
 /** 탐색 키 — loading 중에도 부모로 올라간다(사이트 ds.js 의 NAV 와 같다) */
+/** 안의 버튼을 aria-disabled 로 끈다 — ActionBar 가 0개 선택일 때 쓴다(내부용). 포커스는 남고 클릭은 부르지 않는다 */
+export const ButtonOffContext = createContext(false);
 const NAV = ["Tab", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"];
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -45,6 +47,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   ref,
 ) {
   const Comp: ElementType = as ?? "button";
+  const off = useContext(ButtonOffContext) && !disabled;
   const rest: Record<string, unknown> = { ...props };
   for (const k of LEGACY_PROPS) delete rest[k];
   if (process.env.NODE_ENV !== "production") {
@@ -58,12 +61,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const form = variant ?? (iconOnly ? undefined : "solid");
   /* text 는 색 클래스가 없으면 primary — 사이트의 `btn md text` 마크업이 그대로 primary 로 남는다. assistive 만 클래스를 붙인다 */
   const cls = cx("btn", size, form, form !== "text" ? color : color === "assistive" && color, { "icon-only": iconOnly, block, loading }, className);
-  const extra = Comp === "button" ? { type: type ?? "button", disabled } : { "aria-disabled": disabled || undefined };
+  const extra = Comp === "button" ? { type: type ?? "button", disabled, "aria-disabled": off || undefined } : { "aria-disabled": disabled || off || undefined };
   /* loading 중에는 네 이벤트(캡처 변형 포함)를 부르지 않는다. disabled 를 걸지 않는 이유는 포커스를 유지해야 스크린리더가 aria-busy 변화를 읽기 때문.
      as="a" 처럼 button 이 아닐 때는 disabled 속성이 먹지 않아 aria-disabled 만 나가므로 클릭도 여기서 막는다.
      가드는 rest 뒤에 둬서 사용자의 핸들러가 덮지 못한다. keydown 은 탐색 키(NAV)와 수정 키 조합(단축키)을 부모로 올려 보낸다
      — Esc 닫기 · 화살표 이동 · 전역 단축키가 loading 동안 멈추지 않게. 사용자 onKeyDown 은 어느 키에도 부르지 않는다 */
-  const inert = loading || (Comp !== "button" && disabled);
+  const inert = loading || off || (Comp !== "button" && disabled);
   const swallow = (e: MouseEvent<HTMLButtonElement> | PointerEvent<HTMLButtonElement>) => { e.preventDefault(); e.stopPropagation(); };
   const guard = {
     onClickCapture: (e: MouseEvent<HTMLButtonElement>) => { if (inert) swallow(e); else onClickCapture?.(e); },

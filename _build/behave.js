@@ -1287,7 +1287,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await tbl.locator("th.check input").click();
   ok("table header select all", await tbl.evaluate((e) => { const c = e.querySelectorAll("tbody td.check input"); const all = [...c].every((i) => i.checked); const b = e.querySelector(".action-bar b"); return all && e.querySelectorAll("tbody tr.on").length === c.length && b && b.textContent === c.length + "개 선택"; }), `before ${rowsBefore}`);
   await tbl.locator("th.check input").click();
-  ok("table header deselect → bar hidden", await tbl.evaluate((e) => e.querySelector(".action-bar").hidden && e.querySelectorAll("tbody tr.on").length === 0));
+  ok("table header deselect → bar stays with 0 and its buttons off", await tbl.evaluate((e) => { const b = e.querySelector(".action-bar"); return !b.hidden && b.querySelector("b").textContent === "0개 선택" && [...b.querySelectorAll(".btn")].every((x) => x.getAttribute("aria-disabled") === "true") && e.querySelectorAll("tbody tr.on").length === 0; }));
   const sortable = page.locator(".example-preview th.sortable").first();
   const firstCell = async () => sortable.evaluate((th) => { const t = th.closest("table"); const i = [...t.querySelectorAll("thead th")].indexOf(th); return t.querySelector("tbody tr").children[i].textContent.trim(); });
   const c0 = await firstCell(); await sortable.click(); const c1 = await firstCell(); await sortable.click(); const c2 = await firstCell();

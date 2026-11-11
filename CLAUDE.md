@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1170/1170 · react 700+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1177/1177 · react 702+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -421,7 +421,17 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **측정에서 드러나 고친 것:** 고정 열의 칸별 `left` 가 위치 규칙의 `:is(…)`(가장 센 인자의 명시도 0,3,0)에 져 체크 칸과 첫 열이 같은 0 에 붙었다 — 위치 규칙을 `:where` 로. 하위 텍스트 행이 71.4 로 커졌다(칸 패딩 12 + 두 줄) — `td:has(> .cell-sub)` 패딩 8. 고정 열 예제의 표 폭을 인라인 `min-width:1040px` 대신 CSS `width:max-content` + nowrap 으로(복사한 HTML 에 수치가 남지 않게).
 - 음성 시험 17건(테두리 · 마지막 행 선 · 고정폭 · compact · relaxed · grid · plain · 하위 패딩 · 하위 색 · 고정 left · 고정 면 · 합계 면 · 합계 선 · 밀도 전환 ds.js · verify 조합 셋) 모두 실패로 잡혔다 — plain 을 지우면 복사용 CSS 검사도 잡는다. 표 단정만 도는 임시 실행기로 쟀다(전체 게이트는 한 건에 10분).
 - **이미 있던 것(이번에 바꾸지 않음):** 로그 뷰어 표의 단말 열이 'PC-/2041' 로 줄바꿈한다 — HEAD 빌드에서도 행 62 · 열 폭이 같다.
-- Figma 미반영 222 → 227건(Data Table Spec Size · Container · Label, Table Spec Size · Container). Figma 의 표는 테두리 · radius · 52 행 그대로다 — 일괄 반영 때 테두리를 지우고 마지막 행 선 · 세 밀도 · Grid · Plain · 고정 열 · 합계 행을 그린다.
+- Figma 미반영 222 → 226건(커밋 13cd65f 메시지의 227 은 게이트가 사이트를 다시 짓는 도중에 audit 을 돌려 하나 더 센 값 — 2026-11-12 에 그 커밋을 따로 꺼낸 사본에서 다시 재면 226)(Data Table Spec Size · Container · Label, Table Spec Size · Container). Figma 의 표는 테두리 · radius · 52 행 그대로다 — 일괄 반영 때 테두리를 지우고 마지막 행 선 · 세 밀도 · Grid · Plain · 고정 열 · 합계 행을 그린다.
+
+2026-11-12 표 안의 brand 덜기 · 늘 있는 액션 바(사람의 요청 둘 · 결정 넷) — behave 1170 → 1177(`behave.table.js` 7) · react 700 → 702(`tests/table-optimize.test.tsx` 2). contrast · advisory · pages 수는 그대로(정렬 머리글 neutral-primary / 헤더 면 · 칸 글자색은 기존 쌍).
+- **정렬된 머리글 = `--foreground-neutral-primary` + 진한 화살표**(사람의 결정 — brand 대신 진한 중립. 다른 머리글은 tertiary). **칸 링크 = 칸 글자색**(`color:inherit`) · 500 · hover 밑줄(사람의 결정). Link 페이지의 '표의 .link 도 같은 모양' 설명과 Spec Label 을 고쳤다.
+- **선택 표의 액션 바는 늘 표 위에**(사람의 결정 — '늘 표 위에 둠 + 고정 헤더 표에서는 스크롤해도 맨 위') · **면 없음**. 0개면 '0개 선택' + 버튼 `aria-disabled`(사람의 결정 — 포커스는 남고 누르면 아무 일 없음, 고르면 바로 켜짐).
+  사이트 ds.js `barOff` 가 `data-ds-off` 표식과 함께 달고 풀며, 제품이 직접 단 `aria-disabled` 는 건드리지 않는다. 처음 그릴 때(`DS.init`)도 잰다. React 는 `ActionBar count={0}` 이 안의 `Button` 을 끈다(내부 `ButtonOffContext`, 제품의 `disabled` 는 그대로), `DataTable actionBar` 는 선택이 없어도 부른다.
+  고정 헤더 표(`.sticky`)에서 붙어 있는 바는 아래로 지나가는 행이 비치지 않게 놓인 자리의 면(`--tbl-surface`, 카드 · 패널 · 팝업 안은 elevated)을 칠한다.
+- **기존 단정 고침 3:** 머리글로 모두 풀면 '바 숨김' → '0개 선택 · 버튼 꺼짐'(behave), 선택 해제 후 '바 숨김' → '0개'(behave.data), 고정 헤더 위 바에 불투명 면(behave.data).
+- **측정에서 드러나 지운 것:** 0개일 때 키보드 클릭을 막으려 더한 캡처 리스너는 음성 시험에서 지워도 통과했다 — ds.js 에 이미 `.btn[aria-disabled="true"]` 클릭을 캡처에서 막는 규칙(10-28 Button)이 있었다. 제품이 `disabled` 로 끈 버튼을 건너뛰는 조건도 결과가 같아 지웠다(aria-disabled 를 달았다 풀어도 disabled 는 남음).
+- 음성 시험: 사이트 7건(정렬 색 · 링크 색 · 바 면 · 바 숨김으로 되돌림 · 제품 aria-disabled 보존 · 처음 그릴 때 · 고정 바 면) · React 5건(Provider · 늘 부름 · 클릭 차단 · 제품 disabled · aria-disabled) 모두 실패로 잡혔다.
+- 바의 'n개 선택' 글자는 brand 그대로다(요청 밖). Figma 미반영 226건(그대로 — Data Table Spec Label 문구가 바뀌었을 뿐 이미 어긋난 행).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

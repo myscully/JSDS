@@ -64,4 +64,39 @@ module.exports = async function tableOpt({ page, ok, go }) {
     const p = await page.evaluate((s) => [...document.querySelectorAll(`${s} tbody td`)].map((c) => getComputedStyle(c).borderBottomWidth), ex("table", "plain"));
     ok("plain: no row lines at all, the header face stays", p.length > 0 && p.every((x) => x === "0px"), JSON.stringify(p));
   }
+
+  /* ── brand 를 뺀 정렬 머리글 · 칸 링크, 늘 있는 액션 바(사람의 결정 2026-11-12) ── */
+  {
+    await go("components/data-table.html");
+    const [pri, ter, brand] = [await tok("--foreground-neutral-primary"), await tok("--foreground-neutral-tertiary"), await tok("--foreground-brand-primary")];
+    const r = await page.evaluate((s) => { const th = document.querySelector(`${s} th.sorted`), other = document.querySelector(`${s} th:not(.sorted)`), a = document.querySelector(`${s} td a.link`), td = a.closest("td");
+      return { sorted: getComputedStyle(th).color, arrow: getComputedStyle(th, "::after").opacity, other: getComputedStyle(other).color, link: getComputedStyle(a).color, cell: getComputedStyle(td).color, w: getComputedStyle(a).fontWeight }; }, ex("data-table", "basic"));
+    ok("sorted header is dark neutral with a solid arrow, never brand", r.sorted === pri && r.sorted !== brand && r.arrow === "1" && r.other === ter, JSON.stringify({ r, pri, ter }));
+    await page.hover(`${ex("data-table", "basic")} td a.link`);
+    const hov = await page.evaluate((s) => getComputedStyle(document.querySelector(`${s} td a.link`)).textDecorationLine, ex("data-table", "basic"));
+    ok("a link in a cell takes the cell's text colour, 500, underline on hover", r.link === r.cell && r.link !== brand && r.w === "500" && hov === "underline", JSON.stringify({ r, hov }));
+
+    const S = ex("data-table", "selectable");
+    const bar = await page.evaluate((s) => { const b = document.querySelector(`${s} .action-bar`), cs = getComputedStyle(b), w = b.closest(".tbl-wrap"), t = w.querySelector("table");
+      return { bg: cs.backgroundColor, shown: !b.hidden && b.getBoundingClientRect().height > 0, above: b.getBoundingClientRect().bottom <= t.getBoundingClientRect().top + 1 }; }, S);
+    ok("selection bar has no face and sits above the table", bar.bg === "rgba(0, 0, 0, 0)" && bar.shown && bar.above, JSON.stringify(bar));
+    const hit = await page.evaluate((s) => { const w = document.querySelector(s); window.__barHit = 0; w.querySelectorAll(".action-bar .btn").forEach((b) => b.addEventListener("click", () => window.__barHit++));
+      w.querySelectorAll("tbody td.check input:checked").forEach((i) => i.click()); const b = w.querySelector(".action-bar"), btn = b.querySelector(".btn");
+      return { shown: !b.hidden && b.getBoundingClientRect().height > 0, text: b.querySelector("b").textContent, off: [...b.querySelectorAll(".btn")].map((x) => x.getAttribute("aria-disabled")), dis: btn.disabled, face: getComputedStyle(btn).borderColor, fg: getComputedStyle(btn).color }; }, S);
+    const disFg = await tok("--foreground-disable-primary");
+    await page.locator(`${S} .action-bar .btn`).first().focus(); await page.keyboard.press("Enter"); await page.keyboard.press("Space"); await wait(30);
+    const kb = await page.evaluate((s) => ({ hits: window.__barHit, focus: document.activeElement === document.querySelector(`${s} .action-bar .btn`) }), S);
+    ok("with nothing picked the bar stays: '0개 선택', buttons aria-disabled in disabled colours, still focusable, Enter and Space reach no handler",
+      hit.shown && hit.text === "0개 선택" && hit.off.every((x) => x === "true") && !hit.dis && hit.fg === disFg && kb.hits === 0 && kb.focus, JSON.stringify({ hit, kb, disFg }));
+    const back = await page.evaluate((s) => { const w = document.querySelector(s); w.querySelector("tbody td.check input").click(); const b = w.querySelector(".action-bar");
+      const r = { text: b.querySelector("b").textContent, off: [...b.querySelectorAll(".btn")].map((x) => x.getAttribute("aria-disabled")) }; b.querySelector(".btn").click(); r.hits = window.__barHit; return r; }, S);
+    ok("picking a row turns the bar's buttons back on", back.text === "1개 선택" && back.off.every((x) => x === null) && back.hits === 1, JSON.stringify(back));
+    const own = await page.evaluate((s) => { const w = document.querySelector(s), b = w.querySelector(".action-bar .btn:last-child"); b.setAttribute("aria-disabled", "true");
+      w.querySelectorAll("tbody td.check input:checked").forEach((i) => i.click()); w.querySelector("tbody td.check input").click(); const r = b.getAttribute("aria-disabled") === "true"; b.removeAttribute("aria-disabled"); return r; }, S);
+    ok("a button the product turned off stays off after the selection changes", own, String(own));
+    const fresh = await page.evaluate(() => { const d = document.createElement("div");
+      d.innerHTML = '<div class="tbl-wrap"><div class="action-bar"><b>0개 선택</b><span class="spacer"></span><button type="button" class="btn sm outline assistive">내보내기</button></div><table class="tbl"><thead><tr><th class="check"><label class="checkbox"><input type="checkbox" aria-label="전체 선택"></label></th><th>이름</th></tr></thead><tbody><tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="가 선택"></label></td><td>가</td></tr></tbody></table></div>';
+      document.body.append(d); window.DS.init(d); const r = d.querySelector(".action-bar .btn").getAttribute("aria-disabled"); d.remove(); return r; });
+    ok("a selection table drawn with nothing picked starts with its bar buttons off", fresh === "true", String(fresh));
+  }
 };

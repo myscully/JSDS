@@ -1424,7 +1424,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* 정렬은 버튼 — th 에 클릭만 달려 있어 키보드로 닿지 않았다(2026-11-10). 누를 자리는 th 전체(화살표 포함)이고 버튼은 포커스와 이름을 맡는다 */
 .tbl th.sortable .sort{appearance:none;border:0;background:transparent;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;border-radius:2px}
 .tbl th.sortable:hover{color:var(--foreground-neutral-primary)}
-.tbl th.sorted{color:var(--foreground-brand-primary)}
+.tbl th.sorted{color:var(--foreground-neutral-primary)}   /* 정렬된 열은 진한 중립 글자 + 진한 화살표 — brand 를 쓰지 않는다(사람의 결정 2026-11-12) */
 .tbl th.sorted::after{opacity:1;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 11l-6 -6%22 /%3E%3Cpath d=%22M6 11l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 11l-6 -6%22 /%3E%3Cpath d=%22M6 11l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat}
 .tbl th.sorted.desc::after{-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 13l-6 6%22 /%3E%3Cpath d=%22M6 13l6 6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 13l-6 6%22 /%3E%3Cpath d=%22M6 13l6 6%22 /%3E%3C/svg%3E") center/contain no-repeat}
 .tbl .num{text-align:right}   /* 크기를 견주는 숫자(건수 · % · 용량)만 오른쪽. 날짜 · ID · IP · 전화는 왼쪽(2026-11-11). 고정폭은 .tbl 전체가 준다 */
@@ -1468,7 +1468,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl-wrap.sticky-col{--tbl-surface:var(--background-neutral-primary)}
 .tbl-wrap.sticky-col .tbl{width:max-content;min-width:100%}   /* 넓은 표가 영역 안에서 가로로 스크롤한다 — 칸을 줄바꿈해 폭에 맞추지 않는다 */
 .tbl-wrap.sticky-col .tbl :is(th,td){white-space:nowrap}
-.card .tbl-wrap.sticky-col,.side-panel .tbl-wrap.sticky-col,.popup .tbl-wrap.sticky-col{--tbl-surface:var(--surface-elevated-primary)}
+.card .tbl-wrap:is(.sticky-col,.sticky),.side-panel .tbl-wrap:is(.sticky-col,.sticky),.popup .tbl-wrap:is(.sticky-col,.sticky){--tbl-surface:var(--surface-elevated-primary)}
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :where(:first-child:not(.empty),.expand:first-child + *,.check:first-child + *,.expand:first-child + .check + *){position:sticky;left:0;z-index:1}   /* :where — 아래 칸별 left 가 이기게(:is 는 가장 센 인자의 명시도를 모두에게 준다) */
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(.expand:first-child + *){left:2.5rem}
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(.check:first-child + *){left:2.75rem}
@@ -1481,7 +1481,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
    스크롤 영역이라 키보드로 닿도록 tabindex=0 + 이름(verify). 선택 막대가 있으면 그 아래(10+32+10+1)에 붙는다 */
 .tbl-wrap.sticky{scroll-padding-top:2.75rem}
 .tbl-wrap.sticky .tbl th{position:sticky;top:0;z-index:1;box-shadow:inset 0 -1px 0 var(--line-neutral-secondary)}
-.tbl-wrap.sticky > .action-bar{position:sticky;top:0;left:0;z-index:2}
+.tbl-wrap.sticky > .action-bar{position:sticky;top:0;left:0;z-index:2;background:var(--tbl-surface,var(--background-neutral-primary))}   /* 붙어 있는 동안 아래로 지나가는 행이 비치지 않게 — 놓인 자리의 면 */
 .tbl-wrap.sticky:has(> .action-bar:not([hidden])) .tbl th{top:3.3125rem}
 .tbl-wrap.sticky:has(> .action-bar:not([hidden])){scroll-padding-top:6.0625rem}
 .select-notice{display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.25rem 1rem;background:var(--surface-brand-subtle);border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);line-height:1.6}
@@ -1492,9 +1492,9 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .link.standalone{text-decoration:none;font-weight:500}
 .link.standalone:hover{text-decoration:underline}
 .link svg{width:0.875rem;height:0.875rem;margin-left:2px;vertical-align:-2px}
-.tbl .link{color:var(--foreground-brand-primary);text-decoration:none;font-weight:500}
+.tbl .link{color:inherit;text-decoration:none;font-weight:500}   /* 표 칸의 링크는 칸 글자색 · 500 · hover 밑줄 — brand 를 쓰지 않는다(사람의 결정 2026-11-12) */
 .tbl .link:hover{text-decoration:underline}
-.action-bar{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 1rem;background:var(--surface-brand-subtle);border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);line-height:1.6}
+.action-bar{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 1rem;background:transparent;border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);line-height:1.6}   /* 선택 표 위에 늘 있다 — 면 없음(사람의 결정 2026-11-12). 0개면 버튼이 aria-disabled */
 .action-bar b{color:var(--foreground-brand-primary)}
 .action-bar .spacer{flex:1}
 .action-bar .btn:not(.text,.icon-only){padding:0 0.75rem}   /* 높이 · 글자는 .sm(32 · 12) 이 준다 — 종전 덮어쓰기 중 남는 차이는 좌우 여백뿐. text(8) · 아이콘 전용(0)의 여백은 건드리지 않는다 */

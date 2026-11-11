@@ -46,6 +46,7 @@
     $$(".select-btn[role=radiogroup]", root).forEach(function (g) { var kids = $$(":scope > button", g), live = kids.filter(function (b) { return !b.disabled; }), cur = live.filter(function (b) { return b.classList.contains("on"); })[0] || live[0]; kids.forEach(function (b) { b.tabIndex = b === cur ? 0 : -1; }); });
     $$(".chip-group", root).forEach(syncChipReset);
     $$(".tbl th.check input, .checkbox-group > .checkbox:first-child input", root).forEach(syncMaster);
+    $$(".tbl-wrap > .action-bar", root).forEach(function (bar) { var w = bar.parentNode, t = $("table.tbl", w); barOff(bar, !(t && $("tbody td.check input:checked", t)) && !w._dsAll); });
     $$(".terms", root).forEach(syncTerms);
     $$(".searchbar .clear", root).forEach(function (c) { var i = $("input", closest(c, ".searchbar")); if (i) c.hidden = !i.value; });
     $$(".combobox", root).forEach(cbInit);
@@ -737,7 +738,15 @@
     if (wrap && !pageAll) wrap._dsAll = false;
     if (note) selectNotice(wrap, note, n, total, pageAll);
     if (wrap && wasAll && !wrap._dsAll) fire(wrap, "ds:select-all", { all: false, total: total });
-    if (bar) { var shown = wrap._dsAll ? total : n; var b = $("b", bar); if (b) b.textContent = shown.toLocaleString("ko-KR") + "개 선택"; bar.hidden = n === 0; }
+    if (bar) { var shown = wrap._dsAll ? total : n; var b = $("b", bar); if (b) b.textContent = shown.toLocaleString("ko-KR") + "개 선택"; barOff(bar, n === 0); }
+  }
+  /* 선택 표의 액션 바는 늘 보인다(사람의 결정 2026-11-12). 0개면 버튼을 aria-disabled 로 — 포커스는 남고 누르면 아무 일 없다(아래 .btn[aria-disabled] 클릭 캡처가 막는다).
+     제품이 일부러 aria-disabled 를 단 버튼(data-ds-off 없음)은 건드리지 않는다 — 고르면 풀어 버리지 않게 */
+  function barOff(bar, off) {
+    $$(".btn", bar).forEach(function (btn) {
+      if (off) { if (btn.getAttribute("aria-disabled") === "true" && !btn.hasAttribute("data-ds-off")) return; btn.setAttribute("aria-disabled", "true"); btn.setAttribute("data-ds-off", ""); }
+      else if (btn.hasAttribute("data-ds-off")) { btn.removeAttribute("aria-disabled"); btn.removeAttribute("data-ds-off"); }
+    });
   }
   /* 머리글 체크박스는 이 페이지만 고른다. 건수를 아는 표(data-total)는 전체 결과까지 넓힐 길을 안내한다 — 실행은 제품 서버가 한다(ds:select-all) */
   function selectNotice(wrap, note, n, total, pageAll) {
