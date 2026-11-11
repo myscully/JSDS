@@ -429,7 +429,7 @@ function chipTileExpect() {
     const x = cssRule(".chip .x"), xd = cssRule(".chip[disabled] .x"), ti = cssRule(".tile[disabled] .ico"), ts = cssRule(".tile[disabled] span:not(.tag)");
     const none = (v) => /^(transparent|none)$/.test((v || "").trim());
     const out = {
-      chip: { face: figTok(x.background), icon: figTok(x.color) },
+      chip: { face: none(x.background) ? "-" : figTok(x.background), icon: figTok(x.color) },   // 2026-11-11 부터 면 없음
       chipDisabled: { face: none(xd.background) ? "-" : figTok(xd.background), icon: figTok(xd.color) },
       tile: { icoFace: figTok(ti.background), icon: figTok(ts.color), desc: figTok(ts.color) },
     };

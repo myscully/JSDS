@@ -6,7 +6,7 @@ import { Button } from "../button/Button";
 import { Checkbox } from "../checkbox/Checkbox";
 import { Skeleton } from "../loading/Loading";
 import { Icon } from "../../icons/Icon";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../table/Table";
+import { Table, TableBody, TableCell, TableFoot, TableHead, TableHeader, TableRow, type TableDensity, type TableRowStyle } from "../table/Table";
 import { LABELS } from "../../labels";
 
 export interface DataTableColumn<T> {
@@ -22,6 +22,8 @@ export interface DataTableColumn<T> {
   sortValue?: (row: T) => string | number;
   /** 말줄임. 값이 문자열이면 title 로 전체 값을 둔다 */
   truncate?: boolean;
+  /** 주 값 아래 보조 글(.cell-sub) — 예: 이름 아래 이메일. 두 줄이라 density="relaxed" 를 권한다 */
+  sub?: (row: T, index: number) => ReactNode;
 }
 export interface SortState { key: string; dir: "asc" | "desc" }
 
@@ -84,8 +86,18 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   maxHeight?: number | string;
   /** 표 이름. 화면에는 보이지 않는다 */
   caption?: string;
+  /** 첫 열 고정 — 가로 스크롤 때 맨 앞 펼침 · 체크박스 칸과 첫 열을 왼쪽에 둔다. 스크롤 영역이라 이름(aria-label 또는 caption)을 함께 준다 */
+  stickyColumn?: boolean;
+  /** 합계 · 평균 행(tfoot tr.total) — 열 key 별 값. 첫 열에 '이 페이지 합계' · '전체 합계' 처럼 범위를 적는다 */
+  summaryRow?: Partial<Record<string, ReactNode>>;
+  /** 행 40 (= density="compact") */
   compact?: boolean;
+  /** 행 높이 — compact 40 · default 48 · relaxed 56 */
+  density?: TableDensity;
+  /** 줄무늬 (= rowStyle="zebra") */
   zebra?: boolean;
+  /** lines · zebra · grid · plain */
+  rowStyle?: TableRowStyle;
   wrapStyle?: CSSProperties;
 }
 
@@ -104,7 +116,7 @@ function defaultSortValue<T>(row: T, key: string): string | number {
 }
 
 function DataTableInner<T>(
-  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel = LABELS.loading, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, maxHeight, caption, compact, zebra, className, wrapStyle, ...rest }: DataTableProps<T>,
+  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel = LABELS.loading, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, stickyColumn, summaryRow, maxHeight, caption, compact, density, zebra, rowStyle, className, wrapStyle, ...rest }: DataTableProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [curSort, setSort] = useControllable<SortState | null>({ value: sort, defaultValue: defaultSort, onChange: onSortChange });
@@ -183,15 +195,15 @@ function DataTableInner<T>(
   return (
     <div
       ref={mergeRefs(ref, wrapEl)}
-      className={cx("tbl-wrap", stickyHeader && "sticky", className)}
+      className={cx("tbl-wrap", stickyHeader && "sticky", stickyColumn && "sticky-col", className)}
       style={maxHeight !== undefined ? { ...wrapStyle, maxHeight } : wrapStyle}
-      {...(stickyHeader ? { tabIndex: 0, role: "region", "aria-label": caption } : null)}
+      {...(stickyHeader || stickyColumn ? { tabIndex: 0, role: "region", "aria-label": caption } : null)}
       {...rest}
     >
       {actionBar && sel.size > 0 && actionBar(new Set(sel), { allMatching: !!isAll, count: isAll && totalCount !== undefined ? totalCount : sel.size })}
       {selectable && totalCount !== undefined && <div className="select-notice" aria-live="polite">{noticeBody}</div>}
       {status === "loading" && <span className="sr-only" role="status">{statusLabel}</span>}
-      <Table compact={compact} zebra={zebra} wrap={false} aria-busy={status === "loading" || undefined}>
+      <Table compact={compact} density={density} zebra={zebra} rowStyle={rowStyle} wrap={false} aria-busy={status === "loading" || undefined}>
         {caption && <caption className="sr-only">{caption}</caption>}
         <TableHead>
           <TableRow>
@@ -262,7 +274,7 @@ function DataTableInner<T>(
                   {columns.map((c) => {
                     const raw = (row as Record<string, unknown>)[c.key];
                     return (
-                      <TableCell key={c.key} num={c.num} truncate={c.truncate} title={c.truncate && typeof raw === "string" ? raw : undefined} className={c.className}>
+                      <TableCell key={c.key} num={c.num} truncate={c.truncate} title={c.truncate && typeof raw === "string" ? raw : undefined} className={c.className} sub={c.sub?.(row, i)}>
                         {c.render ? c.render(row, i) : (raw as ReactNode)}
                       </TableCell>
                     );
@@ -282,6 +294,16 @@ function DataTableInner<T>(
             })
           )}
         </TableBody>
+        {summaryRow && status === undefined && (
+          <TableFoot>
+            <TableRow total>
+              {expOn && <TableCell className="expand" />}
+              {selectable && <TableCell check />}
+              {columns.map((c) => <TableCell key={c.key} num={c.num} className={c.className}>{summaryRow[c.key]}</TableCell>)}
+              {actions && <TableCell actions />}
+            </TableRow>
+          </TableFoot>
+        )}
       </Table>
     </div>
   );

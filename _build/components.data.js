@@ -363,10 +363,16 @@ const COMPONENTS = {
           const [value, setValue] = useState("24h");
           return <SelectButton label="기간" options={OPTIONS} value={value} onChange={setValue} />;
         }` },
-      { id: "outline", title: "Outline", desc: "툴바에서 다른 버튼과 나란히 둘 때 아웃라인형.", html: `
+      { id: "outline", title: "Outline", desc: "툴바에서 다른 버튼과 나란히 둘 때 아웃라인형. 고른 버튼은 네 변이 brand 선이고 면은 옅은 brand 입니다.", html: `
         <div class="select-btn outline" role="radiogroup" aria-label="보기">
           <button type="button" class="on" role="radio" aria-checked="true">${I("list")}목록</button>
           <button type="button" role="radio" aria-checked="false">${I("chart-bar")}차트</button>
+        </div>` },
+      { id: "solid", title: "Outline Solid", desc: "<code>.outline.solid</code> — 고른 버튼을 제품 색 면 + 흰 글자로 칠합니다. 고른 값을 툴바에서 더 또렷하게 보여야 할 때 씁니다. outline 틀에만 씁니다.", html: `
+        <div class="select-btn outline solid" role="radiogroup" aria-label="판정">
+          <button type="button" class="on" role="radio" aria-checked="true">전체</button>
+          <button type="button" role="radio" aria-checked="false">차단</button>
+          <button type="button" role="radio" aria-checked="false">허용</button>
         </div>` },
       { id: "disabled", title: "Disabled", desc: "개별 옵션 비활성.", html: `
         <div class="select-btn" role="radiogroup" aria-label="판정">
@@ -375,8 +381,8 @@ const COMPONENTS = {
           <button type="button" role="radio" aria-checked="false" disabled>허용</button>
         </div>` },
     ],
-    props: [[".select-btn", "container", "—", "role=radiogroup + aria-label. 버튼 2~5개, 버튼마다 role=radio"], [".outline", "boolean", "false", "아웃라인형(툴바용)"], [".on", "boolean", "—", "선택 항목. aria-checked=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
-    spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 38 (버튼 36 + 테두리 1)"], ["Container", "radius/md 6 · surface/neutral/secondary"], ["Label", "Label/1 14 · 선택 14 SemiBold"], ["Placement", "카드 헤더 우측, 툴바"]],
+    props: [[".select-btn", "container", "—", "role=radiogroup + aria-label. 버튼 2~5개, 버튼마다 role=radio"], [".outline", "boolean", "false", "아웃라인형(툴바용). 고른 버튼은 brand 선 + 옅은 brand 면"], [".solid", "boolean", "false", "고른 버튼을 제품 색 면 + 흰 글자로. <code>.outline</code> 과 함께만 — React <code>solid</code>"], [".on", "boolean", "—", "선택 항목. aria-checked=true 와 함께"], ["disabled", "attribute", "—", "옵션 비활성"]],
+    spec: [["Size", "높이 38 (버튼 32 + 패딩 3) · outline 38 (버튼마다 테두리 1 포함 38 · 이웃과 1px 겹침)"], ["Container", "radius/md 6 · surface/neutral/secondary · outline 은 버튼마다 line/neutral/primary"], ["Selected", "기본 elevated + shadow-1 · outline brand 선(surface/brand/primary) + brand subtle 면 · outline solid surface/brand/primary 면 + 흰 글자"], ["Label", "Label/1 14 · 선택 14 SemiBold"], ["Placement", "카드 헤더 우측, 툴바"]],
     figma: { frame: "Select Button", radius: "radius/md", sizes: { md: { h: 38 } }, variants: { filled: { bg: "--surface-neutral-secondary" }, outline: { stroke: "--line-neutral-primary" } }, states: ["default", "selected", "disabled"] },
   },
 
@@ -454,7 +460,7 @@ const COMPONENTS = {
         ${dpField({ id: "dp-year", label: "보고 연도", unit: "year", value: "2026" })}
         ${dpField({ id: "dp-month", label: "보고서 월", unit: "month", value: "2026. 09" })}
         ${dpField({ id: "dp-day", label: "점검일", value: "2026. 09. 07" })}`, layout: "top" },
-      { id: "calendar", title: "Calendar", desc: "열린 상태의 달력. 칸의 면은 모두 지름 34 원입니다 — 오늘(.today · aria-current, 옅은 brand 원), 선택(.on · aria-selected, brand 원), 포인터 · 누름(회색 원), 키보드 포커스(원 외곽선). 다른 달(.muted), 선택 불가(data-max 밖 · aria-disabled). 제목을 누르면 연 → 월로 빠르게 옮깁니다.", html: cal({ month: "2026-09", value: "2026-09-07", today: "2026-09-07", max: "2026-09-30", footer: "today apply" }) },
+      { id: "calendar", title: "Calendar", desc: "열린 상태의 달력. 칸의 면은 모두 지름 34 원입니다 — 오늘(.today · aria-current, 옅은 brand 원 + 굵은 brand 글자), 선택(.on · aria-selected, brand 원), 포인터 · 누름(회색 원), 키보드 포커스(원 외곽선). 다른 달(.muted), 선택 불가(data-max 밖 · aria-disabled). 제목을 누르면 연 → 월로 빠르게 옮깁니다.", html: cal({ month: "2026-09", value: "2026-09-07", today: "2026-09-07", max: "2026-09-30", footer: "today apply" }) },
       { id: "range-calendar", title: "Range Calendar", desc: "기간 달력은 두 달을 나란히 봅니다. 시작 · 끝은 .on(.start · .end), 사이는 .in-range. 시작만 고른 동안에는 포인터를 올린 날까지 미리 보여 주고(올린 날은 시작과 같은 brand 원), 적용은 끝을 고른 뒤에 켜집니다. 두 달 보기에서 다른 달 칸은 비워 같은 날짜가 두 번 나오지 않습니다.", html: cal({ month: "2026-09", mode: "range", start: "2026-09-21", end: "2026-10-07", today: "2026-10-07", footer: "apply", presets: "7 30" }) },
       { id: "min-max", title: "Min · Max", desc: "<code>data-min</code> · <code>data-max</code> 밖의 날짜는 달력에서 고를 수 없습니다(aria-disabled). 키보드로는 범위 밖 값도 들어갑니다 — 직접 치거나 ↑↓ 로 조각을 넘기면 값은 그 날짜로 남고, 오류 테두리와 원인 문구가 붙습니다(<code>data-validity=\"max\"</code>). 문구는 무엇이 일어났는지와 고칠 방법 두 부분이고, 범위는 '부터 · 까지'(그 날짜 포함)로 씁니다 — <code>data-messages</code>(JSON, React 는 <code>messages</code>)로 바꿉니다.", html: `
         ${dpField({ id: "dp-in", label: "점검일", value: "2026. 09. 07", help: "2026년 안의 날짜", attrs: 'data-min="2026-01-01" data-max="2026-12-31"' })}
@@ -590,8 +596,8 @@ const COMPONENTS = {
           <span class="chip"><span class="lbl">admin@example.com</span><button type="button" class="x" aria-label="admin@example.com 삭제">${I("x",10)}</button></span>
         </div>` },
     ],
-    props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(brand subtle + 체크)"], [".lbl", "element", "—", "Input Chip 의 값. 240px 에서 말줄임"], [".x", "button", "—", "삭제 버튼(Input Chip). aria-label 에 값을 넣는다"], ["data-chip-reset", "attribute", "—", ".chip-group 끝 버튼 — 켜진 칩이 있을 때만 보이고 누르면 모두 끈다(ds:chip-reset)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성. 입력값 칩(span)은 aria-disabled=\"true\""]],
-    spec: [["Size", "높이 32 (sm 26) · padding 0 12"], ["Container", "radius/full · line/neutral/primary · 선택 brand subtle"], ["Label", "Label/2 12"], ["Placement", "검색 아래 필터 행, 입력 필드 안 값 목록"]],
+    props: [[".chip", "button | span", "—", "선택형은 button, 입력값은 span"], [".on", "boolean", "false", "선택 상태(brand subtle + 체크)"], [".lbl", "element", "—", "Input Chip 의 값. 240px 에서 말줄임"], [".x", "button", "—", "삭제 버튼(Input Chip · Combobox 다중 선택 항목). 면 없이 x 만, aria-label 에 값을 넣는다"], ["data-chip-reset", "attribute", "—", ".chip-group 끝 버튼 — 켜진 칩이 있을 때만 보이고 누르면 모두 끈다(ds:chip-reset)"], ["size", "(md) | sm", "md", "높이 32 / 26"], ["disabled", "attribute", "—", "비활성. 입력값 칩(span)은 aria-disabled=\"true\""]],
+    spec: [["Size", "높이 32 (sm 26) · padding 0 12"], ["Container", "radius/full · line/neutral/primary · 선택 brand subtle"], ["Label", "Label/2 12"], ["Remove", "x 16 · 아이콘 10 · 면 없음 · foreground/neutral/secondary(hover primary)"], ["Placement", "검색 아래 필터 행, 입력 필드 안 값 목록"]],
     figma: { frame: "Chip", radius: "radius/full", sizes: { md: { h: 32 }, sm: { h: 26 } }, variants: { filter: { stroke: "--line-neutral-primary" }, selected: { bg: "--surface-brand-subtle", stroke: "--surface-brand-primary", fg: "--surface-brand-primary" }, input: {} }, states: ["default", "selected", "hover", "disabled"] },
   },
 
@@ -1348,7 +1354,7 @@ const COMPONENTS = {
             <div class="card-foot"><button type="button" class="btn sm outline assistive">로그</button><button type="button" class="btn sm solid primary">업데이트</button></div>
           </div>
         </div>` },
-      { id: "list", title: "List", desc: "최근 이벤트 · 위협 Top 5 처럼 표 · 목록을 카드 폭까지 채울 때는 <code>.flush</code> — padding · gap 0, 헤더만 16 · 24. 헤더 오른쪽에 '전체 보기'(텍스트 assistive). 안에는 테두리 없는 표(<code>.tbl</code>)를 둡니다. <code>.tbl-wrap</code> 과 List 는 자체 테두리가 있어 두 겹이 됩니다.", html: `
+      { id: "list", title: "List", desc: "최근 이벤트 · 위협 Top 5 처럼 표 · 목록을 카드 폭까지 채울 때는 <code>.flush</code> — padding · gap 0, 헤더만 16 · 24. 헤더 오른쪽에 '전체 보기'(텍스트 assistive). 안에는 표(<code>.tbl</code>)를 그대로 둡니다 — 표는 바깥 테두리가 없습니다(2026-11-11). List 는 자체 테두리가 있어 두 겹이 됩니다.", html: `
         <div class="card flush" style="width:400px">
           <div class="card-head"><h3 class="title">최근 이벤트</h3><button type="button" class="btn sm text assistive">전체 보기</button></div>
           <table class="tbl compact">
@@ -1409,7 +1415,7 @@ const COMPONENTS = {
       ["CardMeta / dl.card-meta", "element", "—", "상태 카드의 키-값 행 — dt secondary · dd primary · 14/22, 키 열은 가장 긴 키에 맞춤. React <code>items={[{ label, value }]}</code> 또는 dt · dd 자식"],
       ["CardFoot / .card-foot", "element", "—", "액션 오른쪽 정렬 · 간격 12 · 강조 버튼은 하나"],
       ["variant / .flat", "\"outline\" | \"flat\"", "\"outline\"", "outline 1px line/neutral/secondary 보더 / flat 보더 색 없음(두께 1px 는 남아 크기 같음) — 주변에 배경색 <code>background/neutral/secondary</code> 이 있을 때만. 흰 바탕 위 금지 · 그림자 없음. KPI · Chart Card 도 같은 옵션"],
-      ["flush / .flush", "boolean", "false", "padding · gap 0 — 테두리 없는 표 · 목록을 카드 폭까지. 헤더만 자체 여백(md 16 · 24 / sm 12 · 16). 안의 Table 은 <code>wrap={false}</code> — <code>.tbl-wrap</code> · List 는 자체 테두리가 있어 두 겹"],
+      ["flush / .flush", "boolean", "false", "padding · gap 0 — 테두리 없는 표 · 목록을 카드 폭까지. 헤더만 자체 여백(md 16 · 24 / sm 12 · 16). 안의 Table 은 테두리가 없어 그대로(가로 스크롤이 필요 없으면 <code>wrap={false}</code>) · List 는 자체 테두리가 있어 두 겹"],
       ["clickable / .clickable", "boolean", "false", "카드 전체가 눌림 — 이동이면 <code>a</code>, 선택이면 <code>button</code> + <code>aria-pressed</code>(React <code>as</code>). hover shadow/2. 안에 버튼 · 링크를 두지 않습니다"],
       ["selected / .on", "boolean", "false", "선택됨 — 안쪽 2px brand 링 + surface/brand/subtle, 앞 아이콘 brand. 포커스 외곽선과 함께 보입니다"],
       ["disabled / :disabled · aria-disabled", "boolean", "false", "고를 수 없는 선택 카드 — surface/disable 면 · 제목과 아이콘 foreground/disable, hover 없음, 눌러도 선택되지 않음. 이유는 <code>.desc</code> 에 적고 그 줄은 tertiary 로 읽히게 둡니다. button 이면 <code>disabled</code>, 그 밖은 <code>aria-disabled</code>"],
@@ -1787,7 +1793,7 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Data Table */
   "data-table": {
-    status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".select-notice", ".tag", ".checkbox", ".indicator"], borrows: [".link", ".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep", ".skeleton", ".sr-only", ".code-view", ".spinner", ".spinner-wrap"],
+    status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".select-notice", ".tag", ".checkbox", ".indicator"], borrows: [".link", ".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep", ".skeleton", ".sr-only", ".code-view", ".spinner", ".spinner-wrap", ".stack", ".toolbar", ".spacer", ".select-btn"],
     desc: "로그·이벤트·정책 목록처럼 대량의 행 데이터를 다룹니다. 정렬·선택·행 액션을 갖춘 콘솔의 핵심 컴포넌트입니다. 단순 표는 Table 을 씁니다.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><thead><tr><th>시간</th><th>심각도</th></tr></thead><tbody><tr><td>09:41</td><td><span class="tag critical sm">Critical</span></td></tr><tr><td>09:40</td><td><span class="tag medium sm">Medium</span></td></tr></tbody></table></div>`,
     principles: [
@@ -1799,7 +1805,12 @@ const COMPONENTS = {
       ["행 전체 클릭", "안쪽 버튼 · 링크 · 체크박스를 누르면 행 클릭이 일어나지 않습니다. 키보드로 닿도록 같은 목적지의 링크를 첫 열에 둡니다"],
       ["행 버튼 이름", "행마다 달라야 합니다. '수정' 이 아니라 'USB 차단 정책 수정' 입니다. 빌드가 검사합니다"],
       ["머리글", "정렬 말고는 링크 · 버튼을 넣지 않습니다. 정렬은 머리글 안의 버튼이라 키보드로 닿습니다"],
-      ["정렬 방향", "글자 · 상태는 왼쪽, 숫자는 오른쪽, 행 동작은 맨 오른쪽입니다. 말줄임은 긴 메시지 열 하나에만 쓰고 전체 값은 상세에서 보여 줍니다"],
+      ["정렬 방향", "글자 · 상태 · 날짜 · ID · IP 는 왼쪽, 크기를 견주는 숫자(건수 · % · 용량)만 오른쪽(<code>.num</code>), 행 동작은 맨 오른쪽입니다. 숫자는 표 전체가 고정폭이라 시각 · IP 도 자리가 맞습니다. 말줄임은 긴 메시지 열 하나에만 쓰고 전체 값은 상세에서 보여 줍니다"],
+      ["밀도", "기본 48 · <code>.compact</code> 40(로그처럼 행이 많을 때) · <code>.relaxed</code> 56(하위 텍스트 · 두 줄 셀)입니다. 사용자가 바꾸게 하려면 툴바에 Select Button 을 두고, 고른 값은 제품이 기억합니다"],
+      ["행 스타일", "가로선이 기본입니다. 행이 많아 줄을 놓치기 쉬우면 <code>.zebra</code> 입니다. 숫자가 빽빽한 리포트의 <code>.grid</code> · 작은 요약의 <code>.plain</code> 은 <a href=\"#/components/table\">Table</a> 에서 씁니다"],
+      ["하위 텍스트", "열을 늘리지 않고 맥락을 줄 때 주 값 아래에 보조 글(<code>.cell-sub</code>)을 둡니다 — 이름 아래 이메일, 단말 아래 IP. 두 줄이라 <code>.relaxed</code> 를 씁니다. 정렬 · 검색 기준은 주 값입니다"],
+      ["첫 열 고정", "열이 많아 가로로 스크롤하면 식별 열을 고정합니다(<code>.sticky-col</code>). 맨 앞 체크박스 · 펼침 칸도 함께 고정됩니다. 스크롤 영역이라 이름과 <code>tabindex=0</code> 을 둡니다(빌드가 검사합니다)"],
+      ["합계 행", "합계 · 평균은 <code>tfoot</code> 의 <code>tr.total</code> 에 둡니다. 정렬 · 선택 · 페이지와 무관하게 맨 아래에 남고, 페이지만의 합계인지 전체의 합계인지 첫 칸에 적습니다"],
       ["고정 헤더", "세로로 긴 로그 표에 씁니다. 표 영역에 높이를 주고 이름과 <code>tabindex=0</code> 을 둡니다. 복잡한 표에는 <code>caption</code> 을 둡니다"],
       ["행을 지운 뒤", "포커스를 다음 행으로 옮깁니다. 사이트는 <code>DS.table.removeRow</code>, React 는 행이 사라지면 자동입니다"],
       ["강조", "색만으로 의미를 전하지 않습니다. 심각도 · 상태는 글자를 함께 둡니다"],
@@ -1832,7 +1843,7 @@ const COMPONENTS = {
             </tbody>
           </table>
         </div>` },
-      { id: "compact", title: "Compact", desc: "로그 뷰어처럼 행이 많을 때 행 높이 44. 시간·IP 는 모노스페이스(.log-row).", html: `
+      { id: "compact", title: "Compact", desc: "로그 뷰어처럼 행이 많을 때 행 높이 40. 시간·IP 는 모노스페이스(.log-row).", html: `
         <div class="tbl-wrap">
           <table class="tbl compact">
             <thead><tr><th>시간</th><th>레벨</th><th>소스</th><th>메시지</th></tr></thead>
@@ -1842,6 +1853,51 @@ const COMPONENTS = {
               <tr class="log-row"><td>2026-09-07 09:41:09.114</td><td><span class="tag info sm">INFO</span></td><td>10.0.0.3</td><td>policy.sync ok (rev 2041)</td></tr>
               <tr class="log-row"><td>2026-09-07 09:41:08.552</td><td><span class="tag info sm">INFO</span></td><td>10.0.0.3</td><td>agent.checkin 1284/1284</td></tr>
             </tbody>
+          </table>
+        </div>` },
+      { id: "density", title: "밀도 전환", desc: "툴바의 Select Button(<code>data-density-for</code> = 표 id)이 밀도를 바꿉니다 — 좁게 40 · 기본 48 · 넓게 56. 고른 값을 기억하는 것은 제품 몫입니다.", html: `
+        <div class="stack">
+          <div class="toolbar"><span class="spacer"></span><div class="select-btn outline" role="radiogroup" aria-label="행 밀도" data-density-for="dt-density"><button type="button" role="radio" aria-checked="false" data-density="compact">좁게</button><button type="button" class="on" role="radio" aria-checked="true" data-density="default">기본</button><button type="button" role="radio" aria-checked="false" data-density="relaxed">넓게</button></div></div>
+          <div class="tbl-wrap">
+            <table class="tbl" id="dt-density">
+              <thead><tr><th>정책</th><th>적용 그룹</th><th class="num">대상</th><th>수정</th></tr></thead>
+              <tbody>
+                <tr><td>외부 USB 차단</td><td>전체</td><td class="num">1,284</td><td>2026-09-06</td></tr>
+                <tr><td>스크립트 실행 제한</td><td>개발팀 제외</td><td class="num">1,102</td><td>2026-09-02</td></tr>
+                <tr><td>원격 접속 허용 목록</td><td>인프라팀</td><td class="num">48</td><td>2026-08-21</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>`, layout: "top" },
+      { id: "sub-text", title: "하위 텍스트", desc: "주 값 아래 보조 글(<code>.cell-sub</code>) — 이름 아래 이메일, 단말 아래 IP. 열을 늘리지 않고 맥락을 줍니다. 두 줄이라 <code>.relaxed</code>(56)입니다.", html: `
+        <div class="tbl-wrap">
+          <table class="tbl relaxed">
+            <thead><tr><th>사용자</th><th>단말</th><th>역할</th><th class="num">위반</th></tr></thead>
+            <tbody>
+              <tr><td>김민준<span class="cell-sub">minjun.kim@corp.example.com</span></td><td>PC-2041<span class="cell-sub">10.0.4.21</span></td><td>영업팀</td><td class="num">3</td></tr>
+              <tr><td>이서연<span class="cell-sub">seoyeon.lee@corp.example.com</span></td><td>PC-1187<span class="cell-sub">10.0.4.37</span></td><td>개발팀</td><td class="num">1</td></tr>
+              <tr><td>박지훈<span class="cell-sub">jihoon.park@corp.example.com</span></td><td>PC-0932<span class="cell-sub">10.0.2.8</span></td><td>인프라팀</td><td class="num">0</td></tr>
+            </tbody>
+          </table>
+        </div>` },
+      { id: "sticky-col", title: "첫 열 고정", desc: "열이 많아 가로로 스크롤하면 식별 열을 고정합니다(<code>.sticky-col</code>). 맨 앞 체크박스 칸도 함께 고정되고 고정 칸 오른쪽에 선이 생깁니다. 스크롤 영역이라 이름과 <code>tabindex=0</code> 을 둡니다.", html: `
+        <div class="tbl-wrap sticky-col" tabindex="0" role="region" aria-label="단말 현황" style="max-width:640px">
+          <table class="tbl">
+            <caption class="sr-only">단말 현황</caption>
+            <thead><tr><th class="check"><label class="checkbox"><input type="checkbox" aria-label="전체 선택"></label></th><th>단말</th><th>사용자</th><th>그룹</th><th>IP</th><th>OS</th><th>에이전트</th><th class="num">위반</th><th>최근 접속</th></tr></thead>
+            <tbody>${[["PC-2041", "김민준", "영업팀", "10.0.4.21", "Windows 11", "5.2.1", "3", "2026-09-07 09:41"], ["PC-1187", "이서연", "개발팀", "10.0.4.37", "macOS 14", "5.2.1", "1", "2026-09-07 09:12"], ["PC-0932", "박지훈", "인프라팀", "10.0.2.8", "Windows 10", "5.1.8", "0", "2026-09-06 18:30"]].map(([n, u, g, ip, os, v, c, t]) => `<tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="${n} 선택"></label></td><td>${n}</td><td>${u}</td><td>${g}</td><td>${ip}</td><td>${os}</td><td>${v}</td><td class="num">${c}</td><td>${t}</td></tr>`).join("")}</tbody>
+          </table>
+        </div>`, layout: "top" },
+      { id: "total", title: "합계 행", desc: "<code>tfoot</code> 의 <code>tr.total</code> — 회색 면 · 굵은 글자 · 위 선 한 단계 진하게. 이 페이지의 합계인지 전체의 합계인지 첫 칸에 적습니다.", html: `
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>그룹</th><th class="num">단말</th><th class="num">탐지</th><th class="num">차단</th></tr></thead>
+            <tbody>
+              <tr><td>영업팀</td><td class="num">312</td><td class="num">48</td><td class="num">41</td></tr>
+              <tr><td>개발팀</td><td class="num">184</td><td class="num">27</td><td class="num">19</td></tr>
+              <tr><td>인프라팀</td><td class="num">48</td><td class="num">9</td><td class="num">9</td></tr>
+            </tbody>
+            <tfoot><tr class="total"><td>전체 합계</td><td class="num">544</td><td class="num">84</td><td class="num">69</td></tr></tfoot>
           </table>
         </div>` },
       { id: "empty", title: "Empty", desc: "결과 없음. 조건 초기화 등 다음 행동을 제시.", html: `
@@ -1907,9 +1963,9 @@ const COMPONENTS = {
           </table>
         </div>`, layout: "top" },
     ],
-    props: [[".tbl-wrap", "container", "—", "보더 + radius/lg + 가로 스크롤. 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 52. .compact 44 · .zebra 줄무늬"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["table[data-sort=server]", "attribute", "—", "서버 정렬. 표시만 바꾸고 다시 정렬하지 않는다. 정렬하면 언제나 ds:sort {key, dir}"], [".tbl-wrap[data-total]", "attribute", "—", "전체 건수. .select-notice 에 전체 결과 선택을 안내하고 ds:select-all {all, total}"], [".tbl-wrap.sticky", "class", "—", "고정 헤더. max-height · tabindex=0 · 이름을 함께"], ["td.truncate", "class", "—", "말줄임. title 에 전체 값"], ["DS.table.removeRow(tr)", "function", "—", "행을 지우고 다음 행으로 포커스. 펼친 상세 행도 함께 지운다"], ["th.expand / td.expand > .expand-btn", "cell", "—", "행 펼침 — 맨 앞 칸. 머리글에는 숨긴 이름(.sr-only), 버튼은 aria-expanded · aria-controls(상세 행 id) · 행마다 다른 aria-label. React <code>renderExpanded</code>"], ["tr.row-detail[hidden] > td[colspan] > .row-detail-body", "row", "—", "바로 앞 행의 상세. colspan = 열 수. 글자는 셰브론 뒤 첫 칸의 글자와 같은 선(왼쪽 56)에서 시작합니다. 안에 .detail-meta(dl) · Code · 불러오는 중 .spinner-wrap. React 는 <code>renderExpanded(row, {expanded})</code> — 접힌 행도 그려 두므로 불러와야 하는 내용은 expanded 일 때만 돌려줍니다. 펼칠 내용이 없는 행은 <code>expandable</code> 로 빼면 셰브론 없이 빈 칸"], ["ds:row-expand", "event", "—", "행(tr)에서 {expanded}. 상세를 불러올 때 쓴다. React <code>expanded</code> · <code>defaultExpanded</code> · <code>onExpandedChange(set, {key, expanded})</code> — 지금 rows 에 없는 키는 지우고(페이지를 옮기면 접힘), <code>expandScope</code> 가 바뀌면 모두 접습니다(key null)"], ["[data-retry]", "attribute", "—", "오류 행의 다시 시도. ds:retry"], ["tr.on / .disabled", "row", "—", "선택 / 비활성. 비활성 행 안의 태그도 disable 토큰으로 칠해져 심각도 색이 활성처럼 남지 않습니다"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션"]],
-    spec: [["Size", "행 높이 52 (compact 44) · 헤더 44"], ["Container", "radius/lg 8 · line/neutral/secondary 1px · 셀 격자선 없음"], ["Label", "헤더 12 SemiBold tertiary · 셀 Body/2 14 · 숫자 tabular · 오른쪽 정렬(.num) · 말줄임은 긴 메시지 열 하나"], ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래"]],
-    figma: { frame: "Data Table", radius: "radius/lg", sizes: { row: { h: 52 }, compact: { h: 44 }, header: { h: 44 } }, variants: { default: {}, selectable: {}, compact: {} }, states: ["default", "hover", "selected", "sorted", "empty"] },
+    props: [[".tbl-wrap", "container", "—", "가로 스크롤 영역(테두리 · radius 없음 — 위는 헤더 면, 아래는 마지막 행 선). 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 48. .compact 40 · .relaxed 56 · .zebra 줄무늬. React density · rowStyle"], [".tbl-wrap.sticky-col", "container", "—", "첫 열 고정(맨 앞 체크박스 · 펼침 칸 포함). tabindex=0 + 이름. React stickyColumn"], [".cell-sub", "element", "—", "칸 안 주 값 아래 보조 글(12 secondary). React 열 정의 sub"], ["tfoot tr.total", "row", "—", "합계 · 평균 행. React summaryRow"], [".select-btn[data-density-for]", "attribute", "—", "표 id. 버튼 data-density(compact · default · relaxed)로 밀도를 바꾼다"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["table[data-sort=server]", "attribute", "—", "서버 정렬. 표시만 바꾸고 다시 정렬하지 않는다. 정렬하면 언제나 ds:sort {key, dir}"], [".tbl-wrap[data-total]", "attribute", "—", "전체 건수. .select-notice 에 전체 결과 선택을 안내하고 ds:select-all {all, total}"], [".tbl-wrap.sticky", "class", "—", "고정 헤더. max-height · tabindex=0 · 이름을 함께"], ["td.truncate", "class", "—", "말줄임. title 에 전체 값"], ["DS.table.removeRow(tr)", "function", "—", "행을 지우고 다음 행으로 포커스. 펼친 상세 행도 함께 지운다"], ["th.expand / td.expand > .expand-btn", "cell", "—", "행 펼침 — 맨 앞 칸. 머리글에는 숨긴 이름(.sr-only), 버튼은 aria-expanded · aria-controls(상세 행 id) · 행마다 다른 aria-label. React <code>renderExpanded</code>"], ["tr.row-detail[hidden] > td[colspan] > .row-detail-body", "row", "—", "바로 앞 행의 상세. colspan = 열 수. 글자는 셰브론 뒤 첫 칸의 글자와 같은 선(왼쪽 56)에서 시작합니다. 안에 .detail-meta(dl) · Code · 불러오는 중 .spinner-wrap. React 는 <code>renderExpanded(row, {expanded})</code> — 접힌 행도 그려 두므로 불러와야 하는 내용은 expanded 일 때만 돌려줍니다. 펼칠 내용이 없는 행은 <code>expandable</code> 로 빼면 셰브론 없이 빈 칸"], ["ds:row-expand", "event", "—", "행(tr)에서 {expanded}. 상세를 불러올 때 쓴다. React <code>expanded</code> · <code>defaultExpanded</code> · <code>onExpandedChange(set, {key, expanded})</code> — 지금 rows 에 없는 키는 지우고(페이지를 옮기면 접힘), <code>expandScope</code> 가 바뀌면 모두 접습니다(key null)"], ["[data-retry]", "attribute", "—", "오류 행의 다시 시도. ds:retry"], ["tr.on / .disabled", "row", "—", "선택 / 비활성. 비활성 행 안의 태그도 disable 토큰으로 칠해져 심각도 색이 활성처럼 남지 않습니다"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션"]],
+    spec: [["Size", "행 48 · compact 40 · relaxed 56 · 헤더 44 · 40 · 48 · 셀 좌우 16"], ["Container", "테두리 · radius 없음 · 헤더 background/neutral/secondary · 행 선 line/neutral/secondary 1px(마지막 행 포함) · 합계 행 위 선 line/neutral/primary · 셀 격자선 없음"], ["Label", "헤더 12 SemiBold tertiary · 셀 Body/2 14 · 하위 텍스트 12 secondary · 숫자 tabular(표 전체) · 오른쪽 정렬은 크기 숫자(.num) · 말줄임은 긴 메시지 열 하나"], ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래"]],
+    figma: { frame: "Data Table", radius: "none", sizes: { row: { h: 48 }, compact: { h: 40 }, relaxed: { h: 56 }, header: { h: 44 } }, variants: { default: {}, selectable: {}, compact: {} }, states: ["default", "hover", "selected", "sorted", "empty"] },
   },
 
   /* ------------------------------------------------ Table */
@@ -1921,6 +1977,8 @@ const COMPONENTS = {
       ["용도", "데이터 전용입니다. 레이아웃에 쓰지 않습니다"],
       ["머리글", "머리글 없는 표를 만들지 않습니다. 키-값 표는 <code>th</code> 가 머리글입니다. 빌드가 검사합니다"],
       ["옮기는 기준", "행이 많아 정렬 · 선택 · 페이지가 필요해지면 <a href=\"#/components/data-table\">Data Table</a> 입니다"],
+      ["행 스타일", "가로선이 기본입니다. 긴 비교표는 <code>.zebra</code>, 숫자가 빽빽한 리포트는 열 사이 세로선 <code>.grid</code>, 5행 안팎의 요약은 선 없는 <code>.plain</code> 입니다. <code>.plain</code> 은 <code>.zebra</code> · <code>.grid</code> 와 함께 쓰지 않습니다(빌드가 검사합니다)"],
+      ["경계", "바깥 테두리 · radius 가 없습니다. 위는 회색 헤더 면, 아래는 마지막 행 선이 경계입니다. 카드 안에 붙일 때는 카드 패딩을 없애고(<code>.card.flush</code>) 표를 그대로 둡니다"],
       ["비슷한 것", "한 대상의 속성은 키-값 표, 카드 안의 짧은 속성 몇 줄은 Card Meta, 같은 종류의 항목을 나열하면 <a href=\"#/components/list\">List</a> 입니다"],
     ],
     examples: [
@@ -1971,10 +2029,33 @@ const COMPONENTS = {
             </tbody>
           </table>
         </div>` },
+      { id: "grid", title: "Grid / 합계", desc: "숫자가 빽빽한 리포트는 열 사이 세로선(<code>.grid</code>)으로 칸을 가릅니다. 바깥 테두리가 없어 마지막 칸 오른쪽에는 선이 없습니다. 합계는 <code>tfoot tr.total</code>.", html: `
+        <div class="tbl-wrap" style="max-width:640px">
+          <table class="tbl compact grid">
+            <thead><tr><th>월</th><th class="num">탐지</th><th class="num">차단</th><th class="num">허용</th><th class="num">차단율</th></tr></thead>
+            <tbody>
+              <tr><td>7월</td><td class="num">1,204</td><td class="num">1,113</td><td class="num">91</td><td class="num">92.4%</td></tr>
+              <tr><td>8월</td><td class="num">1,388</td><td class="num">1,301</td><td class="num">87</td><td class="num">93.7%</td></tr>
+              <tr><td>9월</td><td class="num">1,054</td><td class="num">1,002</td><td class="num">52</td><td class="num">95.1%</td></tr>
+            </tbody>
+            <tfoot><tr class="total"><td>3개월 합계</td><td class="num">3,646</td><td class="num">3,416</td><td class="num">230</td><td class="num">93.7%</td></tr></tfoot>
+          </table>
+        </div>` },
+      { id: "plain", title: "Plain", desc: "5행 안팎의 작은 요약은 행 선을 없앱니다(<code>.plain</code>). 헤더 면은 남습니다.", html: `
+        <div class="tbl-wrap" style="max-width:360px">
+          <table class="tbl compact plain">
+            <thead><tr><th>상태</th><th class="num">단말</th></tr></thead>
+            <tbody>
+              <tr><td>정상</td><td class="num">1,236</td></tr>
+              <tr><td>점검 필요</td><td class="num">36</td></tr>
+              <tr><td>연결 끊김</td><td class="num">12</td></tr>
+            </tbody>
+          </table>
+        </div>` },
     ],
-    props: [[".tbl-wrap", "container", "—", "보더 + radius + 스크롤"], [".tbl", "table", "—", "기본 표"], [".kv", "boolean", "false", "키-값 표(th 폭 200, 우측 보더)"], [".zebra / .compact", "boolean", "false", "줄무늬 / 행 44"], ["td.num", "cell", "—", "숫자 우측 정렬"]],
-    spec: [["Size", "행 52 (compact 44) · kv th 폭 200"], ["Container", "radius/lg 8 · line/neutral/secondary"], ["Label", "헤더 12 SemiBold tertiary · 셀 Body/2 14 · kv 헤더 14 Medium secondary"], ["Placement", "상세 패널, 리포트 요약"]],
-    figma: { frame: "Table", radius: "radius/lg", sizes: { row: { h: 52 }, compact: { h: 44 } }, variants: { simple: {}, kv: {}, zebra: {} }, states: ["default"] },
+    props: [[".tbl-wrap", "container", "—", "가로 스크롤(테두리 · radius 없음)"], [".tbl", "table", "—", "기본 표(행 48)"], [".kv", "boolean", "false", "키-값 표(th 폭 200, 우측 보더)"], [".compact / .relaxed", "boolean", "false", "행 40 / 56. React density"], [".zebra / .grid / .plain", "boolean", "false", "줄무늬 / 열 사이 세로선 / 행 선 없음. React rowStyle"], ["tfoot tr.total", "row", "—", "합계 행. React TableFoot"], [".cell-sub", "element", "—", "칸 안 보조 글"], ["td.num", "cell", "—", "크기 숫자 우측 정렬"]],
+    spec: [["Size", "행 48 · compact 40 · relaxed 56 · kv th 폭 200"], ["Container", "테두리 · radius 없음 · 헤더 면 background/neutral/secondary · 행 선 line/neutral/secondary(마지막 행 포함) · grid 세로선 같은 색"], ["Label", "헤더 12 SemiBold tertiary · 셀 Body/2 14 · kv 헤더 14 Medium secondary"], ["Placement", "상세 패널, 리포트 요약"]],
+    figma: { frame: "Table", radius: "none", sizes: { row: { h: 48 }, compact: { h: 40 }, relaxed: { h: 56 } }, variants: { simple: {}, kv: {}, zebra: {}, grid: {}, plain: {} }, states: ["default"] },
   },
 
   /* ------------------------------------------------ List */

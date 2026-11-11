@@ -25,6 +25,15 @@ describe("Select Button — radiogroup", () => {
     expect(onChange).toHaveBeenLastCalledWith("a");
     expect(document.activeElement).toBe(a);
   });
+  it("solid 는 outline 과 함께 클래스를 붙이고, outline 없이는 경고하고 무시한다(2026-11-11)", () => {
+    const { container, rerender } = render(<SelectButton label="판정" options={OPTS} outline solid />);
+    expect(container.querySelector(".select-btn")!.className).toBe("select-btn outline solid");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    rerender(<SelectButton label="판정" options={OPTS} solid />);
+    expect(container.querySelector(".select-btn")!.className).toBe("select-btn");
+    expect(warn.mock.calls.some((c) => String(c[0]).includes("solid"))).toBe(true);
+    warn.mockRestore();
+  });
 });
 
 describe("Switch — 응답 후 반영", () => {

@@ -1342,6 +1342,13 @@
     var g = b.parentNode, live = $$(":scope > button:not([disabled])", g), to = live[(live.indexOf(b) + d + live.length) % live.length];
     if (to !== b) { activate(g, "button", to, "aria-checked"); to.focus(); fire(to, "ds:select"); }
   });
+  /* 표 밀도 전환(2026-11-11) — .select-btn[data-density-for="표 id"] 의 버튼 data-density(compact · default · relaxed)로 표의 클래스를 바꾼다. 고른 밀도의 기억은 제품 몫 */
+  doc.addEventListener("ds:select", function (e) {
+    var g = e.target instanceof Element && closest(e.target, ".select-btn[data-density-for]"), t = g && doc.getElementById(g.getAttribute("data-density-for")), d = e.target.getAttribute("data-density");
+    if (!t || !d) return;
+    var tbl = t.matches("table") ? t : $("table.tbl", t); if (!tbl) return;
+    tbl.classList.toggle("compact", d === "compact"); tbl.classList.toggle("relaxed", d === "relaxed");
+  });
   doc.addEventListener("change", function (e) {
     var vg = e.target instanceof Element && closest(e.target, ".field .checkbox-group[data-required], .field .radio-group[data-required]"), vf = vg && closest(vg, "form[data-validate]");
     if (vf) { vShow(vg, vMessage(vg)); vChanged(vf); }   // 그룹은 고르면 바로 지우고, 마지막 하나를 풀면 바로 알린다. 지나가기만 하면 조용하다

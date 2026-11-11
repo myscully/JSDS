@@ -60,7 +60,7 @@ export { Accordion, AccordionGroup, type AccordionProps, type AccordionGroupProp
 export { Card, CardHead, CardTitle, CardDesc, CardMeta, CardFoot, CardGrid, type CardProps, type CardTitleProps, type CardMetaProps, type CardMetaItem } from "./components/card/Card";
 export { List, ListItem, type ListProps, type ListItemProps } from "./components/list/List";
 export { Tile, TileGrid, type TileProps } from "./components/item-tile/Tile";
-export { Table, TableHead, TableBody, TableRow, TableHeader, TableCell, type TableProps, type TableRowProps, type TableHeaderProps, type TableCellProps } from "./components/table/Table";
+export { Table, TableHead, TableBody, TableFoot, TableRow, TableHeader, TableCell, type TableProps, type TableDensity, type TableRowStyle, type TableRowProps, type TableHeaderProps, type TableCellProps } from "./components/table/Table";
 export { DataTable, ActionBar, type DataTableProps, type DataTableColumn, type SortState, type ActionBarProps } from "./components/data-table/DataTable";
 export { Spinner, Skeleton, SkeletonRow, Progress, useLoadingDelay, LOADING_DELAY, LOADING_MIN, type SpinnerProps, type SkeletonProps, type SkeletonRowProps, type ProgressProps } from "./components/loading/Loading";
 

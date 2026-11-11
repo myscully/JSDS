@@ -197,6 +197,11 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         }
       }
       for (const m of pv.matchAll(/<div class="tbl-wrap sticky"([^>]*)>/g)) if (!/tabindex="0"/.test(m[1]) || !/aria-label="/.test(m[1])) fails.push(`${f}: 고정 헤더 영역은 tabindex=0 + 이름(Data Table › 고정 헤더)`);
+      /* 첫 열 고정 · 행 스타일(2026-11-11) — 고정 열 영역도 스크롤 영역이라 tabindex=0 + 이름. .plain 은 .zebra · .grid 와 함께 쓰지 않는다 */
+      for (const m of pv.matchAll(/<div class="tbl-wrap[^"]*\bsticky-col\b[^"]*"([^>]*)>/g)) if (!/tabindex="0"/.test(m[1]) || !/aria-label="/.test(m[1])) fails.push(`${f}: 첫 열 고정 영역은 tabindex=0 + 이름(Data Table › 첫 열 고정)`);
+      for (const m of pv.matchAll(/<table class="(tbl\b[^"]*)"/g)) { const c = m[1].split(/\s+/);
+        if (c.includes("plain") && (c.includes("zebra") || c.includes("grid"))) fails.push(`${f}: 표 .plain 은 .zebra · .grid 와 함께 쓰지 않는다(Table › 행 스타일) — "${m[1]}"`);
+        if (c.includes("compact") && c.includes("relaxed")) fails.push(`${f}: 표 밀도는 하나 — .compact · .relaxed 를 함께 쓰지 않는다`); }
       for (const m of pv.matchAll(/<ul class="list[^"]*"([^>]*)>([\s\S]*?)<\/ul>/g)) {
         sameNames(m[2], "List");
         if (!/role="option"/.test(m[2])) continue;
@@ -358,6 +363,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       /* Select Button — 항상 하나, radiogroup(2026-11-10). 토글 묶음(aria-pressed)으로 돌아가면 막는다 */
       for (const m of pv.matchAll(/<div class="select-btn[^"]*"([^>]*)>([\s\S]*?)<\/div>/g)) {
+        if (/^<div class="[^"]*\bsolid\b/.test(m[0]) && !/^<div class="[^"]*\boutline\b/.test(m[0])) fails.push(`${f}: Select Button .solid 는 .outline 과 함께만(2026-11-11)`);
         const btns = [...m[2].matchAll(/<button\b([^>]*)>/g)].map((x) => x[1]);
         if (!/role="radiogroup"/.test(m[1])) fails.push(`${f}: Select Button 은 role=radiogroup(Select Button › 키보드)`);
         if (!/aria-label(?:ledby)?="/.test(m[1])) fails.push(`${f}: Select Button 에 묶음 이름이 없다`);
@@ -513,7 +519,8 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
   /* --float-*: 스크롤 영역 안 메뉴의 자리 · 폭 — ds.js · React 가 열 때 재서 넣는다(2026-11-10) */
   /* --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
   /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay"];
+  /* --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면 — 표 규칙 안에서 정하고 td 가 기본값(transparent)과 함께 쓴다(2026-11-11) */
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface"];
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);

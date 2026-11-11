@@ -41,6 +41,13 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   page.on("pageerror", (e) => errors.push(e.message));
   const go = async (p) => { await page.goto("file://" + path.join(SITE, p)); await page.waitForTimeout(150); };
   const ex = (pg, id) => `#ex-${pg}-${id} .example-preview`;
+  /* 칩의 지우기(x)는 면 없이 x 만 — 쉴 때 · hover 의 면과 글자색(사람의 결정 2026-11-11). Input Chip · Combobox 다중 선택 항목이 같은 .chip .x */
+  const xLook = async (loc) => { const tok = (v) => page.evaluate((v) => { const d = document.createElement("div"); d.style.color = `var(${v})`; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; }, v);
+    const read = () => loc.evaluate((x) => { const cs = getComputedStyle(x); return [cs.backgroundColor, cs.color]; });
+    await page.mouse.move(0, 0); await page.waitForTimeout(250); const rest = await read();
+    await loc.hover(); await page.waitForTimeout(250); const hover = await read(); await page.mouse.move(0, 0); await page.waitForTimeout(250);
+    const want = { rest: ["rgba(0, 0, 0, 0)", await tok("--foreground-neutral-secondary")], hover: ["rgba(0, 0, 0, 0)", await tok("--foreground-neutral-primary")] };
+    return { pass: JSON.stringify({ rest, hover }) === JSON.stringify(want), got: { rest, hover }, want }; };
 
   // Select (값 선택) — 열기 · 바깥 클릭 · 선택 · 키보드
   await go("components/select.html");
@@ -160,6 +167,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     ok("combobox multi: selection is announced", (await st(M)) === "재무팀 선택됨", await st(M));
     await page.keyboard.press("Backspace"); await page.waitForTimeout(30);
     ok("combobox multi: Backspace on an empty input removes the last tag", !(await chips()).includes("재무팀"));
+    { const r = await xLook(M.locator(".chip .x").first()); ok("combobox multi: the tag's x has no face, only the glyph, and darkens on hover", r.pass, JSON.stringify(r)); }
+    await MI.focus(); await page.waitForTimeout(30);
     await M.locator(".chip .x").first().click(); await page.waitForTimeout(30);
     ok("combobox multi: x removes that tag and keeps focus", !(await chips()).includes("영업팀") && await M.evaluate((e) => document.activeElement === e.querySelector("input[role=combobox]")));
     await MI.click(); await page.waitForTimeout(30);
@@ -1008,11 +1017,29 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await D.nth(1).click(); await page.keyboard.press("ArrowRight");
     ok("select button skips a disabled option", await D.evaluateAll((k) => k[0].classList.contains("on") && document.activeElement === k[0]));
   }
+  /* Outline — 고른 버튼의 네 변이 brand, 회색 칸 선은 한 겹(선 토큰이 반투명이라 겹치면 진해진다), 묶음 높이 38 · 버튼끼리 1px 겹침.
+     Outline Solid — 고른 버튼이 제품 색 면 + 흰 글자, 옮기면 따라간다(사람의 결정 2026-11-11) */
+  {
+    const look = (sel) => page.evaluate((sel) => { const g = document.querySelector(sel), k = [...g.querySelectorAll("button")], col = (v, p = "color") => { const d = document.createElement("div"); d.style[p] = `var(${v})`; document.body.append(d); const c = getComputedStyle(d)[p]; d.remove(); return c; };
+      const T = { brand: col("--surface-brand-primary"), neutral: col("--line-neutral-primary"), subtle: col("--surface-brand-subtle", "backgroundColor"), solid: col("--surface-brand-primary", "backgroundColor"), label: col("--brand-label"), brandText: col("--foreground-brand-primary") };
+      const b = k.map((x) => { const cs = getComputedStyle(x), r = x.getBoundingClientRect(); return { on: x.classList.contains("on"), sides: [cs.borderTopColor, cs.borderRightColor, cs.borderBottomColor, cs.borderLeftColor], bg: cs.backgroundColor, color: cs.color, l: r.left, r: r.right, h: r.height, z: cs.zIndex }; });
+      return { T, b, h: g.getBoundingClientRect().height }; }, sel);
+    const brandSides = (x, T) => x.sides.every((c) => c === T.brand);
+    const seams = (b, T) => b.slice(1).every((x, i) => Math.abs(x.l - (b[i].r - 1)) < 0.01 && (x.on || b[i].on || (b[i].sides[1] === T.neutral && x.sides[3] === "rgba(0, 0, 0, 0)")));
+    const o = await look(ex("select-button", "outline") + " .select-btn"), on = o.b.find((x) => x.on);
+    ok("outline select button: the picked button has a brand line on all four sides, seams are one line, height 38",
+      brandSides(on, o.T) && on.bg === o.T.subtle && on.color === o.T.brandText && on.z === "1" && o.b.filter((x) => !x.on).every((x) => x.sides[0] === o.T.neutral && x.sides[2] === o.T.neutral) && seams(o.b, o.T) && o.h === 38 && o.b.every((x) => x.h === 38), JSON.stringify(o));
+    const S = ex("select-button", "solid") + " .select-btn", s1 = await look(S);
+    await page.locator(S + " button").nth(1).click(); const s2 = await look(S);
+    const solidOk = (r, i) => { const x = r.b[i]; return x.on && x.bg === r.T.solid && x.color === r.T.label && brandSides(x, r.T) && r.b.filter((y) => !y.on).every((y) => y.bg === "rgba(0, 0, 0, 0)") && seams(r.b, r.T) && r.h === 38; };
+    ok("outline solid select button: the picked button is a brand face with white text and follows the pick", solidOk(s1, 0) && solidOk(s2, 1), JSON.stringify({ s1, s2 }));
+  }
   await go("components/chip.html");
   const chip = page.locator(".example-preview button.chip[aria-pressed]").first();
   const before = await chip.getAttribute("aria-pressed");
   await chip.click();
   ok("chip toggles", (await chip.getAttribute("aria-pressed")) !== before);
+  { const r = await xLook(page.locator(`${ex("chip", "input")} .chip .x`).first()); ok("input chip x has no face, only the glyph, and darkens on hover", r.pass, JSON.stringify(r)); }
   const xchips = page.locator(".example-preview .chip .x");
   const nx = await xchips.count();
   if (nx) { await xchips.first().click(); await page.waitForTimeout(250); ok("input chip removed", (await xchips.count()) === nx - 1); }
@@ -1838,6 +1865,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   await require("./behave.feedback.js")({ page, ok, go });
   await require("./behave.data.js")({ page, ok, go });
+  await require("./behave.table.js")({ page, ok, go });
   await require("./behave.nav.js")({ page, ok, go });
   await require("./behave.promote.js")({ page, ok, go });
     await require("./behave.upload.js")({ page, ok, go });

@@ -466,3 +466,15 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
   12px 이하 글자는 좁은 화면에서도 줄지 않습니다. 불러오지 않으면 지금과 같습니다.
 - 아이콘(`Icon size`)은 `width` 속성을 그대로 내고, 패키지 CSS 가 같은 값을 rem 으로 다시 줍니다(명시도 0 — 제품 CSS 가 정한 크기가 이깁니다).
 - `.ds-root` 기본 글자 15px → `0.9375rem`(기준에서 같음). 탐색형 차트(`@jiran/ds-react/chart`)의 글자 · 여백은 루트 비율을 곱하고, 단계가 바뀌면 다시 칠합니다.
+
+## Table · Data Table — 테두리 없는 표 · 밀도 세 단계 (2026-11-11)
+
+- **표를 감싸는 테두리 · radius · 면이 없어졌습니다**(`.tbl-wrap`). 표는 놓인 자리(페이지 · 카드)의 면을 씁니다. 위 경계는 회색 헤더 면, 아래 경계는 **마지막 행 아래 선**입니다(전에는 테두리가 대신해 마지막 행 선이 없었습니다).
+  카드 안에서 `wrap={false}` 로 이중 테두리를 피하던 코드는 그대로 동작합니다 — 이제 이유는 '카드 패딩 없이 표를 붙일 때' 입니다.
+- **행 높이가 바뀌었습니다** — 기본 52 → **48**, `compact` 44 → **40**, 새 `relaxed` 56. 헤더는 44 · 40 · 48. 행 높이를 픽셀로 단정하던 제품 시험은 고쳐야 합니다.
+- **`Table` · `DataTable` 의 `density`**(`"compact" | "default" | "relaxed"`) · **`rowStyle`**(`"lines" | "zebra" | "grid" | "plain"`) — 새 prop 입니다. 기존 `compact` · `zebra` boolean 은 그대로 받고, 둘 다 주면 `density` · `rowStyle` 이 이깁니다(경고 없음).
+- **`TableFoot`** · `TableRow total`(합계 행) · `TableCell sub`(값 아래 하위 텍스트 `.cell-sub`)가 생겼습니다.
+- **DataTable 새 props** — `stickyColumn`(맨 앞 체크 · 펼침 칸과 첫 열 고정 — `aria-label` 또는 `caption` 이 영역 이름이 됩니다) · `summaryRow`(열 key → 합계 칸) · column `sub`.
+- **숫자는 표 전체가 고정폭**(`font-variant-numeric:tabular-nums` 가 `.tbl` 에)입니다. `.num` 은 오른쪽 정렬만 남았습니다 — 크기를 견주는 숫자(건수 · % · 용량)에만 쓰고 날짜 · ID · IP 는 왼쪽에 둡니다.
+- **사이트 마크업** — `.tbl.relaxed` · `.tbl.grid` · `.tbl.plain` · `.tbl-wrap.sticky-col`(tabindex + 이름, 빌드가 검사) · `tfoot tr.total` · `td > .cell-sub`, 밀도 전환 `.select-btn[data-density-for="표 id"]` 의 `button[data-density]`. `.plain` 은 `.zebra` · `.grid` 와, `.compact` 는 `.relaxed` 와 함께 쓰지 않습니다(빌드가 검사).
+- 런타임 변수 `--tbl-tint`(행 상태 면) · `--tbl-surface`(고정 칸의 불투명 면)가 생겼습니다. 제품 CSS 가 `.tbl td` 의 `background` 를 직접 칠하던 곳은 고정 열에서 덮일 수 있으니 `--tbl-tint` 로 바꾸세요.

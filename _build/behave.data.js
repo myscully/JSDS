@@ -67,7 +67,7 @@ module.exports = async function dataBundle({ page, ok, go }) {
   await go("components/data-table.html");
   await listen("ds:retry");
   const load = await page.evaluate(() => { const w = document.querySelector("#ex-data-table-loading .tbl-wrap"), trs = [...w.querySelectorAll("tbody tr")]; return { busy: w.querySelector("table").getAttribute("aria-busy"), status: w.querySelector("[role=status]").textContent, n: trs.length, h: Math.round(trs[0].getBoundingClientRect().height), skel: trs[0].querySelectorAll(".skeleton").length }; });
-  ok("loading table has skeleton rows at row height, aria-busy and a named status", load.busy === "true" && load.status === "이벤트 불러오는 중" && load.n === 3 && load.h === 52 && load.skel === 4, JSON.stringify(load));
+  ok("loading table has skeleton rows at row height, aria-busy and a named status", load.busy === "true" && load.status === "이벤트 불러오는 중" && load.n === 3 && load.h === 48 && load.skel === 4, JSON.stringify(load));
   const errBox = page.locator("#ex-data-table-error [role=alert]");
   await errBox.locator("[data-retry]").click(); await wait(30);
   ok("error row says what to do and retry fires ds:retry", (await errBox.textContent()).includes("다시 시도하세요") && (await seen("ds:retry")).length === 1);
@@ -81,7 +81,7 @@ module.exports = async function dataBundle({ page, ok, go }) {
   const withBar = await sticky.evaluate((w) => { const b = document.createElement("div"); b.className = "action-bar"; b.innerHTML = '<b>1개 선택</b><button class="btn sm outline assistive">x</button>'; w.prepend(b); w.scrollTop = 200; const r = b.getBoundingClientRect(), th = w.querySelector("th").getBoundingClientRect(), wr = w.getBoundingClientRect(), res = { h: r.height, barGap: Math.round(r.top - wr.top), thGap: Math.round(th.top - r.bottom) }; b.remove(); w.scrollTop = 0; return res; });
   ok("the selection bar stays above the sticky header without a gap", withBar.h === 53 && withBar.barGap <= 1 && Math.abs(withBar.thGap) <= 1, JSON.stringify(withBar));
   const tr = await sticky.evaluate((w) => { const td = w.querySelector("td.truncate"), c = getComputedStyle(td); return { cut: td.scrollWidth > td.clientWidth, ell: c.textOverflow, title: td.title === td.textContent, over: w.scrollWidth - w.clientWidth, h: Math.round(td.getBoundingClientRect().height) }; });
-  ok("a long message is cut in its cell, with the whole value in title, and the table does not widen", tr.cut && tr.ell === "ellipsis" && tr.title && tr.over === 0 && tr.h === 44, JSON.stringify(tr));
+  ok("a long message is cut in its cell, with the whole value in title, and the table does not widen", tr.cut && tr.ell === "ellipsis" && tr.title && tr.over === 0 && tr.h === 40, JSON.stringify(tr));
 
   /* ── Pagination ── */
   await go("components/pagination.html");

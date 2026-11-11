@@ -10,7 +10,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   size?: "sm" | "md";
   /** @deprecated sm 의 옛 이름 — size="sm" 을 쓰세요(MIGRATION.md). 값은 같습니다 */
   compact?: boolean;
-  /** padding·gap 0 — 표를 카드 폭까지 채울 때. 안의 Table 은 wrap={false}(.tbl-wrap · List 는 자체 테두리가 있어 두 겹이 된다) */
+  /** padding·gap 0 — 표를 카드 폭까지 채울 때. Table 은 바깥 테두리가 없어 그대로 둔다(가로 스크롤이 필요 없으면 wrap={false}). List 는 자체 테두리가 있어 두 겹이 된다 */
   flush?: boolean;
   /** 불러오는 중 — children 대신 Skeleton 을 보여주고 aria-busy 를 켭니다 */
   loading?: boolean;

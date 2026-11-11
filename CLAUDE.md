@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1398쌍 실패 0 · advisory 455 · behave 1156/1156 · react 686+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1170/1170 · react 700+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -391,6 +391,37 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - contrast +180 = 새 글자 쌍 234(Critical 은 틴트 · 강한 면 각 3 합성 + 바탕 3 = 9, 다섯 톤은 틴트 3 + 바탕 3 = 6 × 5 → 39 × 맥락 6) − 옛 중립 글자 / 틴트 쌍 54. behave +14 = 테마마다 outline 글자 AA 6 · 등급마다 다른 글자색 1(옛 '색은 점이 나른다' 단정 6 은 '글자 = heavy · 점은 .dot 일 때만' 으로 고침). react +3(dot 클래스 · plain 경고 · SevCell 경고).
 - 음성 시험: Medium 글자색을 지우면 behave 1154/1156 · contrast advisory +1, 점을 기본으로 되돌리면 behave 1143/1156, 예제에 `.sev-cell` · `.plain` 을 넣으면 verify 실패(둘 다 · 복사용 CSS 의 `.plain` 규칙도).
 - audit 의 정적 심각도 색 대조에서 `.sev-cell i` 를 뺐다. Figma 미반영 213 → 215건 — 저장소에만 있는 heavy 토큰 6 · Tag Spec Label 문구 1. Figma 의 Tag 변형은 아직 점 있음 · 중립 글자다(audit 대조 밖 — 일괄 반영 때 글자를 heavy 에 묶고 점을 뺀다).
+
+2026-11-11 칩 지우기(x)는 면 없이 x 만(사람의 요청) — behave 1156 → 1158. contrast · react 수는 그대로(x 글리프는 글자 쌍 밖).
+- `.chip .x` 의 회색 원 면(`--surface-neutral-strong` · hover `--line-neutral-primary`)을 지우고 hover 는 글자색 `--foreground-neutral-secondary` → `primary` 로. 크기 16 · 아이콘 10 · 반경(포커스 외곽선 모양)은 그대로.
+  같은 `.chip.sm > .x` 를 쓰는 Input Chip · 필터 칩 행(검색 · 로그 뷰어 패턴) · Combobox 다중 선택 항목(사이트 ds.js · React `Chip`)이 함께 바뀐다. Tag 에는 x 가 없다.
+- behave +2(Input Chip · Combobox 다중 항목의 x — 쉴 때 · hover 의 면 투명과 글자색). 음성 시험: 면을 되돌리면 두 단정 모두 실패(1156/1158). Chip Spec 에 Remove 행.
+- audit 의 Chip 삭제 기대값이 면 없음('-')을 받게 고쳤다. Figma 미반영 215 → 222건(Input 변형 6개의 x 면 · Spec Remove 행).
+
+2026-11-11 Date Picker 오늘 글자 = brand(사람의 요청) — 게이트 수는 그대로(기존 단정의 기대값만 고침).
+- `.calendar .day.today` 의 글자를 `--foreground-neutral-primary` → `--foreground-brand-primary`(굵기 700 · 옅은 brand 원은 그대로). 11-09 의 '원 위 글자는 기본 색' 결정을 바꿨다.
+  다크 원 위 3.87 은 이미 REF 로 선언된 쌍(`brand-primary` / `brand-subtle-strong` — 기간 띠 안의 오늘)이라 contrast · advisory 수가 같다. 띠 안 오늘만 brand 로 바꾸던 규칙은 지웠다(이제 늘 brand).
+- behave 의 원 단정이 오늘 글자 = brand 를 잰다. 음성 시험: 기본 글자로 되돌리면 그 단정과 띠 안 오늘 단정이 실패.
+- Figma 미반영 222 → 221건 — Figma 의 오늘 글자는 원래 brand 였다.
+
+2026-11-11 Select Button outline 선택 라인 · Outline Solid(사람의 요청 · 결정) — behave 1158 → 1160 · react 686 → 688(choice-controls 1 · 예제 246 → 247 에 따른 구조 비교 1). contrast · advisory 수는 그대로(새 색 쌍 없음 — 흰 글자 / 제품 색 · brand 글자 / brand subtle 은 기존 쌍).
+- **outline 의 고른 버튼은 네 변이 brand 선** — 묶음 테두리 + 칸 구분선이던 것을 버튼마다 테두리 + 1px 겹침으로 바꿨다(높이 38 · 폭 그대로). 고른 버튼이 z-index 1 로 이웃 선을 덮는다.
+  선 색은 Chip 선택과 같은 불투명 `--surface-brand-primary` — `--line-brand-*` 는 반투명(28 · 43%)이라 옅다. 선 토큰이 모두 반투명이라 겹친 칸을 두 번 칠하면 진해져, 뒤 버튼의 왼쪽 선은 투명으로 둔다.
+- **Outline Solid**(사람의 결정 — outline 틀에만) — `.select-btn.outline.solid` · React `solid`(outline 없이 쓰면 경고하고 무시). 고른 버튼 = `--surface-brand-primary` 면 + `--brand-label` 글자. verify 가 outline 없는 `.solid` 를 막는다.
+- behave +2(outline 고른 버튼의 네 변 · 면 · 글자 · 칸 선 한 겹 · 1px 겹침 · 높이 38, solid 면 · 글자 · 고른 것을 옮기면 따라감). 음성 시험 셋(brand 선 · 칸 선 투명 · solid 규칙 지우기) 모두 실패로 잡혔다 — 칸 선은 버튼 셋인 Solid 예제가 잡는다(Outline 예제는 둘이라 고르지 않은 이웃 칸이 없다).
+- Spec Size · Container 문구를 실제 구조로, Selected 행을 더했다. Figma 미반영 221 → 222건(Spec Selected 행). Figma 의 outline 고른 버튼 선 · Solid 변형은 audit 대조 밖 — 일괄 반영 때 그린다.
+
+2026-11-11 Table · Data Table 최적화 — 테두리 없는 표 + 참고 글의 구성(사람의 요청 · 결정 넷, 참고 외부 글 = 외부 글) — contrast 1398 → 1434 · behave 1160 → 1170(`behave.table.js` 10) · react 688 → 700(`tests/table-optimize.test.tsx` 6 · 예제 247 → 253 에 따른 구조 비교 6). advisory · pages 수는 그대로.
+- **표를 감싸는 테두리 · radius · 면을 없앴다**(사람의 요청) — `.tbl-wrap` 은 가로 스크롤만. 위 경계 = 회색 헤더 면, 아래 경계 = **마지막 행 아래 선**(사람의 결정 — 전에는 테두리가 대신해 지워 두었다). `.plain` · 빈 상태 칸은 선 없음. 사이트 셸의 문서 표 규칙 `tbody tr:last-child td{border-bottom:0}` 이 컴포넌트 표에도 걸려 있어 `table:not(.tbl)` 로 좁혔다. Card flush 의 '이중 테두리' 설명을 '카드 패딩 없이 붙일 때' 로.
+- **밀도 세 단계 40 · 48 · 56**(사람의 결정) — 기본 52 → 48 · `.compact` 44 → 40 · 새 `.relaxed` 56, 헤더 44 · 40 · 48(전에는 compact 헤더가 CSS 40 · Spec 44 로 어긋났다). React `density`(기존 `compact` 도 받음). 밀도 전환 예제 — 사이트 `.select-btn[data-density-for="표 id"]` + `button[data-density]`(ds.js), 고른 밀도의 기억은 제품 몫.
+- **행 스타일 넷**(사람의 결정 — Grid · Free form 을 더함) — 가로선(기본) · `.zebra` · `.grid`(칸 사이 세로선, 마지막 칸 없음) · `.plain`(선 없음 — 5행 안팎 요약). React `rowStyle`(기존 `zebra` 도 받음). verify 가 `.plain` + `.zebra`/`.grid` · `.compact` + `.relaxed` 를 막는다.
+- **구성 넷**(사람의 결정) — 하위 텍스트 `td > .cell-sub`(12/16 secondary, 칸 위아래 패딩 8 이라 두 줄이 relaxed 56 에 든다) · 첫 열 고정 `.tbl-wrap.sticky-col`(맨 앞 체크 · 펼침 칸과 첫 열, 불투명 면 `--tbl-surface` 위에 행 상태 면 `--tbl-tint` 를 겹침 · 오른쪽 선 · tabindex + 이름은 verify) · 합계 행 `tfoot tr.total`(회색 면 · 600 · 위 선 `--line-neutral-primary`) · 밀도 전환. React `TableFoot` · `TableRow total` · `TableCell sub` · DataTable `stickyColumn` · `summaryRow` · column `sub`.
+- **글에서 함께 가져온 것** — 숫자 tabular 를 표 전체로(`.num` 은 오른쪽 정렬만, 크기를 견주는 숫자에만 — 예제 · 패턴의 `.num` 을 세어 보니 전부 건수 · % · 그 머리글이라 고칠 것이 없었다). **가져오지 않은 것:** hover 때만 보이는 행 동작(키보드로 못 찾음 — 글도 단점으로 적음), 열 추가 · 순서 · 너비(열 표시 설정은 1.0 뒤 다시 묻기로 함), 복합 필터 저장, 셀 배경 추세 표시(상태색과 겹침).
+- contrast +36(하위 텍스트 secondary / 행 hover · 선택 면 2 × 바탕 3 × 맥락 6). **기존 단정 고침 2:** 로딩 행 높이 52 → 48 · 말줄임 칸 44 → 40(behave.data).
+- **측정에서 드러나 고친 것:** 고정 열의 칸별 `left` 가 위치 규칙의 `:is(…)`(가장 센 인자의 명시도 0,3,0)에 져 체크 칸과 첫 열이 같은 0 에 붙었다 — 위치 규칙을 `:where` 로. 하위 텍스트 행이 71.4 로 커졌다(칸 패딩 12 + 두 줄) — `td:has(> .cell-sub)` 패딩 8. 고정 열 예제의 표 폭을 인라인 `min-width:1040px` 대신 CSS `width:max-content` + nowrap 으로(복사한 HTML 에 수치가 남지 않게).
+- 음성 시험 17건(테두리 · 마지막 행 선 · 고정폭 · compact · relaxed · grid · plain · 하위 패딩 · 하위 색 · 고정 left · 고정 면 · 합계 면 · 합계 선 · 밀도 전환 ds.js · verify 조합 셋) 모두 실패로 잡혔다 — plain 을 지우면 복사용 CSS 검사도 잡는다. 표 단정만 도는 임시 실행기로 쟀다(전체 게이트는 한 건에 10분).
+- **이미 있던 것(이번에 바꾸지 않음):** 로그 뷰어 표의 단말 열이 'PC-/2041' 로 줄바꿈한다 — HEAD 빌드에서도 행 62 · 열 폭이 같다.
+- Figma 미반영 222 → 227건(Data Table Spec Size · Container · Label, Table Spec Size · Container). Figma 의 표는 테두리 · radius · 52 행 그대로다 — 일괄 반영 때 테두리를 지우고 마지막 행 선 · 세 밀도 · Grid · Plain · 고정 열 · 합계 행을 그린다.
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

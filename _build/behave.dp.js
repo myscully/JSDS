@@ -191,7 +191,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     const [grey, strong, todayBg, line, neutral, brandText] = [await tok("--surface-neutral-secondary", "backgroundColor"), await tok("--surface-neutral-strong", "backgroundColor"), await tok("--surface-brand-subtle-strong", "backgroundColor"), await tok("--line-brand-primary"), await tok("--foreground-neutral-primary"), await tok("--foreground-brand-primary")];
     const round = (x) => x.w === "34px" && x.h === "34px" && x.r === "50%" && x.cell === "rgba(0, 0, 0, 0)";
     ok("hover, press, today and keyboard focus are circles too",
-      round(hover) && hover.bg === grey && round(press) && press.bg === strong && round(today) && today.bg === todayBg && today.color === neutral && today.weight === "700" &&
+      round(hover) && hover.bg === grey && round(press) && press.bg === strong && round(today) && today.bg === todayBg && today.color === brandText && today.color !== neutral && today.weight === "700"   /* 오늘 글자 = brand(사람의 결정 2026-11-11) */ &&
       todayHover.bg === todayBg && todayHover.shadow.includes(line) && todayHover.shadow.includes("inset") && focus.own === "none" && focus.outline === `solid 1px ${brandText}` && focus.r === "50%",
       JSON.stringify({ hover, press, today, todayHover, focusKey, focus }));
     /* 띠 안의 오늘 — 원이 띠와 같은 색이라 brand 글자로 갈린다. 최대 날짜가 없는 기간 필드에서 오늘을 넘겨 미리 본다 */

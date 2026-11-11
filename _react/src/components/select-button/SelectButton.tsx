@@ -18,14 +18,17 @@ export interface SelectButtonProps<T extends string = string> extends Omit<HTMLA
   onChange?: (value: T) => void;
   /** 아웃라인형 (툴바용) */
   outline?: boolean;
+  /** 고른 버튼을 solid(제품 색 면 + 흰 글자)로. outline 과 함께만 쓴다 */
+  solid?: boolean;
   /** 그룹 이름 (aria-label) */
   label?: string;
 }
 
 function SelectButtonInner<T extends string>(
-  { options, value, defaultValue, onChange, outline, label, className, ...rest }: SelectButtonProps<T>,
+  { options, value, defaultValue, onChange, outline, solid, label, className, ...rest }: SelectButtonProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
+  if (process.env.NODE_ENV !== "production" && solid && !outline) console.warn("[ds-react] SelectButton solid 는 outline 과 함께만 씁니다 — outline 없이는 무시합니다.");
   const [cur, set] = useControllable<T | undefined>({ value, defaultValue: defaultValue ?? options[0]?.value, onChange: onChange as (v: T | undefined) => void });
   /* Tab 은 묶음에 한 번 — 고른 항목, 고른 것이 비활성이면 첫 활성 항목 */
   const live = options.filter((o) => !o.disabled);
@@ -40,7 +43,7 @@ function SelectButtonInner<T extends string>(
     e.currentTarget.querySelector<HTMLElement>(`[data-value="${to.value}"]`)?.focus();
   };
   return (
-    <div ref={ref} className={cx("select-btn", { outline }, className)} role="radiogroup" aria-label={label} onKeyDown={onKeyDown} {...rest}>
+    <div ref={ref} className={cx("select-btn", { outline, solid: outline && solid }, className)} role="radiogroup" aria-label={label} onKeyDown={onKeyDown} {...rest}>
       {options.map((o) => {
         const on = o.value === cur;
         return (
