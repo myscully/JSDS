@@ -101,8 +101,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
 /* 크기 단위(2026-11-11 글자 크기 체계, 사람의 결정 — 토큰 + rem + 화면 폭 단계).
    화면 폭 단계에서 루트 크기가 바뀌면 rem 으로 적은 글자 · 간격 · 높이가 같은 비율로 따라간다. px 로 남은 크기는 따라가지 않아 그 자리만 어긋난다.
    - 크기 속성의 px(2 초과)는 금지. 테두리 · 외곽선 · 그림자 · 밑줄 · stroke · filter 와 2px 이하는 선이 흐려지지 않게 px 그대로 둔다
-   - 컴포넌트 블록의 font-size 는 var(--font-size-N) · inherit 만. 인라인 코드의 .9em 은 둘레 글자를 따라가야 해서 예외,
-     단계 밖 13px(0.8125rem — Date Picker 달력 · Breadcrumb · Code)은 어느 단계로 묶을지 사람이 정하기 전까지 FONT_STRAY 로 둔다 */
+   - 컴포넌트 블록의 font-size 는 var(--font-size-N) · inherit 만. 인라인 코드의 .9em 은 둘레 글자를 따라가야 해서 예외.
+     단계 밖이던 13px 셋은 단계로 묶었다(사람의 결정 2026-11-11 — 달력 · Breadcrumb 14, Code 12) */
 {
   const raw = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8");
   const src = raw.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/url\((?:"[^"]*"|'[^']*'|[^)]*)\)/g, (m) => m.replace(/[^\n]/g, " "));
@@ -111,7 +111,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   if (a < 0 || b < 0) fails.push("style.src.css: 컴포넌트 블록 표식을 찾지 못했다 — 글자 크기 토큰 검사를 못 함");
   const SKIP = (p) => (/^border/.test(p) && !/radius|spacing/.test(p)) || /^(outline|box-shadow|text-shadow|text-decoration|text-underline-offset|stroke|filter|backdrop-filter|-webkit-text-stroke|column-rule)/.test(p) || /^--(shadow|checker|radius-full|float)/.test(p);
   const tokens = new Set([...src.matchAll(/--font-size-(\d+):/g)].map((m) => m[1]));
-  const FONT_STRAY = { "0.8125rem": ".calendar · .breadcrumb · .code-view pre — 13px, 단계 밖" , ".9em": ".code-inline — 둘레 글자를 따라감" };
+  const FONT_STRAY = { ".9em": ".code-inline — 둘레 글자를 따라감" };
   let bad = 0;
   for (const blk of src.matchAll(/\{([^{}]*)\}/g)) {
     const inSamples = blk.index > a && blk.index < b;

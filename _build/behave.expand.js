@@ -117,7 +117,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await page.setViewportSize({ width: 768, height: 900 });
     const n = await page.evaluate((EX) => { const w = document.querySelector(EX + " .tbl-wrap"); const t = w.querySelector("table"); const d = w.querySelector("tr.row-detail > td"); return { tw: t.offsetWidth, dw: d.offsetWidth, cw: w.clientWidth }; }, EX);
     await page.setViewportSize({ width: 1440, height: 900 });
-    ok("row expand: a long raw log wraps inside the detail and never widens the table", r.code.join() === "rgba(0, 0, 0, 0),13px,0px" && r.sw <= r.cw && r.lines >= 2 && n.dw === n.tw && n.tw <= n.cw, JSON.stringify({ r, n }));
+    ok("row expand: a long raw log wraps inside the detail and never widens the table", r.code.join() === "rgba(0, 0, 0, 0),12px,0px" && r.sw <= r.cw && r.lines >= 2 && n.dw === n.tw && n.tw <= n.cw, JSON.stringify({ r, n }));
   });
 
   await step("row expand: the loading detail is a status line in one row", async () => {

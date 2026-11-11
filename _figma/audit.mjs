@@ -1497,7 +1497,7 @@ function diffComponents(c, want, bad, notes) {
             if (!fam) bad.push(`${at} ${what} ${k.n} 서체 ${t.font}`);
             if (wt !== ww) { if (fam && fam[1] === "Noto Sans KR" && ww === 600 && wt === 700) notes.push(`${at} ${what} 굵기 600 이 Noto Sans KR Bold(700)로 대체돼 있습니다 — 이 환경의 Noto 에 SemiBold 가 없음(되돌릴 목록 _figma/font-revert.md k25 · k26)`); else bad.push(`${at} ${what} ${k.n} 굵기 ${wt} ≠ ${ww}(${t.font})`); }
           };
-          for (const k of items) if (k.tx && (k.tx.fs !== wb.fs || k.tx.lh !== wb.lh)) bad.push(`${at} ${k.n} 글자 ${k.tx.fs}/${k.tx.lh} ≠ ${wb.fs}/${wb.lh} — 사이트 .breadcrumb font-size · line-height(2026-11-02 k27 부터 13/22 — 타이포 단계 밖이라 텍스트 스타일에 연결하지 않음)`);
+          for (const k of items) if (k.tx && (k.tx.fs !== wb.fs || k.tx.lh !== wb.lh)) bad.push(`${at} ${k.n} 글자 ${k.tx.fs}/${k.tx.lh} ≠ ${wb.fs}/${wb.lh} — 사이트 .breadcrumb font-size · line-height(2026-11-11 부터 14/22 = Body 2 — 일괄 반영 때 Body 2 텍스트 스타일에 연결. 그 전 k27 의 13/22 는 단계 밖이라 연결하지 않았음)`);
           /* 마지막 항목 = 현재 페이지(current 는 축이 아니라 마지막 항목 — k26) */
           const last = items[items.length - 1];
           if (!last || !last.tx) bad.push(`${at} 마지막 항목이 현재 페이지 글자가 아님 — ${last ? last.n : "없음"}(모든 변형의 마지막 항목이 현재 페이지입니다)`);

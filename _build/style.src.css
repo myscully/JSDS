@@ -90,7 +90,7 @@
   --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"D2Coding",monospace;
   /* 글자 크기 — rem(html 글꼴 크기 기준, 사람의 결정 2026-11-11). 화면 폭 단계에서 루트 크기가 바뀌면 글자 · 간격 · 높이가 같은 비율로 따라간다.
      12px 이하는 max() 로 최소 크기를 지킨다 — 좁은 화면(93.75%)에서 12 → 11.25 · 10 → 9.4 가 되면 한글이 읽기 어렵다(사람의 결정).
-     컴포넌트 CSS 의 font-size 는 이 토큰만 쓴다(verify). 단계 밖 크기(9 · 11 · 13 · 15)는 아직 rem 그대로 — 어느 단계로 묶을지 사람이 정한다 */
+     컴포넌트 CSS 의 font-size 는 이 토큰만 쓴다(verify). 컴포넌트의 단계 밖 13 셋은 단계로 묶었고(2026-11-11 — 달력 · Breadcrumb 14, Code 12), 사이트 셸의 9 · 11 · 13 · 15 는 문서 화면 전용이라 rem 그대로 */
   --font-size-10:max(0.625rem,10px);--font-size-12:max(0.75rem,12px);--font-size-14:0.875rem;--font-size-16:1rem;--font-size-18:1.125rem;--font-size-20:1.25rem;
   --font-size-24:1.5rem;--font-size-28:1.75rem;--font-size-32:2rem;--font-size-40:2.5rem;--font-size-48:3rem;
   --header-h:4rem;--sidebar-w:14.5rem;--toc-w:12.5rem;--shell-max:87.5rem;
@@ -872,7 +872,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .datepicker .cal-btn:disabled{background:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
 .datepicker .calendar{position:absolute;top:var(--dp-top,calc(100% + 0.25rem));left:var(--dp-left,0);z-index:5;display:none}
 .datepicker.open .calendar{display:block}
-.calendar{width:18.5rem;padding:1.25rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:0.8125rem;line-height:1.6}   /* 패딩 20 · 글자 13(사람의 결정 2026-11-09) */
+.calendar{width:18.5rem;padding:1.25rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:var(--font-size-14);line-height:1.6}   /* 패딩 20(사람의 결정 2026-11-09) · 글자 14 — 11-09 의 13 을 단계 14 로 묶음(사람의 결정 2026-11-11) */
 .calendar .cal-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;padding:0 0.25rem 1rem}   /* 아래 16(사람의 결정 2026-11-09) */
 .calendar .cal-head button{border:0;background:transparent;font:inherit;cursor:pointer;width:1.75rem;height:1.75rem;border-radius:0.375rem;color:var(--foreground-neutral-secondary)}
 .calendar .cal-head button:hover{background:var(--surface-neutral-secondary)}
@@ -1086,7 +1086,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tab-panel{padding:1.25rem 0;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.6}
 
 /* Breadcrumb */
-.breadcrumb{display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;list-style:none;padding:0;margin:0;flex-wrap:wrap;line-height:1.375rem;min-height:1.5rem}   /* 13/22 — 타이포 단계(14개)에 없는 크기. 사람의 결정(2026-11-02 — 14 → 13). 행간 22 · 행 높이 24 한 크기(홈 아이콘 행)는 그대로. 1.6 이면 22.4 · 아이콘 행 24.4 로 소수가 났다 */
+.breadcrumb{display:flex;align-items:center;gap:0.375rem;font-size:var(--font-size-14);list-style:none;padding:0;margin:0;flex-wrap:wrap;line-height:1.375rem;min-height:1.5rem}   /* 14/22 = Body 2 — 11-02 의 13 을 단계 14 로 묶음(사람의 결정 2026-11-11). 행간 22 · 행 높이 24 한 크기(홈 아이콘 행)는 그대로. 1.6 이면 22.4 · 아이콘 행 24.4 로 소수가 났다 */
 .breadcrumb li{display:flex;align-items:center;gap:0.375rem;color:var(--foreground-neutral-tertiary);margin:0}
 .breadcrumb li+li::before{content:"";width:0.75rem;height:0.75rem;flex:none;background:var(--foreground-disable-primary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M17 5l-10 14%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M17 5l-10 14%22 /%3E%3C/svg%3E") center/contain no-repeat}
 .breadcrumb a{color:inherit;text-decoration:none}
@@ -1597,7 +1597,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .code-view{display:flex;flex-direction:column;width:100%;min-width:0;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);overflow:hidden}
 .code-view .head{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.25rem 0.5rem 0.25rem 1rem;border-bottom:1px solid var(--line-neutral-secondary)}
 .code-view .title{min-width:0;font-size:var(--font-size-14);line-height:1.6;font-weight:500;color:var(--foreground-neutral-secondary)}
-.code-view pre{contain:inline-size;margin:0;padding:0.75rem 1rem;border-radius:0;background:none;color:var(--foreground-neutral-primary);font-size:0.8125rem;line-height:1.25rem;tab-size:2;overflow:auto}   /* contain — 긴 줄이 그리드 칸을 넓히지 않게 */
+.code-view pre{contain:inline-size;margin:0;padding:0.75rem 1rem;border-radius:0;background:none;color:var(--foreground-neutral-primary);font-size:var(--font-size-12);line-height:max(1.25rem,20px);tab-size:2;overflow:auto}   /* contain — 긴 줄이 그리드 칸을 넓히지 않게. 12/20 — 13 을 단계 12 로 묶음(사람의 결정 2026-11-11 — 고정폭은 같은 크기에서 커 보인다), 줄 높이도 최소 크기 */
 .code-view pre code{padding:0;border-radius:0;background:none;font-size:inherit}   /* 표 칸 안(행 펼침)에서 td code 의 인라인 칩 면 · 12px 가 줄마다 칠해졌다 */
 .code-view pre:focus-visible{outline-offset:-1px}   /* 틀의 overflow 가 바깥 외곽선을 자른다 */
 .code-view.wrap pre{white-space:pre-wrap;overflow-wrap:anywhere}

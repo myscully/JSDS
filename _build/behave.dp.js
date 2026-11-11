@@ -164,10 +164,10 @@ module.exports = async ({ b, ok, SITE, path }) => {
       r.start.startsWith("linear-gradient(to right") && r.start.includes(band) && r.end.startsWith("linear-gradient(to left") && r.end.includes(band) && r.mid === "0px",
       JSON.stringify({ s, r, brand, band }));
   });
-  await step("calendar padding 20, text 13, title 16", async () => {
+  await step("calendar padding 20, text 14, title 16", async () => {
     const r = await page.locator(`${ex("calendar")} .calendar`).evaluate((c) => { const g = (e) => getComputedStyle(e); return { pad: g(c).padding, fs: g(c).fontSize, title: g(c.querySelector(".cal-title")).fontSize, day: g(c.querySelector(".day")).fontSize }; });
     const y = await dpOf("unit", 0).evaluate(async (e) => { e.querySelector(".cal-btn").click(); await new Promise((r) => setTimeout(r, 50)); const out = getComputedStyle(e.querySelector(".calendar .cell")).fontSize; e.querySelector(".cal-btn").click(); return out; });
-    ok("calendar padding 20, text 13, title 16", r.pad === "20px" && r.fs === "13px" && r.title === "16px" && r.day === "13px" && y === "13px", JSON.stringify({ r, y }));
+    ok("calendar padding 20, text 14, title 16", r.pad === "20px" && r.fs === "14px" && r.title === "16px" && r.day === "14px" && y === "14px", JSON.stringify({ r, y }));
     const head = await page.locator(`${ex("calendar")} .calendar .cal-head`).evaluate((h) => getComputedStyle(h).padding);
     ok("calendar header padding 0 4px 16px", head === "0px 4px 16px", head);
   });
