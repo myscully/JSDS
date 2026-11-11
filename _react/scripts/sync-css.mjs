@@ -18,6 +18,9 @@ const tokens = src.slice(0, tokensEnd).replace('url("PretendardVariable.woff2")'
 const a = src.indexOf(LIB.SAMPLES_START), b = src.indexOf(LIB.SAMPLES_END);
 if (a < 0 || b < 0) throw new Error("style.src.css: Live component samples 마커 없음");
 const samples = src.slice(a, b + LIB.SAMPLES_END.length);
+/* 화면 폭 단계 · 아이콘 크기(2026-11-11) — 사이트와 같은 원본 블록을 뽑는다. 단계는 html 을 바꾸므로 고르는 사람만 쓰는 dist/scale.css 로, 아이콘 크기는 base 로 */
+const block = (name) => { const m = new RegExp("/\\* ds:" + name + ":start[\\s\\S]*?\\*/([\\s\\S]*?)/\\* ds:" + name + ":end \\*/").exec(src); if (!m) throw new Error("style.src.css: ds:" + name + " 블록 없음"); return m[1].trim(); };
+const scale = block("scale"), icons = block("icons");
 
 const base = `/* ---------- Base (패키지용 최소 규칙) ---------- */
 *{box-sizing:border-box}
@@ -28,7 +31,9 @@ const base = `/* ---------- Base (패키지용 최소 규칙) ---------- */
 .ds-root{font-family:var(--font-sans);font-size:0.9375rem;line-height:1.65;color:var(--foreground-neutral-primary);background:var(--background-neutral-primary);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .ds-root pre,.ds-root pre code{font-family:var(--font-mono)}.ds-root code,.ds-root kbd{font-family:var(--font-sans)}
 /* 링크 기본색만 지운다 — :where 로 우선순위를 0,0,1 에 둔다. .ds-root a(0,1,1)는 .btn:where(.solid.primary) 같은 단일 클래스 색을 이겨, 링크형 주 버튼 글자가 면과 같은 색이 됐다(대비 1.05) */
-:where(.ds-root) a{color:inherit}`;
+:where(.ds-root) a{color:inherit}
+/* 아이콘 크기를 rem 으로(화면 폭 단계 · 브라우저 글꼴 설정을 따름) — 명시도 0 */
+${icons}`;
 
 const out = `/* @jiran/ds-react — 생성 파일. 원본: _build/style.src.css (토큰 + Live component samples). 수정하지 마세요. */
 ${tokens}
@@ -62,5 +67,11 @@ for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"
 const dist = path.resolve(here, "..", "dist");
 fs.mkdirSync(path.join(dist, "fonts"), { recursive: true });
 fs.writeFileSync(path.join(dist, "style.css"), out);
+/* 선택: 화면 폭 단계. html 글꼴 크기를 바꾸므로 제품이 고를 때만 불러온다 — import "@jiran/ds-react/scale.css" */
+if (!/@media \(max-width:1279px\)\{html\{font-size:93\.75%\}\}/.test(scale)) throw new Error("sync-css: scale 블록에 화면 폭 단계가 없다");
+fs.writeFileSync(path.join(dist, "scale.css"), `/* @jiran/ds-react — 화면 폭 단계(선택). 생성 파일. 원본: _build/style.src.css 의 ds:scale 블록. 수정하지 마세요.
+   rem 의 기준인 html 글꼴 크기를 폭 구간마다 바꿉니다: ~1279 93.75% · 1280~1919 100% · 1920~ 106.25% · 2560~ 112.5% */
+${scale}
+`);
 fs.copyFileSync(path.join(BUILD, "PretendardVariable.woff2"), path.join(dist, "fonts", "PretendardVariable.woff2"));
 console.log(`style.css: ${(out.length / 1024).toFixed(1)} KB`);

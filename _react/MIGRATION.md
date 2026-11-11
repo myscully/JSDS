@@ -443,3 +443,14 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **`tbody tr` 를 세는 제품 코드** — 펼침을 켜면 상세 행이 섞입니다. 행만 셀 때는 `tbody > tr:not(.row-detail)` 로 고르세요.
 - **사이트 마크업** — `th.expand`(숨긴 이름) · `td.expand > button.expand-btn[aria-expanded][aria-controls][aria-label]` · 바로 뒤 `tr.row-detail[hidden] > td[colspan] > .row-detail-body`. `ds:row-expand` 는 행(tr)에서 납니다(Breadcrumb 의 `ds:expand` 와 이름을 나눔). 정렬 · `DS.table.removeRow` 는 상세 행을 함께 옮기고 지웁니다.
 - **줄무늬 · hover** — `.zebra` 와 행 hover 가 상세 행을 세지 않도록 선택자가 바뀌었습니다(`:where(:not(.row-detail))`, 명시도는 그대로).
+
+## 크기 단위 rem · 화면 폭 단계 (2026-11-11)
+
+- **패키지 CSS 의 크기는 rem 입니다** — 글자(`--font-size-10 ~ 48` 토큰) · 간격(`--space-*`) · 높이 · 반경. 기준(`html` 16px)에서는 전과 픽셀이 같습니다.
+  테두리 · 그림자 · 2px 이하만 px 입니다. 제품 CSS 가 `--space-*` · `--radius-*` 값을 px 숫자로 읽고 있었다면(`parseFloat`) 이제 rem 글자가 옵니다 — 계산값(`getComputedStyle(el).padding` 등)으로 읽으세요.
+- **`html` 글꼴 크기를 바꾸면 화면 전체가 따라갑니다.** `html{font-size:62.5%}` 같은 재정의가 있으면 화면이 62.5% 로 줄어듭니다 — 지우세요.
+  개발 모드에서 루트가 12px 미만이면 한 번 경고합니다(`checkRootFontSize`). 사용자가 브라우저 글꼴을 키운 경우(예: 20px)는 정상이라 조용합니다.
+- **화면 폭 단계(선택)** — `import "@jiran/ds-react/scale.css"` 를 하면 ~1279 93.75% · 1280~1919 100% · 1920~ 106.25% · 2560~ 112.5% 로 루트가 바뀝니다.
+  12px 이하 글자는 좁은 화면에서도 줄지 않습니다. 불러오지 않으면 지금과 같습니다.
+- 아이콘(`Icon size`)은 `width` 속성을 그대로 내고, 패키지 CSS 가 같은 값을 rem 으로 다시 줍니다(명시도 0 — 제품 CSS 가 정한 크기가 이깁니다).
+- `.ds-root` 기본 글자 15px → `0.9375rem`(기준에서 같음). 탐색형 차트(`@jiran/ds-react/chart`)의 글자 · 여백은 루트 비율을 곱하고, 단계가 바뀌면 다시 칠합니다.

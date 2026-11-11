@@ -103,7 +103,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   ok("one system: body links share one look across patterns", sys.links.size <= 1, [...sys.links].join(" · "));
 
   const align = { edges: [], rows: [], spill: [] };
-  for (const w of [1440, 1024, 768]) {
+  for (const w of [1440, 1024, 768, 1920, 2560]) {   // 1920 · 2560 은 화면 폭 단계(2026-11-11) — 루트가 106.25 · 112.5% 라 글자 · 간격이 커진 채로 넘치지 않는지
     await page.setViewportSize({ width: w, height: 900 });
     for (const name of PATTERNS) {
       await page.goto(url(`patterns/${name}.html`)); await page.waitForTimeout(250);   // 차트 캔버스가 폭을 잡을 때까지
@@ -138,8 +138,8 @@ module.exports = async ({ b, ok, SITE, path }) => {
     }
   }
   await page.setViewportSize({ width: 1440, height: 900 });
-  ok("alignment: stacked pattern blocks share a left edge or a centre line (1440 · 1024 · 768)", align.edges.length === 0, align.edges.slice(0, 3).join(" | "));
-  ok("alignment: cards in one row share top and height (1440 · 1024 · 768)", align.rows.length === 0, align.rows.slice(0, 3).join(" | "));
-  ok("alignment: nothing spills past the pattern preview (1440 · 1024 · 768)", align.spill.length === 0, align.spill.slice(0, 3).join(" | "));
+  ok("alignment: stacked pattern blocks share a left edge or a centre line (1440 · 1024 · 768 · 1920 · 2560)", align.edges.length === 0, align.edges.slice(0, 3).join(" | "));
+  ok("alignment: cards in one row share top and height (1440 · 1024 · 768 · 1920 · 2560)", align.rows.length === 0, align.rows.slice(0, 3).join(" | "));
+  ok("alignment: nothing spills past the pattern preview (1440 · 1024 · 768 · 1920 · 2560)", align.spill.length === 0, align.spill.slice(0, 3).join(" | "));
   await ctx.close();
 };

@@ -87,3 +87,20 @@ export function getTheme(root: HTMLElement = document.documentElement): Theme {
   const t = root.getAttribute("data-theme");
   return t === "light" || t === "dark" ? t : null;
 }
+
+/** 패키지 CSS 는 rem(html 글꼴 크기 기준)이다(2026-11-11). 제품이 html{font-size:62.5%} 같은 재정의를 하면 화면 전체가 그만큼 줄어든다.
+ *  루트가 12px 미만이면 개발 모드에서 한 번 알린다 — 단계 표(93.75 ~ 112.5%) 밖이라도 사용자가 브라우저 글꼴을 키운 경우는 정상이라 알리지 않는다 */
+export const ROOT_FONT_MIN = 12;
+let rootChecked = false;
+export function checkRootFontSize(root: HTMLElement | null = typeof document !== "undefined" ? document.documentElement : null): number | null {
+  if (!root || typeof getComputedStyle === "undefined") return null;
+  const px = parseFloat(getComputedStyle(root).fontSize);
+  if (!(px > 0)) return null;
+  if (px < ROOT_FONT_MIN && !rootChecked && process.env.NODE_ENV !== "production") {
+    rootChecked = true;
+    console.warn(`[ds-react] html 글꼴 크기가 ${px}px 입니다 — 패키지는 rem 이라 화면 전체가 ${Math.round((px / 16) * 100)}% 로 줄어듭니다. html{font-size:62.5%} 같은 재정의를 지우고, 화면 폭 단계가 필요하면 "@jiran/ds-react/scale.css" 를 쓰세요(MIGRATION.md).`);
+  }
+  return px;
+}
+/** 테스트용 — 한 번만 알리는 표시를 지운다 */
+export function resetRootFontCheck(): void { rootChecked = false; }

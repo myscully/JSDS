@@ -77,3 +77,18 @@ describe("setTheme / getTheme", () => {
     expect(getTheme()).toBeNull();
   });
 });
+
+describe("checkRootFontSize — 패키지는 rem(2026-11-11)", () => {
+  it("루트가 12px 미만이면 한 번만 알리고, 16 · 브라우저 글꼴을 키운 20 은 조용하다", async () => {
+    const { checkRootFontSize, resetRootFontCheck } = await import("./theme");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const root = document.documentElement;
+    resetRootFontCheck();
+    for (const px of ["16px", "20px"]) { root.style.fontSize = px; expect(checkRootFontSize()).toBe(parseFloat(px)); }
+    expect(warn).not.toHaveBeenCalled();
+    root.style.fontSize = "10px"; checkRootFontSize(); checkRootFontSize();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).toContain("62.5%");
+    root.style.fontSize = ""; warn.mockRestore(); resetRootFontCheck();
+  });
+});

@@ -6,7 +6,7 @@
    또는: DSChart.mount(Chart, canvas, DSChart.presets.bar(spec))  /  React 는 @jiran/ds-react/chart 가 같은 함수를 쓴다.
    - theme(el)      : 토큰(--chart-* · 심각도 · 면 · 글꼴)을 계산값으로 읽어 Chart.js options 조각을 만든다. 캔버스는 CSS 변수를 못 읽는다
    - presets.*      : timeseries(선/영역 · 누적) · bar(세로/가로 · 그룹/누적) · donut · mixed(막대 + 선, y 축 하나) — spec → Chart.js config
-   - mount          : Chart 생성 + 라이트/다크 전환(data-theme · prefers-color-scheme)과 제품색 주입 때 다시 칠한다
+   - mount          : Chart 생성 + 라이트/다크 전환(data-theme · prefers-color-scheme) · 제품색 주입 · 화면 폭 단계 변화 때 다시 칠한다
    - auto           : canvas[data-chart] 를 찾아 data-spec(JSON) 으로 mount
    마크 규격(사람의 결정 2026-11-03, 막대 · 범례는 2026-11-05 · 11-06 개정): 선 2px · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음 · 누적 세그먼트는 틈 없이 이어 붙임 ·
    도넛 조각 사이 2px 면 색 경계 · 격자는 y 축만 · 범례는 2계열 이상일 때 아래, 원형 아이콘(도넛의 옆 범례는 자리가 좁고 높으면 아래로) · y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정, 7번째부터는 '기타'로 묶는다
@@ -55,6 +55,12 @@
     return "rgba(" + p[0] + ", " + p[1] + ", " + p[2] + ", " + a + ")";
   }
 
+  /* ---------- 화면 폭 단계(2026-11-11 글자 크기 체계) ----------
+     CSS 는 rem 이라 루트 글꼴 크기가 바뀌면 글자 · 간격이 같은 비율로 따라간다. 캔버스는 CSS 를 모르므로 그 비율(루트 px / 16)을 곱해 그린다.
+     글자 12 는 CSS 의 --font-size-12 처럼 최소 12 를 지킨다(좁은 화면에서 줄지 않음) */
+  var FONT_MIN = 12;
+  function rootScale() { var f = parseFloat(getComputedStyle(doc.documentElement).fontSize); return f > 0 ? f / 16 : 1; }
+
   /* ---------- theme ---------- */
   function theme(el) {
     el = el || doc.documentElement;
@@ -63,7 +69,8 @@
       series: TOKENS.series.map(function (k) { return resolve(el, k); }),
       tone: {}, grid: resolve(el, TOKENS.grid), axis: resolve(el, TOKENS.axis),
       tipBg: resolve(el, TOKENS.tipBg), tipFg: resolve(el, TOKENS.tipFg), surface: resolve(el, TOKENS.surface), text: resolve(el, TOKENS.text),
-      font: { family: cs.fontFamily, size: 12 },
+      scale: rootScale(),
+      font: { family: cs.fontFamily, size: Math.max(FONT_MIN, 12 * rootScale()) },
       reduced: !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches),
     };
     Object.keys(TONES).forEach(function (k) { t.tone[k] = resolve(el, TONES[k]); });
@@ -77,6 +84,7 @@
   }
   function font(t, weight) { return { family: t.font.family, size: t.font.size, weight: weight || 400 }; }
   function baseOptions(t, n) {
+    var s = t.scale || 1;
     return {
       responsive: true, maintainAspectRatio: false, animation: t.reduced ? false : { duration: 200 },
       interaction: { mode: "index", intersect: false },
@@ -84,12 +92,12 @@
       plugins: {
         /* 원형 점의 지름 — 범례는 boxHeight × √2(7 이면 10, 정적 .chart-legend i 와 같음), 툴팁은 min(boxWidth, boxHeight)(6) — Chart.js 4.6.1 이 둘을 다른 식으로 그린다 */
         /* 범례는 데이터셋(도넛은 조각) 순서 — Chart.js 기본은 그리기 order 라 혼합 차트에서 선(위에 그림)이 먼저 왔다 */
-        legend: { display: n > 1, position: "bottom", align: "start", labels: { color: t.axis, boxWidth: 7, boxHeight: 7, usePointStyle: true, pointStyle: "circle", padding: 16, font: font(t), sort: function (a, b) { return ((a.datasetIndex || 0) - (b.datasetIndex || 0)) || ((a.index || 0) - (b.index || 0)); } } },
-        tooltip: { backgroundColor: t.tipBg, titleColor: t.tipFg, bodyColor: t.tipFg, padding: 10, cornerRadius: 6, boxWidth: 6, boxHeight: 6, boxPadding: 4, usePointStyle: true, pointStyle: "circle", titleFont: font(t, 600), bodyFont: font(t) },
+        legend: { display: n > 1, position: "bottom", align: "start", labels: { color: t.axis, boxWidth: 7 * s, boxHeight: 7 * s, usePointStyle: true, pointStyle: "circle", padding: 16 * s, font: font(t), sort: function (a, b) { return ((a.datasetIndex || 0) - (b.datasetIndex || 0)) || ((a.index || 0) - (b.index || 0)); } } },
+        tooltip: { backgroundColor: t.tipBg, titleColor: t.tipFg, bodyColor: t.tipFg, padding: 10 * s, cornerRadius: 6 * s, boxWidth: 6 * s, boxHeight: 6 * s, boxPadding: 4 * s, usePointStyle: true, pointStyle: "circle", titleFont: font(t, 600), bodyFont: font(t) },
       },
       scales: {
-        x: { grid: { display: false }, border: { color: t.grid }, ticks: { color: t.axis, font: font(t), maxRotation: 0, autoSkip: true, autoSkipPadding: 12 } },
-        y: { beginAtZero: true, grid: { color: t.grid, drawTicks: false }, border: { display: false }, ticks: { color: t.axis, font: font(t), padding: 8, maxTicksLimit: 5 } },
+        x: { grid: { display: false }, border: { color: t.grid }, ticks: { color: t.axis, font: font(t), maxRotation: 0, autoSkip: true, autoSkipPadding: 12 * s } },
+        y: { beginAtZero: true, grid: { color: t.grid, drawTicks: false }, border: { display: false }, ticks: { color: t.axis, font: font(t), padding: 8 * s, maxTicksLimit: 5 } },
       },
     };
   }
@@ -175,11 +183,12 @@
       return { type: "bar", _ds: { kind: "mixed" }, data: { labels: spec.labels, datasets: bars.concat(lines) }, options: {} };
     },
   };
-  /* 도넛 가운데 글자 — CSS .donut::after 와 같은 Title/1 16/600(사람의 결정 2026-11-04) */
+  /* 도넛 가운데 글자 — CSS .donut::after 와 같은 Title/1 16/600(사람의 결정 2026-11-04). 크기는 화면 폭 단계를 따른다 */
+  var CENTER_FONT = { weight: 600, size: 16 };
   var centerPlugin = { id: "dsCenter", afterDraw: function (chart) {
     var ds = chart.$ds; if (!ds || !ds.center) return;
     var area = chart.chartArea, ctx = chart.ctx;
-    ctx.save(); ctx.font = "600 16px " + chart.options.plugins.tooltip.bodyFont.family; ctx.fillStyle = ds.text || "#000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.save(); ctx.font = CENTER_FONT.weight + " " + CENTER_FONT.size * rootScale() + "px " + chart.options.plugins.tooltip.bodyFont.family; ctx.fillStyle = ds.text || "#000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(String(ds.center), (area.left + area.right) / 2, (area.top + area.bottom) / 2); ctx.restore();
   } };
 
@@ -210,6 +219,9 @@
     var repaintAll = function () { mounted.forEach(function (h) { h.repaint(); }); };
     if (root.MutationObserver) new MutationObserver(repaintAll).observe(doc.documentElement, { attributes: true, attributeFilter: ["data-theme", "style", "class"] });
     if (root.matchMedia) { var mq = root.matchMedia("(prefers-color-scheme: dark)"); (mq.addEventListener ? mq.addEventListener("change", repaintAll) : mq.addListener(repaintAll)); }
+    /* 화면 폭 단계가 바뀌면(창 크기 변경으로 루트 글꼴 크기가 달라지면) 다시 칠한다 — 캔버스 크기 변경만으로는 글자 크기를 다시 정하지 않는다 */
+    var lastScale = rootScale();
+    root.addEventListener("resize", function () { var s = rootScale(); if (s !== lastScale) { lastScale = s; repaintAll(); } });
   }
   function auto(Chart, scope) {
     Chart = Chart || root.Chart; scope = scope || doc;

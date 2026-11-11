@@ -1,4 +1,5 @@
-import { forwardRef, type SVGAttributes } from "react";
+import { forwardRef, useEffect, type SVGAttributes } from "react";
+import { checkRootFontSize } from "../theme";
 import { ICONS, type IconName } from "./icons.data";
 
 export interface IconProps extends Omit<SVGAttributes<SVGSVGElement>, "name" | "children"> {
@@ -18,6 +19,8 @@ export interface IconProps extends Omit<SVGAttributes<SVGSVGElement>, "name" | "
  */
 export const Icon = forwardRef<SVGSVGElement, IconProps>(function Icon({ name, size = 18, filled, label, ...rest }, ref) {
   const ic = ICONS[name];
+  /* 루트 글꼴 크기 점검(개발 모드에서 한 번) — 아이콘은 거의 모든 컴포넌트가 그리므로 여기서 본다 */
+  useEffect(() => { checkRootFontSize(); }, []);
   const useFilled = Boolean(filled && ic.f);
   const shape = useFilled
     ? { fill: "currentColor" }

@@ -2238,6 +2238,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await require("./behave.polish.js")({ b, ok, SITE, path });
   await require("./behave.later.js")({ b, ok, SITE, path });
   await require("./behave.expand.js")({ b, ok, SITE, path });
+  await require("./behave.scale.js")({ b, ok, SITE, path });   // 글자 크기 체계 — 화면 폭 단계(2026-11-11)
   /* 모션 · 한 시스템 · 패턴 정렬 — taste-skill 규칙을 콘솔에 맞게 옮긴 것(2026-11-05) */
   await require("./behave.system.js")({ b, ok, SITE, path });
 

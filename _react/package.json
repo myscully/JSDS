@@ -27,7 +27,8 @@
     },
     "./style.css": "./dist/style.css",
     "./fonts/*": "./dist/fonts/*",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./scale.css": "./dist/scale.css"
   },
   "scripts": {
     "gen": "node scripts/gen-icons.mjs && node scripts/sync-css.mjs && node scripts/sync-chart.mjs",

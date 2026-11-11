@@ -801,7 +801,7 @@ function chartExpect() {
     if (!fc || !fc.types || !fc.series || !fc.tones || !fc.tooltip) throw new Error("components.data.js data-visual.figma.chart 를 읽지 못했습니다");
     const js = read("_build/ds-chart.src.js");
     const num = (re, what) => { const m = re.exec(js); if (!m) throw new Error("ds-chart.src.js 에서 " + what + " 를 읽지 못했습니다"); return +m[1]; };
-    const alpha = num(/alpha\(c,\s*([\d.]+)\)/, "영역 알파"), fontSize = num(/font:\s*\{[^}]*size:\s*(\d+)/, "글자 크기");
+    const alpha = num(/alpha\(c,\s*([\d.]+)\)/, "영역 알파"), fontSize = num(/font:\s*\{[^}]*size:\s*(?:Math\.max\(FONT_MIN,\s*)?(\d+)/, "글자 크기");   // 2026-11-11 화면 폭 단계 — 기준 화면의 12 를 루트 비율로 곱한다(최소 FONT_MIN)
     /* 툴팁 · 범례 견본 — 둘 다 usePointStyle + pointStyle "circle"(figma.chart.legend). Chart.js 4.6.1 이 그리는 원의 지름(node_modules/chart.js 의 소스에서 확인, 2026-11-05 k35):
        범례 = boxHeight × √2(legend 의 drawLegendBox: radius = boxHeight · SQRT2 / 2) — 7 이면 9.9, 툴팁 = min(boxWidth, boxHeight)(tooltip 의 drawColorBox: radius = min / 2) — 6 이면 6.
        Figma 는 정수 px 로 그리므로 범례는 ±0.5 로 본다(정적 .chart-legend i 10 과 같은 원) */
@@ -1289,7 +1289,7 @@ function componentsExpect() {
     /* 도넛 가운데 합계(2026-11-05 k34 — 사람의 결정 2026-11-04: Title/1 로 묶는다). .donut::after 의 font-size · line-height · font-weight 와 셋이 같은 타입 스케일 스타일 하나.
        탐색형 도넛(ds-chart centerPlugin 의 ctx.font "굵기 크기px")도 같은 값이어야 한다 — 다르면 기대값을 읽다 멈춘다 */
     donutCenter: (() => { try { const r = cssRule(".donut::after"), size = parseFloat(r["font-size"]), lh = parseFloat(r["line-height"]), weight = parseInt(r["font-weight"], 10);
-      const m = /ctx\.font\s*=\s*"(\d+) (\d+)px/.exec(read("_build/ds-chart.src.js")); if (!m) throw new Error("ds-chart.src.js centerPlugin 의 ctx.font 를 읽지 못했습니다");
+      const m = /CENTER_FONT\s*=\s*\{\s*weight:\s*(\d+),\s*size:\s*(\d+)\s*\}/.exec(read("_build/ds-chart.src.js")); if (!m) throw new Error("ds-chart.src.js 의 CENTER_FONT 를 읽지 못했습니다");   // 2026-11-11 — 가운데 글자는 화면 폭 단계를 따르려고 상수로 옮겼다
       if (+m[1] !== weight || +m[2] !== size) throw new Error(`ds-chart centerPlugin ${m[1]} ${m[2]}px ≠ .donut::after ${weight} ${size}px`);
       const hits = Object.entries(typeScale()).filter(([, d]) => d.size === size && d.lineHeight === lh && d.weight === weight).map(([n]) => n);
       if (hits.length !== 1) throw new Error(`.donut::after ${size}/${lh}/${weight} 에 맞는 타입 스케일 스타일이 ${hits.length}개입니다 — ${hits.join(" · ")}`);
