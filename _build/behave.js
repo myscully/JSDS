@@ -871,11 +871,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
          라벨은 다섯 등급 모두 중립 글자색이고(기준 시스템의 Chip 패턴), 색은 점과 틴트가 나른다.
          dot = ::before 의 실제 배경색이다 — 토큰이 아니라 렌더된 색을 본다 */
       const DOT = { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary",
-        medium: "--foreground-accent-lime", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary", pending: "--foreground-accent-cyan" }[l];
+        medium: "--foreground-accent-light-blue", low: "--foreground-accent-lime", info: "--foreground-inactive-primary", pending: "--foreground-accent-cyan" }[l];
       const TINT = { critical: "--surface-negative-primary", high: "--surface-cautionary-primary",
-        medium: "--surface-accent-lime", low: "--surface-accent-light-blue", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
+        medium: "--surface-accent-light-blue", low: "--surface-accent-lime", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
       const SOLID = { critical: "--surface-negative-strong", high: "--surface-cautionary-primary",
-        medium: "--surface-accent-lime", low: "--surface-accent-light-blue", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
+        medium: "--surface-accent-light-blue", low: "--surface-accent-lime", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
       out.tok[l] = { dot: res("var(" + DOT + ")"), tint: res("var(" + TINT + ")"), surface: res("var(" + SOLID + ")"),
         label: res("var(--foreground-neutral-primary)") };
     }
@@ -901,7 +901,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         t.v[l].subtle.dot === t.tok[l].dot && t.v[l].subtle.fg === t.tok[l].label,
         `dot ${t.v[l].subtle.dot} / ${t.tok[l].dot} · label ${t.v[l].subtle.fg}`);
     }
-    /* 다섯 등급은 색조로만 갈린다(빨강·주황·라임·라이트 블루·중립) — 휘도 분리는 요구하지 않는다.
+    /* 다섯 등급은 색조로만 갈린다(빨강·주황·라이트 블루·라임·중립 — 2026-11-11 Medium ↔ Low 교체) — 휘도 분리는 요구하지 않는다.
        그래서 "서로 다른 색인가" 와 "색 말고 다른 단서가 있는가" 를 묻는다.
        라벨 병기는 verify 가 검사하고, 여기서는 점·틴트가 등급마다 다른지를 본다 */
     {
@@ -915,7 +915,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   }
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
   await page.waitForTimeout(200);
-  /* 상태와 심각도는 클래스를 나눠 쓰지 않는다(2026-11-06) — '검토 대기'는 pending(청록), 심각도 Medium 은 라임.
+  /* 상태와 심각도는 클래스를 나눠 쓰지 않는다(2026-11-06) — '검토 대기'는 pending(청록), 심각도 Medium 은 라이트 블루(2026-11-11 — 그 전엔 라임).
      로그 레벨은 심각도라 INFO 는 info(중립) · LOW 는 low · WARN 은 medium 이다 */
   const pend = await page.evaluate(() => { const t = [...document.querySelectorAll("#ex-tag-status .tag")].find((e) => e.textContent.trim() === "검토 대기");
     return t ? { cls: t.className, dot: getComputedStyle(t, "::before").backgroundColor, cyan: (() => { const d = document.createElement("i"); d.style.color = "var(--foreground-accent-cyan)"; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; })() } : null; });
@@ -1684,7 +1684,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
 
   /* 심각도 5단계(사람의 결정 2026-11-06) — 정적 지표(막대 · 범례 · 밴드 · 행 막대) · 정적 도넛 조각 · 탐색형 차트 톤이 전부 같은 토큰을 집는지.
      차트 색 단정은 DSChart.TONES 와 대조하므로 TONES 자체가 틀리면 함께 틀린다 — 여기서는 기대 토큰을 직접 적어 둘 다 잰다 */
-  const SEV_TOK = { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary", medium: "--foreground-accent-lime", low: "--foreground-accent-light-blue", info: "--foreground-inactive-primary" };
+  const SEV_TOK = { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary", medium: "--foreground-accent-light-blue", low: "--foreground-accent-lime", info: "--foreground-inactive-primary" };
   for (const theme of ["light", "dark"]) {
     await page.evaluate((t) => { t === "dark" ? document.documentElement.setAttribute("data-theme", "dark") : document.documentElement.removeAttribute("data-theme"); }, theme);
     await page.waitForTimeout(200);

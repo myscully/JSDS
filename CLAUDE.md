@@ -374,6 +374,13 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 덤으로 고친 문서: 대시보드 원칙 '밀도' 의 '카드 gap 20' 은 실제 16 이었다(kpi-grid · row-3 · stack 모두 1rem). Data Visual Spec Container 에 KPI 패딩 · 칸 최소를 적었다.
 - Figma 미반영 165 → 166건(Spec 문구 1). Figma 의 KPI 카드 패딩 24 는 audit 대조 밖이라 수에 없다 — 일괄 반영 때 대시보드 · 예제 KPI 패딩을 20 으로.
 
+2026-11-11 심각도 Medium ↔ Low 색 교체(사람의 결정) — Medium = `--foreground-accent-light-blue`, Low = `--foreground-accent-lime`(태그 틴트 · solid 테두리 · 점 · 막대 · 범례 · 밴드 · 행 막대 · 정적 도넛 · ds-chart TONES · React Donut 같이). 게이트 수는 그대로.
+- **근거(실측):** 도넛 · 누적 막대에서 맞붙는 이웃 등급의 최소 CIEDE2000 이 라이트 0.3 → 10.6 · 다크 4.3 → 11.5 — 옛 배치에서는 High 주황과 Medium 라임이 적록 색각(protan)에서 같은 색이었다. 라이트 Medium 지표가 3:1 을 넘는다(2.90 → 3.68).
+  주황 ↔ 라임 쌍 자체(이제 High ↔ Low)는 그대로라 라벨 병기 규칙이 계속 대신 갈라 준다. 잃은 것: 빨강 → 주황 → 라임 → 파랑 의 따뜻한 → 차가운 순서.
+- **초록은 쓰지 않았다(사람의 결정)** — 시스템에 초록 강조색이 없어 '정상 · 성공' 의 positive 초록을 그대로 쓰게 되고(Low 이벤트가 정상으로 읽힘), 라이트 대비 2.46 으로 라임 2.90 보다 낮으며 색각 분리 이득이 없었다.
+- `lime-40`(11-09 DEVIATIONS)은 값 그대로 Low 로 옮겼다. `contrast.pairs` 의 3:1 예외(REF)가 Medium 지표에서 Low 지표로 옮겨 advisory 수는 같다. `severityRanks` 순서도 바꿨다.
+- 음성 시험: 사이트 범례 Medium 하나를 되돌리면 behave 1140/1142(라이트 · 다크), React Donut 토큰 하나를 되돌리면 data.test 1건 실패.
+- Figma 미반영 166 → 213건 — 심각도 견본 · 도넛 호 · 차트 · 분포 밴드가 옛 배치(Figma 는 Medium 이 아직 11-06 의 lime-opaque).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
@@ -384,7 +391,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
   여섯 그룹 **79개**(참조 75 + 더한 4) + 트리 밖 15개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 탐색형 차트 `--chart-*` 12) = **94**.
 - **차트 토큰** `--chart-series-1~6`(순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
-  CSS 가 아니라 `ds-chart.js` 가 계산값으로 읽어 캔버스에 칠합니다(소비자 0 허용 목록 `grammarOnly`). 심각도 계열은 negative-strong · cautionary · accent-lime · accent-light-blue · inactive 토큰 그대로(5단계).
+  CSS 가 아니라 `ds-chart.js` 가 계산값으로 읽어 캔버스에 칠합니다(소비자 0 허용 목록 `grammarOnly`). 심각도 계열은 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 그대로(5단계 — Medium 라이트 블루 · Low 라임, 2026-11-11 교체).
 - **제품 색**은 `--prod-40~60` 다섯 단계로 주입되고 `brand` 계열이 따라옵니다.
   **제품 색 위의 흰 글자가 4.5 를 넘어야 하고 빌드가 검사합니다**(`verify.js`).
 - 비활성은 `--surface-disable-primary` · `--foreground-disable-primary` 로 칠합니다. `opacity` 로

@@ -36,7 +36,7 @@ const REF_ACCENT = REF("기준 시스템 값 — 장식 강조색이라 라이�
 /* [전경, 바탕들, 최소 대비, 메모, 옵션] */
 const pairs = [
   ["--foreground-neutral-primary", [...SURFACES, "--surface-neutral-strong"], 4.5, "본문 · 태그 라벨"],
-  /* 태그 라벨은 중립 글자다 — 심각도 Medium(라임) · Low(라이트 블루) 틴트와 상태 pending(청록) 틴트 위(2026-11-06 5단계) */
+  /* 태그 라벨은 중립 글자다 — 심각도 Medium(라이트 블루) · Low(라임, 2026-11-11 교체) 틴트와 상태 pending(청록) 틴트 위(2026-11-06 5단계) */
   ["--foreground-neutral-primary", ["--surface-accent-lime", "--surface-accent-light-blue", "--surface-accent-cyan"], 4.5, "태그 라벨 — Medium · Low · Pending 틴트"],
   ["--foreground-neutral-strong", SURFACES, 4.5, "가장 높은 대비가 필요할 때"],
   ["--foreground-neutral-secondary", [...SURFACES, "--surface-neutral-strong"], 4.5, "보조 본문 · 중립 칩 라벨"],
@@ -89,8 +89,8 @@ const pairs = [
   /* 심각도 5단계(사람의 결정 2026-11-06), Critical · Medium 톤(2026-11-09) — Critical 은 진한 빨강 negative-strong, Medium 은 foreground/accent/lime(라이트 lime-40).
      Medium 라이트는 3:1 을 못 넘는다 — High 주황(2.24)과 같은 처지이고, 등급 라벨 병기가 제약이라(verify) 색이 유일한 단서가 아니다 */
   ["--foreground-negative-strong", SURFACES, 3, "Critical 지표"],
-  ["--foreground-accent-lime", SURFACES, 3, "Medium 지표", REF("사람의 결정(2026-11-09) — 라이트 lime-40 이 흰 바탕 2.90 · 회색 바탕 2.70, 다크 lime-50 은 통과")],
-  ["--foreground-accent-light-blue", SURFACES, 3, "Low 지표"],
+  ["--foreground-accent-light-blue", SURFACES, 3, "Medium 지표"],   // 2026-11-11 Medium ↔ Low 색 교체(사람의 결정) — 라이트 3.68 · 회색 3.43 로 통과
+  ["--foreground-accent-lime", SURFACES, 3, "Low 지표", REF("사람의 결정(2026-11-09 톤 · 2026-11-11 Low 로 옮김) — 라이트 lime-40 이 흰 바탕 2.90 · 회색 바탕 2.70, 다크 lime-50 은 통과")],
   ["--foreground-inactive-primary", SURFACES, 3, "Info 지표 · 비활성 점", REF("기준 시스템 값 — 라이트 2.78 · 다크 2.55")],
   ["--foreground-accent-cyan", SURFACES, 3, "Pending 상태 점(태그) · info 알림 아이콘"],
   ["--foreground-positive-primary", SURFACES, 3, "긍정 지표", REF("기준 시스템 값 — 라이트 2.46")],
@@ -134,7 +134,9 @@ const separation = [
 ];
 
 /* 심각도 다섯 등급은 서로 다른 값이어야 한다. 휘도 분리는 요구하지 않는다 —
-   다섯 색의 색조가 모두 다르고(빨강·주황·라임·라이트 블루·중립, 2026-11-06) 대비 비율은 색조 차이를 보지 못한다.
+   다섯 색의 색조가 모두 다르고(빨강·주황·라이트 블루·라임·중립 — 2026-11-11 Medium ↔ Low 교체) 대비 비율은 색조 차이를 보지 못한다.
+   2026-11-11 교체(사람의 결정)의 근거 — 이웃 등급(도넛 · 누적 막대에서 맞붙는 쌍)의 최소 CIEDE2000 이 라이트 0.3 → 10.6 · 다크 4.3 → 11.5(tritan Medium 파랑 ↔ Low 라임).
+   주황 ↔ 라임 쌍 자체는 그대로라(High ↔ Low, 라이트 protan 0.3) 아래 실측과 라벨 병기 규칙은 여전히 유효하다. 라이트 Medium 지표는 3:1 을 넘게 됐다(2.90 → 3.68).
    색각 분리 실측(dataviz validate_palette.js --pairs all, 2026-11-09 Critical = negative-strong · Medium = accent-lime 기준): Medium 라임 ↔ High 주황이 적록 색각에서
    라이트 ΔE 0.3(protan, #48AD00 ↔ #FF9200) · 다크 4.4(protan, #58CF04 ↔ #FFA938) — 라이트는 사실상 같은 색으로 보인다(목표 8 · 하한 6).
    (2026-11-06 의 lime-opaque 때는 라이트 2.2 · 다크 0.3)
@@ -143,7 +145,7 @@ const separation = [
    색만으로 의미를 전달하지 않는다(1.4.1)는 라벨 병기와 구분선이 담당하고 verify 가 그것을 검사한다 */
 const severityRanks = [
   "--foreground-negative-strong", "--foreground-cautionary-primary",
-  "--foreground-accent-lime", "--foreground-accent-light-blue", "--foreground-inactive-primary",
+  "--foreground-accent-light-blue", "--foreground-accent-lime", "--foreground-inactive-primary",
 ];
 
 /* 소비자가 없어도 허용하는 토큰 — 기준 시스템과 1:1 이 목적이므로, 우리 화면이 아직 안 쓰는 것이 남는다.
@@ -154,7 +156,7 @@ const grammarOnly = [
   "--surface-neutral-primary", "--surface-elevated-secondary",
   "--surface-brand-heavy",
   ...ACCENTS.flatMap((c) => [`--surface-accent-${c}-opaque`, `--line-accent-${c}`, `--foreground-accent-${c}`])
-    /* 심각도가 쓰는 것은 뺀다 — cyan(Pending · info 알림), lime(Medium: 면 · 점 foreground-accent-lime · solid 테두리), light-blue(Low: 면 · 점 · 테두리) */
+    /* 심각도가 쓰는 것은 뺀다 — cyan(Pending · info 알림), light-blue(Medium: 면 · 점 · solid 테두리), lime(Low: 면 · 점 foreground-accent-lime · 테두리 — 2026-11-11 교체) */
     .filter((t) => !/cyan$/.test(t) || /opaque|line/.test(t))
     .filter((t) => !["--foreground-accent-lime", "--line-accent-lime", "--line-accent-cyan", "--foreground-accent-light-blue", "--line-accent-light-blue"].includes(t)),
   ...ACCENTS.filter((c) => !["cyan", "lime", "light-blue"].includes(c)).map((c) => `--surface-accent-${c}`),

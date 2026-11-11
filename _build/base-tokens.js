@@ -161,7 +161,7 @@ const DEVIATIONS = {
     "foreground-neutral-strong": ["var(--static-black)", "var(--cool-neutral-20)",
       "순수 검정 대신 중립 램프의 끝 — 램프 밖의 값을 글자로 쓰지 않는다(흰 바탕 14.35)"],
     "foreground-accent-lime": ["var(--lime-37)", "var(--lime-40)",
-      "사람의 결정(2026-11-09) — 심각도 Medium 점 · 지표가 이 토큰이 되면서 한 단계 밝은 lime-40 으로. 흰 바탕 3.43 → 2.90(3:1 미달은 contrast.pairs 에 선언). line-accent-lime(lime-37 43%)은 그대로"],
+      "사람의 결정(2026-11-09) — 심각도 Medium 점 · 지표가 이 토큰이 되면서 한 단계 밝은 lime-40 으로. 흰 바탕 3.43 → 2.90(3:1 미달은 contrast.pairs 에 선언). line-accent-lime(lime-37 43%)은 그대로. 2026-11-11 Medium ↔ Low 색 교체로 이 토큰은 Low 가 됐고 값은 그대로 둔다"],
   },
   dark: {
     "surface-accent-lime": ["color-mix(in srgb,var(--lime-60) 8%,transparent)", "color-mix(in srgb,var(--lime-60) 12%,transparent)",
