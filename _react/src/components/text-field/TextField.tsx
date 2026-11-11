@@ -133,11 +133,13 @@ export interface TextFieldProps extends FieldOwnProps, InputBase {
   wrapperProps?: Omit<HTMLAttributes<HTMLDivElement>, "className" | "style" | "children"> & { ref?: Ref<HTMLDivElement> };
   /** 래퍼 안 도움말 뒤에 둘 것(팝오버) */
   after?: ReactNode;
+  /** 입력(.affix)을 감싸 옆에 다른 컨트롤을 둔다 — Slider + 숫자 입력의 .slider-control */
+  wrapControl?: (control: ReactNode) => ReactNode;
 }
 
 /** 한 줄 텍스트 입력 */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, required, help, error, size, prefix, suffix, showCount, wrapperStyle, wrapperClassName, trailing, wrapperProps, after, id: idProp, className, maxLength, value, defaultValue, onChange, mono, reveal, revealLabel = "비밀번호 표시", messages, ...rest },
+  { label, required, help, error, size, prefix, suffix, showCount, wrapperStyle, wrapperClassName, trailing, wrapperProps, after, wrapControl, id: idProp, className, maxLength, value, defaultValue, onChange, mono, reveal, revealLabel = "비밀번호 표시", messages, ...rest },
   ref,
 ) {
   const id = useId(idProp);
@@ -165,7 +167,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
   );
   return (
     <Field {...wrapperProps} label={label} required={required} help={help} error={c.error} size={size} counter={c.counter} counterOver={c.over} live={c.live} htmlFor={id} helpId={c.helpId} style={wrapperStyle} className={cx(mono && "mono", wrapperClassName)} after={after}>
-      {prefix !== undefined || suffix !== undefined || trailing !== undefined || reveal ? (
+      {(wrapControl ?? ((x: ReactNode) => x))(prefix !== undefined || suffix !== undefined || trailing !== undefined || reveal ? (
         <div className="affix">
           {prefix !== undefined && <span>{prefix}</span>}
           {input}
@@ -175,7 +177,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
         </div>
       ) : (
         input
-      )}
+      ))}
     </Field>
   );
 });

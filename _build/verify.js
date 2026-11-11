@@ -85,10 +85,11 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   const src = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "));
   const lineOf = (i) => src.slice(0, i).split("\n").length;
   const LOOPS = ["spin .8s linear infinite", "shimmer 1.4s infinite", "pulse 1.6s infinite"];
+  const DELAY = "ds-delay 0s var(--ds-delay,1s) both";   // Loading 지연 표시(2026-11-11) — 반복이 아니라 한 번 보이게 할 뿐이고 상태 표시 루프와 함께만 쓴다
   for (const m of src.matchAll(/(?<![-\w])(transition|animation):([^;}]*)/g)) {
     const [, prop, val] = m; const v = val.trim(), at = `style.src.css:${lineOf(m.index)}`;
     if (v === "none!important") continue;
-    if (prop === "animation") { if (!LOOPS.includes(v.replace(/!important$/, "")) && !/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
+    if (prop === "animation") { if (!v.replace(/!important$/, "").split(/,(?![^(]*\))/).every((p) => LOOPS.includes(p) || p === DELAY) && !/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
     for (const part of v.split(/,(?![^(]*\))/).map((x) => x.trim())) {
       if (!/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(part)) fails.push(`${at}: transition "${part}" — 속성 하나 + var(--motion-*) 하나만(숫자 · 이징을 덧붙이면 무효가 되거나 토큰을 벗어난다)`);
     }
@@ -189,7 +190,21 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
           if (/step="any"/.test(b)) fails.push(`${f}: Number Input 에 step=any — 증감 버튼이 움직이지 못합니다`);
           if (/min="/.test(b) && !/<span class="help"[^>]*>[^<]+<\/span>/.test(b)) fails.push(`${f}: Number Input 범위를 도움말에(Number Input › 범위 안내)`);
           for (const [cls, word] of [["down", "줄이기"], ["up", "늘리기"]]) if (!b.includes(`class="num-btn ${cls}" tabindex="-1" aria-label="${name} ${word}"`)) fails.push(`${f}: Number Input ${word} 버튼 — tabindex=-1 · 이름에 값의 이름(Number Input › 키보드)`);
+          /* Slider + 숫자 입력(2026-11-11) — 라벨은 숫자 입력칸(제출하는 값)에, 트랙은 aria-labelledby 로 같은 라벨. 입력칸 범위 = 트랙 범위 */
+          if (/slider-field/.test(m[0])) {
+            const lab = /<label\b[^>]*\bid="([^"]+)"[^>]*\bfor="([^"]+)"/.exec(b), rg = /<input\b[^>]*type="range"[^>]*>/.exec(b), num = /<input\b[^>]*type="number"[^>]*>/.exec(b);
+            const at = (t, k) => ((new RegExp(`\\b${k}="([^"]*)"`).exec(t || "") || [])[1]);
+            if (!lab || !rg || !num || at(num[0], "id") !== lab[2] || at(rg[0], "aria-labelledby") !== lab[1]) fails.push(`${f}: Slider + 숫자 입력 — label[id][for=숫자 입력칸] · 트랙 aria-labelledby=라벨(Slider › 숫자 입력을 함께 둘 때)`);
+            else if (["min", "max", "step"].some((k) => at(rg[0], k) !== at(num[0], k))) fails.push(`${f}: Slider + 숫자 입력 — 트랙과 입력칸의 min · max · step 이 다르다`);
+            if (/class="val"/.test(b)) fails.push(`${f}: Slider + 숫자 입력에 .val — 현재 값은 입력칸이 보인다`);
+            if (/<input\b[^>]*type="range"[^>]*\bname="/.test(b)) fails.push(`${f}: Slider + 숫자 입력 — 제출하는 값은 숫자 입력칸(트랙에 name 금지)`);
+          }
         }
+      }
+      /* Loading 지연(2026-11-11) — Spinner · Skeleton 에만. 버튼 loading · Switch 처리 중은 누른 반응이라 바로 보인다 */
+      for (const m of pv.matchAll(/<[a-z]+\b[^>]*\bdata-delay\b[^>]*>/g)) {
+        const cls = (/\bclass="([^"]*)"/.exec(m[0]) || [])[1] || "";
+        if (!/(^|\s)(spinner|spinner-wrap|skeleton|skeleton-row)(\s|$)/.test(cls)) fails.push(`${f}: data-delay 는 Spinner · Skeleton 에만(Loading › 1초 미만) ${m[0].slice(0, 70)}`);
       }
       /* Code · Copy Field 원칙(2026-11-10) */
       {
@@ -456,7 +471,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
   /* --float-*: 스크롤 영역 안 메뉴의 자리 · 폭 — ds.js · React 가 열 때 재서 넣는다(2026-11-10) */
   /* --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
   /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow"];
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay"];
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);

@@ -428,3 +428,11 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **Tooltip `describe`** — 새 prop 입니다. 기본 `true` 는 전과 같습니다.
 - **ChartCanvas** — 바깥 요소가 `.chart-canvas` 에서 `.chart-view` 로 바뀌었고 그 안에 표로 보기 버튼이 있습니다. `className` · `style` · `height` 는 그대로 `.chart-canvas` 로 갑니다. 버튼을 포함해 차트가 40 높아집니다. 문구는 `labels` 입니다(빈 칸의 숨긴 문구 `empty` 포함). `DSChart.tableData` 는 빈 칸을 `null` 로 돌려줍니다.
 - **사이트 마크업** — 탐색형 차트는 `.chart-view > .chart-tools > button[data-chart-table]` 과 `.chart-canvas` 를 함께 씁니다. CSS 와 `ds-chart.js` 를 함께 올려 주세요.
+
+## Loading 지연 · Slider 숫자 입력 (2026-11-11)
+
+- **Spinner · Skeleton · SkeletonRow `delay`** — 새 prop 입니다(true 는 1초, 숫자는 ms). 주지 않으면 전과 같습니다. 끝까지 보일지를 정하려면 `useLoadingDelay(loading, { delay, minDuration })` 를 씁니다(기본 1000 · 500). 그 값으로 그리는 Spinner 에는 `delay` 를 주지 않습니다.
+- **Slider `withInput` · `unit` · `help` · `error` · `messages`** — 새 prop 입니다. `withInput` 이면 바깥이 `.field.number-field.slider-field` 이고 `name` 과 나머지 속성은 숫자 입력칸으로 갑니다. `ref` 는 그대로 트랙(range)입니다. `onChange` 는 입력칸에 친 수(범위 밖 포함)마다 불리고 빈 칸에는 불리지 않습니다.
+- **TextField `wrapControl`** — 새 prop 입니다. 입력(.affix)을 감싸 옆에 다른 컨트롤을 둡니다.
+- **줄인 모션** — 패키지 CSS 의 base 가 사이트와 같아졌습니다. 전에는 패키지에서 Spinner · 버튼 loading · Switch 처리 중이 줄인 모션에서 멈췄습니다(2026-11-10 결정이 패키지에 빠져 있었음).
+- **`.field input` 규칙** — range 입력을 빼도록 바뀌었습니다(`:not([type=range])`, 명시도는 그대로). 제품 CSS 가 이 선택자 문자열에 기대고 있으면 확인하세요.

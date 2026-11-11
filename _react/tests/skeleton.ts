@@ -1,7 +1,7 @@
 /* 사이트 HTML 예제 ↔ React 렌더 결과를 "구조 스켈레톤"으로 비교하기 위한 유틸.
    비교 대상: 태그 이름 · 정렬된 클래스 · 상태 속성(role, aria-*, disabled, checked, open, type).
    무시: id · style · for · aria-describedby/labelledby/controls · href · 텍스트 · svg 내부 */
-const STATE_ATTRS = ["role", "aria-selected", "aria-pressed", "aria-checked", "aria-busy", "aria-current", "aria-invalid", "aria-sort", "aria-expanded", "aria-disabled", "aria-modal", "aria-orientation", "aria-live", "data-time"];
+const STATE_ATTRS = ["role", "aria-selected", "aria-pressed", "aria-checked", "aria-busy", "aria-current", "aria-invalid", "aria-sort", "aria-expanded", "aria-disabled", "aria-modal", "aria-orientation", "aria-live", "data-time", "data-delay"];
 
 function attrs(el: Element): string {
   const out: string[] = [];

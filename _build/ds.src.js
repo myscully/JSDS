@@ -169,6 +169,15 @@
     input.style.setProperty("--p", p + "%");
     var wrap = closest(input, ".slider"), val = wrap && $(".val", wrap);
     if (val && !input.disabled) { var unit = val.dataset.unit || (val.textContent.match(/[^\d,.\s]+$/) || [""])[0]; val.dataset.unit = unit; val.textContent = v + unit; if (unit) input.setAttribute("aria-valuetext", v + unit); }
+    var sf = closest(input, ".slider-field"), su = sf && $(".affix > span", sf); if (su) input.setAttribute("aria-valuetext", v + su.textContent);
+  }
+  /* Slider + 숫자 입력 — 두 칸이 값 하나를 나눠 쓴다(사람의 결정 2026-11-11). 트랙을 움직이면 입력칸이 바로 따라가고(input · change 를 낸다),
+     입력칸에 수를 치면 트랙이 따라간다 — 범위 밖이면 가까운 끝(브라우저가 range 를 범위 · step 에 맞춘다). 입력칸의 글자는 고치지 않고 오류는 Number Input 의 규칙대로 */
+  function sliderPair(t, kind) {
+    var f = closest(t, ".slider-field"); if (!f) return;
+    var r = $(".slider input[type=range]", f), n = $(".affix input[type=number]", f); if (!r || !n) return;
+    if (t === r) { n.value = r.value; n.dispatchEvent(new Event(kind, { bubbles: true })); }
+    else if (kind === "input" && n.value !== "" && !n.validity.badInput) { r.value = n.value; syncSlider(r); }
   }
 
   /* ---------- Date Picker · Calendar ----------
@@ -1285,6 +1294,7 @@
   doc.addEventListener("input", function (e) {
     var t = e.target; if (!(t instanceof Element)) return;
     if (t.matches(".slider input[type=range]")) { syncSlider(t); fire(t, "ds:slide", { value: Number(t.value) }); }
+    if (t.matches(".slider-field input")) sliderPair(t, "input");
     if (t.matches(".datepicker .affix input") && !e.isComposing) dpInput(t, e);
     if (t.matches(".cal-time input") && !e.isComposing) clockInput(t, e);
     if (t.matches(".field input[maxlength], .field textarea[maxlength]")) syncCounter(t);
@@ -1490,6 +1500,7 @@
   ["dragenter", "dragover"].forEach(function (n) { doc.addEventListener(n, function (e) { var h = upZone(e); if (h) { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; h.classList.add("dragging"); } }); });
   doc.addEventListener("dragleave", function (e) { var h = upZone(e); if (h && !$(".upload-zone", h).contains(e.relatedTarget)) h.classList.remove("dragging"); });
   doc.addEventListener("drop", function (e) { var h = upZone(e); if (h) { e.preventDefault(); h.classList.remove("dragging"); upAdd(h, [].slice.call(e.dataTransfer.files)); } });
+  doc.addEventListener("change", function (e) { var t = e.target; if (t.matches && t.matches(".slider-field input[type=range]")) sliderPair(t, "change"); });
   doc.addEventListener("change", function (e) { var t = e.target; if (t.matches && t.matches(".upload input[type=file]")) { var list = [].slice.call(t.files); t.value = ""; upAdd(closest(t, ".upload"), list); } });
   doc.addEventListener("click", function (e) {
     var t = e.target; if (!(t instanceof Element) || t.matches("input[type=file]")) return;
@@ -1504,5 +1515,24 @@
     } else if (z && !z.parentNode.classList.contains("disabled")) $("input[type=file]", z).click();
   });
 
-  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, version: "0.5" };
+  /* ---------- Loading 지연 — 보일지를 정한다(사람의 결정 2026-11-11) ----------
+     start 뒤 delay(기본 1000ms) 안에 stop 하면 끝내 보이지 않고, 한 번 보이면 min(기본 500ms)을 채운 뒤 숨긴다 — 1.1초에 끝나는 동작이 0.1초 번쩍이지 않게.
+     el.hidden 을 쓴다. 이 도우미를 쓰는 요소에는 data-delay 를 달지 않는다(보일 때 CSS 지연이 한 번 더 걸린다) */
+  var LOAD = { delay: 1000, min: 500 };
+  function loadStart(el, o) {
+    o = o || {}; var st = el._dsLoad || (el._dsLoad = {}); clearTimeout(st.t); st.min = o.min != null ? o.min : LOAD.min;
+    if (st.shown) return;   // 이미 보이면 그대로 — 숨기려던 것만 취소한다
+    el.hidden = true;
+    st.t = setTimeout(function () { el.hidden = false; st.shown = Date.now(); }, o.delay != null ? o.delay : LOAD.delay);
+  }
+  function loadStop(el) {
+    var st = el._dsLoad;
+    return new Promise(function (res) {
+      if (!st) { el.hidden = true; res(); return; }
+      clearTimeout(st.t);
+      st.t = setTimeout(function () { el.hidden = true; st.shown = 0; res(); }, st.shown ? Math.max(0, st.min - (Date.now() - st.shown)) : 0);
+    });
+  }
+
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, version: "0.5" };
 })();

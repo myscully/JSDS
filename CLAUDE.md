@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1101/1101 · react 646+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1123/1123 · react 667+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -318,6 +318,15 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함:** `data-max-days` 는 1 이상 정수 · 일 단위 기간만 · 기본 프리셋 ≤ 상한 · 도움말 필수, Breadcrumb 의 `title` 금지, 탐색형 차트의 `.chart-view` + 표로 보기 버튼.
 - **측정에서 드러나 고친 것:** Tooltip 틀의 줄 높이 1.6 이 잘린 항목만 20.8 로 만들어 글자가 옆 항목과 어긋났다(`line-height:inherit`). Breadcrumb 의 복사용 CSS 범위에 Tooltip 을 더했다(`borrows` — ds.js 가 실행 중에 붙이는 클래스라 복사용 CSS 검사가 잡지 못한다).
 - 음성 시험: 사이트 47건 · React 36건, 모두 잡혔다(작성 중에 min · max 유지 · 표 칸 재사용 · 마운트 실패 · 버튼 자리 단정을 미리 더했다). render.js 의 ds.js 크기 144KB → 150KB. Figma 미반영 149건(그대로).
+
+2026-11-11 1.0 뒤로 미뤘던 것 중 둘을 앞당김 — Loading 지연 · Slider 숫자 입력(사람의 결정 넷) — behave 1101 → 1123(`behave.later.js` 22) · react 646+6 → 667+6(`tests/later.test.tsx` 19 · 예제 243 → 245 에 따른 구조 비교 2). contrast · advisory · pages 수는 그대로(새 색 쌍 없음).
+- **지연은 옵션, 켜면 1초**(사람의 결정) — `data-delay` · React `delay`(true | ms)를 단 Spinner · Skeleton 은 `--ds-delay`(기본 1s) 동안 자리를 지킨 채 보이지 않는다. CSS 애니메이션(`ds-delay 0s … both`, visibility)이라 그려지는 순간부터 세고 줄인 모션에서도 기다린다(reduced-motion 규칙에 같은 선언 — 그렇지 않으면 `animation:none!important` 가 지연을 지운다). verify 의 모션 검사가 이 값을 LOOPS 와 함께 받는다.
+- **한 번 보이면 0.5초 유지**(사람의 결정) — 사이트 `DS.loading.start(el, {delay, min})` · `stop(el)`(숨긴 뒤 풀리는 Promise, el.hidden) · React `useLoadingDelay(loading, {delay, minDuration})`. 다시 시작하면 보인 채로 남고 최소 시간은 처음 보인 때부터 잰다.
+- **버튼 loading · Switch 처리 중은 지연 없음**(사람의 결정 — 누른 반응은 바로). verify 가 `data-delay` 를 Spinner · Skeleton 클래스에만 받는다.
+- **Slider + 숫자 입력은 트랙 오른쪽 같은 줄**(사람의 결정) — `.field.number-field.slider-field > label + .slider-control(.slider > range + .affix) + .help`(최소 폭 416 · 입력칸 120 · 간격 16), React `Slider withInput unit help`. 라벨은 숫자 입력칸(제출하는 값)에, 트랙은 `aria-labelledby`. 트랙을 움직이면 입력칸이 따라가며 input · change 를 내고, 입력칸에 치면 트랙이 따라간다 — 범위 밖은 글자를 두고 트랙은 끝, 오류는 Number Input 규칙대로. 빈 칸은 트랙을 둔다. React 는 TextField `wrapControl` 로 입력칸 옆에 트랙을 둔다.
+- **verify 더함:** `.slider-field` 의 라벨 · 트랙 이름 · 두 칸의 min · max · step 같음 · `.val` 금지 · 트랙 name 금지, `data-delay` 자리. 구조 비교(`skeleton.ts`)에 `data-delay` 를 더했다.
+- **측정에서 드러나 고친 것:** `.field input:where(…)` 규칙 9개가 필드 안 range 에도 걸려 트랙이 높이 40 · 테두리를 받았다 — `:not([type=range])` 를 :where 안에 더했다(명시도 그대로, audit 선택자도 같이). **패키지 CSS 의 줄인 모션 base 에 11-10 의 Spinner 예외가 빠져 있었다**(사이트만 돌고 패키지는 멈춤) — 사이트와 같게 하고 `sync-css.mjs` 가 막는다. 도는 Spinner 의 `getBoundingClientRect` 는 기울어진 상자라 크기는 offsetWidth 로 잰다. 줄인 모션 검사(behave.system)는 애니메이션 이름마다 길이를 보게 고쳤다(0s 인 ds-delay 는 움직임이 아니다).
+- 음성 시험: 사이트 31건 · React 16건. 첫 회 1건을 못 잡아(DS.loading 을 보인 채 다시 시작하면 한 번 숨었다 나타남 — 400ms 뒤에만 쟀다) 다시 시작한 순간을 재게 고쳐 잡았다. 쓸모없는 코드 2건은 지웠다(`.number-field input[type=number]` 한정 — 트랙은 `.slider input[type=range]` 가 이미 이김, 트랙 onChange 의 setText — effect 가 따라감). render.js 의 ds.js 크기 150KB → 152KB. Figma 미반영 149건(그대로 — 새 예제 둘은 Figma 대조 밖).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

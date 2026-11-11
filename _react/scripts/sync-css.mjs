@@ -21,7 +21,7 @@ const samples = src.slice(a, b + LIB.SAMPLES_END.length);
 
 const base = `/* ---------- Base (패키지용 최소 규칙) ---------- */
 *{box-sizing:border-box}
-@media (prefers-reduced-motion:reduce){*,*::details-content{transition:none!important;animation:none!important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin .8s linear infinite!important}.spinner[data-delay]{animation:spin .8s linear infinite,ds-delay 0s var(--ds-delay,1s) both!important}.skeleton[data-delay],.spinner-wrap[data-delay],.skeleton-row[data-delay]{animation:ds-delay 0s var(--ds-delay,1s) both!important}}
 :focus-visible{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}
 [hidden]{display:none!important}
 /* 앱 루트(또는 body)에 .ds-root 를 붙이면 서체·색·배경 토큰이 적용됩니다 */
@@ -42,6 +42,8 @@ ${samples}
 for (const bad of [".header{", ".sidebar{", ".shell{", ".toc{", ".drawer{", ".drawer-dim{", ".example{", ".code-tabs{", ".topnav{", ".header-right{", ".hbtn{", ".hmenu{", ".pop{", ".sidebar-foot{"]) {
   if (out.includes(bad)) throw new Error(`sync-css: 사이트 크롬 규칙이 포함됨: ${bad}`);
 }
+/* 줄인 모션에서도 Spinner · 버튼 loading · Switch 처리 중은 돌고 Loading 지연은 기다린다(2026-11-10 · 11-11) — 패키지 base 는 사이트와 따로 쓴 규칙이라 빠지기 쉽다 */
+if (!base.includes('.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin') || !base.includes(".spinner[data-delay]{animation:spin")) throw new Error("sync-css: 줄인 모션 base 에 Spinner 예외 · Loading 지연이 없다");
 if (out.includes(".ds-root a{")) throw new Error("sync-css: .ds-root a{ 는 컴포넌트의 링크 색을 이긴다 — :where(.ds-root) a 로 쓴다");
 for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"]) {
   if (!out.includes(must)) throw new Error(`sync-css: 필수 규칙 없음: ${must}`);
@@ -53,7 +55,7 @@ for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"
   const decl = new Set([...out.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
   const dead = [...new Set([...out.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]))]
     /* 컴포넌트 지역 변수 — verify.js 의 LOCAL 과 같다. --dp-top · --dp-left 는 Date Picker 가 열 때 재서 넣고 CSS 가 기본값을 함께 쓴다. --a 는 도넛 경계 구분선 각도(Donut 이 넣음). --float-* 는 스크롤 영역 안 메뉴의 자리 · 폭(열 때 재서 넣음) */
-    .filter((t) => !decl.has(t) && !t.startsWith("--prod-") && t !== "--p" && t !== "--checker-bg" && !t.startsWith("--cols") && t !== "--dp-top" && t !== "--dp-left" && t !== "--a" && !t.startsWith("--float-"));
+    .filter((t) => !decl.has(t) && !t.startsWith("--prod-") && t !== "--p" && t !== "--checker-bg" && !t.startsWith("--cols") && t !== "--dp-top" && t !== "--dp-left" && t !== "--a" && !t.startsWith("--float-") && t !== "--ds-delay");
   if (dead.length) throw new Error(`sync-css: 선언이 없는 토큰을 참조함: ${dead.join(" ")}`);
 }
 

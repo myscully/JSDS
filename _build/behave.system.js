@@ -24,7 +24,9 @@ module.exports = async ({ b, ok, SITE, path }) => {
         document.querySelectorAll("*").forEach((e) => { for (const pse of [null, "::before", "::after"]) { const s = getComputedStyle(e, pse);
           const tag = e.tagName.toLowerCase() + (e.classList[0] ? "." + e.classList[0] : "") + (pse || "");
           for (const d of s.transitionDuration.split(",").map((x) => x.trim())) if (d !== "0s" && (allowed === null || !allowed.includes(Math.round(parseFloat(d) * 1000) + "ms"))) out.push(`${tag} transition ${d}`);
-          if (allowed === null && s.animationName !== "none" && s.animationName !== "spin" && s.animationDuration !== "0s") out.push(`${tag} animation ${s.animationName}`); } });
+          /* 이름마다 잰다 — Loading 지연(ds-delay)은 길이 0s 로 한 번 보이게 할 뿐 움직이지 않는다(2026-11-11) */
+          const names = s.animationName.split(",").map((x) => x.trim()), durs = s.animationDuration.split(",").map((x) => x.trim());
+          if (allowed === null && names.some((n, i) => n !== "none" && n !== "spin" && (durs[i] || durs[0]) !== "0s")) out.push(`${tag} animation ${s.animationName}`); } });
         return [...new Set(out)].slice(0, 3); }, reducedMotion === "reduce" ? null : MOTION_MS);
       if (r.length) bad.push(`${p}: ${r.join(", ")}`);
     }

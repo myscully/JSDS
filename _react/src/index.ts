@@ -62,7 +62,7 @@ export { List, ListItem, type ListProps, type ListItemProps } from "./components
 export { Tile, TileGrid, type TileProps } from "./components/item-tile/Tile";
 export { Table, TableHead, TableBody, TableRow, TableHeader, TableCell, type TableProps, type TableRowProps, type TableHeaderProps, type TableCellProps } from "./components/table/Table";
 export { DataTable, ActionBar, type DataTableProps, type DataTableColumn, type SortState, type ActionBarProps } from "./components/data-table/DataTable";
-export { Spinner, Skeleton, SkeletonRow, Progress, type SpinnerProps, type SkeletonProps, type SkeletonRowProps, type ProgressProps } from "./components/loading/Loading";
+export { Spinner, Skeleton, SkeletonRow, Progress, useLoadingDelay, LOADING_DELAY, LOADING_MIN, type SpinnerProps, type SkeletonProps, type SkeletonRowProps, type ProgressProps } from "./components/loading/Loading";
 
 // F. data visual
 export { Kpi, KpiGrid, ChartCard, BarChart, Donut, DonutRow, ChartLegend, Sparkline, type KpiProps, type ChartCardProps, type BarChartProps, type BarChartRow, type DonutProps, type DonutSegment, type ChartLegendProps, type ChartLegendItem, type SparklineProps } from "./components/data-visual/DataVisual";

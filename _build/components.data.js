@@ -374,11 +374,11 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Slider */
   "slider": {
-    status: "ready", react: ["Slider"], css: [".slider"], borrows: [".number-field", ".num-btn", ".field", ".affix", ".help"],
+    status: "ready", react: ["Slider"], css: [".slider", ".slider-field"], borrows: [".number-field", ".num-btn", ".field", ".affix", ".help"],
     desc: "범위 안의 값을 드래그로 고릅니다. 정확한 값이 중요하면 <a href=\"#/components/text-field\">Text Field</a> 를 씁니다.",
     principles: [
       ["언제 쓰는가", "대략적인 값일 때입니다. 정책 임계치처럼 숫자가 정확해야 하면 Text Field 를 먼저 씁니다"],
-      ["숫자 입력을 함께 둘 때", "두 칸을 값 하나로 묶습니다. Slider 를 움직이면 입력칸이 바로 바뀝니다. 입력칸에 범위를 벗어난 값을 쓰면 글자는 지우지 않고 오류로 알리며, Slider 는 가까운 끝에 둡니다"],
+      ["숫자 입력을 함께 둘 때", "<code>.slider-field</code> 로 두 칸을 값 하나로 묶습니다. 입력칸은 트랙 오른쪽에 두고, 제출하는 값은 입력칸입니다. Slider 를 움직이면 입력칸이 바로 바뀝니다. 입력칸에 범위를 벗어난 값을 쓰면 글자는 지우지 않고 오류로 알리며, Slider 는 가까운 끝에 둡니다"],
       ["단위", "현재 값에 단위를 붙여 보이고 읽히게 합니다. <code>.val</code> 의 단위는 <code>aria-valuetext</code> 로도 나갑니다"],
       ["범위", "값은 하나입니다. 두 끝을 고르는 범위 슬라이더는 지원하지 않습니다. 시작 · 끝 값을 Text Field 둘로 받습니다"],
     ],
@@ -405,6 +405,15 @@ const COMPONENTS = {
           <input id="s2" type="range" min="30" max="180" step="30" value="90" style="--p:40%">
           <div class="ticks"><span>30</span><span>180</span></div>
         </div>` },
+      { id: "with-input", title: "With Number Input", desc: "대략 맞추고 정확히 고치는 값입니다. 트랙을 움직이면 입력칸이, 입력칸에 치면 트랙이 따라갑니다. 범위 밖 값은 받아서 오류로 알리고 트랙은 끝에 둡니다.", html: `
+        <div class="field number-field slider-field">
+          <label id="s5-label" for="s5">로그인 실패 허용 횟수</label>
+          <div class="slider-control">
+            <div class="slider"><input type="range" min="0" max="20" value="5" style="--p:25%" aria-labelledby="s5-label" aria-valuetext="5회"></div>
+            <div class="affix"><input id="s5" type="number" min="0" max="20" value="5"><span>회</span>${numBtns("로그인 실패 허용 횟수")}</div>
+          </div>
+          <span class="help">0회부터 20회까지 입력할 수 있습니다.</span>
+        </div>` },
       { id: "exact", title: "정확한 값", desc: "숫자가 정확해야 하면 Slider 대신 Number Input 을 씁니다.", html: `
         <div class="field number-field" style="width:280px"><label for="s4">세션 만료</label><div class="affix"><input id="s4" type="number" value="30" min="5" max="1440"><span>분</span>${numBtns("세션 만료")}</div><span class="help">5분부터 1440분까지 입력할 수 있습니다.</span></div>` },
       { id: "disabled", title: "Disabled", html: `
@@ -413,7 +422,7 @@ const COMPONENTS = {
           <input id="s3" type="range" value="40" style="--p:40%" disabled>
         </div>` },
     ],
-    props: [[".slider", "container", "—", ".row(라벨·값) + input[type=range](+ .ticks)"], [".val", "element", "—", "현재 값. 숫자 뒤 글자가 단위(90일) — 움직여도 유지되고 aria-valuetext 로 나간다"], ["--p", "css var (%)", "50%", "채워진 트랙 비율. value 와 동기화"], ["min / max / step", "attribute", "0 / 100 / 1", "네이티브 속성"], ["disabled", "attribute", "—", "비활성"]],
+    props: [[".slider", "container", "—", ".row(라벨·값) + input[type=range](+ .ticks)"], [".val", "element", "—", "현재 값. 숫자 뒤 글자가 단위(90일) — 움직여도 유지되고 aria-valuetext 로 나간다"], [".slider-field", "container", "—", ".field.number-field.slider-field — label(id · 숫자 입력칸에 for) + .slider-control(.slider > range[aria-labelledby=라벨] + .affix > input[type=number] · 단위 · .num-btn) + .help. 두 칸의 min · max · step 은 같다. 트랙의 aria-valuetext 에 입력칸의 단위가 붙는다. React <code>withInput</code> · <code>unit</code>"], ["--p", "css var (%)", "50%", "채워진 트랙 비율. value 와 동기화"], ["min / max / step", "attribute", "0 / 100 / 1", "네이티브 속성"], ["disabled", "attribute", "—", "비활성"]],
     spec: [["Size", "트랙 6 · 썸 20 · 최소 폭 280"], ["Container", "트랙 radius/full · 썸 border 2px brand"], ["Label", "라벨 12 Regular · 현재 값 12 SemiBold · 눈금 12 tertiary"], ["Placement", "정책 설정의 수치 항목. 정확 입력이 필요하면 Text Field 병행"]],
     figma: { frame: "Slider", sizes: { md: { track: 6, thumb: 20 } }, variants: { default: { fill: "--surface-brand-primary", track: "--surface-neutral-strong" } }, states: ["default", "hover", "focused", "disabled"] },
   },
@@ -1616,7 +1625,8 @@ const COMPONENTS = {
     desc: "기다리는 동안의 상태를 알립니다. 영역의 첫 로딩은 Skeleton, 짧은 동작은 Spinner, 진행률을 알면 Progress 를 씁니다.",
     principles: [
       ["고르기", "시간 기준은 <a href=\"#/foundations/interaction\">Interaction</a> 의 Loading 표를 따릅니다."],
-      ["1초 미만", "금방 끝나는 동작에 표시가 깜빡이지 않게, 1초쯤 기다렸다 보여 주는 일은 제품이 합니다. 컴포넌트에 지연 기능은 없습니다."],
+      ["1초 미만", "금방 끝날 수도 있는 기다림에는 <code>data-delay</code> · React <code>delay</code> 를 답니다. 1초 안에 끝나면 표시가 깜빡이지 않습니다. 한 번 보이면 0.5초는 유지합니다(<code>DS.loading</code> · <code>useLoadingDelay</code>)."],
+      ["누른 반응", "버튼 loading · Switch 처리 중은 기다리지 않습니다. 누른 반응이 바로 보여야 두 번 누르지 않습니다. 빌드가 검사합니다."],
       ["Spinner 이름", "'불러오는 중' 만 쓰지 않고 실제 작업을 적습니다. 빌드가 검사합니다."],
       ["Skeleton", "완성될 콘텐츠의 크기와 모양에 맞춥니다."],
       ["Progress", "진행률을 알 때만 씁니다. <code>value</code> 는 필수이고, 끝을 알 수 없는 진행 막대는 제공하지 않습니다. 그때는 Spinner 를 씁니다."],
@@ -1637,6 +1647,9 @@ const COMPONENTS = {
           <div class="skeleton-row"><span class="skeleton circle"></span><div class="lines"><span class="skeleton title"></span><span class="skeleton text short"></span></div></div>
           <span class="skeleton rect"></span>
         </div>` },
+      { id: "delay", title: "Delay", desc: "<code>data-delay</code> 를 달면 1초 동안 자리만 지키고 보이지 않습니다. 그 안에 끝나면 아무것도 깜빡이지 않습니다. 시간은 <code>--ds-delay</code> 로 바꿉니다(아래 줄은 0.3초).", html: `
+        <span class="spinner" data-delay role="status" aria-label="정책 불러오는 중"></span>
+        <div style="width:100%;max-width:520px" aria-busy="true"><div class="skeleton-row" data-delay style="--ds-delay:300ms"><span class="skeleton circle"></span><div class="lines"><span class="skeleton title"></span><span class="skeleton text"></span></div></div></div>` },
       { id: "progress", title: "Progress", desc: "진행률을 알 때. 배포·검사 진행. 완료는 success, 실패는 danger.", html: `
         <div style="width:100%;max-width:480px;display:flex;flex-direction:column;gap:20px">
           <div class="progress-row"><div class="row"><span>정책 배포 중</span><span>842 / 1,284</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"><i style="width:66%"></i></div></div>
@@ -1644,7 +1657,7 @@ const COMPONENTS = {
           <div class="progress-row"><div class="row"><span>업데이트 실패</span><span>38%</span></div><div class="progress danger" role="progressbar" aria-valuenow="38"><i style="width:38%"></i></div></div>
         </div>` },
     ],
-    props: [[".spinner", "span", "—", "role=status · aria-label 은 실제 작업. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"]],
+    props: [[".spinner", "span", "—", "role=status · aria-label 은 실제 작업. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"], ["data-delay", "attr", "—", ".spinner · .spinner-wrap · .skeleton · .skeleton-row 에. <code>--ds-delay</code>(기본 1s) 동안 자리를 지킨 채 보이지 않는다 — 줄인 모션에서도. React <code>delay</code>(true | ms)"], ["DS.loading.start(el, {delay, min}) · stop(el)", "function", "1000 · 500 ms", "보일지를 정한다 — delay 안에 stop 하면 끝내 안 보이고, 보였으면 min 을 채운 뒤 숨긴다(el.hidden). stop 은 숨긴 뒤 풀리는 Promise. 이 요소에는 data-delay 를 달지 않는다. React <code>useLoadingDelay(loading, {delay, minDuration})</code>"]],
     spec: [["Size", "Spinner 16/24/40 · Skeleton 행 14 · Progress 8 (sm 4)"], ["Container", "Skeleton radius 6 · Progress radius/full"], ["Label", "문구 12 Regular — 스피너 tertiary · 진행 secondary"], ["Placement", "Skeleton 은 콘텐츠 자리 그대로, Spinner 는 영역 중앙"]],
     figma: { frame: "Loading", sizes: { spinner: { sm: 16, md: 24, lg: 40 }, progress: { h: 8 } }, variants: { spinner: {}, skeleton: { bg: "--surface-neutral-strong" }, progress: { fill: "--surface-brand-primary", track: "--surface-neutral-strong" } }, states: ["default", "success", "danger"] },
   },

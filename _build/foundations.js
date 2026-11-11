@@ -159,7 +159,7 @@ ${rules([
 ])}
 <h2 id="loading">Loading</h2>
 ${tbl(["예상 시간", "표시"], [
-  ["1초 미만", "표시하지 않습니다. 기다렸다 보여 주는 일은 제품이 합니다"],
+  ["1초 미만", `표시하지 않습니다. ${c("loading", "Spinner · Skeleton")} 의 <code>data-delay</code> · React <code>delay</code> 가 1초 기다렸다 보여 주고, 한 번 보이면 0.5초 유지합니다. 버튼 loading · Switch 처리 중은 바로 보입니다`],
   ["영역의 첫 로딩", `${c("loading", "Skeleton")}`],
   ["짧은 동작", `${c("loading", "Spinner")}, 페이지에 하나. 버튼이 시작했으면 ${c("button", "Button")} loading`],
   ["진행률을 앎", `${c("loading", "Progress")}`],

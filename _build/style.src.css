@@ -189,7 +189,7 @@
 html{scroll-behavior:smooth}
 /* * 는 가상 요소를 고르지 않는다 — Accordion 의 ::details-content 높이 전환을 따로 꺼야 한다 */
 /* 가상 요소도 멈춘다 — 종전 *, ::details-content 만 잡아 로딩 스피너(.btn.loading::after) · Indicator 맥박 · 셰브론 · 스위치 손잡이가 계속 움직였다(2026-11-05 실측) */
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin .8s linear infinite!important}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin .8s linear infinite!important}.spinner[data-delay]{animation:spin .8s linear infinite,ds-delay 0s var(--ds-delay,1s) both!important}.skeleton[data-delay],.spinner-wrap[data-delay],.skeleton-row[data-delay]{animation:ds-delay 0s var(--ds-delay,1s) both!important}}
 html{height:100%}
 body{min-height:100%}
 body{margin:0;background:var(--background-neutral-primary);color:var(--foreground-neutral-primary);font-family:var(--font-sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
@@ -719,16 +719,16 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field{display:flex;flex-direction:column;gap:6px;min-width:260px;font-size:14px;line-height:1.6}
 .field label:where(:not(.checkbox):not(.radio)){font-weight:600}   /* 그룹의 선택지도 label 이다 — 필드 라벨의 굵기를 받지 않는다 */
 .field label em{color:var(--foreground-negative-strong);font-style:normal;margin-left:2px}
-.field input:where(:not([type=checkbox]):not([type=radio])),.field textarea{height:40px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);padding:0 14px;font:inherit;font-size:14px;background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);width:100%;transition:border-color var(--motion-fast),box-shadow var(--motion-fast)}
+.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])),.field textarea{height:40px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);padding:0 14px;font:inherit;font-size:14px;background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);width:100%;transition:border-color var(--motion-fast),box-shadow var(--motion-fast)}
 .field textarea{height:auto;min-height:96px;padding:10px 14px;resize:vertical;line-height:1.5}
 .field input::placeholder,.field textarea::placeholder{color:var(--foreground-neutral-tertiary)}
-.field input:where(:not([type=checkbox]):not([type=radio])):hover,.field textarea:hover{border-color:var(--line-neutral-primary)}
-.field input:where(:not([type=checkbox]):not([type=radio])):focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 brand(대비 6.59 · 4.82) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로) */
-.field input:where(:not([type=checkbox]):not([type=radio])):disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
-.field input:where(:not([type=checkbox]):not([type=radio])):read-only:not(:disabled){background:var(--background-neutral-secondary)}   /* :read-only 는 disabled 입력에도 맞는다 — 뒤에 있어 비활성 면(--surface-disable-primary)을 읽기 전용 색으로 덮었다(2026-10-27 실측 rgb 247 ≠ 244) */
+.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):hover,.field textarea:hover{border-color:var(--line-neutral-primary)}
+.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 brand(대비 6.59 · 4.82) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로) */
+.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
+.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):read-only:not(:disabled){background:var(--background-neutral-secondary)}   /* :read-only 는 disabled 입력에도 맞는다 — 뒤에 있어 비활성 면(--surface-disable-primary)을 읽기 전용 색으로 덮었다(2026-10-27 실측 rgb 247 ≠ 244) */
 .field .help{color:var(--foreground-neutral-tertiary);font-size:12px;contain:inline-size;word-break:keep-all;overflow-wrap:anywhere}   /* 도움말 · 오류 문구는 필드 폭을 넓히지 않고 줄바꿈한다 — 오류가 나도 폭이 그대로(사람의 결정 2026-11-09). 끊는 자리는 띄어쓰기(.keep-all 과 같음) */
-.field.error input:where(:not([type=checkbox]):not([type=radio])),.field.error textarea,.field.error .affix{border-color:var(--foreground-negative-primary)}   /* 불투명 빨강 — 16% 틴트(--surface-negative-strong)는 필드 면 대비 1.23 · 1.34 라 테두리만으로 오류가 보이지 않았다. 3.44 · 5.47(사람의 결정 2026-10-26) */
-.field.error input:where(:not([type=checkbox]):not([type=radio])):focus,.field.error textarea:focus-within,.field.error .affix:has(input:focus){border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}   /* 오류 필드의 포커스 — 빨강 테두리 1px(대비 3.44 · 5.47) + 빨강 후광(장식). brand 링이 오류 테두리를 덮지 않게(사람의 결정 2026-10-26) */
+.field.error input:where(:not([type=checkbox]):not([type=radio]):not([type=range])),.field.error textarea,.field.error .affix{border-color:var(--foreground-negative-primary)}   /* 불투명 빨강 — 16% 틴트(--surface-negative-strong)는 필드 면 대비 1.23 · 1.34 라 테두리만으로 오류가 보이지 않았다. 3.44 · 5.47(사람의 결정 2026-10-26) */
+.field.error input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):focus,.field.error textarea:focus-within,.field.error .affix:has(input:focus){border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}   /* 오류 필드의 포커스 — 빨강 테두리 1px(대비 3.44 · 5.47) + 빨강 후광(장식). brand 링이 오류 테두리를 덮지 않게(사람의 결정 2026-10-26) */
 .field.error .help{color:var(--foreground-negative-strong)}
 .field .help:empty{margin-top:-6px}   /* 비어 있어도 그려 둔다 — 라이브 영역은 글자가 들어오기 전에 있어야 읽힌다. 줄 간격 6 만 되돌린다 */
 .field.mono input,.field.mono textarea{font-family:var(--font-mono);font-variant-numeric:tabular-nums}   /* IP · URL · 해시 */
@@ -739,8 +739,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field .affix .reveal span{display:grid}
 .field .affix .reveal svg{width:18px;height:18px}
 .field .affix .reveal[aria-pressed="true"] .i-show,.field .affix .reveal:not([aria-pressed="true"]) .i-hide{display:none}
-.field.sm input:where(:not([type=checkbox]):not([type=radio])){height:32px;font-size:12px;padding:0 12px}
-.field.lg input:where(:not([type=checkbox]):not([type=radio])){height:48px;font-size:16px;padding:0 16px}
+.field.sm input:where(:not([type=checkbox]):not([type=radio]):not([type=range])){height:32px;font-size:12px;padding:0 12px}
+.field.lg input:where(:not([type=checkbox]):not([type=radio]):not([type=range])){height:48px;font-size:16px;padding:0 16px}
 .field .affix{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary)}
 .field .affix input{border:0;height:auto;padding:0;flex:1;background:transparent;outline:0;min-width:0}
 .field .affix input:focus,.field.error .affix input:focus{box-shadow:none}   /* 고리는 .affix 가 그린다 — .field input:focus 의 후광이 입력칸에도 걸려 두 겹이었다(2026-10-27 실측, Text Field 접두 · 접미 필드도 같았다) */
@@ -824,6 +824,12 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .slider input[type=range]:disabled::-moz-range-track{background:var(--surface-disable-primary)}
 .slider input[type=range]:disabled::-moz-range-thumb{background:var(--surface-elevated-primary);border-color:var(--surface-disable-primary)}
 .slider .ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--foreground-neutral-tertiary);padding:0 4px}
+/* Slider + 숫자 입력(사람의 결정 2026-11-11) — .field.number-field.slider-field 하나가 값 하나다. 라벨 · 도움말 · 오류는 필드의 것이고 제출하는 값은 숫자 입력칸.
+   트랙 오른쪽 같은 줄에 입력칸(폭 120). 현재 값 글자(.val)는 입력칸이 대신한다 */
+.field.slider-field{min-width:416px}
+.slider-field .slider-control{display:flex;align-items:center;gap:16px}
+.slider-field .slider{flex:1;min-width:0}
+.slider-field .affix{flex:none;width:120px}
 
 /* Date Picker — Text Field 입력형 하나(.datepicker.field > .affix > input + .cal-btn, Text Field 셸을 그대로 쓴다).
    버튼형 .field-btn 은 2026-11-09 에 없앴다(사람의 결정 — 기본이 입력형). 상태는 ds.js 가 host 의 data-* 로 들고,
@@ -1305,6 +1311,12 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .skeleton.rect{height:120px;border-radius:var(--radius-md)}
 .skeleton-row{display:flex;align-items:center;gap:12px;width:100%;line-height:1.6}
 .skeleton-row .lines{flex:1;display:flex;flex-direction:column;gap:8px}
+/* 지연 표시(사람의 결정 2026-11-11) — data-delay 를 단 Spinner · Skeleton 은 --ds-delay(기본 1s) 동안 자리를 지킨 채 보이지 않는다. 그 안에 끝나면 깜빡이지 않는다.
+   visibility 라 자리 · 크기는 그대로이고 role=status 도 그동안 읽히지 않는다. 줄인 모션에서도 기다린다(움직임이 아니다 — reduced-motion 규칙에 같은 선언). 버튼 loading · Switch 처리 중에는 쓰지 않는다(누른 반응은 바로) */
+@keyframes ds-delay{from{visibility:hidden}to{visibility:visible}}
+.spinner[data-delay]{animation:spin .8s linear infinite,ds-delay 0s var(--ds-delay,1s) both}
+.skeleton[data-delay]{animation:shimmer 1.4s infinite,ds-delay 0s var(--ds-delay,1s) both}
+.spinner-wrap[data-delay],.skeleton-row[data-delay]{animation:ds-delay 0s var(--ds-delay,1s) both}
 @keyframes shimmer{to{background-position:-200% 0}}
 .progress{width:100%;height:8px;border-radius:var(--radius-full);background:var(--surface-neutral-strong);overflow:hidden;line-height:1.6}
 .progress i{display:block;height:100%;background:var(--foreground-brand-primary);border-radius:var(--radius-full);transition:width var(--motion-base)}
