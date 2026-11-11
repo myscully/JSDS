@@ -444,6 +444,18 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **사이트 마크업** — `th.expand`(숨긴 이름) · `td.expand > button.expand-btn[aria-expanded][aria-controls][aria-label]` · 바로 뒤 `tr.row-detail[hidden] > td[colspan] > .row-detail-body`. `ds:row-expand` 는 행(tr)에서 납니다(Breadcrumb 의 `ds:expand` 와 이름을 나눔). 정렬 · `DS.table.removeRow` 는 상세 행을 함께 옮기고 지웁니다.
 - **줄무늬 · hover** — `.zebra` 와 행 hover 가 상세 행을 세지 않도록 선택자가 바뀌었습니다(`:where(:not(.row-detail))`, 명시도는 그대로).
 
+## Tag 점 · 글자색 · SevCell (2026-11-11)
+
+- **Tag 의 기본은 점 없음**입니다. 글자가 틴트와 같은 색상의 진한 톤(`--foreground-*-heavy`)으로 색을 나릅니다. 점이 필요하면 `dot` 을 씁니다.
+- `variant="plain"` 은 없어졌습니다 — 기본이 점 없음이라 뜻이 없어졌습니다. 쓰면 개발 모드에서 경고하고 기본(subtle)으로 그립니다. 지우면 됩니다.
+- **`SevCell` 은 없어졌습니다**(행 좌측 색 막대 — Tag 글자가 색을 나르므로 겹친 정보). 쓰면 한 번 경고하고 막대 없이 내용만 그립니다. 심각도 칸은 `<Tag tone={sev} size="sm">` 하나로 씁니다. CSS `.sev-cell` 도 없습니다.
+
+| 전 | 후 |
+| --- | --- |
+| `<Tag variant="plain">v2</Tag>` | `<Tag>v2</Tag>` |
+| `<Tag tone="critical">` (점 있음) | `<Tag tone="critical" dot>` |
+| `<SevCell tone="high"><Tag tone="high">High</Tag></SevCell>` | `<Tag tone="high">High</Tag>` |
+
 ## 크기 단위 rem · 화면 폭 단계 (2026-11-11)
 
 - **패키지 CSS 의 크기는 rem 입니다** — 글자(`--font-size-10 ~ 48` 토큰) · 간격(`--space-*`) · 높이 · 반경. 기준(`html` 16px)에서는 전과 픽셀이 같습니다.

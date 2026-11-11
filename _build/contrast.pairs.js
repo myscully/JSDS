@@ -36,8 +36,14 @@ const REF_ACCENT = REF("기준 시스템 값 — 장식 강조색이라 라이�
 /* [전경, 바탕들, 최소 대비, 메모, 옵션] */
 const pairs = [
   ["--foreground-neutral-primary", [...SURFACES, "--surface-neutral-strong"], 4.5, "본문 · 태그 라벨"],
-  /* 태그 라벨은 중립 글자다 — 심각도 Medium(라이트 블루) · Low(라임, 2026-11-11 교체) 틴트와 상태 pending(청록) 틴트 위(2026-11-06 5단계) */
-  ["--foreground-neutral-primary", ["--surface-accent-lime", "--surface-accent-light-blue", "--surface-accent-cyan"], 4.5, "태그 라벨 — Medium · Low · Pending 틴트"],
+  /* Tag 글자 = 틴트와 같은 색상의 진한 톤(사람의 결정 2026-11-11 — 그 전엔 중립 글자 + 점). 자기 틴트 · outline(바탕 그대로) 위에서 4.5.
+     Critical solid 는 한 단계 강한 면(surface-negative-strong). info 는 neutral-secondary(위 쌍), accent 는 brand-primary(아래 brand 쌍) */
+  ["--foreground-negative-heavy", ["--surface-negative-primary", "--surface-negative-strong", ...SURFACES], 4.5, "Critical Tag 글자 — 틴트 · solid 면 · outline"],
+  ["--foreground-cautionary-heavy", ["--surface-cautionary-primary", ...SURFACES], 4.5, "High Tag 글자 — 틴트 · outline"],
+  ["--foreground-accent-light-blue-heavy", ["--surface-accent-light-blue", ...SURFACES], 4.5, "Medium Tag 글자 — 틴트 · outline"],
+  ["--foreground-accent-lime-heavy", ["--surface-accent-lime", ...SURFACES], 4.5, "Low Tag 글자 — 틴트 · outline"],
+  ["--foreground-accent-cyan-heavy", ["--surface-accent-cyan", ...SURFACES], 4.5, "Pending Tag 글자 — 틴트 · outline"],
+  ["--foreground-positive-heavy", ["--surface-positive-primary", ...SURFACES], 4.5, "ok Tag 글자 — 틴트 · outline"],
   ["--foreground-neutral-strong", SURFACES, 4.5, "가장 높은 대비가 필요할 때"],
   ["--foreground-neutral-secondary", [...SURFACES, "--surface-neutral-strong"], 4.5, "보조 본문 · 중립 칩 라벨"],
   /* 라이트 3.67 · 다크 3.78 — 기준 시스템의 설명·캡션 단계다. 종전 우리 값(5.15)보다 연하다.

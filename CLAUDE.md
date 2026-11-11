@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1142/1142 · react 683+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1398쌍 실패 0 · advisory 455 · behave 1156/1156 · react 686+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -382,6 +382,16 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 음성 시험: 사이트 범례 Medium 하나를 되돌리면 behave 1140/1142(라이트 · 다크), React Donut 토큰 하나를 되돌리면 data.test 1건 실패.
 - Figma 미반영 166 → 213건 — 심각도 견본 · 도넛 호 · 차트 · 분포 밴드가 옛 배치(Figma 는 Medium 이 아직 11-06 의 lime-opaque).
 
+2026-11-11 Tag 글자 = 같은 색상의 진한 톤 · 점은 선택 · `.sev-cell` 없앰(사람의 요청 · 결정 둘) — contrast 1218 → 1398 · behave 1142 → 1156 · react 683 → 686. advisory · pages 수는 그대로.
+- **토큰 6개를 더했다**(`ADDITIONS`, 이름은 사람의 결정 — primary < strong < heavy 문법): `--foreground-negative-heavy` · `cautionary-heavy` · `accent-light-blue-heavy` · `accent-lime-heavy` · `accent-cyan-heavy` · `positive-heavy`.
+  라이트 30 단계(lime 만 20 — 30 이 틴트 위 4.42) · 다크 60 단계(red 만 70 — 60 은 Critical solid 의 강한 면 위 4.08). 참조의 foreground 는 strong 까지라 12% 틴트 위 4.5 를 넘는 단계가 없었다(negative-strong 도 3.68).
+  info 글자는 `--foreground-neutral-secondary`, accent 는 `--foreground-brand-primary`(둘 다 기존 쌍). 시멘틱 79 → 85 · 전체 94 → 100. Colors 페이지에 Heavy 스와치.
+- **점은 기본에서 뺐다** — `.tag::before` 는 `display:none`, `.tag.dot` 이면 등급 색 점. `.plain` 은 없앴다(verify 가 예제의 Tag `.plain` 을 막음). React `dot` prop, `variant="plain"` 은 경고하고 subtle 로(MIGRATION). 사이트 셸의 Props 표 태그도 `.plain` 을 뗐다(이름 칸 글자가 positive-heavy 가 됨).
+- **`.sev-cell`(행 좌측 3px 막대 + 글자)을 통째로 없앴다**(사람의 결정 — Tag 글자가 색을 나르므로 겹친 정보). 심각도 패턴의 스케일 셋째 줄과 표의 막대를 지우고 표는 Tag 하나로. verify 가 `.sev-cell` 을 막는다. React `SevCell` 은 한 번 경고하고 막대 없이 내용만 그린다.
+- contrast +180 = 새 글자 쌍 234(Critical 은 틴트 · 강한 면 각 3 합성 + 바탕 3 = 9, 다섯 톤은 틴트 3 + 바탕 3 = 6 × 5 → 39 × 맥락 6) − 옛 중립 글자 / 틴트 쌍 54. behave +14 = 테마마다 outline 글자 AA 6 · 등급마다 다른 글자색 1(옛 '색은 점이 나른다' 단정 6 은 '글자 = heavy · 점은 .dot 일 때만' 으로 고침). react +3(dot 클래스 · plain 경고 · SevCell 경고).
+- 음성 시험: Medium 글자색을 지우면 behave 1154/1156 · contrast advisory +1, 점을 기본으로 되돌리면 behave 1143/1156, 예제에 `.sev-cell` · `.plain` 을 넣으면 verify 실패(둘 다 · 복사용 CSS 의 `.plain` 규칙도).
+- audit 의 정적 심각도 색 대조에서 `.sev-cell i` 를 뺐다. Figma 미반영 213 → 215건 — 저장소에만 있는 heavy 토큰 6 · Tag Spec Label 문구 1. Figma 의 Tag 변형은 아직 점 있음 · 중립 글자다(audit 대조 밖 — 일괄 반영 때 글자를 heavy 에 묶고 점을 뺀다).
+
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
@@ -389,7 +399,8 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 
 - **Atomic** `--{램프}-{단계}` — 램프 13개, **숫자가 클수록 밝습니다**. 컴포넌트에서 직접 쓰지 않습니다.
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
-  여섯 그룹 **79개**(참조 75 + 더한 4) + 트리 밖 15개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 탐색형 차트 `--chart-*` 12) = **94**.
+  여섯 그룹 **85개**(참조 75 + 더한 10) + 트리 밖 15개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 탐색형 차트 `--chart-*` 12) = **100**.
+  더한 것 중 6개는 Tag 글자용 `--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy`(2026-11-11).
 - **차트 토큰** `--chart-series-1~6`(순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
   CSS 가 아니라 `ds-chart.js` 가 계산값으로 읽어 캔버스에 칠합니다(소비자 0 허용 목록 `grammarOnly`). 심각도 계열은 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 그대로(5단계 — Medium 라이트 블루 · Low 라임, 2026-11-11 교체).
 - **제품 색**은 `--prod-40~60` 다섯 단계로 주입되고 `brand` 계열이 따라옵니다.

@@ -3,23 +3,28 @@ import { cx } from "../../utils/cx";
 import type { Size, Tone } from "../../types";
 import { Tooltip } from "../tooltip/Tooltip";
 
+/** "plain" 은 2026-11-11 에 없앴다 — 기본이 점 없음이 되어 뜻이 없어졌다(경고하고 subtle 로 그린다, MIGRATION) */
 export type TagVariant = "subtle" | "outline" | "solid" | "plain";
 
 export interface TagProps extends HTMLAttributes<HTMLSpanElement> {
   /** 의미 색. 없으면 중립(gray) */
   tone?: Tone;
-  /** subtle(기본) · outline · solid(강조) · plain(점 없음) */
+  /** subtle(기본) · outline · solid(강조) */
   variant?: TagVariant;
+  /** 글자 앞 점(등급 색). 기본은 점 없음 — 색은 글자가 나른다 */
+  dot?: boolean;
   /** sm 20 · md 24 · lg 28 */
   size?: Size;
 }
 
 /** 상태·분류·심각도 표시. 선택·삭제가 필요하면 Chip */
-export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag({ tone, variant = "subtle", size = "md", className, ...rest }, ref) {
+export const Tag = forwardRef<HTMLSpanElement, TagProps>(function Tag({ tone, variant = "subtle", dot = false, size = "md", className, ...rest }, ref) {
+  if (process.env.NODE_ENV !== "production" && variant === "plain") console.warn('[ds-react] Tag variant="plain" 은 없어졌습니다 — 기본이 점 없음입니다. 점이 필요하면 dot 을 씁니다(MIGRATION.md).');
+  const v = variant === "plain" ? "subtle" : variant;
   return (
     <span
       ref={ref}
-      className={cx("tag", tone, variant !== "subtle" && variant, size !== "md" && size, className)}
+      className={cx("tag", tone, v !== "subtle" && v, dot && "dot", size !== "md" && size, className)}
       {...rest}
     />
   );
@@ -43,7 +48,7 @@ export const TagGroup = forwardRef<HTMLDivElement, TagGroupProps>(function TagGr
       {shown}
       {hidden.length > 0 && (
         <Tooltip content={hidden.map(textOf).join(", ")}>
-          <button type="button" className="tag plain tag-more" aria-label={moreLabel(hidden.length)}>+{hidden.length}</button>
+          <button type="button" className="tag tag-more" aria-label={moreLabel(hidden.length)}>+{hidden.length}</button>
         </Tooltip>
       )}
     </div>

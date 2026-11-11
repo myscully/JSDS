@@ -7,8 +7,8 @@ export default function Example() {
       <Tag tone="medium" variant="outline">Medium</Tag>
       <Tag tone="critical" variant="solid">Critical</Tag>
       <Tag tone="ok" variant="solid">정상</Tag>
-      <Tag variant="plain">v2.4.1</Tag>
-      <Tag tone="accent" variant="plain">Beta</Tag>
+      <Tag tone="critical" dot>Critical</Tag>
+      <Tag tone="ok" dot>정상</Tag>
     </>
   );
 }

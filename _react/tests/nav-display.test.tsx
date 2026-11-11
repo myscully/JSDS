@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { useState } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { Count, SideNav, SideNavItem, SkipLink, Steps, Tab, TabList, TabPanel, Tabs, Tag, TagGroup } from "../src";
+import { Count, SevCell, SideNav, SideNavItem, SkipLink, Steps, Tab, TabList, TabPanel, Tabs, Tag, TagGroup } from "../src";
 import { revealTab } from "../src/components/tab/Tabs";
 
 const TwoTabs = ({ keep }: { keep?: boolean }) => (
@@ -96,6 +96,31 @@ describe("Navigation", () => {
     const a = screen.getByRole("link", { name: "본문 바로가기" });
     expect(a.getAttribute("href")).toBe("#main");
     expect(a.className).toBe("skip-link");
+  });
+});
+
+describe("Tag 점 · 글자색(2026-11-11)", () => {
+  it("기본은 점 없음(.dot 없음) · dot 이면 .dot · +N 버튼에도 plain 이 없다", () => {
+    const { container } = render(<><Tag tone="critical">기본</Tag><Tag tone="critical" dot>점</Tag><TagGroup max={1}><Tag>가</Tag><Tag>나</Tag></TagGroup></>);
+    const [a, b] = [...container.querySelectorAll("span.tag")];
+    expect(a.className).toBe("tag critical");
+    expect(b.className).toBe("tag critical dot");
+    expect(container.querySelector(".tag-more")!.className).toBe("tag tag-more");
+  });
+  it('옛 variant="plain" 은 경고하고 클래스 없이 기본으로 그린다', () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { container } = render(<Tag variant="plain">v2</Tag>);
+    expect(container.firstElementChild!.className).toBe("tag");
+    expect(warn.mock.calls.some((c) => String(c[0]).includes('variant="plain"'))).toBe(true);
+    warn.mockRestore();
+  });
+  it("SevCell 은 경고하고 막대 없이 내용만 그린다", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { container } = render(<SevCell tone="critical"><Tag tone="critical">Critical</Tag></SevCell>);
+    expect(container.querySelector(".sev-cell, i")).toBeNull();
+    expect(container.querySelector(".tag")!.textContent).toBe("Critical");
+    expect(warn.mock.calls.some((c) => String(c[0]).includes("SevCell"))).toBe(true);
+    warn.mockRestore();
   });
 });
 

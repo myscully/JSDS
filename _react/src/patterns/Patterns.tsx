@@ -212,14 +212,11 @@ export interface SevCellProps extends HTMLAttributes<HTMLSpanElement> {
   /** 없으면 Info(회색) */
   tone?: Exclude<Tone, "ok" | "pending" | "accent">;
 }
-/** 좌측 색 막대 + 내용 (표 셀) */
-export const SevCell = forwardRef<HTMLSpanElement, SevCellProps>(function SevCell({ tone, className, children, ...rest }, ref) {
-  return (
-    <span ref={ref} className={cx("sev-cell", className)} {...rest}>
-      <i className={tone} />
-      {children}
-    </span>
-  );
+let sevCellWarned = false;
+/** @deprecated 2026-11-11 에 없앴다(사람의 결정 — Tag 글자가 색을 나르므로 좌측 색 막대는 겹친 정보). 막대 없이 내용만 그린다. 심각도 칸은 Tag 하나로 */
+export const SevCell = forwardRef<HTMLSpanElement, SevCellProps>(function SevCell({ tone: _tone, className, children, ...rest }, ref) {
+  if (process.env.NODE_ENV !== "production" && !sevCellWarned) { sevCellWarned = true; console.warn("[ds-react] SevCell 은 없어졌습니다 — 심각도 칸은 Tag 하나로 씁니다(MIGRATION.md). 지금은 막대 없이 내용만 그립니다."); }
+  return <span ref={ref} className={className} {...rest}>{children}</span>;
 });
 
 /** 약관 전체 동의 행 */

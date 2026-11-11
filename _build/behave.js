@@ -863,13 +863,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         while (stack.length) { const t = stack.pop(); out = { r: t.r * t.a + out.r * (1 - t.a), g: t.g * t.a + out.g * (1 - t.a), b: t.b * t.a + out.b * (1 - t.a), a: 1 }; }
         return "rgb(" + Math.round(out.r) + ", " + Math.round(out.g) + ", " + Math.round(out.b) + ")";
       };
-      const mk = (cls) => { const e = document.createElement("span"); e.className = cls; e.textContent = "x"; prev.append(e); const c = getComputedStyle(e);
-        const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color, dot: getComputedStyle(e, "::before").backgroundColor }; e.remove(); return r; };
-      out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid") };
+      const mk = (cls) => { const e = document.createElement("span"); e.className = cls; e.textContent = "x"; prev.append(e); const c = getComputedStyle(e), b = getComputedStyle(e, "::before");
+        const r = { bg: c.backgroundColor, bgEff: eff(e), fg: c.color, dot: b.backgroundColor, dotShown: b.display !== "none" }; e.remove(); return r; };
+      out.v[l] = { subtle: mk("tag " + l), solid: mk("tag " + l + " solid"), dotted: mk("tag dot " + l), outline: mk("tag outline " + l) };
       /* 심각도는 독립 축이 아니라 상태·강조 의도 매핑이다 —
          Critical=negative · High=cautionary · Critical 점=negative-strong · Medium=accent lime(점 foreground/accent/lime, 2026-11-09) · Low=accent light blue · Info=중립, 상태 Pending=accent cyan.
-         라벨은 다섯 등급 모두 중립 글자색이고(기준 시스템의 Chip 패턴), 색은 점과 틴트가 나른다.
+         글자는 틴트와 같은 색상의 진한 톤(--foreground-*-heavy, 사람의 결정 2026-11-11 — 그 전엔 중립 글자 + 점)이고 점은 .dot 일 때만.
          dot = ::before 의 실제 배경색이다 — 토큰이 아니라 렌더된 색을 본다 */
+      const LABEL = { critical: "--foreground-negative-heavy", high: "--foreground-cautionary-heavy", medium: "--foreground-accent-light-blue-heavy",
+        low: "--foreground-accent-lime-heavy", info: "--foreground-neutral-secondary", pending: "--foreground-accent-cyan-heavy" }[l];
       const DOT = { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary",
         medium: "--foreground-accent-light-blue", low: "--foreground-accent-lime", info: "--foreground-inactive-primary", pending: "--foreground-accent-cyan" }[l];
       const TINT = { critical: "--surface-negative-primary", high: "--surface-cautionary-primary",
@@ -877,7 +879,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const SOLID = { critical: "--surface-negative-strong", high: "--surface-cautionary-primary",
         medium: "--surface-accent-light-blue", low: "--surface-accent-lime", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
       out.tok[l] = { dot: res("var(" + DOT + ")"), tint: res("var(" + TINT + ")"), surface: res("var(" + SOLID + ")"),
-        label: res("var(--foreground-neutral-primary)") };
+        label: res("var(" + LABEL + ")") };
     }
     out.subtle = res("var(--background-neutral-secondary)"); out.canvas = res("var(--background-neutral-primary)"); out.surface = res("var(--surface-elevated-primary)");
     return out;
@@ -896,10 +898,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       // 채운 태그의 면이 자기 면 토큰이어야 한다 — 규칙이 빠지면 조용히 중립 면으로 떨어진다
       ok(`${theme} ${l} solid tag uses its own surface token`, t.v[l].solid.bg === t.tok[l].surface && t.v[l].solid.bg !== t.subtle,
         `${t.v[l].solid.bg} · surface ${t.tok[l].surface} · subtle ${t.subtle}`);
-      /* 라벨은 네 등급 모두 중립 글자색이다 — 색은 점이 나른다. 점이 등급 색이어야 색 단서가 남는다 */
-      ok(`${theme} ${l} tag carries its rank colour in the dot, not the label`,
-        t.v[l].subtle.dot === t.tok[l].dot && t.v[l].subtle.fg === t.tok[l].label,
-        `dot ${t.v[l].subtle.dot} / ${t.tok[l].dot} · label ${t.v[l].subtle.fg}`);
+      /* 글자가 등급 색의 진한 톤이다(기본 · solid · outline 모두). 점은 기본에 없고 .dot 이면 등급 색으로 나온다 */
+      ok(`${theme} ${l} tag label is the heavy tone of its rank, with no dot unless .dot`,
+        [t.v[l].subtle, t.v[l].solid, t.v[l].outline, t.v[l].dotted].every((v) => v.fg === t.tok[l].label) && !t.v[l].subtle.dotShown && !t.v[l].solid.dotShown && t.v[l].dotted.dotShown && t.v[l].dotted.dot === t.tok[l].dot,
+        JSON.stringify({ label: t.tok[l].label, fg: [t.v[l].subtle.fg, t.v[l].solid.fg, t.v[l].outline.fg], dot: [t.v[l].subtle.dotShown, t.v[l].dotted.dotShown, t.v[l].dotted.dot, t.tok[l].dot] }));
+      ok(`${theme} ${l} outline tag label clears AA on the page`, ratio(t.v[l].outline.fg, t.v[l].outline.bgEff) >= 4.5, `${ratio(t.v[l].outline.fg, t.v[l].outline.bgEff)}`);
     }
     /* 다섯 등급은 색조로만 갈린다(빨강·주황·라이트 블루·라임·중립 — 2026-11-11 Medium ↔ Low 교체) — 휘도 분리는 요구하지 않는다.
        그래서 "서로 다른 색인가" 와 "색 말고 다른 단서가 있는가" 를 묻는다.
@@ -909,6 +912,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       ok(`${theme} five severity ranks are five distinct colours`, new Set(dots).size === 5, dots.join(" · "));
       const tints = LVL.map((l) => t.v[l].subtle.bgEff);
       ok(`${theme} each rank has its own tint`, new Set(tints).size === 5, tints.join(" · "));
+      const labels = LVL.map((l) => t.v[l].subtle.fg);
+      ok(`${theme} each rank has its own label colour`, new Set(labels).size === 5, labels.join(" · "));
       /* 상태 pending 은 어느 심각도 점과도 같은 색이면 안 된다 — 옛 Medium(청록)을 물려받았다 */
       ok(`${theme} pending status tone differs from every severity dot`, !dots.includes(t.tok.pending.dot), t.tok.pending.dot);
     }
@@ -1682,7 +1687,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     tmp.remove(); return r; });
   ok("KPI unit matches Title 1 Medium and delta matches Label 2 SemiBold", kpiType.unit.length === 1 && kpiType.unit[0] === kpiType.t1m && kpiType.t1m.startsWith("16px/24px/500/") && kpiType.delta.length === 1 && kpiType.delta[0] === kpiType.l2s && kpiType.l2s.startsWith("12px/16px/600/"), JSON.stringify(kpiType));
 
-  /* 심각도 5단계(사람의 결정 2026-11-06) — 정적 지표(막대 · 범례 · 밴드 · 행 막대) · 정적 도넛 조각 · 탐색형 차트 톤이 전부 같은 토큰을 집는지.
+  /* 심각도 5단계(사람의 결정 2026-11-06) — 정적 지표(막대 · 범례 · 밴드 · Tag 의 .dot 점 — 행 막대 .sev-cell 은 2026-11-11 에 없앰) · 정적 도넛 조각 · 탐색형 차트 톤이 전부 같은 토큰을 집는지.
      차트 색 단정은 DSChart.TONES 와 대조하므로 TONES 자체가 틀리면 함께 틀린다 — 여기서는 기대 토큰을 직접 적어 둘 다 잰다 */
   const SEV_TOK = { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary", medium: "--foreground-accent-light-blue", low: "--foreground-accent-lime", info: "--foreground-inactive-primary" };
   for (const theme of ["light", "dark"]) {
@@ -1690,12 +1695,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await page.waitForTimeout(200);
     const sev = await page.evaluate((SEV) => {
       const res = (n) => { const d = document.createElement("i"); d.style.color = "var(" + n + ")"; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; };
-      const host = document.createElement("div"); host.innerHTML = Object.keys(SEV).map((l) => `<div class="chart"><div class="bar ${l}"><i></i></div></div><div class="chart-legend"><i class="${l}"></i></div><div class="sev-band"><i class="${l}"></i></div><span class="sev-cell"><i class="${l}"></i></span>`).join("");
+      const host = document.createElement("div"); host.innerHTML = Object.keys(SEV).map((l) => `<div class="chart"><div class="bar ${l}"><i></i></div></div><div class="chart-legend"><i class="${l}"></i></div><div class="sev-band"><i class="${l}"></i></div><span class="tag dot ${l}">x</span>`).join("");
       document.body.append(host);
       const out = {};
       for (const l of Object.keys(SEV)) {
         const want = res(SEV[l]);
-        const got = [".chart .bar." + l + " i", ".chart-legend i." + l, ".sev-band i." + l, ".sev-cell i." + l].map((q) => getComputedStyle(host.querySelector(q)).backgroundColor);
+        const got = [".chart .bar." + l + " i", ".chart-legend i." + l, ".sev-band i." + l].map((q) => getComputedStyle(host.querySelector(q)).backgroundColor).concat(getComputedStyle(host.querySelector(".tag.dot." + l), "::before").backgroundColor);
         out[l] = { want, got, chart: DSChart.resolve(document.body, DSChart.TONES[l]) };
       }
       host.remove();

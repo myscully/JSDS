@@ -68,7 +68,7 @@ function exampleBlock(sec, pageKey, ex, css, cssLabel) {
 }
 /* Props 표 — 이름은 positive 태그(React prop · HTML 클래스가 다르면 " / " · " · " 로 갈라 나란히), 값 목록은 텍스트, 기본값은 중립 태그.
    열 폭은 CSS(table.props th)가 20 · 25 · 15 · 40% 로 고정한다(사람의 결정 2026-10-29) */
-const propTag = (t, tone) => `<span class="tag ${tone ? tone + " " : ""}plain sm">${esc(t)}</span>`;
+const propTag = (t, tone) => `<span class="tag ${tone ? tone + " " : ""}sm">${esc(t)}</span>`;   // 점 없음이 기본(2026-11-11 — 옛 .plain)
 function propsTable(rows) {
   if (!rows || !rows.length) return "";
   const names = (n) => `<div class="prop-tags">${n.split(/ \/ | · /).map((x) => propTag(x.trim(), "ok")).join("")}</div>`;

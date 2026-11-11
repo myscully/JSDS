@@ -301,32 +301,31 @@ const PATTERNS = {
   },
 
   "severity": {
-    status: "ready", react: ["SevBand","SevCell"], uses: ["tag", "indicator", "data-visual", "data-table"], css: [".sev-band", ".sev-cell", ".stack"],
+    status: "ready", react: ["SevBand"], uses: ["tag", "indicator", "data-visual", "data-table"], css: [".sev-band", ".stack"],
     desc: "위협 심각도 5단계(Critical · High · Medium · Low · Info)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
     thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:19"></i><i class="low" style="flex:11"></i><i class="info" style="flex:25"></i></div>`,
-    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태·강조 의도 매핑</b>입니다 — Critical=<code>negative</code>(점 · 지표는 진한 <code>--foreground-negative-strong</code>) · High=<code>cautionary</code> · Medium=<code>accent light blue</code> · Low=<code>accent lime</code> · Info=중립(사람의 결정 2026-11-06 · 2026-11-09 · Medium ↔ Low 교체 2026-11-11 — 도넛 · 누적 막대에서 맞붙는 High 주황과 Medium 이 적록 색각에서 같은 색으로 보였다). 면은 틴트(<code>--surface-*</code>), 점·지표는 솔리드 전경(<code>--foreground-*</code>)을 씁니다. 토큰 전체는 <a href=\"#/foundations/colors\">Colors › Semantic</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛, 행 좌측 색 막대(.sev-cell)는 보조. .sev-cell 글자는 놓인 곳의 크기를 따른다(표 안 14)"], ["정렬", "항상 Critical → Info. <b>라벨을 반드시 함께</b> 둡니다 — 색조가 주된 단서이고, 색만으로 의미를 전달하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다"]],
+    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태·강조 의도 매핑</b>입니다 — Critical=<code>negative</code>(점 · 지표는 진한 <code>--foreground-negative-strong</code>) · High=<code>cautionary</code> · Medium=<code>accent light blue</code> · Low=<code>accent lime</code> · Info=중립(사람의 결정 2026-11-06 · 2026-11-09 · Medium ↔ Low 교체 2026-11-11 — 도넛 · 누적 막대에서 맞붙는 High 주황과 Medium 이 적록 색각에서 같은 색으로 보였다). 면은 틴트(<code>--surface-*</code>), 점·지표는 솔리드 전경(<code>--foreground-*</code>)을 씁니다. 토큰 전체는 <a href=\"#/foundations/colors\">Colors › Semantic</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛. Tag 의 글자가 색을 나르므로 행 좌측 색 막대는 두지 않는다(2026-11-11 사람의 결정 — .sev-cell 을 없앰)"], ["정렬", "항상 Critical → Info. <b>라벨을 반드시 함께</b> 둡니다 — 색조가 주된 단서이고, 색만으로 의미를 전달하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다"]],
     examples: [
-      { id: "scale", title: "5단계 스케일", desc: "Tag 3가지 스타일 + 인디케이터. 같은 토큰을 공유합니다.", html: `
+      { id: "scale", title: "5단계 스케일", desc: "Tag 기본 · Solid. 글자는 틴트와 같은 색상의 진한 톤이고 점은 없습니다.", html: `
         <div class="stack" style="max-width:640px;gap:20px">
           <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical solid">Critical</span><span class="tag high solid">High</span><span class="tag medium solid">Medium</span><span class="tag low solid">Low</span><span class="tag info solid">Info</span></div>
-          <div style="display:flex;gap:16px;flex-wrap:wrap"><span class="sev-cell"><i class="critical"></i>Critical</span><span class="sev-cell"><i class="high"></i>High</span><span class="sev-cell"><i class="medium"></i>Medium</span><span class="sev-cell"><i class="low"></i>Low</span><span class="sev-cell"><i class="info"></i>Info</span></div>
         </div>`, layout: "left" },
       { id: "band", title: "분포 밴드", desc: "전체 대비 비율. flex 값이 비율, 아래 범례로 수치.", html: `
         <div class="stack" style="max-width:640px;gap:10px">
           <div class="sev-band" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:19"></i><i class="low" style="flex:11"></i><i class="info" style="flex:25"></i></div>
           <div class="chart-legend"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>196</b></span><span><i class="low"></i>Low <b>120</b></span><span><i class="info"></i>Info <b>263</b></span></div>
         </div>` },
-      { id: "table", title: "표 안의 심각도", desc: "행 좌측 색 막대(.sev-cell) + Tag. 정렬 기본값은 심각도 내림차순.", html: `
+      { id: "table", title: "표 안의 심각도", desc: "심각도 칸은 Tag 하나로 씁니다(행 좌측 색 막대 .sev-cell 은 2026-11-11 에 없앴습니다 — Tag 글자가 색을 나릅니다). 정렬 기본값은 심각도 내림차순.", html: `
         <div class="tbl-wrap" style="max-width:720px">
           <table class="tbl compact">
             <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">심각도</button></th><th>이벤트</th><th>대상</th><th class="num">건수</th></tr></thead>
             <tbody>
-              <tr><td><span class="sev-cell"><i class="critical"></i><span class="tag critical sm">Critical</span></span></td><td>랜섬웨어 행위 탐지</td><td>PC-2041</td><td class="num">3</td></tr>
-              <tr><td><span class="sev-cell"><i class="high"></i><span class="tag high sm">High</span></span></td><td>알려진 악성코드 차단</td><td>PC-0932</td><td class="num">2</td></tr>
-              <tr><td><span class="sev-cell"><i class="medium"></i><span class="tag medium sm">Medium</span></span></td><td>미승인 USB 연결</td><td>PC-1187</td><td class="num">1</td></tr>
-              <tr><td><span class="sev-cell"><i class="low"></i><span class="tag low sm">Low</span></span></td><td>정책 동기화 지연</td><td>Server-03</td><td class="num">12</td></tr>
-              <tr><td><span class="sev-cell"><i class="info"></i><span class="tag info sm">Info</span></span></td><td>스케줄 검사 완료</td><td>PC-0411</td><td class="num">48</td></tr>
+              <tr><td><span class="tag critical sm">Critical</span></td><td>랜섬웨어 행위 탐지</td><td>PC-2041</td><td class="num">3</td></tr>
+              <tr><td><span class="tag high sm">High</span></td><td>알려진 악성코드 차단</td><td>PC-0932</td><td class="num">2</td></tr>
+              <tr><td><span class="tag medium sm">Medium</span></td><td>미승인 USB 연결</td><td>PC-1187</td><td class="num">1</td></tr>
+              <tr><td><span class="tag low sm">Low</span></td><td>정책 동기화 지연</td><td>Server-03</td><td class="num">12</td></tr>
+              <tr><td><span class="tag info sm">Info</span></td><td>스케줄 검사 완료</td><td>PC-0411</td><td class="num">48</td></tr>
             </tbody>
           </table>
         </div>` },

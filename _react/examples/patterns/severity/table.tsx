@@ -1,4 +1,4 @@
-import { DataTable, SevCell, Tag, type DataTableColumn } from "@jiran/ds-react";
+import { DataTable, Tag, type DataTableColumn } from "@jiran/ds-react";
 
 type Sev = "critical" | "high" | "medium" | "low" | "info";
 type Row = { id: string; sev: Sev; event: string; target: string; count: number };
@@ -14,11 +14,7 @@ const ROWS: Row[] = [
 const COLUMNS: DataTableColumn<Row>[] = [
   {
     key: "sev", header: "심각도", sortable: true, sortValue: (r) => RANK[r.sev],
-    render: (r) => (
-      <SevCell tone={r.sev}>
-        <Tag tone={r.sev} size="sm">{LABEL[r.sev]}</Tag>
-      </SevCell>
-    ),
+    render: (r) => <Tag tone={r.sev} size="sm">{LABEL[r.sev]}</Tag>,
   },
   { key: "event", header: "이벤트" },
   { key: "target", header: "대상" },

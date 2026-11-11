@@ -1131,7 +1131,7 @@ function specExpect() {
         neutral(톤 클래스 없는 .tag)은 Figma 에 따로 두지 않고 Info 가 맡는다 — 바탕 · 점 · Solid 가 CSS 에서 info 와 같을 때만(다르면 멈춤 — 그때는 Neutral 변형이 필요하다).
    라벨 저장소 예제(components.data.js · patterns.data.js 의 examples html)의 <span class="tag 톤 …">라벨</span> 에서 라벨 → 톤. 한 라벨이 두 톤에 쓰이면 대조하지 않는다.
    지표 단계 = patterns.data.js severity 의 band 예제 <i class="단계" style="flex:N"> 순서, 색 = ds-chart TONES[단계](캔버스 · 정적이 같은 표).
-        정적 CSS(.chart-legend i · .chart .bar i · .sev-band i · .sev-cell i · .donut conic-gradient 순서)가 TONES 와 다르면 기대값을 읽다 멈춘다 */
+        정적 CSS(.chart-legend i · .chart .bar i · .sev-band i · .donut conic-gradient 순서 — .sev-cell 은 2026-11-11 에 없앰)가 TONES 와 다르면 기대값을 읽다 멈춘다 */
 function severityExpect() {
   const box = { I: () => "", module: { exports: {} } };
   vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
@@ -1191,7 +1191,7 @@ function severityExpect() {
   for (const l of levels) {
     if (!TONES[l]) throw new Error(`심각도 단계 ${l} 가 ds-chart TONES 에 없습니다`);
     const t = tok(TONES[l]);
-    for (const sel of [`.chart-legend i.${l}`, `.chart .bar.${l} i`, `.sev-band i.${l}`, `.sev-cell i.${l}`]) { const r = has(sel); if (!r || figTok(r.background) !== t) throw new Error(`${sel} ${r ? r.background : "없음"} ≠ ds-chart TONES.${l} ${TONES[l]}`); }
+    for (const sel of [`.chart-legend i.${l}`, `.chart .bar.${l} i`, `.sev-band i.${l}`]) { const r = has(sel); if (!r || figTok(r.background) !== t) throw new Error(`${sel} ${r ? r.background : "없음"} ≠ ds-chart TONES.${l} ${TONES[l]}`); }
     marks[CAP(l)] = t;
   }
   const conic = [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+[\d.]+%?\s+[\d.]+%/g)].map((x) => figTok("var(--" + x[1] + ")")).filter((x) => x !== "surface/elevated/primary");

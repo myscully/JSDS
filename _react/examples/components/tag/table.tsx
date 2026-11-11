@@ -20,7 +20,7 @@ export default function Example() {
             <TableCell>{name}</TableCell>
             <TableCell>
               <TagGroup max={2} moreLabel={(n) => `분류 ${n}개 더 보기`}>
-                {tags.map((t) => <Tag key={t} variant="plain">{t}</Tag>)}
+                {tags.map((t) => <Tag key={t}>{t}</Tag>)}
               </TagGroup>
             </TableCell>
           </TableRow>

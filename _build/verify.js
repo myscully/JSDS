@@ -440,16 +440,16 @@ if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
 }
 /* 색만으로 의미를 전달하지 않는다 — 심각도 다섯 색은 회색조로 분리할 수 없으므로(상태색 램프를 공유하는 한
    만들 수도 없습니다) 1.4.1 준수는 전적으로 라벨 병기에 의존합니다. 그 라벨을 검사하는 것이 지금까지 없었습니다.
-   도넛·밴드는 그래픽이라 접근 이름이 있어야 하고, 표의 좌측 막대(.sev-cell)는 같은 칸 안에 글자가 있어야 합니다. */
+   도넛·밴드는 그래픽이라 접근 이름이 있어야 합니다. 표의 좌측 막대(.sev-cell)는 2026-11-11 에 없앴습니다(사람의 결정 — Tag 글자가 색을 나름). */
 for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
   const rel = path.relative(OUT, f), html = article(read(rel));
   for (const [sel, re] of [[".donut", /<div class="donut"[^>]*>/g], [".sev-band", /<div class="sev-band"[^>]*>/g]])
     for (const m of html.match(re) || []) if (!/aria-label=|aria-hidden="true"/.test(m)) fails.push(`${rel}: ${sel} 에 접근 이름도 aria-hidden 도 없다 — 색만으로 심각도를 전달한다`);
   /* 정적 도넛의 조각 경계는 2px 구분선(i)이다 — 빠지면 조각이 틈 없이 붙어 보인다(2026-11-05, conic 각도 띠를 구분선으로 바꿈) */
   for (const m of html.matchAll(/<div class="donut"[^>]*>([\s\S]*?)<\/div>/g)) if ((m[1].match(/<i style="--a:[\d.]+deg"><\/i>/g) || []).length < 2) fails.push(`${rel}: .donut 에 경계 구분선 <i style="--a:…deg"> 가 없다 — 조각 사이 2px 틈이 사라진다`);
-  /* .sev-cell 은 여는 태그부터 닫는 </td>/</div> 까지에 글자가 있어야 한다 */
-  for (const m of html.matchAll(/<(td|div)([^>]*class="[^"]*sev-cell[^"]*"[^>]*)>([\s\S]*?)<\/\1>/g))
-    if (!/[가-힣A-Za-z0-9]/.test(m[3].replace(/<[^>]*>/g, ""))) fails.push(`${rel}: .sev-cell 에 라벨 글자가 없다 — 3px 막대 색만 남는다`);
+  /* 없앤 것이 돌아오지 않게(2026-11-11) — .sev-cell(행 좌측 색 막대), Tag 의 .plain(점이 기본에서 빠져 뜻이 없어짐 — 점은 .dot) */
+  if (/class="[^"]*\bsev-cell\b/.test(html)) fails.push(`${rel}: .sev-cell 은 없앴다 — 심각도 칸은 Tag 하나로`);
+  for (const m of html.matchAll(/class="([^"]*\btag\b[^"]*)"/g)) if (/\bplain\b/.test(m[1])) fails.push(`${rel}: Tag 의 .plain 은 없앴다(기본이 점 없음) — 점이 필요하면 .dot`);
 }
 
 /* 상호작용 면은 **틴트 쌍**을 써야 한다 — --surface-neutral-secondary → --surface-neutral-strong.

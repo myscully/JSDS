@@ -714,6 +714,7 @@ const COMPONENTS = {
     desc: "상태·분류·심각도를 짧게 표시합니다. 색만이 아니라 라벨 텍스트로도 의미를 전달합니다. 선택·삭제가 필요하면 Chip 을 씁니다.",
     principles: [
       ["톤", "의미 색은 정해진 심각도 · 상태 어휘에만 씁니다. 사용자가 만든 라벨은 중립 또는 accent 입니다."],
+      ["색", "색은 틴트와 같은 색상의 진한 글자(<code>--foreground-*-heavy</code>)가 나릅니다. 점은 기본으로 없고, 필요할 때 <code>.dot</code> 으로 켭니다. 라벨 글자가 늘 등급 이름이라 색만으로 뜻을 전하지 않습니다."],
       ["라벨", "1~2단어로 씁니다. 사용자가 짓는 라벨은 입력에서 글자 수를 제한합니다. 폭 160 을 넘으면 줄바꿈합니다. 포커스를 받지 않아 잘라 내면 읽을 길이 없습니다."],
       ["누를 수 없음", "Tag 는 표시 전용입니다. 선택 · 삭제는 Chip 을 씁니다."],
       ["여러 개", "표 칸은 앞 2개와 <code>+N</code> 을 보이고 나머지는 Tooltip 으로 보여 줍니다. <code>+N</code> 은 포커스를 받는 버튼입니다. 표 밖에서는 줄바꿈해 전부 보입니다."],
@@ -721,7 +722,7 @@ const COMPONENTS = {
     thumb: `<span class="tag critical">Critical</span><span class="tag medium">Medium</span><span class="tag ok">정상</span>`,
     examples: [
       { id: "default", title: "Default", desc: "의미 색을 지정하지 않은 중립 태그입니다.", html: `<span class="tag">Tag</span>` },
-      { id: "severity", title: "Severity", desc: "위협 심각도 5단계. 색은 상태·강조 의도 매핑입니다 — Critical=negative · High=cautionary · Medium=accent light blue · Low=accent lime · Info=중립. 라벨은 중립 글자색이고 색은 점과 틴트가 나릅니다.", html: `
+      { id: "severity", title: "Severity", desc: "위협 심각도 5단계. 색은 상태·강조 의도 매핑입니다 — Critical=negative · High=cautionary · Medium=accent light blue · Low=accent lime · Info=중립. 글자는 틴트와 같은 색상의 진한 톤(<code>--foreground-*-heavy</code>)이고 점은 없습니다.", html: `
         <span class="tag critical">Critical</span>
         <span class="tag high">High</span>
         <span class="tag medium">Medium</span>
@@ -734,27 +735,27 @@ const COMPONENTS = {
         <span class="tag high">반려</span>
         <span class="tag">보관</span>
         <span class="tag accent">신규</span>` },
-      { id: "style", title: "Style", desc: "Outline · Solid(강조) · Plain(점 없음).", html: `
+      { id: "style", title: "Style", desc: "Outline · Solid(강조) · Dot(글자 앞 점 — 선택).", html: `
         <span class="tag critical outline">Critical</span>
         <span class="tag medium outline">Medium</span>
         <span class="tag critical solid">Critical</span>
         <span class="tag ok solid">정상</span>
-        <span class="tag plain">v2.4.1</span>
-        <span class="tag accent plain">Beta</span>` },
+        <span class="tag critical dot">Critical</span>
+        <span class="tag ok dot">정상</span>` },
       { id: "size", title: "Size", desc: "sm 은 테이블 밀도 높은 셀, lg 는 상세 패널 제목 옆.", html: `
         <span class="tag high sm">High</span>
         <span class="tag high">High</span>
         <span class="tag high lg">High</span>` },
       { id: "group", title: "Group", desc: "표 밖에서는 줄바꿈해 전부 보입니다. 사용자가 만든 라벨은 중립 또는 accent 입니다.", html: `
-        <div class="tag-group" style="max-width:240px"><span class="tag plain">내부망</span><span class="tag plain">재택 근무</span><span class="tag plain">외부 협력사</span><span class="tag plain">서버실</span><span class="tag plain">임원</span><span class="tag accent plain">신규</span></div>` },
+        <div class="tag-group" style="max-width:240px"><span class="tag">내부망</span><span class="tag">재택 근무</span><span class="tag">외부 협력사</span><span class="tag">서버실</span><span class="tag">임원</span><span class="tag accent">신규</span></div>` },
       { id: "table", title: "In Table", desc: "표 칸은 행 높이를 지키려고 앞 2개와 <code>+N</code> 을 보입니다. 키보드로 <code>+N</code> 에 오면 나머지가 Tooltip 으로 뜹니다.", html: `
         <div class="tbl-wrap" style="max-width:480px"><table class="tbl compact"><thead><tr><th>정책</th><th>분류</th></tr></thead><tbody>
-          <tr><td>외부 USB 차단</td><td><div class="tag-group"><span class="tag plain">내부망</span><span class="tag plain">재택 근무</span><span class="tooltip-wrap"><button type="button" class="tag plain tag-more" aria-label="분류 3개 더 보기" aria-describedby="tm-1">+3</button><span class="tooltip" role="tooltip" id="tm-1">외부 협력사, 서버실, 임원</span></span></div></td></tr>
-          <tr><td>웹 필터 기본</td><td><div class="tag-group"><span class="tag plain">전사</span></div></td></tr>
+          <tr><td>외부 USB 차단</td><td><div class="tag-group"><span class="tag">내부망</span><span class="tag">재택 근무</span><span class="tooltip-wrap"><button type="button" class="tag tag-more" aria-label="분류 3개 더 보기" aria-describedby="tm-1">+3</button><span class="tooltip" role="tooltip" id="tm-1">외부 협력사, 서버실, 임원</span></span></div></td></tr>
+          <tr><td>웹 필터 기본</td><td><div class="tag-group"><span class="tag">전사</span></div></td></tr>
         </tbody></table></div>` },
     ],
-    props: [[".tag-group", "container", "—", "여러 개를 묶음. 표 밖 줄바꿈, 표 칸 한 줄. React TagGroup max 는 앞 n개 + +N"], [".tag-more", "button", "—", "표 칸의 +N. .tooltip-wrap 안에 두고 나머지를 Tooltip 으로"], ["tone", "critical | high | medium | low | info | ok | pending | accent | (neutral)", "neutral", "의미별 색. 심각도 5단계는 critical · high · medium · low · info, pending 은 상태 톤(검토 대기)입니다. 바탕은 틴트(<code>--surface-{negative|cautionary|…}-primary</code>)이고 <b>라벨은 중립 글자색</b>입니다 — 색은 점(<code>::before</code>)과 테두리가 나릅니다. <code>.solid</code> 는 한 단계 강한 틴트 + 테두리입니다(기준 시스템에 솔리드 상태 면이 없습니다). 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid | .plain", "subtle", "아웃라인 / 채움 / 점 없음"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
-    spec: [["Max width", "160 — 넘으면 줄바꿈(잘라 내지 않음)"], ["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--surface-{…}-primary</code> 틴트, <code>.solid</code> 는 같은 틴트 + <code>--line-{…}</code> 테두리(Critical 만 <code>--surface-negative-strong</code>)"], ["Label", "12 SemiBold (세 사이즈 공통)"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
+    props: [[".tag-group", "container", "—", "여러 개를 묶음. 표 밖 줄바꿈, 표 칸 한 줄. React TagGroup max 는 앞 n개 + +N"], [".tag-more", "button", "—", "표 칸의 +N. .tooltip-wrap 안에 두고 나머지를 Tooltip 으로"], ["tone", "critical | high | medium | low | info | ok | pending | accent | (neutral)", "neutral", "의미별 색. 심각도 5단계는 critical · high · medium · low · info, pending 은 상태 톤(검토 대기)입니다. 바탕은 틴트(<code>--surface-{negative|cautionary|…}-primary</code>)이고 <b>글자는 같은 색상의 진한 톤</b>(<code>--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy</code> · info 는 neutral-secondary · accent 는 brand-primary)입니다. <code>.solid</code> 는 한 단계 강한 틴트 + 테두리입니다(기준 시스템에 솔리드 상태 면이 없습니다). 라벨 색을 직접 지정하지 마세요"], ["style", ".outline | .solid", "subtle", "아웃라인 / 채움"], [".dot", "boolean", "false", "글자 앞 점(등급 색). 기본은 점 없음 — 옛 <code>.plain</code> 은 없어졌습니다"], ["size", "sm | (md) | lg", "md", "폰트는 12 고정이고 padding 으로 높이만 21 / 25 / 29"]],
+    spec: [["Max width", "160 — 넘으면 줄바꿈(잘라 내지 않음)"], ["Size", "높이 25 (sm 21 · lg 29) · padding 3/10 (sm 1/8 · lg 5/12)"], ["Container", "radius/full · 기본형은 <code>--surface-{…}-primary</code> 틴트, <code>.solid</code> 는 같은 틴트 + <code>--line-{…}</code> 테두리(Critical 만 <code>--surface-negative-strong</code>)"], ["Label", "12 SemiBold (세 사이즈 공통) · 같은 색상의 진한 톤 <code>--foreground-*-heavy</code>(라이트 30 · Low 20 / 다크 60) · 점은 <code>.dot</code> 일 때만 6"], ["Placement", "테이블 셀, 카드 헤더, 상세 패널 제목 옆"]],
     figma: { frame: "Tag", radius: "radius/full", sizes: { sm: { h: 21 }, md: { h: 25 }, lg: { h: 29 } }, variants: { critical: { bg: "--surface-negative-primary", fg: "--foreground-negative-strong", solidBg: "--surface-negative-strong", solidFg: "--foreground-neutral-primary" }, high: { bg: "--surface-cautionary-primary", fg: "--foreground-cautionary-primary", solidBg: "--surface-cautionary-primary", solidFg: "--foreground-neutral-primary" }, medium: { bg: "--surface-accent-light-blue", fg: "--foreground-accent-light-blue", solidBg: "--surface-accent-light-blue", solidFg: "--foreground-neutral-primary" }, low: { bg: "--surface-accent-lime", fg: "--foreground-accent-lime", solidBg: "--surface-accent-lime", solidFg: "--foreground-neutral-primary" }, info: { bg: "--surface-neutral-strong", fg: "--foreground-inactive-primary", solidBg: "--surface-neutral-strong", solidFg: "--foreground-neutral-primary" }, pending: { bg: "--surface-accent-cyan", fg: "--foreground-accent-cyan", solidBg: "--surface-accent-cyan", solidFg: "--foreground-neutral-primary" }, ok: { bg: "--surface-positive-primary", fg: "--foreground-positive-primary", solidBg: "--surface-positive-primary", solidFg: "--foreground-neutral-primary" }, accent: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary", solidBg: "--surface-brand-primary", solidFg: "--brand-label" }, neutral: { bg: "--surface-neutral-strong", fg: "--foreground-inactive-primary" } }, states: ["subtle", "outline", "solid"] },
   },
 
@@ -2032,7 +2033,7 @@ const COMPONENTS = {
         </div>` },
       { id: "badge", title: "With Tag", desc: "우상단에 상태·신규 태그. 비활성 타일에서는 태그도 비활성 색으로 흐립니다.", html: `
         <div class="tile-grid" style="max-width:560px">
-          <button type="button" class="tile"><span class="tag accent sm plain">NEW</span><span class="ico">${I("bell")}</span><b>Slack 알림</b><span>채널로 이벤트 전송</span></button>
+          <button type="button" class="tile"><span class="tag accent sm">NEW</span><span class="ico">${I("bell")}</span><b>Slack 알림</b><span>채널로 이벤트 전송</span></button>
           <button type="button" class="tile"><span class="tag ok sm">연결됨</span><span class="ico">${I("user")}</span><b>AD 연동</b><span>사용자·그룹 동기화</span></button>
           <button type="button" class="tile" disabled><span class="tag accent sm">Enterprise</span><span class="ico">${I("chart-bar")}</span><b>SIEM 연동</b><span>이벤트 로그 전달</span></button>
         </div>` },

@@ -209,6 +209,14 @@ const DEVIATIONS = {
    diff() 가 이 표도 검사한다: 적어 둔 이름이 CSS 에 없으면 실패이고,
    참조 정의에 같은 이름이 생기면(= 더 이상 '추가'가 아니면) 그것도 알린다. */
 const ADDITIONS = {
+  /* Tag 글자 — 틴트와 같은 색상의 진한 톤(사람의 결정 2026-11-11). 참조의 foreground 는 primary · strong 까지라 12% 틴트 위에서 4.5 를 넘는 글자 단계가 없다
+     (negative-strong 도 3.68). 라이트 30 · 다크 60(lime 만 라이트 20 — 30 이 4.42, red 만 다크 70 — solid 면 위 4.08). primary < strong < heavy 문법을 따른다 */
+  "foreground-negative-heavy": "Critical Tag 글자 — red-30 / red-70(다크 60 은 Critical solid 의 강한 면 위 4.08)",
+  "foreground-cautionary-heavy": "High Tag 글자 — orange-30 / orange-60",
+  "foreground-accent-light-blue-heavy": "Medium Tag 글자 — light-blue-30 / light-blue-60",
+  "foreground-accent-lime-heavy": "Low Tag 글자 — lime-20 / lime-60(라이트 30 은 틴트 위 4.42)",
+  "foreground-accent-cyan-heavy": "Pending Tag 글자 — cyan-30 / cyan-60",
+  "foreground-positive-heavy": "ok Tag 글자 — green-30 / green-60",
   "surface-negative-heavy":
     "파괴적 버튼의 눌림 — 참조의 부정 틴트가 primary·strong 둘뿐이라 hover 다음 단계가 없었다(라이트 22% · 다크 28% — strong 보다 한 단계 위)",
   "surface-negative-hover":
