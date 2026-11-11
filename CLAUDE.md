@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1141/1141 · react 683+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1218쌍 실패 0 · advisory 455 · behave 1142/1142 · react 683+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -365,6 +365,15 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - verify 의 `FONT_STRAY` 에서 `0.8125rem` 을 지웠다 — 이제 컴포넌트 `font-size` 예외는 인라인 코드 `.9em` 하나(되돌리면 verify 실패, 음성 시험). 사이트 셸의 9 · 11 · 13 · 15 는 문서 화면 전용이라 rem 그대로.
 - behave 기대값: 달력 글자 13 → 14(behave.dp), 행 펼침 원본 로그 13 → 12(behave.expand). Spec 문구 Breadcrumb Label · Code Body.
 - Figma 미반영 149 → 165건 — Breadcrumb 글자 13/22 ≠ 14/22 15 · Spec 문구 1. 일괄 반영 때 Breadcrumb 글자를 Body 2 스타일에 묶는다(audit 메시지에 적음). 달력 · Code 글자는 audit 대조 밖.
+
+2026-11-11 대시보드 KPI 넷을 한 줄로(사람의 요청 · 결정) — behave 1141 → 1142(`behave.scale.js` 1). contrast · react 수는 그대로.
+- 1280 이상에서 문서 본문이 758 이라 4열 한 칸이 177.5 인데 '1,247 / 1,284' 가 패딩 24 로 181 이 필요해 3 + 1 로 줄바꿈했다(B 에서 적어 둔 '이미 있던 것').
+- **격자 안 KPI 는 좌우 패딩 20**(사람의 결정 — 예제 값을 줄이는 안 대신) · `.kpi-grid` 칸 최소 180 → 176 · 격자 안에서 카드 최소 폭 0. 격자 밖 KPI 는 24 · 180 그대로.
+  1024 · 1280 · 1440 · 1920 · 2560 에서 넷이 한 줄이고 가장 긴 줄도 5px 이상 남는다. Data Visual 예제의 KPI 도 격자 안이라 20 이 된다.
+- 단정은 한 줄인지와 값 · 단위 · 증감이 카드 안쪽 폭에 드는지를 함께 잰다. 음성 시험 2건(규칙 지움 · 패딩만 24 로) 모두 실패로 잡혔다 — 칸만 좁히면 넷이 한 줄이어도 값이 카드 밖으로 3px 나간다.
+- 덤으로 고친 문서: 대시보드 원칙 '밀도' 의 '카드 gap 20' 은 실제 16 이었다(kpi-grid · row-3 · stack 모두 1rem). Data Visual Spec Container 에 KPI 패딩 · 칸 최소를 적었다.
+- Figma 미반영 165 → 166건(Spec 문구 1). Figma 의 KPI 카드 패딩 24 는 audit 대조 밖이라 수에 없다 — 일괄 반영 때 대시보드 · 예제 KPI 패딩을 20 으로.
+
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

@@ -217,7 +217,7 @@ const PATTERNS = {
     status: "ready", react: ["PageHead","Stack","Row3"], uses: ["data-visual", "card", "tag", "data-table", "select-button", "button"], css: [".page-head", ".stack", ".row-2", ".row-3"], borrows: [".t-caption-1"],
     desc: "보안 관리자의 첫 화면. 상단 KPI 4개, 아래 추이·분포 차트, 최근 이벤트 표. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
     thumb: `<div class="kpi-grid" style="width:240px;gap:6px"><div class="kpi critical" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">Critical</span><span class="value" style="font-size:18px">1,284</span></div><div class="kpi" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">차단률</span><span class="value" style="font-size:18px">99.2%</span></div></div>`,
-    principles: [["위계", "KPI(무슨 일) → 차트(어디서·얼마나) → 표(무엇을 할지)"], ["기간", "화면 우상단 Select Button 하나로 전체 기간을 바꿈"], ["밀도", "카드 gap 20, 카드 내부 24. 스크롤 없이 첫 화면에 KPI+차트"]],
+    principles: [["위계", "KPI(무슨 일) → 차트(어디서·얼마나) → 표(무엇을 할지)"], ["기간", "화면 우상단 Select Button 하나로 전체 기간을 바꿈"], ["밀도", "카드 gap 16, 카드 내부 24(KPI 는 좌우 20). 스크롤 없이 첫 화면에 KPI+차트"]],
     examples: [
       { id: "full", title: "대시보드", html: `
         <div class="stack">

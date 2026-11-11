@@ -1515,7 +1515,9 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .kpi:has(> .sparkline) > .label,.kpi:has(> .sparkline) > .delta{flex-basis:100%}
 .kpi:has(> .sparkline) > .value{flex:1 0 auto}
 .kpi:has(> .sparkline) > .delta{order:1}   /* delta 는 값·그래프 줄 아래 */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11.25rem,1fr));gap:1rem;width:100%;line-height:1.6}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:1rem;width:100%;line-height:1.6}
+.kpi-grid > .kpi{min-width:0;padding-left:1.25rem;padding-right:1.25rem}   /* 격자 안 KPI 는 좌우 20 · 칸 최소 176(사람의 결정 2026-11-11) — 1280 이상 문서 본문 758 에서 4열 한 칸은 177.5 인데
+   '1,247 / 1,284' 가 패딩 24 로 181 이 필요해 3 + 1 로 줄바꿈했다. 이제 1024 ~ 2560 다섯 폭에서 넷이 한 줄이고 가장 긴 값도 5px 이상 남는다(behave.scale). 카드 하나의 최소 폭 180 은 격자 밖 KPI 에만 */
 .chart{display:flex;flex-direction:column;gap:0.625rem;width:100%;font-size:var(--font-size-12);line-height:1.6}
 .chart .row{display:grid;grid-template-columns:7.5rem 1fr 3.5rem;align-items:center;gap:0.75rem}
 .chart .row .lbl{color:var(--foreground-neutral-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

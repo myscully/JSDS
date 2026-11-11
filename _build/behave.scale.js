@@ -79,6 +79,20 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("scale: no component example spills out of its preview at 1100 and 2560", bad.length === 0, bad.slice(0, 4).join(" || "));
   });
 
+  /* 대시보드 KPI 넷은 1024 ~ 2560 에서 한 줄(사람의 결정 2026-11-11 — 격자 안 KPI 좌우 20 · 칸 최소 176). 1280 이상 문서 본문 758 에서 3 + 1 로 줄바꿈하던 것.
+     가장 긴 줄(값 · 단위 · 증감)이 카드 안쪽 폭 안에 들어가는지도 잰다 — 칸만 좁히고 패딩을 그대로 두면 값이 카드 밖으로 나간다 */
+  await step("scale: dashboard keeps its four KPIs in one row from 1024 to 2560 and every value fits its card", async () => {
+    const r = {};
+    for (const w of [1024, 1280, 1440, 1920, 2560]) {
+      await page.setViewportSize({ width: w, height: 900 }); await go("patterns/dashboard.html");
+      r[w] = await page.evaluate(() => { const ks = [...document.querySelectorAll("#ex-dashboard-full .kpi-grid > .kpi")];
+        return { n: ks.length, rows: new Set(ks.map((k) => Math.round(k.getBoundingClientRect().top))).size,
+          spare: Math.min(...ks.map((k) => { const cs = getComputedStyle(k), inner = k.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+            return Math.min(...[...k.children].map((c) => { const g = document.createRange(); g.selectNodeContents(c); return Math.floor(inner - g.getBoundingClientRect().width); })); })) }; });
+    }
+    ok("scale: dashboard keeps its four KPIs in one row from 1024 to 2560 and every value fits its card", Object.values(r).every((x) => x.n === 4 && x.rows === 1 && x.spare >= 0), JSON.stringify(r));
+  });
+
   ok("scale: no page errors", errors.length === 0, errors.slice(0, 3).join(" | "));
   await ctx.close();
 };
