@@ -19,7 +19,8 @@ module.exports = async function cells({ page, ok, go }) {
 
   /* 키보드로 오면 바로 보이고, 스크롤 영역 안이라 화면 기준으로 뜬다 */
   const cellText = page.locator(`${W} td.truncate .cell-text`).first();
-  await cellText.focus(); await wait(220);
+  await cellText.focus();
+  await page.waitForFunction((s) => Number(getComputedStyle(document.querySelector(s).querySelector("td.truncate > .tooltip-wrap > .tooltip")).opacity) === 1, W, { timeout: 1500 }).catch(() => {});   // 나타나는 전환 도중에 재면 0.96 · 0.999 가 나왔다
   const kb = await page.evaluate((s) => { const w = document.querySelector(s).querySelector("td.truncate > .tooltip-wrap"), tip = w.querySelector(".tooltip"), r = tip.getBoundingClientRect(), c = getComputedStyle(tip);
     return { op: Number(c.opacity), pos: c.position, inView: r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight, focus: document.activeElement === w.querySelector(".cell-text") }; }, W);
   ok("a cut cell shows its Tooltip on keyboard focus, floating on the screen and fully visible", kb.op === 1 && kb.pos === "fixed" && kb.inView && kb.focus, JSON.stringify(kb));
@@ -76,4 +77,31 @@ module.exports = async function cells({ page, ok, go }) {
     return { broken, hs, msgW: msg && Math.round(msg.getBoundingClientRect().width), widest: Math.max(...ths), over: w.scrollWidth - w.clientWidth };
   });
   ok("log rows stay on one line (time · IP · host never break) and the message column takes the remaining width", lg.broken.length === 0 && lg.hs.length === 1 && lg.msgW === lg.widest && lg.over === 0, JSON.stringify(lg));
+
+  /* compact 행의 아이콘 동작은 28 이고 칸 패딩 5 — 행이 40(다른 compact 행과 같음), 버튼은 칸 가운데 */
+  const cp = await page.evaluate(() => { const tr = document.querySelector(".example-preview tr.log-row"), td = tr.querySelector("td.actions"), b = td.querySelector(".btn"), r = b.getBoundingClientRect(), tr_ = td.getBoundingClientRect();
+    return { row: Math.round(tr.getBoundingClientRect().height), btn: [b.offsetWidth, b.offsetHeight], svg: Math.round(b.querySelector("svg").getBoundingClientRect().width), top: Math.round(r.top - tr_.top), bottom: Math.round(tr_.bottom - r.bottom) }; });
+  ok("compact row icon actions are 28 so the row stays 40, centred in the cell", cp.row === 40 && cp.btn.join() === "28,28" && cp.svg === 16 && Math.abs(cp.top - cp.bottom) <= 1, JSON.stringify(cp));
+
+  /* ── 입력값 칩의 긴 값 — 잘린 값에만 Tooltip, title 없음 ── */
+  await go("components/chip.html"); await page.evaluate(() => document.fonts.ready); await wait(50); await away();
+  const chip = await page.evaluate(() => { const ls = [...document.querySelectorAll(".example-preview .chip .lbl")];
+    const cut = ls.filter((l) => l.scrollWidth > l.clientWidth), tipped = ls.filter((l) => l.parentElement.classList.contains("tooltip-wrap"));
+    const tip = tipped[0] && tipped[0].parentElement.querySelector(".tooltip");
+    return { n: ls.length, cut: cut.length, tipped: tipped.length, same: cut.every((l) => tipped.includes(l)), titles: document.querySelectorAll(".example-preview .chip [title]").length, text: tip && tip.textContent === tipped[0].textContent, hidden: tip && tip.getAttribute("aria-hidden"), h: tipped[0] && tipped[0].closest(".chip").offsetHeight }; });
+  ok("only a cut chip value gets a Tooltip (aria-hidden, same text), no title, and the chip keeps its height", chip.n > 1 && chip.cut > 0 && chip.tipped === chip.cut && chip.same && chip.titles === 0 && chip.text && chip.hidden === "true" && chip.h === 32, JSON.stringify(chip));
+  { const l = page.locator("#ex-chip-long .tooltip-wrap > .lbl").first(); await l.scrollIntoViewIfNeeded(); await wait(150); await l.hover(); await page.waitForFunction(() => Number(getComputedStyle(document.querySelector("#ex-chip-long .tooltip-wrap > .tooltip")).opacity) === 1, null, { timeout: 1500 }).catch(() => {}); }   // 스크롤이 띄운 툴팁을 숨기므로(기존 규칙) 먼저 보이게 한 뒤 올린다
+  const chipHover = await page.evaluate(() => { const tip = document.querySelector("#ex-chip-long .tooltip-wrap > .tooltip"), r = tip.getBoundingClientRect(); return { op: Number(getComputedStyle(tip).opacity), inView: r.left >= 0 && r.right <= innerWidth && r.top >= 0 }; });
+  ok("hovering a cut chip value shows its Tooltip", chipHover.op === 1 && chipHover.inView, JSON.stringify(chipHover));
+  await away();
+
+  /* 세 밀도 모두 행 동작 아이콘 버튼이 있는 행 = 없는 행 높이(48 · 40 · 56), 버튼은 칸 가운데 */
+  await go("components/data-table.html");
+  const dens = await page.evaluate(() => { const host = document.querySelector("#ex-data-table-sticky .example-preview"), out = {};
+    for (const d of ["", "compact", "relaxed"]) { const box = document.createElement("div");
+      box.innerHTML = `<div class="tbl-wrap"><table class="tbl ${d}"><thead><tr><th>이름</th><th class="actions"></th></tr></thead><tbody><tr><td>정책 A</td><td class="actions"><button type="button" class="btn sm assistive icon-only" aria-label="정책 A 더 보기"><svg width="16" height="16"></svg></button></td></tr><tr><td>정책 B</td><td>-</td></tr></tbody></table></div>`;
+      host.append(box); const rows = box.querySelectorAll("tbody tr"), btn = box.querySelector(".btn"), r = btn.getBoundingClientRect(), t = btn.parentElement.getBoundingClientRect();
+      out[d || "default"] = [Math.round(rows[0].getBoundingClientRect().height), Math.round(rows[1].getBoundingClientRect().height), btn.offsetHeight, Math.round(r.top - t.top) - Math.round(t.bottom - r.bottom)]; box.remove(); }
+    return out; });
+  ok("a row with an icon action keeps its density height (48 · 40 · 56) with the button centred", JSON.stringify(dens) === JSON.stringify({ default: [48, 48, 32, 0], compact: [40, 40, 28, 0], relaxed: [56, 56, 32, 0] }), JSON.stringify(dens));
 };

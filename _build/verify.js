@@ -227,6 +227,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       }
       for (const m of pv.matchAll(/<ol class="breadcrumb[^"]*">[\s\S]*?<\/ol>/g)) if (/\btitle="/.test(m[0])) fails.push(`${f}: Breadcrumb 에 title 금지 — 키보드로 볼 수 없습니다. 잘린 항목의 Tooltip 은 ds.js 가 답니다(Breadcrumb › Long label)`);
       for (const m of pv.matchAll(/<td\b[^>]*\bclass="[^"]*\btruncate\b[^"]*"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: 말줄임 칸(td.truncate)에 title 금지 — 키보드로 볼 수 없습니다. 잘린 칸의 Tooltip 은 ds.js 가 답니다(Data Table › 고정 헤더)`);
+      for (const m of pv.matchAll(/<span\b[^>]*\bclass="lbl"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: 칩 값(.lbl)에 title 금지 — 키보드로 볼 수 없습니다. 잘린 값의 Tooltip 은 ds.js 가 답니다(Chip › 긴 값)`);
       for (const m of pv.matchAll(/<span\b[^>]*\bclass="avatar\b[^"]*"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: Avatar 에 title 금지 — 이름은 role="img" + aria-label, 누르는 아바타는 버튼의 이름으로(Avatar)`);
       { const charts = (pv.match(/<canvas\b[^>]*\bdata-chart=/g) || []).length, views = (pv.match(/<div class="chart-view"[^>]*><div class="chart-tools"><button\b[^>]*\bdata-chart-table\b/g) || []).length; if (charts !== views) fails.push(`${f}: 탐색형 차트는 .chart-view 와 표로 보기 버튼을 함께 씁니다(차트 ${charts} · 버튼 ${views}, Data Visual)`); }
       /* Date Picker 시각 옵션(2026-11-10) */

@@ -999,7 +999,7 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
 .chip[disabled],.chip[aria-disabled="true"]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}   /* pointer-events:none 을 두지 않는다 — 클릭이 칩을 지나 뒤의 행 · 카드로 떨어지고 not-allowed 커서도 보이지 않았다(2026-11-12). button 은 disabled 가, span 은 ds.js 캡처가 막는다. 입력값 칩은 span 이라 disabled 속성을 못 가진다 — aria-disabled 로 (.btn 과 같게) */
 .chip[disabled] .x,.chip[aria-disabled="true"] .x{background:transparent;color:var(--foreground-disable-primary)}   /* 지울 수 없는 칩의 x 가 회색 원 + 진한 x 로 활성처럼 보였다(사람의 결정 2026-10-27) */
 .chip .lbl{min-width:0;max-width:15rem;overflow:hidden;text-overflow:ellipsis}
-.chip:focus-within .lbl{max-width:none;overflow:visible}   /* 줄인 값은 지우기 버튼에 포커스가 오면 펼친다 — title 은 키보드로 볼 수 없다(Interaction › Overflow) */
+.chip:focus-within .lbl{max-width:none;overflow:visible}   /* 줄인 값은 지우기 버튼에 포커스가 오면 펼친다 — 키보드용. 마우스는 잘린 값에만 붙는 Tooltip(2026-11-12 — title 은 키보드로 볼 수 없어 쓰지 않는다, Interaction › Overflow) */
 .chip-group{display:flex;flex-wrap:wrap;gap:0.5rem;line-height:1.6}
 
 /* Tag — 기준 시스템의 Chip 패턴을 따른다: 바탕은 상태 틴트이고 **라벨은 중립 글자색**이다.
@@ -1439,6 +1439,10 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl .check{width:2.75rem;padding-right:0}
 .tbl .check .checkbox{vertical-align:middle}
 .tbl .actions{text-align:right;white-space:nowrap}
+/* 행 동작 아이콘 버튼이 있는 칸은 위아래 패딩을 줄여 행 높이를 지킨다(사람의 결정 2026-11-12) — 버튼 + 패딩 × 2 + 아래 선 1 이 행 높이(border-box)를 넘어 기본 48 은 57, relaxed 56 은 65 였다 */
+.tbl td.actions:has(> .btn.icon-only.sm, > .dropdown > .btn.icon-only.sm){padding-top:0.4375rem;padding-bottom:0.4375rem}   /* 기본 — 32 + 7 · 7 + 1 = 47 ≤ 48. relaxed 도 이 값을 받아 56 안에 가운데로 든다 */
+.tbl.compact td.actions .btn.icon-only.sm{width:1.75rem;height:1.75rem}   /* compact 행의 아이콘 동작 28(사람의 결정 2026-11-12) — 32 + 칸 패딩 8 · 8 로 행이 40 이 아니라 48 이 됐다. 아이콘 16 · 반경 4 는 그대로 */
+.tbl.compact td.actions:has(> .btn.icon-only.sm, > .dropdown > .btn.icon-only.sm){padding-top:0.3125rem;padding-bottom:0.3125rem}   /* 28 + 8 · 8 + 아래 선 1 = 45 라 그 칸만 5 · 5 — 행 40(border-box) 안에 들고 버튼은 가운데 */
 /* 행 펼침(사람의 결정 2026-11-11) — 맨 앞 칸의 셰브론 버튼(aria-expanded · aria-controls)이 바로 뒤의 tr.row-detail 을 연다. 여러 개를 함께 펼친다.
    상세는 첫 데이터 열에 맞춰 들여 쓰고 회색 면으로 행과 가른다. 긴 원본 로그는 Code(.wrap)가 줄바꿈한다 — contain 은 재 보니 소용없어 두지 않았다 */
 /* 셰브론 칸 = 왼쪽 16 + 버튼 24. td 로 적어 .tbl.compact td 의 padding 을 이긴다 — 상세 글자가 그 뒤 첫 칸 글자와 같은 선(56)에서 시작한다 */

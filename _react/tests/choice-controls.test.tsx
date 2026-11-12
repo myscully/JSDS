@@ -160,3 +160,25 @@ describe("표의 행 이름 · Slider 단위", () => {
     expect(screen.getByRole("slider").getAttribute("aria-valuetext")).toBeNull();
   });
 });
+
+/* 입력값 칩의 긴 값(2026-11-12) — 잘린 값에만 Tooltip(aria-hidden), title 없음. jsdom 은 배치가 없어 폭을 흉내 낸다(글자 수 × 10 / 칸 240) */
+describe("칩 긴 값 Tooltip", () => {
+  it("잘린 값에만 Tooltip 을 붙이고 title 은 쓰지 않는다", () => {
+    const sw = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollWidth"), cw = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", { configurable: true, get() { return (this as HTMLElement).classList.contains("lbl") ? (this as HTMLElement).textContent!.length * 10 : 0; } });
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", { configurable: true, get() { return 240; } });
+    try {
+      render(<ChipGroup><Chip onRemove={() => {}}>10.0.0.12</Chip><Chip onRemove={() => {}}>security-audit-notification@corp.example.com</Chip></ChipGroup>);
+      const lbls = Array.from(document.querySelectorAll(".chip .lbl"));
+      expect(lbls.map((l) => l.parentElement!.classList.contains("tooltip-wrap"))).toEqual([false, true]);
+      expect(lbls.some((l) => l.hasAttribute("title"))).toBe(false);
+      const tip = lbls[1].parentElement!.querySelector(".tooltip")!;
+      expect(tip.textContent).toBe("security-audit-notification@corp.example.com");
+      expect(tip.getAttribute("aria-hidden")).toBe("true");
+      expect(screen.getByRole("button", { name: "security-audit-notification@corp.example.com 삭제" })).toBeTruthy();
+    } finally {
+      if (sw) Object.defineProperty(HTMLElement.prototype, "scrollWidth", sw);
+      if (cw) Object.defineProperty(HTMLElement.prototype, "clientWidth", cw);
+    }
+  });
+});

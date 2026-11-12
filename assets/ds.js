@@ -54,10 +54,19 @@
       }
     });
   }
+  /* 입력값 칩의 긴 값(.lbl 240 말줄임)도 같다 — 잘린 값에만 Tooltip(2026-11-12, title 대신). 키보드는 지우기 버튼에 포커스가 오면 값을 펼쳐 읽는다(CSS) */
+  function fitChips(root) {
+    $$(".chip > .lbl", root || doc).forEach(function (el) {
+      if (el.scrollWidth <= el.clientWidth) return;
+      var w = doc.createElement("span"), tip = doc.createElement("span");
+      w.className = "tooltip-wrap"; tip.className = "tooltip multi"; tip.setAttribute("role", "tooltip"); tip.setAttribute("aria-hidden", "true"); tip.textContent = el.textContent;
+      el.parentNode.insertBefore(w, el); w.appendChild(el); w.appendChild(tip);
+    });
+  }
   var fitTimer = 0;
   window.addEventListener("resize", function () { clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitCells(); }, 150); });
   function init(root) {
-    doc.fonts.ready.then(function () { fitCrumbs(root); fitCells(root); });
+    doc.fonts.ready.then(function () { fitCrumbs(root); fitCells(root); fitChips(root); });
     $$(".number-field input", root || doc).forEach(numSync);
     dsLive();   // 알림 영역은 미리 — 복사하는 순간 새로 넣으면 대개 읽히지 않는다
     root = root || doc;
@@ -1010,6 +1019,7 @@
     if (multi) {
       $$(".chip", ctrl).forEach(function (c) { c.remove(); });
       on.forEach(function (i) { var c = doc.createElement("span"), l = doc.createElement("span"), x = doc.createElement("button"); c.className = "chip sm"; c.dataset.value = cbValue(i); l.className = "lbl"; l.textContent = cbLabel(i); x.type = "button"; x.className = "x"; x.setAttribute("aria-label", cbLabel(i) + " 제거"); x.innerHTML = X_ICON; c.appendChild(l); c.appendChild(x); ctrl.insertBefore(c, inp); });
+      fitChips(ctrl);
     }
     if (name) { $$("input[type=hidden]", h).forEach(function (x) { x.remove(); }); (multi ? on.map(cbValue) : [on[0] ? cbValue(on[0]) : ""]).forEach(function (v) { var x = doc.createElement("input"); x.type = "hidden"; x.name = name; x.value = v; h.appendChild(x); }); }
   }

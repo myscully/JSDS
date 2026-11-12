@@ -1,7 +1,8 @@
-import { forwardRef, useRef, type ButtonHTMLAttributes, type HTMLAttributes, type MouseEvent, type ReactNode } from "react";
+import { forwardRef, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes, type HTMLAttributes, type MouseEvent, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { Icon } from "../../icons/Icon";
+import { Tooltip } from "../tooltip/Tooltip";
 import type { IconName } from "../../icons/icons.data";
 import { LABELS } from "../../labels";
 import { Button } from "../button/Button";
@@ -20,6 +21,21 @@ export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,
   size?: "md" | "sm";
   /** 토글이 아닌 동작 칩(예: "+ 추가"). aria-pressed 없이 onClick 만 */
   action?: boolean;
+}
+
+/* 입력값 칩의 값(.lbl 240 말줄임) — 잘린 값에만 Tooltip(2026-11-12, 사이트 ds.js fitChips 와 같음). title 은 키보드로 볼 수 없어 쓰지 않는다.
+   키보드는 지우기 버튼에 포커스가 오면 값을 펼쳐 읽는다(CSS). Tooltip 은 값과 같은 글이라 describe={false}(aria-hidden) */
+function ChipLabel({ children }: { children: ReactNode }) {
+  const el = useRef<HTMLSpanElement>(null), [cut, setCut] = useState(false);
+  useLayoutEffect(() => {
+    let alive = true;
+    const measure = () => { const t = el.current; if (alive && t) setCut(t.scrollWidth > t.clientWidth); };
+    measure();
+    document.fonts?.ready.then(measure);
+    return () => { alive = false; };
+  }, [children]);
+  const lbl = <span ref={el} className="lbl">{children}</span>;
+  return cut ? <Tooltip content={children} multi describe={false}>{lbl}</Tooltip> : lbl;
 }
 
 /** 필터 조건(토글) 또는 입력값(삭제 가능) 캡슐. 상태 표시는 Tag */
@@ -58,7 +74,7 @@ export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
     return (
       <span className={cls} aria-disabled={disabled || undefined} {...(rest as HTMLAttributes<HTMLSpanElement>)} onClickCapture={disabled ? (e) => { e.preventDefault(); e.stopPropagation(); } : (rest as HTMLAttributes<HTMLSpanElement>).onClickCapture}>
         {icon && <Icon name={icon} size={14} />}
-        <span className="lbl" title={typeof children === "string" ? children : undefined}>{children}</span>
+        <ChipLabel>{children}</ChipLabel>
         <button type="button" className="x" aria-label={name} disabled={disabled} onClick={remove}>
           <Icon name="x" size={10} />
         </button>

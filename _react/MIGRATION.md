@@ -509,3 +509,6 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **로그 행(`TableRow log`)은 한 줄입니다** — 칸이 줄바꿈하지 않고, 행에 `td.truncate` 가 있으면 다른 칸은 글자 폭만 차지해 남는 폭을 그 칸이 갖습니다. 로그 표의 메시지 열에 `truncate` 를 주세요.
 - 액션 바의 선택 건수(`.action-bar b`)는 brand → `--foreground-neutral-primary` 입니다. 끈 Number Input 증감 버튼 · 끈 File Upload 영역의 커서가 `default` → `not-allowed` 입니다.
 - 사이트 마크업: `td.truncate` · `.avatar` 에 `title` 을 쓰면 빌드가 막습니다. 이름이 있는 아바타는 `role="img"` + `aria-label` 입니다.
+- **`Chip onRemove` 의 값이 `title` 을 넣지 않습니다** — 240 에서 잘린 값에만 `Tooltip`(aria-hidden)이 붙습니다. 키보드는 전처럼 지우기 버튼에 포커스가 오면 값이 펼쳐집니다. 사이트는 ds.js 가 `.chip > .lbl` 을 재서 답니다(`.lbl` 에 `title` 을 쓰면 빌드가 막음).
+- **compact 표의 행 동작 아이콘 버튼은 28** 입니다(`td.actions` 안 `Button size="sm" iconOnly`, 칸 위아래 패딩 5). 전에는 32 라 compact 행이 40 이 아니라 48 이었습니다.
+- 기본 · relaxed 표의 행 동작 아이콘 버튼 칸도 위아래 패딩이 7 로 줄었습니다(버튼 32 그대로). 버튼이 있는 행이 48 · 56 이 아니라 57 · 65 였습니다.

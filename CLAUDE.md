@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1197/1197 · react 709+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1201/1201 · react 710+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -473,6 +473,12 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **로그 한 건 = 한 줄** — `.log-row td{white-space:nowrap}` 와, 행에 `td.truncate` 가 있으면 다른 칸 `width:1%`(남는 폭을 메시지 열이 가짐). 로그 뷰어 패턴의 단말 'PC-' / '2041' 과 시간 열이 두 줄로 끊겨 행이 62 였다. 로그 뷰어 · 행 펼침 예제의 메시지 열을 `truncate` 로(사이트 · React) — 행 펼침은 첫 게이트에서 768 폭 표가 12px 넓어져(nowrap 메시지) 잡혔다.
 - 음성 시험: 사이트 12건 · verify 2건 · React 5건. 첫 회 1건(`.tooltip-wrap{line-height:inherit}`)을 못 잡아 재 보니 칸과 줄 높이가 같아 쓸모없는 선언이라 지웠다.
 - 덤으로 본 것(고치지 않음): 로그 행 높이는 compact 인데도 49 다 — 행 동작 아이콘 버튼 32 + 칸 패딩 8 · 8.
+
+2026-11-12 남겨 둔 둘(사람의 결정) — behave 1197 → 1201(`behave.cells.js` 4) · react 709+6 → 710+6(`choice-controls.test` 1). contrast · advisory · pages 수는 그대로.
+- **입력값 칩의 긴 값 title → Tooltip** — ds.js `fitChips` · React `ChipLabel` 이 240 에서 잘린 `.lbl` 에만 Tooltip(aria-hidden)을 단다. 키보드는 전처럼 지우기 버튼에 포커스가 오면 펼친다. 사이트 Combobox 다중 항목도 그릴 때마다 잰다. verify 가 `.lbl` 의 title 을 막는다. 이제 시스템 예제 · React 에 `title` 로 전체 값을 보이는 곳이 없다.
+- **compact 표의 행 동작 아이콘 버튼 28** — 선택지에는 '28 로 줄이면 행 40' 이라고 적었지만 재 보니 28 + 패딩 8 · 8 + 아래 선 1 = 45 였다. 그 칸만 위아래 패딩 5 를 더해 행이 다른 compact 행과 같은 40.19 가 된다(로그 뷰어 49 → 40). Data Table Spec Size 에 적었다.
+- 음성 시험: 사이트 8건 · verify 1건 · React 1건. 3건(`.chip .tooltip-wrap{min-width:0}` · 버튼 `vertical-align` · relaxed 칸 패딩)은 지워도 같아 쓸모없는 선언이라 지웠다. 키보드 포커스 Tooltip 단정이 5회에 3회 실패해 재 보니 나타나는 전환 도중(opacity 0.96 · 0.999)에 쟀다 — opacity 1 을 기다리게 고쳐 6회 통과.
+- **기본 · relaxed 의 행 동작 칸**(재다가 찾아 사람이 결정 — '그 칸 패딩만 줄임') — 아이콘 버튼(32)이 있는 행이 기본 57 · relaxed 65 였다(32 + 칸 패딩 + 아래 선 1). 그 칸만 위아래 7 로 줄여 48 · 56(relaxed 도 같은 규칙으로 가운데에 든다 — relaxed 전용 규칙은 음성 시험에서 쓸모없어 지움). 버튼 크기는 그대로. behave +1(세 밀도의 버튼 있는 행 = 없는 행 높이 · 가운데).
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
