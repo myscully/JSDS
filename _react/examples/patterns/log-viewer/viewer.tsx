@@ -15,7 +15,7 @@ const COLUMNS: DataTableColumn<Log>[] = [
   { key: "level", header: "심각도", render: (r) => <Tag tone={r.level} size="sm">{r.lv}</Tag> },
   { key: "ip", header: "소스 IP" },
   { key: "host", header: "단말" },
-  { key: "msg", header: "메시지" },
+  { key: "msg", header: "메시지", truncate: true },
 ];
 
 const LEVELS = ["CRIT", "HIGH", "WARN", "LOW", "INFO"];

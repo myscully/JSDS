@@ -18,7 +18,7 @@ const logTable = (rows) => `
           <table class="tbl compact">
             <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>심각도</th><th>소스 IP</th><th>단말</th><th>메시지</th><th class="actions"></th></tr></thead>
             <tbody>
-              ${rows.map(([t, tone, lv, ip, host, msg]) => `<tr class="log-row"><td>2026-09-07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td>${msg}</td><td class="actions"><button type="button" class="btn sm assistive icon-only" aria-label="${t} 로그 상세">${I("dots")}</button></td></tr>`).join("\n              ")}
+              ${rows.map(([t, tone, lv, ip, host, msg]) => `<tr class="log-row"><td>2026-09-07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td class="truncate">${msg}</td><td class="actions"><button type="button" class="btn sm assistive icon-only" aria-label="${t} 로그 상세">${I("dots")}</button></td></tr>`).join("\n              ")}
             </tbody>
           </table>
         </div>`;

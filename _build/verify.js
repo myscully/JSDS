@@ -176,6 +176,11 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       for (const m of pv.matchAll(/<div class="banner[^"]*"[^>]*>([\s\S]*?)<\/div>/g)) if (/<(?:button|a)\b[^>]*class="btn\b[^"]*"[^>]*(?:\sdisabled\b|aria-disabled="true")/.test(m[1])) fails.push(`${f}: Banner 안의 끈 버튼 — 할 수 없는 동작이면 버튼을 빼고 문구로(Notification › Banner)`);
       /* 표 · 목록 원칙(2026-11-10) — 머리글 필수 · 정렬은 버튼 · 머리글 안에 다른 조작 없음 · 행 버튼 이름은 행마다 다름 */
       const sameNames = (body, where) => { const names = [...body.matchAll(/<(?:button|a)\b[^>]*aria-label="([^"]*)"/g)].map((x) => x[1]), dup = names.filter((n, i) => names.indexOf(n) !== i); if (dup.length) fails.push(`${f}: 행마다 같은 버튼 이름 "${dup[0]}"(${where} › 행 버튼 이름)`); };
+      /* 비활성 행(2026-11-12) — inert 금지(클릭이 표로 떨어지고 행 글자가 보조기기에서 사라짐), aria-disabled · 안의 링크 · 버튼은 tabindex=-1 + aria-disabled */
+      for (const m of pv.matchAll(/<tr\b([^>]*\bclass="[^"]*\bdisabled\b[^"]*"[^>]*)>([\s\S]*?)<\/tr>/g)) {
+        if (/\binert\b/.test(m[1]) || !/aria-disabled="true"/.test(m[1])) fails.push(`${f}: 비활성 표 행은 inert 대신 aria-disabled="true"(Data Table › 비활성 행)`);
+        for (const c of m[2].matchAll(/<(a\b[^>]*\bhref|button\b(?![^>]*\sdisabled\b))[^>]*>/g)) if (!/tabindex="-1"/.test(c[0]) || !/aria-disabled="true"/.test(c[0])) fails.push(`${f}: 비활성 행 안 링크 · 버튼에 tabindex="-1" + aria-disabled 가 없다(Data Table › 비활성 행)`);
+      }
       for (const m of pv.matchAll(/<table\b[^>]*class="tbl[^"]*"[^>]*>([\s\S]*?)<\/table>/g)) {
         if (!/<th\b/.test(m[1])) fails.push(`${f}: 머리글 없는 표(Table › 머리글)`);
         for (const h of (/<thead>([\s\S]*?)<\/thead>/.exec(m[1]) || ["", ""])[1].matchAll(/<th\b([^>]*)>([\s\S]*?)<\/th>/g)) {
@@ -221,6 +226,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (!input || !/aria-describedby=/.test(input[0])) fails.push(`${f}: 기간 상한은 도움말에 적습니다(Date Picker › Max Days)`);
       }
       for (const m of pv.matchAll(/<ol class="breadcrumb[^"]*">[\s\S]*?<\/ol>/g)) if (/\btitle="/.test(m[0])) fails.push(`${f}: Breadcrumb 에 title 금지 — 키보드로 볼 수 없습니다. 잘린 항목의 Tooltip 은 ds.js 가 답니다(Breadcrumb › Long label)`);
+      for (const m of pv.matchAll(/<td\b[^>]*\bclass="[^"]*\btruncate\b[^"]*"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: 말줄임 칸(td.truncate)에 title 금지 — 키보드로 볼 수 없습니다. 잘린 칸의 Tooltip 은 ds.js 가 답니다(Data Table › 고정 헤더)`);
+      for (const m of pv.matchAll(/<span\b[^>]*\bclass="avatar\b[^"]*"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: Avatar 에 title 금지 — 이름은 role="img" + aria-label, 누르는 아바타는 버튼의 이름으로(Avatar)`);
       { const charts = (pv.match(/<canvas\b[^>]*\bdata-chart=/g) || []).length, views = (pv.match(/<div class="chart-view"[^>]*><div class="chart-tools"><button\b[^>]*\bdata-chart-table\b/g) || []).length; if (charts !== views) fails.push(`${f}: 탐색형 차트는 .chart-view 와 표로 보기 버튼을 함께 씁니다(차트 ${charts} · 버튼 ${views}, Data Visual)`); }
       /* Date Picker 시각 옵션(2026-11-10) */
       for (const m of pv.matchAll(/<div class="datepicker field[^"]*"([^>]*\bdata-time\b[^>]*)>/g)) {

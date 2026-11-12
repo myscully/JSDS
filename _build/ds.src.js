@@ -30,13 +30,34 @@
     $$(".breadcrumb li>a:not(.icon), .breadcrumb li>span:not(.tooltip-wrap)", root || doc).forEach(function (el) {
       if (el.scrollWidth <= el.clientWidth) return;
       var w = doc.createElement("span"), tip = doc.createElement("span");
-      w.className = "tooltip-wrap"; tip.className = "tooltip multi"; tip.setAttribute("role", "tooltip"); tip.textContent = el.textContent;
+      w.className = "tooltip-wrap"; tip.className = "tooltip multi"; tip.setAttribute("role", "tooltip"); tip.setAttribute("aria-hidden", "true"); tip.textContent = el.textContent;
       el.parentNode.insertBefore(w, el); w.appendChild(el); w.appendChild(tip);
       if (el.tagName !== "A") el.tabIndex = 0;
     });
   }
+  /* 표의 말줄임 칸(td.truncate)도 같다 — 잘린 칸만 전체 값 Tooltip(2026-11-12). title 은 키보드로 볼 수 없다.
+     칸 폭은 창 크기를 따라 바뀌므로 다시 재서, 잘리지 않게 된 칸은 풀어 둔다. 비활성 행 안에서는 Tab 칸을 만들지 않는다.
+     Tooltip 은 칸 글자와 같아 aria-hidden — 그렇지 않으면 표를 읽을 때 칸 값이 두 번 읽힌다(Breadcrumb 도 같은 이유) */
+  function fitCells(root) {
+    $$(".tbl td.truncate", root || doc).forEach(function (td) {
+      var w = $(":scope > .tooltip-wrap", td), el = w ? $(":scope > .cell-text", w) : td, cut = el.scrollWidth > el.clientWidth;
+      if (cut && !w) {
+        var t = doc.createElement("span"), tip = doc.createElement("span"); w = doc.createElement("span");
+        w.className = "tooltip-wrap"; t.className = "cell-text"; tip.className = "tooltip multi"; tip.setAttribute("role", "tooltip"); tip.setAttribute("aria-hidden", "true");
+        while (td.firstChild) t.appendChild(td.firstChild);
+        tip.textContent = t.textContent; w.appendChild(t); w.appendChild(tip); td.appendChild(w);
+        if (!closest(td, "tr.disabled")) t.tabIndex = 0;
+      } else if (!cut && w) {
+        if (w.contains(doc.activeElement)) return;   // 포커스를 받고 있는 칸은 그대로 — 풀면 포커스가 사라진다
+        while (el.firstChild) td.insertBefore(el.firstChild, w);
+        td.removeChild(w);
+      }
+    });
+  }
+  var fitTimer = 0;
+  window.addEventListener("resize", function () { clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitCells(); }, 150); });
   function init(root) {
-    doc.fonts.ready.then(function () { fitCrumbs(root); });
+    doc.fonts.ready.then(function () { fitCrumbs(root); fitCells(root); });
     $$(".number-field input", root || doc).forEach(numSync);
     dsLive();   // 알림 영역은 미리 — 복사하는 순간 새로 넣으면 대개 읽히지 않는다
     root = root || doc;
@@ -1191,8 +1212,6 @@
     if ((el = closest(t, ".side-panel [data-panel-close]"))) { panel.close(closest(el, ".side-panel")); return; }
     if ((el = closest(t, "[data-panel-open]"))) { panel.open(el.getAttribute("data-panel-open")); return; }
     if ((el = closest(t, "[data-popup-open]"))) { popup.open(el.getAttribute("data-popup-open")); return; }
-    // Accordion disabled
-    if ((el = closest(t, ".accordion.disabled summary"))) { e.preventDefault(); return; }
   });
 
   // 바깥 클릭: 사용자가 연 Dropdown / DatePicker 닫기
@@ -1210,8 +1229,9 @@
      loading 동안 멈춘다. 그래서 버튼 자신의 리스너도 이 키들은 받는다(React 는 onKeyDown 을 아예 부르지 않는다). 기본 동작은 Enter/Space 만 막는다 */
   var NAV = ["Tab", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"];
   doc.addEventListener("click", function (e) {
-    /* 끈 칩(span) · 메뉴 항목도 같다 — pointer-events:none 을 지운 뒤(2026-11-12) 클릭이 그 요소에 오므로 제품 핸들러 · 링크 이동을 여기서 막는다 */
-    if (closest(e.target, '.btn.loading,.btn[aria-disabled="true"],.chip[aria-disabled="true"],.menu-item[aria-disabled="true"]')) { e.preventDefault(); e.stopPropagation(); return; }
+    /* 끈 칩(span) · 메뉴 항목 · Accordion 헤더 · 표의 비활성 행도 같다 — pointer-events:none · inert 를 지운 뒤(2026-11-12) 클릭이 그 요소에 오므로
+       제품 핸들러 · 부모 · 링크 이동 · 펼침을 여기서 막는다 */
+    if (closest(e.target, '.btn.loading,.btn[aria-disabled="true"],.chip[aria-disabled="true"],.menu-item[aria-disabled="true"],.accordion.disabled summary,.tbl tr.disabled')) { e.preventDefault(); e.stopPropagation(); return; }
     /* 필수 약관이 비었으면 버튼에 달린 제품 핸들러까지 가지 않게 캡처에서 막는다 — disabled 일 때 클릭이 가지 않던 약속을 그대로 지킨다 */
     var nx = closest(e.target, ".terms .btn-group .btn.primary"), terms = nx && closest(nx, ".terms"), miss = terms && !nx.disabled ? termsMissing(terms) : [];
     if (miss.length) { e.preventDefault(); e.stopPropagation(); terms._tried = true; termsNotice(terms); miss[0].focus(); }

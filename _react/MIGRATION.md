@@ -497,3 +497,15 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
   - `MenuItem disabled` 는 이제 제품 `onClick` 을 부르지 않고 클릭을 부모로 올리지 않습니다. 전에는 `onClick` 이 먼저 불리고 `onSelect` 만 막혔습니다(마우스는 CSS 가 막았지만 키보드 · 프로그램 클릭은 지나갔다).
   - 입력값 칩(`Chip onRemove disabled`, span)은 클릭을 부모로 올리지 않습니다. 나머지(button)는 브라우저의 `disabled` 가 막습니다.
 - **`Banner` 안 버튼은 끄지 않습니다**(사람의 결정) — 제품 색 면 위의 비활성 글자는 대비 1.32 로 보이지 않습니다. 할 수 없는 동작이면 버튼을 빼고 문구로 알립니다. `action` 에 끈 `Button` 이 있으면 개발 모드에서 한 번 경고합니다. loading 은 괜찮습니다.
+- **`TableRow disabled` 가 `inert` 대신 `aria-disabled="true"` 를 답니다** — `inert` 는 클릭을 표 · 카드로 떨어뜨리고(제품의 표 · 카드 클릭 핸들러가 받음) 행의 글자를 스크린 리더에서 지웠습니다.
+  이제 행 글자는 읽히고, 행 안 링크 · 버튼은 `tabindex=-1` + `aria-disabled` 로 Tab 에서 빠지며(행을 켜면 원래 tabindex 로 되돌림 — `data-ds-off` 에 적어 둠) 클릭은 행이 캡처에서 삼킵니다.
+  행 안 요소의 `inert` 나 포커스 불가를 직접 재던 제품 코드는 `aria-disabled` 를 보게 바꿉니다.
+- 끈 `Accordion` 바깥에도 `pointer-events:none` 이 없어졌습니다(헤더 클릭은 원래대로 React 가 캡처에서 막음). 헤더는 not-allowed 커서이고 hover 면이 없습니다.
+
+## 말줄임 칸 Tooltip · 끈 커서 · 로그 한 줄 (2026-11-12)
+
+- **`DataTable` 의 `truncate` 열이 `title` 을 넣지 않습니다** — `title` 은 키보드로 볼 수 없습니다. 대신 `TableCell truncate` 가 칸 폭을 재서(ResizeObserver) **잘린 칸에만** 전체 값 `Tooltip` 을 붙이고, 그 칸의 글자(`.cell-text`)가 Tab 칸이 됩니다. 비활성 행 안에서는 Tab 칸이 아닙니다. `td.title` 을 재던 제품 시험은 `.tooltip` 을 보게 바꿉니다.
+- **`Tooltip describe={false}` 는 툴팁을 `aria-hidden` 으로 둡니다** — 화면 글자와 같은 툴팁(잘린 Breadcrumb 항목 · 말줄임 칸)이 스크린 리더에서 두 번 읽혔습니다.
+- **로그 행(`TableRow log`)은 한 줄입니다** — 칸이 줄바꿈하지 않고, 행에 `td.truncate` 가 있으면 다른 칸은 글자 폭만 차지해 남는 폭을 그 칸이 갖습니다. 로그 표의 메시지 열에 `truncate` 를 주세요.
+- 액션 바의 선택 건수(`.action-bar b`)는 brand → `--foreground-neutral-primary` 입니다. 끈 Number Input 증감 버튼 · 끈 File Upload 영역의 커서가 `default` → `not-allowed` 입니다.
+- 사이트 마크업: `td.truncate` · `.avatar` 에 `title` 을 쓰면 빌드가 막습니다. 이름이 있는 아바타는 `role="img"` + `aria-label` 입니다.

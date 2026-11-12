@@ -1,6 +1,7 @@
-import { forwardRef, useCallback, type CSSProperties, type HTMLAttributes, type ReactNode, type TableHTMLAttributes, type TdHTMLAttributes, type ThHTMLAttributes } from "react";
+import { forwardRef, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject, type MouseEvent, type HTMLAttributes, type ReactNode, type TableHTMLAttributes, type TdHTMLAttributes, type ThHTMLAttributes } from "react";
 import { cx } from "../../utils/cx";
 import { mergeRefs } from "../../utils/hooks";
+import { Tooltip } from "../tooltip/Tooltip";
 
 export type TableDensity = "compact" | "default" | "relaxed";
 export type TableRowStyle = "lines" | "zebra" | "grid" | "plain";
@@ -46,11 +47,19 @@ export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   /** 합계 행 (TableFoot 안) */
   total?: boolean;
 }
-export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function TableRow({ selected, disabled, log, total, className, ...rest }, ref) {
-  /* 비활성 행은 inert — CSS 의 pointer-events 는 마우스만 막고 키보드 Tab 은 행 안 링크로 들어갔다.
-     React 18 과 19 가 inert prop 을 다르게 다뤄 DOM 에 직접 둔다 */
-  const inertRef = useCallback((el: HTMLTableRowElement | null) => { if (el) el.toggleAttribute("inert", !!disabled); }, [disabled]);
-  return <tr ref={mergeRefs(ref, inertRef)} className={cx({ on: selected, disabled, "log-row": log, total }, className) || undefined} {...rest} />;
+/* 비활성 행 안에서 Tab 이 멈추는 것 — 원래 tabindex 는 data-ds-off 에 적어 두었다가 행을 켜면 되돌린다 */
+const ROW_FOCUS = 'a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])';
+export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function TableRow({ selected, disabled, log, total, className, onClickCapture, ...rest }, ref) {
+  /* 비활성 행은 inert 대신 aria-disabled(2026-11-12) — inert 는 클릭을 표로 떨어뜨리고(제품의 표 · 카드 핸들러가 받음) 행의 글자를 보조기기에서 지웠다.
+     안의 링크 · 버튼은 tabindex=-1 + aria-disabled 로 Tab 에서 빼고, 클릭은 캡처에서 삼킨다(사이트는 ds.js). 칸 내용이 바뀌어도 맞게 렌더마다 다시 잰다 */
+  const self = useRef<HTMLTableRowElement>(null);
+  useLayoutEffect(() => {
+    const tr = self.current; if (!tr) return;
+    if (disabled) tr.querySelectorAll<HTMLElement>(ROW_FOCUS).forEach((el) => { if (el.hasAttribute("data-ds-off")) return; el.setAttribute("data-ds-off", el.getAttribute("tabindex") ?? ""); el.tabIndex = -1; el.setAttribute("aria-disabled", "true"); });
+    else tr.querySelectorAll<HTMLElement>("[data-ds-off]").forEach((el) => { const t = el.getAttribute("data-ds-off"); if (t) el.setAttribute("tabindex", t); else el.removeAttribute("tabindex"); el.removeAttribute("aria-disabled"); el.removeAttribute("data-ds-off"); });
+  });
+  const swallow = (e: MouseEvent<HTMLTableRowElement>) => { if (disabled) { e.preventDefault(); e.stopPropagation(); } else onClickCapture?.(e); };
+  return <tr ref={mergeRefs(ref, self)} className={cx({ on: selected, disabled, "log-row": log, total }, className) || undefined} aria-disabled={disabled || undefined} onClickCapture={swallow} {...rest} />;
 });
 
 export interface TableHeaderProps extends ThHTMLAttributes<HTMLTableCellElement> {
@@ -84,15 +93,37 @@ export interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement> {
   actions?: boolean;
   /** 빈 상태 셀 (colSpan 과 함께) */
   empty?: boolean;
-  /** 말줄임. 전체 값은 title 로 */
+  /** 말줄임. 잘린 칸에만 전체 값 Tooltip 을 붙이고 Tab 칸이 된다(title 은 키보드로 볼 수 없다) */
   truncate?: boolean;
   /** 주 값 아래 보조 글 (.cell-sub — 예: 이름 아래 이메일) */
   sub?: ReactNode;
 }
+/* 잘린 칸만 Tooltip(2026-11-12, 사이트 ds.js fitCells 와 같음) — 칸 폭이 바뀌면 다시 잰다. 비활성 행 안에서는 Tab 칸을 만들지 않는다 */
+function useCut(on: boolean, td: RefObject<HTMLTableCellElement | null>, deps: unknown) {
+  const [state, setState] = useState({ cut: false, off: false });
+  useLayoutEffect(() => {
+    const el = td.current; if (!on || !el) { setState((s) => (s.cut ? { cut: false, off: false } : s)); return; }
+    let alive = true;
+    const measure = () => {
+      if (!alive) return;
+      const t = el.querySelector<HTMLElement>(":scope > .tooltip-wrap > .cell-text") ?? el;
+      const cut = t.scrollWidth > t.clientWidth, off = !!el.closest("tr.disabled");
+      setState((s) => (s.cut === cut && s.off === off ? s : { cut, off }));
+    };
+    measure();
+    document.fonts?.ready.then(measure);
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
+    ro?.observe(el);
+    return () => { alive = false; ro?.disconnect(); };
+  }, [on, deps]);
+  return state;
+}
 export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(function TableCell({ num, check, actions, empty, truncate, sub, className, children, ...rest }, ref) {
+  const self = useRef<HTMLTableCellElement>(null);
+  const { cut, off } = useCut(!!truncate, self, children);
   return (
-    <td ref={ref} className={cx({ num, check, actions, empty, truncate }, className) || undefined} {...rest}>
-      {children}
+    <td ref={mergeRefs(ref, self)} className={cx({ num, check, actions, empty, truncate }, className) || undefined} {...rest}>
+      {truncate && cut ? <Tooltip content={children} multi describe={false}><span className="cell-text" tabIndex={off ? undefined : 0}>{children}</span></Tooltip> : children}
       {sub != null && sub !== false && <span className="cell-sub">{sub}</span>}
     </td>
   );

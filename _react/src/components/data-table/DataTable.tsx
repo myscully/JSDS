@@ -108,7 +108,7 @@ const NOTICE = {
   clear: "선택 해제",
 };
 const INNER_CONTROL = "a,button,input,select,textarea,label,[role=button],[role=menu],[role=menuitem],.dropdown";
-const FOCUS_IN_ROW = "a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex='0']";
+const FOCUS_IN_ROW = "a[href]:not([tabindex='-1']),button:not(:disabled):not([tabindex='-1']),input:not(:disabled):not([tabindex='-1']),select:not(:disabled),textarea:not(:disabled),[tabindex='0']";   // 비활성 행 안(tabindex -1)은 건너뛴다
 
 function defaultSortValue<T>(row: T, key: string): string | number {
   const v = (row as Record<string, unknown>)[key];
@@ -274,7 +274,7 @@ function DataTableInner<T>(
                   {columns.map((c) => {
                     const raw = (row as Record<string, unknown>)[c.key];
                     return (
-                      <TableCell key={c.key} num={c.num} truncate={c.truncate} title={c.truncate && typeof raw === "string" ? raw : undefined} className={c.className} sub={c.sub?.(row, i)}>
+                      <TableCell key={c.key} num={c.num} truncate={c.truncate} className={c.className} sub={c.sub?.(row, i)}>
                         {c.render ? c.render(row, i) : (raw as ReactNode)}
                       </TableCell>
                     );

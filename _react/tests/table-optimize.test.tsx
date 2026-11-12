@@ -94,3 +94,32 @@ describe("ActionBar 늘 보임", () => {
     expect(screen.getByRole("button", { name: "밖" }).hasAttribute("aria-disabled")).toBe(false);
   });
 });
+
+/* 말줄임 칸(2026-11-12) — 잘린 칸만 Tooltip(title 없음), 칸 글자와 같아 aria-hidden, 비활성 행 안은 Tab 칸 없음. jsdom 은 배치가 없어 폭을 흉내 낸다(글자 수 × 10 / 칸 100) */
+describe("말줄임 칸 Tooltip", () => {
+  const fake = () => {
+    const sw = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollWidth"), cw = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
+    Object.defineProperty(HTMLElement.prototype, "scrollWidth", { configurable: true, get() { return (this as HTMLElement).classList.contains("truncate") || (this as HTMLElement).classList.contains("cell-text") ? ((this as HTMLElement).querySelector(".cell-text") ?? this).textContent!.length * 10 : 0; } });
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", { configurable: true, get() { return 100; } });
+    return () => { if (sw) Object.defineProperty(HTMLElement.prototype, "scrollWidth", sw); if (cw) Object.defineProperty(HTMLElement.prototype, "clientWidth", cw); };
+  };
+  it("잘린 칸만 Tooltip · Tab 칸이 되고 title 은 없으며, 비활성 행 안은 Tab 칸이 아니다", () => {
+    const undo = fake();
+    try {
+      render(<Table><TableBody>
+        <TableRow><TableCell truncate>짧음</TableCell></TableRow>
+        <TableRow><TableCell truncate>process.create blocked: rundll32.exe</TableCell></TableRow>
+        <TableRow disabled><TableCell truncate>usb.attach vendor=0x0781 product=0x5583</TableCell></TableRow>
+      </TableBody></Table>);
+      const tds = Array.from(document.querySelectorAll("td.truncate"));
+      expect(tds.map((td) => !!td.querySelector(".tooltip"))).toEqual([false, true, true]);
+      expect(tds.some((td) => td.hasAttribute("title"))).toBe(false);
+      const tip = tds[1].querySelector(".tooltip")!, text = tds[1].querySelector<HTMLElement>(".cell-text")!;
+      expect(tip.textContent).toBe("process.create blocked: rundll32.exe");
+      expect(tip.getAttribute("aria-hidden")).toBe("true");
+      expect(text.hasAttribute("aria-describedby")).toBe(false);
+      expect(text.tabIndex).toBe(0);
+      expect(tds[2].querySelector<HTMLElement>(".cell-text")!.tabIndex).toBe(-1);
+    } finally { undo(); }
+  });
+});

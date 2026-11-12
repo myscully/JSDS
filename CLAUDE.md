@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1186/1186 · react 706+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1197/1197 · react 709+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -452,6 +452,27 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 음성 시험: 사이트 11건 · verify 1건 · React 4건. 첫 회 2건(칩 hover · 눌림에서 끈 칩 빼기)을 못 잡아 재 보니 `.chip[disabled]` 가 뒤에서 면 색을 이미 이기는 쓸모없는 선언이라 지웠다(칩은 hover 가 면만 바꾼다). Tile 은 hover 그림자가 끈 규칙에 없어 필요했다.
 - **남긴 것:** `.accordion.disabled{pointer-events:none}`(summary 는 tabindex -1 + ds.js 가 막고 behave 가 none 을 단정 — 요청 밖), `.tbl tr.disabled .link`(행이 `inert` 라 마우스 · 키보드 모두 닿지 않음).
 - Figma 미반영 282건(그대로).
+
+2026-11-12 끈 Accordion · 표의 비활성 행(앞 항목에서 남긴 둘, 사람의 요청) — behave 1186 → 1188(`behave.button.js` 2 · behave.js 기존 단정 고침 2) · react 706 → 707(`disabled-controls.test` 1 · `data.test` 기존 단정 고침 1). contrast · advisory · pages 수는 그대로.
+- **측정에서 드러난 것:** 끈 Accordion 헤더를 누르면 클릭이 예제 틀(뒤의 카드 · 패널)에 갔고, 비활성 행의 링크 · 칸을 누르면 `inert` 때문에 표(`TABLE.tbl`)가 받았다 — `inert` 요소는 클릭 대상이 되지 않아 뒤로 떨어진다. 둘 다 not-allowed 커서도 보이지 않았다.
+  `inert` 는 행의 글자까지 보조기기에서 지워 스크린 리더가 비활성 행의 데이터를 읽지 못했다.
+- **Accordion** — `.accordion.disabled{pointer-events:none}` 을 지우고 헤더에 not-allowed · hover 면은 `:where(:not(.disabled))` 로 뺐다(audit 의 hover 조회도 새 선택자로).
+  펼침은 ds.js 캡처 가드에 `.accordion.disabled summary` 를 더해 막는다(부모로도 안 감 — 옛 버블 분기는 지움). React 는 원래 캡처에서 삼켰다. 커서 규칙을 `.accordion.disabled>summary` 로 쓴 것은 audit 의 `cssRule(".accordion.disabled summary")` 가 글자색 규칙 대신 이 규칙을 집어 'Accordion 기대값을 읽지 못함' 이 났기 때문이다.
+- **비활성 행 = `aria-disabled="true"`(inert 금지)** — 안의 링크 · 버튼은 `tabindex="-1"` + `aria-disabled`(Tab 에서 빠짐), 클릭은 ds.js 캡처 가드의 `.tbl tr.disabled` 가 막는다. 행 hover 면 · 칸 링크 밑줄은 `:where(:not(.disabled))` 로 빼고 칸 · 링크에 not-allowed.
+  verify 가 `tr.disabled` 의 inert · aria-disabled 없음 · 안의 tabindex 없는 링크 · 버튼을 막는다. React `TableRow disabled` 는 inert 대신 aria-disabled 를 달고 렌더마다 안의 포커스 요소에 tabindex -1 · aria-disabled 를 주며(원래 tabindex 는 `data-ds-off` 에 — 켜면 되돌림) 클릭을 캡처에서 삼킨다.
+  DataTable 의 행 삭제 후 포커스 대상(`FOCUS_IN_ROW`)은 tabindex -1 을 건너뛴다 — inert 일 때 focus() 가 안 되던 것과 같게(따로 재는 단정은 없다).
+- 음성 시험: 사이트 9건 · verify 2건 · React 4건 모두 잡혔다. 전체 게이트에서 옛 React 단정(`data.test` 의 '비활성 행은 inert')이 걸려 새 동작으로 고쳤다.
+- 이제 컴포넌트 CSS 의 `pointer-events:none` 은 장식(문서 셸의 막대 테두리 · 개요 카드 썸네일 · Tooltip)뿐이다. Figma 미반영 282건(그대로).
+
+2026-11-12 남은 것 정리 다섯(사람의 결정 — 선택지로 고름) — behave 1188 → 1197(`behave.cells.js` 9) · react 707+6 → 709+6(`table-optimize.test` 1 · `data-bundle.test` 1, 기존 title 단정 고침 1). contrast · advisory · pages 수는 그대로.
+- **말줄임 칸 · 아바타의 title → Tooltip** — `td.truncate` 는 잘린 칸에만 ds.js `fitCells` 가 `.tooltip-wrap > .cell-text(tabindex 0) + .tooltip` 을 단다(Breadcrumb 와 같은 방식). 창 크기가 바뀌면 다시 재서 잘리지 않게 된 칸은 풀고(포커스 중인 칸은 그대로), 비활성 행 안은 Tab 칸을 만들지 않는다. React `TableCell truncate` 가 ResizeObserver 로 같은 일을 하고, DataTable 은 title 을 넣지 않는다(MIGRATION).
+  Tooltip 문구가 칸 글자와 같아 **`aria-hidden`** — 표를 읽을 때 칸 값이 두 번 읽혔다. 같은 이유로 **Breadcrumb 의 잘린 항목 Tooltip 도 aria-hidden**(React `Tooltip describe={false}` 전부)으로 바꿨다. 상단 내비 예제의 아바타는 `title` → `role="img"` + `aria-label`. verify 가 `td.truncate` · `.avatar` 의 title 을 막는다. Interaction › Overflow 의 '지금' 칸에 Data Table 을 더했고, 낡은 'Tag 정비 때' 를 실제(최대 폭 160 에서 줄바꿈)로 고쳤다. Chip 의 긴 값 title 은 그대로다(지우기에 포커스가 오면 펼쳐 키보드로 읽힌다 — 선택지 밖).
+- **끈 컨트롤 커서 통일** — 끈 Number Input 증감 버튼 · 끈 File Upload 영역이 `default` → `not-allowed`.
+- **행 삭제 후 포커스 테스트** — 지운 행 자리에 비활성 행이 오면 그 안(tabindex -1)이 아니라 표 영역으로 간다(`FOCUS_IN_ROW` 를 되돌리면 실패).
+- **액션 바 선택 건수** brand → `--foreground-neutral-primary`(굵기 700 그대로) — 표 안의 brand 를 덜며 남긴 하나.
+- **로그 한 건 = 한 줄** — `.log-row td{white-space:nowrap}` 와, 행에 `td.truncate` 가 있으면 다른 칸 `width:1%`(남는 폭을 메시지 열이 가짐). 로그 뷰어 패턴의 단말 'PC-' / '2041' 과 시간 열이 두 줄로 끊겨 행이 62 였다. 로그 뷰어 · 행 펼침 예제의 메시지 열을 `truncate` 로(사이트 · React) — 행 펼침은 첫 게이트에서 768 폭 표가 12px 넓어져(nowrap 메시지) 잡혔다.
+- 음성 시험: 사이트 12건 · verify 2건 · React 5건. 첫 회 1건(`.tooltip-wrap{line-height:inherit}`)을 못 잡아 재 보니 칸과 줄 높이가 같아 쓸모없는 선언이라 지웠다.
+- 덤으로 본 것(고치지 않음): 로그 행 높이는 compact 인데도 49 다 — 행 동작 아이콘 버튼 32 + 칸 패딩 8 · 8.
 
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

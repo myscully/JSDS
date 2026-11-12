@@ -26,7 +26,7 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLSpanElement>, "con
   position?: Side;
   /** 두 줄 이상 (폭 220) */
   multi?: boolean;
-  /** false 면 aria-describedby 를 잇지 않는다 — 툴팁이 화면 글자와 같아 두 번 읽히는 자리(잘린 글자) */
+  /** false 면 aria-describedby 를 잇지 않고 툴팁을 aria-hidden 으로 둔다 — 툴팁이 화면 글자와 같아 두 번 읽히는 자리(잘린 글자) */
   describe?: boolean;
   /** 항상 표시 (문서·디버그) */
   show?: boolean;
@@ -75,7 +75,7 @@ export const Tooltip = forwardRef<HTMLSpanElement, TooltipProps>(function Toolti
       {...rest}
     >
       {trigger}
-      <span ref={tip} className={cx("tooltip", side !== "top" && side, multi && "multi", !show && floating && "float")} style={show ? undefined : spot?.vars ?? undefined} role="tooltip" id={id}>
+      <span ref={tip} className={cx("tooltip", side !== "top" && side, multi && "multi", !show && floating && "float")} style={show ? undefined : spot?.vars ?? undefined} role="tooltip" id={id} aria-hidden={describe ? undefined : true}>
         {content}
       </span>
     </span>

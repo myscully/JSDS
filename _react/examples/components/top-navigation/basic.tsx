@@ -16,7 +16,7 @@ export default function Example() {
         </WithCount>
         <Tooltip content="설정" position="bottom"><Button color="assistive" iconOnly size="sm" aria-label="설정"><Icon name="settings" /></Button></Tooltip>
         <Divider orientation="vertical" />
-        <Avatar initials="JH" title="정희 · 관리자" />
+        <Avatar initials="JH" role="img" aria-label="정희 · 관리자" />
       </TopBarRight>
     </TopBar>
   );

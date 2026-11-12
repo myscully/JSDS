@@ -948,7 +948,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await go("components/accordion.html");
   const accDis = page.locator("#ex-accordion-state .accordion.disabled");
   ok("disabled accordion carries aria-disabled", (await accDis.locator("summary").getAttribute("aria-disabled")) === "true");
-  // pointer-events:none 이라 Playwright 의 click() 은 actionability 에서 멈춘다 — 요소에게 직접 클릭을 보낸다
+  // 프로그램 클릭(e.click())도 막는다 — 실제 마우스 클릭 · 부모로 가지 않음은 behave.button 이 잰다
   await accDis.locator("summary").evaluate((e) => e.click());
   await page.waitForTimeout(120);
   ok("disabled accordion ignores a mouse click", (await accDis.evaluate((e) => e.open)) === false);
@@ -982,7 +982,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const accFixed = await page.evaluate(() => getComputedStyle(document.querySelector('#ex-accordion-state summary[data-state="hover"]')).backgroundColor);
   await page.mouse.move(1, 1); await page.waitForTimeout(200);
   ok("accordion header shows the hover fill, and the fixed Hover example matches it", accRest !== accOver.bg && accOver.bg === accOver.want && accFixed === accOver.bg, JSON.stringify({ accRest, accOver, accFixed }));
-  ok("disabled accordion has no hover (pointer-events none)", (await accDis.evaluate((e) => getComputedStyle(e).pointerEvents)) === "none");
+  /* pointer-events:none 을 지웠다(2026-11-12) — 클릭이 헤더를 지나 뒤로 떨어졌다. hover 면은 CSS :where 가 뺀다 */
+  const disSum = accDis.locator("summary"); await disSum.scrollIntoViewIfNeeded(); await page.mouse.move(4, 500);
+  const disRest = await disSum.evaluate((e) => getComputedStyle(e).backgroundColor); await disSum.hover(); await page.waitForTimeout(80);
+  const disOver = await disSum.evaluate((e) => ({ bg: getComputedStyle(e).backgroundColor, cursor: getComputedStyle(e).cursor, pe: getComputedStyle(e.parentElement).pointerEvents })); await page.mouse.move(4, 500);
+  ok("disabled accordion has no hover fill and shows a not-allowed cursor", disOver.bg === disRest && disOver.cursor === "not-allowed" && disOver.pe === "auto", JSON.stringify({ disRest, disOver }));
   /* 헤더 안 조작 요소는 약관 동의만 예외 — 체크박스를 누르면 체크만 바뀌고 아코디언은 펼쳐지지 않아야 한다 */
   await go("patterns/terms-agreement.html");
   const termsAcc = page.locator("#ex-terms-agreement-inline .accordion").first();
@@ -1273,12 +1277,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     if (!tr) return null;
     const res = (v) => { const d = document.createElement("div"); d.style.color = v; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
     const tag = getComputedStyle(tr.querySelector(".tag")), link = getComputedStyle(tr.querySelector(".link")), dot = getComputedStyle(tr.querySelector(".indicator"), "::before");
-    const a = tr.querySelector(".link"); a.focus();
-    return { focusable: document.activeElement === a, tagBg: tag.backgroundColor, tagFg: tag.color, tagDot: getComputedStyle(tr.querySelector(".tag"), "::before").backgroundColor, link: link.color, linkEvents: link.pointerEvents, dot: dot.backgroundColor,
+    const a = tr.querySelector(".link");
+    return { focusable: a.tabIndex >= 0 || a.getAttribute("aria-disabled") !== "true" || tr.getAttribute("aria-disabled") !== "true" || tr.inert, tagBg: tag.backgroundColor, tagFg: tag.color, tagDot: getComputedStyle(tr.querySelector(".tag"), "::before").backgroundColor, link: link.color, linkEvents: link.pointerEvents, dot: dot.backgroundColor,
       wantBg: res("var(--surface-disable-primary)"), wantFg: res("var(--foreground-disable-primary)") };
   });
   ok("a disabled table row greys its tag, link and status dot with the disable tokens",
-    !!offRow && offRow.tagBg === offRow.wantBg && [offRow.tagFg, offRow.tagDot, offRow.link, offRow.dot].every((c) => c === offRow.wantFg) && offRow.linkEvents === "none" && offRow.focusable === false, JSON.stringify(offRow));
+    !!offRow && offRow.tagBg === offRow.wantBg && [offRow.tagFg, offRow.tagDot, offRow.link, offRow.dot].every((c) => c === offRow.wantFg) && offRow.linkEvents === "auto" && offRow.focusable === false, JSON.stringify(offRow));
   /* 좁은 폭에서 표는 자기 폭을 지키고 .tbl-wrap 이 가로 스크롤한다 — 문서용 .page table 규칙이 .tbl 을
      블록으로 바꿔 266px 에서 잘리고 열이 한 글자씩 접혔다 */
   await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(250);
@@ -1871,6 +1875,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await require("./behave.data.js")({ page, ok, go });
   await require("./behave.table.js")({ page, ok, go });
   await require("./behave.button.js")({ page, ok, go });   // Button 오류 정리(2026-11-12)
+  await require("./behave.cells.js")({ page, ok, go });   // 말줄임 칸 Tooltip · 끈 커서 · 로그 한 줄(2026-11-12)
   await require("./behave.nav.js")({ page, ok, go });
   await require("./behave.promote.js")({ page, ok, go });
     await require("./behave.upload.js")({ page, ok, go });

@@ -11,7 +11,7 @@ const COLUMNS: DataTableColumn<Log>[] = [
   { key: "time", header: "시간", sortable: true },
   { key: "level", header: "레벨", render: (r) => <Tag tone={r.level} size="sm">{LEVEL[r.level]}</Tag> },
   { key: "src", header: "소스" },
-  { key: "msg", header: "메시지" },
+  { key: "msg", header: "메시지", truncate: true },
 ];
 
 /* 상세는 제품이 불러온다 — 받는 동안은 그 자리에 Spinner(두 번째 행) */

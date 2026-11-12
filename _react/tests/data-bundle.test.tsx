@@ -108,6 +108,17 @@ describe("DataTable", () => {
     rerender(T({ actions: act_, rows: ROWS.filter((r) => r.id === "a") }));
     expect(document.activeElement!.textContent).toBe("가 동작");
   });
+  it("지운 행 자리에 비활성 행이 오면 그 안(tabindex -1)으로 옮기지 않고 표 영역으로 — 2026-11-12 FOCUS_IN_ROW", () => {
+    const act_ = (r: Row) => <button type="button">{r.name} 동작</button>;
+    const off = (r: Row) => ({ disabled: r.id === "c" });
+    const { rerender } = render(T({ actions: act_, rowProps: off }));
+    const b = screen.getByRole("button", { name: "나 동작" }); b.focus(); fireEvent.focusIn(b);
+    rerender(T({ actions: act_, rowProps: off, rows: ROWS.filter((r) => r.id !== "b") }));
+    const dead = screen.getByText("다 동작");
+    expect(dead.tabIndex).toBe(-1);
+    expect(document.activeElement).not.toBe(dead);
+    expect(document.activeElement!.classList.contains("tbl-wrap")).toBe(true);
+  });
   it("포커스가 표 밖에 있으면 행이 사라져도 뺏지 않는다", () => {
     const act_ = (r: Row) => <button type="button">{r.name} 동작</button>;
     const { rerender } = render(<><input aria-label="밖" />{T({ actions: act_ })}</>);
@@ -139,11 +150,11 @@ describe("DataTable", () => {
     expect(w.style.maxHeight).toBe("240px");
     expect(document.querySelector("caption")!.className).toBe("sr-only");
   });
-  it("말줄임 열은 전체 값을 title 로", () => {
+  it("말줄임 열은 .truncate 이고 title 을 쓰지 않는다 — 전체 값은 잘린 칸의 Tooltip(2026-11-12, table-optimize.test)", () => {
     render(<DataTable columns={[{ key: "name", header: "이름", truncate: true }]} rows={ROWS} rowKey={(r) => r.id} />);
     const td = screen.getByText("가");
     expect(td.className).toBe("truncate");
-    expect(td.title).toBe("가");
+    expect(td.hasAttribute("title")).toBe(false);
   });
 });
 

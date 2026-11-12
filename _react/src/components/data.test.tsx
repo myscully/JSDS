@@ -23,13 +23,14 @@ const rows: R[] = [{ id: "a", name: "b", n: 2 }, { id: "b", name: "a", n: 1 }, {
 const cols = [{ key: "name", header: "이름", sortable: true }, { key: "n", header: "수", num: true, sortable: true }];
 
 describe("DataTable", () => {
-  /* 비활성 행은 inert — pointer-events 만으로는 키보드 Tab 이 행 안 링크로 들어갔다 */
-  it("rowProps disabled 행은 .disabled + inert, 다른 행은 inert 아님", () => {
+  /* 비활성 행은 inert 대신 aria-disabled(2026-11-12) — inert 는 클릭을 표로 떨어뜨리고 행 글자를 보조기기에서 지웠다. 안 링크의 Tab 제외는 disabled-controls.test 가 잰다 */
+  it("rowProps disabled 행은 .disabled + aria-disabled(inert 아님), 다른 행은 둘 다 없음", () => {
     const { container } = render(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} rowProps={(r) => ({ disabled: r.id === rows[0].id })} />);
     const trs = container.querySelectorAll("tbody tr");
     expect(trs[0]).toHaveClass("disabled");
-    expect(trs[0].hasAttribute("inert")).toBe(true);
-    expect(trs[1].hasAttribute("inert")).toBe(false);
+    expect(trs[0].getAttribute("aria-disabled")).toBe("true");
+    expect(trs[0].hasAttribute("inert")).toBe(false);
+    expect(trs[1].hasAttribute("aria-disabled")).toBe(false);
   });
   it("헤더 클릭으로 asc → desc 정렬, aria-sort 표시", async () => {
     render(<DataTable columns={cols} rows={rows} rowKey={(r) => r.id} />);

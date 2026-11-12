@@ -648,7 +648,7 @@ function accordionExpect() {
       const d = fg.sizes[ACC_SIZES[z]];
       if (d && (d.h !== size[z].h || d.fs !== fs)) throw new Error(`components.data.js accordion.figma.sizes.${ACC_SIZES[z]}(h ${d.h} · fs ${d.fs})와 CSS ${sel}(h ${size[z].h} · fs ${fs})가 다릅니다`);
     }
-    const hoverFace = figTok(cssRule(".accordion summary:hover").background);
+    const hoverFace = figTok(cssRule(".accordion:where(:not(.disabled)) summary:hover").background);
     const dis = cssRule(".accordion.disabled summary"), disAfter = cssRule(".accordion.disabled summary::after");
     const want = {
       variants, sizes, states, size,
