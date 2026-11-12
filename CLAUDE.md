@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1201/1201 · react 710+6 · tsc 0
+pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1208/1208 · react 710+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -480,6 +480,26 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 음성 시험: 사이트 8건 · verify 1건 · React 1건. 3건(`.chip .tooltip-wrap{min-width:0}` · 버튼 `vertical-align` · relaxed 칸 패딩)은 지워도 같아 쓸모없는 선언이라 지웠다. 키보드 포커스 Tooltip 단정이 5회에 3회 실패해 재 보니 나타나는 전환 도중(opacity 0.96 · 0.999)에 쟀다 — opacity 1 을 기다리게 고쳐 6회 통과.
 - **기본 · relaxed 의 행 동작 칸**(재다가 찾아 사람이 결정 — '그 칸 패딩만 줄임') — 아이콘 버튼(32)이 있는 행이 기본 57 · relaxed 65 였다(32 + 칸 패딩 + 아래 선 1). 그 칸만 위아래 7 로 줄여 48 · 56(relaxed 도 같은 규칙으로 가운데에 든다 — relaxed 전용 규칙은 음성 시험에서 쓸모없어 지움). 버튼 크기는 그대로. behave +1(세 밀도의 버튼 있는 행 = 없는 행 높이 · 가운데).
 
+2026-11-12 텍스트 스타일 19단계(사람의 요청 — 이미지의 스케일, 결정 다섯) — behave 1201 → 1206(`behave.type.js` 5 · 기존 단정 고침 7). contrast · advisory · react · pages 수는 그대로(색 변화 없음).
+- **스케일** Display 1~3(56 · 40 · 36) · Title 1~3(32 · 28 · 24) · Heading 1~2(22 · 20) · Headline 1~2(18 · 17) · Body 1 · 2(16 · 15, Normal · Reading) · Label 1(14, Normal · Reading) · Label 2(13) · Caption 1~2(12 · 11). 크기 · 행간 · 자간은 표 그대로이고,
+  Headline 2 는 표에 '26px (1.412)' 로 둘이 어긋나 비율 쪽 **24** 로 정했다(사람의 결정). 클래스 `.t-display-1` … `.t-body-1-normal` · `.t-label-1-reading` …, 이름은 Figma 철자(Body 1/Normal).
+- **굵기는 따로**(사람의 결정) — `.t-bold` 700 · `.t-semibold` 600 · `.t-medium` 500 · `.t-regular` 400(SemiBold 는 컴포넌트 52곳이 600 이라 더함 — 사람의 결정). 스타일마다 기본 굵기: Display · Title · Heading · Headline Bold, Body Regular, Label · Caption Medium(사람의 결정).
+- **같은 이름이 다른 크기가 됐다** — `.t-title-1` 16 → 32 · `.t-heading-1` 28 → 22 · `.t-display-1` 40 → 56. 전환표는 `_react/MIGRATION.md`. verify 가 없어진 이름(`t-body-1/2` · `t-label-1` 단독 · `t-title-1-medium` · `t-label-2-semibold` · `t-heading-3/4`)을 사이트 데이터 · React 에서 막는다.
+  옛 Caption 1(12/18) → 12/16, 옛 Caption 2(10) → 11. 토큰 `--font-size-11 · 13 · 15 · 17 · 22 · 36 · 56` 을 더하고 10 을 지웠다(사이트 셸의 문서 그림 다섯 곳은 `max(0.625rem,10px)` 그대로 — 11 로 옮기니 Foundations 간격 막대 라벨이 넘쳐 behave 2건이 잡았다).
+- **페이지 h1 = Display 3**(사람의 결정) — 문서 사이트 `h1`(28/1.2) · Page Header 제목(24/1.3) → 36/48/700/-0.027em. 홈 hero 는 48 그대로(행간 1.2 를 직접 줌).
+- **컴포넌트 글자를 표에 묶었다**(사람의 결정 — 크기는 그대로, 행간 · 자간을 같은 크기 스타일 중 지금 값에 가장 가까운 것으로). font-size 규칙 152개. 높이가 바뀐 것(실측): Tooltip 30 → 28 · Tag 25 → 22(sm 21 → 18 · lg 29 → 26) · 탭 줄 44.4 → 44(sm 37.2 → 34) · 메뉴 · Navigation 항목 38.4 → 38 · 대화상자 제목 28.8 → 26 · KPI 값 행간 38.4 → 44. 표 행 48 · 헤더 44 · 버튼 · 필드 높이는 그대로.
+  UA 가 버튼의 자간을 normal 로 되돌려 `font:inherit` 버튼 여덟 규칙에 `letter-spacing:inherit`. `.tooltip-wrap` 행간 1.6 → inherit(잘린 칸 · 칩 · Breadcrumb 글자가 22.4 · 19.2 였다 — `.breadcrumb .tooltip-wrap` 규칙은 쓸모없어져 지움). 패턴 인라인 글자 둘(검색 툴바 12px · 온보딩 완료 16px)은 토큰 + 행간 · 자간으로(사이트 · React). 차트 카드 제목은 카드 제목과 같은 16/24.
+- **behave.type** — 19 스타일 · 기본 굵기가 이미지 표와 같음, 굵기 클래스가 이김, 사이트 h1 · Page Header = Display 3, **모든 컴포넌트 · 패턴 예제 글자의 (크기, 행간, 자간)이 표 안**, 굵기 넷 밖 없음. 예외(코드에 이유): 고정폭 Code 12/20 · 인라인 코드 · Pagination 생략 기호(10-26 결정) · 숨긴 글자 · 대문자 그룹 라벨 자간 .06em.
+  기존 단정 고침 7: 탭 44.4 → 44, Tag 21 · 25 · 29 → 18 · 22 · 26, 좁은 Tag 25 → 22, Avatar sm 10 → 11, Page Header 24 → 36, 카드 제목 비교 클래스 · 미리보기 h3 자간(Body 1 의 0.0912px), KPI 단위 · 증감의 스타일 이름(값 같음). behave.scale 의 12 이하 최소 크기는 10 → 11.
+- 문서: Typography 의 Style 표를 CSS 에서 읽고(손 배열을 지움) Weight 절을 더했다. 쓰임 표 · Size units · Spec 의 스타일 이름(Body/2 → Label 1/Reading 등 33곳)과 높이. audit `typeScale()` 이 새 이름 · 굵기 조합을 읽는다(Figma 대조는 스타일 19개만 — 굵기 조합을 몇 개 만들지는 일괄 반영 때).
+- 음성 시험: behave 9건(스타일 값 · 굵기 · 사이트 h1 · Page Header · Tooltip 행간 · Tag 행간 · tooltip-wrap · 달력 칸 자간 · 툴바 인라인) · verify 2건(React 예제 · 사이트 데이터의 옛 이름) 모두 잡혔다.
+- **하지 않은 것:** 사이트 셸의 문서 본문 · 내비 글자, 캔버스 차트 글자(ds-chart — 크기만 스타일과 같고 자간 · 툴팁 행간은 Chart.js 기본, 사람의 결정 '그대로'). Figma 미반영 282 → 473건 — 텍스트 스타일 19개 없음 · 굵기 · 높이 · 이름이 바뀐 대조들. 기준 덤프의 알려진 'Label/2 SemiBold 700 ≠ 600' 은 그 스타일이 없어져 더 나오지 않는다(이제 빼지 않는다).
+- **같은 날 남은 셋(사람의 결정 — 선택지)** — behave 1206 → 1208(`behave.type.js` 2). contrast · advisory · react 수는 그대로.
+  - 사이트 홈 hero 제목 48/1.2 → **Display 1 56/72**(767 이하는 Title 1 32/44 — 56 은 375 에서 여러 줄로 끊김). 쓰는 곳이 없어진 글자 크기 토큰 `--font-size-48` 을 지웠다(MIGRATION).
+  - 문서 제목 **h2 · h3 · h4 = Heading 2 · Body 1/Normal · Label 1/Normal** 의 행간 · 자간(굵기 그대로). 미리보기 안에는 걸리지 않게 `:where(:not(.example-preview *))` — 옛 h3 자간 규칙과 같은 이유. 사이트에 h4 는 없어 단정이 하나 넣어 잰다.
+  - 패키지 **`.ds-root` 기본 글자 = Body 2/Reading 15/24 · 자간 0.0096em**(옛 15/1.65 = 24.75). `sync-css.mjs` 가 `.t-body-2-reading` 값과 다르면 빌드를 막는다. '기본 글자에 기대지 않는다' 단정(behave.js)의 기본 글자를 같이 바꿨더니 **고정폭 Code 블록 셋이 새 자간을 물려받아** 배치가 달랐다 — `.code-view pre{letter-spacing:0}`(제품 앱에서도 같은 일이 났을 것).
+  - 음성 시험 6건(홈 제목 · 좁은 화면 · h2 · h3 · h4 · sync-css 가드) 모두 실패로 잡혔다. Figma 미반영 473건(그대로).
+
 `advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
@@ -503,7 +523,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 > **임시 규칙 — 2026-11-09 부터 사이트 완성 때까지 Figma 반영 보류(사람의 결정 — 일정).**
 > - `use_figma` 로 Figma 를 고치지 않습니다. 결정이 자주 뒤집히고 Figma 한 번이 10~34분이라, 사이트가 끝난 뒤 한 번에 검토 · 반영합니다.
 > - 대신 사이트를 고칠 때마다 기준 덤프로 audit 을 돌립니다: `node _figma/audit.mjs diff _figma/dumps/baseline.json`.
->   알려진 `Label/2 SemiBold: 굵기 700 ≠ 600` 1건을 뺀 ✗ 수를 커밋 메시지에 **'Figma 미반영 n건'** 으로 적습니다. 기준선(2026-11-09, k42b 덤프)은 0건입니다.
+>   ✗ 수를(2026-11-12 까지는 알려진 `Label/2 SemiBold: 굵기 700 ≠ 600` 1건을 뺐다 — 19단계로 그 스타일이 없어져 이제 그대로) 커밋 메시지에 **'Figma 미반영 n건'** 으로 적습니다. 기준선(2026-11-09, k42b 덤프)은 0건입니다.
 > - 기대값은 대부분 저장소에서 읽으므로 사이트를 고치면 audit 이 저절로 따라옵니다. 새 검사에 Figma 쪽 데이터가 필요하면 `audit.mjs` 만 고치고, `probe.js` 수정은 일괄 반영 때 합니다.
 > - **끝나는 조건:** 사이트가 완성되면 전체 probe → audit 목록 → figma-sync 로 고침 → 어긋남 0 → 데스크톱 검토 한 번 → `baseline.json` 을 새 덤프로 바꾸고 이 블록을 지웁니다.
 
@@ -518,7 +538,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 ### 텍스트 편집 — Pretendard 없이 하는 법과 주의점
 
 **에이전트가 쓰는 Figma 플러그인 환경에는 Pretendard 가 없습니다**(보이는 1,938 패밀리 중 0건).
-2026-10-22 에 텍스트 스타일 14단계(지금 16)를 `Noto Sans KR` 로 대체해 저장소 값(크기·행간·자간)으로 교정했고,
+2026-10-22 에 텍스트 스타일 14단계(지금 저장소는 19단계 — 2026-11-12, Figma 는 아직 16)를 `Noto Sans KR` 로 대체해 저장소 값(크기·행간·자간)으로 교정했고,
 **같은 날 사람이 데스크톱에서 직접 Pretendard 로 되돌렸습니다**(교정값은 유지). 그래서 스타일은 Pretendard 이고 Pretendard 글자를
 그대로 고칠 수는 없습니다(`audit.mjs` 의 NOTE 가 실제 상태를 알려 줍니다).
 

@@ -10,6 +10,8 @@
 높이(버튼 · Text Field · Date Picker 필드)가 바뀌었습니다** — 아래 [Button (2026-10-28)](#button-2026-10-28) 절을 보세요.
 그 밖의 컴포넌트 props(`tone` · `variant` · `size`)와 클래스 이름은 그대로입니다.
 
+**2026-11-12 텍스트 스타일이 19단계로 바뀌며 같은 이름의 크기가 달라졌습니다** — `.t-title-1` 은 16 → 32, `.t-heading-1` 은 28 → 22, `.t-display-1` 은 40 → 56 입니다. 제품 마크업의 `.t-*` 는 아래 [텍스트 스타일 19단계 (2026-11-12)](#텍스트-스타일-19단계-2026-11-12) 표대로 바꿔야 합니다.
+
 ## 이름 규칙
 
 ```
@@ -512,3 +514,40 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **`Chip onRemove` 의 값이 `title` 을 넣지 않습니다** — 240 에서 잘린 값에만 `Tooltip`(aria-hidden)이 붙습니다. 키보드는 전처럼 지우기 버튼에 포커스가 오면 값이 펼쳐집니다. 사이트는 ds.js 가 `.chip > .lbl` 을 재서 답니다(`.lbl` 에 `title` 을 쓰면 빌드가 막음).
 - **compact 표의 행 동작 아이콘 버튼은 28** 입니다(`td.actions` 안 `Button size="sm" iconOnly`, 칸 위아래 패딩 5). 전에는 32 라 compact 행이 40 이 아니라 48 이었습니다.
 - 기본 · relaxed 표의 행 동작 아이콘 버튼 칸도 위아래 패딩이 7 로 줄었습니다(버튼 32 그대로). 버튼이 있는 행이 48 · 56 이 아니라 57 · 65 였습니다.
+
+## 텍스트 스타일 19단계 (2026-11-12)
+
+스케일을 Display 1~3 · Title 1~3 · Heading 1~2 · Headline 1~2 · Body 1~2(Normal · Reading) · Label 1(Normal · Reading) · Label 2 · Caption 1~2 로 바꿨습니다.
+스타일은 크기 · 행간 · 자간만 정하고, **굵기는 따로 붙입니다** — `.t-bold`(700) · `.t-semibold`(600) · `.t-medium`(500) · `.t-regular`(400). 붙이지 않으면 기본 굵기입니다(Display · Title · Heading · Headline Bold, Body Regular, Label · Caption Medium).
+
+| 옛 클래스 | 새 클래스 | 값이 바뀌는 것 |
+|---|---|---|
+| `.t-display-1` 40/52 | `.t-display-2` | — |
+| `.t-display-2` 32/44 | `.t-title-1` | — |
+| `.t-heading-1` 28/38 | `.t-title-2` | — |
+| `.t-heading-2` 24/32 | `.t-title-3` | — |
+| `.t-heading-3` 20/28 | `.t-heading-2` | — |
+| `.t-heading-4` 18/26 | `.t-headline-1` | — |
+| `.t-title-1` 16/24 600 | `.t-body-1-normal .t-semibold` | — |
+| `.t-title-1-medium` | `.t-body-1-normal .t-medium` | — |
+| `.t-title-2` 14/20 500 | `.t-label-1-normal` | — |
+| `.t-body-1` 16/26 | `.t-body-1-reading` | — |
+| `.t-body-2` 14/22 | `.t-label-1-reading .t-regular` | — |
+| `.t-label-1` 14/20 600 | `.t-label-1-normal .t-semibold` | — |
+| `.t-label-2` 12/16 500 | `.t-caption-1` | — |
+| `.t-label-2-semibold` | `.t-caption-1 .t-semibold` | — |
+| `.t-caption-1` 12/18 | `.t-caption-1` | **행간 18 → 16** |
+| `.t-caption-2` 10/14 | `.t-caption-2` | **크기 10 → 11** · 굵기 400 → 500 |
+
+새로 생긴 단계: `.t-display-1`(56) · `.t-display-3`(36) · `.t-heading-1`(22) · `.t-headline-2`(17/24) · `.t-body-2-normal` · `.t-body-2-reading`(15) · `.t-label-2`(13). 글자 크기 토큰에 `--font-size-11 · 13 · 15 · 17 · 22 · 36 · 56` 이 생겼고 **`--font-size-10` 은 없어졌습니다**(Caption 2 가 11).
+
+**컴포넌트 글자도 이 표에 묶었습니다** — 크기는 그대로이고 행간 · 자간만 표의 값으로 바뀝니다. 높이가 달라진 것:
+- 12px 글자(Tag · Chip · Tooltip · 도움말 · 표 헤더 · 범례 · 로그 행 등)의 행간이 19.2 · 18 → 16. 높이가 정해지지 않은 것은 2~3px 낮아집니다 — Tooltip 30 → 28, Tag 25 → 22(sm 21 → 18 · lg 29 → 26), 작은 탭 줄 37.2 → 34.
+- 14 · 16 본문의 행간 22.4 · 25.6 → 22 · 26, 체크박스 · 라디오 라벨 19.6 → 20. 그래서 메뉴 · Navigation 항목 38.4 → 38, 탭 줄 44.4 → 44 입니다(표 행 48 · 헤더 44 는 그대로).
+- KPI 값(32)의 행간 38.4 → 44 — KPI 카드가 5.6 높아집니다. 대화상자 제목(18) 28.8 → 26.
+- **`PageHeader` 제목은 Display 3(36/48)** 입니다(24/1.3 이었다).
+- **`.ds-root` 기본 글자는 Body 2/Reading 15/24 · 자간 0.0096em** 입니다(15/1.65 = 24.75 였다). 컴포넌트는 이 값에 기대지 않으므로, 바뀌는 것은 제품 화면에서 컴포넌트 밖의 맨 글자뿐입니다(줄마다 0.75px 낮아짐).
+  고정폭 Code 블록(`CodeBlock`)은 자간 0 을 스스로 정합니다 — 새 기본 자간을 물려받지 않습니다.
+- 글자 크기 토큰 `--font-size-48` 을 지웠습니다(사이트 홈 제목 전용이었고 Display 1 56 이 되었습니다). 제품 CSS 가 썼다면 `--font-size-56`(Display 1) 또는 `--font-size-40`(Display 2)으로 바꾸세요.
+- 자간이 생겨 같은 글자가 조금 넓어집니다(12px 에서 글자당 0.3px).
+

@@ -28,7 +28,7 @@ const TREND = {"labels":["10-21","10-22","10-23","10-24","10-25","10-26","10-27"
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
-    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["text-field", "number-input", "select", "checkbox", "radio-button", "button", "notification"], css: [".form", ".form-legend", ".form-summary"], borrows: [".t-label-1"],
+    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["text-field", "number-input", "select", "checkbox", "radio-button", "button", "notification"], css: [".form", ".form-legend", ".form-summary"], borrows: [".t-label-1-normal", ".t-semibold"],
     desc: "정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.",
     thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
     principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "<code>data-validate</code> — 포커스가 떠날 때 필드 단위로, 제출하면 첫 오류로 이동, 오류 3개 이상이면 위에 요약. 고치면 바로 지웁니다"], ["필수", "필수 항목이 있으면 폼 위에 <code>.form-legend</code>"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
@@ -44,7 +44,7 @@ const PATTERNS = {
             <div class="field"><label id="pgroup-l">그룹</label><div class="dropdown"><button type="button" id="pgroup" class="trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pgroup-l pgroup">전체</button></div></div>
             <div class="field number-field"><label for="prio">우선순위</label><div class="affix"><input id="prio" type="number" value="10" min="1" max="100"><button type="button" class="num-btn down" tabindex="-1" aria-label="우선순위 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="우선순위 늘리기">${I("plus",16)}</button></div><span class="help">1~100</span></div>
           </div>
-          <fieldset class="radio-group"><legend class="t-label-1">탐지 시 동작</legend>
+          <fieldset class="radio-group"><legend class="t-label-1-normal t-semibold">탐지 시 동작</legend>
             <label class="radio"><input type="radio" name="fa" checked><span>차단 후 알림</span></label>
             <label class="radio"><input type="radio" name="fa"><span>알림만</span></label>
           </fieldset>
@@ -143,7 +143,7 @@ const PATTERNS = {
         <div class="onboard">
           <ol class="steps" aria-label="진행 단계"><li class="done"><i>${I("check",12)}</i>조직 정보<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>보호 수준<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>에이전트 배포<span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>4</i>완료</li></ol>
           <div class="card" style="align-items:center;text-align:center">
-            <span class="indicator ok" style="font-size:16px;font-weight:600">설정이 완료되었습니다</span>
+            <span class="indicator ok" style="font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em;font-weight:600">설정이 완료되었습니다</span>
             <p class="desc keep-all">표준 보호 · 에이전트 12대 연결 대기 중. 첫 이벤트가 들어오면 대시보드에서 확인할 수 있습니다.</p>
             <button type="button" class="btn lg solid primary">대시보드로 이동</button>
           </div>
@@ -166,7 +166,7 @@ const PATTERNS = {
             <span class="spacer"></span>
             <button type="button" class="btn md outline assistive">${I("download")}내보내기</button>
           </div>
-          <div class="toolbar" style="font-size:12px;color:var(--foreground-neutral-secondary)">
+          <div class="toolbar" style="font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em;color:var(--foreground-neutral-secondary)">
             <span>결과 <b style="color:var(--foreground-neutral-primary)">128</b>건</span>
             <span class="chip sm on"><span class="lbl">Critical</span><button type="button" class="x" aria-label="Critical 제거">${I("x",10)}</button></span>
             <span class="chip sm on"><span class="lbl">High</span><button type="button" class="x" aria-label="High 제거">${I("x",10)}</button></span>

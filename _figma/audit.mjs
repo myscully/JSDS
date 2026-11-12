@@ -191,24 +191,23 @@ function icons() {
 }
 
 /* ---------- 타입 스케일 ---------- */
-function typeScale() {
+function typeScale(withWeights = true) {
   const css = read("assets/style.css");
-  const out = {};
-  for (const m of css.matchAll(/\.t-([a-z0-9-]+)\{([^}]*)\}/g)) {
-    const d = Object.fromEntries(m[2].split(";").filter(Boolean).map((x) => x.split(":").map((s) => s.trim())));
+  const out = {}, weights = {};
+  /* 2026-11-12 텍스트 스타일 19단계(사람의 결정): 스타일 = 크기 · 행간 · 자간 + 기본 굵기, 굵기는 .t-bold · .t-semibold · .t-medium · .t-regular 로 따로.
+     이름은 Figma Text Style 철자 — t-display-3 → "Display 3", t-body-1-normal → "Body 1/Normal". 굵기를 바꾼 조합은 "Body 1/Normal SemiBold".
+     withWeights=false 는 스타일 19개만(Figma 텍스트 스타일 대조용 — 굵기 조합을 Figma 에 몇 개 만들지는 일괄 반영 때 정한다) */
+  const WS = { 400: "Regular", 500: "Medium", 600: "SemiBold", 700: "Bold" };
+  for (const m of css.matchAll(/\.t-(bold|semibold|medium|regular)\{font-weight:(\d+)\}/g)) weights[m[1]] = +m[2];
+  if (Object.keys(weights).length !== 4) throw new Error(`굵기 클래스 ${Object.keys(weights).length}개 — 넷이어야 합니다`);
+  for (const m of css.matchAll(/\.t-([a-z]+)-(\d)(?:-([a-z]+))?\{([^}]*)\}/g)) {
+    const d = Object.fromEntries(m[4].split(";").filter(Boolean).map((x) => x.split(":").map((s) => s.trim())));
     if (!d["font-size"]) continue;
-    /* t-title-1 → Title/1. 굵기 변형(2026-11-06 k35d — 사람의 결정으로 타입 스케일 14 → 16): t-title-1-medium → "Title/1 Medium", t-label-2-semibold → "Label/2 SemiBold".
-       Figma 텍스트 스타일 이름이 굵기를 Pretendard 의 스타일 철자(SemiBold)로 적는다 */
-    const WS = { regular: "Regular", medium: "Medium", semibold: "SemiBold", bold: "Bold" };
-    const vm2 = /^([a-z]+)-(\d)-([a-z]+)$/.exec(m[1]);
-    if (vm2 && !WS[vm2[3]]) throw new Error(`.t-${m[1]} 의 굵기 접미사 '${vm2[3]}' 를 모릅니다 — audit.mjs typeScale 의 WS 에 더하세요`);
-    const name = vm2 ? `${vm2[1][0].toUpperCase()}${vm2[1].slice(1)}/${vm2[2]} ${WS[vm2[3]]}` : m[1].replace(/-(\d)$/, "/$1").replace(/^(\w)/, (c) => c.toUpperCase());
-    out[name] = {
-      size: parseFloat(d["font-size"]),
-      lineHeight: d["line-height"] ? parseFloat(d["line-height"]) : null,
-      weight: d["font-weight"] ? parseInt(d["font-weight"], 10) : null,
-      letterSpacing: d["letter-spacing"] || "0",
-    };
+    if (m[3] && !/^(normal|reading)$/.test(m[3])) throw new Error(`.t-${m[1]}-${m[2]}-${m[3]} 의 접미사를 모릅니다 — normal · reading 만`);
+    const name = `${m[1][0].toUpperCase()}${m[1].slice(1)} ${m[2]}${m[3] ? "/" + m[3][0].toUpperCase() + m[3].slice(1) : ""}`;
+    const base = { size: parseFloat(d["font-size"]), lineHeight: d["line-height"] ? parseFloat(d["line-height"]) : null, weight: d["font-weight"] ? parseInt(d["font-weight"], 10) : null, letterSpacing: d["letter-spacing"] || "0" };
+    out[name] = base;
+    if (withWeights) for (const w of Object.values(weights)) if (w !== base.weight) out[`${name} ${WS[w]}`] = { ...base, weight: w };
   }
   return out;
 }
@@ -859,7 +858,8 @@ function chartExpect() {
     const padm = /^(\d+)px(?:\s+(\d+)px)?$/.exec(card.padding || ""); if (!padm) throw new Error(".chart-card padding 을 읽지 못했습니다");
     const pad = [+padm[1], +(padm[2] || padm[1]), +padm[1], +(padm[2] || padm[1])];
     const ts = typeScale(); const tsz = parseFloat(title["font-size"]), twt = parseInt(title["font-weight"], 10);
-    const titleStyles = Object.entries(ts).filter(([, d]) => d.size === tsz && d.weight === twt).map(([n]) => n);
+    const tlh = title["line-height"] ? parseFloat(title["line-height"]) : null;   // 2026-11-12 — 굵기가 따로라 크기 · 굵기만으로는 Normal · Reading 둘이 맞는다
+    const titleStyles = Object.entries(ts).filter(([, d]) => d.size === tsz && d.weight === twt && (tlh === null || d.lineHeight === tlh)).map(([n]) => n);
     if (titleStyles.length !== 1) throw new Error(`.chart-card .chart-title ${tsz}/${twt} 에 맞는 타입 스케일 스타일이 ${titleStyles.length}개입니다 — ${titleStyles.join(" · ")}`);
     const styles12 = Object.entries(ts).filter(([, d]) => d.size === fontSize).map(([n]) => n);
     /* 데이터 — 예제 HTML 의 data-spec 과 .chart-title */
@@ -1079,7 +1079,7 @@ function cardExpect() {
     const want = {
       types, sizes, axis, table, vnames, vdef, size, flush, headPad, headGap: px(cssRule(".card .card-head").gap), headBtn,
       face: figTok(base.background), stroke: figTok(bm[2]), sw: +bm[1], radius: { tok: "radius/" + rm[1], px: px(root["--radius-" + rm[1]]) }, minW: px(base["min-width"]),
-      title, desc: { st: styleOf(px(d["font-size"]), null, parseInt(d["font-weight"], 10) || 400, "설명"), fill: figTok(d.color) },
+      title, desc: { st: styleOf(px(d["font-size"]), d["line-height"] ? px(d["line-height"]) : null, parseInt(d["font-weight"], 10) || 400, "설명"), fill: figTok(d.color) },
       meta: { row: mg[0], col: mg[1] ?? mg[0], st: styleOf(px(mt["font-size"]), px(mt["line-height"]), 400, "키-값"), key: figTok(cssRule(".card .card-meta dt").color), val: figTok(cssRule(".card .card-meta dd").color) },
       icon: { size: +im[2], ink: figTok(cssRule(".card.clickable>svg").color), on: figTok(cssRule(".card.on>svg").color), dis: figTok(cssRule(dis + ">svg").color) },
       hover: "shadow/" + hov[1],
@@ -2103,7 +2103,7 @@ function diffComponents(c, want, bad, notes) {
 function expect_() {
   const t = tokens();
   const ic = icons();
-  const ts = typeScale();
+  const ts = typeScale(false);
   return {
     primitives: t.primitives,
     semantic: t.semantic,

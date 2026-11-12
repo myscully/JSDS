@@ -127,6 +127,16 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   }
 }
 
+/* 텍스트 스타일 19단계(2026-11-12) — 없어진 클래스 이름이 예제 · React 에 남으면 스타일 없이 둘레 글자를 물려받는다.
+   같은 이름이 다른 크기가 된 것(.t-title-1 16 → 32 등)은 글자로 잡을 수 없어 behave.type 이 크기를 잰다 */
+{
+  const OLD = /(?<![\w-])t-(?:body-[12]|label-1|title-1-medium|label-2-semibold|heading-[34])(?![\w-])/g;
+  const files = ["components.data.js", "patterns.data.js", "render.js", "foundations.js"].map((f) => path.join(__dirname, f));
+  const walk = (d) => fs.existsSync(d) ? fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.name.startsWith(".") || e.name === "node_modules" ? [] : e.isDirectory() ? walk(path.join(d, e.name)) : /\.(tsx?|jsx?)$/.test(e.name) ? [path.join(d, e.name)] : []) : [];
+  for (const d of ["../_react/src", "../_react/examples"]) files.push(...walk(path.join(__dirname, d)));
+  for (const f of files) for (const m of fs.readFileSync(f, "utf8").matchAll(OLD)) fails.push(`${path.relative(path.join(__dirname, ".."), f)}: .${m[0]} — 없어진 텍스트 스타일(19단계 전환표는 _react/MIGRATION.md)`);
+}
+
 /* 문구 — 예제 미리보기의 버튼 · 링크 글자와 자리 표시 글. 규칙과 예외는 foundations/writing(Writing 페이지)과 같다.
    taste-skill 2.5.0(MIT) references/copy.md 를 한국어 콘솔에 맞게 옮겼다(2026-11-05) */
 {

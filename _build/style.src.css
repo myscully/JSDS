@@ -90,10 +90,10 @@
   --font-sans:"Pretendard",-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"D2Coding",monospace;
   /* 글자 크기 — rem(html 글꼴 크기 기준, 사람의 결정 2026-11-11). 화면 폭 단계에서 루트 크기가 바뀌면 글자 · 간격 · 높이가 같은 비율로 따라간다.
-     12px 이하는 max() 로 최소 크기를 지킨다 — 좁은 화면(93.75%)에서 12 → 11.25 · 10 → 9.4 가 되면 한글이 읽기 어렵다(사람의 결정).
-     컴포넌트 CSS 의 font-size 는 이 토큰만 쓴다(verify). 컴포넌트의 단계 밖 13 셋은 단계로 묶었고(2026-11-11 — 달력 · Breadcrumb 14, Code 12), 사이트 셸의 9 · 11 · 13 · 15 는 문서 화면 전용이라 rem 그대로 */
-  --font-size-10:max(0.625rem,10px);--font-size-12:max(0.75rem,12px);--font-size-14:0.875rem;--font-size-16:1rem;--font-size-18:1.125rem;--font-size-20:1.25rem;
-  --font-size-24:1.5rem;--font-size-28:1.75rem;--font-size-32:2rem;--font-size-40:2.5rem;--font-size-48:3rem;
+     12px 이하는 max() 로 최소 크기를 지킨다 — 좁은 화면(93.75%)에서 12 → 11.25 · 11 → 10.3 이 되면 한글이 읽기 어렵다(사람의 결정).
+     단계는 텍스트 스타일 19단계의 크기 16개(2026-11-12 — 10 은 Caption 2 가 11 이 되며, 홈 hero 의 48 은 Display 1 이 되며 지움). 컴포넌트 CSS 의 font-size 는 이 토큰만 쓴다(verify) */
+  --font-size-11:max(0.6875rem,11px);--font-size-12:max(0.75rem,12px);--font-size-13:0.8125rem;--font-size-14:0.875rem;--font-size-15:0.9375rem;--font-size-16:1rem;--font-size-17:1.0625rem;--font-size-18:1.125rem;--font-size-20:1.25rem;
+  --font-size-22:1.375rem;--font-size-24:1.5rem;--font-size-28:1.75rem;--font-size-32:2rem;--font-size-36:2.25rem;--font-size-40:2.5rem;--font-size-56:3.5rem;
   --header-h:4rem;--sidebar-w:14.5rem;--toc-w:12.5rem;--shell-max:87.5rem;
   /* 코드 패널 — 라이트·다크 모두 어두운 배경이라 한 벌이다. 구문 강조 네 색은 램프에서 동결해 온 사본이다 */
   --code-bg:var(--cool-neutral-10);--code-chip:var(--cool-neutral-22);--code-chip-border:var(--cool-neutral-25);--code-chip-fg:var(--cool-neutral-90);--code-head-fg:var(--cool-neutral-80);
@@ -285,7 +285,7 @@ code{font-size:inherit}
 .nav a.active{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary);font-weight:600}
 .nav a.active::after{content:"";width:1rem;height:1rem;flex:none;margin-left:auto;opacity:.45;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3Cpath d=%22M13 18l6 -6%22 /%3E%3Cpath d=%22M13 6l6 6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3Cpath d=%22M13 18l6 -6%22 /%3E%3Cpath d=%22M13 6l6 6%22 /%3E%3C/svg%3E") center/contain no-repeat}
 /* Foundations Overview 목록의 N 배지도 같은 모양 — .base-list a span 규칙에 먹혀 평범한 회색 글씨로 보이던 것 */
-.nav a .n,.base-list a b .n{font-size:var(--font-size-10);font-weight:800;line-height:1;padding:0.1875rem 0.25rem;border-radius:0.1875rem;background:var(--foreground-neutral-primary);color:var(--surface-elevated-primary)}
+.nav a .n,.base-list a b .n{font-size:max(0.625rem,10px);font-weight:800;line-height:1;padding:0.1875rem 0.25rem;border-radius:0.1875rem;background:var(--foreground-neutral-primary);color:var(--surface-elevated-primary)}
 .nav .sec-label{margin:var(--space-6) 0 var(--space-2);padding:0 0.625rem;font-size:max(0.6875rem,11px);font-weight:700;letter-spacing:.34px;text-transform:uppercase;color:var(--foreground-brand-primary)}
 .nav .sec-label:first-child{margin-top:0}
 .sidebar-foot{margin-top:var(--space-10);padding:0 0.625rem;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
@@ -332,13 +332,17 @@ code{font-size:inherit}
 .drawer .d-group:first-child{margin-top:0}
 
 /* ---------- Content typography ---------- */
-h1{font-size:var(--font-size-28);line-height:1.2;letter-spacing:-.025em;margin:0 0 var(--space-4);text-wrap:balance;display:flex;align-items:center;gap:0.75rem}
+h1{font-size:var(--font-size-36);line-height:3rem;font-weight:700;letter-spacing:-0.027em;margin:0 0 var(--space-4);text-wrap:balance;display:flex;align-items:center;gap:0.75rem}
 h1 .n{font-size:var(--font-size-12);font-weight:800;line-height:1;padding:0.25rem 0.3125rem;border-radius:0.3125rem;background:var(--foreground-neutral-primary);color:var(--surface-elevated-primary);letter-spacing:0}
 .lead{font-size:var(--font-size-16);font-weight:500;color:var(--foreground-neutral-primary);margin:0 0 var(--space-10);line-height:1.6}
-h2{font-size:var(--font-size-20);letter-spacing:-.02em;margin:var(--space-16) 0 var(--space-5);scroll-margin-top:calc(var(--header-h) + 1rem)}
+h2{font-size:var(--font-size-20);margin:var(--space-16) 0 var(--space-5);scroll-margin-top:calc(var(--header-h) + 1rem)}
 h2:first-of-type{margin-top:var(--space-6)}
 h3{font-size:var(--font-size-16);margin:var(--space-10) 0 var(--space-3);scroll-margin-top:calc(var(--header-h) + 1rem)}
-h3:where(:not(.example-preview *)){letter-spacing:-.01em}   /* 문서 제목만 — 미리보기 안까지 먹어 Card·Popup 제목 자간이 배포 CSS(복사본·React)와 달랐다. :where 라 특정도는 h3 그대로 */
+/* 문서 제목 h2 · h3 · h4 = Heading 2 · Body 1/Normal · Label 1/Normal 의 행간 · 자간(사람의 결정 2026-11-12, 굵기는 그대로).
+   문서 제목만 — 미리보기 안까지 먹어 Card·Popup 제목 자간이 배포 CSS(복사본·React)와 달랐다. :where 라 특정도는 h2 · h3 · h4 그대로 */
+h2:where(:not(.example-preview *)){line-height:1.75rem;letter-spacing:-0.012em}
+h3:where(:not(.example-preview *)){line-height:1.5rem;letter-spacing:0.0057em}
+h4:where(:not(.example-preview *)){line-height:1.25rem;letter-spacing:0.0145em}
 h4{font-size:var(--font-size-14);margin:var(--space-6) 0 var(--space-2)}
 p{margin:0 0 var(--space-3)}
 ul:where(:not(.example-preview *)),ol:where(:not(.example-preview *)){padding-left:1.3em;max-width:70ch}li:where(:not(.example-preview *)){margin-bottom:0.375rem}   /* 문서 목록만 — 미리보기의 Dropdown·Select 메뉴 항목 사이가 6px 벌어졌고, Breadcrumb · 메뉴 목록에 70ch 상한이 걸려 있었다 */
@@ -365,7 +369,7 @@ ul:where(:not(.example-preview *)),ol:where(:not(.example-preview *)){padding-le
 table.wbs{table-layout:fixed;min-width:55rem;font-size:var(--font-size-12)}
 table.wbs th{height:auto;padding:0.5rem 0.375rem;text-align:center;line-height:1.3;white-space:normal}
 table.wbs th:first-child{text-align:left;width:11.875rem;padding-left:var(--space-4)}
-table.wbs th small{display:block;font-weight:400;font-size:var(--font-size-10);color:var(--foreground-neutral-tertiary);}
+table.wbs th small{display:block;font-weight:400;font-size:max(0.625rem,10px);color:var(--foreground-neutral-tertiary);}
 table.wbs th.end{color:var(--company-mark)}
 table.wbs td{height:2.375rem;padding:0 0.375rem;border-left:1px solid var(--line-neutral-tertiary)}
 table.wbs td:first-child{border-left:0;padding:0.375rem var(--space-4);white-space:nowrap}
@@ -404,7 +408,7 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--company-mark)}
 .checker{--checker-bg:repeating-conic-gradient(var(--line-neutral-secondary) 0 25%,transparent 0 50%) 0 0/12px 12px}
 .pal{margin:0 0 var(--space-16)}.pal h3{margin:0 0 0.5rem;font-size:var(--font-size-16)}
 .pal .scale{margin:0;align-items:end;grid-auto-rows:2rem}.pal .scale .val-cell{height:2rem;border-radius:0;transition:height var(--motion-slow);box-shadow:inset 0 1px 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary)}
-.pal .scale .val-cell:hover,.pal .scale .val-cell[aria-expanded="true"]{height:2.5rem}   /* 바닥이 고정이라 위로 자라고 숫자 라벨은 버튼 하단 기준이라 제자리 */.pal .scale .val-cell i{font-size:var(--font-size-10);line-height:1;left:0;right:0;bottom:-1.125rem;text-align:center;mix-blend-mode:normal;color:var(--foreground-neutral-primary);font-weight:700}
+.pal .scale .val-cell:hover,.pal .scale .val-cell[aria-expanded="true"]{height:2.5rem}   /* 바닥이 고정이라 위로 자라고 숫자 라벨은 버튼 하단 기준이라 제자리 */.pal .scale .val-cell i{font-size:max(0.625rem,10px);line-height:1;left:0;right:0;bottom:-1.125rem;text-align:center;mix-blend-mode:normal;color:var(--foreground-neutral-primary);font-weight:700}
 .pal .scale{margin-bottom:1.375rem;gap:0;row-gap:1.5rem}
 .elev-types{display:grid;grid-template-columns:1fr 1fr;gap:var(--card-gap);margin:var(--space-4) 0 var(--space-10)}
 .elev-types .demo{height:11rem;background:var(--background-neutral-secondary);border:1px solid var(--line-neutral-tertiary);border-radius:var(--radius-lg);display:grid;place-items:center}
@@ -426,11 +430,11 @@ table.wbs td.ms{box-shadow:inset -2px 0 var(--company-mark)}
 .space-bars>div i{display:block;height:13.75rem;background:var(--surface-positive-primary);border-radius:0.1875rem}
 .space-bars>div.base b{background:var(--foreground-brand-primary)}.space-bars>div.base i{background:var(--surface-brand-subtle)}
 .space-bars>div.off b{background:var(--surface-cautionary-primary);color:var(--foreground-neutral-primary)}.space-bars>div.off i{background:var(--surface-cautionary-primary)}   /* 4의 배수가 아닌 값 = 그리드 밖 */
-.space-bars>div small{font-size:var(--font-size-10);color:var(--foreground-neutral-tertiary)}
+.space-bars>div small{font-size:max(0.625rem,10px);color:var(--foreground-neutral-tertiary)}
 .grid-demo{background:var(--background-neutral-secondary);border:1px solid var(--line-neutral-tertiary);border-radius:var(--radius-xl);padding:var(--space-8) 2.5rem;margin:var(--space-4) 0 var(--space-6)}
 .grid-demo .cols{display:grid;grid-template-columns:repeat(12,1fr);gap:1.5rem;height:12.5rem}
 .grid-demo .cols i{display:block;background:var(--surface-negative-primary);border-radius:2px;position:relative}
-.grid-demo .cols i::after{content:attr(data-n);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:var(--font-size-10);color:var(--foreground-negative-strong);font-style:normal}
+.grid-demo .cols i::after{content:attr(data-n);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:max(0.625rem,10px);color:var(--foreground-negative-strong);font-style:normal}
 .grid-demo .meta-row{display:flex;justify-content:space-between;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);margin-top:0.625rem}
 .shell-demo{display:grid;grid-template-columns:7.5rem 1fr;height:11.25rem;background:var(--background-neutral-secondary);border:1px solid var(--line-neutral-tertiary);border-radius:var(--radius-xl);overflow:hidden;margin:var(--space-4) 0 var(--space-6);font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);}
 .shell-demo>div{display:grid;place-items:center}.shell-demo .side{background:var(--background-neutral-secondary);border-right:1px solid var(--line-neutral-secondary)}
@@ -487,7 +491,7 @@ table.type-table td .smp{display:block;color:var(--foreground-neutral-primary)}
 .ov-card .label small{margin-left:auto;font-weight:500;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12)}
 /* Home hero + section cards */
 .hero{padding:var(--space-20) var(--space-16) var(--space-16);text-align:center;position:relative;overflow:hidden}
-.hero h1{justify-content:center;font-size:var(--font-size-48);margin:0 0 var(--space-4)}
+.hero h1{justify-content:center;font-size:var(--font-size-56);line-height:4.5rem;letter-spacing:-0.0319em;margin:0 0 var(--space-4)}   /* Display 1 (사람의 결정 2026-11-12) — 좁은 화면은 아래 767 에서 Title 1 */
 .hero .sub{color:var(--foreground-neutral-secondary);margin:0 auto}
 .hero svg.wave{position:absolute;left:0;right:0;bottom:-0.625rem;width:100%;height:10rem;z-index:-1;opacity:.9;color:var(--line-neutral-secondary)}
 .home-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--card-gap);padding:var(--space-12) var(--space-16) var(--space-20);max-width:70rem;margin:0 auto}
@@ -617,7 +621,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
   .drawer{padding:var(--space-5) var(--space-5) var(--space-16)}
   .home-grid{grid-template-columns:1fr;padding:var(--space-8) var(--space-5) var(--space-12)}
   .hero{padding:var(--space-12) var(--space-5) var(--space-10)}
-  .hero h1{font-size:clamp(1.75rem,7vw,3rem)}
+  .hero h1{font-size:var(--font-size-32);line-height:2.75rem;letter-spacing:-0.0253em}   /* Title 1 — 56 은 375 에서 두 줄 넘게 끊긴다 */
   div.kv{grid-template-columns:minmax(0,1fr);gap:2px 0}
   div.kv dt{margin-top:var(--space-3)}
   div.kv dd{min-width:0}
@@ -646,32 +650,43 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 /* 이 블록의 규칙은 컴포넌트 페이지의 "HTML+CSS" 탭과 components.json 으로 추출됩니다.
    규칙: 평면 규칙만(@media 금지, @keyframes 는 허용), 셀렉터는 컴포넌트 클래스로 시작, 색은 var(--*) 토큰만. */
 /* Typography utilities */
-.t-display-1{font-size:var(--font-size-40);line-height:3.25rem;font-weight:700;letter-spacing:-0.0282em}
-.t-display-2{font-size:var(--font-size-32);line-height:2.75rem;font-weight:700;letter-spacing:-0.0253em}
-.t-heading-1{font-size:var(--font-size-28);line-height:2.375rem;font-weight:700;letter-spacing:-0.0236em}
-.t-heading-2{font-size:var(--font-size-24);line-height:2rem;font-weight:700;letter-spacing:-0.023em}
-.t-heading-3{font-size:var(--font-size-20);line-height:1.75rem;font-weight:700;letter-spacing:-0.012em}
-.t-heading-4{font-size:var(--font-size-18);line-height:1.625rem;font-weight:700;letter-spacing:-0.002em}
-.t-title-1{font-size:var(--font-size-16);line-height:1.5rem;font-weight:600;letter-spacing:0.0057em}   /* 참조 500 → 600(사람의 결정 2026-11-02, Card 정의). 카드 제목 · Chart Card 제목 · Accordion md 헤더가 이미 16/24 600 이었다 */
-.t-title-1-medium{font-size:var(--font-size-16);line-height:1.5rem;font-weight:500;letter-spacing:0.0057em}   /* 우리가 더한 단계(사람의 결정 2026-11-06) — KPI 단위(.kpi .value small). Title 1 과 치수가 같고 굵기만 500 */
-.t-title-2{font-size:var(--font-size-14);line-height:1.25rem;font-weight:500;letter-spacing:0.0145em}
-.t-body-1{font-size:var(--font-size-16);line-height:1.625rem;font-weight:400;letter-spacing:0.0057em}
-.t-body-2{font-size:var(--font-size-14);line-height:1.375rem;font-weight:400;letter-spacing:0.0145em}
-.t-label-1{font-size:var(--font-size-14);line-height:1.25rem;font-weight:600;letter-spacing:0.0145em}   /* 500 → 600: 사람이 Figma 스타일을 SemiBold 로 바꾼 것을 저장소로(사람의 결정 2026-10-27). 필드 라벨(.field label · .datepicker label 600)과 같아졌다 */
-.t-label-2{font-size:var(--font-size-12);line-height:max(1rem,16px);font-weight:500;letter-spacing:0.0252em}
-.t-label-2-semibold{font-size:var(--font-size-12);line-height:max(1rem,16px);font-weight:600;letter-spacing:0.0252em}   /* 우리가 더한 단계(사람의 결정 2026-11-06) — KPI 증감(.kpi .delta). Label 2 와 치수가 같고 굵기만 600 */
-.t-caption-1{font-size:var(--font-size-12);line-height:max(1.125rem,18px);font-weight:500;letter-spacing:0.0252em}   /* 참조 400 → 500(2026-10-22 사람의 결정, Figma 와 함께). Label/2 와는 행간(16 · 18)으로 갈린다 */
-.t-caption-2{font-size:var(--font-size-10);line-height:max(0.875rem,14px);font-weight:400;letter-spacing:0.0311em}
+/* 텍스트 스타일 19단계(사람의 결정 2026-11-12 — 이미지의 스케일). 크기 · 행간 · 자간은 스타일이, 굵기는 아래 굵기 클래스가 정한다.
+   기본 굵기(사람의 결정): Display · Title · Heading · Headline = Bold, Body = Regular, Label · Caption = Medium. 이름은 Figma Text Style 과 같다(t-body-1-normal = Body 1/Normal).
+   컴포넌트 CSS 의 글자도 이 표의 (크기, 행간, 자간) 에 묶는다 — behave.type 이 미리보기 글자를 잰다 */
+.t-display-1{font-size:var(--font-size-56);line-height:4.5rem;font-weight:700;letter-spacing:-0.0319em}
+.t-display-2{font-size:var(--font-size-40);line-height:3.25rem;font-weight:700;letter-spacing:-0.0282em}
+.t-display-3{font-size:var(--font-size-36);line-height:3rem;font-weight:700;letter-spacing:-0.027em}
+.t-title-1{font-size:var(--font-size-32);line-height:2.75rem;font-weight:700;letter-spacing:-0.0253em}
+.t-title-2{font-size:var(--font-size-28);line-height:2.375rem;font-weight:700;letter-spacing:-0.0236em}
+.t-title-3{font-size:var(--font-size-24);line-height:2rem;font-weight:700;letter-spacing:-0.023em}
+.t-heading-1{font-size:var(--font-size-22);line-height:1.875rem;font-weight:700;letter-spacing:-0.0194em}
+.t-heading-2{font-size:var(--font-size-20);line-height:1.75rem;font-weight:700;letter-spacing:-0.012em}
+.t-headline-1{font-size:var(--font-size-18);line-height:1.625rem;font-weight:700;letter-spacing:-0.002em}
+.t-headline-2{font-size:var(--font-size-17);line-height:1.5rem;font-weight:700;letter-spacing:0em}
+.t-body-1-normal{font-size:var(--font-size-16);line-height:1.5rem;font-weight:400;letter-spacing:0.0057em}
+.t-body-1-reading{font-size:var(--font-size-16);line-height:1.625rem;font-weight:400;letter-spacing:0.0057em}
+.t-body-2-normal{font-size:var(--font-size-15);line-height:1.375rem;font-weight:400;letter-spacing:0.0096em}
+.t-body-2-reading{font-size:var(--font-size-15);line-height:1.5rem;font-weight:400;letter-spacing:0.0096em}
+.t-label-1-normal{font-size:var(--font-size-14);line-height:1.25rem;font-weight:500;letter-spacing:0.0145em}
+.t-label-1-reading{font-size:var(--font-size-14);line-height:1.375rem;font-weight:500;letter-spacing:0.0145em}
+.t-label-2{font-size:var(--font-size-13);line-height:1.125rem;font-weight:500;letter-spacing:0.0194em}
+.t-caption-1{font-size:var(--font-size-12);line-height:max(1rem,16px);font-weight:500;letter-spacing:0.0252em}
+.t-caption-2{font-size:var(--font-size-11);line-height:max(0.875rem,14px);font-weight:500;letter-spacing:0.0311em}
+/* 굵기 4(사람의 결정 2026-11-12 — Bold · Medium · Regular 에 SemiBold 를 더함: 컴포넌트 52곳이 600). 스타일 뒤에 두어 같은 명시도에서 이긴다 */
+.t-bold{font-weight:700}
+.t-semibold{font-weight:600}
+.t-medium{font-weight:500}
+.t-regular{font-weight:400}
 .t-num{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .keep-all{word-break:keep-all;overflow-wrap:anywhere}
 
 /* Button — Variant(solid · outline · 정의 밖 text) × Color(primary · assistive · negative). 우선순위 Lv4 solid primary → Lv3 outline primary → Lv2 solid assistive → Lv1 outline assistive,
    negative 는 되돌리기 어려운 행동(사람의 정의 2026-10-28). 변형×색 규칙은 :where 로 (0,1,0) 에 둔다 — 그래야 .btn[disabled](0,2,0) 하나가 순서와 무관하게 모든 변형을 이긴다.
    종전에는 .btn.danger.secondary(0,3,0) 를 이기려고 비활성 규칙을 (0,4,0) 으로 따로 써야 했다 */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.375rem;height:2.5rem;padding:0 1.25rem;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;font:inherit;font-size:var(--font-size-14);font-weight:600;line-height:1;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background var(--motion-fast),border-color var(--motion-fast)}
-.btn.sm{height:2rem;padding:0 0.875rem;font-size:var(--font-size-12);border-radius:var(--radius-sm)}   /* sm 은 radius/sm 4 — md · lg 는 radius/md 6(사람의 결정 2026-11-12) */
-.btn.md{height:2.5rem;padding:0 1.25rem;font-size:var(--font-size-14)}
-.btn.lg{height:3rem;padding:0 1.625rem;font-size:var(--font-size-16)}   /* 높이는 고정, 너비는 라벨을 따라 자유 — 필드(Text Field · Date Picker)도 같은 32 · 40 · 48 이라 나란히 놓으면 맞는다 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:0.375rem;height:2.5rem;padding:0 1.25rem;border-radius:var(--radius-md);border:1px solid transparent;background:transparent;font:inherit;font-size:var(--font-size-14);font-weight:600;line-height:1.25rem;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background var(--motion-fast),border-color var(--motion-fast);letter-spacing:0.0145em}
+.btn.sm{height:2rem;padding:0 0.875rem;font-size:var(--font-size-12);border-radius:var(--radius-sm);line-height:max(1rem,16px);letter-spacing:0.0252em}   /* sm 은 radius/sm 4 — md · lg 는 radius/md 6(사람의 결정 2026-11-12) */
+.btn.md{height:2.5rem;padding:0 1.25rem;font-size:var(--font-size-14);line-height:1.25rem;letter-spacing:0.0145em}
+.btn.lg{height:3rem;padding:0 1.625rem;font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}   /* 높이는 고정, 너비는 라벨을 따라 자유 — 필드(Text Field · Date Picker)도 같은 32 · 40 · 48 이라 나란히 놓으면 맞는다 */
 .btn:where(.solid.primary){background:var(--surface-brand-primary);color:var(--brand-label)}
 .btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-brand-strong)}
 .btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-brand-heavy)}
@@ -745,17 +760,17 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .btn-group.vertical{flex-direction:column;align-items:stretch;gap:0.5rem}
 
 /* Text Field */
-.field{display:flex;flex-direction:column;gap:0.375rem;min-width:16.25rem;font-size:var(--font-size-14);line-height:1.6}
+.field{display:flex;flex-direction:column;gap:0.375rem;min-width:16.25rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .field label:where(:not(.checkbox):not(.radio)){font-weight:600}   /* 그룹의 선택지도 label 이다 — 필드 라벨의 굵기를 받지 않는다 */
 .field label em{color:var(--foreground-negative-strong);font-style:normal;margin-left:2px}
-.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])),.field textarea{height:2.5rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);padding:0 0.875rem;font:inherit;font-size:var(--font-size-14);background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);width:100%;transition:border-color var(--motion-fast),box-shadow var(--motion-fast)}
-.field textarea{height:auto;min-height:6rem;padding:0.625rem 0.875rem;resize:vertical;line-height:1.5}
+.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])),.field textarea{height:2.5rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);padding:0 0.875rem;font:inherit;font-size:var(--font-size-14);background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);width:100%;transition:border-color var(--motion-fast),box-shadow var(--motion-fast);line-height:1.375rem;letter-spacing:0.0145em}
+.field textarea{height:auto;min-height:6rem;padding:0.625rem 0.875rem;resize:vertical;line-height:1.375rem}
 .field input::placeholder,.field textarea::placeholder{color:var(--foreground-neutral-tertiary)}
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):hover,.field textarea:hover{border-color:var(--line-neutral-primary)}
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 brand(대비 6.59 · 4.82) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로) */
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):read-only:not(:disabled){background:var(--background-neutral-secondary)}   /* :read-only 는 disabled 입력에도 맞는다 — 뒤에 있어 비활성 면(--surface-disable-primary)을 읽기 전용 색으로 덮었다(2026-10-27 실측 rgb 247 ≠ 244) */
-.field .help{color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);contain:inline-size;word-break:keep-all;overflow-wrap:anywhere}   /* 도움말 · 오류 문구는 필드 폭을 넓히지 않고 줄바꿈한다 — 오류가 나도 폭이 그대로(사람의 결정 2026-11-09). 끊는 자리는 띄어쓰기(.keep-all 과 같음) */
+.field .help{color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);contain:inline-size;word-break:keep-all;overflow-wrap:anywhere;line-height:max(1rem,16px);letter-spacing:0.0252em}   /* 도움말 · 오류 문구는 필드 폭을 넓히지 않고 줄바꿈한다 — 오류가 나도 폭이 그대로(사람의 결정 2026-11-09). 끊는 자리는 띄어쓰기(.keep-all 과 같음) */
 .field.error input:where(:not([type=checkbox]):not([type=radio]):not([type=range])),.field.error textarea,.field.error .affix{border-color:var(--foreground-negative-primary)}   /* 불투명 빨강 — 16% 틴트(--surface-negative-strong)는 필드 면 대비 1.23 · 1.34 라 테두리만으로 오류가 보이지 않았다. 3.44 · 5.47(사람의 결정 2026-10-26) */
 .field.error input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):focus,.field.error textarea:focus-within,.field.error .affix:has(input:focus){border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}   /* 오류 필드의 포커스 — 빨강 테두리 1px(대비 3.44 · 5.47) + 빨강 후광(장식). brand 링이 오류 테두리를 덮지 않게(사람의 결정 2026-10-26) */
 .field.error .help{color:var(--foreground-negative-strong)}
@@ -768,8 +783,8 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field .affix .reveal span{display:grid}
 .field .affix .reveal svg{width:1.125rem;height:1.125rem}
 .field .affix .reveal[aria-pressed="true"] .i-show,.field .affix .reveal:not([aria-pressed="true"]) .i-hide{display:none}
-.field.sm input:where(:not([type=checkbox]):not([type=radio]):not([type=range])){height:2rem;font-size:var(--font-size-12);padding:0 0.75rem;border-radius:var(--radius-sm)}   /* 32 높이 컨트롤은 radius/sm 4 — sm 버튼과 나란히 놓여도 모서리가 같다(사람의 결정 2026-11-12) */
-.field.lg input:where(:not([type=checkbox]):not([type=radio]):not([type=range])){height:3rem;font-size:var(--font-size-16);padding:0 1rem}
+.field.sm input:where(:not([type=checkbox]):not([type=radio]):not([type=range])){height:2rem;font-size:var(--font-size-12);padding:0 0.75rem;border-radius:var(--radius-sm);line-height:max(1rem,16px);letter-spacing:0.0252em}   /* 32 높이 컨트롤은 radius/sm 4 — sm 버튼과 나란히 놓여도 모서리가 같다(사람의 결정 2026-11-12) */
+.field.lg input:where(:not([type=checkbox]):not([type=radio]):not([type=range])){height:3rem;font-size:var(--font-size-16);padding:0 1rem;line-height:1.625rem;letter-spacing:0.0057em}
 .field .affix{display:flex;align-items:center;gap:0.5rem;height:2.5rem;padding:0 0.75rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary)}
 .field .affix input{border:0;height:auto;padding:0;flex:1;background:transparent;outline:0;min-width:0}
 .field .affix input:focus,.field.error .affix input:focus{box-shadow:none}   /* 고리는 .affix 가 그린다 — .field input:focus 의 후광이 입력칸에도 걸려 두 겹이었다(2026-10-27 실측, Text Field 접두 · 접미 필드도 같았다) */
@@ -783,9 +798,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .field.error .dropdown .trigger{border-color:var(--foreground-negative-primary)}
 .field.error .dropdown.open .trigger,.field.error .dropdown .trigger:focus-visible{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}
 /* Combobox — 검색해서 고르기 · 여러 개 고르기. 입력이 필드 셸 안에 있어 .field input 의 테두리 · 후광을 지운다 */
-.combobox{position:relative;display:block;min-width:16.25rem;font-size:var(--font-size-14);line-height:1.6}
+.combobox{position:relative;display:block;min-width:16.25rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .combobox .control{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:0.25rem;min-height:2.5rem;padding:0.1875rem 2.25rem 0.1875rem 0.75rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);cursor:text;transition:border-color var(--motion-fast)}
-.combobox .control input{flex:1 1 4.5rem;min-width:4.5rem;width:auto;height:2rem;padding:0;border:0;background:transparent;outline:0;box-shadow:none;font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary)}
+.combobox .control input{flex:1 1 4.5rem;min-width:4.5rem;width:auto;height:2rem;padding:0;border:0;background:transparent;outline:0;box-shadow:none;font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);line-height:1.375rem;letter-spacing:0.0145em}
 .combobox .control input::placeholder{color:var(--foreground-neutral-tertiary)}
 .combobox .control input:focus,.field.error .combobox .control input:focus{box-shadow:none;border:0}
 .combobox .control input:disabled{background:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
@@ -797,9 +812,9 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .combobox.disabled .control{background:var(--surface-disable-primary);cursor:not-allowed}
 .combobox.disabled .control::after{background:var(--foreground-disable-primary)}
 .field.sm .combobox .control{min-height:2rem;padding-top:1px;padding-bottom:1px;border-radius:var(--radius-sm)}
-.field.sm .combobox .control input{height:1.75rem;font-size:var(--font-size-12)}
+.field.sm .combobox .control input{height:1.75rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .field.lg .combobox .control{min-height:3rem;padding-top:0.375rem;padding-bottom:0.375rem}
-.field.lg .combobox .control input{height:2.125rem;font-size:var(--font-size-16)}
+.field.lg .combobox .control input{height:2.125rem;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
 .combobox .menu{position:absolute;top:calc(100% + 0.25rem);left:0;display:none;z-index:5;min-width:100%}
 .combobox.open .menu{display:block}
 .combobox.up .menu{top:auto;bottom:calc(100% + 0.25rem)}
@@ -808,27 +823,27 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .combobox[data-multiple] .menu-item.on::after{content:"";margin-left:auto;width:1rem;height:1rem;flex:none;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12l5 5l10 -10%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12l5 5l10 -10%22/%3E%3C/svg%3E") center/contain no-repeat}
 .field .affix:has(input:disabled){background:var(--surface-disable-primary);cursor:not-allowed}
 .field .affix:has(input:read-only:not(:disabled)){background:var(--background-neutral-secondary)}
-.field .affix span{color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);white-space:nowrap}
-.field .counter{margin-left:auto;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
+.field .affix span{color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);white-space:nowrap;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.field .counter{margin-left:auto;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .field .row{display:flex;justify-content:space-between;align-items:baseline}
 
 /* Search */
-.searchbar{display:flex;align-items:center;gap:0.5rem;height:2.5rem;padding:0 0.75rem;min-width:17.5rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);transition:border-color var(--motion-fast),box-shadow var(--motion-fast);font-size:var(--font-size-16);line-height:1.6}
+.searchbar{display:flex;align-items:center;gap:0.5rem;height:2.5rem;padding:0 0.75rem;min-width:17.5rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);transition:border-color var(--motion-fast),box-shadow var(--motion-fast);font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
 .searchbar svg{width:1.125rem;height:1.125rem;color:var(--foreground-neutral-tertiary);flex:none}
-.searchbar input{flex:1;border:0;background:transparent;font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);outline:0;min-width:0}
+.searchbar input{flex:1;border:0;background:transparent;font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);outline:0;min-width:0;line-height:1.375rem;letter-spacing:0.0145em}
 .searchbar input::placeholder{color:var(--foreground-neutral-tertiary)}
 .searchbar:has(input:focus){border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 함께 나왔다(사람의 결정 2026-10-26) */
 .searchbar .clear{border:0;padding:0;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);width:1.25rem;height:1.25rem;border-radius:50%;font:inherit;font-size:var(--font-size-12);line-height:0;cursor:pointer;display:grid;place-items:center;flex:none}
 .searchbar .clear svg{display:block;width:0.75rem;height:0.75rem}
-.searchbar kbd{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:0.25rem;padding:1px 0.3125rem;background:var(--background-neutral-secondary)}
+.searchbar kbd{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:0.25rem;padding:1px 0.3125rem;background:var(--background-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .searchbar input::-webkit-search-cancel-button,.searchbar input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}   /* 브라우저 기본 ×가 .clear 와 나란히 두 개 떴다 */
 .searchbar.lg{height:3rem}
-.searchbar.lg input{font-size:var(--font-size-16)}
+.searchbar.lg input{font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
 .searchbar.block{width:100%}
 
 /* Select Button (Segmented) */
 .select-btn{display:inline-flex;padding:0.1875rem;gap:2px;background:var(--surface-neutral-secondary);border-radius:var(--radius-md);line-height:1.6}
-.select-btn button{display:inline-flex;align-items:center;justify-content:center;gap:0.25rem;height:2rem;padding:0 0.875rem;border:0;border-radius:var(--radius-sm);background:transparent;font:inherit;font-size:var(--font-size-14);font-weight:500;color:var(--foreground-neutral-secondary);cursor:pointer;white-space:nowrap}
+.select-btn button{display:inline-flex;align-items:center;justify-content:center;gap:0.25rem;height:2rem;padding:0 0.875rem;border:0;border-radius:var(--radius-sm);background:transparent;font:inherit;font-size:var(--font-size-14);font-weight:500;color:var(--foreground-neutral-secondary);cursor:pointer;white-space:nowrap;line-height:1.375rem;letter-spacing:0.0145em}
 .select-btn button svg{width:1rem;height:1rem;flex:none}
 .select-btn button:hover{color:var(--foreground-neutral-primary)}
 .select-btn button.on{background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);font-weight:600;box-shadow:var(--shadow-1)}
@@ -843,7 +858,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .select-btn.outline button:focus-visible{z-index:2}   /* 포커스 외곽선이 옆 버튼에 가리지 않게 */
 
 /* Slider */
-.slider{display:flex;flex-direction:column;gap:0.5rem;min-width:17.5rem;font-size:var(--font-size-12);line-height:1.6}
+.slider{display:flex;flex-direction:column;gap:0.5rem;min-width:17.5rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .slider .row{display:flex;justify-content:space-between;color:var(--foreground-neutral-secondary)}
 .slider .val{font-weight:600;color:var(--foreground-neutral-primary)}
 .slider:has(input:disabled) .row,.slider:has(input:disabled) .val{color:var(--foreground-disable-primary)}   /* 비활성이면 라벨 · 값도 흐리게 — :disabled 가 input 에만 걸려 막대만 흐렸다(사람의 결정 2026-10-27, Checkbox · Radio · Switch 와 같게) */
@@ -857,7 +872,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .slider input[type=range]:disabled::-webkit-slider-thumb{background:var(--surface-elevated-primary);border-color:var(--surface-disable-primary);box-shadow:none}
 .slider input[type=range]:disabled::-moz-range-track{background:var(--surface-disable-primary)}
 .slider input[type=range]:disabled::-moz-range-thumb{background:var(--surface-elevated-primary);border-color:var(--surface-disable-primary)}
-.slider .ticks{display:flex;justify-content:space-between;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);padding:0 0.25rem}
+.slider .ticks{display:flex;justify-content:space-between;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);padding:0 0.25rem;line-height:max(1rem,16px);letter-spacing:0.0252em}
 /* Slider + 숫자 입력(사람의 결정 2026-11-11) — .field.number-field.slider-field 하나가 값 하나다. 라벨 · 도움말 · 오류는 필드의 것이고 제출하는 값은 숫자 입력칸.
    트랙 오른쪽 같은 줄에 입력칸(폭 120). 현재 값 글자(.val)는 입력칸이 대신한다 */
 .field.slider-field{min-width:26rem}
@@ -868,7 +883,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 /* Date Picker — Text Field 입력형 하나(.datepicker.field > .affix > input + .cal-btn, Text Field 셸을 그대로 쓴다).
    버튼형 .field-btn 은 2026-11-09 에 없앴다(사람의 결정 — 기본이 입력형). 상태는 ds.js 가 host 의 data-* 로 들고,
    달력 자리는 --dp-top · --dp-left 로 준다(아래 자리가 모자라면 위로 .up) */
-.datepicker{display:inline-flex;flex-direction:column;gap:0.375rem;position:relative;font-size:var(--font-size-14);line-height:1.6}
+.datepicker{display:inline-flex;flex-direction:column;gap:0.375rem;position:relative;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .datepicker label{font-weight:600}
 .datepicker.field[data-range][data-time]{min-width:25.625rem}   /* 시각까지 쓰면 'YYYY. MM. DD HH:mm ~ …' 가 Large 에서 343 */
 .datepicker.field[data-range][data-time="seconds"]{min-width:28.125rem}   /* 초까지 383 */
@@ -882,19 +897,19 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .datepicker .cal-btn:disabled{background:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
 .datepicker .calendar{position:absolute;top:var(--dp-top,calc(100% + 0.25rem));left:var(--dp-left,0);z-index:5;display:none}
 .datepicker.open .calendar{display:block}
-.calendar{width:18.5rem;padding:1.25rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:var(--font-size-14);line-height:1.6}   /* 패딩 20(사람의 결정 2026-11-09) · 글자 14 — 11-09 의 13 을 단계 14 로 묶음(사람의 결정 2026-11-11) */
+.calendar{width:18.5rem;padding:1.25rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}   /* 패딩 20(사람의 결정 2026-11-09) · 글자 14 — 11-09 의 13 을 단계 14 로 묶음(사람의 결정 2026-11-11) */
 .calendar .cal-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;padding:0 0.25rem 1rem}   /* 아래 16(사람의 결정 2026-11-09) */
-.calendar .cal-head button{border:0;background:transparent;font:inherit;cursor:pointer;width:1.75rem;height:1.75rem;border-radius:0.375rem;color:var(--foreground-neutral-secondary)}
+.calendar .cal-head button{border:0;background:transparent;font:inherit;letter-spacing:inherit;cursor:pointer;width:1.75rem;height:1.75rem;border-radius:0.375rem;color:var(--foreground-neutral-secondary)}
 .calendar .cal-head button:hover{background:var(--surface-neutral-secondary)}
 .calendar .cal-head button:active{background:var(--surface-neutral-strong)}
 .calendar .cal-head button{display:grid;place-items:center}
 .calendar .cal-head button svg{width:1rem;height:1rem}
-.calendar .cal-head .cal-title{width:auto;padding:0 0.5rem;font-size:var(--font-size-16);font-weight:600;color:var(--foreground-neutral-primary)}   /* 누르면 연 → 월 → 일 */
+.calendar .cal-head .cal-title{width:auto;padding:0 0.5rem;font-size:var(--font-size-16);font-weight:600;color:var(--foreground-neutral-primary);line-height:1.625rem;letter-spacing:0.0057em}   /* 누르면 연 → 월 → 일 */
 .calendar .cal-nav-gap{width:1.75rem;flex:none}
 .calendar .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);row-gap:2px;text-align:center}   /* 열 간격 0 — 2px 틈이 기간 띠를 끊었다 */
 .calendar .cal-week{display:contents}   /* role=row 는 접근성 트리에만 — 칸은 바로 위 격자에 놓인다 */
-.calendar .dow{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);padding:0.25rem 0;font-weight:600}
-.calendar .day{position:relative;isolation:isolate;height:2.125rem;border:0;background:transparent;font:inherit;color:var(--foreground-neutral-primary);cursor:pointer}   /* isolation — 원(::before, z-index -1)이 칸 면(기간 띠) 위 · 글자 아래에 놓인다 */
+.calendar .dow{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);padding:0.25rem 0;font-weight:600;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.calendar .day{position:relative;isolation:isolate;height:2.125rem;border:0;background:transparent;font:inherit;letter-spacing:inherit;color:var(--foreground-neutral-primary);cursor:pointer}   /* isolation — 원(::before, z-index -1)이 칸 면(기간 띠) 위 · 글자 아래에 놓인다 */
 .calendar .day::before{content:"";position:absolute;inset:0;z-index:-1;margin:auto;width:2.125rem;height:2.125rem;border-radius:50%}   /* 칸의 면은 전부 원(사람의 결정 2026-11-09 — 선택 · hover · 누름 · 오늘 · 포커스). 지름 = 칸 높이 34 */
 .calendar .day:hover:not(.on,.today,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"])::before{background:var(--surface-neutral-secondary)}   /* 선택 · 오늘 · 기간 · 선택 불가 칸은 회색 원을 얹지 않는다 */
 .calendar .day:active:not(.on,.today,.in-range,.preview,.preview-end,[disabled],[aria-disabled="true"])::before{background:var(--surface-neutral-strong)}
@@ -913,7 +928,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .calendar .day:focus-visible{outline:none}
 .calendar .day:focus-visible::before{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}   /* 포커스도 원을 따라(전역 외곽선과 같은 1px · 2px 띄움) */
 .calendar .cal-grid.years,.calendar .cal-grid.months{grid-template-columns:repeat(3,1fr);gap:0.25rem}
-.calendar .cell{height:2.5rem;border:0;border-radius:0.375rem;background:transparent;font:inherit;color:var(--foreground-neutral-primary);cursor:pointer}
+.calendar .cell{height:2.5rem;border:0;border-radius:0.375rem;background:transparent;font:inherit;letter-spacing:inherit;color:var(--foreground-neutral-primary);cursor:pointer}
 .calendar .cell:hover:not(.on,.in-range,[aria-disabled="true"]){background:var(--surface-neutral-secondary)}
 .calendar .cell:active:not(.on,.in-range,[aria-disabled="true"]){background:var(--surface-neutral-strong)}
 .calendar .cell.today{font-weight:700;color:var(--foreground-brand-primary)}
@@ -928,13 +943,13 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .calendar .cal-time{display:flex;gap:0.75rem;margin-top:0.75rem}
 .calendar .cal-time .field{flex:1;min-width:0}
 /* 달력은 피커 .field 안에 있다 — 바깥 필드의 크기(lg) · 오류(빨강)가 시각 칸으로 내려오지 않게 sm · 기본 테두리로 되돌린다 */
-.calendar .cal-time .field input{height:2rem;font-size:var(--font-size-12);padding:0 0.75rem;border-color:var(--line-neutral-primary);font-variant-numeric:tabular-nums}
+.calendar .cal-time .field input{height:2rem;font-size:var(--font-size-12);padding:0 0.75rem;border-color:var(--line-neutral-primary);font-variant-numeric:tabular-nums;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .calendar .cal-time .field input:focus{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}
 .calendar .cal-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0.375rem;padding-top:0.625rem;margin-top:0.375rem;border-top:1px solid var(--line-neutral-secondary)}
 .calendar .cal-foot .btn.text+.btn:not(.text){margin-left:auto}   /* 오늘 · 초기화 · 프리셋은 왼쪽, 취소 · 적용은 오른쪽 */
 
 /* Checkbox */
-.checkbox{display:inline-flex;align-items:flex-start;gap:0.5rem;font-size:var(--font-size-14);cursor:pointer;line-height:1.4}
+.checkbox{display:inline-flex;align-items:flex-start;gap:0.5rem;font-size:var(--font-size-14);cursor:pointer;line-height:1.25rem;letter-spacing:0.0145em}
 .checkbox input{appearance:none;-webkit-appearance:none;flex:none;width:1rem;height:1rem;margin:2px 0 0;border:0;box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);border-radius:var(--radius-sm);background:var(--surface-elevated-primary);display:grid;place-items:center;cursor:inherit;transition:background var(--motion-fast),border-color var(--motion-fast)}
 .checkbox input:hover{box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary)}   /* 테두리를 안쪽 그림자로 그린다 — Chromium 은 border 1.5px 를 1px 로 내려 엔진마다 굵기가 달랐다(사람의 결정 2026-10-26: 1.5px 로 통일) */
 .checkbox input:checked,.checkbox input:indeterminate,.checkbox input.mixed{background:var(--surface-brand-primary);box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary)}
@@ -943,7 +958,7 @@ div.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}div.kv dd{mar
 .checkbox input:disabled{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary);cursor:not-allowed}
 .checkbox input:checked:disabled::after,.checkbox input:indeterminate:disabled::after{background:var(--foreground-disable-primary)}
 .checkbox input:disabled+span{color:var(--foreground-disable-primary)}
-.checkbox small{display:block;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);font-weight:400}
+.checkbox small{display:block;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);font-weight:400;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .checkbox-group{display:flex;flex-direction:column;gap:0.75rem;line-height:1.6}
 .checkbox-group.row{flex-direction:row;gap:1.5rem}
 fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-width:0}
@@ -952,7 +967,7 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
 .field.error .checkbox input:not(:checked):not(:disabled),.field.error .radio input:not(:checked):not(:disabled){box-shadow:inset 0 0 0 1.5px var(--foreground-negative-primary)}   /* 필수 그룹의 오류 — 고를 수 있는 칸의 테두리만. 입력 필드 오류와 같은 불투명 빨강 */
 
 /* Radio Button */
-.radio{display:inline-flex;align-items:flex-start;gap:0.5rem;font-size:var(--font-size-14);cursor:pointer;line-height:1.4}
+.radio{display:inline-flex;align-items:flex-start;gap:0.5rem;font-size:var(--font-size-14);cursor:pointer;line-height:1.25rem;letter-spacing:0.0145em}
 .radio input{appearance:none;-webkit-appearance:none;flex:none;width:1rem;height:1rem;margin:2px 0 0;border:0;box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);border-radius:50%;background:var(--surface-elevated-primary);cursor:inherit;display:grid;place-items:center;transition:background var(--motion-fast),border-color var(--motion-fast)}
 .radio input:hover{box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary)}
 .radio input:checked{box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary);background:var(--surface-brand-primary)}   /* 테두리를 안쪽 그림자로 바꾸며 여기만 border-color 로 남아, 선택된 Radio 의 brand 면 위에 기본 회색 띠가 남았다 */
@@ -960,14 +975,14 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
 .radio input:disabled{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary);cursor:not-allowed}
 .radio input:checked:disabled::after{background:var(--foreground-disable-primary)}
 .radio input:disabled+span{color:var(--foreground-disable-primary)}
-.radio small{display:block;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);font-weight:400}
+.radio small{display:block;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);font-weight:400;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .radio-group{display:flex;flex-direction:column;gap:0.75rem;line-height:1.6}
 .radio-group.row{flex-direction:row;gap:1.5rem}
-.radio.card{line-height:1.4;padding:0.875rem 1rem;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);min-width:13.75rem;flex-direction:row;gap:0.5rem;box-shadow:none;position:static}   /* 뒤의 .card 규칙이 column·그림자를 흘려보내므로 되돌린다 */
+.radio.card{line-height:1.25rem;padding:0.875rem 1rem;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);min-width:13.75rem;flex-direction:row;gap:0.5rem;box-shadow:none;position:static}   /* 뒤의 .card 규칙이 column·그림자를 흘려보내므로 되돌린다 */
 .radio.card:has(input:checked){border-color:var(--surface-brand-primary);background:var(--surface-brand-subtle)}
 
 /* Switch */
-.switch{display:inline-flex;align-items:center;gap:0.625rem;font-size:var(--font-size-14);cursor:pointer;line-height:1.6}
+.switch{display:inline-flex;align-items:center;gap:0.625rem;font-size:var(--font-size-14);cursor:pointer;line-height:1.375rem;letter-spacing:0.0145em}
 .switch input{appearance:none;-webkit-appearance:none;flex:none;width:2.75rem;height:1.5rem;margin:0;border-radius:var(--radius-full);background:var(--line-neutral-primary);position:relative;cursor:inherit;transition:background var(--motion-fast)}
 .switch input::after{content:"";position:absolute;top:2px;left:2px;width:1.25rem;height:1.25rem;background:var(--static-white);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22black%22 %3E%3Cpath d=%22M7 3.34a10 10 0 1 1 -4.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 4.995 -8.336z%22 /%3E%3C/svg%3E") center/120% no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22black%22 %3E%3Cpath d=%22M7 3.34a10 10 0 1 1 -4.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 4.995 -8.336z%22 /%3E%3C/svg%3E") center/120% no-repeat;transition:left var(--motion-fast)}
 .switch input:checked{background:var(--surface-brand-primary)}
@@ -986,16 +1001,16 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
 .switch.label-left{flex-direction:row-reverse}
 
 /* Chip */
-.chip{display:inline-flex;align-items:center;gap:0.375rem;height:2rem;padding:0 0.75rem;border-radius:var(--radius-full);border:1px solid var(--line-neutral-primary);background:var(--surface-elevated-primary);font:inherit;font-size:var(--font-size-12);font-weight:500;color:var(--foreground-neutral-primary);cursor:pointer;white-space:nowrap;transition:background var(--motion-fast),border-color var(--motion-fast);line-height:1.6}
+.chip{display:inline-flex;align-items:center;gap:0.375rem;height:2rem;padding:0 0.75rem;border-radius:var(--radius-full);border:1px solid var(--line-neutral-primary);background:var(--surface-elevated-primary);font:inherit;font-size:var(--font-size-12);font-weight:500;color:var(--foreground-neutral-primary);cursor:pointer;white-space:nowrap;transition:background var(--motion-fast),border-color var(--motion-fast);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .chip:hover{background:var(--surface-neutral-secondary)}   /* 끈 칩은 아래 .chip[disabled] 가 뒤에서 면을 이겨 hover · 눌림 색이 없다 */
 .chip:active{background:var(--surface-neutral-strong)}
 .chip.on{background:var(--surface-brand-subtle);border-color:var(--surface-brand-primary);color:var(--foreground-brand-primary)}
 .chip[aria-pressed]::before{content:"";width:0.875rem;height:0.875rem;flex:none;background:var(--foreground-disable-primary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat}
 .chip.on::before{background:currentColor}
-.chip .x{flex:none;padding:0;border:0;cursor:pointer;display:inline-grid;place-items:center;width:1rem;height:1rem;border-radius:50%;background:transparent;color:var(--foreground-neutral-secondary);font-size:var(--font-size-10);line-height:1;margin-right:-0.25rem;transition:color var(--motion-fast)}   /* 면 없이 x 만(사람의 결정 2026-11-11 — Input Chip · 필터 칩 행 · Combobox 다중 선택 항목). 반경은 포커스 외곽선 모양 */
+.chip .x{flex:none;padding:0;border:0;cursor:pointer;display:inline-grid;place-items:center;width:1rem;height:1rem;border-radius:50%;background:transparent;color:var(--foreground-neutral-secondary);font-size:var(--font-size-11);line-height:1;margin-right:-0.25rem;transition:color var(--motion-fast)}   /* 면 없이 x 만(사람의 결정 2026-11-11 — Input Chip · 필터 칩 행 · Combobox 다중 선택 항목). 반경은 포커스 외곽선 모양 */
 .chip .x:hover{color:var(--foreground-neutral-primary)}
 .chip .x svg{width:0.625rem;height:0.625rem}
-.chip.sm{height:1.625rem;padding:0 0.625rem;font-size:var(--font-size-12)}
+.chip.sm{height:1.625rem;padding:0 0.625rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .chip[disabled],.chip[aria-disabled="true"]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}   /* pointer-events:none 을 두지 않는다 — 클릭이 칩을 지나 뒤의 행 · 카드로 떨어지고 not-allowed 커서도 보이지 않았다(2026-11-12). button 은 disabled 가, span 은 ds.js 캡처가 막는다. 입력값 칩은 span 이라 disabled 속성을 못 가진다 — aria-disabled 로 (.btn 과 같게) */
 .chip[disabled] .x,.chip[aria-disabled="true"] .x{background:transparent;color:var(--foreground-disable-primary)}   /* 지울 수 없는 칩의 x 가 회색 원 + 진한 x 로 활성처럼 보였다(사람의 결정 2026-10-27) */
 .chip .lbl{min-width:0;max-width:15rem;overflow:hidden;text-overflow:ellipsis}
@@ -1011,7 +1026,7 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
    pending 은 심각도가 아니라 상태 톤이다('검토 대기' — 옛 Medium 의 청록을 물려받는다. 심각도와 상태가 한 클래스를 나눠 쓰지 않게 갈랐다)
    solid 는 '채운 태그'였다 — 기준 시스템에 솔리드 상태 면이 없어 같은 틴트 + 테두리로 한 단계 강조하도록 다시 디자인했다.
    색만으로 의미를 전달하지 않는다(1.4.1)는 라벨 병기가 담당하고 verify 가 그것을 검사한다 */
-.tag{display:inline-flex;align-items:center;gap:0.375rem;font-size:var(--font-size-12);font-weight:600;padding:0.1875rem 0.625rem;border-radius:var(--radius-full);line-height:1.6;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);flex:none;width:max-content;max-width:10rem;word-break:keep-all}   /* 160 을 넘는 라벨만 줄바꿈 — 포커스를 받지 않아 잘라 내면 읽을 길이 없다 */
+.tag{display:inline-flex;align-items:center;gap:0.375rem;font-size:var(--font-size-12);font-weight:600;padding:0.1875rem 0.625rem;border-radius:var(--radius-full);line-height:max(1rem,16px);background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);flex:none;width:max-content;max-width:10rem;word-break:keep-all;letter-spacing:0.0252em}   /* 160 을 넘는 라벨만 줄바꿈 — 포커스를 받지 않아 잘라 내면 읽을 길이 없다 */
 .tag-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:0.25rem;max-width:100%;line-height:1.6}
 td .tag-group{flex-wrap:nowrap}
 .tag-more{border:0;font-family:inherit}
@@ -1032,8 +1047,8 @@ td .tag-group{flex-wrap:nowrap}
 .tag.ok::before{background:var(--foreground-positive-primary)}
 .tag.accent{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
 .tag.accent::before{background:var(--foreground-brand-primary)}
-.tag.sm{font-size:var(--font-size-12);padding:1px 0.5rem}
-.tag.lg{font-size:var(--font-size-12);padding:0.3125rem 0.75rem}
+.tag.sm{font-size:var(--font-size-12);padding:1px 0.5rem;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.tag.lg{font-size:var(--font-size-12);padding:0.3125rem 0.75rem;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .tag.outline{background:transparent;box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
 .tag.solid{box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
 .tag.solid.critical{background:var(--surface-negative-strong);box-shadow:inset 0 0 0 1px var(--line-negative-strong)}
@@ -1048,7 +1063,7 @@ td .tag-group{flex-wrap:nowrap}
 
 /* Dropdown */
 .dropdown{position:relative;display:inline-block;line-height:1.6}
-.dropdown .trigger{display:inline-flex;align-items:center;gap:0.5rem;height:2.5rem;padding:0 0.75rem 0 0.875rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);cursor:pointer;min-width:12.5rem;justify-content:space-between}
+.dropdown .trigger{display:inline-flex;align-items:center;gap:0.5rem;height:2.5rem;padding:0 0.75rem 0 0.875rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);cursor:pointer;min-width:12.5rem;justify-content:space-between;line-height:1.375rem;letter-spacing:0.0145em}
 .dropdown .trigger:hover{border-color:var(--line-neutral-primary)}
 .dropdown .trigger:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
 .dropdown .trigger .placeholder{color:var(--foreground-neutral-tertiary)}
@@ -1062,51 +1077,50 @@ td .tag-group{flex-wrap:nowrap}
 /* 스크롤 영역 안의 메뉴 — 화면 기준으로 띄워 잘리지 않게(사람의 결정 2026-11-10). 좌표는 ds.js 가 열 때 재서 넣고 스크롤하면 닫는다. 우측 정렬 인라인 left:auto · right:0 을 이겨야 해서 !important */
 .dropdown.float .menu,.combobox.float .menu{position:fixed;top:var(--float-y,0)!important;bottom:auto!important;left:var(--float-x,0)!important;right:auto!important;min-width:var(--float-w,0);z-index:30}
 .dropdown.up .menu{top:auto;bottom:calc(100% + 0.25rem)}   /* 아래 공간이 모자라면 위로 뒤집어 연다(ds.js 가 열 때 계산) */
-.menu{min-width:12.5rem;padding:0.375rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);box-shadow:var(--shadow-2);list-style:none;margin:0;max-height:min(20rem,60vh);overflow-y:auto;overscroll-behavior:contain;font-size:var(--font-size-16);line-height:1.6}   /* 항목 약 8개까지 보이고 그 뒤로는 메뉴 안에서 스크롤 */
-.menu-item{display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.375rem;font-size:var(--font-size-14);cursor:pointer;color:var(--foreground-neutral-primary);white-space:nowrap;line-height:1.6}
+.menu{min-width:12.5rem;padding:0.375rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);box-shadow:var(--shadow-2);list-style:none;margin:0;max-height:min(20rem,60vh);overflow-y:auto;overscroll-behavior:contain;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}   /* 항목 약 8개까지 보이고 그 뒤로는 메뉴 안에서 스크롤 */
+.menu-item{display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.375rem;font-size:var(--font-size-14);cursor:pointer;color:var(--foreground-neutral-primary);white-space:nowrap;line-height:1.375rem;letter-spacing:0.0145em}
 a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decoration:none}   /* 이동 항목 — 진짜 링크(사람의 결정 2026-11-10). 글 안 링크 모양을 입지 않는다 */
 .menu-item:where(:not([aria-disabled="true"])):hover{background:var(--surface-neutral-tertiary)}   /* 메뉴 항목 호버는 tertiary(사람의 결정 2026-10-27 — Figma 에서 바꾼 것을 저장소로). 눌림은 strong */
 .menu-item:where(:not([aria-disabled="true"])):active{background:var(--surface-neutral-strong)}
 .menu-item.on{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);font-weight:600}
 .menu-item.danger{color:var(--foreground-negative-strong)}
 .menu-item[aria-disabled="true"]{color:var(--foreground-disable-primary);cursor:not-allowed}   /* pointer-events:none 을 두지 않는다(2026-11-12) — 커서가 보이지 않았고 링크 항목은 ds.js 캡처가 이동을 막는다. hover · 눌림 면은 위 :where 가 뺀다 */
-.menu-item .hint{margin-left:auto;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
+.menu-item .hint{margin-left:auto;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .menu-item svg{width:1rem;height:1rem;flex:none;color:var(--foreground-neutral-tertiary)}
 .menu-item.on svg,.menu-item.danger svg,.menu-item[aria-disabled="true"] svg{color:currentColor}   /* 선택·위험·비활성은 글자색을 따른다 — 회색으로 고정하면 상태가 아이콘에서 사라졌다 */
-.menu-state{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.6;white-space:normal;word-break:keep-all;min-width:12.5rem}
+.menu-state{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.625rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.375rem;white-space:normal;word-break:keep-all;min-width:12.5rem;letter-spacing:0.0145em}
 .menu-state .btn{margin-left:auto;flex:none}
 .menu-sep{height:1px;background:var(--line-neutral-secondary);margin:0.375rem 0;line-height:1.6}
-.menu-label{padding:0.375rem 0.625rem 2px;font-size:var(--font-size-12);letter-spacing:.06em;text-transform:uppercase;color:var(--foreground-neutral-tertiary);font-weight:600;line-height:1.6}
+.menu-label{padding:0.375rem 0.625rem 2px;font-size:var(--font-size-12);letter-spacing:.06em;text-transform:uppercase;color:var(--foreground-neutral-tertiary);font-weight:600;line-height:max(1rem,16px)}
 
 /* Tab */
 .tabs{display:flex;gap:1.5rem;box-shadow:inset 0 -1px 0 var(--line-neutral-secondary);width:100%;line-height:1.6;overflow:auto hidden;scrollbar-width:thin}   /* 넘치면 탭 줄만 옆으로(사람의 결정 2026-11-10). 스크롤 영역은 테두리 밖을 자르므로 아랫줄을 안쪽 그림자로 — 활성 탭의 2px 밑줄이 그 위에 놓인다 */
-.tabs .tab{display:inline-flex;align-items:center;gap:0.25rem;padding:0.625rem 2px;border:0;border-bottom:2px solid transparent;background:transparent;font:inherit;font-size:var(--font-size-14);font-weight:500;color:var(--foreground-neutral-tertiary);cursor:pointer;white-space:nowrap;transition:color var(--motion-fast)}
+.tabs .tab{display:inline-flex;align-items:center;gap:0.25rem;padding:0.625rem 2px;border:0;border-bottom:2px solid transparent;background:transparent;font:inherit;font-size:var(--font-size-14);font-weight:500;color:var(--foreground-neutral-tertiary);cursor:pointer;white-space:nowrap;transition:color var(--motion-fast);line-height:1.375rem;letter-spacing:0.0145em}
 .tabs .tab:focus-visible{outline-offset:-2px}   /* 스크롤 영역이 바깥 외곽선을 자른다 */
 .tabs .tab:hover{color:var(--foreground-neutral-primary)}
 .tabs .tab.on{color:var(--foreground-neutral-primary);font-weight:700;border-bottom-color:var(--foreground-neutral-primary)}
 .tabs .tab[disabled]{color:var(--foreground-disable-primary);cursor:not-allowed}
-.tabs .tab .count{font-size:var(--font-size-12);font-weight:700;padding:1px 0.375rem;border-radius:var(--radius-full);background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);min-width:0;height:auto}
+.tabs .tab .count{font-size:var(--font-size-12);font-weight:700;padding:1px 0.375rem;border-radius:var(--radius-full);background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);min-width:0;height:auto;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .tabs .tab.on .count{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
 .tabs.accent .tab.on{color:var(--foreground-brand-primary);border-bottom-color:var(--foreground-brand-primary)}
 .tabs.pill{display:inline-flex;gap:0.25rem;box-shadow:none;background:var(--surface-neutral-secondary);padding:0.1875rem;border-radius:var(--radius-md);width:auto;max-width:100%}
-.tabs.pill .tab{padding:0.375rem 0.875rem;border:0;border-radius:0.375rem;margin:0;font-size:var(--font-size-14)}
+.tabs.pill .tab{padding:0.375rem 0.875rem;border:0;border-radius:0.375rem;margin:0;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .tabs.pill .tab.on{background:var(--surface-elevated-primary);box-shadow:var(--shadow-1);font-weight:600}
-.tabs.sm .tab{font-size:var(--font-size-12);padding:0.5rem 0.75rem}
-.tab-panel{padding:1.25rem 0;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.6}
+.tabs.sm .tab{font-size:var(--font-size-12);padding:0.5rem 0.75rem;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.tab-panel{padding:1.25rem 0;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.375rem;letter-spacing:0.0145em}
 
 /* Breadcrumb */
-.breadcrumb{display:flex;align-items:center;gap:0.375rem;font-size:var(--font-size-14);list-style:none;padding:0;margin:0;flex-wrap:wrap;line-height:1.375rem;min-height:1.5rem}   /* 14/22 = Body 2 — 11-02 의 13 을 단계 14 로 묶음(사람의 결정 2026-11-11). 행간 22 · 행 높이 24 한 크기(홈 아이콘 행)는 그대로. 1.6 이면 22.4 · 아이콘 행 24.4 로 소수가 났다 */
+.breadcrumb{display:flex;align-items:center;gap:0.375rem;font-size:var(--font-size-14);list-style:none;padding:0;margin:0;flex-wrap:wrap;line-height:1.375rem;min-height:1.5rem;letter-spacing:0.0145em}   /* 14/22 = Body 2 — 11-02 의 13 을 단계 14 로 묶음(사람의 결정 2026-11-11). 행간 22 · 행 높이 24 한 크기(홈 아이콘 행)는 그대로. 1.6 이면 22.4 · 아이콘 행 24.4 로 소수가 났다 */
 .breadcrumb li{display:flex;align-items:center;gap:0.375rem;color:var(--foreground-neutral-tertiary);margin:0}
 .breadcrumb li+li::before{content:"";width:0.75rem;height:0.75rem;flex:none;background:var(--foreground-disable-primary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M17 5l-10 14%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M17 5l-10 14%22 /%3E%3C/svg%3E") center/contain no-repeat}
 .breadcrumb a{color:inherit;text-decoration:none}
 .breadcrumb a:hover{color:var(--foreground-neutral-primary);text-decoration:underline}
 .breadcrumb li[aria-current]{color:var(--foreground-neutral-primary);font-weight:500}
-.breadcrumb .more{padding:0 0.25rem;color:var(--foreground-neutral-tertiary);cursor:pointer;border:0;background:none;font:inherit}
+.breadcrumb .more{padding:0 0.25rem;color:var(--foreground-neutral-tertiary);cursor:pointer;border:0;background:none;font:inherit;letter-spacing:inherit}
 .breadcrumb .more:hover{color:var(--foreground-neutral-primary)}
 .breadcrumb .more svg{width:0.875rem;height:0.875rem;display:block}
 /* 라벨이 길면 220 에서 말줄임. 현재 항목의 라벨은 span 으로 감싼다 — li 가 flex 라 맨 텍스트(익명 flex 항목)에는 ellipsis 가 적용되지 않는다 */
 .breadcrumb li>a:not(.icon),.breadcrumb li>span:not(.tooltip-wrap),.breadcrumb .tooltip-wrap>a,.breadcrumb .tooltip-wrap>span:not(.tooltip){max-width:13.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.breadcrumb .tooltip-wrap{line-height:inherit}   /* 줄 높이 22 — 잘린 항목만 20.8 이 되어 글자 위치가 어긋나지 않게 */
 /* 아이콘만 있는 링크와 … 버튼은 클릭 영역을 24x24 로(WCAG 2.5.8). 보이는 모양과 행 높이는 그대로 — 말줄임 쪽에 overflow:hidden 이 있어 같은 요소에 겹치면 안 된다 */
 .breadcrumb li>a.icon,.breadcrumb .more{position:relative}
 .breadcrumb li>a.icon{display:flex}   /* 아이콘 18 만 — 인라인이면 줄 상자(strut)가 붙어 행이 24.4 가 된다 */
@@ -1114,24 +1128,24 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 
 /* Pagination */
 .pagination{display:inline-flex;align-items:center;gap:0.25rem;line-height:1.6}
-.pagination button{min-width:2.25rem;height:2.25rem;padding:0 0.5rem;border:1px solid transparent;border-radius:var(--radius-md);background:transparent;font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);cursor:pointer}
+.pagination button{min-width:2.25rem;height:2.25rem;padding:0 0.5rem;border:1px solid transparent;border-radius:var(--radius-md);background:transparent;font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);cursor:pointer;line-height:1.375rem;letter-spacing:0.0145em}
 .pagination button:where(:not([disabled])):hover{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
 .pagination button:where(:not([disabled])):active{background:var(--surface-neutral-strong)}
 .pagination button.on{background:var(--surface-brand-primary);color:var(--brand-label);font-weight:600}
 .pagination button[disabled]{color:var(--foreground-disable-primary);cursor:not-allowed}   /* pointer-events:none 을 두지 않는다(2026-11-12) — not-allowed 커서가 보이지 않았다. 클릭은 disabled 가 막는다 */
 .pagination button svg{width:1rem;height:1rem;display:block}
 .pagination .gap{min-width:2.25rem;text-align:center;color:var(--foreground-disable-primary)}
-.pagination.compact button{min-width:2rem;height:2rem;font-size:var(--font-size-12)}
+.pagination.compact button{min-width:2rem;height:2rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .pagination.cursor button{display:inline-flex;align-items:center;justify-content:center;gap:0.25rem}
-.pagination.cursor .range{padding:0 0.5rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);font-variant-numeric:tabular-nums}
+.pagination.cursor .range{padding:0 0.5rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);font-variant-numeric:tabular-nums;line-height:1.375rem;letter-spacing:0.0145em}
 .pagination.outline button{border-color:var(--line-neutral-secondary);background:var(--surface-elevated-primary)}
 .pagination.outline button.on{border-color:var(--surface-brand-primary); color:var(--foreground-brand-primary);}
-.pagination-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%;font-size:var(--font-size-12);color:var(--foreground-neutral-secondary);line-height:1.6}
-.pagination-bar .dropdown .trigger{height:2rem;min-width:7.5rem;font-size:var(--font-size-12);border-radius:var(--radius-sm)}
+.pagination-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%;font-size:var(--font-size-12);color:var(--foreground-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
+.pagination-bar .dropdown .trigger{height:2rem;min-width:7.5rem;font-size:var(--font-size-12);border-radius:var(--radius-sm);line-height:max(1rem,16px);letter-spacing:0.0252em}
 
 /* Navigation (Side) */
-.sidenav{width:15rem;padding:0.75rem;background:var(--surface-elevated-primary);border-right:1px solid var(--line-neutral-secondary);display:flex;flex-direction:column;gap:2px;font-size:var(--font-size-14);min-height:20rem;line-height:1.6}
-.sidenav .group{margin:0.75rem 0.75rem 0.25rem;font-size:var(--font-size-12);letter-spacing:.06em;text-transform:uppercase;color:var(--foreground-neutral-tertiary);font-weight:600}
+.sidenav{width:15rem;padding:0.75rem;background:var(--surface-elevated-primary);border-right:1px solid var(--line-neutral-secondary);display:flex;flex-direction:column;gap:2px;font-size:var(--font-size-14);min-height:20rem;line-height:1.375rem;letter-spacing:0.0145em}
+.sidenav .group{margin:0.75rem 0.75rem 0.25rem;font-size:var(--font-size-12);letter-spacing:.06em;text-transform:uppercase;color:var(--foreground-neutral-tertiary);font-weight:600;line-height:max(1rem,16px)}
 .sidenav a{display:flex;align-items:center;font-weight:500;gap:0.625rem;padding:0.5rem 0.75rem;border-radius:var(--radius-md);text-decoration:none;color:var(--foreground-neutral-primary);white-space:nowrap}
 .sidenav a:hover{background:var(--surface-neutral-secondary)}
 .sidenav a:active{background:var(--surface-neutral-strong)}
@@ -1139,7 +1153,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .sidenav a svg{width:1.125rem;height:1.125rem;flex:none;color:var(--foreground-neutral-tertiary)}
 .sidenav a.on svg{color:var(--foreground-brand-primary)}
 .sidenav a .count{margin-left:auto}
-.sidenav a.sub{padding-left:2.5rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary)}
+.sidenav a.sub{padding-left:2.5rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.375rem;letter-spacing:0.0145em}
 .sidenav a.sub.on{color:var(--foreground-brand-primary)}   /* .sub 가 .on 과 특정도가 같고 뒤에 있어, 하위 항목을 골라도 회색이 이겼다 */
 .sidenav .tooltip-wrap > a{flex:1;min-width:0}
 .sidenav:not(.collapsed) .tooltip{display:none}
@@ -1148,47 +1162,47 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .sidenav.collapsed a span,.sidenav.collapsed .group,.sidenav.collapsed a .count,.sidenav.collapsed a.sub,.sidenav.collapsed .foot{display:none}   /* 하위 항목은 아이콘이 없어 레일에서 글자만 남았다 — 항목째 숨긴다. .foot 은 64 폭에서 한 글자씩 세로로 쪼개졌다(React 는 접히면 그리지 않는다) */
 .sidenav.collapsed a.has-on{background:var(--surface-brand-subtle)}   /* 하위 항목이 현재 메뉴인 부모 — 레일에서는 하위 항목이 숨으니 부모가 선택 모양을 이어받는다. 펼친 레일에서는 모양이 그대로 */
 .sidenav.collapsed a.has-on svg{color:var(--foreground-brand-primary)}
-.sidenav .foot{margin-top:auto;padding:0.75rem;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
+.sidenav .foot{margin-top:auto;padding:0.75rem;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 
 /* Top Navigation */
-.topbar{display:flex;align-items:center;gap:1rem;height:3.5rem;padding:0 1.25rem;background:var(--surface-elevated-primary);border-bottom:1px solid var(--line-neutral-secondary);width:100%;font-size:var(--font-size-16);line-height:1.6}
+.topbar{display:flex;align-items:center;gap:1rem;height:3.5rem;padding:0 1.25rem;background:var(--surface-elevated-primary);border-bottom:1px solid var(--line-neutral-secondary);width:100%;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
 .topbar .logo{font-weight:700;display:flex;align-items:center;gap:0.5rem;text-decoration:none;color:var(--foreground-neutral-primary);white-space:nowrap}
 .topbar .logo i{width:1.5rem;height:1.5rem;border-radius:0.375rem;background:var(--surface-brand-primary);display:inline-block}
-.topbar .logo small{font-weight:500;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12)}
+.topbar .logo small{font-weight:500;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .topbar nav{display:flex;gap:0.25rem;margin-left:0.5rem}
-.topbar nav a{padding:0.5rem 0.75rem;border-radius:var(--radius-md);text-decoration:none;color:var(--foreground-neutral-secondary);font-size:var(--font-size-14);font-weight:500;white-space:nowrap}
+.topbar nav a{padding:0.5rem 0.75rem;border-radius:var(--radius-md);text-decoration:none;color:var(--foreground-neutral-secondary);font-size:var(--font-size-14);font-weight:500;white-space:nowrap;line-height:1.375rem;letter-spacing:0.0145em}
 .topbar nav a:hover{color:var(--foreground-neutral-primary)}
 .topbar nav a.on{color:var(--foreground-neutral-primary);background:var(--surface-neutral-strong)}
 .topbar .right{margin-left:auto;display:flex;align-items:center;gap:0.5rem}
 .topbar .searchbar{min-width:13.75rem;height:2.25rem}
 .topbar .divider.vertical{height:1.25rem}
 .topbar-user{display:inline-flex;padding:0;border:0;background:transparent;border-radius:var(--radius-full);cursor:pointer}
-.skip-link{position:absolute;top:0.5rem;left:0.5rem;z-index:130;padding:0.5rem 0.75rem;border-radius:var(--radius-md);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-14);font-weight:600;line-height:1.6;text-decoration:none;transform:translateY(calc(-100% - 1rem))}   /* 키보드의 첫 칸. 포커스가 오기 전에는 화면 밖 */
+.skip-link{position:absolute;top:0.5rem;left:0.5rem;z-index:130;padding:0.5rem 0.75rem;border-radius:var(--radius-md);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-14);font-weight:600;line-height:1.375rem;text-decoration:none;transform:translateY(calc(-100% - 1rem));letter-spacing:0.0145em}   /* 키보드의 첫 칸. 포커스가 오기 전에는 화면 밖 */
 .skip-link:focus,.skip-link.show{transform:none}
 .skip-link:focus-visible{outline-color:currentColor}
-.avatar{width:2rem;height:2rem;border-radius:50%;background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);display:inline-grid;place-items:center;font-size:var(--font-size-12);font-weight:700;flex:none;line-height:1.6}
-.avatar.sm{width:1.5rem;height:1.5rem;font-size:var(--font-size-10)}
+.avatar{width:2rem;height:2rem;border-radius:50%;background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);display:inline-grid;place-items:center;font-size:var(--font-size-12);font-weight:700;flex:none;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.avatar.sm{width:1.5rem;height:1.5rem;font-size:var(--font-size-11);line-height:max(0.875rem,14px);letter-spacing:0.0311em}
 
 /* Accordion — 변형 Outline(기본, 클래스 .outline 은 명시용) · Flat, 크기 sm 40 · md 52 · lg 60, 상태 Collapsed · Expanded · Hover · Disabled(사람의 정의 2026-10-29).
    헤더 안에는 조작 요소를 두지 않는다 — 약관 동의의 항목 체크박스만 예외(Terms Agreement 패턴) */
 .accordion{border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);width:100%;interpolate-size:allow-keywords;line-height:1.6}
-.accordion summary{list-style:none;display:flex;align-items:center;gap:0.5rem;padding:0.875rem 1.25rem;font-weight:600;font-size:var(--font-size-16);line-height:1.5rem;cursor:pointer;border-radius:calc(var(--radius-lg) - 1px);transition:background var(--motion-fast)}   /* Title/1 의 line-height — 빠지면 본문 1.6 을 상속해 헤더가 54 가 된다(스펙 52). radius 는 hover 면이 둥근 테두리 밖으로 삐지지 않게 */
+.accordion summary{list-style:none;display:flex;align-items:center;gap:0.5rem;padding:0.875rem 1.25rem;font-weight:600;font-size:var(--font-size-16);line-height:1.5rem;cursor:pointer;border-radius:calc(var(--radius-lg) - 1px);transition:background var(--motion-fast);letter-spacing:0.0057em}   /* Title/1 의 line-height — 빠지면 본문 1.6 을 상속해 헤더가 54 가 된다(스펙 52). radius 는 hover 면이 둥근 테두리 밖으로 삐지지 않게 */
 .accordion[open] summary{border-bottom-left-radius:0;border-bottom-right-radius:0}
 .accordion:where(:not(.disabled)) summary:hover{background:var(--surface-neutral-secondary)}   /* Hover — 누를 수 있는 영역이라는 신호. Button Assistive 의 hover 와 같은 토큰. Pressed 는 두지 않는다 */
 .accordion summary::-webkit-details-marker{display:none}
 .accordion summary::after{content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast);margin-left:auto}   /* 셰브론만 오른쪽 끝으로 — space-between 이면 앞 아이콘이 있을 때 제목이 가운데로 뜬다 */
 .accordion summary:has(>small)::after{margin-left:0}   /* 보조 정보가 오른쪽으로 밀고 셰브론은 그 옆 8 */
 .accordion[open] summary::after{transform:rotate(180deg)}
-.accordion summary small{font-weight:500;color:var(--foreground-neutral-tertiary);margin-left:auto;font-size:var(--font-size-12)}
+.accordion summary small{font-weight:500;color:var(--foreground-neutral-tertiary);margin-left:auto;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .accordion summary>svg{flex:none;width:1.125rem;height:1.125rem}   /* 제목이 길어도 찌그러지지 않게 — 셰브론(::after)과 같은 보호 */
-.accordion .body{padding:0 1.25rem 1rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.6}
+.accordion .body{padding:0 1.25rem 1rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.375rem;letter-spacing:0.0145em}
 .accordion.outline{border-color:var(--line-neutral-secondary)}   /* 기본 모양을 이름으로 부르는 명시용 — 클래스가 없어도 Outline 이다 */
-.accordion.md summary{padding:0.875rem 1.25rem;font-size:var(--font-size-16);line-height:1.5rem}   /* md 는 기본값과 같다 — 크기를 명시한 마크업용 */
-.accordion.md .body{padding:0 1.25rem 1rem;font-size:var(--font-size-14)}
-.accordion.sm summary{padding:0.5625rem 1rem;font-size:var(--font-size-14);line-height:1.375rem}
+.accordion.md summary{padding:0.875rem 1.25rem;font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}   /* md 는 기본값과 같다 — 크기를 명시한 마크업용 */
+.accordion.md .body{padding:0 1.25rem 1rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
+.accordion.sm summary{padding:0.5625rem 1rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .accordion.sm summary>svg{width:1rem;height:1rem}
-.accordion.sm .body{padding:0 1rem 0.75rem;font-size:var(--font-size-12)}
-.accordion.lg summary{padding:1.0625rem 1.5rem;font-size:var(--font-size-18);line-height:1.625rem}
+.accordion.sm .body{padding:0 1rem 0.75rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
+.accordion.lg summary{padding:1.0625rem 1.5rem;font-size:var(--font-size-18);line-height:1.625rem;letter-spacing:-0.002em}
 .accordion.lg summary::after,.accordion.lg summary>svg{width:1.25rem;height:1.25rem}
 .accordion.lg .body{padding:0 1.5rem 1.25rem}
 .accordion.disabled>summary{cursor:not-allowed}   /* 자식 결합자 — audit 의 cssRule(".accordion.disabled summary") 가 아래 글자색 규칙을 찾게. pointer-events:none 을 두지 않는다(2026-11-12) — 클릭이 헤더를 지나 뒤의 카드 · 패널로 떨어지고 커서가 보이지 않았다. 펼침은 ds.js 캡처 · React 가 막고, hover 면은 위 :where 가 뺀다 */
@@ -1210,19 +1224,19 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
    .card .title 은 .skeleton.title 과도 겹친다(loading 예제) — 뒤에 오는 .skeleton.title 이 height·width 를 이겨 지금은 무해 */
 .card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:var(--card-pad);display:flex;flex-direction:column;gap:0.75rem;min-width:16.25rem;position:relative;line-height:1.6}
 .card .card-head{display:flex;align-items:center;justify-content:space-between;gap:0.75rem}
-.card .title{font-size:var(--font-size-16);line-height:1.5rem;font-weight:600;margin:0}   /* Title/1 16/24 600 — line-height 가 빠지면 문맥에 따라 25.6(문서)·28(패턴)·26.4(패키지)로 흔들린다 */
-.card .desc{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0;line-height:1.6}
+.card .title{font-size:var(--font-size-16);line-height:1.5rem;font-weight:600;margin:0;letter-spacing:0.0057em}   /* Title/1 16/24 600 — line-height 가 빠지면 문맥에 따라 25.6(문서)·28(패턴)·26.4(패키지)로 흔들린다 */
+.card .desc{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0;line-height:1.375rem;letter-spacing:0.0145em}
 .card .card-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0.75rem;margin-top:auto;padding-top:0.25rem}   /* wrap 없으면 액션이 카드 왼쪽으로 넘치고, 시작 방향 넘침은 스크롤로 닿지 않는다 */
 /* 상태 카드의 키-값 행(dl). 열 폭은 가장 긴 키에 맞춘다 */
-.card .card-meta{display:grid;grid-template-columns:max-content 1fr;gap:0.375rem 1rem;margin:0;font-size:var(--font-size-14);line-height:1.375rem}
+.card .card-meta{display:grid;grid-template-columns:max-content 1fr;gap:0.375rem 1rem;margin:0;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .card .card-meta dt{color:var(--foreground-neutral-secondary)}   /* 키는 읽어야 하는 정보 — tertiary(3.66)가 아니라 secondary(사람의 결정 2026-11-03, .tbl.kv th 와 같은 색) */
 .card .card-meta dd{margin:0;min-width:0;color:var(--foreground-neutral-primary);overflow-wrap:anywhere}
 /* 크기 — md 는 기본값과 같다(크기를 명시한 마크업용). sm 제목은 Label/1 14/20 600. .compact 는 sm 의 옛 이름(호환) */
 .card.md{padding:var(--card-pad);gap:0.75rem}
 .card.sm,.card.compact{padding:1rem;gap:0.5rem}
-.card.sm .title,.card.compact .title{font-size:var(--font-size-14);line-height:1.25rem}
+.card.sm .title,.card.compact .title{font-size:var(--font-size-14);line-height:1.25rem;letter-spacing:0.0145em}
 /* button.card 는 UA 기본값(Arial·가운데 정렬·outset 보더)이 새므로 리셋한다. 보더는 .card 의 1px 이 덮으므로 border 는 리셋하지 않는다 */
-.card.clickable{appearance:none;font:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer;transition:box-shadow var(--motion-fast)}
+.card.clickable{appearance:none;font:inherit;letter-spacing:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer;transition:box-shadow var(--motion-fast)}
 .card.clickable>svg{flex:none;color:var(--foreground-neutral-secondary)}   /* 선택 카드 앞 아이콘 */
 .card.bordered{box-shadow:none;border:1px solid var(--line-neutral-secondary)}   /* 호환용 — 기본 카드가 같은 1px 보더를 가져 효과가 없다. 문서에서는 내렸다 */
 .card.clickable:not(:disabled,[aria-disabled="true"]):hover{box-shadow:var(--shadow-2)}
@@ -1240,7 +1254,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .card.clickable:is(:disabled,[aria-disabled="true"]) .desc{color:var(--foreground-neutral-tertiary)}   /* 고를 수 없는 이유는 읽혀야 한다 — disable(1.3) 대신 tertiary(사람의 결정 2026-11-03) */
 /* 빈 · 오류 — 카드 틀과 헤더는 두고 본문 자리만 .empty 로. 카드가 이미 보더 · 면 · 여백을 가지므로 .empty 의 점선 · 면을 끈다 */
 .card .empty{border:0;background:none;padding:1.5rem 0}
-.card .empty b{font-size:var(--font-size-14)}   /* 카드 제목(16)보다 커지지 않게 — .empty b 는 16 */
+.card .empty b{font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}   /* 카드 제목(16)보다 커지지 않게 — .empty b 는 16 */
 .card .empty .ico{width:2.25rem;height:2.25rem;background:none;border-radius:0}   /* 카드 안에서는 아이콘 칸(48 · surface/neutral/strong) 없이 아이콘만 36(사람의 결정 2026-11-03) */
 .card .empty .ico svg{width:2.25rem;height:2.25rem}
 .card .empty.error .ico{color:var(--foreground-negative-strong)}   /* 카드 면 위 부정 아이콘 — 빈 상태 아이콘(tertiary)과 갈린다 */
@@ -1253,8 +1267,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* Popup */
 .popup-backdrop{position:fixed;inset:0;padding:1.5rem;background:var(--effect-dimmer-primary);display:grid;place-items:center;z-index:100;line-height:1.6}
 .popup{position:relative;width:27.5rem;max-width:100%;background:var(--surface-elevated-primary);border-radius:var(--radius-xl);box-shadow:var(--shadow-3);padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;line-height:1.6;max-height:calc(100vh - 3rem)}   /* 길면 본문만 스크롤 — 제목 · 버튼은 그 자리 */
-.popup .popup-title{font-size:var(--font-size-18);font-weight:700;margin:0;padding-right:2.25rem;display:flex;align-items:center;gap:0.625rem;flex:none}
-.popup .popup-body{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0;line-height:1.6;overflow-y:auto;min-height:0}
+.popup .popup-title{font-size:var(--font-size-18);font-weight:700;margin:0;padding-right:2.25rem;display:flex;align-items:center;gap:0.625rem;flex:none;line-height:1.625rem;letter-spacing:-0.002em}
+.popup .popup-body{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0;line-height:1.375rem;overflow-y:auto;min-height:0;letter-spacing:0.0145em}
 .popup .popup-actions{display:flex;justify-content:flex-end;gap:0.75rem;margin-top:0.75rem;flex:none}
 .popup .popup-close{position:absolute;top:1.375rem;right:1.25rem}   /* 제목 첫 줄과 세로 가운데 */
 .popup.lg{width:40rem}
@@ -1262,19 +1276,19 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .popup .popup-form{display:flex;flex-direction:column;gap:1rem;overflow-y:auto;min-height:0;margin:0 -0.25rem -0.25rem;padding:0.25rem}   /* 스크롤 영역이 입력 포커스 링(4px)을 자르지 않게 패딩을 두고 음수 여백으로 자리를 되돌린다 */
 
 /* Side Panel — 띄우지 않은 모습이 기본이고 .fixed 가 화면 오른쪽에 띄운다. 비모달이 기본(사람의 결정) */
-.side-panel{display:flex;flex-direction:column;width:25rem;max-width:100%;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);overflow:hidden;font-size:var(--font-size-14);line-height:1.6;outline:none}
+.side-panel{display:flex;flex-direction:column;width:25rem;max-width:100%;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);overflow:hidden;font-size:var(--font-size-14);line-height:1.375rem;outline:none;letter-spacing:0.0145em}
 .side-panel[hidden]{display:none}
 .side-panel.lg{width:35rem}
 .side-panel.fixed{position:fixed;top:0;right:0;bottom:0;max-width:100vw;border-width:0 0 0 1px;border-radius:0;box-shadow:var(--shadow-3);z-index:91}
 .side-panel-dim{position:fixed;inset:0;background:var(--effect-dimmer-primary);z-index:90}
 .side-panel-header{flex:none;display:flex;align-items:center;gap:0.5rem;min-height:3.5rem;padding:0.75rem 0.75rem 0.75rem 1.25rem;border-bottom:1px solid var(--line-neutral-secondary)}
-.side-panel-title{flex:1;min-width:0;margin:0;font-size:var(--font-size-16);font-weight:600;line-height:1.5rem}
+.side-panel-title{flex:1;min-width:0;margin:0;font-size:var(--font-size-16);font-weight:600;line-height:1.5rem;letter-spacing:0.0057em}
 .side-panel-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1.25rem}
 .side-panel-footer{flex:none;display:flex;justify-content:flex-end;gap:0.5rem;padding:0.75rem 1.25rem;border-top:1px solid var(--line-neutral-secondary)}
 
 /* Tooltip */
-.tooltip-wrap{position:relative;display:inline-flex;line-height:1.6}
-.tooltip{position:absolute;left:50%;bottom:calc(100% + 0.5rem);transform:translateX(-50%);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-12);font-weight:500;line-height:max(1.125rem,18px);letter-spacing:0.0252em;padding:0.375rem 0.625rem;border-radius:0.375rem;white-space:nowrap;box-shadow:var(--shadow-2);z-index:10;pointer-events:none;opacity:0;transition:opacity var(--motion-fast)}
+.tooltip-wrap{position:relative;display:inline-flex;line-height:inherit}   /* 둘레 줄 높이를 따른다(2026-11-12 — 1.6 이면 칸 · 칩 · Breadcrumb 의 잘린 글자가 텍스트 스타일 밖 22.4 · 19.2 가 됐다) */
+.tooltip{position:absolute;left:50%;bottom:calc(100% + 0.5rem);transform:translateX(-50%);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-12);font-weight:500;line-height:max(1rem,16px);letter-spacing:0.0252em;padding:0.375rem 0.625rem;border-radius:0.375rem;white-space:nowrap;box-shadow:var(--shadow-2);z-index:10;pointer-events:none;opacity:0;transition:opacity var(--motion-fast)}
 .tooltip::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--surface-neutral-inverse)}
 .tooltip.bottom{bottom:auto;top:calc(100% + 0.5rem)}
 .tooltip.bottom::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--surface-neutral-inverse)}
@@ -1290,7 +1304,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tooltip.multi{white-space:normal;width:13.75rem;text-align:left;word-break:keep-all}
 
 /* Notification */
-.notice{display:flex;gap:0.75rem;align-items:flex-start;border-radius:var(--radius-lg);padding:0.875rem 1.125rem;font-size:var(--font-size-14);border:1px solid var(--line-neutral-secondary);width:100%;background:var(--surface-elevated-primary);line-height:1.55}
+.notice{display:flex;gap:0.75rem;align-items:flex-start;border-radius:var(--radius-lg);padding:0.875rem 1.125rem;font-size:var(--font-size-14);border:1px solid var(--line-neutral-secondary);width:100%;background:var(--surface-elevated-primary);line-height:1.375rem;letter-spacing:0.0145em}
 .notice b{display:block;margin-bottom:2px}
 .notice .ico{flex:none;width:1.25rem;height:1.25rem;display:grid;place-items:center;color:var(--foreground-accent-cyan);margin-top:1px}
 .notice .ico svg{width:1.25rem;height:1.25rem}
@@ -1305,12 +1319,12 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .notice.warning .ico{color:var(--foreground-cautionary-primary)}
 .notice.danger{background:var(--surface-negative-primary);border-color:var(--line-negative-primary)}
 .notice.danger .ico{color:var(--foreground-negative-primary)}
-.toast{display:inline-flex;align-items:center;gap:0.75rem;width:22.5rem;max-width:100%;padding:0.75rem 1rem;border-radius:var(--radius-lg);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-14);box-shadow:var(--shadow-3);line-height:1.6}
+.toast{display:inline-flex;align-items:center;gap:0.75rem;width:22.5rem;max-width:100%;padding:0.75rem 1rem;border-radius:var(--radius-lg);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-14);box-shadow:var(--shadow-3);line-height:1.375rem;letter-spacing:0.0145em}
 /* 반전 표면(--surface-neutral-inverse) 위라 -text 를 쓰면 더 나빠진다 — 기준 단계를 그대로 쓴다(라이트 4.74 · 다크 2.37) */
 .toast .ico{flex:none;width:1.25rem;height:1.25rem;display:grid;place-items:center;color:var(--foreground-positive-primary)}
 .toast .ico svg{width:1.25rem;height:1.25rem}
 .toast.danger .ico{color:var(--foreground-negative-primary)}
-.toast .action{margin-left:auto;background:none;border:0;color:var(--foreground-brand-inverse);font:inherit;font-size:var(--font-size-12);font-weight:600;cursor:pointer;white-space:nowrap}
+.toast .action{margin-left:auto;background:none;border:0;color:var(--foreground-brand-inverse);font:inherit;font-size:var(--font-size-12);font-weight:600;cursor:pointer;white-space:nowrap;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .toast .action:hover{text-decoration:underline}
 .toast .close,.banner .close{flex:none;margin-left:auto;border:0;background:transparent;color:inherit;font:inherit;line-height:1;cursor:pointer;padding:2px;display:grid;place-items:center;border-radius:0.25rem}
 .toast .close svg,.banner .close svg{width:0.875rem;height:0.875rem}
@@ -1318,7 +1332,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .toast button:focus-visible,.banner .close:focus-visible{outline-color:currentColor}   /* 기본 외곽선(brand)은 어두운 Toast · 제품 색 Banner 면에서 보이지 않는다 */
 .toast-stack{display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;line-height:1.6}
 .toast-stack.fixed{position:fixed;right:1.5rem;bottom:1.5rem;z-index:110}
-.banner{display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.625rem 1.25rem;background:var(--surface-brand-primary);color:var(--brand-label);font-size:var(--font-size-14);font-weight:500;line-height:1.6}
+.banner{display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.625rem 1.25rem;background:var(--surface-brand-primary);color:var(--brand-label);font-size:var(--font-size-14);font-weight:500;line-height:1.375rem;letter-spacing:0.0145em}
 .banner .btn{margin-left:auto}
 .banner.warning{background:var(--surface-cautionary-primary);color:var(--foreground-neutral-primary)}
 .banner.danger{background:var(--surface-negative-strong);color:var(--foreground-neutral-primary)}
@@ -1337,7 +1351,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .spinner{display:inline-block;width:1.5rem;height:1.5rem;border:3px solid var(--line-neutral-secondary);border-top-color:var(--surface-brand-primary);border-radius:50%;animation:spin .8s linear infinite;line-height:1.6}
 .spinner.sm{width:1rem;height:1rem;border-width:2px}
 .spinner.lg{width:2.5rem;height:2.5rem;border-width:4px}
-.spinner-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:0.75rem;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:1.6}
+.spinner-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:0.75rem;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 @keyframes spin{to{transform:rotate(360deg)}}
 .skeleton{display:block;height:0.875rem;border-radius:0.375rem;background:linear-gradient(90deg,var(--surface-neutral-strong) 25%,var(--background-neutral-secondary) 50%,var(--surface-neutral-strong) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;line-height:1.6}
 .skeleton.title{height:1.25rem;width:40%}
@@ -1359,11 +1373,11 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .progress.sm{height:0.25rem}
 .progress.success i{background:var(--foreground-positive-primary)}
 .progress.danger i{background:var(--foreground-negative-primary)}
-.progress-row{display:flex;flex-direction:column;gap:0.375rem;width:100%;font-size:var(--font-size-12);color:var(--foreground-neutral-secondary);line-height:1.6}
+.progress-row{display:flex;flex-direction:column;gap:0.375rem;width:100%;font-size:var(--font-size-12);color:var(--foreground-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .progress-row .row{display:flex;justify-content:space-between}
 
 /* Indicator */
-.indicator{display:inline-flex;align-items:center;gap:0.5rem;font-size:var(--font-size-14);line-height:1.6}
+.indicator{display:inline-flex;align-items:center;gap:0.5rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .indicator::before{content:"";width:0.5rem;height:0.5rem;border-radius:50%;background:var(--foreground-inactive-primary);flex:none}
 .indicator.ok::before{background:var(--foreground-positive-primary)}
 .indicator.warn::before{background:var(--foreground-cautionary-primary)}
@@ -1372,7 +1386,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .indicator.accent::before{background:var(--foreground-brand-primary)}
 .indicator.pulse::before{box-shadow:0 0 0 0 var(--foreground-negative-primary);animation:pulse 1.6s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 8px transparent}}
-.count{display:inline-grid;place-items:center;min-width:1.25rem;height:1.25rem;padding:0 0.375rem;border-radius:var(--radius-full);background:var(--foreground-negative-strong);color:var(--static-white);font-size:var(--font-size-12);font-weight:700;line-height:1;}   /* 진한 빨강 + 흰 숫자(사람의 결정). 다크에서 흰 숫자가 4.5 아래 — 저장소 _build/contrast.pairs.js 의 Count 쌍이 예외로 잰다 */
+.count{display:inline-grid;place-items:center;min-width:1.25rem;height:1.25rem;padding:0 0.375rem;border-radius:var(--radius-full);background:var(--foreground-negative-strong);color:var(--static-white);font-size:var(--font-size-12);font-weight:700;line-height:max(1rem,16px);letter-spacing:0.0252em}   /* 진한 빨강 + 흰 숫자(사람의 결정). 다크에서 흰 숫자가 4.5 아래 — 저장소 _build/contrast.pairs.js 의 Count 쌍이 예외로 잰다 */
 .count.neutral{background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary)}
 .count.accent{background:var(--surface-brand-primary);color:var(--brand-label)}
 .count.dot{min-width:0.5rem;width:0.5rem;height:0.5rem;padding:0}
@@ -1380,15 +1394,15 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .with-count .count{position:absolute;top:-0.375rem;right:-0.375rem}
 /* 화면에는 보이지 않고 보조기기만 읽는 문구 — Steps 의 완료처럼 시각 신호(체크 아이콘)만 있던 상태를 알린다 */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.steps{display:flex;align-items:center;gap:0.5rem;list-style:none;padding:0;margin:0;font-size:var(--font-size-12);max-width:none;line-height:1.6}
+.steps{display:flex;align-items:center;gap:0.5rem;list-style:none;padding:0;margin:0;font-size:var(--font-size-12);max-width:none;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .steps li{display:flex;align-items:center;gap:0.5rem;color:var(--foreground-neutral-tertiary);margin:0;white-space:nowrap}
-.steps li i{width:1.5rem;height:1.5rem;border-radius:50%;display:inline-grid;place-items:center;font-style:normal;font-size:var(--font-size-12);font-weight:700;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);flex:none}
+.steps li i{width:1.5rem;height:1.5rem;border-radius:50%;display:inline-grid;place-items:center;font-style:normal;font-size:var(--font-size-12);font-weight:700;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);flex:none;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .steps li i svg{width:0.75rem;height:0.75rem;stroke-width:3}
 .steps li.done i{background:var(--surface-positive-primary);color:var(--foreground-positive-primary)}   /* 체크 아이콘을 긍정 색으로(사람의 결정). 틴트 위 대비가 라이트에서 낮다 — 저장소 _build/contrast.pairs.js 의 positive 쌍이 잰다 */
 .steps li.on{color:var(--foreground-neutral-primary);font-weight:600}
 .steps li.on i{background:var(--surface-brand-primary);color:var(--brand-label)}
 .steps li+li::before{content:"";width:2rem;height:1px;background:var(--line-neutral-primary)}
-.steps .step-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0;border:0;background:transparent;font:inherit;color:inherit;cursor:pointer;border-radius:var(--radius-xs)}
+.steps .step-btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0;border:0;background:transparent;font:inherit;letter-spacing:inherit;color:inherit;cursor:pointer;border-radius:var(--radius-xs)}
 .steps .step-btn:hover{color:var(--foreground-neutral-primary)}
 .steps.vertical{flex-direction:column;align-items:flex-start}
 .steps.vertical li+li::before{display:none}
@@ -1397,7 +1411,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .divider{border:0;border-top:1px solid var(--line-neutral-secondary);margin:1rem 0;width:100%;line-height:1.6}
 .divider.strong{border-color:var(--line-neutral-primary)}
 .divider.dashed{border-top-style:dashed}
-.divider.label{display:flex;align-items:center;gap:0.75rem;border:0;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);white-space:nowrap}
+.divider.label{display:flex;align-items:center;gap:0.75rem;border:0;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);white-space:nowrap;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .divider.label::before,.divider.label::after{content:"";flex:1;height:1px;background:var(--line-neutral-secondary)}
 .divider.vertical{width:1px;height:1.5rem;border:0;background:var(--line-neutral-secondary);margin:0 0.75rem;display:inline-block;vertical-align:middle;flex:none}
 
@@ -1406,8 +1420,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
    밀도 세 단계(참고: 외부 글 의 40 · 48 · 56) — 행 48 · .compact 40 · .relaxed 56, 헤더 44 · 40 · 48.
    행 상태의 면은 --tbl-tint 로 칠한다 — 고정 열(.sticky-col)이 불투명 면 위에 같은 색을 겹쳐 칠하려고. 숫자는 표 전체가 고정폭이다 */
 .tbl-wrap{overflow-x:auto;width:100%;line-height:1.6}
-.tbl{width:100%;border-collapse:collapse;font-size:var(--font-size-14);margin:0;line-height:1.6;font-variant-numeric:tabular-nums}
-.tbl th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);height:2.75rem;padding:0 1rem;border-bottom:1px solid var(--line-neutral-secondary);white-space:nowrap;background:var(--background-neutral-secondary)}
+.tbl{width:100%;border-collapse:collapse;font-size:var(--font-size-14);margin:0;line-height:1.375rem;font-variant-numeric:tabular-nums;letter-spacing:0.0145em}
+.tbl th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);height:2.75rem;padding:0 1rem;border-bottom:1px solid var(--line-neutral-secondary);white-space:nowrap;background:var(--background-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .tbl td{height:3rem;padding:0.75rem 1rem;border-bottom:1px solid var(--line-neutral-secondary);vertical-align:middle;background:var(--tbl-tint,transparent)}
 .tbl tbody tr:where(:not(.row-detail,.disabled)):hover td{--tbl-tint:var(--surface-neutral-secondary)}
 .tbl tbody tr:where(:not(.row-detail)):active td{--tbl-tint:var(--surface-neutral-strong)}
@@ -1421,7 +1435,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl tr.disabled td{cursor:not-allowed}   /* 비활성 행은 inert 대신 aria-disabled(2026-11-12) — inert 는 클릭을 표로 떨어뜨리고 행의 글자를 보조기기에서 지웠다. 안의 링크 · 버튼은 tabindex=-1, 클릭은 ds.js 캡처가 막는다 */
 .tbl tr.disabled .link{color:var(--foreground-disable-primary);cursor:not-allowed}
 .tbl tr.disabled .indicator::before{background:var(--foreground-disable-primary)}
-.tbl.compact td{height:2.5rem;padding:0.5rem 1rem;font-size:var(--font-size-14)}
+.tbl.compact td{height:2.5rem;padding:0.5rem 1rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .tbl.compact th{height:2.5rem}
 .tbl.relaxed td{height:3.5rem;padding:1rem}
 .tbl.relaxed th{height:3rem}
@@ -1429,7 +1443,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl th.sortable{cursor:pointer;user-select:none}
 .tbl th.sortable::after{content:"";display:inline-block;width:0.875rem;height:0.875rem;margin-left:0.375rem;vertical-align:-0.1875rem;opacity:.45;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M3 9l4 -4l4 4m-4 -4v14%22 /%3E%3Cpath d=%22M21 15l-4 4l-4 -4m4 4v-14%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M3 9l4 -4l4 4m-4 -4v14%22 /%3E%3Cpath d=%22M21 15l-4 4l-4 -4m4 4v-14%22 /%3E%3C/svg%3E") center/contain no-repeat}
 /* 정렬은 버튼 — th 에 클릭만 달려 있어 키보드로 닿지 않았다(2026-11-10). 누를 자리는 th 전체(화살표 포함)이고 버튼은 포커스와 이름을 맡는다 */
-.tbl th.sortable .sort{appearance:none;border:0;background:transparent;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;border-radius:2px}
+.tbl th.sortable .sort{appearance:none;border:0;background:transparent;padding:0;margin:0;font:inherit;letter-spacing:inherit;color:inherit;cursor:pointer;border-radius:2px}
 .tbl th.sortable:hover{color:var(--foreground-neutral-primary)}
 .tbl th.sorted{color:var(--foreground-neutral-primary)}   /* 정렬된 열은 진한 중립 글자 + 진한 화살표 — brand 를 쓰지 않는다(사람의 결정 2026-11-12) */
 .tbl th.sorted::after{opacity:1;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 11l-6 -6%22 /%3E%3Cpath d=%22M6 11l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 11l-6 -6%22 /%3E%3Cpath d=%22M6 11l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat}
@@ -1452,17 +1466,17 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl .expand-btn:hover{background:var(--surface-neutral-strong)}
 .tbl .expand-btn svg{transition:transform var(--motion-fast)}
 .tbl .expand-btn[aria-expanded="true"] svg{transform:rotate(90deg)}
-.tbl tr.row-detail > td{height:auto;padding:1rem 1rem 1.25rem 3.5rem;background:var(--background-neutral-secondary);font-size:var(--font-size-14)}
+.tbl tr.row-detail > td{height:auto;padding:1rem 1rem 1.25rem 3.5rem;background:var(--background-neutral-secondary);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .tbl.compact tr.row-detail > td{height:auto;padding:0.75rem 1rem 1rem 3.5rem}
 .tbl.relaxed tr.row-detail > td{height:auto;padding:1.25rem 1rem 1.5rem 3.5rem}
 .tbl .row-detail-body{display:flex;flex-direction:column;gap:0.75rem}
 .tbl .detail-meta{display:grid;grid-template-columns:max-content 1fr;gap:0.25rem 1.5rem;margin:0}
 .tbl .detail-meta dt{color:var(--foreground-neutral-secondary)}
 .tbl .detail-meta dd{margin:0;overflow-wrap:anywhere}
-.tbl .row-detail .spinner-wrap{flex-direction:row;font-size:var(--font-size-14)}
-.tbl.kv th{width:12.5rem;height:auto;padding:0.75rem 1rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);font-weight:500;border-right:1px solid var(--line-neutral-secondary);white-space:normal;vertical-align:top}
+.tbl .row-detail .spinner-wrap{flex-direction:row;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
+.tbl.kv th{width:12.5rem;height:auto;padding:0.75rem 1rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);font-weight:500;border-right:1px solid var(--line-neutral-secondary);white-space:normal;vertical-align:top;line-height:1.375rem;letter-spacing:0.0145em}
 .tbl.kv td{height:auto}
-.tbl td.empty{display:table-cell;text-align:center;color:var(--foreground-neutral-tertiary);height:auto;padding:1.5rem 1rem;font-size:var(--font-size-14);border:none;border-radius:0;background:transparent}
+.tbl td.empty{display:table-cell;text-align:center;color:var(--foreground-neutral-tertiary);height:auto;padding:1.5rem 1rem;font-size:var(--font-size-14);border:none;border-radius:0;background:transparent;line-height:1.375rem;letter-spacing:0.0145em}
 .tbl td.truncate{max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}   /* 남는 폭을 차지하고 그 안에서 자른다. 전체 값은 잘린 칸에만 붙는 Tooltip(ds.js · React — title 은 쓰지 않는다)과 상세에서 */
 .tbl td.truncate>.tooltip-wrap{display:flex;max-width:100%}
 .tbl td.truncate .cell-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1470,7 +1484,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl.grid :is(th,td):not(:last-child){border-right:1px solid var(--line-neutral-secondary)}
 .tbl.plain td{border-bottom:0}
 /* 하위 텍스트 — 주 값 아래 보조 글(예: 이름 아래 이메일). 열을 늘리지 않고 맥락을 준다. 두 줄이라 .relaxed 를 권한다 */
-.tbl .cell-sub{display:block;font-size:var(--font-size-12);line-height:max(1rem,16px);color:var(--foreground-neutral-secondary)}
+.tbl .cell-sub{display:block;font-size:var(--font-size-12);line-height:max(1rem,16px);color:var(--foreground-neutral-secondary);letter-spacing:0.0252em}
 .tbl td:has(> .cell-sub){padding-top:0.5rem;padding-bottom:0.5rem}   /* 두 줄(22.4 + 16) + 위아래 8 = 54.4 — relaxed 56 행에 든다 */
 .tbl tr.disabled .cell-sub{color:var(--foreground-disable-primary)}
 /* 합계 행 — tfoot 의 합계 · 평균. 회색 면 + 굵은 글자 + 위 선 한 단계 진하게(collapse 표는 위 칸의 아래 선이 이겨 그 선을 바꾼다) */
@@ -1497,7 +1511,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl-wrap.sticky > .action-bar{position:sticky;top:0;left:0;z-index:2;background:var(--tbl-surface,var(--background-neutral-primary))}   /* 붙어 있는 동안 아래로 지나가는 행이 비치지 않게 — 놓인 자리의 면 */
 .tbl-wrap.sticky:has(> .action-bar:not([hidden])) .tbl th{top:3.3125rem}
 .tbl-wrap.sticky:has(> .action-bar:not([hidden])){scroll-padding-top:6.0625rem}
-.select-notice{display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.25rem 1rem;background:var(--surface-brand-subtle);border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);line-height:1.6}
+.select-notice{display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.25rem 1rem;background:var(--surface-brand-subtle);border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .select-notice:empty{display:none}
 /* Link — 문장 안은 늘 밑줄(색만으로 구분하지 않음), 그 줄 자체가 링크인 자리(.standalone · 표)는 hover 때만 */
 .link{color:var(--foreground-brand-primary);text-decoration:underline;text-underline-offset:2px}
@@ -1507,34 +1521,34 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .link svg{width:0.875rem;height:0.875rem;margin-left:2px;vertical-align:-2px}
 .tbl .link{color:inherit;text-decoration:none;font-weight:500}   /* 표 칸의 링크는 칸 글자색 · 500 · hover 밑줄 — brand 를 쓰지 않는다(사람의 결정 2026-11-12) */
 .tbl tr:where(:not(.disabled)) .link:hover{text-decoration:underline}
-.action-bar{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 1rem;background:transparent;border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);line-height:1.6}   /* 선택 표 위에 늘 있다 — 면 없음(사람의 결정 2026-11-12). 0개면 버튼이 aria-disabled */
+.action-bar{display:flex;align-items:center;gap:0.75rem;padding:0.625rem 1rem;background:transparent;border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}   /* 선택 표 위에 늘 있다 — 면 없음(사람의 결정 2026-11-12). 0개면 버튼이 aria-disabled */
 .action-bar b{color:var(--foreground-neutral-primary)}   /* 진한 중립(2026-11-12) — 표 안의 brand 를 덜며(정렬 머리글 · 칸 링크) 남은 하나. 굵기 700 이 건수를 가른다 */
 .action-bar .spacer{flex:1}
 .action-bar .btn:not(.text,.icon-only){padding:0 0.75rem}   /* 높이 · 글자는 .sm(32 · 12) 이 준다 — 종전 덮어쓰기 중 남는 차이는 좌우 여백뿐. text(8) · 아이콘 전용(0)의 여백은 건드리지 않는다 */
 
 /* List */
 .list{list-style:none;margin:0;padding:0;width:100%;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);overflow:hidden;max-width:none;line-height:1.6}
-.list li{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);margin:0}
+.list li{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-14);margin:0;line-height:1.375rem;letter-spacing:0.0145em}
 .list li:last-child{border-bottom:0}
 .list.hover li:hover{background:var(--surface-neutral-secondary);cursor:pointer}
 .list.hover li:active{background:var(--surface-neutral-strong)}
 .list li.on{background:var(--surface-brand-subtle)}
 .list .primary{font-weight:500;display:block}
-.list .meta{display:block;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
+.list .meta{display:block;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .list .end{margin-left:auto;display:flex;gap:0.5rem;align-items:center;flex:none}
 .list.plain{border:0;background:transparent;border-radius:0}
 .list.plain li{padding:0.625rem 0}
-.list.dense li{padding:0.5rem 1rem;font-size:var(--font-size-14)}
+.list.dense li{padding:0.5rem 1rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 
 /* Item Tile */
 .tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(11.25rem,1fr));gap:0.75rem;width:100%;line-height:1.6}
-.tile{display:flex;flex-direction:column;gap:0.5rem;padding:1rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);cursor:pointer;position:relative;text-align:left;font:inherit;color:var(--foreground-neutral-primary);transition:border-color var(--motion-fast),box-shadow var(--motion-fast);line-height:1.6}
+.tile{display:flex;flex-direction:column;gap:0.5rem;padding:1rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);cursor:pointer;position:relative;text-align:left;font:inherit;letter-spacing:inherit;color:var(--foreground-neutral-primary);transition:border-color var(--motion-fast),box-shadow var(--motion-fast);line-height:1.6}
 .tile:where(:not([disabled])):hover{border-color:var(--line-neutral-primary);box-shadow:var(--shadow-1)}
 .tile.on{border-color:var(--surface-brand-primary);box-shadow:inset 0 0 0 1px var(--surface-brand-primary);background:var(--surface-brand-subtle)}
-.tile .ico{width:2.25rem;height:2.25rem;border-radius:var(--radius-lg);background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);display:grid;place-items:center;font-weight:700;font-size:var(--font-size-14)}
+.tile .ico{width:2.25rem;height:2.25rem;border-radius:var(--radius-lg);background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);display:grid;place-items:center;font-weight:700;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .tile.on .ico{background:var(--surface-brand-primary);color:var(--brand-label)}
-.tile b{font-size:var(--font-size-14)}
-.tile span{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
+.tile b{font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
+.tile span{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .tile .tag{position:absolute;top:0.75rem;right:0.75rem}
 .tile.horizontal{flex-direction:row;align-items:center}
 .tile.horizontal>div{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1546,8 +1560,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 
 /* Data Visual */
 .kpi{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:1.25rem 1.5rem;min-width:11.25rem;display:flex;flex-direction:column;gap:0.25rem;line-height:1.6}
-.kpi .label{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);font-weight:500}
-.kpi .value{font-size:var(--font-size-32);font-weight:700;letter-spacing:-.02em;line-height:1.2;white-space:nowrap;color:var(--foreground-neutral-primary)}   /* 색이 없어 부모 색을 물려받았다 — 개요 썸네일(tertiary 글자)에서 값만 회색이 됐다 */
+.kpi .label{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);font-weight:500;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.kpi .value{font-size:var(--font-size-32);font-weight:700;letter-spacing:-0.0253em;line-height:2.75rem;white-space:nowrap;color:var(--foreground-neutral-primary)}   /* 색이 없어 부모 색을 물려받았다 — 개요 썸네일(tertiary 글자)에서 값만 회색이 됐다 */
 .kpi .value small{font-size:var(--font-size-16);line-height:1.5rem;font-weight:500;letter-spacing:0.0057em;color:var(--foreground-neutral-tertiary);margin-left:2px}   /* = Title 1 Medium. 값의 행간 1.2 · 자간 -0.02em 을 물려받아 어느 텍스트 스타일과도 맞지 않았다(2026-11-06) */
 .kpi .delta{font-size:var(--font-size-12);line-height:max(1rem,16px);font-weight:600;letter-spacing:0.0252em;color:var(--foreground-neutral-secondary)}   /* = Label 2 SemiBold. 종전엔 카드 행간 1.6(19.2)을 물려받아 Figma 글 상자(16)와 3.2 어긋났다 */
 .kpi .delta svg{width:0.75rem;height:0.75rem;vertical-align:-1px}
@@ -1566,7 +1580,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:1rem;width:100%;line-height:1.6}
 .kpi-grid > .kpi{min-width:0;padding-left:1.25rem;padding-right:1.25rem}   /* 격자 안 KPI 는 좌우 20 · 칸 최소 176(사람의 결정 2026-11-11) — 1280 이상 문서 본문 758 에서 4열 한 칸은 177.5 인데
    '1,247 / 1,284' 가 패딩 24 로 181 이 필요해 3 + 1 로 줄바꿈했다. 이제 1024 ~ 2560 다섯 폭에서 넷이 한 줄이고 가장 긴 값도 5px 이상 남는다(behave.scale). 카드 하나의 최소 폭 180 은 격자 밖 KPI 에만 */
-.chart{display:flex;flex-direction:column;gap:0.625rem;width:100%;font-size:var(--font-size-12);line-height:1.6}
+.chart{display:flex;flex-direction:column;gap:0.625rem;width:100%;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .chart .row{display:grid;grid-template-columns:7.5rem 1fr 3.5rem;align-items:center;gap:0.75rem}
 .chart .row .lbl{color:var(--foreground-neutral-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* 막대는 각지게(트랙 · 채움 · 스파크라인, 사람의 결정 2026-11-05 — 탐색형 막대와 같다) */
@@ -1579,7 +1593,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .chart .bar.info i{background:var(--foreground-inactive-primary)}
 .chart .num{text-align:right;color:var(--foreground-neutral-secondary)}
 .chart-card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;width:100%;line-height:1.6}
-.chart-card .chart-title{font-size:var(--font-size-16);font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center}
+.chart-card .chart-title{font-size:var(--font-size-16);font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center;line-height:1.5rem;letter-spacing:0.0057em}
 .chart-card.flat{border-color:transparent}   /* variant flat — .card.flat 과 같은 결정 · 같은 조건(회색 바탕 전용) */
 /* 탐색형 차트(Chart.js) 캔버스 자리 — 높이는 CSS 가 정하고 Chart.js 가 responsive 로 채운다. canvas 에 width · height 를 직접 주지 않는다 */
 /* contain:inline-size — Chart.js 캔버스의 첫 폭(300)이 그리드 · 플렉스 열의 최소 폭으로 잡혀 좁은 화면에서 넘쳤다(대시보드 768 에서 24px). 캔버스가 열 폭을 정하지 않게 한다 */
@@ -1594,10 +1608,10 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* 조각은 이어 붙이고, 경계는 폭이 일정한 2px 구분선(i)으로 낸다 — 탐색형 도넛(Chart.js 2px 면 색 경계)과 같은 모양(2026-11-05).
    종전에는 conic-gradient 의 각도 띠(1.2%)라 바깥으로 갈수록 넓어지는 쐐기가 되고 경계가 계단처럼 깨졌다. --a 는 경계 각도(위 = 0, 시계 방향) */
 .donut{position:relative;width:7.5rem;height:7.5rem;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--foreground-negative-strong) 0 18.03%,var(--foreground-cautionary-primary) 18.03% 45.07%,var(--foreground-accent-light-blue) 45.07% 63.66%,var(--foreground-accent-lime) 63.66% 75.05%,var(--foreground-inactive-primary) 75.05% 100%);line-height:1.6}
-.donut::after{content:attr(data-label);width:5rem;height:5rem;border-radius:50%;background:var(--surface-elevated-primary);display:grid;place-items:center;font-weight:600;font-size:var(--font-size-16);line-height:1.5rem}   /* 가운데 합계 = Title/1 16/24/600 — 700 이던 것을 Figma 스타일 14단계에 맞춰 600 으로(사람의 결정 2026-11-04). 탐색형 도넛(ds-chart centerPlugin)도 같다 */
+.donut::after{content:attr(data-label);width:5rem;height:5rem;border-radius:50%;background:var(--surface-elevated-primary);display:grid;place-items:center;font-weight:600;font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}   /* 가운데 합계 = Title/1 16/24/600 — 700 이던 것을 Figma 스타일 14단계에 맞춰 600 으로(사람의 결정 2026-11-04). 탐색형 도넛(ds-chart centerPlugin)도 같다 */
 .donut i{position:absolute;top:0;left:50%;width:2px;height:1.25rem;margin-left:-1px;background:var(--surface-elevated-primary);transform-origin:50% 3.75rem;transform:rotate(var(--a,0deg))}
 .donut-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem 1.5rem;line-height:1.6}   /* 자리가 좁아 도넛 + 범례가 한 줄에 안 들어가면 범례가 도넛 아래로 내려간다(사람의 요청 2026-11-06 — 탐색형 도넛의 옆 범례와 같은 규칙). 줄 사이 16 = chart-card gap */
-.chart-legend{display:flex;flex-wrap:wrap;gap:0.5rem 1.25rem;font-size:var(--font-size-12);color:var(--foreground-neutral-secondary);line-height:1.6}
+.chart-legend{display:flex;flex-wrap:wrap;gap:0.5rem 1.25rem;font-size:var(--font-size-12);color:var(--foreground-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .chart-legend span{display:inline-flex;align-items:center;gap:0.375rem}
 .chart-legend i{width:0.625rem;height:0.625rem;border-radius:50%;background:var(--foreground-inactive-primary);flex:none}
 /* 범례 스와치는 클래스로 고른다 — 예제 HTML 이 인라인 style 로 토큰을 참조하면
@@ -1619,8 +1633,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* 2열 격자 — Breadcrumb 는 윗줄 전체, 긴 제목은 왼쪽 칸에서 줄바꿈하고 동작은 오른쪽 위에 남는다 */
 .page-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:0.5rem 1rem;width:100%;line-height:1.6}
 .page-head > nav{grid-column:1/-1}
-.page-head .title{font-size:var(--font-size-24);font-weight:700;margin:0;letter-spacing:-.02em;line-height:1.3;word-break:keep-all}
-.page-head .sub{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0.25rem 0 0}
+.page-head .title{font-size:var(--font-size-36);font-weight:700;margin:0;letter-spacing:-0.027em;line-height:3rem;word-break:keep-all}   /* = Display 3(사람의 결정 2026-11-12 — 페이지 h1). 24/1.3 이었다 */
+.page-head .sub{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0.25rem 0 0;line-height:1.375rem;letter-spacing:0.0145em}
 .page-head .actions{display:flex;gap:0.5rem;flex:none}
 .stack{display:flex;flex-direction:column;gap:1rem;width:100%;line-height:1.6}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;width:100%;line-height:1.6}
@@ -1630,7 +1644,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .form{display:flex;flex-direction:column;gap:1.25rem;width:100%;max-width:40rem;background:var(--surface-elevated-primary);padding:1.5rem;border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);line-height:1.6}
 .form .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .form .form-row .field{min-width:0}
-.form .form-section{font-size:var(--font-size-16);font-weight:600;margin:0.25rem 0 -0.5rem;padding-top:0.5rem}
+.form .form-section{font-size:var(--font-size-16);font-weight:600;margin:0.25rem 0 -0.5rem;padding-top:0.5rem;line-height:1.625rem;letter-spacing:0.0057em}
 .form .form-actions{display:flex;justify-content:flex-end;gap:0.75rem;padding-top:1rem;border-top:1px solid var(--line-neutral-secondary)}
 .form .form-actions .left{margin-right:auto}
 .form .field{min-width:0}
@@ -1646,8 +1660,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .code-inline{font-family:var(--font-mono);font-size:.9em;font-variant-numeric:tabular-nums;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);padding:1px 0.375rem;border-radius:0.25rem;overflow-wrap:anywhere}
 .code-view{display:flex;flex-direction:column;width:100%;min-width:0;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);overflow:hidden}
 .code-view .head{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.25rem 0.5rem 0.25rem 1rem;border-bottom:1px solid var(--line-neutral-secondary)}
-.code-view .title{min-width:0;font-size:var(--font-size-14);line-height:1.6;font-weight:500;color:var(--foreground-neutral-secondary)}
-.code-view pre{contain:inline-size;margin:0;padding:0.75rem 1rem;border-radius:0;background:none;color:var(--foreground-neutral-primary);font-size:var(--font-size-12);line-height:max(1.25rem,20px);tab-size:2;overflow:auto}   /* contain — 긴 줄이 그리드 칸을 넓히지 않게. 12/20 — 13 을 단계 12 로 묶음(사람의 결정 2026-11-11 — 고정폭은 같은 크기에서 커 보인다), 줄 높이도 최소 크기 */
+.code-view .title{min-width:0;font-size:var(--font-size-14);line-height:1.375rem;font-weight:500;color:var(--foreground-neutral-secondary);letter-spacing:0.0145em}
+.code-view pre{contain:inline-size;margin:0;padding:0.75rem 1rem;border-radius:0;background:none;color:var(--foreground-neutral-primary);font-size:var(--font-size-12);line-height:max(1.25rem,20px);letter-spacing:0;tab-size:2;overflow:auto}   /* 자간 0 — 고정폭은 칸이 맞아야 하고, 앱 루트(.ds-root)의 Body 2/Reading 자간을 물려받지 않게(2026-11-12 behave 가 잡음). contain — 긴 줄이 그리드 칸을 넓히지 않게. 12/20 — 13 을 단계 12 로 묶음(사람의 결정 2026-11-11 — 고정폭은 같은 크기에서 커 보인다), 줄 높이도 최소 크기 */
 .code-view pre code{padding:0;border-radius:0;background:none;font-size:inherit}   /* 표 칸 안(행 펼침)에서 td code 의 인라인 칩 면 · 12px 가 줄마다 칠해졌다 */
 .code-view pre:focus-visible{outline-offset:-1px}   /* 틀의 overflow 가 바깥 외곽선을 자른다 */
 .code-view.wrap pre{white-space:pre-wrap;overflow-wrap:anywhere}
@@ -1659,11 +1673,11 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .copy-field .affix .reveal{margin-right:0}
 .copy-field .affix .copy span{color:inherit;font-size:inherit}   /* .field .affix span 은 접두 · 접미 글자용 */
 .copy-field .affix .copy{flex:none;margin-right:-0.375rem}
-.copy-field.inline{display:inline-flex;align-items:center;gap:0.25rem;max-width:100%;font-size:var(--font-size-14);line-height:1.6}
+.copy-field.inline{display:inline-flex;align-items:center;gap:0.25rem;max-width:100%;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .copy-field.inline .value{min-width:0;font-family:var(--font-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .copy-field.inline .copy{flex:none;width:1.5rem;height:1.5rem}
 /* File Upload — 영역 전체가 눌리고(마우스) 키보드는 안의 버튼으로. 면 · 글자는 기존 쌍만 쓴다 */
-.upload{display:flex;flex-direction:column;gap:0.5rem;width:100%;font-size:var(--font-size-14);line-height:1.6}
+.upload{display:flex;flex-direction:column;gap:0.5rem;width:100%;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .upload-zone{display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:1.5rem;border:1px dashed var(--line-neutral-primary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);color:var(--foreground-neutral-secondary);text-align:center;cursor:pointer;transition:border-color var(--motion-fast)}
 .upload-zone:hover,.upload.dragging .upload-zone{border-color:var(--foreground-brand-primary)}
 .upload.dragging .upload-zone{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
@@ -1686,44 +1700,44 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .upload-item .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:0.25rem;padding:0.25rem 0}
 .upload-item .row{display:flex;align-items:baseline;justify-content:space-between;gap:0.75rem}
 .upload-item .name{min-width:0;overflow-wrap:anywhere}   /* 긴 파일 이름은 줄바꿈 — 말줄임은 키보드로 읽을 길이 없다 */
-.upload-item .size{flex:none;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
-.upload-item .msg{font-size:var(--font-size-12);color:var(--foreground-negative-strong);word-break:keep-all;overflow-wrap:anywhere}
-.form-legend{margin:0;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
+.upload-item .size{flex:none;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
+.upload-item .msg{font-size:var(--font-size-12);color:var(--foreground-negative-strong);word-break:keep-all;overflow-wrap:anywhere;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.form-legend{margin:0;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .form-legend em{color:var(--foreground-negative-strong);font-style:normal}
 .form-summary{margin-bottom:-0.25rem}   /* 폼 간격 20 에서 요약과 다음 줄 사이만 16 */
-.terms{display:flex;flex-direction:column;gap:0.25rem;width:100%;max-width:35rem;font-size:var(--font-size-16);line-height:1.6}
+.terms{display:flex;flex-direction:column;gap:0.25rem;width:100%;max-width:35rem;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
 .terms .all{padding:0.875rem 1rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);font-weight:600;margin-bottom:0.5rem}
 .terms .item{display:flex;align-items:center;gap:0.5rem;padding:0.625rem 1rem}
-.terms .item .req{font-size:var(--font-size-12);color:var(--foreground-brand-primary);font-weight:600}
-.terms .item .opt{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
-.terms .msg{padding:0.25rem 1rem 0;font-size:var(--font-size-12);color:var(--foreground-negative-strong)}
+.terms .item .req{font-size:var(--font-size-12);color:var(--foreground-brand-primary);font-weight:600;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.terms .item .opt{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
+.terms .msg{padding:0.25rem 1rem 0;font-size:var(--font-size-12);color:var(--foreground-negative-strong);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .terms .msg:empty{padding:0;margin-top:-0.25rem}   /* 비어 있어도 그려 둔다 — 라이브 영역 */
-.terms .item .view{margin-left:auto;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);text-decoration:underline;background:none;border:0;font-family:inherit;cursor:pointer}
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.375rem;padding:3rem 1.5rem;text-align:center;width:100%;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-14);background:var(--surface-elevated-primary);border:1px dashed var(--line-neutral-primary);border-radius:var(--radius-lg);line-height:1.6}
-.empty b{font-size:var(--font-size-16);color:var(--foreground-neutral-primary)}
-.empty .ico{width:3rem;height:3rem;border-radius:var(--radius-lg);background:var(--surface-neutral-strong);display:grid;place-items:center;font-size:var(--font-size-20);margin-bottom:0.375rem;color:var(--foreground-neutral-tertiary)}
+.terms .item .view{margin-left:auto;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);text-decoration:underline;background:none;border:0;font-family:inherit;cursor:pointer;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.375rem;padding:3rem 1.5rem;text-align:center;width:100%;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-14);background:var(--surface-elevated-primary);border:1px dashed var(--line-neutral-primary);border-radius:var(--radius-lg);line-height:1.375rem;letter-spacing:0.0145em}
+.empty b{font-size:var(--font-size-16);color:var(--foreground-neutral-primary);line-height:1.625rem;letter-spacing:0.0057em}
+.empty .ico{width:3rem;height:3rem;border-radius:var(--radius-lg);background:var(--surface-neutral-strong);display:grid;place-items:center;font-size:var(--font-size-20);margin-bottom:0.375rem;color:var(--foreground-neutral-tertiary);line-height:1.75rem;letter-spacing:-0.012em}
 .empty .btn{margin-top:0.625rem}
 .empty.compact{padding:1.5rem;flex-direction:row;justify-content:flex-start;text-align:left;gap:0.75rem}
-.empty.compact .ico{margin:0;width:2.25rem;height:2.25rem;font-size:var(--font-size-16)}
-.empty.compact b{font-size:var(--font-size-14)}
+.empty.compact .ico{margin:0;width:2.25rem;height:2.25rem;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
+.empty.compact b{font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .empty.compact > div > span{display:block}
 .empty.compact .btn{margin:0 0 0 auto}
-.notes{width:100%;background:var(--background-neutral-secondary);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.6}
-.notes b{display:block;color:var(--foreground-neutral-primary);margin-bottom:0.5rem;font-size:var(--font-size-14)}
+.notes{width:100%;background:var(--background-neutral-secondary);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.375rem;letter-spacing:0.0145em}
+.notes b{display:block;color:var(--foreground-neutral-primary);margin-bottom:0.5rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .notes ul{margin:0;padding-left:1.2em;max-width:none}
 .notes li{margin-bottom:0.25rem}
 .notes.warning{background:var(--surface-cautionary-primary)}
-.settings-section{width:100%;background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:0.5rem 1.5rem;font-size:var(--font-size-16);line-height:1.6}
-.settings-section .section-head{display:flex;align-items:center;justify-content:space-between;padding:0.875rem 0;font-size:var(--font-size-16);font-weight:600;border-bottom:1px solid var(--line-neutral-secondary)}
-.setting{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;padding:0.875rem 0;border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-16);line-height:1.6}
+.settings-section{width:100%;background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:0.5rem 1.5rem;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
+.settings-section .section-head{display:flex;align-items:center;justify-content:space-between;padding:0.875rem 0;font-size:var(--font-size-16);font-weight:600;border-bottom:1px solid var(--line-neutral-secondary);line-height:1.625rem;letter-spacing:0.0057em}
+.setting{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;padding:0.875rem 0;border-bottom:1px solid var(--line-neutral-secondary);font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
 .setting:last-child{border-bottom:0}
-.setting .info b{display:block;font-size:var(--font-size-14);font-weight:600}
-.setting .info span{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary)}
+.setting .info b{display:block;font-size:var(--font-size-14);font-weight:600;line-height:1.375rem;letter-spacing:0.0145em}
+.setting .info span{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .setting .ctrl{flex:none;display:flex;align-items:center;gap:0.5rem}
 .status-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(13.75rem,1fr));gap:0.75rem;width:100%;line-height:1.6}
-.status-item{display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);font-size:var(--font-size-14);line-height:1.6}
+.status-item{display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .status-item .indicator{font-weight:600}
-.status-item .meta{margin-left:auto;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);}
+.status-item .meta{margin-left:auto;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 /* 밴드도 같은 이유로 조각을 떼어 놓는다 — gap 이 아니라 inset 그림자여야 비율(flex)이 그대로 읽힌다 */
 .sev-band{display:flex;height:0.625rem;border-radius:var(--radius-full);overflow:hidden;width:100%;line-height:1.6}
 .sev-band i{display:block;height:100%;box-shadow:inset -1px 0 0 var(--surface-elevated-primary)}
@@ -1736,7 +1750,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 
 .onboard{display:flex;flex-direction:column;gap:1.5rem;align-items:center;align-items:safe center;width:100%;max-width:35rem;margin:0 auto;line-height:1.6}   /* safe — Steps 가 넘치면 왼쪽부터(390 에서 양끝이 잘렸다). 앞의 center 는 safe 를 모르는 엔진용 */
 .onboard .card{width:100%}
-.log-row{font-size:var(--font-size-12);line-height:1.6}
+.log-row{font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .log-row td{white-space:nowrap}   /* 로그 한 건 = 한 줄(2026-11-12) — 시간 · 단말 · IP 가 'PC-' / '2041' 처럼 끊겨 행이 62 가 됐다 */
 .log-row:has(> td.truncate) > td:not(.truncate){width:1%}   /* 짧은 열은 글자 폭만 — 남는 폭은 메시지 열(td.truncate)이 갖고, 잘리면 Tooltip 으로 전체를 보인다 */
 /* ---------- /Live component samples ---------- */

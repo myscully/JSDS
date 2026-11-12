@@ -11,7 +11,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   const go = async (f) => { await page.goto("file://" + path.join(SITE, f)); await page.evaluate(() => document.fonts.ready); await page.waitForTimeout(250); };
   const STEPS = { 1100: 15, 1440: 16, 1920: 17, 2560: 18 };
 
-  /* 표의 숫자 — 루트 · 본문(Body 2) · 버튼 md · 버튼 아이콘 · 12 이하 글자(최소 크기) · 그 행간 */
+  /* 표의 숫자 — 루트 · 본문(Label 1 · 14) · 버튼 md · 버튼 아이콘 · 12 이하 글자(최소 크기) · 그 행간 */
   await step("scale: each width step sets the root and everything follows it, 12px and smaller text keeps its minimum", async () => {
     const got = {}, want = {};
     for (const [w, root] of Object.entries(STEPS)) {
@@ -19,11 +19,11 @@ module.exports = async ({ b, ok, SITE, path }) => {
       got[w] = await page.evaluate(() => {
         const mk = (cls) => { const e = document.createElement("span"); e.className = cls; e.textContent = "가"; document.body.appendChild(e); return getComputedStyle(e); };
         const btn = document.querySelector(".example-preview .btn.md"), ico = document.querySelector(".example-preview .btn.md svg");
-        return [parseFloat(getComputedStyle(document.documentElement).fontSize), parseFloat(mk("t-body-2").fontSize), btn.getBoundingClientRect().height, ico.getBoundingClientRect().width,
-          parseFloat(mk("t-label-2").fontSize), parseFloat(mk("t-label-2").lineHeight), parseFloat(mk("t-caption-2").fontSize)];
+        return [parseFloat(getComputedStyle(document.documentElement).fontSize), parseFloat(mk("t-label-1-reading").fontSize), btn.getBoundingClientRect().height, ico.getBoundingClientRect().width,
+          parseFloat(mk("t-caption-1").fontSize), parseFloat(mk("t-caption-1").lineHeight), parseFloat(mk("t-caption-2").fontSize)];
       });
       const k = root / 16;
-      want[w] = [root, 14 * k, 40 * k, 18 * k, Math.max(12, 12 * k), Math.max(16, 16 * k), Math.max(10, 10 * k)];
+      want[w] = [root, 14 * k, 40 * k, 18 * k, Math.max(12, 12 * k), Math.max(16, 16 * k), Math.max(11, 11 * k)];
     }
     ok("scale: each width step sets the root and everything follows it, 12px and smaller text keeps its minimum", JSON.stringify(got) === JSON.stringify(want), JSON.stringify({ got, want }));
   });

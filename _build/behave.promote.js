@@ -32,7 +32,7 @@ module.exports = async function promote({ page, ok, go }) {
   /* ── Avatar ── */
   await go("components/avatar.html");
   const av = await page.evaluate(() => [...document.querySelectorAll("#ex-avatar-sizes .avatar")].map((a) => { const r = a.getBoundingClientRect(), c = getComputedStyle(a); return [r.width, r.height, c.fontSize, c.borderTopLeftRadius]; }));
-  ok("avatar is 32 with 12 text and sm 24 with 10 text, both round", JSON.stringify(av) === JSON.stringify([[32, 32, "12px", "50%"], [24, 24, "10px", "50%"]]), JSON.stringify(av));
+  ok("avatar is 32 with 12 text and sm 24 with 11 text, both round", JSON.stringify(av) === JSON.stringify([[32, 32, "12px", "50%"], [24, 24, "11px", "50%"]]), JSON.stringify(av));
 
   /* ── Empty State ── */
   ok("the empty-state pattern page is gone", !fs.existsSync(path.join(__dirname, "..", "patterns/empty-state.html")));
@@ -46,7 +46,7 @@ module.exports = async function promote({ page, ok, go }) {
   await go("components/page-header.html");
   const headOf = (id) => page.locator(`#ex-page-header-${id} .page-head`).evaluate((h) => { const r = h.getBoundingClientRect(), t = h.querySelector(".title"), tr = t.getBoundingClientRect(), a = h.querySelector(".actions"), ar = a.getBoundingClientRect(), n = h.querySelector("nav"), nr = n && n.getBoundingClientRect(), c = getComputedStyle(t); return { tag: t.tagName, keep: c.wordBreak, fs: c.fontSize, fw: c.fontWeight, aRight: Math.round(r.right - ar.right), aTop: Math.round(ar.top - tr.top), titleH: Math.round(tr.height), titleRight: tr.right, aLeft: ar.left, navW: nr && Math.round(r.width - nr.width), navGap: nr && Math.round((tr.top - nr.bottom) * 10) / 10, first: h.firstElementChild.tagName }; });
   const d = await headOf("default");
-  ok("page title is h1 at 24/700 with actions at the top right", d.tag === "H1" && d.fs === "24px" && d.fw === "700" && d.aRight === 0 && d.aTop === 0, JSON.stringify(d));
+  ok("page title is h1 at 36/700 (Display 3) with actions at the top right", d.tag === "H1" && d.fs === "36px" && d.fw === "700" && d.aRight === 0 && d.aTop === 0, JSON.stringify(d));
   const b = await headOf("breadcrumb");
   ok("breadcrumb takes the whole first row, 8 above the title", b.first === "NAV" && b.navW === 0 && b.navGap === 8, JSON.stringify(b));
   const l = await headOf("long");

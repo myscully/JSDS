@@ -27,7 +27,7 @@ export const ChoiceGroup = forwardRef<HTMLElement, ChoiceGroupProps & { base: st
   const helpText = error ?? help;
   const helpId = wrapped ? `${id}-help` : undefined;
   const cls = cx(base, className);
-  const legendEl = legend !== undefined && <legend className="t-label-1">{legend}{required && <em>*</em>}</legend>;
+  const legendEl = legend !== undefined && <legend className="t-label-1-normal t-semibold">{legend}{required && <em>*</em>}</legend>;
   const group = legend !== undefined ? (
     <fieldset
       ref={ref as React.Ref<HTMLFieldSetElement>}

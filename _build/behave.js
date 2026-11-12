@@ -1489,10 +1489,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     onEdge.push(await page.evaluate((sel) => { const i = document.querySelector(sel), c = getComputedStyle(i); return { bg: c.backgroundColor, shadow: c.boxShadow }; }, sel)); }
   ok("checked checkbox and radio keep the edge in the brand fill colour", onEdge.every((x) => x.shadow.startsWith(x.bg)), JSON.stringify(onEdge));
   await go("components/card.html");
-  /* 문서 제목 자간(h3 -0.01em)이 미리보기의 카드 제목까지 먹어 배포 CSS 와 0.16px 달랐다 — 문서 제목에만 남는다 */
+  /* 문서 제목 자간(h3 -0.01em)이 미리보기의 카드 제목까지 먹어 배포 CSS 와 0.16px 달랐다 — 문서 제목에만 남는다. 카드 제목은 제 스타일 자간(Body 1 0.0057em = 0.0912px, 2026-11-12) */
   const h3Ls = await page.evaluate(() => { const ls = (e) => e && getComputedStyle(e).letterSpacing;
     return { preview: ls(document.querySelector(".example-preview h3")), doc: ls([...document.querySelectorAll("article h3")].find((h) => !h.closest(".example-preview"))) }; });
-  ok("docs heading letter-spacing stays out of previews", h3Ls.preview === "normal" && !!h3Ls.doc && h3Ls.doc !== "normal", JSON.stringify(h3Ls));
+  ok("docs heading letter-spacing stays out of previews", h3Ls.preview === "0.0912px" && !!h3Ls.doc && h3Ls.doc !== "normal", JSON.stringify(h3Ls));
   const cg = page.locator("#ex-card-selection .example-preview .card-grid");
   /* Card 정의(2026-11-02) — 선택 카드: 고정 Hover 가 실제 hover 와 같은 그림자, Disabled 는 disable 토큰 · hover 없음 · 선택 안 됨 */
   await cg.locator(".card.clickable").first().hover(); await page.waitForTimeout(250);
@@ -1529,16 +1529,16 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const on = e.querySelector(".card.on"); const c = getComputedStyle(on);
     return on.matches(":focus-visible") && c.boxShadow.includes("inset") && c.outlineStyle !== "none";
   }));
-  /* 제목 = 타이포 단계(md Title/1 16/24 600 · sm Label/1 14/20 600), .compact 는 sm 과 같은 값(호환 별칭) — 제목에 line-height 가 없으면 문맥에 따라 25.6·28·26.4 로 흔들렸다 */
+  /* 제목 = 타이포 단계(md Body 1/Normal 16/24 600 · sm Label 1/Normal 14/20 600 — 2026-11-12 19단계로 이름만 바뀜), .compact 는 sm 과 같은 값(호환 별칭) — 제목에 line-height 가 없으면 문맥에 따라 25.6·28·26.4 로 흔들렸다 */
   const cardType = await page.evaluate(() => {
     const f = (e) => { const c = getComputedStyle(e); return c.fontSize + "/" + c.lineHeight + "/" + c.fontWeight; };
     const box = (e) => { const c = getComputedStyle(e); return c.padding + "|" + c.rowGap; };
     const host = document.querySelector("#ex-card-size .example-preview"), md = host.querySelector(".card.md"), sm = host.querySelector(".card.sm");
-    const tmp = document.createElement("div"); tmp.innerHTML = '<span class="t-title-1">a</span><span class="t-label-1">a</span><div class="card compact"><h3 class="title">a</h3></div>'; host.append(tmp);
+    const tmp = document.createElement("div"); tmp.innerHTML = '<span class="t-body-1-normal t-semibold">a</span><span class="t-label-1-normal t-semibold">a</span><div class="card compact"><h3 class="title">a</h3></div>'; host.append(tmp);
     const r = { md: f(md.querySelector(".title")), t1: f(tmp.children[0]), sm: f(sm.querySelector(".title")), l1: f(tmp.children[1]), compact: f(tmp.querySelector(".title")), mdBox: box(md), smBox: box(sm), compactBox: box(tmp.querySelector(".card")),
       inline: [md, sm].some((c) => c.querySelector(".title").hasAttribute("style")) };
     tmp.remove(); return r; });
-  ok("card titles match Title/1 · Label/1 and compact equals sm", cardType.md === "16px/24px/600" && cardType.md === cardType.t1 && cardType.sm === "14px/20px/600" && cardType.sm === cardType.l1 && cardType.compact === cardType.sm && cardType.mdBox === "24px|12px" && cardType.smBox === "16px|8px" && cardType.compactBox === cardType.smBox && !cardType.inline, JSON.stringify(cardType));
+  ok("card titles match Body 1/Normal SemiBold · Label 1/Normal SemiBold and compact equals sm", cardType.md === "16px/24px/600" && cardType.md === cardType.t1 && cardType.sm === "14px/20px/600" && cardType.sm === cardType.l1 && cardType.compact === cardType.sm && cardType.mdBox === "24px|12px" && cardType.smBox === "16px|8px" && cardType.compactBox === cardType.smBox && !cardType.inline, JSON.stringify(cardType));
   /* 상태 카드의 키-값 행 — 값 열이 한 줄로 맞고 키(secondary)와 값(primary)의 색이 다르다 */
   const meta = await page.evaluate(() => [...document.querySelectorAll("#ex-card-status .card-meta")].map((dl) => ({ ddX: [...new Set([...dl.querySelectorAll("dd")].map((d) => Math.round(d.getBoundingClientRect().left)))].length, dt: getComputedStyle(dl.querySelector("dt")).color, dd: getComputedStyle(dl.querySelector("dd")).color, ind: !!dl.closest(".card").querySelector(".card-head .indicator") })));
   ok("status card meta aligns values in one column under an indicator head", meta.length === 2 && meta.every((m) => m.ddX === 1 && m.dt !== m.dd && m.ind), JSON.stringify(meta));
@@ -1713,14 +1713,14 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("static legend markers are circles", statics.legend.length === 1 && statics.legend[0] === "50%", JSON.stringify(statics.legend));
   ok("static donut boundaries are 2px straight separators spanning the ring at each slice edge", statics.cuts.length === 5 && statics.cuts.every((c, i) => c.w === "2px" && parseFloat(c.h) === statics.ring && Math.abs(c.deg - statics.want[i]) <= 0.2), JSON.stringify(statics));
   ok("KPI example shows three cards", statics.kpis === 3, String(statics.kpis));
-  /* KPI 단위 = Title 1 Medium · 증감 = Label 2 SemiBold(2026-11-06) — 종전엔 값 · 카드의 행간 · 자간을 물려받아 어느 텍스트 스타일과도 맞지 않았다 */
+  /* KPI 단위 = Body 1/Normal Medium · 증감 = Caption 1 SemiBold(2026-11-06 — 2026-11-12 19단계로 이름만 바뀜) — 종전엔 값 · 카드의 행간 · 자간을 물려받아 어느 텍스트 스타일과도 맞지 않았다 */
   const kpiType = await page.evaluate(() => {
     const f = (e) => { const c = getComputedStyle(e); return [c.fontSize, c.lineHeight, c.fontWeight, c.letterSpacing].join("/"); };
     const host = document.querySelector("#ex-data-visual-kpi .example-preview");
-    const tmp = document.createElement("div"); tmp.innerHTML = '<span class="t-title-1-medium">a</span><span class="t-label-2-semibold">a</span>'; host.append(tmp);
+    const tmp = document.createElement("div"); tmp.innerHTML = '<span class="t-body-1-normal t-medium">a</span><span class="t-caption-1 t-semibold">a</span>'; host.append(tmp);
     const r = { unit: [...new Set([...host.querySelectorAll(".kpi .value small")].map(f))], delta: [...new Set([...host.querySelectorAll(".kpi .delta")].map(f))], t1m: f(tmp.children[0]), l2s: f(tmp.children[1]) };
     tmp.remove(); return r; });
-  ok("KPI unit matches Title 1 Medium and delta matches Label 2 SemiBold", kpiType.unit.length === 1 && kpiType.unit[0] === kpiType.t1m && kpiType.t1m.startsWith("16px/24px/500/") && kpiType.delta.length === 1 && kpiType.delta[0] === kpiType.l2s && kpiType.l2s.startsWith("12px/16px/600/"), JSON.stringify(kpiType));
+  ok("KPI unit matches Body 1/Normal Medium and delta matches Caption 1 SemiBold", kpiType.unit.length === 1 && kpiType.unit[0] === kpiType.t1m && kpiType.t1m.startsWith("16px/24px/500/") && kpiType.delta.length === 1 && kpiType.delta[0] === kpiType.l2s && kpiType.l2s.startsWith("12px/16px/600/"), JSON.stringify(kpiType));
 
   /* 심각도 5단계(사람의 결정 2026-11-06) — 정적 지표(막대 · 범례 · 밴드 · Tag 의 .dot 점 — 행 막대 .sev-cell 은 2026-11-11 에 없앰) · 정적 도넛 조각 · 탐색형 차트 톤이 전부 같은 토큰을 집는지.
      차트 색 단정은 DSChart.TONES 와 대조하므로 TONES 자체가 틀리면 함께 틀린다 — 여기서는 기대 토큰을 직접 적어 둘 다 잰다 */
@@ -1876,6 +1876,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await require("./behave.table.js")({ page, ok, go });
   await require("./behave.button.js")({ page, ok, go });   // Button 오류 정리(2026-11-12)
   await require("./behave.cells.js")({ page, ok, go });   // 말줄임 칸 Tooltip · 끈 커서 · 로그 한 줄(2026-11-12)
+  await require("./behave.type.js")({ page, ok, go });   // 텍스트 스타일 19단계(2026-11-12)
   await require("./behave.nav.js")({ page, ok, go });
   await require("./behave.promote.js")({ page, ok, go });
     await require("./behave.upload.js")({ page, ok, go });
@@ -2224,7 +2225,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("doc chrome intact (no page errors so far)", errors.length === 0, errors.join(" | "));
 
   // sweep: every component/pattern page loads w/o errors
-  /* + 컴포넌트는 기본 글자(body)에 기대지 않는다 — React 앱의 .ds-root(15px/1.65)에서도 사이트(16px/1.6)와 같은 배치여야 한다.
+  /* + 컴포넌트는 기본 글자(body)에 기대지 않는다 — React 앱의 .ds-root(15px/24px — Body 2/Reading, 2026-11-12 전에는 15px/1.65)에서도 사이트(16px/1.6)와 같은 배치여야 한다.
      줄 높이를 상속받아 1440 에서 미리보기 83개가 달랐다. 뺀 넷은 놓인 곳의 글자 크기를 따르게 만든 셋(Pagination 의 생략 기호 · Dropdown · 심각도 셀)을
      단독으로 둔 예제다 — 사람의 결정(2026-10-26): 따르게 두고 Props · 설명에 적는다 */
   const fs = require("fs");
@@ -2235,12 +2236,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const leaned = [];
   for (const sec of ["components", "patterns"]) for (const f of fs.readdirSync(path.join(SITE, sec))) { await go(`${sec}/${f}`);
     if (!f.endsWith(".html") || /^(index|overview)\.html$/.test(f)) continue;
-    const a = await page.evaluate(sig), st = await page.addStyleTag({ content: "body{font-size:15px !important;line-height:1.65 !important}" });
+    const a = await page.evaluate(sig), st = await page.addStyleTag({ content: "body{font-size:15px !important;line-height:24px !important;letter-spacing:0.0096em !important}" });
     const c = await page.evaluate(sig); await st.evaluate((s) => s.remove());
     for (const k of Object.keys(a)) if (a[k] !== c[k] && !ADAPTIVE.includes(k)) leaned.push(k.replace(/^ex-/, "")); }
   await go("index.html");
   ok("all pages load without JS errors", errors.length === 0, errors.slice(0, 3).join(" | "));
-  ok("components keep their layout under the React base font (15px/1.65)", leaned.length === 0, `${leaned.length}: ${leaned.slice(0, 12).join(" ")}`);
+  ok("components keep their layout under the React base font (15px/24px)", leaned.length === 0, `${leaned.length}: ${leaned.slice(0, 12).join(" ")}`);
 
   // 반응형: 데스크톱~모바일 전 폭에서 가로 넘침 없음
   for (const w of [1440, 1280, 1024, 768, 390]) {

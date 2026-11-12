@@ -27,8 +27,8 @@ const base = `/* ---------- Base (패키지용 최소 규칙) ---------- */
 @media (prefers-reduced-motion:reduce){*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin .8s linear infinite!important}.spinner[data-delay]{animation:spin .8s linear infinite,ds-delay 0s var(--ds-delay,1s) both!important}.skeleton[data-delay],.spinner-wrap[data-delay],.skeleton-row[data-delay]{animation:ds-delay 0s var(--ds-delay,1s) both!important}}
 :focus-visible{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}
 [hidden]{display:none!important}
-/* 앱 루트(또는 body)에 .ds-root 를 붙이면 서체·색·배경 토큰이 적용됩니다 */
-.ds-root{font-family:var(--font-sans);font-size:0.9375rem;line-height:1.65;color:var(--foreground-neutral-primary);background:var(--background-neutral-primary);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+/* 앱 루트(또는 body)에 .ds-root 를 붙이면 서체·색·배경 토큰이 적용됩니다. 기본 글자 = Body 2/Reading 15/24(2026-11-12 — 옛 15/1.65) */
+.ds-root{font-family:var(--font-sans);font-size:var(--font-size-15);line-height:1.5rem;letter-spacing:0.0096em;color:var(--foreground-neutral-primary);background:var(--background-neutral-primary);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .ds-root pre,.ds-root pre code{font-family:var(--font-mono)}.ds-root code,.ds-root kbd{font-family:var(--font-sans)}
 /* 링크 기본색만 지운다 — :where 로 우선순위를 0,0,1 에 둔다. .ds-root a(0,1,1)는 .btn:where(.solid.primary) 같은 단일 클래스 색을 이겨, 링크형 주 버튼 글자가 면과 같은 색이 됐다(대비 1.05) */
 :where(.ds-root) a{color:inherit}
@@ -49,6 +49,9 @@ for (const bad of [".header{", ".sidebar{", ".shell{", ".toc{", ".drawer{", ".dr
 }
 /* 줄인 모션에서도 Spinner · 버튼 loading · Switch 처리 중은 돌고 Loading 지연은 기다린다(2026-11-10 · 11-11) — 패키지 base 는 사이트와 따로 쓴 규칙이라 빠지기 쉽다 */
 if (!base.includes('.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin') || !base.includes(".spinner[data-delay]{animation:spin")) throw new Error("sync-css: 줄인 모션 base 에 Spinner 예외 · Loading 지연이 없다");
+/* 앱 루트 기본 글자 = 텍스트 스타일 Body 2/Reading(2026-11-12) — 스타일 값이 바뀌면 base 도 같이 바뀌어야 한다 */
+{ const t = /\.t-body-2-reading\{font-size:([^;]+);line-height:([^;]+);font-weight:\d+;letter-spacing:([^;}]+)\}/.exec(src);
+  if (!t || !base.includes(`.ds-root{font-family:var(--font-sans);font-size:${t[1]};line-height:${t[2]};letter-spacing:${t[3]};`)) throw new Error("sync-css: .ds-root 기본 글자가 Body 2/Reading(.t-body-2-reading)과 다르다"); }
 if (out.includes(".ds-root a{")) throw new Error("sync-css: .ds-root a{ 는 컴포넌트의 링크 색을 이긴다 — :where(.ds-root) a 로 쓴다");
 for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"]) {
   if (!out.includes(must)) throw new Error(`sync-css: 필수 규칙 없음: ${must}`);
