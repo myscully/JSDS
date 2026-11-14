@@ -321,7 +321,7 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 | `maxLength` 가 네이티브 — 한도에서 입력이 멈추고 붙여넣은 값이 잘림 | 같은 이름이지만 **넘겨도 입력되고 오류로 알립니다.** 넘은 상태로는 `Form validate` 를 통과하지 못합니다 | `maxlength` → `data-maxlength` + `.counter`. 네이티브 `maxlength` 는 그대로 두면 예전처럼 잘립니다 |
 | 검증을 제품이 직접 | `<Form validate messages onValidate>` — 표준 제약(`required` · `pattern` · `min` · `max` · `minLength` · `type`) + 글자 수 | `form[data-validate]` · `data-messages`(JSON) · 이벤트 `ds:validate` · `DS.validate(form)` |
 | 없음 | `<TextField reveal>` | `.affix` 안 `button.reveal[aria-pressed]` |
-| 없음 | `<TextField mono>` | `.field.mono` |
+| 없음 | `<TextField mono>` — 2026-11-13 에 없앰(아래 절) | `.field.mono` — 같은 날 없앰 |
 | 없음 | `<FormLegend />` | `.form-legend` |
 
 - 검증하는 폼에서 막히면 `onSubmit` 은 불리지 않습니다. `onValidate` 로 결과를 받습니다.
@@ -551,3 +551,77 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - 글자 크기 토큰 `--font-size-48` 을 지웠습니다(사이트 홈 제목 전용이었고 Display 1 56 이 되었습니다). 제품 CSS 가 썼다면 `--font-size-56`(Display 1) 또는 `--font-size-40`(Display 2)으로 바꾸세요.
 - 자간이 생겨 같은 글자가 조금 넓어집니다(12px 에서 글자당 0.3px).
 
+
+## 컴포넌트 수정 15건 — 폼 높이 · 표 · 개별 스타일 (2026-11-12)
+
+- **`SelectButton` 기본 높이 38 → 40**(outline · solid 포함) — 폼 컨트롤은 전부 sm 32 · md 40 · lg 48 입니다. 새 `size="sm" | "md" | "lg"`(기본 md). sm 은 반경 4.
+- **`Select` · `Dropdown` · `SearchBar` 에 `size`** — 지금까지 40 하나였습니다. sm 32(반경 4 · 글자 12) · lg 48(글자 16). `.field.sm` · `.field.lg` 안의 Select 트리거도 필드 높이를 따라갑니다.
+  상단 내비 검색(`.topbar .searchbar`)은 36 → 32 — 옆 아이콘 버튼과 같습니다.
+- **`Table` 에 `stickyHeader` · `stickyColumn` · `maxHeight` · `regionLabel`** — DataTable 과 같은 고정 헤더 · 첫 열 고정입니다. 스크롤 영역이 키보드로 닿도록 `tabIndex 0` · `role="region"` 을 달고, `regionLabel` 이 없으면 개발 모드에서 한 번 경고합니다.
+- **표 행 hover = `--surface-neutral-tertiary`**(Table · DataTable · List). 표 머리글 · 키-값 표(`.tbl.kv`) 머리글 = Label 2 13/18. 키-값 표 첫 줄 위에 1px 선.
+  Side Panel 의 속성 표는 `className="tbl kv"` 로 쓰세요(예제를 바꿨습니다).
+- **Notice 테두리 없음** — padding 20 · 18, 톤 없는 Notice 는 회색 면(`--background-neutral-secondary`). 톤 Notice 는 면만 남습니다.
+- **`PageHeader` 제목 = Title 1 32/44 · 자간 -0.0253em**(같은 날 Display 3 36/48 에서 바꿈), Breadcrumb ↔ 제목 간격 8 → 16(`gap:1rem`).
+- **`Empty` 아이콘** — 면 없음 · 색 `--foreground-neutral-quaternary` · 40(compact 32 · 카드 안 36) · 선 굵기 1.5.
+- **Steps 완료 원** — 면 `--foreground-positive-primary`(진한 초록) · 체크 `--brand-label`. 단계 글자 굵기 500.
+- **File Upload 오류 줄 테두리** = `--line-negative-primary`.
+- 문서 사이트: 컴포넌트 페이지가 Default · Variant · Size · State · Spec · Props · Usage 순서가 되고 Placement 절이 없어졌습니다(자리 규칙은 원칙 표의 Placement 행). 예제 id 는 그대로입니다.
+
+
+## Chip 형태 둘 · 색 둘 (2026-11-13)
+
+- **고른 칩(`selected`)의 모양이 바뀌었습니다** — 옅은 brand 면 + brand 선 · 글자 → **제품 색 면(`--surface-brand-primary`) + `--brand-label` 글자**. 체크도 글자색을 따라갑니다.
+  고르지 않은 칩(회색 선 · 흰 면)은 그대로입니다.
+- 새 `variant="outline" | "solid"`(기본 outline) — solid 는 고르지 않은 칩이 회색 면(`--surface-neutral-tertiary`, 선 투명 1px 라 크기 같음)입니다. 고른 칩은 두 형태가 같습니다.
+- 새 `color="brand" | "neutral"`(기본 brand) — 고른 칩의 면만 바꿉니다. neutral 은 반전 면(`--surface-neutral-inverse` + `--foreground-neutral-inverse`).
+- **입력값 칩(`onRemove`) · 동작 칩(`action`)은 형태만 받습니다** — `color="neutral"` · `selected` 를 주면 개발 모드에서 한 번 경고하고 무시합니다(`.on` · `.neutral` 클래스를 붙이지 않습니다).
+  전에는 `onRemove` 칩에 `selected` 를 주면 `.on` 이 붙어 옅은 brand 면이 됐습니다 — 이제 진한 면이 될 자리라 막았습니다. 적용된 필터를 입력값 칩으로 보여 주던 곳은 `selected` 를 빼세요.
+- HTML: `.chip.solid` · `.chip.neutral`. `.on` · `.neutral` 은 `aria-pressed` 가 있는 칩에만 씁니다(문서 사이트 verify 가 막음).
+
+## Steps 마법사 (2026-11-13)
+
+외부 컴포넌트 Stepper 의 구조 · 동작을 참고해 Steps 를 다시 짰습니다(외부 컴포넌트 PRO 는 상용이라 코드 · 클래스 이름 · 아이콘은 옮기지 않음).
+
+- **모양이 바뀌었습니다** — 원 24 → **32**, 체크 12 → **16**, 라벨 12 → **14**(Label 1/Normal, 현재 단계 600 · 완료 secondary · 아직 tertiary).
+  완료 원은 진한 초록(`--foreground-positive-primary`) → **제품 색 면(`--surface-brand-primary`) + 흰 체크(`--brand-label`)**, 현재 원은 **제품 색 테두리 + `--surface-brand-subtle` 면 + `--foreground-brand-primary` 숫자**, 아직인 단계는 회색 테두리 원입니다.
+  연결선은 32 고정 → **남는 폭을 나누는 2px**(완료한 단계 뒤는 제품 색)이고, 세로 배치에도 선이 생겼습니다.
+- **라벨이 `<span class="label">` 안에 들어갑니다** — 단계 글자를 직접 고르던 CSS 는 `.steps .label` 로 바꾸세요.
+- `vertical` → **`layout="vertical"`**(옛 prop 은 개발 모드에서 한 번 경고하고 받습니다). 새 `layout="label-below"`. 세로는 이제 '단계 아래에 내용이 펼쳐지는' 마법사 배치입니다.
+- **좁으면 세로로** — 가로 · 라벨 아래 배치가 자리에 안 들어가면 `Steps` · `Stepper` 가 `.stacked` 를 붙여 세로로 쌓습니다(부모 폭이 바뀌면 다시 잼). 전에는 가로로 넘쳤습니다. 사이트는 ds.js 가 같은 일을 합니다.
+- `Steps nonLinear` — `onStepClick` 과 함께 주면 현재가 아닌 모든 단계가 버튼입니다(기본은 완료한 단계만).
+- **새 `Stepper`** — 단계 패널 · 이전/다음/완료 · 단계별 폼 검사. `steps={[{label, content}]}` · `current`/`defaultCurrent` · `onStepChange(index, {from, trigger})`(next · prev · click · finish) · `onFinish(index)` · `layout` · `nonLinear` · `actions` · `labels`.
+  '다음'은 패널 안 폼을 `requestSubmit()` 으로 제출해 `<Form validate>` 의 검사를 탑니다(폼 안 Enter 도 '다음'). 패널은 늘 그려 두고 숨겨서 입력값이 남습니다. 저장 · 전송은 `onStepChange` · `onFinish` 에서 제품이 합니다.
+- **새 `StepButton step="prev | next | finish"`** — `actions={false}` 일 때 내용 안(카드 아래 등)에 두는 버튼. 첫 단계의 이전은 꺼지고, 마지막 단계에서는 다음 대신 완료가 보입니다.
+- **`Form bare`** — 카드 모양(면 · 테두리 · 패딩) 없이 검사만. 카드나 Stepper 패널 안에 둘 때(사이트는 class 없는 `form[data-validate]`).
+- HTML: `.stepper > .steps + .step-panel × 단계 수 + .step-actions`(세로는 각 li 안에 패널), `button[data-step="prev|next|finish"]`, `data-nonlinear`.
+  **`ds:step` 상세가 하나로 합쳐졌습니다** — 온보딩의 `{step}` · 돌아가기의 `{index}` → `{index, from, trigger}`. 새 `ds:step-finish {index}` · `DS.stepper.go(el, index)`(trigger `api`).
+  온보딩 패턴의 이전 · 다음은 `.onboard [data-step]` 전용 동작에서 `.stepper` 일반 동작으로 옮겼고, 이제 단계마다 카드가 바뀝니다.
+
+## 수정 묶음 · Avatar Group · Time Picker (2026-11-13)
+
+- **고정폭 글자는 Code 에만** — `TextField mono` 는 개발 모드에서 한 번 경고하고 무시합니다. `CopyField` 값도 본문 글자입니다(숫자 자리는 `tabular-nums` 가 맞춤). HTML 의 `.field.mono` 규칙은 없어졌습니다.
+- **`ChartCanvas table` 의 기본값이 false 입니다** — 2026-11-10 부터 늘 있던 '표로 보기' 버튼이 이제 `table` 을 줄 때만 나옵니다. 바깥 `.chart-view` 틀은 그대로입니다. 버튼이 필요한 차트에 `table` 을 더하세요(사이트 대시보드 패턴은 끔).
+- **표 행 hover 가 기본에서 빠졌습니다** — `Table hover` · `DataTable hover`(HTML `.tbl.hover`)를 줄 때만 행 hover · 눌림 면이 칠해집니다. 행을 고르거나 행에 동작이 있는 표에 주세요.
+- **`Notification` 의 Notice · Banner 아이콘이 채운(filled) 아이콘입니다.** 아이콘을 직접 넘기는 곳은 `<Icon filled>` 로 맞추세요(사이트 verify 가 예제를 막음).
+- **새 `AvatarGroup`** — `label`(묶음 이름, 필수) · `max`(기본 5, 5 넘으면 경고하고 5) · `size` · `onMore`(주면 '외 N명' 이 목록을 여는 글자 버튼) · `moreText` · `moreLabel`. 겹침 -8(sm -6) · 경계 링 2px. HTML `.avatar-group[role=group][aria-label] > .avatar × 5 이하 + .avatar-group-more`.
+- **새 `TimePicker`** — 하루 안의 시각(24시간제 `HH:mm`, `seconds` 면 `HH:mm:ss`). 입력칸 + 시 · 분 · 초 열 목록이고 고르면 바로 값이 됩니다(적용 버튼 없음).
+  `value` · `defaultValue`(필드 글자) · `onChange(value, {text, validity})`(확정할 때 글자가 바뀌면 — value 는 미완성 · 없는 시각이면 null, 범위 밖은 그 시각) · `step`(분 열 간격) · `min` · `max` · `size` · `required` · `messages`(Date Picker 와 같은 키 incomplete · invalidTime · min · max · timeSubject) · `labels`(dialog · hour · minute · second · open).
+  `<Form validate>` 에 낍니다 — 빈 필수는 공통 문구, 그 밖은 시각 문구(`setCustomValidity` 로 넘기고 `validationMessage` 가 읽습니다). 순수 함수 `checkTime` 을 함께 냅니다.
+  HTML `.field.timepicker[data-seconds][data-step][data-min][data-max] > label + .affix > input + button.tp-btn` — 열 목록은 ds.js 가 열 때 그리고 `ds:time {value, text, validity}` 를 냅니다.
+- `pasteText` 가 시각만 쓰는 단위에서 첫 조각(시)도 두 자리로 채웁니다 — `2:0` 이 `20:0` 이 되던 것을 `02:00` 으로(Date Picker 시각 칸 붙여넣기도 같음).
+- 상태 틴트(positive · cautionary · negative · accent)가 12 → 8% 로 옅어졌습니다(참조값). negative 다음 단계도 함께 — 라이트 8 · 12 · 16%, 다크 8 · 16 · 22%. Tag 중립 면 = `--surface-neutral-tertiary`, Info = `--surface-neutral-secondary`, outline Tag 테두리 = 그 톤의 선 토큰.
+
+## Date Picker 시각 칸 = Time Picker (2026-11-13)
+
+- `DatePicker time` · `DateRangePicker time` 의 달력 아래 시각 칸이 `TimePicker size="sm"` 이 됐습니다. 시계 버튼으로 시 · 분(· 초) 열을 열어 고를 수 있고, 칸에 치는 동작 · ↑↓ · Enter(적용)는 그대로입니다. 범위와 형식은 지금처럼 적용할 때 필드가 잽니다.
+  Tab 순서에 시계 버튼이 하나 더 낍니다(시각 칸 → 시계 버튼 → 푸터). 열 목록이 열린 동안 Esc 는 목록만 닫고, 다음 Esc 가 달력을 닫습니다.
+- `labels.timeOpen`(기본 "선택") — 시계 버튼 이름의 뒷말("시작 시각 선택"). 사이트 `data-labels` 도 같은 키입니다.
+- `TimePicker` 에 `onTextChange(text)`(칠 때마다 끊은 글자)와 `validate`(기본 true, false 면 스스로 오류 문구를 띄우지 않고 폼에도 넘기지 않음)를 더했습니다. ↑↓ 뒤 커서는 다음 그림 직후 같은 조각으로 돌아옵니다 — 연달아 누르면 분 조각으로 넘어가던 것을 고쳤습니다.
+- 사이트 HTML: 달력 안 시각 칸은 `.field.sm.timepicker[data-dp-side="a|b"] > label + .affix > input + button.tp-btn` 입니다. 그래서 `.datepicker .affix input` 은 달력이 그려진 동안 시각 칸까지 집습니다 — 필드 입력만 원하면 `.datepicker > .affix input` 으로 좁히세요. 달력 안 칸은 `ds:time` 을 내지 않습니다(값은 필드의 `ds:date` 가 나릅니다).
+
+## 모양 넷 — 상단 내비 선택 · Tag sm · Count 점 (2026-11-14)
+
+코드는 그대로이고 보이는 모양만 바뀝니다.
+- **상단 내비 선택 메뉴**는 제품 색 면과 흰 글자에서 brand 글자와 아래 2px brand 선으로 바뀌었습니다(11-13 의 면을 되돌림). 다른 메뉴에도 투명한 2px 아래 선이 생겨 메뉴 높이가 2px 늘었고, 모서리가 없어졌으며 메뉴 사이가 4 에서 8 로 넓어졌습니다.
+- **Tag sm** 글자가 Caption 2 11/14 로 작아지고 위아래 여백이 1 에서 2 가 됐습니다. 높이 18 은 그대로입니다.
+- **아이콘 위 Count 점**(`.with-count .count.dot`)이 모서리에서 6 이 아니라 2 만 바깥으로 나옵니다. 숫자 배지는 그대로 6 입니다.

@@ -22,10 +22,12 @@ export interface SelectButtonProps<T extends string = string> extends Omit<HTMLA
   solid?: boolean;
   /** 그룹 이름 (aria-label) */
   label?: string;
+  /** 높이 sm 32 · md 40 · lg 48 — Button · 필드와 같다(2026-11-12, 그 전에는 38 하나) */
+  size?: "sm" | "md" | "lg";
 }
 
 function SelectButtonInner<T extends string>(
-  { options, value, defaultValue, onChange, outline, solid, label, className, ...rest }: SelectButtonProps<T>,
+  { options, value, defaultValue, onChange, outline, solid, label, size = "md", className, ...rest }: SelectButtonProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   if (process.env.NODE_ENV !== "production" && solid && !outline) console.warn("[ds-react] SelectButton solid 는 outline 과 함께만 씁니다 — outline 없이는 무시합니다.");
@@ -43,7 +45,7 @@ function SelectButtonInner<T extends string>(
     e.currentTarget.querySelector<HTMLElement>(`[data-value="${to.value}"]`)?.focus();
   };
   return (
-    <div ref={ref} className={cx("select-btn", { outline, solid: outline && solid }, className)} role="radiogroup" aria-label={label} onKeyDown={onKeyDown} {...rest}>
+    <div ref={ref} className={cx("select-btn", { outline, solid: outline && solid, sm: size === "sm", lg: size === "lg" }, className)} role="radiogroup" aria-label={label} onKeyDown={onKeyDown} {...rest}>
       {options.map((o) => {
         const on = o.value === cur;
         return (

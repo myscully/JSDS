@@ -7,7 +7,7 @@ const fs = require("fs");
 const PATTERNS = ["dashboard", "input-form", "log-viewer", "notes", "onboarding", "policy-settings", "search", "severity", "system-status", "terms-agreement"];
 const MOTION_MS = ["120ms", "200ms", "320ms"];   // --motion-fast · base · slow
 /* .btn 이 아닌 button 은 이 컴포넌트 안에서만 — 각자 정의된 모양이 있다 */
-const BUTTON_HOSTS = [".number-field", "th.sortable", ".select-btn", ".chip-group", ".chip", ".toast", ".banner", ".pagination", ".dropdown", ".datepicker", ".tile-grid", ".terms .item"];
+const BUTTON_HOSTS = [".number-field", "th.sortable", ".select-btn", ".chip-group", ".chip", ".toast", ".banner", ".pagination", ".dropdown", ".datepicker", ".tile-grid", ".terms .item", ".steps"];   // .steps — 단계 버튼(.step-btn, 2026-11-13 Steps 마법사가 온보딩 패턴에)
 /* Button 정의의 클래스. 무리마다 하나까지. left 는 폼 액션 줄의 배치 클래스(.form .form-actions .left) */
 const BTN_GROUPS = { size: ["sm", "md", "lg"], variant: ["solid", "outline", "text"], color: ["primary", "assistive", "negative"], mod: ["icon-only", "loading", "block", "left"] };
 

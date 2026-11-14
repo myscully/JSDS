@@ -183,7 +183,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 |---|---|
 | \`data.js\` | 사이트 구조(SITE) · 제품 컬러(PRODUCTS) · 버전 · Changelog |
 | \`components.data.js\` | 컴포넌트 33개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
-| \`patterns.data.js\` | 패턴 11개: 사용 컴포넌트(uses) · 예제 · 가이드라인 |
+| \`patterns.data.js\` | 패턴 10개: 사용 컴포넌트(uses) · 예제 · 가이드라인 |
 | \`style.src.css\` | 스타일 원본. 컴포넌트 CSS 는 \`/* ---------- Live component samples ---------- */\` 블록 안에 평면 규칙으로 작성(코드 패널 추출 대상) |
 | \`lib.js\` | cssFor(컴포넌트 CSS 추출) · htmlToJsx(React 코드 생성) · hl(구문 강조) · tokenBlock |
 | \`icons.js\` | 사용 아이콘 목록(\`ICON_NAMES\`) + \`assets/icons\` SVG 를 읽어 \`I(name,size)\` 인라인 헬퍼 제공. 빌드 시 \`icons.gen.js\`(브라우저용, 생성물) 기록 |

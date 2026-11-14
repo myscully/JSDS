@@ -123,6 +123,21 @@
     var meta = chart.$ds || {}; if (meta.kind !== "donut") return;
     chart.options.plugins.legend.position = legendPosition(meta.legend, size.width, size.height);
   }
+  /* 누적 영역 = 계열마다 세로 그라데이션(사람의 결정 2026-11-13 — 단색 24% 대신). 그 계열의 가장 높은 값(누적이면 쌓은 값)에서 차트 바닥까지
+     위 32% → 아래 6%(사람이 정하지 않은 제안값 — 아래 띠도 보이게). 크기 · 값이 같으면 만든 것을 다시 쓴다. 배치 전(chartArea 없음)에는 단색.
+     범례 · 툴팁 마커는 점 색(pointBackgroundColor)이라 이 그라데이션을 쓰지 않는다 */
+  function areaFill(c) {
+    var cache = {};
+    return function (ctx) {
+      var chart = ctx.chart, a = chart.chartArea, y = chart.scales && chart.scales.y, i = ctx.datasetIndex;
+      if (!a || !y || i == null) return alpha(c, 0.24);
+      var ds = chart.data.datasets, stacked = !!(y.options && y.options.stacked), top = -Infinity;
+      (ds[i].data || []).forEach(function (_, j) { var v = 0; for (var k = stacked ? 0 : i; k <= i; k++) { var d = +(ds[k].data || [])[j]; if (isFinite(d)) v += d; } if (v > top) top = v; });
+      var py = isFinite(top) ? Math.max(a.top, Math.min(a.bottom - 1, y.getPixelForValue(top))) : a.top, key = py + "|" + a.bottom;
+      if (cache.key !== key) { var g = chart.ctx.createLinearGradient(0, py, 0, a.bottom); g.addColorStop(0, alpha(c, 0.32)); g.addColorStop(1, alpha(c, 0.06)); cache = { key: key, g: g }; }
+      return cache.g;
+    };
+  }
   function paint(chart, t) {
     /* Chart.js 의 chart.config 는 Config 래퍼라 config 에 붙인 _ds 가 보이지 않는다 — mount 가 chart.$ds 로 옮겨 둔다 */
     var meta = chart.$ds || {}, kind = meta.kind, data = chart.data, n = data.datasets.length;
@@ -136,7 +151,7 @@
         ds.backgroundColor = (ds._dsTones || []).map(function (tone, j) { return tone && t.tone[tone] ? t.tone[tone] : t.series[Math.min(j, SERIES_MAX - 1)]; });
         ds.borderColor = t.surface; ds.borderWidth = 2; ds.hoverBorderColor = t.surface; ds.hoverOffset = 4;
       } else if (ds.type === "line" || kind === "timeseries") {
-        ds.borderColor = c; ds.backgroundColor = ds.fill ? alpha(c, 0.24) : c; ds.pointBackgroundColor = c; ds.pointBorderColor = t.surface;
+        ds.borderColor = c; ds.backgroundColor = ds.fill ? areaFill(c) : c; ds.pointBackgroundColor = c; ds.pointBorderColor = t.surface;
       } else {
         ds.backgroundColor = c; ds.borderColor = "transparent";   // 막대는 stroke 없음
       }

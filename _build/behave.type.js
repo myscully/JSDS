@@ -1,7 +1,7 @@
 /* 텍스트 스타일 19단계(사람의 결정 2026-11-12) — behave.js 가 부른다.
    기대값은 사람이 준 표(이미지)를 그대로 옮긴 것이다 — CSS 에서 읽으면 CSS 가 틀려도 통과한다.
    - 스타일은 크기 · 행간 · 자간, 굵기는 .t-bold · .t-semibold · .t-medium · .t-regular(기본 굵기: Display · Title · Heading · Headline Bold, Body Regular, Label · Caption Medium)
-   - 페이지 h1(문서 사이트 · Page Header) = Display 3
+   - 문서 사이트 h1 = Title 1(2026-11-14 사람의 결정 — 11-12 의 Display 3 에서 내림), Page Header 제목 = Title 2(2026-11-13 사람의 결정 — 11-12 의 Title 1 에서 내림)
    - 컴포넌트 글자도 표의 (크기, 행간, 자간) 중 하나 — 크기는 그대로 두고 행간 · 자간을 묶었다(사람의 결정) */
 module.exports = async function type({ page, ok, go }) {
   const fs = require("fs"), path = require("path");
@@ -25,11 +25,11 @@ module.exports = async function type({ page, ok, go }) {
   ok("19 text styles match the given table (size · line height · letter spacing) with their default weight", bad.length === 0, bad.join(" "));
   ok("weight classes override the style's default weight (Bold 700 · SemiBold 600 · Medium 500 · Regular 400)", JSON.stringify(got.weights) === JSON.stringify(Object.values(WEIGHTS)) && got.heading === 400, JSON.stringify(got));
 
-  /* 페이지 h1 = Display 3 — 문서 사이트 제목 · Page Header 제목 */
+  /* 페이지 h1 — 문서 사이트 제목 = Title 1 · Page Header 제목 = Title 2 */
   await go("components/page-header.html");
   const h1 = await page.evaluate(() => { const f = (e) => { const c = getComputedStyle(e); return [parseFloat(c.fontSize), parseFloat(c.lineHeight), +c.fontWeight, +(parseFloat(c.letterSpacing) / parseFloat(c.fontSize)).toFixed(3)].join("/"); };
     return { site: f(document.querySelector("main h1, h1")), head: [...new Set([...document.querySelectorAll(".example-preview .page-head .title")].map(f))] }; });
-  ok("page h1 is Display 3 — the site title and the Page Header title", h1.site === "36/48/700/-0.027" && h1.head.length === 1 && h1.head[0] === "36/48/700/-0.027", JSON.stringify(h1));
+  ok("site h1 is Title 1 (2026-11-14) and the Page Header title is Title 2 (2026-11-13)", h1.site === "32/44/700/-0.025" && h1.head.length === 1 && h1.head[0] === "28/38/700/-0.024", JSON.stringify(h1));
 
   /* 문서 제목 h2 · h3 · h4 = Heading 2 · Body 1/Normal · Label 1/Normal 의 크기 · 행간 · 자간(굵기는 그대로) — 사이트에 h4 가 없어 하나 넣어 잰다 */
   const f4 = (e) => { const c = getComputedStyle(e); return [parseFloat(c.fontSize), parseFloat(c.lineHeight), +(parseFloat(c.letterSpacing) / parseFloat(c.fontSize)).toFixed(4)].join("/"); };

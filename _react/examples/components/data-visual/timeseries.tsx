@@ -16,7 +16,7 @@ const TREND = {
 export default function Example() {
   return (
     <ChartCard title="일별 탐지 추이" extra="최근 14일" style={{ maxWidth: 640 }}>
-      <ChartCanvas chart={Chart} config={presets.timeseries(TREND)} aria-label="일별 탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역" />
+      <ChartCanvas table chart={Chart} config={presets.timeseries(TREND)} aria-label="일별 탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역" />
     </ChartCard>
   );
 }

@@ -59,6 +59,7 @@ export function validationMessage(el: TextControl, messages?: ValidationMessages
   const v = el.validity;
   const limit = Number(el.getAttribute("data-maxlength")) || 0;
   const over = limit ? el.value.length - limit : 0;
+  if (!v.valueMissing && v.customError) return el.validationMessage;   // 스스로 재는 입력(Time Picker)이 setCustomValidity 로 넣은 문구 — 필수는 위의 공통 문구
   const key: keyof typeof VALIDATION_MESSAGES | "" = v.valueMissing ? "required" : v.badInput ? "number" : v.typeMismatch ? (el.type === "email" ? "email" : "url") : v.patternMismatch ? "pattern" : v.rangeUnderflow ? "min" : v.rangeOverflow ? "max" : v.tooShort ? "minlength" : v.stepMismatch ? "step" : over > 0 ? "length" : "";
   if (!key) return "";
   const input = el as HTMLInputElement;

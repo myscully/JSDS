@@ -43,8 +43,10 @@ module.exports = async function buttonFix({ page, ok, go }) {
 
   /* ── 끈 Accordion 헤더 · 표의 비활성 행(실제 예제) — pointer-events:none · inert 를 지웠다(2026-11-12).
        실제 마우스 클릭이 그 요소에 오고 펼침 · 링크 이동 · 부모(예제 틀 · 표 · 카드) 클릭이 없으며, Tab 은 행 안 링크에 멈추지 않고 행 글자는 보조기기에 남는다 ── */
-  const realHit = async (pagePath, sel) => {
+  const realHit = async (pagePath, sel, hoverTable) => {
     await go(pagePath); await away();
+    /* 행 hover 는 .tbl.hover 일 때만(2026-11-13) — 비활성 행이 hover 면을 받지 않는지 재려면 hover 를 켠 표에서 잰다 */
+    if (hoverTable) await page.evaluate((s) => document.querySelector(s).closest("table").classList.add("hover"), sel);
     const el = page.locator(sel).first(); await el.evaluate((e) => e.scrollIntoView({ block: "center", behavior: "instant" })); await wait(60);
     await page.evaluate((s) => { window.__parent = 0; document.querySelector(s).closest(".example-preview").addEventListener("click", () => window.__parent++); }, sel);
     const look = () => el.evaluate((e) => { const td = e.closest("td"), c = getComputedStyle(td || e); return [c.backgroundColor, getComputedStyle(e).textDecorationLine, getComputedStyle(e).backgroundColor].join("|"); });
@@ -55,7 +57,7 @@ module.exports = async function buttonFix({ page, ok, go }) {
     return { sel, top, still: rest === hov, cursor, parent: await page.evaluate(() => window.__parent), hash: await page.evaluate(() => location.hash), open: await el.evaluate((e) => e.closest("details")?.open ?? null) };
   };
   const acc = await realHit("components/accordion.html", "#ex-accordion-state .accordion.disabled summary");
-  const row = await realHit("components/data-table.html", "#ex-data-table-basic tr.disabled .link");
+  const row = await realHit("components/data-table.html", "#ex-data-table-basic tr.disabled .link", true);
   const tabRow = await page.evaluate(async () => { const tr = document.querySelector("#ex-data-table-basic tr.disabled"); const all = [...document.querySelectorAll("#ex-data-table-basic a[href], #ex-data-table-basic button")].filter((e) => e.tabIndex >= 0 && !e.disabled); return { inRowTabbable: all.filter((e) => tr.contains(e)).length, inert: tr.inert, cellCursor: getComputedStyle(tr.cells[0]).cursor, rowOff: tr.getAttribute("aria-disabled"), text: tr.innerText.includes("알려진 악성코드 차단") }; });
   ok("a disabled accordion header and a disabled table row take the real click — no toggle, link move or parent click; not-allowed cursor; no hover look", [acc, row].every((o) => o.top && o.still && o.cursor === "not-allowed" && o.parent === 0 && o.hash === "" && o.open !== true), JSON.stringify({ acc, row }));
   ok("a disabled table row is aria-disabled, not inert — its text stays readable and Tab never stops on its link", tabRow.inRowTabbable === 0 && tabRow.inert === false && tabRow.cellCursor === "not-allowed" && tabRow.rowOff === "true" && tabRow.text, JSON.stringify(tabRow));

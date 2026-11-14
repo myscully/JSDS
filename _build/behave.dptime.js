@@ -14,15 +14,15 @@ module.exports = async ({ b, ok, SITE, path }) => {
   const single = () => dpOf("time"), sec = () => dpOf("time", 1), range = () => dpOf("time-range");
   const toTop = (loc) => loc.evaluate((e) => { e.scrollIntoView({ block: "start", behavior: "instant" }); window.scrollBy(0, -140); });
   const day = (dp, k) => dp.locator(`.calendar .day[data-date="${k}"]:not(.muted)`);
-  const state = (dp) => dp.evaluate((e) => ({ v: e.dataset.value || null, s: e.dataset.start || null, e: e.dataset.end || null, t: e.querySelector(".affix input").value, val: e.dataset.validity || null, err: e.classList.contains("error"), msg: (e.querySelector(".help") || {}).textContent || "", open: e.classList.contains("open") }));
-  const typeInto = async (dp, digits) => { const i = dp.locator(".affix input"); await i.fill(""); await i.pressSequentially(digits); await i.press("Enter"); return state(dp); };
-  const clear = async (dp) => { const i = dp.locator(".affix input"); await i.fill(""); await i.press("Enter"); };
+  const state = (dp) => dp.evaluate((e) => ({ v: e.dataset.value || null, s: e.dataset.start || null, e: e.dataset.end || null, t: e.querySelector(":scope > .affix input").value, val: e.dataset.validity || null, err: e.classList.contains("error"), msg: (e.querySelector(".help") || {}).textContent || "", open: e.classList.contains("open") }));
+  const typeInto = async (dp, digits) => { const i = dp.locator(":scope > .affix input"); await i.fill(""); await i.pressSequentially(digits); await i.press("Enter"); return state(dp); };
+  const clear = async (dp) => { const i = dp.locator(":scope > .affix input"); await i.fill(""); await i.press("Enter"); };
   const openCal = async (dp) => { await toTop(dp); await dp.locator(".cal-btn").click(); };
   const last = async () => (await page.evaluate(() => window.__dsd)).pop() || {};
   const clockVals = (dp) => dp.locator(".cal-time input").evaluateAll((l) => l.map((i) => i.value));
   const applyBtn = (dp) => dp.locator('.calendar [data-cal="apply"]');
   const set = (dp, a, v) => dp.evaluate((e, [x, y]) => e.setAttribute(x, y), [a, v]);
-  const caret = (dp, at) => dp.locator(".affix input").evaluate((e, p) => { e.focus(); e.setSelectionRange(p, p); }, at);
+  const caret = (dp, at) => dp.locator(":scope > .affix input").evaluate((e, p) => { e.focus(); e.setSelectionRange(p, p); }, at);
 
   await fresh();
 
@@ -36,7 +36,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     const h = await typeInto(single(), "20260907905"), m = await typeInto(single(), "20260907147");
     ok("hour 3-9 and minute 6-9 get a leading zero", h.t === "2026. 09. 07 09:05" && m.t.startsWith("2026. 09. 07 14:07"), h.t + " | " + m.t);
   });
-  await step("hour 2 waits for its second digit", async () => { const i = single().locator(".affix input"); await i.fill(""); await i.pressSequentially("202609072"); const t = await i.inputValue(); ok("hour 2 waits for its second digit", t === "2026. 09. 07 2", t); });
+  await step("hour 2 waits for its second digit", async () => { const i = single().locator(":scope > .affix input"); await i.fill(""); await i.pressSequentially("202609072"); const t = await i.inputValue(); ok("hour 2 waits for its second digit", t === "2026. 09. 07 2", t); });
   await step("seconds field takes 14 digits", async () => {
     const r = await typeInto(sec(), "20260907143007");
     ok("seconds field takes 14 digits", r.t === "2026. 09. 07 14:30:07" && r.v === "2026-09-07 14:30:07" && r.val === "valid", JSON.stringify(r));
@@ -44,7 +44,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("second 6-9 gets a leading zero", s9.t === "2026. 09. 07 14:30:09", s9.t);
   });
   await step("pasting a machine value formats it", async () => {
-    const i = single().locator(".affix input");
+    const i = single().locator(":scope > .affix input");
     const t = await i.evaluate((e) => { e.focus(); e.value = "2026-9-7 14:30"; e.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertFromPaste" })); return e.value; });
     ok("pasting a machine value formats it", t === "2026. 09. 07 14:30", t);
     await i.press("Enter");
@@ -60,7 +60,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("a missing date still names the date", d.val === "invalid" && d.msg.startsWith("날짜가 달력에 없습니다"), d.msg);
   });
   await step("the parser rejects what typing cannot produce", async () => {
-    const raw = async (dp, v) => { const i = dp.locator(".affix input"); await i.evaluate((e, x) => { e.value = x; }, v); await i.press("Enter"); return state(dp); };
+    const raw = async (dp, v) => { const i = dp.locator(":scope > .affix input"); await i.evaluate((e, x) => { e.value = x; }, v); await i.press("Enter"); return state(dp); };
     const m = await raw(single(), "2026. 09. 07 14:60");
     ok("minute 60 is not a time", m.val === "invalid" && !m.v, JSON.stringify(m));
     const c = await raw(sec(), "2026. 09. 07 14:30:60");
@@ -105,18 +105,18 @@ module.exports = async ({ b, ok, SITE, path }) => {
   });
 
   await step("arrows fill a missing clock", async () => {
-    const dp = single(), i = dp.locator(".affix input");
+    const dp = single(), i = dp.locator(":scope > .affix input");
     await i.fill("2026. 09. 07"); await caret(dp, 12); await page.keyboard.press("ArrowUp");
     let r = await state(dp);
     ok("an empty clock fills with 00:00", r.t === "2026. 09. 08 00:00", r.t);
-    const g = range(), j = g.locator(".affix input");
+    const g = range(), j = g.locator(":scope > .affix input");
     await j.fill("2026. 09. 07 09:00 ~ 2026. 09. 08"); await caret(g, 33); await page.keyboard.press("ArrowUp");
     r = await state(g);
     ok("an empty end clock fills with 23:59", r.t === "2026. 09. 07 09:00 ~ 2026. 09. 09 23:59", r.t);
   });
   await step("a time on a month picker is ignored", async () => {
     await fresh();
-    await page.evaluate(() => { const o = document.querySelector('#ex-date-picker-unit .example-preview .datepicker[data-unit="month"]'), h = o.cloneNode(true); ["data-value", "data-validity"].forEach((a) => h.removeAttribute(a)); h.setAttribute("data-time", ""); h.id = "dp-month-time"; const i = h.querySelector(".affix input"); i.id = "dp-month-time-i"; i.value = ""; i.setAttribute("value", ""); h.querySelector("label").setAttribute("for", i.id); const c = h.querySelector(".calendar"); if (c) c.remove(); h.classList.remove("open"); o.parentNode.append(h); });
+    await page.evaluate(() => { const o = document.querySelector('#ex-date-picker-unit .example-preview .datepicker[data-unit="month"]'), h = o.cloneNode(true); ["data-value", "data-validity"].forEach((a) => h.removeAttribute(a)); h.setAttribute("data-time", ""); h.id = "dp-month-time"; const i = h.querySelector(":scope > .affix input"); i.id = "dp-month-time-i"; i.value = ""; i.setAttribute("value", ""); h.querySelector("label").setAttribute("for", i.id); const c = h.querySelector(".calendar"); if (c) c.remove(); h.classList.remove("open"); o.parentNode.append(h); });
     const dp = page.locator("#dp-month-time"), r = await typeInto(dp, "202609");
     ok("a time on a month picker is ignored", r.v === "2026-09" && r.t === "2026. 09" && r.val === "valid", JSON.stringify(r));
     await openCal(dp);
@@ -179,7 +179,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   });
   await step("typing in the field while open moves the clock", async () => {
     await fresh(); const dp = single(); await openCal(dp);
-    const i = dp.locator(".affix input"); await i.fill(""); await i.pressSequentially("202609080715"); await i.press("Enter");
+    const i = dp.locator(":scope > .affix input"); await i.fill(""); await i.pressSequentially("202609080715"); await i.press("Enter");
     const r = await state(dp);
     ok("typing in the field while open moves the clock", r.open && (await clockVals(dp)).join() === "07:15", JSON.stringify(r) + (await clockVals(dp)).join());
     await page.keyboard.press("Escape");
@@ -256,8 +256,11 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await fresh(); const dp = single(); await openCal(dp);
     await dp.locator(".cal-time input").focus();
     await page.keyboard.press("Tab");
+    const btn = await page.evaluate(() => { const a = document.activeElement; return a.classList.contains("tp-btn") && !!a.closest(".cal-time .timepicker"); });
+    ok("Tab from the time field goes to its clock button (2026-11-13 — the field is a Time Picker)", btn);
+    await page.keyboard.press("Tab");
     const apply = await dp.evaluate((e) => document.activeElement.dataset.cal || document.activeElement.textContent);
-    await day(dp, "2026-09-10").click(); await dp.locator(".cal-time input").focus(); await page.keyboard.press("Tab"); await page.keyboard.press("Tab");
+    await day(dp, "2026-09-10").click(); await dp.locator(".cal-time input").focus(); await page.keyboard.press("Tab"); await page.keyboard.press("Tab"); await page.keyboard.press("Tab");
     const a2 = await page.evaluate(() => document.activeElement.dataset.cal || "");
     await page.keyboard.press("Tab");
     const wrap = await page.evaluate(() => document.activeElement.className);
@@ -268,7 +271,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   });
   await step("the time field can be the last stop", async () => {
     await fresh(); const dp = single(); await set(dp, "data-footer", "apply"); await openCal(dp);
-    await dp.locator(".cal-time input").focus();
+    await dp.locator(".cal-time .tp-btn").focus();
     await page.keyboard.press("Tab");
     ok("Tab from the last stop wraps inside the calendar", await page.evaluate(() => /cal-nav/.test(document.activeElement.className)), await page.evaluate(() => document.activeElement.className));
     await dp.locator(".cal-time input").focus();
@@ -308,7 +311,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   });
   await step("default preset ends at the end of today", async () => {
     await fresh();
-    const r = await page.evaluate(() => { const h = document.querySelector("#ex-date-picker-time-range .example-preview .datepicker").cloneNode(true); h.removeAttribute("data-validity"); h.removeAttribute("data-start"); h.removeAttribute("data-end"); h.setAttribute("data-default-preset", "7"); const inp = h.querySelector(".affix input"); inp.id = "dp-time-clone"; inp.value = ""; inp.setAttribute("value", ""); h.querySelector("label").setAttribute("for", "dp-time-clone"); document.querySelector("#ex-date-picker-time-range .example-preview").append(h); h.querySelector(".cal-btn").click(); h.querySelector(".cal-btn").click(); const d = { s: h.dataset.start, e: h.dataset.end, t: inp.value }; h.remove(); return d; });
+    const r = await page.evaluate(() => { const h = document.querySelector("#ex-date-picker-time-range .example-preview .datepicker").cloneNode(true); h.removeAttribute("data-validity"); h.removeAttribute("data-start"); h.removeAttribute("data-end"); h.setAttribute("data-default-preset", "7"); const inp = h.querySelector(":scope > .affix input"); inp.id = "dp-time-clone"; inp.value = ""; inp.setAttribute("value", ""); h.querySelector("label").setAttribute("for", "dp-time-clone"); document.querySelector("#ex-date-picker-time-range .example-preview").append(h); h.querySelector(".cal-btn").click(); h.querySelector(".cal-btn").click(); const d = { s: h.dataset.start, e: h.dataset.end, t: inp.value }; h.remove(); return d; });
     ok("default preset ends at the end of today", r.s === "2026-10-21 00:00" && r.e === "2026-10-27 23:59", JSON.stringify(r));
   });
 
@@ -332,19 +335,19 @@ module.exports = async ({ b, ok, SITE, path }) => {
   });
   await step("the time field stays small and neutral inside an error or large field", async () => {
     await fresh(); const dp = single(); await dp.evaluate((e) => e.classList.add("lg")); await typeInto(dp, "20260907"); await openCal(dp);
-    const r = await dp.locator(".cal-time input").evaluate((e) => { const c = getComputedStyle(e), t = document.createElement("div"); t.style.borderColor = "var(--line-neutral-primary)"; document.body.append(t); const want = getComputedStyle(t).borderColor; t.remove(); return { h: c.height, f: c.fontSize, c: c.borderColor, want }; });
-    ok("the time field stays small and neutral inside an error or large field", r.h === "32px" && r.f === "12px" && r.c === r.want, JSON.stringify(r));
+    const r = await dp.locator(".cal-time .affix").evaluate((e) => { const c = getComputedStyle(e), t = document.createElement("div"); t.style.borderColor = "var(--line-neutral-primary)"; document.body.append(t); const want = getComputedStyle(t).borderColor; t.remove(); return { h: c.height, f: getComputedStyle(e.querySelector("input")).fontSize, c: c.borderColor, want, s: c.boxShadow }; });
+    ok("the time field stays small and neutral inside an error or large field", r.h === "32px" && r.f === "12px" && r.c === r.want && r.s === "none", JSON.stringify(r));
     await dp.locator(".cal-time input").focus(); await page.waitForTimeout(350);   // 테두리 전환이 끝난 뒤
-    const f = await dp.locator(".cal-time input").evaluate((e) => { const c = getComputedStyle(e), t = document.createElement("div"); t.style.borderColor = "var(--foreground-brand-primary)"; document.body.append(t); const want = getComputedStyle(t).borderColor; t.remove(); return { c: c.borderColor, want, s: c.boxShadow }; });
+    const f = await dp.locator(".cal-time .affix").evaluate((e) => { const c = getComputedStyle(e), t = document.createElement("div"); t.style.borderColor = "var(--foreground-brand-primary)"; document.body.append(t); const want = getComputedStyle(t).borderColor; t.remove(); return { c: c.borderColor, want, s: c.boxShadow }; });
     ok("the time field shows the brand focus ring", f.c === f.want && f.s !== "none", JSON.stringify(f));
     await page.keyboard.press("Escape");
   });
   await step("wide values fit their field", async () => {
     await fresh();
     const r = await page.evaluate(() => {
-      const fits = (host, big) => { if (big) host.classList.add("lg"); const i = host.querySelector(".affix input"), ph = i.placeholder; i.value = ""; const s = document.createElement("span"), c = getComputedStyle(i); s.style.cssText = `position:absolute;white-space:pre;font:${c.font}`; s.textContent = ph; document.body.append(s); const w = s.getBoundingClientRect().width; s.remove(); const pad = parseFloat(c.paddingLeft) + parseFloat(c.paddingRight); return { w, room: i.clientWidth - pad, width: host.getBoundingClientRect().width }; };
+      const fits = (host, big) => { if (big) host.classList.add("lg"); const i = host.querySelector(":scope > .affix input"), ph = i.placeholder; i.value = ""; const s = document.createElement("span"), c = getComputedStyle(i); s.style.cssText = `position:absolute;white-space:pre;font:${c.font}`; s.textContent = ph; document.body.append(s); const w = s.getBoundingClientRect().width; s.remove(); const pad = parseFloat(c.paddingLeft) + parseFloat(c.paddingRight); return { w, room: i.clientWidth - pad, width: host.getBoundingClientRect().width }; };
       const g = document.querySelector("#ex-date-picker-time-range .example-preview .datepicker"), a = fits(g, true);
-      g.setAttribute("data-time", "seconds"); g.querySelector(".affix input").placeholder = "YYYY. MM. DD HH:mm:ss ~ YYYY. MM. DD HH:mm:ss"; const b2 = fits(g, true);
+      g.setAttribute("data-time", "seconds"); g.querySelector(":scope > .affix input").placeholder = "YYYY. MM. DD HH:mm:ss ~ YYYY. MM. DD HH:mm:ss"; const b2 = fits(g, true);
       return { a, b2 };
     });
     ok("a time range fits its placeholder in a large field", r.a.w <= r.a.room && r.a.width === 410, JSON.stringify(r.a));
@@ -352,7 +355,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   });
   await step("time fields stay unique without an input id", async () => {
     await fresh();
-    const ids = await page.evaluate(() => { const out = []; document.querySelectorAll("#ex-date-picker-time .datepicker").forEach((h) => { h.querySelector(".affix input").removeAttribute("id"); h.querySelector(".cal-btn").click(); out.push(h.querySelector(".cal-time input").id); h.querySelector(".cal-btn").click(); }); return out; });
+    const ids = await page.evaluate(() => { const out = []; document.querySelectorAll("#ex-date-picker-time .datepicker").forEach((h) => { h.querySelector(":scope > .affix input").removeAttribute("id"); h.querySelector(".cal-btn").click(); out.push(h.querySelector(".cal-time input").id); h.querySelector(".cal-btn").click(); }); return out; });
     ok("time fields stay unique without an input id", ids.length === 2 && ids[0] && ids[1] && ids[0] !== ids[1], ids.join());
   });
 
@@ -365,7 +368,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("the log viewer starts with the last 7 whole days", first.t === "2026. 10. 21 00:00 ~ 2026. 10. 27 23:59" && first.s === "2026-10-21 00:00" && first.e === "2026-10-27 23:59" && first.val === "valid" && !first.err, JSON.stringify(first));
     const row = await page.evaluate(() => { const t = document.querySelector("#ex-log-viewer-viewer .toolbar"), a = t.querySelector(".searchbar").getBoundingClientRect(), b = t.querySelector(".datepicker").getBoundingClientRect(); return Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2); });
     ok("the log viewer keeps search and range on one line", row < 1, String(row));
-    ok("the log viewer range is named", await dp.locator(".affix input").getAttribute("aria-label") === "조회 구간");
+    ok("the log viewer range is named", await dp.locator(":scope > .affix input").getAttribute("aria-label") === "조회 구간");
     await openCal(dp);
     ok("the log viewer calendar shows both clocks", (await clockVals(dp)).join() === "00:00,23:59", (await clockVals(dp)).join());
     const lab = await dp.locator(".cal-time label").first().evaluate((l) => !!document.getElementById(l.htmlFor));
@@ -377,6 +380,72 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("the log viewer accepts the end of today and rejects tomorrow", end.val === "valid" && over.val === "max", end.val + " " + over.val);
     const narrow = await typeInto(dp, "202610270900202610270830");
     ok("the log viewer reports a reversed clock", narrow.val === "order" && narrow.msg.startsWith("종료 시각이"), narrow.msg);
+  });
+  // ── 달력 안 시각 칸 = Time Picker sm(사람의 결정 2026-11-13) ──────────────
+  const tpPanel = (dp) => dp.evaluate((e) => { const h = e.querySelector(".cal-time .timepicker"), p = h && h.querySelector(".time-panel"), a = document.activeElement; return { open: !!h && h.classList.contains("open"), shown: !!p && getComputedStyle(p).display === "flex", cols: p ? p.querySelectorAll(".time-col").length : 0, cal: e.classList.contains("open"), inp: h ? h.querySelector("input").value : "", act: a.classList.contains("time-opt") ? "opt:" + a.closest(".time-col").dataset.part + ":" + a.dataset.v : a.classList.contains("tp-btn") ? "btn" : a.matches(".cal-time input") ? "input" : a.className }; });
+  await step("the calendar time field is a Time Picker", async () => {
+    await fresh(); const dp = single(); await page.evaluate(() => { window.__tpt = 0; document.addEventListener("ds:time", () => window.__tpt++); });
+    const before = await state(dp); await openCal(dp);   // 예제 처음 값의 시각 14:30
+    const shape = await dp.evaluate((e) => { const h = [...e.querySelectorAll(".cal-time .timepicker")]; return { n: h.length, sm: h.every((x) => x.matches(".field.sm[data-dp-side='a']")), name: h[0]?.querySelector(".tp-btn").getAttribute("aria-label"), exp: h[0]?.querySelector(".tp-btn").getAttribute("aria-expanded"), r: h[0] && Math.round(h[0].querySelector(".tp-btn").getBoundingClientRect().height) }; });
+    ok("the calendar's time field is a small Time Picker with a named clock button", shape.n === 1 && shape.sm && shape.name === "시각 선택" && shape.exp === "false" && shape.r === 28, JSON.stringify(shape));
+    await dp.locator(".cal-time .tp-btn").click(); await page.waitForTimeout(40);
+    const o = await tpPanel(dp);
+    ok("the clock button opens the hour and minute columns inside the open calendar, on the current hour", o.open && o.shown && o.cols === 2 && o.cal && o.act === "opt:hour:14", JSON.stringify(o));
+    const ring = await dp.evaluate((e) => { const t = document.createElement("div"); t.style.color = "var(--foreground-brand-primary)"; document.body.append(t); const want = getComputedStyle(t).color; t.remove(); const a = getComputedStyle(e.querySelector(".cal-time .affix")); return { b: a.borderTopColor, want, s: a.boxShadow }; });
+    ok("the open time field shows the brand ring", ring.b === ring.want && ring.s !== "none", JSON.stringify(ring));
+    await dp.locator('.cal-time .time-col[data-part="hour"] .time-opt[data-v="9"]').click();
+    await dp.locator('.cal-time .time-col[data-part="minute"] .time-opt[data-v="5"]').click(); await page.waitForTimeout(30);
+    const p = await tpPanel(dp), outer = await state(dp);
+    ok("picking an hour and a minute writes the time field at once, the list and calendar stay open, the field waits for apply", p.inp === "09:05" && p.open && p.cal && outer.t === before.t, JSON.stringify([p, outer, before.t]));
+    await dp.locator('.cal-time .time-col[data-part="minute"] .time-opt[data-v="5"]').focus(); await page.keyboard.press("Escape"); await page.waitForTimeout(30);
+    const e1 = await tpPanel(dp);
+    ok("Esc closes only the clock list and returns to the time field", !e1.open && e1.cal && e1.act === "input", JSON.stringify(e1));
+    await page.keyboard.press("Enter"); await page.waitForTimeout(40);
+    const r = await state(dp);
+    ok("Enter in the time field applies the picked time", r.t === before.t.replace(/\d\d:\d\d$/, "09:05") && r.t !== before.t && /09:05$/.test(r.v) && !(await dp.evaluate((e) => e.classList.contains("open"))), JSON.stringify(r));
+    ok("the calendar's clock list fires no ds:time — the field's ds:date carries the value", await page.evaluate(() => window.__tpt) === 0);
+  });
+  await step("Alt+Down opens the clock list from the time field without stepping it", async () => {
+    await fresh(); const dp = single(); await openCal(dp);
+    const i = dp.locator(".cal-time input"); await i.focus(); await page.keyboard.press("Alt+ArrowDown"); await page.waitForTimeout(40);
+    const a = await tpPanel(dp);
+    ok("Alt+Down opens the clock list and leaves the time as it is", a.open && a.inp === "14:30" && a.act === "opt:hour:14", JSON.stringify(a));
+    await page.keyboard.press("Shift+Tab");
+    ok("Shift+Tab from the first column goes back to the clock button, not around the calendar", (await tpPanel(dp)).act === "btn", JSON.stringify(await tpPanel(dp)));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(40);
+    const eb = await tpPanel(dp);
+    ok("Esc on the clock button closes only the list and returns to the time field", !eb.open && eb.cal && eb.act === "input", JSON.stringify(eb));
+    await page.keyboard.press("Alt+ArrowDown"); await page.waitForTimeout(40);
+    await page.keyboard.press("ArrowDown"); await page.keyboard.press("Enter"); await page.waitForTimeout(30);
+    const b = await tpPanel(dp);
+    ok("Enter picks the hour and moves to the minute column", b.inp === "15:30" && b.act === "opt:minute:30", JSON.stringify(b));
+    await page.keyboard.press("Enter"); await page.waitForTimeout(30);
+    const c = await tpPanel(dp);
+    ok("Enter in the last column closes the list and returns to the time field, the calendar stays open", !c.open && c.act === "input" && c.cal && c.inp === "15:30", JSON.stringify(c));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(30);
+    ok("the next Esc closes the calendar", !(await dp.evaluate((e) => e.classList.contains("open"))));
+  });
+  await step("typing in the calendar time field cuts the clock and moves the open list", async () => {
+    await fresh(); const dp = single(); await openCal(dp);
+    await dp.locator(".cal-time .tp-btn").click(); await page.waitForTimeout(40);
+    const i = dp.locator(".cal-time input"); await i.focus(); await i.fill(""); await i.pressSequentially("0915"); await page.waitForTimeout(30);
+    const t = await dp.evaluate((e) => ({ v: e.querySelector(".cal-time input").value, on: [...e.querySelectorAll(".cal-time .time-opt.on")].map((o) => o.closest(".time-col").dataset.part + ":" + o.dataset.v).join(), open: e.querySelector(".cal-time .timepicker").classList.contains("open") }));
+    ok("typing digits in the calendar time field cuts them as a clock and the open list follows", t.v === "09:15" && t.on === "hour:9,minute:15" && t.open, JSON.stringify(t));
+    await page.keyboard.press("Enter"); await page.waitForTimeout(40);
+    ok("Enter after typing applies the typed time", /09:15$/.test((await state(dp)).t), (await state(dp)).t);
+  });
+  await step("range and seconds time fields are Time Pickers too", async () => {
+    await fresh(); const g = range(); await openCal(g);
+    const names = await g.locator(".cal-time .tp-btn").evaluateAll((l) => l.map((x) => x.getAttribute("aria-label")));
+    ok("the range calendar has start and end Time Pickers", names.join() === "시작 시각 선택,종료 시각 선택", names.join());
+    await g.locator(".cal-time .timepicker[data-dp-side='b'] .tp-btn").click(); await page.waitForTimeout(40);
+    await g.locator('.cal-time .timepicker[data-dp-side="b"] .time-col[data-part="hour"] .time-opt[data-v="20"]').click(); await page.waitForTimeout(30);
+    ok("picking in the end field changes only the end time", (await clockVals(g)).join() === "09:00,20:30", (await clockVals(g)).join());
+    await page.keyboard.press("Escape"); await page.keyboard.press("Escape");
+    const s = sec(); await openCal(s); await s.locator(".cal-time .tp-btn").click(); await page.waitForTimeout(40);
+    const sc = await tpPanel(s);
+    ok("the seconds calendar's clock list has a seconds column", sc.cols === 3 && (await s.locator(".cal-time .timepicker").getAttribute("data-seconds")) === "", JSON.stringify(sc));
+    await page.keyboard.press("Escape"); await page.keyboard.press("Escape");
   });
   await step("no script errors", async () => { ok("time picker raises no script errors", errors.length === 0, errors.join(" | ")); });
 

@@ -19,6 +19,7 @@ export default function Example() {
   const [selected, setSelected] = useState(new Set(["p1", "p2"]));
   return (
     <DataTable
+      hover
       columns={COLUMNS}
       rows={ROWS}
       rowKey={(r) => r.id}

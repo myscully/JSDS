@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Chip, ChipGroup, DataTable, DateRangePicker, Icon, Indicator, Pagination, PaginationBar, SearchBar, SelectButton, Spacer, Stack, Tag, Toolbar, type DataTableColumn } from "@jiran/ds-react";
+import { Button, Chip, ChipGroup, DataTable, DateRangePicker, Icon, Pagination, PaginationBar, SearchBar, SelectButton, Spacer, Stack, Tag, Toolbar, type DataTableColumn } from "@jiran/ds-react";
 
 type Log = { id: number; time: string; level: "critical" | "medium" | "high" | "low" | "info"; lv: string; ip: string; host: string; msg: string };
 const ROWS: Log[] = [
@@ -34,18 +34,22 @@ export default function Example() {
   return (
     <Stack>
       <Toolbar>
-        <SearchBar placeholder="메시지, 단말, IP 검색" label="로그 검색" wrapperStyle={{ minWidth: 320 }} />
+        <SearchBar placeholder="메시지, 단말, IP 검색" label="로그 검색" wrapperStyle={{ minWidth: 320, flex: 1 }} />
         <DateRangePicker aria-label="조회 구간" time max={today} presets={PRESETS} defaultValue={{ start: daysAgo(6), end: END_OF_TODAY }} />
+      </Toolbar>
+      {/* 첫 줄은 검색 · 기간(40), 둘째 줄은 전부 32 — 나란히 놓인 컨트롤은 높이가 같다(2026-11-12). CSV 는 첫 줄에 들어가지 않아(검색 320 + 구간 410) 혼자 줄바꿈했다 */}
+      <Toolbar>
         <ChipGroup clearable={levels.length > 0} onClear={() => setLevels([])}>
           {LEVELS.map((l) => (
-            <Chip key={l} size="sm" selected={levels.includes(l)} onSelectedChange={(on) => setLevels((s) => (on ? [...s, l] : s.filter((x) => x !== l)))}>{l}</Chip>
+            <Chip key={l} selected={levels.includes(l)} onSelectedChange={(on) => setLevels((s) => (on ? [...s, l] : s.filter((x) => x !== l)))}>{l}</Chip>
           ))}
         </ChipGroup>
         <Spacer />
-        <SelectButton outline label="갱신" value={live} onChange={setLive} options={[{ value: "live", label: <Indicator tone="danger" pulse style={{ gap: 6 }}>실시간</Indicator> }, { value: "pause", label: "일시정지" }]} />
-        <Button variant="outline" color="assistive" iconLeft={<Icon name="download" />}>CSV</Button>
+        <SelectButton outline size="sm" label="갱신" value={live} onChange={setLive} options={[{ value: "live", label: "실시간" }, { value: "pause", label: "일시정지" }]} />
+        <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>CSV</Button>
       </Toolbar>
       <DataTable
+        hover
         compact
         columns={COLUMNS}
         rows={ROWS}

@@ -18,8 +18,8 @@ module.exports = async ({ b, ok, SITE, path }) => {
   const day = (h, k) => h.locator(`.calendar .day[data-date="${k}"]:not(.muted)`);
   const off = (h, k) => day(h, k).evaluate((e) => e.getAttribute("aria-disabled") === "true");
   const apply = (h) => h.locator('.calendar [data-cal="apply"]');
-  const state = (h) => h.evaluate((e) => ({ s: e.dataset.start || null, e: e.dataset.end || null, val: e.dataset.validity || null, help: e.querySelector(".help")?.textContent || "", inv: e.querySelector(".affix input").getAttribute("aria-invalid"), t: e.querySelector(".affix input").value }));
-  const typeInto = async (h, digits) => { const i = h.locator(".affix input"); await i.fill(""); await i.pressSequentially(digits); await i.press("Enter"); return state(h); };
+  const state = (h) => h.evaluate((e) => ({ s: e.dataset.start || null, e: e.dataset.end || null, val: e.dataset.validity || null, help: e.querySelector(".help")?.textContent || "", inv: e.querySelector(":scope > .affix input").getAttribute("aria-invalid"), t: e.querySelector(":scope > .affix input").value }));
+  const typeInto = async (h, digits) => { const i = h.locator(":scope > .affix input"); await i.fill(""); await i.pressSequentially(digits); await i.press("Enter"); return state(h); };
   const last = async () => (await page.evaluate(() => window.__dsd)).pop() || {};
 
   await go("components/date-picker.html");
@@ -96,7 +96,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("max-days: clock does not count — same days, different times", a.val === "valid" && c.val === "long", JSON.stringify([a.val, c.val]));
   });
   await step("max-days: month range ignores the limit", async () => {
-    await page.evaluate(() => { const o = document.querySelector("#ex-date-picker-max-days .example-preview .datepicker"), h = o.cloneNode(true); ["data-start", "data-end", "data-value", "data-validity", "data-presets"].forEach((a) => h.removeAttribute(a)); h.setAttribute("data-unit", "month"); h.setAttribute("data-max-days", "1"); h.id = "dp-span-month"; const i = h.querySelector(".affix input"); i.id = "dp-span-month-i"; i.value = ""; i.setAttribute("value", ""); h.querySelector("label").setAttribute("for", i.id); const c = h.querySelector(".calendar"); if (c) c.remove(); h.classList.remove("open"); o.parentNode.append(h); });
+    await page.evaluate(() => { const o = document.querySelector("#ex-date-picker-max-days .example-preview .datepicker"), h = o.cloneNode(true); ["data-start", "data-end", "data-value", "data-validity", "data-presets"].forEach((a) => h.removeAttribute(a)); h.setAttribute("data-unit", "month"); h.setAttribute("data-max-days", "1"); h.id = "dp-span-month"; const i = h.querySelector(":scope > .affix input"); i.id = "dp-span-month-i"; i.value = ""; i.setAttribute("value", ""); h.querySelector("label").setAttribute("for", i.id); const c = h.querySelector(".calendar"); if (c) c.remove(); h.classList.remove("open"); o.parentNode.append(h); });
     const r = await typeInto(page.locator("#dp-span-month"), "202601202603");
     ok("max-days: month range ignores the limit", r.val === "valid", JSON.stringify(r));
     await page.evaluate(() => document.querySelector("#dp-span-month").remove());
@@ -152,13 +152,15 @@ module.exports = async ({ b, ok, SITE, path }) => {
   // ── 차트 표로 보기 ─────────────────────────────────────────
   const view = (id, n = 0) => page.locator(`#ex-data-visual-${id} .chart-view`).nth(n);
   const tog = (v) => v.locator("[data-chart-table]");
+  /* 표로 보기는 옵션(2026-11-13) — 켠 예제는 timeseries 하나다. 다른 종류(도넛 · 막대 · 혼합)의 표 변환은 { table: true } 와 같은 마크업을 넣어 잰다 */
+  const optIn = (v) => v.evaluate((e) => { if (!e.querySelector("[data-chart-table]")) e.insertAdjacentHTML("afterbegin", '<div class="chart-tools"><button type="button" class="btn sm text assistive" data-chart-table>표로 보기</button></div>'); });
   const tableOf = (v) => v.evaluate((e) => { const t = e.querySelector(".chart-table table"); return t && { head: [...t.querySelectorAll("thead th")].map((x) => x.textContent), rows: [...t.querySelectorAll("tbody tr")].map((r) => [...r.children].map((c) => c.textContent)) }; });
   const painted = (v) => v.locator("canvas").evaluate((c) => { const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; for (let i = 3; i < d.length; i += 4) if (d[i]) return true; return false; });
   await go("components/data-visual.html");
   await page.waitForTimeout(400);
-  await step("chart table: every chart has the toggle and starts as a chart", async () => {
-    const r = await page.evaluate(() => [...document.querySelectorAll("canvas[data-chart]")].map((c) => { const v = c.closest(".chart-view"); return [!!v.querySelector("[data-chart-table]"), v.querySelector("[data-chart-table]").textContent, !c.parentNode.hidden, v.querySelectorAll(".chart-table").length]; }));
-    ok("chart table: every chart has the toggle and starts as a chart", r.length === 6 && r.every((x) => x[0] && x[1] === "표로 보기" && x[2] && x[3] === 0), JSON.stringify(r));
+  await step("chart table: only the chart that opts in has the toggle, every chart starts as a chart", async () => {
+    const r = await page.evaluate(() => [...document.querySelectorAll("canvas[data-chart]")].map((c) => { const v = c.closest(".chart-view"), b = v.querySelector("[data-chart-table]"); return [c.closest(".example").id, b ? b.textContent : null, !c.parentNode.hidden, v.querySelectorAll(".chart-table").length, !!v.querySelector(".chart-tools")]; }));
+    ok("chart table: only the chart that opts in has the toggle, every chart starts as a chart", r.length === 6 && r.every((x) => x[2] && x[3] === 0 && (x[0] === "ex-data-visual-timeseries" ? x[1] === "표로 보기" && x[4] : x[1] === null && !x[4])), JSON.stringify(r));
   });
   await step("chart table: the toggle sits at the right, 8 above the chart", async () => {
     const r = await view("timeseries").evaluate((v) => { const b = v.querySelector("[data-chart-table]").getBoundingClientRect(), w = v.querySelector(".chart-canvas").getBoundingClientRect(); return { right: w.right - b.right, gap: w.top - b.bottom }; });
@@ -193,18 +195,19 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("chart table: back to the chart restores the canvas", r.d !== "none" && r.h === 240 && Math.abs(r.cw - r.ww) <= 1 && r.table === "none" && r.btn === "표로 보기" && await painted(view("timeseries")), JSON.stringify(r));
   });
   await step("chart table: a donut has one unnamed series", async () => {
-    await view("donut-live").scrollIntoViewIfNeeded();
+    await view("donut-live").scrollIntoViewIfNeeded(); await optIn(view("donut-live"));
     await tog(view("donut-live")).click();
     const t = await tableOf(view("donut-live"));
     ok("chart table: a donut has one unnamed series", t.head.join() === "구분,값" && t.rows.length === 5 && t.rows[0][0] === "Critical", JSON.stringify(t));
   });
   await step("chart table: uses the current data, formats numbers, shows gaps, escapes text", async () => {
+    await optIn(view("bars"));
     const r = await view("bars").evaluate((v) => { const d = v.querySelector("canvas").__dsChart.chart.data, s = d.datasets[0].data, o = [...s], l = [...d.labels]; s[0] = 12345; s[1] = null; d.labels[2] = "<img src=x>"; v.querySelector("[data-chart-table]").click(); const tb = v.querySelector(".chart-table tbody"), res = { a: tb.rows[0].cells[1].textContent, b: tb.rows[1].cells[1].querySelector("[aria-hidden=true]")?.textContent, sr: tb.rows[1].cells[1].querySelector(".sr-only")?.textContent, srHidden: (() => { const s = tb.rows[1].cells[1].querySelector(".sr-only"); return s ? s.getBoundingClientRect().width <= 1 : false; })(), lbl: tb.rows[2].cells[0].textContent, img: tb.querySelectorAll("img").length }; v.querySelector("[data-chart-table]").click(); d.datasets[0].data = o; d.labels = l; return res; });
     ok("chart table: uses the current data, formats numbers, shows gaps, escapes text", r.a === "12,345" && r.b === "—" && r.sr === "값 없음" && r.srHidden && r.lbl === "<img src=x>" && r.img === 0, JSON.stringify(r));
   });
   await step("chart table: data-labels replaces every word, broken JSON falls back", async () => {
     const warns = []; const on = (m) => { if (m.type() === "warning") warns.push(m.text()); }; page.on("console", on);
-    const v = view("mixed");
+    const v = view("mixed"); await optIn(v);
     const a = await v.evaluate((e) => { const s = e.querySelector("canvas").__dsChart.chart.data.datasets[0].data, o = s[0]; s[0] = null; e.setAttribute("data-labels", '{"table":"Table","chart":"Chart","head":"Day","empty":"No value"}'); const b = e.querySelector("[data-chart-table]"); b.click(); const r = [b.textContent, e.querySelector("thead th").textContent, e.querySelector("tbody .sr-only")?.textContent]; b.click(); s[0] = o; const back = b.textContent; e.setAttribute("data-labels", "{oops"); b.click(); r.push(back, b.textContent); b.click(); e.removeAttribute("data-labels"); return r; });
     page.off("console", on);
     ok("chart table: data-labels replaces every word, broken JSON falls back", a.join() === "Chart,Day,No value,Table,차트로 보기" && warns.some((w) => w.includes("data-labels")), JSON.stringify({ a, warns }));
@@ -220,12 +223,10 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(200);
     ok("chart table: the chart repaints for dark while the table is showing", r.now !== before && r.now && await painted(v), JSON.stringify({ before, r }));
   });
-  await step("chart table: dashboard pattern has the same toggle", async () => {
+  await step("chart table: the dashboard pattern has no toggle (2026-11-13 — off on the dashboard)", async () => {
     await go("patterns/dashboard.html"); await page.waitForTimeout(400);
-    const v = page.locator(".chart-view").first();
-    await v.scrollIntoViewIfNeeded(); await tog(v).click();
-    const t = await tableOf(v);
-    ok("chart table: dashboard pattern has the same toggle", !!t && t.rows.length > 0 && t.head.length >= 2, JSON.stringify(t).slice(0, 160));
+    const r = await page.evaluate(() => ({ views: document.querySelectorAll(".chart-view > .chart-canvas > canvas[data-chart]").length, btn: document.querySelectorAll("[data-chart-table], .chart-tools").length }));
+    ok("chart table: the dashboard pattern has no toggle (2026-11-13 — off on the dashboard)", r.views >= 1 && r.btn === 0, JSON.stringify(r));
   });
   ok("polish pages run without script errors", errors.length === 0, errors.slice(0, 2).join(" | "));
   await ctx.close();

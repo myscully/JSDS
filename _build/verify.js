@@ -239,13 +239,29 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       for (const m of pv.matchAll(/<td\b[^>]*\bclass="[^"]*\btruncate\b[^"]*"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: 말줄임 칸(td.truncate)에 title 금지 — 키보드로 볼 수 없습니다. 잘린 칸의 Tooltip 은 ds.js 가 답니다(Data Table › 고정 헤더)`);
       for (const m of pv.matchAll(/<span\b[^>]*\bclass="lbl"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: 칩 값(.lbl)에 title 금지 — 키보드로 볼 수 없습니다. 잘린 값의 Tooltip 은 ds.js 가 답니다(Chip › 긴 값)`);
       for (const m of pv.matchAll(/<span\b[^>]*\bclass="avatar\b[^"]*"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: Avatar 에 title 금지 — 이름은 role="img" + aria-label, 누르는 아바타는 버튼의 이름으로(Avatar)`);
-      { const charts = (pv.match(/<canvas\b[^>]*\bdata-chart=/g) || []).length, views = (pv.match(/<div class="chart-view"[^>]*><div class="chart-tools"><button\b[^>]*\bdata-chart-table\b/g) || []).length; if (charts !== views) fails.push(`${f}: 탐색형 차트는 .chart-view 와 표로 보기 버튼을 함께 씁니다(차트 ${charts} · 버튼 ${views}, Data Visual)`); }
+      /* 표로 보기는 옵션(2026-11-13) — 탐색형 차트는 늘 .chart-view 안 .chart-canvas 에 있고, 버튼은 있으면 .chart-view 의 첫 자식 .chart-tools 안(canvas 앞)이다 */
+      { const charts = (pv.match(/<canvas\b[^>]*\bdata-chart=/g) || []).length, wrapped = (pv.match(/<div class="chart-canvas"><canvas\b[^>]*\bdata-chart=/g) || []).length, views = (pv.match(/<div class="chart-view"[^>]*>/g) || []).length, btns = (pv.match(/\bdata-chart-table\b/g) || []).length, placed = (pv.match(/<div class="chart-view"[^>]*><div class="chart-tools"><button\b[^>]*\bdata-chart-table\b/g) || []).length;
+        if (charts !== wrapped || charts !== views) fails.push(`${f}: 탐색형 차트는 .chart-view > .chart-canvas > canvas 로 씁니다(차트 ${charts} · 틀 ${views} · 캔버스 칸 ${wrapped}, Data Visual)`);
+        if (btns !== placed || btns > charts) fails.push(`${f}: 표로 보기 버튼은 .chart-view 의 첫 자식 .chart-tools 안에만, 차트 수 이하(버튼 ${btns} · 제자리 ${placed} · 차트 ${charts})`); }
       /* Date Picker 시각 옵션(2026-11-10) */
       for (const m of pv.matchAll(/<div class="datepicker field[^"]*"([^>]*\bdata-time\b[^>]*)>/g)) {
         const at = m[1], sec = /data-time="seconds"/.test(at), input = /<input\b[^>]*>/.exec(pv.slice(m.index));
         if (/data-time="[^"]/.test(at) && !sec) fails.push(`${f}: data-time 값은 없거나 seconds 입니다(Date Picker › Time)`);
         if (/data-unit="/.test(at)) fails.push(`${f}: data-time 은 일 단위 Date Picker 에만 씁니다(Date Picker › Time)`);
         if (!input || !new RegExp(`placeholder="YYYY\\. MM\\. DD HH:mm${sec ? ":ss" : ""}(?: ~ [^"]*)?"`).test(input[0])) fails.push(`${f}: 시각까지 받는 Date Picker 의 placeholder 는 형식 그대로(Date Picker › Time)`);
+      }
+      /* Time Picker 원칙(2026-11-13) — 라벨 · placeholder 형식 · 버튼 이름 · data-step 정수 · min ≤ max · 범위는 도움말에 */
+      for (const m of pv.matchAll(/<div class="field[^"]*\btimepicker\b[^"]*"[^>]*>/g)) {
+        const at = m[0], b = pv.slice(m.index, m.index + 3000), name = ((/<label\b[^>]*>([^<*]+)/.exec(b) || [])[1] || "").trim();
+        if (!name) continue;   // 썸네일
+        const sec = /data-seconds/.test(at), input = /<input\b[^>]*>/.exec(b), get = (k) => ((new RegExp(`data-${k}="([^"]*)"`).exec(at) || [])[1]);
+        if (!input || !input[0].includes(`placeholder="${sec ? "HH:mm:ss" : "HH:mm"}"`) || !/inputmode="numeric"/.test(input[0])) fails.push(`${f}: Time Picker 입력의 placeholder 는 형식 그대로 · inputmode=numeric(Time Picker › 형식)`);
+        if (!b.includes(`class="tp-btn" aria-label="${name} 선택"`)) fails.push(`${f}: Time Picker 버튼 이름에 값의 이름 — "${name} 선택"`);
+        const st = get("step"); if (st !== undefined && !(/^\d+$/.test(st) && +st >= 1 && +st <= 59)) fails.push(`${f}: Time Picker data-step 은 1~59 정수 — ${st}`);
+        const lo = get("min"), hi = get("max"), okT = (t) => /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(t);
+        for (const t of [lo, hi]) if (t !== undefined && !okT(t)) fails.push(`${f}: Time Picker data-min · data-max 는 HH:mm — ${t}`);
+        if (lo && hi && lo > hi) fails.push(`${f}: Time Picker data-min 이 data-max 보다 늦습니다 — ${lo} > ${hi}`);
+        if ((lo || hi) && !/<span class="help"[^>]*>[^<]+<\/span>/.test(b.slice(0, b.indexOf("</div></div>") + 200))) fails.push(`${f}: Time Picker 범위를 도움말에(Time Picker › 범위)`);
       }
       /* Number Input 원칙(2026-11-10) */
       {
@@ -324,6 +340,16 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (/target="_blank"/.test(m[2]) && (!/rel="[^"]*noopener/.test(m[2]) || !/<svg/.test(m[3]) || !/class="sr-only"/.test(m[3]))) fails.push(`${f}: 새 창 링크는 rel · 아이콘 · 숨긴 문구(Link › 새 창)`);
       }
       for (const m of pv.matchAll(/<span class="avatar(?: sm)?"[^>]*>([^<]*)<\/span>/g)) if ([...m[1].trim()].length < 1 || [...m[1].trim()].length > 2) fails.push(`${f}: Avatar 이니셜은 1~2자 "${m[1]}"`);
+      /* Avatar Group(2026-11-13) — role=group + 이름, 아바타 5개까지 · 아바타마다 role=img + 이름, '외 N명' 은 맨 뒤(버튼이면 이름에 그 글자) */
+      const groups = [...pv.matchAll(/<span class="avatar-group"([^>]*)>((?:\s|<span class="avatar(?:-group-more| sm)?"[^>]*>[^<]*<\/span>|<button\b[^>]*>[^<]*<\/button>)*)<\/span>/g)];
+      if (groups.length !== (pv.match(/<span class="avatar-group"/g) || []).length) fails.push(`${f}: .avatar-group 의 자식은 .avatar 와 맨 뒤 '외 N명' 뿐이다`);
+      for (const m of groups) {
+        const [, attrs, inner] = m, avs = [...inner.matchAll(/<span class="avatar(?: sm)?"([^>]*)>/g)], more = inner.match(/<(span|button)\b[^>]*class="[^"]*\bavatar-group-more\b[^"]*"[^>]*>([^<]*)<\/\1>/);
+        if (!/\brole="group"/.test(attrs) || !/\baria-label="[^"]+"/.test(attrs)) fails.push(`${f}: .avatar-group 은 role="group" 과 aria-label(무엇의 사람들인지)`);
+        if (avs.length > 5) fails.push(`${f}: Avatar Group 은 아바타 5개까지 — 나머지는 '외 N명'(${avs.length}개)`);
+        if (avs.some((a) => !/role="img"/.test(a[1]) || !/aria-label="[^"]+"/.test(a[1]))) fails.push(`${f}: Avatar Group 의 아바타마다 role="img" + aria-label 이름`);
+        if (more) { if (!/^외 \d+명$/.test(more[2].trim())) fails.push(`${f}: '외 N명' 형식이 아니다 "${more[2]}"`); if (inner.trim().slice(-more[0].length) !== more[0]) fails.push(`${f}: '외 N명' 은 Avatar Group 의 맨 뒤`); if (more[1] === "button" && !new RegExp(`aria-label="[^"]*${more[2].trim()}[^"]*"`).test(more[0])) fails.push(`${f}: '외 N명' 버튼 이름에 보이는 글자가 들어가야 한다`); }
+      }
       if ((pv.match(/class="page-head"/g) || []).length > 1) fails.push(`${f}: Page Header 는 화면에 하나`);
       each(/<div class="page-head"[^>]*>/g, (b) => {
         if (!/<h[1-3] class="title">/.test(b)) { if (!/<span class="title"/.test(b)) fails.push(`${f}: Page Header 제목은 h1(as 로 h2 · h3)`); }
@@ -363,7 +389,23 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       for (const m of pv.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)) { const n = [...m[1].matchAll(/class="tag[ "](?![^"]*tag-more)/g)].length; if (n > 3) fails.push(`${f}: 표 칸의 Tag ${n}개 — 앞 2개 + +N(Tag › 여러 개)`); }
       for (const m of pv.matchAll(/class="tag[^"]*tag-more[^"]*"/g)) { const before = pv.slice(Math.max(0, m.index - 40), m.index); if (!/<button type="button" $/.test(before)) fails.push(`${f}: +N 은 버튼(Tag › 여러 개)`); }
       for (const m of pv.matchAll(/<span class="count(?! neutral)(?: [^"]*)?"[^>]*>([^<]+)<\/span>/g)) { const t = m[1].trim(); if (/^\d+$/.test(t) && (+t === 0 || +t > 99) && !/class="tab\b/.test(pv.slice(Math.max(0, m.index - 120), m.index))) fails.push(`${f}: Count "${t}" — 0 은 숨기고 99 초과는 99+(Indicator › Count)`); }
-      for (const m of pv.matchAll(/<ol class="steps[^"]*"([^>]*)>([\s\S]*?)<\/ol>/g)) { const n = [...m[2].matchAll(/<li\b/g)].length; if (n < 3 || n > 6) fails.push(`${f}: Steps ${n}단계 — 3~6(Steps › 단계 수)`); if (!/aria-label="/.test(m[1])) fails.push(`${f}: Steps 이름 없음(Steps)`); if (/<li(?![^>]*class="done")[^>]*>\s*<button/.test(m[2])) fails.push(`${f}: 완료한 단계로만 돌아감(Steps › 돌아가기)`); }
+      for (const m of pv.matchAll(/<ol class="steps[^"]*"([^>]*)>([\s\S]*?)<\/ol>/g)) { const n = [...m[2].matchAll(/<li\b/g)].length; if (n < 3 || n > 6) fails.push(`${f}: Steps ${n}단계 — 3~6(Steps › 단계 수)`); if (!/aria-label="/.test(m[1])) fails.push(`${f}: Steps 이름 없음(Steps)`); 
+        /* Steps 마법사(2026-11-13) — .stepper 바로 안의 .steps. 순서대로면 .done 만 버튼, data-nonlinear 면 현재가 아닌 모든 단계가 버튼. 단계마다 .label.
+           패널 수 = 단계 수 · 보이는 패널 하나 = .on 의 자리 · 세로는 패널이 li 안 · 이전/다음/완료 버튼 */
+        const sp = /<div class="stepper"([^>]*)>\s*$/.exec(pv.slice(Math.max(0, m.index - 200), m.index)), free = !!sp && /data-nonlinear/.test(sp[1]);
+        const lis = m[2].split(/(?=<li\b)/).filter((x) => /^<li\b/.test(x)), onAt = lis.findIndex((x) => /^<li class="on"/.test(x));
+        if (lis.some((x) => !/<span class="label">/.test(x))) fails.push(`${f}: Steps 단계 라벨은 span.label(Steps)`);
+        if (/class="steps[^"]*\bstacked\b/.test(m[0])) fails.push(`${f}: Steps .stacked 는 ds.js · React 가 재서 붙인다 — 예제에 적지 않는다`);
+        if (!free && lis.some((x) => !/^<li class="done"/.test(x) && /^<li[^>]*>\s*<button/.test(x))) fails.push(`${f}: 완료한 단계로만 돌아감 — 순서대로인 Steps 는 .done 만 .step-btn(Steps › 이동)`);
+        if (free && lis.some((x, i) => (i === onAt) === /^<li[^>]*>\s*<button class="step-btn"|^<li[^>]*>\s*<button type="button" class="step-btn"/.test(x))) fails.push(`${f}: data-nonlinear Steps 는 현재가 아닌 모든 단계가 .step-btn, 현재는 버튼이 아니다(Steps › 이동)`);
+        if (sp) {
+          const vertical = /class="steps[^"]*\bvertical\b/.test(m[0]), rest = pv.slice(m.index + m[0].length), stop = rest.search(/<div class="stepper"|<ol class="steps/);
+          const region = vertical ? m[2] : rest.slice(0, stop < 0 ? undefined : stop), panels = [...region.matchAll(/<div class="step-panel"([^>]*)>/g)].map((x) => x[1]);
+          if (panels.length !== lis.length) fails.push(`${f}: Steps 마법사의 .step-panel ${panels.length}개 ≠ 단계 ${lis.length}개${vertical ? " — 세로는 각 li 안에 패널" : ""}`);
+          else if (panels.filter((x) => !/\bhidden\b/.test(x)).length !== 1 || /\bhidden\b/.test(panels[onAt] || "hidden")) fails.push(`${f}: Steps 마법사는 현재(.on) 단계의 패널 하나만 보인다(hidden)`);
+          if (!/data-step="next"/.test(region)) fails.push(`${f}: Steps 마법사에 data-step="next" 버튼이 없다`);  // 완료는 선택 — 마지막 단계가 완료 화면이면(온보딩) finish 가 없다
+        }
+      }
       if (/<(?:ul class="(?:menu|list)|table)[^>]*>(?:(?!<\/(?:ul|table)>)[\s\S])*?<hr class="divider/.test(pv)) fails.push(`${f}: 구분선이 이미 있는 컴포넌트 안에 Divider(Divider › 중복 금지)`);
       /* 라벨(Text Field 원칙) — placeholder 는 이름이 아니다. 글자 입력마다 label · aria-label 로 접근 이름이 있어야 한다 */
       for (const m of pv.matchAll(/<(?:input|textarea)\b[^>]*>/g)) {
@@ -398,6 +440,12 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
           const n = (/aria-label="([^"]+)"/.exec(m[1]) || [])[1];
           if (!n || names.has(n)) fails.push(`${f}: Input Chip 지우기 버튼의 이름이 없거나 겹친다 "${n}" — 값을 넣는다`); names.add(n);
         } }
+      /* 색은 고른 모양만 바꾼다 — 고를 수 없는 칩(입력값 span · 동작 칩)에 .on · .neutral 은 뜻이 없다(사람의 결정 2026-11-13, Input Chip 은 형태만 받고 중립 고정) */
+      for (const m of pv.matchAll(/<(span|button)\b([^>]*\bclass="chip\b[^"]*"[^>]*)>/g)) {
+        const cls = (/class="([^"]*)"/.exec(m[2]) || [])[1].split(/\s+/), pressed = /aria-pressed=/.test(m[2]);
+        if (!pressed && cls.includes("on")) fails.push(`${f}: 고를 수 없는 칩(${m[1]}, aria-pressed 없음)에 .on — Input Chip 은 선택 상태가 없다(Chip › 형태와 색)`);
+        if (!pressed && cls.includes("neutral")) fails.push(`${f}: 고를 수 없는 칩(${m[1]})에 .neutral — 색은 고른 모양만 바꾼다(Chip › 형태와 색)`);
+      }
       for (const m of pv.matchAll(/<div class="chip-group"[^>]*>([\s\S]*?)<\/div>/g)) if ((m[1].match(/aria-pressed=/g) || []).length >= 2 && !/data-chip-reset/.test(m[1])) fails.push(`${f}: 필터 칩이 2개 이상인데 필터 초기화가 없다(Chip › 필터 초기화)`);
       /* 표의 행 — 체크박스 · Switch 는 행마다 다른 이름(Checkbox · Switch 원칙) */
       for (const m of pv.matchAll(/<tbody>([\s\S]*?)<\/tbody>/g)) {
@@ -417,11 +465,40 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   }
 }
 
-/* 컴포넌트 페이지 구성(사람의 결정 2026-11-09) — 모든 컴포넌트에 Placement · Spec 절이 있다. spec 은 예전에 components.json 에만 있어 값이 낡아도 드러나지 않았다 */
+/* 컴포넌트 페이지 구성(사람의 결정 2026-11-12 · 11-13) — 정의 · 고르기 표 · Default · Variant · Size · State · Rules · Spec · Props · Usage.
+   Placement 절은 없앴고(2026-11-09 의 절) 자리 규칙은 고르기 표(choose)의 Placement 행 하나다. 예제는 네 묶음 중 하나에 들고, 제목은 영문이다.
+   고르기 표는 '언제 쓰는가'(필수) → '비슷한 것'(있으면) → 'Placement'(필수) 순서로 3행 이하, 나머지 규칙은 principles(Rules 절)이고
+   8행을 넘으면 소제목으로 묶는다(11-13). 옛 이름(언제 · 용도 · 고르기 · 경계를 뜻하는 이름)이 principles 로 돌아오면 막는다 */
+const EX_GROUPS = ["default", "variant", "size", "state"];
+const CHOOSE_KEYS = ["언제 쓰는가", "비슷한 것", "Placement"];
+const CHOOSE_OLD = ["언제", "용도", "고르기", "링크와 버튼", "Button 과의 경계", "옮기는 기준"];
 for (const [k, c] of Object.entries(COMPONENTS)) {
   const f = `components/${k}.html`; if (!fs.existsSync(path.join(OUT, f))) continue; const b = read(f);
-  if (!(c.spec || []).some(([n]) => n === "Placement")) fails.push(`${k}: spec 에 Placement 가 없다`);
-  for (const id of ["placement", "spec", "props", "usage"]) if (!b.includes(`<h2 id="${id}">`)) fails.push(`${f}: ${id} 절이 없다`);
+  if ((c.spec || []).some(([n]) => n === "Placement")) fails.push(`${k}: spec 에 Placement 행이 있다 — 고르기 표(choose)의 Placement 행으로`);
+  const ch = (c.choose || []).map(([n]) => n);
+  if (ch.filter((n) => n === "언제 쓰는가").length !== 1) fails.push(`${k}: 고르기 표(choose)에 '언제 쓰는가' 행이 하나 있어야 한다`);
+  if (ch.filter((n) => n === "Placement").length !== 1) fails.push(`${k}: 고르기 표(choose)에 Placement 행이 하나 있어야 한다`);
+  if (ch.length > 3) fails.push(`${k}: 고르기 표가 ${ch.length}행 — 3행 이하(언제 쓰는가 · 비슷한 것 · Placement)`);
+  const bad = ch.filter((n) => !CHOOSE_KEYS.includes(n)); if (bad.length) fails.push(`${k}: 고르기 표에 ${bad.join(", ")} — 언제 쓰는가 · 비슷한 것 · Placement 만`);
+  if (ch.join() !== CHOOSE_KEYS.filter((x) => ch.includes(x)).join()) fails.push(`${k}: 고르기 표 순서가 ${ch.join(" → ")} — 언제 쓰는가 → 비슷한 것 → Placement`);
+  const rules = !c.principles ? [] : Array.isArray(c.principles) ? c.principles : Object.values(c.principles).flat();
+  if (c.principles && !Array.isArray(c.principles) && Object.values(c.principles).some((g) => !Array.isArray(g) || !g.length)) fails.push(`${k}: Rules 소제목에 빈 묶음이 있다`);
+  const stray = rules.map(([n]) => n).filter((n) => CHOOSE_KEYS.includes(n) || CHOOSE_OLD.includes(n));
+  if (stray.length) fails.push(`${k}: principles 에 ${stray.join(", ")} — 고르기 표(choose)로`);
+  if (Array.isArray(c.principles) && c.principles.length > 8) fails.push(`${k}: Rules 가 ${c.principles.length}행 — 8행을 넘으면 { 소제목: 행[] } 으로 묶는다`);
+  if (/<div class="kv"/.test(b)) fails.push(`${f}: div.kv — dt · dd 는 dl 안에만(dl.kv)`);
+  if (/<h2 id="placement">/.test(b)) fails.push(`${f}: Placement 절이 있다(2026-11-12 에 없앰)`);
+  for (const id of ["default", "spec", "props", "usage"]) if (!b.includes(`<h2 id="${id}">`)) fails.push(`${f}: ${id} 절이 없다`);
+  for (const ex of c.examples || []) {
+    if (!EX_GROUPS.includes(ex.group)) fails.push(`${k}/${ex.id}: 예제 group 이 ${JSON.stringify(ex.group)} — default · variant · size · state 중 하나`);
+    if (/[가-힣]/.test(ex.title)) fails.push(`${k}/${ex.id}: 예제 제목 '${ex.title}' 이 한글이다 — 영문으로(사람의 결정 2026-11-12)`);
+  }
+  /* 절 순서 — 묶음은 Default → Variant → Size → State, 그 뒤 Rules → Spec → Props → Usage. 고르기 표는 정의 바로 뒤 */
+  if (c.choose && !/<p class="lead">[\s\S]*?<\/p><dl class="kv">/.test(b)) fails.push(`${f}: 고르기 표가 정의(lead) 바로 뒤에 없다`);
+  if (rules.length && !b.includes(`<h2 id="rules">`)) fails.push(`${f}: rules 절이 없다`);
+  const order = [...b.matchAll(/<h2 id="(default|variant|size|state|rules|spec|props|usage)">/g)].map((m) => m[1]);
+  const want = ["default", "variant", "size", "state", "rules", "spec", "props", "usage"].filter((x) => order.includes(x));
+  if (order.join() !== want.join()) fails.push(`${f}: 절 순서가 ${order.join(" → ")} — ${want.join(" → ")} 이어야 한다`);
 }
 
 /* 주석 열림·닫힘이 짝인지 — 선언을 지울 때 여러 줄 주석의 한쪽만 남기기 쉽고,
@@ -460,7 +537,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 43) fails.push(`components.json 컴포넌트 ${j.components.length}개(43 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 44) fails.push(`components.json 컴포넌트 ${j.components.length}개(44 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 10) fails.push(`components.json 패턴 ${j.patterns.length}개(10 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }
@@ -476,6 +553,15 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
   /* 없앤 것이 돌아오지 않게(2026-11-11) — .sev-cell(행 좌측 색 막대), Tag 의 .plain(점이 기본에서 빠져 뜻이 없어짐 — 점은 .dot) */
   if (/class="[^"]*\bsev-cell\b/.test(html)) fails.push(`${rel}: .sev-cell 은 없앴다 — 심각도 칸은 Tag 하나로`);
   for (const m of html.matchAll(/class="([^"]*\btag\b[^"]*)"/g)) if (/\bplain\b/.test(m[1])) fails.push(`${rel}: Tag 의 .plain 은 없앴다(기본이 점 없음) — 점이 필요하면 .dot`);
+  /* 고정폭 글자는 Code 에만(사람의 결정 2026-11-13) — Text Field · Copy Field 의 .mono 를 없앴다 */
+  for (const m of html.matchAll(/class="([^"]*\bfield\b[^"]*)"/g)) if (/\bmono\b/.test(m[1])) fails.push(`${rel}: .field.mono 는 없앴다 — 고정폭 글자는 Code 에만 쓴다`);
+  /* Notice · Banner 아이콘은 filled(사람의 결정 2026-11-13) — 선 아이콘은 stroke 로 그린다 */
+  for (const m of html.matchAll(/<div class="(notice|banner)\b[^"]*"[^>]*>\s*(?:<span class="ico">)?(<svg[^>]*>)/g)) if (!/fill="currentColor"/.test(m[2])) fails.push(`${rel}: .${m[1]} 아이콘이 선 아이콘이다 — filled 로(I(name, size, {style:"filled"}))`);
+}
+/* 고정폭 글자 = Code 에만(2026-11-13) — --font-mono 를 쓰는 규칙은 pre · code 선택자뿐이다 */
+{
+  const css = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const m of css.matchAll(/([^{}]+)\{[^}]*font-family:var\(--font-mono\)[^}]*\}/g)) { const sel = m[1].trim(); if (sel.startsWith("--") || sel.startsWith(":root")) continue; if (!sel.split(",").every((x) => /\b(pre|code)\b|code-inline|code-view/.test(x))) fails.push(`style.src.css: Code 밖에서 고정폭 글자 — ${sel.slice(0, 80)}`); }
 }
 
 /* 상호작용 면은 **틴트 쌍**을 써야 한다 — --surface-neutral-secondary → --surface-neutral-strong.
@@ -537,10 +623,11 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
   const cut = css.indexOf("*{box-sizing");
   const declared = new Set([...css.slice(0, cut).matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
   /* --float-*: 스크롤 영역 안 메뉴의 자리 · 폭 — ds.js · React 가 열 때 재서 넣는다(2026-11-10) */
-  /* --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
+  /* --tp-top · --tp-left 는 Time Picker 열 목록 자리(2026-11-13, 같은 방식). --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
   /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
   /* --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면 — 표 규칙 안에서 정하고 td 가 기본값(transparent)과 함께 쓴다(2026-11-11) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface"];
+  /* --avatar-ring: Avatar Group 링 · 겹친 면의 밑색 — 놓인 자리의 면(2026-11-13) */
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring"];
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);

@@ -117,7 +117,7 @@ export interface TextFieldProps extends FieldOwnProps, InputBase {
   showCount?: boolean;
   /** 글자 수 한도. 넘겨도 입력되고 오류로 알린다(네이티브 maxlength 가 아니다) */
   maxLength?: number;
-  /** 입력 글자를 고정폭으로 — IP · URL · 해시 */
+  /** @deprecated 고정폭 글자는 Code 에만 쓴다(사람의 결정 2026-11-13). 개발 모드에서 경고하고 무시한다 — 숫자 자리는 tabular-nums 가 맞춘다 */
   mono?: boolean;
   /** 비밀번호 표시 토글 — type 을 password 로 두고 버튼으로 바꾼다 */
   reveal?: boolean;
@@ -137,12 +137,14 @@ export interface TextFieldProps extends FieldOwnProps, InputBase {
   wrapControl?: (control: ReactNode) => ReactNode;
 }
 
+let monoWarned = false;
 /** 한 줄 텍스트 입력 */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
   { label, required, help, error, size, prefix, suffix, showCount, wrapperStyle, wrapperClassName, trailing, wrapperProps, after, wrapControl, id: idProp, className, maxLength, value, defaultValue, onChange, mono, reveal, revealLabel = "비밀번호 표시", messages, ...rest },
   ref,
 ) {
   const id = useId(idProp);
+  if (mono && process.env.NODE_ENV !== "production" && !monoWarned && (monoWarned = true)) console.warn("[ds-react] TextField mono 는 없어졌습니다 — 고정폭 글자는 Code 에만 씁니다(MIGRATION.md).");
   const [shown, setShown] = useState(false);
   const c = useTextControl<HTMLInputElement>({ id, value, defaultValue, maxLength, showCount, onChange, help, error, messages });
   const revealButton = reveal ? (
@@ -166,7 +168,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
     />
   );
   return (
-    <Field {...wrapperProps} label={label} required={required} help={help} error={c.error} size={size} counter={c.counter} counterOver={c.over} live={c.live} htmlFor={id} helpId={c.helpId} style={wrapperStyle} className={cx(mono && "mono", wrapperClassName)} after={after}>
+    <Field {...wrapperProps} label={label} required={required} help={help} error={c.error} size={size} counter={c.counter} counterOver={c.over} live={c.live} htmlFor={id} helpId={c.helpId} style={wrapperStyle} className={wrapperClassName} after={after}>
       {(wrapControl ?? ((x: ReactNode) => x))(prefix !== undefined || suffix !== undefined || trailing !== undefined || reveal ? (
         <div className="affix">
           {prefix !== undefined && <span>{prefix}</span>}

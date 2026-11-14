@@ -13,6 +13,7 @@ const COLUMNS: DataTableColumn<Row>[] = [
 export default function Example() {
   return (
     <DataTable
+      hover
       columns={COLUMNS}
       rows={ROWS}
       rowKey={(r) => r.id}

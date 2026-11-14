@@ -18,5 +18,5 @@ const COLUMNS: DataTableColumn<Device>[] = [
 ];
 
 export default function Example() {
-  return <DataTable stickyColumn selectable caption="단말 현황" columns={COLUMNS} rows={ROWS} rowKey={(r) => r.pc} wrapStyle={{ maxWidth: 640 }} />;
+  return <DataTable hover stickyColumn selectable caption="단말 현황" columns={COLUMNS} rows={ROWS} rowKey={(r) => r.pc} wrapStyle={{ maxWidth: 640 }} />;
 }

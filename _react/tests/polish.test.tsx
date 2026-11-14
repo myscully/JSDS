@@ -160,13 +160,20 @@ describe("차트 표로 보기", () => {
   const heads = () => Array.from(document.querySelectorAll("thead th")).map((t) => t.textContent);
   const rows = () => Array.from(document.querySelectorAll("tbody tr")).map((r) => Array.from(r.children).map((c) => c.textContent));
 
+  it("표로 보기는 옵션 — table 이 없으면 버튼 · 표가 없고 .chart-view 틀은 남는다(사람의 결정 2026-11-13)", () => {
+    const { container } = render(<ChartCanvas chart={Chart} config={two} aria-label="탐지" />);
+    expect(container.querySelector("[data-chart-table]")).toBeNull();
+    expect(container.querySelector(".chart-tools")).toBeNull();
+    expect(container.querySelector(".chart-view > .chart-canvas > canvas")).not.toBeNull();
+  });
+
   it("처음은 차트, 버튼은 canvas 앞(읽는 순서 = 보이는 순서)", () => {
-    render(<ChartCanvas chart={Chart} config={two} aria-label="탐지" />);
+    render(<ChartCanvas table chart={Chart} config={two} aria-label="탐지" />);
     expect(btn().textContent).toBe("표로 보기"); expect(document.querySelector(".chart-table")).toBeNull();
     expect(btn().compareDocumentPosition(document.querySelector("canvas")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
   it("누르면 같은 데이터를 표로 — 숫자 형식, 빈 값은 보이는 — + 숨긴 '값 없음', 머리글 scope", async () => {
-    render(<ChartCanvas chart={Chart} config={two} aria-label="탐지" />);
+    render(<ChartCanvas table chart={Chart} config={two} aria-label="탐지" />);
     await userEvent.click(btn());
     expect(heads()).toEqual(["구분", "A", "B"]);
     expect(rows()).toEqual([["월", "1,234", "3"], ["화", "—값 없음", "4"]]);
@@ -179,26 +186,26 @@ describe("차트 표로 보기", () => {
     expect(document.activeElement).toBe(btn());
   });
   it("표 영역은 차트와 같은 이름 · 포커스로 스크롤 · 같은 높이", async () => {
-    render(<ChartCanvas chart={Chart} config={two} aria-label="탐지" height={300} />);
+    render(<ChartCanvas table chart={Chart} config={two} aria-label="탐지" height={300} />);
     await userEvent.click(btn());
     const box = screen.getByRole("region", { name: "탐지" });
     expect(box.tabIndex).toBe(0); expect(box.style.height).toBe("300px");
   });
   it("다시 누르면 차트로, 표는 지운다", async () => {
-    render(<ChartCanvas chart={Chart} config={two} aria-label="탐지" />);
+    render(<ChartCanvas table chart={Chart} config={two} aria-label="탐지" />);
     await userEvent.click(btn()); await userEvent.click(btn());
     expect(document.querySelector(".chart-table")).toBeNull();
     expect((document.querySelector(".chart-canvas") as HTMLElement).hidden).toBe(false);
     expect(btn().textContent).toBe("표로 보기");
   });
   it("이름 없는 단일 계열은 '값', 여러 개면 번호", async () => {
-    const { unmount } = render(<ChartCanvas chart={Chart} config={cfg({ labels: ["x"], datasets: [{ data: [1] }] })} aria-label="도넛" />);
+    const { unmount } = render(<ChartCanvas table chart={Chart} config={cfg({ labels: ["x"], datasets: [{ data: [1] }] })} aria-label="도넛" />);
     await userEvent.click(btn()); expect(heads()).toEqual(["구분", "값"]); unmount();
-    render(<ChartCanvas chart={Chart} config={cfg({ labels: ["x"], datasets: [{ data: [1] }, { data: [2] }] })} aria-label="둘" />);
+    render(<ChartCanvas table chart={Chart} config={cfg({ labels: ["x"], datasets: [{ data: [1] }, { data: [2] }] })} aria-label="둘" />);
     await userEvent.click(btn()); expect(heads()).toEqual(["구분", "값 1", "값 2"]);
   });
   it("labels 로 문구를 바꾼다", async () => {
-    render(<ChartCanvas chart={Chart} config={two} aria-label="x" labels={{ table: "Table", chart: "Chart", head: "Day", empty: "No value" }} />);
+    render(<ChartCanvas table chart={Chart} config={two} aria-label="x" labels={{ table: "Table", chart: "Chart", head: "Day", empty: "No value" }} />);
     expect(btn().textContent).toBe("Table");
     await userEvent.click(btn());
     expect(btn().textContent).toBe("Chart"); expect(heads()[0]).toBe("Day");

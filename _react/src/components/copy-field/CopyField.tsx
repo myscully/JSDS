@@ -72,7 +72,6 @@ export const CopyField = forwardRef<HTMLSpanElement, CopyFieldProps>(function Co
     <TextField
       label={label}
       help={help}
-      mono
       readOnly
       autoComplete="off"
       type={secret && !shown ? "password" : "text"}

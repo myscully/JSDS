@@ -93,6 +93,12 @@ module.exports = async function nav({ page, ok, go }) {
   const uf = await userEx.locator(".topbar-user").evaluate((b) => { const c = getComputedStyle(b), a = b.querySelector(".avatar").getBoundingClientRect(), r = b.getBoundingClientRect(); return { bg: c.backgroundColor, b: c.borderTopWidth, same: Math.round(r.width) === Math.round(a.width) && Math.round(r.height) === Math.round(a.height) }; });
   ok("the user button is just the avatar, with no button face", uf.bg === "rgba(0, 0, 0, 0)" && uf.b === "0px" && uf.same, JSON.stringify(uf));
   ok("user menu opens from the avatar, logout last after a separator, Esc returns", um.open && um.last === "로그아웃" && um.sep && um.expanded === "true" && (await active()).cls === "topbar-user", JSON.stringify(um));
+  /* 좁은 자리 — 바가 내용 폭만큼 늘어 면 · 선이 내용 끝까지, 미리보기가 가로로 스크롤(2026-11-13). 넓은 자리에서는 폭을 채움 그대로 */
+  const fitBar = () => page.evaluate(() => [...document.querySelectorAll(".example-preview .topbar")].map((b) => { const r = b.getBoundingClientRect(), k = [...b.children].map((c) => c.getBoundingClientRect().right), pv = b.closest(".example-preview"), ps = getComputedStyle(b.parentElement); return { id: b.closest(".example").id, inside: Math.max(...k) <= r.right + 0.5, fill: r.width >= b.parentElement.clientWidth - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight) - 0.5, scroll: pv.scrollWidth > pv.clientWidth, h: Math.abs(r.height - 3.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)) <= 0.5 }; }));
+  const wideBar = await fitBar();
+  const vpN = page.viewportSize(); await page.setViewportSize({ width: 390, height: 900 }); await wait(120);
+  const narrowBar = await fitBar(); await page.setViewportSize(vpN); await wait(120);
+  ok("a top bar narrower than its content grows with it — face and line reach the last item, the preview scrolls; wide bars still fill", wideBar.every((x) => x.inside && x.fill && !x.scroll && x.h) && narrowBar.every((x) => x.inside && x.fill && x.h) && narrowBar.filter((x) => x.scroll).length === 2, JSON.stringify({ wideBar, narrowBar }));
 
   /* ── Tag ── */
   await go("components/tag.html");
@@ -122,17 +128,18 @@ module.exports = async function nav({ page, ok, go }) {
   await go("components/indicator.html");
   ok("Indicator no longer documents Steps as an example", (await page.locator("#ex-indicator-steps").count()) === 0);
   await go("components/steps.html");
+  /* .stepper 밖의 .steps(표시 전용) — 이동은 제품, 완료 단계 누름만 ds:step(2026-11-13 — 상세에 from · trigger) */
   await page.evaluate(() => { window.__step = []; document.addEventListener("ds:step", (e) => window.__step.push(e.detail)); });
-  const back = page.locator("#ex-steps-back .steps");
+  const back = page.locator("#ex-steps-indicator .steps");
   await back.locator(".step-btn").nth(1).click(); await wait(20);
   const sev = await page.evaluate(() => window.__step);
   await back.locator(".step-btn").first().hover(); await wait(60);
-  const hov = await page.evaluate(() => { const d = document.createElement("div"); d.style.color = "var(--foreground-neutral-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove(); return getComputedStyle(document.querySelector("#ex-steps-back .step-btn")).color === want; });
+  const hov = await page.evaluate(() => { const d = document.createElement("div"); d.style.color = "var(--foreground-neutral-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove(); return getComputedStyle(document.querySelector("#ex-steps-indicator .step-btn .label")).color === want; });
   await page.mouse.move(4, 500);
   ok("hovering a done step darkens its label", hov);
-  ok("pressing a done step fires ds:step with its index", JSON.stringify(sev) === '[{"index":1}]', JSON.stringify(sev));
-  const stepLook = await page.evaluate(() => { const a = document.querySelector("#ex-steps-back li.done"), b = document.querySelector("#ex-steps-default li.done"), btn = a.querySelector(".step-btn"), c = getComputedStyle(btn), f = (e) => Math.round(e.getBoundingClientRect().height), g = (e) => Math.round(e.getBoundingClientRect().width); return { h: [f(a), f(b)], w: [g(a), g(b)], bg: c.backgroundColor, b: c.borderTopWidth, p: c.paddingLeft, gap: c.columnGap, fs: c.fontSize === getComputedStyle(a).fontSize, color: c.color === getComputedStyle(a).color, future: document.querySelectorAll("#ex-steps-back li:not(.done) button").length, ver: getComputedStyle(document.querySelector("#ex-steps-vertical .steps")).flexDirection, cur: document.querySelector("#ex-steps-default li.on").getAttribute("aria-current") }; });
-  ok("a done step button looks the same as a static one; only done steps are buttons", stepLook.h[0] === stepLook.h[1] && stepLook.w[0] === stepLook.w[1] && stepLook.bg === "rgba(0, 0, 0, 0)" && stepLook.b === "0px" && stepLook.p === "0px" && stepLook.gap === "8px" && stepLook.fs && stepLook.color && stepLook.future === 0, JSON.stringify(stepLook));
+  ok("pressing a done step of a plain .steps fires ds:step and does not move it", JSON.stringify(sev) === '[{"index":1,"from":2,"trigger":"click"}]' && await page.evaluate(() => document.querySelectorAll("#ex-steps-indicator li")[2].classList.contains("on")), JSON.stringify(sev));
+  const stepLook = await page.evaluate(() => { const a = document.querySelector("#ex-steps-indicator li.done"), b = document.querySelector("#ex-steps-indicator li.on"), btn = a.querySelector(".step-btn"), c = getComputedStyle(btn), f = (e) => Math.round(e.getBoundingClientRect().height); return { h: [f(a), f(b)], bg: c.backgroundColor, b: c.borderTopWidth, p: c.paddingLeft, gap: c.columnGap, fs: c.fontSize === getComputedStyle(a).fontSize, future: document.querySelectorAll("#ex-steps-indicator li:not(.done) button").length, ver: getComputedStyle(document.querySelector("#ex-steps-vertical .steps")).flexDirection, cur: document.querySelector("#ex-steps-default li.on").getAttribute("aria-current") }; });
+  ok("a done step button looks the same as a static step; only done steps are buttons", stepLook.h[0] === stepLook.h[1] && stepLook.bg === "rgba(0, 0, 0, 0)" && stepLook.b === "0px" && stepLook.p === "0px" && stepLook.gap === "8px" && stepLook.fs && stepLook.future === 0, JSON.stringify(stepLook));
   ok("steps lie vertically with .vertical and mark the current step", stepLook.ver === "column" && stepLook.cur === "step", JSON.stringify(stepLook));
   const nav2 = await page.evaluate(() => !!document.querySelector('.nav a[href$="steps.html"]'));
   ok("Steps has its own page in the components menu", nav2);

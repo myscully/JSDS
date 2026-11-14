@@ -113,6 +113,21 @@ describe("Chip", () => {
     expect(screen.queryByRole("button", { name: "필터 초기화" })).toBeNull();
     expect(document.activeElement?.textContent).toBe("a");
   });
+  it("형태 · 색 — outline 은 클래스 없음, solid · neutral 클래스, 고르면 on(2026-11-13)", () => {
+    const { container } = render(<>
+      <Chip defaultSelected>a</Chip><Chip variant="solid" color="neutral" defaultSelected>b</Chip><Chip variant="solid">c</Chip>
+    </>);
+    expect([...container.querySelectorAll(".chip")].map((c) => c.className)).toEqual(["chip on", "chip solid neutral on", "chip solid"]);
+  });
+  it("입력값 · 동작 칩은 형태만 받는다 — color · selected 는 경고하고 무시", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { container } = render(<>
+      <Chip variant="solid" color="neutral" selected onRemove={() => {}}>10.0.0.1</Chip><Chip action variant="solid" color="neutral">추가</Chip>
+    </>);
+    expect([...container.querySelectorAll(".chip")].map((c) => c.className)).toEqual(["chip solid", "chip solid"]);
+    expect(warn.mock.calls.some((c) => String(c[0]).includes("고를 수 있는 칩에만"))).toBe(true);
+    warn.mockRestore();
+  });
 });
 
 describe("필수 그룹 — <Form validate>", () => {

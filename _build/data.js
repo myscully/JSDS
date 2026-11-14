@@ -14,7 +14,7 @@ const SITE = {
     ["Selection Controls", [["checkbox", "Checkbox"], ["chip", "Chip"], ["combobox", "Combobox"], ["radio-button", "Radio Button"], ["select-button", "Select Button"]]],
     ["", [["search", "Search"], ["select", "Select"], ["side-panel", "Side Panel"], ["slider", "Slider"], ["steps", "Steps"], ["switch", "Switch"], ["tab", "Tab"]]],
     ["Table", [["data-table", "Data Table"], ["table", "Table"]]],
-    ["", [["tag", "Tag"], ["text-field", "Text Field"], ["tooltip", "Tooltip"], ["top-navigation", "Top Navigation"]]],
+    ["", [["tag", "Tag"], ["text-field", "Text Field"], ["time-picker", "Time Picker"], ["tooltip", "Tooltip"], ["top-navigation", "Top Navigation"]]],
   ] },
   patterns: { title: "Patterns", desc: "반복되는 업무 단위와 문제를 해결하는 가이드라인", isNew: true, pages: { overview: "Overview" }, groups: [
     ["Common UI", [["input-form", "입력 폼"], ["terms-agreement", "약관 동의"], ["notes", "유의사항"]]],

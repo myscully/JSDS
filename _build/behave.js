@@ -134,7 +134,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     ok("combobox: menu is as wide as the field", await H.evaluate((e) => Math.abs(e.querySelector(".menu").offsetWidth - e.querySelector(".control").offsetWidth) <= 1));
     await page.keyboard.type("인"); await page.waitForTimeout(30);
     ok("combobox: typing filters the list", JSON.stringify(await vis(H)) === '["인프라팀","디자인팀","인사팀"]', JSON.stringify(await vis(H)));
-    ok("combobox: first match becomes the active descendant", await H.evaluate((e) => { const a = e.querySelector(".menu-item.active"); return a.textContent === "인프라팀" && e.querySelector("input").getAttribute("aria-activedescendant") === a.id; }));
+    ok("combobox: first match becomes the active descendant — a tertiary face and no outline (2026-11-13)", await H.evaluate((e) => { const a = e.querySelector(".menu-item.active"), d = document.createElement("div"); d.style.background = "var(--surface-neutral-tertiary)"; document.body.append(d); const t = getComputedStyle(d).backgroundColor; d.remove(); const c = getComputedStyle(a); return a.textContent === "인프라팀" && e.querySelector("input").getAttribute("aria-activedescendant") === a.id && c.outlineStyle === "none" && c.backgroundColor === t; }));
     ok("combobox: result count is announced", (await st(H)) === "결과 3개", await st(H));
     await page.keyboard.press("ArrowUp"); ok("combobox: ArrowUp wraps to the last match", await H.evaluate((e) => e.querySelector(".menu-item.active").textContent === "인사팀"));
     await page.keyboard.press("ArrowDown"); await page.keyboard.press("Enter"); await page.waitForTimeout(30);
@@ -888,9 +888,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const DOT = { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary",
         medium: "--foreground-accent-light-blue", low: "--foreground-accent-lime", info: "--foreground-inactive-primary", pending: "--foreground-accent-cyan" }[l];
       const TINT = { critical: "--surface-negative-primary", high: "--surface-cautionary-primary",
-        medium: "--surface-accent-light-blue", low: "--surface-accent-lime", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
+        medium: "--surface-accent-light-blue", low: "--surface-accent-lime", info: "--surface-neutral-secondary", pending: "--surface-accent-cyan" }[l];
       const SOLID = { critical: "--surface-negative-strong", high: "--surface-cautionary-primary",
-        medium: "--surface-accent-light-blue", low: "--surface-accent-lime", info: "--surface-neutral-strong", pending: "--surface-accent-cyan" }[l];
+        medium: "--surface-accent-light-blue", low: "--surface-accent-lime", info: "--surface-neutral-secondary", pending: "--surface-accent-cyan" }[l];
       out.tok[l] = { dot: res("var(" + DOT + ")"), tint: res("var(" + TINT + ")"), surface: res("var(" + SOLID + ")"),
         label: res("var(" + LABEL + ")") };
     }
@@ -1035,11 +1035,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const brandSides = (x, T) => x.sides.every((c) => c === T.brand);
     const seams = (b, T) => b.slice(1).every((x, i) => Math.abs(x.l - (b[i].r - 1)) < 0.01 && (x.on || b[i].on || (b[i].sides[1] === T.neutral && x.sides[3] === "rgba(0, 0, 0, 0)")));
     const o = await look(ex("select-button", "outline") + " .select-btn"), on = o.b.find((x) => x.on);
-    ok("outline select button: the picked button has a brand line on all four sides, seams are one line, height 38",
-      brandSides(on, o.T) && on.bg === o.T.subtle && on.color === o.T.brandText && on.z === "1" && o.b.filter((x) => !x.on).every((x) => x.sides[0] === o.T.neutral && x.sides[2] === o.T.neutral) && seams(o.b, o.T) && o.h === 38 && o.b.every((x) => x.h === 38), JSON.stringify(o));
+    ok("outline select button: the picked button has a brand line on all four sides, seams are one line, height 40 (md — 2026-11-12, 38 이었다)",
+      brandSides(on, o.T) && on.bg === o.T.subtle && on.color === o.T.brandText && on.z === "1" && o.b.filter((x) => !x.on).every((x) => x.sides[0] === o.T.neutral && x.sides[2] === o.T.neutral) && seams(o.b, o.T) && o.h === 40 && o.b.every((x) => x.h === 40), JSON.stringify(o));
     const S = ex("select-button", "solid") + " .select-btn", s1 = await look(S);
     await page.locator(S + " button").nth(1).click(); const s2 = await look(S);
-    const solidOk = (r, i) => { const x = r.b[i]; return x.on && x.bg === r.T.solid && x.color === r.T.label && brandSides(x, r.T) && r.b.filter((y) => !y.on).every((y) => y.bg === "rgba(0, 0, 0, 0)") && seams(r.b, r.T) && r.h === 38; };
+    const solidOk = (r, i) => { const x = r.b[i]; return x.on && x.bg === r.T.solid && x.color === r.T.label && brandSides(x, r.T) && r.b.filter((y) => !y.on).every((y) => y.bg === "rgba(0, 0, 0, 0)") && seams(r.b, r.T) && r.h === 40; };
     ok("outline solid select button: the picked button is a brand face with white text and follows the pick", solidOk(s1, 0) && solidOk(s2, 1), JSON.stringify({ s1, s2 }));
   }
   await go("components/chip.html");
@@ -1359,11 +1359,14 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { tag: li.firstElementChild.tagName, link: !!li.querySelector("a"), color: c.color, tert: getComputedStyle(document.querySelector("#ex-breadcrumb-text-parent .breadcrumb li:nth-child(3) a")).color }; });
   ok("breadcrumb parent without a page is plain text in the link colour (not disabled)", bcText.tag === "SPAN" && !bcText.link && bcText.color === bcText.tert, JSON.stringify(bcText));
   await go("patterns/onboarding.html");
-  const ob = page.locator("#ex-onboarding-step .example-preview .onboard");
-  await ob.locator('[data-step="next"]').click();
-  ok("onboarding next moves step", await ob.evaluate((e) => { const li = e.querySelectorAll(".steps li"); return li[2].classList.contains("on") && li[2].getAttribute("aria-current") === "step" && li[1].classList.contains("done") && !li[1].classList.contains("on"); }));
-  await ob.locator('[data-step="prev"]').click(); await ob.locator('[data-step="prev"]').click();
-  ok("onboarding prev disabled at first step", await ob.evaluate((e) => e.querySelectorAll(".steps li")[0].classList.contains("on") && e.querySelector('[data-step="prev"]').disabled && e.querySelectorAll(".steps li")[1].querySelector("i").textContent.trim() === "2"));
+  const ob = page.locator("#ex-onboarding-step .example-preview .onboard"), obNext = ob.locator('[data-step="next"]:visible'), obPrev = ob.locator('[data-step="prev"]:visible');
+  await obNext.click(); await page.waitForTimeout(60);
+  ok("onboarding next moves step and shows that step's card", await ob.evaluate((e) => { const li = e.querySelectorAll(".steps li"), ps = e.querySelectorAll(".step-panel"); return li[2].classList.contains("on") && li[2].getAttribute("aria-current") === "step" && li[1].classList.contains("done") && !li[1].classList.contains("on") && !ps[2].hidden && ps[1].hidden; }));
+  await obPrev.click(); await obPrev.click(); await page.waitForTimeout(60);
+  ok("onboarding prev disabled at first step; the steps already done stay done", await ob.evaluate((e) => e.querySelectorAll(".steps li")[0].classList.contains("on") && [...e.querySelectorAll('[data-step="prev"]')].every((b) => b.disabled) && e.querySelectorAll(".steps li")[1].classList.contains("done") && !!e.querySelectorAll(".steps li")[1].querySelector(".step-btn svg")));
+  await page.fill("#ob-org", ""); await obNext.click(); await page.waitForTimeout(60);
+  ok("onboarding next checks the organisation name", await ob.evaluate((e) => e.querySelectorAll(".steps li")[0].classList.contains("on") && document.activeElement.id === "ob-org"));
+  await page.fill("#ob-org", "지란지교시큐리티"); await obNext.click(); await page.waitForTimeout(60);
   await ob.locator(".radio.card").nth(1).click();
   ok("onboarding card radios choose one", await ob.evaluate((e) => e.querySelectorAll(".radio.card input:checked").length === 1 && e.querySelectorAll(".radio.card input")[1].checked));
   /* 완료 문단 — 한국어 기본 줄바꿈은 음절 사이에서 끊겨 1440 에서 "…있습니 / 다." 로 한 글자 줄이 남았다. .keep-all 로 어절째 넘긴다 */
@@ -1373,10 +1376,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   ok("onboarding done text keeps its last word whole", obLast.last > 30, JSON.stringify(obLast));
   /* 390 — .onboard 가 가운데 정렬이라 넘친 Steps 의 양끝이 잘렸다. safe center 는 넘칠 때만 왼쪽부터 놓는다 */
   await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(250);
-  const obFit = await page.evaluate(() => { const pv = document.querySelector("#ex-onboarding-done .example-preview"), s = pv.querySelector(".steps").getBoundingClientRect();
-    return { left: Math.round(s.left - pv.getBoundingClientRect().left), scrolls: pv.scrollWidth > pv.clientWidth }; });
+  const obFit = await page.evaluate(() => { const pv = document.querySelector("#ex-onboarding-done .example-preview"), ol = pv.querySelector(".steps"), s = ol.getBoundingClientRect();
+    return { left: Math.round(s.left - pv.getBoundingClientRect().left), scrolls: pv.scrollWidth > pv.clientWidth, stacked: ol.classList.contains("stacked") }; });
   await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
-  ok("onboarding steps start inside the preview at 390", obFit.left >= 0 && obFit.scrolls, JSON.stringify(obFit));
+  /* 2026-11-13 부터 넘치는 Steps 는 세로로 쌓인다(.stacked) — 전에는 가로로 넘쳐 미리보기가 스크롤했다 */
+  ok("onboarding steps start inside the preview at 390 and stack instead of scrolling", obFit.left >= 0 && obFit.stacked && !obFit.scrolls, JSON.stringify(obFit));
   await go("components/text-field.html");
   const cf = page.locator("#ex-text-field-affix .example-preview .field").filter({ has: page.locator(".counter") }).first();
   await cf.locator("input").fill("새 정책");
@@ -1437,7 +1441,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   const rv0 = await rvState(); await rv.locator(".reveal").click(); const rv1 = await rvState(); await rv.locator(".reveal").click(); const rv2 = await rvState();
   ok("password reveal: type, aria-pressed, icon swap, value and focus stay", rv0.type === "password" && rv0.pressed === "false" && rv0.hide === "none" && rv0.show !== "none" && rv0.name === "비밀번호 표시" && rv1.type === "text" && rv1.pressed === "true" && rv1.show === "none" && rv1.hide !== "none" && rv1.focus && rv1.value === rv0.value && rv2.type === "password" && rv2.pressed === "false", JSON.stringify([rv0, rv1, rv2]));
   const monoF = await page.evaluate(() => { const a = document.querySelector("#ip1"), b = document.querySelector("#af-d"); return { a: getComputedStyle(a).fontFamily, b: getComputedStyle(b).fontFamily, field: a.closest(".field").classList.contains("mono") }; });
-  ok(".mono uses the mono stack", monoF.field && monoF.a !== monoF.b, JSON.stringify(monoF));
+  ok("IP field uses the body font — monospace is for Code only (2026-11-13, was .mono)", !monoF.field && monoF.a === monoF.b, JSON.stringify(monoF));
   /* 비활성 입력칸의 면은 비활성 토큰, 읽기 전용은 읽기 전용 면 — :read-only 가 disabled 에도 맞아 비활성 면을 덮었다(2026-10-27) */
   const tfState = await page.evaluate(() => { const box = document.querySelector("#ex-text-field-state .example-preview"), dis = box.querySelector("input:disabled"), ro = box.querySelector("input[readonly]:not(:disabled)"), tok = (v) => { const d = document.createElement("div"); d.style.background = `var(${v})`; document.body.append(d); const c = getComputedStyle(d).backgroundColor; d.remove(); return c; };
     return { dis: getComputedStyle(dis).backgroundColor, ro: getComputedStyle(ro).backgroundColor, wantDis: tok("--surface-disable-primary"), wantRo: tok("--background-neutral-secondary") }; });
@@ -1825,7 +1829,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     return { text: sr.textContent, w: r.width, h: r.height, onHasSr: !!document.querySelector("#ex-steps-default li.on .sr-only") }; });
   ok("done steps carry a screen-reader-only label", !!stepSr && /완료/.test(stepSr.text) && stepSr.w <= 1 && stepSr.h <= 1 && !stepSr.onHasSr, JSON.stringify(stepSr));
   /* 390 — 미리보기(.panel)가 가운데 정렬이라 넘친 예제는 왼쪽이 잘려 스크롤로도 못 봤다("기본 정보" → "정보"). safe center 는 넘칠 때만 왼쪽부터 놓는다 */
-  const stepFit = () => page.evaluate(() => { const pv = document.querySelector("#ex-steps-default .example-preview"), s = pv.querySelector(".steps").getBoundingClientRect(), p = pv.getBoundingClientRect();
+  /* 2026-11-13 부터 Steps 는 넘치면 세로로 쌓여 넘치지 않는다 — 미리보기의 safe center 는 넣은 고정 폭 상자로 잰다(1440 에서는 들어가고 390 에서는 넘치는 600) */
+  await page.evaluate(() => { const d = document.createElement("div"); d.id = "__wide"; d.style.cssText = "width:600px;height:8px;flex:none"; const pv = document.querySelector("#ex-steps-indicator .example-preview"); pv.querySelector(".steps").style.display = "none"; pv.append(d); });
+  const stepFit = () => page.evaluate(() => { const pv = document.querySelector("#ex-steps-indicator .example-preview"), s = pv.querySelector("#__wide").getBoundingClientRect(), p = pv.getBoundingClientRect();
     return { left: Math.round(s.left - p.left), right: Math.round(p.right - s.right), scrolls: pv.scrollWidth > pv.clientWidth }; });
   const step1440 = await stepFit();
   await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(250);
@@ -1877,6 +1883,11 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await require("./behave.button.js")({ page, ok, go });   // Button 오류 정리(2026-11-12)
   await require("./behave.cells.js")({ page, ok, go });   // 말줄임 칸 Tooltip · 끈 커서 · 로그 한 줄(2026-11-12)
   await require("./behave.type.js")({ page, ok, go });   // 텍스트 스타일 19단계(2026-11-12)
+  await require("./behave.layout.js")({ page, ok, go });   // 컴포넌트 수정 15건 — 높이 · 표 · 개별 스타일 · Spec 표(2026-11-12)
+  await require("./behave.chip.js")({ page, ok, go });   // Chip 형태 둘 · 색 둘(2026-11-13)
+  await require("./behave.stepper.js")({ page, ok, go });   // Steps 마법사 — 외부 컴포넌트 Stepper 참고(2026-11-13)
+  await require("./behave.revise.js")({ page, ok, go });   // 수정 묶음 — Tab 글자 · 상단 내비 선택 · Notice 아이콘 · Mono(2026-11-13)
+  await require("./behave.timepicker.js")({ page, ok, go });   // Time Picker — 입력칸 + 열 목록, 고르면 바로(2026-11-13)
   await require("./behave.nav.js")({ page, ok, go });
   await require("./behave.promote.js")({ page, ok, go });
     await require("./behave.upload.js")({ page, ok, go });
@@ -1900,15 +1911,40 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   ok("props table: fixed widths, positive name tags, text values, neutral default tags, no overflow",
     pt.pct.join() === "20,25,15,40" && pt.gap >= 5.5 && pt.names && pt.types && pt.defaults && !pt.overflow.length, JSON.stringify(pt));
+  /* 구성(사람의 결정 2026-11-12) — 첫 h2 = Default, 묶음 Default → Variant → Size → State → Spec → Props → Usage, Placement 절 없음.
+     Button 은 묶음 넷이 다 있고 Default 묶음은 예제 하나라 h3 가 없다 */
   const cs = await page.evaluate(() => ({
-    first: document.querySelector('#content h2[id^="ex-"]').textContent,
-    tag: document.querySelector('#content h2[id^="ex-"]').tagName,
+    first: document.querySelector("#content h2").textContent,
+    tag: document.querySelector("#content h2").tagName,
+    order: [...document.querySelectorAll("#content h2[id]")].filter((h) => !h.closest(".example")).map((h) => h.id).join(","),
+    defaultH3: !!document.querySelector("#default + h3, #default + p + h3"),
+    placement: !!document.querySelector("#placement"),
     anatomy: !!document.querySelector('#anatomy, .legend, .marker'),
     examplesH2: !!document.querySelector('#examples'),
     toc: [...document.querySelectorAll("#toc a")].map((a) => a.textContent).join(" / "),
     panes: [...document.querySelector(".example").querySelectorAll("[data-pane]")].map((x) => x.dataset.pane).join(","),
   }));
-  ok("component page opens with 1. Default, no Anatomy/Examples heading", cs.first === "1. Default" && cs.tag === "H2" && !cs.anatomy && !cs.examplesH2 && cs.panes === "html,react", JSON.stringify(cs));
+  ok("component page opens with Default, groups in order Default · Variant · Size · State · Rules · Spec · Props · Usage, no Placement/Anatomy/Examples heading",
+    cs.first === "Default" && cs.tag === "H2" && cs.order === "default,variant,size,state,rules,spec,props,usage" && !cs.defaultH3 && !cs.placement && !cs.anatomy && !cs.examplesH2 && cs.panes === "html,react", JSON.stringify(cs));
+
+  /* 고르기 표 · Rules(사람의 결정 2026-11-13) — 정의 바로 아래 dl.kv 하나(언제 쓰는가 · 비슷한 것 · Placement, 3행 이하)가 첫 예제보다 위,
+     나머지 규칙은 예제 뒤 · Spec 바로 앞의 Rules 절. 규칙이 8행을 넘는 Data Table 은 h3 소제목 다섯으로 묶인다 */
+  const chooseOf = () => page.evaluate(() => {
+    const lead = document.querySelector("#content .lead"), kv = lead.nextElementSibling, ex = document.querySelector("#content .example");
+    const rules = document.querySelector("#rules"), spec = document.querySelector("#spec"), seq = [];
+    let n = rules && rules.nextElementSibling; while (n && n !== spec) { seq.push(n.tagName + (n.tagName === "DL" ? "." + n.className + n.querySelectorAll(":scope > dt").length : "")); n = n.nextElementSibling; }
+    return { kv: kv && kv.tagName + "." + kv.className, keys: kv ? [...kv.querySelectorAll(":scope > dt")].map((d) => d.textContent).join("|") : "",
+      above: !!(kv && ex) && kv.getBoundingClientRect().bottom <= ex.getBoundingClientRect().top,
+      afterEx: !!(rules && ex) && !!(ex.compareDocumentPosition(rules) & 4) && !document.querySelector("#rules ~ .example, #rules ~ * .example"), toSpec: !!rules && n === spec, seq: seq.join(","),
+      divKv: document.querySelectorAll("div.kv").length };
+  });
+  const chB = await chooseOf();
+  ok("choose list (dl.kv, 3 rows max) sits right under the lead above the first example; Rules follows the examples and leads straight into Spec",
+    chB.kv === "DL.kv" && chB.keys === "언제 쓰는가|Placement" && chB.above && chB.afterEx && chB.toSpec && chB.seq === "DL.kv2" && !chB.divKv, JSON.stringify(chB));
+  await go("components/data-table.html");
+  const chT = await chooseOf();
+  ok("Data Table rules are grouped under five h3 headings, each followed by its own dl.kv (20 rows in all)",
+    chT.keys === "언제 쓰는가|Placement" && chT.above && chT.afterEx && chT.toSpec && chT.seq === "H3,DL.kv3,H3,DL.kv3,H3,DL.kv6,H3,DL.kv7,H3,DL.kv2", JSON.stringify(chT));
 
   // Patterns: Examples 제목 없음 · 예제가 하나뿐이면 번호 제목도 없음
   await go("patterns/input-form.html");
@@ -2162,7 +2198,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     ok(`atomic palette columns at ${w}`, JSON.stringify(got) === JSON.stringify(want), JSON.stringify(got));
   }
   await go("resources/design-token.html");
-  ok("responsive block applies at 390 (kv 1열)", await page.evaluate(() => document.querySelector("div.kv") && getComputedStyle(document.querySelector("div.kv")).gridTemplateColumns.split(" ").length === 1));
+  ok("responsive block applies at 390 (kv 1열)", await page.evaluate(() => document.querySelector("dl.kv") && getComputedStyle(document.querySelector("dl.kv")).gridTemplateColumns.split(" ").length === 1));
   await page.setViewportSize({ width: 1440, height: 900 });
 
   // Colors: Atomic 팔레트도 같은 팝오버

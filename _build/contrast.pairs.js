@@ -35,9 +35,9 @@ const REF_ACCENT = REF("기준 시스템 값 — 장식 강조색이라 라이�
 
 /* [전경, 바탕들, 최소 대비, 메모, 옵션] */
 const pairs = [
-  ["--foreground-neutral-primary", [...SURFACES, "--surface-neutral-strong"], 4.5, "본문 · 태그 라벨"],
+  ["--foreground-neutral-primary", [...SURFACES, "--surface-neutral-strong"], 4.5, "본문 · 누름 면 위 라벨"],
   /* Tag 글자 = 틴트와 같은 색상의 진한 톤(사람의 결정 2026-11-11 — 그 전엔 중립 글자 + 점). 자기 틴트 · outline(바탕 그대로) 위에서 4.5.
-     Critical solid 는 한 단계 강한 면(surface-negative-strong). info 는 neutral-secondary(위 쌍), accent 는 brand-primary(아래 brand 쌍) */
+     Critical solid 는 한 단계 강한 면(surface-negative-strong). 중립 Tag 는 tertiary 면 위 primary 글자(Assistive 버튼과 같은 쌍), info 는 secondary 면 위 secondary 글자(아래 Info Tag 쌍), accent 는 brand-primary(아래 brand 쌍) — 면은 2026-11-13 strong 에서 바꿈 */
   ["--foreground-negative-heavy", ["--surface-negative-primary", "--surface-negative-strong", ...SURFACES], 4.5, "Critical Tag 글자 — 틴트 · solid 면 · outline"],
   ["--foreground-cautionary-heavy", ["--surface-cautionary-primary", ...SURFACES], 4.5, "High Tag 글자 — 틴트 · outline"],
   ["--foreground-accent-light-blue-heavy", ["--surface-accent-light-blue", ...SURFACES], 4.5, "Medium Tag 글자 — 틴트 · outline"],
@@ -57,22 +57,23 @@ const pairs = [
   ["--foreground-inactive-primary", SURFACES, 4.5, "선택되지 않은 상태", REF("기준 시스템 값 — 라이트 2.78 · 다크 2.55")],
   ["--foreground-brand-primary", SURFACES, 4.5, "제품색 글자·링크"],
   /* 자기 옅은 면 위에서만 4.22~4.49 다 — 기준 시스템의 brand 50 과 그 5% 틴트 조합이 원래 그렇다 */
-  ["--foreground-brand-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "옅은 제품 면 위 글자 — text · outline primary · 면 없는 아이콘 전용 primary 버튼의 hover·pressed, Date Picker 오늘 원 · 기간 띠 안의 오늘(2026-11-09 · 원 위는 2026-11-11 부터 — 사람의 결정)", REF("기준 시스템 값 — brand 와 그 틴트 조합이 4.2 언저리다")],
+  ["--foreground-brand-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "옅은 제품 면 위 글자 — text · outline primary · 면 없는 아이콘 전용 primary 버튼의 hover·pressed, Date Picker 오늘 원 · 기간 띠 안의 오늘(2026-11-09 · 원 위는 2026-11-11 부터 — 사람의 결정), Steps 현재 원의 숫자(2026-11-13)", REF("기준 시스템 값 — brand 와 그 틴트 조합이 4.2 언저리다")],
   /* Assistive 버튼 라벨 — solid 면(tertiary 단계), 그리고 solid · outline · 면 없는 아이콘 전용이 hover 에 올라앉는 secondary 단계(2026-10-28 정의 때 셌더니 선언이 없었다) */
-  ["--foreground-neutral-primary", ["--surface-neutral-tertiary", "--surface-neutral-secondary"], 4.5, "Assistive 버튼 라벨 — rest · hover 면"],
+  ["--foreground-neutral-primary", ["--surface-neutral-tertiary", "--surface-neutral-secondary"], 4.5, "Assistive 버튼 라벨 — rest · hover 면 · 중립 Tag 라벨(tertiary 면, 2026-11-13)"],
+  ["--foreground-neutral-secondary", ["--surface-neutral-secondary"], 4.5, "Info Tag 글자 — 중립 Tag 보다 한 단계 진한 secondary 면(사람의 결정 2026-11-13)"],
   /* Accordion 헤더 Hover(2026-10-29) — 제목은 위 쌍(neutral-primary on surface-neutral-secondary), 보조 정보 · 셰브론은 여기 */
   ["--foreground-neutral-tertiary", ["--surface-neutral-secondary"], 4.5, "Accordion 헤더 보조 정보 — hover 면", REF("기준 시스템 값 — tertiary 는 바탕에서도 3.67 · 3.78")],
   ["--foreground-neutral-tertiary", ["--surface-disable-primary"], 4.5, "Disabled 선택 카드의 이유 문구", REF("기준 시스템 tertiary — disable 면 위 라이트 3.53 · 다크 3.28. 제목 · 아이콘은 disable(1.4.3 면제)이고 이유만 읽히게 둔 사람의 결정(2026-11-03)")],
   ["--foreground-neutral-secondary", ["--surface-neutral-secondary"], 3, "Accordion 셰브론 — hover 면(그래픽 3:1)"],
-  ["--foreground-neutral-secondary", ["--surface-neutral-secondary", "--surface-brand-subtle"], 4.5, "표 하위 텍스트(.cell-sub) — 행 hover · 선택 면(2026-11-11). 누름 면 strong 은 위 보조 본문 쌍이 잰다"],
+  ["--foreground-neutral-secondary", ["--surface-neutral-tertiary", "--surface-brand-subtle"], 4.5, "표 하위 텍스트(.cell-sub) — 행 hover(2026-11-12 secondary → tertiary) · 선택 면. 누름 면 strong 은 위 보조 본문 쌍이 잰다"],
   ["--foreground-neutral-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "Date Picker 기간 사이 · 미리보기 날짜와 그 위 호버(2026-10-27) — 쓰고 있었는데 선언이 없었다. 다른 달(흐린) 칸은 띠를 칠하지 않아 이 쌍이 없다. 오늘 원 위 글자(2026-11-09, 다른 달의 오늘도 이 색)"],
   ["--foreground-brand-inverse", ["--surface-neutral-inverse"], 4.5, "반전 표면 위 제품색 글자"],
-  ["--foreground-positive-primary", [...SURFACES, "--surface-positive-primary"], 4.5, "긍정 글자·아이콘 — Steps 완료 체크(.steps li.done i)도 이 쌍이다. 틴트 위 라이트 2.06~2.19 · 다크 6.43~8.03 — 그래픽 3:1 에도 라이트가 못 미친다, 사람의 결정", REF_STATUS],
+  ["--foreground-positive-primary", [...SURFACES, "--surface-positive-primary"], 4.5, "긍정 글자·아이콘 — 틴트 위(Notice success 아이콘 등)", REF_STATUS],
   ["--foreground-cautionary-primary", [...SURFACES, "--surface-cautionary-primary"], 4.5, "주의 글자·아이콘", REF_STATUS],
   ["--foreground-negative-primary", [...SURFACES, "--surface-negative-primary"], 4.5, "부정 아이콘·그래픽(글자는 strong)", REF_STATUS],
-  /* 두 틴트 모두에 올라앉는다 — solid negative 버튼(옛 .btn.danger)이 이 글자를 12% 틴트(--surface-negative-primary) 위에 쓴다.
+  /* 두 틴트 모두에 올라앉는다 — solid negative 버튼(옛 .btn.danger)이 이 글자를 8% 틴트(--surface-negative-primary, 2026-11-13 전에는 12%) 위에 쓴다.
      강한 틴트만 재고 있어서 파괴적 버튼의 실제 라벨 대비를 아무도 측정하지 않았다 */
-  ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong", "--surface-negative-heavy", "--surface-negative-hover", "--surface-negative-pressed"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨(rest·hover·pressed). 라이트는 primary(3.44)보다 나아 글자에 쓰지만, 다크는 strong(red-50)이 primary(red-60)보다 어두워 elevated 위 4.63 으로 내려간다. 위험 버튼 rest·hover·pressed 는 라이트 12·16·22% 틴트 위 3.93 · 3.73 · 3.44, 다크 위험 보조 버튼 hover·pressed 는 20·28% 틴트 위 3.70 · 3.20 — 틴트를 한 단계 진하게 한 대가이고 참조 값을 바꾸지 않고 예외로 둔다", REF_STATUS],
+  ["--foreground-negative-strong", [...SURFACES, "--surface-negative-primary", "--surface-negative-strong", "--surface-negative-heavy", "--surface-negative-hover", "--surface-negative-pressed"], 4.5, "강조된 부정 글자 · 파괴적 버튼 라벨(rest·hover·pressed). 라이트는 primary(3.44)보다 나아 글자에 쓰지만, 다크는 strong(red-50)이 primary(red-60)보다 어두워 elevated 위 4.63 으로 내려간다. 위험 버튼 rest·hover·pressed 는 라이트 8·12·16% 틴트 위 최저 3.87 · 3.68 · 3.50, 다크 위험 보조 버튼 hover·pressed 는 16·22% 틴트 위 최저 3.69 · 3.33(2026-11-13 상태 틴트를 참조의 8% 로 되돌리며 단계를 함께 내려 전보다 오름) — 참조 값을 바꾸지 않고 예외로 둔다", REF_STATUS],
   /* Count 배지 — 진한 빨강 면 위 흰 숫자(사람의 결정). 면 토큰이 아니라 전경 토큰(--foreground-negative-strong)을 면으로 쓴다 */
   ["--static-white", ["--foreground-negative-strong"], 4.5, "Count 배지 숫자", REF("다크는 negative-strong 이 red-50(#FF4242)이라 3.44, 라이트 red-40 은 4.58 — 진한 빨강 + 흰 숫자는 사람의 결정")],
   ...ACCENTS.map((c) => [`--foreground-accent-${c}`, [...SURFACES, `--surface-accent-${c}`], 4.5, "강조색 글자·아이콘", REF_ACCENT]),
@@ -88,7 +89,7 @@ const pairs = [
      고치려면 다크 면을 어둡게 내려야 하는데 그러면 버튼이 어두운 캔버스에 묻힌다(분리 1.11~1.23, 바닥 1.5).
      **제품 색이 앞으로 바뀔 수 있으므로 지금은 참조 값을 따르기로 했다**(사용자 결정) —
      고친 것이 아니라 고르지 않은 것이고, 그래서 숨기지 않고 매 빌드 숫자를 보고한다 */
-  ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자", REF("다크는 rest 가 제품 HEX(brand-50)라 제품 색 제약이 받치고, 상태가 밝아지는 쪽(55 → 60)이라 hover·pressed 만 4.5 아래다 — #0066FF 4.13 · 3.54, 밝은 제품 #008760 3.31 · 2.51")],
+  ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자 · Steps 완료 원의 체크", REF("다크는 rest 가 제품 HEX(brand-50)라 제품 색 제약이 받치고, 상태가 밝아지는 쪽(55 → 60)이라 hover·pressed 만 4.5 아래다 — #0066FF 4.13 · 3.54, 밝은 제품 #008760 3.31 · 2.51")],
 
   /* 글자 없는 지표(점·바·밴드·도넛) — 1.4.11 의 3:1 */
   ["--foreground-negative-primary", SURFACES, 3, "부정 지표 — danger 점 · 진행 막대"],   // 오류 필드의 테두리(포커스 때도 1px)도 이 토큰. 바깥 4px --line-negative-focus 후광은 장식(1.17)
@@ -159,7 +160,7 @@ const severityRanks = [
    여기 적지 않은 채 소비자가 0 이면 빌드가 경고한다(= 군살이 소리 없이 쌓이지 않는다) */
 const grammarOnly = [
   /* 기준 시스템의 전체 집합을 그대로 싣는다 — 아래는 우리 화면에 아직 쓸 자리가 없는 것들이다 */
-  "--foreground-neutral-quaternary", "--foreground-brand-inverse",
+  "--foreground-brand-inverse",
   "--surface-neutral-primary", "--surface-elevated-secondary",
   "--surface-brand-heavy",
   ...ACCENTS.flatMap((c) => [`--surface-accent-${c}-opaque`, `--line-accent-${c}`, `--foreground-accent-${c}`])

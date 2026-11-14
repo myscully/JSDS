@@ -7,7 +7,7 @@
    - Slider(--p·값 표시) · Search(지우기) · DatePicker/Calendar(입력 'YYYY. MM. DD' 자동 형식 · ↑↓ 조각 이동, 단위 연 · 월 · 일, 단일 · 기간(두 달), locale(Intl) · timezone(dayjs 가 있으면), 유효하지 않은 값 상태, 달 · 연 이동, 키보드, min/max, 하단 버튼 · 즉시 적용, 위로 펼침)
    - Checkbox 전체선택(indeterminate) · 약관 동의 · Data Table(정렬·행 선택·액션 바)
    - Notice 닫기 · Toast 액션/자동 소멸 · Popup 배경 클릭 닫기 · Accordion disabled
-   - Tabs 패널 텍스트 · Breadcrumb .more 펼치기(data-items) · Onboard 단계 이동([data-step]) · 달력 프리셋([data-preset]) — 확정은 ds:date {value, start, end, date, text, validity, 기간은 sides} · Text Field 글자 수(.counter) · 선택형 카드(.card-grid .card.clickable)
+   - Tabs 패널 텍스트 · Breadcrumb .more 펼치기(data-items) · Steps 마법사(.stepper — 패널 · 이전 · 다음 · 완료 · 검증, ds:step · ds:step-finish) · 달력 프리셋([data-preset]) — 확정은 ds:date {value, start, end, date, text, validity, 기간은 sides} · Text Field 글자 수(.counter) · 선택형 카드(.card-grid .card.clickable)
    ========================================================= */
 (function () {
   "use strict";
@@ -16,6 +16,7 @@
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); };
   var closest = function (el, sel) { return el && el.closest ? el.closest(sel) : null; };
   var ICON = {
+    "clock": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l3 3"/></svg>',
     "chevron-left": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6l6 6"/></svg>',
     "check": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l10 -10"/></svg>',
     "chevron-right": '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"/></svg>',
@@ -63,10 +64,19 @@
       el.parentNode.insertBefore(w, el); w.appendChild(el); w.appendChild(tip);
     });
   }
+  /* Steps — 가로 · 라벨 아래 배치가 자리에 안 들어가면 .stacked 로 세로로 쌓는다(2026-11-13 — 사람의 결정 '좁으면 세로로').
+     클래스를 뗀 모양에서 넘치는지 잰다 — 붙인 채로는 늘 들어가 보여서. .vertical 은 이미 세로라 재지 않는다 */
+  function fitSteps(root) {
+    $$(".steps:not(.vertical)", root || doc).forEach(function (ol) {
+      ol.classList.remove("stacked");
+      if (ol.offsetParent !== null && ol.scrollWidth > ol.clientWidth + 1) ol.classList.add("stacked");
+    });
+  }
   var fitTimer = 0;
-  window.addEventListener("resize", function () { clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitCells(); }, 150); });
+  window.addEventListener("resize", function () { fitSteps(); clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitCells(); }, 150); });
   function init(root) {
-    doc.fonts.ready.then(function () { fitCrumbs(root); fitCells(root); fitChips(root); });
+    fitSteps(root);
+    doc.fonts.ready.then(function () { fitCrumbs(root); fitCells(root); fitChips(root); fitSteps(root); });
     $$(".number-field input", root || doc).forEach(numSync);
     dsLive();   // 알림 영역은 미리 — 복사하는 순간 새로 넣으면 대개 읽히지 않는다
     root = root || doc;
@@ -86,8 +96,10 @@
     $$(".field input[maxlength], .field textarea[maxlength], .field [data-maxlength]", root).forEach(syncCounter);
     $$(".field [data-maxlength]", root).forEach(vHelp);
     $$("form[data-validate]", root).forEach(function (f) { f.noValidate = true; vFields(f).forEach(vHelp); });
+    $$(".stepper", root).forEach(spPaint);
     /* Date Picker — 확정 값을 처음부터 data-* 에 둔다(필드 글자 · 정적 달력에서 읽어). 단독 달력만 host 다 */
     $$(".datepicker", root).forEach(function (h) { S(h); });
+    $$(".timepicker", root).forEach(tpInit);
     $$(".calendar", root).forEach(function (c) { if (!closest(c, ".datepicker")) S(c); });
   }
 
@@ -226,7 +238,7 @@
            · data-time(시각까지 — 일 단위 피커만. 값 'YYYY-MM-DD HH:mm', 필드 'YYYY. MM. DD HH:mm', 24시간제. data-time="seconds" 면 초까지) */
   var FOOT = { today: "text", reset: "text", cancel: "outline assistive", apply: "solid primary" };
   /* 문구 — 사람의 결정(2026-11-09): 다른 언어로 쓸 때 data-labels 로 바꾼다. '오늘' 의 기본은 Intl.RelativeTimeFormat */
-  var LABELS = { dialog: "날짜 선택", reset: "초기화", cancel: "취소", apply: "적용", prevMonth: "이전 달", nextMonth: "다음 달", prevYear: "이전 연도", nextYear: "다음 연도", prevYears: "이전 12년", nextYears: "다음 12년", chooseYear: "연도 선택", yearGrid: "연도 목록", backToDays: "날짜로 돌아가기", backToMonths: "월 선택으로", recent: "최근 {n}일", time: "시각", startTime: "시작 시각", endTime: "종료 시각" };
+  var LABELS = { dialog: "날짜 선택", reset: "초기화", cancel: "취소", apply: "적용", prevMonth: "이전 달", nextMonth: "다음 달", prevYear: "이전 연도", nextYear: "다음 연도", prevYears: "이전 12년", nextYears: "다음 12년", chooseYear: "연도 선택", yearGrid: "연도 목록", backToDays: "날짜로 돌아가기", backToMonths: "월 선택으로", recent: "최근 {n}일", time: "시각", startTime: "시작 시각", endTime: "종료 시각", timeOpen: "선택" };
   var labelWarned = {};
   function dpLabels(host) {
     var raw = host.getAttribute("data-labels"), o = {}, out = {}, k;
@@ -365,7 +377,8 @@
   function pasteText(s, unit, range) {
     return groups(String(s || "").split("~").slice(0, range ? 2 : 1).map(function (p) {
       var g = p.match(/\d+/g) || [];
-      return g.length > 1 ? g[0] + g.slice(1).map(function (x) { return x.length === 1 ? "0" + x : x; }).join("") : g.join("");
+      var one = function (x) { return x.length === 1 ? "0" + x : x; };   // 시각만 쓰는 단위는 첫 조각(시)도 채운다 — 2:0 → 02:00(날짜의 첫 조각은 연)
+      return g.length > 1 ? (isClock(unit) ? one(g[0]) : g[0]) + g.slice(1).map(one).join("") : g.join("");
     }).join(""), unit, range);
   }
   /* 입력 검사 — 빈 · 미완성 · 없는 날짜 · 순서 · min · max · 유효 */
@@ -395,7 +408,7 @@
   /* host 의 상태. 처음 만질 때 마크업(입력 글자 · 정적 달력의 .on)에서 값을 읽어 data-* 로 옮긴다 */
   function S(host) {
     if (host._dp) return host._dp;
-    var inp = $(".affix input", host), cal = isPicker(host) ? $(".calendar", host) : host, help = $(":scope > .help", host), unit = dpUnit(host);
+    var inp = $(":scope > .affix input", host), cal = isPicker(host) ? $(".calendar", host) : host, help = $(":scope > .help", host), unit = dpUnit(host);
     var time = isPicker(host) && unit === "day" && host.hasAttribute("data-time") ? (host.getAttribute("data-time") === "seconds" ? "second" : "minute") : null;
     var mode = host.hasAttribute("data-range") || (!isPicker(host) && ($(".day.in-range", host) || $$(".day.on", host).length > 1)) ? "range" : "single";
     var st = host._dp = { mode: mode, unit: unit, time: time, clock: null, view: baseView(unit), draft: null, month: null, focus: null, hover: null, opener: null, live: "", validity: "empty", text: "" };
@@ -426,8 +439,9 @@
   function clockPaint(host) { var st = S(host); $$(".cal-time input", calOf(host)).forEach(function (i) { i.value = st.clock[i.dataset.side]; i._dpPrev = i.value; }); }
   var dpUid = 0;   // id 없는 입력(aria-label 만 쓰는 툴바)이 여럿이어도 시각 칸의 id 가 겹치지 않게
   function timeHtml(host) {
-    var st = S(host), L = dpLabels(host), base = $(".affix input", host).id || (st.uid = st.uid || "dp-" + (++dpUid)), ph = st.time === "second" ? "HH:mm:ss" : "HH:mm";
-    var one = function (side, label) { var id = base + "-time-" + side; return '<div class="field sm"><label for="' + id + '">' + label + '</label><input id="' + id + '" data-side="' + side + '" value="' + st.clock[side] + '" placeholder="' + ph + '" inputmode="numeric" autocomplete="off"></div>'; };
+    var st = S(host), L = dpLabels(host), base = $(":scope > .affix input", host).id || (st.uid = st.uid || "dp-" + (++dpUid)), ph = st.time === "second" ? "HH:mm:ss" : "HH:mm";
+    /* 칸마다 Time Picker sm(사람의 결정 2026-11-13) — 입력 · ↑↓ · Enter 는 달력이 맡고(st.clock), 열 목록은 Time Picker 가 연다. 범위 검사는 적용할 때 필드가 한다 */
+    var one = function (side, label) { var id = base + "-time-" + side; return '<div class="field sm timepicker" data-dp-side="' + side + '"' + (st.time === "second" ? " data-seconds" : "") + '><label for="' + id + '">' + label + '</label><div class="affix"><input id="' + id + '" data-side="' + side + '" value="' + st.clock[side] + '" placeholder="' + ph + '" inputmode="numeric" autocomplete="off"><button type="button" class="tp-btn" aria-label="' + label + ' ' + L.timeOpen + '" aria-haspopup="dialog" aria-expanded="false">' + ICON.clock + "</button></div></div>"; };
     return '<div class="cal-time">' + (st.mode === "range" ? one("a", L.startTime) + one("b", L.endTime) : one("a", L.time)) + "</div>";
   }
   /* 적용하면 필드에 들어갈 글자 — 시각 칸의 글자를 날짜 뒤에 그대로 붙인다(덜 친 시각은 필드 검사가 알린다) */
@@ -538,7 +552,7 @@
   }
   function setExpanded(host, open) { $$(".cal-btn", host).forEach(function (b) { b.setAttribute("aria-expanded", String(open)); }); }
   function openDP(host, opener) {
-    var st = S(host), inp = $(".affix input", host);
+    var st = S(host), inp = $(":scope > .affix input", host);
     if (inp && inp.value.trim() !== st.text) typed(host);   // 열기 전에 친 글자를 먼저 반영한다
     st.draft = readValue(host); st.view = baseView(st.unit); st.hover = null; st.focus = null; st.opener = opener; st.live = "";
     if (st.time) clockSync(st, st.draft);
@@ -568,20 +582,20 @@
      기간은 sides {start, end} — 쪽마다의 상태(달력에서 고른 값은 늘 valid · 비운 쪽 empty) */
   function emit(host, v, validity, sides) {
     var st = S(host), u = tu(st), k = function (d) { return d ? keyOf(d, u) : null; }, bad = validity === "incomplete" || validity === "invalid";
-    var at = function (d) { return bad ? new Date(NaN) : d ? instant(host, d) : null; }, inp = $(".affix input", host), text = inp ? inp.value.trim() : valText(host, v);
+    var at = function (d) { return bad ? new Date(NaN) : d ? instant(host, d) : null; }, inp = $(":scope > .affix input", host), text = inp ? inp.value.trim() : valText(host, v);
     fire(host, "ds:date", st.mode === "range" ? { value: v.a && v.b ? k(v.a) + " ~ " + k(v.b) : null, start: k(v.a), end: k(v.b), date: { start: at(v.a), end: at(v.b) }, text: text, validity: validity, sides: sides || { start: v.a ? "valid" : "empty", end: v.b ? "valid" : "empty" } }
       : { value: k(v.a), date: at(v.a), text: text, validity: validity });
   }
   function commit(host) {
     var st = S(host), v = st.draft || { a: null, b: null };
     if (st.mode === "range" && v.a && !v.b) return false;
-    if (st.time && v.a) { var ti = $(".affix input", host); ti.value = pendingText(host, v); ti._dpPrev = ti.value; typed(host); return true; }   // 달력은 날짜만 막는다 — 시각의 범위 · 순서는 필드 검사가 잰다
+    if (st.time && v.a) { var ti = $(":scope > .affix input", host); ti.value = pendingText(host, v); ti._dpPrev = ti.value; typed(host); return true; }   // 달력은 날짜만 막는다 — 시각의 범위 · 순서는 필드 검사가 잰다
     writeValue(host, v); display(host); clearError(host); setValidity(host, v.a ? "valid" : "empty");
     emit(host, v, st.validity);
     return true;
   }
   function display(host) {
-    var st = S(host), inp = $(".affix input", host); if (!inp) return;
+    var st = S(host), inp = $(":scope > .affix input", host); if (!inp) return;
     inp.value = valText(host, readValue(host)); inp._dpPrev = inp.value; st.text = inp.value;
   }
   /* 고르기 — 기간은 첫 클릭이 시작, 둘째 클릭이 끝(앞이면 바꾼다). 하단에 적용이 없으면 고르는 순간 적용하고 닫는다.
@@ -631,6 +645,7 @@
     var st = S(host), cal = calOf(host), k = e.key, open = isPicker(host) && host.classList.contains("open");
     if (k === "Escape") { if (!open) return false; e.preventDefault(); closeDP(host, true); return true; }
     if (k === "Tab" && open) {
+      if (closest(e.target, ".time-panel")) return true;   // 시각 열 사이 · 버튼으로는 브라우저의 Tab 그대로(열을 떠나면 Time Picker 가 닫는다)
       var f = $$("button, input", cal).filter(function (b) { return !b.disabled && b.tabIndex >= 0 && b.offsetParent !== null; }), i = f.indexOf(doc.activeElement);
       if (e.shiftKey ? i <= 0 : i === f.length - 1) { e.preventDefault(); f[e.shiftKey ? f.length - 1 : 0].focus(); }
       return true;
@@ -699,17 +714,21 @@
   }
   /* 시각 칸의 ↑↓ — 커서 조각 ±1(시 23 ↔ 0, 분 · 초 59 ↔ 0). 적용하기 전이라 값은 아직 바뀌지 않는다 */
   function clockStep(host, inp, dir) {
-    var st = S(host), n = st.time === "second" ? 3 : 2, segs = inp.value.split(":"), caret = inp.selectionStart || 0, si = Math.min(caret <= 2 ? 0 : caret <= 5 ? 1 : 2, n - 1), num = [];
+    var st = S(host); clockBump(inp, st.time === "second" ? 3 : 2, dir); st.clock[inp.dataset.side] = inp.value;
+    renderMarks(host);
+  }
+  /* 시각 글자의 ↑↓ — Date Picker 의 시각 칸과 Time Picker 가 같이 쓴다. 빈 조각은 00 으로 채운다 */
+  function clockBump(inp, n, dir) {
+    var segs = inp.value.split(":"), caret = inp.selectionStart || 0, si = Math.min(caret <= 2 ? 0 : caret <= 5 ? 1 : 2, n - 1), num = [];
     for (var i = 0; i < n; i++) num.push(segs[i] && segs[i].length === 2 ? +segs[i] : 0);
     if (segs[si] && segs[si].length === 2) { var w = si ? 60 : 24; num[si] = (num[si] + dir + w) % w; }
-    inp.value = num.map(pad).join(":"); inp._dpPrev = inp.value; st.clock[inp.dataset.side] = inp.value;
+    inp.value = num.map(pad).join(":"); inp._dpPrev = inp.value;
     var end = [2, 5, 8][si]; try { inp.setSelectionRange(end, end); } catch (x) { /* 포커스 없는 입력 */ }
-    renderMarks(host);
   }
   /* 검사 · 확정 — Enter · 포커스가 필드를 떠날 때 · ↑↓. 값이 늘 유효하지는 않다(사람의 요구 2026-11-09):
      미완성 · 없는 날짜는 값을 비우고, 범위 밖 · 순서는 값을 그 날짜로 둔 채 data-validity 와 오류 테두리 · 원인 문구로 알린다 */
   function typed(host) {
-    var st = S(host), inp = $(".affix input", host); if (!inp) return true;
+    var st = S(host), inp = $(":scope > .affix input", host); if (!inp) return true;
     var r = check(host, inp.value), v = { a: r.a, b: r.b }, changed = inp.value.trim() !== st.text;
     writeValue(host, v); setValidity(host, r.validity);
     if (r.msg) setError(host, r.msg); else clearError(host);
@@ -720,14 +739,14 @@
     return r.validity === "valid" || r.validity === "empty";
   }
   function setError(host, msg) {
-    var inp = $(".affix input", host), help = $(":scope > .help", host);
+    var inp = $(":scope > .affix input", host), help = $(":scope > .help", host);
     if (!help) { help = doc.createElement("span"); help.className = "help"; help.id = (inp && inp.id ? inp.id : "dp" + Math.random().toString(36).slice(2, 8)) + "-help"; ($(".affix", host) || host.lastChild).after(help); }
     help.textContent = msg; host.classList.add("error");
     if (inp) { inp.setAttribute("aria-invalid", "true"); var ids = (inp.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean); if (help.id && ids.indexOf(help.id) < 0) inp.setAttribute("aria-describedby", ids.concat(help.id).join(" ")); }
   }
   function clearError(host) {
     if (!host.classList.contains("error")) return;
-    var st = S(host), inp = $(".affix input", host), help = $(":scope > .help", host);
+    var st = S(host), inp = $(":scope > .affix input", host), help = $(":scope > .help", host);
     host.classList.remove("error"); if (inp) inp.removeAttribute("aria-invalid");
     if (help) { if (st.help) help.textContent = st.help; else help.remove(); }
   }
@@ -1090,6 +1109,7 @@
   }
   function vLimit(inp) { return Number(inp.getAttribute("data-maxlength")) || 0; }
   function vMessage(inp) {
+    var tph = closest(inp, ".timepicker"); if (tph) return !inp.value.trim() ? (inp.required ? vMsgs(inp).required : "") : tpCheck(tph, inp.value).msg || "";
     var host = vChoice(inp); if (host) return host.matches(".upload") ? upMessage(host) : vEmpty(host) ? vMsgs(inp).choose : "";
     var v = inp.validity, limit = vLimit(inp), over = limit ? inp.value.length - limit : 0;
     var key = v.valueMissing ? "required" : v.badInput ? "number" : v.typeMismatch ? (inp.type === "email" ? "email" : "url") : v.patternMismatch ? "pattern" : v.rangeUnderflow ? "min" : v.rangeOverflow ? "max" : v.tooShort ? "minlength" : v.stepMismatch ? "step" : over > 0 ? "length" : "";
@@ -1134,18 +1154,60 @@
   /* Select — 열었다가 고르지 않고 닫으면 알린다. 건드리지 않은 필드는 제출할 때 */
   function vTouch(dd) { var tr = $(".trigger", dd), form = closest(dd, "form[data-validate]"); if (tr && form && dd.hasAttribute("data-required") && closest(dd, ".field")) { vShow(tr, vMessage(tr)); vChanged(form); } }
 
-  function stepTo(board, dir) {
-    var steps = $$(".steps li", board); if (!steps.length) return;
-    var cur = steps.findIndex(function (li) { return li.classList.contains("on"); }); if (cur < 0) cur = 0;
-    var next = Math.max(0, Math.min(steps.length - 1, cur + dir)); if (next === cur) return;
+  /* ---------- Steps 마법사 — .stepper(2026-11-13, 외부 컴포넌트 Stepper 참고 — 상용이라 구조 · 동작만, 코드는 옮기지 않음) ----------
+     단계(.steps li)와 패널(.step-panel)은 문서 순서로 짝짓는다(세로 배치는 패널이 li 안). 현재 = li.on + aria-current, 완료 = li.done(+ 숨긴 '(완료)').
+     누를 수 있는 단계만 .step-btn — 순서대로면 완료한 단계, data-nonlinear 면 현재가 아닌 모든 단계. 검증은 패널 안 form[data-validate] 를 vRun 으로 */
+  function spSteps(sp) { var ol = $(".steps", sp); return ol ? $$(":scope > li", ol) : []; }
+  function spPanels(sp) { return $$(".step-panel", sp); }
+  function spCur(sp) { var i = spSteps(sp).findIndex(function (li) { return li.classList.contains("on"); }); return i < 0 ? 0 : i; }
+  function spForm(p) { return p ? $("form[data-validate]", p) : null; }
+  function spQuiet(p) { var f = spForm(p); return !f || vFields(f).every(function (i) { return !vMessage(i); }); }   /* 문구 없이 통과 여부만 */
+  function spPaint(sp) {
+    var steps = spSteps(sp), panels = spPanels(sp), free = sp.hasAttribute("data-nonlinear"), cur = spCur(sp), last = steps.length - 1;
     steps.forEach(function (li, i) {
-      li.classList.toggle("done", i < next); li.classList.toggle("on", i === next);
-      i === next ? li.setAttribute("aria-current", "step") : li.removeAttribute("aria-current");
-      var ic = $("i", li); if (ic) { if (i < next) { if (!ic.dataset.num) ic.dataset.num = ic.textContent.trim() || String(i + 1); ic.innerHTML = ICON.check; } else if (ic.dataset.num) ic.textContent = ic.dataset.num; }
+      var on = i === cur, done = li.classList.contains("done"), btn = $(":scope > .step-btn", li), want = !on && (done || free), ic = $("i", li), lab = $(".label", li), sr = $(".sr-only", li);
+      li.classList.toggle("on", on);
+      on ? li.setAttribute("aria-current", "step") : li.removeAttribute("aria-current");
+      if (ic) { if (done && !on) { if (!ic.dataset.num) ic.dataset.num = ic.textContent.trim() || String(i + 1); ic.innerHTML = ICON.check.replace(/"12"/g, '"16"'); } else ic.textContent = ic.dataset.num || ic.textContent.trim() || String(i + 1); }
+      if (done && !sr && lab) { sr = doc.createElement("span"); sr.className = "sr-only"; sr.textContent = " (완료)"; lab.parentNode.insertBefore(sr, lab.nextSibling); }
+      else if (!done && sr) sr.remove();
+      if (want && !btn) {
+        btn = doc.createElement("button"); btn.type = "button"; btn.className = "step-btn";
+        [].slice.call(li.childNodes).forEach(function (n) { if (!(n.nodeType === 1 && n.classList.contains("step-panel"))) btn.appendChild(n); });
+        li.insertBefore(btn, li.firstChild);
+      } else if (!want && btn) { while (btn.firstChild) li.insertBefore(btn.firstChild, btn); btn.remove(); }
     });
-    var prev = $('[data-step="prev"]', board), nx = $('[data-step="next"]', board);
-    if (prev) prev.disabled = next === 0; if (nx) nx.disabled = next === steps.length - 1;
-    fire(board, "ds:step", { step: next });
+    panels.forEach(function (p, i) { p.hidden = i !== cur; p.tabIndex = -1; });
+    $$("[data-step]", sp).forEach(function (b) { var k = b.dataset.step; if (k === "prev") b.disabled = cur === 0; else if (k === "next") b.hidden = cur === last; else if (k === "finish") b.hidden = cur !== last; });
+  }
+  function spGo(sp, to, trigger) {
+    var steps = spSteps(sp), from = spCur(sp); if (to < 0 || to >= steps.length || to === from) return false;
+    steps[from].classList.remove("on"); steps[to].classList.add("on");
+    spPaint(sp);
+    var p = spPanels(sp)[to]; if (p) { p.focus({ preventScroll: true }); if (p.getBoundingClientRect().top < 0) p.scrollIntoView({ block: "start" }); }
+    fire(sp, "ds:step", { index: to, from: from, trigger: trigger });
+    return true;
+  }
+  /* 떠나는 단계 — 자유 이동이면 조용히 재서 완료 표시를 맞춘다(순서대로면 '다음' 만 완료를 만든다) */
+  function spLeave(sp) { if (!sp.hasAttribute("data-nonlinear")) return; var cur = spCur(sp); spSteps(sp)[cur].classList.toggle("done", spQuiet(spPanels(sp)[cur])); }
+  function spNext(sp, checked) {
+    var cur = spCur(sp), f = spForm(spPanels(sp)[cur]);
+    if (!checked && f && !vRun(f)) return;
+    spSteps(sp)[cur].classList.add("done");
+    if (cur === spSteps(sp).length - 1) return spFinish(sp, true);
+    spGo(sp, cur + 1, "next");
+  }
+  /* 완료 — 현재 단계를 검사하고, 자유 이동이면 모든 단계를 순서대로 재서 막힌 첫 단계로 간다 */
+  function spFinish(sp, checked) {
+    var steps = spSteps(sp), panels = spPanels(sp), cur = spCur(sp), free = sp.hasAttribute("data-nonlinear");
+    if (!checked) { var cf = spForm(panels[cur]); if (cf && !vRun(cf)) return; }
+    steps[cur].classList.add("done");
+    if (free) for (var i = 0; i < steps.length; i++) {
+      if (i === cur || spQuiet(panels[i])) { steps[i].classList.add("done"); continue; }
+      steps[i].classList.remove("done"); spGo(sp, i, "finish"); vRun(spForm(panels[i])); return;
+    }
+    spPaint(sp);
+    fire(sp, "ds:step-finish", { index: cur });
   }
 
   function fire(el, name, detail) { if (el) el.dispatchEvent(new CustomEvent(name, { bubbles: true, detail: detail })); }
@@ -1174,11 +1236,12 @@
 
     // Tabs
     if ((el = closest(t, ".tabs .tab")) && !el.disabled) { tabPick(el); return; }
-    if ((el = closest(t, ".steps .step-btn"))) { var stepLi = closest(el, "li"); fire(el, "ds:step", { index: $$(":scope > li", stepLi.parentNode).indexOf(stepLi) }); return; }
+    if ((el = closest(t, ".steps .step-btn"))) { var stepLi = closest(el, "li"), stepAt = $$(":scope > li", stepLi.parentNode).indexOf(stepLi), stepSp = closest(el, ".stepper");
+      if (stepSp) { spLeave(stepSp); spGo(stepSp, stepAt, "click"); } else fire(el, "ds:step", { index: stepAt, from: $$(":scope > li", stepLi.parentNode).findIndex(function (x) { return x.classList.contains("on"); }), trigger: "click" }); return; }   /* .stepper 밖 — 이동은 제품이 한다 */
     // Breadcrumb 펼치기
     if ((el = closest(t, ".breadcrumb .more"))) { setTimeout(fitCrumbs, 0); var li = closest(el, "li"), items = (el.dataset.items || "").split("|").map(function (s) { return s.trim(); }).filter(Boolean); if (li && items.length) { var first = null; items.forEach(function (s) { var n = doc.createElement("li"); var a2 = doc.createElement("a"); a2.href = "#"; a2.textContent = s; n.appendChild(a2); li.parentNode.insertBefore(n, li); if (!first) first = a2; }); var ol = li.parentNode; li.remove(); /* 버튼이 사라지니 포커스를 펼친 첫 링크로 — 안 옮기면 body 로 떨어진다 */ if (first) first.focus(); fire(ol, "ds:expand", { items: items }); } return; }
-    // Onboard 단계
-    if ((el = closest(t, ".onboard [data-step]")) && !el.disabled) { stepTo(closest(el, ".onboard"), el.dataset.step === "prev" ? -1 : 1); return; }
+    // Steps 마법사 — 이전 · 다음 · 완료
+    if ((el = closest(t, ".stepper [data-step]")) && !el.disabled) { var spx = closest(el, ".stepper"), sk = el.dataset.step; if (sk === "next") spNext(spx); else if (sk === "prev") { spLeave(spx); spGo(spx, spCur(spx) - 1, "prev"); } else if (sk === "finish") spFinish(spx); return; }
     // 선택형 카드 (데모 링크)
     if ((el = closest(t, ".card-grid .card.clickable")) && !el.disabled && el.getAttribute("aria-disabled") !== "true") {   /* 고를 수 없는 선택 카드(Card 정의 2026-11-02) — button 은 disabled, 그 밖은 aria-disabled */ $$(".card.clickable", closest(el, ".card-grid")).forEach(function (c) { var on = c === el; c.classList.toggle("on", on); /* 선택은 .on 만으로는 보조기기에 전해지지 않는다 */ if (c.tagName === "BUTTON") c.setAttribute("aria-pressed", on ? "true" : "false"); }); fire(el, "ds:select", { value: (el.querySelector(".title") || el).textContent.trim() }); return; }
     // Select Button
@@ -1228,6 +1291,7 @@
   doc.addEventListener("pointerdown", function (e) {
     $$(".dropdown.open[data-ds-opened]").forEach(function (dd) { if (!dd.contains(e.target)) setOpen(dd, false); });
     $$(".datepicker.open[data-ds-opened]").forEach(function (dp) { if (!dp.contains(e.target)) closeDP(dp, false); });   // 바깥 클릭은 초안을 버리고 포커스는 옮기지 않는다
+    $$(".timepicker.open[data-ds-opened]").forEach(function (tp) { if (!tp.contains(e.target)) tpClose(tp, false); });
   }, true);
 
   /* Loading 버튼과 aria-disabled 버튼(비활성 링크 포함): 둘 다 포커스를 받으므로 키보드 Enter/Space 가 그대로 click 을 쏜다.
@@ -1277,8 +1341,9 @@
     var cti = closest(e.target, ".cal-time input");
     if (cti) { var cdh = closest(cti, ".datepicker");
       if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); var cap = $('[data-cal="apply"]', calOf(cdh)); if (cap && !cap.disabled) foot(cdh, "apply"); return; }
-      if (e.key === "ArrowUp" || e.key === "ArrowDown") { e.preventDefault(); clockStep(cdh, cti, e.key === "ArrowUp" ? 1 : -1); return; } }
-    var di = closest(e.target, ".datepicker .affix input");
+      if ((e.key === "ArrowUp" || e.key === "ArrowDown") && !e.altKey) { e.preventDefault(); clockStep(cdh, cti, e.key === "ArrowUp" ? 1 : -1); return; }
+      if (e.defaultPrevented) return; }   // Alt+↓ 는 Time Picker 가 열 목록을 연다
+    var di = closest(e.target, ".datepicker > .affix input");
     if (di) { var dh = closest(di, ".datepicker");
       if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); typed(dh); return; }   // 한글 조합 중 Enter 는 조합 확정이다
       if (e.key === "ArrowDown" && e.altKey) { e.preventDefault(); var cb = $(".cal-btn", dh); if (!dh.classList.contains("open") && cb && !cb.disabled) openDP(dh, cb); return; }
@@ -1327,17 +1392,19 @@
   /* 입력형 Date Picker — 포커스가 필드 밖(달력 · 달력 버튼은 안)으로 나가면 친 글자를 검사한다 */
   /* 입력 검증 — 캡처라 폼 · 버튼에 달린 제품 핸들러보다 먼저 막는다 */
   doc.addEventListener("submit", function (e) { if (e.target.matches && e.target.matches("form[data-validate]") && !vRun(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);
+  /* Steps 마법사 — 패널 안 폼의 Enter 제출은 '다음'(마지막이면 '완료'). 검증은 위 캡처가 이미 했고 막히면 여기까지 오지 않는다 */
+  doc.addEventListener("submit", function (e) { var f = e.target, p = f && f.closest && f.closest(".stepper .step-panel"), sp = p && closest(p, ".stepper"); if (!sp) return; e.preventDefault();   /* 막힌 제출은 위 캡처가 멈춘다. defaultPrevented 는 보지 않는다 — 제출 기본 동작을 막는 제품 · 문서 미리보기 처리기가 먼저 돌아도 단계는 넘어가야 한다 */ if (spPanels(sp).indexOf(p) === spCur(sp)) spNext(sp, true); });
   doc.addEventListener("focusout", function (e) { var cb = closest(e.target, ".combobox"); if (cb && !cb.contains(e.relatedTarget)) cbLeave(cb); });
-  doc.addEventListener("focusout", function (e) { var t = e.target; if (!vIsField(t) || closest(t, ".combobox")) return; var form = closest(t, "form[data-validate]"); if (!form || !t.willValidate) return; if (t._dsDirty || t.value || closest(t, ".field").classList.contains("error")) { vShow(t, vMessage(t)); vChanged(form); } });
+  doc.addEventListener("focusout", function (e) { var t = e.target; if (!vIsField(t) || closest(t, ".combobox, .timepicker")) return; var form = closest(t, "form[data-validate]"); if (!form || !t.willValidate) return; if (t._dsDirty || t.value || closest(t, ".field").classList.contains("error")) { vShow(t, vMessage(t)); vChanged(form); } });
   doc.addEventListener("input", function (e) {
-    var t = e.target; if (!vIsField(t) || closest(t, ".combobox")) return; t._dsDirty = true;
+    var t = e.target; if (!vIsField(t) || closest(t, ".combobox, .timepicker")) return; t._dsDirty = true;   // Time Picker 는 글자를 끊은 뒤 스스로 잰다
     if (t.hasAttribute("data-maxlength")) syncCounter(t);
     var form = closest(t, "form[data-validate]"), limit = vLimit(t), over = limit > 0 && t.value.length > limit;
     if (form) { if (t.willValidate && (over || closest(t, ".field").classList.contains("error"))) { vShow(t, vMessage(t)); vChanged(form); } }
     else if (limit) { if (over) { vShow(t, vMessage(t)); t._dsOver = true; } else if (t._dsOver) { vShow(t, ""); t._dsOver = false; } }   // 폼 밖 — 한도 오류만, 제품이 건 오류는 건드리지 않는다
   });
   doc.addEventListener("focusout", function (e) {
-    var host = closest(e.target, ".datepicker"), inp = host && $(".affix input", host); if (!inp || inp.readOnly || inp.disabled) return;
+    var host = closest(e.target, ".datepicker"), inp = host && $(":scope > .affix input", host); if (!inp || inp.readOnly || inp.disabled) return;
     if (e.relatedTarget && host.contains(e.relatedTarget)) return;   // 필드 안(달력 버튼 · 달력)에서 옮기는 동안은 기다린다 — 입력칸 → 달력 버튼 → 바깥으로 Tab 해도 검사한다
     /* 확정 뒤 바뀐 글자가 있을 때만 — 달력을 다시 그리면 포커스된 버튼이 사라지며 relatedTarget 없는 focusout 이 난다. 그때 검사하면 빈 입력으로 초안('오늘' 등)을 지웠다(2026-11-09 실측) */
     if (inp.value.trim() !== S(host).text) typed(host);
@@ -1347,7 +1414,7 @@
     var t = e.target; if (!(t instanceof Element)) return;
     if (t.matches(".slider input[type=range]")) { syncSlider(t); fire(t, "ds:slide", { value: Number(t.value) }); }
     if (t.matches(".slider-field input")) sliderPair(t, "input");
-    if (t.matches(".datepicker .affix input") && !e.isComposing) dpInput(t, e);
+    if (t.matches(".datepicker > .affix input") && !e.isComposing) dpInput(t, e);
     if (t.matches(".cal-time input") && !e.isComposing) clockInput(t, e);
     if (t.matches(".field input[maxlength], .field textarea[maxlength]")) syncCounter(t);
     if (t.matches(".combobox input[role=combobox]")) { var cbh = closest(t, ".combobox"), rm = cbh.getAttribute("data-filter") === "none"; cbh._dsTyped = true; cbOpen(cbh, true); cbFilter(cbh);
@@ -1432,6 +1499,159 @@
   /* 폼 밖에서도 범위를 알린다 — 빈 값은 조용하다(필수 여부는 폼이 잰다) */
   doc.addEventListener("input", function (e) { var t = e.target; if (!t.matches || !t.matches(".number-field input")) return; numSync(t); if (closest(t, ".field").classList.contains("error")) vShow(t, vMessage(t)); });
   doc.addEventListener("focusout", function (e) { var t = e.target; if (t.matches && t.matches(".number-field input") && (t.value || t.validity.badInput)) vShow(t, vMessage(t)); });
+
+  /* ---------- Time Picker — .timepicker(2026-11-13, 외부 컴포넌트 Time Picker 참고 — 상용이라 구조 · 동작만, 코드는 옮기지 않음) ----------
+     입력칸 + 열 목록(시 · 분 · 초). 24시간제 HH:mm, data-seconds 면 HH:mm:ss. 열에서 고르면 바로 값이 된다(사람의 결정 — 적용 버튼 없음).
+     data-step 은 분 열의 간격이고 입력은 받는다. data-min · data-max 밖 칸은 고를 수 없고, 입력은 받아서 오류로 알린다(Number Input 과 같은 방식).
+     문구는 Date Picker 의 시각 문구(invalidTime · timeSubject)와 범위 문구(min · max)를 같이 쓴다 — data-messages 로 바꾼다 */
+  var TP_LABELS = { dialog: "시각 선택", hour: "시", minute: "분", second: "초" };
+  function tpLabels(host) {
+    var raw = host.getAttribute("data-labels"), o = {}, out = {}, k;
+    if (raw) try { o = JSON.parse(raw) || {}; } catch (e) { if (!labelWarned[raw]) { labelWarned[raw] = 1; if (window.console) console.warn("[ds.js] data-labels 가 JSON 이 아닙니다 — 기본 문구를 씁니다: " + raw); } }
+    for (k in TP_LABELS) out[k] = TP_LABELS[k];
+    for (k in o) if (typeof o[k] === "string") out[k] = o[k];
+    return out;
+  }
+  function tpSec(host) { return host.hasAttribute("data-seconds"); }
+  function tpUnit(host) { return tpSec(host) ? "clockS" : "clock"; }
+  function tpInp(host) { return $(".affix input", host); }
+  function tpS(host) { return host._dsTp || (host._dsTp = { text: "" }); }
+  /* 범위 값 — 초가 없는 data-min 은 :00 을 붙인다 */
+  function tpBound(host, name) { var g = (host.getAttribute("data-" + name) || "").match(/\d+/g); if (!g || g.length < 2) return ""; return [g[0], g[1], g[2] || "0"].slice(0, tpSec(host) ? 3 : 2).map(function (x) { return pad(+x); }).join(":"); }
+  /* 검사 — 빈 · 미완성 · 없는 시각 · min · max · 유효. 범위 밖도 값은 남긴다(React 와 같다) */
+  function tpCheck(host, text) {
+    var sec = tpSec(host), s = String(text || "").trim(), dg = s.replace(/\D/g, ""), n = sec ? 6 : 4, M = dpMessages(host);
+    var lo = tpBound(host, "min"), hi = tpBound(host, "max"), x = { subject: M.timeSubject, example: sec ? "14:30:05" : "14:30", min: lo, max: hi };
+    if (!s) return { validity: "empty", value: null };
+    if (dg.length < n) return { validity: "incomplete", value: null, msg: say(M, "incomplete", x) };
+    var h = +dg.slice(0, 2), m = +dg.slice(2, 4), c = sec ? +dg.slice(4, 6) : 0;
+    if (dg.length > n || h > 23 || m > 59 || c > 59) return { validity: "invalid", value: null, msg: say(M, "invalidTime", x) };
+    var v = pad(h) + ":" + pad(m) + (sec ? ":" + pad(c) : "");
+    if (lo && v < lo) return { validity: "min", value: v, msg: say(M, "min", x) };
+    if (hi && v > hi) return { validity: "max", value: v, msg: say(M, "max", x) };
+    return { validity: "valid", value: v };
+  }
+  /* 확정 — Enter · 열에서 고름 · ↑↓ · 필드를 떠날 때. 폼 안에서는 폼 검증 문구(필수 포함), 밖에서는 시각 문구만 — 제품이 건 오류는 건드리지 않는다 */
+  function tpCommit(host) {
+    if (host.dataset.dpSide) { var dpi = tpInp(host), dhs = dpHost(host); if (dhs) { S(dhs).clock[host.dataset.dpSide] = dpi.value; renderMarks(dhs); } tpS(host).text = dpi.value.trim(); if (host.classList.contains("open")) tpMarks(host); return; }   // 달력 안 시각 칸 — 글자만 달력에 넘긴다(문구 · ds:time 없음, 적용할 때 필드가 잰다)
+    var inp = tpInp(host), st = tpS(host), f = closest(inp, ".field"), r = tpCheck(host, inp.value), form = closest(inp, "form[data-validate]");
+    if (r.value) { inp.value = r.value; inp._dpPrev = r.value; }
+    host.dataset.validity = r.validity;
+    if (form) { if (inp.value || inp._dsDirty || f.classList.contains("error")) { vShow(inp, vMessage(inp)); vChanged(form); } }
+    else if (r.msg) { vShow(inp, r.msg); st.err = true; }
+    else if (st.err) { vShow(inp, ""); st.err = false; }
+    if (inp.value.trim() !== st.text) { st.text = inp.value.trim(); fire(host, "ds:time", { value: r.value, text: st.text, validity: r.validity }); }
+    if (host.classList.contains("open")) tpMarks(host);
+  }
+  function tpInit(host) {
+    var inp = tpInp(host), st = tpS(host); if (!inp) return;
+    if (inp.value) { inp.value = pasteText(inp.value, tpUnit(host), false); inp._dpPrev = inp.value; }   // 마크업 값 9:5 → 09:05
+    st.text = inp.value.trim(); host.dataset.validity = tpCheck(host, inp.value).validity;
+  }
+  /* 지금 글자의 조각 — 두 자리가 찬 조각만(없으면 null) */
+  function tpSegs(host) { var n = tpSec(host) ? 3 : 2, g = tpInp(host).value.split(":"), out = []; for (var i = 0; i < n; i++) out.push(g[i] && /^\d\d$/.test(g[i]) && +g[i] < (i ? 60 : 24) ? +g[i] : null); return out; }
+  function tpCols(host) { return $$(".time-panel .time-col", host); }
+  function tpOpts(col) { return $$(":scope > .time-opt", col); }
+  function tpLive(o) { return o.getAttribute("aria-disabled") !== "true"; }
+  /* 패널 — 열 때마다 새로 그린다(data-step · min · max 를 그때 읽는다). 칸은 div — .field .affix span 규칙을 받지 않게 패널은 .affix 밖 host 끝에 둔다 */
+  function tpBuild(host) {
+    var L = tpLabels(host), p = $(":scope > .time-panel", host), uid = (tpInp(host).id || "tp" + Math.random().toString(36).slice(2, 8)), step = Math.max(1, Math.min(59, parseInt(host.getAttribute("data-step"), 10) || 1));
+    if (!p) { p = doc.createElement("div"); p.className = "time-panel"; p.setAttribute("role", "dialog"); host.appendChild(p); }
+    p.setAttribute("aria-label", L.dialog);
+    var col = function (key, len, by) { var h = '<div class="time-col" role="listbox" aria-label="' + L[key] + '" data-part="' + key + '">'; for (var i = 0; i < len; i += by) h += '<div class="time-opt" role="option" id="' + uid + "-" + key + "-" + pad(i) + '" data-v="' + i + '" aria-selected="false" tabindex="-1">' + pad(i) + "</div>"; return h + "</div>"; };
+    p.innerHTML = col("hour", 24, 1) + col("minute", 60, step) + (tpSec(host) ? col("second", 60, 1) : "");
+    tpMarks(host);
+  }
+  /* 고른 칸 · 고를 수 없는 칸 · 열마다 Tab 이 멈출 칸. 시는 그 시간 전체가 범위 밖일 때, 분은 그 분 전체, 초는 그 값이 범위 밖일 때 끈다 */
+  function tpMarks(host) {
+    var seg = tpSegs(host), sec = tpSec(host), lo = tpBound(host, "min"), hi = tpBound(host, "max"), t = function (a) { return a.map(pad).join(":"); };
+    tpCols(host).forEach(function (col, ci) {
+      var opts = tpOpts(col), act = null;
+      opts.forEach(function (o) {
+        var v = +o.dataset.v, first, last;
+        if (ci === 0) { first = [v, 0, 0]; last = [v, 59, 59]; }
+        else if (ci === 1) { if (seg[0] == null) { first = last = null; } else { first = [seg[0], v, 0]; last = [seg[0], v, 59]; } }
+        else { if (seg[0] == null || seg[1] == null) { first = last = null; } else first = last = [seg[0], seg[1], v]; }
+        var off = !!first && ((lo && t(last.slice(0, sec ? 3 : 2)) < lo) || (hi && t(first.slice(0, sec ? 3 : 2)) > hi));
+        if (off) o.setAttribute("aria-disabled", "true"); else o.removeAttribute("aria-disabled");
+        var on = seg[ci] === v; o.setAttribute("aria-selected", String(on)); o.classList.toggle("on", on);
+        if (on && !off) act = o;
+      });
+      if (!act) { var cur = opts.filter(function (o) { return o.tabIndex === 0 && tpLive(o); })[0]; act = cur || opts.filter(tpLive)[0] || opts[0]; }
+      opts.forEach(function (o) { o.tabIndex = o === act ? 0 : -1; });
+    });
+  }
+  function tpPlace(host) {
+    var p = $(":scope > .time-panel", host), anchor = $(".affix", host), hr = host.getBoundingClientRect(), r = anchor.getBoundingClientRect(), h = p.offsetHeight, w = p.offsetWidth, gap = 4;
+    var below = window.innerHeight - r.bottom - gap, above = r.top - gap, up = below < h && above > below, vw = doc.documentElement.clientWidth;
+    host.classList.toggle("up", up);
+    host.style.setProperty("--tp-top", (up ? r.top - hr.top - gap - h : r.bottom - hr.top + gap) + "px");
+    host.style.setProperty("--tp-left", Math.max(8 - hr.left, Math.min(0, vw - 8 - w - hr.left)) + "px");
+  }
+  function tpOpen(host, focus) {
+    var inp = tpInp(host); if (inp.value.trim() !== tpS(host).text) tpCommit(host);   // 열기 전에 친 글자를 먼저 반영한다
+    tpBuild(host); host.classList.add("open"); host.dataset.dsOpened = "1";
+    $$(".tp-btn", host).forEach(function (b) { b.setAttribute("aria-expanded", "true"); });
+    tpPlace(host);
+    tpCols(host).forEach(function (col) { var on = $(".time-opt.on", col); col.scrollTop = on ? on.offsetTop - parseFloat(getComputedStyle(col).paddingTop) : 0; });   // 고른 칸을 맨 위로
+    if (focus) { var first = $(".time-opt[tabindex='0']", host); if (first) first.focus({ preventScroll: true }); }
+  }
+  function tpClose(host, restore) {
+    host.classList.remove("open", "up"); delete host.dataset.dsOpened;
+    $$(".tp-btn", host).forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+    if (restore) tpInp(host).focus();
+  }
+  /* 고름 — 그 조각만 바꾸고 빈 조각은 00 으로 채운다 */
+  function tpPick(opt) {
+    var host = closest(opt, ".timepicker"), col = closest(opt, ".time-col"), ci = tpCols(host).indexOf(col), seg = tpSegs(host), inp = tpInp(host);
+    if (!tpLive(opt)) return false;
+    seg[ci] = +opt.dataset.v;
+    inp.value = seg.map(function (x) { return pad(x == null ? 0 : x); }).join(":"); inp._dpPrev = inp.value; inp._dsDirty = true;
+    tpCommit(host);
+    tpOpts(col).forEach(function (o) { o.tabIndex = o === opt ? 0 : -1; });
+    return true;
+  }
+  function tpMove(col, opt) { tpOpts(col).forEach(function (o) { o.tabIndex = o === opt ? 0 : -1; }); opt.focus({ preventScroll: true }); opt.scrollIntoView({ block: "nearest" }); }
+  function tpKey(e, opt) {
+    var host = closest(opt, ".timepicker"), col = closest(opt, ".time-col"), cols = tpCols(host), ci = cols.indexOf(col), live = tpOpts(col).filter(tpLive), i = live.indexOf(opt), k = e.key;
+    if (k === "ArrowDown" || k === "ArrowUp") { e.preventDefault(); var nx = live[k === "ArrowDown" ? Math.min(live.length - 1, i + 1) : Math.max(0, i < 0 ? 0 : i - 1)]; if (nx) tpMove(col, nx); return true; }
+    if (k === "Home" || k === "End") { e.preventDefault(); if (live.length) tpMove(col, live[k === "Home" ? 0 : live.length - 1]); return true; }
+    if (k === "ArrowLeft" || k === "ArrowRight") { e.preventDefault(); var c2 = cols[ci + (k === "ArrowRight" ? 1 : -1)]; if (c2) { var t2 = $(".time-opt[tabindex='0']", c2); if (t2) tpMove(c2, t2); } return true; }
+    if (k === "Enter" || k === " ") { e.preventDefault(); if (!tpPick(opt)) return true; var c3 = cols[ci + 1]; if (c3) { var t3 = $(".time-opt[tabindex='0']", c3); if (t3) tpMove(c3, t3); } else tpClose(host, true); return true; }   // 고르고 다음 열로, 마지막 열이면 닫고 입력칸으로
+    if (k === "Escape") { e.preventDefault(); e.stopPropagation(); tpClose(host, true); return true; }
+    return false;
+  }
+  doc.addEventListener("input", function (e) {
+    var t = e.target; if (!t.matches || !t.matches(".timepicker .affix input") || e.isComposing) return;
+    var host = closest(t, ".timepicker"), form = closest(t, "form[data-validate]");
+    reflow(t, e, tpUnit(host), false); t._dsDirty = true;
+    if (closest(t, ".field").classList.contains("error")) { if (form) { vShow(t, vMessage(t)); vChanged(form); } else vShow(t, tpCheck(host, t.value).msg || ""); }   // 오류가 있는 동안은 칠 때마다 다시 재 바로 지운다
+    if (host.classList.contains("open")) tpMarks(host);
+  });
+  doc.addEventListener("keydown", function (e) {
+    var t = e.target; if (!(t instanceof Element)) return;
+    var opt = closest(t, ".timepicker .time-opt"); if (opt) { tpKey(e, opt); return; }
+    var otp = e.key === "Escape" && closest(t, ".timepicker.open"); if (otp && !closest(t, ".affix input")) { e.preventDefault(); e.stopPropagation(); tpClose(otp, true); return; }   // 열린 채 시계 버튼에서 Esc — 목록만 닫는다(달력 안이면 달력은 그대로)
+    var inp = closest(t, ".timepicker .affix input"); if (!inp || e.isComposing) return;
+    var host = closest(inp, ".timepicker");
+    if (host.dataset.dpSide && e.key !== "Escape" && !(e.key === "ArrowDown" && e.altKey)) return;   // 달력 안 — Enter(적용) · ↑↓ 는 달력이 맡는다
+    if (e.key === "Enter") { e.preventDefault(); tpCommit(host); return; }
+    if (e.key === "ArrowDown" && e.altKey) { e.preventDefault(); var b = $(".tp-btn", host); if (b && !b.disabled) tpOpen(host, true); return; }
+    if ((e.key === "ArrowUp" || e.key === "ArrowDown") && !e.altKey && !inp.readOnly && !inp.disabled) { e.preventDefault(); clockBump(inp, tpSec(host) ? 3 : 2, e.key === "ArrowUp" ? 1 : -1); inp._dsDirty = true; tpCommit(host); return; }
+    if (e.key === "Escape" && host.classList.contains("open")) { e.preventDefault(); e.stopPropagation(); tpClose(host, false); }   // 가장 안쪽 하나만 — 대화상자는 다음 Esc 에
+  }, true);
+  doc.addEventListener("click", function (e) {
+    var t = e.target; if (!(t instanceof Element)) return;
+    var b = closest(t, ".timepicker .tp-btn"); if (b) { var h = closest(b, ".timepicker"); if (b.disabled) return; if (h.classList.contains("open")) tpClose(h, true); else tpOpen(h, true); return; }
+    var opt = closest(t, ".timepicker .time-opt"); if (opt) tpPick(opt);
+  });
+  /* 필드를 떠나면 닫고 확정한다 — 입력칸 → 버튼 → 열 사이를 옮기는 동안은 기다린다 */
+  doc.addEventListener("focusout", function (e) {
+    var host = closest(e.target, ".timepicker"); if (!host || (e.relatedTarget && host.contains(e.relatedTarget))) return;
+    var inp = tpInp(host); if (!inp || inp.disabled || inp.readOnly) return;
+    if (host.classList.contains("open")) tpClose(host, false);
+    tpCommit(host);
+  });
 
   /* ---------- Code · Copy Field — 복사 ----------
      결과는 버튼 자리에서 2초(Toast 를 쓰지 않음). 값은 이벤트에 싣지 않는다 — 민감한 값이 로그로 새지 않게.
@@ -1593,5 +1813,5 @@
     });
   }
 
-  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, version: "0.5" };
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, version: "0.5" };
 })();

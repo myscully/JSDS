@@ -7,9 +7,10 @@ import { Button } from "../button/Button";
 import { TextField } from "../text-field/TextField";
 import { FormValidationContext } from "../text-field/validation";
 import { LABELS } from "../../labels";
+import { TimePicker } from "../time-picker/TimePicker";
 import type { Size } from "../../types";
 import { Calendar, addMonths, baseView, isRange, labelsFor, outOf, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
-import { checkText, clockOf, formatMonth, spanDays, isValidDate, pasteText, placeholderOf, reformat, showOf, stepClock, stepText, unitStart, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity, type TextUnit } from "./format";
+import { checkText, clockOf, formatMonth, spanDays, isValidDate, pasteText, placeholderOf, reformat, showOf, stepText, unitStart, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity, type TextUnit } from "./format";
 import { calendarDateOf, clockDateOf, instantOf, resolveZone, todayIn } from "./tz";
 
 export { Calendar, type CalendarProps, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
@@ -164,7 +165,6 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   const input = useRef<HTMLInputElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const caret = useRef<number | null>(null);
-  const clockCaret = useRef<{ side: keyof Clock; at: number } | null>(null);
   const id = useId(inputId);
   const footItems = footer === false ? [] : footer ?? (range ? ["apply"] : ["today", "apply"]);
   const items = isTime && !footItems.includes("apply") ? [...footItems, "apply" as const] : footItems;   // 시각을 고를 틈이 있어야 한다 — 날짜를 누르는 순간 닫히면 시각을 못 고친다
@@ -186,9 +186,6 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   useLayoutEffect(() => {   // 다시 끊은 글자에서 커서를 같은 숫자 뒤에
     if (caret.current !== null && input.current && document.activeElement === input.current) input.current.setSelectionRange(caret.current, caret.current);
     caret.current = null;
-    const c = clockCaret.current;
-    if (c) { const el = document.getElementById(`${id}-time-${c.side}`) as HTMLInputElement | null; if (el && document.activeElement === el) el.setSelectionRange(c.at, c.at); }
-    clockCaret.current = null;
   });
 
   const emit = (p: Pair, info: DateChangeInfo) => { if (!controlled) setInner(p); onPair?.(p, info); };
@@ -289,7 +286,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
 
   const rootKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(e);
-    if (e.key === "Escape" && isOpen) { e.preventDefault(); e.stopPropagation(); setOpen(false, true); }   // 이 피커만 닫고 필드로
+    if (e.key === "Escape" && isOpen && !(e.target as HTMLElement).closest(".timepicker.open")) { e.preventDefault(); e.stopPropagation(); setOpen(false, true); }   // 이 피커만 닫고 필드로 — 시각 열 목록이 열려 있으면 그것이 먼저(useEscape)
   };
   const inputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); commitText(text); }   // 한글 조합 중 Enter 는 조합 확정이다
@@ -301,30 +298,20 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
       caret.current = r.caret; commitText(r.text);
     }
   };
+  /* 시각 칸 = Time Picker sm(사람의 결정 2026-11-13 — 입력칸만이던 것). 치는 글자는 바로 달력에, Enter 는 적용, 범위 검사는 적용할 때 필드가 한다 */
   const clockField = (side: keyof Clock, name: string) => (
-    <TextField
+    <TimePicker
       key={side}
       id={`${id}-time-${side}`}
       size="sm"
       label={name}
       value={clock[side]}
-      placeholder={tu === "second" ? "HH:mm:ss" : "HH:mm"}
-      inputMode="numeric"
-      autoComplete="off"
-      onChange={(e) => {
-        const ne = e.nativeEvent as InputEvent, r = reformat(e.target.value, clock[side], e.target.selectionStart ?? e.target.value.length, ne.inputType, tu === "second" ? "clockS" : "clock", false);
-        clockCaret.current = { side, at: r.caret };
-        setClock((c) => ({ ...c, [side]: r.text }));
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (canApply) done(draft); }
-        else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-          e.preventDefault();
-          const r = stepClock(clock[side], e.currentTarget.selectionStart ?? 0, e.key === "ArrowUp" ? 1 : -1, tu === "second");
-          clockCaret.current = { side, at: r.caret };
-          setClock((c) => ({ ...c, [side]: r.text }));
-        }
-      }}
+      seconds={tu === "second"}
+      validate={false}
+      labels={{ open: L.timeOpen }}
+      wrapperProps={{ "data-dp-side": side } as never}
+      onTextChange={(t) => setClock((c) => (c[side] === t ? c : { ...c, [side]: t }))}
+      onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (canApply) done(draft); } }}
     />
   );
   const rootStyle = place ? ({ ...style, "--dp-top": `${place.top}px`, "--dp-left": `${place.left}px` } as CSSProperties) : style;

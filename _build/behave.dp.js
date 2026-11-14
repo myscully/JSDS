@@ -31,8 +31,8 @@ module.exports = async ({ b, ok, SITE, path }) => {
     document.addEventListener("ds:date", (e) => { const d = e.detail; window.__dsd.push({ ...d, date: d.date && !(d.date instanceof Date) ? { start: iso(d.date.start), end: iso(d.date.end) } : iso(d.date) }); });
   });
   const last = async (pg = page) => (await pg.evaluate(() => window.__dsd || [])).pop() || {};
-  const state = (dp) => dp.evaluate((e) => ({ v: e.dataset.value || null, s: e.dataset.start || null, e: e.dataset.end || null, t: e.querySelector(".affix input").value, val: e.dataset.validity || null, err: e.classList.contains("error"), inv: e.querySelector(".affix input").getAttribute("aria-invalid"), help: e.querySelector(".help")?.textContent || "", open: e.classList.contains("open") }));
-  const typeInto = async (dp, digits) => { const i = dp.locator(".affix input"); await i.fill(""); await i.pressSequentially(digits); await i.press("Enter"); return state(dp); };
+  const state = (dp) => dp.evaluate((e) => ({ v: e.dataset.value || null, s: e.dataset.start || null, e: e.dataset.end || null, t: e.querySelector(":scope > .affix input").value, val: e.dataset.validity || null, err: e.classList.contains("error"), inv: e.querySelector(":scope > .affix input").getAttribute("aria-invalid"), help: e.querySelector(".help")?.textContent || "", open: e.classList.contains("open") }));
+  const typeInto = async (dp, digits) => { const i = dp.locator(":scope > .affix input"); await i.fill(""); await i.pressSequentially(digits); await i.press("Enter"); return state(dp); };
   /* 토큰의 계산 색 */
   const tok = (name, prop = "color") => page.evaluate(([n, p]) => { const d = document.createElement("div"); d.style[p] = `var(${n})`; document.body.append(d); const c = getComputedStyle(d)[p]; d.remove(); return c; }, [name, prop]);
 
@@ -347,7 +347,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   // ── 입력 · 자동 형식 · validity ──────────────────────────────
   await step("typing digits fills in YYYY. MM. DD as you go", async () => {
     await go("components/date-picker.html");
-    const dp = dpOf("default"), i = dp.locator(".affix input");
+    const dp = dpOf("default"), i = dp.locator(":scope > .affix input");
     await toTop(dp); await listen();
     await i.click();
     const seen = [];
@@ -359,19 +359,19 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("typing digits fills in YYYY. MM. DD as you go", seen.join("|") === "2|20|202|2026|2026. 09|2026. 09. 04" && !quiet.err && r.v === "2026-09-04" && r.val === "valid" && ev.text === "2026. 09. 04" && ev.date === "2026-09-03T15:00:00.000Z", JSON.stringify({ seen, quiet, r, ev }));
   });
   await step("Backspace removes digits through the separators", async () => {
-    const i = dpOf("default").locator(".affix input");
+    const i = dpOf("default").locator(":scope > .affix input");
     const seen = [];
     for (let n = 0; n < 3; n++) { await page.keyboard.press("Backspace"); seen.push(await i.inputValue()); }
     ok("Backspace removes digits through the separators", seen.join("|") === "2026. 09. 0|2026. 09|2026. 0", seen.join("|"));
   });
   await step("pasted 2026/9/1 is padded to 2026. 09. 01", async () => {
-    const i = dpOf("default").locator(".affix input");
+    const i = dpOf("default").locator(":scope > .affix input");
     const v = await i.evaluate((e) => { e.focus(); e.value = "2026/9/1"; e.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertFromPaste", data: "2026/9/1" })); return e.value; });
     ok("pasted 2026/9/1 is padded to 2026. 09. 01", v === "2026. 09. 01", v);
     await i.press("Enter");
   });
   await step("incomplete typing is an error only when you leave, and ds:date carries an Invalid Date", async () => {
-    const dp = dpOf("default"), i = dp.locator(".affix input");
+    const dp = dpOf("default"), i = dp.locator(":scope > .affix input");
     await listen();
     await i.fill(""); await i.pressSequentially("202609");
     const quiet = await state(dp);
@@ -389,7 +389,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     ok("an impossible date is invalid and never becomes another date", r.t === "2026. 02. 30" && r.val === "invalid" && !r.v && r.err && r.help === "날짜가 달력에 없습니다. 달력에서 고르거나 2026. 09. 07 처럼 입력하세요." && ev.date === "NaN" && border === want, JSON.stringify({ r, ev, border, want }));
   });
   await step("↑↓ step the segment under the cursor and ignore max — the value stays", async () => {
-    const dp = dpOf("min-max", 0), i = dp.locator(".affix input");
+    const dp = dpOf("min-max", 0), i = dp.locator(":scope > .affix input");
     await toTop(dp); await listen();
     await i.evaluate((e) => { e.focus(); e.setSelectionRange(2, 2); });
     await page.keyboard.press("ArrowUp");
@@ -458,7 +458,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   await step("typed text is checked when focus leaves through the calendar button", async () => {
     const dp = dpOf("default");
     await toTop(dp);
-    await dp.locator(".affix input").fill("20260230");
+    await dp.locator(":scope > .affix input").fill("20260230");
     await page.keyboard.press("Tab"); await page.keyboard.press("Tab");
     const r = await state(dp);
     ok("typed text is checked when focus leaves through the calendar button", r.err && r.inv === "true" && r.val === "invalid", JSON.stringify(r));
@@ -467,7 +467,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await go("components/date-picker.html");
     const dp = dpOf("default");
     await toTop(dp); await openCal(dp);
-    await dp.locator(".affix input").fill("20260315"); await dp.locator(".affix input").press("Enter");
+    await dp.locator(":scope > .affix input").fill("20260315"); await dp.locator(":scope > .affix input").press("Enter");
     const t = await dp.evaluate((e) => ({ title: e.querySelector(".cal-title").textContent, on: e.querySelector(".day.on")?.dataset.date, v: e.dataset.value, i: e.querySelector("input").value, apply: e.querySelector('[data-cal="apply"]').disabled }));
     /* 입력의 Enter 가 이미 확정했으므로 초안 = 확정 값 — 적용은 꺼져 예전 값으로 되돌릴 길이 없다 */
     ok("typing while the calendar is open moves the calendar and apply keeps it", t.title === "2026년 3월" && t.on === "2026-03-15" && t.v === "2026-03-15" && t.i === "2026. 03. 15" && t.apply, JSON.stringify(t));
@@ -487,12 +487,12 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await go("components/date-picker.html");
     const dp = dpOf("min-max", 0), er = dpOf("min-max", 1);
     await toTop(dp);
-    const ring = (loc) => loc.evaluate((e) => { const a = getComputedStyle(e.querySelector(".affix")), c = getComputedStyle(e.querySelector(".cal-btn")); return { border: a.borderTopColor, shadow: a.boxShadow, btnOutline: c.outlineStyle + " " + c.outlineWidth, inner: getComputedStyle(e.querySelector(".affix input")).boxShadow }; });
-    await dp.locator(".affix input").focus(); await page.waitForTimeout(250);
+    const ring = (loc) => loc.evaluate((e) => { const a = getComputedStyle(e.querySelector(".affix")), c = getComputedStyle(e.querySelector(".cal-btn")); return { border: a.borderTopColor, shadow: a.boxShadow, btnOutline: c.outlineStyle + " " + c.outlineWidth, inner: getComputedStyle(e.querySelector(":scope > .affix input")).boxShadow }; });
+    await dp.locator(":scope > .affix input").focus(); await page.waitForTimeout(250);
     const inp = await ring(dp);
     await page.keyboard.press("Tab"); await page.waitForTimeout(250);
     const btn = await ring(dp);
-    await er.locator(".affix input").focus(); await page.waitForTimeout(250);
+    await er.locator(":scope > .affix input").focus(); await page.waitForTimeout(250);
     const red = await ring(er);
     const brand = await tok("--foreground-brand-primary"), halo = await tok("--line-brand-focus"), neg = await tok("--foreground-negative-primary"), negHalo = await tok("--line-negative-focus");
     ok("input focus rings: field halo for the input, own outline for the calendar button, red when in error",

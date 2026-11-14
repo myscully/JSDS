@@ -2,6 +2,7 @@
 export const LABELS = {
   prev: "이전",
   next: "다음",
+  finish: "완료",
   prevMonth: "이전 달",
   nextMonth: "다음 달",
   close: "닫기",
@@ -54,6 +55,7 @@ export const LABELS = {
   time: "시각",
   startTime: "시작 시각",
   endTime: "종료 시각",
+  timeOpen: "선택",
   more: "더 보기",
   undo: "실행 취소",
 } as const;

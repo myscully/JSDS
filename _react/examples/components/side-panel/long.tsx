@@ -5,7 +5,7 @@ const FACTS = [["시각", "2026-09-07 14:22:05"], ["호스트", "DESKTOP-7F3K"],
 export default function Example() {
   return (
     <SidePanelSurface title="에이전트 상세" onClose={() => {}} style={{ height: 320 }} footer={<Button>격리</Button>}>
-      <table className="tbl compact">
+      <table className="tbl kv">
           <tbody>
             {FACTS.map(([k, v]) => <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>)}
           </tbody>

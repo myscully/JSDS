@@ -8,7 +8,7 @@ import { LABELS } from "../../labels";
 import { Button } from "../button/Button";
 import { mergeRefs } from "../../utils/hooks";
 
-export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange"> {
+export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange" | "color"> {
   /** 필터 칩 선택 상태 (제어) */
   selected?: boolean;
   defaultSelected?: boolean;
@@ -19,6 +19,10 @@ export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,
   /** 라벨 앞 아이콘 */
   icon?: IconName;
   size?: "md" | "sm";
+  /** 형태 — outline(기본, 회색 선) · solid(회색 면). 고른 칩은 두 형태 모두 같은 진한 면(2026-11-13) */
+  variant?: "outline" | "solid";
+  /** 고른 칩의 색 — brand(기본, 제품 색 면) · neutral(반전 면). 고를 수 없는 칩(onRemove · action)은 중립 고정이라 무시 */
+  color?: "brand" | "neutral";
   /** 토글이 아닌 동작 칩(예: "+ 추가"). aria-pressed 없이 onClick 만 */
   action?: boolean;
 }
@@ -38,13 +42,22 @@ function ChipLabel({ children }: { children: ReactNode }) {
   return cut ? <Tooltip content={children} multi describe={false}>{lbl}</Tooltip> : lbl;
 }
 
+let warned = false;
+function warnFixed() {
+  if (warned) return; warned = true;
+  console.warn("[ds-react] Chip 의 color=\"neutral\" · selected 는 고를 수 있는 칩에만 씁니다 — onRemove · action 칩은 선택 상태가 없고 색은 중립이라 무시합니다(2026-11-13).");
+}
+
 /** 필터 조건(토글) 또는 입력값(삭제 가능) 캡슐. 상태 표시는 Tag */
 export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
-  { selected, defaultSelected = false, onSelectedChange, onRemove, removeLabel = LABELS.remove, icon, size = "md", action, className, children, onClick, disabled, ...rest },
+  { selected, defaultSelected = false, onSelectedChange, onRemove, removeLabel = LABELS.remove, icon, size = "md", variant = "outline", color = "brand", action, className, children, onClick, disabled, ...rest },
   ref,
 ) {
   const [on, setOn] = useControllable<boolean>({ value: selected, defaultValue: defaultSelected, onChange: onSelectedChange });
-  const cls = cx("chip", size === "sm" && "sm", on && "on", className);
+  const pickable = !action && !onRemove;
+  if (process.env.NODE_ENV !== "production" && !pickable && (color === "neutral" || selected)) warnFixed();
+  /* 색 · 선택은 고를 수 있는 칩에만 — 입력값 칩 · 동작 칩은 형태만 받는다(사람의 결정 2026-11-13) */
+  const cls = cx("chip", size === "sm" && "sm", variant === "solid" && "solid", pickable && color === "neutral" && "neutral", pickable && on && "on", className);
   if (action) {
     return (
       <button ref={ref} type="button" className={cls} disabled={disabled} onClick={onClick} {...rest}>

@@ -123,3 +123,18 @@ describe("말줄임 칸 Tooltip", () => {
     } finally { undo(); }
   });
 });
+
+/* 행 hover 는 옵션(사람의 결정 2026-11-13) — 기본 표는 .hover 가 없고, 행을 고르거나 행 동작이 있는 표만 켠다 */
+describe("Table · Data Table 행 hover", () => {
+  it("기본은 .hover 없음, hover 를 주면 .tbl.hover — DataTable 도 그대로 넘긴다", () => {
+    const { container, rerender } = render(<Table>{body}</Table>);
+    expect(cls(container.querySelector("table"))).toBe("tbl");
+    rerender(<Table hover density="relaxed">{body}</Table>);
+    expect(cls(container.querySelector("table"))).toBe("tbl relaxed hover");
+    const cols = [{ key: "a", header: "A" }];
+    const d = render(<DataTable caption="t" columns={cols} rows={[{ a: 1 }]} rowKey={(r) => String(r.a)} />);
+    expect(d.container.querySelector("table")!.classList.contains("hover")).toBe(false);
+    d.rerender(<DataTable hover caption="t" columns={cols} rows={[{ a: 1 }]} rowKey={(r) => String(r.a)} />);
+    expect(d.container.querySelector("table")!.classList.contains("hover")).toBe(true);
+  });
+});

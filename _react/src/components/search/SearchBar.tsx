@@ -17,7 +17,8 @@ export interface SearchBarProps extends Omit<InputHTMLAttributes<HTMLInputElemen
   debounce?: boolean | number;
   /** 결과 건수 등 — 숨긴 role=status 로 알린다 */
   status?: ReactNode;
-  size?: "md" | "lg";
+  /** 높이 sm 32 · md 40 · lg 48 — Button · 필드와 같다(sm 은 2026-11-12) */
+  size?: "sm" | "md" | "lg";
   /** 전체 폭 */
   block?: boolean;
   /** 단축키 표시 (kbd). 예: "/" */
@@ -87,7 +88,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
     }
   };
   return (
-    <div className={cx("searchbar", size === "lg" && "lg", { block }, wrapperClassName)} role="search" style={wrapperStyle}>
+    <div className={cx("searchbar", size !== "md" && size, { block }, wrapperClassName)} role="search" style={wrapperStyle}>
       <Icon name="search" />
       <input ref={mergeRefs(inner, ref)} type="search" value={cur} onChange={(e) => change(e.target.value)} onKeyDown={keyDown} aria-label={label} {...rest} />
       {status !== undefined && <span className="sr-only" role="status">{status}</span>}

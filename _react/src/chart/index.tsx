@@ -36,20 +36,22 @@ export interface ChartCanvasProps extends Omit<HTMLAttributes<HTMLDivElement>, "
   "aria-label": string;
   /** 캔버스 높이(px). 기본은 CSS .chart-canvas 의 240. 표로 볼 때도 같은 높이 */
   height?: number;
+  /** '표로 보기' 버튼 — 같은 data 를 표로 바꿔 보여 준다. 기본은 없음(사람의 결정 2026-11-13 — 11-10 의 기본 제공을 옵션으로).
+   *  정확한 값을 읽어야 하는 차트에 켠다. 끄면 대안은 aria-label 요약뿐이므로 요약에 핵심 수치를 적는다 */
+  table?: boolean;
   /** 표로 보기의 문구 — table · chart · head · value · empty(빈 칸의 숨긴 문구) */
   labels?: Partial<ChartTableLabels>;
 }
-/** .chart-view > 표로 보기 버튼 + .chart-canvas + canvas[role=img]. 사이트의 canvas[data-chart] 와 같은 골격.
- *  캔버스의 값은 스크린 리더 · 키보드로 읽을 수 없어 같은 data 를 표로 바꿔 보여 준다(사람의 결정 2026-11-10) */
-export const ChartCanvas = forwardRef<HTMLCanvasElement, ChartCanvasProps>(function ChartCanvas({ chart, config, "aria-label": label, height, labels, className, style, ...rest }, ref) {
+/** .chart-view > (표로 보기 버튼) + .chart-canvas + canvas[role=img]. 사이트의 canvas[data-chart] 와 같은 골격 */
+export const ChartCanvas = forwardRef<HTMLCanvasElement, ChartCanvasProps>(function ChartCanvas({ chart, config, "aria-label": label, height, table = false, labels, className, style, ...rest }, ref) {
   const inner = useRef<HTMLCanvasElement>(null);
   const [asTable, setAsTable] = useState(false);
   useDsChart(inner, chart, config);
   const L = { ...DSChart.TABLE_LABELS, ...labels };
-  const t: ChartTableData | null = asTable ? DSChart.tableData(config.data, L) : null;
+  const t: ChartTableData | null = table && asTable ? DSChart.tableData(config.data, L) : null;
   return (
     <div className="chart-view">
-      <div className="chart-tools"><button type="button" className="btn sm text assistive" data-chart-table onClick={() => setAsTable((v) => !v)}>{asTable ? L.chart : L.table}</button></div>
+      {table && <div className="chart-tools"><button type="button" className="btn sm text assistive" data-chart-table onClick={() => setAsTable((v) => !v)}>{asTable ? L.chart : L.table}</button></div>}
       <div className={cx("chart-canvas", className)} style={height ? { height, ...style } : style} hidden={asTable} {...rest}>
         <canvas ref={mergeRefs(inner, ref)} role="img" aria-label={label} />
       </div>

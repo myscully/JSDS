@@ -10,7 +10,7 @@ export default function Example() {
     <>
       <Button variant="outline" color="assistive" onClick={() => setOpen(true)}>이벤트 상세 열기</Button>
       <SidePanel open={open} onClose={() => setOpen(false)} title="이벤트 상세">
-        <table className="tbl compact">
+        <table className="tbl kv">
           <tbody>
             {FACTS.map(([k, v]) => <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>)}
           </tbody>

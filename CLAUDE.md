@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 74 · verify 0/0 · contrast 1434쌍 실패 0 · advisory 455 · behave 1208/1208 · react 710+6 · tsc 0
+pages 75 · verify 0/0 · contrast 1452쌍 실패 0 · advisory 449 · behave 1328/1328 · react 764+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -500,7 +500,110 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
   - 패키지 **`.ds-root` 기본 글자 = Body 2/Reading 15/24 · 자간 0.0096em**(옛 15/1.65 = 24.75). `sync-css.mjs` 가 `.t-body-2-reading` 값과 다르면 빌드를 막는다. '기본 글자에 기대지 않는다' 단정(behave.js)의 기본 글자를 같이 바꿨더니 **고정폭 Code 블록 셋이 새 자간을 물려받아** 배치가 달랐다 — `.code-view pre{letter-spacing:0}`(제품 앱에서도 같은 일이 났을 것).
   - 음성 시험 6건(홈 제목 · 좁은 화면 · h2 · h3 · h4 · sync-css 가드) 모두 실패로 잡혔다. Figma 미반영 473건(그대로).
 
-`advisory 455` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
+2026-11-12 컴포넌트 수정 15건(사람의 요청 · 결정 열둘) — contrast 1434 → 1440 · advisory 455 → 460 · behave 1208 → 1225(`behave.layout.js` 17 · 기존 단정 고침 5) · react 710+6 → 717+6(예제 253 → 260 에 따른 구조 비교 7). pages 수는 그대로.
+- **컴포넌트 페이지 구성 = 정의 → 원칙 표 → Default → Variant → Size → State → Spec → Props → Usage**(사람의 결정 — 기존 예제를 네 묶음에 나눔). 예제마다 `group`(241개: default 43 · variant 147 · size 16 · state 35), 묶음은 h2 · 예제는 h3(번호 없음), 빈 묶음은 그리지 않고 묶음에 예제 하나가 묶음 이름과 같으면 h3 를 생략한다. 예제 id 는 그대로라 React · 구조 비교 · audit 이 그대로다. 패턴 페이지는 옛 번호 목록 그대로.
+  네 묶음에 안 맞는 것(Icon · Toast · 행 펼침 …)은 Variant, 상태 화면(Loading · 오류 · 빈 상태 · Disabled)은 State.
+- **Placement 절을 없앴다**(사람의 결정) — 자리 규칙 문장 43개를 원칙 표의 'Placement' 행으로(원칙 표가 없던 date-picker · breadcrumb · accordion · card · data-visual 은 그 행 하나로 원칙 표가 생김). Button · Breadcrumb 의 Placement 예제는 Variant 에 남겼다. Spec 머리글 항목 · 값 → **Property · Value**. 컴포넌트 예제 제목 한글 38개를 영문으로(사람의 결정 — 패턴 · 설명 · 예제 안 문구는 한글 그대로).
+  verify: spec 의 Placement 금지 · principles 의 Placement 행 하나 · `h2#placement` 금지 · 필수 절 default · spec · props · usage · group 값 · 제목의 한글 · 절 순서. audit 의 Spec 대조는 principles 의 Placement 행을 기대값으로 읽는다(Figma 카드의 Placement 행이 'Figma 에만 있는 행' 이 되지 않게).
+- **폼 컨트롤 높이 32 · 40 · 48**(사람의 결정 — Chip · Pagination · Tab 은 폼 컨트롤이 아니라 그대로) — Select Button 38 → 40(안쪽 버튼 34 · outline 은 버튼마다 40) + `sm` 32 · `lg` 48, Select · Dropdown 트리거 · Search 에 `sm` · `lg`(`.field.sm` · `.lg` 안 Select 도 따라감), 상단 내비 검색 36 → 32(옆 아이콘 버튼 32), Copy Field sm 의 복사 버튼 28. 32 높이는 반경 4. React `SelectButton` · `Select` · `Dropdown` · `SearchBar` `size`. 크기 예제 셋(select-button · select · search).
+  **나란히 놓인 컨트롤은 같은 높이** — 로그 뷰어 툴바를 두 줄로(검색 · 기간 40 / 칩 · 초기화 · Select Button · CSV 32 — CSV 를 첫 줄에 두면 1440 미리보기(약 760)에 검색 320 + 구간 410 뒤로 혼자 줄바꿈해 둘째 줄 끝으로 옮겼다, 캡처에서 발견 · 사람이 확인), 로그 뷰어 '실시간 | 일시정지' Select Button 의 빨간 맥박 점을 지웠다(사람의 요청 · 결정 — 점까지 지우고 글자만, 사이트 · React. Indicator 페이지의 맥박 예제는 그대로), 검색 툴바도 같은 방식으로(사람의 결정 — 내보내기를 결과 줄 끝 32 로 · 검색 최소 폭 320 → 280, 그러면 검색 · 심각도 · 기간이 한 줄. 전에는 기간 · 내보내기가 둘째 줄로 줄바꿈했다), 검색 툴바 칩 기본 32 · Select 인라인 높이 지움. 줄바꿈 여부는 behave 가 재지 않는다(캡처로 1440 에서 확인). behave 가 모든 컴포넌트 · 패턴 예제에서 같은 줄 형제 컨트롤 높이를 잰다 — 크기 시연 넷(button-size · button-icon-only · button-text · chip-size)만 이유와 함께 뺐다.
+- **표** — 행 hover `--surface-neutral-tertiary`(표 · List — 사람의 결정), 머리글 · 키-값 표 머리글 = Label 2 13/18(사람의 결정), 키-값 표 첫 줄 위 1px 선. Side Panel 예제의 속성 표를 `.tbl.kv` 로(사이트 · React). `.cell-sub` 대비 쌍의 바탕을 tertiary 로.
+  **Table 페이지에 밀도 · 하위 텍스트 · 고정 헤더 · 첫 열 고정 예제**(사람의 결정), React `Table` `stickyHeader` · `stickyColumn` · `maxHeight` · `regionLabel`.
+- **개별 스타일** — Empty State 아이콘 면 없음 · `--foreground-neutral-quaternary` · 40(compact 32 · 카드 36) · 선 1.5(`grammarOnly` 에서 quaternary 를 뺌). Notice 테두리 없음 · padding 20 18 · 톤 없는 Notice 는 회색 면(사람의 결정). Page Header 제목 Title 1 32/44 · 자간 -0.0253em(요청은 rem 이었지만 Title 1 자간은 em — rem 이면 표 밖), 간격 16. File Upload 오류 줄 `--line-negative-primary`. Steps 단계 글자 500.
+- **Steps 완료 원 = 진한 초록 면 `--foreground-positive-primary` + 흰 체크 `--brand-label`**(사람의 결정 — 요청의 12% 틴트 + 흰색은 라이트 1.13 으로 체크가 보이지 않았다). 체크가 그래픽 3:1 미달(라이트 2.46 · 다크 1.98)이라 REF 로 선언 — contrast +6(맥락 6) · advisory +5(다크 '상태색과 겹치는 제품' 맥락은 `--brand-label` 이 흰색이 아니라 통과). 제품 색 원(`--surface-brand-primary`)도 해 보았으나 현재 단계(.on)와 같은 면이 되어 사람이 초록으로 되돌렸다.
+- **측정에서 드러나 고친 것 — Spec 표 잘림(1199 이하):** `.page table:not(.tbl){display:block}`(0,2,1)이 되돌리는 `.tablewrap table{display:table}`(0,1,1)을 이겨 표가 내용 폭(1100 에서 277/846)으로 줄었다 — 되돌리는 규칙을 `.page .tablewrap table:not(.tbl)` 로. behave 가 1100 폭에서 Spec · Props 표 폭 = 감싼 틀 폭을 잰다.
+- **기존 단정 고침 5:** Select Button 높이 38 → 40(outline · solid), Page Header 제목 36 → 32 · Breadcrumb 간격 8 → 16(behave.promote), Page Header 스타일 = Title 1(behave.type), 구성 단정 '1. Default' → 묶음 h2 순서.
+- 음성 시험: 사이트 17건(Select Button · Search · Select 크기 · 상단 검색 · 행 · List hover · 헤더 13 · kv 선 · Spec 폭 · Notice 테두리 · 회색 면 · page-head 간격 · 제목 · Steps 굵기 · 완료 면(틴트로 되돌림) · Upload 선 · Empty 선) · verify 4건(group 틀림 · 없음 · 한글 제목 · 원칙 표 Placement 없음). 첫 회 Notice 회색 면 1건을 못 잡았다 — 예제에 톤 없는 Notice 가 없어 단정이 빈 목록으로 통과했다. 하나 넣어 재게 고쳐 잡았다.
+- Figma 미반영 473 → 485건 — Spec 문구 8(Data Table · Table Label, Notification Container · Size, Search Container · Size, Select · Select Button Size — 옛 행 6 은 새 문구로 바뀜) · Steps 완료 원 면 · 체크 6(Figma 는 아직 초록 틴트 면 · 초록 체크) · 카드 빈 상태 아이콘 quaternary 4. audit 이 카드 아이콘 칸의 면 · 모서리 선언이 없으면 읽지 못하고 Card 대조 전체(48건)를 건너뛰던 것을 '선언 없음 = 면 없음 · 모서리 0' 으로 고쳤다(그대로 두면 434 로 줄어 보였다). Empty State 페이지 아이콘 40 · Notice 테두리 · 표 hover · 폼 높이는 audit 대조 밖 — 일괄 반영 때.
+
+2026-11-13 Chip 형태 둘 · 색 둘(사람의 요청 · 결정 넷) — behave 1225 → 1236(`behave.chip.js` 11) · react 717+6 → 721+6(`choice-controls.test` 2 · 예제 260 → 262 에 따른 구조 비교 2). contrast · advisory · pages 수는 그대로(새 색 쌍 없음 — 흰 글자 / 제품 면 · 반전 글자 / 반전 면 · 기본 글자 / tertiary 는 기존 쌍).
+- **형태 = Outline(기본, 회색 선) · `.solid`(회색 면 `--surface-neutral-tertiary`, 선 투명 1px 라 높이 32 같음)** — hover · 눌림 면은 두 형태가 같다(secondary · strong). React `variant`.
+- **고른 칩은 두 형태 모두 같은 진한 면**(사람의 요청) — brand(기본) = `--surface-brand-primary` + `--brand-label`, `.neutral` = `--surface-neutral-inverse` + `--foreground-neutral-inverse`(사람의 결정 — '진한 회색 면' 대신). 옛 선택 모양(옅은 brand 면 + brand 선)은 없어졌다. React `color`.
+- **색은 고른 모양만 바꾼다**(사람의 결정) — 고르지 않은 칩은 brand · neutral 모두 중립. 기본은 Outline · Brand(사람의 결정 — 검색 · 로그 뷰어 패턴의 필터 칩도 이 모양이라 켜진 칩이 제품 색 면이 됐다).
+- **입력값 칩은 형태만 받고 색은 중립 고정**(사람의 결정) — verify 가 `aria-pressed` 없는 칩의 `.on` · `.neutral` 을 막는다. React `onRemove` · `action` 칩은 `color` · `selected` 를 경고하고 무시한다(MIGRATION).
+  검색 패턴의 '적용된 필터' 입력값 칩 둘에 `.on` 이 붙어 있었다(사이트 · React `selected`) — 지웠다. 그대로 두면 지우기 x(neutral-secondary)가 제품 색 면 위에 놓였다.
+- 명시도 — `.chip:where(.solid)` 0,1,0 · `.chip.on:where(.neutral)` 0,2,0 으로 hover 가 solid 면을, `.on` 이 hover 를, 뒤의 비활성이 고른 neutral 을 이긴다(behave 가 끈 칩 셋 · hover 로 잰다).
+- 예제 Outline · Solid(위 brand 줄 · 아래 neutral 줄, Solid 에는 입력값 칩 줄)(사이트 · React), 원칙 표 '형태와 색' 행, Props `.solid` · `.neutral`, Spec Container · Selected.
+- 음성 시험: CSS 6건(선택 면 되돌림 · solid 규칙 · neutral 규칙 · neutral 명시도 · solid 명시도 · 체크 색) · verify 2건(입력값 칩 `.on` · `.neutral`) · React 2건(입력값 칩 `.on` · 경고) 모두 실패로 잡혔다.
+- Figma 미반영 485 → 487건(Spec Chip Container 문구 · 새 Selected 행). Figma 의 Chip 은 아직 옅은 brand 선택 면이고 Solid · Neutral 변형이 없다 — 일괄 반영 때 그린다.
+
+
+2026-11-13 Steps 재구성 — 외부 컴포넌트 Stepper 참고(사람의 요청 · 결정 다섯) — contrast 1440 → 1434 · advisory 460 → 455 · behave 1236 → 1274(`behave.stepper.js` 37 · 온보딩 1) · react 721+6 → 732+6(`tests/stepper.test.tsx` 9 · 예제 262 → 264 에 따른 구조 비교 2). pages 수는 그대로.
+- **참고 출처:** 외부 컴포넌트.io/bootstrap/docs/forms/stepper · 로컬 `외부 참고 자료`(`scss/_stepper.scss` · `js/src/stepper.js`). **외부 컴포넌트 PRO 는 상용**("This is commercial software")이라 코드 · 클래스 이름 · 아이콘은 옮기지 않고 구조와 동작만 참고했다(사람의 확인).
+- **표시 + 마법사 동작**(사람의 결정) — `.stepper > .steps + .step-panel × 단계 수 + .step-actions`. '다음'(폼 안 Enter 포함)은 그 패널의 `form[data-validate]` 를 기존 `vRun` 으로 검사하고 막히면 첫 오류로, 통과하면 완료 표시 · 다음 패널 · 패널로 포커스. 패널은 숨기기만 해서 입력값이 남는다. 저장 · 전송은 제품(`ds:step {index, from, trigger}` · `ds:step-finish` · `DS.stepper.go`). React `Stepper` · `StepButton`, `Form bare`(카드 안 폼).
+- **배치 셋**(사람의 결정) — 가로(연결선이 남는 폭을 나눔, 기본) · `.label-below` · `.vertical`(각 li 안에 패널 — 단계 아래에 내용이 펼쳐짐). 세로에도 연결선이 생겼다.
+  **좁으면 세로로**(사람의 결정 — 캡처에서 390 의 가로 · 라벨 아래가 미리보기를 넘쳐 잘려 보였다) — 가로 · 라벨 아래가 자리에 안 들어가면 ds.js `fitSteps` · React `useStacked` 가 `.stacked` 를 붙여 세로 배치의 목록 규칙으로 쌓는다(패널은 목록 아래 그대로). `.stacked` 를 뗀 모양에서 넘치는지 재고, 처음 그릴 때 · 글꼴 준비 뒤 · 창 크기가 바뀔 때(React 는 부모 폭이 바뀔 때) 다시 잰다. 숨은 자리(offsetParent 없음)는 재지 않는다. 예제에 직접 적으면 verify 가 막는다.
+- **색은 모두 브랜드**(사람의 결정 — 11-12 의 초록 완료 원을 바꿈) — 완료 = `--surface-brand-primary` 면 + `--brand-label` 체크, 현재 = 같은 색 테두리 + `--surface-brand-subtle` 면 + `--foreground-brand-primary` 숫자, 아직 = `--line-neutral-primary` 테두리 · 면 없음, 완료 뒤 연결선 = 제품 색. 11-12 에 제품 색 원을 되돌린 이유(현재 원과 같은 면)는 현재 원이 테두리가 되어 모양으로 갈린다.
+  초록 체크 쌍(REF)을 지워 contrast −6 · advisory −5. 새 쌍은 없다(흰 체크 / 제품 면 · brand 숫자 / brand subtle 은 기존 쌍 — 설명만 고침).
+- **이동은 순서대로가 기본, `data-nonlinear` · `nonLinear` 는 자유 이동**(사람의 결정) — 순서대로면 완료한 단계만 `.step-btn`, 자유 이동이면 현재가 아닌 모든 단계. 자유 이동은 떠날 때 폼을 조용히 재서(문구 없이) 통과하면 완료로 표시하고, '완료' 는 모든 단계를 재서 막힌 첫 단계로 간다.
+- **사람이 정하지 않은 기본값(계획 승인 때 함께 확인):** 원 24 → 32 · 체크 16 · 라벨 12 → Label 1/Normal 14(현재 600 · 완료 secondary · 아직 tertiary) · 연결선 2px(최소 16), 단계를 옮기면 새 패널(tabindex -1)로 포커스, 첫 단계의 이전은 disabled · 마지막 단계는 다음 대신 완료, 포커스 링은 원에. 가져오지 않은 것 — `role=tab` · 방향키(순서가 있는 진행이라 탭 묶음이 아님, `aria-current="step"` 유지), 높이 애니메이션, 검증 끄기 옵션(폼에 `data-validate` 를 안 달면 된다).
+- **예제** default(가로 마법사 — 적용 그룹이 비어 '다음' 이 막힘) · label-below · vertical · nonlinear · indicator(표시만 — 이동은 제품, `.stepper` 밖 `.steps` 의 완료 단계 누름은 `ds:step` 만). `back` 은 default 에 흡수해 지웠다. 온보딩 '단계 화면' 을 `.stepper` 로 — 전에는 다음을 눌러도 카드가 그대로인 흉내였다. 이제 단계마다 카드가 바뀌고 조직 이름 폼을 검사한다(카드 아래 버튼은 React `StepButton`).
+- **verify 더함:** 단계마다 `span.label`, 순서대로는 `.done` 만 `.step-btn` · 자유 이동은 현재 말고 모두, `.stepper` 의 패널 수 = 단계 수 · 보이는 패널 하나 = `.on` 의 자리(세로는 li 안), `data-step="next"` 버튼(완료는 선택 — 마지막 단계가 완료 화면인 온보딩).
+- **라디오 카드 줄 줄바꿈**(사람의 요청 — 390 캡처에서 발견) — `.radio-group.row` 가 줄바꿈하지 않고 `.radio.card` 가 최소 폭 220 이라 390 에서 카드 둘이 넘쳐 잘렸다(온보딩 '보호 수준' 과 Radio Button 'Card Radio' 둘 다). 묶음은 `flex-wrap:wrap`(줄 사이 0.75rem), 카드는 `flex:1 1 13.75rem` 로 늘어나 줄을 채우고 안 들어가면 한 장씩 자리 폭으로. 최소 220 은 남겼다 — `min(13.75rem,100%)` 로 바꾸니 내용 폭으로 줄어드는 Radio 예제 묶음이 1440 에서도 줄바꿈했다(퍼센트 최소 폭은 내용 폭 계산에 들어가지 않음, 실측). 1440 의 두 예제는 전후 위치 · 폭이 같다. behave +2(1440 나란히 · 220 이상, 390 줄바꿈 · 자리 폭 · 줄 사이). 음성 시험 4건(줄바꿈 · 늘어남 · 최소 폭 · 줄 사이) 모두 잡혔다.
+- **측정에서 드러나 고친 것:** 폼 안 Enter 가 '다음' 이 되지 않았다 — 문서 미리보기의 제출 막기(`app.src.js`)가 먼저 preventDefault 해서 단계 처리기가 `defaultPrevented` 를 보고 물러났다. 막힌 제출은 캡처의 검증이 멈추므로 `defaultPrevented` 를 보지 않는다(제품의 제출 처리기도 같은 일을 한다). behave.system 의 '패턴 버튼은 .btn 이거나 정의된 컴포넌트' 에 `.steps` 를 더했다(온보딩의 `.step-btn`).
+- **기존 단정 고침:** 완료 원 초록 → 브랜드(behave.layout), back 예제 → indicator 예제 · `ds:step` 상세에 from · trigger(behave.nav), 온보딩 다음 · 이전이 카드를 바꾸고 이미 완료한 단계는 돌아가도 완료로 남음(behave.js — 전에는 이전으로 가면 완료가 풀렸다). Figma audit 의 Steps 기대값 — 예제가 템플릿 함수가 되어 데이터를 실행해 읽고, 라벨 색은 `.label` 에서, 아직인 원의 면은 '없음'.
+- 음성 시험: 사이트 12건(CSS 6 · ds.js 6) · verify 5건 · React 10건. React 1건(제어형에서 내부 상태도 바꾸기)은 결과가 같은 변형이라 조건을 지웠다.
+  좁으면 세로로: 사이트 5건 · verify 1건 · React 3건. 첫 회 3건을 못 잡았다 — 라벨 아래의 가운데 정렬 되돌림(라벨이 원 오른쪽이기만 하면 통과해 원과의 간격 12 를 재게 고침), 처음 그릴 때 재기(글꼴 준비 뒤에도 재서 통과 — 글꼴 준비가 끝나지 않는 페이지에서 재게 고침), React 의 떼고 재기(흉내 낸 폭이 클래스와 무관해 통과 — 쌓인 모양은 들어가게 흉내 내고 다시 그려 재게 고침). `min-width:0` 되돌림은 세로에서 묶이지 않는 쓸모없는 선언이라 지웠다.
+- Figma 미반영 487 → 498건 — Step 세 상태의 원 · 숫자 · 체크 · 라벨 색 6, 예제 단계 순서 4(Figma 기본 예제는 현재가 3단계), 체크 아이콘 색 4, 체크 선 굵기 3(16 에 stroke 2.5 = 1.67 ≠ 1.5) 중 새로 어긋난 것. Figma 의 Steps 는 아직 초록 완료 · 원 24 · 라벨 12 이고 Label Below · 마법사 패널 · 자유 이동 변형이 없다 — 일괄 반영 때 그린다.
+2026-11-13 File Upload 전송 중 지우기(사람의 요청 — 기능 점검에서 찾은 문서 빈칸) — 게이트 수는 그대로(문구만).
+- 전송 중인 줄의 지우기 · 하나만 받는 자리의 교체는 `ds:upload-remove` · React `onRemove` 를 내는데(behave.upload 가 잼), 그때 **제품이 그 전송을 멈춘다**는 말이 사이트 문서에 없었다. 원칙 표에 '전송 중 지우기' 행, Props 의 이벤트 설명에 '교체될 때도 남 · 거절된 줄은 안 남'. React JSDoc 에는 이미 있었다.
+- Figma 미반영 498건(그대로 — 원칙 표는 Placement 행만 대조).
+
+2026-11-13 고르기 표 · Rules — 컴포넌트 페이지 구성 개편(사람의 결정 — 11-12 의 '정의 → 원칙 표 → 예제' 를 바꿈) — behave 1274 → 1276. contrast · advisory · react · pages 수는 그대로.
+- **구성 = 정의 → 고르기 표 → Default · Variant · Size · State → Rules → Spec → Props → Usage.** 고르기 표(`choose`)는 정의 바로 아래의 `dl.kv` 로, 언제 쓰는가(필수) · 비슷한 것(선택) · Placement(필수) 세 줄까지다. 나머지 원칙은 예제 뒤 h2 'Rules' 로 옮겼다. 8줄을 넘는 Rules 는 h3 소제목으로 묶는다 — Data Table 다섯 묶음, Text Field 세 묶음. 패턴 페이지는 원칙 표를 위에 둔 그대로다.
+- 43개 컴포넌트 모두 고르기 표가 있다. 원칙 표에 흩어져 있던 '언제 · 용도 · 고르기 · 링크와 버튼 · Button 과의 경계 · 옮기는 기준' 줄은 언제 쓰는가 · 비슷한 것으로 합쳤다(Button · Link 의 경계 문장, Table 의 '용도' 와 '옮기는 기준' 을 한 줄로). 문장을 옮기며 Slider 의 어긋난 표현을 고치고 정의와 겹치는 설명을 줄였다. 새로 쓴 언제 쓰는가 초안은 18개이고 괄호 없이 서술형으로 썼다(사람의 요청). Search 의 언제 쓰는가는 옮기다 빠져 손으로 쓴 초안이었고, 11-13 에 사람이 그대로 확정했다. Placement 문장은 고치지 않고 자리만 옮겼다.
+- 모든 `div.kv` 를 `dl.kv`(dt · dd)로 바꿨다 — 사이트 · Foundations. 390 폭의 한 열 규칙도 `dl.kv` 로.
+- **verify 더함:** 고르기 표의 언제 쓰는가 · Placement 각 하나 · 세 줄 이하 · 허용 항목과 순서, principles 에 고르기 항목이나 옛 이름 금지, 빈 묶음 금지, 묶지 않은 8줄 초과 금지, `div.kv` 금지, 정의 바로 뒤 `dl.kv`, 절 순서에 rules. audit 은 Placement 를 `choose` 에서 읽는다.
+- behave +2 — Button 의 절 순서 · 고르기 표 키와 Rules 한 묶음, Data Table 의 Rules 다섯 묶음 순서. 기존 '원칙 표가 정의 바로 아래' 단정은 고르기 표 기준으로 고쳤다.
+- 음성 시험 8건(Rules 를 예제 앞으로 · dl 을 div 로 · 390 규칙 · 언제 쓰는가 없음 · 네 줄 · 순서 · principles 의 옛 이름 · 9줄을 묶지 않음) 모두 잡혔다 — 390 규칙은 behave 만, 나머지는 verify 가 잡는다.
+- Figma 미반영 498건(그대로 — audit 이 Placement 를 고르기 표에서 읽는다).
+
+2026-11-13 수정 13건 — 글꼴 · 크기 · 색 · 차트 · 표 hover · Avatar Group · Time Picker 신규(사람의 요청 · 결정 넷) — pages 74 → 75 · 컴포넌트 43 → 44 · contrast 1434 → 1452 · advisory 455 → 449 · behave 1276 → 1306(`behave.revise.js` 11 · `behave.timepicker.js` 18 · 기본 표 hover 1) · react 732+6 → 759+6(`tests/revise.test.tsx` 5 · `tests/time-picker.test.tsx` 9 · polish 1 · table-optimize 1 · 예제 264 → 275 에 따른 구조 비교 11).
+- **고정폭 글자는 Code 에만** — `.field.mono` 를 없앴고 Copy Field 값도 본문 글자 + `tabular-nums`. React `TextField mono` 는 경고하고 무시한다. verify 가 `.field.mono` 와 Code 밖 `--font-mono` 를 막는다. 기존 단정 셋(IP 필드 · Copy Field 두 곳의 '고정폭')을 반대로 고쳤다.
+- **Page Header 제목 = Title 2 28/38**(11-12 의 Title 1 32/44 를 바꿈). **Tab 기본 16/24 · sm 14/20** — 높이는 기본 44 · pill 탭 34 그대로, sm 은 34 → 38(Figma 메타의 sm 38 과 같아짐).
+- **Tag** — 중립 면 `--surface-neutral-tertiary`, Info 면 `--surface-neutral-secondary`(이제 둘이 갈린다), outline 테두리는 톤마다 그 색의 선 토큰. contrast +18 = Info 글자 secondary / secondary 면 쌍(× 바탕 3 × 맥락 6).
+- **상태 틴트 12 → 8%**(사람의 결정 '함께 내림') — positive · cautionary · negative · accent 가족이 참조값 8% 가 되어 `DEVIATIONS` 의 12% 를 지웠다. negative 단계는 라이트 8 · 12 · 16(hover 8 · pressed 12), 다크 8 · 16 · 22(hover 16 · pressed 22), 다크 strong 만 참조 22 → 16 을 `DEVIATIONS` 로. **advisory −6** = 다크 negative-strong 글자 / negative hover · strong 면 + 회색 바탕 쌍(맥락 셋 × 2)이 4.5 를 넘었다 — 옛 틴트 값을 생성 CSS 에 넣어 다시 재면 455 로 돌아오는 것으로 확인했다.
+- **누적 영역 = 세로 그라데이션**(ds-chart `areaFill` — 계열의 가장 높은 점에서 바닥까지 알파 0.32 → 0.06, 사람이 정하지 않은 제안값. 첫 배치처럼 chartArea 가 없으면 단색).
+- **'표로 보기' 는 옵션**(사람의 결정 — 11-10 의 '늘 있음' 을 바꿈) — `chartCanvas(…, {table:true})` · React `ChartCanvas table`(기본 false). 켠 예제는 data-visual timeseries 하나, 대시보드는 끔. verify 는 버튼이 `.chart-view` 첫 자식 `.chart-tools` 에만 · 차트 수 이하인지를 본다.
+- **Top Navigation 선택 = 제품 색 면 + `--brand-label`**(hover 도 같음), **Notice · Banner 아이콘 = filled**(폼 요약 상자 포함, verify), **Combobox 활성 항목 = 면만**(외곽선 없음).
+- **표 hover 는 옵션** — `.tbl.hover` · React `hover`. 켠 곳: 행을 고르거나 행 동작이 있는 Data Table 예제 넷 · 로그 뷰어. Table 예제는 끔. Data Table Rules '행 동작' 에 '행 hover' 줄(5 → 6).
+- **Avatar Group**(사람의 결정 '이니셜만 + 외 N명') — `.avatar-group[role=group][aria-label]` · 겹침 -8(sm -6) · 경계 링 2px `--avatar-ring`(놓인 면) · 5개까지 · 넘친 수는 `.avatar-group-more` 글자 또는 목록을 여는 글자 버튼. React `AvatarGroup`. verify 가 개수 · 이름 · '외 N명' 형식과 자리를 본다.
+- **Time Picker 신규**(사람의 결정 '입력칸 + 열 목록, 바로 반영') — 외부 컴포넌트 Time Picker 를 참고했고 **외부 컴포넌트 PRO 는 상용이라 구조 · 동작만, 코드 · 클래스 이름 · 아이콘은 옮기지 않았다**. `.field.timepicker > .affix > input + .tp-btn`, 열 목록 `.time-panel > .time-col[role=listbox] > .time-opt[role=option]` 은 ds.js 가 열 때 그린다. 24시간제 HH:mm · `data-seconds` · `data-step`(분 열 간격, 입력은 받음) · `data-min/max`(밖 칸은 끄고 입력은 받아 오류) · `data-messages` · `data-labels` · `ds:time {value, text, validity}` · `form[data-validate]` 참여. React `TimePicker` · `checkTime`(폼에는 `setCustomValidity` 로 — `validationMessage` 가 customError 를 읽게 했다).
+  사람이 정하지 않은 기본값: 열 칸 56 × 32 · 8칸 높이, 고른 칸 = 제품 색 면 + 흰 글자, 빈 조각은 00 으로 채움, Tab 은 열 사이를 옮기고 필드를 떠나면 닫힘, 폭 160. Date Picker 시각 칸과 `clockBump` 를 함께 쓴다.
+- **측정에서 드러나 고친 것:** `pasteText` 가 시각 단위에서 첫 조각(시)을 채우지 않아 마크업 값 `2:0` 이 `20:0` 이 됐다(사이트 · React — Date Picker 시각 칸 붙여넣기도 같은 함수). 그 수정이 `noUncheckedIndexedAccess` 에 걸린 tsc 1건은 전체 게이트에서 잡혔다(vitest 는 타입을 안 봄). About 페이지 '컴포넌트 43개 · 패턴 11개' 와 build.js 문서의 '패턴 11개' 는 실제 10개였다 — 44 · 10 으로.
+- **Figma audit 도구:** Tag 중립과 Info 의 칠이 같다고 가정하고 다르면 멈추던 것을 Neutral 을 제 톤으로 대조하게 바꿨다(Figma 에 Neutral 변형이 없으니 '없는 변형' 으로 센다). `tag.figma.variants` 의 info · neutral 면을 새 토큰으로.
+- 음성 시험: 사이트 21건 · React 7건, 모두 실패로 잡혔다. 첫 회 2건을 고쳤다 — 끈 칸 단정이 빈 결과에서 예외로 멈춘 것(값 없음으로 실패하게), React 폼 문구 연결을 지워도 통과한 것(입력 경로가 문구를 따로 넣어서 — 처음 값이 잘못된 채 저장하는 테스트를 더함).
+- **덤으로 본 것(고치지 않음):** 390 폭에서 Top Navigation 예제가 미리보기 오른쪽으로 잘린다 — 이번 선택 면 변경과 무관한 기존 가로 넘침으로 보인다.
+- Figma 미반영 498 → 523건 — 상태 틴트 semantic 값 · Tag solid/outline 의 중립 · Info 면과 톤 선 · Tab · Page Header · Spec 문구 등. Time Picker · Avatar Group 은 Figma 에 없다(일괄 반영 때 그림).
+
+2026-11-13 좁은 자리의 상단 바(사람의 결정 — 위 항목에서 남긴 것) — behave 1306 → 1307(`behave.nav.js` 1). contrast · advisory · react · pages 수는 그대로.
+- 390 폭에서 Top Navigation 예제가 잘려 보였다. `.topbar{width:100%}` 라 면과 아래 선은 미리보기 폭 321 에서 끝나는데 로고 · 메뉴 · 오른쪽 묶음은 줄지 않아 기본 예제는 629, 검색 예제는 491 까지 나갔다. 스크롤하면 면 없는 자리에 메뉴와 아이콘이 떠 있었다. 768 · 1024 에서는 넘치지 않았다.
+- **바 전체가 가로 스크롤**(사람의 결정 — 메뉴 줄만 스크롤 · 좁으면 메뉴 버튼으로 접기 대신, 데스크톱 콘솔 기준) — `min-width:max-content` 로 바가 내용 폭만큼 늘고 바깥(미리보기 · 제품 화면)이 가로로 스크롤한다. 넓은 자리에서는 전처럼 폭을 채운다.
+- behave +1 — 1440 에서 세 예제가 폭을 채우고 스크롤 없음, 390 에서 내용이 바 안에 있고 바가 자리를 채우며 넘치는 두 예제만 스크롤, 높이 3.5rem(1279 이하는 루트 93.75% 라 52.5). 음성 시험: 규칙을 지우면 실패. 390 캡처로 오른쪽 끝까지 면과 테두리가 이어지는 것을 보았다.
+- 같은 날 고르기 표 항목의 Search '언제 쓰는가' 초안을 사람이 그대로 확정했다. Figma 미반영 523건(그대로).
+
+2026-11-13 Date Picker 시각 칸 = Time Picker sm(사람의 결정 — '칸마다 Time Picker', 달력 옆에 열을 늘 펼치는 안 · 그대로 두는 안 대신) — behave 1307 → 1326(`behave.dptime.js` 94 → 113) · react 759+6 → 764+6(`tests/date-time.test.tsx` 39 → 44). contrast · advisory · pages 수는 그대로(새 색 쌍 없음).
+- 달력 아래 시각 칸(단일 하나 · 기간 둘)이 `.field.sm.timepicker[data-dp-side="a|b"] > label + .affix > input + button.tp-btn` 이 됐다. 시계 버튼(이름 '시각 선택' · '시작 시각 선택' · '종료 시각 선택', 문구 `timeOpen`)이 시 · 분(· 초) 열을 연다. 칸에 치기 · ↑↓ · Enter(적용)는 달력이 그대로 맡고, 범위 · 형식 검사는 지금처럼 적용할 때 필드가 한다 — 달력 안 칸은 오류 문구 · `ds:time` 을 내지 않는다. React `TimePicker` 에 `onTextChange` · `validate` 를 더해 `DatePicker` 가 쓴다.
+- 열 목록이 열린 동안 Esc 는 목록만 닫고 시각 칸으로, 다음 Esc 가 달력을 닫는다(사이트는 캡처 단계에서 멈춤, React 는 `rootKeyDown` 이 `.timepicker.open` 안이면 `useEscape` 에 양보). 열 안의 Tab · Shift+Tab 은 브라우저 그대로(달력의 Tab 가둠이 `.time-panel` 은 건너뜀). Tab 순서에 시계 버튼이 하나 낀다.
+- 달력은 피커 `.field` 안이라 바깥의 lg · 오류 · 열린 링이 시각 칸 `.affix` 로 내려온다 — `.calendar .cal-time .timepicker.field .affix` 로 32 · 기본 테두리 · 링 없음으로 되돌리고, 포커스 · 열림만 brand 링.
+- **단정을 쓰다 드러나 고친 것:** 열 목록이 열린 채 시계 버튼에서 Esc 를 누르면 달력 전체가 닫혔다(단독 Time Picker 도 버튼의 Esc 를 받지 않았다 — 열린 Time Picker 안이면 어디서든 목록만 닫게). 첫 열의 Shift+Tab 이 달력 끝으로 돌았다. React Time Picker 의 ↑↓ 커서 복원이 `requestAnimationFrame` 이라 연달아 누르면 분 조각으로 넘어갔다(그린 직후 layout effect 로).
+- **선택자를 좁힘:** ds.js 의 Date Picker 코드가 `.affix input` 을 첫 입력으로 찾았다 — 달력 안 칸도 `.affix input` 이라 `:scope > .affix input` · `.datepicker > .affix input` 으로(behave 의 Date Picker 선택자 31곳도). 피커에서는 필드 입력이 먼저 와서 결과는 같았다(MIGRATION — 제품 선택자도 좁히라고 적음).
+- 기존 단정 고침: 사이트 넷(Tab 이 시계 버튼을 지나 푸터로 · 시계 버튼이 마지막 칸 · 작은 칸과 링을 `.affix` 에서 잼) · React 둘(Tab 순서).
+- 음성 시험: 사이트 10건 · React 5건. 사이트 2건은 되돌려도 결과가 같은 변형이었다 — Time Picker 입력 처리를 달력 안 칸에서 건너뛰던 조건은 끊기가 두 번 돌아도 같아 지웠고, 필드 입력 선택자를 넓히는 변형도 시각 칸 처리가 뒤에서 다시 끊어 같았다(선택자는 정확도를 위해 좁힌 채 둠). 키보드로 치는 단정이 없어 하나 더했다(치면 09:15 · 열린 목록이 따라감 · Enter 로 적용).
+- 처음 전체 게이트에서 새 React 테스트의 기간 prop 이름(`defaultPair` → `defaultValue`)이 tsc 로 잡혔다(vitest 는 타입을 안 봄).
+- Figma 미반영 523건(그대로 — Date Picker Spec 의 Time 행은 이미 저장소에만 있는 행).
+
+2026-11-14 모양 넷 — 사이트 h1 · 상단 내비 선택 · Tag sm · Count 점(사람의 요청, 속성값을 사람이 정함) — behave 1326 → 1328(`behave.revise.js` 2 · 기존 단정 고침 2). contrast · advisory · react · pages 수는 그대로(새 색 쌍 없음).
+- **문서 사이트 h1 = Title 1 32/44 · 700 · -0.0253em**(11-12 의 Display 3 36/48 을 바꿈). Foundations 쓰임 표의 '페이지 타이틀' 도 Title 1 로 고쳤고, 제품 화면의 Page Header 제목은 Title 2 그대로라고 적었다. 홈 hero 제목(Display 1)은 그대로다.
+- **상단 내비 선택 = brand 글자 + 아래 2px brand 선, 면 없음**(11-13 의 제품 색 면 · 흰 글자를 바꿈) — 둘 다 `--foreground-brand-primary`. 메뉴 모서리를 없애고 메뉴 사이를 4 → 8 로 넓혔다.
+  **사람이 정하지 않은 것:** 다른 메뉴에도 투명한 2px 아래 선을 줬다 — 선택 메뉴만 선이 있으면 그 메뉴만 2px 높아져 글자 줄이 어긋난다. 그래서 메뉴 높이가 38 → 40 이 됐다(바 높이 3.5rem 은 그대로).
+- **Tag sm = Caption 2 11/14 · 위아래 2 · 좌우 8**(12/16 · 위아래 1 이었다). 높이 18 은 그대로다. Spec Size · Label 문구를 고쳤다.
+- **Count 점 위치 = 감싼 틀 모서리에서 -2**(`.with-count .count.dot`, 숫자 배지는 -6 그대로). `.with-count .count`(0,2,0)를 이기도록 `.count.dot` 까지 적었다. Indicator Spec · Props 에 적었다.
+- 기존 단정 고침 2: 사이트 h1(behave.type), 상단 내비 선택(behave.revise — 면 · 흰 글자에서 brand 글자 · 2px 선 · 면 없음 · hover 같음 · 다른 메뉴 투명 선 · 간격 8 · 모서리 0 · 메뉴 높이 · 위치 같음, 라이트 · 다크). 새 단정 2: Tag sm 크기 · 여백 · 높이, Count 점 · 숫자 배지 위치.
+- 음성 시험 8건(h1 36 · 선택 선 · hover · 투명 선 · 간격 · 모서리 · Tag sm 옛 값 · 점 규칙) 모두 잡혔다. 첫 회 2건을 못 잡았다 — 선택 선 변형은 같은 글이 Tab accent 규칙에 먼저 있어 엉뚱한 곳을 바꿨고(선택자까지 넣어 다시 잡음), `a.on:hover` 선택자는 명시도가 `:hover` 규칙과 같고 뒤에 있어 쓸모없는 선택자라 지웠다.
+- MIGRATION 에 보이는 모양 변화 셋(상단 내비 · Tag sm · Count 점)을 적었다. 사이트 h1 은 문서 셸 전용이라 패키지와 무관하다. Figma 미반영 523건(그대로 — 상단 내비 선택 · Tag sm · Count 점 위치는 audit 대조 밖, 일괄 반영 때 그린다).
+
+`advisory 449` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
 ## 토큰 체계 (v0.8)

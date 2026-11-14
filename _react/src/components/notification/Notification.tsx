@@ -21,12 +21,12 @@ export interface NoticeProps extends Omit<HTMLAttributes<HTMLDivElement>, "title
   onClose?: () => void;
   closeLabel?: string;
 }
-/** 페이지 안에 머무는 인라인 알림. danger 는 role=alert */
+/** 페이지 안에 머무는 인라인 알림. danger 는 role=alert. 아이콘은 filled(사람의 결정 2026-11-13 — Notice · Banner) */
 export const Notice = forwardRef<HTMLDivElement, NoticeProps>(function Notice({ tone, title, icon, actions, onClose, closeLabel = LABELS.close, className, children, role, ...rest }, ref) {
   const ic = icon ?? TONE_ICON[tone ?? "info"];
   return (
     <div ref={ref} className={cx("notice", tone, className)} role={role ?? (tone === "danger" ? "alert" : "status")} {...rest}>
-      <span className="ico"><Icon name={ic} size={20} /></span>
+      <span className="ico"><Icon name={ic} size={20} filled /></span>
       <div>
         {title !== undefined && <b>{title}</b>}
         {children}
@@ -98,7 +98,7 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner({ 
   });
   return (
     <div ref={mergeRefs(ref, self)} className={cx("banner", tone, className)} role={role ?? (tone ? "alert" : "status")} {...rest}>
-      {icon && <Icon name={icon} size={18} />}
+      {icon && <Icon name={icon} size={18} filled />}
       {children}
       {action}
       {onClose && (

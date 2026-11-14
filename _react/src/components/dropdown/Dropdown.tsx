@@ -60,13 +60,15 @@ export interface DropdownProps extends Omit<HTMLAttributes<HTMLDivElement>, "onC
   disabled?: boolean;
   /** 닫혀 있어도 ul.menu 를 hidden 으로 유지(정적 마크업과 동일 구조) */
   keepMounted?: boolean;
+  /** 트리거 높이 sm 32 · md 40 · lg 48 — Button · 필드와 같다(2026-11-12). TextField size 안에서는 그 크기를 따른다 */
+  size?: "sm" | "md" | "lg";
 }
 
 const ITEM_SEL = '[role="option"]:not([aria-disabled="true"]),[role="menuitem"]:not([aria-disabled="true"])';
 
 /** 열림/닫힘 · 바깥 클릭 · Esc · 방향키를 관리하는 컨테이너(.dropdown) */
 export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropdown(
-  { open, defaultOpen = false, onOpenChange, kind = "select", align = "start", disabled, keepMounted, className, style, children, onKeyDown, ...rest },
+  { open, defaultOpen = false, onOpenChange, kind = "select", align = "start", disabled, keepMounted, size = "md", className, style, children, onKeyDown, ...rest },
   ref,
 ) {
   const [isOpen, setOpen] = useControllable<boolean>({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
@@ -118,7 +120,7 @@ export const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(function Dropd
   };
   return (
     <Ctx.Provider value={{ open: isOpen, setOpen, closeToTrigger, kind, menuId, align, disabled, keepMounted, rootRef }}>
-      <div ref={mergeRefs(rootRef, ref)} className={cx("dropdown", isOpen && "open", up && "up", floating && "float", className)} style={{ ...vars, ...style }} onKeyDown={keyDown} {...rest}>
+      <div ref={mergeRefs(rootRef, ref)} className={cx("dropdown", size !== "md" && size, isOpen && "open", up && "up", floating && "float", className)} style={{ ...vars, ...style }} onKeyDown={keyDown} {...rest}>
         {children}
       </div>
     </Ctx.Provider>

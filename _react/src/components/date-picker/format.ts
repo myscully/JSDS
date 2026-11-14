@@ -87,7 +87,8 @@ export function groups(dg: string, unit: GroupUnit, range: boolean): string {
 export function pasteText(s: string, unit: GroupUnit, range: boolean): string {
   return groups(String(s ?? "").split("~").slice(0, range ? 2 : 1).map((p) => {
     const g = p.match(/\d+/g) || [];
-    return g.length > 1 ? g[0] + g.slice(1).map((x) => (x.length === 1 ? "0" + x : x)).join("") : g.join("");
+    const one = (x: string) => (x.length === 1 ? "0" + x : x);   // 시각만 쓰는 단위는 첫 조각(시)도 채운다 — 2:0 → 02:00(날짜의 첫 조각은 연)
+    return g.length > 1 ? (isClock(unit) ? one(g[0] ?? "") : g[0]) + g.slice(1).map(one).join("") : g.join("");
   }).join(""), unit, range);
 }
 /** 치는 동안 — 숫자만 남겨 다시 끊는다. 구분자 하나만 지운 Backspace 는 그 앞 숫자를 지운다(구분자는 다시 생기므로). 커서는 같은 숫자 뒤에 둔다 */

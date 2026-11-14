@@ -11,7 +11,7 @@ export default function Example() {
     <>
       <Button variant="outline" color="assistive" onClick={() => setOpen(true)}>격리 설정 열기</Button>
       <SidePanel open={open} onClose={close} modal size="lg" title="격리 설정" footer={<><Button variant="outline" color="assistive" onClick={close}>취소</Button><Button onClick={close}>격리</Button></>}>
-        <table className="tbl compact">
+        <table className="tbl kv">
           <tbody>
             {FACTS.map(([k, v]) => <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>)}
           </tbody>

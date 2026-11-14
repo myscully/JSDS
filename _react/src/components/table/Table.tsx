@@ -16,16 +16,35 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   rowStyle?: TableRowStyle;
   /** 키-값 표 (th 가 키) */
   kv?: boolean;
+  /** 행 hover · 눌림 면(.tbl.hover) — 행을 고르거나 행에 동작이 있는 표만(사람의 결정 2026-11-13 — 기본은 없음) */
+  hover?: boolean;
   /** .tbl-wrap 으로 감싸기 (기본 true) */
   wrap?: boolean;
   wrapClassName?: string;
   wrapStyle?: CSSProperties;
+  /** 고정 헤더(.tbl-wrap.sticky) — maxHeight 와 regionLabel 을 함께 준다. DataTable 과 같다(2026-11-12) */
+  stickyHeader?: boolean;
+  /** 첫 열 고정(.tbl-wrap.sticky-col) — regionLabel 을 함께 준다 */
+  stickyColumn?: boolean;
+  /** 고정 헤더 표 영역의 높이 */
+  maxHeight?: number | string;
+  /** 스크롤 영역의 이름(aria-label) — 고정 헤더 · 첫 열 고정이면 영역이 Tab 칸(tabindex 0)이 되어 이름이 필요하다 */
+  regionLabel?: string;
 }
+let regionWarned = false;
 /** 단순 표. 정렬·선택이 필요하면 DataTable */
-export const Table = forwardRef<HTMLTableElement, TableProps>(function Table({ compact, density, zebra, rowStyle, kv, wrap = true, wrapClassName, wrapStyle, className, ...rest }, ref) {
+export const Table = forwardRef<HTMLTableElement, TableProps>(function Table({ compact, density, zebra, rowStyle, kv, hover, wrap = true, wrapClassName, wrapStyle, stickyHeader, stickyColumn, maxHeight, regionLabel, className, ...rest }, ref) {
   const d = density ?? (compact ? "compact" : "default"), r = rowStyle ?? (zebra ? "zebra" : "lines");
-  const table = <table ref={ref} className={cx("tbl", { compact: d === "compact", relaxed: d === "relaxed", zebra: r === "zebra", grid: r === "grid", plain: r === "plain", kv }, className)} {...rest} />;
-  return wrap ? <div className={cx("tbl-wrap", wrapClassName)} style={wrapStyle}>{table}</div> : table;
+  const table = <table ref={ref} className={cx("tbl", { compact: d === "compact", relaxed: d === "relaxed", zebra: r === "zebra", grid: r === "grid", plain: r === "plain", kv, hover }, className)} {...rest} />;
+  const scroll = stickyHeader || stickyColumn;
+  if (scroll && !regionLabel && process.env.NODE_ENV !== "production" && !regionWarned) { regionWarned = true; console.warn("[ds-react] Table stickyHeader · stickyColumn 은 스크롤 영역(Tab 칸)이라 regionLabel 이 필요합니다."); }
+  return wrap ? (
+    <div
+      className={cx("tbl-wrap", stickyHeader && "sticky", stickyColumn && "sticky-col", wrapClassName)}
+      style={maxHeight !== undefined ? { ...wrapStyle, maxHeight } : wrapStyle}
+      {...(scroll ? { tabIndex: 0, role: "region", "aria-label": regionLabel } : null)}
+    >{table}</div>
+  ) : table;
 });
 
 export const TableHead = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTMLTableSectionElement>>(function TableHead(props, ref) {

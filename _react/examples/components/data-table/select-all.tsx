@@ -16,6 +16,7 @@ export default function Example() {
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set(ROWS.map((r) => r.id)));
   return (
     <DataTable
+      hover
       columns={COLUMNS}
       rows={ROWS}
       rowKey={(r) => r.id}

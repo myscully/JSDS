@@ -69,7 +69,7 @@ module.exports = async function code({ page, ok, go }) {
   const plain = page.locator("#ex-copy-field-default .copy-field");
   const inp = plain.locator("input");
   ok("copy field: the value is read-only and named by the label", (await inp.getAttribute("readonly")) !== null && (await page.getByLabel("SHA-256", { exact: true }).first().evaluate((i) => i.tagName)) === "INPUT");
-  ok("copy field: the value is monospaced", (await inp.evaluate((i) => getComputedStyle(i).fontFamily)).includes("monospace"));
+  ok("copy field: the value uses the body font — monospace is for Code only (2026-11-13)", !(await inp.evaluate((i) => getComputedStyle(i).fontFamily)).includes("monospace"));
   ok("copy field: the frame uses the read-only surface and the input height", await plain.locator(".affix").evaluate((a) => { const d = document.createElement("div"); d.style.backgroundColor = "var(--background-neutral-secondary)"; document.body.append(d); const c = getComputedStyle(d).backgroundColor; d.remove(); return getComputedStyle(a).backgroundColor === c && a.getBoundingClientRect().height === 40; }));
   const cb = plain.locator(".copy");
   await cb.click(); await wait(120);
@@ -98,7 +98,7 @@ module.exports = async function code({ page, ok, go }) {
   const inline = page.locator("#ex-copy-field-inline .copy-field.inline").first();
   const ib = inline.locator(".copy");
   ok("copy field: inline has an icon-only 24 button with a name", (await ib.getAttribute("aria-label")) === "에이전트 IP 복사" && (await ib.evaluate((b) => b.getBoundingClientRect().width === 24 && b.getBoundingClientRect().height === 24)));
-  ok("copy field: inline text is 14 monospaced", await inline.locator(".value").evaluate((v) => { const s = getComputedStyle(v); return s.fontSize === "14px" && s.fontFamily.includes("monospace"); }));
+  ok("copy field: inline text is 14 in the body font with tabular digits (2026-11-13)", await inline.locator(".value").evaluate((v) => { const s = getComputedStyle(v); return s.fontSize === "14px" && !s.fontFamily.includes("monospace") && s.fontVariantNumeric.includes("tabular-nums"); }));
   await ib.click(); await wait(120);
   ok("copy field: inline copies the value", (await copied()).at(-1) === "203.0.113.24");
   ok("copy field: inline swaps the icon to a check", (await ib.evaluate((b) => b.classList.contains("copy-done"))) && (await ib.locator("svg path").count()) === 1);

@@ -21,8 +21,10 @@ export interface DatePickerLabels {
   chooseYear: string; yearGrid: string; backToDays: string; backToMonths: string;
   /** 시각 옵션의 칸 이름 */
   time: string; startTime: string; endTime: string;
+  /** 시각 칸의 시계 버튼 이름 뒷말 — "시작 시각 선택"(2026-11-13) */
+  timeOpen: string;
 }
-const BASE_LABELS = { reset: LABELS.reset, cancel: LABELS.cancel, apply: LABELS.apply, openCalendar: LABELS.openCalendar, dialog: LABELS.dateDialog, prevMonth: LABELS.prevMonth, nextMonth: LABELS.nextMonth, prevYear: LABELS.prevYear, nextYear: LABELS.nextYear, prevYears: LABELS.prevYears, nextYears: LABELS.nextYears, chooseYear: LABELS.chooseYear, yearGrid: LABELS.yearGrid, backToDays: LABELS.backToDays, backToMonths: LABELS.backToMonths, time: LABELS.time, startTime: LABELS.startTime, endTime: LABELS.endTime };
+const BASE_LABELS = { reset: LABELS.reset, cancel: LABELS.cancel, apply: LABELS.apply, openCalendar: LABELS.openCalendar, dialog: LABELS.dateDialog, prevMonth: LABELS.prevMonth, nextMonth: LABELS.nextMonth, prevYear: LABELS.prevYear, nextYear: LABELS.nextYear, prevYears: LABELS.prevYears, nextYears: LABELS.nextYears, chooseYear: LABELS.chooseYear, yearGrid: LABELS.yearGrid, backToDays: LABELS.backToDays, backToMonths: LABELS.backToMonths, time: LABELS.time, startTime: LABELS.startTime, endTime: LABELS.endTime, timeOpen: LABELS.timeOpen };
 /** '오늘' — Intl.RelativeTimeFormat(locale) 로(ko 오늘 · en Today · ja 今日) */
 export function todayLabel(locale: string): string {
   try { const s = new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(0, "day"); return s.charAt(0).toUpperCase() + s.slice(1); } catch { return LABELS.today; }
@@ -143,6 +145,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
     if (e.defaultPrevented) return;
     const el = root.current!;
     if (e.key === "Tab" && dialog) {
+      if ((e.target as HTMLElement).closest(".time-panel")) return;   // 시각 열 사이 · 버튼으로는 브라우저의 Tab 그대로(열을 떠나면 Time Picker 가 닫는다)
       const list = Array.from(el.querySelectorAll<HTMLButtonElement>("button, input")).filter((x) => !x.disabled && x.tabIndex >= 0);
       const i = list.indexOf(document.activeElement as HTMLButtonElement);
       if (e.shiftKey ? i <= 0 : i === list.length - 1) { e.preventDefault(); list[e.shiftKey ? list.length - 1 : 0]?.focus(); }

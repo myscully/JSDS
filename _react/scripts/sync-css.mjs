@@ -63,7 +63,7 @@ for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"
   const decl = new Set([...out.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
   const dead = [...new Set([...out.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]))]
     /* 컴포넌트 지역 변수 — verify.js 의 LOCAL 과 같다. --dp-top · --dp-left 는 Date Picker 가 열 때 재서 넣고 CSS 가 기본값을 함께 쓴다. --a 는 도넛 경계 구분선 각도(Donut 이 넣음). --float-* 는 스크롤 영역 안 메뉴의 자리 · 폭(열 때 재서 넣음) */
-    .filter((t) => !decl.has(t) && !t.startsWith("--prod-") && t !== "--p" && t !== "--checker-bg" && !t.startsWith("--cols") && t !== "--dp-top" && t !== "--dp-left" && t !== "--a" && !t.startsWith("--float-") && t !== "--ds-delay");
+    .filter((t) => !decl.has(t) && !t.startsWith("--prod-") && t !== "--p" && t !== "--checker-bg" && !t.startsWith("--cols") && t !== "--dp-top" && t !== "--dp-left" && t !== "--tp-top" && t !== "--tp-left" && t !== "--a" && !t.startsWith("--float-") && t !== "--ds-delay");
   if (dead.length) throw new Error(`sync-css: 선언이 없는 토큰을 참조함: ${dead.join(" ")}`);
 }
 

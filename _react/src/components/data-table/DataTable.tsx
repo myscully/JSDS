@@ -98,6 +98,8 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   zebra?: boolean;
   /** lines · zebra · grid · plain */
   rowStyle?: TableRowStyle;
+  /** 행 hover · 눌림 면(.tbl.hover) — 기본은 없음(사람의 결정 2026-11-13). 행을 고르거나 행 동작 · 행 클릭이 있으면 켠다 */
+  hover?: boolean;
   wrapStyle?: CSSProperties;
 }
 
@@ -116,7 +118,7 @@ function defaultSortValue<T>(row: T, key: string): string | number {
 }
 
 function DataTableInner<T>(
-  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel = LABELS.loading, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, stickyColumn, summaryRow, maxHeight, caption, compact, density, zebra, rowStyle, className, wrapStyle, ...rest }: DataTableProps<T>,
+  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel = LABELS.loading, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, stickyColumn, summaryRow, maxHeight, caption, compact, density, zebra, rowStyle, hover, className, wrapStyle, ...rest }: DataTableProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [curSort, setSort] = useControllable<SortState | null>({ value: sort, defaultValue: defaultSort, onChange: onSortChange });
@@ -203,7 +205,7 @@ function DataTableInner<T>(
       {actionBar && actionBar(new Set(sel), { allMatching: !!isAll, count: isAll && totalCount !== undefined ? totalCount : sel.size })}
       {selectable && totalCount !== undefined && <div className="select-notice" aria-live="polite">{noticeBody}</div>}
       {status === "loading" && <span className="sr-only" role="status">{statusLabel}</span>}
-      <Table compact={compact} density={density} zebra={zebra} rowStyle={rowStyle} wrap={false} aria-busy={status === "loading" || undefined}>
+      <Table compact={compact} density={density} zebra={zebra} rowStyle={rowStyle} hover={hover} wrap={false} aria-busy={status === "loading" || undefined}>
         {caption && <caption className="sr-only">{caption}</caption>}
         <TableHead>
           <TableRow>

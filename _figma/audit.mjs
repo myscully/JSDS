@@ -252,12 +252,17 @@ function exampleHtml(comp, id) {
   return src.slice(h + 7, e);
 }
 const strip = (s) => s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+/* Steps 예제는 2026-11-13 부터 템플릿 함수(stepLi · stepsOl)로 짓는다 — 글자 그대로는 li 가 없어서 데이터를 실행해 나온 HTML 을 읽는다.
+   체크 아이콘은 I("check") 의 path 와 같은지로 이름을 얻는다 */
 function stepsExample() {
-  return [...exampleHtml("steps", "default").matchAll(/<li([^>]*)>([\s\S]*?)<\/li>/g)].map((m) => {
+  globalThis.I = globalThis.I || require(path.join(ROOT, "_build/icons.js")).I;
+  const html = require(path.join(ROOT, "_build/components.data.js")).steps.examples.find((e) => e.id === "default").html;
+  const ol = /<ol class="steps[^"]*"[^>]*>([\s\S]*?)<\/ol>/.exec(html)[1], checkPath = /<path[^>]*>/.exec(globalThis.I("check"))[0];
+  return [...ol.matchAll(/<li([^>]*)>([\s\S]*?)<\/li>/g)].map((m) => {
     const cls = ((/class="([^"]*)"/.exec(m[1]) || [])[1] || "").split(/\s+/);
-    const i = /<i>([\s\S]*?)<\/i>/.exec(m[2]), ic = i && /\$\{I\("([a-z0-9-]+)"/.exec(i[1]);
-    return { state: cls.includes("done") ? "Done" : cls.includes("on") ? "Current" : "Todo", mark: ic ? ic[1] : i ? strip(i[1]) : null,
-      label: strip(m[2].replace(/<i>[\s\S]*?<\/i>/, "").replace(/<span class="sr-only">[\s\S]*?<\/span>/g, "")) };
+    const i = /<i>([\s\S]*?)<\/i>/.exec(m[2]);
+    return { state: cls.includes("done") ? "Done" : cls.includes("on") ? "Current" : "Todo", mark: i ? (/<svg/.test(i[1]) ? (i[1].includes(checkPath) ? "check" : "svg") : strip(i[1])) : null,
+      label: strip((/<span class="label">([\s\S]*?)<\/span>/.exec(m[2]) || [])[1] || "") };
   });
 }
 function navExample(id = "basic") {
@@ -1069,7 +1074,7 @@ function cardExpect() {
     const BSZ = { sm: "Small", md: "Medium", lg: "Large" };
     const skel = [...ex("loading").matchAll(/class="skeleton ([^"]+)"/g)].map((x) => x[1].split(/\s+/).map(cap).join(" "));
     const ce = cssRule(".card .empty"), e0 = cssRule(".empty"), ico = Object.assign({}, cssRule(".empty .ico"), cssRule(".card .empty .ico"));   // 카드 안 아이콘 칸 = .empty .ico 위에 .card .empty .ico 를 덮은 값(k31 — 칸 없이 36)
-    const isvg = cssRule(".card .empty .ico svg"), noBg = (v) => /^(none|transparent)$/.test(String(v || "").trim());
+    const isvg = cssRule(".card .empty .ico svg"), noBg = (v) => /^(none|transparent|)$/.test(String(v || "").trim());   // 선언이 없어도 면 없음 — 2026-11-12 .empty .ico 의 면을 지워 .card 쪽 background:none 도 지웠다
     /* 헤더 오른쪽 버튼(k31 — '전체 보기' = 텍스트 assistive) — 예제마다 .card-head 안 버튼 클래스를 읽어 유형별로 기대. 버튼이 없는 헤더(오류 카드)는 null */
     const btnName = (cls) => { const b = cls.split(/\s+/), pk = (o) => cap(b.find((x) => o.includes(x)) || ""); return `Variant=${pk(["solid", "outline", "text"])}, Color=${pk(["primary", "assistive", "negative"])}, Size=${BSZ[b.find((x) => BSZ[x])] || "?"}`; };
     const heads = (html) => [...html.matchAll(/class="card-head">([\s\S]*?)<\/div>/g)].map((x) => { const b = /<button[^>]*class="btn ([^"]+)"/.exec(x[1]); return b ? btnName(b[1]) : null; });
@@ -1088,7 +1093,7 @@ function cardExpect() {
       empty: { pad: pads(ce.padding), noBorder: /^(0|none)$/.test(String(ce.border).trim()), noFace: /^(none|transparent)$/.test(String(ce.background).trim()), gap: px(e0.gap), hint: figTok(e0.color),
         msg: { fs: px(cssRule(".card .empty b")["font-size"]), fill: figTok(cssRule(".empty b").color) },
         ico: { w: px(ico.width), h: px(ico.height), noFace: noBg(ico.background), face: noBg(ico.background) ? "-" : figTok(ico.background),
-          radius: /^0(px)?$/.test(String(ico["border-radius"]).trim()) ? null : "radius/" + ((/var\(--radius-([a-z0-9]+)\)/.exec(ico["border-radius"] || "") || [])[1]), r0: /^0(px)?$/.test(String(ico["border-radius"]).trim()),
+          radius: /^0(px)?$/.test(String(ico["border-radius"] || "0").trim()) ? null : "radius/" + ((/var\(--radius-([a-z0-9]+)\)/.exec(ico["border-radius"] || "") || [])[1]), r0: /^0(px)?$/.test(String(ico["border-radius"] || "0").trim()),   // 선언이 없으면 0 — 2026-11-12 아이콘 칸(면 · 모서리)을 지웠다
           iw: px(isvg.width), ih: px(isvg.height), ink: figTok(ico.color), err: figTok(cssRule(".card .empty.error .ico").color) },
         btn: `Variant=${pick(["solid", "outline", "text"])}, Color=${pick(["primary", "assistive", "negative"])}, Size=${BSZ[bc.find((x) => BSZ[x])] || "?"}` },
       skel,
@@ -1123,7 +1128,8 @@ function specExpect() {
   const box = { I: () => "", module: { exports: {} } };
   vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
   const out = {};
-  for (const [slug, c] of Object.entries(box.module.exports)) out[slug] = (c.spec || []).map(([k, v]) => [specNorm(k), specSite(v)]);
+  /* Placement 는 2026-11-12 부터 spec 이 아니라 원칙 표의 행이고, 2026-11-13 부터는 정의 아래 고르기 표(choose)의 행이다(사람의 결정 — 페이지의 Placement 절을 없앰 · 규칙은 Rules 절로). Figma Spec 카드의 Placement 행은 그것과 대조한다 */
+  for (const [slug, c] of Object.entries(box.module.exports)) out[slug] = [...(c.spec || []), ...(c.choose || []).filter(([k]) => k === "Placement")].map(([k, v]) => [specNorm(k), specSite(v)]);
   return out;
 }
 
@@ -1155,8 +1161,9 @@ function severityExpect() {
         label: figTok(sc.color || base.color), dot: sd ? figTok(sd.background) : dot } }; };
   const V = tf.variants, keys = Object.keys(V), alias = {};
   if (V.neutral && V.info) { const n = css("neutral"), i = css("info");
-    if (JSON.stringify(n) !== JSON.stringify(i) || V.neutral.bg !== V.info.bg) throw new Error(`tag neutral(.tag)과 info(.tag.info)의 칠이 다릅니다 ${JSON.stringify(n)} ≠ ${JSON.stringify(i)} — Figma 에 Neutral 변형이 따로 필요합니다`);
-    alias.neutral = "info"; }
+    /* 2026-11-13 부터 칠이 다르다(중립 tertiary · Info secondary, 사람의 결정) — 멈추지 않고 Neutral 을 제 톤으로 대조한다. Figma 에 Neutral 변형이 없으면 '없는 변형' 으로 센다 */
+    if (JSON.stringify(n) === JSON.stringify(i) && V.neutral.bg === V.info.bg) alias.neutral = "info";
+    else notes.push(`tag neutral(.tag) 과 info(.tag.info) 의 칠이 다릅니다 — Figma 에 Neutral 변형이 따로 필요합니다(일괄 반영 때)`); }
   const NAME = (k) => (k === "ok" ? "OK" : k[0].toUpperCase() + k.slice(1));
   const face = {}, tones = {}, names = [];
   for (const k of keys) {
@@ -1234,9 +1241,10 @@ function componentsExpect() {
       return { Danger: t(".count"), Neutral: t(".count.neutral"), Accent: t(".count.accent"), Dot: { fill: figTok(cssRule(".count.dot").background || base.background), text: null } }; })(),   // .count.dot 은 배경을 따로 두지 않아 .count 를 따른다
     statusDot: Object.fromEntries([["Neutral", ".indicator::before"], ["OK", ".indicator.ok::before"], ["Warn", ".indicator.warn::before"], ["Danger", ".indicator.danger::before"], ["Info", ".indicator.info::before"], ["Accent", ".indicator.accent::before"]].map(([k, sel]) => [k, figTok(cssRule(sel).background)])),
     step: (() => { const r = cssRule; return {
-      Todo: { circle: figTok(r(".steps li i").background), number: figTok(r(".steps li i").color), label: figTok(r(".steps li").color) },
-      Done: { circle: figTok(r(".steps li.done i").background), check: figTok(r(".steps li.done i").color), label: figTok(r(".steps li").color) },
-      Current: { circle: figTok(r(".steps li.on i").background), number: figTok(r(".steps li.on i").color), label: figTok(r(".steps li.on").color) } }; })(),
+      /* 2026-11-13 Steps 마법사 — 라벨은 .label, 아직인 단계는 면 없는 회색 테두리 원(면 기대값 '-' = 칠 없음) */
+      Todo: { circle: r(".steps li i").background === "transparent" ? "-" : figTok(r(".steps li i").background), number: figTok(r(".steps li i").color), label: figTok(r(".steps .label").color) },
+      Done: { circle: figTok(r(".steps li.done i").background), check: figTok(r(".steps li.done i").color), label: figTok(r(".steps li.done .label").color) },
+      Current: { circle: figTok(r(".steps li.on i").background), number: figTok(r(".steps li.on i").color), label: figTok(r(".steps li.on .label").color) } }; })(),
     navItem: (() => { const r = cssRule; return {
       hover: figTok(r(".sidenav a:hover").background), pressed: figTok(r(".sidenav a:active").background),
       selected: { fill: figTok(r(".sidenav a.on").background), label: figTok(r(".sidenav a.on").color), icon: figTok(r(".sidenav a.on svg").color) },

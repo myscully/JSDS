@@ -18,9 +18,9 @@ export { Button, ButtonGroup, type ButtonProps, type ButtonGroupProps, type Butt
 export { Tag, type TagProps, type TagVariant } from "./components/tag/Tag";
 export { TagGroup, type TagGroupProps } from "./components/tag/Tag";
 export { Indicator, Count, WithCount, type IndicatorProps, type CountProps, type WithCountProps } from "./components/indicator/Indicator";
-export { Steps, type StepsProps } from "./components/steps/Steps";
+export { Steps, Stepper, StepButton, type StepsProps, type StepsLayout, type StepperProps, type StepperStep, type StepButtonProps, type StepTrigger } from "./components/steps/Steps";
 export { Divider, type DividerProps } from "./components/divider/Divider";
-export { Avatar, type AvatarProps } from "./components/avatar/Avatar";
+export { Avatar, AvatarGroup, type AvatarProps, type AvatarGroupProps } from "./components/avatar/Avatar";
 
 // B. form controls
 export { Field, TextField, TextArea, type FieldProps, type FieldOwnProps, type TextFieldProps, type TextAreaProps } from "./components/text-field/TextField";
@@ -54,6 +54,7 @@ export { Tooltip, type TooltipProps } from "./components/tooltip/Tooltip";
 export { Popup, PopupSurface, PopupTitle, PopupBody, PopupActions, PopupForm, type PopupProps, type PopupSurfaceProps } from "./components/popup/Popup";
 export { Notice, Toast, ToastStack, Banner, ToastProvider, useToast, type NoticeProps, type ToastProps, type ToastStackProps, type BannerProps, type ToastProviderProps, type ToastOptions } from "./components/notification/Notification";
 export { Calendar, DatePicker, DateRangePicker, formatDate, formatMonth, parseDate, parseMonth, parseYear, type CalendarProps, type CalendarView, type DateChangeInfo, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMessages, type DatePickerMode, type DatePickerProps, type DateRange, type DateRangePickerProps, type DateRangeValue, type DateUnit, type DateSideValidity, type DateValidity, type DateValue } from "./components/date-picker/DatePicker";
+export { TimePicker, checkTime, TIME_MESSAGES, TIME_LABELS, type TimePickerProps, type TimeChangeInfo, type TimeValidity, type TimePickerMessages, type TimePickerLabels } from "./components/time-picker/TimePicker";
 
 // E. containers & data
 export { Accordion, AccordionGroup, type AccordionProps, type AccordionGroupProps, type AccordionVariant } from "./components/accordion/Accordion";

@@ -15,7 +15,7 @@ const LOG_ROWS = [
 ];
 const logTable = (rows) => `
         <div class="tbl-wrap">
-          <table class="tbl compact">
+          <table class="tbl compact hover">
             <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>심각도</th><th>소스 IP</th><th>단말</th><th>메시지</th><th class="actions"></th></tr></thead>
             <tbody>
               ${rows.map(([t, tone, lv, ip, host, msg]) => `<tr class="log-row"><td>2026-09-07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td class="truncate">${msg}</td><td class="actions"><button type="button" class="btn sm assistive icon-only" aria-label="${t} 로그 상세">${I("dots")}</button></td></tr>`).join("\n              ")}
@@ -53,7 +53,7 @@ const PATTERNS = {
         </form>` },
       { id: "error", title: "오류 상태", desc: "제출 후 오류. 필드 오류 + 상단 요약 Notice(오류 3개 이상일 때).", html: `
         <form class="form" novalidate>
-          <div class="notice danger form-summary" role="alert" data-form-summary><span class="ico">${I("alert-circle",20)}</span><div><b>입력값 3개를 확인하세요</b>정책 이름, 허용 IP, 보관 기간</div></div>
+          <div class="notice danger form-summary" role="alert" data-form-summary><span class="ico">${I("alert-circle",20,{style:"filled"})}</span><div><b>입력값 3개를 확인하세요</b>정책 이름, 허용 IP, 보관 기간</div></div>
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field error"><label for="e1">정책 이름 <em>*</em></label><input id="e1" aria-invalid="true" aria-describedby="e1h"><span class="help" id="e1h">정책 이름을 입력하세요</span></div>
           <div class="field error"><label for="e2">허용 IP</label><input id="e2" value="10.0.0" aria-invalid="true" aria-describedby="e2h"><span class="help" id="e2h">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div>
@@ -64,7 +64,7 @@ const PATTERNS = {
         <form class="form" data-validate novalidate>
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field"><label for="v1">정책 이름 <em>*</em></label><input id="v1" required minlength="2" data-maxlength="40"><span class="help" aria-live="polite">2~40자</span></div>
-          <div class="field mono"><label for="v2">허용 IP <em>*</em></label><input id="v2" required pattern="^([0-9]{1,3}[.]){3}[0-9]{1,3}$" data-messages='{"pattern":"올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12"}'><span class="help" aria-live="polite">IPv4 형식</span></div>
+          <div class="field"><label for="v2">허용 IP <em>*</em></label><input id="v2" required pattern="^([0-9]{1,3}[.]){3}[0-9]{1,3}$" data-messages='{"pattern":"올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12"}'><span class="help" aria-live="polite">IPv4 형식</span></div>
           <div class="field number-field"><label for="v3">보관 기간 <em>*</em></label><div class="affix"><input id="v3" type="number" required min="1" max="365"><span>일</span><button type="button" class="num-btn down" tabindex="-1" aria-label="보관 기간 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="보관 기간 늘리기">${I("plus",16)}</button></div><span class="help" aria-live="polite">1~365일</span></div>
           <div class="field"><label for="v4">알림 이메일 <em>*</em></label><input id="v4" type="email" required><span class="help" aria-live="polite"></span></div>
           <div class="form-actions"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
@@ -122,26 +122,51 @@ const PATTERNS = {
 
   /* ------------------------------------------------ Service Pattern */
   "onboarding": {
-    status: "ready", react: ["Onboard","Steps"], uses: ["steps", "indicator", "card", "radio-button", "button"], css: [".onboard"], borrows: [".keep-all"],
+    status: "ready", react: ["Onboard","Stepper","StepButton","Steps"], uses: ["steps", "indicator", "card", "radio-button", "text-field", "button"], css: [".onboard"], borrows: [".keep-all", ".form-legend"],
     desc: "첫 사용자가 콘솔을 설정하는 단계형 흐름입니다. 진행 단계 표시, 한 단계 한 결정, 건너뛰기 허용.",
-    thumb: `<ol class="steps" style="font-size:12px"><li class="done"><i style="width:18px;height:18px;font-size:10px">${I("check",10)}</i>1</li><li class="on"><i style="width:18px;height:18px;font-size:10px">2</i>2</li><li><i style="width:18px;height:18px;font-size:10px">3</i>3</li></ol>`,
+    thumb: `<ol class="steps" aria-label="진행 단계" style="width:200px"><li class="done"><i style="width:18px;height:18px">${I("check",10)}</i></li><li class="on"><i style="width:18px;height:18px;font-size:10px">2</i></li><li><i style="width:18px;height:18px;font-size:10px">3</i></li></ol>`,
     examples: [
-      { id: "step", title: "단계 화면", desc: "상단 Steps + 카드 한 장 + 하단 이전/다음. 선택형 단계는 Item Tile.", html: `
+      { id: "step", title: "단계 화면", desc: "Steps 마법사(.stepper) — 단계마다 카드 한 장, 카드 아래에 이전 · 다음. 선택형 단계는 Card Radio. '다음'은 그 단계 폼을 검사하고, 단계를 옮겨도 입력값은 남습니다.", html: `
         <div class="onboard">
-          <ol class="steps" aria-label="진행 단계"><li class="done"><i>${I("check",12)}</i>조직 정보<span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>2</i>보호 수준</li><li><i>3</i>에이전트 배포</li><li><i>4</i>완료</li></ol>
-          <div class="card">
-            <h3 class="title">보호 수준을 선택하세요</h3>
-            <p class="desc">나중에 정책 › 기본 정책에서 바꿀 수 있습니다.</p>
-            <div class="radio-group row" role="radiogroup" aria-label="보호 수준">
-              <label class="radio card"><input type="radio" name="ob-level" checked><span>표준<small>알려진 위협 차단. 권장</small></span></label>
-              <label class="radio card"><input type="radio" name="ob-level"><span>강화<small>의심 행위까지 차단</small></span></label>
+          <div class="stepper">
+            <ol class="steps" aria-label="진행 단계"><li class="done"><button type="button" class="step-btn"><i>${I("check",16)}</i><span class="label">조직 정보</span><span class="sr-only"> (완료)</span></button></li><li class="on" aria-current="step"><i>2</i><span class="label">보호 수준</span></li><li><i>3</i><span class="label">에이전트 배포</span></li><li><i>4</i><span class="label">완료</span></li></ol>
+            <div class="step-panel" tabindex="-1" hidden>
+              <div class="card">
+                <h3 class="title">조직 이름을 입력하세요</h3>
+                <form data-validate novalidate><p class="form-legend"><em>*</em> 필수 항목</p><div class="field"><label for="ob-org">조직 이름 <em>*</em></label><input id="ob-org" value="지란지교시큐리티" required><span class="help" aria-live="polite">보고서와 알림에 표시됩니다.</span></div></form>
+                <div class="card-foot"><button type="button" class="btn md outline assistive" data-step="prev">이전</button><button type="button" class="btn md solid primary" data-step="next">다음</button></div>
+              </div>
             </div>
-            <div class="card-foot"><button type="button" class="btn md text">건너뛰기</button><button type="button" class="btn md outline assistive" data-step="prev">이전</button><button type="button" class="btn md solid primary" data-step="next">다음</button></div>
+            <div class="step-panel" tabindex="-1">
+              <div class="card">
+                <h3 class="title">보호 수준을 선택하세요</h3>
+                <p class="desc">나중에 정책 › 기본 정책에서 바꿀 수 있습니다.</p>
+                <div class="radio-group row" role="radiogroup" aria-label="보호 수준">
+                  <label class="radio card"><input type="radio" name="ob-level" checked><span>표준<small>알려진 위협 차단. 권장</small></span></label>
+                  <label class="radio card"><input type="radio" name="ob-level"><span>강화<small>의심 행위까지 차단</small></span></label>
+                </div>
+                <div class="card-foot"><button type="button" class="btn md text">건너뛰기</button><button type="button" class="btn md outline assistive" data-step="prev">이전</button><button type="button" class="btn md solid primary" data-step="next">다음</button></div>
+              </div>
+            </div>
+            <div class="step-panel" tabindex="-1" hidden>
+              <div class="card">
+                <h3 class="title">에이전트를 배포하세요</h3>
+                <p class="desc">설치 파일을 받아 단말에 설치합니다. 나중에 설정 › 에이전트에서도 받을 수 있습니다.</p>
+                <div class="card-foot"><button type="button" class="btn md text">건너뛰기</button><button type="button" class="btn md outline assistive" data-step="prev">이전</button><button type="button" class="btn md solid primary" data-step="next">다음</button></div>
+              </div>
+            </div>
+            <div class="step-panel" tabindex="-1" hidden>
+              <div class="card" style="align-items:center;text-align:center">
+                <span class="indicator ok" style="font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em;font-weight:600">설정이 완료되었습니다</span>
+                <p class="desc keep-all">표준 보호 · 에이전트 12대 연결 대기 중. 첫 이벤트가 들어오면 대시보드에서 확인할 수 있습니다.</p>
+                <button type="button" class="btn lg solid primary">대시보드로 이동</button>
+              </div>
+            </div>
           </div>
         </div>` },
       { id: "done", title: "완료", desc: "요약 + 첫 행동으로 이어지는 Primary.", html: `
         <div class="onboard">
-          <ol class="steps" aria-label="진행 단계"><li class="done"><i>${I("check",12)}</i>조직 정보<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>보호 수준<span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",12)}</i>에이전트 배포<span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>4</i>완료</li></ol>
+          <ol class="steps" aria-label="진행 단계"><li class="done"><i>${I("check",16)}</i><span class="label">조직 정보</span><span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",16)}</i><span class="label">보호 수준</span><span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",16)}</i><span class="label">에이전트 배포</span><span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>4</i><span class="label">완료</span></li></ol>
           <div class="card" style="align-items:center;text-align:center">
             <span class="indicator ok" style="font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em;font-weight:600">설정이 완료되었습니다</span>
             <p class="desc keep-all">표준 보호 · 에이전트 12대 연결 대기 중. 첫 이벤트가 들어오면 대시보드에서 확인할 수 있습니다.</p>
@@ -154,23 +179,23 @@ const PATTERNS = {
   "search": {
     status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "chip", "select", "date-picker", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack"], borrows: [".field", ".link"],
     desc: "검색 + 필터 + 결과 목록의 조회 화면 패턴입니다. 조건은 항상 보이고, 결과 수와 적용 중인 필터를 함께 보여줍니다.",
-    thumb: `<div class="toolbar" style="width:240px"><div class="searchbar" style="min-width:0;flex:1;height:32px">${I("search")}<input placeholder="검색"></div><button class="chip sm on">Critical</button></div>`,
+    thumb: `<div class="toolbar" style="width:240px"><div class="searchbar sm" style="min-width:0;flex:1">${I("search")}<input placeholder="검색"></div><button class="chip sm on">Critical</button></div>`,
     principles: [["툴바", "검색(좌) · 필터 드롭다운 · 기간 · 여백 · 액션(우)"], ["필터 표시", "적용 중인 필터는 Chip 으로, 결과 수는 툴바 아래"], ["빈 결과", "빈 화면 패턴 + 필터 초기화"]],
     examples: [
       { id: "toolbar", title: "검색 툴바 + 결과", html: `
         <div class="stack">
           <div class="toolbar">
-            <div class="searchbar" role="search" style="min-width:320px">${I("search")}<input type="search" placeholder="이벤트, 단말, IP 검색" aria-label="검색"></div>
-            <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" style="min-width:140px;height:40px">심각도: 2</button></div>
+            <div class="searchbar" role="search" style="min-width:280px;flex:1">${I("search")}<input type="search" placeholder="이벤트, 단말, IP 검색" aria-label="검색"></div>
+            <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false" style="min-width:140px">심각도: 2</button></div>
             <div class="datepicker field" data-range data-max="today" data-presets="7 30" data-default-preset="7"><div class="affix"><input value="2026. 10. 21 ~ 2026. 10. 27" placeholder="YYYY. MM. DD ~ YYYY. MM. DD" inputmode="numeric" autocomplete="off" aria-label="조회 기간"><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div></div>
-            <span class="spacer"></span>
-            <button type="button" class="btn md outline assistive">${I("download")}내보내기</button>
           </div>
           <div class="toolbar" style="font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em;color:var(--foreground-neutral-secondary)">
             <span>결과 <b style="color:var(--foreground-neutral-primary)">128</b>건</span>
-            <span class="chip sm on"><span class="lbl">Critical</span><button type="button" class="x" aria-label="Critical 제거">${I("x",10)}</button></span>
-            <span class="chip sm on"><span class="lbl">High</span><button type="button" class="x" aria-label="High 제거">${I("x",10)}</button></span>
+            <span class="chip"><span class="lbl">Critical</span><button type="button" class="x" aria-label="Critical 제거">${I("x",10)}</button></span>
+            <span class="chip"><span class="lbl">High</span><button type="button" class="x" aria-label="High 제거">${I("x",10)}</button></span>
             <button type="button" class="btn sm text">필터 초기화</button>
+            <span class="spacer"></span>
+            <button type="button" class="btn sm outline assistive">${I("download")}내보내기</button>
           </div>
           <div class="tbl-wrap">
             <table class="tbl">
@@ -194,7 +219,7 @@ const PATTERNS = {
     examples: [
       { id: "overview", title: "서비스 상태 보드", html: `
         <div class="stack" style="max-width:800px">
-          <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20)}</span><div><b>SIEM 연동 연결 끊김</b>09:12 부터 이벤트 전송이 실패하고 있습니다. 인증 토큰을 확인하세요.<div class="actions"><button type="button" class="btn sm solid primary">연동 설정</button><button type="button" class="btn sm text">다시 시도</button></div></div></div>
+          <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20,{style:"filled"})}</span><div><b>SIEM 연동 연결 끊김</b>09:12 부터 이벤트 전송이 실패하고 있습니다. 인증 토큰을 확인하세요.<div class="actions"><button type="button" class="btn sm solid primary">연동 설정</button><button type="button" class="btn sm text">다시 시도</button></div></div></div>
           <div class="status-list">
             <div class="status-item"><span class="indicator ok">수집 서버</span><span class="meta">가동 99.98%</span></div>
             <div class="status-item"><span class="indicator ok">정책 배포</span><span class="meta">rev 2041</span></div>
@@ -229,7 +254,7 @@ const PATTERNS = {
             <div class="kpi"><span class="label">미처리 검토</span><span class="value">5</span><span class="delta">24시간 내 처리</span></div>
           </div>
           <div class="row-3">
-            <div class="chart-card"><h3 class="chart-title">탐지 추이 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 14일</span></h3><div class="chart-view"><div class="chart-tools"><button type="button" class="btn sm text assistive" data-chart-table>표로 보기</button></div><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div></div>
+            <div class="chart-card"><h3 class="chart-title">탐지 추이 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 14일</span></h3><div class="chart-view"><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div></div>
             <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:229.2deg"></i><i style="--a:270.2deg"></i></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>196</b></span><span><i class="low"></i>Low <b>120</b></span><span><i class="info"></i>Info <b>263</b></span></div></div></div>
           </div>
           <div class="card flush">
@@ -248,17 +273,19 @@ const PATTERNS = {
     status: "ready", react: ["Toolbar","Stack"], uses: ["search", "date-picker", "chip", "select-button", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack", ".log-row"], borrows: [".field"],
     desc: "대량 로그를 빠르게 훑고 필터링하는 화면입니다. Compact 표 + 모노스페이스 시간/IP + 심각도 태그 + 실시간/일시정지 전환.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><tbody><tr class="log-row"><td style="height:32px">09:41:12</td><td><span class="tag critical sm">CRIT</span></td></tr><tr class="log-row"><td style="height:32px">09:41:11</td><td><span class="tag medium sm">WARN</span></td></tr></tbody></table></div>`,
-    principles: [["밀도", ".tbl.compact 44px 행, 시간·IP 는 .log-row 모노스페이스"], ["필터", "심각도 Chip 다중 선택 + 검색 + 실시간/일시정지"], ["조회 구간", "시각까지 입력합니다. 달력이나 프리셋으로 고른 날짜는 첫날 00:00 부터 마지막 날 23:59 까지입니다"], ["상세", "행 클릭 → 우측 패널(표는 그대로)"]],
+    principles: [["밀도", ".tbl.compact 40 행, 로그 한 건은 한 줄(.log-row). 시간 · IP 는 숫자 tabular 이고 고정폭 글자는 쓰지 않는다(고정폭은 Code 에만). 행 동작이 있어 행 hover 를 켠다(.tbl.hover)"], ["필터", "심각도 Chip 다중 선택 + 검색 + 실시간/일시정지"], ["조회 구간", "시각까지 입력합니다. 달력이나 프리셋으로 고른 날짜는 첫날 00:00 부터 마지막 날 23:59 까지입니다"], ["상세", "행 클릭 → 우측 패널(표는 그대로)"]],
     examples: [
       { id: "viewer", title: "로그 뷰어", html: `
         <div class="stack">
           <div class="toolbar">
-            <div class="searchbar" role="search" style="min-width:320px">${I("search")}<input type="search" placeholder="메시지, 단말, IP 검색" aria-label="로그 검색"></div>
+            <div class="searchbar" role="search" style="min-width:320px;flex:1">${I("search")}<input type="search" placeholder="메시지, 단말, IP 검색" aria-label="로그 검색"></div>
             <div class="datepicker field" data-range data-time data-max="today" data-presets="7 30" data-default-preset="7"><div class="affix"><input value="2026. 10. 21 00:00 ~ 2026. 10. 27 23:59" placeholder="YYYY. MM. DD HH:mm ~ YYYY. MM. DD HH:mm" inputmode="numeric" autocomplete="off" aria-label="조회 구간"><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div></div>
-            <div class="chip-group"><button type="button" class="chip sm on" aria-pressed="true">CRIT</button><button type="button" class="chip sm on" aria-pressed="true">HIGH</button><button type="button" class="chip sm on" aria-pressed="true">WARN</button><button type="button" class="chip sm" aria-pressed="false">LOW</button><button type="button" class="chip sm" aria-pressed="false">INFO</button><button type="button" class="btn sm text assistive" data-chip-reset>필터 초기화</button></div>
+          </div>
+          <div class="toolbar">
+            <div class="chip-group"><button type="button" class="chip on" aria-pressed="true">CRIT</button><button type="button" class="chip on" aria-pressed="true">HIGH</button><button type="button" class="chip on" aria-pressed="true">WARN</button><button type="button" class="chip" aria-pressed="false">LOW</button><button type="button" class="chip" aria-pressed="false">INFO</button><button type="button" class="btn sm text assistive" data-chip-reset>필터 초기화</button></div>
             <span class="spacer"></span>
-            <div class="select-btn outline" role="radiogroup" aria-label="갱신"><button type="button" class="on" role="radio" aria-checked="true"><span class="indicator danger pulse" style="gap:6px">실시간</span></button><button type="button" role="radio" aria-checked="false">일시정지</button></div>
-            <button type="button" class="btn md outline assistive">${I("download")}CSV</button>
+            <div class="select-btn outline sm" role="radiogroup" aria-label="갱신"><button type="button" class="on" role="radio" aria-checked="true">실시간</button><button type="button" role="radio" aria-checked="false">일시정지</button></div>
+            <button type="button" class="btn sm outline assistive">${I("download")}CSV</button>
           </div>
           ${logTable(LOG_ROWS)}
           <div class="pagination-bar"><span>총 <b>48,213</b>건 · 최신 100건 표시</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><span class="gap">…</span><button type="button">483</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
@@ -283,7 +310,7 @@ const PATTERNS = {
               </ol>
             </nav>
           <div><h1 class="title">외부 USB 차단</h1><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06</p></div><div class="actions"><button type="button" class="btn md outline primary">복제</button><button type="button" class="btn md solid primary">배포</button></div></div>
-          <div class="notice warning" role="status"><span class="ico">${I("alert-triangle",20)}</span><div><b>배포되지 않은 변경 2건</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>
+          <div class="notice warning" role="status"><span class="ico">${I("alert-triangle",20,{style:"filled"})}</span><div><b>배포되지 않은 변경 2건</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>
           <div class="settings-section">
             <div class="section-head">탐지</div>
             <div class="setting"><div class="info"><b>실시간 보호</b><span>파일 실행 시 즉시 검사합니다</span></div><div class="ctrl"><label class="switch"><input type="checkbox" role="switch" checked aria-label="실시간 보호"></label></div></div>

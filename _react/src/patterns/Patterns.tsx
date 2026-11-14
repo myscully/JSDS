@@ -74,10 +74,12 @@ export interface FormProps extends FormHTMLAttributes<HTMLFormElement> {
   messages?: ValidationMessages;
   /** 제출 때마다 결과 — 막혔을 때 onSubmit 은 불리지 않는다 */
   onValidate?: (result: FormValidationResult) => void;
+  /** 카드 모양(면 · 테두리 · 패딩) 없이 — 카드 · Stepper 패널 안에 둘 때. 사이트는 class 없는 form[data-validate] */
+  bare?: boolean;
 }
 
 /** form.form — 카드 형태의 폼 컨테이너 */
-export const Form = forwardRef<HTMLFormElement, FormProps>(function Form({ className, validate, messages, onValidate, noValidate, onBlur, onInput, onSubmit, children, ...rest }, ref) {
+export const Form = forwardRef<HTMLFormElement, FormProps>(function Form({ className, bare, validate, messages, onValidate, noValidate, onBlur, onInput, onSubmit, children, ...rest }, ref) {
   const v = useFormValidation({ enabled: Boolean(validate), messages, onValidate });
   const setRef = (el: HTMLFormElement | null) => {
     v.form.current = el;
@@ -88,7 +90,7 @@ export const Form = forwardRef<HTMLFormElement, FormProps>(function Form({ class
     <FormValidationContext.Provider value={validate ? { errors: v.errors, touch: v.touch, refresh: v.refresh } : null}>
       <form
         ref={setRef}
-        className={cx("form", className)}
+        className={cx(!bare && "form", className) || undefined}
         data-validate={validate ? "" : undefined}
         noValidate={validate || noValidate}
         onBlur={(e) => { v.handleBlur(e); onBlur?.(e); }}

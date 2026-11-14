@@ -46,9 +46,9 @@ module.exports = async function promote({ page, ok, go }) {
   await go("components/page-header.html");
   const headOf = (id) => page.locator(`#ex-page-header-${id} .page-head`).evaluate((h) => { const r = h.getBoundingClientRect(), t = h.querySelector(".title"), tr = t.getBoundingClientRect(), a = h.querySelector(".actions"), ar = a.getBoundingClientRect(), n = h.querySelector("nav"), nr = n && n.getBoundingClientRect(), c = getComputedStyle(t); return { tag: t.tagName, keep: c.wordBreak, fs: c.fontSize, fw: c.fontWeight, aRight: Math.round(r.right - ar.right), aTop: Math.round(ar.top - tr.top), titleH: Math.round(tr.height), titleRight: tr.right, aLeft: ar.left, navW: nr && Math.round(r.width - nr.width), navGap: nr && Math.round((tr.top - nr.bottom) * 10) / 10, first: h.firstElementChild.tagName }; });
   const d = await headOf("default");
-  ok("page title is h1 at 36/700 (Display 3) with actions at the top right", d.tag === "H1" && d.fs === "36px" && d.fw === "700" && d.aRight === 0 && d.aTop === 0, JSON.stringify(d));
+  ok("page title is h1 at 28/700 (Title 2 — 2026-11-13) with actions at the top right", d.tag === "H1" && d.fs === "28px" && d.fw === "700" && d.aRight === 0 && d.aTop === 0, JSON.stringify(d));
   const b = await headOf("breadcrumb");
-  ok("breadcrumb takes the whole first row, 8 above the title", b.first === "NAV" && b.navW === 0 && b.navGap === 8, JSON.stringify(b));
+  ok("breadcrumb takes the whole first row, 16 above the title (2026-11-12 — 8 이었다)", b.first === "NAV" && b.navW === 0 && b.navGap === 16, JSON.stringify(b));
   const l = await headOf("long");
   ok("a long title wraps at spaces in its cell and the action stays top right", l.keep === "keep-all" && l.titleH > 40 && l.aRight === 0 && l.aTop === 0 && l.titleRight <= l.aLeft, JSON.stringify(l));
   await go("patterns/policy-settings.html");

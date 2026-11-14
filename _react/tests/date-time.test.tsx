@@ -209,6 +209,8 @@ describe("DatePicker time", () => {
     await openCal();
     clocks()[0].focus();
     await userEvent.tab();
+    expect(document.activeElement!.className).toContain("tp-btn");   // 시각 칸 = Time Picker — 시계 버튼이 마지막 칸(2026-11-13)
+    await userEvent.tab();
     expect(document.activeElement!.className).toContain("cal-nav");
   });
   it("잘못된 시각 칸은 적용할 때 필드 오류로 알린다", async () => {
@@ -241,6 +243,8 @@ describe("DatePicker time", () => {
     await openCal();
     await userEvent.click(cell("2026-09-10"));
     clocks()[0].focus();
+    await userEvent.tab();
+    expect(document.activeElement!.className).toContain("tp-btn");
     await userEvent.tab();
     expect((document.activeElement as HTMLElement).dataset.cal).toBe("today");
     await userEvent.tab();
@@ -338,5 +342,58 @@ describe("DateRangePicker time", () => {
     await userEvent.click(document.querySelector("[data-preset]")!);
     const [v] = fn.mock.calls[fn.mock.calls.length - 1];
     expect([v.start.getHours(), v.start.getMinutes(), v.end.getHours(), v.end.getMinutes()]).toEqual([0, 0, 23, 59]);
+  });
+});
+
+/* 달력 안 시각 칸 = Time Picker sm(사람의 결정 2026-11-13) — 사이트 behave.dptime.js 의 같은 단정 */
+describe("DatePicker time — 시각 칸은 Time Picker", () => {
+  const tpHost = () => document.querySelector<HTMLElement>(".cal-time .timepicker")!;
+  it("칸마다 이름 있는 시계 버튼이 있는 sm Time Picker", async () => {
+    render(<DateRangePicker label="구간" time defaultValue={{ start: at(2026, 9, 7, 9, 0), end: at(2026, 9, 8, 18, 30) }} />);
+    await openCal();
+    const hosts = Array.from(document.querySelectorAll<HTMLElement>(".cal-time .timepicker"));
+    expect(hosts.map((h) => [h.className.includes("sm"), h.dataset.dpSide, h.querySelector(".tp-btn")!.getAttribute("aria-label")])).toEqual([[true, "a", "시작 시각 선택"], [true, "b", "종료 시각 선택"]]);
+  });
+  it("열에서 고르면 시각 칸에 바로, 필드는 적용할 때 — Enter 로 적용", async () => {
+    const fn = vi.fn();
+    render(<DatePicker label="실행" time onChange={fn} defaultValue={at(2026, 9, 7, 14, 30)} />);
+    await openCal();
+    await userEvent.click(tpHost().querySelector(".tp-btn")!);
+    expect(tpHost().querySelectorAll(".time-col")).toHaveLength(2);
+    expect(document.activeElement!.closest(".time-col")?.getAttribute("data-part")).toBe("hour");
+    await userEvent.click(tpHost().querySelector('[data-col="0"] [data-v="9"]')!);
+    await userEvent.click(tpHost().querySelector('[data-col="1"] [data-v="5"]')!);
+    expect(clocks()[0].value).toBe("09:05");
+    expect(field().value).toBe("2026. 09. 07 14:30");
+    clocks()[0].focus();
+    fireEvent.keyDown(clocks()[0], { key: "Enter" });
+    expect(field().value).toBe("2026. 09. 07 09:05");
+    expect(document.querySelector(".calendar")).toBeNull();
+  });
+  it("Esc 는 열 목록만 닫고 시각 칸으로, 다음 Esc 가 달력을 닫는다", async () => {
+    render(<DatePicker label="실행" time defaultValue={at(2026, 9, 7, 14, 30)} />);
+    await openCal();
+    await userEvent.click(tpHost().querySelector(".tp-btn")!);
+    expect(tpHost().querySelector(".time-panel")).not.toBeNull();
+    await userEvent.keyboard("{Escape}");
+    expect(tpHost().querySelector(".time-panel")).toBeNull();
+    expect(document.activeElement).toBe(clocks()[0]);
+    await userEvent.keyboard("{Escape}");
+    expect(document.querySelector(".calendar")).toBeNull();
+  });
+  it("Shift+Tab 은 첫 열에서 시계 버튼으로 — 달력 끝으로 돌지 않는다", async () => {
+    render(<DatePicker label="실행" time defaultValue={at(2026, 9, 7, 14, 30)} />);
+    await openCal();
+    await userEvent.click(tpHost().querySelector(".tp-btn")!);
+    await userEvent.tab({ shift: true });
+    expect(document.activeElement!.className).toContain("tp-btn");
+  });
+  it("달력 안 시각 칸은 스스로 오류 문구를 띄우지 않는다 — 적용할 때 필드가 잰다", async () => {
+    render(<DatePicker label="실행" time defaultValue={at(2026, 9, 7, 14, 30)} />);
+    await openCal();
+    fireEvent.change(clocks()[0], { target: { value: "25:00" } });
+    fireEvent.blur(clocks()[0]);
+    expect(tpHost().classList.contains("error")).toBe(false);
+    expect(clocks()[0].validationMessage).toBe("");
   });
 });

@@ -78,9 +78,9 @@ ${tbl(["쓰지 않음", "대신", "예외"], [
   ["더 보기", "펼쳐지는 것 — 이벤트 20건 더 보기", "⋯ 아이콘 버튼의 접근 이름(<code>aria-label=\"더 보기\"</code>)은 Dropdown 액션 메뉴 트리거로 허용"],
   ["전체 보기", "", "Card 헤더에서 같은 목록 화면으로 가는 링크로 허용(사람의 결정 2026-11-03)"],
 ])}
-${dd(`<div class="banner" role="status" style="flex:1">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button></div>`,
+${dd(`<div class="banner" role="status" style="flex:1">${I("info-circle",18,{style:"filled"})}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button></div>`,
   "버튼만 읽어도 무엇이 열리는지 압니다. 스크린 리더의 버튼 목록에서도 구분됩니다.",
-  `<div class="banner" role="status" style="flex:1">${I("info-circle")}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">자세히</button></div>`,
+  `<div class="banner" role="status" style="flex:1">${I("info-circle",18,{style:"filled"})}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">자세히</button></div>`,
   "'자세히' 가 여러 개면 버튼 목록에서 구분되지 않고, 무엇이 열리는지 눌러 봐야 압니다.")}
 <h2 id="titles">Titles</h2><p>페이지 · 카드 · 섹션 제목에는 <b>대상을 가리키는 명사</b>가 있습니다 — 정책 목록 · 에이전트 연결 · 일별 탐지 추이. 질문(빈 화면 · 확인 대화상자 제외) · 명령 · 분위기 문구로 쓰지 않습니다.</p>
 <h2 id="numbers">Numbers</h2><ul><li>숫자와 단위는 붙여 쓰고 줄이 갈라지지 않게 합니다 — 1,054건 · 18% · 240px. 표 · KPI 숫자에는 <code style="white-space:nowrap">.t-num</code> 을 함께 씁니다</li><li>네 자리부터 쉼표 — 1,054. 날짜는 <code>2026-09-07</code>, 기간은 <code>2026-09-01 ~ 2026-09-07</code></li><li>예제 데이터도 실제처럼 고르지 않은 값으로 씁니다(100 · 50 · 25 대신 1,054 · 38 · 212)</li></ul>
@@ -396,7 +396,7 @@ ${codeBlock("grid-css", `.grid{display:grid;grid-template-columns:repeat(12,minm
 ${codeBlock("icon-inline", I("search", 18).split("><").join(">\n  <").replace("\n  </svg>", "\n</svg>"), "html")}
 ${codeBlock("icon-react", `// React: @jiran/ds-react 의 Icon (이 페이지의 ${names.length}개, 사이트와 같은 마크업)\nimport { Icon } from "@jiran/ds-react";\n\n<Icon name="search" size={18} />\n<Icon name="shield" size={24} filled />\n<Icon name="alert-triangle" label="경고" />  // role="img" + aria-label\n\n// 세트 밖의 아이콘: 같은 세트의 공식 패키지\n// npm i @tabler/icons-react → import { IconSearch } from "@tabler/icons-react";`, "tsx")}
 ${codeBlock("icon-img", `<!-- 정적 파일 (색 상속 불가, 장식용) -->\n<img src="assets/icons/outline/search.svg" width="18" height="18" alt="">\n\n<!-- CSS mask: currentColor 로 색 상속 -->\n.ico-search{width:18px;height:18px;background:currentColor;-webkit-mask:url("assets/icons/outline/search.svg") center/contain no-repeat;mask:url("assets/icons/outline/search.svg") center/contain no-repeat}`, "html")}
-<div class="kv"><dt>파일 · 이름</dt><dd><code>assets/icons/{outline|filled}/{name}.svg</code> — Tabler 원본 이름 그대로(kebab-case). Figma 는 Tabler Icons 라이브러리, 컴포넌트 이름 = 파일 이름</dd><dt>사이트 소스</dt><dd><code>I("name", size, { style: "filled" })</code> 헬퍼(<code>_build/icons.js</code>). 새 아이콘은 <code>ICON_NAMES</code> 에 추가하면 빌드 시 인라인되고 이 갤러리와 React <code>Icon</code> 에 함께 나타납니다</dd></div>
+<dl class="kv"><dt>파일 · 이름</dt><dd><code>assets/icons/{outline|filled}/{name}.svg</code> — Tabler 원본 이름 그대로(kebab-case). Figma 는 Tabler Icons 라이브러리, 컴포넌트 이름 = 파일 이름</dd><dt>사이트 소스</dt><dd><code>I("name", size, { style: "filled" })</code> 헬퍼(<code>_build/icons.js</code>). 새 아이콘은 <code>ICON_NAMES</code> 에 추가하면 빌드 시 인라인되고 이 갤러리와 React <code>Icon</code> 에 함께 나타납니다</dd></dl>
 ${valPop()}`;
     },
 
@@ -429,7 +429,7 @@ ${tbl(["명칭", "크기", "행간", "자간", "기본 굵기", "클래스"], ra
 <p>컴포넌트의 글자도 이 표의 크기 · 행간 · 자간 중 하나입니다 — 컴포넌트 CSS 가 같은 값을 직접 적고, 동작 검사가 모든 예제의 글자를 재서 표 밖의 값이 없는지 봅니다. 예외는 고정폭 Code(12/20)와 인라인 코드(둘레 글자의 0.9배)입니다.</p>
 <h2 id="weight">Weight</h2><p>Pretendard 가변 서체의 굵기 넷입니다. 스타일 클래스 뒤에 붙여 기본 굵기를 바꿉니다(예: <code>class="t-body-1-normal t-semibold"</code> — 카드 제목).</p>
 ${tbl(["명칭", "굵기", "클래스"], weights.map(([cls, w]) => [`<span class="smp t-body-1-normal ${cls}">${wname[w]}</span>`, String(w), `<code data-copy-text=".${cls}" title="클래스 복사" style="cursor:pointer">.${cls}</code>`]))}
-<div class="kv" style="margin-top:var(--space-6)"><dt>페이지 타이틀</dt><dd>Display 3 · 화면 제목(h1), 페이지당 하나</dd><dt>대화상자 제목</dt><dd>Headline 1 · Bold</dd><dt>섹션 · 카드 타이틀</dt><dd>Body 1/Normal · SemiBold</dd><dt>본문 · 표 셀</dt><dd>Label 1/Reading (14) — 콘솔 기본 크기</dd><dt>버튼 · 필드 라벨</dt><dd>Label 1/Normal · SemiBold</dd><dt>KPI 수치</dt><dd>Title 1 + <code>.t-num</code></dd><dt>태그 · 표 헤더 · 보조 설명</dt><dd>Caption 1</dd></div>
+<dl class="kv" style="margin-top:var(--space-6)"><dt>페이지 타이틀</dt><dd>Title 1 · 화면 제목(h1), 페이지당 하나 — 제품 화면의 Page Header 제목은 Title 2</dd><dt>대화상자 제목</dt><dd>Headline 1 · Bold</dd><dt>섹션 · 카드 타이틀</dt><dd>Body 1/Normal · SemiBold</dd><dt>본문 · 표 셀</dt><dd>Label 1/Reading (14) — 콘솔 기본 크기</dd><dt>버튼 · 필드 라벨</dt><dd>Label 1/Normal · SemiBold</dd><dt>KPI 수치</dt><dd>Title 1 + <code>.t-num</code></dd><dt>태그 · 표 헤더 · 보조 설명</dt><dd>Caption 1</dd></dl>
 <h2 id="units">Size units</h2><p>글자 · 간격 · 높이는 <b>rem</b> 으로 적습니다. rem 은 페이지 루트(<code>html</code>)의 글꼴 크기를 기준으로 하므로, 화면 폭에 따라 루트 크기를 한 단계 바꾸면 화면 전체가 같은 비율로 커지거나 줄어듭니다. 기준 화면의 루트는 16px 이라 Figma 의 px 수치와 같습니다. 루트를 % 로 적어 사용자가 브라우저 글꼴 크기를 바꾸면 그것도 따릅니다.</p>
 ${tbl(["화면 폭", "루트 크기", "Label 1 (14)", "버튼 md (40)", "12px 이하 글자"], scaleRows)}
 <ul><li><b>최소 글자 크기</b> — 좁은 화면에서 12px 이 11.25 · 11px 이 10.3 이 되면 한글이 읽기 어려워 12 이하 글자와 그 행간은 줄이지 않습니다(<code>--font-size-12: max(0.75rem, 12px)</code>).</li><li><b>em 은 크기 단위로 쓰지 않습니다</b> — 부모 크기를 곱해 중첩될수록 값이 커지거나 작아집니다. 자간처럼 글자 크기를 따라가야 하는 값과 인라인 코드(<code>.9em</code>)에만 씁니다.</li><li><b>px 로 남기는 것</b> — 테두리 · 외곽선 두께, 그림자, 2px 이하. 소수 px 에서 선이 흐려지지 않게 합니다.</li><li><b>글자 크기는 토큰으로</b> — 컴포넌트 CSS 의 <code>font-size</code> 는 <code>--font-size-N</code> 토큰만 씁니다(빌드가 검사). 탐색형 차트는 캔버스라 <code>ds-chart.js</code> 가 같은 비율을 곱해 그립니다.</li><li><b>React</b> — 패키지는 rem 이라 제품의 <code>html</code> 글꼴 크기를 따릅니다. 화면 폭 단계는 <code>@jiran/ds-react/scale.css</code> 를 불러올 때만 켜지고, <code>html{font-size:62.5%}</code> 같은 재정의가 있으면 화면 전체가 줄어듭니다.</li></ul>

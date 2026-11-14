@@ -9,7 +9,7 @@ export default function Example() {
       onClose={() => {}}
       footer={<><Button variant="outline" color="assistive">닫기</Button><Button>예외 추가</Button></>}
     >
-      <table className="tbl compact">
+      <table className="tbl kv">
           <tbody>
             {FACTS.map(([k, v]) => <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>)}
           </tbody>

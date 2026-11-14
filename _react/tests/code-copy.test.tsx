@@ -80,7 +80,8 @@ describe("CopyField", () => {
     const input = screen.getByLabelText("해시") as HTMLInputElement;
     expect(input.readOnly).toBe(true);
     expect(input.value).toBe("abc");
-    expect(container.querySelector(".field.mono.copy-field")).not.toBeNull();
+    expect(container.querySelector(".field.copy-field")).not.toBeNull();
+    expect(container.querySelector(".mono")).toBeNull();   /* 고정폭은 Code 에만(사람의 결정 2026-11-13) */
     expect(container.querySelector(".reveal")).toBeNull();
     await click(screen.getByRole("button", { name: "해시 복사" }));
     expect(writeText).toHaveBeenCalledWith("abc");
