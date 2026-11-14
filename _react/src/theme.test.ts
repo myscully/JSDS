@@ -1,4 +1,7 @@
-import { applyAccent, accentScale, isLightAccent, setTheme, getTheme } from "./theme";
+import { createRequire } from "node:module";
+import { applyAccent, accentScale, isLightAccent, setTheme, getTheme, applyProductColor, PRODUCT_COLORS } from "./theme";
+
+const require = createRequire(import.meta.url);
 
 describe("applyAccent", () => {
   beforeEach(() => {
@@ -62,6 +65,55 @@ describe("applyAccent", () => {
 
   it("accentScale 은 50 에 입력 HEX 를 그대로 둔다", () => {
     expect(accentScale("#00aab6")[50]).toBe("#00AAB6");
+  });
+});
+
+/* 제품 색 팔레트(2026-11-14 사람의 결정) — 사이트 _build/data.js 의 PRODUCTS 와 같은 표여야 한다(사이트 헤더 메뉴 · contrast 맥락 · verify 가 그 표를 읽는다) */
+describe("applyProductColor · PRODUCT_COLORS", () => {
+  const root = document.documentElement;
+  beforeEach(() => { root.removeAttribute("style"); delete root.dataset.accent; });
+
+  it("PRODUCT_COLORS 가 사이트 팔레트(data.js PRODUCTS)와 같다", () => {
+    const { PRODUCTS } = require("../../_build/data.js") as { PRODUCTS: unknown[] };
+    expect(JSON.parse(JSON.stringify(PRODUCT_COLORS))).toEqual(PRODUCTS);
+  });
+
+  it("파랑은 기본 — --prod-* 와 data-accent 를 지운다", () => {
+    applyProductColor("red");
+    expect(root.style.getPropertyValue("--prod-50")).toBe("#C30D2A");
+    expect(applyProductColor("blue")).toBeNull();
+    expect(root.style.getPropertyValue("--prod-50")).toBe("");
+    expect(root.hasAttribute("data-accent")).toBe(false);
+  });
+
+  it("빨강 · 시안 · 주황 · AI 는 --prod-* 를 넣고 data-accent=키, 중립은 --prod-* 없이 data-accent=neutral", () => {
+    for (const key of ["red", "cyan", "orange", "ai"] as const) {
+      const sc = applyProductColor(key);
+      const hex = PRODUCT_COLORS.find((p) => p.key === key)!.hex;
+      expect(sc?.[50]).toBe(hex);
+      expect(root.style.getPropertyValue("--prod-50")).toBe(hex);
+      expect(root.dataset.accent).toBe(key);
+    }
+    expect(applyProductColor("neutral")).toBeNull();
+    expect(root.style.getPropertyValue("--prod-50")).toBe("");
+    expect(root.dataset.accent).toBe("neutral");
+  });
+
+  it("모르는 키는 경고하고 기본(파랑)으로 둔다", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    applyProductColor("cyan");
+    applyProductColor("green" as never);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(root.hasAttribute("data-accent")).toBe(false);
+    expect(root.style.getPropertyValue("--prod-50")).toBe("");
+    warn.mockRestore();
+  });
+
+  /* 다크 글자 단계(60)는 다크 바탕 셋 모두에서 4.5 가 될 때까지 밝힌다 — 빨강 · AI 는 기본 +10 으로 4.5 에 못 미쳤다(사이트 app.src.js 와 같은 값) */
+  it("다크 글자 단계 60 을 4.5 까지 밝힌다 — 빨강 #F34B65 · AI #9076F6, 이미 넘는 시안 · 주황 · 파랑은 그대로", () => {
+    expect(accentScale("#C30D2A")[60]).toBe("#F34B65");
+    expect(accentScale("#6541F2")[60]).toBe("#9076F6");
+    expect(accentScale("#0066FF")[60]).toBe("#3385FF");
   });
 });
 

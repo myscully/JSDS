@@ -1,6 +1,6 @@
 /* 대비 계약 — '한 화면에서 만날 수 있는 쌍'만 선언하고 값은 빌드가 잰다(contrast.js).
    사람이 숫자를 적지 않는다: 종전에는 페이지의 대비 수치가 네 번 낡았다.
-   측정은 실제 생성 사이트에서 라이트·다크 × 제품 세 경우(기본 · 다른 제품 · 상태색과 겹치는 제품)로 전수 수행한다.
+   측정은 실제 생성 사이트에서 라이트·다크 × 제품 색 팔레트 여섯(data.js PRODUCTS — 2026-11-14)으로 전수 수행한다.
 
    이번 라운드부터 토큰 값이 기준 시스템의 것이다.
    그 값은 소비자 제품용이라 **우리 기준을 여럿 넘기지 못한다** — 라이트에서 상태색 글자가 2.2~3.4 다.
@@ -91,6 +91,9 @@ const pairs = [
      고친 것이 아니라 고르지 않은 것이고, 그래서 숨기지 않고 매 빌드 숫자를 보고한다 */
   ["--brand-label", ["--surface-brand-primary", "--surface-brand-strong", "--surface-brand-heavy"], 4.5, "제품 면 위 글자 · Steps 완료 원의 체크", REF("다크는 rest 가 제품 HEX(brand-50)라 제품 색 제약이 받치고, 상태가 밝아지는 쪽(55 → 60)이라 hover·pressed 만 4.5 아래다 — #0066FF 4.13 · 3.54, 밝은 제품 #008760 3.31 · 2.51")],
 
+  /* 값 입력 필드의 포커스 테두리 — 기본 brand, 빨강 · 주황 제품은 중립(2026-11-14). 1.4.11 의 3:1 */
+  ["--line-field-focus", SURFACES, 3, "입력 포커스 · 열린 필드의 테두리"],
+
   /* 글자 없는 지표(점·바·밴드·도넛) — 1.4.11 의 3:1 */
   ["--foreground-negative-primary", SURFACES, 3, "부정 지표 — danger 점 · 진행 막대"],   // 오류 필드의 테두리(포커스 때도 1px)도 이 토큰. 바깥 4px --line-negative-focus 후광은 장식(1.17)
   ["--foreground-cautionary-primary", SURFACES, 3, "High 지표", REF("기준 시스템 값 — 라이트 2.24")],
@@ -169,6 +172,8 @@ const grammarOnly = [
     .filter((t) => !["--foreground-accent-lime", "--line-accent-lime", "--line-accent-cyan", "--foreground-accent-light-blue", "--line-accent-light-blue"].includes(t)),
   ...ACCENTS.filter((c) => !["cyan", "lime", "light-blue"].includes(c)).map((c) => `--surface-accent-${c}`),
   "--line-neutral-primary-opaque", "--line-neutral-secondary-opaque", "--line-neutral-tertiary-opaque",
+  /* 삭제 버튼이 중립이 되며(2026-11-14 사람의 결정) 소비자가 0 이 된 우리 추가 틴트 셋 — Figma 변수와 짝이라 일괄 반영 때 함께 정리한다 */
+  "--surface-negative-heavy", "--surface-negative-hover", "--surface-negative-pressed",
   "--line-negative-strong",   // --line-brand-focus · --line-negative-focus 는 값 입력 필드 포커스 후광으로, --line-brand-strong 은 Outline Primary 버튼 테두리로(2026-10-29) 쓰기 시작해 뺐다
   "--line-positive-primary",
   "--effect-transparent-primary", "--effect-transparent-secondary",

@@ -1,6 +1,6 @@
 // 공용 스크립트(생성됨): 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭. 원본은 _build/app.src.js
 const SEARCH_INDEX=[{"t":"Overview","s":"Home","g":"","u":"index.html"},{"t":"Getting started","s":"Home","g":"","u":"home/getting-started.html"},{"t":"About","s":"Home","g":"","u":"home/about.html"},{"t":"UX Principles","s":"Home","g":"","u":"home/principles.html"},{"t":"Overview","s":"Foundations","g":"","u":"foundations/overview.html"},{"t":"Colors","s":"Foundations","g":"Base material","u":"foundations/colors.html"},{"t":"Elevation","s":"Foundations","g":"Base material","u":"foundations/elevation.html"},{"t":"Grid","s":"Foundations","g":"Base material","u":"foundations/grid.html"},{"t":"Icons","s":"Foundations","g":"Base material","u":"foundations/icons.html"},{"t":"Interaction","s":"Foundations","g":"Base material","u":"foundations/interaction.html"},{"t":"Typography","s":"Foundations","g":"Base material","u":"foundations/typography.html"},{"t":"Writing","s":"Foundations","g":"Base material","u":"foundations/writing.html"},{"t":"Overview","s":"Components","g":"","u":"components/overview.html"},{"t":"Accordion","s":"Components","g":"","u":"components/accordion.html"},{"t":"Avatar","s":"Components","g":"","u":"components/avatar.html"},{"t":"Breadcrumb","s":"Components","g":"","u":"components/breadcrumb.html"},{"t":"Button","s":"Components","g":"","u":"components/button.html"},{"t":"Card","s":"Components","g":"","u":"components/card.html"},{"t":"Code","s":"Components","g":"","u":"components/code.html"},{"t":"Copy Field","s":"Components","g":"","u":"components/copy-field.html"},{"t":"Data Visual","s":"Components","g":"","u":"components/data-visual.html"},{"t":"Date Picker","s":"Components","g":"","u":"components/date-picker.html"},{"t":"Divider","s":"Components","g":"","u":"components/divider.html"},{"t":"Dropdown","s":"Components","g":"","u":"components/dropdown.html"},{"t":"Empty State","s":"Components","g":"","u":"components/empty-state.html"},{"t":"File Upload","s":"Components","g":"","u":"components/file-upload.html"},{"t":"Form","s":"Components","g":"","u":"components/form.html"},{"t":"Indicator","s":"Components","g":"","u":"components/indicator.html"},{"t":"Item Tile","s":"Components","g":"","u":"components/item-tile.html"},{"t":"Link","s":"Components","g":"","u":"components/link.html"},{"t":"List","s":"Components","g":"","u":"components/list.html"},{"t":"Loading","s":"Components","g":"","u":"components/loading.html"},{"t":"Navigation","s":"Components","g":"","u":"components/navigation.html"},{"t":"Notification","s":"Components","g":"","u":"components/notification.html"},{"t":"Notification Center","s":"Components","g":"","u":"components/notification-center.html"},{"t":"Number Input","s":"Components","g":"","u":"components/number-input.html"},{"t":"Page Header","s":"Components","g":"","u":"components/page-header.html"},{"t":"Pagination","s":"Components","g":"","u":"components/pagination.html"},{"t":"Popup","s":"Components","g":"","u":"components/popup.html"},{"t":"Checkbox","s":"Components","g":"Selection Controls","u":"components/checkbox.html"},{"t":"Chip","s":"Components","g":"Selection Controls","u":"components/chip.html"},{"t":"Combobox","s":"Components","g":"Selection Controls","u":"components/combobox.html"},{"t":"Radio Button","s":"Components","g":"Selection Controls","u":"components/radio-button.html"},{"t":"Select Button","s":"Components","g":"Selection Controls","u":"components/select-button.html"},{"t":"Search","s":"Components","g":"","u":"components/search.html"},{"t":"Select","s":"Components","g":"","u":"components/select.html"},{"t":"Side Panel","s":"Components","g":"","u":"components/side-panel.html"},{"t":"Slider","s":"Components","g":"","u":"components/slider.html"},{"t":"Steps","s":"Components","g":"","u":"components/steps.html"},{"t":"Switch","s":"Components","g":"","u":"components/switch.html"},{"t":"Tab","s":"Components","g":"","u":"components/tab.html"},{"t":"Data Table","s":"Components","g":"Table","u":"components/data-table.html"},{"t":"Table","s":"Components","g":"Table","u":"components/table.html"},{"t":"Tag","s":"Components","g":"","u":"components/tag.html"},{"t":"Text Field","s":"Components","g":"","u":"components/text-field.html"},{"t":"Time Picker","s":"Components","g":"","u":"components/time-picker.html"},{"t":"Tooltip","s":"Components","g":"","u":"components/tooltip.html"},{"t":"Top Navigation","s":"Components","g":"","u":"components/top-navigation.html"},{"t":"Tree","s":"Components","g":"","u":"components/tree.html"},{"t":"Overview","s":"Patterns","g":"","u":"patterns/overview.html"},{"t":"입력 폼","s":"Patterns","g":"Common UI","u":"patterns/input-form.html"},{"t":"약관 동의","s":"Patterns","g":"Common UI","u":"patterns/terms-agreement.html"},{"t":"유의사항","s":"Patterns","g":"Common UI","u":"patterns/notes.html"},{"t":"온보딩","s":"Patterns","g":"Service Pattern","u":"patterns/onboarding.html"},{"t":"검색","s":"Patterns","g":"Service Pattern","u":"patterns/search.html"},{"t":"시스템 상태","s":"Patterns","g":"Service Pattern","u":"patterns/system-status.html"},{"t":"대시보드","s":"Patterns","g":"Security Console","u":"patterns/dashboard.html"},{"t":"로그 뷰어","s":"Patterns","g":"Security Console","u":"patterns/log-viewer.html"},{"t":"정책 설정","s":"Patterns","g":"Security Console","u":"patterns/policy-settings.html"},{"t":"심각도 표시","s":"Patterns","g":"Security Console","u":"patterns/severity.html"},{"t":"React Package","s":"Resources","g":"","u":"resources/react.html"},{"t":"Design Token","s":"Resources","g":"","u":"resources/design-token.html"},{"t":"Figma Library","s":"Resources","g":"","u":"resources/figma.html"},{"t":"Token Download","s":"Resources","g":"","u":"resources/tokens.html"},{"t":"Changelog","s":"Resources","g":"","u":"resources/changelog.html"},{"t":"Contribution","s":"Resources","g":"","u":"resources/contribution.html"},{"t":"WBS","s":"Resources","g":"","u":"resources/wbs.html"}];
-const PRODUCTS=[{"key":"product-a","name":"제품 A","hex":"#00AAB6","note":"제품 컬러로 교체"},{"key":"product-b","name":"제품 B","hex":"#C30D2A","note":"제품 컬러로 교체"},{"key":"product-c","name":"제품 C","hex":"#008760","note":"제품 컬러로 교체"}];
+const PRODUCTS=[{"key":"blue","name":"파랑","group":"기본","kind":"base","hex":"#0066FF"},{"key":"red","name":"빨강","group":"제품별","kind":"ramp","hex":"#C30D2A","neutralFocus":true},{"key":"cyan","name":"시안","group":"제품별","kind":"ramp","hex":"#00828B"},{"key":"orange","name":"주황","group":"Company","kind":"ramp","hex":"#FF7F00","neutralFocus":true,"exception":"회사 색(--company-mark)을 제품 색으로 그대로 쓴다 — 흰 글자와 제품 색 글자가 4.5 에 못 미치는 것을 알고 정한 사람의 결정(2026-11-14)"},{"key":"neutral","name":"중립","group":"중립","kind":"neutral","hex":"#1B1C1E"},{"key":"ai","name":"AI","group":"AI","kind":"ai","hex":"#6541F2","gradient":{"rest":["purple-40","violet-45"],"strong":["purple-30","violet-40"],"heavy":["purple-30","violet-30"]}}];
 const ROOT=document.body.dataset.root||'../';
 /* 공용 런타임: 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭/접기
    - 생성 사이트: build.js 가 SEARCH_INDEX / PRODUCTS / ROOT 상수를 앞에 붙여 assets/app.js 로 기록
@@ -18,48 +18,43 @@ const ROOT=document.body.dataset.root||'../';
      그래서 제품 HEX 를 50 에 놓고 L 만 그 간격대로 옮기면, 제품이 #0066FF 일 때 blue 가 정확히 재현된다.
      다섯 단계뿐인 이유: 시멘틱이 brand 를 40·45·50·55·60 에서만 집는다 */
   const BRAND_DL = { 40: -9.0, 45: -3.9, 50: 0, 55: 5.1, 60: 10.0 };
+  /* 다크 글자 단계 보정(사람의 결정 2026-11-14) — 60 은 다크의 brand 글자(--foreground-brand-primary)이자 라이트 반전 면 위 글자다.
+     채도 높은 빨강 · 보라는 같은 명도에서 휘도가 낮아 +10 으로는 어두운 바탕 위 4.5 를 못 넘었다(빨강 3.66 · AI 4.39).
+     그래서 60 만 그 바탕 셋(cool-neutral-15 · 17 · 5 = 다크 캔버스 · 카드 · 들어간 면, 라이트 반전 면도 15) 위 4.5 를 넘을 때까지 0.5 씩 밝힌다.
+     파랑 · 시안 · 주황은 이미 넘어 그대로다. contrast.js 가 매 빌드 실제 토큰으로 다시 재므로 바탕 값이 바뀌면 드러난다 */
+  const DARK_BEDS = ["#1B1C1E", "#212225", "#0F0F10"], DARK_TEXT_MIN = 4.5;
   function accentScale(hex) {
     const [h, s, l] = hexToHsl(hex);
     const out = {};
     for (const k of Object.keys(BRAND_DL)) out[k] = hslToHex(h, s, Math.max(0, Math.min(100, l + BRAND_DL[k])));
+    for (let dl = BRAND_DL[60]; dl <= 100 && Math.min(...DARK_BEDS.map(b => +ratio(out[60], b).toFixed(2))) < DARK_TEXT_MIN; dl += 0.5) out[60] = hslToHex(h, s, Math.min(100, l + dl));
     out[50] = hex.toUpperCase();
     return out;
   }
   const STEPS = [40, 45, 50, 55, 60];
-  /* 제품 메인 컬러가 상태색과 헷갈리는지 — 색상환에서 15도 미만이면 참.
-     각도는 램프에서 실측했다: negative #FF4242 = 0 · cautionary #FF9200 = 34 · positive #00BF40 = 140 · accent cyan #00BDDE = 189(Pending · info 알림),
-     심각도 5단계(2026-11-06)의 Medium lime #58CF04 = 95 · Low light-blue #00AEFF = 199.
-     종전 표 [0,38,160,199] 는 램프와 최대 20도 어긋나 있었다 — 초록이 160 으로 적혀 있었다.
-     채도가 낮은 색은 애초에 상태색으로 읽히지 않으므로 뺀다.
-     겹치면 --prod-* 를 넣지 않고 data-accent-neutral 만 켠다 — CSS 가 brand 다섯 단계를 중립으로 갈아끼운다 */
-  const STATUS_HUES = [0, 34, 95, 140, 189, 199];
-  /* 제품 색 제약 — 면 위 글자는 늘 흰색이므로, 제품 색이 흰 글자를 받칠 수 있어야 한다.
+  /* 제품 색 제약 — Brand 면 위 글자는 늘 흰색이므로, 제품 색이 흰 글자를 받칠 수 있어야 한다.
      종전에는 밝은 제품에 맞춰 글자를 어둡게 뒤집었지만(data-accent-light) 그 적응을 걷어냈다:
      면을 어둡게 내려 흰 글자를 세우는 길은 다크에서 버튼이 캔버스에 묻혀(분리 1.11) 막혀 있고,
      글자를 뒤집으면 기준 시스템에 없는 분기가 계속 남는다. 그래서 적응 대신 제약으로 바꿨다.
      기준은 라이트의 기준 단계(brand-50 = 제품 HEX)다 — hover·pressed 는 더 어두워 자동으로 통과한다.
-     다크 rest 도 같은 단계(brand-50)라 이 제약이 두 테마의 rest 를 받친다. 다크 hover·pressed(55·60)는 advisory 다.
-     빌드도 같은 검사를 한다(verify.js) — 여기 경고는 런타임에 제품 색을 바꿔 넣는 경우를 위한 것이다 */
+     빌드도 같은 검사를 한다(verify.js) — 여기 경고는 런타임에 제품 색을 바꿔 넣는 경우를 위한 것이다.
+     팔레트에서 exception 으로 선언한 색(주황 — 사람의 결정)은 알리지 않는다.
+     상태색과 색상환 15° 안의 제품을 중립으로 바꾸던 규칙은 2026-11-14 에 걷어냈다 — 제품 색은 늘 그대로 쓴다(사람의 결정) */
   const BRAND_LABEL_MIN = 4.5;
   function relLum(hex) { const c = [0, 1, 2].map(i => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16) / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4)); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
   function ratio(a, b) { const [x, y] = [relLum(a) + .05, relLum(b) + .05]; return Math.max(x, y) / Math.min(x, y); }
-  /* 흰 글자를 받치지 못하는 '밝은' 제품인가 — 이제 적응 스위치가 아니라 검증 술어다 */
+  /* 흰 글자를 받치지 못하는 '밝은' 제품인가 — 적응 스위치가 아니라 검증 술어다 */
   function isLightAccent(hex) { return ratio(hex, "#FFFFFF") < BRAND_LABEL_MIN; }
-  function clashesWithStatus(hex) {
-    const [h, sat] = hexToHsl(hex);
-    if (sat < 20) return false;
-    return STATUS_HUES.some(t => { const d = Math.abs(h - t) % 360; return Math.min(d, 360 - d) < 15; });
-  }
+  /* 팔레트 키 하나로 적용한다(data.js PRODUCTS). blue · 빈 값 · 모르는 키 = 기본(CSS 토큰 그대로 — 속성 없음).
+     ramp · ai 는 --prod-* 를 넣고, neutral 은 넣지 않고 CSS 의 [data-accent="neutral"] 블록이 brand 다섯 단계를 중립으로 갈아끼운다.
+     AI 그라데이션 · 빨강 · 주황의 중립 입력 링도 [data-accent] 로 CSS 가 건다 */
   function applyAccent(key) {
-    const p = products.find(x => x.key === key);
-    const clear = () => { for (const k of STEPS) root.style.removeProperty("--prod-" + k); };
-    if (!p) { /* 기본: CSS 토큰 값(--brand-* → --blue-*) 그대로 */ clear(); delete root.dataset.accent; delete root.dataset.accentNeutral; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
-    const neutral = clashesWithStatus(p.hex);
-    clear();
-    if (!neutral) { const sc = accentScale(p.hex); for (const k of STEPS) root.style.setProperty("--prod-" + k, sc[k]); }
+    const p = products.find(x => x.key === key && x.kind !== "base");
+    for (const k of STEPS) root.style.removeProperty("--prod-" + k);
+    if (!p) { delete root.dataset.accent; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
+    if (p.kind !== "neutral") { const sc = accentScale(p.hex); for (const k of STEPS) root.style.setProperty("--prod-" + k, sc[k]); }
     root.dataset.accent = p.key;
-    if (neutral) root.dataset.accentNeutral = ""; else delete root.dataset.accentNeutral;
-    if (!neutral && isLightAccent(p.hex))
+    if (p.kind !== "neutral" && !p.exception && isLightAccent(p.hex))
       console.warn(`[ds] 제품 색 ${p.hex} 위에서 흰 글자가 ${ratio(p.hex, "#FFFFFF").toFixed(2)} 로 ${BRAND_LABEL_MIN} 에 못 미칩니다 — 어두운 변형을 쓰세요`);
     try { localStorage.setItem("jsds-accent", p.key); } catch (e) { }
     paintAccent();
@@ -81,24 +76,25 @@ const ROOT=document.body.dataset.root||'../';
 
   /* Accent 팝오버 (팔레트 아이콘의 점이 현재 색) */
   const accentBtn = document.getElementById("accentBtn"), accentPop = document.getElementById("accentPop");
+  /* 견본 — AI 는 그라데이션 두 끝, 나머지는 팔레트 hex. 고정 값이라 지금 적용된 제품 색 · 다크 값을 따라가지 않는다(사람의 결정 2026-10-28) */
+  const RAMP = n => getComputedStyle(root).getPropertyValue("--" + n).trim();
+  function swatch(p) { return p.gradient ? "linear-gradient(90deg," + RAMP(p.gradient.rest[0]) + "," + RAMP(p.gradient.rest[1]) + ")" : p.hex; }
   function paintAccent() {
-    const key = root.dataset.accent || "", p = products.find(x => x.key === key);
-    const dot = accentBtn && accentBtn.querySelector(".dot"); if (dot) dot.style.background = p ? p.hex : "";
+    const key = root.dataset.accent || "", p = products.find(x => x.key === key) || products.find(x => x.kind === "base");
+    const dot = accentBtn && accentBtn.querySelector(".dot"); if (dot) dot.style.background = key && p ? swatch(p) : "";
     if (accentPop) accentPop.querySelectorAll("[data-accent]").forEach(b => b.setAttribute("aria-checked", String(b.dataset.accent === key)));
     markFaintSwatches();
   }
   if (accentPop) {
-    /* "기본" 견본은 다른 제품 견본처럼 고정 hex(--blue-50) — 토큰(--surface-brand-primary)은 지금 적용된 제품 색 · 다크 값을 따라가
-       '기본' 이 다른 색으로 보였다(사람의 결정 2026-10-28) */
-    accentPop.innerHTML = '<button type="button" role="menuitemradio" aria-checked="false" data-accent=""><i style="background:#0066FF"></i>기본 (토큰 값)</button>'
-      + products.map(p => '<button type="button" role="menuitemradio" aria-checked="false" data-accent="' + p.key + '"><i style="background:' + p.hex + '"></i>' + p.name + "</button>").join("");
+    /* 기본(파랑)은 data-accent="" — 속성을 지운다. 이름 옆 작은 글자는 갈래(기본 · 제품별 · Company · 중립 · AI) */
+    accentPop.innerHTML = products.map(p => '<button type="button" role="menuitemradio" aria-checked="false" data-accent="' + (p.kind === "base" ? "" : p.key) + '"><i style="background:' + swatch(p) + '"></i>' + p.name + '<small>' + p.group + "</small></button>").join("");
     /* stopPropagation 금지 — 바깥 클릭 닫기가 이 이벤트에 얹혀 있다 */
     accentPop.addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if (b) { applyAccent(b.dataset.accent); closePop(accentBtn, accentPop); accentBtn.focus(); } });
   }
   /* 팝오버 밖의 [data-accent] 도 같은 동작 — Foundations › Colors 의 "이 컬러로 미리보기" 카드 버튼 */
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-accent]");
-    if (b && !(accentPop && accentPop.contains(b))) applyAccent(b.dataset.accent);
+    if (b && b !== root && !(accentPop && accentPop.contains(b))) applyAccent(b.dataset.accent);   /* 루트 자신도 data-accent 를 가진다 */
   });
   let saved = null; try { saved = localStorage.getItem("jsds-accent"); } catch (e) { }
   applyAccent(saved || "");

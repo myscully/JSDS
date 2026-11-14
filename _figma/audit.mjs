@@ -214,6 +214,25 @@ function typeScale(withWeights = true) {
 
 /* ---------- 컴포넌트 ----------
    기대값은 style.src.css 의 해당 규칙에서 읽는다 — 간격 12 를 여기 적어 두면 CSS 가 바뀌는 날 거짓이 된다 */
+/* :where(a,b) · :is(a,b) 목록을 갈래마다 펼친다(2026-11-14) — 삭제 버튼을 중립으로 바꾸며 .btn:where(.solid.assistive) 와 .btn:where(.solid.negative) 를
+   한 규칙 .btn:where(.solid.assistive,.solid.negative) 로 합쳤더니 셀렉터를 그대로 찾던 cssRule 이 Button 대조 전체를 건너뛰었다.
+   한 갈래만 남은 :is(.x) 는 .x 로 푼다(.icon-only:not(…):is(.assistive,.negative) → .icon-only:not(…).assistive) */
+function expandWhere(sel) {
+  const out = new Set(), todo = [sel];
+  while (todo.length && out.size < 64) {
+    const s = todo.pop(), m = /:(where|is)\(/g; let hit = false, r;
+    while ((r = m.exec(s))) {
+      let d = 1, i = r.index + r[0].length, start = i; const parts = []; let last = start;
+      for (; i < s.length && d; i++) { const ch = s[i]; if (ch === "(") d++; else if (ch === ")") { d--; if (!d) break; } else if (ch === "," && d === 1) { parts.push(s.slice(last, i)); last = i + 1; } }
+      parts.push(s.slice(last, i));
+      if (parts.length < 2) continue;
+      for (const p of parts) { const one = r[1] === "is" && /^\.[\w-]+$/.test(p.trim()) ? p.trim() : `:${r[1]}(${p.trim()})`; todo.push(s.slice(0, r.index) + one + s.slice(i + 1)); }
+      hit = true; break;
+    }
+    if (!hit) out.add(s);
+  }
+  return [...out];
+}
 function cssRule(sel) {
   /* 주석을 먼저 지운다 — 규칙 뒤에 붙은 설명 주석이 다음 규칙의 셀렉터 앞에 끼어 목록 안 셀렉터를 못 찾았다(2026-10-26 k5) */
   const css = read("_build/style.src.css").replace(/\/\*[\s\S]*?\*\//g, "");
@@ -222,7 +241,7 @@ function cssRule(sel) {
   /* 셀렉터 목록 안에 있는 규칙(예: .sidenav.collapsed a span,…,.sidenav.collapsed a.sub{…})도 찾는다.
      목록은 괄호 밖의 쉼표에서만 가른다(2026-10-28 k16) — Button 개편 뒤 .btn:where(.text,.icon-only:not(.solid,.outline))[disabled] 처럼
      괄호 안에 쉼표가 든 셀렉터가 생겼고, 쉼표마다 가르면 ".btn:where(.text" 같은 조각이 되어 찾지 못했다. 사이트 빌드와 같은 함수(_build/lib.js splitSelectors)를 쓴다 */
-  if (!m) for (const r of css.matchAll(/(?:^|\n|\})([^{}@]+)\{([^}]*)\}/g)) if (splitSelectors(r[1]).includes(sel)) { m = [null, r[2]]; break; }
+  if (!m) for (const r of css.matchAll(/(?:^|\n|\})([^{}@]+)\{([^}]*)\}/g)) if (splitSelectors(r[1]).some((x) => x === sel || expandWhere(x).includes(sel))) { m = [null, r[2]]; break; }
   if (!m) throw new Error("CSS 규칙 없음: " + sel);
   return Object.fromEntries(m[1].split(";").filter((x) => x.includes(":")).map((x) => { const i = x.indexOf(":"); return [x.slice(0, i).trim(), x.slice(i + 1).trim()]; }));
 }

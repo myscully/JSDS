@@ -56,14 +56,13 @@ function parse(s) {
   return null;
 }
 
-const CONTEXTS = [
-  { theme: "light", accent: "", label: "라이트 · 기본" },
-  { theme: "light", accent: "product-c", label: "라이트 · 다른 제품" },
-  { theme: "light", accent: "product-b", label: "라이트 · 상태색과 겹치는 제품" },
-  { theme: "dark", accent: "", label: "다크 · 기본" },
-  { theme: "dark", accent: "product-c", label: "다크 · 다른 제품" },
-  { theme: "dark", accent: "product-b", label: "다크 · 상태색과 겹치는 제품" },
-];
+/* 맥락 = 라이트 · 다크 × 제품 색 팔레트 여섯(data.js PRODUCTS — 2026-11-14 부터. 그 전에는 기본 · 다른 제품 · 상태색과 겹치는 제품 셋).
+   팔레트의 exception(주황 — 사람의 결정)은 그 맥락에서 brand 가 낀 쌍의 미달을 advisory 로 내린다 — 이유는 data.js 의 문장 그대로 */
+const PRODUCTS = require("./data.js").PRODUCTS;
+const CONTEXTS = ["light", "dark"].flatMap((theme) => PRODUCTS.map((p) => ({
+  theme, accent: p.kind === "base" ? "" : p.key, exception: p.exception || null,
+  label: `${theme === "light" ? "라이트" : "다크"} · ${p.name}`,
+})));
 
 /* 소비자 0 검사 — 샘플 블록과 문서 크롬이 실제로 참조하는지 본다 */
 function consumerAudit(css) {
@@ -111,7 +110,7 @@ async function run() {
 
   /* 전용 푸트페이지에서 잰다 — 빌드가 섹션 폴더를 먼저 지우므로 생성 페이지에 의존할 수 없고,
      무엇보다 이 게이트가 페이지 렌더보다 앞서야 Colors 페이지가 측정 결과를 표로 쓸 수 있다.
-     제품 전환은 실제 경로를 쓴다: app.js 가 window.applyAccent 를 노출하고 램프 생성·상태색 충돌 판정이
+     제품 전환은 실제 경로를 쓴다: app.js 가 window.applyAccent 를 노출하고 팔레트 키 → 램프 생성 · 속성 전환이
      모두 그 안에 있다 — 여기서 다시 구현하면 검증 가치가 사라진다.
      page.setContent 로는 외부 스크립트가 로드되지 않아 파일로 쓴다 */
   const probe = path.join(__dirname, ".contrast-probe.html");
@@ -136,7 +135,7 @@ async function run() {
       await page.evaluate((k) => window.applyAccent(k), ctx.accent);
     } else {
       /* 제품 슬롯 다섯 단계를 지운다 — 옛 10단계 목록을 그대로 두면 40·45·55·60 이 앞 맥락에서 새어 들어온다 */
-      await page.evaluate(() => { const r = document.documentElement; for (const i of [40, 45, 50, 55, 60]) r.style.removeProperty("--prod-" + i); r.removeAttribute("data-accent-light"); r.removeAttribute("data-accent-neutral"); });
+      await page.evaluate(() => { const r = document.documentElement; for (const i of [40, 45, 50, 55, 60]) r.style.removeProperty("--prod-" + i); r.removeAttribute("data-accent"); r.removeAttribute("data-accent-light"); });
     }
     await page.waitForTimeout(120);
     /* 선언 존재 검사 — 비어 있으면 그 선언이 파서에게 버려졌다 */
@@ -175,7 +174,9 @@ async function run() {
           const r = ratio(fgEff, eff);
           const label = bed ? `${bg} / ${bed}` : bg;
           table.push({ ctx: ctx.label, theme: ctx.theme, accent: ctx.accent, fg, bg: label, min, r, note, pass: r >= min, hex: { fg: hex(fgEff), bg: hex(eff) } });
-          if (r < min) (opt && opt.advisory ? warns : fails).push(`${ctx.label}: ${fg}(${hex(fgEff)}) on ${label}(${hex(eff)}) = ${r} < ${min}`);
+          /* 주황처럼 사람의 결정으로 흰 글자 제약을 넘지 못하는 제품 — brand 가 낀 쌍만 그 맥락에서 advisory(이유는 data.js exception) */
+          const byProduct = ctx.exception && /brand/.test(fg + " " + bg);
+          if (r < min) (opt && opt.advisory || byProduct ? warns : fails).push(`${ctx.label}: ${fg}(${hex(fgEff)}) on ${label}(${hex(eff)}) = ${r} < ${min}${byProduct && !(opt && opt.advisory) ? ` — 제품 색 예외: ${ctx.exception}` : ""}`);
         }
       }
     }
@@ -186,7 +187,8 @@ async function run() {
       for (const bg of bgs) {
         const eff = over(C[fill], C[bg]);
         const r = ratio(eff, C[bg]);
-        if (r < min) (opt && opt.advisory ? warns : fails).push(`${ctx.label}: ${fill} 이 ${bg} 와 구분되지 않는다 — ${r} < ${min}`);
+        const byProduct = ctx.exception && /brand/.test(fill);
+        if (r < min) (opt && opt.advisory || byProduct ? warns : fails).push(`${ctx.label}: ${fill} 이 ${bg} 와 구분되지 않는다 — ${r} < ${min}${byProduct ? ` — 제품 색 예외: ${ctx.exception}` : ""}`);
       }
     }
 

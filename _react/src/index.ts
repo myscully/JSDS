@@ -1,5 +1,5 @@
 /* @jiran/ds-react — 지란지교시큐리티 Design System React 컴포넌트
-   CSS: import "@jiran/ds-react/style.css"(+ 선택: "@jiran/ds-react/scale.css" 화면 폭 단계)  ·  테마: <html data-theme="dark">  ·  제품 컬러: applyAccent("#1D4ED8") */
+   CSS: import "@jiran/ds-react/style.css"(+ 선택: "@jiran/ds-react/scale.css" 화면 폭 단계)  ·  테마: <html data-theme="dark">  ·  제품 컬러: applyProductColor("red") (팔레트 밖 색은 applyAccent("#1D4ED8")) */
 
 export * from "./types";
 export { cx } from "./utils/cx";
@@ -7,7 +7,7 @@ export { useControllable } from "./utils/useControllable";
 export { useId } from "./utils/useId";
 export { Portal, type PortalProps } from "./utils/Portal";
 export { useOutsideClick, useEscape, useFocusTrap, mergeRefs } from "./utils/hooks";
-export { accentScale, applyAccent, isLightAccent, setTheme, getTheme, checkRootFontSize, ROOT_FONT_MIN, type AccentScale, type Theme } from "./theme";
+export { accentScale, applyAccent, applyProductColor, PRODUCT_COLORS, isLightAccent, setTheme, getTheme, checkRootFontSize, ROOT_FONT_MIN, type AccentScale, type ProductColor, type ProductColorKey, type Theme } from "./theme";
 export { LABELS, type LabelKey } from "./labels";
 
 export { Icon, type IconProps } from "./icons/Icon";

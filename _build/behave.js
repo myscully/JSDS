@@ -373,10 +373,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 6 · components/button.html", async () => {
 
-    /* 제품 슬롯 — 기준 시스템의 brand 자리에 제품 컬러가 들어간다. 단계는 다섯(40·45·50·55·60)이고 50 이 제품 HEX 다.
-       세 경우를 본다: 기본(주입 없음 = Blue 램프) · 밝은 제품(제품 C) · 상태색과 겹치는 제품(제품 A·B).
-       색상환 거리는 램프에서 실측한 여섯 각도(negative 0 · cautionary 34 · lime 95 · positive 140 · accent cyan 189 · light-blue 199)로 잰다 —
-       종전 표 [0,38,160,199] 는 최대 20도 어긋나 있었고, 그래서 청록 제품(184도)이 Medium 과 5도 차이인데도 통과했다 */
+    /* 제품 슬롯 — 기준 시스템의 brand 자리에 제품 색이 들어간다. 단계는 다섯(40·45·50·55·60)이고 50 이 제품 HEX 다.
+       팔레트 여섯(data.js PRODUCTS — 2026-11-14 사람의 결정)을 헤더 메뉴로 하나씩 고른다. 상태색과 겹쳐도(빨강) 제품 색 그대로다 —
+       예전의 자동 중립 전환(data-accent-neutral)은 걷어냈고, 중립은 팔레트에서 고른다 */
     await go("components/button.html");
     accent = async (key) => {
       await page.click("#accentBtn"); await page.waitForTimeout(80);
@@ -387,18 +386,34 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         const r = getComputedStyle(document.documentElement);
         const g = (n) => r.getPropertyValue(n).trim();
         return {
-          neutral: document.documentElement.hasAttribute("data-accent-neutral"),
-          light: document.documentElement.hasAttribute("data-accent-light"),
+          key: document.documentElement.dataset.accent || "",
+          neutral: document.documentElement.dataset.accent === "neutral",
+          legacy: document.documentElement.hasAttribute("data-accent-neutral") || document.documentElement.hasAttribute("data-accent-light"),
           bg: btn ? getComputedStyle(btn).backgroundColor : "", text: txt ? getComputedStyle(txt).color : "",
           surface: g("--surface-brand-primary"), fg: g("--foreground-brand-primary"),
           ramp: [40, 45, 50, 55, 60].map((k) => g("--brand-" + k)),
-          /* 중립 전환이 '정말 중립 램프로' 갈렸는지 보려면 그 램프 값 전부가 필요하다.
-             단계 번호를 박아 두면 램프를 조정할 때마다 단정이 깨진다 — 단계 선택은 설계 선택이다 */
           coolRamp: [5, 7, 10, 15, 17, 20, 22, 23, 25, 30, 40, 50, 60, 70, 80, 90, 95, 96, 97, 98, 99].map((k) => g("--cool-neutral-" + k)),
         };
       });
     };
-    const teal = await accent("product-a"), red = await accent("product-b"), bright = await accent("product-c");
+    const PAL = require("./data.js").PRODUCTS;
+    const KEY = (p) => (p.kind === "base" ? "" : p.key);
+    /* 팝오버 — 여섯 항목이 팔레트 순서대로, 고른 것 하나만 aria-checked */
+    await page.click("#accentBtn"); await page.waitForTimeout(80);
+    const items = await page.evaluate(() => [...document.querySelectorAll("#accentPop [data-accent]")].map((b) => ({ k: b.dataset.accent, t: b.textContent.trim() })));
+    await page.keyboard.press("Escape"); await page.waitForTimeout(80);
+    ok("the product color menu lists the six palette colors in order", items.map((i) => i.k).join() === PAL.map(KEY).join() && items.every((i, n) => i.t.startsWith(PAL[n].name)), JSON.stringify(items));
+    const got = {};
+    for (const p of PAL) got[p.key] = await accent(KEY(p));
+    const checked = await page.evaluate(() => [...document.querySelectorAll('#accentPop [aria-checked="true"]')].map((b) => b.dataset.accent));
+    ok("only the chosen palette item is checked", checked.length === 1 && checked[0] === "ai", JSON.stringify(checked));
+    /* 여섯 색마다 Brand 면 = 팔레트 값. 중립은 라이트 면이 중립 램프의 어두운 단계 */
+    for (const p of PAL) {
+      const t = got[p.key];
+      ok(`palette ${p.key}: brand surface is ${p.hex} and the attribute is the key`,
+        t.surface.toUpperCase() === p.hex && t.key === KEY(p) && !t.legacy, JSON.stringify({ surface: t.surface, key: t.key, legacy: t.legacy }));
+    }
+    ok("a red product keeps its own red — no automatic neutral switch", got.red.ramp.every((v) => !got.red.coolRamp.includes(v)) && got.red.bg === "rgb(195, 13, 42)", JSON.stringify(got.red));
     /* 메뉴의 "기본" 견본은 제품 색 · 테마와 상관없이 기본 brand(#0066FF) — 토큰을 썼더니 적용된 제품 색 · 다크 값을 따라갔다(사람의 결정 2026-10-28) */
     const baseSwatch = await page.evaluate(() => {
       const root = document.documentElement, was = root.getAttribute("data-theme"), sw = () => getComputedStyle(document.querySelector('#accentPop [data-accent=""] i')).backgroundColor;
@@ -407,28 +422,19 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       return { withAccent, dark };
     });
     ok("the default swatch in the product color menu stays #0066FF", baseSwatch.withAccent === "rgb(0, 102, 255)" && baseSwatch.dark === "rgb(0, 102, 255)", JSON.stringify(baseSwatch));
-    /* 청록 제품은 Medium(accent cyan)과 5도 차이라 이제 중립으로 내려간다 — 실측 각도로 고친 결과다.
-       어느 중립 단계를 집는지는 설계 선택이라 박아 두지 않는다. 대신 **다섯 단계가 전부 중립 램프의 값이고
-       번호가 커질수록 밝다**를 본다 — 중립 전환이 뜻하는 바가 그것이고, 단계를 조정해도 살아남는다 */
+    /* 중립 — 다섯 단계가 전부 중립 램프의 값이고 번호가 커질수록 밝다. 어느 단계를 집는지는 설계 선택이라 박아 두지 않는다 */
     const neutralRamp = (t) => t.ramp.every((v) => t.coolRamp.includes(v));
     const lighterUp = (t) => { const L = (h) => { const n = parseInt(h.slice(1), 16); return ((n >> 16 & 255) + (n >> 8 & 255) + (n & 255)); };
       return t.ramp.every((v, i) => i === 0 || L(v) > L(t.ramp[i - 1])); };
-    ok("a teal product now trips the status-clash guard",
-      teal.neutral && neutralRamp(teal) && lighterUp(teal), JSON.stringify(teal.ramp));
-    ok("a red product turns the whole brand ramp neutral",
-      red.neutral && neutralRamp(red) && lighterUp(red) && red.ramp.includes(red.surface) && red.bg === red.text, JSON.stringify(red.ramp));
-    /* 제품 C(#00AD7B)만 상태색과 겹치지 않는다. 밝은 제품이라 면 위 글자가 어두워지고 상태가 밝은 쪽으로 간다 */
-    /* 밝은 제품 적응(data-accent-light)을 걷어냈다 — 이제 제품 색은 흰 글자를 받칠 수 있어야 한다는 **제약**이고,
-       빌드가 data.js 의 제품 전부를 검사한다. 여기서는 겹치지 않는 제품이 자기 색을 그대로 쓰는지만 본다 */
-    ok("a non-clashing product keeps its own colour and never flips the label",
-      !bright.neutral && !bright.light && bright.surface === "#008760", JSON.stringify(bright));
+    ok("the neutral palette turns the whole brand ramp neutral",
+      got.neutral.neutral && neutralRamp(got.neutral) && lighterUp(got.neutral) && got.neutral.ramp.includes(got.neutral.surface) && got.neutral.bg === got.neutral.text, JSON.stringify(got.neutral.ramp));
 
     const readTokens = () => page.evaluate(() => {
       const r = getComputedStyle(document.documentElement); const g = (n) => r.getPropertyValue(n).trim();
       const res = (t) => { const d = document.createElement("div"); d.style.color = t; document.body.append(d); const c = getComputedStyle(d).color; d.remove(); return c; };
       return {
         surface: g("--surface-brand-primary"), strong: g("--surface-brand-strong"), heavy: g("--surface-brand-heavy"),
-        light: document.documentElement.hasAttribute("data-accent-light"), neutral: document.documentElement.hasAttribute("data-accent-neutral"),
+        light: document.documentElement.hasAttribute("data-accent-light"), neutral: document.documentElement.dataset.accent === "neutral",
         ramp: [40, 45, 50, 55, 60].map((k) => g("--brand-" + k)),
         surfaceRgb: res("var(--surface-brand-primary)"), strongRgb: res("var(--surface-brand-strong)"), heavyRgb: res("var(--surface-brand-heavy)"),
         labelRgb: res("var(--brand-label)"), fgRgb: res("var(--foreground-brand-primary)"),
@@ -440,18 +446,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const goDark = async () => { await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(250); return readTokens(); };
     const unDark = async () => { await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(150); };
     const cases = [];
-    for (const [name, key] of [["base", ""], ["other", "product-c"], ["clashing", "product-b"]]) {
-      await unDark(); await accent(key);
+    for (const p of PAL) {
+      await unDark(); await accent(KEY(p));
       const L = await readTokens(); const D = await goDark(); await unDark();
-      cases.push([name, L, D]);
+      cases.push([p.key, L, D, p]);
     }
-    for (const [n, L, D] of cases) {
-      const [s40, s45, s50, s55, s60] = L.ramp, [d40, d45, d50, d55, d60] = D.ramp;
+    for (const [n, L, D, p] of cases) {
+      const [s40, s45, s50] = L.ramp, [, , d50, d55, d60] = D.ramp;
       /* 라이트는 50 이 면이고 상태가 짙어지는 쪽(45·40)으로 간다. 다크도 50 이 면이고 밝아지는 쪽(55·60)으로 간다.
-         밝은 제품만 라이트의 상태 방향이 뒤집힌다 — 어두운 글자인데 면이 더 어두워지면 글자 쪽으로 다가가 3.57 로 깨진다 */
-      /* 라이트의 상태 방향이 제품 종류마다 다르다.
-         기본은 50 에서 짙어지고(45·40), 밝은 제품은 어두운 글자라 밝아지며(55·60),
-         중립 제품은 거의 검정에서 시작해 밝아진다(40 → 45 → 50) */
+         중립 제품만 라이트가 거의 검정에서 시작해 밝아진다(40 → 45 → 50) */
       const wantL = L.neutral ? [s40, s45, s50] : [s50, s45, s40];
       const wantD = [d50, d55, d60];
       ok(`the ${n} product follows the base-step rule in both themes`,
@@ -459,10 +462,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         && D.surface === wantD[0] && D.strong === wantD[1] && D.heavy === wantD[2],
         JSON.stringify({ light: [L.surface, L.strong, L.heavy], dark: [D.surface, D.strong, D.heavy], wantL, wantD }));
       ok(`the ${n} product never sets data-accent-light`, !L.light && !D.light, `${L.light} · ${D.light}`);
+      /* 사람의 결정으로 흰 글자 제약을 넘지 못하는 제품(주황 — data.js exception)은 AA 단정을 건너뛰고 contrast 가 advisory 로 보고한다.
+         대신 그 예외가 실제로 기준 아래인지(= 낡은 예외가 아닌지)를 본다 */
+      if (p.exception) {
+        ok(`the ${n} product's declared exception is real — white on its surface is under 4.5`, ratio(L.surfaceRgb, L.labelRgb) < 4.5, `${ratio(L.surfaceRgb, L.labelRgb)}`);
+        continue;
+      }
       /* 면 위 글자. 다크 rest 도 제품 HEX(brand-50)라 제품 색 제약이 받쳐 AA 다.
          상태는 밝아지는 쪽(55·60)이라 hover·pressed 는 4.5 아래로 내려가고, 게이트가 advisory 로 보고한다.
-         중립 전환은 면이 밝은 회색이라 라벨을 뒤집고, 그쪽은 AA 를 요구한다.
-         라이트는 제품 색 제약(흰 글자 4.5)이 받치므로 전부 AA 다 */
+         중립 제품은 면이 밝은 회색이라 라벨을 뒤집고, 그쪽은 AA 를 요구한다. 라이트는 제품 색 제약(흰 글자 4.5)이 받치므로 전부 AA 다 */
       for (const [theme, t] of [["light", L], ["dark", D]]) {
         if (theme === "dark" && !t.neutral) {
           ok(`dark ${n} brand label is white and its rest clears AA`,
@@ -473,27 +481,25 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         for (const [st, fill] of [["rest", t.surfaceRgb], ["hover", t.strongRgb], ["pressed", t.heavyRgb]])
           ok(`${theme} ${n} Primary ${st} clears AA`, ratio(fill, t.labelRgb) >= 4.5, `${ratio(fill, t.labelRgb)} · ${fill} / ${t.labelRgb}`);
       }
-      // 글자로 보정할 수 없는 자리 — 지표·포커스 링은 3:1, 패널 위 텍스트는 4.5
+      // 글자로 보정할 수 없는 자리 — 지표·포커스 링은 3:1, 패널 위 텍스트는 4.5. 다크 글자 단계(60)는 accentScale 이 4.5 까지 밝힌다(2026-11-14)
       ok(`dark ${n} brand graphic clears 3:1 on every surface`,
         Math.min(ratio(D.fgRgb, D.canvas), ratio(D.fgRgb, D.card), ratio(D.fgRgb, D.subtle)) >= 3,
         `${ratio(D.fgRgb, D.canvas)} · ${ratio(D.fgRgb, D.card)} · ${ratio(D.fgRgb, D.subtle)}`);
-      ok(`dark ${n} brand text clears AA on the subtle background`, ratio(D.fgRgb, D.subtle) >= 4.5, `${ratio(D.fgRgb, D.subtle)}`);
-      /* 옅은 제품 면(선택 행)은 알파라 캔버스 위에 합성해서 재야 한다 — 원문 값으로 재면 color-mix 문자열이 그대로 들어온다.
-         기준 시스템의 5% 는 아주 옅어서 분리 바닥을 1.02 로 두었다(contrast.pairs.js) */
+      ok(`dark ${n} brand text clears AA on every dark surface`, Math.min(ratio(D.fgRgb, D.canvas), ratio(D.fgRgb, D.card), ratio(D.fgRgb, D.subtle)) >= 4.5,
+        `${ratio(D.fgRgb, D.canvas)} · ${ratio(D.fgRgb, D.card)} · ${ratio(D.fgRgb, D.subtle)}`);
       ok(`dark ${n} selected background stays visible on the canvas`,
         ratio(D.subtleRgb, D.canvas, D.canvas) >= 1.02, `${ratio(D.subtleRgb, D.canvas, D.canvas)} · ${D.subtleRgb}`);
-      // 다크의 반전 표면은 밝다 — 그 위의 제품색은 램프의 어두운 쪽이어야 묻히지 않는다
+      // 다크의 반전 표면은 밝다 — 그 위의 제품색은 램프의 어두운 쪽이어야 묻히지 않는다. 라이트의 반전 면(어두움) 위는 60 단계다
       ok(`dark ${n} inverse-surface brand clears AA`, ratio(D.invRgb, D.bgInverse) >= 4.5, `${ratio(D.invRgb, D.bgInverse)} · ${D.invRgb} / ${D.bgInverse}`);
+      ok(`light ${n} inverse-surface brand clears AA`, ratio(L.invRgb, L.bgInverse) >= 4.5, `${ratio(L.invRgb, L.bgInverse)} · ${L.invRgb} / ${L.bgInverse}`);
     }
-    ok("light base and clashing keep a white brand label",
-      cases[0][1].labelRgb === "rgb(255, 255, 255)" && cases[2][1].labelRgb === "rgb(255, 255, 255)", `${cases[0][1].labelRgb} · ${cases[2][1].labelRgb}`);
     /* 라이트에서는 어떤 제품이든 흰 글자다 — 적응이 사라졌으므로 제품마다 다를 이유가 없다 */
     ok("every product keeps a white brand label in light", cases.every(([, L2]) => L2.labelRgb === "rgb(255, 255, 255)"),
       cases.map(([n2, L2]) => `${n2} ${L2.labelRgb}`).join(" · "));
-    await accent("product-c");
+    await accent("cyan");
     const backLight = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--surface-brand-primary").trim());
-    ok("light keeps the product colour", backLight === "#008760", backLight);
-    await accent("product-b");   // 뒤 케이스(Atomic 램프)가 중립 전환 상태를 전제한다 — 원복해 둔다
+    ok("light keeps the product colour", backLight === "#00828B", backLight);
+    await accent("neutral");   // 뒤 케이스(Atomic 램프)가 중립 상태를 전제한다
   });
   await part("part 7 · foundations/colors.html", async () => {
 
@@ -509,7 +515,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     });
     ok("Atomic Brand ramp follows the neutral switch", ramp.n === 1 && ramp.bg === ramp.want, JSON.stringify(ramp));
     base = await accent("");
-    ok("back to token accent clears the flag", !base.neutral, JSON.stringify(base));
+    ok("back to token accent clears the attribute", !base.neutral && base.key === "", JSON.stringify(base));
   });
   await part("part 8 · components/button.html", async () => {
 
@@ -769,7 +775,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await page.waitForTimeout(200);
 
     // --foreground-brand-primary 는 두 테마 모두 봐야 한다 — 밝은 제품은 라이트에서 600 으로 쓰면 패널 위 2.58 이었다
-    for (const key of ["", "product-a", "product-b"]) {
+    for (const key of ["", "red", "cyan", "neutral", "ai"]) {   // 주황은 사람의 결정으로 선언한 예외(data.js exception) — contrast 가 advisory 로 보고한다
       await accent(key);
       for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
         await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
@@ -2047,6 +2053,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 67b · behave.font.js", async () => {
     await require("./behave.font.js")({ page, ok, go });   // 일본어 한자용 Pretendard JP(2026-11-14)
   });
+  await part("part 67c · behave.product.js", async () => {
+    await require("./behave.product.js")({ page, ok, go });   // 제품 색 팔레트 여섯 · 삭제 버튼 중립 · AI 그라데이션 · 빨강/주황 입력 링(2026-11-14)
+  });
   await part("part 68 · components/button.html", async () => {
 
     // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
@@ -2093,9 +2102,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         afterEx: !!(rules && ex) && !!(ex.compareDocumentPosition(rules) & 4) && !document.querySelector("#rules ~ .example, #rules ~ * .example"), toSpec: !!rules && n === spec, seq: seq.join(","),
         divKv: document.querySelectorAll("div.kv").length };
     });
-    const chB = await chooseOf();
+    const chB = await chooseOf();   // Button Rules 2 → 3행: '삭제는 중립'(2026-11-14)
     ok("choose list (dl.kv, 3 rows max) sits right under the lead above the first example; Rules follows the examples and leads straight into Spec",
-      chB.kv === "DL.kv" && chB.keys === "언제 쓰는가|Placement" && chB.above && chB.afterEx && chB.toSpec && chB.seq === "DL.kv2" && !chB.divKv, JSON.stringify(chB));
+      chB.kv === "DL.kv" && chB.keys === "언제 쓰는가|Placement" && chB.above && chB.afterEx && chB.toSpec && chB.seq === "DL.kv3" && !chB.divKv, JSON.stringify(chB));
   });
   await part("part 69 · components/data-table.html", async () => {
     await go("components/data-table.html");
@@ -2269,9 +2278,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const semPage = await page.evaluate(() => {
       const pane = document.querySelector('[data-docpane="semantic"]');
       const cells = [...pane.querySelectorAll(".val-cell")];
-      const blank = cells.filter((c) => { const b2 = getComputedStyle(c.querySelector(".bar i")).backgroundColor; return !b2 || b2 === "rgba(0, 0, 0, 0)"; });
+      const blank = cells.filter((c) => { const st = getComputedStyle(c.querySelector(".bar i")), b2 = st.backgroundColor; return (!b2 || b2 === "rgba(0, 0, 0, 0)") && st.backgroundImage === "none"; });   // 그라데이션 견본(Surface - Brand Gradient, 2026-11-14)은 background-image 로 칠한다
       /* #roles(브랜드 역할 맵)는 토큰 절이 아니라 쓰는 법이다 — 스와치 줄이 없으므로 세지 않는다 */
-      const h2s = [...pane.querySelectorAll("h2")].filter((h) => h.id !== "roles");
+      const h2s = [...pane.querySelectorAll("h2")].filter((h) => h.id !== "roles" && h.id !== "product-color");   // Product color(팔레트 표, 2026-11-14)도 쓰는 법이라 세지 않는다
       return { sections: h2s.length, cells: cells.length,
         blank: blank.map((c) => c.dataset.token),
         /* 절마다 설명 문단이 하나씩 — 이미지의 형식이다 */
@@ -2284,7 +2293,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       semPage.sections === 28 && semPage.paras === 28, JSON.stringify(semPage).slice(0, 220));
     ok("no swatch is blank", semPage.blank.length === 0, semPage.blank.join(" ") || "없음");
     /* 알파가 든 절만 체커 바탕 — 솔리드 절에 체커가 깔리면 반투명으로 오독된다 */
-    ok("only the alpha sections are checkered", semPage.checker === 14, String(semPage.checker));
+    ok("only the alpha sections are checkered", semPage.checker === 15, String(semPage.checker));   // 14 → 15: Line - Field Focus 의 후광이 반투명(2026-11-14)
     /* 한 절의 바들은 같은 높이에 서야 한다. Surface - Accent 는 칸이 12개라 이름이 두 줄이 되는데,
        버튼의 UA 세로 가운데 정렬 때문에 한 줄짜리 칸의 바가 9px 내려앉아 있었다 */
     const barAlign = await page.evaluate(() => {

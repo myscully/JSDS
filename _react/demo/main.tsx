@@ -2,7 +2,7 @@
 import { StrictMode, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
 import "../dist/style.css";
-import { Button, SelectButton, ToastProvider, applyAccent, setTheme, getTheme, type Theme } from "@jiran/ds-react";
+import { Button, SelectButton, ToastProvider, applyProductColor, PRODUCT_COLORS, setTheme, getTheme, type Theme, type ProductColorKey } from "@jiran/ds-react";
 
 const modules = import.meta.glob("../examples/**/*.tsx", { eager: true }) as Record<string, { default: ComponentType }>;
 const sources = import.meta.glob("../examples/**/*.tsx", { eager: true, query: "?raw", import: "default" }) as Record<string, string>;
@@ -14,7 +14,6 @@ const LAYOUT: Record<string, string> = {
   "components/loading/skeleton": "white", "patterns/search/toolbar": "stack", "patterns/system-status/overview": "stack", "patterns/dashboard/full": "stack",
   "patterns/log-viewer/viewer": "stack", "patterns/policy-settings/sections": "stack", "patterns/severity/scale": "left",
 };
-const PRODUCTS = [["#0066FF", "기본 (토큰 값)"], ["#00AAB6", "제품 A"], ["#C30D2A", "제품 B"], ["#00AD7B", "제품 C"]];
 
 const keys = Object.keys(modules).map((f) => f.replace(/^\.\.\/examples\//, "").replace(/\.tsx$/, "")).sort();
 const byPage = new Map<string, string[]>();
@@ -26,7 +25,7 @@ function App() {
     <>
       <div className="demo-bar">
         <h1>@jiran/ds-react demo · {keys.length} examples</h1>
-        <SelectButton label="Accent" defaultValue={PRODUCTS[0][0]} options={PRODUCTS.map(([hex, name]) => ({ value: hex, label: name }))} onChange={(hex) => applyAccent(hex)} />
+        <SelectButton label="제품 색" defaultValue="blue" options={PRODUCT_COLORS.map((p) => ({ value: p.key, label: p.name }))} onChange={(key) => applyProductColor(key as ProductColorKey)} />
         <Button variant="outline" color="assistive" size="sm" onClick={() => { const next: Theme = theme === "dark" ? "light" : "dark"; setTheme(next); location.reload(); }}>테마 전환</Button>
       </div>
       <div className="demo-page">
@@ -49,7 +48,7 @@ function App() {
   );
 }
 
-applyAccent(PRODUCTS[0][0]);
+applyProductColor("blue");
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ToastProvider>

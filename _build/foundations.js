@@ -32,7 +32,36 @@ window.FOUNDATION_PAGES = function (H) {
   function semRow(items, o = {}) {
     /* "Background - Normal" 섹션의 "Normal" 처럼 섹션 제목이 이미 이름으로 끝나면 되풀이하지 않는다 */
     const label = name => (!o.group ? name : o.group.toLowerCase().endsWith(name.toLowerCase()) ? o.group : o.group + " / " + name);
-    return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<button type="button" class="val-cell" data-token="${tok}" data-label="${attr(label(name))}" aria-haspopup="dialog" title="${attr(label(name))} 값 보기"><div class="bar"><i style="background:var(${tok})"></i></div><div class="name">${name}</div></button>`).join("")}</div>`;
+    return `<div class="sem-row${o.alpha ? " checker" : ""}">${items.map(([name, tok]) => `<button type="button" class="val-cell" data-token="${tok}" data-label="${attr(label(name))}" aria-haspopup="dialog" title="${attr(label(name))} 값 보기"><div class="bar"><i style="background:${o.preview ? o.preview(tok) : `var(${tok})`}"></i></div><div class="name">${name}</div></button>`).join("")}</div>`;
+  }
+  /* 제품 색 팔레트(data.js PRODUCTS — 2026-11-14 사람의 결정). 흰 글자 대비는 빌드가 hex 에서 계산한다(사람이 숫자를 적지 않는다).
+     AI 의 그라데이션 끝 hex 는 style.src.css 의 램프에서 읽는다 */
+  function productColor() {
+    const css = STYLE();
+    const ramp = (n) => (new RegExp("--" + n + ":(#[0-9A-Fa-f]{6})").exec(css) || [])[1] || "";
+    const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    const lum = (h) => { const c = [1, 3, 5].map((i) => lin(parseInt(h.slice(i, i + 2), 16))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const white = (h) => (1.05 / (lum(h) + 0.05)).toFixed(2);
+    const NOTE = { base: "기본 토큰 값(Blue 램프) — 아무것도 주입하지 않습니다", ramp: "제품 HEX 하나로 다섯 단계를 만듭니다", neutral: "중립 램프로 갈아끼웁니다 — 라이트는 진한 회색 면 · 흰 글자, 다크는 밝은 회색 면 · 어두운 글자", ai: "대표 단색으로 다섯 단계를 만들고, 주 버튼 · Banner 만 그라데이션입니다" };
+    const rows = PRODUCTS.map((p) => {
+      const g = p.gradient ? p.gradient.rest.map(ramp) : null;
+      const swatch = g ? `linear-gradient(90deg,${g[0]},${g[1]})` : p.hex;
+      const val = g ? `<code>${p.hex}</code> · 그라데이션 <code>${g[0]}</code> → <code>${g[1]}</code>` : `<code>${p.hex}</code>`;
+      const ratio = p.kind === "neutral" ? "라이트 " + white(p.hex) + " · 다크는 어두운 글자" : g ? `${white(p.hex)} · 끝 ${white(g[0])} · ${white(g[1])}` : white(p.hex);
+      const notes = [NOTE[p.kind], p.neutralFocus ? "입력 필드 포커스 링은 중립" : "", p.exception ? `<b>예외</b> — ${p.exception}` : ""].filter(Boolean).join(". ");
+      return [`<span class="pc-sw" style="background:${swatch}"></span>${p.group}`, `<b>${p.name}</b>`, val, ratio, notes,
+        `<button type="button" class="btn sm outline assistive" data-accent="${p.kind === "base" ? "" : p.key}" aria-label="${p.name} 적용">적용</button>`];
+    });
+    return `<h2 id="product-color">Product color</h2>
+<p>제품 색은 아래 팔레트에서 하나를 고릅니다. 고른 색이 <code>--prod-40~60</code> 다섯 단계로 들어가 brand 토큰을 쓰는 곳 — 저장 · 설정 · 추가 같은 주 버튼, 링크, 내비게이션의 선택, 탭, 체크박스 · 라디오 · 스위치, 포커스 링 — 이 모두 그 색으로 바뀝니다. 1.0 전에는 제공된 여섯 가지만 쓰고, <b>1.0 뒤에는 사용자가 색을 더하거나 고칠 수 있는 팔레트</b>를 제공합니다.</p>
+${tbl(["갈래", "이름", "값", "흰 글자 대비", "적용", "미리보기"], rows, "product-colors")}
+<ul class="bullets">
+<li><b>상태색과 겹쳐도 제품 색 그대로</b> — 예전에는 제품 색이 상태색과 색상환 15° 안이면 자동으로 중립으로 바꿨습니다. 제품의 독립성을 위해 걷어냈고, 중립은 팔레트에서 고릅니다.</li>
+<li><b>삭제 버튼은 모든 제품에서 중립</b> — <code>.btn.negative</code> 는 Assistive 와 같은 색입니다. 빨강 제품의 주 버튼과 헷갈리지 않게 합니다. 빨강은 위험 확인 팝업의 제목 · 메뉴의 위험 항목 글자에만 남습니다.</li>
+<li><b>빨강 · 주황 제품의 입력 포커스 링은 중립</b> — 오류 링(빨강) · 경고색(주황)과 헷갈리지 않게 합니다. 체크박스 · 버튼의 포커스 외곽선은 제품 색 그대로입니다.</li>
+<li><b>흰 글자 4.5</b> — Brand 면의 글자는 늘 흰색이라 제품 색이 그 흰 글자를 받쳐야 하고 빌드가 검사합니다. 넘지 못하는 색은 사람의 결정으로 이유를 선언해야 합니다(주황).</li>
+<li><b>다크 글자 단계는 자동으로 밝힘</b> — 다크의 brand 글자(60 단계)가 어두운 바탕 셋 위 4.5 를 넘을 때까지 밝힙니다. 채도 높은 빨강 · 보라가 여기에 걸립니다.</li>
+</ul>`;
   }
   /* o.h3 — 상위 h2 아래 묶이는 절(Theme 의 구성원들). 포함 관계가 ToC 에 드러나야 한다 */
   const sem = (id, title, desc, items, o = {}) => `<h${o.h3 ? 3 : 2} id="${id}">${title}</h${o.h3 ? 3 : 2}><p>${desc}</p>${semRow(items, Object.assign({ group: title }, o))}`;
@@ -199,13 +228,15 @@ ${sem("bg-neutral", "Background - Neutral", "일반적인 화면의 배경 색�
 ${sem("sf-neutral", "Surface - Neutral", "패널과 같이 어떠한 요소에서 표면 색상이 필요한 경우 사용합니다. 투명도가 포함된 Secondary, Tertiary, Strong으로 배경과의 구분 정도를 조절하며, Inverse는 반전된 표면을 표현할 때 사용합니다.", [["Primary", "--surface-neutral-primary"], ["Secondary", "--surface-neutral-secondary"], ["Tertiary", "--surface-neutral-tertiary"], ["Strong", "--surface-neutral-strong"], ["Inverse", "--surface-neutral-inverse"]], { alpha: true })}
 ${sem("sf-elevated", "Surface - Elevated", "모달과 같이 층위가 있는 화면에서 사용하는 표면 색상으로 다크 모드에서 Background - Neutral과의 색상 차이가 있습니다.", [["Primary", "--surface-elevated-primary"], ["Secondary", "--surface-elevated-secondary"]])}
 ${sem("sf-brand", "Surface - Brand", "화면 내에서 가장 중요한 요소를 표현할 때 사용하는 브랜드 표면 색상입니다. Primary, Strong, Heavy를 상황에 맞게 적절히 선택하여 사용하며, Subtle은 옅은 브랜드 배경이 필요할 때 사용합니다.", [["Primary", "--surface-brand-primary"], ["Strong", "--surface-brand-strong"], ["Heavy", "--surface-brand-heavy"], ["Subtle", "--surface-brand-subtle"], ["Subtle Strong", "--surface-brand-subtle-strong"]])}
+${sem("sf-brand-gradient", "Surface - Brand Gradient", "AI 제품의 넓은 브랜드 면(주 버튼 · Banner)에만 칠하는 그라데이션입니다. 다른 제품에서는 값이 none 이고 면은 Surface - Brand 단색 그대로입니다. 견본은 AI 의 값(램프 두 끝)을 보여 줍니다 — 값 보기에는 지금 고른 제품의 값이 나옵니다. 우리가 더한 토큰입니다(2026-11-14).", [["Rest", "--surface-brand-gradient"], ["Strong", "--surface-brand-gradient-strong"], ["Heavy", "--surface-brand-gradient-heavy"]], { h3: true, preview: (t) => ({ "--surface-brand-gradient": "linear-gradient(90deg,var(--purple-40),var(--violet-45))", "--surface-brand-gradient-strong": "linear-gradient(90deg,var(--purple-30),var(--violet-40))", "--surface-brand-gradient-heavy": "linear-gradient(90deg,var(--purple-30),var(--violet-30))" })[t] })}
 ${sem("sf-positive", "Surface - Positive", "긍정적인 상태를 배경으로 표현할 때 사용합니다.", [["Primary", "--surface-positive-primary"]], { alpha: true })}
 ${sem("sf-cautionary", "Surface - Cautionary", "주의가 필요한 상태를 배경으로 표현할 때 사용합니다.", [["Primary", "--surface-cautionary-primary"]], { alpha: true })}
-${sem("sf-negative", "Surface - Negative", "부정적인 상태나 오류를 배경으로 표현할 때 사용합니다. 더 강한 강조가 필요한 경우 Strong을 사용합니다. Hover · Pressed 는 면이 비어 있는 Negative 버튼(Outline · 면 없는 아이콘 전용)의 상태 전용입니다(테마마다 집는 단계가 다릅니다).", [["Primary", "--surface-negative-primary"], ["Strong", "--surface-negative-strong"], ["Heavy", "--surface-negative-heavy"], ["Hover", "--surface-negative-hover"], ["Pressed", "--surface-negative-pressed"]], { alpha: true })}
+${sem("sf-negative", "Surface - Negative", "부정적인 상태나 오류를 배경으로 표현할 때 사용합니다. 더 강한 강조가 필요한 경우 Strong을 사용합니다. Heavy · Hover · Pressed 는 Negative 버튼의 상태용이었는데, 2026-11-14 부터 삭제 버튼이 중립색이라 지금은 쓰는 곳이 없습니다(Figma 일괄 반영 때 정리).", [["Primary", "--surface-negative-primary"], ["Strong", "--surface-negative-strong"], ["Heavy", "--surface-negative-heavy"], ["Hover", "--surface-negative-hover"], ["Pressed", "--surface-negative-pressed"]], { alpha: true })}
 ${sem("sf-disable", "Surface - Disable", "상호작용이 불가능한 비활성 상태의 표면에 사용합니다.", [["Primary", "--surface-disable-primary"]])}
 ${sem("sf-accent", "Surface - Accent", "시각적 대비를 명확하게 유지하기 위해 배경과 같은 뒤쪽 요소에 사용하는 색상입니다. Opaque는 투명도가 없는 색상으로 표면이 겹치는 경우 사용합니다.", A.flatMap(n => [[n, `--surface-accent-${akey(n)}`], [`${n} Opaque`, `--surface-accent-${akey(n)}-opaque`]]), { alpha: true })}
 ${sem("ln-neutral", "Line - Neutral", "Divider, Border 등 요소 간의 구분이 필요한 경우 사용합니다. 투명 값이 포함된 색상으로 라인이 중첩되는 경우 투명도가 없는 Opaque를 사용하여 중첩을 방지합니다.", [["Primary", "--line-neutral-primary"], ["Primary Opaque", "--line-neutral-primary-opaque"], ["Secondary", "--line-neutral-secondary"], ["Secondary Opaque", "--line-neutral-secondary-opaque"], ["Tertiary", "--line-neutral-tertiary"], ["Tertiary Opaque", "--line-neutral-tertiary-opaque"]], { alpha: true })}
 ${sem("ln-brand", "Line - Brand", "브랜드 컬러가 필요한 Border에 사용합니다. Focus는 상호작용 요소의 포커스 상태를 표현할 때 사용합니다.", [["Primary", "--line-brand-primary"], ["Strong", "--line-brand-strong"], ["Focus", "--line-brand-focus"]], { alpha: true })}
+${sem("ln-field-focus", "Line - Field Focus", "값 입력 필드(Text Field · Select · Date Picker …)의 포커스 · 열린 필드 테두리와 바깥 후광입니다. 기본은 Foreground - Brand Primary · Line - Brand Focus 와 같고, 빨강 · 주황 제품에서는 중립으로 바뀝니다 — 오류 링 · 경고색과 헷갈리지 않게 합니다. 우리가 더한 토큰입니다(2026-11-14).", [["Border", "--line-field-focus"], ["Halo", "--line-field-focus-halo"]], { h3: true, alpha: true })}
 ${sem("ln-positive", "Line - Positive", "긍정적인 상태를 Border로 표현할 때 사용합니다.", [["Primary", "--line-positive-primary"]], { alpha: true })}
 ${sem("ln-cautionary", "Line - Cautionary", "주의가 필요한 상태를 Border로 표현할 때 사용합니다.", [["Primary", "--line-cautionary-primary"]], { alpha: true })}
 ${sem("ln-negative", "Line - Negative", "부정적인 상태나 오류를 Border로 표현할 때 사용합니다. Focus는 오류 상태의 포커스 상태를 표현할 때 사용합니다.", [["Primary", "--line-negative-primary"], ["Strong", "--line-negative-strong"], ["Focus", "--line-negative-focus"]], { alpha: true })}
@@ -215,12 +246,13 @@ ${sem("ef-transparent", "Effect - Transparent", "Chrome 효과를 적용할 때 
 ${sem("static", "Static", "Light, Dark 테마에 상관없이 고정된 고유 색으로 테마가 변경되더라도 색상을 유지하여 해당 요소에 대비를 줄 때 사용합니다.", [["White", "--static-white"], ["Black", "--static-black"]])}
 ${sem("chart", "Chart", "탐색형 차트(Chart.js)의 계열 · 격자 · 축 · 툴팁 색입니다. 계열 1~6 은 <b>순서 고정</b>이고 제품색과 무관하며, 라이트/다크 각각 색각 이상 분리 · 명도 띠 · 3:1 을 검증한 단계입니다(상태색과 같은 단계는 피함). 심각도 5단계는 Foreground - Negative strong · Cautionary · Accent light blue · Accent lime · Inactive 를 그대로 씁니다. 캔버스는 CSS 변수를 못 읽어 <code>ds-chart.js</code> 가 계산값으로 읽습니다 — 트리 밖 토큰입니다(<a href=\"#/components/data-visual\">Data Visual</a>).", [["Series 1", "--chart-series-1"], ["Series 2", "--chart-series-2"], ["Series 3", "--chart-series-3"], ["Series 4", "--chart-series-4"], ["Series 5", "--chart-series-5"], ["Series 6", "--chart-series-6"], ["Series 1 subtle", "--chart-series-1-subtle"], ["Series 1 strong", "--chart-series-1-strong"], ["Grid", "--chart-grid-primary"], ["Axis text", "--chart-axis-text"], ["Tooltip surface", "--chart-tooltip-surface"], ["Tooltip text", "--chart-tooltip-text"]])}
 ${sem("company", "Brand Mark", "지란지교시큐리티 브랜드 색입니다. 기준 시스템의 Brand 는 제품 색이라 회사 정체성을 표기할 자리가 없어, 토큰 트리 밖에 따로 둡니다. 로고·헤더 마크에만 쓰고 제품 UI 의 Brand 로 쓰지 않습니다.", [["Mark", "--company-mark"], ["Subtle", "--company-mark-subtle"]])}
+${productColor()}
 <h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>Product Brand</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand Mark</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다.</p>
 ${tbl(["축", "쓰는 곳", "쓰지 않는 곳"], [
-  ["<b>Product Brand</b>", "화면당 하나인 주요 행동 버튼, 링크, 활성·선택 상태, 포커스 링", "위험도나 처리 결과 표현, 넓은 면의 장식 배경, 로고"],
-  ["<b>Status</b>", "성공·실패·검토 대기 알림, 입력 검증 오류, Negative 색(<code>.btn.negative</code>)의 되돌리기 어려운 행동 버튼", "탐색·선택 상태, 브랜드 강조"],
+  ["<b>Product Brand</b>", "화면당 하나인 주요 행동 버튼, 링크, 활성·선택 상태, 포커스 링(빨강 · 주황 제품의 입력 필드 링은 중립)", "위험도나 처리 결과 표현, 삭제 버튼, 넓은 면의 장식 배경, 로고"],
+  ["<b>Status</b>", "성공·실패·검토 대기 알림, 입력 검증 오류, 위험 확인 팝업의 제목 · 메뉴의 위험 항목 글자", "탐색·선택 상태, 브랜드 강조, 삭제 버튼(<code>.btn.negative</code> 는 모든 제품에서 중립 — 2026-11-14)"],
   ["<b>Severity</b>", "위협·이벤트 등급 태그, 점·밴드, 표 행 강조, 대시보드 KPI. 항상 Critical 같은 등급 라벨을 병기", "버튼·링크, 일반 처리 결과, 색만 있는 점·배경, 한 칸에 Status 와 함께"],
-  ["<b>Brand Mark</b>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "제품 UI 의 Brand · CTA · 위험도 · 상태. 헤더 Accent 선택지에 없음 — 브랜드 디자인 시스템은 별도 제작"],
+  ["<b>Brand Mark</b>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "위험도 · 상태. 같은 #FF7F00 을 제품 색으로 쓰려면 팔레트의 '주황'(예외 선언)을 고른다 — 마크 토큰을 제품 UI 에 직접 쓰지 않는다"],
   ["<b>Neutral</b>", "화면 바탕, 텍스트, 구분선, 비활성 상태. 정보 밀도가 높은 콘솔의 기본 색", "강조. 회색 톤 차이만으로 상태나 등급을 표현"]
 ], "roles")}
 <div class="dodont">

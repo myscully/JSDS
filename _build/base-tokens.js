@@ -188,7 +188,16 @@ const ADDITIONS = {
   "surface-brand-subtle-strong":
     "제품색 글자 버튼(text · outline primary · 면 없는 primary 아이콘 전용)과 달력 기간 띠의 눌림 · 강한 면 — 참조의 brand 틴트가 subtle 하나뿐이라, 종전에는 중립색으로 떨어져 색상이 튀었다(두 테마 12%)",
   "brand-label":
-    "brand 면 위 글자 — 참조에는 면 위 글자 역할(-on)이 아예 없고 늘 static.white 다. 기본값도 흰색이고, 다크 + 중립 전환에서만 뒤집힌다(그때는 면이 밝은 회색이다). 제품 색이 흰 글자를 받쳐야 한다는 제약이 이 토큰의 짝이다",
+    "brand 면 위 글자 — 참조에는 면 위 글자 역할(-on)이 아예 없고 늘 static.white 다. 기본값도 흰색이고, 다크 + 중립 제품에서만 뒤집힌다(그때는 면이 밝은 회색이다). 제품 색이 흰 글자를 받쳐야 한다는 제약이 이 토큰의 짝이다",
+  /* 제품 색 팔레트(2026-11-14 사람의 결정) */
+  "line-field-focus":
+    "값 입력 필드의 포커스 · 열린 필드 테두리 — 기본은 --foreground-brand-primary, 빨강 · 주황 제품은 중립 글자색(오류 링 · 경고색과 헷갈리지 않게)",
+  "line-field-focus-halo":
+    "위 테두리 바깥 4px 후광 — 기본은 --line-brand-focus, 빨강 · 주황 제품은 중립 12%",
+  "surface-brand-gradient":
+    "AI 제품의 넓은 브랜드 면(주 버튼 · Banner) 그라데이션 — purple-40 → violet-45. 다른 제품은 none(단색 면 그대로). 참조에는 그라데이션 토큰이 없다",
+  "surface-brand-gradient-strong": "위 그라데이션의 hover — purple-30 → violet-40(사람이 정하지 않은 기본값)",
+  "surface-brand-gradient-heavy": "위 그라데이션의 누름 — purple-30 → violet-30(사람이 정하지 않은 기본값)",
   "company-mark":
     "지란지교시큐리티 회사 마크 — 참조의 brand 는 제품 색이라 회사 정체성을 표기할 자리가 없다. 로고·헤더 마크 전용",
   "company-mark-subtle":

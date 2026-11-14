@@ -23,15 +23,24 @@ const SITE = {
   ] },
   resources: { title: "Resources", desc: "라이브러리, 토큰, 변경 이력", pages: { react: "React Package", "design-token": "Design Token", figma: "Figma Library", tokens: "Token Download", changelog: "Changelog", contribution: "Contribution", wbs: "WBS" /* v1.0 공개(2026-11-30) 시 제거 — render.js "resources/wbs" · style.src.css .wbs 도 함께 */ } },
 };
-/* 제품별 Accent(메인 컬러) 프리셋. 실제 제품 컬러로 교체.
-   **제약: 흰 글자가 4.5 를 넘는 색이어야 한다** — 면 위 글자는 늘 흰색이고 verify 가 검사한다.
-   제품 C 는 이 제약에 두 번 걸려 내려온 값이다: #00AD7B(흰 글자 2.89) → #00704F(6.12) → #008760(4.53).
-   마지막은 #00966A(3.77) 요청에서 출발해 **같은 색상에서 통과하는 가장 밝은 값**으로 잡은 것이라
-   기준선 4.5 에서 여유가 0.03 뿐이다 — 조금이라도 밝게 조정하면 빌드가 막힌다 */
+/* 제품 색 팔레트(2026-11-14 사람의 결정) — 1.0 전에는 이 여섯 가지만 쓴다. 1.0 뒤에는 사용자가 색을 더하거나 고치는 팔레트를 준다.
+   사이트(app.src.js) · React(theme.ts PRODUCT_COLORS — 테스트가 이 표와 같은지 대조) · contrast 맥락 · verify 가 모두 이 표를 읽는다.
+   - kind: base(CSS 기본 = Blue 램프, 주입 없음) · ramp(hex 로 --prod-40~60 을 만든다) · neutral(중립 CSS 블록) · ai(ramp + 넓은 면 그라데이션)
+   - **제약: 흰 글자가 4.5 를 넘는 색이어야 한다** — Brand 면 위 글자는 늘 흰색이고 verify 가 검사한다.
+     넘지 못하는 색은 exception 에 이유를 적어야 한다(사람의 결정만 — 비우면 verify 가 막는다). 그 맥락의 brand 쌍은 contrast 가 advisory 로 보고한다
+   - 상태색과 겹쳐도 제품 색을 그대로 쓴다 — 예전에는 색상환 15° 안이면 중립으로 바꿨는데(STATUS_HUES) 제품의 독립성을 위해 걷어냈다
+   - neutralFocus: 입력 포커스 링을 중립으로 — 빨강은 오류 링, 주황은 경고색과 헷갈리지 않게(사람의 결정)
+   - gradient: AI 의 넓은 브랜드 면(주 버튼 · Banner) 그라데이션 두 끝 — 램프 이름. 면 위 흰 글자는 끝마다 4.5 를 verify 가 잰다
+   시안은 #00AAB6(흰 글자 2.83)에서 같은 색상 · 채도로 밝기만 낮춘 값이다 */
 const PRODUCTS = [
-  { key: "product-a", name: "제품 A", hex: "#00AAB6", note: "제품 컬러로 교체" },
-  { key: "product-b", name: "제품 B", hex: "#C30D2A", note: "제품 컬러로 교체" },
-  { key: "product-c", name: "제품 C", hex: "#008760", note: "제품 컬러로 교체" },
+  { key: "blue", name: "파랑", group: "기본", kind: "base", hex: "#0066FF" },
+  { key: "red", name: "빨강", group: "제품별", kind: "ramp", hex: "#C30D2A", neutralFocus: true },
+  { key: "cyan", name: "시안", group: "제품별", kind: "ramp", hex: "#00828B" },
+  { key: "orange", name: "주황", group: "Company", kind: "ramp", hex: "#FF7F00", neutralFocus: true,
+    exception: "회사 색(--company-mark)을 제품 색으로 그대로 쓴다 — 흰 글자와 제품 색 글자가 4.5 에 못 미치는 것을 알고 정한 사람의 결정(2026-11-14)" },
+  { key: "neutral", name: "중립", group: "중립", kind: "neutral", hex: "#1B1C1E" },
+  { key: "ai", name: "AI", group: "AI", kind: "ai", hex: "#6541F2",
+    gradient: { rest: ["purple-40", "violet-45"], strong: ["purple-30", "violet-40"], heavy: ["purple-30", "violet-30"] } },
 ];
 const CHANGELOG = [
   ["v0.8", "2026-10-20", "컬러 시스템 전면 개편: 의미 토큰을 <code>--{그룹}-{하위}-{이름}</code> 여섯 그룹(foreground · background · surface · line · effect · static) 77개로 값·이름까지 교체하고, Atomic 램프 13개는 숫자가 클수록 밝은 체계로 통일. <code>brand</code> 는 제품이 주입하는 슬롯(<code>--prod-40~60</code> 다섯 단계)이고, 제품 색 위의 흰 글자가 4.5 를 넘어야 한다는 제약을 빌드가 검사합니다 — 종전의 밝은 제품 적응(<code>data-accent-light</code>)은 걷어냈습니다. Colors 페이지를 Semantic 27절 + Atomic 탭으로 재구성하고 브랜드 역할 맵을 그 안으로 합쳤습니다. React 패키지 0.8.0 은 깨지는 변경입니다(<code>_react/MIGRATION.md</code>)."],

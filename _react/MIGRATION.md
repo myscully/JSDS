@@ -682,3 +682,17 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
   - `font-jp.css` 를 불러오지 않으면 그 이름은 건너뛰므로 화면은 전과 같습니다.
 - 한자는 **일본식 자형**입니다. 한국어 문장 안의 한자도 그렇습니다. 한국식 자형이 필요한 자리는 `font-feature-settings:"ss05"` 를 씁니다.
 - 폐쇄망 제품도 쓸 수 있게 CDN 이 아니라 패키지 파일입니다. 번들러가 `fonts/jp/*.woff2` 를 자산으로 내보내는지 확인하세요. `fonts/PretendardVariable.woff2` 와 같은 방식입니다.
+
+## 제품 색 팔레트 · 삭제 버튼 중립 (2026-11-14)
+
+- **제품 색은 팔레트 여섯에서 고릅니다** — `applyProductColor(key)`, 키는 `blue`(기본) · `red` · `cyan` · `orange` · `neutral` · `ai`. 값은 `PRODUCT_COLORS` 에 있습니다.
+  - blue 는 기본이라 `--prod-*` 와 `data-accent` 를 지웁니다. 그 밖은 `<html data-accent="키">` 를 달고, red · cyan · orange · ai 는 `--prod-40~60` 도 넣습니다.
+  - 팔레트 밖 색은 1.0 전까지 `applyAccent(hex)` 로 넣습니다. 이때 속성 값이 hex 라 아래의 키별 CSS(중립 램프 · AI 그라데이션 · 중립 입력 링)는 걸리지 않습니다.
+  - 1.0 뒤에는 사용자가 색을 더하거나 고치는 팔레트를 줄 예정입니다.
+- **상태색과 겹치는 제품을 회색으로 바꾸던 규칙을 없앴습니다.** 사이트만 그렇게 하던 규칙이라 같은 빨강이 React 에서는 빨강, 사이트에서는 회색이었습니다. 이제 둘 다 고른 색 그대로입니다. 중립은 `neutral` 로 고릅니다(`data-accent-neutral` → `data-accent="neutral"`).
+- **시안은 `#00828B`** 입니다(옛 `#00AAB6` 은 흰 글자 2.83 이라 같은 색조에서 진하게 — 4.60).
+- **주황(`#FF7F00`, 회사 색)은 흰 글자 2.53** 입니다. 사람의 결정으로 선언한 예외이고 경고하지 않습니다(`PRODUCT_COLORS` 의 `exception`).
+- **AI 는 단색 `#6541F2` + 넓은 면 그라데이션** — 주 버튼(Solid Primary)과 Banner 만 `background-image` 로 purple → violet 그라데이션을 덧칠합니다. 비활성 주 버튼에는 없습니다. 새 토큰 `--surface-brand-gradient` · `-strong` · `-heavy` 는 다른 제품에서 `none` 입니다.
+- **다크의 brand 글자 단계(`--prod-60`)를 4.5 까지 밝힙니다** — `accentScale` 이 다크 바탕 셋 모두에서 4.5 가 될 때까지 밝기를 0.5 씩 올립니다. 빨강 `#EF1437` → `#F34B65`, AI → `#9076F6`. 이미 넘는 색은 그대로입니다.
+- **삭제 버튼(`color="negative"` · `.negative`)은 모든 제품에서 중립색**입니다. Assistive 와 같은 모양입니다 — 빨강 제품의 주 버튼과 헷갈리지 않게 합니다. 빨강은 위험 확인 팝업 제목과 메뉴 위험 항목 글자에 남습니다. 클래스 · prop 은 그대로라 마크업을 바꿀 필요가 없습니다.
+- **빨강 · 주황 제품의 입력 포커스 · 열린 필드 링은 중립색**입니다(오류 링 · 경고색과 헷갈리지 않게). 새 토큰 `--line-field-focus` · `--line-field-focus-halo` 가 링 색이고, 다른 제품에서는 전처럼 brand 입니다. 오류 필드는 늘 빨강입니다.

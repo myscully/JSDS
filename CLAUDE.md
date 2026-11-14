@@ -45,7 +45,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 77 · verify 0/0 · contrast 1452쌍 실패 0 · advisory 449 · behave 1360/1360 · react 793+6 · tsc 0
+pages 77 · verify 0/0 · contrast 2940쌍 실패 0 · advisory 920 · behave 1412/1412 · react 798+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -679,19 +679,42 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
   React 2건(exports 지움 · 조각 하나 지움) 모두 실패로 잡혔다.
 - **보지 못한 것:** Windows · 다른 브라우저(Playwright Chromium 맥에서만 쟀다), 실제 일본어 제품 화면. Figma 에는 Pretendard JP 가 없다(플러그인 환경에 Pretendard 계열 0건) — 반영 보류 규칙대로. Figma 미반영 525건(그대로).
 
-`advisory 449` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
+2026-11-14 제품 색 재설정 — 팔레트 여섯 · 자동 중립 폐지 · 삭제 버튼 중립 · 빨강/주황 입력 링 중립(사람의 요청 · 결정 여덟) — contrast 1452 → 2940 · advisory 449 → 920 · behave 1360 → 1412(`behave.product.js` 14) · react 793 → 798(`theme.test` 5). pages · verify 수는 그대로.
+- **팔레트 여섯**(사람의 결정) — 파랑 `#0066FF`(기본 토큰, 주입 없음) · 빨강 `#C30D2A` · 시안 `#00828B` · 주황 `#FF7F00`(Company) · 중립 · AI `#6541F2`. 옛 제품 A · B · C(시안 #00AAB6 · 빨강 · 초록 #008760)를 바꿨고 초록은 뺐다.
+  정의는 `data.js` 의 `PRODUCTS` 하나(kind base · ramp · neutral · ai, `exception` · `neutralFocus` · `gradient`)이고 사이트 헤더 메뉴 · Foundations › Colors 'Product color' 표 · contrast 맥락 · verify 가 읽는다. React 는 같은 값의 `PRODUCT_COLORS` + `applyProductColor(key)` 이고 테스트가 `data.js` 와 대조한다.
+  적용은 `<html data-accent="키">`(파랑은 속성을 지움) — 옛 `data-accent-neutral` 은 `data-accent="neutral"` 이 됐다. **1.0 뒤에는 사용자가 색을 더하거나 고치는 팔레트를 준다(사람의 요청 — 메모리에 알림).**
+- **상태색과 겹치면 회색으로 바꾸던 규칙을 없앴다**(사람의 결정 — 제품의 독립성). 사이트만 `STATUS_HUES` 로 바꿔 같은 빨강이 React 에서는 빨강, 사이트에서는 회색이었다. verify 가 네 파일(app.src · style.src · contrast · theme.ts)에서 그 이름이 되살아나면 막는다.
+- **시안은 같은 색조에서 밝기만 낮춰 `#00828B`**(흰 글자 2.83 → 4.60, 사람의 결정). **주황은 회사 색 그대로이고 흰 글자 2.53 을 예외로 선언**(사람의 결정 — `exception` 에 이유, 비우면 verify 가 막음). 그 맥락의 brand 쌍은 contrast 가 실패가 아니라 advisory 로 보고한다(라이트 18 · 다크 4). `--company-mark` 는 그대로다.
+- **AI = 단색 violet-50 + 넓은 면만 그라데이션**(사람의 결정) — 주 버튼 · Banner 에만 `background-image:var(--surface-brand-gradient)`(purple-40 → violet-45, hover purple-30 → violet-40 · 누름 purple-30 → violet-30 — 끝 색은 사람이 정하지 않은 기본값, 흰 글자 4.5 를 verify 가 끝마다 잰다). 체크박스 · 링크 · 내비처럼 그라데이션을 칠할 수 없는 곳은 단색이다.
+  토큰 셋은 다른 제품에서 `none` 이라 단색 제품의 주 버튼은 그대로이고, 비활성은 `background` 단축 속성이 그라데이션을 지운다.
+- **삭제 버튼(`.negative`)은 모든 제품에서 중립**(사람의 결정 — 빨강 제품의 주 버튼과 헷갈리지 않게). Assistive 와 같은 규칙으로 합쳤고 클래스 · React `color="negative"` 는 그대로다. 빨강은 위험 확인 팝업 제목 · 메뉴 위험 항목 글자에만 남는다. Button Rules '삭제는 중립' 행.
+  쓰는 곳이 없어진 `--surface-negative-heavy · hover · pressed` 는 `grammarOnly` 로(Figma 변수와 짝이라 일괄 반영 때 정리).
+- **입력 포커스 · 열린 필드 링은 빨강 · 주황 제품만 중립**(사람의 결정 — 빨강은 오류 링, 주황은 경고색과 헷갈리지 않게). 새 토큰 `--line-field-focus` · `--line-field-focus-halo`(기본 = 지금의 brand 링)를 링 규칙 아홉이 쓰고 `:root:is([data-accent="red"],[data-accent="orange"])` 에서 중립으로. 그 키 목록을 verify 가 `neutralFocus` 와 대조한다. 오류 필드는 늘 빨강, 체크박스 · 버튼의 외곽선은 brand 그대로. Text Field Rules '포커스 링' 행.
+- **다크 brand 글자(60 단계)는 4.5 까지 자동으로 밝힌다**(사람의 결정 — 첫 빌드에서 다크 빨강 3.66 ~ 4.4 · AI 4.39 로 contrast 실패 11건). `accentScale` 이 다크 바탕 셋(#1B1C1E · #212225 · #0F0F10)에서 4.5 가 될 때까지 밝기를 0.5 씩 올린다(사이트 · React 같은 식, 게이트처럼 소수 둘째 자리 반올림 — 파랑 #3385FF 는 4.499 라 반올림하지 않으면 밝혀졌다). 빨강 #EF1437 → #F34B65 · AI → #9076F6, 파랑 · 시안 · 주황은 그대로.
+- 토큰 100 → 105 — 시멘틱 85 → 90(`ADDITIONS` 다섯: field focus 둘 · brand gradient 셋). Colors 에 Surface - Brand Gradient(견본은 AI 값) · Line - Field Focus(후광이 반투명이라 체커 — 체커 절 14 → 15) 절, 'Product color' 표(갈래 · 값 · 흰 글자 대비는 빌드가 hex 에서 계산 · 적용 버튼).
+- **수의 근거:** contrast 맥락이 라이트 · 다크 × 셋(기본 · 다른 제품 · 겹치는 제품)에서 × 팔레트 여섯으로 6 → 12, 맥락당 242 → 245(`--line-field-focus` 3:1 × 바탕 3) = 2940. advisory 는 맥락이 늘어 라이트 103 · 다크 44 ~ 49 가 여섯 번씩 되고 주황 라이트가 121(+18 예외). behave +52 = `behave.product` 14(삭제 버튼 중립 세 형태 · 빨강 위험 글자 · AI 그라데이션 주 버튼 · Banner · 비활성 없음 · 단색 제품 none · 링 여섯 색 · 오류 링 · 열린 Select · 새로 읽어도 유지 · 파랑이 --prod-* 지움) + 옛 제품 단정을 팔레트 여섯으로 다시 쓴 몫 38(색마다 면 hex · 단계 규칙 · AA, AA 루프 키 3 → 5 — 주황은 예외라 그 예외가 실제로 4.5 미만인지만 잰다). 기존 단정 고침: Colors 절 수에서 Product color 를 뺌, 그라데이션 견본은 background-image 로 칠함, Button Rules 2 → 3행.
+- **바뀌기 전과 같은지(파랑):** 버튼 · Banner 172개의 계산값(면 · 그라데이션 · 글자 · 테두리 · 그림자 · 크기 · 스피너)이 HEAD 와 라이트 · 다크 모두 같고, Banner · 입력 링 · Select · Checkbox · Navigation 예제는 HEAD 와 픽셀이 같다(삭제 버튼만 의도대로 다름).
+- 음성 시험 10건 모두 잡혔다 — 자동 중립 되살림(verify) · 삭제 버튼 빨강(behave 2) · 빨강 링 brand · 시안 링 중립(verify · behave 2) · AI 그라데이션 토큰 지움(verify · behave 2) · 비활성에 그라데이션(behave 1) · 시안 #00AAB6 · 주황 예외 지움(contrast · verify · React) · React 표만 어긋남(React) · 다크 밝히기 지움(contrast 11).
+- **Figma audit 도구:** 삭제 버튼 규칙을 합친 셀렉터(`.btn:where(.solid.assistive,.solid.negative)`)를 `cssRule` 이 찾지 못해 Button 대조 전체가 '읽지 못함' 하나로 줄어 있었다(그대로 두면 미반영이 적어 보였다) — `:where` · `:is` 목록을 갈래마다 펼쳐 찾게 했다(`expandWhere`).
+- **눈으로 본 것:** 빨강 제품에서는 로그 뷰어의 켠 필터 칩(CRIT · HIGH · WARN)도 빨강 면이 된다 — 포인트 색이 제품 색을 따르는 결정대로이고 바꾸지 않았다.
+- Figma 미반영 525 → 693건 — Negative 버튼 변형(Figma 는 빨강) · Text Field · Date Picker · Search 포커스 상태(Figma 는 brand 토큰, 저장소는 `--line-field-focus`) · 저장소에만 있는 토큰 6 → 11. 팔레트 · 그라데이션은 Figma 에 없다 — 일괄 반영 때 그린다.
+
+`advisory 920` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
 ## 토큰 체계 (v0.8)
 
 - **Atomic** `--{램프}-{단계}` — 램프 13개, **숫자가 클수록 밝습니다**. 컴포넌트에서 직접 쓰지 않습니다.
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
-  여섯 그룹 **85개**(참조 75 + 더한 10) + 트리 밖 15개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 탐색형 차트 `--chart-*` 12) = **100**.
-  더한 것 중 6개는 Tag 글자용 `--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy`(2026-11-11).
+  여섯 그룹 **90개**(참조 75 + 더한 15) + 트리 밖 15개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 탐색형 차트 `--chart-*` 12) = **105**.
+  더한 것 중 6개는 Tag 글자용 `--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy`(2026-11-11),
+  5개는 입력 링 `--line-field-focus` · `-halo` 와 AI 면 `--surface-brand-gradient` · `-strong` · `-heavy`(2026-11-14).
 - **차트 토큰** `--chart-series-1~6`(순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
   CSS 가 아니라 `ds-chart.js` 가 계산값으로 읽어 캔버스에 칠합니다(소비자 0 허용 목록 `grammarOnly`). 심각도 계열은 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 그대로(5단계 — Medium 라이트 블루 · Low 라임, 2026-11-11 교체).
-- **제품 색**은 `--prod-40~60` 다섯 단계로 주입되고 `brand` 계열이 따라옵니다.
-  **제품 색 위의 흰 글자가 4.5 를 넘어야 하고 빌드가 검사합니다**(`verify.js`).
+- **제품 색**은 팔레트 여섯(`data.js` PRODUCTS — 파랑 기본 · 빨강 · 시안 · 주황 · 중립 · AI)에서 고르고 `<html data-accent="키">` 로 적용합니다.
+  `--prod-40~60` 다섯 단계로 주입되고 `brand` 계열이 따라옵니다. 상태색과 겹쳐도 제품 색 그대로입니다(자동 중립은 2026-11-14 에 없앰).
+  **제품 색 위의 흰 글자가 4.5 를 넘어야 하고 빌드가 검사합니다**(`verify.js`) — 넘지 못하면 `exception` 에 사람의 결정으로 이유를 적습니다(주황).
+  삭제 버튼은 모든 제품에서 중립, 입력 포커스 링은 빨강 · 주황 제품만 중립입니다.
 - 비활성은 `--surface-disable-primary` · `--foreground-disable-primary` 로 칠합니다. `opacity` 로
   흐리게 하지 않습니다.
 - **크기는 rem**(2026-11-11) — 글자는 `--font-size-N` 토큰(12 이하는 최소 크기를 지키는 `max()`), 간격 · 높이 · 반경은 rem 이고

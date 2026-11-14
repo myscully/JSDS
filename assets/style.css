@@ -80,6 +80,12 @@
      제품 색은 흰 글자가 4.5 를 넘어야 한다는 제약이 있고 빌드가 검사한다 — 그래서 라이트에서는 늘 흰색이다.
      남는 예외는 다크 + 중립 전환 하나뿐이다: 거기선 면이 밝은 회색이라 글자가 어두워야 한다 */
   --brand-label:var(--static-white);
+  /* 값 입력 필드의 포커스 링 — 테두리 1px + 바깥 4px 후광. 기본은 brand 그대로(--foreground-brand-primary · --line-brand-focus)이고,
+     빨강 · 주황 제품만 중립으로 갈아끼운다(아래 [data-accent] 블록 — 오류 링 · 경고색과 헷갈리지 않게, 사람의 결정 2026-11-14).
+     같은 :root 에서 var() 를 풀므로 다크 블록에 다시 적지 않아도 다크 값을 따른다 */
+  --line-field-focus:var(--foreground-brand-primary);--line-field-focus-halo:var(--line-brand-focus);
+  /* AI 제품의 넓은 브랜드 면(주 버튼 · Banner) 그라데이션 — 기본은 none 이라 단색 면 그대로다. 값은 [data-accent="ai"] 블록(data.js gradient 와 verify 가 대조) */
+  --surface-brand-gradient:none;--surface-brand-gradient-strong:none;--surface-brand-gradient-heavy:none;
   --space-1:0.25rem;--space-2:0.5rem;--space-3:0.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;--space-16:4rem;--space-20:5rem;
   --card-pad:1.5rem;--card-gap:1.25rem;--row-h:3.25rem;
   --radius-xs:2px;--radius-sm:0.25rem;--radius-md:0.375rem;--radius-lg:0.5rem;--radius-xl:0.625rem;--radius-full:999px;
@@ -101,11 +107,12 @@
   --code-tag:#57DFF7;--code-attr:#FF8C8C;--code-str:#88F03E;--code-kw:#9E86FC;
   color-scheme:light;
 }
-/* 제품 메인 컬러가 상태색과 색상환 15도 미만이면 app.js 가 --prod-* 를 넣지 않고 이 속성만 켠다.
+/* 중립 제품(팔레트의 neutral — 2026-11-14 부터 고르는 색. 그 전에는 상태색과 겹치는 제품을 app.js 가 자동으로 여기로 보냈다).
+   app.js · React applyProductColor 가 --prod-* 를 넣지 않고 data-accent="neutral" 만 켠다.
    blue 와 달리 테마마다 램프가 다르다 — 무채색에는 blue 같은 '중간 밝기 하나로 양쪽을 만족'이 없기 때문이다.
    라이트는 어두운 쪽이 면이고 흰 글자가 선다. --foreground-brand-inverse 만 반대쪽(반전 표면 위)이라 따로 덮는다 —
    덮지 않으면 brand-60 이 그대로 와서 반전 표면 위 3.6 으로 묻힌다(덮으면 4.94) */
-:root[data-accent-neutral]{--brand-40:var(--cool-neutral-15);--brand-45:var(--cool-neutral-22);--brand-50:var(--cool-neutral-30);--brand-55:var(--cool-neutral-40);--brand-60:var(--cool-neutral-50);--foreground-brand-inverse:var(--cool-neutral-60);--surface-brand-primary:var(--brand-40);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-50)}
+:root[data-accent="neutral"]{--brand-40:var(--cool-neutral-15);--brand-45:var(--cool-neutral-22);--brand-50:var(--cool-neutral-30);--brand-55:var(--cool-neutral-40);--brand-60:var(--cool-neutral-50);--foreground-brand-inverse:var(--cool-neutral-60);--surface-brand-primary:var(--brand-40);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-50)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   /* ── Semantic · Dark ──────────────────────────────────────────
      라이트와 같은 75 토큰이다. 값의 출처도 같다 — 기준 시스템의 dark 테마를 그대로 받았다.
@@ -191,8 +198,15 @@
 /* 다크 + 중립 전환 — 라이트의 거울이다. 면이 밝은 쪽이므로 면 위 글자를 어둡게 뒤집는다.
    여기서도 --foreground-brand-inverse 만 반대쪽이라 따로 덮는다(반전 표면이 다크에서는 흰색이다).
    특정도 (0,3,0) 으로 다크 블록을 이긴다 */
-:root[data-theme="dark"][data-accent-neutral]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-99);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-99);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}}
+:root[data-theme="dark"][data-accent="neutral"]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-99);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent="neutral"]{--brand-40:var(--cool-neutral-60);--brand-45:var(--cool-neutral-70);--brand-50:var(--cool-neutral-80);--brand-55:var(--cool-neutral-90);--brand-60:var(--cool-neutral-99);--brand-label:var(--cool-neutral-10);--foreground-brand-inverse:var(--cool-neutral-40)}}
+/* 빨강 · 주황 제품의 입력 포커스 링 = 중립(data.js 의 neutralFocus — verify 가 이 선택자 목록과 대조한다). 글자색 토큰이라 테마를 따라간다.
+   체크박스 · 버튼의 :focus-visible 외곽선은 brand 그대로다(요청 범위 밖). 오류 필드는 늘 빨강 링 */
+:root:is([data-accent="red"],[data-accent="orange"]){--line-field-focus:var(--foreground-neutral-primary);--line-field-focus-halo:color-mix(in srgb,var(--foreground-neutral-primary) 12%,transparent)}
+/* AI 제품 — 대표 단색 violet-50 은 app.js · React 가 --prod-* 로 넣고, 넓은 면(주 버튼 · Banner)만 그라데이션이다(사람의 결정 2026-11-14).
+   두 끝 = data.js gradient(verify 가 대조 · 흰 글자 4.5 를 끝마다 잰다). hover · 누름은 같은 방향으로 한 단계씩 짙게 — 사람이 정하지 않은 기본값.
+   다크도 같은 끝이다(단색 면은 다크에서 밝아지는 쪽이지만 그라데이션은 흰 글자를 지키려 짙은 쪽 그대로) */
+:root[data-accent="ai"]{--surface-brand-gradient:linear-gradient(90deg,var(--purple-40),var(--violet-45));--surface-brand-gradient-strong:linear-gradient(90deg,var(--purple-30),var(--violet-40));--surface-brand-gradient-heavy:linear-gradient(90deg,var(--purple-30),var(--violet-30))}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -264,6 +278,8 @@ code{font-size:inherit}
 .accent-pop button{display:flex;align-items:center;gap:0.625rem;width:100%;padding:0.5rem 0.625rem;border:0;border-radius:var(--radius-sm);background:none;font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);text-align:left;cursor:pointer}
 .accent-pop button:hover{background:var(--surface-neutral-secondary)}
 .accent-pop button[aria-checked="true"]{font-weight:600}
+.accent-pop button small{margin-left:auto;font-size:var(--font-size-12);font-weight:400;color:var(--foreground-neutral-tertiary)}
+.pc-sw{display:inline-block;width:0.875rem;height:0.875rem;border-radius:50%;vertical-align:-2px;margin-right:0.5rem;box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
 .accent-pop i{width:0.875rem;height:0.875rem;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
 .search{display:flex;align-items:center;gap:0.5rem;width:100%;padding:0.5rem 0.625rem;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);background:var(--background-neutral-secondary);border:1px solid transparent;border-radius:var(--radius-md)}
 .search:focus-within{border-color:var(--foreground-brand-primary)}
@@ -689,31 +705,24 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .btn.sm{height:2rem;padding:0 0.875rem;font-size:var(--font-size-12);border-radius:var(--radius-sm);line-height:max(1rem,16px);letter-spacing:0.0252em}   /* sm 은 radius/sm 4 — md · lg 는 radius/md 6(사람의 결정 2026-11-12) */
 .btn.md{height:2.5rem;padding:0 1.25rem;font-size:var(--font-size-14);line-height:1.25rem;letter-spacing:0.0145em}
 .btn.lg{height:3rem;padding:0 1.625rem;font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}   /* 높이는 고정, 너비는 라벨을 따라 자유 — 필드(Text Field · Date Picker)도 같은 32 · 40 · 48 이라 나란히 놓으면 맞는다 */
-.btn:where(.solid.primary){background:var(--surface-brand-primary);color:var(--brand-label)}
-.btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-brand-strong)}
-.btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-brand-heavy)}
+.btn:where(.solid.primary){background:var(--surface-brand-primary);background-image:var(--surface-brand-gradient);color:var(--brand-label)}   /* 그라데이션은 AI 제품만 — 나머지는 none 이라 단색 그대로. 비활성 규칙의 background 단축 속성이 그림을 지운다 */
+.btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-brand-strong);background-image:var(--surface-brand-gradient-strong)}
+.btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-brand-heavy);background-image:var(--surface-brand-gradient-heavy)}
 .btn:where(.outline.primary){border-color:var(--line-brand-strong);color:var(--foreground-brand-primary)}   /* Lv3 대체 행동(미리보기 · 임시 저장) — 면은 text 와 같은 brand 틴트 두 단계. 테두리는 brand 43%(--line-brand-strong): 반투명 28%(--line-brand-primary)는 바탕 대비 1.5 라 text 변형과 구분되는 단서가 거의 안 보였고, 글자와 같은 불투명 제품색은 Lv4 에 너무 가까웠다(사람의 결정 2026-10-28 → 2026-10-29) */
 .btn:where(.outline.primary):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-brand-subtle)}
 .btn:where(.outline.primary):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-brand-subtle-strong)}
 /* 중립 버튼의 면은 반투명 3단(fill alternative .03 → normal .05 → strong .10)이다 — 바탕이 무엇이든 같은 간격으로 어두워진다.
    종전에는 solid assistive(옛 tertiary) 의 rest 가 불투명 --surface-neutral-strong 이고 hover 가 --surface-neutral-secondary 이어서, 흰 바탕에서 합성하면 두 색이 사실상 같아 hover 가 보이지 않았다.
    outline 은 면을 비워 둔다 — 패널·카드 위에서 흰 칩처럼 떠 보이지 않는다 */
-.btn:where(.solid.assistive){background:var(--surface-neutral-tertiary);color:var(--foreground-neutral-primary)}
-.btn:where(.solid.assistive):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-neutral-secondary)}
-.btn:where(.solid.assistive):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-neutral-strong)}
-.btn:where(.outline.assistive){border-color:var(--line-neutral-primary);color:var(--foreground-neutral-primary)}
-.btn:where(.outline.assistive):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-neutral-secondary)}
-.btn:where(.outline.assistive):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-neutral-strong)}
-/* negative — 기준 시스템의 Button 과 같은 조합이다(foreground.negative.strong on surface.negative.strong).
-   솔리드 상태 면이 없으므로 solid 도 틴트 세 단계(라이트 8 → 12 → 16% · 다크 8 → 16 → 22%, 2026-11-13 상태 틴트 8% 와 함께 내림)로 만든다(사람의 결정 2026-10-28 — 꽉 찬 빨강으로 바꾸지 않음).
-   라벨에 상태색을 쓰는 것은 태그와 다른 선택이다 — 태그는 표에 빽빽이 들어가 중립 라벨이 필요하지만,
-   버튼은 하나씩 크게 서고 기준 시스템도 버튼에는 상태색 라벨을 쓴다. 그 대가(라이트 2.9)는 게이트가 매 빌드 보고한다 */
-.btn:where(.solid.negative){background:var(--surface-negative-primary);color:var(--foreground-negative-strong)}
-.btn:where(.solid.negative):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-negative-strong)}
-.btn:where(.solid.negative):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-negative-heavy)}
-.btn:where(.outline.negative){border-color:var(--line-negative-primary);color:var(--foreground-negative-strong)}
-.btn:where(.outline.negative):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-negative-hover)}   /* 테마마다 단계가 달라(라이트 12 · 다크 20%) 전용 토큰 — Figma 도 변수 하나로 같은 구조를 쓴다 */
-.btn:where(.outline.negative):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-negative-pressed);border-color:var(--line-negative-strong)}
+/* negative(되돌리기 어려운 행동 — 삭제)는 assistive 와 같은 중립 색이다(사람의 결정 2026-11-14 — 빨강 제품의 주 버튼과 헷갈리지 않게, 모든 제품에서).
+   그 전에는 빨강 틴트 면 + negative-strong 글자였다. 빨강은 위험 확인 팝업 제목 · 메뉴 위험 항목의 글자에만 남는다.
+   클래스는 그대로라 '되돌리기 어려운 행동' 이라는 뜻은 ds.js(첫 포커스에서 건너뜀) · verify(위험 확인은 취소가 앞)가 계속 쓴다 */
+.btn:where(.solid.assistive,.solid.negative){background:var(--surface-neutral-tertiary);color:var(--foreground-neutral-primary)}
+.btn:where(.solid.assistive,.solid.negative):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-neutral-secondary)}
+.btn:where(.solid.assistive,.solid.negative):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-neutral-strong)}
+.btn:where(.outline.assistive,.outline.negative){border-color:var(--line-neutral-primary);color:var(--foreground-neutral-primary)}
+.btn:where(.outline.assistive,.outline.negative):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-neutral-secondary)}
+.btn:where(.outline.assistive,.outline.negative):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-neutral-strong)}
 /* text — 정의 밖 변형(사람의 결정 2026-10-28). 색은 primary(색 클래스 없음) · assistive(2026-10-29) 둘 */
 .btn:where(.text){color:var(--foreground-brand-primary)}
 .btn.text{padding-left:0.5rem;padding-right:0.5rem}   /* 크기 규칙(.sm 등, 0,2,0)보다 뒤에 같은 무게로 둬야 좌우 8 이 이긴다 */
@@ -730,12 +739,9 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .btn:where(.icon-only:not(.solid,.outline).primary){color:var(--foreground-brand-primary)}
 .btn:where(.icon-only:not(.solid,.outline).primary):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-brand-subtle)}
 .btn:where(.icon-only:not(.solid,.outline).primary):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-brand-subtle-strong)}
-.btn:where(.icon-only:not(.solid,.outline).assistive){color:var(--foreground-neutral-secondary)}
-.btn:where(.icon-only:not(.solid,.outline).assistive):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
-.btn:where(.icon-only:not(.solid,.outline).assistive):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary)}
-.btn:where(.icon-only:not(.solid,.outline).negative){color:var(--foreground-negative-strong)}
-.btn:where(.icon-only:not(.solid,.outline).negative):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-negative-hover)}
-.btn:where(.icon-only:not(.solid,.outline).negative):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-negative-pressed)}
+.btn:where(.icon-only:not(.solid,.outline):is(.assistive,.negative)){color:var(--foreground-neutral-secondary)}
+.btn:where(.icon-only:not(.solid,.outline):is(.assistive,.negative)):where(:not(.loading,[disabled],[aria-disabled="true"])):hover{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
+.btn:where(.icon-only:not(.solid,.outline):is(.assistive,.negative)):where(:not(.loading,[disabled],[aria-disabled="true"])):active{background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary)}
 .btn svg{width:1.125rem;height:1.125rem;flex:none}
 .btn.sm svg{width:1rem;height:1rem}
 .btn.lg svg{width:1.25rem;height:1.25rem}
@@ -755,7 +761,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .btn.lg.loading::after{width:1.25rem;height:1.25rem}   /* 스피너 = 그 크기의 아이콘(16 · 18 · 20) — 아이콘 전용이 loading 이 되어도 크기가 같다(사람의 결정 2026-11-12). 의사 요소는 * 의 border-box 를 받지 않아 직접 적는다 */
 .btn:where(.assistive).loading::after{color:var(--foreground-brand-primary)}   /* 면 토큰(surface-brand-primary)이던 것 — 다크 투명 바탕에서 3.53 · solid assistive 3.02 였다(2026-11-12) */
 .btn:where(.outline.primary,.text:not(.assistive),.icon-only:not(.solid,.outline).primary).loading::after{color:var(--foreground-brand-primary)}
-.btn:where(.negative:not(.text)).loading::after{color:var(--foreground-negative-strong)}   /* text 의 색은 primary · assistive 둘이라 negative 를 붙여도 글자는 제품색이다 — 스피너만 빨개지지 않게 */
+.btn:where(.negative:not(.text)).loading::after{color:var(--foreground-neutral-primary)}   /* 삭제 버튼은 중립(2026-11-14) — 스피너도 중립 글자색. text 의 색은 primary · assistive 둘이라 negative 를 붙여도 글자는 제품색이다(이 규칙은 text 를 뺀다) */
 /* 묶음 — 수평이면 주 행동이 오른쪽(.end 로 오른쪽 정렬), 수직이면 주 행동이 위(.vertical, 같은 폭) */
 .btn-group{display:inline-flex;gap:0.75rem;align-items:center;line-height:1.6}
 .btn-group.end{justify-content:flex-end;width:100%}
@@ -769,7 +775,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .field textarea{height:auto;min-height:6rem;padding:0.625rem 0.875rem;resize:vertical;line-height:1.375rem}
 .field input::placeholder,.field textarea::placeholder{color:var(--foreground-neutral-tertiary)}
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):hover,.field textarea:hover{border-color:var(--line-neutral-primary)}
-.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):focus,.field textarea:focus-within{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 brand(대비 6.59 · 4.82) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로) */
+.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):focus,.field textarea:focus-within{border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo);outline:none}   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 --line-field-focus(기본 brand · 빨강 · 주황 제품은 중립) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로) */
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):read-only:not(:disabled){background:var(--background-neutral-secondary)}   /* :read-only 는 disabled 입력에도 맞는다 — 뒤에 있어 비활성 면(--surface-disable-primary)을 읽기 전용 색으로 덮었다(2026-10-27 실측 rgb 247 ≠ 244) */
 .field .help{color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);contain:inline-size;word-break:keep-all;overflow-wrap:anywhere;line-height:max(1rem,16px);letter-spacing:0.0252em}   /* 도움말 · 오류 문구는 필드 폭을 넓히지 않고 줄바꿈한다 — 오류가 나도 폭이 그대로(사람의 결정 2026-11-09). 끊는 자리는 띄어쓰기(.keep-all 과 같음) */
@@ -789,7 +795,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .field .affix{display:flex;align-items:center;gap:0.5rem;height:2.5rem;padding:0 0.75rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary)}
 .field .affix input{border:0;height:auto;padding:0;flex:1;background:transparent;outline:0;min-width:0}
 .field .affix input:focus,.field.error .affix input:focus{box-shadow:none}   /* 고리는 .affix 가 그린다 — .field input:focus 의 후광이 입력칸에도 걸려 두 겹이었다(2026-10-27 실측, Text Field 접두 · 접미 필드도 같았다) */
-.field .affix:has(input:focus){border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 입력칸 포커스일 때 — 안의 달력 버튼에 Tab 으로만 오면 버튼 자기 외곽선만(검색창과 같은 결정 2026-10-26). 달력이 열린 동안은 .datepicker.open 이 같은 링을 준다(2026-11-09) */
+.field .affix:has(input:focus){border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo);outline:none}   /* 입력칸 포커스일 때 — 안의 달력 버튼에 Tab 으로만 오면 버튼 자기 외곽선만(검색창과 같은 결정 2026-10-26). 달력이 열린 동안은 .datepicker.open 이 같은 링을 준다(2026-11-09) */
 .field.sm .affix{height:2rem;padding:0 0.625rem;border-radius:var(--radius-sm)}
 .field.sm .affix :is(.reveal,.cal-btn,.num-btn){border-radius:var(--radius-sm)}   /* 필드 안 28 버튼이 바깥(4)보다 둥글지 않게 */
 .field.lg .affix{height:3rem;padding:0 0.875rem}
@@ -807,7 +813,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .combobox .control input:disabled{background:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
 .combobox .control::after{content:"";position:absolute;right:0.75rem;top:calc(50% - 0.5rem);content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
 .combobox.open .control::after{transform:rotate(180deg)}
-.combobox .control:has(input:focus),.combobox.open .control{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
+.combobox .control:has(input:focus),.combobox.open .control{border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo);outline:none}
 .field.error .combobox .control{border-color:var(--foreground-negative-primary)}
 .field.error .combobox .control:has(input:focus),.field.error .combobox.open .control{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}
 .combobox.disabled .control{background:var(--surface-disable-primary);cursor:not-allowed}
@@ -833,7 +839,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .searchbar svg{width:1.125rem;height:1.125rem;color:var(--foreground-neutral-tertiary);flex:none}
 .searchbar input{flex:1;border:0;background:transparent;font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);outline:0;min-width:0;line-height:1.375rem;letter-spacing:0.0145em}
 .searchbar input::placeholder{color:var(--foreground-neutral-tertiary)}
-.searchbar:has(input:focus){border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}   /* 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 함께 나왔다(사람의 결정 2026-10-26) */
+.searchbar:has(input:focus){border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo);outline:none}   /* 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 함께 나왔다(사람의 결정 2026-10-26) */
 .searchbar .clear{border:0;padding:0;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);width:1.25rem;height:1.25rem;border-radius:50%;font:inherit;font-size:var(--font-size-12);line-height:0;cursor:pointer;display:grid;place-items:center;flex:none}
 .searchbar .clear svg{display:block;width:0.75rem;height:0.75rem}
 .searchbar kbd{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:0.25rem;padding:1px 0.3125rem;background:var(--background-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
@@ -901,7 +907,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .datepicker.field[data-range][data-time]{min-width:25.625rem}   /* 시각까지 쓰면 'YYYY. MM. DD HH:mm ~ …' 가 Large 에서 343 */
 .datepicker.field[data-range][data-time="seconds"]{min-width:28.125rem}   /* 초까지 383 */
 .datepicker.field[data-range]{min-width:18.75rem}   /* 'YYYY. MM. DD ~ YYYY. MM. DD' 가 Large(16px)에서도 잘리지 않게 */
-.datepicker.open .affix{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}   /* 달력이 열린 동안은 어떻게 열었든 입력 포커스와 같은 링(사람의 결정 2026-11-09 — 모든 폼이 같은 포커스 모양) */
+.datepicker.open .affix{border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo)}   /* 달력이 열린 동안은 어떻게 열었든 입력 포커스와 같은 링(사람의 결정 2026-11-09 — 모든 폼이 같은 포커스 모양) */
 .datepicker.field.error.open .affix{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}   /* 오류 필드는 열어도 빨강 링 */
 .datepicker .cal-btn{display:grid;place-items:center;flex:none;width:1.75rem;height:1.75rem;margin-right:-0.375rem;padding:0;border:0;border-radius:var(--radius-md);background:transparent;color:var(--foreground-neutral-tertiary);cursor:pointer}
 .datepicker .cal-btn:hover{background:var(--surface-neutral-secondary)}
@@ -913,7 +919,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 /* Time Picker — Text Field 입력형 + 열 목록(.timepicker.field > .affix > input + .tp-btn, 패널은 ds.js 가 host 끝에 둔다 — 2026-11-13).
    열에서 고르면 바로 값이 된다. 칸은 Label 1/Normal 14/20, 고른 칸은 제품 색 면 + 흰 글자(Select Button solid · Chip 선택과 같은 쌍) */
 .timepicker.field{position:relative;min-width:0;width:10rem}
-.timepicker.open .affix{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}   /* 열린 동안은 입력 포커스와 같은 링(Date Picker 와 같은 결정) */
+.timepicker.open .affix{border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo)}   /* 열린 동안은 입력 포커스와 같은 링(Date Picker 와 같은 결정) */
 .timepicker.field.error.open .affix{border-color:var(--foreground-negative-primary);box-shadow:0 0 0 4px var(--line-negative-focus)}
 .timepicker .tp-btn{display:grid;place-items:center;flex:none;width:1.75rem;height:1.75rem;margin-right:-0.375rem;padding:0;border:0;border-radius:var(--radius-md);background:transparent;color:var(--foreground-neutral-tertiary);cursor:pointer}
 .field.sm.timepicker .tp-btn{border-radius:var(--radius-sm)}
@@ -1045,7 +1051,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .calendar .cal-time .timepicker.field{flex:1;width:auto;min-width:0}
 /* 달력은 피커 .field 안에 있다 — 바깥 필드의 크기(lg) · 오류(빨강) · 열린 링이 시각 칸으로 내려오지 않게 sm · 기본 테두리로 되돌린다 */
 .calendar .cal-time .timepicker.field .affix{height:2rem;padding:0 0.625rem;border-color:var(--line-neutral-primary);box-shadow:none}
-.calendar .cal-time .timepicker.field .affix:has(input:focus),.calendar .cal-time .timepicker.field.open .affix{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}
+.calendar .cal-time .timepicker.field .affix:has(input:focus),.calendar .cal-time .timepicker.field.open .affix{border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo)}
 .calendar .cal-time .timepicker.field .affix input{font-size:var(--font-size-12);font-variant-numeric:tabular-nums;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .calendar .cal-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:0.375rem;padding-top:0.625rem;margin-top:0.375rem;border-top:1px solid var(--line-neutral-secondary)}
 .calendar .cal-foot .btn.text+.btn:not(.text){margin-left:auto}   /* 오늘 · 초기화 · 프리셋은 왼쪽, 취소 · 적용은 오른쪽 */
@@ -1180,10 +1186,10 @@ td .tag-group{flex-wrap:nowrap}
 .dropdown{position:relative;display:inline-block;line-height:1.6}
 .dropdown .trigger{display:inline-flex;align-items:center;gap:0.5rem;height:2.5rem;padding:0 0.75rem 0 0.875rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);font:inherit;font-size:var(--font-size-14);color:var(--foreground-neutral-primary);cursor:pointer;min-width:12.5rem;justify-content:space-between;line-height:1.375rem;letter-spacing:0.0145em}
 .dropdown .trigger:hover{border-color:var(--line-neutral-primary)}
-.dropdown .trigger:focus-visible{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus);outline:none}
+.dropdown .trigger:focus-visible{border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo);outline:none}
 .dropdown .trigger .placeholder{color:var(--foreground-neutral-tertiary)}
 .dropdown .trigger::after{content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M6 9l6 6l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;transition:transform var(--motion-fast)}
-.dropdown.open .trigger{border-color:var(--foreground-brand-primary);box-shadow:0 0 0 4px var(--line-brand-focus)}   /* 목록이 열린 동안은 입력 포커스와 같은 링 — 마우스로 열면 :focus-visible 이 없어 테두리만 남았다(사람의 결정 2026-11-09) */
+.dropdown.open .trigger{border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo)}   /* 목록이 열린 동안은 입력 포커스와 같은 링 — 마우스로 열면 :focus-visible 이 없어 테두리만 남았다(사람의 결정 2026-11-09) */
 .dropdown.open .trigger::after{transform:rotate(180deg)}
 .dropdown .trigger[disabled]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}
 .dropdown .trigger[disabled]::after{background:var(--foreground-disable-primary)}
@@ -1458,7 +1464,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .toast button:focus-visible,.banner .close:focus-visible{outline-color:currentColor}   /* 기본 외곽선(brand)은 어두운 Toast · 제품 색 Banner 면에서 보이지 않는다 */
 .toast-stack{display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;line-height:1.6}
 .toast-stack.fixed{position:fixed;right:1.5rem;bottom:1.5rem;z-index:110}
-.banner{display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.625rem 1.25rem;background:var(--surface-brand-primary);color:var(--brand-label);font-size:var(--font-size-14);font-weight:500;line-height:1.375rem;letter-spacing:0.0145em}
+.banner{display:flex;align-items:center;gap:0.75rem;width:100%;padding:0.625rem 1.25rem;background:var(--surface-brand-primary);background-image:var(--surface-brand-gradient);color:var(--brand-label);font-size:var(--font-size-14);font-weight:500;line-height:1.375rem;letter-spacing:0.0145em}
 .banner .btn{margin-left:auto}
 .banner.warning{background:var(--surface-cautionary-primary);color:var(--foreground-neutral-primary)}
 .banner.danger{background:var(--surface-negative-strong);color:var(--foreground-neutral-primary)}
@@ -1918,28 +1924,22 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* ---------- /Live component samples ---------- */
 
 /* 예제 고정 상태(사이트 전용, build.js 가 생성) — State 예제가 Hover · Pressed 를 나란히 보인다 */
-.btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-brand-strong)}
-.btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-brand-heavy)}
+.btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-brand-strong);background-image:var(--surface-brand-gradient-strong)}
+.btn:where(.solid.primary):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-brand-heavy);background-image:var(--surface-brand-gradient-heavy)}
 .btn:where(.outline.primary):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-brand-subtle)}
 .btn:where(.outline.primary):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-brand-subtle-strong)}
-.btn:where(.solid.assistive):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-neutral-secondary)}
-.btn:where(.solid.assistive):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-neutral-strong)}
-.btn:where(.outline.assistive):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-neutral-secondary)}
-.btn:where(.outline.assistive):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-neutral-strong)}
-.btn:where(.solid.negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-negative-strong)}
-.btn:where(.solid.negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-negative-heavy)}
-.btn:where(.outline.negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-negative-hover)}
-.btn:where(.outline.negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-negative-pressed);border-color:var(--line-negative-strong)}
+.btn:where(.solid.assistive,.solid.negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-neutral-secondary)}
+.btn:where(.solid.assistive,.solid.negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-neutral-strong)}
+.btn:where(.outline.assistive,.outline.negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-neutral-secondary)}
+.btn:where(.outline.assistive,.outline.negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-neutral-strong)}
 .btn:where(.text):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-brand-subtle)}
 .btn:where(.text):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-brand-subtle-strong)}
 .btn:where(.text.assistive):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
 .btn:where(.text.assistive):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary)}
 .btn:where(.icon-only:not(.solid,.outline).primary):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-brand-subtle)}
 .btn:where(.icon-only:not(.solid,.outline).primary):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-brand-subtle-strong)}
-.btn:where(.icon-only:not(.solid,.outline).assistive):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
-.btn:where(.icon-only:not(.solid,.outline).assistive):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary)}
-.btn:where(.icon-only:not(.solid,.outline).negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-negative-hover)}
-.btn:where(.icon-only:not(.solid,.outline).negative):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-negative-pressed)}
+.btn:where(.icon-only:not(.solid,.outline):is(.assistive,.negative)):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="hover"]{background:var(--surface-neutral-secondary);color:var(--foreground-neutral-primary)}
+.btn:where(.icon-only:not(.solid,.outline):is(.assistive,.negative)):where(:not(.loading,[disabled],[aria-disabled="true"]))[data-state="pressed"]{background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary)}
 .breadcrumb a[data-state="hover"]{color:var(--foreground-neutral-primary);text-decoration:underline}
 .breadcrumb .more[data-state="hover"]{color:var(--foreground-neutral-primary)}
 .accordion:where(:not(.disabled)) summary[data-state="hover"]{background:var(--surface-neutral-secondary)}

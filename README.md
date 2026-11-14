@@ -19,10 +19,10 @@
 - `assets/icons/outline` `assets/icons/filled` — Tabler Icons(MIT) 중 **사이트가 쓰는 것만**(원본, 빌드가 건드리지 않음). 목록은 `_build/icons.js` 의 `ICON_NAMES`, 갤러리는 Foundations › Icons. **아이콘을 더할 때는 Tabler 원본 SVG 를 이 폴더에 먼저 넣고** `ICON_NAMES` 에 이름을 더합니다 — 없으면 빌드가 잡습니다
 
 ## 컬러 모델
-- 토큰은 기준 시스템의 Atomic 램프 13개와 시멘틱 85개(참조 75 + 우리가 더한 10)를 씁니다. `brand` 가 제품 메인 컬러 슬롯이고, 지란지교 오렌지(#FF7F00)는 트리 밖 `--company-mark` 로 두어 로고·헤더 마크에만 씁니다
-- 제품에 적용할 때: 제품 메인 컬러 HEX 하나로 `--prod-40~60` 다섯 단계를 생성해 주입(`app.js` 의 `accentScale` 참고)하고 나머지 토큰은 그대로 사용
+- 토큰은 기준 시스템의 Atomic 램프 13개와 시멘틱 90개(참조 75 + 우리가 더한 15)를 씁니다. `brand` 가 제품 메인 컬러 슬롯이고, 지란지교 오렌지(#FF7F00)는 트리 밖 `--company-mark` 로 두어 로고·헤더 마크에만 씁니다
+- 제품에 적용할 때: 제품 색 팔레트(파랑 · 빨강 · 시안 · 주황 · 중립 · AI) 중 하나의 키로 `--prod-40~60` 다섯 단계와 `data-accent` 를 넣고(`app.js` 의 `applyAccent` · React `applyProductColor`) 나머지 토큰은 그대로 사용
 - **제품 색 제약**: Brand 면 위 글자는 늘 흰색이라 제품 색 위에서 흰 글자가 **4.5** 를 넘어야 합니다 — `verify` 가 검사합니다
-- 헤더의 Accent 선택은 미리보기용입니다. 실제 제품 컬러는 `_build/data.js` 의 `PRODUCTS` 에 등록하세요
+- 헤더의 제품 색 선택은 미리보기용입니다. 팔레트는 `_build/data.js` 의 `PRODUCTS`(1.0 전에는 여섯 가지 — 바꾸려면 사람의 결정)
 
 ## 소스 (`_build/`)
 | 파일 | 내용 |
@@ -50,7 +50,7 @@
 `@jiran/ds-react` — 30개 컴포넌트 + 패턴 래퍼를 실제 React 컴포넌트로 구현. 같은 클래스 마크업을 렌더링하므로 `dist/style.css`(토큰 + 컴포넌트 CSS 만 합성) 하나로 동작합니다.
 - `src/components/<page>/` 컴포넌트 · `examples/<sec>/<page>/<id>.tsx` 예제(= 사이트 React 탭 소스 = 테스트 대상) · `tests/site-consistency.test.tsx` 사이트 HTML 과 구조 비교
 - `cd _react && npm i && npm test && npm run build` → `dist/`(ESM·CJS·d.ts·style.css·fonts). `npm run demo` 로 전체 예제 확인
-- 사용: `import "@jiran/ds-react/style.css"` · `<html data-theme="dark">` · `applyAccent("#1D4ED8")` · 앱 루트에 `<ToastProvider>`. 자세한 내용은 사이트 Resources › React Package
+- 사용: `import "@jiran/ds-react/style.css"` · `<html data-theme="dark">` · `applyProductColor("red")` · 앱 루트에 `<ToastProvider>`. 자세한 내용은 사이트 Resources › React Package
 
 ### 재빌드
 ```

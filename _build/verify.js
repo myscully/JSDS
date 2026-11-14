@@ -69,7 +69,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   };
   for (const [media, direct] of [
     ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])', ':root[data-theme="dark"]'],
-    ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent-neutral]', ':root[data-theme="dark"][data-accent-neutral]'],
+    ['@media (prefers-color-scheme:dark){:root:not([data-theme="light"])[data-accent="neutral"]', ':root[data-theme="dark"][data-accent="neutral"]'],
   ]) {
     const a2 = body(media), b2 = body(direct);
     if (a2 === null || b2 === null) fails.push(`style.src.css: 다크 블록 쌍을 찾지 못했다 — ${direct}`);
@@ -682,35 +682,62 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
       fails.push(`${m[1].trim()} 이 hover 에 --background-neutral-secondary 를 쓴다 — 상호작용 면은 틴트 쌍(--surface-neutral-secondary → -strong)이어야 다크에서 방향이 뒤집히지 않는다`);
 }
 
-/* 제품 색 제약 — 면 위 글자(--brand-label)는 늘 흰색이므로, 제품 색이 그 흰 글자를 받쳐야 한다.
-   종전에는 밝은 제품에 맞춰 글자를 뒤집는 적응(data-accent-light)이 있었는데 걷어냈다:
-   면을 어둡게 내리는 길은 다크에서 버튼이 캔버스에 묻혀 막혀 있고, 적응을 두면 참조에 없는 분기가 남는다.
-   적응을 걷어낸 자리를 이 가드가 메운다 — 규격 미달 제품이 들어오면 빌드가 막는다.
-   기준은 제품 HEX 자체(brand-50)다. 다크 rest 도 같은 단계라 이 검사 하나가 두 테마의 rest 를 받친다.
-   라이트 hover·pressed 는 더 어두워 자동으로 통과하고, 다크 hover·pressed 는 밝아지는 쪽이라 advisory 다 */
+/* 제품 색 팔레트(data.js PRODUCTS — 2026-11-14 사람의 결정: 파랑 · 빨강 · 시안 · 주황 · 중립 · AI).
+   ① 제약 — Brand 면 위 글자(--brand-label)는 늘 흰색이므로 제품 색이 그 흰 글자를 받쳐야 한다(4.5). 기준은 제품 HEX 자체(brand-50)이고
+      다크 rest 도 같은 단계라 이 검사 하나가 두 테마의 rest 를 받친다. AI 는 그라데이션 끝마다 잰다(주 버튼 · Banner 의 흰 글자가 그 위에 선다).
+      못 넘는 색은 exception 에 이유가 있어야 한다(주황 — 사람의 결정). 이유 없는 미달은 빌드를 막는다.
+   ② 상태색과 겹치면 중립으로 바꾸던 규칙(STATUS_HUES · clashesWithStatus · data-accent-neutral)은 걷어냈다 — 되살아나면 막는다.
+   ③ CSS 가 data.js 를 따르는지 — 빨강 · 주황의 중립 입력 링 선택자 = neutralFocus 키, AI 그라데이션 끝 = gradient, 중립 블록 = kind neutral 의 키 */
 {
   const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
   const L = (hex) => { const c = [0, 1, 2].map((i) => lin(parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
   const onWhite = (hex) => 1.05 / (L(hex) + 0.05);
-  const hsl = (hex) => { const n = parseInt(hex.slice(1), 16), r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
-    const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, sat = 0; const l = (mx + mn) / 2;
-    if (mx !== mn) { const d = mx - mn; sat = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
-      h = (mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4) / 6; }
-    return [h * 360, sat * 100]; };
-  /* 상태색 색상환 표는 app.src.js 가 하나의 출처다 — 여기 베껴 두면 드리프트한다.
-     실제로 종전 표가 램프와 20도 어긋난 적이 있다. 못 읽으면 조용히 넘기지 않고 실패시킨다 */
-  const hueSrc = fs.readFileSync(path.join(__dirname, "app.src.js"), "utf8");
-  const hueM = hueSrc.match(/const STATUS_HUES = \[([^\]]+)\]/);
-  if (!hueM) fails.push("app.src.js 에서 STATUS_HUES 를 읽지 못했다 — 제품 색 제약을 검사할 수 없다");
-  const HUES = hueM ? hueM[1].split(",").map((x) => parseFloat(x)) : [];
-  const clashes = (hex) => { const [h, sat] = hsl(hex); if (sat < 20) return false;
-    return HUES.some((t) => { const d = Math.abs(h - t) % 360; return Math.min(d, 360 - d) < 15; }); };
-  for (const p2 of require("./data.js").PRODUCTS) {
-    /* 상태색과 겹치는 제품은 중립 램프로 갈아끼워지므로 자기 색을 면에 쓰지 않는다 — 제약 대상이 아니다 */
-    if (clashes(p2.hex)) continue;
-    const r = onWhite(p2.hex);
-    if (r < 4.5) fails.push(`제품 색 ${p2.name}(${p2.hex}) 위에서 흰 글자가 ${r.toFixed(2)} — Brand 면의 글자는 늘 흰색이라 4.5 를 넘어야 한다`);
+  const src = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8");
+  const ramp = (n) => { const m = new RegExp("--" + n + ":(#[0-9A-Fa-f]{6})").exec(src); return m ? m[1] : null; };
+  const PR = DATA.PRODUCTS;
+  const KEYS = ["blue", "red", "cyan", "orange", "neutral", "ai"];
+  if (PR.map((p) => p.key).join() !== KEYS.join()) fails.push(`data.js PRODUCTS 의 키가 팔레트와 다르다 — ${PR.map((p) => p.key).join(" · ")} (사람의 결정 2026-11-14: ${KEYS.join(" · ")}). 바꾸려면 사람에게 묻고 이 목록 · React PRODUCT_COLORS 를 함께 고친다`);
+  const KINDS = ["base", "ramp", "neutral", "ai"];
+  for (const p of PR) {
+    if (!KINDS.includes(p.kind)) { fails.push(`제품 색 ${p.key}: kind "${p.kind}" 는 ${KINDS.join(" · ")} 중 하나여야 한다`); continue; }
+    if (!/^#[0-9A-F]{6}$/.test(p.hex || "")) fails.push(`제품 색 ${p.key}: hex 는 대문자 #RRGGBB 여야 한다 — "${p.hex}"`);
+    if (!p.name || !p.group) fails.push(`제품 색 ${p.key}: name · group(팝오버 · Colors 의 갈래)이 없다`);
+    if (p.exception !== undefined && !(typeof p.exception === "string" && p.exception.trim().length >= 10)) fails.push(`제품 색 ${p.key}: exception 은 이유 문장이어야 한다 — 비운 예외는 선언이 아니다`);
+    if (p.kind === "neutral") continue;   // 중립은 CSS 블록이 고른 단계라 아래 contrast 맥락이 잰다
+    const stops = [["hex", p.hex]];
+    if (p.kind === "ai") {
+      if (!p.gradient) fails.push(`제품 색 ${p.key}: AI 는 gradient(rest · strong · heavy 두 끝)가 있어야 한다`);
+      else for (const st of ["rest", "strong", "heavy"]) for (const n of p.gradient[st] || []) { const h = ramp(n); if (!h) fails.push(`제품 색 ${p.key}: gradient ${st} 의 램프 --${n} 을 style.src.css 에서 찾지 못했다`); else stops.push([`${st} ${n}`, h]); }
+    } else if (p.gradient) fails.push(`제품 색 ${p.key}: gradient 는 AI 에만 — 넓은 면 그라데이션은 사람의 결정으로 AI 만 쓴다`);
+    for (const [where, h] of stops) {
+      const r = onWhite(h);
+      if (r < 4.5 && !p.exception) fails.push(`제품 색 ${p.name}(${where} ${h}) 위에서 흰 글자가 ${r.toFixed(2)} — Brand 면의 글자는 늘 흰색이라 4.5 를 넘어야 한다(넘지 못하는 색은 사람의 결정으로 exception 에 이유를 적는다)`);
+      if (r >= 4.5 && p.exception && where === "hex") fails.push(`제품 색 ${p.name}: 흰 글자가 ${r.toFixed(2)} 로 통과하는데 exception 이 남아 있다 — 낡은 예외를 지운다`);
+    }
   }
+  /* ② 자동 중립의 흔적 */
+  for (const f of ["app.src.js", "style.src.css", "contrast.js", path.join("..", "_react", "src", "theme.ts")]) {
+    const t = fs.readFileSync(path.join(__dirname, f), "utf8");
+    for (const w of ["STATUS_HUES", "clashesWithStatus", "data-accent-neutral", "accentNeutral"])
+      if (t.includes(w)) fails.push(`${f}: '${w}' — 상태색과 겹치는 제품을 중립으로 바꾸던 규칙은 2026-11-14 에 걷어냈다(제품 색은 늘 그대로, 중립은 팔레트에서 고른다)`);
+  }
+  /* ③ CSS ↔ data.js */
+  const css0 = src.replace(/\/\*[\s\S]*?\*\//g, "");
+  const nf = /:root:is\(([^)]*)\)\{--line-field-focus:/.exec(css0);
+  const nfKeys = nf ? [...nf[1].matchAll(/\[data-accent="([a-z-]+)"\]/g)].map((m) => m[1]).sort().join() : null;
+  const wantNf = PR.filter((p) => p.neutralFocus).map((p) => p.key).sort().join();
+  if (nfKeys !== wantNf) fails.push(`style.src.css: 중립 입력 링 블록 :root:is(…){--line-field-focus:…} 의 제품(${nfKeys}) ≠ data.js neutralFocus(${wantNf})`);
+  const ai = PR.find((p) => p.kind === "ai");
+  const aiBlock = /:root\[data-accent="ai"\]\{([^}]*)\}/.exec(css0);
+  if (ai && ai.gradient) {
+    if (!aiBlock) fails.push('style.src.css: :root[data-accent="ai"] 그라데이션 블록이 없다');
+    else for (const [st, tok] of [["rest", "--surface-brand-gradient"], ["strong", "--surface-brand-gradient-strong"], ["heavy", "--surface-brand-gradient-heavy"]]) {
+      const want = `${tok}:linear-gradient(90deg,var(--${ai.gradient[st][0]}),var(--${ai.gradient[st][1]}))`;
+      if (!aiBlock[1].includes(want)) fails.push(`style.src.css: AI 블록의 ${tok} 가 data.js gradient.${st} 와 다르다 — '${want}' 를 기대`);
+    }
+  }
+  for (const p of PR.filter((x) => x.kind === "neutral"))
+    if (!css0.includes(`:root[data-accent="${p.key}"]{--brand-40:`)) fails.push(`style.src.css: 중립 제품 '${p.key}' 의 :root[data-accent="${p.key}"] 블록이 없다`);
 }
 
 /* 값 대조 — 시멘틱 75×2 와 램프가 기준 시스템의 정의와 한 글자까지 같은지.
@@ -815,7 +842,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
    3차에서 --graphic-muted → --muted-graphic 개명이 foundations.js 의 sem() 맨 문자열에
    닿지 않아 빈 칩이 하나 남았고, 빌드는 녹색이었습니다 */
 {
-  const blocks = [":root", ':root[data-theme="dark"]', ":root[data-accent-neutral]"];
+  const blocks = [":root", ':root[data-theme="dark"]', ':root[data-accent="neutral"]'];
   const declared = new Set();
   for (const sel of blocks) for (const k of Object.keys(LIB.parseVars(LIB.rootBlock(css, sel)))) declared.add(k);
   const pointed = new Set();

@@ -13,9 +13,9 @@ npm i @jiran/ds-react
 ```tsx
 // main.tsx — 앱 진입점에서 한 번
 import "@jiran/ds-react/style.css";
-import { ToastProvider, applyAccent } from "@jiran/ds-react";
+import { ToastProvider, applyProductColor } from "@jiran/ds-react";
 
-applyAccent("#0066FF"); // 제품 메인 컬러 → --prod-40~60 (brand 다섯 단계)
+applyProductColor("red"); // 팔레트 여섯(blue · red · cyan · orange · neutral · ai) 중 하나 → --prod-40~60 + data-accent
 
 createRoot(document.getElementById("root")!).render(
   <ToastProvider><App /></ToastProvider>
@@ -37,7 +37,7 @@ createRoot(document.getElementById("root")!).render(
 | `src/patterns/` | 패턴 레이아웃 래퍼 (Stack · Toolbar · Form · Empty · Notes · Settings …) |
 | `src/icons/` | `Icon` + 생성 파일 `icons.data.ts` (`_build/icons.js` 의 36개 Tabler 아이콘 — 사이트 Foundations › Icons 갤러리와 동일) |
 | `src/utils/` | `cx` · `useControllable` · `useId` · `Portal` · `useOutsideClick` · `useEscape` · `useFocusTrap` |
-| `src/theme.ts` | `accentScale` · `applyAccent` · `setTheme` |
+| `src/theme.ts` | `PRODUCT_COLORS` · `applyProductColor` · `accentScale` · `applyAccent`(팔레트 밖 색) · `setTheme` |
 | `examples/<sec>/<page>/<id>.tsx` | **사이트 React 탭에 그대로 표시되는 예제**(118개). 테스트가 렌더해 사이트 HTML 과 구조를 비교 |
 | `tests/` | `site-consistency` (태그·클래스·상태 속성 비교) · `examples-coverage` |
 | `scripts/` | `gen-icons` · `sync-css`(style.css 합성) · `check-version` · `visual-compare` |
