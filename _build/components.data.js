@@ -119,6 +119,39 @@ const TREE_ORG = () => [
   { label: "부산 지사", icon: "building", meta: 31, children: [{ label: "영업팀", icon: "users", meta: 19 }, { label: "기술지원팀", icon: "users", meta: 12 }] },
 ];
 
+/* Notification Center 마크업(2026-11-14) — groups: [{label, items:[{id, title, sub, time, datetime, severity, href, unread}]}].
+   ds.js 의 nfItemHtml 과 같은 구조여야 한다(behave 가 정적 항목과 새로 넣은 항목을 같이 잰다). o: id, open, more, attrs */
+const NF_SEV = { critical: "Critical", high: "High", medium: "Medium", low: "Low", info: "Info" };
+const notifyItem = (it) => {
+  const inner = `<span class="notify-dot" aria-hidden="true"></span><span class="notify-main"><span class="notify-text">${it.severity ? `<span class="tag sm ${it.severity}">${NF_SEV[it.severity]}</span>` : ""}${it.title}</span>${it.sub ? `<span class="notify-sub">${it.sub}</span>` : ""}</span><time class="notify-time" datetime="${it.datetime}">${it.time}</time><span class="sr-only">${it.unread ? ", 안 읽음" : ""}</span>`;
+  return `<li class="notify-item${it.unread ? " unread" : ""}" data-id="${it.id}">${it.href ? `<a class="notify-link" href="${it.href}">${inner}</a>` : `<button type="button" class="notify-link">${inner}</button>`}</li>`;
+};
+const notifyHtml = (groups, o) => {
+  const items = groups.flatMap((g) => g.items), n = items.filter((it) => it.unread).length, name = n ? `알림 ${n}건` : "알림";
+  const body = groups.length
+    ? groups.map((g) => `<section class="notify-group" aria-label="${g.label}"><h3 class="notify-day">${g.label}</h3><ul class="notify-list">${g.items.map(notifyItem).join("")}</ul></section>`).join("") + `<p class="notify-empty" hidden>알림이 없습니다.</p>`
+    : `<p class="notify-empty">알림이 없습니다.</p>`;
+  return `<div class="notify"${o.attrs ? " " + o.attrs : ""}${o.hostId ? ` id="${o.hostId}"` : ""}>
+            <span class="with-count"><span class="tooltip-wrap"><button type="button" class="btn sm assistive icon-only" aria-label="${name}" aria-haspopup="dialog" aria-expanded="${o.open ? "true" : "false"}" aria-controls="${o.id}">${I("bell")}</button><span class="tooltip bottom" role="tooltip">${name}</span></span>${n ? `<span class="count" aria-hidden="true">${n}</span>` : ""}</span>
+            <section class="notify-panel" id="${o.id}" role="dialog" aria-labelledby="${o.id}-t" tabindex="-1"${o.open ? "" : " hidden"}>
+              <div class="notify-head"><h2 class="notify-title" id="${o.id}-t">알림</h2><button type="button" class="btn sm text assistive notify-read-all"${n ? "" : ' aria-disabled="true"'}>모두 읽음</button></div>
+              <div class="tabs sm" role="tablist" aria-label="알림 보기"><button type="button" class="tab on" role="tab" aria-selected="true" data-filter="all">전체</button><button type="button" class="tab" role="tab" aria-selected="false" tabindex="-1" data-filter="unread">안 읽음${n ? ` <span class="count">${n}</span>` : ""}</button></div>
+              <div class="tab-panel notify-body" role="tabpanel" data-static>${body}${o.more ? `<div class="notify-more"><button type="button" class="btn sm outline assistive">이전 알림 보기</button></div>` : ""}</div>
+            </section>
+          </div>`;
+};
+const NF_GROUPS = () => [
+  { label: "오늘", items: [
+    { id: "n1", severity: "critical", title: "랜섬웨어 의심 행위를 차단했습니다", sub: "PC-2041 · 김보안", time: "10분 전", datetime: "2026-11-14T09:40", href: "#ev-2041", unread: true },
+    { id: "n2", severity: "high", title: "승인되지 않은 원격 접속을 막았습니다", sub: "SRV-DB-01 · 198.51.100.7", time: "32분 전", datetime: "2026-11-14T09:18", href: "#ev-2040", unread: true },
+    { id: "n3", title: "보안 정책 '외부 저장장치 차단'이 배포되었습니다", sub: "영업팀 외 3개 그룹", time: "1시간 전", datetime: "2026-11-14T08:50", href: "#policy-12", unread: true },
+  ] },
+  { label: "어제", items: [
+    { id: "n4", severity: "medium", title: "에이전트 12대가 24시간 동안 응답하지 않습니다", sub: "부산 지사", time: "어제 18:20", datetime: "2026-11-13T18:20", href: "#agents-offline" },
+    { id: "n5", title: "라이선스가 30일 뒤 만료됩니다", time: "어제 09:00", datetime: "2026-11-13T09:00", unread: true },
+  ] },
+];
+
 /* Date Picker 필드 — Text Field 셸(.field + .affix) 위 입력 하나와 달력 버튼. 입력 형식은 단위마다 고정(YYYY. MM. DD · YYYY. MM · YYYY), locale 과 무관(사람의 결정 2026-11-09).
    opts: id, label, value, help, attrs(data-* 문자열), cls(sm · lg · error), unit, range, invalid, disabled, readonly */
 const dpField = (o) => {
@@ -3060,6 +3093,48 @@ sudo systemctl enable --now js-agent</code></pre>
     ],
     props: [[".tree", "class", "—", "<code>ul[role=tree][aria-label]</code>. React <code>Tree</code>"], [".checkable", "class", "—", "체크박스형 — <code>aria-multiselectable</code> · 항목마다 <code>aria-checked</code>. React <code>checkable</code>"], [".tree-item", "class", "—", "<code>li[role=treeitem][aria-level]</code>. 하위가 있으면 <code>aria-expanded</code> 와 <code>aria-labelledby</code>(.tree-label 의 id) · 하위 <code>ul.tree-group[role=group]</code>"], ["aria-selected", "attr", "—", "탐색형에서 고른 항목 하나만 true. React <code>selected</code> · <code>defaultSelected</code>"], ["aria-checked", "attr", "—", "체크박스형 true · false · mixed. 상위는 하위에서 계산합니다. React <code>checked</code> · <code>defaultChecked</code>"], ["aria-disabled", "attr", "—", "고르거나 켤 수 없음. React 항목의 <code>disabled</code>"], ["data-lazy", "attr", "—", "펼칠 때 하위를 불러옵니다. React 항목의 <code>lazy</code> + <code>onLoad</code>"], ["data-value", "attr", "글자", "이벤트에 실을 값. React 항목의 <code>value</code>"], [".tree-meta", "class", "—", "행 끝 짧은 글자 — 인원 · 개수 · 끈 이유. React 항목의 <code>meta</code>"], [".tree-view", "class", "—", "Search + Tree 묶음 — 검색 필터. React <code>searchable</code>"], ["data-labels", "attr", "—", "문구 JSON(failed · failedStatus · results · empty). React <code>labels</code>"], ["ds:tree-select", "event", "—", "<code>{value, label}</code>. React <code>onSelect(value)</code>"], ["ds:tree-expand", "event", "—", "<code>{value, expanded}</code>. React <code>onExpandedChange(values, {value, expanded})</code>"], ["ds:tree-check", "event", "—", "<code>{value, checked, values}</code> — values 는 켜진 모든 항목. React <code>onCheckedChange(values, {value, checked})</code>"], ["ds:tree-load", "event", "—", "<code>{value, resolve(items), reject(message)}</code> — items 는 <code>{label, value, children, lazy, disabled, meta}</code>. React <code>onLoad(value)</code> 가 하위를 돌려주는 Promise"]],
     spec: [["Size", "행 32 · padding 6/8 · 들여쓰기 단계마다 20 · 8단계까지 · 모서리 radius/sm"], ["Label", "Label 1/Normal 14/20 · 행 끝 글자 Caption 1 12 foreground/neutral/secondary · 검색에 맞는 글자 700"], ["Selected", "surface/brand/subtle 면 · foreground/brand/primary 글자 600 · 아이콘도 brand"], ["State", "hover surface/neutral/tertiary · 누름 surface/neutral/strong · 끈 항목 foreground/disable/primary · 포커스는 행 안쪽 1px 외곽선"], ["Checkbox", "16 · Checkbox 와 같은 면과 체크 · 부분 선택은 가로줄"], ["Icon", "셰브론 16 foreground/neutral/tertiary · 펼치면 90° · 불러오는 동안 스피너 12"]],
+  },
+
+  /* ------------------------------------------------ Notification Center(2026-11-14) */
+  "notification-center": {
+    status: "ready", react: ["NotificationCenter"], css: [".notify", ".notify-panel", ".notify-head", ".notify-title", ".notify-read-all", ".notify-body", ".notify-group", ".notify-day", ".notify-list", ".notify-item", ".notify-link", ".notify-dot", ".notify-main", ".notify-text", ".notify-sub", ".notify-time", ".notify-empty", ".notify-more"], borrows: [".btn", ".with-count", ".count", ".tooltip-wrap", ".tooltip", ".tabs", ".tab", ".tab-panel", ".tag", ".sr-only"],
+    desc: "상단 바의 벨 버튼으로 여는 지난 알림 목록입니다. Toast 로 지나간 탐지 · 배포 · 계정 알림을 다시 보고, 안 읽은 것을 골라 관련 화면으로 갑니다.",
+    choose: [
+      ["언제 쓰는가", "실시간 탐지처럼 흘려보내면 놓칠 수 있는 알림을 쌓아 두고 나중에 다시 보게 할 때 씁니다. 안 읽은 수를 벨에 보여 주고, 항목을 누르면 그 알림의 관련 화면으로 갑니다."],
+      ["비슷한 것", "방금 한 동작의 결과는 Toast, 화면 일부의 지속 상태는 Notice, 제품 전체에 영향을 주는 상태는 Banner 입니다. 알림을 검색하고 오래 쌓아 보는 이력 화면은 Data Table 로 따로 만듭니다."],
+      ["Placement", "Top Navigation 오른쪽 — 검색 다음, 사용자 메뉴 앞"],
+    ],
+    principles: [
+      ["열기", "벨 버튼 아래에 비모달 대화상자로 엽니다. 열면 포커스가 패널로 가고, Esc 를 누르면 닫히며 벨로 돌아옵니다. 바깥을 누르거나 Tab 으로 패널을 떠나도 닫힙니다."],
+      ["읽음", "항목을 누르면 그 항목만 읽음이 됩니다. 열기만 해서는 바뀌지 않습니다. 머리의 '모두 읽음' 은 안 읽은 것을 한꺼번에 읽음으로 바꾸고, 남은 것이 없으면 꺼집니다. 서버에 저장하는 일은 제품이 <code>ds:notify-read</code> 를 받아 합니다."],
+      ["항목", "누르면 관련 화면으로 갑니다. 그래서 항목은 링크이고, 갈 화면이 없는 알림은 버튼이라 누르면 읽음만 됩니다. 항목 안에 다른 버튼을 두지 않고, 알림 하나를 지우는 동작도 두지 않습니다."],
+      ["안 읽은 수", "벨의 Count · 접근 이름 · Tooltip · '안 읽음' 탭의 수를 시스템이 함께 맞춥니다. 99 를 넘으면 99+ 이고, 0 이면 배지를 숨깁니다."],
+      ["새 알림", "제품이 <code>DS.notify.add</code>(React 는 <code>items</code>)로 넘기면 맨 위 '오늘' 묶음에 넣고 수를 늘리며 화면 낭독기에 알립니다. 알림을 받아 오는 연결은 제품의 몫입니다."],
+      ["목록", "'전체' 와 '안 읽음' 탭으로 거르고, 목록 안은 오늘 · 어제 · 이전 같은 날짜 묶음으로 나눕니다. 묶음 이름과 '10분 전' 같은 시각 글자는 제품이 정합니다. 심각도가 있는 알림만 앞에 심각도 Tag 를 둡니다."],
+      ["이전 알림", "목록 끝의 '이전 알림 보기' 가 <code>ds:notify-more</code> 를 냅니다. 불러오는 동안 버튼에 스피너가 돌고, 실패하면 버튼 위에 알리고 '다시 시도' 로 바뀝니다. 끝이면 <code>resolve(items, {done:true})</code> 로 버튼을 없앱니다."],
+    ],
+    thumb: `<div style="display:flex;justify-content:flex-end;width:200px"><span class="with-count"><span class="btn sm assistive icon-only" aria-hidden="true">${I("bell")}</span><span class="count" aria-hidden="true">3</span></span></div>`,
+    examples: [
+      { id: "default", group: "default", title: "Default", desc: "벨을 누르면 열립니다. 안 읽은 항목은 점과 굵은 제목으로 보이고, 누르면 읽음이 되며 관련 화면으로 갑니다. 이 예제는 열린 채로 시작합니다.", html: `
+        <div style="display:flex;justify-content:flex-end;width:100%;min-height:36rem">
+          ${notifyHtml(NF_GROUPS(), { id: "nc1", open: true, more: true })}
+        </div>` },
+      { id: "live", group: "variant", title: "New Alerts", desc: "제품이 새 알림을 넘기면 맨 위에 쌓이고 벨의 수가 늘며 화면 낭독기에 알립니다. 아래 버튼은 도착을 흉내 냅니다.", html: `
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;min-height:32rem">
+          <button type="button" class="btn sm outline assistive" data-demo-notify="nc2-host">새 알림 도착 흉내</button>
+          ${notifyHtml(NF_GROUPS().slice(1), { id: "nc2", hostId: "nc2-host" })}
+        </div>` },
+      { id: "empty", group: "state", title: "Empty", desc: "알림이 하나도 없으면 빈 상태 문구만 보이고 '모두 읽음' 은 꺼집니다. '안 읽음' 탭에서 다 읽었을 때도 같은 자리에 문구가 나옵니다.", html: `
+        <div style="display:flex;justify-content:flex-end;width:100%;min-height:16rem">
+          ${notifyHtml([], { id: "nc3", open: true })}
+        </div>` },
+      { id: "load-failed", group: "state", title: "Load Failed", desc: "이전 알림을 불러오지 못하면 버튼 위에 알리고 '다시 시도' 로 바뀝니다. 이 예제는 첫 시도가 실패합니다.", html: `
+        <div style="display:flex;justify-content:flex-end;width:100%;min-height:30rem">
+          ${notifyHtml(NF_GROUPS().slice(1), { id: "nc4", open: true, more: true, attrs: "data-demo-fail" })}
+        </div>` },
+    ],
+    props: [[".notify", "class", "—", "벨 버튼과 패널을 감쌉니다. React <code>NotificationCenter</code>"], ["[aria-haspopup=dialog]", "button", "필수", "벨 아이콘 버튼 — <code>aria-expanded</code> · <code>aria-controls</code>, 접근 이름과 Tooltip 은 ds.js 가 안 읽은 수로 맞춥니다. 배지는 <code>.with-count > .count</code>"], [".notify-panel", "section", "—", "<code>role=dialog</code> · <code>aria-labelledby</code>(.notify-title). <code>hidden</code> 이면 닫힘"], [".notify-read-all", "button", "—", "모두 읽음 — 안 읽은 것이 없으면 <code>aria-disabled</code>"], [".tabs [data-filter]", "tab", "all · unread", "탭 두 개가 같은 <code>.tab-panel.notify-body[data-static]</code> 를 거릅니다"], [".notify-group", "section", "—", "날짜 묶음 — <code>aria-label</code> = <code>.notify-day</code> 글자"], [".notify-item", "li", "—", "<code>data-id</code>. 안 읽음이면 <code>.unread</code> + 링크 안 <code>.sr-only</code> ', 안 읽음'"], [".notify-link", "a | button", "—", "갈 화면이 있으면 <code>a[href]</code>, 없으면 <code>button</code>. 안에 다른 조작을 두지 않습니다"], [".notify-more", "container", "—", "이전 알림 보기 버튼. 실패 문구 <code>.msg</code> 는 ds.js 가 넣습니다. React <code>hasMore</code> · <code>onMore</code>"], ["data-labels", "attr", "—", "문구 JSON(trigger · triggerNone · unread · empty · emptyUnread · more · retry · moreFailed · loaded · readAll · fresh · freshMany · today). React <code>labels</code>"], ["DS.notify.add(el, items)", "function", "—", "맨 위에 넣고 수와 알림을 맞춥니다. items 는 <code>{id, title, sub, time, datetime, severity, href, unread, group}</code>. React 는 <code>items</code> 를 바꿉니다"], ["ds:notify-read", "event", "—", "<code>{ids, all}</code>. React <code>onRead(ids, {all})</code>"], ["ds:notify-more", "event", "—", "<code>{resolve(items, {done}), reject(message)}</code>. React <code>onMore()</code> 가 Promise"], ["ds:notify-open", "event", "—", "<code>{open}</code>. React <code>onOpenChange(open)</code>"]],
+    spec: [["Size", "패널 폭 380(화면 폭 − 32 까지) · 높이 화면 − 96 과 560 중 작은 값 · 본문만 스크롤 · 항목 padding 12/20"], ["Container", "surface/elevated/primary · line/neutral/secondary · radius/lg · shadow-3 · 벨 아래 8 · 오른쪽 맞춤"], ["Label", "제목 Body 1/Normal 16/24 600 · 항목 Label 1/Normal 14/20(안 읽음 600) · 보조 · 시각 Caption 1 12/16 foreground/neutral/secondary · 날짜 묶음 Caption 1 600"], ["Unread", "앞 점 8 surface/brand/primary · 제목 600 — 읽으면 점 자리만 남음"], ["State", "항목 hover surface/neutral/tertiary · 누름 surface/neutral/strong · 포커스는 항목 안쪽 1px"], ["Count", "벨 배지 = Indicator Count · 99 넘으면 99+ · 0 이면 숨김 · 안 읽음 탭은 탭 건수 Count"]],
   },
 };
 

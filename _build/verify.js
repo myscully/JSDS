@@ -293,6 +293,43 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (chk && sels) bad("체크박스형에는 aria-selected 를 두지 않습니다");
         if (sels > 1) bad("탐색형에서 고른 항목은 하나");
       }
+      /* Notification Center 원칙(2026-11-14) — 벨 · 대화상자 · 탭 · 항목 · 안 읽은 수가 한 숫자를 말함 */
+      for (const m of pv.matchAll(/<div class="notify"[^>]*>/g)) {
+        let depth = 0, end = pv.length; const re = /<(\/?)section\b[^>]*>/g; re.lastIndex = m.index;
+        for (let t; (t = re.exec(pv));) { depth += t[1] ? -1 : 1; if (!depth) { end = t.index; break; } }
+        const b = pv.slice(m.index, end), bad = (msg) => fails.push(`${f}: ${msg}(Notification Center)`);
+        const trig = /<button\b[^>]*aria-haspopup="dialog"[^>]*>/.exec(b), panel = /<section class="notify-panel"([^>]*)>/.exec(b);
+        if (!trig) { bad("벨 버튼에 aria-haspopup=\"dialog\""); continue; }
+        if (!panel) { bad("패널 section.notify-panel"); continue; }
+        const at = (s, k) => (new RegExp(`\\b${k}="([^"]*)"`).exec(s) || [])[1];
+        const pid = at(panel[1], "id");
+        if (!pid || at(trig[0], "aria-controls") !== pid) bad("벨의 aria-controls = 패널 id");
+        const exp = at(trig[0], "aria-expanded"), hidden = /\shidden\b/.test(panel[1]);
+        if (exp !== (hidden ? "false" : "true")) bad("벨의 aria-expanded = 패널이 열렸는지");
+        if (at(panel[1], "role") !== "dialog") bad("패널 role=\"dialog\"");
+        const lb = at(panel[1], "aria-labelledby");
+        if (!lb || !new RegExp(`\\bid="${lb}"`).test(b)) bad("패널 aria-labelledby 가 제목을 가리킴");
+        if (!/role="tablist"[^>]*aria-label="[^"]+"/.test(b) || !/data-filter="all"/.test(b) || !/data-filter="unread"/.test(b)) bad("탭 전체 · 안 읽음(이름 있는 tablist, data-filter all · unread)");
+        const items = [...b.matchAll(/<li class="notify-item( unread)?"[^>]*>([\s\S]*?)<\/li>/g)];
+        for (const it of items) {
+          const links = it[2].match(/class="notify-link"/g) || [];
+          if (links.length !== 1) bad("항목마다 .notify-link 하나");
+          if (!/^<(a class="notify-link" href="[^"]+"|button type="button" class="notify-link")>/.test(it[2])) bad("항목의 .notify-link 는 a[href] 이거나 button");
+          if (/<(a|button|input|select|textarea)\b/.test(it[2].replace(/^<(a|button)\b[^>]*>/, ""))) bad("항목 안에 다른 조작을 두지 않음(항목 동작 없음)");
+          const sr = (/<span class="sr-only">([^<]*)<\/span>/.exec(it[2]) || [])[1];
+          if (sr !== (it[1] ? ", 안 읽음" : "")) bad("숨긴 ', 안 읽음' 은 안 읽은 항목에만");
+          for (const t of it[2].matchAll(/<span class="tag sm ([a-z]+)">/g)) if (!["critical", "high", "medium", "low", "info"].includes(t[1])) bad(`심각도 Tag 톤 ${t[1]}`);
+        }
+        const n = items.filter((it) => it[1]).length, name = n ? `알림 ${n}건` : "알림";
+        if (at(trig[0], "aria-label") !== name) bad(`벨 이름 = '${name}'`);
+        const tip = (/<span class="tooltip[^"]*" role="tooltip">([^<]*)<\/span>/.exec(b) || [])[1];
+        if (tip !== name) bad(`벨 Tooltip = '${name}'`);
+        const badge = /<span class="count" aria-hidden="true">([^<]*)<\/span>/.exec(b);
+        if (n ? !badge || badge[1] !== (n > 99 ? "99+" : String(n)) : badge) bad(n ? `벨 Count = ${n}` : "안 읽은 알림이 없으면 벨 Count 없음");
+        const ra = /<button\b[^>]*class="[^"]*notify-read-all[^"]*"[^>]*>/.exec(b);
+        if (!ra) bad("'모두 읽음' 버튼 .notify-read-all");
+        else if (/aria-disabled="true"/.test(ra[0]) !== !n) bad("'모두 읽음' 은 안 읽은 알림이 없을 때만 aria-disabled");
+      }
       /* Time Picker 원칙(2026-11-13) — 라벨 · placeholder 형식 · 버튼 이름 · data-step 정수 · min ≤ max · 범위는 도움말에 */
       for (const m of pv.matchAll(/<div class="field[^"]*\btimepicker\b[^"]*"[^>]*>/g)) {
         const at = m[0], b = pv.slice(m.index, m.index + 3000), name = ((/<label\b[^>]*>([^<*]+)/.exec(b) || [])[1] || "").trim();
@@ -580,7 +617,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 45) fails.push(`components.json 컴포넌트 ${j.components.length}개(45 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 46) fails.push(`components.json 컴포넌트 ${j.components.length}개(46 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 10) fails.push(`components.json 패턴 ${j.patterns.length}개(10 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }
@@ -670,7 +707,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
   /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
   /* --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면 — 표 규칙 안에서 정하고 td 가 기본값(transparent)과 함께 쓴다(2026-11-11) */
   /* --avatar-ring: Avatar Group 링 · 겹친 면의 밑색 — 놓인 자리의 면(2026-11-13) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring"];
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--nf-dx"];
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);

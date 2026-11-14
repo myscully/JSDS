@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 76 · verify 0/0 · contrast 1452쌍 실패 0 · advisory 449 · behave 1345/1345 · react 779+6 · tsc 0
+pages 77 · verify 0/0 · contrast 1452쌍 실패 0 · advisory 449 · behave 1356/1356 · react 792+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -623,6 +623,32 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
   - 접을 때 하위에 있던 포커스를 상위로 옮기는 코드는 쓸모가 없어 지웠다(사이트 · React). 셰브론을 누르면 포커스가 이미 상위로 가기 때문이다.
 - 전체 게이트에서 tsc 1건 — `TreeNode.icon` 이 string 이라 Icon 이름 타입에 맞지 않았다(`IconName` 으로). vitest 는 타입을 안 봐서 통과했다.
 - Figma 미반영 523 → 524건(Tree Spec 카드 없음). Tree 는 Figma 에 없다 — 일괄 반영 때 그린다.
+
+2026-11-14 Notification Center 신규 — 1.0 뒤로 미뤘던 것을 앞당김(사람의 결정 여덟) — pages 76 → 77 · 컴포넌트 45 → 46 · behave 1345 → 1356(`behave.notify.js` 11) · react 779+6 → 792+6(`tests/notification-center.test.tsx` 9 · 예제 280 → 284 에 따른 구조 비교 4). contrast · advisory 수는 그대로(새 색 쌍 없음 — 기존 토큰만 씀).
+- **벨 아래 팝오버**(사람의 결정) — `.notify > .with-count(.tooltip-wrap > button[aria-haspopup=dialog][aria-expanded][aria-controls] + .count) + section.notify-panel[role=dialog][aria-labelledby][tabindex=-1]`, React `NotificationCenter`. 비모달이다. 열면 패널로 포커스, Esc 는 팝오버만 닫고 벨로(캡처 단계 — 바깥 대화상자까지 닫지 않음), 바깥 누름 · Tab 으로 떠남도 닫는다. `ds:notify-open {open}`.
+- **누른 항목 + 모두 읽음**(사람의 결정) — 열기만 해서는 읽음이 되지 않는다. `ds:notify-read {ids, all}` · `onRead(ids, {all})`, 저장은 제품. 이미 읽은 항목은 이벤트를 내지 않고, 안 읽은 것이 없으면 '모두 읽음' 은 `aria-disabled`.
+- **새 알림의 화면 갱신까지 시스템, 연결은 제품**(사람의 결정) — `DS.notify.add(el, items)` 가 맨 위 '오늘' 묶음에 넣고, 하나면 '새 알림: 제목' · 여럿이면 '새 알림 n건' 을 한 번 알린다. React 는 `items` 에 새로 들어온 안 읽은 항목을 센다. 마크업을 직접 고치면 `DS.notify.sync(el)`.
+- **탭 전체 · 안 읽음**(사람의 결정) — 한 `.tab-panel.notify-body[data-static]` 을 거른다(`data-static` 이 ds.js 탭의 글자 바꾸기를 막는다). 안 읽음 탭은 읽은 항목 · 빈 묶음을 숨기고 없으면 '안 읽은 알림이 없습니다.'
+- **항목 누름 = 관련 화면으로 이동**(사람의 결정) — `a.notify-link[href]` 는 읽음 + 이동 + 닫힘, 갈 화면이 없는 항목은 `button.notify-link` 로 읽음만(열린 채, 포커스 유지). React 라우터는 `onNavigate(item, e)`.
+- **오래된 알림 = '이전 알림 보기' 버튼**(사람의 결정 — verify 가 '더 보기' 를 모호한 라벨로 잡아 이름을 바꿈) — `ds:notify-more {resolve(items, {done}), reject(msg)}` · React `hasMore` · `onMore() => Promise`. 불러오는 동안 스피너 · `aria-busy`, 몇 건 왔는지 알리고, 끝이면 버튼을 지우고 새 첫 항목으로 포커스. 실패는 버튼 위 문구(role=status) + '다시 시도'.
+- **심각도가 있는 항목은 앞에 Tag**(사람의 결정 — `.tag.sm` 다섯 톤) · **항목마다 동작은 두지 않음**(사람의 결정 — verify 가 항목 안 다른 조작을 막음).
+- **안 읽은 수 하나가 다섯 곳에** — 벨 Count(99 초과 99+, 0 이면 마크업에 없음 — Indicator 의 Count 0 규칙), 벨 이름 · Tooltip '알림 n건', 안 읽음 탭 Count, 항목의 숨긴 ', 안 읽음'. `nfSync` 가 함께 맞춘다.
+- **자리** — 넘침을 자르는 곳(미리보기 · 표) 안에서 벨로 열면 화면 기준(`.float`, `--float-x/y`)으로 뜨고 바깥 스크롤 · 창 크기 변경에 닫는다(closeFloats). 패널 본문의 스크롤은 닫지 않는다. 그 밖에서는 오른쪽 맞춤이 화면 왼쪽을 넘으면 민다(`--nf-dx` — verify LOCAL · sync-css).
+- **제안을 사람이 확인한 기본값(같은 날 선택지로 물음 — 모두 유지):** 패널 폭 380 · 최대 높이 560, 안 읽음 = 제품 색 점 8 + 굵기 600, Tab 으로 떠나면 닫힘, 링크 항목은 누르면 닫힘, 보조 · 시각 글자 12/16 secondary, 열면 패널로 포커스. 묻지 않은 것: 항목 padding 12/20 · 글자 14/20.
+- **verify 더함:** 벨의 aria-haspopup · aria-controls = 패널 id · aria-expanded = 열림, 패널 role=dialog · aria-labelledby 가 제목, 이름 있는 tablist 와 data-filter all · unread, 항목마다 `.notify-link` 하나(a[href] 또는 button) · 그 안 다른 조작 금지, 숨긴 ', 안 읽음' 은 안 읽은 항목에만, 심각도 Tag 톤, 벨 이름 · Tooltip · Count 가 안 읽은 수와 같음 · 0 이면 Count 없음, '모두 읽음' 의 aria-disabled 는 안 읽은 것이 없을 때만.
+- **측정에서 드러나 고친 것:**
+  - ds.js 의 `init()` 이 파일 중간에서 돌아 그 뒤에 선언한 문구 상수(`NF_LABEL`)가 아직 없었다(PAGEERROR) — `init()` 호출을 `window.DS` 바로 앞으로 옮겼다.
+  - flex 행에서 `.notify` 가 늘어나 패널이 벨이 아니라 늘어난 높이 아래(552px)에 붙었다 — `height:max-content`.
+  - 사이트 셸의 `h2:first-of-type`(0,1,1)이 패널 제목에 위 여백 24 를 줬다 — 선택자를 `.notify-panel .notify-title` 로.
+  - 항목 글자의 줄 높이가 22 로 재졌다 — `.notify-link` 에 20 을 정했다.
+  - **처음부터 열린 패널이 390 에서 미리보기 왼쪽에 잘렸다(캡처에서 발견)** — `nfInit` 이 자리를 재지 않았다. 처음 열린 패널을 띄우면 첫 페이지 스크롤에 닫히므로 띄우지 않고, 넘침을 자르는 영역 안 8px 에 들도록 좁히고 민다(`nfFit` · React `fit`, 창 크기가 바뀌면 다시 맞춤). 벨로 연 패널은 전처럼 띄운다.
+- 음성 시험: 첫 회 사이트 CSS 6 · ds.js 11 · verify 6 · React 6건 중 4건을 못 잡았다.
+  - 본문 스크롤 · 화면 기준 띄움 — 단정이 없었고, 띄움을 지우면 항목 클릭이 시간 초과(30초)로 던져 **behave 전체가 멈췄다**(exit 2 — 뒤의 검사가 돌지 않고 수도 나오지 않음). 긴 목록 단정을 새로 두고, 열고 닫기 단정에 '떠서 네 모서리가 보임' 을 더해 클릭 전에 실패로 잡게 했다.
+    그리고 `behave.notify.js` 의 열한 부분을 `step()` 으로 감쌌다 — 한 부분이 던지면 그 부분의 실패로 남기고(테마마다 한 부분이라 단정 수는 늘 11) 다음으로 간다. 이 묶음의 기다림은 5초(끝나면 30초로 되돌림). 띄움 변형은 이제 멈추지 않고 notify 4/11, 처음 열린 패널을 띄우는 변형은 7/11 로 끝난다.
+  - 왼쪽 넘침 밀기 — 390 예제가 늘 띄움 경로를 타서 밀기 경로가 돌지 않았다. 넘침을 자르지 않는 자리에 복제한 벨로 잰다.
+  - 숨긴 ', 안 읽음' 맞추기 — 처음 상태만 쟀다. 읽음 · 모두 읽음 · 새 알림 뒤를 더했다.
+  - 처음 열린 패널 맞추기를 더한 뒤 사이트 3 · React 2건(맞추지 않음 · 창 크기 · 처음부터 띄움 · React 좁힘)을 더 깨서, 모두 실패로 잡았다.
+- Figma 미반영 524 → 525건(Notification Center Spec 카드 없음). Notification Center 는 Figma 에 없다 — 일괄 반영 때 그린다.
 
 `advisory 449` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

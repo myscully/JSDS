@@ -966,6 +966,37 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .tree-view>.searchbar{width:100%;min-width:0}
 .tree-hit{background:transparent;color:inherit;font-weight:700}   /* 검색어와 맞는 글자 — 색이 아니라 굵기로(고른 행의 brand 글자 위에서도 보이게) */
 .tree-empty{margin:0;padding:0.375rem 0.5rem;font-size:var(--font-size-14);line-height:1.25rem;letter-spacing:0.0145em;color:var(--foreground-neutral-secondary)}
+/* ---------- Notification Center(2026-11-14 — 사람의 결정: 벨 아래 팝오버 · 누른 항목 + 모두 읽음 · 새 알림 화면 갱신은 시스템 · 탭 전체/안 읽음 · 누르면 관련 화면 · 더 보기 · 심각도 Tag · 항목 동작 없음)
+   비모달 대화상자. 폭 380 · 높이는 화면 안(본문만 스크롤). 안 읽은 항목은 제품 색 점 + 600 제목, 읽은 항목은 점 자리만 남긴다 */
+.notify{position:relative;display:inline-flex;height:max-content}   /* 늘어나지 않게 — flex 행에서 stretch 되면 패널이 벨이 아니라 늘어난 높이 아래에 붙는다 */
+.notify-panel{position:absolute;top:calc(100% + 0.5rem);right:0;z-index:30;display:flex;flex-direction:column;width:23.75rem;max-width:calc(100vw - 2rem);max-height:min(35rem,calc(100vh - 6rem));background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-3);outline:none;transform:translateX(var(--nf-dx,0));font-size:var(--font-size-14);line-height:1.25rem;letter-spacing:0.0145em;color:var(--foreground-neutral-primary);text-align:left;white-space:normal}   /* --nf-dx — 화면 왼쪽 밖으로 나가면 ds.js · React 가 오른쪽으로 민다 */
+.notify-panel[hidden],.notify .count[hidden]{display:none}   /* .count 의 inline-grid 가 hidden 을 이긴다 */
+.notify.float .notify-panel{position:fixed;top:var(--float-y);right:auto;left:var(--float-x);transform:none}   /* 넘침을 자르는 영역 안 — 화면 기준 */
+.notify-head{flex:none;display:flex;align-items:center;gap:0.5rem;padding:0.75rem 0.75rem 0.25rem 1.25rem}
+.notify-panel .notify-title{flex:1;min-width:0;margin:0;font-size:var(--font-size-16);font-weight:600;line-height:1.5rem;letter-spacing:0.0057em}
+.notify-panel>.tabs{flex:none;padding:0 1.25rem;gap:0.5rem}
+.notify-panel>.tabs .tab{padding-left:0.25rem;padding-right:0.25rem}
+.notify-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 0 0.5rem;outline:none}
+.notify-group[hidden],.notify-item[hidden]{display:none}
+.notify-panel .notify-day{margin:0;padding:0.75rem 1.25rem 0.25rem;font-size:var(--font-size-12);font-weight:600;line-height:max(1rem,16px);letter-spacing:0.0252em;color:var(--foreground-neutral-secondary)}
+.notify-list{list-style:none;margin:0;padding:0}
+.notify-link{display:grid;grid-template-columns:0.5rem minmax(0,1fr) auto;column-gap:0.75rem;align-items:start;width:100%;padding:0.75rem 1.25rem;border:0;background:transparent;font:inherit;line-height:1.25rem;letter-spacing:inherit;color:inherit;text-align:left;text-decoration:none;cursor:pointer}
+.notify-link:hover{background:var(--surface-neutral-tertiary)}
+.notify-link:active{background:var(--surface-neutral-strong)}
+.notify-link:focus-visible{outline:1px solid var(--foreground-brand-primary);outline-offset:-1px}
+.notify-dot{width:0.5rem;height:0.5rem;margin-top:0.375rem;border-radius:50%}
+.notify-item.unread .notify-dot{background:var(--surface-brand-primary)}
+.notify-main{display:flex;flex-direction:column;gap:0.25rem;min-width:0}
+.notify-text{word-break:keep-all;overflow-wrap:anywhere}   /* 자르지 않는다 — 알림 문장은 끝까지 읽혀야 한다 */
+.notify-text .tag{margin-right:0.375rem;vertical-align:1px}
+.notify-item.unread .notify-text{font-weight:600}
+.notify-sub,.notify-time{font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em;color:var(--foreground-neutral-secondary)}
+.notify-time{white-space:nowrap;margin-top:0.125rem;font-variant-numeric:tabular-nums}
+.notify-empty{margin:0;padding:2rem 1.25rem;text-align:center;color:var(--foreground-neutral-secondary)}
+.notify-empty[hidden]{display:none}
+.notify-more{display:flex;flex-direction:column;align-items:center;gap:0.5rem;padding:0.5rem 1.25rem 0.5rem}
+.notify-more .msg{margin:0;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em;color:var(--foreground-negative-strong)}
+.notify-more .msg:empty{display:none}
 .calendar{width:18.5rem;padding:1.25rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}   /* 패딩 20(사람의 결정 2026-11-09) · 글자 14 — 11-09 의 13 을 단계 14 로 묶음(사람의 결정 2026-11-11) */
 .calendar .cal-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;padding:0 0.25rem 1rem}   /* 아래 16(사람의 결정 2026-11-09) */
 .calendar .cal-head button{border:0;background:transparent;font:inherit;letter-spacing:inherit;cursor:pointer;width:1.75rem;height:1.75rem;border-radius:0.375rem;color:var(--foreground-neutral-secondary)}

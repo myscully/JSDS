@@ -101,6 +101,7 @@
     $$(".datepicker", root).forEach(function (h) { S(h); });
     $$(".timepicker", root).forEach(tpInit);
     $$(".tree", root).forEach(trInit);
+    $$(".notify", root).forEach(nfInit);
     $$(".calendar", root).forEach(function (c) { if (!closest(c, ".datepicker")) S(c); });
   }
 
@@ -129,6 +130,7 @@
       if (d.matches(".combobox")) { cbOpen(d, false); return; }
       setOpen(d, false); var tr = $("[aria-haspopup]", d); if (tr) tr.focus({ preventScroll: true });
     });
+    $$(".notify.float.open").forEach(function (h) { if (e.type === "scroll" && nfPanel(h).contains(e.target)) return; nfOpen(h, false, true); });   // 알림 패널도 — 본문 스크롤은 그대로
   }
   function setOpen(dd, open) {
     dd.classList.toggle("open", open);
@@ -1479,7 +1481,6 @@
     fire(nav || bar, "ds:page", { page: 1, pageSize: Number(e.detail && e.detail.value) });
   });
 
-  if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
   /* ---------- Number Input — .number-field ----------
      브라우저의 stepUp · stepDown · 표준 제약을 쓴다. 범위 밖 값은 고치지 않고 받아서 오류로 알린다(사람의 결정 2026-11-10).
      버튼은 Tab 에서 뺀다 — 키보드는 위 · 아래 화살표가 같은 일을 한다 */
@@ -1954,6 +1955,134 @@
   doc.addEventListener("input", trQuery);
   doc.addEventListener("ds:search", trQuery);   // 지우기 버튼 · Esc 로 비웠을 때
 
+  /* ---------- Notification Center(2026-11-14) ----------
+     벨 버튼(aria-haspopup=dialog)이 비모달 대화상자 .notify-panel 을 연다. 읽음 · 개수 · 탭 거르기 · 더 보기 상태 · 새 알림 추가와 알림은 여기서,
+     알림을 받아 오는 연결과 서버의 읽음 저장은 제품이 한다(ds:notify-read · ds:notify-more · DS.notify.add) */
+  var NF_LABEL = { trigger: "알림 {n}건", triggerNone: "알림", unread: "안 읽음", empty: "알림이 없습니다.", emptyUnread: "안 읽은 알림이 없습니다.", more: "이전 알림 보기", retry: "다시 시도", moreFailed: "알림을 불러오지 못했습니다.", loaded: "알림 {n}건을 더 불러왔습니다.", readAll: "모든 알림을 읽음으로 표시했습니다.", fresh: "새 알림: {title}", freshMany: "새 알림 {n}건", today: "오늘" };
+  var NF_SEV = { critical: "Critical", high: "High", medium: "Medium", low: "Low", info: "Info" };
+  function nfL(host, k) { var raw = host.getAttribute("data-labels"), o = {}; if (raw) { try { o = JSON.parse(raw) || {}; } catch (e) { o = {}; } } return o[k] || NF_LABEL[k]; }
+  function nfPanel(host) { return $(":scope > .notify-panel", host); }
+  function nfTrigger(host) { return $("[aria-haspopup=dialog]", host); }
+  function nfItems(host) { return $$(".notify-item", host); }
+  function nfSync(host) {   // 안 읽은 수 — 벨 배지 · 접근 이름 · Tooltip · 탭 배지 · 모두 읽음 버튼
+    var n = nfItems(host).filter(function (li) { return li.classList.contains("unread"); }).length, t = nfTrigger(host), name = n ? nfL(host, "trigger").replace("{n}", n) : nfL(host, "triggerNone");
+    var wc = $(".with-count", host), c = wc && $(":scope > .count", wc); if (n && wc && !c) { c = doc.createElement("span"); c.className = "count"; c.setAttribute("aria-hidden", "true"); wc.appendChild(c); }   // 0 이면 배지를 두지 않는다 — 새 알림이 오면 만든다
+    if (c) { c.textContent = n > 99 ? "99+" : String(n); c.hidden = !n; }
+    if (t) { t.setAttribute("aria-label", name); var tip = t.parentNode.classList.contains("tooltip-wrap") && $(".tooltip", t.parentNode); if (tip) tip.textContent = name; }
+    var ut = $(".tabs .tab[data-filter=unread]", host), tc = ut && $(".count", ut); if (n && ut && !tc) { tc = doc.createElement("span"); tc.className = "count"; ut.appendChild(doc.createTextNode(" ")); ut.appendChild(tc); }
+    if (tc) { tc.textContent = n > 99 ? "99+" : String(n); tc.hidden = !n; }
+    var ra = $(".notify-read-all", host); if (ra) { if (n) ra.removeAttribute("aria-disabled"); else ra.setAttribute("aria-disabled", "true"); }
+    nfItems(host).forEach(function (li) { var s = $(".notify-link > .sr-only", li); if (s) s.textContent = li.classList.contains("unread") ? ", " + nfL(host, "unread") : ""; });
+    return n;
+  }
+  function nfFilter(host) {   // 안 읽음 탭이면 읽은 항목 · 빈 묶음을 숨기고, 보일 것이 없으면 빈 상태 문구
+    var tab = $(".tabs .tab.on", host), only = tab && tab.getAttribute("data-filter") === "unread", shown = 0;
+    nfItems(host).forEach(function (li) { li.hidden = only && !li.classList.contains("unread"); if (!li.hidden) shown++; });
+    $$(".notify-group", host).forEach(function (g) { g.hidden = !$$(".notify-item", g).some(function (li) { return !li.hidden; }); });
+    var body = $(".notify-body", host); if (!body) return;
+    var em = $(":scope > .notify-empty", body); if (!em) { em = doc.createElement("p"); em.className = "notify-empty"; var more = $(":scope > .notify-more", body); body.insertBefore(em, more); }
+    em.textContent = nfL(host, only ? "emptyUnread" : "empty"); em.hidden = shown > 0;
+  }
+  function nfFit(host) {   // 띄우지 않는 자리 — 넘침을 자르는 영역(없으면 화면) 안 8px 에 들게 좁히고 민다
+    var p = nfPanel(host), c = { left: 0, right: window.innerWidth };
+    p.style.removeProperty("--nf-dx"); p.style.removeProperty("max-width");
+    for (var e = host.parentElement; e && e !== doc.body; e = e.parentElement) { var cs = getComputedStyle(e); if (/auto|scroll|hidden|clip/.test(cs.overflowX + cs.overflowY)) { c = e.getBoundingClientRect(); break; } }
+    var room = c.right - c.left - 16; if (p.offsetWidth > room) p.style.maxWidth = room + "px";
+    var pr = p.getBoundingClientRect(); if (pr.left < c.left + 8) p.style.setProperty("--nf-dx", (c.left + 8 - pr.left) + "px");   // 오른쪽 정렬이 왼쪽을 넘으면 민다
+  }
+  function nfPlace(host, init) {   // init — 처음부터 열린 패널은 띄우지 않는다(띄운 패널은 페이지 스크롤에 닫히므로)
+    var p = nfPanel(host), t = nfTrigger(host); host.classList.remove("float"); p.style.removeProperty("--nf-dx"); p.style.removeProperty("max-width");
+    if (!init && inClipper(host) && t) {   // 표 · 스크롤 영역 안 — 화면 기준, 트리거 오른쪽 끝에 맞추고 화면 안 8px
+      var r = t.getBoundingClientRect(), w = p.offsetWidth;
+      host.style.setProperty("--float-x", Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px");
+      host.style.setProperty("--float-y", (r.bottom + 8) + "px"); host.classList.add("float"); return;
+    }
+    nfFit(host);
+  }
+  function nfOpen(host, open, back) {
+    var p = nfPanel(host), t = nfTrigger(host); if (!p || host.classList.contains("open") === open) return;
+    host.classList.toggle("open", open); p.hidden = !open; if (t) t.setAttribute("aria-expanded", String(open));
+    if (open) { if (!p.hasAttribute("tabindex")) p.tabIndex = -1; nfSync(host); nfFilter(host); nfPlace(host); p.focus({ preventScroll: true }); fire(host, "ds:notify-open", { open: true }); }
+    else { host.classList.remove("float"); if (back && t) t.focus({ preventScroll: true }); fire(host, "ds:notify-open", { open: false }); }
+  }
+  function nfRead(host, lis, all) {
+    var ids = lis.filter(function (li) { return li.classList.contains("unread"); }).map(function (li) { li.classList.remove("unread"); return li.dataset.id; });
+    if (!ids.length) return;
+    nfSync(host); fire(host, "ds:notify-read", { ids: ids, all: !!all });
+  }
+  var nfUid = 0;
+  function nfItemHtml(host, it) {
+    var sev = it.severity && NF_SEV[it.severity], tag = sev ? "<span class=\"tag sm " + it.severity + "\">" + trEsc(it.severityLabel || sev) + "</span>" : "", inner =
+      "<span class=\"notify-dot\" aria-hidden=\"true\"></span><span class=\"notify-main\"><span class=\"notify-text\">" + tag + trEsc(it.title) + "</span>" + (it.sub ? "<span class=\"notify-sub\">" + trEsc(it.sub) + "</span>" : "") + "</span>" +
+      "<time class=\"notify-time\"" + (it.datetime ? " datetime=\"" + trEsc(it.datetime) + "\"" : "") + ">" + trEsc(it.time || "") + "</time><span class=\"sr-only\"></span>";
+    return "<li class=\"notify-item" + (it.unread === false ? "" : " unread") + "\" data-id=\"" + trEsc(it.id != null ? it.id : "nf-" + (++nfUid)) + "\">" + (it.href ? "<a class=\"notify-link\" href=\"" + trEsc(it.href) + "\">" + inner + "</a>" : "<button type=\"button\" class=\"notify-link\">" + inner + "</button>") + "</li>";
+  }
+  function nfGroup(body, label, top) {   // 같은 이름의 묶음이 끝(더 보기) 또는 처음(새 알림)에 있으면 그곳에, 없으면 새로
+    var gs = $$(":scope > .notify-group", body), g = top ? gs[0] : gs[gs.length - 1];
+    if (g && $(".notify-day", g).textContent.trim() === label) return $(".notify-list", g);
+    g = doc.createElement("section"); g.className = "notify-group"; g.setAttribute("aria-label", label);
+    g.innerHTML = "<h3 class=\"notify-day\">" + trEsc(label) + "</h3><ul class=\"notify-list\"></ul>";
+    var anchor = top ? gs[0] || $(":scope > .notify-empty, :scope > .notify-more", body) : $(":scope > .notify-empty, :scope > .notify-more", body);
+    body.insertBefore(g, anchor || null); return $(".notify-list", g);
+  }
+  function nfAdd(host, items, top) {
+    var body = $(".notify-body", host); if (!body) return [];
+    items = [].concat(items || []); if (top) items = items.slice().reverse();
+    var made = items.map(function (it) {
+      var ul = nfGroup(body, it.group || nfL(host, "today"), top), w = doc.createElement("ul"); w.innerHTML = nfItemHtml(host, it);
+      var li = w.firstChild; if (top) ul.insertBefore(li, ul.firstChild); else ul.appendChild(li); return li;
+    });
+    nfSync(host); nfFilter(host); if (top) made.reverse(); return made;
+  }
+  function nfMore(host, btn) {
+    if (btn.classList.contains("loading")) return;
+    var box = closest(btn, ".notify-more"), msg = $(".msg", box), done = false;
+    if (!msg) { msg = doc.createElement("p"); msg.className = "msg"; msg.setAttribute("role", "status"); box.insertBefore(msg, btn); }
+    msg.textContent = ""; btn.classList.add("loading"); btn.setAttribute("aria-busy", "true");
+    var end = function () { done = true; btn.classList.remove("loading"); btn.removeAttribute("aria-busy"); };
+    fire(host, "ds:notify-more", {
+      resolve: function (items, o) {
+        if (done || !host.isConnected) return; end();
+        var made = nfAdd(host, items, false); btn.textContent = nfL(host, "more");
+        dsSay(nfL(host, "loaded").replace("{n}", made.length));
+        if (o && o.done) { var f = made.filter(function (li) { return !li.hidden; })[0]; box.remove(); if (f) $(".notify-link", f).focus(); else nfPanel(host).focus(); }
+      },
+      reject: function (m) {
+        if (done || !host.isConnected) return; end();
+        msg.textContent = m || nfL(host, "moreFailed"); btn.textContent = nfL(host, "retry");
+      },
+    });
+  }
+  doc.addEventListener("click", function (e) {
+    var t = closest(e.target, ".notify > .with-count [aria-haspopup=dialog], .notify > [aria-haspopup=dialog]");
+    if (t) { var h = closest(t, ".notify"); nfOpen(h, !h.classList.contains("open")); return; }
+    var host = closest(e.target, ".notify"); if (!host) return;
+    var ln = closest(e.target, ".notify-link");
+    if (ln) { nfRead(host, [closest(ln, ".notify-item")], false); if (ln.tagName === "A") setTimeout(function () { nfOpen(host, false); }, 0); return; }   // 이동하는 항목은 닫는다 — 이동은 링크가 한다
+    var ra = closest(e.target, ".notify-read-all");
+    if (ra) { if (ra.getAttribute("aria-disabled") === "true") return; nfRead(host, nfItems(host), true); nfFilter(host); dsSay(nfL(host, "readAll")); return; }
+    var mb = closest(e.target, ".notify-more > .btn"); if (mb) nfMore(host, mb);
+  });
+  doc.addEventListener("ds:tab", function (e) { var host = closest(e.target, ".notify"); if (host) nfFilter(host); });
+  doc.addEventListener("pointerdown", function (e) { $$(".notify.open").forEach(function (h) { if (!h.contains(e.target)) nfOpen(h, false); }); });
+  doc.addEventListener("keydown", function (e) {   // Esc 는 팝오버만 닫고 벨로 — 바깥 대화상자까지 닫지 않는다
+    if (e.key !== "Escape") return; var host = closest(e.target, ".notify.open"); if (!host) return;
+    e.stopImmediatePropagation(); e.preventDefault(); nfOpen(host, false, true);
+  }, true);
+  window.addEventListener("resize", function () { $$(".notify.open:not(.float)").forEach(nfFit); });   // 띄운 패널은 closeFloats 가 닫는다
+  doc.addEventListener("focusout", function (e) { var host = closest(e.target, ".notify.open"); if (host && e.relatedTarget && !host.contains(e.relatedTarget)) nfOpen(host, false); });   // Tab 으로 떠나면 닫는다(포커스가 사라진 경우 — 창 전환 — 는 그대로)
+  function nfInit(host) {
+    var p = nfPanel(host), t = nfTrigger(host); if (!p) return;
+    if (t) { if (!p.id) p.id = "ds-notify-" + (++nfUid); t.setAttribute("aria-controls", p.id); t.setAttribute("aria-expanded", String(!p.hidden)); }
+    host.classList.toggle("open", !p.hidden);
+    nfSync(host); nfFilter(host); if (!p.hidden) nfPlace(host, true);
+  }
+  function nfApiAdd(el, items) {
+    var host = closest(el, ".notify") || el, list = [].concat(items || []), made = nfAdd(host, list, true), fresh = list.filter(function (it) { return it.unread !== false; });
+    if (fresh.length) dsSay(fresh.length === 1 ? nfL(host, "fresh").replace("{title}", fresh[0].title) : nfL(host, "freshMany").replace("{n}", fresh.length));   // 한꺼번에 여럿이면 한 번만 — 연달아 넣으면 앞 문구가 지워진다
+    return made;
+  }
+
   /* ---------- Loading 지연 — 보일지를 정한다(사람의 결정 2026-11-11) ----------
      start 뒤 delay(기본 1000ms) 안에 stop 하면 끝내 보이지 않고, 한 번 보이면 min(기본 500ms)을 채운 뒤 숨긴다 — 1.1초에 끝나는 동작이 0.1초 번쩍이지 않게.
      el.hidden 을 쓴다. 이 도우미를 쓰는 요소에는 data-delay 를 달지 않는다(보일 때 CSS 지연이 한 번 더 걸린다) */
@@ -1973,5 +2102,7 @@
     });
   }
 
-  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, version: "0.5" };
+  /* 맨 끝에서 부른다 — 뒤에 선언한 문구 상수(NF_LABEL 등)가 init 때 아직 undefined 이지 않게 */
+  if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, notify: { add: nfApiAdd, sync: function (el) { var h = closest(el, ".notify") || el; nfFilter(h); return nfSync(h); } }, version: "0.5" };
 })();

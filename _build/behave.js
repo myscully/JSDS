@@ -1889,6 +1889,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await require("./behave.revise.js")({ page, ok, go });   // 수정 묶음 — Tab 글자 · 상단 내비 선택 · Notice 아이콘 · Mono(2026-11-13)
   await require("./behave.timepicker.js")({ page, ok, go });   // Time Picker — 입력칸 + 열 목록, 고르면 바로(2026-11-13)
   await require("./behave.tree.js")({ page, ok, go });   // Tree — 탐색형 + 체크박스 · 불러오기 · 검색(2026-11-14)
+  await require("./behave.notify.js")({ page, ok, go });   // Notification Center — 벨 팝오버 · 읽음 · 탭 · 이전 알림 · 새 알림(2026-11-14)
   await require("./behave.nav.js")({ page, ok, go });
   await require("./behave.promote.js")({ page, ok, go });
     await require("./behave.upload.js")({ page, ok, go });

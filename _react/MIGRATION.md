@@ -649,3 +649,24 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
   - 이벤트는 `ds:tree-select` · `ds:tree-expand` · `ds:tree-check` 입니다.
   - 트리 안에는 링크 · 버튼 · 입력을 두지 않습니다(verify).
 - 끌어 옮기기는 없습니다(사람의 결정).
+
+## Notification Center 신규 (2026-11-14)
+
+- **새 `NotificationCenter`** — 상단 바의 벨 버튼과, 그 아래 열리는 알림 팝오버입니다. 팝오버는 비모달 대화상자입니다.
+  - 항목 `NotificationItem` 의 필드는 `id` · `title` · `sub` · `time` · `datetime` · `severity` · `href` · `unread` · `group` 입니다. `group` 이 같은 항목끼리 '오늘' · '어제' 같은 묶음 제목 아래 모입니다.
+  - 열림은 `open` · `defaultOpen` · `onOpenChange` 로 다룹니다. 벨을 누르면 열리고 포커스가 패널로 갑니다. Esc 를 누르면 닫히고 포커스가 벨로 돌아갑니다. 바깥을 누르거나 Tab 으로 패널을 벗어나도 닫힙니다.
+  - 자리: 표 · 스크롤 영역처럼 넘침을 자르는 곳 안에서 벨로 열면 패널이 화면 기준(fixed)으로 뜨고, 바깥이 스크롤되거나 창 크기가 바뀌면 닫힙니다. 처음부터 열린 패널(`defaultOpen` · 마크업의 열린 패널)은 띄우지 않습니다. 대신 그 영역 안 8px 에 들도록 폭을 좁히고 오른쪽으로 밉니다. 띄우면 페이지 스크롤에 바로 닫히기 때문입니다.
+- **읽음은 제품이 저장합니다** — `onRead(ids, {all})` 를 받으면 그 항목의 `unread` 를 false 로 바꿔 다시 넘기세요. 시스템은 읽음 상태를 따로 들고 있지 않습니다.
+  - 안 읽은 항목을 누르면 그 항목 하나를, '모두 읽음' 을 누르면 안 읽은 모든 항목을 넘깁니다. 이미 읽은 항목을 누르면 아무것도 넘기지 않습니다.
+  - `href` 가 있는 항목은 링크로 이동하고 패널을 닫습니다. 라우터를 쓰면 `onNavigate(item, e)` 에서 `e.preventDefault()` 하고 직접 옮기세요. `href` 가 없는 항목은 읽음만 표시하고 패널을 연 채로 둡니다.
+- **안 읽은 수 하나가 여러 곳에 함께 나옵니다** — 벨 Count(99 를 넘으면 99+, 0 이면 없음), 벨 이름과 Tooltip('알림 n건'), '안 읽음' 탭의 Count, 항목의 숨긴 ', 안 읽음' 입니다. `items` 만 바꾸면 모두 따라갑니다.
+- **새 알림** — 연결(WebSocket · 폴링)은 제품이 맡습니다. 새 항목을 `items` 맨 앞에 넣으면, 안 읽은 새 항목을 알림 영역에 한 번 읽어 줍니다. 하나면 '새 알림: 제목', 여럿이면 '새 알림 n건' 입니다.
+- **이전 알림** — `hasMore` 와 `onMore() => Promise` 를 쓰면 목록 끝에 '이전 알림 보기' 버튼이 붙습니다.
+  - 불러오는 동안 버튼에 스피너와 `aria-busy` 가 붙습니다.
+  - 끝나면 몇 건 왔는지 읽어 주고, 새로 온 첫 항목으로 포커스를 옮깁니다.
+  - 실패해 reject 하면 버튼 위에 '알림을 불러오지 못했습니다.'(role=status)가 나오고, 버튼이 '다시 시도' 가 됩니다.
+- 문구는 `labels` 로 바꿉니다. 기본값은 `NOTIFY_LABELS` 이고, `{n}` · `{title}` 자리표시를 씁니다.
+- **HTML 구조:** `.notify > .with-count(.tooltip-wrap > button[aria-haspopup=dialog][aria-expanded][aria-controls] + .count) + section.notify-panel[role=dialog][aria-labelledby][tabindex=-1]`. 패널 안에는 머리(제목 + `.notify-read-all`), 탭 전체 · 안 읽음, `.tab-panel.notify-body[data-static]` 가 들어갑니다. 항목은 `li.notify-item(.unread) > a.notify-link[href] | button.notify-link` 입니다.
+  - 이벤트는 `ds:notify-read {ids, all}` · `ds:notify-more {resolve(items, {done}), reject(msg)}` · `ds:notify-open {open}` 입니다.
+  - 새 알림은 `DS.notify.add(el, items)` 로 넣습니다. 마크업을 직접 바꿨다면 `DS.notify.sync(el)` 로 숫자를 맞춥니다.
+  - 항목 안에는 다른 버튼 · 링크를 두지 않습니다(verify). 항목마다 동작을 붙이지 않는다는 결정입니다.
