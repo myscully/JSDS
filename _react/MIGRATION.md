@@ -670,3 +670,15 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
   - 이벤트는 `ds:notify-read {ids, all}` · `ds:notify-more {resolve(items, {done}), reject(msg)}` · `ds:notify-open {open}` 입니다.
   - 새 알림은 `DS.notify.add(el, items)` 로 넣습니다. 마크업을 직접 바꿨다면 `DS.notify.sync(el)` 로 숫자를 맞춥니다.
   - 항목 안에는 다른 버튼 · 링크를 두지 않습니다(verify). 항목마다 동작을 붙이지 않는다는 결정입니다.
+
+## 일본어 한자 서체 — Pretendard JP (2026-11-14)
+
+- **Pretendard 에는 한자가 없습니다.** 그래서 일본어 화면의 한자만 시스템 서체로 그려졌습니다. 맥에서는 Apple SD Gothic Neo 였고, 한국식 자형에 디자인도 달랐습니다.
+- **일본어를 쓰는 제품은 `import "@jiran/ds-react/font-jp.css"` 를 더합니다.** 선택 파일이고 `style.css` 뒤에 둡니다.
+  - Pretendard JP Variable v1.3.9 조각 119개입니다. 합계 4.7MB 이고 OFL 1.1 입니다(`dist/fonts/jp/OFL.txt`).
+  - 조각마다 `unicode-range` 가 있어, 그 범위의 한자가 화면에 나올 때만 해당 조각을 내려받습니다. 한자가 없는 화면은 0 입니다.
+- `style.css` 의 `--font-sans` 가 `"Pretendard","Pretendard JP",…` 로 바뀌었습니다.
+  - 한글 · 라틴 · 가나는 지금처럼 Pretendard 가 그립니다.
+  - `font-jp.css` 를 불러오지 않으면 그 이름은 건너뛰므로 화면은 전과 같습니다.
+- 한자는 **일본식 자형**입니다. 한국어 문장 안의 한자도 그렇습니다. 한국식 자형이 필요한 자리는 `font-feature-settings:"ss05"` 를 씁니다.
+- 폐쇄망 제품도 쓸 수 있게 CDN 이 아니라 패키지 파일입니다. 번들러가 `fonts/jp/*.woff2` 를 자산으로 내보내는지 확인하세요. `fonts/PretendardVariable.woff2` 와 같은 방식입니다.

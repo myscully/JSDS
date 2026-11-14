@@ -24,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
 
 - 테마: `<html data-theme="dark">` 또는 `setTheme("dark")`. Popup·Toast 포털도 `<html>` 에서 토큰을 상속합니다.
 - 서체·배경: 앱 루트에 `.ds-root` 클래스를 붙이면 Pretendard · 본문 색 · 배경이 적용됩니다.
+- 일본어: Pretendard 에는 한자가 없습니다. 일본어를 쓰는 제품은 `import "@jiran/ds-react/font-jp.css"` 를 더합니다. Pretendard JP 의 조각 파일이고, 한자가 화면에 나올 때만 그 조각을 내려받습니다.
 - 브라우저: `color-mix()` 사용 — Chrome 111+ · Safari 16.2+ · Firefox 113+.
 - React 18.2+ / 19. TypeScript 타입 포함. ESM + CJS.
 - React 를 쓰지 않는 제품은 사이트의 `assets/ds.js`(순수 JS, `_build/ds.src.js`)가 같은 클래스 마크업에 동작을 붙입니다. 두 구현의 동작 범위를 함께 유지합니다(사이트 Resources › React Package 표 참고).

@@ -11,6 +11,7 @@ const DATA = require("./data.js"); const COMPONENTS = require("./components.data
 const SRC = path.resolve(__dirname, "jiran-design-system-guide.standalone.html");
 const OUT = path.resolve(__dirname, "..");
 const FONT = path.resolve(__dirname, "PretendardVariable.woff2");
+const FONT_JP = path.resolve(__dirname, "fonts-jp");
 const { SITE, PRODUCTS, VERSION } = DATA;
 // React 예제 레지스트리: _react/examples/<sec>/<page>/<id>.tsx → 사이트 React 탭 소스 (없으면 htmlToJsx 폴백)
 const EX_DIR = path.resolve(__dirname, "..", "_react", "examples");
@@ -38,9 +39,13 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   // 출력 폴더 초기화 + assets
   for (const d of ["home", "foundations", "components", "patterns", "resources"]) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
   // assets/ 는 통째로 지우지 않는다 (assets/icons 는 사용자가 관리하는 원본). 생성물만 교체
-  for (const f of ["assets/style.css", "assets/app.js", "assets/ds.js", "assets/ds-chart.js", "assets/vendor", "assets/fonts"]) fs.rmSync(path.join(OUT, f), { recursive: true, force: true });
+  for (const f of ["assets/style.css", "assets/font-jp.css", "assets/app.js", "assets/ds.js", "assets/ds-chart.js", "assets/vendor", "assets/fonts"]) fs.rmSync(path.join(OUT, f), { recursive: true, force: true });
   fs.mkdirSync(path.join(OUT, "assets", "fonts"), { recursive: true });
   fs.copyFileSync(FONT, path.join(OUT, "assets", "fonts", "PretendardVariable.woff2"));
+  /* 일본어 한자용 Pretendard JP(2026-11-14) — 조각 woff2 + OFL 을 assets/fonts/jp 로, @font-face(unicode-range) 를 assets/font-jp.css 로.
+     사이트는 ja-JP 예제가 있어 모든 페이지에 링크한다. 조각은 한자가 화면에 나올 때만 내려받는다 */
+  fs.cpSync(FONT_JP, path.join(OUT, "assets", "fonts", "jp"), { recursive: true });
+  fs.copyFileSync(path.join(__dirname, "font-jp.src.css"), path.join(OUT, "assets", "font-jp.css"));
   fs.writeFileSync(path.join(OUT, "assets", "style.css"), LIB.siteCss(cssSrc));   // 폰트 URL + 예제 고정 상태 — pre-commit 검사도 같은 함수로 비교한다
   fs.writeFileSync(path.join(OUT, "assets", "ds.js"), fs.readFileSync(path.join(__dirname, "ds.src.js"), "utf8"));
   /* 탐색형 차트 — Chart.js(MIT) 본체를 node_modules 에서 벤더로 복사하고, 테마 어댑터 원본 ds-chart.src.js 를 그대로 싣는다.
@@ -90,6 +95,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${parts.title}</title>
 <link rel="stylesheet" href="${root}assets/style.css">
+<link rel="stylesheet" href="${root}assets/font-jp.css">
 <script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <script src="${root}assets/app.js" defer></script>
 <script src="${root}assets/ds.js" defer></script>${chartPage ? `
@@ -170,6 +176,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 - \`assets/app.js\` — 테마 전환, Accent(제품 메인 컬러) 미리보기, 검색, 코드 복사/탭
 - \`assets/ds.js\` — **컴포넌트 동작 스크립트**(순수 JS, 의존성 없음). 드롭다운·탭·페이지네이션·달력·테이블 정렬/선택·토스트 등. 사이트 프리뷰가 이 파일로 동작하며, HTML 을 복사해 쓰는 제품도 \`<script src="assets/ds.js" defer>\` 한 줄로 같은 동작을 얻습니다. React 제품은 불필요(@jiran/ds-react 가 동작 포함)
 - \`assets/fonts/PretendardVariable.woff2\` — Pretendard Variable v1.3.9 (OFL)
+- \`assets/font-jp.css\` · \`assets/fonts/jp/\` — Pretendard JP Variable v1.3.9 (OFL) 조각 119개. Pretendard 에 없는 한자만 그리고, 한자가 화면에 나올 때만 그 조각을 내려받습니다. 원본은 \`_build/font-jp.src.css\` · \`_build/fonts-jp/\`
 - \`assets/icons/outline\` \`assets/icons/filled\` — Tabler Icons(MIT) 중 **사이트가 쓰는 것만**(원본, 빌드가 건드리지 않음). 목록은 \`_build/icons.js\` 의 \`ICON_NAMES\`, 갤러리는 Foundations › Icons. **아이콘을 더할 때는 Tabler 원본 SVG 를 이 폴더에 먼저 넣고** \`ICON_NAMES\` 에 이름을 더합니다 — 없으면 빌드가 잡습니다
 
 ## 컬러 모델

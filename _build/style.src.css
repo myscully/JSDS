@@ -87,7 +87,8 @@
   --shadow-spread-sm:0 0 8px 0 rgba(23,23,25,.08);--shadow-spread-md:0 0 24px 0 rgba(23,23,25,.12);
   --shadow-1:var(--shadow-sm);--shadow-2:var(--shadow-md);--shadow-3:var(--shadow-xl);
   --motion-fast:120ms ease-out;--motion-base:200ms ease-in-out;--motion-slow:320ms cubic-bezier(.2,.8,.2,1);
-  --font-sans:"Pretendard",-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  /* "Pretendard JP" 는 한자만 그린다(Pretendard 에 한자가 없음 — 2026-11-14). 선언은 font-jp.src.css(사이트 늘 · 패키지 선택 import), 선언이 없으면 건너뛴다 */
+  --font-sans:"Pretendard","Pretendard JP",-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"D2Coding",monospace;
   /* 글자 크기 — rem(html 글꼴 크기 기준, 사람의 결정 2026-11-11). 화면 폭 단계에서 루트 크기가 바뀌면 글자 · 간격 · 높이가 같은 비율로 따라간다.
      12px 이하는 max() 로 최소 크기를 지킨다 — 좁은 화면(93.75%)에서 12 → 11.25 · 11 → 10.3 이 되면 한글이 읽기 어렵다(사람의 결정).

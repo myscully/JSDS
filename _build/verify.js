@@ -597,6 +597,30 @@ for (const f of ["assets/style.css"]) {
 }
 
 const css = read("assets/style.css"); if (/data:font\/woff2/.test(css)) fails.push("style.css 에 base64 폰트 포함"); if (!/fonts\/PretendardVariable\.woff2/.test(css)) fails.push("style.css 폰트 경로 오류");
+/* 일본어 한자용 Pretendard JP(2026-11-14) — 서체 순서 · 조각 파일 · unicode-range · 한글 범위 없음 · 모든 페이지 링크 · 문서의 조각 수.
+   unicode-range 가 없으면 한국어 페이지도 조각 전부를 받고, 한글 범위가 끼면 한글을 JP 가 가로챈다 */
+{
+  const fam = (css.match(/--font-sans:([^;]+);/) || [])[1] || "";
+  if (!/^"Pretendard","Pretendard JP",/.test(fam)) fails.push(`--font-sans: Pretendard 바로 뒤가 "Pretendard JP" 가 아니다 — ${fam.slice(0, 60)}`);
+  const JP = "assets/font-jp.css";
+  if (!fs.existsSync(path.join(OUT, JP))) fails.push(`${JP} 없음`);
+  else {
+    const jp = read(JP).replace(/\/\*[\s\S]*?\*\//g, ""); const faces = jp.match(/@font-face\s*\{[^}]*\}/g) || [];
+    if (!faces.length) fails.push(`${JP}: @font-face 없음`);
+    faces.forEach((b, i) => {
+      if (!/font-family:"Pretendard JP"/.test(b)) fails.push(`${JP} #${i}: font-family 가 "Pretendard JP" 가 아니다`);
+      const src = (b.match(/url\("([^"]+)"\)/) || [])[1]; if (!src || !fs.existsSync(path.join(OUT, "assets", src))) fails.push(`${JP} #${i}: 조각 파일 없음 ${src}`);
+      const ur = (b.match(/unicode-range:([^;}]+)/) || [])[1]; if (!ur) { fails.push(`${JP} #${i}: unicode-range 없음 — 한자가 없는 페이지도 내려받는다`); return; }
+      for (const r of ur.split(",")) { const [a, z] = r.trim().replace(/^u\+/i, "").split("-").map((x) => parseInt(x, 16)); if (a <= 0xD7A3 && (z || a) >= 0xAC00) { fails.push(`${JP} #${i}: 한글 범위(U+AC00–D7A3)를 포함 ${r.trim()}`); break; } }
+    });
+    if (!fs.existsSync(path.join(OUT, "assets/fonts/jp/OFL.txt"))) fails.push("assets/fonts/jp/OFL.txt 없음 — OFL 은 서체와 함께 배포해야 한다");
+    const typo = fs.existsSync(path.join(OUT, "foundations/typography.html")) ? read("foundations/typography.html") : "";
+    if (!typo.includes(`조각 ${faces.length}개`)) fails.push(`Typography: 문서의 조각 수가 ${JP} 의 ${faces.length} 와 다르다`);
+    const pagesOf = Object.keys(DATA.SITE).flatMap((s) => LIB.allPages(DATA.SITE, s).map((p) => (s === "home" && p.key === "overview" ? "index.html" : `${s}/${p.key}.html`)));
+    const noLink = pagesOf.filter((f) => fs.existsSync(path.join(OUT, f)) && !/<link rel="stylesheet" href="(?:\.\.\/)?assets\/font-jp\.css">/.test(read(f)));
+    if (noLink.length) fails.push(`font-jp.css 링크 없는 페이지 ${noLink.length}: ${noLink.slice(0, 3).join(" ")}`);
+  }
+}
 if (!fs.existsSync(path.join(OUT, "assets/ds.js"))) fails.push("assets/ds.js 없음");
 for (const f of ["components/button.html", "index.html"]) if (fs.existsSync(path.join(OUT, f)) && !/assets\/ds\.js/.test(read(f))) fails.push(`${f}: ds.js 스크립트 태그 없음`);
 const app = read("assets/app.js"); const idx = JSON.parse((app.match(/const SEARCH_INDEX=(\[.*?\]);\n/s) || [])[1] || "[]");

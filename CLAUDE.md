@@ -14,6 +14,7 @@
 | `_react/` | **원본.** `@jiran/ds-react` 패키지. `dist/` 는 생성물이라 git 에 없습니다 |
 | `_figma/` | **원본.** Figma 작업 도구 — `font.js`(폰트 안전 로더) · `probe.js`(조사) · `audit.mjs`(대조) · `dumps/baseline.json`(audit 기준 덤프) · `font-revert.md`(Noto 대체 경과 · 되돌릴 노드 · 굵기를 고칠 노드 — 목록은 같은 폴더의 `.tsv` 셋) |
 | `assets/` `home/` `foundations/` `components/` `patterns/` `resources/` `index.html` | **전부 생성물.** 직접 고치지 말고 `_build/` 를 고친 뒤 빌드하세요. `assets/vendor/chart.umd.js` · `assets/ds-chart.js` 도 생성물 |
+| `_build/font-jp.src.css` · `_build/fonts-jp/` | **원본.** 일본어 한자용 Pretendard JP Variable v1.3.9(OFL) — 조각 woff2 119개 · `OFL.txt` 와 그 `@font-face`(unicode-range). 내려받은 원본 CSS 에서 만들었고 손으로 고치지 않습니다. `build.js` 가 `assets/font-jp.css` · `assets/fonts/jp/`(생성물)로, `sync-css.mjs` 가 패키지 `dist/font-jp.css`(선택 import)로 복사 |
 | `assets/vendor/dayjs.min.js` · `dayjs.utc.js` · `dayjs.timezone.js` · `dayjs.LICENSE` | **생성물.** Date Picker 기준 시간대용 dayjs(MIT, 1.11.13 고정)를 `build.js` 가 `_build/node_modules/dayjs` 에서 복사하고 Date Picker 가 있는 페이지에만 붙입니다(`verify.js` 가 동반 · 부재를 봄). React 는 패키지 dependency 로 `date-picker/tz.ts` 에서 extend |
 
 ## 일하는 방식
@@ -44,7 +45,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 77 · verify 0/0 · contrast 1452쌍 실패 0 · advisory 449 · behave 1356/1356 · react 792+6 · tsc 0
+pages 77 · verify 0/0 · contrast 1452쌍 실패 0 · advisory 449 · behave 1360/1360 · react 793+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -661,6 +662,22 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **음성 시험 — 넷을 한 번에 넣었고 모두 잡혔다:** ① behave.js 덩어리(slider) 안에서 없는 요소를 클릭하게 했다. ② tree 묶음의 둘째 덩어리에서 같은 클릭을 넣었다. ③ dp 묶음이 step 밖에서 던지게 했다. ④ `b.close()` 앞에서 던지게 했다.
   결과는 1259/1263 이고 exit 2 다. 실패는 넣은 넷뿐이다. tree 의 뒤 덩어리 · dptime · system 은 그대로 돌았고, 바깥 catch 가 결과를 모두 찍었다.
 - Figma 미반영 525건(그대로).
+
+2026-11-14 일본어 한자 서체 — Pretendard JP(사람의 요청 '한국어 · 영어 · 일본어 지원 제품', 결정 셋) — behave 1356 → 1360(`behave.font.js` 4) · react 792+6 → 793+6(`tests/font-jp.test.ts` 1). contrast · advisory · pages 수는 그대로(색 변화 없음).
+- **잰 근거:** `PretendardVariable.woff2` 는 한글 · 라틴 · 숫자 · 히라가나 · 가타카나 · 전각 괄호는 그리지만 **한자가 하나도 없다**(CDP `CSS.getPlatformFontsForNode`).
+  그래서 일본어의 한자만 시스템 서체가 그렸다 — 맥 Apple SD Gothic Neo(한국식 자형 · 다른 디자인), Windows 는 설치된 서체에 따라 다름. Date Picker ja-JP 의 '2026年9月' 도 한 줄에 서체 둘이었다.
+- **Pretendard 뒤에 한자용으로**(사람의 결정 — `:lang(ja)` 에서만 · 시스템 일본어 서체 대신) — `--font-sans:"Pretendard","Pretendard JP",…`. 한글 · 라틴 · 가나는 지금처럼 Pretendard, 한자만 Pretendard JP.
+  Pretendard JP 의 범위에는 한글이 0자라(한자 12,747 · 히라가나 93 · 가타카나 96) Pretendard 를 대신할 수 없다. 한국어 문장 안의 한자도 일본식 자형이 되는 것이 대가다(보안 콘솔에서는 드묾 — 한국식은 `ss05`).
+- **조각 119개 · 합계 4.7MB**(3 ~ 121KB) — 조각마다 `unicode-range` 라 그 범위의 한자가 화면에 나올 때만 받는다. 잰 값: Button 페이지 0개, Date Picker 페이지 7개.
+- **내려받아 직접 호스팅**(사람의 결정 — 폐쇄망 제품) — `orioncactus/pretendard@v1.3.9` 의 `packages/pretendard-jp/dist/web/variable/woff2-dynamic-subset/` 와 `dist/web/variable/pretendardvariable-jp-dynamic-subset.css`(unicode-range), 라이선스는 OFL 1.1(`fonts-jp/OFL.txt` — 서체와 함께 배포).
+  family 는 원본의 'Pretendard JP Variable' 을 "Pretendard JP" 로 바꿨다(Pretendard 쪽도 "Pretendard").
+- **사이트는 모든 페이지가 `assets/font-jp.css` 를 링크**(ja-JP 예제 · Typography 일본어 견본), **패키지는 선택 파일**(사람의 결정) `import "@jiran/ds-react/font-jp.css"`(exports · README · MIGRATION). 불러오지 않으면 이름을 건너뛰어 전과 같다.
+- **크기:** 높이는 그대로다(달력 339 · 제목 28 · 버튼 32 — 전후 같음). 한자 폭만 글자당 약 0.9px 넓어졌다('2026年9月' 94.09 → 96.41, '今日' 39.38 → 41.11). 1440 라이트 · 다크 · 390 캡처로 보았다.
+- **verify 더함:** `--font-sans` 의 Pretendard 바로 뒤 "Pretendard JP" · 조각마다 family · 파일 · `unicode-range` · 한글 범위(U+AC00–D7A3) 없음 · OFL 동반 · 모든 페이지 링크 · Typography 문서의 '조각 N개' = 실제 수. `sync-css.mjs` 도 조각 파일이 다 있는지 · 서체 순서를 본다.
+- **behave.font:** 글자별 서체(한자 = JP 만, 가나 · 한글 · 숫자 = Pretendard 만, '2026年9月' = 5 + 2) · 가변 굵기(300 < 400 < 700 잉크 — 합성 굵기로는 300 과 400 이 같다) · 새 컨텍스트에서 조각 요청(한자 없는 페이지 0 · Date Picker 는 전체의 1/4 미만) · ja-JP 달력 크기.
+- 음성 시험: 사이트 6건(서체 순서 · unicode-range 지움 · 링크 지움 · 조각 하나 뺌 · 한글 범위 넣음 · 문서 수 틀림) 모두 verify 가 잡았다. behave 는 화면에 드러나는 둘(서체 순서 · 링크)을 잡고, 나머지 넷은 화면이 같아 verify 만 잡는다.
+  React 2건(exports 지움 · 조각 하나 지움) 모두 실패로 잡혔다.
+- **보지 못한 것:** Windows · 다른 브라우저(Playwright Chromium 맥에서만 쟀다), 실제 일본어 제품 화면. Figma 에는 Pretendard JP 가 없다(플러그인 환경에 Pretendard 계열 0건) — 반영 보류 규칙대로. Figma 미반영 525건(그대로).
 
 `advisory 449` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

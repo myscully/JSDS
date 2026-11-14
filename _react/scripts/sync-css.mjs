@@ -77,4 +77,16 @@ fs.writeFileSync(path.join(dist, "scale.css"), `/* @jiran/ds-react — 화면 �
 ${scale}
 `);
 fs.copyFileSync(path.join(BUILD, "PretendardVariable.woff2"), path.join(dist, "fonts", "PretendardVariable.woff2"));
+/* 선택: 일본어 한자용 Pretendard JP(2026-11-14) — import "@jiran/ds-react/font-jp.css". 사이트와 같은 원본(font-jp.src.css)이고 url 은 dist 기준 fonts/jp/ 로 같다.
+   style.css 의 --font-sans 가 이미 "Pretendard JP" 를 Pretendard 뒤에 두므로, 불러오지 않으면 그 이름은 건너뛴다 */
+{
+  const jp = fs.readFileSync(path.join(BUILD, "font-jp.src.css"), "utf8");
+  const files = [...jp.matchAll(/url\("fonts\/jp\/([^"]+)"\)/g)].map((m) => m[1]);
+  if (!files.length || !/--font-sans:"Pretendard","Pretendard JP"/.test(tokens)) throw new Error("sync-css: font-jp.src.css 의 조각이 없거나 --font-sans 에 Pretendard JP 가 없다");
+  fs.rmSync(path.join(dist, "fonts", "jp"), { recursive: true, force: true });
+  fs.cpSync(path.join(BUILD, "fonts-jp"), path.join(dist, "fonts", "jp"), { recursive: true });
+  const missing = files.filter((f) => !fs.existsSync(path.join(dist, "fonts", "jp", f)));
+  if (missing.length) throw new Error(`sync-css: font-jp 조각 파일 없음 ${missing.join(" ")}`);
+  fs.writeFileSync(path.join(dist, "font-jp.css"), jp.replace("/* Pretendard JP", "/* @jiran/ds-react — 생성 파일, 수정하지 마세요. Pretendard JP"));
+}
 console.log(`style.css: ${(out.length / 1024).toFixed(1)} KB`);

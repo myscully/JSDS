@@ -2044,6 +2044,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 67 · behave.number.js", async () => {
     await require("./behave.number.js")({ page, ok, go });
   });
+  await part("part 67b · behave.font.js", async () => {
+    await require("./behave.font.js")({ page, ok, go });   // 일본어 한자용 Pretendard JP(2026-11-14)
+  });
   await part("part 68 · components/button.html", async () => {
 
     // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작

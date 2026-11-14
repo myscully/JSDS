@@ -1,6 +1,6 @@
 {
   "version": "v0.8",
-  "generatedAt": "2026-11-14T09:01:42.758Z",
+  "generatedAt": "2026-11-14T11:59:34.438Z",
   "figma": "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV",
   "tokens": {
     "light": {
@@ -307,7 +307,7 @@
       "--motion-fast": "120ms ease-out",
       "--motion-base": "200ms ease-in-out",
       "--motion-slow": "320ms cubic-bezier(.2,.8,.2,1)",
-      "--font-sans": "\"Pretendard\",-apple-system,\"Apple SD Gothic Neo\",\"Noto Sans KR\",sans-serif",
+      "--font-sans": "\"Pretendard\",\"Pretendard JP\",-apple-system,\"Apple SD Gothic Neo\",\"Noto Sans KR\",sans-serif",
       "--font-mono": "ui-monospace,\"SF Mono\",Menlo,Consolas,\"D2Coding\",monospace",
       "--font-size-11": "max(0.6875rem,11px)",
       "--font-size-12": "max(0.75rem,12px)",

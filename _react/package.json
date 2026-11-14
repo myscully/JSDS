@@ -28,7 +28,8 @@
     "./style.css": "./dist/style.css",
     "./fonts/*": "./dist/fonts/*",
     "./package.json": "./package.json",
-    "./scale.css": "./dist/scale.css"
+    "./scale.css": "./dist/scale.css",
+    "./font-jp.css": "./dist/font-jp.css"
   },
   "scripts": {
     "gen": "node scripts/gen-icons.mjs && node scripts/sync-css.mjs && node scripts/sync-chart.mjs",
