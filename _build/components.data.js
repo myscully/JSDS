@@ -97,6 +97,28 @@ const tpField = (o) => {
   return `<div class="field timepicker${o.cls ? " " + o.cls : ""}"${attrs ? " " + attrs : ""}${o.style ? ` style="${o.style}"` : ""}><label for="${o.id}">${o.label}${o.req ? " <em>*</em>" : ""}</label><div class="affix"><input id="${o.id}" type="text" inputmode="numeric" autocomplete="off" placeholder="${o.sec ? "HH:mm:ss" : "HH:mm"}"${o.value ? ` value="${o.value}"` : ""}${o.req ? " required" : ""}${bad ? ' aria-invalid="true"' : ""}${help ? ` aria-describedby="${o.id}-help"` : ""}${o.off ? " disabled" : ""}><button type="button" class="tp-btn" aria-label="${o.label} 선택" aria-haspopup="dialog" aria-expanded="false"${o.off ? " disabled" : ""}>${I("clock")}</button></div>${help ? `<span class="help" id="${o.id}-help"${o.live ? ' aria-live="polite"' : ""}>${o.help}</span>` : ""}</div>`;
 };
 
+/* Tree 마크업(2026-11-14) — items: {label, value, icon, meta, children, open, selected, checked, disabled, lazy}. 상위의 aria-checked 는 하위에서 계산한다(빌드가 검사하는 규칙과 같게).
+   o: id(라벨 id 접두), label(트리 이름), checkable, attrs */
+const treeState = (it) => it.children ? (() => { const k = it.children.map(treeState); return k.every((x) => x === "true") ? "true" : k.every((x) => x === "false") ? "false" : "mixed"; })() : String(!!it.checked);
+const treeItems = (items, o, lv, path) => items.map((it, n) => {
+  const id = `${o.id}-${path}${n}`, par = !!(it.children || it.lazy), st = o.checkable ? treeState(it) : null;
+  const a = [`aria-level="${lv}"`, `tabindex="${it.focus ? 0 : -1}"`, par && `aria-expanded="${it.open ? "true" : "false"}"`, par && `aria-labelledby="${id}"`, it.lazy && "data-lazy", it.selected && `aria-selected="true"`, st && `aria-checked="${st}"`, it.disabled && `aria-disabled="true"`, it.value && `data-value="${it.value}"`, it.demoFail && "data-demo-fail"].filter(Boolean).join(" ");
+  return `<li class="tree-item" role="treeitem" ${a}><div class="tree-row"><span class="tree-toggle" aria-hidden="true">${par ? I("chevron-right", 16) : ""}</span>${o.checkable ? `<span class="tree-check" aria-hidden="true"></span>` : ""}${it.icon ? I(it.icon, 16) : ""}<span class="tree-label"${par ? ` id="${id}"` : ""}>${it.label}</span>${it.meta != null ? `<span class="tree-meta">${it.meta}</span>` : ""}</div>${it.children ? `<ul class="tree-group" role="group"${it.open ? "" : " hidden"}>${treeItems(it.children, o, lv + 1, `${path}${n}-`)}</ul>` : ""}</li>`;
+}).join("");
+const treeHtml = (items, o) => {
+  const first = (function f(xs) { for (const x of xs) { if (x.selected) return x; if (x.open && x.children) { const y = f(x.children); if (y) return y; } } return null; })(items) || items[0];
+  first.focus = true;
+  return `<ul class="tree${o.checkable ? " checkable" : ""}" role="tree" aria-label="${o.label}"${o.checkable ? ` aria-multiselectable="true"` : ""}${o.attrs ? " " + o.attrs : ""}>${treeItems(items, o, 1, "")}</ul>`;
+};
+const TREE_ORG = () => [
+  { label: "본사", icon: "building", meta: 128, open: true, children: [
+    { label: "보안팀", icon: "users", meta: 24, open: true, children: [{ label: "관제 파트", icon: "users", meta: 12, selected: true }, { label: "대응 파트", icon: "users", meta: 12 }] },
+    { label: "개발팀", icon: "users", meta: 56, children: [{ label: "플랫폼 파트", icon: "users", meta: 30 }, { label: "앱 파트", icon: "users", meta: 26 }] },
+    { label: "경영지원팀", icon: "users", meta: 48 },
+  ] },
+  { label: "부산 지사", icon: "building", meta: 31, children: [{ label: "영업팀", icon: "users", meta: 19 }, { label: "기술지원팀", icon: "users", meta: 12 }] },
+];
+
 /* Date Picker 필드 — Text Field 셸(.field + .affix) 위 입력 하나와 달력 버튼. 입력 형식은 단위마다 고정(YYYY. MM. DD · YYYY. MM · YYYY), locale 과 무관(사람의 결정 2026-11-09).
    opts: id, label, value, help, attrs(data-* 문자열), cls(sm · lg · error), unit, range, invalid, disabled, readonly */
 const dpField = (o) => {
@@ -2984,6 +3006,60 @@ sudo systemctl enable --now js-agent</code></pre>
     ],
     props: [[".timepicker", "class", "—", ".field 와 함께. React <code>TimePicker</code>"], ["data-seconds", "attr", "—", "HH:mm:ss. React <code>seconds</code>"], ["data-step", "attr", "1", "분 열의 간격(1~59 정수). React <code>step</code>"], ["data-min · data-max", "attr", "—", "HH:mm 범위. 밖 칸은 고를 수 없고 입력은 오류로 알립니다. React <code>min</code> · <code>max</code>"], ["data-messages", "attr", "—", "오류 문구 JSON — Date Picker 와 같은 키(incomplete · invalidTime · min · max · timeSubject). React <code>messages</code>"], ["data-labels", "attr", "—", "패널 · 열 이름 JSON(dialog · hour · minute · second). React <code>labels</code>"], ["data-validity", "attr(출력)", "—", "empty · incomplete · invalid · min · max · valid"], ["ds:time", "event", "—", "확정할 때 글자가 바뀌면 <code>{value, text, validity}</code>. value 는 미완성 · 잘못된 시각이면 null. React <code>onChange(value, {text, validity})</code>"]],
     spec: [["Size", "Text Field 와 같음 · sm 32 · md 40 · lg 48 · 폭 160"], ["Panel", "열 폭 56 · 칸 높이 32 · 칸 8개 높이 · 위아래 4 · 열 사이 1px 선"], ["Option", "Label 1/Normal 14/20 · 고른 칸 surface/brand/primary + 흰 글자 · 끈 칸 foreground/disable/primary"], ["Format", "24시간제 HH:mm · HH:mm:ss"]],
+  },
+  "tree": {
+    status: "ready", react: ["Tree"], css: [".tree", ".tree-group", ".tree-item", ".tree-row", ".tree-toggle", ".tree-check", ".tree-label", ".tree-meta", ".tree-view", ".tree-hit", ".tree-empty"], borrows: [".searchbar", ".spinner"],
+    desc: "조직 · 자산 그룹처럼 상하 관계가 있는 항목을 접고 펼치며 보여 줍니다. 하나를 골라 오른쪽 내용을 바꾸거나, 체크박스로 여러 개를 고릅니다.",
+    choose: [
+      ["언제 쓰는가", "조직이나 자산 그룹, 정책 폴더처럼 단계가 있는 항목을 보여 주고 그 안에서 고르게 할 때 씁니다. 하나를 골라 오른쪽 내용을 바꾸는 탐색에도, 정책을 적용할 대상을 여러 개 고르는 데에도 씁니다."],
+      ["비슷한 것", "화면 사이를 옮기는 메뉴는 Navigation 입니다. 단계가 하나뿐이면 List 나 Checkbox 묶음으로 충분하고, 값 자리에서 하나를 고르는 것은 Select 나 Combobox 입니다. 표의 행 아래에 자세한 내용을 펼치는 것은 Data Table 의 행 펼침입니다."],
+      ["Placement", "화면 왼쪽 목록 패널 · 적용 대상을 고르는 대화상자 · Side Panel"],
+    ],
+    principles: [
+      ["선택", "탐색형은 클릭이나 Enter · Space 로 하나를 고릅니다. 포커스를 옮기는 것만으로는 고르지 않습니다 — 화살표로 지나갈 때마다 오른쪽 내용을 다시 불러오지 않게 하려는 것입니다."],
+      ["펼치기", "셰브론을 누르거나 오른쪽 · 왼쪽 화살표로 펼치고 접습니다. 행을 누르면 고르기만 하고 펼치지 않습니다."],
+      ["체크박스형", "<code>.checkable</code> 이면 상위를 켤 때 켤 수 있는 하위가 모두 따라 켜지고, 일부만 켜지면 상위가 부분 선택으로 보입니다. 이벤트는 켜진 항목을 모두 싣습니다. 상위만 보낼지 하위만 보낼지는 제품이 정합니다."],
+      ["끈 항목", "고르거나 켤 수 없지만 포커스는 받고 펼칠 수 있습니다. 이유는 행 끝 글자로 적습니다. 체크박스형에서 끈 하위는 상위를 켜도 그대로라 상위가 부분 선택으로 남고, 그 상위를 다시 누르면 꺼집니다."],
+      ["불러오기", "<code>data-lazy</code> 항목은 펼칠 때 <code>ds:tree-load</code> 를 냅니다. 제품은 <code>resolve</code> 로 하위를 넘기거나 <code>reject</code> 로 실패를 알려야 합니다. 불러오는 동안 셰브론 자리에 스피너가 돌고, 실패하면 접힌 채 줄 끝에 알리며 다시 펼치면 다시 부릅니다."],
+      ["검색", "<code>.tree-view</code> 위 Search 에 치면 맞는 항목과 그 상위만 남기고 펼칩니다. 맞는 글자는 굵게 보이고 결과 수는 화면 낭독기에 알립니다. 지우면 검색 전 펼침으로 돌아갑니다. 아직 불러오지 않은 하위는 찾지 않으므로, 큰 트리는 서버 검색을 제품이 붙입니다."],
+      ["키보드", "위 · 아래 화살표로 보이는 항목을 옮기고 Home · End 로 처음과 끝으로 갑니다. 글자를 치면 그 글자로 시작하는 항목으로 가고, * 는 같은 단계를 모두 펼칩니다. Tab 칸은 트리 전체에 하나이고, 검색칸에서 아래 화살표를 누르면 첫 항목으로 갑니다."],
+      ["구성", "8단계까지 들여씁니다. 긴 이름은 자르지 않고 줄을 바꿉니다. 행 안에는 버튼이나 링크를 두지 않고, 항목에 대한 동작은 트리 밖 툴바나 오른쪽 내용에 둡니다. 끌어다 놓아 옮기는 기능은 없으므로 옮기기도 오른쪽 내용의 동작으로 합니다."],
+    ],
+    thumb: `<div style="width:200px">${treeHtml([{ label: "본사", open: true, children: [{ label: "보안팀", selected: true }, { label: "개발팀" }] }], { id: "tth", label: "조직" })}</div>`,
+    examples: [
+      { id: "default", group: "default", title: "Default", desc: "하나를 골라 오른쪽 내용을 바꾸는 탐색형입니다. 셰브론으로 펼치고, 행을 누르면 고릅니다. 행 끝에는 인원 같은 짧은 수를 둘 수 있습니다.", html: `
+        <div style="width:280px">${treeHtml(TREE_ORG(), { id: "tr1", label: "조직" })}</div>` },
+      { id: "checkable", group: "variant", title: "Checkbox", desc: "정책을 적용할 대상을 여러 개 고릅니다. 상위를 켜면 하위가 따라가고, 일부만 켜지면 상위가 부분 선택으로 보입니다.", html: `
+        <div style="width:280px">${treeHtml([{ label: "전체 조직", open: true, children: [
+          { label: "본사", open: true, children: [
+            { label: "보안팀", children: [{ label: "관제 파트", checked: true }, { label: "대응 파트", checked: true }] },
+            { label: "개발팀", children: [{ label: "플랫폼 파트" }, { label: "앱 파트" }] },
+            { label: "경영지원팀", checked: true },
+          ] },
+          { label: "부산 지사", children: [{ label: "영업팀" }, { label: "기술지원팀" }] },
+        ] }], { id: "tr2", label: "적용 대상", checkable: true })}</div>` },
+      { id: "search", group: "variant", title: "Search", desc: "트리 위 Search 에 치면 맞는 항목과 그 상위만 남기고 펼칩니다. 지우면 검색 전 펼침으로 돌아갑니다.", html: `
+        <div class="tree-view" style="width:280px">
+          <div class="searchbar sm" role="search">${I("search")}<input type="search" placeholder="그룹 이름" aria-label="자산 그룹 검색"></div>
+          ${treeHtml([
+            { label: "서버", icon: "server", open: true, children: [{ label: "웹 서버", icon: "server", children: [{ label: "WEB-01" }, { label: "WEB-02" }] }, { label: "DB 서버", icon: "server", children: [{ label: "DB-01" }, { label: "DB-백업" }] }] },
+            { label: "단말", icon: "device-desktop", children: [{ label: "본사 PC", icon: "device-desktop", children: [{ label: "보안팀 PC" }, { label: "개발팀 PC" }] }, { label: "지사 PC", icon: "device-desktop" }] },
+          ], { id: "tr3", label: "자산 그룹" })}
+        </div>` },
+      { id: "lazy", group: "variant", title: "Load on Expand", desc: "하위가 많으면 펼칠 때 불러옵니다. 불러오는 동안 셰브론 자리에 스피너가 돌고, 실패하면 줄 끝에 알립니다. 이 예제의 부산 IDC 는 실패를 흉내 냅니다.", html: `
+        <div style="width:280px">${treeHtml([
+          { label: "본사 IDC", icon: "server", lazy: true, value: "idc-seoul" },
+          { label: "부산 IDC", icon: "server", lazy: true, value: "idc-busan", demoFail: true },
+        ], { id: "tr4", label: "서버 위치" })}</div>` },
+      { id: "disabled", group: "state", title: "Disabled", desc: "권한이 없는 항목은 끕니다. 포커스는 받고 펼칠 수 있지만 고르거나 켤 수 없고, 이유를 행 끝에 적습니다.", html: `
+        <div style="width:280px">${treeHtml([{ label: "본사", open: true, children: [
+          { label: "보안팀", checked: true },
+          { label: "개발팀" },
+          { label: "외부 협력사", disabled: true, meta: "권한 없음" },
+        ] }], { id: "tr5", label: "적용 대상", checkable: true })}</div>` },
+    ],
+    props: [[".tree", "class", "—", "<code>ul[role=tree][aria-label]</code>. React <code>Tree</code>"], [".checkable", "class", "—", "체크박스형 — <code>aria-multiselectable</code> · 항목마다 <code>aria-checked</code>. React <code>checkable</code>"], [".tree-item", "class", "—", "<code>li[role=treeitem][aria-level]</code>. 하위가 있으면 <code>aria-expanded</code> 와 <code>aria-labelledby</code>(.tree-label 의 id) · 하위 <code>ul.tree-group[role=group]</code>"], ["aria-selected", "attr", "—", "탐색형에서 고른 항목 하나만 true. React <code>selected</code> · <code>defaultSelected</code>"], ["aria-checked", "attr", "—", "체크박스형 true · false · mixed. 상위는 하위에서 계산합니다. React <code>checked</code> · <code>defaultChecked</code>"], ["aria-disabled", "attr", "—", "고르거나 켤 수 없음. React 항목의 <code>disabled</code>"], ["data-lazy", "attr", "—", "펼칠 때 하위를 불러옵니다. React 항목의 <code>lazy</code> + <code>onLoad</code>"], ["data-value", "attr", "글자", "이벤트에 실을 값. React 항목의 <code>value</code>"], [".tree-meta", "class", "—", "행 끝 짧은 글자 — 인원 · 개수 · 끈 이유. React 항목의 <code>meta</code>"], [".tree-view", "class", "—", "Search + Tree 묶음 — 검색 필터. React <code>searchable</code>"], ["data-labels", "attr", "—", "문구 JSON(failed · failedStatus · results · empty). React <code>labels</code>"], ["ds:tree-select", "event", "—", "<code>{value, label}</code>. React <code>onSelect(value)</code>"], ["ds:tree-expand", "event", "—", "<code>{value, expanded}</code>. React <code>onExpandedChange(values, {value, expanded})</code>"], ["ds:tree-check", "event", "—", "<code>{value, checked, values}</code> — values 는 켜진 모든 항목. React <code>onCheckedChange(values, {value, checked})</code>"], ["ds:tree-load", "event", "—", "<code>{value, resolve(items), reject(message)}</code> — items 는 <code>{label, value, children, lazy, disabled, meta}</code>. React <code>onLoad(value)</code> 가 하위를 돌려주는 Promise"]],
+    spec: [["Size", "행 32 · padding 6/8 · 들여쓰기 단계마다 20 · 8단계까지 · 모서리 radius/sm"], ["Label", "Label 1/Normal 14/20 · 행 끝 글자 Caption 1 12 foreground/neutral/secondary · 검색에 맞는 글자 700"], ["Selected", "surface/brand/subtle 면 · foreground/brand/primary 글자 600 · 아이콘도 brand"], ["State", "hover surface/neutral/tertiary · 누름 surface/neutral/strong · 끈 항목 foreground/disable/primary · 포커스는 행 안쪽 1px 외곽선"], ["Checkbox", "16 · Checkbox 와 같은 면과 체크 · 부분 선택은 가로줄"], ["Icon", "셰브론 16 foreground/neutral/tertiary · 펼치면 90° · 불러오는 동안 스피너 12"]],
   },
 };
 

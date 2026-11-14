@@ -44,7 +44,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 75 · verify 0/0 · contrast 1452쌍 실패 0 · advisory 449 · behave 1328/1328 · react 764+6 · tsc 0
+pages 76 · verify 0/0 · contrast 1452쌍 실패 0 · advisory 449 · behave 1345/1345 · react 779+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -602,6 +602,27 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 기존 단정 고침 2: 사이트 h1(behave.type), 상단 내비 선택(behave.revise — 면 · 흰 글자에서 brand 글자 · 2px 선 · 면 없음 · hover 같음 · 다른 메뉴 투명 선 · 간격 8 · 모서리 0 · 메뉴 높이 · 위치 같음, 라이트 · 다크). 새 단정 2: Tag sm 크기 · 여백 · 높이, Count 점 · 숫자 배지 위치.
 - 음성 시험 8건(h1 36 · 선택 선 · hover · 투명 선 · 간격 · 모서리 · Tag sm 옛 값 · 점 규칙) 모두 잡혔다. 첫 회 2건을 못 잡았다 — 선택 선 변형은 같은 글이 Tab accent 규칙에 먼저 있어 엉뚱한 곳을 바꿨고(선택자까지 넣어 다시 잡음), `a.on:hover` 선택자는 명시도가 `:hover` 규칙과 같고 뒤에 있어 쓸모없는 선택자라 지웠다.
 - MIGRATION 에 보이는 모양 변화 셋(상단 내비 · Tag sm · Count 점)을 적었다. 사이트 h1 은 문서 셸 전용이라 패키지와 무관하다. Figma 미반영 523건(그대로 — 상단 내비 선택 · Tag sm · Count 점 위치는 audit 대조 밖, 일괄 반영 때 그린다).
+
+2026-11-14 Tree 신규 — 1.0 뒤로 미뤘던 것을 앞당김(사람의 결정 넷) — pages 75 → 76 · 컴포넌트 44 → 45 · behave 1328 → 1345(`behave.tree.js` 17) · react 764+6 → 779+6(`tests/tree.test.tsx` 10 · 예제 275 → 280 에 따른 구조 비교 5). contrast · advisory 수는 그대로(새 색 쌍 없음 — 기존 토큰만 씀).
+- **탐색형이 기본, 체크박스형은 옵션**(사람의 결정) — 사이트 `ul.tree[role=tree][aria-label] > li.tree-item[role=treeitem][aria-level] > .tree-row + ul.tree-group[role=group]`, React `Tree`. WAI-ARIA tree 이고 Tab 칸은 트리에 하나(roving tabindex)다.
+  탐색형은 클릭 · Enter · Space 로 하나를 고르고 `ds:tree-select {value, label}` · `onSelect` 를 낸다. 체크박스형은 `.checkable[aria-multiselectable]` 에 항목마다 `aria-checked` 를 달고, 상위가 하위를 따라가며 일부만 켜지면 mixed 다. `ds:tree-check {value, checked, values}` · `onCheckedChange` 의 values 는 켜진 모든 항목이고 상위도 들어간다.
+  셰브론은 펼치기만, 행은 고르기 · 켜기만 한다. 하위가 있는 항목은 `aria-labelledby` 로 제 라벨만 가리킨다 — 그러지 않으면 이름에 하위 글자까지 들어간다.
+- **하위 불러오기는 상태와 이벤트만**(사람의 결정) — `li[data-lazy]` 를 펼치면 `ds:tree-load {value, resolve(items), reject(msg)}` · React `onLoad(value) => Promise`. 조회는 제품 몫이다. 불러오는 동안 셰브론 자리에 스피너와 `aria-busy` 가 붙고, 실패하면 접힌 채 줄 끝에 '불러오지 못했습니다' 를 보이고 알림 영역에도 읽힌다. 다시 펼치면 다시 부른다.
+- **검색 필터를 넣음**(사람의 결정) — `.tree-view > .searchbar.sm + .tree` · React `searchable`. 맞는 항목과 그 상위만 남겨 펼치고 맞는 글자를 굵게 한다. 초성으로도 찾고, 결과 수를 알리며, 하나도 없으면 안내 문구를 보인다. 비우면 검색 전 펼침으로 돌아가고, 검색칸에서 ↓ 를 누르면 첫 항목으로 간다. 아직 불러오지 않은 하위는 찾지 않는다(서버 검색은 제품 몫).
+- **끌어 옮기기는 넣지 않음**(사람의 결정).
+- **제안을 사람이 확인한 기본값(여섯 다 유지 — 크기 · 줄바꿈 · 끈 항목 · 고른 행 · 포커스로 고르지 않음 · `*` 건너뜀, 같은 날 선택지로 물음):**
+  - 크기: 행 32 · 단계마다 들여쓰기 20 · 8단계까지(verify) · 글자 Label 1/Normal 14/20 · 체크 상자 16.
+  - 모양: 고른 행은 brand subtle 면과 brand 글자 600, hover 는 tertiary 면, 포커스 링은 행 안쪽 1px. 긴 이름은 자르지 않고 줄바꿈한다.
+  - 동작: 포커스만으로는 고르지 않는다. `*` 는 같은 단계를 모두 펼치되 불러와야 하는 항목은 건너뛴다(한꺼번에 조회하지 않게). 글자로 찾기는 0.5초 버퍼이고 초성으로도 찾는다.
+  - 끈 항목은 포커스 · 펼치기는 되지만 고르거나 켤 수 없다. 상위를 켜도 끈 하위는 꺼진 채라 상위가 mixed 로 남고, 다시 누르면 꺼진다. 끈 이유 글자는 tertiary(Card 의 끈 이유와 같은 결정).
+- **verify 더함:** role · 이름, 체크박스형과 aria-multiselectable, 트리 안 링크 · 버튼 · 입력 금지, aria-level = 단계 · 8단계까지, 하위 목록 role, 접힌 항목의 하위만 hidden, 하위가 있거나 불러올 항목만 aria-expanded, data-lazy 는 하위가 없을 때만, 상위의 aria-labelledby, 상위 aria-checked = 하위에서 계산한 값, Tab 칸 하나, 고른 항목 하나 · 체크박스형에는 aria-selected 없음.
+- **측정에서 드러나 고친 것:** 상위를 다시 눌러도 꺼지지 않았다 — 끈 하위가 있으면 상위 자신이 mixed 라 '모두 켜짐' 판정에서 늘 빠졌다. 끝 항목만 보게 고쳤다(사이트 · React). 끈 이유 글자가 끈 글자색과 같아 거의 보이지 않았다(tertiary 로). verify 의 트리 정규식이 `tree-group` 까지 잡아 거짓 실패 111건이 났다.
+- 음성 시험: 사이트 CSS 6 · ds.js 8 · verify 4 · React 8건. 첫 회 5건을 못 잡았다.
+  - 변형이 잘못된 3건 — 초성 찾기 변형은 같은 글이 Select 쪽에 먼저 있어 엉뚱한 곳을 바꿨고, 체크 상태 변형은 바꿀 글을 찾지 못했고, Tab 칸 변형은 실제로 칸이 늘지 않았다. 고쳐 다시 깨서 잡았다.
+  - `*` 가 불러올 항목까지 펼치는 변형은 사이트 단정에 그런 경우가 없어 단정을 더해 잡았다.
+  - 접을 때 하위에 있던 포커스를 상위로 옮기는 코드는 쓸모가 없어 지웠다(사이트 · React). 셰브론을 누르면 포커스가 이미 상위로 가기 때문이다.
+- 전체 게이트에서 tsc 1건 — `TreeNode.icon` 이 string 이라 Icon 이름 타입에 맞지 않았다(`IconName` 으로). vitest 는 타입을 안 봐서 통과했다.
+- Figma 미반영 523 → 524건(Tree Spec 카드 없음). Tree 는 Figma 에 없다 — 일괄 반영 때 그린다.
 
 `advisory 449` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

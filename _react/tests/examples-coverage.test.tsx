@@ -19,6 +19,6 @@ describe("예제 커버리지", () => {
   it("모든 사이트 예제에 React 예제가 있다", () => {
     const missing = expected.filter((k) => !files.includes(k));
     expect(missing, `누락 ${missing.length}/${expected.length}`).toEqual([]);
-    expect(expected.length).toBe(275); // components 256 + patterns 19 (2026-11-13 Avatar Group 예제 셋 · Time Picker 예제 여덟)
+    expect(expected.length).toBe(280); // components 261 + patterns 19 (2026-11-14 Tree 예제 다섯)
   });
 });

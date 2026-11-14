@@ -5,7 +5,7 @@
 const FIGMA = "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV";
 const VERSION = "v0.8";
 /* 사이드바·헤더에 N 배지를 붙일 페이지 */
-const NEW = new Set(["home/getting-started", "foundations/colors", "foundations/icons", "resources/design-token", "components/select", "foundations/writing", "foundations/interaction", "components/combobox", "components/side-panel"]);
+const NEW = new Set(["home/getting-started", "foundations/colors", "foundations/icons", "resources/design-token", "components/select", "foundations/writing", "foundations/interaction", "components/combobox", "components/side-panel", "components/tree"]);
 const SITE = {
   home: { title: "Home", desc: "지란지교시큐리티 디자인 시스템 소개", pages: { overview: "Overview", "getting-started": "Getting started", about: "About", principles: "UX Principles" } },
   foundations: { title: "Foundations", desc: "모든 디자인 요소의 기반이 되는 가장 원자적인 단위", pages: { overview: "Overview" }, groups: [["Base material", [["colors", "Colors"], ["elevation", "Elevation"], ["grid", "Grid"], ["icons", "Icons"], ["interaction", "Interaction"], ["typography", "Typography"], ["writing", "Writing"]]]] },
@@ -14,7 +14,7 @@ const SITE = {
     ["Selection Controls", [["checkbox", "Checkbox"], ["chip", "Chip"], ["combobox", "Combobox"], ["radio-button", "Radio Button"], ["select-button", "Select Button"]]],
     ["", [["search", "Search"], ["select", "Select"], ["side-panel", "Side Panel"], ["slider", "Slider"], ["steps", "Steps"], ["switch", "Switch"], ["tab", "Tab"]]],
     ["Table", [["data-table", "Data Table"], ["table", "Table"]]],
-    ["", [["tag", "Tag"], ["text-field", "Text Field"], ["time-picker", "Time Picker"], ["tooltip", "Tooltip"], ["top-navigation", "Top Navigation"]]],
+    ["", [["tag", "Tag"], ["text-field", "Text Field"], ["time-picker", "Time Picker"], ["tooltip", "Tooltip"], ["top-navigation", "Top Navigation"], ["tree", "Tree"]]],
   ] },
   patterns: { title: "Patterns", desc: "반복되는 업무 단위와 문제를 해결하는 가이드라인", isNew: true, pages: { overview: "Overview" }, groups: [
     ["Common UI", [["input-form", "입력 폼"], ["terms-agreement", "약관 동의"], ["notes", "유의사항"]]],

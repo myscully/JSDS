@@ -250,6 +250,49 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (/data-unit="/.test(at)) fails.push(`${f}: data-time 은 일 단위 Date Picker 에만 씁니다(Date Picker › Time)`);
         if (!input || !new RegExp(`placeholder="YYYY\\. MM\\. DD HH:mm${sec ? ":ss" : ""}(?: ~ [^"]*)?"`).test(input[0])) fails.push(`${f}: 시각까지 받는 Date Picker 의 placeholder 는 형식 그대로(Date Picker › Time)`);
       }
+      /* Tree 원칙(2026-11-14) — role · 이름 · 단계 · 펼침과 하위 · 상위의 aria-labelledby · 체크 상태 계산 · 고른 항목 하나 · Tab 칸 하나 · 트리 안 다른 조작 금지 */
+      for (const m of pv.matchAll(/<ul class="tree((?: [^"]*)?)"([^>]*)>/g)) {
+        const at = m[2], chk = /\bcheckable\b/.test(m[1]);
+        let depth = 0, end = m.index; const re = /<(\/?)ul\b[^>]*>/g; re.lastIndex = m.index;
+        for (let t; (t = re.exec(pv));) { depth += t[1] ? -1 : 1; if (!depth) { end = t.index; break; } }
+        const body = pv.slice(m.index + m[0].length, end), bad = (msg) => fails.push(`${f}: ${msg}(Tree)`);
+        if (!/role="tree"/.test(at) || !/aria-label="[^"]+"/.test(at)) bad("트리는 role=\"tree\" 와 aria-label");
+        if (chk !== /aria-multiselectable="true"/.test(at)) bad("체크박스형(.checkable)에만 aria-multiselectable=\"true\"");
+        if (/<(a|button|input|select|textarea)\b/.test(body)) bad("트리 안에 링크 · 버튼 · 입력을 두지 않습니다 — 동작은 트리 밖에");
+        const stack = [], tops = []; let tabs = 0, sels = 0;
+        for (const t of body.matchAll(/<(\/?)(li|ul|span)\b([^>]*)>/g)) {
+          const [, close, tag, a] = t, top = stack[stack.length - 1];
+          if (tag === "li" && !close) {
+            const lv = stack.length + 1, it = { a, lv, group: false, label: null, kids: [] };
+            if (!/class="tree-item"/.test(a) || !/role="treeitem"/.test(a)) bad("항목은 li.tree-item[role=treeitem]");
+            if ((/aria-level="(\d+)"/.exec(a) || [])[1] !== String(lv)) bad(`aria-level 은 단계와 같게 — ${lv}단계`);
+            if (lv > 8) bad("8단계까지");
+            if (/tabindex="0"/.test(a)) tabs++;
+            if (/aria-selected="true"/.test(a)) sels++;
+            stack.push(it);
+          } else if (tag === "ul" && !close && top) {
+            top.group = true;
+            if (!/class="tree-group"/.test(a) || !/role="group"/.test(a)) bad("하위 목록은 ul.tree-group[role=group]");
+            if (/\bhidden\b/.test(a) !== !/aria-expanded="true"/.test(top.a)) bad("접힌 항목의 하위만 hidden");
+          } else if (tag === "span" && !close && top && /class="tree-label"/.test(a)) {
+            if (top.label === null) top.label = (/\bid="([^"]+)"/.exec(a) || [])[1] || "";
+          } else if (tag === "li" && close && top) {
+            stack.pop();
+            const lazy = /\bdata-lazy\b/.test(top.a), par = top.group || lazy, exp = /aria-expanded="(true|false)"/.test(top.a);
+            if (par !== exp) bad(par ? "하위가 있거나 불러올 항목은 aria-expanded" : "하위가 없는 항목에는 aria-expanded 를 두지 않습니다");
+            if (lazy && top.group) bad("data-lazy 는 아직 하위가 없는 항목에만");
+            if (par && (!top.label || !new RegExp(`aria-labelledby="${top.label}"`).test(top.a))) bad("하위가 있는 항목은 aria-labelledby = .tree-label 의 id — 그렇지 않으면 이름에 하위 글자까지 들어갑니다");
+            const st = (/aria-checked="(true|false|mixed)"/.exec(top.a) || [])[1];
+            if (chk && !st) bad("체크박스형 항목마다 aria-checked");
+            if (!chk && st) bad("aria-checked 는 체크박스형에만");
+            if (chk && top.kids.length) { const want = top.kids.every((x) => x === "true") ? "true" : top.kids.every((x) => x === "false") ? "false" : "mixed"; if (st !== want) bad(`상위의 aria-checked 는 하위에서 — ${want} 여야 합니다`); }
+            (stack.length ? stack[stack.length - 1].kids : tops).push(st);
+          }
+        }
+        if (tabs !== 1) bad(`Tab 칸은 트리에 하나(tabindex="0" ${tabs}개)`);
+        if (chk && sels) bad("체크박스형에는 aria-selected 를 두지 않습니다");
+        if (sels > 1) bad("탐색형에서 고른 항목은 하나");
+      }
       /* Time Picker 원칙(2026-11-13) — 라벨 · placeholder 형식 · 버튼 이름 · data-step 정수 · min ≤ max · 범위는 도움말에 */
       for (const m of pv.matchAll(/<div class="field[^"]*\btimepicker\b[^"]*"[^>]*>/g)) {
         const at = m[0], b = pv.slice(m.index, m.index + 3000), name = ((/<label\b[^>]*>([^<*]+)/.exec(b) || [])[1] || "").trim();
@@ -537,7 +580,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 44) fails.push(`components.json 컴포넌트 ${j.components.length}개(44 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 45) fails.push(`components.json 컴포넌트 ${j.components.length}개(45 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 10) fails.push(`components.json 패턴 ${j.patterns.length}개(10 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }

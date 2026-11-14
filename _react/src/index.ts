@@ -55,6 +55,7 @@ export { Popup, PopupSurface, PopupTitle, PopupBody, PopupActions, PopupForm, ty
 export { Notice, Toast, ToastStack, Banner, ToastProvider, useToast, type NoticeProps, type ToastProps, type ToastStackProps, type BannerProps, type ToastProviderProps, type ToastOptions } from "./components/notification/Notification";
 export { Calendar, DatePicker, DateRangePicker, formatDate, formatMonth, parseDate, parseMonth, parseYear, type CalendarProps, type CalendarView, type DateChangeInfo, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMessages, type DatePickerMode, type DatePickerProps, type DateRange, type DateRangePickerProps, type DateRangeValue, type DateUnit, type DateSideValidity, type DateValidity, type DateValue } from "./components/date-picker/DatePicker";
 export { TimePicker, checkTime, TIME_MESSAGES, TIME_LABELS, type TimePickerProps, type TimeChangeInfo, type TimeValidity, type TimePickerMessages, type TimePickerLabels } from "./components/time-picker/TimePicker";
+export { Tree, TREE_LABELS, type TreeProps, type TreeNode, type TreeLabels } from "./components/tree/Tree";
 
 // E. containers & data
 export { Accordion, AccordionGroup, type AccordionProps, type AccordionGroupProps, type AccordionVariant } from "./components/accordion/Accordion";

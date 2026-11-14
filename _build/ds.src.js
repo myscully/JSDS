@@ -100,6 +100,7 @@
     /* Date Picker — 확정 값을 처음부터 data-* 에 둔다(필드 글자 · 정적 달력에서 읽어). 단독 달력만 host 다 */
     $$(".datepicker", root).forEach(function (h) { S(h); });
     $$(".timepicker", root).forEach(tpInit);
+    $$(".tree", root).forEach(trInit);
     $$(".calendar", root).forEach(function (c) { if (!closest(c, ".datepicker")) S(c); });
   }
 
@@ -1793,6 +1794,165 @@
       fire(h, "ds:upload-retry", { id: li.dataset.id, file: (h._dsFiles || {})[li.dataset.id] });
     } else if (z && !z.parentNode.classList.contains("disabled")) $("input[type=file]", z).click();
   });
+
+  /* ---------- Tree — ul.tree[role=tree](2026-11-14 사람의 결정: 탐색형 기본 + 체크박스 옵션 · 불러오기는 상태만 · 검색 필터 · 끌어 옮기기 없음) ----------
+     WAI-ARIA tree 패턴. 포커스는 li 하나만 Tab 칸(roving tabindex). 탐색형은 Enter · Space · 클릭으로 고르고(포커스가 옮겨도 고르지 않는다 — 고를 때마다 오른쪽 내용을 다시 부르지 않게),
+     체크박스형(.tree.checkable)은 하위를 따라 켜고 일부만 켜지면 상위가 mixed. 끈 항목은 펼칠 수는 있고 고르거나 켤 수 없다.
+     data-lazy 항목은 펼칠 때 ds:tree-load {value, resolve(items), reject(msg)} — 조회는 제품, 불러오는 동안 셰브론 자리에 스피너 · aria-busy, 실패하면 접고 줄에 알린다(다시 펼치면 다시 부름) */
+  var TREE_LABEL = { failed: "불러오지 못했습니다", failedStatus: "{label} 하위 항목을 불러오지 못했습니다. 다시 펼치면 다시 불러옵니다.", results: "결과 {n}개", empty: "검색 결과가 없습니다." };
+  function trL(tree, k) { var h = closest(tree, ".tree-view") || tree, raw = h.getAttribute("data-labels") || tree.getAttribute("data-labels"), o = {}; if (raw) { try { o = JSON.parse(raw) || {}; } catch (e) { o = {}; } } return o[k] || TREE_LABEL[k]; }
+  function trEsc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
+  function trGroup(li) { return $(":scope > .tree-group", li); }
+  function trText(li) { var l = $(":scope > .tree-row > .tree-label", li); return l ? (l._dsText != null ? l._dsText : l.textContent).trim() : ""; }
+  function trVal(li) { return li.dataset.value != null ? li.dataset.value : trText(li); }
+  function trOff(li) { return li.getAttribute("aria-disabled") === "true"; }
+  function trShown(li, tree) { if (li.hidden) return false; for (var p = li.parentElement; p && p !== tree; p = p.parentElement) if (p.hidden) return false; return true; }
+  function trVisible(tree) { return $$(".tree-item", tree).filter(function (li) { return trShown(li, tree); }); }
+  function trParent(li) { var g = li.parentElement; return g && g.classList.contains("tree-group") ? closest(g, ".tree-item") : null; }
+  function trFocus(li, noFocus) {
+    var tree = closest(li, ".tree"); if (!tree) return;
+    $$(".tree-item", tree).forEach(function (x) { x.tabIndex = x === li ? 0 : -1; });
+    if (!noFocus) li.focus();
+  }
+  function trInit(tree) {
+    $$(".tree-item", tree).forEach(function (li) { var g = trGroup(li); if (g) g.hidden = li.getAttribute("aria-expanded") !== "true"; });
+    if (tree.classList.contains("checkable")) trSync(tree);
+    trRove(tree);
+  }
+  function trRove(tree) {   // Tab 칸 하나 — 보이는 고른 항목, 없으면 보이는 첫 항목
+    var vis = trVisible(tree), cur = vis.filter(function (li) { return li.tabIndex === 0; })[0] || vis.filter(function (li) { return li.getAttribute("aria-selected") === "true"; })[0] || vis[0];
+    if (cur) trFocus(cur, true);
+  }
+  function trExpand(li, open) {
+    if (!li.hasAttribute("aria-expanded") || li.getAttribute("aria-busy") === "true") return;
+    if (open && li.hasAttribute("data-lazy") && !trGroup(li)) { trLoad(li); return; }
+    var g = trGroup(li); if (!g || (li.getAttribute("aria-expanded") === "true") === open) return;
+    li.setAttribute("aria-expanded", String(open)); g.hidden = !open;
+    fire(li, "ds:tree-expand", { value: trVal(li), expanded: open });
+  }
+  function trLoad(li) {
+    var tree = closest(li, ".tree"), tg = $(":scope > .tree-row > .tree-toggle", li), err = $(":scope > .tree-row > .tree-meta.error", li), done = false;
+    if (err) err.remove();
+    li.setAttribute("aria-busy", "true");
+    if (tg) { var sp = doc.createElement("span"); sp.className = "spinner"; sp.setAttribute("aria-hidden", "true"); tg.appendChild(sp); }
+    var end = function () { done = true; li.removeAttribute("aria-busy"); var s = tg && $(".spinner", tg); if (s) s.remove(); };
+    fire(li, "ds:tree-load", {
+      value: trVal(li),
+      resolve: function (items) {
+        if (done || !li.isConnected) return; end();
+        var lv = +li.getAttribute("aria-level") || 1, chk = tree.classList.contains("checkable"), on = li.getAttribute("aria-checked") === "true";
+        var g = doc.createElement("ul"); g.className = "tree-group"; g.setAttribute("role", "group");
+        g.innerHTML = trBuild(items || [], lv + 1, chk, on);
+        li.appendChild(g); li.removeAttribute("data-lazy");
+        li.setAttribute("aria-expanded", "true");
+        if (chk) trSync(tree);
+        if (tree._dsQ) trFilter(tree, tree._dsQ);
+        fire(li, "ds:tree-expand", { value: trVal(li), expanded: true });
+      },
+      reject: function (msg) {
+        if (done || !li.isConnected) return; end();
+        li.setAttribute("aria-expanded", "false");
+        var row = $(":scope > .tree-row", li), m = doc.createElement("span"); m.className = "tree-meta error"; m.textContent = trL(tree, "failed"); row.appendChild(m);
+        dsSay(msg || trL(tree, "failedStatus").replace("{label}", trText(li)));
+      },
+    });
+  }
+  var trUid = 0;
+  function trBuild(items, lv, chk, on) {
+    return items.map(function (it) {
+      var kids = it.children && it.children.length, par = kids || it.lazy, id = "tree-" + (++trUid), st = it.checked != null ? (it.checked === "mixed" ? "mixed" : String(!!it.checked)) : String(!!on && !it.disabled);
+      return "<li class=\"tree-item\" role=\"treeitem\" aria-level=\"" + lv + "\" tabindex=\"-1\"" + (par ? " aria-expanded=\"false\" aria-labelledby=\"" + id + "\"" : "") + (it.lazy && !kids ? " data-lazy" : "") + (it.disabled ? " aria-disabled=\"true\"" : "") + (chk ? " aria-checked=\"" + st + "\"" : "") + (it.value != null ? " data-value=\"" + trEsc(it.value) + "\"" : "") + ">" +
+        "<div class=\"tree-row\"><span class=\"tree-toggle\" aria-hidden=\"true\">" + (par ? ICON["chevron-right"] : "") + "</span>" + (chk ? "<span class=\"tree-check\" aria-hidden=\"true\"></span>" : "") +
+        "<span class=\"tree-label\"" + (par ? " id=\"" + id + "\"" : "") + ">" + trEsc(it.label) + "</span>" + (it.meta != null ? "<span class=\"tree-meta\">" + trEsc(it.meta) + "</span>" : "") + "</div>" +
+        (kids ? "<ul class=\"tree-group\" role=\"group\" hidden>" + trBuild(it.children, lv + 1, chk, st === "true") + "</ul>" : "") + "</li>";
+    }).join("");
+  }
+  function trSelect(li) {
+    var tree = closest(li, ".tree"); if (!tree || trOff(li)) return;
+    if (tree.classList.contains("checkable")) { trCheck(li); return; }
+    $$(".tree-item[aria-selected]", tree).forEach(function (x) { if (x !== li) x.removeAttribute("aria-selected"); });
+    li.setAttribute("aria-selected", "true"); trFocus(li);
+    fire(li, "ds:tree-select", { value: trVal(li), label: trText(li) });
+  }
+  /* 켜고 끄기 — 상위를 누르면 켤 수 있는 하위가 모두 따라간다. 이미 켤 수 있는 것이 다 켜져 있으면 끈다(끈 하위가 꺼진 채라 mixed 로 남아도 다시 누르면 꺼짐) */
+  function trCheck(li) {
+    var tree = closest(li, ".tree"); if (trOff(li)) return;
+    var open = [li].concat($$(".tree-item", li)).filter(function (x) { return !trOff(x); }), ends = open.filter(function (x) { return !trGroup(x); }), full = ends.every(function (x) { return x.getAttribute("aria-checked") === "true"; }), next = !full;   // 상위 자신의 mixed 는 보지 않는다 — 켤 수 있는 끝 항목이 다 켜졌으면 끈다
+    open.forEach(function (x) { x.setAttribute("aria-checked", String(next)); });
+    trSync(tree); trFocus(li);
+    fire(li, "ds:tree-check", { value: trVal(li), checked: next, values: $$(".tree-item[aria-checked=\"true\"]", tree).map(trVal) });
+  }
+  function trSync(tree) {   // 아래에서 위로 — 하위가 모두 켜지면 true, 모두 꺼지면 false, 그 밖은 mixed
+    $$(".tree-item", tree).filter(trGroup).sort(function (a, b) { return (+b.getAttribute("aria-level") || 1) - (+a.getAttribute("aria-level") || 1); }).forEach(function (li) {
+      var kids = $$(":scope > .tree-group > .tree-item", li).map(function (x) { return x.getAttribute("aria-checked"); }); if (!kids.length) return;
+      li.setAttribute("aria-checked", kids.every(function (s) { return s === "true"; }) ? "true" : kids.every(function (s) { return s === "false"; }) ? "false" : "mixed");
+    });
+  }
+  /* 검색 필터 — 맞는 항목과 그 상위만 남기고 펼친다. 맞는 글자는 굵게, 결과 수는 알림 영역에. 지우면 검색 전 펼침으로 돌아간다. 아직 불러오지 않은 하위는 찾지 않는다(서버 검색은 제품) */
+  function trFilter(tree, q) {
+    var view = closest(tree, ".tree-view"); q = (q || "").trim().toLowerCase();
+    var items = $$(".tree-item", tree);
+    if (q && !tree._dsQ) tree._dsExp = items.filter(function (li) { return li.getAttribute("aria-expanded") === "true"; });
+    tree._dsQ = q;
+    items.forEach(function (li) { var l = $(":scope > .tree-row > .tree-label", li); if (l._dsText == null) l._dsText = l.textContent; l.textContent = l._dsText; });
+    if (!q) {
+      var keep = tree._dsExp || []; delete tree._dsExp;
+      items.forEach(function (li) { li.hidden = false; var g = trGroup(li); if (g) { var o = keep.indexOf(li) > -1; li.setAttribute("aria-expanded", String(o)); g.hidden = !o; } });
+      var e0 = view && $(":scope > .tree-empty", view); if (e0) e0.hidden = true;
+      trRove(tree); return;
+    }
+    var jamo = /^[ㄱ-ㅎ]+$/.test(q), n = 0;
+    items.slice().sort(function (a, b) { return (+b.getAttribute("aria-level") || 1) - (+a.getAttribute("aria-level") || 1); }).forEach(function (li) {
+      var t = li.querySelector(":scope > .tree-row > .tree-label")._dsText, lo = t.toLowerCase(), at = lo.indexOf(q), hit = at > -1 || (jamo && cho(lo).indexOf(q) > -1);
+      var g = trGroup(li), kid = g && $$(":scope > .tree-item", g).some(function (x) { return !x.hidden; });
+      li.hidden = !(hit || kid);
+      if (g) { li.setAttribute("aria-expanded", String(!!kid)); g.hidden = !kid; }
+      if (hit) { n++; if (at > -1) { var l = $(":scope > .tree-row > .tree-label", li); l.innerHTML = trEsc(t.slice(0, at)) + "<mark class=\"tree-hit\">" + trEsc(t.slice(at, at + q.length)) + "</mark>" + trEsc(t.slice(at + q.length)); } }
+    });
+    if (view) { var e = $(":scope > .tree-empty", view); if (!e) { e = doc.createElement("p"); e.className = "tree-empty"; e.textContent = trL(tree, "empty"); view.appendChild(e); } e.hidden = n > 0; }
+    dsSay(n ? trL(tree, "results").replace("{n}", n) : trL(tree, "empty"));
+    trRove(tree);
+  }
+  var trType = { s: "", t: 0 };
+  function trTypeahead(tree, li, key) {
+    var now = Date.now(); if (now - trType.t > 500) trType.s = ""; trType.t = now; trType.s += key.toLowerCase();
+    var rep = trType.s.split("").every(function (c) { return c === trType.s[0]; }), q = rep ? trType.s[0] : trType.s, vis = trVisible(tree), i = vis.indexOf(li), from = rep ? i + 1 : Math.max(i, 0);
+    return vis.slice(from).concat(vis.slice(0, from)).filter(function (x) { var l = trText(x).toLowerCase(); return l.indexOf(q) === 0 || cho(l).indexOf(q) === 0; })[0];
+  }
+  doc.addEventListener("click", function (e) {
+    var row = closest(e.target, ".tree-row"), li = row && row.parentElement; if (!li || !li.classList.contains("tree-item")) return;
+    if (closest(e.target, ".tree-toggle") && li.hasAttribute("aria-expanded")) { trExpand(li, li.getAttribute("aria-expanded") !== "true"); trFocus(li); return; }
+    if (trOff(li)) { trFocus(li); return; }
+    trSelect(li);
+  });
+  doc.addEventListener("keydown", function (e) {
+    var li = e.target, tree = li.classList && li.classList.contains("tree-item") && closest(li, ".tree");
+    if (!tree) {   // 검색칸에서 아래 화살표 — 트리의 첫 항목으로
+      var view = e.key === "ArrowDown" && closest(e.target, ".tree-view > .searchbar"), t = view && $(".tree", view.parentNode), f = t && trVisible(t)[0];
+      if (f) { e.preventDefault(); trFocus(f); }
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var vis = trVisible(tree), i = vis.indexOf(li), exp = li.getAttribute("aria-expanded"), go = null;
+    switch (e.key) {
+      case "ArrowDown": go = vis[i + 1]; break;
+      case "ArrowUp": go = vis[i - 1]; break;
+      case "Home": go = vis[0]; break;
+      case "End": go = vis[vis.length - 1]; break;
+      case "ArrowRight": if (exp === "false") trExpand(li, true); else if (exp === "true") go = vis[i + 1] && trParent(vis[i + 1]) === li ? vis[i + 1] : null; break;
+      case "ArrowLeft": if (exp === "true") trExpand(li, false); else go = trParent(li); break;
+      case "Enter": case " ": trSelect(li); break;
+      case "*": $$(":scope > .tree-item", li.parentElement).forEach(function (x) { if (!x.hasAttribute("data-lazy")) trExpand(x, true); }); break;   // 같은 단계 모두 펼침 — 불러와야 하는 항목은 건너뛴다(한꺼번에 조회하지 않게)
+      default:
+        if (e.key.length === 1 && e.key !== " ") { var hit = trTypeahead(tree, li, e.key); if (hit) { e.preventDefault(); trFocus(hit); } }
+        return;
+    }
+    e.preventDefault();
+    if (go) trFocus(go);
+  });
+  function trQuery(e) { var view = closest(e.target, ".tree-view"), inp = view && $(":scope > .searchbar input", view); if (!inp || (e.type === "input" && e.target !== inp)) return; var t = $(":scope > .tree", view); if (t) trFilter(t, inp.value); }
+  doc.addEventListener("input", trQuery);
+  doc.addEventListener("ds:search", trQuery);   // 지우기 버튼 · Esc 로 비웠을 때
 
   /* ---------- Loading 지연 — 보일지를 정한다(사람의 결정 2026-11-11) ----------
      start 뒤 delay(기본 1000ms) 안에 stop 하면 끝내 보이지 않고, 한 번 보이면 min(기본 500ms)을 채운 뒤 숨긴다 — 1.1초에 끝나는 동작이 0.1초 번쩍이지 않게.

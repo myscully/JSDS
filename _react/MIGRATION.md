@@ -625,3 +625,27 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **상단 내비 선택 메뉴**는 제품 색 면과 흰 글자에서 brand 글자와 아래 2px brand 선으로 바뀌었습니다(11-13 의 면을 되돌림). 다른 메뉴에도 투명한 2px 아래 선이 생겨 메뉴 높이가 2px 늘었고, 모서리가 없어졌으며 메뉴 사이가 4 에서 8 로 넓어졌습니다.
 - **Tag sm** 글자가 Caption 2 11/14 로 작아지고 위아래 여백이 1 에서 2 가 됐습니다. 높이 18 은 그대로입니다.
 - **아이콘 위 Count 점**(`.with-count .count.dot`)이 모서리에서 6 이 아니라 2 만 바깥으로 나옵니다. 숫자 배지는 그대로 6 입니다.
+
+## Tree 신규 (2026-11-14)
+
+- **새 `Tree`** — 계층 목록입니다. 기본은 탐색형으로, 항목 하나를 고릅니다. `checkable` 을 주면 체크박스형이 되어 여러 개를 켭니다.
+  - 탐색형: `selected` · `defaultSelected` · `onSelect(value)` 를 씁니다. 클릭 · Enter · Space 로 고르고, 화살표로 포커스만 옮겨서는 고르지 않습니다.
+  - 체크박스형: `checked` · `defaultChecked` · `onCheckedChange(values, {value, checked})` 를 씁니다. 상위는 하위를 따라 켜지고, 일부만 켜지면 mixed 가 됩니다. 넘기는 값은 켜진 모든 항목이고 상위도 들어갑니다.
+  - 펼침: `expanded` · `defaultExpanded` · `onExpandedChange(values, {value, expanded})` 를 씁니다.
+  - 항목 `TreeNode` 의 필드는 `value` · `label` · `icon` · `meta` · `children` · `lazy` · `disabled` 입니다.
+  - 끈 항목은 포커스와 펼치기는 되지만 고르거나 켤 수 없습니다. 상위를 켜도 끈 하위는 그대로이고, 그 상위는 mixed 로 남습니다.
+- **하위 불러오기는 `onLoad(value) => Promise<TreeNode[]>`** — 조회는 제품이 하고, 시스템은 상태만 보여 줍니다.
+  - 불러오는 동안 셰브론 자리에 스피너가 돌고 `aria-busy` 가 붙습니다.
+  - 실패해 reject 하면 항목이 접힌 채 남고, 줄 끝에 '불러오지 못했습니다' 가 보이며 알림 영역에도 읽힙니다. 다시 펼치면 다시 부릅니다.
+  - HTML 에서는 `li[data-lazy]` 가 `ds:tree-load {value, resolve(items), reject(msg)}` 를 냅니다.
+- **`searchable`** 을 주면 트리 위에 sm 검색칸이 붙습니다(`searchLabel` · `searchPlaceholder`).
+  - 맞는 항목과 그 상위만 남기고 펼치며, 맞는 글자는 굵게 보입니다. 초성으로도 찾습니다.
+  - 결과 수를 알림 영역에 읽어 주고, 하나도 없으면 안내 문구를 보입니다.
+  - 검색칸을 비우면 검색 전 펼침으로 돌아갑니다.
+  - 아직 불러오지 않은 하위는 찾지 않습니다. 서버 검색은 제품이 맡습니다.
+- 문구는 `labels` 로 바꿉니다(`failed` · `failedStatus` · `results` · `empty` · `search`, 기본값 `TREE_LABELS`).
+- **HTML 구조:** `ul.tree[role=tree][aria-label] > li.tree-item[role=treeitem][aria-level] > .tree-row + ul.tree-group[role=group]`. 체크박스형은 `.tree.checkable[aria-multiselectable="true"]` 에 항목마다 `aria-checked` 를 답니다.
+  - 하위가 있는 항목은 `aria-labelledby` 로 제 `.tree-label` 을 가리킵니다. 그러지 않으면 이름에 하위 글자까지 들어갑니다.
+  - 이벤트는 `ds:tree-select` · `ds:tree-expand` · `ds:tree-check` 입니다.
+  - 트리 안에는 링크 · 버튼 · 입력을 두지 않습니다(verify).
+- 끌어 옮기기는 없습니다(사람의 결정).

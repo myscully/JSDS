@@ -193,6 +193,8 @@
   document.addEventListener("ds:upload-retry", e => { if (e.target.closest(".example-preview") && e.target.hasAttribute("data-demo")) uploadDemo(e.target, e.detail.id, true); });
   /* Switch 예제 — 서버 대신 0.9초 뒤 응답한다. data-demo-fail 은 실패를 보여 주는 문서 전용 표시 */
   document.addEventListener("ds:switch", e => { if (!e.target.closest(".example-preview")) return; setTimeout(() => e.target.closest("[data-demo-fail]") ? e.detail.reject("정책 서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.") : e.detail.resolve(), 900); });
+  /* Tree 펼칠 때 불러오기 — 문서 예제의 응답을 흉내 낸다(조회는 제품 몫). data-demo-fail 항목은 실패 */
+  document.addEventListener("ds:tree-load", e => { if (!e.target.closest(".example-preview")) return; setTimeout(() => e.target.closest("[data-demo-fail]") ? e.detail.reject() : e.detail.resolve([{ label: "WEB-01", value: e.detail.value + "-web" }, { label: "DB-01", value: e.detail.value + "-db" }]), 800); });
   document.addEventListener("click", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });
   document.addEventListener("focusin", e => { if (!e.target.closest(".hmenu,.drawer,.copy-helper")) closeAll(); if (!e.target.closest(".val-cell,.icon-tile,#valPop,.copy-helper")) closeValPop(); });
   window.addEventListener("hashchange", closeValPop);
