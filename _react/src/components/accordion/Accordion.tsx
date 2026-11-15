@@ -24,11 +24,13 @@ export interface AccordionProps extends Omit<DetailsHTMLAttributes<HTMLDetailsEl
   disabled?: boolean;
   /** .body 스타일 (예: max-height + overflow) */
   bodyStyle?: CSSProperties;
+  /** .body 에 붙일 속성 — 스크롤되는 본문의 tabIndex · role="region" · aria-label 등 */
+  bodyProps?: HTMLAttributes<HTMLDivElement>;
 }
 
 /** 네이티브 details/summary 기반 아코디언 — JS 없이 동작, React 는 상태만 동기화 */
 export const Accordion = forwardRef<HTMLDetailsElement, AccordionProps>(function Accordion(
-  { title, extra, variant = "outline", size = "md", open, defaultOpen = false, onOpenChange, name, disabled, bodyStyle, className, children, onToggle, ...props },
+  { title, extra, variant = "outline", size = "md", open, defaultOpen = false, onOpenChange, name, disabled, bodyStyle, bodyProps, className, children, onToggle, ...props },
   ref,
 ) {
   /* 2026-10-29 flat boolean → variant="flat". 별칭은 두지 않는다 — 개발 모드에서 알리고 DOM 에는 내지 않는다 */
@@ -60,7 +62,7 @@ export const Accordion = forwardRef<HTMLDetailsElement, AccordionProps>(function
         {title}
         {extra !== undefined && <> <small>{extra}</small></>}
       </summary>
-      <div className="body" style={bodyStyle}>{children}</div>
+      <div {...bodyProps} className={cx("body", bodyProps?.className)} style={{ ...bodyProps?.style, ...bodyStyle }}>{children}</div>
     </details>
   );
 });

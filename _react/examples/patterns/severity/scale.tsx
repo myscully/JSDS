@@ -1,16 +1,12 @@
-import { Stack, Tag } from "@jiran/ds-react";
+import { Stack, Tag, TagGroup } from "@jiran/ds-react";
 
 const LEVELS = [["critical", "Critical"], ["high", "High"], ["medium", "Medium"], ["low", "Low"], ["info", "Info"]] as const;
 
 export default function Example() {
   return (
-    <Stack style={{ maxWidth: 640, gap: 20 }}>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {LEVELS.map(([t, l]) => <Tag key={t} tone={t}>{l}</Tag>)}
-      </div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {LEVELS.map(([t, l]) => <Tag key={t} tone={t} variant="solid">{l}</Tag>)}
-      </div>
+    <Stack>
+      <TagGroup>{LEVELS.map(([t, l]) => <Tag key={t} tone={t}>{l}</Tag>)}</TagGroup>
+      <TagGroup>{LEVELS.map(([t, l]) => <Tag key={t} tone={t} variant="solid">{l}</Tag>)}</TagGroup>
     </Stack>
   );
 }

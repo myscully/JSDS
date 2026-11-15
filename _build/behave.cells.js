@@ -98,8 +98,10 @@ module.exports = async function cells({ page, ok, go }) {
   });
   await part("9 · compact 행의 아이콘 동작은 28 이고 칸 패딩 5 — 행이 40(다른 compact 행과 같음), 버", async () => {
 
-    /* compact 행의 아이콘 동작은 28 이고 칸 패딩 5 — 행이 40(다른 compact 행과 같음), 버튼은 칸 가운데 */
-    const cp = await page.evaluate(() => { const tr = document.querySelector(".example-preview tr.log-row"), td = tr.querySelector("td.actions"), b = td.querySelector(".btn"), r = b.getBoundingClientRect(), tr_ = td.getBoundingClientRect();
+    /* compact 행의 아이콘 동작은 28 이고 칸 패딩 5 — 행이 40(다른 compact 행과 같음), 버튼은 칸 가운데.
+       2026-11-15 로그 뷰어가 행 펼침으로 바뀌어 compact + 아이콘 동작 예제가 없다 — Data Table '행 동작' 표에 compact 를 붙여 잰다(제품이 그렇게 쓸 수 있음) */
+    await go("components/data-table.html");
+    const cp = await page.evaluate(() => { const t = document.querySelector("#ex-data-table-row-actions table.tbl"); t.classList.add("compact"); const tr = [...t.querySelectorAll("tbody tr")].find((x) => x.querySelector("td.actions .btn")), td = tr.querySelector("td.actions"), b = td.querySelector(".btn"), r = b.getBoundingClientRect(), tr_ = td.getBoundingClientRect();
       return { row: Math.round(tr.getBoundingClientRect().height), btn: [b.offsetWidth, b.offsetHeight], svg: Math.round(b.querySelector("svg").getBoundingClientRect().width), top: Math.round(r.top - tr_.top), bottom: Math.round(tr_.bottom - r.bottom) }; });
     ok("compact row icon actions are 28 so the row stays 40, centred in the cell", cp.row === 40 && cp.btn.join() === "28,28" && cp.svg === 16 && Math.abs(cp.top - cp.bottom) <= 1, JSON.stringify(cp));
   });

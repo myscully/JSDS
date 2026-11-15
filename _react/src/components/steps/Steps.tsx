@@ -96,9 +96,10 @@ export const Steps = forwardRef<HTMLOListElement, StepsProps>(function Steps({ i
 
 export type StepTrigger = "next" | "prev" | "click" | "finish";
 
-interface Ctx { current: number; last: number; act: (kind: "prev" | "next" | "finish") => void; labels: typeof STEP_LABELS }
+interface Ctx { current: number; last: number; act: (kind: "prev" | "next" | "finish") => void; labels: StepLabels }
 const StepperContext = createContext<Ctx | null>(null);
-const STEP_LABELS = { prev: LABELS.prev, next: LABELS.next, finish: LABELS.finish };
+type StepLabels = Record<"prev" | "next" | "finish", string>;
+const STEP_LABELS: StepLabels = { prev: LABELS.prev, next: LABELS.next, finish: LABELS.finish };
 
 export interface StepperStep {
   label: ReactNode;
@@ -121,7 +122,7 @@ export interface StepperProps extends Omit<HTMLAttributes<HTMLDivElement>, "chil
   nonLinear?: boolean;
   /** 이전 · 다음 · 완료 버튼 줄(.step-actions)을 그린다. false 면 내용 안에 StepButton 을 직접 둔다 */
   actions?: boolean;
-  labels?: Partial<typeof STEP_LABELS>;
+  labels?: Partial<StepLabels>;
   /** 단계 목록의 접근 이름. 기본 '진행 단계' */
   "aria-label"?: string;
 }

@@ -4,14 +4,14 @@ import { Card, CardDesc, CardHead, CardMeta, CardTitle, Indicator, Tag } from "@
 export default function Example() {
   return (
     <div style={{ background: "var(--background-neutral-secondary)", padding: 24, borderRadius: "var(--radius-lg)", display: "flex", flexWrap: "wrap", gap: 20, alignItems: "flex-start" }}>
-      <Card variant="flat" style={{ width: 300 }}>
+      <Card variant="flat" style={{ width: "min(300px, 100%)" }}>
         <CardHead>
           <CardTitle>라이선스</CardTitle>
           <Tag tone="ok">정상</Tag>
         </CardHead>
         <CardDesc>1,000석 중 842석 사용 중. 2026-12-31 만료.</CardDesc>
       </Card>
-      <Card variant="flat" style={{ width: 300 }}>
+      <Card variant="flat" style={{ width: "min(300px, 100%)" }}>
         <CardHead>
           <CardTitle>PC-2041</CardTitle>
           <Indicator tone="ok">온라인</Indicator>

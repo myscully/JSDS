@@ -4,7 +4,7 @@ import { Button, Calendar, type DateRange } from "@jiran/ds-react";
 const TODAY = new Date(2026, 9, 7);
 const daysAgo = (n: number) => new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() - n);
 
-/* 기간 달력은 두 달이 기본이다(calendars={1} 로 한 달) */
+/* 기간 달력은 두 달이 기본이고 767px 이하에서는 한 달이다(calendars={1} 이면 늘 한 달) */
 export default function Example() {
   const [month, setMonth] = useState(new Date(2026, 8, 1));
   const [range, setRange] = useState<DateRange>({ start: new Date(2026, 8, 21), end: TODAY });

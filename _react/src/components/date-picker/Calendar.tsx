@@ -8,6 +8,20 @@ import { formatDate, formatMonth, keyOf, parseDate, parseMonth, type DateUnit } 
 import { resolveZone, todayIn } from "./tz";
 
 export type DateRange = { start: Date; end: Date | null };
+
+/* 767px 이하인지 — calendars 를 주지 않은 단독 기간 달력의 달 수에만 쓴다(주면 듣지 않는다) */
+const NARROW = "(max-width:767px)";
+function useNarrow(listen: boolean) {
+  const get = () => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia(NARROW).matches;
+  const [narrow, setNarrow] = useState(listen && get());
+  useEffect(() => {
+    if (!listen || typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia(NARROW), on = () => setNarrow(mq.matches);
+    on(); mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, [listen]);
+  return listen && narrow;
+}
 /** @deprecated "month" 는 unit="month" 로 바뀌었다 */
 export type DatePickerMode = "single" | "range" | "month";
 export type CalendarView = "day" | "month" | "year";
@@ -70,7 +84,7 @@ export interface CalendarProps extends Omit<HTMLAttributes<HTMLDivElement>, "onS
   footer?: ReactNode;
   /** 달력 이름(aria-label) */
   label?: string;
-  /** 기간 · 일 단위의 달 수 — 기본 2 */
+  /** 기간 · 일 단위의 달 수 — 기본 2, 767px 이하에서는 1(창 크기가 바뀌면 따라감 — 사이트 ds.js 와 같음, 2026-11-15) */
   calendars?: 1 | 2;
   view?: CalendarView;
   defaultView?: CalendarView;
@@ -99,7 +113,8 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
   const wantFocus = useRef(false);
   const todayD = today ? new Date(today.getFullYear(), today.getMonth(), today.getDate()) : todayIn(resolveZone(timezone));
   const shown = firstOf(month);
-  const n = rangeMode && unit === "day" && view === "day" ? calendars ?? 2 : 1;
+  const narrow = useNarrow(calendars === undefined);
+  const n = rangeMode && unit === "day" && view === "day" ? calendars ?? (narrow ? 1 : 2) : 1;
   const fmtTitle = new Intl.DateTimeFormat(locale, { year: "numeric", month: "long" });
   const fmtFull = new Intl.DateTimeFormat(locale, { dateStyle: "full" });
   const y0 = shown.getFullYear() - (shown.getFullYear() % 12);

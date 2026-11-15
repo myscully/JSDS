@@ -10,7 +10,7 @@ const DIST = [
 
 export default function Example() {
   return (
-    <Stack style={{ maxWidth: 640, gap: 10 }}>
+    <Stack>
       <SevBand segments={DIST} />
       <ChartLegend items={DIST.map((d) => ({ label: d.label, value: d.value, tone: d.tone }))} />
     </Stack>

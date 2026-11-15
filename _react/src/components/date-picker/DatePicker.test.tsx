@@ -1,6 +1,6 @@
 /* Date Picker · Calendar 동작 — 사이트 ds.js 와 같은 규칙을 React 에서도 잰다.
    2026-11-09 개편(사람의 요청): TextField 입력 하나 · YYYY. MM. DD 자동 형식 · ↑↓ 조각 · 유효하지 않은 값 상태 · unit · 기간 두 달 · locale · timezone */
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { Calendar, DatePicker, DateRangePicker, parseDate } from "./DatePicker";
@@ -358,6 +358,22 @@ describe("DateRangePicker", () => {
     render(<DateRangePicker today={TODAY} />);
     await openField();
     expect(document.querySelectorAll(".cal-month")).toHaveLength(0);
+    window.matchMedia = mm;
+  });
+
+  it("단독 기간 달력 — 두 달이 기본, 767px 이하면 한 달이고 창 크기를 따라감, calendars 를 주면 그대로", () => {
+    const mm = window.matchMedia;
+    let narrow = false; const subs: Array<() => void> = [];
+    window.matchMedia = ((q: string) => ({ get matches() { return narrow && q.includes("767"); }, media: q, addEventListener: (_: string, f: () => void) => subs.push(f), removeEventListener() {} })) as unknown as typeof window.matchMedia;
+    const month = new Date(2026, 8, 1), value = { start: new Date(2026, 8, 21), end: null };
+    const r = render(<Calendar month={month} mode="range" value={value} today={TODAY} />);
+    expect(document.querySelectorAll(".cal-month")).toHaveLength(2);
+    narrow = true; act(() => subs.forEach((f) => f()));
+    expect(document.querySelectorAll(".cal-month")).toHaveLength(0);
+    expect(document.querySelector(".calendar")).not.toHaveClass("two");
+    r.unmount();
+    render(<Calendar month={month} mode="range" value={value} today={TODAY} calendars={2} />);
+    expect(document.querySelectorAll(".cal-month")).toHaveLength(2);
     window.matchMedia = mm;
   });
 

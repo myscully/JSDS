@@ -45,7 +45,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 76 · verify 0/0 · contrast 3192쌍 실패 0 · advisory 943 · behave 1440/1440 · react 828+6 · tsc 0
+pages 88 · verify 0/0 · contrast 3192쌍 실패 0 · advisory 943 · behave 1461/1461 · react 859+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -736,6 +736,57 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함** — 위 본문 자리(컴포넌트 · 패턴 데이터)와 Foundations · Home 의 소개 문단에서 토큰 · 코드 · 날짜 · 결정 이력 · 빌드 언급 · 한 문장 괄호 둘 이상을 막는다(Placement 행은 괄호 수만 보지 않음). 음성 시험 9건 모두 잡혔다.
 - **v0.9**(사람의 결정) — Changelog 에 11-09 ~ 11-15 항목, `VERSION` v0.9 · 패키지 0.9.0(check-version), MIGRATION 제목 0.6.x → 0.9.0. **WBS 페이지를 지웠다**(사람의 결정 — 메뉴 · render 함수 · `table.wbs` · `.wbs-legend` CSS). Changelog 의 옛 항목(v0.1 ~ v0.8)도 토큰 · 파일 경로 없이 서술형으로 다시 썼다(내용은 그대로).
 - Figma 미반영 732 → 736건 — 클래스 이름 괄호를 걷은 Placement 행 넷(Checkbox · Dropdown · Select · Top Navigation, Figma 는 옛 글). 차트 카드 제목 Spec 은 이미 어긋난 행이라 수에 없다.
+
+2026-11-15 패턴 재정비 · 새 패턴 여덟(사람의 요청 '최종 정리된 컴포넌트로 패턴을 모두 재정비', 결정 여덟) — pages 76 → 84 · 패턴 10 → 18 · behave 1440 → 1453(`behave.patterns.js` 13) · react 828+6 → 851+6(예제 291 → 313 에 따른 구조 비교 22 · `requiredMark` 1). contrast · advisory · verify 수는 그대로(새 색 쌍 없음).
+- **패턴 페이지 = 컴포넌트처럼**(사람의 결정) — 정의 → 고르기 표(언제 쓰는가 · 비슷한 패턴, Placement 없음 — 화면 단위) → Composition → 예제(번호 h2 그대로) → Rules → Usage. 18개 모두 Rules 가 있고, 패턴 전용 원칙 표 렌더러를 지웠다.
+- **새 패턴**(사람의 결정) — Common UI: 오류 · 권한 없음 · 위험 작업 확인 · 가져오기 · 내보내기, Service: 로그인 · 세션, Security Console: 상세 화면 · 권한 · 역할 · API 키 · 비밀값 · 사고 처리. 새 ds.js 동작은 만들지 않고 기존 컴포넌트를 조합했다. 시간 세기 · 서버 확인(세션 연장 · 일회용 코드 확인 · 재발급)은 제품 몫으로 Rules 에 적었다.
+- **결정한 세부:** 로그 상세 = Data Table 행 펼침(⋯ 상세 버튼을 뺌), 2단계 인증 = 숫자 6자리 한 칸(`inputmode` · `one-time-code` · `pattern`), 이름 입력 확인 = 버튼은 늘 켜 두고 누르면 기존 입력 검증(`pattern` + 문구)이 막음, 유의사항 = Notice 위에 다시 지음(`.notes` CSS 삭제), 메뉴는 세 묶음 그대로.
+- **기존 열 개 고침** — 열리지 않던 가짜 Select 세 곳을 실제 Select · Combobox 로, 인라인 스타일을 클래스로, `uses` 를 예제가 실제로 쓰는 컴포넌트와 맞춤, 정책 설정에 Number Input · Time Picker · Combobox 입력값 칩 · inline Copy Field · 적용 대상 Tree(모달 Side Panel), 온보딩을 Steps 마법사 하나로(완료 예제를 지우고 마지막 패널이 완료 화면 · 에이전트 단계에 설치 Code + 등록 키 Copy Field), 검색에 빈 결과, 시스템 상태 측정값을 진행 막대(meter)로, 심각도 태그 줄을 Tag Group 으로, 약관 '보기' 를 전문 Popup 으로 · 필수 표시를 Tag 로.
+- **verify 더함:** 패턴 수 18, 고르기 표 키 · 순서 · 위치(정의 바로 뒤), Rules 필수 · 8행 초과면 소제목, 절 순서, 예제의 대표 클래스로 `uses` 대조(빠진 것 · 남는 것), 패턴 예제 인라인 style 금지(도넛 각도 · 막대 비율 · 밴드 조각처럼 값이 곧 데이터인 기하는 뺌), 메뉴 없는 가짜 Select 금지, 고르기 표 · Rules 문구도 본문 문구 검사에.
+- **behave.patterns 13** — 18 페이지 구성 · `.notes` 없음, 약관 보기 Popup 과 포커스 복귀, 온보딩 다음 · 나중에 설치 · `ds:step-finish`, 검색 칩 지우기 · 빈 결과, 로그 행 펼침 · 한 줄 행 · 고정 헤더 이름 · 새 로그 안내, 정책 Number Input ↑ · Time Picker · 모달 Side Panel 열고 닫기 · 제자리 복귀, 이름 입력 확인 세 경우, 2단계 코드 속성과 검증, 오류 화면 동작 하나, 비밀값 보기 · 재발급 alertdialog, 역할 Tree 묶음 mixed → 켬, 상세 탭 · 위험 동작 위치, 가져오기 오류 줄. 음성 시험 13건 모두 잡혔다(역할은 처음 변형이 ds.js 의 묶음 재계산에 지워져 하위를 끄는 변형으로 다시 잡음).
+- **측정에서 드러나 고친 것:**
+  - Side Panel 을 닫으면 처음부터 보이던 정적 패널(예제)까지 `hidden` 이 됐다 — 열 때 원래 hidden 을 기억해 되돌린다(ds.js).
+  - 약관의 남은 필수 세기가 옛 `.req` 글자를 찾아, Tag 로 바꾸자 '다음' 이 막지 않았다 — 필수 항목에 `data-required`(사이트 · React `TermsItem`), 옛 `.req` 도 받는다.
+  - 패턴 데이터의 필드 문구 키를 `valueMissing` 으로 적어 기본 문구가 나왔다 — 시스템 키는 `required` · `pattern`.
+  - 로그 뷰어 필터 칩이 sm(26)이라 옆 32 버튼과 높이가 달랐다(기본 칩으로), 정책 '+3' 이 Tag Group 구조가 아니라 UA 글자였다, 2단계 인증 아래 링크 · 비밀값 범위 legend 가 텍스트 스타일 밖이었다.
+  - 사이트와 React 구조 비교가 찾은 것 넷: 단위 없는 Number Input 의 `aria-valuetext`, 보관 기간 라벨 · 단위 자리, compact 빈 상태의 묶음, 검증 폼 안 fieldset 의 `.field` 감싸기. 보관 기간에 라벨을 붙이자 기존 Number Input 규칙(범위는 도움말에)이 걸려 '30~365일' 도움말을 더했다.
+- verify 음성 시험 넷(인라인 style · uses 누락 · 고르기 표 키 · 메뉴 없는 Select) 모두 잡혔다.
+- **390 캡처에서 발견해 고친 것 둘:** 두 칸 줄의 칸이 최소 폭 = 내용 폭이라 사고 처리 화면이 미리보기 밖으로 나갔다(435/351 — `.row-2 > *, .row-3 > *{min-width:0}`). 표 머리글 안 숨긴 글자(`.sr-only`, 절대 위치)가 스크롤 틀 밖 조상을 기준으로 놓여 권한 · 역할 목록이 틀 바깥을 넓혔다(467/351 — `.tbl-wrap{position:relative}`). 고친 뒤 전 페이지의 390 · 768 미리보기를 재면 패턴에서 넘치는 것은 아래 둘이고, 나머지는 컴포넌트 예제다(Button · Top Navigation 등 — 이번에 보지 않았고 전후 비교도 하지 않았다).
+  남은 패턴 넘침 둘(위험 작업 확인 '되돌리기' 의 Toast 묶음, 로그 뷰어의 시각 있는 기간 칸)은 컴포넌트가 390 에서 같은 폭으로 넘치는 것이었다 — 같은 날 다음 항목에서 컴포넌트를 고쳤다.
+- **기존 단정 고침:** 약관(필수 판정), 온보딩(완료 예제 → 마지막 패널까지 넘겨 잼), behave.cells 의 compact 아이콘 동작(예제가 없어져 Data Table '행 동작' 표에 compact 를 붙여 잼), 예제 하나짜리 패턴 목차에 Rules, behave.system 의 허용 목록(Time Picker 시계 · 행 펼침 · Copy Field 보기 · Tag Group +N 버튼, 복사 · 파일 고르기 · Popup 닫기 · Side Panel 닫기 역할 클래스 — 패턴이 이 컴포넌트들을 쓰기 시작해 걸렸다).
+- **React** — 새 예제 22 · 다시 쓴 예제(사이트 구조와 같게), `Notes` 가 Notice 를 그림 · `TermsItem` 이 Tag 와 `data-required`, 새 prop `TextField`/`TextArea requiredMark` · `labelHidden` · `Accordion bodyProps`, `Stepper labels` 타입을 넓힘(MIGRATION).
+- audit 은 이전과 같은 736건이다(대시보드 · 심각도 기대값을 바뀐 마크업에서 그대로 읽음 — 새 패턴은 Figma 대조 밖). Figma 미반영 736건(그대로).
+- 이때 알고 둔 둘(Popup 위험 확인 예제의 끈 삭제 버튼, 1440 검색 툴바에서 기간이 저절로 둘째 줄로 감)은 같은 날 다음 항목에서 고쳤다.
+
+2026-11-15 남은 것 정리 · 새 패턴 넷(사람의 결정 — 선택지로 고름) — pages 84 → 88 · 패턴 18 → 22 · behave 1453 → 1460(`behave.patterns.js` 13 → 20) · react 851+6 → 858+6(예제 313 → 320 에 따른 구조 비교 7). contrast · advisory · verify 수는 그대로(새 색 쌍 없음).
+- **Popup 위험 확인 예제 = 삭제 버튼을 늘 켜 둠**(사람의 결정 — 이름 입력 확인 패턴과 같게). `form#dg-form[data-validate]` + `pattern="삭제"` + 문구(`required` · `pattern`), 삭제 버튼은 `type=submit form=dg-form`(사이트 · React). Popup Rules '위험 확인' · Foundations › Interaction 의 예외 문장을 고쳤다 — 이제 처음부터 끈 버튼은 Date Picker 의 '적용' 하나다.
+- **390 넘침은 컴포넌트에서 고침**(사람의 결정) — `.toast-stack{max-width:100%}` · 화면 고정 묶음은 화면 폭 − 48, 기간 Date Picker 최소 폭을 `min(…, 100%)` 로(시각 410 · 초 450 · 날짜만 300 은 넓은 자리에서 그대로). 1440 폭은 전후 같다(Toast 360 · 기간 410 / 300).
+- **검색 툴바 두 줄**(사람의 결정) — 첫 줄 검색 + 기간, 둘째 줄 심각도 Combobox, 결과 줄은 그 아래 그대로(사이트 · React). 검색 Rules '툴바' 를 고쳤다. 390 에서 표 칸이 낱말 가운데서 끊겨 `.tbl.nowrap` 을 붙였다 — React 는 `DataTable nowrap` 을 새로 더했다(MIGRATION).
+- **새 패턴 넷**(사람의 결정 — 넷 다) — 일괄 작업 진행(Common UI — 진행 막대 · 성공/실패/남음 · 남은 것만 취소 · 실패 목록과 실패만 다시 실행), 보고서 · 예약 발송(Service — 검증 폼 · 요약 Notice · 예약 목록의 사용 Switch · 받는 사람 Avatar Group), 감사 로그 · 변경 이력(Security — 행 펼침으로 변경 전 → 후 · 고치거나 지우는 동작 없음 · 버전 표와 두 버전 비교), 알림 규칙(Security — 조건 · 동작 섹션 · Number Input '건 이상' · 웹훅 주소 문구 `url`). 새 ds.js 동작은 없다.
+- **verify** — 패턴 수 22, uses 대조의 Loading 표식에 `role="progressbar"` 를 더했다(진행 막대만 쓰는 패턴이 Loading 을 uses 에 적으면 '쓰지 않는다' 로 실패했다).
+- **측정 · 캡처에서 드러나 고친 것:**
+  - `.field .row`(라벨 + 글자 수 줄 — space-between · baseline)가 필드 안 `.radio-group.row` 에도 걸려 PDF 와 CSV 가 양끝으로 벌어지고 4px 어긋났다 — `:where(:not(.radio-group)):where(:not(.checkbox-group))` 로 뺐다(명시도 그대로, 쉼표 없이).
+  - 두 칸 폼 줄(`.form .form-row`)이 390 에서 Select 트리거 최소 폭으로 20 넘쳤다 — 767 이하 한 칸.
+  - 폼 아래 버튼 줄(`.form .form-actions`)이 줄바꿈하지 않아 버튼 셋이 390 에서 폼 왼쪽 밖으로 밀렸다(캡처에서 발견 — 미리보기 넘침은 0 이라 넘침 검사로는 안 보였다) — `flex-wrap:wrap`(Card 꼬리와 같음).
+  - 검증 폼 안 필드의 빈 도움말 칸 — React 는 늘 `aria-live` 칸을 그린다. 사이트 도우미 `pCombo` · `pTime` 에 `live` 옵션을 더하고 두 폼의 Select · Combobox · Number Input · Time Picker 에 칸을 넣었다(구조 비교가 잡음).
+  - 알림 규칙 웹훅 문구 키를 `type` 으로 적었다 — 시스템 키는 `url`(React tsc 가 먼저 잡음).
+- **behave.patterns +7:** Popup 위험 확인(켜진 버튼 · 빈 칸 · 다른 문구 · 통과), 390 넘침(위험 작업 확인 · 로그 뷰어 · 보고서 · 알림 규칙 · Notification · Date Picker · Form), 검색 툴바 두 줄, 일괄 진행 막대 이름 · 값 · 실패 수 일치, 보고서 라디오 나란히(간격 24) · 이름 필수 · 390 쌓기, 감사 로그 펼침 · 수정/삭제 없음 · 되돌리기 이름, 알림 규칙 ↑ '6건 이상' · 웹훅 문구.
+- 음성 시험 13건 모두 잡혔다 — CSS 5(form-row 쌓기 · `.field .row` 되돌림 · Toast 최대 폭 · 기간 최소 폭 · form-actions 줄바꿈) · 데이터 8(삭제 버튼 끔 · 심각도를 한 줄로 · 다시 실행 수 · 진행 막대 이름 · 이름 required · 되돌리기 이름 중복 · 웹훅 키 · 횟수 단위).
+- **이번 범위 밖으로 둔 것:** Date Picker 의 정적 두 달 달력 예제(range-calendar)의 390 넘침과 컴포넌트 예제의 다른 390 넘침 — 다음 날 '좁은 화면 넘침 정리' 항목에서 고쳤다.
+- Figma 미반영 736건(그대로 — 새 패턴은 Figma 대조 밖).
+
+2026-11-16 좁은 화면 넘침 정리(사람의 요청 '보지 않았거나 남긴 것들도 함께 고쳐줘') — behave 1460 → 1461(`behave.patterns.js` 20 → 21) · react 858+6 → 859+6(`DatePicker.test` 1). contrast · advisory · verify · pages 수는 그대로.
+- **잰 것:** 모든 컴포넌트 · 패턴 페이지의 미리보기를 390 · 768 에서 쟀다. 패턴은 0, 컴포넌트는 390 에서 아홉 페이지 · 768 에서 셋이 넘쳤다.
+  - 390: Button 넷(최대 343), Card Flat 27, Checkbox 가로 묶음 72, 두 달 달력 247, Pagination Bar 79, Slider 숫자 입력 69, Textarea 99, Tooltip 위치 3, Top Navigation 둘.
+  - 768: Button 비활성 33, Tooltip 3, Top Navigation 30.
+- **두 달 달력은 767px 이하에서 한 달** — 사이트 ds.js `dpFitStatic` 이 단독 `.calendar.two` 를 처음 그릴 때와 창 폭이 767 을 넘나들 때 다시 그린다. React `Calendar` 는 `calendars` 를 주지 않으면 같은 기준(`useNarrow`)이다. 주면 그 값 그대로이고, `DateRangePicker` 는 원래 그랬다. 예제 설명에 한 문장을 더했다.
+- **CSS 넷:** `.btn-group` · `.checkbox-group.row` 줄바꿈(가로 라디오와 같은 줄 사이 12), `.pagination-bar` 와 그 안 묶음 줄바꿈(예제 · React `PaginationBar` 의 인라인 배치를 `.pagination-bar > div` 로 옮김), `.field.slider-field{min-width:min(26rem,100%)}`.
+- **예제 넷(사이트 · React):** Textarea 최소 폭과 Flat 카드 폭을 `min(…, 100%)` 로, Tooltip 위치 예제의 좌우 여백을 40 → 72 로 했다. 오른쪽 툴팁이 버튼 밖으로 58 나가므로, 이 여백이면 줄이 가득 차도 미리보기 안에 든다. 1440 배치는 전후 같다.
+- **Button State 예제의 4열 상태 표는 그 안에서 가로로 스크롤한다** — 제안을 사람이 확인했다(두 열로 바꾸는 안 대신). 줄바꿈하면 열(변형)과 행(상태)의 짝이 깨져서 표를 유지했다.
+- **Top Navigation 은 그대로 둔다** — 바 전체가 가로로 스크롤하는 것이 2026-11-13 의 결정이다. 넘침 단정에서 이유와 함께 뺀다.
+- **behave:** part 15 를 일곱 페이지에서 모든 컴포넌트(Top Navigation 제외) · 패턴의 390 과 컴포넌트의 768 로 넓혔다(단정 수는 그대로). 패턴 768 은 behave.system 이 이미 잰다. part 21 은 두 달 달력을 잰다 — 390 한 달, 넓히면 두 달, 다시 좁히면 한 달, 넓게 열면 두 달.
+- **음성 시험 9건(CSS 4 · 예제 3 · ds.js 2)과 React 1건이 모두 잡혔다.** 390 캡처로 달력 · 상태 표 · Pagination Bar · Slider · Flat 카드를 보았다.
+- Figma 미반영 736건(그대로 — 넘침 고침은 audit 대조 밖).
 
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

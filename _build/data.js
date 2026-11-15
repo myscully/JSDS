@@ -17,9 +17,9 @@ const SITE = {
     ["", [["tag", "Tag"], ["text-field", "Text Field"], ["time-picker", "Time Picker"], ["tooltip", "Tooltip"], ["top-navigation", "Top Navigation"], ["tree", "Tree"]]],
   ] },
   patterns: { title: "Patterns", desc: "반복되는 업무 단위와 문제를 해결하는 가이드라인", isNew: true, pages: { overview: "Overview" }, groups: [
-    ["Common UI", [["input-form", "입력 폼"], ["terms-agreement", "약관 동의"], ["notes", "유의사항"]]],
-    ["Service Pattern", [["onboarding", "온보딩"], ["search", "검색"], ["system-status", "시스템 상태"]]],
-    ["Security Console", [["dashboard", "대시보드"], ["log-viewer", "로그 뷰어"], ["policy-settings", "정책 설정"], ["severity", "심각도 표시"]]],
+    ["Common UI", [["input-form", "입력 폼"], ["terms-agreement", "약관 동의"], ["notes", "유의사항"], ["error-pages", "오류 · 권한 없음"], ["danger-confirm", "위험 작업 확인"], ["import-export", "가져오기 · 내보내기"], ["bulk-progress", "일괄 작업 진행"]]],
+    ["Service Pattern", [["onboarding", "온보딩"], ["search", "검색"], ["system-status", "시스템 상태"], ["sign-in", "로그인 · 세션"], ["report-schedule", "보고서 · 예약 발송"]]],
+    ["Security Console", [["dashboard", "대시보드"], ["log-viewer", "로그 뷰어"], ["policy-settings", "정책 설정"], ["severity", "심각도 표시"], ["detail", "상세 화면"], ["roles", "권한 · 역할"], ["secrets", "API 키 · 비밀값"], ["incident", "사고 처리"], ["audit-log", "감사 로그 · 변경 이력"], ["alert-rules", "알림 규칙"]]],
   ] },
   resources: { title: "Resources", desc: "라이브러리, 토큰, 변경 이력", pages: { react: "React Package", "design-token": "Design Token", figma: "Figma Library", tokens: "Token Download", changelog: "Changelog", contribution: "Contribution" } },
 };
@@ -43,7 +43,7 @@ const PRODUCTS = [
     gradient: { rest: ["purple-40", "violet-45"], strong: ["purple-30", "violet-40"], heavy: ["purple-30", "violet-30"] } },
 ];
 const CHANGELOG = [
-  ["v0.9", "2026-11-15", "컴포넌트를 하나씩 정비하고 공통 정책을 세웠습니다. Foundations 에 Interaction · Writing 페이지를 더하고, 컴포넌트 페이지를 정의 · 고르기 표 · 예제 · Rules · Spec · Props · Usage 순서로 맞췄습니다. 새 컴포넌트는 Combobox · Side Panel · Steps · Form · Empty State · Page Header · Avatar · Link · File Upload · Code · Copy Field · Number Input · Time Picker · Tree · Notification Center 입니다. 입력 검증, 표의 밀도와 행 펼침, 기간 선택과 시각 입력, 글자 크기 체계와 텍스트 스타일 19단계, 제품 색 팔레트 여섯, 한 톤으로 맞춘 Data Visual 세트를 더했습니다. 마지막으로 전체 코드를 점검해 오류와 쓰지 않는 코드를 정리하고, 모든 페이지의 설명을 지금 동작에 맞게 다시 썼습니다."],
+  ["v0.9", "2026-11-15", "컴포넌트를 하나씩 정비하고 공통 정책을 세웠습니다. Foundations 에 Interaction · Writing 페이지를 더하고, 컴포넌트 페이지를 정의 · 고르기 표 · 예제 · Rules · Spec · Props · Usage 순서로 맞췄습니다. 새 컴포넌트는 Combobox · Side Panel · Steps · Form · Empty State · Page Header · Avatar · Link · File Upload · Code · Copy Field · Number Input · Time Picker · Tree · Notification Center 입니다. 입력 검증, 표의 밀도와 행 펼침, 기간 선택과 시각 입력, 글자 크기 체계와 텍스트 스타일 19단계, 제품 색 팔레트 여섯, 한 톤으로 맞춘 Data Visual 세트를 더했습니다. 패턴은 컴포넌트 페이지와 같은 순서로 맞추고 정비한 컴포넌트로 다시 지었으며, 상세 화면 · 권한과 역할 · API 키와 비밀값 · 사고 처리 · 오류와 권한 없음 · 위험 작업 확인 · 가져오기와 내보내기 · 로그인과 세션 · 일괄 작업 진행 · 보고서와 예약 발송 · 감사 로그와 변경 이력 · 알림 규칙 패턴을 더했습니다. 마지막으로 전체 코드를 점검해 오류와 쓰지 않는 코드를 정리하고, 모든 페이지의 설명을 지금 동작에 맞게 다시 썼습니다."],
   ["v0.8","2026-10-20","컬러 시스템을 전면 개편했습니다. 의미 토큰을 여섯 그룹(foreground · background · surface · line · effect · static)으로 값과 이름까지 바꾸고, Atomic 램프 13개는 숫자가 클수록 밝은 체계로 통일했습니다. Brand 는 제품이 넣는 다섯 단계 색이고, 제품 색 위의 흰 글자가 4.5 대비를 넘어야 합니다. Colors 페이지를 Semantic 과 Atomic 탭으로 다시 짜고 브랜드 역할 맵을 그 안으로 합쳤습니다. React 패키지 0.8.0 은 깨지는 변경이라 마이그레이션 문서를 함께 냈습니다."],
   ["v0.6","2026-09-09","Foundations 를 Overview 와 Base material(Colors · Elevation · Grid · Icons · Typography)로 다시 짰습니다. Colors 는 Semantic 과 Atomic 탭에 라이트 · 다크 값을 보여 주고, Elevation 은 그림자 종류와 단계 표를, Grid 는 아트보드 · 브레이크포인트 · 간격 · 12 컬럼 레이아웃을, Icons 는 검색되는 Outline · Filled 갤러리를, Typography 는 기본 규칙 · 줄바꿈 · 스타일 표를 담았습니다. Radius · Motion · Accessibility · 토큰 원본은 Resources › Design Token 으로 옮겼습니다."],
   ["v0.5","2026-09-08","React 컴포넌트 패키지를 더했습니다. 컴포넌트와 패턴 30개를 동작과 접근성까지 갖춘 React 컴포넌트로 만들고, 사이트의 React 탭을 패키지를 쓰는 코드로 바꿨습니다. 사이트 HTML 과 React 의 구조가 같은지 테스트합니다. 아이콘을 한 세트로 통일하고 Resources › React Package 페이지를 열었습니다. 사이트의 모든 미리보기를 실제로 동작하게 하는 순수 JS 스크립트도 더했습니다. HTML+CSS 로 쓰는 제품은 이 파일 하나로 같은 동작을 얻습니다."],

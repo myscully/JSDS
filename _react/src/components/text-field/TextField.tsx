@@ -7,6 +7,8 @@ import type { Size } from "../../types";
 
 export interface FieldOwnProps {
   label?: ReactNode;
+  /** 라벨을 화면에서 숨기고 스크린 리더에만 둔다(label.sr-only) — 이름이 옆에 이미 보이는 설정 행 같은 자리 */
+  labelHidden?: boolean;
   /** 라벨 뒤 * 표시 (input 의 required 와 별개로 시각 표시) */
   required?: boolean;
   /** 아래 도움말. error 가 문자열이면 그 문구가 대신 표시 */
@@ -38,7 +40,7 @@ export const FieldContext = createContext<{ controlId: string; labelId?: string;
 
 /** 라벨 · 컨트롤 · 도움말을 묶는 필드 셸. TextField/TextArea 가 사용하고, Dropdown 등 다른 컨트롤도 감쌀 수 있다 */
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
-  { label, required, help, error: errorProp, size = "md", counter, htmlFor, helpId: helpIdProp, live: liveProp, counterOver, className, children, after, ...rest },
+  { label, labelHidden, required, help, error: errorProp, size = "md", counter, htmlFor, helpId: helpIdProp, live: liveProp, counterOver, className, children, after, ...rest },
   ref,
 ) {
   const form = useContext(FormValidationContext);
@@ -50,7 +52,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   const helpId = helpIdProp ?? (live || helpText ? `${controlId}-help` : undefined);
   const labelId = label !== undefined ? `${controlId}-label` : undefined;
   const labelEl = label !== undefined && (
-    <label id={labelId} htmlFor={htmlFor}>
+    <label id={labelId} htmlFor={htmlFor} className={labelHidden ? "sr-only" : undefined}>
       {label}
       {required && <em>*</em>}
     </label>
@@ -124,6 +126,8 @@ export interface TextFieldProps extends FieldOwnProps, InputBase {
   revealLabel?: string;
   /** 이 필드의 검증 문구(Form messages 위에 얹는다) */
   messages?: ValidationMessages;
+  /** false 면 required 여도 라벨 뒤 * 를 그리지 않는다 — 칸이 모두 필수인 짧은 폼(로그인 · 2단계 인증). 기본 true */
+  requiredMark?: boolean;
   /** 래퍼(.field) 스타일 */
   wrapperStyle?: CSSProperties;
   wrapperClassName?: string;
@@ -140,7 +144,7 @@ export interface TextFieldProps extends FieldOwnProps, InputBase {
 let monoWarned = false;
 /** 한 줄 텍스트 입력 */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, required, help, error, size, prefix, suffix, showCount, wrapperStyle, wrapperClassName, trailing, wrapperProps, after, wrapControl, id: idProp, className, maxLength, value, defaultValue, onChange, mono, reveal, revealLabel = "비밀번호 표시", messages, ...rest },
+  { label, labelHidden, required, help, error, size, prefix, suffix, showCount, wrapperStyle, wrapperClassName, trailing, wrapperProps, after, wrapControl, id: idProp, className, maxLength, value, defaultValue, onChange, mono, reveal, revealLabel = "비밀번호 표시", messages, requiredMark = true, ...rest },
   ref,
 ) {
   const id = useId(idProp);
@@ -168,7 +172,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
     />
   );
   return (
-    <Field {...wrapperProps} label={label} required={required} help={help} error={c.error} size={size} counter={c.counter} counterOver={c.over} live={c.live} htmlFor={id} helpId={c.helpId} style={wrapperStyle} className={wrapperClassName} after={after}>
+    <Field {...wrapperProps} label={label} labelHidden={labelHidden} required={required && requiredMark} help={help} error={c.error} size={size} counter={c.counter} counterOver={c.over} live={c.live} htmlFor={id} helpId={c.helpId} style={wrapperStyle} className={wrapperClassName} after={after}>
       {(wrapControl ?? ((x: ReactNode) => x))(prefix !== undefined || suffix !== undefined || trailing !== undefined || reveal ? (
         <div className="affix">
           {prefix !== undefined && <span>{prefix}</span>}
@@ -191,16 +195,18 @@ export interface TextAreaProps extends FieldOwnProps, TextareaHTMLAttributes<HTM
   showCount?: boolean;
   /** 이 필드의 검증 문구(Form messages 위에 얹는다) */
   messages?: ValidationMessages;
+  /** false 면 required 여도 라벨 뒤 * 를 그리지 않는다 — TextField 와 같다(칸 하나뿐인 메모 폼). 기본 true */
+  requiredMark?: boolean;
 }
 /** 여러 줄 입력 (최소 96px, 세로 리사이즈) */
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function TextArea(
-  { label, required, help, error, size, wrapperStyle, wrapperClassName, id: idProp, maxLength, showCount, value, defaultValue, onChange, messages, ...rest },
+  { label, labelHidden, required, help, error, size, wrapperStyle, wrapperClassName, id: idProp, maxLength, showCount, value, defaultValue, onChange, messages, requiredMark = true, ...rest },
   ref,
 ) {
   const id = useId(idProp);
   const c = useTextControl<HTMLTextAreaElement>({ id, value, defaultValue, maxLength, showCount, onChange, help, error, messages });
   return (
-    <Field label={label} required={required} help={help} error={c.error} size={size} counter={c.counter} counterOver={c.over} live={c.live} htmlFor={id} helpId={c.helpId} style={wrapperStyle} className={wrapperClassName}>
+    <Field label={label} labelHidden={labelHidden} required={required && requiredMark} help={help} error={c.error} size={size} counter={c.counter} counterOver={c.over} live={c.live} htmlFor={id} helpId={c.helpId} style={wrapperStyle} className={wrapperClassName}>
       <textarea ref={ref} id={id} aria-invalid={c.error ? true : undefined} aria-describedby={c.helpId} required={required || undefined} {...rest} {...c.control} />
     </Field>
   );

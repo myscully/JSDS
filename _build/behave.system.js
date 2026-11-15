@@ -7,7 +7,7 @@ const fs = require("fs");
 const PATTERNS = ["dashboard", "input-form", "log-viewer", "notes", "onboarding", "policy-settings", "search", "severity", "system-status", "terms-agreement"];
 const MOTION_MS = ["120ms", "200ms", "320ms"];   // --motion-fast · base · slow
 /* .btn 이 아닌 button 은 이 컴포넌트 안에서만 — 각자 정의된 모양이 있다 */
-const BUTTON_HOSTS = [".number-field", "th.sortable", ".select-btn", ".chip-group", ".chip", ".toast", ".banner", ".pagination", ".dropdown", ".datepicker", ".tile-grid", ".terms .item", ".steps"];   // .steps — 단계 버튼(.step-btn, 2026-11-13 Steps 마법사가 온보딩 패턴에)
+const BUTTON_HOSTS = [".number-field", "th.sortable", ".select-btn", ".chip-group", ".chip", ".toast", ".banner", ".pagination", ".dropdown", ".datepicker", ".tile-grid", ".terms .item", ".steps", ".timepicker", "td.expand", ".copy-field", ".tag-group"];   // .steps — 단계 버튼(.step-btn, 2026-11-13 Steps 마법사가 온보딩 패턴에). 2026-11-15 패턴 재정비 — Time Picker 시계(.tp-btn) · 행 펼침(.expand-btn) · Copy Field 보기(.reveal) · Tag Group 의 +N(.tag-more)
 /* Button 정의의 클래스. 무리마다 하나까지. left 는 폼 액션 줄의 배치 클래스(.form .form-actions .left) */
 const BTN_GROUPS = { size: ["sm", "md", "lg"], variant: ["solid", "outline", "text"], color: ["primary", "assistive", "negative"], mod: ["icon-only", "loading", "block", "left"] };
 
@@ -78,7 +78,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
       const okR = (v, e) => v === 0 || v >= 900 || tok.some((t) => Math.abs(v - t) < 0.01) || inner(v, e);
       const tag = (e) => e.tagName.toLowerCase() + (e.classList.length ? "." + [...e.classList].join(".") : "");
       const out = { radius: [], button: [], vocab: [], primary: [], nest: [], links: [] };
-      const vocab = Object.values(groups).flat().concat("btn");
+      const vocab = Object.values(groups).flat().concat("btn", "copy", "upload-pick", "popup-close", "side-panel-close");   // copy · upload-pick · popup-close · side-panel-close — Code · Copy Field 의 복사, File Upload 의 고르기, Popup · Side Panel 의 닫기 버튼이 .btn 에 붙이는 컴포넌트 역할 클래스(2026-11-15 패턴이 쓰기 시작)
       document.querySelectorAll(".example-preview").forEach((pv) => {
         pv.querySelectorAll("*").forEach((e) => { if (!e.getClientRects().length) return; const s = getComputedStyle(e);
           for (const k of ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomLeftRadius", "borderBottomRightRadius"]) { const v = s[k]; if (v.includes("%")) continue; if (!okR(parseFloat(v), e)) out.radius.push(`${tag(e)} ${v}`); } });

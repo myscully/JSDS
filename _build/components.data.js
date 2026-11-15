@@ -53,7 +53,7 @@ const cb = (label, attrs = "", small = "") => `<label class="checkbox"><input ty
 
 /* 정적 달력 — ds.js 가 그리는 마크업과 같다(behave 가 대조한다). 정적 데모도 클릭 · 키보드 · 달 이동이 그대로 동작한다.
    React Calendar 도 같은 골격이다(site-consistency). 표기는 Intl(locale, 기본 ko-KR) — ds.js · React 와 같은 식.
-   opts: month "YYYY-MM", mode("range" 면 두 달 — calendars:1 로 한 달), value | start · end, today, min, max, footer, presets, locale,
+   opts: month "YYYY-MM", mode("range" 면 두 달 — calendars:1 로 한 달, 767px 이하에서는 ds.js 가 한 달로 다시 그림), value | start · end, today, min, max, footer, presets, locale,
    labels(Intl 이 만들지 못하는 문구 — ds.js data-labels 와 같은 키 · 기본값) */
 const CAL_LABELS = { dialog: "날짜 선택", reset: "초기화", cancel: "취소", apply: "적용", prevMonth: "이전 달", nextMonth: "다음 달", chooseYear: "연도 선택", recent: "최근 {n}일" };
 const cal = (o) => {
@@ -268,7 +268,7 @@ const COMPONENTS = {
           <button type="button" class="btn lg solid primary icon-only" aria-label="설정">${I("settings")}</button>
         </div>` },
       { id: "state", group: "state", title: "State", desc: "상태는 <b>Normal · Hover · Pressed · Disabled</b> 네 가지입니다.", html: `
-        <div style="display:grid;grid-template-columns:repeat(4,auto);gap:12px">
+        <div style="display:grid;grid-template-columns:repeat(4,auto);gap:12px;max-width:100%;overflow-x:auto">
           <button type="button" class="btn md solid primary">Normal</button>
           <button type="button" class="btn md outline primary">Normal</button>
           <button type="button" class="btn md solid assistive">Normal</button>
@@ -377,7 +377,7 @@ const COMPONENTS = {
       { id: "password", group: "variant", title: "Password", desc: "표시 토글로 입력한 값을 확인합니다. 토글을 눌러도 포커스는 버튼에 남고, 붙여넣기를 막지 않습니다.", html: `
         <div class="field"><label for="pw1">관리자 비밀번호</label><div class="affix"><input id="pw1" type="password" value="secret-value" autocomplete="current-password"><button type="button" class="reveal" aria-label="비밀번호 표시" aria-pressed="false"><span class="i-show">${I("eye",18)}</span><span class="i-hide">${I("eye-off",18)}</span></button></div></div>` },
       { id: "textarea", group: "variant", title: "Textarea", desc: "여러 줄을 입력합니다. 높이는 세로로만 늘릴 수 있고 최소 96px 입니다.", html: `
-        <div class="field" style="min-width:420px"><label for="memo">메모</label><textarea id="memo" placeholder="정책 변경 사유를 남겨 주세요"></textarea><span class="help">감사 로그에 기록됩니다</span></div>` },
+        <div class="field" style="min-width:min(420px,100%)"><label for="memo">메모</label><textarea id="memo" placeholder="정책 변경 사유를 남겨 주세요"></textarea><span class="help">감사 로그에 기록됩니다</span></div>` },
       { id: "state", group: "state", title: "Disabled / Read-only", desc: "Disabled 는 값을 바꿀 수도 복사할 수도 없을 때 씁니다. Read-only 는 값을 읽고 복사할 수 있지만 고칠 수 없을 때 씁니다.", html: `
         <div class="field"><label for="st-id">정책 ID</label><input id="st-id" value="POL-2041" readonly><span class="help">자동 생성</span></div>
         <div class="field"><label for="st-by">생성자</label><input id="st-by" value="admin@jiran.com" disabled></div>` },
@@ -599,7 +599,7 @@ const COMPONENTS = {
         ${dpField({ id: "dp-month", label: "보고서 월", unit: "month", value: "2026. 09" })}
         ${dpField({ id: "dp-day", label: "점검일", value: "2026. 09. 07" })}`, layout: "top" },
       { id: "calendar", group: "variant", title: "Calendar", desc: "열린 상태의 달력입니다. 칸에 칠하는 면은 모두 지름 34px 원입니다. 오늘은 옅은 제품 색 원에 굵은 제품 색 글자로, 고른 날은 제품 색 원으로 보입니다. 포인터를 올리거나 누르면 회색 원이, 키보드 포커스에는 원 외곽선이 생깁니다. 다른 달의 날짜는 흐리게 보이고, 최대 날짜 밖의 날짜는 고를 수 없습니다. 제목을 누르면 연도와 월을 골라 빠르게 옮겨 갑니다.", html: cal({ month: "2026-09", value: "2026-09-07", today: "2026-09-07", max: "2026-09-30", footer: "today apply" }) },
-      { id: "range-calendar", group: "variant", title: "Range Calendar", desc: "기간 달력은 두 달을 나란히 보여 줍니다. 시작일과 종료일은 제품 색 원이고, 그 사이는 옅은 띠로 이어집니다. 시작만 고른 동안에는 포인터를 올린 날까지 기간을 미리 보여 줍니다. 포인터를 올린 날은 시작과 같은 제품 색 원입니다. 적용 버튼은 끝을 고른 뒤에 켜집니다. 두 달 보기에서는 다른 달 칸을 비워 같은 날짜가 두 번 나오지 않게 합니다.", html: cal({ month: "2026-09", mode: "range", start: "2026-09-21", end: "2026-10-07", today: "2026-10-07", footer: "apply", presets: "7 30" }) },
+      { id: "range-calendar", group: "variant", title: "Range Calendar", desc: "기간 달력은 두 달을 나란히 보여 줍니다. 자리가 좁은 화면에서는 한 달만 보여 줍니다. 시작일과 종료일은 제품 색 원이고, 그 사이는 옅은 띠로 이어집니다. 시작만 고른 동안에는 포인터를 올린 날까지 기간을 미리 보여 줍니다. 포인터를 올린 날은 시작과 같은 제품 색 원입니다. 적용 버튼은 끝을 고른 뒤에 켜집니다. 두 달 보기에서는 다른 달 칸을 비워 같은 날짜가 두 번 나오지 않게 합니다.", html: cal({ month: "2026-09", mode: "range", start: "2026-09-21", end: "2026-10-07", today: "2026-10-07", footer: "apply", presets: "7 30" }) },
       { id: "min-max", group: "variant", title: "Min · Max", desc: "최소 · 최대 날짜 밖은 달력에서 고를 수 없습니다. 키보드로는 범위 밖 값도 들어갑니다. 직접 치거나 화살표로 조각을 넘기면 값은 그 날짜로 남고, 오류 테두리와 원인 문구가 붙습니다. 문구는 무엇이 일어났는지와 고치는 법 두 부분으로 씁니다. 범위는 그 날짜를 포함하는 '부터 · 까지' 로 적습니다. 오류 문구는 제품이 바꿀 수 있습니다.", html: `
         ${dpField({ id: "dp-in", label: "점검일", value: "2026. 09. 07", help: "2026년 안의 날짜", attrs: 'data-min="2026-01-01" data-max="2026-12-31"' })}
         ${dpField({ id: "dp-out", label: "점검일", value: "2027. 01. 05", help: "날짜가 범위를 벗어났습니다. 2026. 12. 31 까지 입력할 수 있습니다.", cls: "error", invalid: true, attrs: 'data-min="2026-01-01" data-max="2026-12-31" data-help="2026년 안의 날짜"' })}`, layout: "top" },
@@ -1363,7 +1363,7 @@ const COMPONENTS = {
       { id: "bar", group: "variant", title: "Pagination Bar", desc: "표 아래에 둡니다. 왼쪽에 총 건수를, 오른쪽에 표시 개수 선택과 페이지 이동을 둡니다.", html: `
         <div class="pagination-bar">
           <span>총 <b>1,284</b>건 · 1–50</span>
-          <div style="display:flex;align-items:center;gap:12px">
+          <div>
             <div class="dropdown"><button type="button" class="trigger" aria-haspopup="listbox" aria-expanded="false">50개씩</button><ul class="menu" role="listbox" aria-label="페이지당 개수"><li class="menu-item" role="option" data-value="20">20개씩</li><li class="menu-item on" role="option" data-value="50" aria-selected="true">50개씩</li><li class="menu-item" role="option" data-value="100">100개씩</li></ul></div>
             <nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><span class="gap">…</span><button type="button">26</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav>
           </div>
@@ -1612,11 +1612,11 @@ const COMPONENTS = {
         </div>` },
       { id: "flat", group: "variant", title: "Flat", desc: "회색 바탕 위에서는 테두리 없이 면 색 차이로만 카드를 가릅니다. 그림자는 두지 않습니다. 흰 바탕 위에서는 카드가 바탕과 같은 색이 되므로 쓰지 않습니다. 테두리 자리 1px 은 남아 있어 테두리 있는 카드와 크기가 같습니다.", html: `
         <div style="background:var(--background-neutral-secondary);padding:24px;border-radius:var(--radius-lg);display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
-          <div class="card flat" style="width:300px">
+          <div class="card flat" style="width:min(300px,100%)">
             <div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div>
             <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
           </div>
-          <div class="card flat" style="width:300px">
+          <div class="card flat" style="width:min(300px,100%)">
             <div class="card-head"><h3 class="title">PC-2041</h3><span class="indicator ok">온라인</span></div>
             <dl class="card-meta"><dt>에이전트</dt><dd>6.2.1</dd><dt>그룹</dt><dd>개발팀</dd><dt>IP</dt><dd>10.20.4.41</dd></dl>
           </div>
@@ -1673,7 +1673,7 @@ const COMPONENTS = {
       ["첫 포커스", "열 때 닫기 버튼과 위험한 실행 버튼은 건너뜁니다. 입력칸이 있으면 입력칸에, 없으면 취소 버튼에 포커스를 놓습니다."],
       ["주 버튼", "주 버튼의 이름은 제목의 동작을 그대로 씁니다. '정책을 배포할까요?' 의 주 버튼은 '확인' 이 아니라 '배포' 입니다."],
       ["처리 중", "처리하는 동안 주 버튼에 로딩 표시를 하고, 닫기 버튼 · 취소 · Esc · 배경 누름으로 닫는 길을 모두 막습니다. 실패하면 팝업을 그대로 두고 안에 오류를 보입니다. 입력한 내용을 잃지 않게 하려는 것입니다."],
-      ["위험 확인", "위험 확인은 제목을 위험 색으로 칠하고, 화면 낭독기에 경고 대화상자로 알립니다. 확인 문구를 입력받는 것은 복구할 수 없고 대량일 때만 둡니다. 모두 확인받으면 습관적으로 넘기게 됩니다."],
+      ["위험 확인", "위험 확인은 제목을 위험 색으로 칠하고, 화면 낭독기에 경고 대화상자로 알립니다. 확인 문구를 입력받는 것은 복구할 수 없고 대량일 때만 둡니다. 모두 확인받으면 습관적으로 넘기게 됩니다. 삭제 버튼은 끄지 않고, 누르면 문구를 검사해 다르면 입력칸 아래에 고치는 법을 적습니다."],
       ["긴 본문", "본문만 스크롤하고 제목과 버튼은 그 자리에 둡니다."],
       ["폭", "폭은 기본 440px 입니다. 넓은 640px 은 필드가 두 열이거나 미리보기를 함께 보여 줄 때만 씁니다."],
       ["겹침", "모달 위에 모달을 띄우지 않습니다."],
@@ -1714,12 +1714,12 @@ const COMPONENTS = {
             </>
           );
         }` },
-      { id: "danger", group: "variant", title: "Danger Confirm", desc: "삭제나 초기화를 확인받습니다. 제목은 위험 색이고, 주 버튼은 삭제 버튼을 씁니다. 복구할 수 없고 대량이면 확인 문구를 입력받습니다. 배경을 눌러도 닫히지 않습니다.", html: `
+      { id: "danger", group: "variant", title: "Danger Confirm", desc: "삭제나 초기화를 확인받습니다. 제목은 위험 색이고, 주 버튼은 삭제 버튼을 씁니다. 복구할 수 없고 대량이면 확인 문구를 입력받습니다. 삭제 버튼은 늘 켜 두고, 누르면 문구를 검사해 다르면 막고 고치는 법을 알립니다. 배경을 눌러도 닫히지 않습니다.", html: `
         <div class="popup danger" role="alertdialog" aria-modal="true" aria-labelledby="dg-title" aria-describedby="dg-body">
           <h3 class="popup-title" id="dg-title">정책 12개를 삭제할까요?</h3>${popX()}
           <p class="popup-body" id="dg-body">삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</p>
-          <div class="field"><label for="confirm">확인을 위해 "삭제" 를 입력하세요</label><input id="confirm" placeholder="삭제"></div>
-          <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid negative" disabled>삭제</button></div>
+          <form class="popup-form" id="dg-form" data-validate novalidate><div class="field"><label for="confirm">확인을 위해 "삭제" 를 입력하세요</label><input id="confirm" placeholder="삭제" required pattern="삭제" autocomplete="off" data-messages='{"required":"확인 문구를 입력하세요.","pattern":"문구가 다릅니다. 삭제 를 그대로 입력하세요."}'><span class="help" aria-live="polite"></span></div></form>
+          <div class="popup-actions"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="submit" form="dg-form" class="btn md solid negative">삭제</button></div>
         </div>` },
       { id: "form", group: "variant", title: "Form", desc: "필드 1~3개의 짧은 입력을 받습니다. 그보다 많으면 별도 페이지로 보냅니다. 입력을 시작하면 배경을 눌러도 닫히지 않습니다.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="f-title">
@@ -1828,7 +1828,7 @@ const COMPONENTS = {
         <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Top</button><span class="tooltip" role="tooltip">위 (기본)</span></span>
         <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Bottom</button><span class="tooltip bottom" role="tooltip">아래</span></span>
         <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Left</button><span class="tooltip left" role="tooltip">왼쪽</span></span>
-        <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Right</button><span class="tooltip right" role="tooltip">오른쪽</span></span>`, style: "gap:104px;padding:64px 40px" },
+        <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">Right</button><span class="tooltip right" role="tooltip">오른쪽</span></span>`, style: "gap:104px;padding:64px 72px" },
       { id: "hover", group: "variant", title: "On Hover / Focus", desc: "실제 동작입니다. 아이콘 버튼 위에 마우스를 올리거나 키보드로 포커스하면 툴팁이 뜹니다. 버튼 이름이 곧 툴팁이라 설명으로 따로 잇지 않습니다.", html: `
         <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button><span class="tooltip" role="tooltip" id="tt1">새로 고침</span></span>
         <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="필터">${I("filter")}</button><span class="tooltip" role="tooltip" id="tt2">필터</span></span>

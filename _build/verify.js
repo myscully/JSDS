@@ -429,7 +429,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       /* File Upload 원칙(2026-11-10) */
       {
         const fieldBlock = (i) => { let d = 0; const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i; for (let m; (m = re.exec(pv)); ) { d += m[1] ? -1 : 1; if (!d) return pv.slice(i, m.index + m[0].length); } return pv.slice(i); };
-        for (const m of pv.matchAll(/<div class="field[^"]*"[^>]*>\s*<label\b[^>]*>[\s\S]*?<\/label>\s*<div class="upload[ "]/g)) {
+        for (const m of pv.matchAll(/<div class="field[^"]*"[^>]*>\s*<label\b[^>]*>(?:(?!<\/label>)[\s\S])*<\/label>\s*<div class="upload[ "]/g)) {
           const b = fieldBlock(m.index);
           if (!/<span class="help"[^>]*>[^<]+<\/span>/.test(b)) fails.push(`${f}: File Upload 는 형식과 용량을 도움말에(File Upload › 안내)`);
           if (!/<button\b[^>]*upload-pick[^>]*aria-labelledby="/.test(b)) fails.push(`${f}: 필드의 File Upload 버튼에 aria-labelledby 없음`);
@@ -478,7 +478,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if ((b.match(/class="btn /g) || []).length > 2) fails.push(`${f}: Empty State 동작은 2개까지`);
         if ((b.match(/class="btn [^"]*solid primary/g) || []).length > 1) fails.push(`${f}: Empty State 주 버튼은 하나`);
       });
-      each(/<div class="form-row"[^>]*>/g, (b) => { const n = (b.match(/class="field[ "]/g) || []).length; if (n !== 2) fails.push(`${f}: .form-row 는 필드 2개(${n}개)`); });
+      each(/<div class="form-row"[^>]*>/g, (b) => { const n = (b.match(/class="(?:[\w-]+ )*field[ "]/g) || []).length; if (n !== 2) fails.push(`${f}: .form-row 는 필드 2개(${n}개)`); });
       for (const m of pv.matchAll(/<form\b[^>]*>([\s\S]*?)<\/form>/g)) {
         const s = m[1].indexOf("data-form-summary");
         if (s > -1) {
@@ -616,6 +616,59 @@ for (const [k, c] of Object.entries(COMPONENTS)) {
   const want = ["default", "variant", "size", "state", "rules", "spec", "props", "usage"].filter((x) => order.includes(x));
   if (order.join() !== want.join()) fails.push(`${f}: 절 순서가 ${order.join(" → ")} — ${want.join(" → ")} 이어야 한다`);
 }
+/* 패턴 페이지 구성(사람의 결정 2026-11-15) — 컴포넌트처럼 정의 · 고르기 표 · Composition · 예제 · Rules · Usage.
+   고르기 표는 '언제 쓰는가'(필수) → '비슷한 패턴'(있으면) 2행 이하 — 패턴은 화면 단위라 Placement 행이 없다. Rules 는 모든 패턴에 있고 8행을 넘으면 소제목으로 묶는다.
+   예제에는 인라인 style 을 쓰지 않는다(복사한 화면에 수치가 남는다) — 미리보기 틀 폭은 layout 이 정한다 */
+const P_CHOOSE = ["언제 쓰는가", "비슷한 패턴"];
+/* [대표 표식, 엄격] — 엄격이면 예제에 있는데 uses 에 없어도 실패. 엄격하지 않은 것(글자 입력 · 버튼 · 표)은 uses 에 있는데 예제에 없을 때만 본다 */
+const USES_MARK = {
+  "button": [/class="btn[ "]/, false], "text-field": [/<(input|textarea)\b(?![^>]*type="(checkbox|radio|hidden|file|range|number)")/, false],
+  "data-table": [/class="tbl[ "]/, false], "table": [/class="tbl[ "]/, false], "link": [/class="link[ "]|class="btn[^"]*"[^>]*href|<a href/, false],
+  "search": [/class="searchbar/, true], "select-button": [/class="select-btn/, true], "slider": [/class="slider[ "]/, true],
+  "date-picker": [/class="datepicker/, true], "time-picker": [/class="field[^"]*\btimepicker\b/, true], "number-input": [/class="field[^"]*\bnumber-field\b/, true],
+  "checkbox": [/class="checkbox[ "]/, true], "radio-button": [/class="radio[ "]|class="radio-group/, true], "switch": [/class="switch[ "]/, true],
+  "chip": [/class="chip[ "]/, true], "tag": [/class="tag[ "]/, true], "combobox": [/class="combobox/, true],
+  "select": [/class="dropdown[^"]*"[^>]*>\s*<button[^>]*aria-haspopup="listbox"/, true], "dropdown": [/aria-haspopup="menu"/, true],
+  "tab": [/role="tablist"/, true], "breadcrumb": [/class="breadcrumb/, true], "pagination": [/class="pagination[ "]/, true],
+  "accordion": [/class="accordion[ "]/, true], "card": [/class="card[ "]/, true], "popup": [/class="popup[ "]/, true], "side-panel": [/class="side-panel[ "]/, true],
+  "notification": [/class="(notice|toast|banner)[ "]/, true], "loading": [/class="(spinner|skeleton)[ "]|role="progressbar"/, true], "indicator": [/class="indicator[ "]|class="count[ "]/, true],
+  "steps": [/class="steps[ "]/, true], "data-visual": [/class="(kpi|chart-card|donut|sev-band|progress-list|chart-legend)[ "]/, true],
+  "empty-state": [/class="empty[ "]/, true], "form": [/class="form[ "]|class="form-(legend|actions|section)/, true], "page-header": [/class="page-head[ "]/, true],
+  "avatar": [/class="avatar(-group)?[ "]/, true], "file-upload": [/class="upload[ "]/, true], "code": [/class="code-view/, true],
+  "copy-field": [/copy-field/, true], "tree": [/class="tree[ "]/, true], "notification-center": [/class="notify[ "]/, true],
+};
+for (const [k, c] of Object.entries(PATTERNS)) {
+  const f = `patterns/${k}.html`; if (!fs.existsSync(path.join(OUT, f))) continue; const b = read(f);
+  const ch = (c.choose || []).map(([n]) => n);
+  if (ch.filter((n) => n === "언제 쓰는가").length !== 1) fails.push(`patterns/${k}: 고르기 표(choose)에 '언제 쓰는가' 행이 하나 있어야 한다`);
+  const bad = ch.filter((n) => !P_CHOOSE.includes(n)); if (bad.length) fails.push(`patterns/${k}: 고르기 표에 ${bad.join(", ")} — 언제 쓰는가 · 비슷한 패턴 만`);
+  if (ch.join() !== P_CHOOSE.filter((x) => ch.includes(x)).join()) fails.push(`patterns/${k}: 고르기 표 순서가 ${ch.join(" → ")} — 언제 쓰는가 → 비슷한 패턴`);
+  const rules = !c.principles ? [] : Array.isArray(c.principles) ? c.principles : Object.values(c.principles).flat();
+  if (!rules.length) fails.push(`patterns/${k}: Rules(principles)가 없다 — 모든 패턴에 둔다`);
+  if (Array.isArray(c.principles) && c.principles.length > 8) fails.push(`patterns/${k}: Rules 가 ${c.principles.length}행 — 8행을 넘으면 { 소제목: 행[] } 으로 묶는다`);
+  const stray = rules.map(([n]) => n).filter((n) => P_CHOOSE.includes(n) || CHOOSE_KEYS.includes(n) || CHOOSE_OLD.includes(n));
+  if (stray.length) fails.push(`patterns/${k}: principles 에 ${stray.join(", ")} — 고르기 표(choose)로`);
+  if (c.choose && !/<p class="lead">[\s\S]*?<\/p><dl class="kv">/.test(b)) fails.push(`${f}: 고르기 표가 정의(lead) 바로 뒤에 없다`);
+  const order = [...b.matchAll(/<h2 id="(composition|ex-[\w-]+|rules|usage)">/g)].map((m) => (m[1].startsWith("ex-") ? "examples" : m[1])).filter((x, i, a) => a[i - 1] !== x);
+  const want = ["composition", ...((c.examples || []).length > 1 ? ["examples"] : []), "rules", "usage"];
+  if (order.join() !== want.join()) fails.push(`${f}: 절 순서가 ${order.join(" → ")} — ${want.join(" → ")} 이어야 한다`);
+  for (const ex of c.examples || []) {
+    /* 값이 곧 데이터인 기하(도넛 각도 · 막대 비율 · 밴드 조각 · 슬라이더 위치)는 빼고 잰다 */
+    if (/\sstyle="/.test(ex.html.replace(/\sstyle="(?:--a:[\d.]+deg|--p:[\d.]+%|width:[\d.]+%|flex:[\d.]+)"/g, ""))) fails.push(`patterns/${k}/${ex.id}: 예제에 인라인 style — 클래스 · 텍스트 스타일로(복사한 화면에 수치가 남는다)`);
+    /* 메뉴 없는 Select 트리거 — 누르면 아무것도 열리지 않는다 */
+    for (const m of ex.html.matchAll(/<div class="dropdown[^"]*"[^>]*>\s*<button[^>]*class="trigger"[^>]*aria-haspopup="listbox"[\s\S]*?<\/button>(\s*<ul class="menu)?/g)) if (!m[1]) fails.push(`patterns/${k}/${ex.id}: 목록 없는 Select 트리거 — 메뉴(ul.menu)를 함께 둔다`);
+  }
+  /* uses 대조 — 예제가 쓰는 컴포넌트와 Composition 목록이 같아야 한다. 컴포넌트마다 대표 클래스 하나로 잰다 */
+  const all = (c.examples || []).map((e) => e.html).join("\n");
+  const noCombo = all.replace(/<div class="combobox[\s\S]*?<\/ul>/g, "");   // Combobox 의 선택 칩은 Chip 컴포넌트를 쓰는 것이 아니다
+  for (const [u, [re, strict]] of Object.entries(USES_MARK)) {
+    const has = re.test(u === "chip" ? noCombo : all), listed = (c.uses || []).includes(u);
+    if (has && !listed && strict) fails.push(`patterns/${k}: 예제가 ${u} 를 쓰는데 uses 에 없다`);
+    if (!has && listed) fails.push(`patterns/${k}: uses 에 ${u} 가 있는데 예제가 쓰지 않는다`);
+  }
+  if (/class="tbl[ "]/.test(all) && !(c.uses || []).some((u) => u === "table" || u === "data-table")) fails.push(`patterns/${k}: 예제에 표가 있는데 uses 에 Table · Data Table 이 없다`);
+  for (const u of c.uses || []) if (!USES_MARK[u] && !COMPONENTS[u]) fails.push(`patterns/${k}: uses 의 ${u} 는 없는 컴포넌트다`);
+}
 
 /* 주석 열림·닫힘이 짝인지 — 선언을 지울 때 여러 줄 주석의 한쪽만 남기기 쉽고,
    열림 없는 닫힘 표시는 파서가 '다음 세미콜론까지'를 통째로 버려서 바로 뒤의 선언 하나가 조용히 사라진다.
@@ -678,7 +731,7 @@ const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
   if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 46) fails.push(`components.json 컴포넌트 ${j.components.length}개(46 기대)`);
-  if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 10) fails.push(`components.json 패턴 ${j.patterns.length}개(10 기대)`);
+  if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 22) fails.push(`components.json 패턴 ${j.patterns.length}개(22 기대)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }
 /* 색만으로 의미를 전달하지 않는다 — 심각도 다섯 색은 회색조로 분리할 수 없으므로(상태색 램프를 공유하는 한
@@ -913,7 +966,8 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 토큰
   }
   for (const [k, c] of Object.entries(PATTERNS)) {
     check(`patterns/${k} 정의`, c.desc);
-    for (const r of rows(c.principles)) check(`patterns/${k} 원칙 '${r[0]}'`, r[1]);
+    for (const r of c.choose || []) check(`patterns/${k} 고르기 표 '${r[0]}'`, r[1]);
+    for (const r of rows(c.principles)) check(`patterns/${k} Rules '${r[0]}'`, r[1]);
     for (const e of c.examples || []) check(`patterns/${k} 예제 ${e.id}`, e.desc);
   }
   for (const sec of ["foundations", "home"]) for (const n of fs.readdirSync(path.join(OUT, sec)).filter((x) => x.endsWith(".html"))) {

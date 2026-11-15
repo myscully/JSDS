@@ -102,7 +102,7 @@
     $$(".timepicker", root).forEach(tpInit);
     $$(".tree", root).forEach(trInit);
     $$(".notify", root).forEach(nfInit);
-    $$(".calendar", root).forEach(function (c) { if (!closest(c, ".datepicker")) S(c); });
+    $$(".calendar", root).forEach(function (c) { if (!closest(c, ".datepicker")) { S(c); dpFitStatic(c); } });
   }
 
   /* ---------- Dropdown ---------- */
@@ -430,6 +430,14 @@
     }
     return st;
   }
+  /* 단독 기간 달력의 좁은 화면(2026-11-15) — 마크업에 두 달로 그린 달력은 767 이하에서도 처음 누를 때까지 두 달이라 390 에서 247 넘쳤다.
+     두 달로 그려졌는데 지금 한 달이어야 하면 다시 그리고, 넓어지면 이렇게 줄인 달력만 두 달로 되돌린다(처음부터 한 달인 달력은 건드리지 않는다) */
+  function dpFitStatic(c) {
+    var n = dpMonths(c);
+    if (c.classList.contains("two") && n === 1) { c._dpFit = true; renderStructure(c); }
+    else if (c._dpFit && n === 2 && !c.classList.contains("two")) renderStructure(c);
+  }
+  if (window.matchMedia) { var dpMq = window.matchMedia("(max-width:767px)"), dpRefit = function () { $$(".calendar").forEach(function (c) { if (!closest(c, ".datepicker") && c._dp) dpFitStatic(c); }); }; if (dpMq.addEventListener) dpMq.addEventListener("change", dpRefit); }
   function dpMonths(host) { var st = S(host); return st.view === "day" && st.unit === "day" && st.mode === "range" && host.getAttribute("data-calendars") !== "1" && !(window.matchMedia && window.matchMedia("(max-width:767px)").matches) ? 2 : 1; }
   function dpFoot(host) {
     var f = host.getAttribute("data-footer"), st = S(host), list = f ? (f === "none" ? [] : f.split(/\s+/)) : st.mode === "single" ? ["today", "apply"] : ["apply"];
@@ -824,7 +832,7 @@
     if (terms._tried) termsNotice(terms);   // 눌러서 안내가 나온 뒤에만 — 고치면 바로 줄이고, 다 고치면 지운다
   }
   /* 약관 동의의 '다음' 은 비활성으로 두지 않는다(Interaction › Disabled, 사람의 결정 2026-11-09) — 누르면 비어 있는 필수 항목을 알리고 첫 항목으로 포커스를 옮긴다 */
-  function termsMissing(terms) { return $$(".item input[type=checkbox]", terms).filter(function (i) { return $(".req", closest(i, ".item")) && !i.checked; }); }
+  function termsMissing(terms) { return $$(".item input[type=checkbox]", terms).filter(function (i) { var it = closest(i, ".item"); return (it.hasAttribute("data-required") || $(".req", it)) && !i.checked; }); }
   function termsNotice(terms) {
     var miss = termsMissing(terms), msg = $(":scope > .msg", terms);
     if (!msg) { msg = doc.createElement("div"); msg.className = "msg"; msg.setAttribute("aria-live", "polite"); var g = $(":scope > .btn-group", terms); terms.insertBefore(msg, g); }   // 옛 마크업에는 없다
@@ -972,6 +980,7 @@
       var cur = $(".side-panel.fixed:not([hidden])"), from = doc.activeElement;
       if (cur && cur !== el) { from = cur._dsPrev || from; panel.close(cur, true); }
       el._dsPrev = from;
+      if (cur !== el) el._dsWasHidden = el.hidden;   // 닫을 때 되돌린다 — 문서 예제처럼 처음부터 보이던 패널은 닫아도 제자리에 다시 보인다
       if (cur !== el) { var ph = doc.createComment("side-panel"); el.parentNode.insertBefore(ph, el); el._dsPlaceholder = ph; doc.body.appendChild(el); }
       el.hidden = false; el.classList.add("fixed");
       if (el.hasAttribute("data-modal") && !$(".side-panel-dim")) { var dim = doc.createElement("div"); dim.className = "side-panel-dim"; doc.body.insertBefore(dim, el); doc.body.style.overflow = "hidden"; }
@@ -980,7 +989,7 @@
     close: function (el, swapping) {
       el = el || $(".side-panel.fixed:not([hidden])"); if (!el || !el.classList.contains("fixed")) return;   // 문서 예제처럼 띄우지 않은 패널은 닫을 것이 없다
       var inside = el.contains(doc.activeElement), modal = el.hasAttribute("data-modal"), prev = el._dsPrev;
-      el.hidden = true; el.classList.remove("fixed");
+      el.hidden = el._dsWasHidden !== false; el.classList.remove("fixed"); delete el._dsWasHidden;
       if (el._dsPlaceholder) { el._dsPlaceholder.parentNode.replaceChild(el, el._dsPlaceholder); delete el._dsPlaceholder; }
       var dim = $(".side-panel-dim"); if (dim) { dim.remove(); doc.body.style.overflow = ""; }
       el._dsPrev = null;

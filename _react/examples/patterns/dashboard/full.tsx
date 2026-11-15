@@ -1,5 +1,5 @@
 import { Chart } from "chart.js/auto";
-import { Button, Card, CardHead, CardTitle, ChartCard, ChartLegend, Donut, DonutRow, Icon, Indicator, Kpi, KpiGrid, PageHead, ProgressList, Row2, Row3, SelectButton, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
+import { Button, Card, CardHead, CardTitle, ChartCard, ChartLegend, Donut, DonutRow, Icon, Indicator, Kpi, KpiGrid, Link, PageHead, ProgressList, Row2, Row3, SelectButton, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
 
 import { ChartCanvas, SparkCanvas, presets } from "@jiran/ds-react/chart";
 
@@ -66,7 +66,7 @@ export default function Example() {
         <ChartCard title="심각도 분포">
           <DonutRow>
             <Donut segments={SEGMENTS} label="1,054" />
-            <ChartLegend column items={SEGMENTS.map((s) => ({ label: s.label, value: s.value, tone: s.tone }))} />
+            <ChartLegend className="column" items={SEGMENTS.map((s) => ({ label: s.label, value: s.value, tone: s.tone }))} />
           </DonutRow>
         </ChartCard>
       </Row3>
@@ -88,14 +88,14 @@ export default function Example() {
       <Card flush>
         <CardHead>
           <CardTitle>최근 Critical 이벤트</CardTitle>
-          <Button variant="text" color="assistive" as="a" href="#" size="sm">전체 보기 →</Button>
+          <Button variant="text" color="assistive" as="a" href="#" size="sm" iconRight={<Icon name="chevron-right" size={16} />}>전체 보기</Button>
         </CardHead>
         <Table nowrap>
           <TableHead><TableRow><TableHeader>시간</TableHeader><TableHeader>이벤트</TableHeader><TableHeader>대상</TableHeader><TableHeader>상태</TableHeader></TableRow></TableHead>
           <TableBody>
             {RECENT.map(([t, e, target, s]) => (
               <TableRow key={t}>
-                <TableCell>{t}</TableCell><TableCell>{e}</TableCell><TableCell>{target}</TableCell>
+                <TableCell>{t}</TableCell><TableCell><Link href="#">{e}</Link></TableCell><TableCell>{target}</TableCell>
                 <TableCell>{s === "blocked" ? <Indicator tone="danger">차단</Indicator> : <Indicator tone="warn">검토 필요</Indicator>}</TableCell>
               </TableRow>
             ))}

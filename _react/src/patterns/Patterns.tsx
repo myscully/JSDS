@@ -5,6 +5,7 @@ import { Icon } from "../icons/Icon";
 import { ICONS, type IconName } from "../icons/icons.data";
 import { Indicator } from "../components/indicator/Indicator";
 import { Notice, type NoticeProps } from "../components/notification/Notification";
+import { Tag } from "../components/tag/Tag";
 import { FormValidationContext, useFormValidation, type FormValidationResult, type ValidationMessages } from "../components/text-field/validation";
 import type { StatusTone, Tone } from "../types";
 
@@ -170,15 +171,14 @@ export interface NotesProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"
   /** 되돌리기 어려운 영향 */
   warning?: boolean;
 }
-/** 유의사항 블록 */
-export const Notes = forwardRef<HTMLDivElement, NotesProps>(function Notes({ title, items, warning, className, ...rest }, ref) {
+/** 유의사항 블록 — Notice(role=note) 위에 목록을 그린다. 사이트 마크업 `.notice[role=note] > .ico + div > b + ul` 과 같다 */
+export const Notes = forwardRef<HTMLDivElement, NotesProps>(function Notes({ title, items, warning, role, ...rest }, ref) {
   return (
-    <div ref={ref} className={cx("notes", { warning }, className)} {...rest}>
-      <b>{title}</b>
+    <Notice ref={ref} tone={warning ? "warning" : undefined} role={role ?? "note"} title={title} {...rest}>
       <ul>
         {items.map((it, i) => <li key={i}>{it}</li>)}
       </ul>
-    </div>
+    </Notice>
   );
 });
 
@@ -224,7 +224,7 @@ export const SevCell = forwardRef<HTMLSpanElement, SevCellProps>(function SevCel
 /** 약관 전체 동의 행 */
 export const TermsAll = simple("all", "TermsAll");
 export interface TermsItemProps extends HTMLAttributes<HTMLDivElement> {
-  /** 필수 여부 표시 */
+  /** 필수 — Tag "필수" 와 `data-required`(사이트 ds.js 가 이것으로 남은 필수를 센다) */
   required?: boolean;
   /** 있으면 "보기" 버튼 */
   onView?: () => void;
@@ -233,9 +233,9 @@ export interface TermsItemProps extends HTMLAttributes<HTMLDivElement> {
 /** 약관 항목: 체크박스(children) + 필수/선택 + 보기 */
 export const TermsItem = forwardRef<HTMLDivElement, TermsItemProps>(function TermsItem({ required, onView, viewLabel = "보기", className, children, ...rest }, ref) {
   return (
-    <div ref={ref} className={cx("item", className)} {...rest}>
+    <div ref={ref} className={cx("item", className)} data-required={required ? "" : undefined} {...rest}>
       {children}
-      <span className={required ? "req" : "opt"}>{required ? "필수" : "선택"}</span>
+      <Tag tone={required ? "accent" : undefined} size="sm">{required ? "필수" : "선택"}</Tag>
       {onView && (
         <button type="button" className="view" onClick={onView}>
           {viewLabel}

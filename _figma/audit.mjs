@@ -44,7 +44,7 @@
  *           세로 · 간격 = 행 간격 · 왼쪽 정렬 · 범례가 도넛 아래, 아니면 가로 · 열 간격 · .donut-row justify · align · 폭 채움 · 범례가 도넛 오른쪽(staticChartExpect.row · diffStatic rowCheck),
  *           범례 견본 = 원 · 지름 boxHeight × √2(±0.5) · 툴팁 견본 = min(boxWidth, boxHeight) ↔ ds-chart legend · tooltip(usePointStyle · pointStyle = figma.chart.legend),
  *           계열 톤(series-1 · -subtle 지난 주 · -strong 혼합 선) ↔ ds-chart TONES(figma.chart.tones 와 다르면 멈춤) — 막대 · 선 · 범례 색의 변수 연결로 본다.
- *           정적: Chart Card 막대 · 대시보드 트랙 ↔ .chart .bar · .chart .bar i border-radius, 스파크라인(Chart Card · KPI) ↔ .sparkline i, 범례 견본 크기 · 원 ↔ .chart-legend i,
+ *           정적: Chart Card 막대 · 대시보드 트랙(Figma 의 옛 그림 — 사이트 대시보드는 2026-11-15 부터 진행 막대 목록) ↔ .chart .bar · .chart .bar i border-radius, 스파크라인(Chart Card · KPI) ↔ .sparkline i, 범례 견본 크기 · 원 ↔ .chart-legend i,
  *           도넛 경계선(Chart Card 의 Donut · 대시보드 도넛) 개수 · 각도 · 크기 · 칠 · 반지름 방향 ↔ .donut i 와 예제 donut · 대시보드의 --a, 호는 틈 0,
  *           Data Visual 문서 'KPI · 예제 =' 카드 ↔ 예제 kpi 의 .kpi(라벨 · 값 · 단위 · 증감 · 화살표 · 칠 — k35b), 'KPI · Tone =' = Default + CSS 톤 · 라벨 하나,
  *           4 Pattern 대시보드 KPI ↔ patterns.data.js dashboard 의 .kpi(같은 항목) · 대시보드에만 있는 KPI 라벨 없음(staticChartExpect · diffStatic).
@@ -938,7 +938,7 @@ function chartExpect() {
    도넛   CSS .donut 의 width(지름) · .donut i 의 width · height · background(경계선 크기 · 칠) · top 0(경계선이 바깥 끝에서 안쪽으로 = 중심에서 R − h/2 거리),
           경계 각도 = components.data.js data-visual 예제 donut 과 patterns.data.js dashboard 예제의 <i style="--a:…deg">(위 = 0°, 시계 방향). 둘 다 같은 .donut conic-gradient 를 쓰므로 다르면 기대값을 읽다 멈춘다
    KPI    (2026-11-05 k35b — 사람의 결정: 문서 KPI 예제 = 저장소 예제) 문서 카드 "KPI · 예제 =" 행의 카드 = data-visual 예제 kpi 의 .kpi 들(순서 · 라벨 · 값 · <small> 단위 · 증감 글 · 화살표 I(이름) · 톤),
-          4 Pattern "Card/대시보드" 의 KPI = patterns.data.js dashboard 예제의 .kpi 들(같은 항목). 칠은 CSS .kpi .label · .kpi .value(.critical/.high) · .kpi .value small · .kpi .delta(.up/.down).
+          4 Pattern "Card/대시보드" 의 KPI = patterns.data.js dashboard 예제의 .kpi 들(같은 항목). 칠은 CSS .kpi .label · .kpi .value(.critical/.high) · .kpi .value small · .kpi .delta(.bad/.good — 방향 클래스 .up/.down 은 2026-11-15 에 없앰).
           "KPI · Tone =" 행은 한 축(Tone)만 바꿔 보여 주는 행 — 라벨이 같은 것이 의도다. 카드의 Tone = Default + CSS .kpi.<톤> .value 가 있는 톤(순서대로)이고 라벨이 하나여야 한다.
           문서 KPI 라벨에 예제 kpi 에 없고 대시보드에만 있는 라벨('미처리 검토' 등)이 없어야 한다.
           (2026-11-05 k35c — 사람의 결정) 단위 = .kpi .value small 의 font-size · font-weight, 행간 · 자간은 small 에 없으면 .kpi .value 에서 물려받는다
@@ -2453,7 +2453,7 @@ function diffStatic(c, w, bad, notes) {
     if (v.donutGaps) donutCheck(`${at} 도넛`, null, null, v.donutDividers);   // 틈 · 테두리는 diffComponents 의 Donut 대조가 본다
   }
   for (const v of kp) if (v.sparkR !== undefined && v.sparkR !== flatR(w.sparkR)) bad.push(`KPI ${v.name} (${v.id}) 스파크라인 모서리 ${v.sparkR} ≠ ${w.sparkR} — .sparkline i border-radius`);
-  /* 세트 밖(4 Pattern 대시보드) — 도넛 · 트랙. 호 각도는 같은 .donut conic-gradient */
+  /* 세트 밖(4 Pattern 대시보드) — 도넛 · 트랙(Figma 의 옛 그림, 사이트는 진행 막대 목록 — 일괄 반영 때 다시 그림). 호 각도는 같은 .donut conic-gradient */
   /* 대시보드 차트 줄 카드 구성(k37) — 개수 · 순서 · 제목 · 기간 · 종류, 탐색형은 spec = 예제 · 범례 · 선 · 영역 · x 눈금 · Hover */
   const cardsCheck = (g, G) => { const at = `4 Pattern 차트 줄 (${g.id})`;
     if (g.cards === undefined) { notes.push(`${at} 카드 구성 조사(cards)가 없습니다 — 2026-11-06 k37 전 probe.js 로 만든 덤프입니다`); return; }

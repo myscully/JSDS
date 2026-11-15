@@ -1438,7 +1438,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 31 · patterns/onboarding.html", async () => {
     await go("patterns/onboarding.html");
-    const ob = page.locator("#ex-onboarding-step .example-preview .onboard"), obNext = ob.locator('[data-step="next"]:visible'), obPrev = ob.locator('[data-step="prev"]:visible');
+    const ob = page.locator("#ex-onboarding-step .example-preview .onboard"), obNext = ob.locator('.step-actions [data-step="next"]'), obPrev = ob.locator('.step-actions [data-step="prev"]');
     await obNext.click(); await page.waitForTimeout(60);
     ok("onboarding next moves step and shows that step's card", await ob.evaluate((e) => { const li = e.querySelectorAll(".steps li"), ps = e.querySelectorAll(".step-panel"); return li[2].classList.contains("on") && li[2].getAttribute("aria-current") === "step" && li[1].classList.contains("done") && !li[1].classList.contains("on") && !ps[2].hidden && ps[1].hidden; }));
     await obPrev.click(); await obPrev.click(); await page.waitForTimeout(60);
@@ -1448,14 +1448,16 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await page.fill("#ob-org", "지란지교시큐리티"); await obNext.click(); await page.waitForTimeout(60);
     await ob.locator(".radio.card").nth(1).click();
     ok("onboarding card radios choose one", await ob.evaluate((e) => e.querySelectorAll(".radio.card input:checked").length === 1 && e.querySelectorAll(".radio.card input")[1].checked));
-    /* 완료 문단 — 한국어 기본 줄바꿈은 음절 사이에서 끊겨 1440 에서 "…있습니 / 다." 로 한 글자 줄이 남았다. .keep-all 로 어절째 넘긴다 */
-    const obLast = await page.evaluate(() => { const p = document.querySelector("#ex-onboarding-done .desc"), r = document.createRange(); r.selectNodeContents(p);
+    /* 완료 문단 — 한국어 기본 줄바꿈은 음절 사이에서 끊겨 1440 에서 "…있습니 / 다." 로 한 글자 줄이 남았다. .keep-all 로 어절째 넘긴다.
+       2026-11-15 부터 완료 화면은 단계 화면의 마지막 패널이다(따로 있던 완료 예제를 지움) — 끝까지 넘겨 잰다 */
+    await obNext.click(); await page.waitForTimeout(60); await obNext.click(); await page.waitForTimeout(60);
+    const obLast = await page.evaluate(() => { const p = document.querySelector("#ex-onboarding-step .step-panel:not([hidden]) .card.center .desc"), r = document.createRange(); r.selectNodeContents(p);
       const rows = {}; for (const x of r.getClientRects()) { const k = Math.round(x.top); rows[k] = (rows[k] || 0) + x.width; }
       const ws = Object.keys(rows).sort((a, b) => a - b).map((k) => Math.round(rows[k])); return { lines: ws.length, last: ws[ws.length - 1] }; });
     ok("onboarding done text keeps its last word whole", obLast.last > 30, JSON.stringify(obLast));
     /* 390 — .onboard 가 가운데 정렬이라 넘친 Steps 의 양끝이 잘렸다. safe center 는 넘칠 때만 왼쪽부터 놓는다 */
     await page.setViewportSize({ width: 390, height: 900 }); await page.waitForTimeout(250);
-    const obFit = await page.evaluate(() => { const pv = document.querySelector("#ex-onboarding-done .example-preview"), ol = pv.querySelector(".steps"), s = ol.getBoundingClientRect();
+    const obFit = await page.evaluate(() => { const pv = document.querySelector("#ex-onboarding-step .example-preview"), ol = pv.querySelector(".steps"), s = ol.getBoundingClientRect();
       return { left: Math.round(s.left - pv.getBoundingClientRect().left), scrolls: pv.scrollWidth > pv.clientWidth, stacked: ol.classList.contains("stacked") }; });
     await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250);
     /* 2026-11-13 부터 넘치는 Steps 는 세로로 쌓인다(.stacked) — 전에는 가로로 넘쳐 미리보기가 스크롤했다 */
@@ -2062,6 +2064,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 67d · behave.chart.js", async () => {
     await require("./behave.chart.js")({ page, ok, go });   // Data Visual 한 세트 — 한 톤 · 카드 틀 · 게이지 · 진행 막대 · 증감 배지(2026-11-15)
   });
+  await part("part 67e · behave.patterns.js", async () => {
+    await require("./behave.patterns.js")({ page, ok, go });   // 패턴 재정비 18 — 페이지 구성 · 패턴이 약속하는 동작(2026-11-15)
+  });
   await part("part 68· components/button.html", async () => {
 
     // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
@@ -2136,7 +2141,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       examples: document.querySelectorAll(".example").length,
       toc: [...document.querySelectorAll("#toc a")].map((a) => a.textContent).join(" / "),
     }));
-    ok("single-example pattern drops the numbered heading", one.heads === 0 && one.examples === 1 && one.toc === "Composition / Usage", JSON.stringify(one));
+    ok("single-example pattern drops the numbered heading", one.heads === 0 && one.examples === 1 && one.toc === "Composition / Rules / Usage", JSON.stringify(one));
   });
   await part("part 72 · foundations/icons.html", async () => {
 

@@ -752,3 +752,40 @@ Steps 를 다시 짰습니다.
 **좁은 화면**
 - `Row2` · `Row3`(`.row-2` · `.row-3`)는 767 이하에서 한 칸으로 쌓입니다. 전에는 390 에서도 두 칸이라 도넛이 카드 밖으로 잘렸습니다.
 - `PageHead` 의 부제(`.page-head .sub`)는 띄어쓰기에서만 줄바꿈합니다(`word-break:keep-all`).
+
+## 패턴 재정비 (2026-11-15)
+
+패턴 10개를 지금의 컴포넌트로 다시 짓고 새 패턴 여덟을 더했습니다. 예제 코드는 `examples/patterns/` 에 있습니다. 패키지에서 바뀐 것은 아래뿐입니다.
+
+**마크업이 바뀐 것**
+- `Notes` — 회색 판(`div.notes`)이 아니라 Notice 를 그립니다: `.notice[role=note] > .ico + div > b + ul`, `warning` 이면 경고 톤. props 는 그대로입니다. `.notes` 를 선택자로 쓰던 제품 CSS 는 `.notice` 로 바꾸세요(사이트 CSS 에서 `.notes` 규칙을 지웠습니다).
+- `TermsItem` — 필수 · 선택 표시가 `span.req` · `span.opt` 글자에서 Tag(필수 `tag accent sm` · 선택 `tag sm`)로 바뀌었고, 필수 항목에는 `data-required` 가 붙습니다. 사이트 ds.js 는 이제 `.item[data-required]` 로 남은 필수를 셉니다(옛 `.req` 도 아직 받음). 사이트 CSS 의 `.terms .item .req` · `.opt` 규칙은 지웠습니다.
+
+**새 prop(기존 코드는 그대로 동작)**
+- `TextField requiredMark`(기본 true) · `TextArea requiredMark` — `false` 면 필수여도 별표를 그리지 않습니다. 칸이 하나뿐인 폼(로그인 · 2단계 인증 · 처리 메모)처럼 무엇이 필수인지 분명할 때만 씁니다.
+- `TextField labelHidden`(`Field` · `TextArea` · `NumberInput` · `TimePicker` 도 받음) — 라벨을 `label.sr-only` 로 그립니다. 설정 행처럼 옆 글자가 이름을 보여 주는 자리용입니다.
+- `Accordion bodyProps` — 펼친 본문(`.body`)에 `tabIndex` · `role` · `aria-label` 을 줄 수 있습니다(약관 본문의 이름 있는 스크롤 영역).
+- `Stepper labels` 의 타입이 문구 리터럴에서 `Record<"prev" | "next" | "finish", string>` 으로 넓어졌습니다 — `labels={{ finish: "대시보드로 이동" }}` 가 이제 tsc 를 통과합니다.
+
+## 남은 것 정리 · 새 패턴 넷 (2026-11-15)
+
+**보이는 모양이 바뀐 것**
+- `FormRow`(`.form .form-row`)는 767 이하에서 한 칸으로 쌓입니다. 전에는 390 에서도 두 칸이라 Select 트리거가 자리 밖으로 밀렸습니다.
+- `FormActions`(`.form .form-actions`)는 자리가 좁으면 줄바꿈합니다(오른쪽 맞춤 그대로).
+- 필드 안 가로 선택 묶음(`.field` 안 `.radio-group.row` · `.checkbox-group.row`)이 양끝으로 벌어지지 않습니다. 라벨 + 글자 수 줄 규칙(`.field .row`)이 그 묶음에도 걸려 있었습니다.
+- `ToastStack` 은 놓인 자리 폭을 넘지 않고(`.toast-stack{max-width:100%}`, 화면에 고정한 묶음은 화면 폭 − 48), 시각 있는 기간 `DateRangePicker` 의 최소 폭은 자리가 좁으면 자리 폭까지 줄어듭니다. 390 에서 둘 다 자리 밖으로 나갔습니다.
+
+**새 prop**
+- `DataTable nowrap` — `Table nowrap` 과 같습니다. 칸을 한 줄로 두고 좁으면 표 틀이 가로로 스크롤합니다.
+
+**예제**
+- Popup '위험 확인' 예제는 삭제 버튼을 끄지 않습니다. `Form validate` + `TextField pattern="삭제"` 로, 누르면 빈 칸과 다른 문구를 입력 검증이 막습니다(이름 입력 확인 패턴과 같은 방식).
+- 새 패턴 예제 — `examples/patterns/bulk-progress` · `report-schedule` · `audit-log` · `alert-rules`.
+
+## 좁은 화면 넘침 정리 (2026-11-16)
+
+**보이는 모양이 바뀐 것**
+- 단독 기간 `Calendar`(`mode="range"`, 일 단위)는 `calendars` 를 주지 않으면 767px 이하에서 한 달을 그립니다. 창 크기가 바뀌면 따라갑니다. 전에는 늘 두 달(폭 606)이라 390 에서 자리 밖으로 나갔습니다. `calendars={1 | 2}` 를 주면 그 값 그대로입니다. `DateRangePicker` 는 원래 그랬습니다.
+- 버튼 묶음(`.btn-group`)과 가로 체크박스 묶음(`.checkbox-group.row`)은 자리에 안 들어가면 줄바꿈합니다. 가로 라디오 묶음과 같은 줄 사이 12 입니다.
+- `PaginationBar` 의 표시 개수 + 페이지 이동 묶음은 인라인 스타일 대신 CSS(`.pagination-bar > div`)로 배치하고, 바와 묶음 모두 좁으면 줄바꿈합니다. 패키지 CSS 를 함께 올리세요 — 옛 CSS 에서는 묶음이 세로로 쌓입니다.
+- `Slider withInput`(`.field.slider-field`)의 최소 폭 416 은 자리가 좁으면 자리 폭까지 줄어듭니다.

@@ -156,7 +156,6 @@ const groupedExamples = (sec, key, c) => EXAMPLE_GROUPS.map(([g, name]) => {
    2026-11-09 의 Placement 절은 없앴고 그 문장은 고르기 표의 Placement 행이다. 규칙은 예제를 본 뒤 읽도록 Rules 절로 내렸다(11-13) */
 const tbl = (head, rows, cls = "") => `<div class="tablewrap"><table class="${cls}"><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 const kvList = rows => `<dl class="kv">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>`;
-const principlesBlock = c => c.principles ? kvList(c.principles) : "";   /* 패턴 페이지 — 맨 위 그대로 */
 /* 사람의 결정 2026-11-13 — 컴포넌트 페이지는 정의 아래에 고르기 표(choose: 언제 쓰는가 · 비슷한 것 · Placement)만 두고,
    나머지 규칙은 예제 뒤 · Spec 앞의 Rules 절로. 규칙이 8행을 넘는 컴포넌트는 { 소제목: 행[] } 으로 묶어 h3 로 그린다 */
 const chooseBlock = c => c.choose ? kvList(c.choose) : "";
@@ -185,9 +184,8 @@ function patternPage(key) {
   const uses = c.uses || []; const prefixes = cssPrefixes(c, COMPONENTS);
   const css = cssFor(prefixes, STYLE(), VERSION); const label = prefixes.join(", ");
   const group = (allPages("patterns").find(p => p.key === key) || {}).group;
-  return `<h1>${t}${nb("patterns", key)}</h1><p class="lead">${c.desc}</p><h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지에 있습니다.</p><div class="uses">${uses.map(u => `<a href="#/components/${u}">${titleOf("components", u)}</a>`).join("")}</div>
-${principlesBlock(c)}
-${examplesBlock("patterns", key, c)}
+  return `<h1>${t}${nb("patterns", key)}</h1><p class="lead">${c.desc}</p>${chooseBlock(c)}<h2 id="composition">Composition</h2><p>이 패턴이 조합하는 컴포넌트입니다. 세부 옵션은 각 컴포넌트 페이지에 있습니다.</p><div class="uses">${uses.map(u => `<a href="#/components/${u}">${titleOf("components", u)}</a>`).join("")}</div>
+${examplesBlock("patterns", key, c)}${rulesBlock(c)}
 ${usageBlock(key, css, label, [...new Set([...(c.react || []), ...uses.flatMap(u => (COMPONENTS[u] || {}).react || [])])])}`;
 }
 

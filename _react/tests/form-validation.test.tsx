@@ -139,4 +139,12 @@ describe("TextField", () => {
     expect(btn.getAttribute("aria-pressed")).toBe("true");
     expect(el.value).toBe("abc");
   });
+  it("requiredMark={false} — * 는 그리지 않고 required 와 검증은 그대로다", () => {
+    const { container } = render(<Form validate><TextField id="rm" label="아이디" required requiredMark={false} /><button type="submit">로그인</button></Form>);
+    const el = container.querySelector("input") as HTMLInputElement;
+    expect(container.querySelector("label em")).toBeNull();
+    expect(el.required).toBe(true);
+    fireEvent.submit(container.querySelector("form")!);
+    expect(el.getAttribute("aria-invalid")).toBe("true");
+  });
 });
