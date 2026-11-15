@@ -1739,14 +1739,18 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await page.waitForFunction(() => window.Chart && window.DSChart && [...document.querySelectorAll("canvas[data-chart]")].every((c) => c.__dsChart && c.__dsChart.chart.ctx), null, { timeout: 5000 }).catch(() => {});
     const chartProbe = () => page.evaluate(() => {
       const tok = (name) => DSChart.resolve(document.body, name);
-      return [...document.querySelectorAll("canvas[data-chart]")].map((c) => {
+      /* 2026-11-15 — 축 있는 네 종류만(게이지 · 스파크는 behave.chart). 색 기대값 = 한 톤 규칙(DSChart.palette — 그 규칙 자체는 behave.chart 가 토큰과 대조), 강조 · 그라데이션 막대는 behave.chart 가 픽셀로 잰다 */
+      const T = DSChart.theme(document.documentElement);
+      return [...document.querySelectorAll('canvas:is([data-chart="timeseries"],[data-chart="bar"],[data-chart="donut"],[data-chart="mixed"])')].map((c) => {
         const h = c.__dsChart, ch = h && h.chart, kind = c.dataset.chart, ds = ch ? ch.data.datasets : [], r = c.getBoundingClientRect();
         if (!ch) return { kind, mounted: false };
-        const seriesTok = (i) => tok(DSChart.TOKENS.series[Math.min(i, DSChart.SERIES_MAX - 1)]);
-        return { kind, mounted: true, label: c.getAttribute("aria-label"), h: Math.round(r.height), w: Math.round(r.width), n: ds.length, legend: ch.options.plugins.legend.display,
+        const special = !!ch.$ds.gradient, hl = ch.$ds.highlight;   // 그라데이션 칠은 함수라 behave.chart 가 픽셀로 잰다
+        const pal = kind === "donut" ? DSChart.palette(T, ch.$ds.color, ds[0]._dsTones) : DSChart.palette(T, ch.$ds.color, ds.map((d) => d.tone));
+        const card = c.closest(".chart-card"), size = card && card.classList.contains("sm") ? "sm" : card && card.classList.contains("lg") ? "lg" : "md";
+        return { kind, mounted: true, size, label: c.getAttribute("aria-label"), h: Math.round(r.height), w: Math.round(r.width), n: ds.length, legend: ch.options.plugins.legend.display,
           yAxes: Object.keys(ch.options.scales || {}).filter((k) => k.startsWith("y")).length,
           colors: kind === "donut" ? ds[0].backgroundColor : ds.map((d) => d.type === "line" || kind === "timeseries" ? d.borderColor : d.backgroundColor),
-          want: kind === "donut" ? ds[0]._dsTones.map((t, i) => t ? tok(DSChart.TONES[t]) : seriesTok(i)) : ds.map((d, i) => d.tone ? tok(DSChart.TONES[d.tone]) : seriesTok(i)),
+          want: special ? null : hl != null ? [ch.data.labels.map((_, i) => (i === hl ? T.mono[0] : T.mono[3]))] : pal, special,
           grid: kind === "donut" ? null : ch.options.scales.y.grid.color, gridTok: tok(DSChart.TOKENS.grid), axis: ch.options.plugins.legend.labels.color, axisTok: tok(DSChart.TOKENS.axis),
           line: ds[0].borderWidth, pr: ds[0].pointHoverRadius, radius: ds[0].borderRadius,
           /* 막대는 각지고 stroke 가 없다(2026-11-05) — 누적 틈의 투명 테두리도 지웠다(2026-11-06) */
@@ -1755,26 +1759,28 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       });
     });
     const ch1 = await chartProbe();
-    ok("chart examples render with Chart.js at 240 high and carry an accessible name", ch1.length === 6 && ch1.every((c) => c.mounted && c.h === 240 && c.w > 200 && c.label), JSON.stringify(ch1.map((c) => [c.kind, c.mounted, c.h, c.w])));
-    ok("chart series · grid · axis colours equal the token values ds-chart resolved", ch1.every((c) => c.mounted && JSON.stringify(c.colors) === JSON.stringify(c.want) && (c.grid === null || c.grid === c.gridTok) && c.axis === c.axisTok), JSON.stringify(ch1.map((c) => [c.kind, c.colors, c.want, c.grid, c.gridTok])));
+    /* 높이 단계(2026-11-15) — 기본 240, .chart-card.sm 160 · .lg 320 */
+    const hOf = (c) => c.h === ({ sm: 160, lg: 320 }[c.size] || 240);   // 폭은 깨짐만 본다 — '한 세트' 예제는 1440 미리보기에 카드 셋이 한 줄이라 192(캡처로 읽힘을 확인)
+    ok("chart examples render with Chart.js at their card's height step (240 · sm 160 · lg 320) and carry an accessible name", ch1.length === 15 && ch1.every((c) => c.mounted && hOf(c) && c.w > 160 && c.label), JSON.stringify(ch1.map((c) => [c.kind, c.mounted, c.h, c.size, c.w])));
+    ok("chart series · grid · axis colours equal the token values ds-chart resolved", ch1.every((c) => c.mounted && (c.special || JSON.stringify(c.colors) === JSON.stringify(c.want)) && (c.grid === null || c.grid === c.gridTok) && c.axis === c.axisTok), JSON.stringify(ch1.map((c) => [c.kind, c.colors, c.want, c.grid, c.gridTok])));
     /* 범주 축은 라벨을 건너뛰지 않는다 — paint 가 기본 옵션으로 프리셋 옵션을 덮어 5개 중 3개만 보였다(Figma 대조에서 발견, 2026-11-04) */
     const barTicks = await page.evaluate(() => [...document.querySelectorAll('canvas[data-chart="bar"]')].map((c) => { const ch = c.__dsChart.chart, ax = ch.options.indexAxis === "y" ? "y" : "x"; return { labels: ch.data.labels.length, ticks: ch.scales[ax].ticks.length, autoSkip: ch.options.scales[ax].ticks.autoSkip }; }));
-    ok("bar charts show every category label", barTicks.length === 2 && barTicks.every((b) => b.ticks === b.labels && b.autoSkip === false), JSON.stringify(barTicks));
+    ok("bar charts show every category label", barTicks.length >= 2 && barTicks.every((b) => b.ticks === b.labels && b.autoSkip === false), JSON.stringify(barTicks));
     ok("chart legend only with 2+ series, mixed keeps one y axis, line 2 · hover point 8 · bar radius 0", ch1.every((c) => c.legend === (c.kind === "donut" ? true : c.n > 1)) && ch1.filter((c) => c.kind !== "donut").every((c) => c.yAxes === 1) && ch1.filter((c) => c.kind === "timeseries").every((c) => c.line === 2 && c.pr === 4) && ch1.filter((c) => c.kind === "bar").every((c) => c.radius === 0), JSON.stringify(ch1.map((c) => [c.kind, c.n, c.legend, c.yAxes, c.line, c.pr, c.radius])));
-    ok("chart bars are square with no stroke or border at all (bar · mixed)", ch1.filter((c) => c.bars.length).length === 3 && ch1.every((c) => c.bars.every(([r, w, col]) => r === 0 && w === 0 && col === "transparent")), JSON.stringify(ch1.map((c) => [c.kind, c.bars])));
+    ok("chart bars are square with no stroke or border at all (bar · mixed)", ch1.filter((c) => c.bars.length).length >= 3 && ch1.every((c) => c.bars.every(([r, w, col]) => r === 0 && w === 0 && col === "transparent")), JSON.stringify(ch1.map((c) => [c.kind, c.bars])));
     ok("chart legends and tooltips use circle markers", ch1.every((c) => c.point[0] === "circle" && c.point[1] === "circle"), JSON.stringify(ch1.map((c) => [c.kind, c.point])));
-    /* 비교 기간은 계열 1의 옅은 톤, 막대 위 선은 진한 톤(사람의 결정 2026-11-05) — tone 이 빠지면 계열 2(주황)로 칠해진다 */
-    const tones = await page.evaluate(() => { const tok = (n) => DSChart.resolve(document.body, n); const weeks = document.querySelectorAll('canvas[data-chart="bar"]')[0].__dsChart.chart.data.datasets, mixed = document.querySelector('canvas[data-chart="mixed"]').__dsChart.chart.data.datasets;
-      return { now: weeks[0].backgroundColor, prev: weeks[1].backgroundColor, line: mixed.find((d) => d.type === "line").borderColor, bar: mixed.find((d) => d.type === "bar").backgroundColor, s1: tok("--chart-series-1"), subtle: tok("--chart-series-1-subtle"), strong: tok("--chart-series-1-strong") }; });
-    ok("week comparison uses series 1 and its subtle tone, the mixed line its strong tone", tones.now === tones.s1 && tones.prev === tones.subtle && tones.bar === tones.s1 && tones.line === tones.strong && tones.subtle !== tones.s1 && tones.strong !== tones.s1, JSON.stringify(tones));
+    /* 비교 기간 = 한 톤의 진한 · 옅은 끝(2026-11-15 — 11-05 의 series-1 · subtle 을 바꿈), 막대 위 선은 진한 톤 series-1-strong(사람의 결정 2026-11-05) */
+    const tones = await page.evaluate(() => { const tok = (n) => DSChart.resolve(document.body, n); const weeks = document.querySelector('#ex-data-visual-bars canvas[data-chart="bar"]').__dsChart.chart.data.datasets, mixed = document.querySelector('canvas[data-chart="mixed"]').__dsChart.chart.data.datasets;
+      return { now: weeks[0].backgroundColor, prev: weeks[1].backgroundColor, line: mixed.find((d) => d.type === "line").borderColor, bar: mixed.find((d) => d.type === "bar").backgroundColor, m1: tok("--chart-mono-1"), m4: tok("--chart-mono-4"), strong: tok("--chart-series-1-strong") }; });
+    ok("week comparison uses mono 1 and mono 4, the mixed bars mono 1 and its line the strong tone", tones.now === tones.m1 && tones.prev === tones.m4 && tones.bar === tones.m1 && tones.line === tones.strong && tones.m4 !== tones.m1 && tones.strong !== tones.m1, JSON.stringify(tones));
     await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); await page.waitForTimeout(300);
     const ch2 = await chartProbe();
-    ok("charts repaint on theme change with the dark token values", ch2.every((c) => JSON.stringify(c.colors) === JSON.stringify(c.want) && (c.grid === null || c.grid === c.gridTok)) && ch2.every((c, i) => JSON.stringify(c.colors) !== JSON.stringify(ch1[i].colors)), JSON.stringify(ch2.map((c, i) => [c.kind, ch1[i].colors[0], c.colors[0]])));
+    ok("charts repaint on theme change with the dark token values", ch2.every((c) => (c.special || JSON.stringify(c.colors) === JSON.stringify(c.want)) && (c.grid === null || c.grid === c.gridTok)) && ch2.every((c, i) => c.special || JSON.stringify(c.colors) !== JSON.stringify(ch1[i].colors)), JSON.stringify(ch2.map((c, i) => [c.kind, ch1[i].colors[0], c.colors[0]])));
     await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); await page.waitForTimeout(300);
     /* 누적 세그먼트는 틈 없이 붙는다(사람의 요청 2026-11-06) — 누적 가로 막대의 첫 세그먼트 끝(x) 좌우 8px 를 막대 가운데 높이에서 읽어 비어 있는(알파 < 40) 픽셀을 센다.
        경과: 2px 면 색 stroke(틈 ≈4px) → 2px 투명 틈(2026-11-05) → 틈 없음 */
     gap = await page.evaluate(() => {
-      const c = document.querySelectorAll('canvas[data-chart="bar"]')[1], ch = c.__dsChart.chart, b0 = ch.getDatasetMeta(0).data[0], dpr = c.width / c.getBoundingClientRect().width;
+      const c = document.querySelectorAll('#ex-data-visual-bars canvas[data-chart="bar"]')[1], ch = c.__dsChart.chart, b0 = ch.getDatasetMeta(0).data[0], dpr = c.width / c.getBoundingClientRect().width;
       const img = c.getContext("2d").getImageData(Math.round((b0.x - 4) * dpr), Math.round(b0.y * dpr), Math.round(8 * dpr), 1).data; let hit = 0;
       for (let i = 3; i < img.length; i += 4) if (img[i] < 40) hit++;
       return { css: +(hit / dpr).toFixed(1), dpr, horizontal: ch.options.indexAxis === "y", stacked: ch.options.scales.x.stacked };
@@ -1782,9 +1788,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     ok("stacked bar segments touch with no gap", gap.horizontal && gap.stacked && gap.css === 0, JSON.stringify(gap));
     /* 옆 범례는 자리가 좁고 세로로 길면 아래로(사람의 요청 2026-11-06) — 탐색형 도넛(legend right)의 캔버스 자리를 260 으로 줄이면 범례가 차트 아래, 되돌리면 다시 오른쪽.
        정적 .donut-row 는 한 줄에 안 들어가는 폭(200)에서 범례가 도넛 아래로 줄을 바꾸고 넘치지 않는다 */
-    const legendAt = () => page.evaluate(() => { const ch = document.querySelector('canvas[data-chart="donut"]').__dsChart.chart, l = ch.legend, a = ch.chartArea;
+    const legendAt = () => page.evaluate(() => { const ch = document.querySelector('#ex-data-visual-donut-categorical canvas[data-chart="donut"]').__dsChart.chart, l = ch.legend, a = ch.chartArea;
       return { pos: ch.options.plugins.legend.position, below: l.top >= a.bottom - 1, right: l.left >= a.right - 1, w: Math.round(ch.width), r: Math.round(ch.getDatasetMeta(0).data[0].outerRadius) }; });
-    const holder = 'canvas[data-chart="donut"]';
+    const holder = '#ex-data-visual-donut-categorical canvas[data-chart="donut"]';   // 폭 480 카드 — 2026-11-15 donut-live 는 두 카드 grid 라 1440 에서 이미 좁다
     const lgWide = await legendAt();
     await page.evaluate((sel) => { document.querySelector(sel).parentElement.style.width = "260px"; }, holder); await page.waitForTimeout(400);
     const lgNarrow = await legendAt();
@@ -1827,10 +1833,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const kpiType = await page.evaluate(() => {
       const f = (e) => { const c = getComputedStyle(e); return [c.fontSize, c.lineHeight, c.fontWeight, c.letterSpacing].join("/"); };
       const host = document.querySelector("#ex-data-visual-kpi .example-preview");
-      const tmp = document.createElement("div"); tmp.innerHTML = '<span class="t-body-1-normal t-medium">a</span><span class="t-caption-1 t-semibold">a</span>'; host.append(tmp);
+      const tmp = document.createElement("div"); tmp.innerHTML = '<span class="t-body-1-normal t-medium">a</span><span class="t-caption-2 t-semibold">a</span>'; host.append(tmp);
       const r = { unit: [...new Set([...host.querySelectorAll(".kpi .value small")].map(f))], delta: [...new Set([...host.querySelectorAll(".kpi .delta")].map(f))], t1m: f(tmp.children[0]), l2s: f(tmp.children[1]) };
       tmp.remove(); return r; });
-    ok("KPI unit matches Body 1/Normal Medium and delta matches Caption 1 SemiBold", kpiType.unit.length === 1 && kpiType.unit[0] === kpiType.t1m && kpiType.t1m.startsWith("16px/24px/500/") && kpiType.delta.length === 1 && kpiType.delta[0] === kpiType.l2s && kpiType.l2s.startsWith("12px/16px/600/"), JSON.stringify(kpiType));
+    ok("KPI unit matches Body 1/Normal Medium and the delta badge matches Caption 2 SemiBold", kpiType.unit.length === 1 && kpiType.unit[0] === kpiType.t1m && kpiType.t1m.startsWith("16px/24px/500/") && kpiType.delta.length === 1 && kpiType.delta[0] === kpiType.l2s && kpiType.l2s.startsWith("11px/14px/600/"), JSON.stringify(kpiType));   // 2026-11-15 증감은 틴트 배지(Tag sm 크기)
 
     /* 심각도 5단계(사람의 결정 2026-11-06) — 정적 지표(막대 · 범례 · 밴드 · Tag 의 .dot 점 — 행 막대 .sev-cell 은 2026-11-11 에 없앰) · 정적 도넛 조각 · 탐색형 차트 톤이 전부 같은 토큰을 집는지.
        차트 색 단정은 DSChart.TONES 와 대조하므로 TONES 자체가 틀리면 함께 틀린다 — 여기서는 기대 토큰을 직접 적어 둘 다 잰다 */
@@ -2056,7 +2062,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 67c · behave.product.js", async () => {
     await require("./behave.product.js")({ page, ok, go });   // 제품 색 팔레트 여섯 · 삭제 버튼 중립 · AI 그라데이션 · 빨강/주황 입력 링(2026-11-14)
   });
-  await part("part 68 · components/button.html", async () => {
+  await part("part 67d · behave.chart.js", async () => {
+    await require("./behave.chart.js")({ page, ok, go });   // Data Visual 한 세트 — 한 톤 · 카드 틀 · 게이지 · 진행 막대 · 증감 배지(2026-11-15)
+  });
+  await part("part 68· components/button.html", async () => {
 
     // Components: Anatomy 없음 · Examples 제목 없음 · 1. Default 로 시작
     await go("components/button.html");

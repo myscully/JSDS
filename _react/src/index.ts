@@ -68,7 +68,7 @@ export { DataTable, ActionBar, type DataTableProps, type DataTableColumn, type S
 export { Spinner, Skeleton, SkeletonRow, Progress, useLoadingDelay, LOADING_DELAY, LOADING_MIN, type SpinnerProps, type SkeletonProps, type SkeletonRowProps, type ProgressProps } from "./components/loading/Loading";
 
 // F. data visual
-export { Kpi, KpiGrid, ChartCard, BarChart, Donut, DonutRow, ChartLegend, Sparkline, type KpiProps, type ChartCardProps, type BarChartProps, type BarChartRow, type DonutProps, type DonutSegment, type ChartLegendProps, type ChartLegendItem, type SparklineProps } from "./components/data-visual/DataVisual";
+export { Kpi, KpiGrid, ChartCard, BarChart, Donut, DonutRow, ChartLegend, Sparkline, ProgressList, Delta, type KpiProps, type ChartCardProps, type ChartFigure, type ProgressListProps, type ProgressListItem, type DeltaProps, type DeltaTone, type ChartColorMode, type BarChartProps, type BarChartRow, type DonutProps, type DonutSegment, type ChartLegendProps, type ChartLegendItem, type SparklineProps } from "./components/data-visual/DataVisual";
 
 // patterns (thin wrappers)
 export { SettingsSection, Setting, type SettingsSectionProps, type SettingProps } from "./patterns/Settings";

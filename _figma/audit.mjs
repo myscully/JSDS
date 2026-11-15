@@ -819,7 +819,7 @@ function flatExpect() {
 /* 세트 "Chart" 의 변형 하나 = 예제 chart-card 하나 — [Type, 예제 id, 그 예제의 몇 번째 chart-card]. 변형 이름 = "Type=<Type>, Legend=<범례 자리>"
    (2026-11-06 k36 — 사람의 결정: 좁은 자리 도넛 donut-narrow 를 Figma 에도. 범례 자리 = ds-chart legendPosition(spec.legend, 캔버스 폭, 높이),
    캔버스 폭 = 예제 chart-card 의 max-width − .chart-card 좌우 padding − 좌우 보더. max-width 가 없으면 폭을 모르므로 옆 범례(right · left)는 판정할 수 없어 멈춘다) */
-const CHART_EX = [["timeseries", "timeseries", 0], ["bar", "bars", 0], ["donut", "donut-live", 0], ["donut", "donut-narrow", 0], ["mixed", "mixed", 0]];
+const CHART_EX = [["timeseries", "timeseries", 0], ["bar", "bars", 0], ["donut", "donut-live", 1], ["donut", "donut-narrow", 0], ["mixed", "mixed", 0], ["gauge", "gauge", 0], ["spark", "spark", 0]];   // gauge · spark — 2026-11-15 Data Visual 한 세트(Figma 에는 아직 없다)
 function chartExpect() {
   try {
     const box = { I: () => "", module: { exports: {} } };
@@ -897,23 +897,31 @@ function chartExpect() {
       if (!fc.types.includes(type)) throw new Error(`audit CHART_EX 의 ${type} 가 figma.chart.types 에 없습니다`);
       const ex = (c.examples || []).find((e) => e.id === exId);
       if (!ex) throw new Error(`data-visual 예제 ${exId} 가 없습니다`);
-      const cards = [...ex.html.matchAll(/<div class="chart-card"([^>]*)>([\s\S]*?)<\/canvas>/g)]; const cardHtml = cards[nth] && cards[nth][2], cardAttr = cards[nth] ? cards[nth][1] : "";
+      const cards = type === "spark" ? [...ex.html.matchAll(/<div class="kpi([^"]*)"[^>]*>([\s\S]*?)<\/canvas>/g)] : [...ex.html.matchAll(/<div class="chart-card[^"]*"([^>]*)>([\s\S]*?)<\/canvas>/g)];   // 2026-11-15 spark 는 .kpi 안, 카드에 sm · lg 클래스
+      const cardHtml = cards[nth] && cards[nth][2], cardAttr = cards[nth] ? cards[nth][1] : "";
       if (!cardHtml) throw new Error(`예제 ${exId} 의 ${nth + 1}번째 chart-card 를 찾지 못했습니다`);
-      const tm = /<h3 class="chart-title">([\s\S]*?)<\/h3>/.exec(cardHtml), sm = /<span[^>]*>([\s\S]*?)<\/span>/.exec(tm ? tm[1] : "");
-      const title_ = text((tm ? tm[1] : "").replace(/<span[\s\S]*?<\/span>/, "")), meta = sm ? text(sm[1]) : null;
+      const tm = type === "spark" ? /<span class="label">([\s\S]*?)<\/span>/.exec(cardHtml) : /<h3 class="chart-title">([\s\S]*?)<\/h3>/.exec(cardHtml), sm = /<span class="chart-sub">([\s\S]*?)<\/span>/.exec(cardHtml);   // 2026-11-15 보조 글은 제목 밖 .chart-sub
+      const title_ = text(tm ? tm[1] : ""), meta = sm ? text(sm[1]) : null;
       const spm = /data-chart="([a-z]+)" data-spec='([^']+)'/.exec(cardHtml); if (!spm || spm[1] !== type) throw new Error(`예제 ${exId} 의 data-chart 가 ${type} 이 아닙니다`);
       const spec = JSON.parse(spm[2]);
-      const mw = /max-width:\s*(\d+)px/.exec(cardAttr), cardW = mw ? +mw[1] : null, canvasW = cardW != null ? cardW - pad[1] - pad[3] - 2 * +bm[1] : null;
+      /* 카드에 max-width 가 없으면 감싼 grid 의 max-width 를 카드 수로 나눈다(2026-11-15 donut-live 가 두 카드 grid — 넓은 화면 기준) */
+      const gm = !/max-width/.test(cardAttr) && /<div style="display:grid;[^"]*gap:(\d+)px;[^"]*max-width:(\d+)px">/.exec(ex.html), nCards = (ex.html.match(/<div class="chart-card[ "]/g) || []).length;
+      const mw = /max-width:\s*(\d+)px/.exec(cardAttr), cardW = mw ? +mw[1] : gm ? (+gm[2] - +gm[1] * (nCards - 1)) / nCards : null, canvasW = cardW != null ? cardW - pad[1] - pad[3] - 2 * +bm[1] : null;
       const want = type === "donut" ? spec.legend : undefined;
       if ((want === "right" || want === "left") && canvasW == null) throw new Error(`예제 ${exId} 의 chart-card 에 max-width 가 없어 옆 범례 자리를 판정할 수 없습니다`);
       const pos = legendPosition(want, canvasW || 0, fc.canvasH);
       const v = { title: title_, meta, ex: exId, cardW, canvasW, legendPos: pos, name: "Type=" + type[0].toUpperCase() + type.slice(1) + ", Legend=" + pos[0].toUpperCase() + pos.slice(1) };
       if (variants[v.name]) throw new Error(`예제 ${exId} 와 ${variants[v.name].ex} 가 같은 변형 ${v.name} 이 됩니다`);
       order.push(v.name);
-      const serTok = (list) => list.map((s, i) => tone(s.tone) || figTok(`var(${fc.series[i]})`));
+      /* 2026-11-15 한 톤 — tone 없는 것만 세어 4개까지 mono 단계(ds-chart MONO_STEPS), 넘거나 color:"categorical" 이면 계열 색 */
+      const MONO_STEPS = { 1: [0], 2: [0, 3], 3: [0, 1, 3], 4: [0, 1, 2, 3] };
+      const serTok = (list) => { const free = list.filter((s) => !s.tone).length, cat = spec.color === "categorical" || free > 4 || !fc.mono; let j = 0;
+        return list.map((s) => tone(s.tone) || figTok(`var(${cat ? fc.series[j++] : fc.mono[MONO_STEPS[free][j++]]})`)); };
       if (type === "timeseries") { v.series = spec.series.map((s) => s.label); v.colors = serTok(spec.series); v.lines = v.series.length; v.areas = spec.stacked ? v.series.length : 0; v.points = v.series.length; v.tooltip = true; }
       else if (type === "bar") { v.series = spec.series.map((s) => s.label); v.colors = serTok(spec.series); v.bars = spec.labels.length * spec.series.length; v.barsPer = spec.series.map((s) => spec.labels.length); v.lines = 0; v.stacked = !!spec.stacked; v.horizontal = !!spec.horizontal; v.nLabels = spec.labels.length; }
       else if (type === "donut") { v.series = spec.series.map((s) => s.label); v.colors = serTok(spec.series); const total = spec.series.reduce((a, s) => a + s.value, 0); let acc = -90; v.arcs = spec.series.map((s) => { const a0 = acc; acc += (s.value / total) * 360; return [+a0.toFixed(2), +acc.toFixed(2)]; }); v.center = spec.center != null ? String(spec.center) : null; v.lines = 0; v.legendWant = spec.legend || null; }
+      else if (type === "gauge") { v.series = []; v.colors = [figTok(`var(${fc.mono[0]})`)]; v.lines = 0; v.center = spec.label != null ? String(spec.label) : null; v.ratio = spec.value / (spec.max || 100); }
+      else if (type === "spark") { v.series = []; v.colors = [figTok(`var(${fc.mono[0]})`)]; v.lines = 1; v.areas = spec.area === false ? 0 : 1; }
       else if (type === "mixed") { v.series = spec.bars.map((s) => s.label).concat(spec.lines.map((s) => s.label)); v.colors = serTok(spec.bars.concat(spec.lines)); v.bars = spec.labels.length * spec.bars.length; v.lines = spec.lines.length; v.lineColors = spec.lines.map((s, i) => tone(s.tone) || figTok(`var(${fc.series[spec.bars.length + i]})`)); v.barColors = spec.bars.map((s, i) => tone(s.tone) || figTok(`var(${fc.series[i]})`)); }
       v.legend = v.series.length > 1;
       variants[v.name] = v;
@@ -949,23 +957,27 @@ function staticChartExpect() {
     const dvc = box.module.exports["data-visual"], ex = (id) => { const e = (dvc.examples || []).find((x) => x.id === id); if (!e) throw new Error(`data-visual 예제 ${id} 가 없습니다`); return e.html; };
     const pb = { I: mark, module: { exports: {} } }; vm.runInNewContext(read("_build/patterns.data.js"), pb, { filename: "patterns.data.js" });
     const dash = (((pb.module.exports.dashboard || {}).examples || [])[0] || {}).html; if (!dash) throw new Error("patterns.data.js dashboard 예제를 읽지 못했습니다");
-    const angles = (h) => [...h.matchAll(/--a:([\d.]+)deg/g)].map((m) => +m[1]);
+    const angles = (h) => { const i = h.indexOf('class="donut'); const seg = i < 0 ? "" : h.slice(i, h.indexOf("</div>", i)); return [...seg.matchAll(/--a:([\d.]+)deg/g)].map((m) => +m[1]); };   // 첫 도넛(심각도) — 2026-11-15 예제에 한 톤 도넛이 더 있다
     const aDoc = angles(ex("donut")), aDash = angles(dash);
     if (!aDoc.length) throw new Error("data-visual 예제 donut 에 경계선(--a)이 없습니다");
     if (aDoc.join() !== aDash.join()) throw new Error(`도넛 경계 각도 예제 [${aDoc}] ≠ 대시보드 [${aDash}]`);
-    const labels = (h) => [...h.matchAll(/<div class="kpi[^"]*"><span class="label">([^<]*)<\/span>/g)].map((m) => m[1].trim());
+    const labels = (h) => [...h.matchAll(/<div class="kpi(?: [^"]*)?"><span class="label">([^<]*)<\/span>/g)].map((m) => m[1].trim());
     const kpiEx = labels(ex("kpi")), dashOnly = labels(dash).filter((l) => !kpiEx.includes(l));
     /* KPI 카드 하나 = .kpi(.critical|.high) 의 label · value(<small> 단위) · delta(.up|.down, 앞의 I(이름) = 화살표). class="kpi-grid" 는 고르지 않는다 */
     const tok = (sel) => { const t = figTok(cssRule(sel).color); if (!t) throw new Error(sel + " 의 color 가 토큰이 아닙니다"); return t; };
-    const toneSel = { default: ".kpi .value", critical: ".kpi.critical .value", high: ".kpi.high .value" }, dirSel = { "": ".kpi .delta", up: ".kpi .delta.up", down: ".kpi .delta.down" };
-    const cards = (h, where) => [...h.matchAll(/<div class="kpi((?: [^"]*)?)"[^>]*>([\s\S]*?)<\/div>/g)].map((m) => {
-      const cls = m[1].trim().split(/\s+/).filter(Boolean), b = m[2];
-      if (/<div/.test(b)) throw new Error(where + " 의 .kpi 안에 div 가 있습니다(스파크라인?) — KPI 대조가 읽는 모양이 아닙니다");
-      const lab = /<span class="label">([^<]*)<\/span>/.exec(b), val = /<span class="value">([^<]*)(?:<small>([^<]*)<\/small>)?<\/span>/.exec(b), del = /<span class="delta([^"]*)">([\s\S]*?)<\/span>/.exec(b);
+    const toneSel = { default: ".kpi .value", critical: ".kpi.critical .value", high: ".kpi.high .value" }, dirSel = { "": ".delta", bad: ".delta.bad", good: ".delta.good" };   // 2026-11-15 증감 색 = 의미(bad · good · 중립), 방향은 화살표
+    /* 2026-11-15 — .kpi 안에 .kpi-foot · 스파크 캔버스(div)가 들어가 짝 맞춰 자른다. 증감 = <span class="delta( bad| good)?">[[화살표]]<span class="sr-only">증가|감소</span>글</span> */
+    const kpiBlocks = (h) => { const out = []; const re = /<div class="kpi((?: [^"]*)?)"[^>]*>/g; let m;
+      while ((m = re.exec(h))) { let depth = 1, end = -1; const t = /<div\b|<\/div>/g; t.lastIndex = re.lastIndex;
+        for (let x; (x = t.exec(h)); ) { depth += x[0] === "</div>" ? -1 : 1; if (!depth) { end = x.index; break; } }
+        out.push([m[1], h.slice(re.lastIndex, end)]); } return out; };
+    const cards = (h, where) => kpiBlocks(h).map((m) => {
+      const cls = m[0].trim().split(/\s+/).filter(Boolean), b = m[1];
+      const lab = /<span class="label">([^<]*)<\/span>/.exec(b), val = /<span class="value">([^<]*)(?:<small>([^<]*)<\/small>)?<\/span>/.exec(b), del = /<span class="delta((?: [^"]*)?)">((?:\[\[[^\]]+\]\])?)(?:<span class="sr-only">[^<]*<\/span>)?([^<]*)<\/span>/.exec(b);
       const tone = cls.includes("critical") ? "critical" : cls.includes("high") ? "high" : "default", dir = del ? del[1].trim() : null, ic = del && /\[\[([^\]]+)\]\]/.exec(del[2]);
       if (dir != null && !(dir in dirSel)) throw new Error(`${where} 의 .delta 클래스 '${dir}' 를 모릅니다`);
       return { label: lab ? lab[1].trim() : null, value: val ? val[1].trim() : null, unit: val && val[2] ? val[2].trim() : null,
-        delta: del ? del[2].replace(/\[\[[^\]]+\]\]/g, "").trim() : null, arrow: ic ? ic[1] : null, tone, dir,
+        delta: del ? del[3].trim() : null, arrow: ic ? ic[1] : null, tone, dir,
         lfill: tok(".kpi .label"), vfill: tok(toneSel[tone]), ufill: val && val[2] ? tok(".kpi .value small") : null, dfill: del ? tok(dirSel[dir]) : null };
     });
     const example = cards(ex("kpi"), "data-visual 예제 kpi"), dashK = cards(dash, "patterns.data.js dashboard");
@@ -981,11 +993,11 @@ function staticChartExpect() {
     const ts = typeScale(), uStyle = Object.keys(ts).filter((n) => ts[n].size === ufs && (ts[n].weight || 400) === uwt && ts[n].lineHeight === +ulh.toFixed(2));
     const unit = { fs: ufs, wt: uwt, lh: +ulh.toFixed(2), ls: +uls.toFixed(2), style: uStyle[0] || null, fill: tok(".kpi .value small") };
     /* 증감 글자 모양(2026-11-06 k35d) — .kpi .delta 의 크기 · 행간 · 굵기와 셋이 같은 타입 스케일 스타일 하나(지금 Label/2 SemiBold) */
-    const dl = cssRule(".kpi .delta"), dfs = px(dl["font-size"]), dlh = px(dl["line-height"]), dwt = parseInt(dl["font-weight"], 10) || 400;
-    const dStyle = Object.keys(ts).filter((n) => ts[n].size === dfs && ts[n].lineHeight === dlh && (ts[n].weight || 400) === dwt);
+    const dl = cssRule(".delta"), dfs = px(dl["font-size"]), dlh = px(dl["line-height"]), dwt = parseInt(dl["font-weight"], 10) || 400;   // 2026-11-15 배지 = Caption 2 + .t-semibold
+    const dStyle = Object.keys(ts).filter((n) => ts[n].size === dfs && ts[n].lineHeight === dlh && (ts[n].weight || 400) === dwt).concat(Object.keys(ts).filter((n) => ts[n].size === dfs && ts[n].lineHeight === dlh && (ts[n].weight || 400) !== dwt).map((n) => n + " " + dwt)).slice(0, 1);
     if (dStyle.length !== 1) throw new Error(`.kpi .delta ${dfs}/${dlh}/${dwt} 에 맞는 타입 스케일 스타일이 ${dStyle.length}개입니다 — ${dStyle.join(" · ")}`);
     const delta = { fs: dfs, lh: dlh, wt: dwt, style: dStyle[0] };
-    const dirFill = { None: tok(dirSel[""]), Up: tok(dirSel.up), Down: tok(dirSel.down) };
+    const dirFill = { None: tok(dirSel[""]), Bad: tok(dirSel.bad), Good: tok(dirSel.good) };
     const needNone = example.concat(dashK).some((k) => k.dir === "");
     const tones = ["Default"].concat(["critical", "high"].filter((t) => { try { cssRule(toneSel[t]); return true; } catch { return false; } }).map((t) => t[0].toUpperCase() + t.slice(1)));
     /* 도넛 + 범례 행(2026-11-06 k36 — 사람의 요청) — .donut-row 의 gap(행 열) · flex-wrap · justify-content · align-items. wrap 이면 한 줄에 안 들어갈 때(쓸 수 있는 폭 < 도넛 + 열 간격 + 범례 폭)
@@ -1000,7 +1012,7 @@ function staticChartExpect() {
     if (!rowM) throw new Error("patterns.data.js dashboard 에서 .donut-row 를 품은 줄(row-*)을 찾지 못했습니다");
     const gr = cssRule("." + rowM[1]), frs = String(gr["grid-template-columns"] || "").trim().split(/\s+/);
     if (!frs.length || frs.some((f) => !/^[\d.]+fr$/.test(f))) throw new Error(`.${rowM[1]} grid-template-columns ${gr["grid-template-columns"]} 가 fr 만으로 되어 있지 않습니다`);
-    const grid = { cls: rowM[1], fr: frs.map(parseFloat), gap: px(gr.gap || gr["column-gap"] || "0"), idx: [...dash.slice(rowM.index, di0).matchAll(/class="chart-card"/g)].length - 1 };
+    const grid = { cls: rowM[1], fr: frs.map(parseFloat), gap: px(gr.gap || gr["column-gap"] || "0"), idx: [...dash.slice(rowM.index, di0).matchAll(/class="chart-card[ "]/g)].length - 1 };
     if (grid.idx < 0 || grid.idx >= grid.fr.length) throw new Error(`대시보드 도넛 카드 위치 ${grid.idx} 가 .${rowM[1]} 열 ${grid.fr.length}개 밖입니다`);
     if (!(row.rowGap >= 0) || !(row.colGap >= 0)) throw new Error(`.donut-row gap ${dr.gap} 를 읽지 못했습니다`);
     /* 줄의 카드 구성(2026-11-06 k37) — 줄 div 를 짝 맞춰 잘라 그 안의 chart-card 들(카드끼리는 중첩되지 않는다)을 순서대로 읽는다.
@@ -1011,9 +1023,9 @@ function staticChartExpect() {
       const rowHtml = dash.slice(rowM.index, end), ENT2 = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", apos: "'", nbsp: " " };
       const txt = (h) => String(h).replace(/<[^>]+>/g, "").replace(/&(amp|lt|gt|quot|#39|apos|nbsp);/g, (_, e) => ENT2[e]).normalize("NFC").replace(/\s+/g, " ").trim();
       const canon = (o) => JSON.stringify(o, (k, v) => (v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
-      grid.cards = rowHtml.split('<div class="chart-card"').slice(1).map((h, i) => {
+      grid.cards = rowHtml.split(/<div class="chart-card[ "]/).slice(1).map((h, i) => {
         const tm = /<h3 class="chart-title">([\s\S]*?)<\/h3>/.exec(h); if (!tm) throw new Error(`.${rowM[1]} ${i + 1}번째 chart-card 에 .chart-title 이 없습니다`);
-        const sm = /<span[^>]*>([\s\S]*?)<\/span>/.exec(tm[1]), card = { title: txt(tm[1].replace(/<span[\s\S]*?<\/span>/, "")), meta: sm ? txt(sm[1]) : null };
+        const sm = /<span class="chart-sub">([\s\S]*?)<\/span>/.exec(h), card = { title: txt(tm[1]), meta: sm ? txt(sm[1]) : null };   // 2026-11-15 보조 글은 .chart-sub
         const cm = /data-chart="([a-z]+)" data-spec='([^']+)'/.exec(h);
         if (cm) { const e = CHART_EX.find((x) => x[0] === cm[1]); if (!e) throw new Error(`대시보드 ${card.title} 의 data-chart ${cm[1]} 에 맞는 예제가 audit CHART_EX 에 없습니다`);
           const eh = [...ex(e[1]).matchAll(/data-chart="([a-z]+)" data-spec='([^']+)'/g)][e[2]]; if (!eh) throw new Error(`data-visual 예제 ${e[1]} 의 canvas 를 찾지 못했습니다`);
@@ -1026,12 +1038,13 @@ function staticChartExpect() {
     const bar = (() => { const h = ex("bar"), ENT = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", apos: "'", nbsp: " " };
       const tx = (v) => String(v).replace(/<[^>]+>/g, "").replace(/&(amp|lt|gt|quot|#39|apos|nbsp);/g, (_, e) => ENT[e]).normalize("NFC").replace(/\s+/g, " ").trim();
       const tm = /<h3 class="chart-title">([\s\S]*?)<\/h3>/.exec(h); if (!tm) throw new Error("data-visual 예제 bar 에 .chart-title 이 없습니다");
-      const cm = /<span[^>]*>([\s\S]*?)<\/span>/.exec(tm[1]);
+      const cm = /<span class="chart-sub">([\s\S]*?)<\/span>/.exec(h);   // 2026-11-15 보조 글은 .chart-sub
       const tb = /var TONES = \{([\s\S]*?)\};/.exec(read("_build/ds-chart.src.js")); if (!tb) throw new Error("ds-chart.src.js 의 TONES 를 읽지 못했습니다");
       const TONES = Object.fromEntries([...tb[1].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/"?([a-z0-9-]+)"?\s*:\s*"(--[a-z0-9-]+)"/g)].map((m) => [m[1], m[2]]));
-      const rows = [...h.matchAll(/<div class="row"><span class="lbl">([\s\S]*?)<\/span><div class="bar ([a-z0-9-]+)"><i style="width:([\d.]+)%"><\/i><\/div><span class="num">([\s\S]*?)<\/span><\/div>/g)].map((m) => {
-        const tone = m[2]; if (!TONES[tone]) throw new Error(`bar 예제의 톤 ${tone} 이 ds-chart TONES 에 없습니다`);
-        const t = figTok(`var(${TONES[tone]})`), r = cssRule(`.chart .bar.${tone} i`); if (figTok(r.background) !== t) throw new Error(`.chart .bar.${tone} i ${r.background} ≠ TONES.${tone} ${TONES[tone]}`);
+      /* 2026-11-15 한 톤 — 톤 없는 막대는 .chart .bar i 의 칠(--chart-mono-1) */
+      const rows = [...h.matchAll(/<div class="row"><span class="lbl">([\s\S]*?)<\/span><div class="bar(?: ([a-z0-9-]+))?"><i style="width:([\d.]+)%"><\/i><\/div><span class="num">([\s\S]*?)<\/span><\/div>/g)].map((m) => {
+        const tone = m[2] || null; if (tone && !TONES[tone]) throw new Error(`bar 예제의 톤 ${tone} 이 ds-chart TONES 에 없습니다`);
+        const t = tone ? figTok(`var(${TONES[tone]})`) : figTok(cssRule(".chart .bar i").background), r = cssRule(tone ? `.chart .bar.${tone} i` : ".chart .bar i"); if (figTok(r.background) !== t) throw new Error(`.chart .bar.${tone} i ${r.background} ≠ TONES.${tone} ${TONES[tone]}`);
         return { lbl: tx(m[1]), tone, tok: t, pct: +m[3], num: tx(m[4]) }; });
       const nRow = (h.match(/<div class="row">/g) || []).length;
       if (!rows.length || rows.length !== nRow) throw new Error(`data-visual 예제 bar 의 행 ${nRow}개 중 ${rows.length}개만 읽었습니다(.row > .lbl · .bar.{톤} > i width% · .num)`);
@@ -1224,7 +1237,7 @@ function severityExpect() {
     for (const sel of [`.chart-legend i.${l}`, `.chart .bar.${l} i`, `.sev-band i.${l}`]) { const r = has(sel); if (!r || figTok(r.background) !== t) throw new Error(`${sel} ${r ? r.background : "없음"} ≠ ds-chart TONES.${l} ${TONES[l]}`); }
     marks[CAP(l)] = t;
   }
-  const conic = [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+[\d.]+%?\s+[\d.]+%/g)].map((x) => figTok("var(--" + x[1] + ")")).filter((x) => x !== "surface/elevated/primary");
+  const conic = [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+(?:[\d.]+%?|var\(--d\d\))\s+(?:[\d.]+%|var\(--d\d\))/g)].map((x) => figTok("var(--" + x[1] + ")")).filter((x) => x !== "surface/elevated/primary");
   if (conic.join() !== levels.map((l) => tok(TONES[l])).join()) throw new Error(`.donut conic-gradient 색 순서 ${conic.join(" · ")} ≠ 심각도 단계 ${levels.join(" · ")} 의 TONES`);
   return { tag, labels, ambiguous, levels, marks, band: { tones: bandEx.map(([l]) => tok(TONES[l])), flex: bandEx.map(([, f]) => f), levels }, notes };
 }
@@ -2521,7 +2534,7 @@ function diffStatic(c, w, bad, notes) {
         for (const f of Object.keys(F)) { const gv = /fill$/.test(f) ? (g[f] ? String(g[f]).replace(/^\$/, "") : null) : g[f]; if ((gv ?? null) !== (x[f] ?? null)) diffs.push(`${F[f]} ${JSON.stringify(gv ?? null)} ≠ ${JSON.stringify(x[f] ?? null)}`); }
         if (g.tone != null && g.tone.toLowerCase() !== x.tone) diffs.push(`Tone ${g.tone} ≠ ${x.tone}`);
         /* 증감 방향 = Delta 값(class 없음 → None) · 칠은 변형이 정한다 — 덮어쓰기로 흉내 내지 않는다(k35c) */
-        const wd = x.dir == null ? null : { "": "None", up: "Up", down: "Down" }[x.dir];
+        const wd = x.dir == null ? null : { "": "None", bad: "Bad", good: "Good" }[x.dir];   // 2026-11-15 Figma Delta 축 Up · Down → 의미(Bad · Good) — 일괄 반영 때
         if (g.dir != null && wd && g.dir !== wd) diffs.push(`Delta ${g.dir} ≠ ${wd}(.delta${x.dir ? "." + x.dir : " class 없음"})`);
         if (Array.isArray(g.ov)) {
           const fills = g.ov.filter((o) => /fills/.test(o.split(":").pop()));

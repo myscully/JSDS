@@ -88,7 +88,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
       r[w] = await page.evaluate(() => { const ks = [...document.querySelectorAll("#ex-dashboard-full .kpi-grid > .kpi")];
         return { n: ks.length, rows: new Set(ks.map((k) => Math.round(k.getBoundingClientRect().top))).size,
           spare: Math.min(...ks.map((k) => { const cs = getComputedStyle(k), inner = k.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-            return Math.min(...[...k.children].map((c) => { const g = document.createRange(); g.selectNodeContents(c); return Math.floor(inner - g.getBoundingClientRect().width); })); })) }; });
+            return Math.min(...[...k.children].filter((c) => !c.matches(".chart-canvas")).map((c) => { const g = document.createRange(); g.selectNodeContents(c); return Math.floor(inner - g.getBoundingClientRect().width); })); })) }; });   // 스파크 캔버스는 폭을 채우는 그래픽(2026-11-15) — 글자만 잰다
     }
     ok("scale: dashboard keeps its four KPIs in one row from 1024 to 2560 and every value fits its card", Object.values(r).every((x) => x.n === 4 && x.rows === 1 && x.spare >= 0), JSON.stringify(r));
   });

@@ -11,7 +11,7 @@ const DAILY = {
 
 export default function Example() {
   return (
-    <ChartCard title="일별 탐지와 차단" extra="최근 7일" style={{ maxWidth: 640 }}>
+    <ChartCard title="일별 탐지와 차단" sub="최근 7일" style={{ maxWidth: 640 }}>
       <ChartCanvas chart={Chart} config={presets.mixed(DAILY)} aria-label="일별 탐지와 차단 — 최근 7일, 막대는 탐지 건수, 선은 차단 건수" />
     </ChartCard>
   );

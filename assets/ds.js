@@ -1231,6 +1231,7 @@
     if ((el = closest(t, ".dropdown [aria-haspopup]")) && !el.disabled) { var dd = closest(el, ".dropdown"); setOpen(dd, !dd.classList.contains("open")); return; }
     if ((el = closest(t, ".menu-state [data-retry]"))) { fire(closest(el, ".dropdown, .combobox"), "ds:retry"); return; }
     if ((el = closest(t, ".tbl [data-retry]"))) { fire(closest(el, ".tbl-wrap"), "ds:retry"); return; }
+    if ((el = closest(t, ".chart-state [data-retry]"))) { fire(closest(el, ".chart-card"), "ds:retry"); return; }   // 차트 카드 오류 상태(2026-11-15) — 다시 부르는 일은 제품
     if ((el = closest(t, ".tbl .expand-btn"))) { toggleDetail(el); return; }
     if ((el = closest(t, ".combobox .x"))) { var cbh = closest(el, ".combobox"); if (!cbInput(cbh).disabled) cbRemove(cbh, closest(el, ".chip")); return; }
     if ((el = closest(t, ".combobox .menu-item"))) { if (el.getAttribute("aria-disabled") !== "true") cbPick(closest(el, ".combobox"), el); return; }

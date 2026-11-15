@@ -108,6 +108,14 @@ const pairs = [
   ["--foreground-brand-primary", SURFACES, 3, "제품색 지표 · 포커스 링"],
   /* 탐색형 차트 계열 — 글자 없는 마크(선 · 막대 · 조각)라 3:1. 라이트 · 다크 각각 세 바탕에서 넘기는 단계를 골랐다(dataviz 검증기 — style.src.css 주석) */
   ...[1, 2, 3, 4, 5, 6].map((i) => [`--chart-series-${i}`, SURFACES, 3, `차트 계열 ${i}`]),
+  /* 한 톤(사람의 결정 2026-11-15) — 고정 파랑 명도 4단계. 진한 두 단계는 세 바탕에서 3:1 을 넘고, 옅은 끝은 계열을 명도로 가르려고 3:1 아래로 내려간다.
+     dataviz 검증기(ordinal 모드)로 이웃 ΔL ≥ 0.06 · 옅은 끝 ≥ 2:1 을 확인했다(style.src.css 주석) */
+  ["--chart-mono-1", SURFACES, 3, "차트 한 톤 1단계(가장 진함) — 계열 하나 · 강조 막대 · 진행 막대 · 게이지 채움"],
+  ["--chart-mono-2", SURFACES, 3, "차트 한 톤 2단계"],
+  ["--chart-mono-3", SURFACES, 3, "차트 한 톤 3단계"],
+  ["--chart-mono-4", SURFACES, 3, "차트 한 톤 4단계(가장 옅음) — 비교 기간 · 강조 밖 막대 · 정적 스파크라인", { advisory: true, why: "사람의 결정(2026-11-15 한 톤) — 라이트 blue-70 2.49 · 회색 2.33, 다크 blue-45 카드 2.88. 명도로 계열을 가르는 옅은 끝이라 3:1 아래이고(검증기 바닥 2:1 은 넘음), 값은 범례 · 툴팁 · 표로 보기가 나른다" }],
+  /* 게이지 · 진행 막대 · 정적 막대 — 채움이 트랙(--surface-neutral-strong) 위에서 보여야 한다 */
+  ["--chart-mono-1", ["--surface-neutral-strong"], 3, "게이지 · 진행 막대 · 정적 막대의 채움 / 트랙"],
   ["--chart-series-1-subtle", SURFACES, 3, "차트 비교 기간 막대(계열 1 옅은 톤)", { advisory: true, why: "사람의 결정(2026-11-05) — 비교 기간은 같은 색상의 옅은 톤으로 나누는 관례를 따른다. 계열 1 과의 대비 2.74 로 둘이 갈리고, 값은 툴팁 · 범례로 읽는다" }],
   ["--chart-series-1-strong", SURFACES, 3, "차트 막대 위 선(계열 1 진한 톤)"],
   ["--chart-axis-text", SURFACES, 4.5, "차트 축 · 범례 글자", REF("foreground/neutral/tertiary 를 참조 — 기준 시스템 값(61% 알파)이라 글자 쌍과 같은 예외")],
@@ -132,7 +140,7 @@ const separation = [
   /* 눌림 단계 — 참조에 없어 우리가 더한 틴트다(base-tokens.js 의 ADDITIONS) */
   ["--surface-negative-heavy", SURFACES, { light: 1.1, dark: 1.1 }],
   ["--surface-brand-subtle-strong", SURFACES, { light: 1.04, dark: 1.04 }],
-  /* Sparkline 일반 막대 — 강조(.hi)와 갈리도록 옅게 했다. 장식(aria-hidden)이라 3:1 대상은 아니지만 막대가 바탕에 녹으면 안 된다 */
+  /* 제품 색 옅은 선 — 달력 오늘 · 띠 hover 의 안쪽 선, accent outline Tag. 2026-11-15 까지는 Sparkline 일반 막대이기도 했다(이제 --chart-mono-4) */
   ["--line-brand-primary", SURFACES, { light: 1.4, dark: 1.4 }],   // 실측 라이트 1.45~1.61 · 다크 1.45~2.45
   ["--line-brand-strong", SURFACES, { light: 1.7, dark: 1.7 }],   // Outline Primary 버튼 테두리(2026-10-29) — 실측 기본 제품 라이트 1.92 · 다크 1.90, 가장 낮은 곳은 제품 C 의 패널 바탕 1.79. 비텍스트 3:1 에는 못 미치지만 라벨(제품색 글자)이 버튼을 알린다
   ...ACCENTS.map((c) => [`--surface-accent-${c}`, SURFACES, { light: 1.03, dark: 1.03 }]),
@@ -179,7 +187,7 @@ const grammarOnly = [
   "--effect-transparent-primary", "--effect-transparent-secondary",
   "--company-mark-subtle",
   /* 탐색형 차트 토큰은 CSS 가 아니라 ds-chart.js 가 계산값으로 읽는다(캔버스) — CSS 소비자가 0 이어도 살아 있는 토큰이다 */
-  ...[1, 2, 3, 4, 5, 6].map((i) => `--chart-series-${i}`), "--chart-series-1-subtle", "--chart-series-1-strong", "--chart-grid-primary", "--chart-axis-text", "--chart-tooltip-surface", "--chart-tooltip-text",
+  ...[1, 2, 3, 4].map((i) => `--chart-mono-${i}`), ...[1, 2, 3, 4, 5, 6].map((i) => `--chart-series-${i}`), "--chart-series-1-subtle", "--chart-series-1-strong", "--chart-grid-primary", "--chart-axis-text", "--chart-tooltip-surface", "--chart-tooltip-text",
   /* 램프는 의미 토큰이 고르는 재료라 단계별 소비자를 요구하지 않는다 */
 ];
 

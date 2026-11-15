@@ -53,7 +53,7 @@ import { Chart } from "chart.js/auto";
 import { ChartCard } from "@jiran/ds-react";
 import { ChartCanvas, presets } from "@jiran/ds-react/chart";
 
-<ChartCard title="일별 탐지 추이" extra="최근 14일">
+<ChartCard title="일별 탐지 추이" sub="최근 14일">
   <ChartCanvas chart={Chart} aria-label="일별 탐지 추이 — Critical · High 누적 영역"
     config={presets.timeseries({ labels, series: [{ label: "Critical", tone: "critical", data }], stacked: true })} />
 </ChartCard>

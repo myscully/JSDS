@@ -19,6 +19,6 @@ describe("예제 커버리지", () => {
   it("모든 사이트 예제에 React 예제가 있다", () => {
     const missing = expected.filter((k) => !files.includes(k));
     expect(missing, `누락 ${missing.length}/${expected.length}`).toEqual([]);
-    expect(expected.length).toBe(284); // components 265 + patterns 19 (2026-11-14 Tree 예제 다섯 · Notification Center 넷)
+    expect(expected.length).toBe(291); // components 272 + patterns 19 (2026-11-15 Data Visual 예제 일곱 — bar-emphasis · progress · gauge · donut-categorical · set · size · state)
   });
 });

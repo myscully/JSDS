@@ -240,9 +240,45 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       for (const m of pv.matchAll(/<span\b[^>]*\bclass="lbl"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: 칩 값(.lbl)에 title 금지 — 키보드로 볼 수 없습니다. 잘린 값의 Tooltip 은 ds.js 가 답니다(Chip › 긴 값)`);
       for (const m of pv.matchAll(/<span\b[^>]*\bclass="avatar\b[^"]*"[^>]*>/g)) if (/\stitle=/.test(m[0])) fails.push(`${f}: Avatar 에 title 금지 — 이름은 role="img" + aria-label, 누르는 아바타는 버튼의 이름으로(Avatar)`);
       /* 표로 보기는 옵션(2026-11-13) — 탐색형 차트는 늘 .chart-view 안 .chart-canvas 에 있고, 버튼은 있으면 .chart-view 의 첫 자식 .chart-tools 안(canvas 앞)이다 */
-      { const charts = (pv.match(/<canvas\b[^>]*\bdata-chart=/g) || []).length, wrapped = (pv.match(/<div class="chart-canvas"><canvas\b[^>]*\bdata-chart=/g) || []).length, views = (pv.match(/<div class="chart-view"[^>]*>/g) || []).length, btns = (pv.match(/\bdata-chart-table\b/g) || []).length, placed = (pv.match(/<div class="chart-view"[^>]*><div class="chart-tools"><button\b[^>]*\bdata-chart-table\b/g) || []).length;
+      /* KPI 안 탐색형 스파크(2026-11-15)는 .kpi > .chart-canvas.spark > canvas[data-chart="spark"] — 표로 보기 틀 없이 카드 맨 아래 */
+      const sparks = (pv.match(/<div class="chart-canvas spark"><canvas\b[^>]*\bdata-chart="spark"/g) || []).length;
+      for (const m of pv.matchAll(/<canvas\b[^>]*\bdata-chart="spark"/g)) if (!/<div class="chart-canvas spark">$/.test(pv.slice(Math.max(0, m.index - 40), m.index))) fails.push(`${f}: 스파크(data-chart="spark")는 .kpi > .chart-canvas.spark 안에 씁니다(Data Visual › Sparkline)`);
+      for (const m of pv.matchAll(/<div class="chart-canvas spark">/g)) { const kpis = [...pv.slice(0, m.index).matchAll(/<div class="kpi[ "]/g)], open = kpis.length ? kpis[kpis.length - 1].index : -1; if (open < 0 || pv.slice(open, m.index).split("<div").length - 1 !== pv.slice(open, m.index).split("</div>").length) fails.push(`${f}: .chart-canvas.spark 는 .kpi 의 바로 아래 자식입니다(Data Visual › Sparkline)`); }
+      { const charts = (pv.match(/<canvas\b[^>]*\bdata-chart=/g) || []).length - sparks, wrapped = (pv.match(/<div class="chart-canvas"><canvas\b[^>]*\bdata-chart=/g) || []).length, views = (pv.match(/<div class="chart-view"[^>]*>/g) || []).length, btns = (pv.match(/\bdata-chart-table\b/g) || []).length, placed = (pv.match(/<div class="chart-view"[^>]*><div class="chart-tools"><button\b[^>]*\bdata-chart-table\b/g) || []).length;
         if (charts !== wrapped || charts !== views) fails.push(`${f}: 탐색형 차트는 .chart-view > .chart-canvas > canvas 로 씁니다(차트 ${charts} · 틀 ${views} · 캔버스 칸 ${wrapped}, Data Visual)`);
         if (btns !== placed || btns > charts) fails.push(`${f}: 표로 보기 버튼은 .chart-view 의 첫 자식 .chart-tools 안에만, 차트 수 이하(버튼 ${btns} · 제자리 ${placed} · 차트 ${charts})`); }
+      /* 차트 색 모드 · 강조 · 게이지(2026-11-15) — data-spec 을 읽어 ds-chart 가 경고만 하고 넘어가는 조합을 빌드에서 막는다 */
+      for (const m of pv.matchAll(/<canvas\b[^>]*\bdata-chart="([a-z]+)"[^>]*\bdata-spec=(?:"([^"]*)"|'([^']*)')/g)) {   // 위(L29)와 같이 두 따옴표 형식 — 처음엔 '…' 만 읽어 생성 페이지에서 아무것도 보지 않았다(음성 시험에서 발견)
+        const kind = m[1], bad = (msg) => fails.push(`${f}: ${msg}(Data Visual › ${kind})`); let spec;
+        try { spec = JSON.parse((m[2] ?? m[3]).replace(/&quot;/g, '"').replace(/&amp;/g, "&")); } catch (e) { bad("data-spec 이 JSON 이 아닙니다"); continue; }
+        if (spec.color != null && !["mono", "categorical"].includes(spec.color)) bad(`color 는 "mono" 또는 "categorical" 입니다(받은 값 ${spec.color})`);
+        const list = kind === "mixed" ? (spec.bars || []).concat(spec.lines || []) : spec.series || [], free = list.filter((s) => !s.tone).length;
+        if (spec.color === "mono" && free > 4) bad(`한 톤은 tone 없는 계열 4개까지입니다(${free}개) — color 를 지우면 계열 색으로 그립니다`);
+        if (spec.highlight != null && (kind !== "bar" || list.length !== 1 || !Number.isInteger(spec.highlight) || spec.highlight < 0 || spec.highlight >= (spec.labels || []).length)) bad("highlight 는 계열이 하나인 bar 의 막대 번호(0부터, 라벨 수 미만)입니다");
+        if (spec.gradient && (kind !== "bar" || spec.stacked)) bad("gradient 는 누적이 아닌 bar 에만 씁니다");
+        if (kind === "gauge" && !(+spec.value >= 0 && +spec.value <= (spec.max == null ? 100 : +spec.max))) bad("gauge 의 value 는 0 이상 max 이하입니다");
+      }
+      /* 진행 막대 목록은 측정값 — role=meter 와 값 속성 · 이름(2026-11-15) */
+      for (const m of pv.matchAll(/<div class="progress-list">/g)) {
+        const body = pv.slice(m.index, m.index + 6000);
+        let depth = 0, n = 0; for (const t of body.matchAll(/<(\/?)div\b/g)) { depth += t[1] ? -1 : 1; if (!depth) { n = t.index; break; } }
+        for (const bar of body.slice(0, n).matchAll(/<div class="progress(?: [^"]*)?"([^>]*)>/g)) {
+          const at = bar[1];
+          if (!/role="meter"/.test(at) || !/aria-valuenow="/.test(at) || !/aria-valuemin="/.test(at) || !/aria-valuemax="/.test(at) || !/aria-valuetext="[^"]+"/.test(at) || !/aria-(labelledby|label)="[^"]+"/.test(at)) fails.push(`${f}: 진행 막대 목록의 막대는 role="meter" + aria-valuenow · min · max · valuetext + 이름(Data Visual › Progress List)`);
+        }
+      }
+      /* 증감 배지 — 색은 의미 클래스(bad · good · 없음), 방향 클래스(.up · .down)는 없앴다. 화살표가 있으면 숨긴 '증가' · '감소' 가 함께 */
+      for (const m of pv.matchAll(/<span class="delta((?: [^"]*)?)">(<svg\b[\s\S]*?<\/svg>)?(<span class="sr-only">[^<]*<\/span>)?[^<]*<\/span>/g)) {
+        if (/\b(up|down)\b/.test(m[1])) fails.push(`${f}: .delta 의 .up · .down 은 없앴습니다 — 색은 .bad · .good, 방향은 화살표와 숨긴 글자(Data Visual › 증감)`);
+        if (m[2] && !/>(증가|감소)</.test(m[3] || "")) fails.push(`${f}: 증감 화살표에는 숨긴 '증가' · '감소' 를 함께 둡니다(Data Visual › 증감)`);
+      }
+      for (const m of pv.matchAll(/<span class="delta((?: [^"]*)?)"/g)) if (!/^(?: (?:bad|good))?$/.test(m[1])) fails.push(`${f}: .delta 의 클래스는 bad · good · 없음(중립)입니다(받은 값${m[1]}, Data Visual › 증감)`);
+      /* 차트 카드 — 머리(.chart-head > h3.chart-title)가 맨 앞, 높이 단계는 sm · lg 하나만 */
+      for (const m of pv.matchAll(/<div class="chart-card((?: [^"]*)?)"[^>]*>\s*([\s\S]{0,60})/g)) {
+        const mods = m[1].trim().split(/\s+/).filter(Boolean);
+        if (mods.some((c) => !["sm", "lg", "flat"].includes(c)) || (mods.includes("sm") && mods.includes("lg"))) fails.push(`${f}: .chart-card 의 클래스는 sm · lg(하나) · flat 만입니다(받은 값 ${m[1].trim()}, Data Visual › 카드)`);
+        if (!/^<div class="chart-head"><h3 class="chart-title">/.test(m[2])) fails.push(`${f}: .chart-card 는 .chart-head > h3.chart-title 로 시작합니다(Data Visual › 카드)`);
+      }
       /* Date Picker 시각 옵션(2026-11-10) */
       for (const m of pv.matchAll(/<div class="datepicker field[^"]*"([^>]*\bdata-time\b[^>]*)>/g)) {
         const at = m[1], sec = /data-time="seconds"/.test(at), input = /<input\b[^>]*>/.exec(pv.slice(m.index));
@@ -758,7 +794,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
   /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
   /* --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면 — 표 규칙 안에서 정하고 td 가 기본값(transparent)과 함께 쓴다(2026-11-11) */
   /* --avatar-ring: Avatar Group 링 · 겹친 면의 밑색 — 놓인 자리의 면(2026-11-13) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--nf-dx"];
+  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5"];   /* --d1~5: 정적 도넛 조각의 누적 % (2026-11-15) */
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);

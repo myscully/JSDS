@@ -5,21 +5,27 @@
          <canvas data-chart="timeseries" data-spec='{…}' role="img" aria-label="…"></canvas>   → DOMContentLoaded 때 자동 mount
    또는: DSChart.mount(Chart, canvas, DSChart.presets.bar(spec))  /  React 는 @jiran/ds-react/chart 가 같은 함수를 쓴다.
    - theme(el)      : 토큰(--chart-* · 심각도 · 면 · 글꼴)을 계산값으로 읽어 Chart.js options 조각을 만든다. 캔버스는 CSS 변수를 못 읽는다
-   - presets.*      : timeseries(선/영역 · 누적) · bar(세로/가로 · 그룹/누적) · donut · mixed(막대 + 선, y 축 하나) — spec → Chart.js config
+   - presets.*      : timeseries(선/영역 · 누적) · bar(세로/가로 · 그룹/누적 · 강조 · 그라데이션) · donut · mixed(막대 + 선, y 축 하나) · gauge(반원 진행률) · spark(KPI 안 작은 추이) — spec → Chart.js config
+   - 색 모드(사람의 결정 2026-11-15): color "mono"(기본 — 고정 파랑 명도 4단계 --chart-mono-1~4, 제품 색과 무관) · "categorical"(--chart-series-1~6).
+     tone 을 준 계열(심각도 · 상태)은 언제나 그 톤이다. tone 없는 계열(도넛은 조각)이 5개 이상이면 mono 대신 categorical 로 그린다
    - mount          : Chart 생성 + 라이트/다크 전환(data-theme · prefers-color-scheme) · 제품색 주입 · 화면 폭 단계 변화 때 다시 칠한다
    - auto           : canvas[data-chart] 를 찾아 data-spec(JSON) 으로 mount
    마크 규격(사람의 결정 2026-11-03, 막대 · 범례는 2026-11-05 · 11-06 개정): 선 2px · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음 · 누적 세그먼트는 틈 없이 이어 붙임 ·
-   도넛 조각 사이 2px 면 색 경계 · 격자는 y 축만 · 범례는 2계열 이상일 때 아래, 원형 아이콘(도넛의 옆 범례는 자리가 좁고 높으면 아래로) · y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정, 7번째부터는 '기타'로 묶는다
+   도넛 조각 사이 2px 면 색 경계 · 격자는 y 축만, 점선(2026-11-15) · 범례는 2계열 이상일 때 아래, 원형 아이콘(도넛의 옆 범례는 자리가 좁고 높으면 아래로) · y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정, 7번째부터는 '기타'로 묶는다
    ========================================================= */
 (function (root) {
   "use strict";
   var doc = root.document;
   var SERIES_MAX = 6;
+  var MONO_MAX = 4;
   var TOKENS = {
     series: ["--chart-series-1", "--chart-series-2", "--chart-series-3", "--chart-series-4", "--chart-series-5", "--chart-series-6"],
+    mono: ["--chart-mono-1", "--chart-mono-2", "--chart-mono-3", "--chart-mono-4"],
     grid: "--chart-grid-primary", axis: "--chart-axis-text", tipBg: "--chart-tooltip-surface", tipFg: "--chart-tooltip-text",
-    surface: "--surface-elevated-primary", text: "--foreground-neutral-primary",
+    surface: "--surface-elevated-primary", text: "--foreground-neutral-primary", sub: "--foreground-neutral-tertiary", track: "--surface-neutral-strong",
   };
+  /* 한 톤의 계열 수별 단계(사람의 결정 2026-11-15 '명도 단계') — 둘이면 가장 진한 것과 옅은 것으로 벌린다. 이웃 단계의 명도 차는 dataviz 검증기로 잰 값(0.06 이상) */
+  var MONO_STEPS = { 1: [0], 2: [0, 3], 3: [0, 1, 3], 4: [0, 1, 2, 3] };
   /* 심각도 · 상태 톤 → 기존 토큰. 계열 색과 섞지 않는다(빨강 = Critical 의 의미를 지킨다) */
   var TONES = {
     /* 심각도 5단계(사람의 결정 2026-11-06) — Critical 은 진한 빨강(negative-strong), Medium 은 라이트 블루 · Low 는 accent lime(라이트 lime-40) — 2026-11-11 교체(그 전 2026-11-09 엔 반대), Info 는 중립 */
@@ -27,6 +33,8 @@
     low: "--foreground-accent-lime", info: "--foreground-inactive-primary", ok: "--foreground-positive-primary", brand: "--foreground-brand-primary",
     /* 계열 1의 톤(사람의 결정 2026-11-05) — 비교 기간(지난 주 · 전월)은 옅은 톤, 막대 위를 지나는 선은 진한 톤. 같은 지표의 다른 기간 · 다른 값으로 읽힌다 */
     "series-1": "--chart-series-1", "series-1-subtle": "--chart-series-1-subtle", "series-1-strong": "--chart-series-1-strong",
+    /* 한 톤의 단계를 직접 고를 때(2026-11-15) */
+    "mono-1": "--chart-mono-1", "mono-2": "--chart-mono-2", "mono-3": "--chart-mono-3", "mono-4": "--chart-mono-4",
   };
 
   /* ---------- 토큰 읽기 ----------
@@ -67,8 +75,10 @@
     var cs = getComputedStyle(el);
     var t = {
       series: TOKENS.series.map(function (k) { return resolve(el, k); }),
+      mono: TOKENS.mono.map(function (k) { return resolve(el, k); }),
       tone: {}, grid: resolve(el, TOKENS.grid), axis: resolve(el, TOKENS.axis),
       tipBg: resolve(el, TOKENS.tipBg), tipFg: resolve(el, TOKENS.tipFg), surface: resolve(el, TOKENS.surface), text: resolve(el, TOKENS.text),
+      sub: resolve(el, TOKENS.sub), track: resolve(el, TOKENS.track),
       scale: rootScale(),
       font: { family: cs.fontFamily, size: Math.max(FONT_MIN, 12 * rootScale()) },
       reduced: !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches),
@@ -76,11 +86,22 @@
     Object.keys(TONES).forEach(function (k) { t.tone[k] = resolve(el, TONES[k]); });
     return t;
   }
-  /* 데이터셋의 색 — tone 이 있으면 그 토큰, 없으면 계열 순서(6 고정, 넘치면 마지막 색을 쓰지 않고 '기타'로 묶는 것이 규칙이라 경고) */
-  function seriesColor(t, ds, i) {
-    if (ds.tone && t.tone[ds.tone]) return t.tone[ds.tone];
-    if (i >= SERIES_MAX && root.console) root.console.warn("[ds-chart] 계열이 " + SERIES_MAX + "개를 넘습니다 — 7번째부터는 '기타'로 묶으세요");
-    return t.series[Math.min(i, SERIES_MAX - 1)];
+  /* 색 정하기 — tone 이 있으면 그 토큰. tone 없는 것들만 모아 color 모드로 칠한다:
+     mono(기본)는 개수에 맞는 명도 단계(MONO_STEPS), 5개 이상이거나 categorical 이면 계열 색 1~6 순서(넘치면 '기타'로 묶는 것이 규칙이라 경고).
+     tones 는 계열(도넛은 조각)마다 tone 또는 undefined. 돌려주는 값은 같은 길이의 색 배열 */
+  function colorMode(mode, n) {
+    if (mode === "categorical") return "categorical";
+    if (n > MONO_MAX) { if (mode === "mono" && root.console) root.console.warn("[ds-chart] 한 톤(mono)은 " + MONO_MAX + "계열까지입니다 — " + n + "계열은 범주색(categorical)으로 그립니다"); return "categorical"; }
+    return "mono";
+  }
+  function palette(t, mode, tones) {
+    var free = tones.filter(function (x) { return !(x && t.tone[x]); }).length, m = colorMode(mode, free), k = 0;
+    if (m === "categorical" && free > SERIES_MAX && root.console) root.console.warn("[ds-chart] 계열이 " + SERIES_MAX + "개를 넘습니다 — 7번째부터는 '기타'로 묶으세요");
+    return tones.map(function (x) {
+      if (x && t.tone[x]) return t.tone[x];
+      var j = k++;
+      return m === "mono" ? t.mono[MONO_STEPS[free][j]] : t.series[Math.min(j, SERIES_MAX - 1)];
+    });
   }
   function font(t, weight) { return { family: t.font.family, size: t.font.size, weight: weight || 400 }; }
   function baseOptions(t, n) {
@@ -97,7 +118,8 @@
       },
       scales: {
         x: { grid: { display: false }, border: { color: t.grid }, ticks: { color: t.axis, font: font(t), maxRotation: 0, autoSkip: true, autoSkipPadding: 12 * s } },
-        y: { beginAtZero: true, grid: { color: t.grid, drawTicks: false }, border: { display: false }, ticks: { color: t.axis, font: font(t), padding: 8 * s, maxTicksLimit: 5 } },
+        /* 가로 격자는 점선 3 · 3(사람의 결정 2026-11-15) — Chart.js 4 는 격자선 점선을 border.dash 로 받는다(축 선을 숨겨도 격자에 적용) */
+        y: { beginAtZero: true, grid: { color: t.grid, drawTicks: false }, border: { display: false, dash: [3 * s, 3 * s] }, ticks: { color: t.axis, font: font(t), padding: 8 * s, maxTicksLimit: 5 } },
       },
     };
   }
@@ -138,43 +160,76 @@
       return cache.g;
     };
   }
+  /* 막대 그라데이션(옵션, 사람의 결정 2026-11-15 — 기본은 단색) — 막대마다 값 끝(진한 색)에서 기준선(같은 색 55%)까지. 진한 끝이 그래픽 3:1 을 지킨다.
+     가로 막대는 왼쪽(기준선) → 오른쪽(값 끝). 위치 · 크기가 같으면 만든 것을 다시 쓴다 */
+  var BAR_FADE = 0.55;
+  function barFill(c, horizontal) {
+    var cache = {};
+    return function (ctx) {
+      var chart = ctx.chart, v = ctx.raw;
+      var axis = chart.scales && chart.scales[horizontal ? "x" : "y"];
+      if (!axis || !chart.chartArea || !isFinite(+v)) return c;
+      var end = axis.getPixelForValue(+v), base = axis.getPixelForValue(0), key = end + "|" + base;
+      if (!cache[key]) { var g = horizontal ? chart.ctx.createLinearGradient(base, 0, end, 0) : chart.ctx.createLinearGradient(0, base, 0, end); g.addColorStop(0, alpha(c, BAR_FADE)); g.addColorStop(1, c); cache[key] = g; }
+      return cache[key];
+    };
+  }
   function paint(chart, t) {
     /* Chart.js 의 chart.config 는 Config 래퍼라 config 에 붙인 _ds 가 보이지 않는다 — mount 가 chart.$ds 로 옮겨 둔다 */
-    var meta = chart.$ds || {}, kind = meta.kind, data = chart.data, n = data.datasets.length;
-    deepAssign(chart.options, baseOptions(t, kind === "donut" ? data.labels.length : n));
+    var meta = chart.$ds || {}, kind = meta.kind, data = chart.data, n = data.datasets.length, round = kind === "donut" || kind === "gauge";
+    deepAssign(chart.options, baseOptions(t, kind === "donut" ? data.labels.length : kind === "gauge" || kind === "spark" ? 1 : n));
     /* 프리셋 · 사용자가 config.options 에 준 것이 기본 옵션 위에 남아야 한다 — 종전에는 기본이 덮어 bar 의 autoSkip:false 가 사라졌다(Figma 대조에서 발견, 2026-11-04) */
     if (meta.options) deepAssign(chart.options, meta.options);
-    if (kind === "donut") { chart.options.scales = {}; chart.options.interaction = { mode: "nearest", intersect: true }; chart.options.plugins.legend.position = legendPosition(meta.legend, chart.width, chart.height); chart.options.onResize = relayout; }
+    if (round) { chart.options.scales = {}; chart.options.interaction = { mode: "nearest", intersect: true }; }
+    if (kind === "donut") { chart.options.plugins.legend.position = legendPosition(meta.legend, chart.width, chart.height); chart.options.onResize = relayout; }
+    if (kind === "gauge") { chart.options.plugins.tooltip.enabled = false; }
+    if (kind === "spark") { chart.options.scales = { x: { display: false }, y: { display: false, beginAtZero: false } }; }
+    var cols = kind === "donut" ? palette(t, meta.color, data.datasets[0]._dsTones || [])
+      : palette(t, meta.color, data.datasets.map(function (ds) { return ds.tone; }));
     data.datasets.forEach(function (ds, i) {
-      var c = seriesColor(t, ds, i);
+      var c = cols[i];
       if (kind === "donut") {
-        ds.backgroundColor = (ds._dsTones || []).map(function (tone, j) { return tone && t.tone[tone] ? t.tone[tone] : t.series[Math.min(j, SERIES_MAX - 1)]; });
+        ds.backgroundColor = cols;
         ds.borderColor = t.surface; ds.borderWidth = 2; ds.hoverBorderColor = t.surface; ds.hoverOffset = 4;
-      } else if (ds.type === "line" || kind === "timeseries") {
+      } else if (kind === "gauge") {
+        /* 채운 호 = 한 톤의 가장 진한 단계(또는 tone), 나머지 = 트랙(진행 막대 · 정적 막대의 트랙과 같은 면) */
+        var g = ds.tone && t.tone[ds.tone] ? t.tone[ds.tone] : t.mono[0];
+        ds.backgroundColor = [g, t.track]; ds.hoverBackgroundColor = [g, t.track]; ds.borderWidth = 0;
+      } else if (ds.type === "line" || kind === "timeseries" || kind === "spark") {
         ds.borderColor = c; ds.backgroundColor = ds.fill ? areaFill(c) : c; ds.pointBackgroundColor = c; ds.pointBorderColor = t.surface;
       } else {
-        ds.backgroundColor = c; ds.borderColor = "transparent";   // 막대는 stroke 없음
+        /* 강조(highlight) — 한 계열 막대에서 그 막대만 가장 진한 단계, 나머지는 가장 옅은 단계(같은 파랑). tone 을 준 계열은 강조하지 않는다 */
+        var hi = meta.highlight;
+        if (hi != null && n === 1 && !(ds.tone && t.tone[ds.tone])) {
+          ds.backgroundColor = (ds.data || []).map(function (_, j) { return j === hi ? t.mono[0] : t.mono[MONO_MAX - 1]; });
+        } else ds.backgroundColor = meta.gradient ? barFill(c, !!meta.horizontal) : c;
+        ds.borderColor = "transparent";   // 막대는 stroke 없음
       }
     });
-    meta.text = t.text;
+    meta.text = t.text; meta.sub = t.sub;
   }
 
   /* ---------- presets ---------- */
   function seriesOf(spec) { return (spec.series || []).map(function (s) { return { label: s.label, data: s.data, tone: s.tone }; }); }
+  function warn(msg) { if (root.console) root.console.warn("[ds-chart] " + msg); }
   var presets = {
-    /* 시계열 — 선, stacked 면 누적 영역(심각도 누적 추이 같은). 점은 hover 때만 지름 8 */
+    /* 시계열 — 선, stacked 면 누적 영역(심각도 누적 추이 같은). 점은 hover 때만 지름 8.
+       계열이 하나면 선 아래를 옅은 그라데이션으로 칠한다(사람의 결정 2026-11-15) — area:false 로 끈다. 여러 계열의 겹친 영역은 서로 가려 칠하지 않는다 */
     timeseries: function (spec) {
-      var stacked = !!spec.stacked;
-      return { type: "line", _ds: { kind: "timeseries" },
-        data: { labels: spec.labels, datasets: seriesOf(spec).map(function (s, i) {
-          return deepAssign(s, { borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 12, pointBorderWidth: 2, fill: stacked ? (i === 0 ? "origin" : "-1") : false, order: i });
+      var stacked = !!spec.stacked, list = seriesOf(spec), area = !stacked && list.length === 1 && spec.area !== false;
+      return { type: "line", _ds: { kind: "timeseries", color: spec.color },
+        data: { labels: spec.labels, datasets: list.map(function (s, i) {
+          return deepAssign(s, { borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 12, pointBorderWidth: 2, fill: stacked ? (i === 0 ? "origin" : "-1") : area ? "origin" : false, order: i });
         }) },
         options: { scales: { x: { stacked: stacked }, y: { stacked: stacked } } } };
     },
-    /* 막대 — horizontal 로 가로, stacked 로 누적. 각지고 stroke 없음, 누적 세그먼트는 틈 없이 이어 붙임 */
+    /* 막대 — horizontal 로 가로, stacked 로 누적. 각지고 stroke 없음, 누적 세그먼트는 틈 없이 이어 붙임.
+       highlight: n(0부터) — 한 계열에서 그 막대만 진하게. gradient: true — 막대마다 세로(가로) 그라데이션, 누적에는 쓰지 않는다(세그먼트끼리 갈리지 않음) */
     bar: function (spec) {
-      var stacked = !!spec.stacked, list = seriesOf(spec);
-      return { type: "bar", _ds: { kind: "bar" },
+      var stacked = !!spec.stacked, list = seriesOf(spec), gradient = !!spec.gradient;
+      if (gradient && stacked) { warn("누적 막대에는 gradient 를 쓰지 않습니다 — 단색으로 그립니다"); gradient = false; }
+      if (spec.highlight != null && list.length !== 1) warn("highlight 는 계열이 하나인 막대에만 씁니다");
+      return { type: "bar", _ds: { kind: "bar", color: spec.color, highlight: spec.highlight, gradient: gradient, horizontal: !!spec.horizontal },
         data: { labels: spec.labels, datasets: list.map(function (s, i) {
           /* 막대는 각지고 stroke 가 없다(사람의 결정 2026-11-05). 누적 세그먼트는 틈 없이 이어 붙인다(사람의 요청 2026-11-06 — 종전 2px 투명 틈을 지움).
              inflateAmount 는 기본(auto)이라 이웃 세그먼트 사이에 안티에일리어싱 실금이 생기지 않는다 */
@@ -186,7 +241,7 @@
     /* 도넛 — series 는 {label, value, tone?}. center 는 구멍 가운데 글자(합계 등) */
     donut: function (spec) {
       var list = spec.series || [];
-      return { type: "doughnut", _ds: { kind: "donut", center: spec.center, legend: spec.legend },
+      return { type: "doughnut", _ds: { kind: "donut", center: spec.center, legend: spec.legend, color: spec.color },
         data: { labels: list.map(function (s) { return s.label; }), datasets: [{ data: list.map(function (s) { return s.value; }), _dsTones: list.map(function (s) { return s.tone; }), borderWidth: 2 }] },
         options: { cutout: "67%" },
         plugins: [centerPlugin] };
@@ -195,16 +250,45 @@
     mixed: function (spec) {
       var bars = (spec.bars || []).map(function (s, i) { return { label: s.label, data: s.data, tone: s.tone, type: "bar", borderWidth: 0, borderRadius: 0, maxBarThickness: 32, order: 2 + i }; });
       var lines = (spec.lines || []).map(function (s, i) { return { label: s.label, data: s.data, tone: s.tone, type: "line", borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 12, pointBorderWidth: 2, fill: false, order: i }; });
-      return { type: "bar", _ds: { kind: "mixed" }, data: { labels: spec.labels, datasets: bars.concat(lines) }, options: {} };
+      return { type: "bar", _ds: { kind: "mixed", color: spec.color }, data: { labels: spec.labels, datasets: bars.concat(lines) }, options: {} };
+    },
+    /* 게이지 — 목표 대비 하나(사람의 결정 2026-11-15). value · max(기본 100) · label(가운데 큰 글자, 없으면 값) · caption(그 위 작은 설명) · tone.
+       반원(위쪽), 채운 호 = 한 톤의 가장 진한 단계, 나머지 = 트랙. 범례 · 툴팁은 없다 — 값은 가운데 글자와 canvas 의 aria-label 이 나른다 */
+    gauge: function (spec) {
+      var max = +spec.max > 0 ? +spec.max : 100, v = Math.max(0, Math.min(max, +spec.value || 0));
+      if (+spec.value > max) warn("gauge 의 value 가 max 보다 큽니다 — max 에서 멈춥니다");
+      return { type: "doughnut", _ds: { kind: "gauge", center: spec.label != null ? spec.label : String(spec.value), caption: spec.caption },
+        data: { labels: [spec.caption || "값", "남은 값"], datasets: [{ data: [v, max - v], tone: spec.tone, borderWidth: 0 }] },
+        options: { rotation: -90, circumference: 180, cutout: "78%" },
+        plugins: [centerPlugin] };
+    },
+    /* 스파크 — KPI 안 작은 추이. 축 · 격자 · 범례 없이 선과 옅은 영역만, hover 점과 툴팁은 남긴다. data · labels? · tone · area(기본 true) */
+    spark: function (spec) {
+      var data = spec.data || [], labels = spec.labels || data.map(function (_, i) { return String(i + 1); });
+      return { type: "line", _ds: { kind: "spark" },
+        data: { labels: labels, datasets: [{ label: spec.label || "값", data: data, tone: spec.tone, borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 3, pointHitRadius: 8, pointBorderWidth: 2, fill: spec.area === false ? false : "origin" }] },
+        options: { layout: { padding: 2 } } };
     },
   };
-  /* 도넛 가운데 글자 — CSS .donut::after 와 같은 Title/1 16/600(사람의 결정 2026-11-04). 크기는 화면 폭 단계를 따른다 */
+  /* 가운데 글자 — 도넛은 CSS .donut::after 와 같은 Title/1 16/600(사람의 결정 2026-11-04), 게이지는 반원 안 Title 2 28/700 + 그 위 설명 12(Label 2) tertiary.
+     크기는 화면 폭 단계를 따른다 */
   var CENTER_FONT = { weight: 600, size: 16 };
+  var GAUGE_FONT = { weight: 700, size: 28, caption: 12 };
   var centerPlugin = { id: "dsCenter", afterDraw: function (chart) {
-    var ds = chart.$ds; if (!ds || !ds.center) return;
-    var area = chart.chartArea, ctx = chart.ctx;
-    ctx.save(); ctx.font = CENTER_FONT.weight + " " + CENTER_FONT.size * rootScale() + "px " + chart.options.plugins.tooltip.bodyFont.family; ctx.fillStyle = ds.text || "#000"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(String(ds.center), (area.left + area.right) / 2, (area.top + area.bottom) / 2); ctx.restore();
+    var ds = chart.$ds; if (!ds || ds.center == null || ds.center === "") return;
+    var area = chart.chartArea, ctx = chart.ctx, s = rootScale(), fam = chart.options.plugins.tooltip.bodyFont.family;
+    ctx.save(); ctx.textAlign = "center";
+    if (ds.kind === "gauge") {
+      /* 반원의 중심(호의 아래 끝)을 기준으로 값의 기준선을 놓는다 */
+      var arc = chart.getDatasetMeta(0).data[0], cx = arc ? arc.x : (area.left + area.right) / 2, cy = arc ? arc.y : area.bottom;
+      ctx.textBaseline = "alphabetic"; ctx.fillStyle = ds.text || "#000"; ctx.font = GAUGE_FONT.weight + " " + GAUGE_FONT.size * s + "px " + fam;
+      ctx.fillText(String(ds.center), cx, cy - 4 * s);
+      if (ds.caption) { ctx.fillStyle = ds.sub || ds.text || "#000"; ctx.font = "500 " + Math.max(FONT_MIN, GAUGE_FONT.caption * s) + "px " + fam; ctx.fillText(String(ds.caption), cx, cy - (4 + GAUGE_FONT.size + 8) * s); }
+    } else {
+      ctx.font = CENTER_FONT.weight + " " + CENTER_FONT.size * s + "px " + fam; ctx.fillStyle = ds.text || "#000"; ctx.textBaseline = "middle";
+      ctx.fillText(String(ds.center), (area.left + area.right) / 2, (area.top + area.bottom) / 2);
+    }
+    ctx.restore();
   } };
 
   /* ---------- mount / auto ---------- */
@@ -278,7 +362,8 @@
     btn.textContent = show ? L.chart : L.table;
   }
 
-  var DSChart = { tableData: tableData, TABLE_LABELS: TABLE_LABELS, theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, legendPosition: legendPosition, SERIES_MAX: SERIES_MAX, TOKENS: TOKENS, TONES: TONES };
+  var DSChart = { tableData: tableData, TABLE_LABELS: TABLE_LABELS, theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, legendPosition: legendPosition, palette: palette, areaFill: areaFill,
+    SERIES_MAX: SERIES_MAX, MONO_MAX: MONO_MAX, MONO_STEPS: MONO_STEPS, CENTER_FONT: CENTER_FONT, GAUGE_FONT: GAUGE_FONT, TOKENS: TOKENS, TONES: TONES };
   if (typeof module !== "undefined" && module.exports) module.exports = DSChart;
   root.DSChart = DSChart;
   if (doc && root.Chart !== undefined) { /* 사이트 · 순수 JS: 벤더 스크립트가 먼저 defer 로 실려 있다 */

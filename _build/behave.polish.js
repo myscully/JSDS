@@ -159,8 +159,8 @@ module.exports = async ({ b, ok, SITE, path }) => {
   await go("components/data-visual.html");
   await page.waitForTimeout(400);
   await step("chart table: only the chart that opts in has the toggle, every chart starts as a chart", async () => {
-    const r = await page.evaluate(() => [...document.querySelectorAll("canvas[data-chart]")].map((c) => { const v = c.closest(".chart-view"), b = v.querySelector("[data-chart-table]"); return [c.closest(".example").id, b ? b.textContent : null, !c.parentNode.hidden, v.querySelectorAll(".chart-table").length, !!v.querySelector(".chart-tools")]; }));
-    ok("chart table: only the chart that opts in has the toggle, every chart starts as a chart", r.length === 6 && r.every((x) => x[2] && x[3] === 0 && (x[0] === "ex-data-visual-timeseries" ? x[1] === "표로 보기" && x[4] : x[1] === null && !x[4])), JSON.stringify(r));
+    const r = await page.evaluate(() => [...document.querySelectorAll(".chart-view canvas[data-chart]")].map((c) => { const v = c.closest(".chart-view"), b = v.querySelector("[data-chart-table]"); return [c.closest(".example").id, b ? b.textContent : null, !c.parentNode.hidden, v.querySelectorAll(".chart-table").length, !!v.querySelector(".chart-tools")]; }));
+    ok("chart table: only the chart that opts in has the toggle, every chart starts as a chart", r.length === 17 && r.every((x) => x[2] && x[3] === 0 && (x[0] === "ex-data-visual-timeseries" ? x[1] === "표로 보기" && x[4] : x[1] === null && !x[4])), JSON.stringify(r));
   });
   await step("chart table: the toggle sits at the right, 8 above the chart", async () => {
     const r = await view("timeseries").evaluate((v) => { const b = v.querySelector("[data-chart-table]").getBoundingClientRect(), w = v.querySelector(".chart-canvas").getBoundingClientRect(); return { right: w.right - b.right, gap: w.top - b.bottom }; });
@@ -198,7 +198,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await view("donut-live").scrollIntoViewIfNeeded(); await optIn(view("donut-live"));
     await tog(view("donut-live")).click();
     const t = await tableOf(view("donut-live"));
-    ok("chart table: a donut has one unnamed series", t.head.join() === "구분,값" && t.rows.length === 5 && t.rows[0][0] === "Critical", JSON.stringify(t));
+    ok("chart table: a donut has one unnamed series", t.head.join() === "구분,값" && t.rows.length === 4 && t.rows[0][0] === "엔드포인트", JSON.stringify(t));   // 2026-11-15 donut-live 첫 카드 = 탐지 경로(한 톤 4조각)
   });
   await step("chart table: uses the current data, formats numbers, shows gaps, escapes text", async () => {
     await optIn(view("bars"));

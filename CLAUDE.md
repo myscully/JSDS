@@ -45,7 +45,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 77 · verify 0/0 · contrast 2940쌍 실패 0 · advisory 920 · behave 1412/1412 · react 798+6 · tsc 0
+pages 77 · verify 0/0 · contrast 3120쌍 실패 0 · advisory 944 · behave 1432/1432 · react 820+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -699,18 +699,41 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **눈으로 본 것:** 빨강 제품에서는 로그 뷰어의 켠 필터 칩(CRIT · HIGH · WARN)도 빨강 면이 된다 — 포인트 색이 제품 색을 따르는 결정대로이고 바꾸지 않았다.
 - Figma 미반영 525 → 693건 — Negative 버튼 변형(Figma 는 빨강) · Text Field · Date Picker · Search 포커스 상태(Figma 는 brand 토큰, 저장소는 `--line-field-focus`) · 저장소에만 있는 토큰 6 → 11. 팔레트 · 그라데이션은 Figma 에 없다 — 일괄 반영 때 그린다.
 
-`advisory 920` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
+2026-11-15 Data Visual 한 세트 — 한 톤 · 차트 카드 한 틀 · 새 차트 넷(사람의 요청 · 결정 여덟) — contrast 2940 → 3120 · advisory 920 → 944 · behave 1412 → 1432(`behave.chart.js` 20) · react 798+6 → 820+6(`tests/data-visual-set.test.tsx` 15 · 예제 284 → 291 에 따른 구조 비교 7). pages · verify 수는 그대로.
+- **목표(사람의 요청):** 디자인 시스템 사용자가 차트를 쉽게 넣고, 어느 차트를 골라도 한 화면에 한 세트로 어울리게. 심각도 · 요소 구분이 아니면 한 톤.
+- **라이브러리는 Chart.js 4.6.1 유지**(사람의 결정) — 검토 결과는 Data Visual 사용 절 '차트 라이브러리를 고른 이유'. 다른 차트 라이브러리 는 듀얼 라이선스(조직 매출 · 예산 200만 달러 이상이면 개발자당 유료, 일부 기능 Pro · Premium, 제품 배포 따로)라 쓰지 않는다. 다른 차트 라이브러리(Apache-2.0)는 게이지 · 히트맵 · 생키 · 지도가 기본이지만 몇 배 크고 어댑터 · React · 단정을 다시 짜야 해 지도 · 생키가 필요할 때 다시 본다. 게이지는 doughnut 반원, 강조 · 그라데이션은 scriptable 색이라 의존성이 늘지 않았다.
+- **한 톤 = 제품과 무관한 고정 파랑**(사람의 결정 — 빨강 · 주황 제품에서도 경고 · 위험처럼 읽히지 않게) `--chart-mono-1~4` — 라이트 blue-40 · 50 · 60 · 70, 다크 blue-80 · 70 · 60 · 45. dataviz 검증기(ordinal)로 한 색상 · 명도 단조 · 이웃 ΔL ≥ 0.06 · 옅은 끝 ≥ 2:1 을 라이트 · 다크 각각 통과한 단계다.
+- **색 모드** spec `color`: `"mono"`(기본) · `"categorical"`(계열 1~6). tone 없는 계열 수에 따라 1 → 1단계, 2 → 1 · 4, 3 → 1 · 2 · 4, 4 → 1~4(`MONO_STEPS`), **5개부터는 계열 색**(사람의 결정 — 넘으면 범주색). `tone` 을 준 계열은 늘 그 톤이고 남은 것만 센다. **도넛 조각도 같은 규칙**(사람의 질문에 답한 결정) — 정적 `.donut.mono` · `.categorical` 은 조각 비율을 `--d1~--d5` 로 받고, 클래스 없는 도넛은 지금처럼 심각도 다섯 색. React `Donut` 은 tone 없는 조각 수로 고른다.
+- **새 프리셋 둘** `gauge`(반원 doughnut · 회전 −90 · 180° · 구멍 78% · data = [값, max − 값] · 가운데 큰 값 + 설명 · 범례 · 툴팁 없음, max 를 넘으면 멈추고 경고) · `spark`(축 · 격자 · 범례 없는 선, KPI 안 `.kpi > .chart-canvas.spark` 높이 40). 프리셋은 넷 → 여섯. React `SparkCanvas`.
+- **막대 옵션** `highlight: n`(그 막대만 mono-1, 나머지 mono-4) · `gradient: true`(값 끝 mono-1 불투명 → 바닥 같은 파랑 약 55%, 누적이면 경고하고 단색). **막대는 단색**(사람의 결정 — 그라데이션은 강조용 옵션). **계열 하나인 추이 선은 아래를 옅게 칠한다**(사람의 결정 — `area:false` 로 끔). **가로 격자는 점선 3 · 3**(사람의 결정).
+- **정적 요소** — 진행 막대 목록 `.progress-list > .progress-row`(라벨 + '값 / 목표', `.progress[role=meter]` 에 aria-valuenow · min · max · valuetext · 이름, React `ProgressList`). 정적 막대 · 진행 막대 채움 mono-1, 정적 스파크라인 mono-4 · 강조 mono-1, 범례 스와치 `i.mono-1~4` · `i.series-1~6`.
+- **증감 = 옅은 틴트 배지, 색은 의미**(사람의 결정) — `.delta`(중립) · `.delta.bad` · `.delta.good` = Caption 2 SemiBold 11/14 · 위아래 2 좌우 8 · 높이 18(Tag sm 과 같음), 8% 틴트 + heavy 글자(Tag 글자 쌍과 같음). 방향은 화살표 + 숨긴 '증가' · '감소' 만 나르고 **옛 `.up` · `.down` 클래스는 없앴다**(계획은 `.up.bad` 로 옮기기였다 — 방향 클래스가 색을 갖지 않으면 남길 이유가 없어서, verify 가 막음). 비교 기준은 `.kpi-foot > .delta-note`. React `deltaTone`, `deltaDir` 만 주면 옛 뜻(up = bad · down = good)으로 그리고 한 번 경고(MIGRATION).
+- **차트 카드 한 틀** `.chart-card > .chart-head(h3.chart-title + .chart-sub? + .chart-action?) + .chart-figure? + 본문` — 머리 높이는 동작 유무와 무관하게 32, **본문 높이 단계** `.sm` 160 · 기본 240 · `.lg` 320(캔버스 · 표로 보기 · 상태가 따름), 같은 줄 카드는 머리 아래 끝 · 본문 위 끝 · 카드 높이가 같다. **State** — `aria-busy` + Skeleton · 빈 상태 · 오류(다시 시도 → `ds:retry`, ds.js)가 본문 높이를 지킨다. React `ChartCard size · sub · action · figure · state · onRetry`(옛 `extra` 는 `sub` 로 그리고 경고).
+- **예제 네 묶음** Default 1 · Variant 15 · Size 1 · State 1(18) — 새 예제 일곱 bar-emphasis · progress · gauge · donut-categorical · set(종류가 다른 카드 셋이 한 줄) · size · state(사이트 · React). **대시보드 패턴을 한 세트로** — KPI 넷(증감 배지, 둘은 spark — '미처리 검토' 자리에 '신규 위협'), 추이(심각도 누적 — tone 유지) + 심각도 도넛, 새 셋째 줄 주간 비교 막대(mono) + 진행 막대 목록. 고르기 표 · Rules(차트 고르기 · 색 · 카드 · 마크 · 증감 · 접근성 h3 묶음) · Spec · Props 를 다시 썼다.
+- **토큰** `--chart-mono-1~4` 를 `ADDITIONS` · `grammarOnly` 에(정적 막대 · 진행 막대 · 도넛은 CSS 로도 씀) — 차트 12 → 16 · 트리 밖 15 → 19 · 전체 105 → 109. Colors 의 Chart 절에 Mono 1~4.
+- **contrast +180** = (mono 4 × 바탕 3 + mono-1 / 트랙 `--surface-neutral-strong` 3) × 맥락 12. **advisory +24** = mono-4 3:1 미달(라이트 흰 2.49 · 회색 2.33, 다크 카드 2.88 — 사람의 결정, 범례 · 툴팁 · 표로 보기가 값을 나름). **behave +20** = `behave.chart` 20(계열 수별 한 톤 라이트 · 다크 · 빨강 · 주황 제품에서 그대로, 정적 mono 와 도넛 정지점, 강조 · 그라데이션 픽셀 라이트 · 다크, 영역 칠, 점선 격자, 게이지 각도, 스파크, meter, 증감 배지, 머리 32, 한 세트 정렬 1024 · 1440 · 1920, 높이 단계, 상태, 대시보드, 390 대시보드 두 가지 — 아래 '좁은 화면'). **react +22** = 새 테스트 15 + 구조 비교 7.
+- **기존 단정 고침:** 차트 탐침은 축 있는 넷만(게이지 · 스파크는 behave.chart), 색 기대값 = `DSChart.palette` · 강조 막대는 계산한 기대값으로 라이트 · 다크 대조 · 그라데이션은 behave.chart 픽셀로, 차트 수 15 · 높이 단계, 폭 하한 200 → 160('한 세트' 예제가 1440 미리보기에서 192 — 캡처로 읽힘 확인), 주간 비교 = mono-1 · mono-4(11-05 의 series-1 · subtle), 막대 눈금 · 누적 · 도넛 범례 예제 선택자, KPI 증감 스타일, 표로 보기 차트 수 17 · donut-live 표, scale 의 KPI 글자 폭에서 스파크 캔버스 뺌.
+- **계획과 다르게 한 것:** mono-1 은 series-1(blue-50)이 아니라 한 단계 진한 blue-40(검증기의 명도 단계), 강조 밖 막대는 mono-3 이 아니라 mono-4, `series-1-subtle`(blue-80)은 mono-3(blue-60)으로 다시 가리키지 않았다 — 값이 달라 쓰는 제품의 화면이 바뀌므로. 주간 비교가 mono-4 로 옮겨 예제의 소비자는 0 이고 tone 값 `series-1-subtle` 로만 남는다, 정적 Tone 에 `brand` 를 전역으로 더하지 않고 범례 스와치에만, 라이브러리 검토는 Resources 가 아니라 Data Visual 사용 절에.
+- **측정에서 드러나 고친 것:** 새 verify 차트 스펙 검사가 `data-spec='…'` 만 찾아 생성 페이지(`data-spec="…&quot;…"`)에서 아무것도 보지 않았다 — 음성 시험에서 발견해 두 따옴표 형식으로(L29 의 기존 검사와 같게). 그 뒤 실패 0. `behave.scale` 고칠 때 주석이 코드를 삼켜 문법 오류가 났고, b 기반 실행기가 브라우저를 닫지 못해 한 시간 넘게 멈췄다(behave 본체는 덩어리 가드가 있지만 묶음 require 자체의 SyntaxError 는 잡지 못한다 — 게이트 전 `node --check` 로 발견).
+- 음성 시험: 사이트 7건(mono → index · 격자 실선 · 강조 무시 · 게이지 비율 · 머리 높이 지움 · 높이 단계 지움 · 증감 bad 색 지움) · verify 6건(없는 color · mono 에 5계열 · 누적 + gradient · 범위 밖 highlight · `.delta.up` · `.chart-card.md`) · React 7건 중 6건(mono → index · 강조 무시 · 게이지 비율 · 증감을 방향으로 · 도넛 늘 categorical · 예제 크기 lg 빼기). 처음에 못 잡은 1건(React 진행 막대 단위 '대' 빼기 — 구조 비교가 글자 · `aria-valuetext` 를 보지 않았다)은 아래 '구조 비교' 로 잡게 됐다.
+- **좁은 화면(캡처에서 발견, 사람의 결정)** — 390 에서 대시보드 차트 줄(`.row-3` · 새 `.row-2`)이 두 칸 그대로라 도넛이 카드 밖으로 잘리고 제목이 '심각도…' 로, 막대 라벨이 겹쳤다(`.row-3` 은 HEAD 부터). 767 이하에서 한 칸으로 쌓는다(`Row2` · `Row3` 도 같은 클래스). 같은 캡처에서 본 이전부터의 둘도 고쳤다 — Page Header 부제가 '자동 갱 / 신' 으로 끊겼다(`.page-head .sub` 에 제목과 같은 `keep-all`), 최근 이벤트 표가 '차 / 단' · 'PC- / 2041' 로 끊겼다(카드에 `.tbl-wrap` 없이 들어 있었다 — 새 수정자 `.tbl.nowrap` · React `Table nowrap` 으로 칸을 한 줄로 두고 틀이 가로로 스크롤, Table Props · MIGRATION). behave.chart +2(차트 줄 한 칸 · 넘침 · 제목 잘림 없음, 부제는 띄어쓰기에서만 · 표 행 3rem 한 줄 · 가로 스크롤).
+- **구조 비교에 `aria-valuetext`(사람의 결정)** — `skeleton.ts` 가 값 문구를 비교한다. 더하자 Number Input 넷 · Slider 셋 · 입력 폼 오류 하나가 실패했다: 사이트는 ds.js 가 실행 중에 붙이고 React 는 처음부터 그려서다(화면 동작은 같음). 11-10 결정('정적 예제도 ds.js 가 켜기 전 · 복사한 HTML 이 같은 모양')대로 사이트 예제 입력 10개에 값 문구를 적었다. react 수는 그대로(같은 비교가 더 본다).
+- **`series-1-subtle` 은 tone 값으로 남김(사람의 결정)** — Data Visual Props · React `Tone` 설명에 '비교 기간은 mono-1 · mono-4, 새로 쓰지 않음'.
+- 음성 시험(좁은 화면 · 구조 비교): `.row-2` · `.row-3` 한 칸 규칙 지움 · 부제 keep-all 지움 · `.tbl.nowrap` 지움(behave.chart 각 1), React Table 의 nowrap 클래스 빼기(대시보드 구조 비교) · React 진행 막대 단위 빼기 — 모두 잡혔다.
+- audit: CHART_EX 에 gauge · spark, 카드 정규식 · 부제 `.chart-sub`, 최대 폭 없는 카드는 격자 폭 ÷ 카드 수, 계열 색 기대값이 MONO_STEPS 를 따름, 도넛 `var(--dN)` 정지점, 중첩 div 를 세는 KPI 블록, 증감 Figma 변형 None · Bad · Good. Figma 미반영 693 → 732건 — 한 톤 계열 색 · Gauge · Spark 변형 없음 · 카드 폭 · Spec 문구 · 저장소에만 있는 chart-mono 토큰. Figma 의 차트 · KPI 는 옛 모양 그대로다 — 일괄 반영 때 그린다.
+
+`advisory 944` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
 ## 토큰 체계 (v0.8)
 
 - **Atomic** `--{램프}-{단계}` — 램프 13개, **숫자가 클수록 밝습니다**. 컴포넌트에서 직접 쓰지 않습니다.
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
-  여섯 그룹 **90개**(참조 75 + 더한 15) + 트리 밖 15개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 탐색형 차트 `--chart-*` 12) = **105**.
+  여섯 그룹 **90개**(참조 75 + 더한 15) + 트리 밖 19개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 16) = **109**.
   더한 것 중 6개는 Tag 글자용 `--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy`(2026-11-11),
   5개는 입력 링 `--line-field-focus` · `-halo` 와 AI 면 `--surface-brand-gradient` · `-strong` · `-heavy`(2026-11-14).
-- **차트 토큰** `--chart-series-1~6`(순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
-  CSS 가 아니라 `ds-chart.js` 가 계산값으로 읽어 캔버스에 칠합니다(소비자 0 허용 목록 `grammarOnly`). 심각도 계열은 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 그대로(5단계 — Medium 라이트 블루 · Low 라임, 2026-11-11 교체).
+- **차트 토큰** `--chart-mono-1~4`(한 톤 — 기본, 제품과 무관한 고정 파랑 명도 단계, 2026-11-15) · `--chart-series-1~6`(범주색 — tone 없는 계열 5개부터 · 순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
+  `ds-chart.js` 가 계산값으로 읽어 캔버스에 칠합니다(허용 목록 `grammarOnly` — mono 는 정적 막대 · 진행 막대 · 도넛 CSS 도 씀). 심각도 계열은 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 그대로(5단계 — Medium 라이트 블루 · Low 라임, 2026-11-11 교체).
 - **제품 색**은 팔레트 여섯(`data.js` PRODUCTS — 파랑 기본 · 빨강 · 시안 · 주황 · 중립 · AI)에서 고르고 `<html data-accent="키">` 로 적용합니다.
   `--prod-40~60` 다섯 단계로 주입되고 `brand` 계열이 따라옵니다. 상태색과 겹쳐도 제품 색 그대로입니다(자동 중립은 2026-11-14 에 없앰).
   **제품 색 위의 흰 글자가 4.5 를 넘어야 하고 빌드가 검사합니다**(`verify.js`) — 넘지 못하면 `exception` 에 사람의 결정으로 이유를 적습니다(주황).

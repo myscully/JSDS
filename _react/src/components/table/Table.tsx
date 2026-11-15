@@ -18,6 +18,8 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   kv?: boolean;
   /** 행 hover · 눌림 면(.tbl.hover) — 행을 고르거나 행에 동작이 있는 표만(사람의 결정 2026-11-13 — 기본은 없음) */
   hover?: boolean;
+  /** 칸을 한 줄로(.tbl.nowrap) — 좁으면 .tbl-wrap 이 가로로 스크롤. 짧은 값만 있는 요약 표에(2026-11-15) */
+  nowrap?: boolean;
   /** .tbl-wrap 으로 감싸기 (기본 true) */
   wrap?: boolean;
   wrapClassName?: string;
@@ -33,9 +35,9 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
 }
 let regionWarned = false;
 /** 단순 표. 정렬·선택이 필요하면 DataTable */
-export const Table = forwardRef<HTMLTableElement, TableProps>(function Table({ compact, density, zebra, rowStyle, kv, hover, wrap = true, wrapClassName, wrapStyle, stickyHeader, stickyColumn, maxHeight, regionLabel, className, ...rest }, ref) {
+export const Table = forwardRef<HTMLTableElement, TableProps>(function Table({ compact, density, zebra, rowStyle, kv, hover, nowrap, wrap = true, wrapClassName, wrapStyle, stickyHeader, stickyColumn, maxHeight, regionLabel, className, ...rest }, ref) {
   const d = density ?? (compact ? "compact" : "default"), r = rowStyle ?? (zebra ? "zebra" : "lines");
-  const table = <table ref={ref} className={cx("tbl", { compact: d === "compact", relaxed: d === "relaxed", zebra: r === "zebra", grid: r === "grid", plain: r === "plain", kv, hover }, className)} {...rest} />;
+  const table = <table ref={ref} className={cx("tbl", { compact: d === "compact", relaxed: d === "relaxed", zebra: r === "zebra", grid: r === "grid", plain: r === "plain", kv, hover, nowrap }, className)} {...rest} />;
   const scroll = stickyHeader || stickyColumn;
   if (scroll && !regionLabel && process.env.NODE_ENV !== "production" && !regionWarned) { regionWarned = true; console.warn("[ds-react] Table stickyHeader · stickyColumn 은 스크롤 영역(Tab 칸)이라 regionLabel 이 필요합니다."); }
   return wrap ? (

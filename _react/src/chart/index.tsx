@@ -7,8 +7,9 @@ import { mergeRefs } from "../utils/hooks";
 import DSChart from "./ds-chart.js";
 import type { ChartLike, ChartTableData, ChartTableLabels, DsChartConfig, DsChartHandle } from "./ds-chart.js";
 
-export type { ChartTableLabels, ChartTableData, ChartLike, DsChartConfig, DsChartHandle, DsTheme, Presets, Series, DonutSlice, Tone, TimeseriesSpec, BarSpec, DonutSpec, MixedSpec } from "./ds-chart.js";
-/** 프리셋 — spec → Chart.js config. timeseries(선 · 누적 영역) · bar(세로/가로 · 그룹/누적) · donut · mixed(막대 + 선, y 축 하나) */
+export type { ChartTableLabels, ChartTableData, ChartLike, DsChartConfig, DsChartHandle, DsTheme, Presets, Series, DonutSlice, Tone, ColorMode, TimeseriesSpec, BarSpec, DonutSpec, MixedSpec, GaugeSpec, SparkSpec } from "./ds-chart.js";
+/** 프리셋 — spec → Chart.js config. timeseries(선 · 누적 영역) · bar(세로/가로 · 그룹/누적 · 강조 · 그라데이션) · donut · mixed(막대 + 선, y 축 하나) · gauge(반원) · spark(KPI 안 추이).
+ *  tone 없는 계열은 한 톤(고정 파랑 명도 단계)이 기본이고 5개를 넘으면 계열 색이다(color) */
 export const presets = DSChart.presets;
 /** 토큰(--chart-* · 심각도 · 면 · 글꼴)을 계산값으로 읽은 테마 */
 export const chartTheme = DSChart.theme;
@@ -63,6 +64,24 @@ export const ChartCanvas = forwardRef<HTMLCanvasElement, ChartCanvasProps>(funct
           </table>
         </div>
       )}
+    </div>
+  );
+});
+
+export interface SparkCanvasProps extends Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> {
+  chart: ChartLike;
+  /** presets.spark(...) */
+  config: DsChartConfig;
+  /** 무엇이 어떻게 변했는지 — 예: "신규 위협 — 최근 10일 62건에서 112건으로 증가" */
+  "aria-label": string;
+}
+/** KPI 안 탐색형 스파크 — .chart-canvas.spark > canvas(높이 40, 표로 보기 틀 없음). Kpi 의 children 으로 맨 아래에 둔다 */
+export const SparkCanvas = forwardRef<HTMLCanvasElement, SparkCanvasProps>(function SparkCanvas({ chart, config, "aria-label": label, className, ...rest }, ref) {
+  const inner = useRef<HTMLCanvasElement>(null);
+  useDsChart(inner, chart, config);
+  return (
+    <div className={cx("chart-canvas", "spark", className)} {...rest}>
+      <canvas ref={mergeRefs(inner, ref)} role="img" aria-label={label} />
     </div>
   );
 });

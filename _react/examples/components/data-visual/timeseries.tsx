@@ -2,7 +2,7 @@ import { Chart } from "chart.js/auto";
 import { ChartCard } from "@jiran/ds-react";
 import { ChartCanvas, presets } from "@jiran/ds-react/chart";
 
-/* 시계열 — 심각도 누적 영역. 데이터는 사이트 예제(components.data.js)와 같다 */
+/* 시계열 — 심각도 누적 영역(심각도는 한 톤의 예외라 tone 을 준다). 데이터는 사이트 예제(components.data.js)와 같다 */
 const TREND = {
   labels: ["10-21", "10-22", "10-23", "10-24", "10-25", "10-26", "10-27", "10-28", "10-29", "10-30", "10-31", "11-01", "11-02", "11-03"],
   series: [
@@ -15,7 +15,7 @@ const TREND = {
 
 export default function Example() {
   return (
-    <ChartCard title="일별 탐지 추이" extra="최근 14일" style={{ maxWidth: 640 }}>
+    <ChartCard title="일별 탐지 추이" sub="최근 14일" style={{ maxWidth: 640 }}>
       <ChartCanvas table chart={Chart} config={presets.timeseries(TREND)} aria-label="일별 탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역" />
     </ChartCard>
   );

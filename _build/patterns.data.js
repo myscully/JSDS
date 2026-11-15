@@ -25,6 +25,17 @@ const logTable = (rows) => `
 
 /* 대시보드의 탐색형 추이 차트 데이터 — React 예제(_react/examples/patterns/dashboard/full.tsx)와 같아야 한다 */
 const TREND = {"labels":["10-21","10-22","10-23","10-24","10-25","10-26","10-27","10-28","10-29","10-30","10-31","11-01","11-02","11-03"],"series":[{"label":"Critical","tone":"critical","data":[12,18,9,14,22,17,11,8,15,19,24,13,10,16]},{"label":"High","tone":"high","data":[30,24,41,35,28,33,39,27,31,36,44,29,25,32]},{"label":"Medium","tone":"medium","data":[52,48,61,55,47,58,64,49,53,60,66,51,46,57]}],"stacked":true};
+/* 2026-11-15 차트 카드 · 증감 · 스파크 · 진행 막대 — components.data.js 의 chartHead · delta · sparkCanvas · meter 와 같은 마크업(브라우저에서 두 파일이 한 전역을 나눠 써 이름을 달리한다) */
+const pChartHead = (title, sub = "", action = "") => `<div class="chart-head"><h3 class="chart-title">${title}</h3>${sub ? `<span class="chart-sub">${sub}</span>` : ""}${action ? `<div class="chart-action">${action}</div>` : ""}</div>`;
+const pDelta = (dir, tone, text) => `<span class="delta${tone ? " " + tone : ""}">${I(dir === "up" ? "arrow-up" : "arrow-down", 12)}<span class="sr-only">${dir === "up" ? "증가" : "감소"}</span>${text}</span>`;
+const pSpark = (spec, label) => `<div class="chart-canvas spark"><canvas data-chart="spark" data-spec='${JSON.stringify(spec)}' role="img" aria-label="${label}"></canvas></div>`;
+const pMeter = (id, label, value, max, unit = "") => { const pct = Math.round(value / max * 1000) / 10, fmt = (n) => n.toLocaleString("en-US"); return `<div class="progress-row"><div class="row"><span id="${id}">${label}</span><span><b>${fmt(value)}</b><span class="target">/ ${fmt(max)}${unit}</span></span></div><div class="progress" role="meter" aria-labelledby="${id}" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${value}" aria-valuetext="${fmt(value)}${unit} / ${fmt(max)}${unit}, ${Math.round(pct)}%"><i style="width:${pct}%"></i></div></div>`; };
+const DASH = {
+  critical: {"label":"Critical 이벤트","data":[1021,1088,1046,1132,1150,1146,1284]},
+  threats: {"label":"신규 위협","data":[62,70,58,81,77,96,112]},
+  /* tone 없는 두 계열 → 한 톤 1 · 4 단계 */
+  weeks: {"labels":["랜섬웨어","악성코드","USB 위반","정책 위반","피싱"],"series":[{"label":"이번 주","data":[412,306,221,115,88]},{"label":"지난 주","data":[349,331,198,142,97]}]},
+};
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
@@ -57,7 +68,7 @@ const PATTERNS = {
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field error"><label for="e1">정책 이름 <em>*</em></label><input id="e1" aria-invalid="true" aria-describedby="e1h"><span class="help" id="e1h">정책 이름을 입력하세요</span></div>
           <div class="field error"><label for="e2">허용 IP</label><input id="e2" value="10.0.0" aria-invalid="true" aria-describedby="e2h"><span class="help" id="e2h">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div>
-          <div class="field number-field error"><label for="e3">보관 기간</label><div class="affix"><input id="e3" type="number" value="500" min="1" max="365" aria-invalid="true" aria-describedby="e3h"><span>일</span><button type="button" class="num-btn down" tabindex="-1" aria-label="보관 기간 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="보관 기간 늘리기" disabled>${I("plus",16)}</button></div><span class="help" id="e3h">값이 너무 큽니다. 365 이하 입력하세요.</span></div>
+          <div class="field number-field error"><label for="e3">보관 기간</label><div class="affix"><input id="e3" type="number" value="500" min="1" max="365" aria-invalid="true" aria-describedby="e3h" aria-valuetext="500일"><span>일</span><button type="button" class="num-btn down" tabindex="-1" aria-label="보관 기간 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="보관 기간 늘리기" disabled>${I("plus",16)}</button></div><span class="help" id="e3h">값이 너무 큽니다. 365 이하 입력하세요.</span></div>
           <div class="form-actions"><button type="button" class="btn md outline negative left">삭제</button><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
       { id: "validate", title: "제출 검증", desc: "폼에 data-validate 를 달면 포커스가 떠날 때 필드 단위로 검사합니다. 빈 채로 정책 저장을 누르면 막고, 첫 오류로 이동하며, 오류가 3개 이상이면 위에 요약합니다. 고치면 문구를 바로 지웁니다.", html: `
@@ -239,8 +250,8 @@ const PATTERNS = {
 
   /* ------------------------------------------------ Security Console */
   "dashboard": {
-    status: "ready", react: ["PageHead","Stack","Row3"], uses: ["data-visual", "card", "tag", "data-table", "select-button", "button"], css: [".page-head", ".stack", ".row-2", ".row-3"], borrows: [".t-caption-1"],
-    desc: "보안 관리자의 첫 화면. 상단 KPI 4개, 아래 추이·분포 차트, 최근 이벤트 표. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
+    status: "ready", react: ["PageHead","Stack","Row3","Row2"], uses: ["data-visual", "card", "tag", "data-table", "select-button", "button"], css: [".page-head", ".stack", ".row-2", ".row-3"], borrows: [".sr-only", ".progress-row", ".progress"],
+    desc: "보안 관리자의 첫 화면. 상단 KPI 4개, 아래 추이·분포 차트, 비교 · 목표 대비 차트, 최근 이벤트 표. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
     thumb: `<div class="kpi-grid" style="width:240px;gap:6px"><div class="kpi critical" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">Critical</span><span class="value" style="font-size:18px">1,284</span></div><div class="kpi" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">차단률</span><span class="value" style="font-size:18px">99.2%</span></div></div>`,
     principles: [["위계", "KPI(무슨 일) → 차트(어디서·얼마나) → 표(무엇을 할지)"], ["기간", "화면 우상단 Select Button 하나로 전체 기간을 바꿈"], ["밀도", "카드 gap 16, 카드 내부 24(KPI 는 좌우 20). 스크롤 없이 첫 화면에 KPI+차트"]],
     examples: [
@@ -248,22 +259,26 @@ const PATTERNS = {
         <div class="stack">
           <div class="page-head"><div><h1 class="title">대시보드</h1><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">24시간</button><button type="button" role="radio" aria-checked="false">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
           <div class="kpi-grid">
-            <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><span class="delta up">${I("arrow-up",12)} 12% 전일 대비</span></div>
-            <div class="kpi"><span class="label">차단률</span><span class="value">99.2<small>%</small></span><span class="delta down">${I("arrow-down",12)} 0.3%p</span></div>
-            <div class="kpi"><span class="label">연결 에이전트</span><span class="value">1,247<small>/ 1,284</small></span><span class="delta">37대 오프라인</span></div>
-            <div class="kpi"><span class="label">미처리 검토</span><span class="value">5</span><span class="delta">24시간 내 처리</span></div>
+            <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><div class="kpi-foot">${pDelta("up", "bad", "12%")}<span class="delta-note">전일 대비</span></div>${pSpark(DASH.critical, "Critical 이벤트 — 최근 7일 1,021건에서 1,284건으로 증가")}</div>
+            <div class="kpi"><span class="label">차단률</span><span class="value">99.2<small>%</small></span><div class="kpi-foot">${pDelta("up", "good", "0.3%p")}<span class="delta-note">전일 대비</span></div></div>
+            <div class="kpi"><span class="label">연결 에이전트</span><span class="value">1,247<small>/ 1,284</small></span><div class="kpi-foot"><span class="delta-note">37대 오프라인</span></div></div>
+            <div class="kpi"><span class="label">신규 위협</span><span class="value">112</span><div class="kpi-foot">${pDelta("up", "bad", "20%")}<span class="delta-note">전일 대비</span></div>${pSpark(DASH.threats, "신규 위협 — 최근 7일 62건에서 112건으로 증가")}</div>
           </div>
           <div class="row-3">
-            <div class="chart-card"><h3 class="chart-title">탐지 추이 <span class="t-caption-1" style="color:var(--foreground-neutral-tertiary)">최근 14일</span></h3><div class="chart-view"><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div></div>
-            <div class="chart-card"><h3 class="chart-title">심각도 분포</h3><div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:229.2deg"></i><i style="--a:270.2deg"></i></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>196</b></span><span><i class="low"></i>Low <b>120</b></span><span><i class="info"></i>Info <b>263</b></span></div></div></div>
+            <div class="chart-card">${pChartHead("탐지 추이", "최근 14일")}<div class="chart-view"><div class="chart-canvas"><canvas data-chart="timeseries" data-spec='${JSON.stringify(TREND)}' role="img" aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역"></canvas></div></div></div>
+            <div class="chart-card">${pChartHead("심각도 분포")}<div class="donut-row"><div class="donut" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%" data-label="1,054"><i style="--a:0deg"></i><i style="--a:64.9deg"></i><i style="--a:162.3deg"></i><i style="--a:229.2deg"></i><i style="--a:270.2deg"></i></div><div class="chart-legend" style="flex-direction:column"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>196</b></span><span><i class="low"></i>Low <b>120</b></span><span><i class="info"></i>Info <b>263</b></span></div></div></div>
+          </div>
+          <div class="row-2">
+            <div class="chart-card">${pChartHead("유형별 탐지", "주간 비교")}<div class="chart-view"><div class="chart-canvas"><canvas data-chart="bar" data-spec='${JSON.stringify(DASH.weeks)}' role="img" aria-label="유형별 탐지 — 이번 주와 지난 주 비교, 랜섬웨어 412건이 가장 많음"></canvas></div></div></div>
+            <div class="chart-card">${pChartHead("부서별 패치 적용", "에이전트 기준")}<div class="progress-list">${pMeter("dash-pl-dev", "개발팀", 412, 450, "대")}${pMeter("dash-pl-sales", "영업팀", 236, 298, "대")}${pMeter("dash-pl-ops", "운영팀", 128, 196, "대")}${pMeter("dash-pl-fin", "재무팀", 66, 140, "대")}</div></div>
           </div>
           <div class="card flush">
             <div class="card-head"><h3 class="title">최근 Critical 이벤트</h3><a href="#" class="btn sm text assistive">전체 보기 →</a></div>
-            <table class="tbl"><thead><tr><th>시간</th><th>이벤트</th><th>대상</th><th>상태</th></tr></thead><tbody>
+            <div class="tbl-wrap"><table class="tbl nowrap"><thead><tr><th>시간</th><th>이벤트</th><th>대상</th><th>상태</th></tr></thead><tbody>
               <tr><td>09:41:12</td><td>랜섬웨어 행위 탐지</td><td>PC-2041 · 김민준</td><td><span class="indicator danger">차단</span></td></tr>
               <tr><td>09:36:47</td><td>알려진 악성코드 차단</td><td>PC-0932 · 박지훈</td><td><span class="indicator danger">차단</span></td></tr>
               <tr><td>08:58:20</td><td>C2 통신 시도</td><td>PC-0411 · 최유진</td><td><span class="indicator warn">검토 필요</span></td></tr>
-            </tbody></table>
+            </tbody></table></div>
           </div>
         </div>`, layout: "stack" },
     ],

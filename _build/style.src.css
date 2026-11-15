@@ -72,6 +72,10 @@
      계열 1의 톤 둘(사람의 결정 2026-11-05) — subtle 은 비교 기간(지난 주 · 전월) 막대, strong 은 막대 위를 지나는 선. 같은 색상에서 톤만 다르게 해 '같은 지표의 다른 기간'으로 읽힌다.
      실측 대비: subtle 라이트 blue-80 / 흰 1.77 · 계열 1 과 2.74, 다크 blue-30 / #212225 1.64 · 계열 1 과 2.74 — 3:1 아래라 contrast.pairs 에 예외로 선언. strong 라이트 blue-30 · 다크 blue-80 은 3:1 통과 */
   --chart-series-1:var(--blue-50);--chart-series-2:var(--orange-39);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-45);--chart-series-5:var(--lime-37);--chart-series-6:var(--pink-40);--chart-series-1-subtle:var(--blue-80);--chart-series-1-strong:var(--blue-30);
+  /* 한 톤(사람의 결정 2026-11-15 — 심각도 · 범주 구분이 필요 없는 차트의 기본, 제품 색과 무관한 고정 파랑) — 계열 순서대로 진한 → 옅은 명도 4단계.
+     dataviz 검증기(ordinal 모드): 라이트 blue-40 · 50 · 60 · 70 / #F7F7F8 — 한 색상(3°) · 명도 단조 · 이웃 ΔL ≥ 0.06 · 옅은 끝 2.33:1(≥ 2) PASS,
+     다크 blue-80 · 70 · 60 · 45 / #212225 — 같은 검사 PASS(옅은 끝 2.88). 둘째 · 넷째 계열 순서 규칙은 ds-chart.js MONO_STEPS(2계열 = 1 · 4 단계) */
+  --chart-mono-1:var(--blue-40);--chart-mono-2:var(--blue-50);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-70);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   /* 참조 트리 밖 — 셋뿐이고, 왜 밖인지가 각각 적혀 있다 */
   /* 지란지교시큐리티 회사 마크. 이 시스템의 brand 는 제품 색이라 회사 정체성 표기가 들어갈 자리가 없다 */
@@ -149,6 +153,7 @@
   /* Chart(트리 밖) 다크 — 같은 여섯 색상을 어두운 면에 맞는 단계로. 검증기 다크, 바탕 #212225 · #1B1C1E: 명도 띠 PASS · 채도 PASS ·
      색각 분리 worst 8.2(violet↔light-blue, deutan) PASS · 정상 시각 16.1 PASS · 3:1 전부 PASS(2026-11-03) */
   --chart-series-1:var(--blue-60);--chart-series-2:var(--orange-40);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-60);--chart-series-5:var(--lime-40);--chart-series-6:var(--pink-46);--chart-series-1-subtle:var(--blue-30);--chart-series-1-strong:var(--blue-80);
+  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   --company-mark-subtle:#3A2410;
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
@@ -190,6 +195,7 @@
   /* Chart(트리 밖) 다크 — 같은 여섯 색상을 어두운 면에 맞는 단계로. 검증기 다크, 바탕 #212225 · #1B1C1E: 명도 띠 PASS · 채도 PASS ·
      색각 분리 worst 8.2(violet↔light-blue, deutan) PASS · 정상 시각 16.1 PASS · 3:1 전부 PASS(2026-11-03) */
   --chart-series-1:var(--blue-60);--chart-series-2:var(--orange-40);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-60);--chart-series-5:var(--lime-40);--chart-series-6:var(--pink-46);--chart-series-1-subtle:var(--blue-30);--chart-series-1-strong:var(--blue-80);
+  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   --company-mark-subtle:#3A2410;
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
@@ -1660,6 +1666,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl-wrap.sticky-col{--tbl-surface:var(--background-neutral-primary)}
 .tbl-wrap.sticky-col .tbl{width:max-content;min-width:100%}   /* 넓은 표가 영역 안에서 가로로 스크롤한다 — 칸을 줄바꿈해 폭에 맞추지 않는다 */
 .tbl-wrap.sticky-col .tbl :is(th,td){white-space:nowrap}
+.tbl.nowrap :is(th,td){white-space:nowrap}   /* 칸을 한 줄로 — 좁으면 .tbl-wrap 이 가로로 스크롤한다. 짧은 값만 있는 요약 표(대시보드 최근 이벤트) — 390 에서 '차 / 단' · 'PC- / 2041' 로 끊겼다(사람의 결정 2026-11-15) */
 .card .tbl-wrap:is(.sticky-col,.sticky),.side-panel .tbl-wrap:is(.sticky-col,.sticky),.popup .tbl-wrap:is(.sticky-col,.sticky){--tbl-surface:var(--surface-elevated-primary)}
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :where(:first-child:not(.empty),.expand:first-child + *,.check:first-child + *,.expand:first-child + .check + *){position:sticky;left:0;z-index:1}   /* :where — 아래 칸별 left 가 이기게(:is 는 가장 센 인자의 명시도를 모두에게 준다) */
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(.expand:first-child + *){left:2.5rem}
@@ -1724,41 +1731,70 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tile[disabled] .tag::before{background:var(--foreground-disable-primary)}   /* 우상단 Tag 도 비활성 면 · 글자색 — 상태 색(연결됨 · NEW)이 비활성 타일에서 눈에 띄었다(사람의 결정 2026-10-27) */
 
 /* Data Visual */
+/* 한 세트(사람의 결정 2026-11-15) — 모든 차트는 같은 카드 틀(.chart-card: 머리 32 · 선택 figure · 본문 높이 단계)에 들어가고, 색은 한 톤(--chart-mono-1~4, 제품 색과 무관한 고정 파랑)이 기본이다.
+   심각도 · 상태는 그 토큰, 순서 없는 범주가 5개 이상일 때만 계열 색(--chart-series-1~6) */
 .kpi{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:1.25rem 1.5rem;min-width:11.25rem;display:flex;flex-direction:column;gap:0.25rem;line-height:1.6}
 .kpi .label{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);font-weight:500;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .kpi .value{font-size:var(--font-size-32);font-weight:700;letter-spacing:-0.0253em;line-height:2.75rem;white-space:nowrap;color:var(--foreground-neutral-primary)}   /* 색이 없어 부모 색을 물려받았다 — 개요 썸네일(tertiary 글자)에서 값만 회색이 됐다 */
 .kpi .value small{font-size:var(--font-size-16);line-height:1.5rem;font-weight:500;letter-spacing:0.0057em;color:var(--foreground-neutral-tertiary);margin-left:2px}   /* = Title 1 Medium. 값의 행간 1.2 · 자간 -0.02em 을 물려받아 어느 텍스트 스타일과도 맞지 않았다(2026-11-06) */
-.kpi .delta{font-size:var(--font-size-12);line-height:max(1rem,16px);font-weight:600;letter-spacing:0.0252em;color:var(--foreground-neutral-secondary)}   /* = Label 2 SemiBold. 종전엔 카드 행간 1.6(19.2)을 물려받아 Figma 글 상자(16)와 3.2 어긋났다 */
-.kpi .delta svg{width:0.75rem;height:0.75rem;vertical-align:-1px}
-.kpi .delta.up{color:var(--foreground-negative-strong)}
-.kpi .delta.down{color:var(--foreground-positive-primary)}
+/* 증감 = 옅은 틴트 배지(사람의 결정 2026-11-15 — 색 글자 대신). Tag sm 과 같은 크기(Caption 2 11/14 · 높이 18)와 같은 색 쌍(틴트 8% + heavy 글자).
+   색은 방향이 아니라 의미 — .bad(위협 증가 · 차단률 하락) · .good · 클래스 없음 = 중립. 방향(.up · .down)은 화살표만 나른다 */
+.delta{display:inline-flex;align-items:center;gap:2px;align-self:flex-start;flex:none;font-size:var(--font-size-11);font-weight:600;line-height:max(0.875rem,14px);letter-spacing:0.0311em;padding:2px 0.5rem;border-radius:var(--radius-full);background:var(--surface-neutral-tertiary);color:var(--foreground-neutral-primary);white-space:nowrap}
+.delta svg{width:0.75rem;height:0.75rem;flex:none}
+.delta.bad{background:var(--surface-negative-primary);color:var(--foreground-negative-heavy)}
+.delta.good{background:var(--surface-positive-primary);color:var(--foreground-positive-heavy)}
+/* 배지 옆 비교 기준('전주 대비') — 배지 밖 보조 글자 */
+.kpi-foot{display:flex;align-items:center;flex-wrap:wrap;gap:0.25rem 0.5rem;line-height:1.6}
+.delta-note{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .kpi.critical .value{color:var(--foreground-negative-strong)}
 .kpi.high .value{color:var(--foreground-cautionary-primary)}
 .kpi.flat{border-color:transparent}   /* variant flat — .card.flat 과 같은 결정 · 같은 조건(회색 바탕 전용) */
+/* 썸네일 · 좁은 자리의 작은 KPI */
+.kpi.compact{padding:0.75rem 0.875rem;min-width:7.5rem}
+.kpi.compact .value{font-size:var(--font-size-24);line-height:2rem;letter-spacing:-0.0232em}
 /* sparkline 을 품은 KPI — 라벨 한 줄, 그 아래 값과 그래프를 한 줄에 두고 그래프 밑변을 숫자 기준선에 맞춘다.
    자리가 모자라면 그래프가 값 아래로 내려가 넘치지 않는다(KpiGrid 의 좁은 칸). 남는 높이는 아래에 둔다(이웃 카드가 더 커도 줄이 벌어지지 않게).
-   마크업 순서(label · value · delta · sparkline)는 그대로라 React Kpi 의 children 도 같다. 2열 grid 는 nowrap 값을 줄이지 못해 좁은 칸에서 보더 밖으로 넘쳤다 */
+   마크업 순서(label · value · kpi-foot · sparkline)는 그대로라 React Kpi 의 children 도 같다. 2열 grid 는 nowrap 값을 줄이지 못해 좁은 칸에서 보더 밖으로 넘쳤다 */
 .kpi:has(> .sparkline){flex-flow:row wrap;align-content:flex-start;align-items:last baseline;column-gap:1rem;row-gap:0.25rem}
-.kpi:has(> .sparkline) > .label,.kpi:has(> .sparkline) > .delta{flex-basis:100%}
+.kpi:has(> .sparkline) > .label,.kpi:has(> .sparkline) > .kpi-foot{flex-basis:100%}
 .kpi:has(> .sparkline) > .value{flex:1 0 auto}
-.kpi:has(> .sparkline) > .delta{order:1}   /* delta 는 값·그래프 줄 아래 */
+.kpi:has(> .sparkline) > .kpi-foot{order:1}   /* 증감은 값·그래프 줄 아래 */
+/* 탐색형 스파크(Chart.js spark 프리셋) — KPI 맨 아래 폭 전체, 높이 40 */
+.kpi > .chart-canvas.spark{height:2.5rem;margin-top:0.5rem}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:1rem;width:100%;line-height:1.6}
 .kpi-grid > .kpi{min-width:0;padding-left:1.25rem;padding-right:1.25rem}   /* 격자 안 KPI 는 좌우 20 · 칸 최소 176(사람의 결정 2026-11-11) — 1280 이상 문서 본문 758 에서 4열 한 칸은 177.5 인데
    '1,247 / 1,284' 가 패딩 24 로 181 이 필요해 3 + 1 로 줄바꿈했다. 이제 1024 ~ 2560 다섯 폭에서 넷이 한 줄이고 가장 긴 값도 5px 이상 남는다(behave.scale). 카드 하나의 최소 폭 180 은 격자 밖 KPI 에만 */
 .chart{display:flex;flex-direction:column;gap:0.625rem;width:100%;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .chart .row{display:grid;grid-template-columns:7.5rem 1fr 3.5rem;align-items:center;gap:0.75rem}
 .chart .row .lbl{color:var(--foreground-neutral-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* 막대는 각지게(트랙 · 채움 · 스파크라인, 사람의 결정 2026-11-05 — 탐색형 막대와 같다) */
+/* 막대는 각지게(트랙 · 채움 · 스파크라인, 사람의 결정 2026-11-05 — 탐색형 막대와 같다). 채움 기본은 한 톤의 가장 진한 단계(2026-11-15 — 제품 색이던 것) */
 .chart .bar{height:0.75rem;border-radius:0;background:var(--surface-neutral-strong);overflow:hidden}
-.chart .bar i{display:block;height:100%;background:var(--foreground-brand-primary);border-radius:0}
+.chart .bar i{display:block;height:100%;background:var(--chart-mono-1);border-radius:0}
 .chart .bar.critical i{background:var(--foreground-negative-strong)}
 .chart .bar.high i{background:var(--foreground-cautionary-primary)}
 .chart .bar.medium i{background:var(--foreground-accent-light-blue)}
 .chart .bar.low i{background:var(--foreground-accent-lime)}
 .chart .bar.info i{background:var(--foreground-inactive-primary)}
 .chart .num{text-align:right;color:var(--foreground-neutral-secondary)}
-.chart-card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;width:100%;line-height:1.6}
-.chart-card .chart-title{font-size:var(--font-size-16);font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center;line-height:1.5rem;letter-spacing:0.0057em}
+/* 진행 막대 목록(2026-11-15) — 항목마다 목표 대비 값. Loading 의 .progress-row 틀(윗줄 라벨 · 값, 아랫줄 트랙)을 그대로 쓰고, 데이터 막대라 각지고 한 톤으로 칠한다.
+   작업 진행(progressbar)이 아니라 측정값이라 role=meter */
+.progress-list{display:flex;flex-direction:column;gap:1rem;width:100%;line-height:1.6}
+.progress-list .progress-row{gap:0.5rem}
+.progress-list .progress-row .row b{font-weight:600;color:var(--foreground-neutral-primary)}
+.progress-list .progress-row .row .target{color:var(--foreground-neutral-tertiary);margin-left:0.25rem}
+.progress-list .progress{border-radius:0}
+.progress-list .progress i{background:var(--chart-mono-1);border-radius:0}
+/* 차트 카드 — 머리(제목 · 보조 글자 · 동작) 높이 32 고정, 선택 figure(큰 값 · 증감), 본문은 높이 단계(sm 160 · 기본 240 · lg 320).
+   같은 줄의 카드는 머리 아래 끝 · 본문 위 끝이 같다(behave.chart) — 동작(Select sm · 텍스트 버튼 32)이 없는 카드도 머리가 32 라 줄이 어긋나지 않는다 */
+.chart-card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;width:100%;min-width:0;line-height:1.6}
+.chart-head{display:flex;align-items:center;gap:0.5rem;height:2rem;min-width:0}
+.chart-card .chart-title{font-size:var(--font-size-16);font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center;line-height:1.5rem;letter-spacing:0.0057em;min-width:0}
+.chart-head .chart-title{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-sub{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em;white-space:nowrap}
+.chart-action{margin-left:auto;display:flex;align-items:center;gap:0.5rem;flex:none}
+.chart-figure{display:flex;align-items:center;flex-wrap:wrap;gap:0.25rem 0.75rem;margin-top:-0.5rem}
+.chart-figure .value{font-size:var(--font-size-32);font-weight:700;letter-spacing:-0.0253em;line-height:2.75rem;white-space:nowrap;color:var(--foreground-neutral-primary)}
+.chart-figure .value small{font-size:var(--font-size-16);line-height:1.5rem;font-weight:500;letter-spacing:0.0057em;color:var(--foreground-neutral-tertiary);margin-left:2px}
 .chart-card.flat{border-color:transparent}   /* variant flat — .card.flat 과 같은 결정 · 같은 조건(회색 바탕 전용) */
 /* 탐색형 차트(Chart.js) 캔버스 자리 — 높이는 CSS 가 정하고 Chart.js 가 responsive 로 채운다. canvas 에 width · height 를 직접 주지 않는다 */
 /* contain:inline-size — Chart.js 캔버스의 첫 폭(300)이 그리드 · 플렉스 열의 최소 폭으로 잡혀 좁은 화면에서 넘쳤다(대시보드 768 에서 24px). 캔버스가 열 폭을 정하지 않게 한다 */
@@ -1768,11 +1804,33 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .chart-table{height:15rem}
 .chart-canvas{position:relative;width:100%;height:15rem;contain:inline-size}
 .chart-canvas>canvas{display:block}
+/* 본문 높이 단계(2026-11-15) — 캔버스 · 표로 보기 · 상태 자리가 함께 따른다 */
+.chart-card.sm .chart-canvas{height:10rem}
+.chart-card.sm .chart-table{height:10rem}
+.chart-card.sm .chart-state{height:10rem}
+.chart-card.lg .chart-canvas{height:20rem}
+.chart-card.lg .chart-table{height:20rem}
+.chart-card.lg .chart-state{height:20rem}
+/* 상태(2026-11-15) — 카드 틀과 머리는 남기고 본문 자리만 바꾼다. 높이는 본문 높이 그대로라 같은 줄 카드가 흔들리지 않는다.
+   로딩은 aria-busy 카드 안 Skeleton, 빈 · 오류는 Card 의 빈 · 오류 틀과 같은 모양(점선 · 면 없음, 아이콘 36) */
+.chart-state{height:15rem;display:flex;flex-direction:column;justify-content:center}
+.chart-state > .skeleton.rect{height:100%}
+.chart-card .empty{border:0;background:none;padding:0;height:100%}
+.chart-card .empty b{font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
+.chart-card .empty .ico{width:2.25rem;height:2.25rem}
+.chart-card .empty .ico svg{width:2.25rem;height:2.25rem}
+.chart-card .empty.error .ico{color:var(--foreground-negative-strong)}
 /* 조각 사이에 틈이 필요하다 — 이웃 조각의 밝기 대비가 라이트 1.23~1.53 · 다크 1.18~2.97 이라 틈이 없으면 색상으로만 갈리고,
    색각 이상에서는 한 덩어리로 읽힌다(190 · 285 · 196 · 120 · 263 기준 값). React Donut 도 같은 식으로 그린다 */
 /* 조각은 이어 붙이고, 경계는 폭이 일정한 2px 구분선(i)으로 낸다 — 탐색형 도넛(Chart.js 2px 면 색 경계)과 같은 모양(2026-11-05).
    종전에는 conic-gradient 의 각도 띠(1.2%)라 바깥으로 갈수록 넓어지는 쐐기가 되고 경계가 계단처럼 깨졌다. --a 는 경계 각도(위 = 0, 시계 방향) */
-.donut{position:relative;width:7.5rem;height:7.5rem;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--foreground-negative-strong) 0 18.03%,var(--foreground-cautionary-primary) 18.03% 45.07%,var(--foreground-accent-light-blue) 45.07% 63.66%,var(--foreground-accent-lime) 63.66% 75.05%,var(--foreground-inactive-primary) 75.05% 100%);line-height:1.6}
+/* 조각 비율은 누적 % 변수 --d1 ~ --d5(2026-11-15 — 전에는 심각도 예제의 비율이 CSS 에 박혀 있었다). 마지막 조각은 100% 까지.
+   팔레트: 기본 = 심각도 다섯, .mono = 한 톤(조각 수에 따라 ds-chart MONO_STEPS 와 같은 단계 — 구분선 i 의 수 = 조각 수), .categorical = 계열 색 1~6 */
+.donut{--d1:18.03%;--d2:45.07%;--d3:63.66%;--d4:75.05%;--d5:100%;position:relative;width:7.5rem;height:7.5rem;border-radius:50%;display:grid;place-items:center;flex:none;background:conic-gradient(var(--foreground-negative-strong) 0 var(--d1),var(--foreground-cautionary-primary) var(--d1) var(--d2),var(--foreground-accent-light-blue) var(--d2) var(--d3),var(--foreground-accent-lime) var(--d3) var(--d4),var(--foreground-inactive-primary) var(--d4) 100%);line-height:1.6}
+.donut.mono{background:conic-gradient(var(--chart-mono-1) 0 var(--d1),var(--chart-mono-2) var(--d1) var(--d2),var(--chart-mono-3) var(--d2) var(--d3),var(--chart-mono-4) var(--d3) 100%)}
+.donut.mono:has(> i:nth-of-type(3):last-of-type){background:conic-gradient(var(--chart-mono-1) 0 var(--d1),var(--chart-mono-2) var(--d1) var(--d2),var(--chart-mono-4) var(--d2) 100%)}
+.donut.mono:has(> i:nth-of-type(2):last-of-type){background:conic-gradient(var(--chart-mono-1) 0 var(--d1),var(--chart-mono-4) var(--d1) 100%)}
+.donut.categorical{background:conic-gradient(var(--chart-series-1) 0 var(--d1),var(--chart-series-2) var(--d1) var(--d2),var(--chart-series-3) var(--d2) var(--d3),var(--chart-series-4) var(--d3) var(--d4),var(--chart-series-5) var(--d4) var(--d5),var(--chart-series-6) var(--d5) 100%)}
 .donut::after{content:attr(data-label);width:5rem;height:5rem;border-radius:50%;background:var(--surface-elevated-primary);display:grid;place-items:center;font-weight:600;font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}   /* 가운데 합계 = Title/1 16/24/600 — 700 이던 것을 Figma 스타일 14단계에 맞춰 600 으로(사람의 결정 2026-11-04). 탐색형 도넛(ds-chart centerPlugin)도 같다 */
 .donut i{position:absolute;top:0;left:50%;width:2px;height:1.25rem;margin-left:-1px;background:var(--surface-elevated-primary);transform-origin:50% 3.75rem;transform:rotate(var(--a,0deg))}
 .donut-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem 1.5rem;line-height:1.6}   /* 자리가 좁아 도넛 + 범례가 한 줄에 안 들어가면 범례가 도넛 아래로 내려간다(사람의 요청 2026-11-06 — 탐색형 도넛의 옆 범례와 같은 규칙). 줄 사이 16 = chart-card gap */
@@ -1786,24 +1844,37 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .chart-legend i.medium{background:var(--foreground-accent-light-blue)}
 .chart-legend i.low{background:var(--foreground-accent-lime)}
 .chart-legend i.info{background:var(--foreground-inactive-primary)}
-
 .chart-legend i.ok{background:var(--foreground-positive-primary)}
-.chart-legend i.accent{background:var(--foreground-brand-primary)}
+.chart-legend i.pending{background:var(--foreground-accent-cyan)}
+.chart-legend i.brand{background:var(--foreground-brand-primary)}
+.chart-legend i.accent{background:var(--foreground-brand-primary)}   /* brand 의 옛 이름 — 차트 tone(brand)과 같은 낱말로 맞췄다(2026-11-15) */
+.chart-legend i.mono-1{background:var(--chart-mono-1)}
+.chart-legend i.mono-2{background:var(--chart-mono-2)}
+.chart-legend i.mono-3{background:var(--chart-mono-3)}
+.chart-legend i.mono-4{background:var(--chart-mono-4)}
+.chart-legend i.series-1{background:var(--chart-series-1)}
+.chart-legend i.series-2{background:var(--chart-series-2)}
+.chart-legend i.series-3{background:var(--chart-series-3)}
+.chart-legend i.series-4{background:var(--chart-series-4)}
+.chart-legend i.series-5{background:var(--chart-series-5)}
+.chart-legend i.series-6{background:var(--chart-series-6)}
 .chart-legend b{color:var(--foreground-neutral-primary);}
 .sparkline{display:flex;align-items:flex-end;gap:0.1875rem;height:2rem;line-height:1.6}
-.sparkline i{display:block;width:0.375rem;background:var(--line-brand-primary);border-radius:0}   /* 일반 막대는 옅게 — 둘 다 brand-primary 라 .hi 강조가 보이지 않았다 */
-.sparkline i.hi{background:var(--foreground-brand-primary)}
+.sparkline i{display:block;width:0.375rem;background:var(--chart-mono-4);border-radius:0}   /* 일반 막대는 옅은 단계, .hi 는 진한 단계(같은 파랑 — 2026-11-15 제품 색이던 것) */
+.sparkline i.hi{background:var(--chart-mono-1)}
 
 /* Patterns: layout helpers */
 /* 2열 격자 — Breadcrumb 는 윗줄 전체, 긴 제목은 왼쪽 칸에서 줄바꿈하고 동작은 오른쪽 위에 남는다 */
 .page-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:1rem;width:100%;line-height:1.6}   /* 줄 사이 · 열 사이 16(사람의 결정 2026-11-12 — Breadcrumb ↔ 제목이 8 이었다) */
 .page-head > nav{grid-column:1/-1}
 .page-head .title{font-size:var(--font-size-28);font-weight:700;margin:0;letter-spacing:-0.0236em;line-height:2.375rem;word-break:keep-all}   /* = Title 2 28/38(사람의 결정 2026-11-13 — 11-12 의 Title 1 32 에서 내림). 문서 사이트 h1 은 Display 3 그대로 */
-.page-head .sub{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0.25rem 0 0;line-height:1.375rem;letter-spacing:0.0145em}
+.page-head .sub{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0.25rem 0 0;line-height:1.375rem;letter-spacing:0.0145em;word-break:keep-all}   /* 제목과 같이 띄어쓰기에서 끊는다 — 390 에서 '자동 갱 / 신' 으로 끊겼다(사람의 결정 2026-11-15) */
 .page-head .actions{display:flex;align-items:center;gap:0.5rem;flex:none}   /* 높이가 다른 동작이 늘어나지 않게 — Select Button(38)이 40 으로 늘어나 안쪽 버튼이 위로 쏠렸다(2026-11-12) */
 .stack{display:flex;flex-direction:column;gap:1rem;width:100%;line-height:1.6}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;width:100%;line-height:1.6}
 .row-3{display:grid;grid-template-columns:2fr 1fr;gap:1rem;width:100%;line-height:1.6}
+/* 좁은 화면에서는 한 칸으로 쌓는다(2026-11-15) — 390 에서 두 칸 그대로라 도넛이 카드 밖으로 잘리고 제목이 '심각도…' 로, 막대 라벨이 겹쳤다(캡처에서 발견, HEAD 의 .row-3 부터) */
+@media (max-width:767px){.row-2,.row-3{grid-template-columns:1fr}}
 .toolbar{display:flex;align-items:center;gap:0.5rem;width:100%;flex-wrap:wrap;line-height:1.6}
 .toolbar .spacer{flex:1}
 .form{display:flex;flex-direction:column;gap:1.25rem;width:100%;max-width:40rem;background:var(--surface-elevated-primary);padding:1.5rem;border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);line-height:1.6}

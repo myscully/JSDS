@@ -696,3 +696,34 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 - **다크의 brand 글자 단계(`--prod-60`)를 4.5 까지 밝힙니다** — `accentScale` 이 다크 바탕 셋 모두에서 4.5 가 될 때까지 밝기를 0.5 씩 올립니다. 빨강 `#EF1437` → `#F34B65`, AI → `#9076F6`. 이미 넘는 색은 그대로입니다.
 - **삭제 버튼(`color="negative"` · `.negative`)은 모든 제품에서 중립색**입니다. Assistive 와 같은 모양입니다 — 빨강 제품의 주 버튼과 헷갈리지 않게 합니다. 빨강은 위험 확인 팝업 제목과 메뉴 위험 항목 글자에 남습니다. 클래스 · prop 은 그대로라 마크업을 바꿀 필요가 없습니다.
 - **빨강 · 주황 제품의 입력 포커스 · 열린 필드 링은 중립색**입니다(오류 링 · 경고색과 헷갈리지 않게). 새 토큰 `--line-field-focus` · `--line-field-focus-halo` 가 링 색이고, 다른 제품에서는 전처럼 brand 입니다. 오류 필드는 늘 빨강입니다.
+
+## Data Visual 한 세트 — 한 톤 · 차트 카드 틀 · 증감 배지 (2026-11-15)
+
+차트를 어느 것을 골라 옆에 두어도 한 세트로 보이게 다시 정리했습니다. **보이는 모양이 바뀌고, 증감 배지의 클래스가 바뀝니다.**
+
+**색 — 한 톤이 기본**
+- tone 없는 계열 · 조각은 이제 **고정 파랑 명도 단계**(`--chart-mono-1~4`)입니다. 전에는 index 로 계열 1(파랑) → 2(주황) → 3 … 여러 색이 되었습니다. 계열 수에 따라 1 · 1·4 · 1·2·4 · 1~4 단계를 쓰고, 5개를 넘으면 계열 색(`--chart-series-1~6`)으로 넘어갑니다. 예전처럼 여러 색이 필요하면 spec 에 `color: "categorical"`.
+- 차트는 **제품 색을 따르지 않습니다** — 정적 막대(`BarChart`) · 스파크라인(`Sparkline`)이 전에는 제품 색(`--foreground-brand-primary` · `--line-brand-primary`)이었고 이제 한 톤입니다. 빨강 · 주황 제품에서 차트가 경고처럼 읽히지 않게 하려는 결정입니다.
+- 심각도 · 상태는 그대로 `tone` 입니다.
+- 이번 주 · 지난 주 비교에 `tone: "series-1"` · `"series-1-subtle"` 을 손으로 주던 것은 tone 을 빼면 같은 의도(진한 · 옅은)로 그립니다(값은 mono 1 · 4 단계 — 옛 subtle 과 다른 파랑). 옛 tone 도 계속 받습니다.
+- 가로 격자가 점선(3 · 3)이 되고, 계열이 하나인 `timeseries` 는 선 아래를 옅게 칠합니다(`area: false` 로 끔).
+
+**증감 배지 — 색은 의미, 방향은 화살표**
+- `.delta.up`(빨강) · `.delta.down`(초록) 은 없어졌습니다. 이제 `.delta.bad` · `.delta.good` · 클래스 없음(중립)이고 Tag sm 크기의 틴트 배지입니다. 차단률이 오르는 것처럼 '오름 = 좋음' 을 그릴 수 있게 됐습니다.
+- 사이트 HTML: `<span class="delta up">↑ 12% 전주 대비</span>` → `<div class="kpi-foot"><span class="delta bad">↑<span class="sr-only">증가</span>12%</span><span class="delta-note">전주 대비</span></div>`.
+- React `Kpi`: `deltaTone`("bad" | "good" | "neutral") · `note`(비교 기준 · 보조 문구)를 더했습니다. `deltaDir` 만 주면 옛 뜻(up = bad · down = good)으로 그리고 개발 모드에서 한 번 경고합니다. 증감이 아닌 문구(`delta="37대 오프라인"`)는 `note` 로 옮기세요 — `delta` 는 이제 배지로 그립니다.
+
+**ChartCard 틀**
+- 머리가 `.chart-head > h3.chart-title + .chart-sub + .chart-action`(높이 32)이 됐습니다. 전에는 `h3.chart-title` 안 `span.t-caption-1` 이었습니다.
+- React `ChartCard`: `extra` → `sub`(옛 이름은 받고 경고), 새 `action` · `figure`(큰 값 · 단위 · 증감 · 비교 기준) · `size`("sm" 160 · "md" 240 · "lg" 320) · `state`("loading" · "empty" · "error") · `stateTitle` · `stateText` · `onRetry`.
+
+**새 것**
+- 프리셋 `gauge`(반원) · `spark`(KPI 안 추이), bar 의 `highlight` · `gradient`, 공통 `color`.
+- `SparkCanvas`(`@jiran/ds-react/chart`) — KPI 안 `.chart-canvas.spark`.
+- `ProgressList`(진행 막대 목록, role=meter) · `Delta` · `Donut color`("mono" · "categorical" — tone 없는 조각에만).
+- `ChartLegend` 견본 tone 에 `brand` · `mono-1~4` · `series-1~6`.
+- `Table nowrap`(`.tbl.nowrap`) — 칸을 한 줄로 두고 좁으면 `.tbl-wrap` 이 가로로 스크롤합니다. 짧은 값만 있는 요약 표(대시보드 최근 이벤트)에 씁니다. 대시보드 예제는 `<Table wrap={false}>` → `<Table nowrap>`.
+
+**좁은 화면**
+- `Row2` · `Row3`(`.row-2` · `.row-3`)는 767 이하에서 한 칸으로 쌓입니다. 전에는 390 에서도 두 칸이라 도넛이 카드 밖으로 잘렸습니다.
+- `PageHead` 의 부제(`.page-head .sub`)는 띄어쓰기에서만 줄바꿈합니다(`word-break:keep-all`).

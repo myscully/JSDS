@@ -2,12 +2,12 @@ import { Chart } from "chart.js/auto";
 import { ChartCard } from "@jiran/ds-react";
 import { ChartCanvas, presets } from "@jiran/ds-react/chart";
 
-/* 막대 — 그룹(이번 주 = 계열 1, 지난 주 = 계열 1의 옅은 톤)과 가로 누적(심각도 톤) */
+/* 막대 — tone 없는 두 계열은 한 톤의 1 · 4 단계(이번 주 진하게 · 지난 주 옅게), 심각도 누적은 tone */
 const WEEKS = {
   labels: ["랜섬웨어", "악성코드", "USB 위반", "정책 위반", "피싱"],
   series: [
-    { label: "이번 주", tone: "series-1" as const, data: [412, 306, 221, 115, 88] },
-    { label: "지난 주", tone: "series-1-subtle" as const, data: [349, 331, 198, 142, 97] },
+    { label: "이번 주", data: [412, 306, 221, 115, 88] },
+    { label: "지난 주", data: [349, 331, 198, 142, 97] },
   ],
 };
 const DEPTS = {
@@ -25,8 +25,8 @@ const DEPTS = {
 
 export default function Example() {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, width: "100%", maxWidth: 960 }}>
-      <ChartCard title="유형별 탐지" extra="주간 비교">
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(18rem,1fr))", gap: 16, width: "100%", maxWidth: 960 }}>
+      <ChartCard title="유형별 탐지" sub="주간 비교">
         <ChartCanvas chart={Chart} config={presets.bar(WEEKS)} aria-label="유형별 탐지 — 이번 주와 지난 주 비교" />
       </ChartCard>
       <ChartCard title="부서별 심각도">
