@@ -42,7 +42,7 @@ export function Tabs({ value, defaultValue, onChange, children }: TabsProps) {
 export interface TabListProps extends HTMLAttributes<HTMLDivElement> {
   /** 캡슐형(보조 전환) */
   pill?: boolean;
-  /** 13.5px */
+  /** 작은 탭 — 글자 14/20 · 높이 38 */
   sm?: boolean;
   /** 활성 색 accent */
   accent?: boolean;

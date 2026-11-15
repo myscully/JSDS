@@ -22,9 +22,13 @@ const samples = src.slice(a, b + LIB.SAMPLES_END.length);
 const block = (name) => { const m = new RegExp("/\\* ds:" + name + ":start[\\s\\S]*?\\*/([\\s\\S]*?)/\\* ds:" + name + ":end \\*/").exec(src); if (!m) throw new Error("style.src.css: ds:" + name + " 블록 없음"); return m[1].trim(); };
 const scale = block("scale"), icons = block("icons");
 
+/* 줄인 모션 — 사이트와 같은 원본 규칙을 떠 온다(손으로 옮겨 적으면 어긋난다 — 11-11 에 Spinner 예외가 빠져 있었다). html 의 스크롤 동작은 제품 것이라 뺀다 */
+const rm = /@media \(prefers-reduced-motion:reduce\)\{html\{scroll-behavior:auto\}(.*?\}\})/.exec(src);
+if (!rm) throw new Error("style.src.css: 줄인 모션 규칙을 찾을 수 없음");
+const reducedMotion = "@media (prefers-reduced-motion:reduce){" + rm[1];
 const base = `/* ---------- Base (패키지용 최소 규칙) ---------- */
 *{box-sizing:border-box}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin .8s linear infinite!important}.spinner[data-delay]{animation:spin .8s linear infinite,ds-delay 0s var(--ds-delay,1s) both!important}.skeleton[data-delay],.spinner-wrap[data-delay],.skeleton-row[data-delay]{animation:ds-delay 0s var(--ds-delay,1s) both!important}}
+${reducedMotion}
 :focus-visible{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}
 [hidden]{display:none!important}
 /* 앱 루트(또는 body)에 .ds-root 를 붙이면 서체·색·배경 토큰이 적용됩니다. 기본 글자 = Body 2/Reading 15/24(2026-11-12 — 옛 15/1.65) */
@@ -62,8 +66,8 @@ for (const must of [":root{", ".btn{", ".tbl{", "@font-face", ".popup-backdrop{"
 {
   const decl = new Set([...out.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
   const dead = [...new Set([...out.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]))]
-    /* 컴포넌트 지역 변수 — verify.js 의 LOCAL 과 같다. --dp-top · --dp-left 는 Date Picker 가 열 때 재서 넣고 CSS 가 기본값을 함께 쓴다. --a 는 도넛 경계 구분선 각도(Donut 이 넣음). --float-* 는 스크롤 영역 안 메뉴의 자리 · 폭(열 때 재서 넣음). --nf-dx 는 알림 패널이 화면 왼쪽 밖으로 나갈 때 미는 거리. --d1~5 는 정적 도넛 조각의 누적 %(Donut 이 넣음) */
-    .filter((t) => !decl.has(t) && !t.startsWith("--prod-") && t !== "--p" && t !== "--checker-bg" && !t.startsWith("--cols") && t !== "--dp-top" && t !== "--dp-left" && t !== "--tp-top" && t !== "--tp-left" && t !== "--a" && !t.startsWith("--float-") && t !== "--ds-delay" && t !== "--nf-dx" && !/^--d[1-5]$/.test(t));
+    /* 컴포넌트 지역 변수 — lib.js 의 LOCAL_VARS(verify 와 같은 목록) */
+    .filter((t) => !decl.has(t) && !t.startsWith("--prod-") && !LIB.LOCAL_VARS.includes(t));
   if (dead.length) throw new Error(`sync-css: 선언이 없는 토큰을 참조함: ${dead.join(" ")}`);
 }
 

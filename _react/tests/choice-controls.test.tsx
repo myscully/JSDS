@@ -91,16 +91,16 @@ describe("Chip", () => {
   }
   it("지우기는 값이 든 이름의 진짜 버튼", () => {
     render(<Inputs />);
-    expect(screen.getByRole("button", { name: "a 삭제" }).tagName).toBe("BUTTON");
+    expect(screen.getByRole("button", { name: "a 제거" }).tagName).toBe("BUTTON");
   });
   it("지우면 다음, 없으면 앞, 없으면 묶음으로 포커스", async () => {
     render(<Inputs />);
-    fireEvent.click(screen.getByRole("button", { name: "a 삭제" }));
-    await waitFor(() => expect(document.activeElement?.getAttribute("aria-label")).toBe("b 삭제"));
-    screen.getByRole("button", { name: "c 삭제" }).focus();   // 포커스가 b 에 그대로 있으면 옮기지 않아도 통과한다
-    fireEvent.click(screen.getByRole("button", { name: "c 삭제" }));
-    await waitFor(() => expect(document.activeElement?.getAttribute("aria-label")).toBe("b 삭제"));
-    fireEvent.click(screen.getByRole("button", { name: "b 삭제" }));
+    fireEvent.click(screen.getByRole("button", { name: "a 제거" }));
+    await waitFor(() => expect(document.activeElement?.getAttribute("aria-label")).toBe("b 제거"));
+    screen.getByRole("button", { name: "c 제거" }).focus();   // 포커스가 b 에 그대로 있으면 옮기지 않아도 통과한다
+    fireEvent.click(screen.getByRole("button", { name: "c 제거" }));
+    await waitFor(() => expect(document.activeElement?.getAttribute("aria-label")).toBe("b 제거"));
+    fireEvent.click(screen.getByRole("button", { name: "b 제거" }));
     await waitFor(() => expect(document.activeElement).toBe(screen.getByTestId("g")));
   });
   it("필터 초기화는 끄고 첫 칩으로 포커스", () => {
@@ -190,7 +190,7 @@ describe("칩 긴 값 Tooltip", () => {
       const tip = lbls[1].parentElement!.querySelector(".tooltip")!;
       expect(tip.textContent).toBe("security-audit-notification@corp.example.com");
       expect(tip.getAttribute("aria-hidden")).toBe("true");
-      expect(screen.getByRole("button", { name: "security-audit-notification@corp.example.com 삭제" })).toBeTruthy();
+      expect(screen.getByRole("button", { name: "security-audit-notification@corp.example.com 제거" })).toBeTruthy();
     } finally {
       if (sw) Object.defineProperty(HTMLElement.prototype, "scrollWidth", sw);
       if (cw) Object.defineProperty(HTMLElement.prototype, "clientWidth", cw);

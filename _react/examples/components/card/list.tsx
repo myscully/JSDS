@@ -8,7 +8,7 @@ export default function Example() {
         <Button variant="text" color="assistive" size="sm">전체 보기</Button>
       </CardHead>
       {/* 테두리 없는 표 — wrap 을 끄지 않으면 .tbl-wrap 의 테두리가 카드 테두리와 겹친다 */}
-      <Table compact wrap={false}>
+      <Table density="compact" wrap={false}>
         <TableHead>
           <TableRow>
             <TableHeader>시간</TableHeader>

@@ -462,13 +462,13 @@ function chipTileExpect() {
 }
 
 /* Date Picker 필드 · 날짜 칸(2026-10-27 k14) — 저장소 4199ac6 의 개편. 기대값은 사이트 CSS 에서 읽고, 못 읽으면 어긋남이다.
-   필드 변형 표 — Type=Button(.datepicker .field-btn) · Input(.datepicker.field > .affix, Text Field 셸) × Size=Small · Medium · Large
+   필드 변형 표 — Input(.datepicker.field > .affix, Text Field 셸) × Size=Small · Medium · Large
    (사이트 .sm · 기본 · .lg — Figma 의 Button · Tag 와 같은 크기 이름) × State. 상태 목록은 사이트 예제(components.data.js date-picker 의 Sizes · States · Input / Error)와
    CSS 규칙이 있는 것만이다: Default · Focused(:focus-visible / :has(input:focus)) · Open(.open) · Disabled(:disabled / :has(input:disabled)) ·
-   Read-only(입력형만 — 버튼형은 readonly 가 없다) · Error(.error) · Error Focused. 입력형 안쪽 입력칸에는 후광이 없어야 한다(.field .affix input:focus 의 box-shadow:none).
+   Read-only · Error(.error) · Error Focused. 안쪽 입력칸에는 후광이 없어야 한다(.field .affix input:focus 의 box-shadow:none).
    날짜 칸 상태 — .calendar .day 와 상태 규칙. Start · End 는 .on 에 띠 쪽 모서리 0, In-range · Preview 는 같은 띠, Preview End 는 띠 + inset 1px 선(Figma 는 INSIDE 선),
    Muted(다른 달)는 띠 · 선택 없이 흐린 글자, Focused 는 전역 :focus-visible 외곽선(고리 "Focus Ring" — focusExpect 머리 주석의 표현) */
-/* 2026-11-09(사람의 요청) — 버튼형(Type=Button)을 없앴다. Figma 에 남은 Type=Button 변형은 '표에 없는 변형' 으로 나온다(지울 것).
+/* Figma 에 남은 Type=Button 변형은 '표에 없는 변형' 으로 나온다(일괄 반영 때 지울 것).
    날짜 칸의 선택은 원(.day.on::before 지름 34 · radius 50%)이고, 기간 양끝은 칸 반쪽만 띠(linear-gradient)다 — 기대값은 Selected · Start · End · Preview End 의
    면 · 모서리를 원으로 본다(모서리 = 지름 / 2). 반쪽 띠는 probe 가 Figma 쪽 자료를 아직 모으지 않아 대조하지 못한다(probe.js 는 일괄 반영 때 고친다) */
 const DP_STATES = { Input: ["Default", "Focused", "Open", "Disabled", "Read-only", "Error", "Error Focused"] };

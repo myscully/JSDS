@@ -143,7 +143,7 @@ module.exports = async function tree({ page, ok, go }) {
     await busan.locator(":scope > .tree-row > .tree-toggle").click(); await wait(100);
     const retry = await busan.evaluate((li) => ({ busy: li.getAttribute("aria-busy"), err: !!li.querySelector(".tree-meta.error") }));
     ok("tree lazy failure: stays collapsed and lazy, says so at the row end and to screen readers; expanding again retries and clears the error",
-      fail.busy === null && fail.exp === "false" && fail.lazy && fail.err === "불러오지 못했습니다" && /부산 IDC 하위 항목을 불러오지 못했습니다/.test(fail.live) && retry.busy === "true" && !retry.err && intoKids === "WEB-01", JSON.stringify({ fail, retry, intoKids }));
+      fail.busy === null && fail.exp === "false" && fail.lazy && fail.err === "불러오지 못했습니다. 다시 펼치세요" && /부산 IDC 하위 항목을 불러오지 못했습니다/.test(fail.live) && retry.busy === "true" && !retry.err && intoKids === "WEB-01", JSON.stringify({ fail, retry, intoKids }));
     await wait(1000);
   });
   await part("10 · 검색 — 맞는 항목과 상위만 남기고 펼침 · 맞는 글자 굵게 · 결과 수 알림 · 초성 · 없으면 안내 · ", async () => {

@@ -69,14 +69,14 @@ describe("form controls", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "A" }));
     expect(onSel).toHaveBeenCalledWith(true);
-    await userEvent.click(screen.getByRole("button", { name: "B 삭제" }));
+    await userEvent.click(screen.getByRole("button", { name: "B 제거" }));
     expect(onRemove).toHaveBeenCalled();
   });
   /* 입력값 칩은 span 이라 disabled 속성 대신 aria-disabled — 넘기지 않아 비활성 칩이 활성처럼 그려지고 x 가 눌렸다 */
   it("비활성 입력값 칩은 칩에 aria-disabled, x 는 disabled 로 삭제하지 않는다", () => {
     const onRemove = vi.fn();
     render(<Chip disabled onRemove={onRemove}>B</Chip>);
-    const x = screen.getByRole("button", { name: "B 삭제" });
+    const x = screen.getByRole("button", { name: "B 제거" });
     expect(x.closest(".chip")).toHaveAttribute("aria-disabled", "true");
     expect(x).toBeDisabled();
     fireEvent.click(x);

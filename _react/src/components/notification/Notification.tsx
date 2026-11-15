@@ -80,6 +80,7 @@ export const ToastStack = forwardRef<HTMLDivElement, ToastStackProps>(function T
 
 export interface BannerProps extends HTMLAttributes<HTMLDivElement> {
   tone?: "warning" | "danger";
+  /** 없으면 톤에 맞는 아이콘(정보 · 경고 · 위험), null 이면 아이콘 없음 */
   icon?: IconName | null;
   /** 우측 버튼 */
   action?: ReactNode;
@@ -89,7 +90,7 @@ export interface BannerProps extends HTMLAttributes<HTMLDivElement> {
 }
 let bannerWarned = false;
 /** 시스템 전체 공지 (헤더 위 전체 폭) */
-export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner({ tone, icon = "info-circle", action, onClose, closeLabel = LABELS.close, className, children, role, ...rest }, ref) {
+export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner({ tone, icon, action, onClose, closeLabel = LABELS.close, className, children, role, ...rest }, ref) {
   /* Banner 안 버튼은 끄지 않는다(사람의 결정 2026-11-12) — 제품 색 면 위의 비활성 글자는 대비 1.32 라 보이지 않는다. 할 수 없으면 버튼을 빼고 문구로 알린다. loading 은 괜찮다 */
   const self = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -98,7 +99,7 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner({ 
   });
   return (
     <div ref={mergeRefs(ref, self)} className={cx("banner", tone, className)} role={role ?? (tone ? "alert" : "status")} {...rest}>
-      {icon && <Icon name={icon} size={18} filled />}
+      {icon !== null && <Icon name={icon ?? TONE_ICON[tone ?? "info"]} size={18} filled />}
       {children}
       {action}
       {onClose && (

@@ -185,7 +185,7 @@
   function tabPick(el) {
     var bar = closest(el, ".tabs"), pn = bar.nextElementSibling; activate(bar, ".tab", el, "aria-selected");
     if (!el.hasAttribute("aria-controls") && pn && pn.classList.contains("tab-panel") && !pn.hasAttribute("data-static")) pn.textContent = el.textContent.trim().replace(/\s*\d+$/, "") + " 탭의 내용이 여기에 표시됩니다.";
-    tabSync(bar); tabReveal(el); fire(el, "ds:tab");
+    tabSync(bar); tabReveal(el); fire(el, "ds:tab", { value: el.dataset.value != null ? el.dataset.value : el.textContent.trim().replace(/\s*\d+$/, ""), index: Array.prototype.indexOf.call(bar.querySelectorAll(".tab"), el) });
   }
 
   /* ---------- Pagination ---------- */
@@ -890,7 +890,15 @@
     var out = focusablesIn(doc.body).filter(function (x) { return !el.contains(x); }), to = out.filter(function (x) { return el.compareDocumentPosition(x) & 4; })[0] || out[out.length - 1];
     if (to) to.focus({ preventScroll: true });
   }
-  function dismiss(el) { if (!el) return; el.style.transition = "opacity 160ms"; el.style.opacity = "0"; setTimeout(function () { el.remove(); }, 170); }
+  /* 닫기 — --motion-fast 로 흐려진 뒤 지운다. 줄인 모션이면 바로 지운다(전환 토큰 규칙 · React 는 바로 지움) */
+  function dismiss(el) {
+    if (!el) return;
+    var ms = parseFloat(getComputedStyle(doc.documentElement).getPropertyValue("--motion-fast")) || 0;
+    if (!ms || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { el.remove(); return; }
+    el.style.transition = "opacity var(--motion-fast)"; el.style.opacity = "0"; setTimeout(function () { el.remove(); }, ms + 20);
+  }
+  /* Select Button 의 값 — data-value, 없으면 글자 */
+  function sbValue(b) { return b.dataset.value != null ? b.dataset.value : b.textContent.trim(); }
   /* Filter Chip — 켜진 칩이 있을 때만 '필터 초기화'를 보인다. 누르면 버튼이 사라지므로 포커스는 첫 칩으로 */
   function syncChipReset(g) { var b = $(":scope > [data-chip-reset]", g); if (b) b.hidden = !$(":scope > .chip.on[aria-pressed]", g); }
   /* Input Chip — 지운 뒤 포커스는 다음 칸, 없으면 앞 칸, 칸이 하나도 없으면 묶음 자신. body 로 떨어지지 않게 */
@@ -1157,7 +1165,7 @@
   /* Select — 열었다가 고르지 않고 닫으면 알린다. 건드리지 않은 필드는 제출할 때 */
   function vTouch(dd) { var tr = $(".trigger", dd), form = closest(dd, "form[data-validate]"); if (tr && form && dd.hasAttribute("data-required") && closest(dd, ".field")) { vShow(tr, vMessage(tr)); vChanged(form); } }
 
-  /* ---------- Steps 마법사 — .stepper(2026-11-13, 외부 컴포넌트 Stepper 참고 — 상용이라 구조 · 동작만, 코드는 옮기지 않음) ----------
+  /* ---------- Steps 마법사 — .stepper(2026-11-13) ----------
      단계(.steps li)와 패널(.step-panel)은 문서 순서로 짝짓는다(세로 배치는 패널이 li 안). 현재 = li.on + aria-current, 완료 = li.done(+ 숨긴 '(완료)').
      누를 수 있는 단계만 .step-btn — 순서대로면 완료한 단계, data-nonlinear 면 현재가 아닌 모든 단계. 검증은 패널 안 form[data-validate] 를 vRun 으로 */
   function spSteps(sp) { var ol = $(".steps", sp); return ol ? $$(":scope > li", ol) : []; }
@@ -1249,10 +1257,10 @@
     // 선택형 카드 (데모 링크)
     if ((el = closest(t, ".card-grid .card.clickable")) && !el.disabled && el.getAttribute("aria-disabled") !== "true") {   /* 고를 수 없는 선택 카드(Card 정의 2026-11-02) — button 은 disabled, 그 밖은 aria-disabled */ $$(".card.clickable", closest(el, ".card-grid")).forEach(function (c) { var on = c === el; c.classList.toggle("on", on); /* 선택은 .on 만으로는 보조기기에 전해지지 않는다 */ if (c.tagName === "BUTTON") c.setAttribute("aria-pressed", on ? "true" : "false"); }); fire(el, "ds:select", { value: (el.querySelector(".title") || el).textContent.trim() }); return; }
     // Select Button
-    if ((el = closest(t, ".select-btn > button")) && !el.disabled) { activate(closest(el, ".select-btn"), "button", el, "aria-checked"); fire(el, "ds:select"); return; }
+    if ((el = closest(t, ".select-btn > button")) && !el.disabled) { activate(closest(el, ".select-btn"), "button", el, "aria-checked"); fire(el, "ds:select", { value: sbValue(el) }); return; }
     // Chip
-    if ((el = closest(t, ".chip .x"))) { if (!el.disabled) { var gone = closest(el, ".chip"); chipFocusAfter(gone); dismiss(gone); } return; }   // 비활성 입력값 칩은 지우지 않는다 — CSS pointer-events 만 믿으면 보조기술의 클릭이 지운다
-    if ((el = closest(t, "button.chip[aria-pressed]")) && !el.disabled) { var on = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", on); el.setAttribute("aria-pressed", String(on)); syncChipReset(el.parentNode); return; }
+    if ((el = closest(t, ".chip .x"))) { if (!el.disabled) { var gone = closest(el, ".chip"), gl = $(".lbl", gone); fire(gone, "ds:chip-remove", { value: gone.dataset.value != null ? gone.dataset.value : (gl || gone).textContent.trim() }); chipFocusAfter(gone); dismiss(gone); } return; }   // 비활성 입력값 칩은 지우지 않는다 — CSS pointer-events 만 믿으면 보조기술의 클릭이 지운다
+    if ((el = closest(t, "button.chip[aria-pressed]")) && !el.disabled) { var on = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", on); el.setAttribute("aria-pressed", String(on)); syncChipReset(el.parentNode); fire(el, "ds:chip-toggle", { selected: on, value: el.dataset.value != null ? el.dataset.value : el.textContent.trim() }); return; }
     if ((el = closest(t, "[data-chip-reset]"))) { var cg = closest(el, ".chip-group"); $$(":scope > .chip.on[aria-pressed]", cg).forEach(function (c) { c.classList.remove("on"); c.setAttribute("aria-pressed", "false"); }); syncChipReset(cg); var c1 = $(":scope > button.chip:not([disabled])", cg); if (c1) c1.focus(); fire(cg, "ds:chip-reset"); return; }
     // Tile
     if ((el = closest(t, ".tile[aria-pressed]")) && !el.disabled) { var o2 = el.getAttribute("aria-pressed") !== "true"; el.classList.toggle("on", o2); el.setAttribute("aria-pressed", String(o2)); return; }
@@ -1278,7 +1286,7 @@
     if ((el = closest(t, ".datepicker .cal-btn")) && !el.disabled) { var dp = closest(el, ".datepicker"); if (dp.classList.contains("open")) closeDP(dp, false); else openDP(dp, el); return; }
     if ((el = closest(t, ".calendar")) && calClick(el, t)) return;
     // Notice · Toast
-    if ((el = closest(t, ".notice .close"))) { var ntc = closest(el, ".notice"); if (e.detail === 0) focusPast(ntc); dismiss(ntc); return; }
+    if ((el = closest(t, ".notice .close"))) { var ntc = closest(el, ".notice"); if (e.detail === 0) focusPast(ntc); fire(ntc, "ds:notice-close"); dismiss(ntc); return; }
     if ((el = closest(t, ".banner .close"))) { var bnr = closest(el, ".banner"); if (e.detail === 0) focusPast(bnr); fire(bnr, "ds:banner-close"); dismiss(bnr); return; }
     if ((el = closest(t, ".toast .action, .toast .close"))) { closeToast(closest(el, ".toast"), e.detail === 0); return; }
     // Popup — 입력 중 · 위험 확인 · 처리 중에는 배경을 눌러도 닫지 않는다(Interaction › Overlays)
@@ -1424,7 +1432,8 @@
     if (t.matches(".combobox input[role=combobox]")) { var cbh = closest(t, ".combobox"), rm = cbh.getAttribute("data-filter") === "none"; cbh._dsTyped = true; cbOpen(cbh, true); cbFilter(cbh);
       if (rm) { clearTimeout(t._dsQuery); t._dsQuery = setTimeout(function () { fire(cbh, "ds:query", { query: t.value }); }, 300); } }
     if (t.matches(".searchbar input")) { var sb = closest(t, ".searchbar"), clr = $(".clear", sb), kb = $("kbd", sb); if (clr) clr.hidden = !t.value; if (kb) kb.hidden = !!t.value;
-      if (sb.hasAttribute("data-debounce")) { clearTimeout(t._dsSearch); t._dsSearch = setTimeout(function () { searchFire(sb, t, "input"); }, Number(sb.getAttribute("data-debounce")) || 300); } }
+      if (sb.hasAttribute("data-debounce")) { clearTimeout(t._dsSearch); var dbr = sb.getAttribute("data-debounce"), dbn = dbr === "" ? 300 : Number(dbr); if (isNaN(dbn)) dbn = 300;   // 0 은 기다리지 않음(React debounce={0} 와 같다) — 빈 값만 기본 300
+        if (dbn <= 0) searchFire(sb, t, "input"); else t._dsSearch = setTimeout(function () { searchFire(sb, t, "input"); }, dbn); } }
   });
   window.addEventListener("scroll", closeFloats, true);
   window.addEventListener("resize", closeFloats);
@@ -1452,7 +1461,7 @@
     if (!b || !d || e.ctrlKey || e.metaKey || e.altKey) return;
     e.preventDefault();
     var g = b.parentNode, live = $$(":scope > button:not([disabled])", g), to = live[(live.indexOf(b) + d + live.length) % live.length];
-    if (to !== b) { activate(g, "button", to, "aria-checked"); to.focus(); fire(to, "ds:select"); }
+    if (to !== b) { activate(g, "button", to, "aria-checked"); to.focus(); fire(to, "ds:select", { value: sbValue(to) }); }
   });
   /* 표 밀도 전환(2026-11-11) — .select-btn[data-density-for="표 id"] 의 버튼 data-density(compact · default · relaxed)로 표의 클래스를 바꾼다. 고른 밀도의 기억은 제품 몫 */
   doc.addEventListener("ds:select", function (e) {
@@ -1503,7 +1512,7 @@
   doc.addEventListener("input", function (e) { var t = e.target; if (!t.matches || !t.matches(".number-field input")) return; numSync(t); if (closest(t, ".field").classList.contains("error")) vShow(t, vMessage(t)); });
   doc.addEventListener("focusout", function (e) { var t = e.target; if (t.matches && t.matches(".number-field input") && (t.value || t.validity.badInput)) vShow(t, vMessage(t)); });
 
-  /* ---------- Time Picker — .timepicker(2026-11-13, 외부 컴포넌트 Time Picker 참고 — 상용이라 구조 · 동작만, 코드는 옮기지 않음) ----------
+  /* ---------- Time Picker — .timepicker(2026-11-13) ----------
      입력칸 + 열 목록(시 · 분 · 초). 24시간제 HH:mm, data-seconds 면 HH:mm:ss. 열에서 고르면 바로 값이 된다(사람의 결정 — 적용 버튼 없음).
      data-step 은 분 열의 간격이고 입력은 받는다. data-min · data-max 밖 칸은 고를 수 없고, 입력은 받아서 오류로 알린다(Number Input 과 같은 방식).
      문구는 Date Picker 의 시각 문구(invalidTime · timeSubject)와 범위 문구(min · max)를 같이 쓴다 — data-messages 로 바꾼다 */
@@ -1801,7 +1810,7 @@
      WAI-ARIA tree 패턴. 포커스는 li 하나만 Tab 칸(roving tabindex). 탐색형은 Enter · Space · 클릭으로 고르고(포커스가 옮겨도 고르지 않는다 — 고를 때마다 오른쪽 내용을 다시 부르지 않게),
      체크박스형(.tree.checkable)은 하위를 따라 켜고 일부만 켜지면 상위가 mixed. 끈 항목은 펼칠 수는 있고 고르거나 켤 수 없다.
      data-lazy 항목은 펼칠 때 ds:tree-load {value, resolve(items), reject(msg)} — 조회는 제품, 불러오는 동안 셰브론 자리에 스피너 · aria-busy, 실패하면 접고 줄에 알린다(다시 펼치면 다시 부름) */
-  var TREE_LABEL = { failed: "불러오지 못했습니다", failedStatus: "{label} 하위 항목을 불러오지 못했습니다. 다시 펼치면 다시 불러옵니다.", results: "결과 {n}개", empty: "검색 결과가 없습니다." };
+  var TREE_LABEL = { failed: "불러오지 못했습니다. 다시 펼치세요", failedStatus: "{label} 하위 항목을 불러오지 못했습니다. 다시 펼치면 다시 불러옵니다.", results: "결과 {n}개", empty: "검색 결과가 없습니다." };
   function trL(tree, k) { var h = closest(tree, ".tree-view") || tree, raw = h.getAttribute("data-labels") || tree.getAttribute("data-labels"), o = {}; if (raw) { try { o = JSON.parse(raw) || {}; } catch (e) { o = {}; } } return o[k] || TREE_LABEL[k]; }
   function trEsc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); }
   function trGroup(li) { return $(":scope > .tree-group", li); }
@@ -2105,5 +2114,5 @@
 
   /* 맨 끝에서 부른다 — 뒤에 선언한 문구 상수(NF_LABEL 등)가 init 때 아직 undefined 이지 않게 */
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
-  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, notify: { add: nfApiAdd, sync: function (el) { var h = closest(el, ".notify") || el; nfFilter(h); return nfSync(h); } }, version: "0.5" };
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, notify: { add: nfApiAdd, sync: function (el) { var h = closest(el, ".notify") || el; nfFilter(h); return nfSync(h); } }, version: "__DS_VERSION__" };
 })();

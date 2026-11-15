@@ -16,5 +16,5 @@ const COLUMNS: DataTableColumn<Log>[] = [
 ];
 
 export default function Example() {
-  return <DataTable compact columns={COLUMNS} rows={ROWS} rowKey={(r) => String(r.id)} rowProps={() => ({ log: true })} />;
+  return <DataTable density="compact" columns={COLUMNS} rows={ROWS} rowKey={(r) => String(r.id)} rowProps={() => ({ log: true })} />;
 }

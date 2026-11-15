@@ -89,7 +89,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
   ref,
 ) {
   const unit: DateUnit = unitProp ?? (mode === "month" ? "month" : "day"), rangeMode = mode === "range";
-  useEffect(() => { if (mode === "month") console.warn('[ds-react] Calendar mode="month" 는 unit="month" 로 바뀌었습니다 (MIGRATION.md).'); }, [mode]);
+  useEffect(() => { if (process.env.NODE_ENV !== "production" && mode === "month") console.warn('[ds-react] Calendar mode="month" 는 unit="month" 로 바뀌었습니다 (MIGRATION.md).'); }, [mode]);
   const L = labelsFor(locale, labels);
   const [view, setView] = useControllable<CalendarView>({ value: viewProp, defaultValue: defaultView ?? baseView(unit), onChange: onViewChange });
   const [focusKey, setFocusKey] = useState<string | null>(null);

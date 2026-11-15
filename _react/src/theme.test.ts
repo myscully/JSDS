@@ -30,10 +30,10 @@ describe("applyAccent", () => {
     expect(document.documentElement.dataset.accent).toBe("#00AAB6");
   });
 
-  /* 파생 규칙이 기준 시스템의 blue 램프에서 나왔으므로 그 램프를 재현해야 한다.
-     55 단계만 초록 채널이 1 어긋난다(#1A76FF vs #1A75FF) — 참조 값이 HSL 곡선에서 살짝 벗어나 있다.
+  /* 파생 규칙이 기준 토큰의 blue 램프에서 나왔으므로 그 램프를 재현해야 한다.
+     55 단계만 초록 채널이 1 어긋난다(#1A76FF vs #1A75FF) — 기준 값이 HSL 곡선에서 살짝 벗어나 있다.
      기본 제품은 이 함수를 타지 않고 CSS 가 --blue-* 를 직접 쓰므로 화면에는 영향이 없다 */
-  it("#0066FF 를 넣으면 기준 시스템 blue 램프를 1/255 안에서 재현한다", () => {
+  it("#0066FF 를 넣으면 기준 토큰 blue 램프를 1/255 안에서 재현한다", () => {
     const sc = accentScale("#0066FF");
     const want = ["#0054D1", "#005EEB", "#0066FF", "#1A75FF", "#3385FF"];
     const got = [sc[40], sc[45], sc[50], sc[55], sc[60]];
@@ -60,7 +60,7 @@ describe("applyAccent", () => {
   it("isLightAccent 가 규격에 못 미치는 제품 색을 가려낸다", () => {
     expect(isLightAccent("#00AD7B")).toBe(true);   // 흰 글자 2.89 — 쓸 수 없다
     expect(isLightAccent("#008760")).toBe(false);  // 4.53 — 같은 색상에서 통과하는 가장 밝은 값
-    expect(isLightAccent("#0066FF")).toBe(false);  // 4.83 — 기준 시스템의 기본색
+    expect(isLightAccent("#0066FF")).toBe(false);  // 4.83 — 기준 토큰의 기본색
   });
 
   it("accentScale 은 50 에 입력 HEX 를 그대로 둔다", () => {

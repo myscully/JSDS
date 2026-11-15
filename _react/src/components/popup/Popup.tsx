@@ -97,7 +97,7 @@ const PopupLayer = forwardRef<HTMLDivElement, Omit<PopupProps, "open" | "contain
   const mark = () => { dirty.current = true; };
   useFocusTrap(inner, true, initialFocus);
   useEffect(() => {
-    if (openPopups > 0) console.warn("[ds-react] 모달 위에 모달을 띄우지 않습니다 — 열려 있는 Popup 을 먼저 닫으세요.");
+    if (process.env.NODE_ENV !== "production" && openPopups > 0) console.warn("[ds-react] 모달 위에 모달을 띄우지 않습니다 — 열려 있는 Popup 을 먼저 닫으세요.");
     openPopups++;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";

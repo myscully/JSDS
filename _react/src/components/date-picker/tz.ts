@@ -14,7 +14,7 @@ export function resolveZone(tz: string | undefined): string | undefined {
   if (!tz) return undefined;
   try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return tz; }
   catch {
-    if (!warned.has(tz)) { warned.add(tz); console.warn(`[ds-react] DatePicker timezone="${tz}" 는 IANA 시간대 이름이 아닙니다 — 환경 시간대로 계산합니다.`); }
+    if (process.env.NODE_ENV !== "production" && !warned.has(tz)) { warned.add(tz); console.warn(`[ds-react] DatePicker timezone="${tz}" 는 IANA 시간대 이름이 아닙니다 — 환경 시간대로 계산합니다.`); }
     return undefined;
   }
 }

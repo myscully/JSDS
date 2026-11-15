@@ -4,7 +4,7 @@
 > (0.8.0 에서 CSS 변수 이름이 전부 바뀌었습니다 — 의미 층째 교체.)
 > 마크업과 props 는 그대로입니다. 전환표는 [MIGRATION.md](./MIGRATION.md) 에 있습니다.
 
-지란지교시큐리티 Design System 의 React 컴포넌트 패키지입니다. 사이트(제품가이드)의 30개 컴포넌트와 패턴 래퍼를 **같은 클래스 마크업**으로 렌더링하는 실제 React 컴포넌트로 구현했습니다. 스타일은 `dist/style.css` 하나(토큰 + 컴포넌트 CSS, 사이트 크롬 제외)이고, 각 컴포넌트 페이지의 React 탭 코드가 곧 사용법입니다.
+지란지교시큐리티 Design System 의 React 컴포넌트 패키지입니다. 사이트(제품가이드)의 모든 컴포넌트와 패턴 래퍼를 **같은 클래스 마크업**으로 렌더링하는 실제 React 컴포넌트로 구현했습니다. 스타일은 `dist/style.css` 하나(토큰 + 컴포넌트 CSS, 사이트 크롬 제외)이고, 각 컴포넌트 페이지의 React 탭 코드가 곧 사용법입니다.
 
 ```bash
 npm i @jiran/ds-react
@@ -35,13 +35,13 @@ createRoot(document.getElementById("root")!).render(
 |---|---|
 | `src/components/<page>/` | 컴포넌트 (사이트 페이지 1:1). `forwardRef` · `className` 병합 · 나머지 props 전달 |
 | `src/patterns/` | 패턴 레이아웃 래퍼 (Stack · Toolbar · Form · Empty · Notes · Settings …) |
-| `src/icons/` | `Icon` + 생성 파일 `icons.data.ts` (`_build/icons.js` 의 36개 Tabler 아이콘 — 사이트 Foundations › Icons 갤러리와 동일) |
+| `src/icons/` | `Icon` + 생성 파일 `icons.data.ts` (`_build/icons.js` 의 Tabler 아이콘 목록 — 사이트 Foundations › Icons 갤러리와 동일) |
 | `src/utils/` | `cx` · `useControllable` · `useId` · `Portal` · `useOutsideClick` · `useEscape` · `useFocusTrap` |
 | `src/theme.ts` | `PRODUCT_COLORS` · `applyProductColor` · `accentScale` · `applyAccent`(팔레트 밖 색) · `setTheme` |
-| `examples/<sec>/<page>/<id>.tsx` | **사이트 React 탭에 그대로 표시되는 예제**(118개). 테스트가 렌더해 사이트 HTML 과 구조를 비교 |
+| `examples/<sec>/<page>/<id>.tsx` | **사이트 React 탭에 그대로 표시되는 예제**. 테스트가 렌더해 사이트 HTML 과 구조를 비교 |
 | `tests/` | `site-consistency` (태그·클래스·상태 속성 비교) · `examples-coverage` |
 | `scripts/` | `gen-icons` · `sync-css`(style.css 합성) · `check-version` · `visual-compare` |
-| `demo/` | Vite 데모 — 전체 예제 + 테마/Accent 토글 |
+| `demo/` | Vite 데모 — 전체 예제 + 테마 · 제품 색 토글 |
 
 
 ## 탐색형 차트 (`@jiran/ds-react/chart`)

@@ -9,7 +9,7 @@ export type StepsLayout = "horizontal" | "label-below" | "vertical";
 
 const warned = new Set<string>();
 const warnOnce = (key: string, msg: string) => { if (process.env.NODE_ENV !== "production" && !warned.has(key)) { warned.add(key); console.warn(msg); } };
-const useCountWarning = (n: number) => useEffect(() => { if (n < 3 || n > 6) console.warn(`[ds-react] Steps 는 3~6단계입니다(지금 ${n}단계).`); }, [n]);
+const useCountWarning = (n: number) => useEffect(() => { if (process.env.NODE_ENV !== "production" && (n < 3 || n > 6)) console.warn(`[ds-react] Steps 는 3~6단계입니다(지금 ${n}단계).`); }, [n]);
 
 /* 단계 목록 — Steps(표시)와 Stepper(마법사)가 같이 쓴다. 사이트 ds.js 의 spPaint 와 같은 모양:
    완료 = 체크 + 숨긴 '(완료)', 현재 = aria-current, 누를 수 있는 단계만 .step-btn(현재는 버튼이 아니다) */

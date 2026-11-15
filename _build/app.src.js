@@ -9,7 +9,7 @@
   /* Accent 스케일 */
   function hexToHsl(hex) { const n = parseInt(hex.slice(1), 16); const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255; const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0; const l = (mx + mn) / 2; if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); switch (mx) { case r: h = (g - b) / d + (g < b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; default: h = (r - g) / d + 4; } h /= 6; } return [h * 360, s * 100, l * 100]; }
   function hslToHex(h, s, l) { s /= 100; l /= 100; const k = n => (n + h / 30) % 12; const a = s * Math.min(l, 1 - l); const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return "#" + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, "0")).join("").toUpperCase(); }
-  /* 제품 램프 — 기준 시스템의 blue 램프에서 읽어 낸 규칙이다.
+  /* 제품 램프 — 기준 토큰의 blue 램프에서 읽어 낸 규칙이다.
      blue 는 단계 번호가 곧 HSL 명도 %다(40→41.0 · 45→46.1 · 50→50.0 · 55→55.1 · 60→60.0, 색조·채도 고정).
      그래서 제품 HEX 를 50 에 놓고 L 만 그 간격대로 옮기면, 제품이 #0066FF 일 때 blue 가 정확히 재현된다.
      다섯 단계뿐인 이유: 시멘틱이 brand 를 40·45·50·55·60 에서만 집는다 */
@@ -31,7 +31,7 @@
   /* 제품 색 제약 — Brand 면 위 글자는 늘 흰색이므로, 제품 색이 흰 글자를 받칠 수 있어야 한다.
      종전에는 밝은 제품에 맞춰 글자를 어둡게 뒤집었지만(data-accent-light) 그 적응을 걷어냈다:
      면을 어둡게 내려 흰 글자를 세우는 길은 다크에서 버튼이 캔버스에 묻혀(분리 1.11) 막혀 있고,
-     글자를 뒤집으면 기준 시스템에 없는 분기가 계속 남는다. 그래서 적응 대신 제약으로 바꿨다.
+     글자를 뒤집으면 기준 토큰에 없는 분기가 계속 남는다. 그래서 적응 대신 제약으로 바꿨다.
      기준은 라이트의 기준 단계(brand-50 = 제품 HEX)다 — hover·pressed 는 더 어두워 자동으로 통과한다.
      빌드도 같은 검사를 한다(verify.js) — 여기 경고는 런타임에 제품 색을 바꿔 넣는 경우를 위한 것이다.
      팔레트에서 exception 으로 선언한 색(주황 — 사람의 결정)은 알리지 않는다.

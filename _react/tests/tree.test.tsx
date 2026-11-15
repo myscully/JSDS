@@ -141,7 +141,7 @@ describe("Tree — lazy", () => {
     await act(async () => { fireEvent.click(toggle("부산 IDC")); });
     expect(it_("부산 IDC").getAttribute("aria-expanded")).toBe("false");
     expect(it_("부산 IDC").hasAttribute("data-lazy")).toBe(true);
-    expect(row("부산 IDC").querySelector(".tree-meta.error")?.textContent).toBe("불러오지 못했습니다");
+    expect(row("부산 IDC").querySelector(".tree-meta.error")?.textContent).toBe("불러오지 못했습니다. 다시 펼치세요");
     expect(await live()).toBe("부산 IDC 하위 항목을 불러오지 못했습니다. 다시 펼치면 다시 불러옵니다.");
     fail = false;
     await act(async () => { fireEvent.click(toggle("부산 IDC")); });

@@ -25,7 +25,7 @@ export interface TreeNode {
   lazy?: boolean;
   disabled?: boolean;
 }
-export const TREE_LABELS = { failed: "불러오지 못했습니다", failedStatus: "{label} 하위 항목을 불러오지 못했습니다. 다시 펼치면 다시 불러옵니다.", results: "결과 {n}개", empty: "검색 결과가 없습니다.", search: "검색" };
+export const TREE_LABELS = { failed: "불러오지 못했습니다. 다시 펼치세요", failedStatus: "{label} 하위 항목을 불러오지 못했습니다. 다시 펼치면 다시 불러옵니다.", results: "결과 {n}개", empty: "검색 결과가 없습니다.", search: "검색" };
 export type TreeLabels = typeof TREE_LABELS;
 type Check = "true" | "false" | "mixed";
 

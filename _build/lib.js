@@ -229,6 +229,12 @@
   /* Date Picker(.datepicker · 단독 .calendar)가 있는 마크업인가 — build 가 dayjs 를 실을 페이지를 고르고 verify 가 짝을 본다 */
   function hasDatePicker(html) { return /\sclass="(?:[^"]*\s)?(?:datepicker|calendar)(?:\s[^"]*)?"/.test(html); }
 
-  const api = { esc, dedent, toPx, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  /* 런타임 · 지역 CSS 변수 — 루트에 선언하지 않고 ds.js · React · 마크업 · 컴포넌트 규칙이 그 자리에서 넣는다. verify 와 패키지 sync-css 가 이 목록 하나를 쓴다.
+     --checker-bg · --cols* · --p: 문서 셸 · 격자 · 진행 막대 비율. --dp-top · --dp-left · --tp-top · --tp-left: Date Picker 달력 · Time Picker 열 목록 자리(열 때 잼).
+     --a: 정적 도넛 경계 구분선 각도. --d1~--d5: 정적 도넛 조각의 누적 비율. --float-*: 스크롤 영역 안에서 화면 기준으로 띄운 메뉴 · Tooltip 의 자리 · 폭.
+     --ds-delay: Loading 지연 시간. --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면. --avatar-ring: Avatar Group 링(놓인 면). --nf-dx: 알림 패널을 화면 안으로 미는 거리 */
+  const LOCAL_VARS = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5"];
+
+  const api = { LOCAL_VARS, esc, dedent, toPx, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);

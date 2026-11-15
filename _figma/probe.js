@@ -364,7 +364,7 @@ for (const p of figma.root.children) {
     if (/\$surface\//.test(f)) components.textOnSurface.push(t.id);   // 글자에 면 토큰 — 라이트는 같아 보여도 다크에서 갈린다
   }
   /* 컴포넌트가 써서는 안 되는 변수를 물고 있는 노드 — opaque 보더와 옛 변수 층(color/* · site/*)이 여기 걸린다.
-     opaque 토큰 자체는 저장소에 있다(참조 토큰). 대개 컴포넌트 CSS 가 쓰지 않으므로, 토큰 견본을 늘어놓는
+     opaque 토큰 자체는 저장소에 있다(기준 토큰). 대개 컴포넌트 CSS 가 쓰지 않으므로, 토큰 견본을 늘어놓는
      1 Theme 밖의 것은 모두 모아 보낸다 — 견본을 다른 토큰으로 묶으면 토큰 문서가 거짓이 된다.
      저장소가 실제로 소비하는 opaque(k42: Medium 심각도 lime-opaque)는 audit 이 CSS · ds-chart 에서 세어 허용한다 */
   const swatchPage = p.name === "1 Theme";

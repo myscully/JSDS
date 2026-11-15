@@ -88,7 +88,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
         const scope = ".card, form, [role=dialog], .popup";
         pv.querySelectorAll(scope).forEach((c) => { const n = [...c.querySelectorAll(".btn.solid.primary")].filter((x) => x.closest(scope) === c).length; if (n > 1) out.primary.push(`${tag(c)} ×${n}`); });
         pv.querySelectorAll(".card .card .card").forEach((c) => out.nest.push(tag(c)));
-        pv.querySelectorAll("a:not(.btn)").forEach((a) => { if (a.closest("nav, .breadcrumb, .tabs, .pagination, .menu, .lnb, .sidebar")) return; const s = getComputedStyle(a); out.links.push(`${s.color}|${s.textDecorationLine}`); });
+        pv.querySelectorAll("a:not(.btn)").forEach((a) => { if (a.closest("nav, .breadcrumb, .tabs, .pagination, .menu, .sidebar")) return; const s = getComputedStyle(a); out.links.push(`${s.color}|${s.textDecorationLine}`); });
       });
       return out;
     }, { hosts: BUTTON_HOSTS, groups: BTN_GROUPS });

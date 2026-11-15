@@ -6,7 +6,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   bordered?: boolean;
   /** outline(1px line/neutral/secondary 보더, 기본) · flat(보더 색 없음 — 주변에 배경색 background/neutral/secondary 이 있을 때만. 흰 바탕 금지) */
   variant?: "outline" | "flat";
-  /** md(padding 24 · gap 12 · 제목 Title/1 16/24 600, 기본) · sm(padding 16 · gap 8 · 제목 Label/1 14/20 600 — 밀도 높은 그리드) */
+  /** md(padding 24 · gap 12 · 제목 Body 1 Normal 16/24 600, 기본) · sm(padding 16 · gap 8 · 제목 Label/1 14/20 600 — 밀도 높은 그리드) */
   size?: "sm" | "md";
   /** @deprecated sm 의 옛 이름 — size="sm" 을 쓰세요(MIGRATION.md). 값은 같습니다 */
   compact?: boolean;

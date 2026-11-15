@@ -1,4 +1,4 @@
-/* Steps 마법사(2026-11-13, 외부 컴포넌트 Stepper 참고 — 구조 · 동작만) — 배치 셋의 기하, 브랜드 색(라이트 · 다크), 순서대로 · 자유 이동 흐름, 폼 검사, Enter, ds:step, DS.stepper.go.
+/* Steps 마법사(2026-11-13) — 배치 셋의 기하, 브랜드 색(라이트 · 다크), 순서대로 · 자유 이동 흐름, 폼 검사, Enter, ds:step, DS.stepper.go.
    behave.js 가 부른다 */
 module.exports = async function stepper({ page, ok, go }) {
   const wait = (ms) => page.waitForTimeout(ms);

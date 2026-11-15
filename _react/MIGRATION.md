@@ -1,6 +1,7 @@
-# 마이그레이션 — 0.6.x → 0.8.0
+# 마이그레이션 — 0.6.x → 0.9.0
 
 **깨지는 변경입니다.** CSS 변수 이름이 전부 바뀌었고(0.7.0), 제품 색에 제약이 생겼습니다(0.8.0).
+0.9.0 은 컴포넌트 정비 묶음입니다 — 바뀐 props · 클래스 · 모양은 아래 각 절에 컴포넌트별로 있습니다.
 
 컬러 토큰을 의미 층째 값·이름까지 교체했습니다.
 `dist/style.css` 의 토큰 이름은 이 패키지의 공개 API 입니다 — 제품 CSS 에서 `var(--text-primary)` 처럼
@@ -69,14 +70,14 @@ applyAccent("#0066FF");   // --prod-40 · 45 · 50 · 55 · 60 (50 = 입력값)
 ```
 
 `accentScale()` 의 반환 타입 `AccentScale` 이 `Record<40|45|50|55|60, string>` 으로 좁아집니다.
-단계를 직접 읽고 있었다면 함께 고쳐야 합니다. 제품 컬러를 지정하지 않으면 기준 시스템의 Blue 램프가 기본값입니다.
+단계를 직접 읽고 있었다면 함께 고쳐야 합니다. 제품 컬러를 지정하지 않으면 기준 토큰의 Blue 램프가 기본값입니다.
 
 #### 제품 색에 제약이 생깁니다 — `data-accent-light` 가 사라집니다
 
-Brand 면 위의 글자는 **늘 흰색**입니다(기준 시스템에 면 위 글자 역할이 없습니다).
+Brand 면 위의 글자는 **늘 흰색**입니다(기준 토큰에 면 위 글자 역할이 없습니다).
 종전에는 제품 색이 밝으면 `data-accent-light` 를 켜서 글자를 어둡게 뒤집었는데, 그 적응을 걷어냈습니다 —
 면을 어둡게 내려 흰 글자를 세우는 길은 다크에서 버튼이 캔버스에 묻혀(분리 1.11) 막혀 있고,
-적응을 두면 기준 시스템에 없는 분기가 계속 남기 때문입니다.
+적응을 두면 기준 토큰에 없는 분기가 계속 남기 때문입니다.
 
 **제품 색 위에서 흰 글자가 4.5 를 넘어야 합니다.** 기준은 라이트의 기준 단계(제품 HEX 자체)입니다 —
 hover·pressed 는 더 어두워 자동으로 통과합니다.
@@ -89,7 +90,7 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 
 - `applyAccent()` 는 더 이상 `data-accent-light` 를 설정하지 않습니다. 그 속성에 CSS 를 걸어 두었다면 지우세요.
 - 규격에 못 미치는 색을 넘기면 콘솔에 경고합니다. 밝은 브랜드 색을 가진 제품은 **어두운 변형**을 만들어 넣어야 합니다.
-- 다크에서 rest 가 3.2~3.5 인 것은 기준 시스템 값 그대로입니다(다크 면이 한 단계 밝은 brand-60 이고 그 위에 흰 글자).
+- 다크에서 rest 가 3.2~3.5 인 것은 기준 토큰 값 그대로입니다(다크 면이 한 단계 밝은 brand-60 이고 그 위에 흰 글자).
   이 제약과 무관하며, 모든 제품에 똑같이 적용됩니다.
 
 ### 상태색
@@ -103,7 +104,7 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 | `--muted-surface` | `--surface-neutral-strong` |
 | `--muted-graphic` | `--foreground-inactive-primary` |
 
-**솔리드 상태 면과 `-on` 이 사라졌습니다.** 기준 시스템의 상태 면은 8%·12% 틴트뿐이고,
+**솔리드 상태 면과 `-on` 이 사라졌습니다.** 기준 토큰의 상태 면은 8%·12% 틴트뿐이고,
 면 위 글자 역할이 없습니다. 채운 상태 태그를 쓰고 있었다면 틴트 + 테두리로 바뀝니다 —
 태그 라벨은 `--foreground-neutral-primary`(중립)이고 색은 점(`::before`)과 테두리가 나릅니다.
 
@@ -121,7 +122,7 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 | `--brand-surface` | `--company-mark` |
 | `--brand-fill` | `--company-mark-subtle` |
 
-기준 시스템의 `brand` 는 **제품 색**입니다. 지란지교 오렌지는 토큰 트리 밖으로 옮겨
+기준 토큰의 `brand` 는 **제품 색**입니다. 지란지교 오렌지는 토큰 트리 밖으로 옮겨
 로고·헤더 마크 전용으로 남겼습니다. `--brand-*` 를 회사색으로 쓰고 있었다면 반드시 바꿔야 합니다 —
 이름은 그대로 있지만 **뜻이 반대**가 됩니다.
 
@@ -155,9 +156,33 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 나머지 이름(`--neutral-950` 등)은 선언이 없어져 상속색으로 떨어지므로 눈에 띄지만,
 이 다섯은 눈에 띄지 않습니다. 제품 CSS 에서 `-50` 으로 끝나는 프리미티브를 먼저 검색하세요.
 
+## 1.0 정리 목록 — 아직 받는 옛 이름
+
+아래 이름은 지금도 받아서 새 방식으로 그리지만 **1.0 에서 지웁니다.** 개발 모드에서 경고가 한 번 찍히는 것은 '경고' 칸에 적었습니다.
+제품 코드에서 먼저 새 이름으로 바꾸세요.
+
+| 옛 이름 | 새 이름 | 경고 |
+| --- | --- | --- |
+| `Button icon` · `leading` · `trailing` | `iconOnly` · `iconLeft` · `iconRight` | 있음 |
+| `Accordion flat` · `AccordionGroup flat` | `variant="flat"` | 있음 |
+| `Card compact` | `size="sm"` | 있음 |
+| `ChartCard extra` | `sub` | 있음 |
+| `Kpi deltaDir` 만 주기 | `deltaTone`(색) + `deltaDir`(방향) | 있음 |
+| `Tag variant="plain"` | 기본(subtle) | 있음 |
+| `SevCell` | `Tag` 하나 | 있음 |
+| `TextField mono` | 없음 — 고정폭 글자는 Code 에만 | 있음 |
+| `DatePicker mode="range"` · `mode="month"` · `Calendar mode="month"` | `DateRangePicker` · `unit="month"` | 있음 |
+| `DatePicker allowTyping` · `triggerStyle` · `displayText` | 없음 — 늘 입력형 | 있음 |
+| `MenuItem selected`(동작 메뉴) | Select · SelectButton | 있음 |
+| `Steps vertical` | `layout="vertical"` | 있음 |
+| `Table compact` · `DataTable compact` | `density="compact"` | 없음 |
+| `Table zebra` · `DataTable zebra` | `rowStyle="zebra"` | 없음 |
+
+사이트 CSS 에도 호환용 클래스가 셋 남아 있습니다 — `.card.compact`(= `.sm`), `.card.bordered` · `.card.bordered.on`(기본 카드와 같음). 1.0 에서 지웁니다.
+
 ## 접근성 — 알고 써야 할 것
 
-기준 시스템의 값을 그대로 쓰기로 한 결정의 대가가 있습니다. **라이트 모드에서
+기준 토큰의 값을 그대로 쓰기로 한 결정의 대가가 있습니다. **라이트 모드에서
 상태색 글자·아이콘이 WCAG AA 아래입니다** — 주의 2.24 · 긍정 2.46 · 부정 3.44.
 이 값들은 빌드의 대비 게이트가 `advisory` 로 매 빌드 보고합니다(숨기지 않습니다).
 
@@ -580,7 +605,7 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
 
 ## Steps 마법사 (2026-11-13)
 
-외부 컴포넌트 Stepper 의 구조 · 동작을 참고해 Steps 를 다시 짰습니다(외부 컴포넌트 PRO 는 상용이라 코드 · 클래스 이름 · 아이콘은 옮기지 않음).
+Steps 를 다시 짰습니다.
 
 - **모양이 바뀌었습니다** — 원 24 → **32**, 체크 12 → **16**, 라벨 12 → **14**(Label 1/Normal, 현재 단계 600 · 완료 secondary · 아직 tertiary).
   완료 원은 진한 초록(`--foreground-positive-primary`) → **제품 색 면(`--surface-brand-primary`) + 흰 체크(`--brand-label`)**, 현재 원은 **제품 색 테두리 + `--surface-brand-subtle` 면 + `--foreground-brand-primary` 숫자**, 아직인 단계는 회색 테두리 원입니다.
@@ -609,7 +634,7 @@ Card 정의를 다시 내렸습니다. 유형은 기본 정보 · 상태 · 목�
   `<Form validate>` 에 낍니다 — 빈 필수는 공통 문구, 그 밖은 시각 문구(`setCustomValidity` 로 넘기고 `validationMessage` 가 읽습니다). 순수 함수 `checkTime` 을 함께 냅니다.
   HTML `.field.timepicker[data-seconds][data-step][data-min][data-max] > label + .affix > input + button.tp-btn` — 열 목록은 ds.js 가 열 때 그리고 `ds:time {value, text, validity}` 를 냅니다.
 - `pasteText` 가 시각만 쓰는 단위에서 첫 조각(시)도 두 자리로 채웁니다 — `2:0` 이 `20:0` 이 되던 것을 `02:00` 으로(Date Picker 시각 칸 붙여넣기도 같음).
-- 상태 틴트(positive · cautionary · negative · accent)가 12 → 8% 로 옅어졌습니다(참조값). negative 다음 단계도 함께 — 라이트 8 · 12 · 16%, 다크 8 · 16 · 22%. Tag 중립 면 = `--surface-neutral-tertiary`, Info = `--surface-neutral-secondary`, outline Tag 테두리 = 그 톤의 선 토큰.
+- 상태 틴트(positive · cautionary · negative · accent)가 12 → 8% 로 옅어졌습니다(기준 값). negative 다음 단계도 함께 — 라이트 8 · 12 · 16%, 다크 8 · 16 · 22%. Tag 중립 면 = `--surface-neutral-tertiary`, Info = `--surface-neutral-secondary`, outline Tag 테두리 = 그 톤의 선 토큰.
 
 ## Date Picker 시각 칸 = Time Picker (2026-11-13)
 

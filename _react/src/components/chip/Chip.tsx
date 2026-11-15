@@ -13,7 +13,7 @@ export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,
   selected?: boolean;
   defaultSelected?: boolean;
   onSelectedChange?: (selected: boolean) => void;
-  /** 있으면 Input Chip(span + 삭제 x) 으로 렌더 */
+  /** 있으면 Input Chip(span + 제거 x) 으로 렌더 */
   onRemove?: () => void;
   removeLabel?: string;
   /** 라벨 앞 아이콘 */
@@ -48,7 +48,7 @@ function warnFixed() {
   console.warn("[ds-react] Chip 의 color=\"neutral\" · selected 는 고를 수 있는 칩에만 씁니다 — onRemove · action 칩은 선택 상태가 없고 색은 중립이라 무시합니다(2026-11-13).");
 }
 
-/** 필터 조건(토글) 또는 입력값(삭제 가능) 캡슐. 상태 표시는 Tag */
+/** 필터 조건(토글) 또는 입력값(제거 가능) 캡슐. 상태 표시는 Tag */
 export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
   { selected, defaultSelected = false, onSelectedChange, onRemove, removeLabel = LABELS.remove, icon, size = "md", variant = "outline", color = "brand", action, className, children, onClick, disabled, ...rest },
   ref,

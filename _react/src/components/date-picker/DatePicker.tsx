@@ -126,7 +126,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   const cur = controlled ? pair! : inner;
   /* 달력은 달력 날짜(로컬 연 · 월 · 일)로 일한다 — 바깥 Date(순간)는 기준 시간대에서 무슨 날인지로 바꾼다 */
   const tu: TextUnit = time && unit === "day" ? (time === "seconds" ? "second" : "minute") : unit, isTime = tu === "minute" || tu === "second";
-  useEffect(() => { if (time && unit !== "day") console.warn(`[ds-react] DatePicker time 은 일 단위에만 씁니다 — unit="${unit}" 에서는 무시합니다.`); }, [time, unit]);
+  useEffect(() => { if (process.env.NODE_ENV !== "production" && time && unit !== "day") console.warn(`[ds-react] DatePicker time 은 일 단위에만 씁니다 — unit="${unit}" 에서는 무시합니다.`); }, [time, unit]);
   const cd = (d: Date | null | undefined) => (isValidDate(d) ? (isTime ? clockDateOf(d, tz) : calendarDateOf(d, tz)) : null);
   const todayD = today ? calendarDateOf(today, tz) : todayIn(tz);
   const minD = cd(min);
@@ -134,7 +134,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   if (isTime && maxD && !maxD.getHours() && !maxD.getMinutes() && !maxD.getSeconds()) maxD = new Date(maxD.getFullYear(), maxD.getMonth(), maxD.getDate(), 23, 59, 59);   // 사이트 data-max 의 날짜만 적은 값과 같다 — 그 하루 전체
   const textOfDays = (a: Date | null, b: Date | null) => (!a ? "" : range ? (b ? `${showOf(a, tu)} ~ ${showOf(b, tu)}` : "") : showOf(a, tu));
   const maxDays = range && unit === "day" && maxDaysProp && maxDaysProp > 0 ? maxDaysProp : undefined;
-  useEffect(() => { if (maxDaysProp && (!range || unit !== "day")) console.warn("[ds-react] maxDays 는 일 단위 기간(DateRangePicker)에만 씁니다 — 무시합니다."); }, [maxDaysProp, range, unit]);
+  useEffect(() => { if (process.env.NODE_ENV !== "production" && maxDaysProp && (!range || unit !== "day")) console.warn("[ds-react] maxDays 는 일 단위 기간(DateRangePicker)에만 씁니다 — 무시합니다."); }, [maxDaysProp, range, unit]);
   const check = (t: string) => checkText(t, { unit: tu, range, min: minD, max: maxD, maxDays, messages: msg });
   /* 달력 아래 시각 칸 — 친 글자는 적용할 때 날짜와 합쳐 필드와 같은 검사를 지난다(사람의 결정 2026-11-10 — 처음 값 00:00 · 기간 끝 23:59) */
   type Clock = { a: string; b: string };
@@ -393,6 +393,7 @@ export const DatePicker = forwardRef<HTMLDivElement, DatePickerProps>(function D
   ref,
 ) {
   useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
     if (mode === "range") console.warn('[ds-react] DatePicker mode="range" 는 DateRangePicker 로 바뀌었습니다 (MIGRATION.md).');
     if (mode === "month") console.warn('[ds-react] DatePicker mode="month" 는 unit="month" 로 바뀌었습니다 (MIGRATION.md).');
     if (allowTyping !== undefined) console.warn("[ds-react] DatePicker allowTyping 은 없어졌습니다 — 늘 입력형입니다 (MIGRATION.md).");

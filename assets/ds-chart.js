@@ -270,7 +270,7 @@
         options: { layout: { padding: 2 } } };
     },
   };
-  /* 가운데 글자 — 도넛은 CSS .donut::after 와 같은 Title/1 16/600(사람의 결정 2026-11-04), 게이지는 반원 안 Title 2 28/700 + 그 위 설명 12(Label 2) tertiary.
+  /* 가운데 글자 — 도넛은 CSS .donut::after 와 같은 Body 1 Normal 16/600, 게이지는 반원 안 Title 2 28/700 + 그 위 설명 12(Label 2) tertiary.
      크기는 화면 폭 단계를 따른다 */
   var CENTER_FONT = { weight: 600, size: 16 };
   var GAUGE_FONT = { weight: 700, size: 28, caption: 12 };

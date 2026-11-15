@@ -1,5 +1,5 @@
 /* Table · Data Table 최적화(사람의 결정 2026-11-11) — 테두리 없는 표 · 밀도 세 단계 · 행 스타일 · 하위 텍스트 · 첫 열 고정 · 합계 행. behave.js 가 부른다.
-   참고: 외부 글(외부 글 번역) — 행 40 · 48 · 56, 셀 좌우 16 이상, 숫자 고정폭 */
+   기준: 행 40 · 48 · 56, 셀 좌우 16 이상, 숫자 고정폭 */
 module.exports = async function tableOpt({ page, ok, go }) {
   const wait = (ms) => page.waitForTimeout(ms);
   const tok = (v, p = "color") => page.evaluate(([v, p]) => { const d = document.createElement("div"); d.style[p] = `var(${v})`; document.body.append(d); const c = getComputedStyle(d)[p]; d.remove(); return c; }, [v, p]);

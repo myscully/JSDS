@@ -1,9 +1,7 @@
-/* 기준 시스템의 토큰 정의를 코드로 옮겨 둔 것.
-   출처: 참조 theme 패키지의 atomic 램프 파일 전부 · semantic/index.ts · opacity/index.ts.
-   (어느 시스템을 참조했는지는 이 파일을 만든 커밋에 적혀 있다 — 사이트·문서에서는 이름을 쓰지 않는다.)
-   이 파일의 목적은 **대조**다 — style.src.css 가 기준 시스템과 한 글자라도 달라지면 verify 가 실패시킨다.
+/* 기준 토큰 — 이 시스템의 atomic 램프 · semantic 정의 · opacity 눈금의 원장.
+   이 파일의 목적은 **대조**다 — style.src.css 가 기준 토큰과 한 글자라도 달라지면 verify 가 실패시킨다.
    "값까지 동일하게 교체"가 이번 설계의 정의이므로, 이것이 틀리면 다른 검사가 다 통과해도 틀린 것이다.
-   기준 시스템을 새 버전으로 올릴 때는 여기만 고치고 빌드를 돌리면 어긋난 자리가 전부 나온다. */
+   기준 토큰을 고칠 때는 여기만 고치고 빌드를 돌리면 어긋난 자리가 전부 나온다. */
 
 const AT = {
   common: { 0: "#000000", 100: "#FFFFFF" },
@@ -21,19 +19,19 @@ const AT = {
   pink: { 10:"#3D0133",20:"#730560",30:"#A81690",40:"#D331B8",46:"#E846CD",50:"#F553DA",60:"#FA73E3",70:"#FF94ED",80:"#FFB8F3",90:"#FED3F7",95:"#FEECFB",99:"#FFFAFE" },
   redOrange: { 10:"#290F00",20:"#592100",30:"#913500",40:"#C94A00",48:"#F55A00",50:"#FF5E00",60:"#FF7B2E",70:"#FF9B61",80:"#FFBD96",90:"#FED9C4",95:"#FEEEE5",99:"#FFFAF7" },
 };
-/* 기준 시스템의 opacity 눈금. 이제 퍼센트를 그대로 쓰므로 이 표는 '어떤 값이 허용되는가'의 기록이다 —
-   여기 없는 숫자가 나오면 기준 시스템에서 온 값이 아니다(다크 line-neutral-primary 의 32 만 예외) */
+/* 기준 토큰의 opacity 눈금. 이제 퍼센트를 그대로 쓰므로 이 표는 '어떤 값이 허용되는가'의 기록이다 —
+   여기 없는 숫자가 나오면 기준 토큰에서 온 값이 아니다(다크 line-neutral-primary 의 32 만 예외) */
 const OP_SCALE = [5, 8, 12, 16, 22, 28, 35, 43, 52, 61, 74, 88, 97];
 const kebab = (s) => s.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 const ACCENTS = ["lime", "cyan", "lightBlue", "violet", "purple", "pink"];
 /* 의미 토큰은 **램프를 참조한다** — 값을 굳혀 두지 않는다.
    그래야 3계층(Primitive → Semantic → Component)이 말이 아니라 사실이 되고,
-   램프 한 줄을 고치면 그 가족이 전부 따라온다. 기준 시스템 버전을 올릴 때도 한 자리만 고치면 된다.
+   램프 한 줄을 고치면 그 가족이 전부 따라온다.
    종전에는 brand 만 이렇게 이어져 있었고 나머지 11개 램프는 소비자가 0 이었다 —
    Atomic 탭이 "Semantic 토큰이 참조하는 원천 값"이라고 적어 둔 채로. */
 const tok = (fam, n) => `--${kebab(fam)}-${n}`;
 const ref = (fam, n) => `var(${tok(fam, n)})`;
-/* 알파는 기준 시스템의 opacity 눈금 숫자를 그대로 쓴다(그쪽 소스가 0.08 이고 8자리 HEX 는 직렬화 산물이다).
+/* 알파는 기준 토큰의 opacity 눈금 숫자를 그대로 쓴다(0.08 처럼 — 8자리 HEX 대신).
    Chromium 에서 두 표현이 같은 값으로 풀리는 것을 알파 토큰 68개 전수로 확인했다(차이 0.0000) */
 const mixVar = (t, pct) => `color-mix(in srgb,var(${t}) ${pct}%,transparent)`;
 const mixRef = (fam, n, pct) => mixVar(tok(fam, n), pct);
@@ -87,7 +85,7 @@ function semantic(theme) {
     o[`surface-accent-${kebab(f)}`] = mixRef(f, accSurf, 8);
     o[`surface-accent-${kebab(f)}-opaque`] = ref(f, accSurf);
   }
-  /* 다크 line-neutral-primary 만 기준 시스템이 눈금을 벗어나 0.32 를 직접 쓴다 */
+  /* 다크 line-neutral-primary 만 기준 토큰이 눈금을 벗어나 0.32 를 직접 쓴다 */
   o["line-neutral-primary"] = L ? cnMix(50, 22) : cnMix(50, 32);
   o["line-neutral-primary-opaque"] = L ? cn(96) : cn(25);
   o["line-neutral-secondary"] = L ? cnMix(50, 16) : cnMix(50, 28);
@@ -122,20 +120,20 @@ function ramps() {
   return out;
 }
 
-/* ── 기준 시스템에서 의도적으로 벗어난 자리 ──────────────────────
-   관용이 아니라 선언이다. [참조 값, 우리 값, 왜] 셋을 함께 적는다.
-   참조 값을 같이 적어 두는 이유: 상류가 움직이면 그 사실을 알아야 하고,
+/* ── 기준 토큰에서 의도적으로 벗어난 자리 ──────────────────────
+   관용이 아니라 선언이다. [기준 값, 우리 값, 왜] 셋을 함께 적는다.
+   기준 값을 같이 적어 두는 이유: 상류가 움직이면 그 사실을 알아야 하고,
    그래야 다음 사람이 '버그'와 '우리가 내린 결정'을 구분할 수 있다.
    diff() 는 이 표에 적힌 토큰만 우리 값으로 기대하고, **표 자체도 검사한다** —
-   적어 둔 참조 값이 실제 참조 정의와 다르면 그것도 실패다. 이탈이 상류 변화를 가려서는 안 된다. */
+   적어 둔 기준 값이 기준 정의와 다르면 그것도 실패다. 이탈이 상류 변화를 가려서는 안 된다. */
 const DEVIATIONS = {
   light: {
     "surface-neutral-tertiary": ["color-mix(in srgb,var(--cool-neutral-50) 5%,transparent)", "color-mix(in srgb,var(--cool-neutral-50) 8%,transparent)",
-      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 참조의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(5% → 8%)"],
+      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 기준의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(5% → 8%)"],
     "surface-neutral-secondary": ["color-mix(in srgb,var(--cool-neutral-50) 8%,transparent)", "color-mix(in srgb,var(--cool-neutral-50) 12%,transparent)",
-      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 참조의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(8% → 12%)"],
+      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 기준의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(8% → 12%)"],
     "surface-neutral-strong": ["color-mix(in srgb,var(--cool-neutral-50) 16%,transparent)", "color-mix(in srgb,var(--cool-neutral-50) 22%,transparent)",
-      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 참조의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(16% → 22%)"],
+      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 기준의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(16% → 22%)"],
     "foreground-brand-primary": ["var(--brand-50)", "var(--brand-40)",
       "링크·레이블을 한 단계 짙게 — 흰 바탕에서 4.83 → 6.59"],
     "foreground-neutral-strong": ["var(--static-black)", "var(--cool-neutral-20)",
@@ -145,13 +143,13 @@ const DEVIATIONS = {
   },
   dark: {
     "surface-neutral-tertiary": ["color-mix(in srgb,var(--cool-neutral-50) 12%,transparent)", "color-mix(in srgb,var(--cool-neutral-50) 15%,transparent)",
-      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 참조의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(12% → 15%)"],
+      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 기준의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(12% → 15%)"],
     "surface-neutral-secondary": ["color-mix(in srgb,var(--cool-neutral-50) 22%,transparent)", "color-mix(in srgb,var(--cool-neutral-50) 26%,transparent)",
-      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 참조의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(22% → 26%)"],
+      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 기준의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(22% → 26%)"],
     "surface-neutral-strong": ["color-mix(in srgb,var(--cool-neutral-50) 28%,transparent)", "color-mix(in srgb,var(--cool-neutral-50) 34%,transparent)",
-      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 참조의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(28% → 34%)"],
+      "틴트형 버튼·태그 바탕이 옅어 한 단계 진하게 — 처음에는 상태 틴트 12% 와 같은 진하기로 맞췄다. 2026-11-13 상태 틴트가 기준의 8% 로 돌아가 그 근거는 이제 라이트 tertiary 8% 와만 맞지만, 중립 면은 hover · 표 · 칩 면이 쓰고 있어 값은 그대로 둔다(28% → 34%)"],
     "surface-negative-strong": ["color-mix(in srgb,var(--red-60) 22%,transparent)", "color-mix(in srgb,var(--red-60) 16%,transparent)",
-      "다크 위험 틴트 단계를 고른 간격(8 → 16 → 22)으로 — 사람의 결정(2026-11-13)으로 상태 틴트를 참조의 8% 로 되돌리며 다음 단계도 함께 내렸다. 참조 22% 는 heavy 자리다(22% → 16%)"],
+      "다크 위험 틴트 단계를 고른 간격(8 → 16 → 22)으로 — 사람의 결정(2026-11-13)으로 상태 틴트를 기준의 8% 로 되돌리며 다음 단계도 함께 내렸다. 기준 22% 는 heavy 자리다(22% → 16%)"],
     "foreground-neutral-strong": ["var(--static-white)", "var(--cool-neutral-90)",
       "순수 흰색 대신 중립 램프의 끝 — 라이트와 같은 이유다(다크 캔버스 9.76)"],
     "foreground-negative-strong": ["var(--red-60)", "var(--red-50)",
@@ -161,17 +159,17 @@ const DEVIATIONS = {
     "surface-brand-primary": ["var(--brand-60)", "var(--brand-50)",
       "다크 면도 제품 HEX 그 자체로 — 제품 색 제약(흰 글자 4.5)이 다크 rest 까지 받친다(#0066FF 3.54 → 4.83). 캔버스 분리 3.53"],
     "surface-brand-heavy": ["var(--brand-50)", "var(--brand-60)",
-      "다크의 상태는 밝아지는 방향(50 → 55 → 60) — 틴트형 버튼(알파가 커질수록 밝아짐)과 같은 방향. strong 은 참조와 같은 55 라 따로 적지 않는다"],
+      "다크의 상태는 밝아지는 방향(50 → 55 → 60) — 틴트형 버튼(알파가 커질수록 밝아짐)과 같은 방향. strong 은 기준과 같은 55 라 따로 적지 않는다"],
   },
 };
 
-/* ── 기준 시스템에 없는데 우리가 더한 토큰 ───────────────────
-   DEVIATIONS 와 같은 이유로 적는다. diff() 는 참조 토큰만 순회하므로 더한 것은 그냥 통과한다 —
-   그래서 더더욱 적어 둬야 한다. 적지 않으면 "기준 시스템에 이게 있었나"를 코드가 답하지 못한다.
+/* ── 기준 토큰에 없는데 우리가 더한 토큰 ───────────────────
+   DEVIATIONS 와 같은 이유로 적는다. diff() 는 기준 토큰만 순회하므로 더한 것은 그냥 통과한다 —
+   그래서 더더욱 적어 둬야 한다. 적지 않으면 "기준 토큰에 이게 있었나"를 코드가 답하지 못한다.
    diff() 가 이 표도 검사한다: 적어 둔 이름이 CSS 에 없으면 실패이고,
-   참조 정의에 같은 이름이 생기면(= 더 이상 '추가'가 아니면) 그것도 알린다. */
+   기준 정의에 같은 이름이 생기면(= 더 이상 '추가'가 아니면) 그것도 알린다. */
 const ADDITIONS = {
-  /* Tag 글자 — 틴트와 같은 색상의 진한 톤(사람의 결정 2026-11-11). 참조의 foreground 는 primary · strong 까지라 12% 틴트(2026-11-13 부터 8%) 위에서 4.5 를 넘는 글자 단계가 없다
+  /* Tag 글자 — 틴트와 같은 색상의 진한 톤(사람의 결정 2026-11-11). 기준의 foreground 는 primary · strong 까지라 12% 틴트(2026-11-13 부터 8%) 위에서 4.5 를 넘는 글자 단계가 없다
      (negative-strong 도 3.68). 라이트 30 · 다크 60(lime 만 라이트 20 — 30 이 4.42, red 만 다크 70 — solid 면 위 4.08). primary < strong < heavy 문법을 따른다 */
   "foreground-negative-heavy": "Critical Tag 글자 — red-30 / red-70(다크 60 은 Critical solid 의 강한 면 위 4.08)",
   "foreground-cautionary-heavy": "High Tag 글자 — orange-30 / orange-60",
@@ -180,29 +178,29 @@ const ADDITIONS = {
   "foreground-accent-cyan-heavy": "Pending Tag 글자 — cyan-30 / cyan-60",
   "foreground-positive-heavy": "ok Tag 글자 — green-30 / green-60",
   "surface-negative-heavy":
-    "파괴적 버튼의 눌림 — 참조의 부정 틴트가 primary·strong 둘뿐이라 hover 다음 단계가 없었다(라이트 16% · 다크 22% — strong 보다 한 단계 위, 2026-11-13 상태 틴트 8% 와 함께 내림)",
+    "파괴적 버튼의 눌림 — 기준의 부정 틴트가 primary·strong 둘뿐이라 hover 다음 단계가 없었다(라이트 16% · 다크 22% — strong 보다 한 단계 위, 2026-11-13 상태 틴트 8% 와 함께 내림)",
   "surface-negative-hover":
     "면이 빈 Negative 버튼(Outline · 면 없는 아이콘 전용) hover — 다크는 옅은 틴트가 바탕에 묻혀 한 단계 진하게(라이트 8% · 다크 16% — 2026-11-13 상태 틴트 8% 와 함께 내림). 테마마다 집는 단계가 달라, CSS 의 다크 전용 규칙 대신 토큰으로 두어 Figma 도 변수 하나로 같은 구조를 쓴다",
   "surface-negative-pressed":
     "면이 빈 Negative 버튼(Outline · 면 없는 아이콘 전용) pressed — hover 보다 한 단계 위(라이트 12% · 다크 22% — 2026-11-13). 위와 같은 이유",
   "surface-brand-subtle-strong":
-    "제품색 글자 버튼(text · outline primary · 면 없는 primary 아이콘 전용)과 달력 기간 띠의 눌림 · 강한 면 — 참조의 brand 틴트가 subtle 하나뿐이라, 종전에는 중립색으로 떨어져 색상이 튀었다(두 테마 12%)",
+    "제품색 글자 버튼(text · outline primary · 면 없는 primary 아이콘 전용)과 달력 기간 띠의 눌림 · 강한 면 — 기준의 brand 틴트가 subtle 하나뿐이라, 종전에는 중립색으로 떨어져 색상이 튀었다(두 테마 12%)",
   "brand-label":
-    "brand 면 위 글자 — 참조에는 면 위 글자 역할(-on)이 아예 없고 늘 static.white 다. 기본값도 흰색이고, 다크 + 중립 제품에서만 뒤집힌다(그때는 면이 밝은 회색이다). 제품 색이 흰 글자를 받쳐야 한다는 제약이 이 토큰의 짝이다",
+    "brand 면 위 글자 — 기준에는 면 위 글자 역할(-on)이 아예 없고 늘 static.white 다. 기본값도 흰색이고, 다크 + 중립 제품에서만 뒤집힌다(그때는 면이 밝은 회색이다). 제품 색이 흰 글자를 받쳐야 한다는 제약이 이 토큰의 짝이다",
   /* 제품 색 팔레트(2026-11-14 사람의 결정) */
   "line-field-focus":
     "값 입력 필드의 포커스 · 열린 필드 테두리 — 기본은 --foreground-brand-primary, 빨강 · 주황 제품은 중립 글자색(오류 링 · 경고색과 헷갈리지 않게)",
   "line-field-focus-halo":
     "위 테두리 바깥 4px 후광 — 기본은 --line-brand-focus, 빨강 · 주황 제품은 중립 12%",
   "surface-brand-gradient":
-    "AI 제품의 넓은 브랜드 면(주 버튼 · Banner) 그라데이션 — purple-40 → violet-45. 다른 제품은 none(단색 면 그대로). 참조에는 그라데이션 토큰이 없다",
+    "AI 제품의 넓은 브랜드 면(주 버튼 · Banner) 그라데이션 — purple-40 → violet-45. 다른 제품은 none(단색 면 그대로). 기준에는 그라데이션 토큰이 없다",
   "surface-brand-gradient-strong": "위 그라데이션의 hover — purple-30 → violet-40(사람이 정하지 않은 기본값)",
   "surface-brand-gradient-heavy": "위 그라데이션의 누름 — purple-30 → violet-30(사람이 정하지 않은 기본값)",
   "company-mark":
-    "지란지교시큐리티 회사 마크 — 참조의 brand 는 제품 색이라 회사 정체성을 표기할 자리가 없다. 로고·헤더 마크 전용",
+    "지란지교시큐리티 회사 마크 — 기준의 brand 는 제품 색이라 회사 정체성을 표기할 자리가 없다. 로고·헤더 마크 전용",
   "company-mark-subtle":
     "회사 마크의 옅은 배경 — 위와 같은 이유",
-  /* 탐색형 차트(Chart.js) 전용 — 기준 시스템에는 데이터 시각화 토큰이 없다(사람의 결정 2026-11-03).
+  /* 탐색형 차트(Chart.js) 전용 — 기준 토큰에는 데이터 시각화 토큰이 없다(사람의 결정 2026-11-03).
      계열 6색은 심각도 토큰과 섞지 않으려고 따로 둔다(빨강 = Critical 의 의미를 지킨다). 제품색(brand)과 무관한 고정 램프이고,
      라이트/다크 각각 dataviz 검증기(색각 이상 분리 · 명도 띠 · 3:1)를 통과한 단계다 — 값과 검증 결과는 style.src.css 의 주석에 있다.
      상태색과 같은 단계는 쓰지 않는다(cyan-40 은 Medium 이라 teal 자리는 light-blue-40). 캔버스는 CSS 변수를 못 읽어 ds-chart.js 가 계산값으로 읽는다 */
@@ -244,11 +242,11 @@ function diff(css) {
   for (const [theme, got] of [["light", light], ["dark", dark]]) {
     const want = semantic(theme);
     const dev = DEVIATIONS[theme] || {};
-    /* 이탈 표가 낡지 않았는지 먼저 본다 — 적어 둔 '참조 값'이 실제 참조 정의와 같아야 한다.
+    /* 이탈 표가 낡지 않았는지 먼저 본다 — 적어 둔 '기준 값'이 기준 정의와 같아야 한다.
        여기가 틀리면 상류가 움직였는데 이탈이 그걸 덮고 있다는 뜻이다 */
     for (const [k, [ref]] of Object.entries(dev)) {
       if (want[k] === undefined) { bad.push(`이탈 선언이 없는 토큰을 가리킨다 — ${theme} --${k}`); continue; }
-      if (want[k] !== ref) bad.push(`이탈 선언이 낡았다 — ${theme} --${k}: 기준 시스템은 이제 ${want[k]} 인데 표에는 ${ref} 라 적혀 있다`);
+      if (want[k] !== ref) bad.push(`이탈 선언이 낡았다 — ${theme} --${k}: 기준 토큰은 이제 ${want[k]} 인데 표에는 ${ref} 라 적혀 있다`);
     }
     for (const [k, v] of Object.entries(want)) {
       const expect = dev[k] ? dev[k][1] : v;
@@ -256,14 +254,14 @@ function diff(css) {
       if (have === undefined) { bad.push(`${theme} --${k} 선언 없음`); continue; }
       if (have !== expect) bad.push(dev[k]
         ? `${theme} --${k}: 의도적 이탈이라 ${expect} 여야 하는데 ${have}`
-        : `${theme} --${k}: 기준 시스템은 ${v} 인데 ${have}`);
+        : `${theme} --${k}: 기준 토큰은 ${v} 인데 ${have}`);
     }
   }
-  for (const [k, v] of Object.entries(ramps())) if (light[k] !== v) bad.push(`램프 ${k}: 기준 시스템은 ${v} 인데 ${light[k]}`);
+  for (const [k, v] of Object.entries(ramps())) if (light[k] !== v) bad.push(`램프 ${k}: 기준 토큰은 ${v} 인데 ${light[k]}`);
   /* 더한 토큰 — 선언한 이름이 세 블록에 다 있는지, 그리고 아직 '추가'가 맞는지 */
   const refLight = semantic("light");
   for (const [k, why] of Object.entries(ADDITIONS)) {
-    if (refLight[k] !== undefined) bad.push(`추가 선언이 낡았다 — --${k} 가 기준 시스템에도 생겼다(${why})`);
+    if (refLight[k] !== undefined) bad.push(`추가 선언이 낡았다 — --${k} 가 기준 토큰에도 생겼다(${why})`);
     /* 존재는 :root 에서만 본다 — 더한 토큰 중에는 다크에서 값이 같아 다시 선언하지 않는 것이 있고
        (--brand-label · --company-mark), 변형 블록에서만 덮이는 것도 있다. 두 블록 모두를 요구하면 그것들이 걸린다 */
     if (light["--" + k] === undefined) bad.push(`--${k} 선언 없음 — 더한 토큰으로 적혀 있는데 :root 에 없다`);

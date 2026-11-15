@@ -7,7 +7,7 @@ import { TextField, type TextFieldProps } from "../text-field/TextField";
 import { FormValidationContext } from "../text-field/validation";
 import { pasteText, reformat, stepClock } from "../date-picker/format";
 
-/* Time Picker — 입력칸 + 열 목록(2026-11-13, 외부 컴포넌트 Time Picker 참고 — 상용이라 구조 · 동작만). 사이트 ds.js 의 .timepicker 와 같은 규칙:
+/* Time Picker — 입력칸 + 열 목록(2026-11-13). 사이트 ds.js 의 .timepicker 와 같은 규칙:
    24시간제 HH:mm(seconds 면 HH:mm:ss), 열에서 고르면 바로 값, step 은 분 열의 간격, min · max 밖 칸은 고를 수 없고 입력은 받아 오류로 알린다 */
 
 export type TimeValidity = "empty" | "incomplete" | "invalid" | "min" | "max" | "valid";

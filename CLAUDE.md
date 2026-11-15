@@ -1,7 +1,7 @@
 # JS Design System — 함께 일하는 기준
 
 지란지교시큐리티 보안 콘솔용 디자인 시스템입니다. 정적 사이트 + React 패키지 + Figma 라이브러리 셋이
-**같은 토큰 하나**를 공유합니다. 현재 **v0.8**.
+**같은 토큰 하나**를 공유합니다. 현재 **v0.9**.
 
 ## 저장소 구조 — 무엇이 원본이고 무엇이 생성물인가
 
@@ -9,7 +9,7 @@
 | --- | --- |
 | `_build/` | **원본.** 사이트 생성기. `build.js` 가 전부를 만들고 `verify.js`·`contrast.js` 를 함께 돌립니다 |
 | `_build/style.src.css` | **토큰과 컴포넌트 CSS 의 단일 출처.** 사이트·패키지·Figma 가 전부 여기서 나옵니다 |
-| `_build/base-tokens.js` | 기준 시스템의 토큰 정의를 코드로 옮긴 대장. `DEVIATIONS`(값을 바꾼 것) · `ADDITIONS`(우리가 더한 것) |
+| `_build/base-tokens.js` | 이 시스템의 기준 토큰 원장(atomic 램프 · semantic 정의). `DEVIATIONS`(값을 바꾼 것) · `ADDITIONS`(우리가 더한 것) |
 | `_build/ds-chart.src.js` | **원본.** 탐색형 차트(Chart.js) 테마 어댑터 + 프리셋. `assets/ds-chart.js` 로 복사되고 React 는 `_react/scripts/sync-chart.mjs` 가 `src/chart/ds-chart.js`(생성물)로 가져갑니다. Chart.js 본체는 `_build/node_modules` 에서 `assets/vendor/` 로 복사(MIT) |
 | `_react/` | **원본.** `@jiran/ds-react` 패키지. `dist/` 는 생성물이라 git 에 없습니다 |
 | `_figma/` | **원본.** Figma 작업 도구 — `font.js`(폰트 안전 로더) · `probe.js`(조사) · `audit.mjs`(대조) · `dumps/baseline.json`(audit 기준 덤프) · `font-revert.md`(Noto 대체 경과 · 되돌릴 노드 · 굵기를 고칠 노드 — 목록은 같은 폴더의 `.tsv` 셋) |
@@ -27,7 +27,7 @@
 이 저장소에서 반복해서 난 사고가 전부 이것이었습니다 — "램프 14개"(실제 13), "컴포넌트 30개"(31),
 "`summary > svg` 는 16~18 로 고정됩니다"(CSS 에 크기 지정 없음).
 
-**예외는 코드에 선언합니다.** 참조 값을 바꿨으면 `base-tokens.js` 의 `DEVIATIONS`,
+**예외는 코드에 선언합니다.** 기준 값을 바꿨으면 `base-tokens.js` 의 `DEVIATIONS`,
 우리가 더한 토큰이면 `ADDITIONS`, 대비 기준을 못 넘기는 쌍이면 `contrast.pairs.js` 의 `REF()` 에
 **이유와 함께** 적습니다. 주석 없이 넘어가면 다음 사람이 그 값을 마음대로 바꿉니다.
 
@@ -45,7 +45,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 77 · verify 0/0 · contrast 3120쌍 실패 0 · advisory 944 · behave 1432/1432 · react 820+6 · tsc 0
+pages 76 · verify 0/0 · contrast 3192쌍 실패 0 · advisory 943 · behave 1440/1440 · react 828+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -80,7 +80,6 @@ behave +1(카드 헤더 '전체 보기' 가 텍스트 assistive · 아이콘 칸
 
 2026-11-03 Data Visual 재정의 — 하이브리드(사람의 결정). 정적 요약(KPI · 스파크라인 · CSS 막대 · 도넛)은 그대로 두고, 축 · 툴팁 · 시계열이 필요한 **탐색형 차트는 Chart.js(MIT, 4.6.1 고정)** 위에
 토큰을 입혀 그린다 — 테마 어댑터 `ds-chart.src.js`(theme · presets 4종 timeseries · bar · donut · mixed · mount · auto) 하나를 사이트 · 순수 JS · React(`@jiran/ds-react/chart`, chart.js 는 optional peer)가 같이 쓴다.
-**다른 차트 라이브러리 는 쓰지 않는다** — 코어가 이중 라이선스라 연 매출 200만 달러 이상 조직은 개발자당 유료 Commercial 이고 7.x 는 일부가 Premium 워터마크다.
 차트 토큰 10개(`--chart-series-1~6` · grid · axis-text · tooltip 면 · 글자)를 트리 밖에 더했다(ADDITIONS). 계열 6색은 제품색과 무관한 고정 램프이고 상태색과 같은 단계를 피했으며,
 dataviz 검증기(색각 분리 · 명도 띠 · 3:1)를 라이트(흰 · 회색 바탕) · 다크(카드 · 페이지 바탕) 각각 통과한 단계다 — 결과는 `style.src.css` 주석.
 contrast +132(계열 6 × 바탕 3 × 맥락 6 = 108, 축 글자 18, 툴팁 6), advisory +18(축 글자 = foreground/neutral/tertiary 참조라 글자 쌍과 같은 REF),
@@ -385,7 +384,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 
 2026-11-11 Tag 글자 = 같은 색상의 진한 톤 · 점은 선택 · `.sev-cell` 없앰(사람의 요청 · 결정 둘) — contrast 1218 → 1398 · behave 1142 → 1156 · react 683 → 686. advisory · pages 수는 그대로.
 - **토큰 6개를 더했다**(`ADDITIONS`, 이름은 사람의 결정 — primary < strong < heavy 문법): `--foreground-negative-heavy` · `cautionary-heavy` · `accent-light-blue-heavy` · `accent-lime-heavy` · `accent-cyan-heavy` · `positive-heavy`.
-  라이트 30 단계(lime 만 20 — 30 이 틴트 위 4.42) · 다크 60 단계(red 만 70 — 60 은 Critical solid 의 강한 면 위 4.08). 참조의 foreground 는 strong 까지라 12% 틴트 위 4.5 를 넘는 단계가 없었다(negative-strong 도 3.68).
+  라이트 30 단계(lime 만 20 — 30 이 틴트 위 4.42) · 다크 60 단계(red 만 70 — 60 은 Critical solid 의 강한 면 위 4.08). 기준의 foreground 는 strong 까지라 12% 틴트 위 4.5 를 넘는 단계가 없었다(negative-strong 도 3.68).
   info 글자는 `--foreground-neutral-secondary`, accent 는 `--foreground-brand-primary`(둘 다 기존 쌍). 시멘틱 79 → 85 · 전체 94 → 100. Colors 페이지에 Heavy 스와치.
 - **점은 기본에서 뺐다** — `.tag::before` 는 `display:none`, `.tag.dot` 이면 등급 색 점. `.plain` 은 없앴다(verify 가 예제의 Tag `.plain` 을 막음). React `dot` prop, `variant="plain"` 은 경고하고 subtle 로(MIGRATION). 사이트 셸의 Props 표 태그도 `.plain` 을 뗐다(이름 칸 글자가 positive-heavy 가 됨).
 - **`.sev-cell`(행 좌측 3px 막대 + 글자)을 통째로 없앴다**(사람의 결정 — Tag 글자가 색을 나르므로 겹친 정보). 심각도 패턴의 스케일 셋째 줄과 표의 막대를 지우고 표는 Tag 하나로. verify 가 `.sev-cell` 을 막는다. React `SevCell` 은 한 번 경고하고 막대 없이 내용만 그린다.
@@ -412,12 +411,12 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - behave +2(outline 고른 버튼의 네 변 · 면 · 글자 · 칸 선 한 겹 · 1px 겹침 · 높이 38, solid 면 · 글자 · 고른 것을 옮기면 따라감). 음성 시험 셋(brand 선 · 칸 선 투명 · solid 규칙 지우기) 모두 실패로 잡혔다 — 칸 선은 버튼 셋인 Solid 예제가 잡는다(Outline 예제는 둘이라 고르지 않은 이웃 칸이 없다).
 - Spec Size · Container 문구를 실제 구조로, Selected 행을 더했다. Figma 미반영 221 → 222건(Spec Selected 행). Figma 의 outline 고른 버튼 선 · Solid 변형은 audit 대조 밖 — 일괄 반영 때 그린다.
 
-2026-11-11 Table · Data Table 최적화 — 테두리 없는 표 + 참고 글의 구성(사람의 요청 · 결정 넷, 참고 외부 글 = 외부 글) — contrast 1398 → 1434 · behave 1160 → 1170(`behave.table.js` 10) · react 688 → 700(`tests/table-optimize.test.tsx` 6 · 예제 247 → 253 에 따른 구조 비교 6). advisory · pages 수는 그대로.
+2026-11-11 Table · Data Table 최적화 — 테두리 없는 표 · 밀도 · 행 스타일 · 구성(사람의 요청 · 결정 넷) — contrast 1398 → 1434 · behave 1160 → 1170(`behave.table.js` 10) · react 688 → 700(`tests/table-optimize.test.tsx` 6 · 예제 247 → 253 에 따른 구조 비교 6). advisory · pages 수는 그대로.
 - **표를 감싸는 테두리 · radius · 면을 없앴다**(사람의 요청) — `.tbl-wrap` 은 가로 스크롤만. 위 경계 = 회색 헤더 면, 아래 경계 = **마지막 행 아래 선**(사람의 결정 — 전에는 테두리가 대신해 지워 두었다). `.plain` · 빈 상태 칸은 선 없음. 사이트 셸의 문서 표 규칙 `tbody tr:last-child td{border-bottom:0}` 이 컴포넌트 표에도 걸려 있어 `table:not(.tbl)` 로 좁혔다. Card flush 의 '이중 테두리' 설명을 '카드 패딩 없이 붙일 때' 로.
 - **밀도 세 단계 40 · 48 · 56**(사람의 결정) — 기본 52 → 48 · `.compact` 44 → 40 · 새 `.relaxed` 56, 헤더 44 · 40 · 48(전에는 compact 헤더가 CSS 40 · Spec 44 로 어긋났다). React `density`(기존 `compact` 도 받음). 밀도 전환 예제 — 사이트 `.select-btn[data-density-for="표 id"]` + `button[data-density]`(ds.js), 고른 밀도의 기억은 제품 몫.
 - **행 스타일 넷**(사람의 결정 — Grid · Free form 을 더함) — 가로선(기본) · `.zebra` · `.grid`(칸 사이 세로선, 마지막 칸 없음) · `.plain`(선 없음 — 5행 안팎 요약). React `rowStyle`(기존 `zebra` 도 받음). verify 가 `.plain` + `.zebra`/`.grid` · `.compact` + `.relaxed` 를 막는다.
 - **구성 넷**(사람의 결정) — 하위 텍스트 `td > .cell-sub`(12/16 secondary, 칸 위아래 패딩 8 이라 두 줄이 relaxed 56 에 든다) · 첫 열 고정 `.tbl-wrap.sticky-col`(맨 앞 체크 · 펼침 칸과 첫 열, 불투명 면 `--tbl-surface` 위에 행 상태 면 `--tbl-tint` 를 겹침 · 오른쪽 선 · tabindex + 이름은 verify) · 합계 행 `tfoot tr.total`(회색 면 · 600 · 위 선 `--line-neutral-primary`) · 밀도 전환. React `TableFoot` · `TableRow total` · `TableCell sub` · DataTable `stickyColumn` · `summaryRow` · column `sub`.
-- **글에서 함께 가져온 것** — 숫자 tabular 를 표 전체로(`.num` 은 오른쪽 정렬만, 크기를 견주는 숫자에만 — 예제 · 패턴의 `.num` 을 세어 보니 전부 건수 · % · 그 머리글이라 고칠 것이 없었다). **가져오지 않은 것:** hover 때만 보이는 행 동작(키보드로 못 찾음 — 글도 단점으로 적음), 열 추가 · 순서 · 너비(열 표시 설정은 1.0 뒤 다시 묻기로 함), 복합 필터 저장, 셀 배경 추세 표시(상태색과 겹침).
+- **함께 정한 것** — 숫자 tabular 를 표 전체로(`.num` 은 오른쪽 정렬만, 크기를 견주는 숫자에만 — 예제 · 패턴의 `.num` 을 세어 보니 전부 건수 · % · 그 머리글이라 고칠 것이 없었다). **하지 않은 것:** hover 때만 보이는 행 동작(키보드로 못 찾음), 열 추가 · 순서 · 너비(열 표시 설정은 1.0 뒤 다시 묻기로 함), 복합 필터 저장, 셀 배경 추세 표시(상태색과 겹침).
 - contrast +36(하위 텍스트 secondary / 행 hover · 선택 면 2 × 바탕 3 × 맥락 6). **기존 단정 고침 2:** 로딩 행 높이 52 → 48 · 말줄임 칸 44 → 40(behave.data).
 - **측정에서 드러나 고친 것:** 고정 열의 칸별 `left` 가 위치 규칙의 `:is(…)`(가장 센 인자의 명시도 0,3,0)에 져 체크 칸과 첫 열이 같은 0 에 붙었다 — 위치 규칙을 `:where` 로. 하위 텍스트 행이 71.4 로 커졌다(칸 패딩 12 + 두 줄) — `td:has(> .cell-sub)` 패딩 8. 고정 열 예제의 표 폭을 인라인 `min-width:1040px` 대신 CSS `width:max-content` + nowrap 으로(복사한 HTML 에 수치가 남지 않게).
 - 음성 시험 17건(테두리 · 마지막 행 선 · 고정폭 · compact · relaxed · grid · plain · 하위 패딩 · 하위 색 · 고정 left · 고정 면 · 합계 면 · 합계 선 · 밀도 전환 ds.js · verify 조합 셋) 모두 실패로 잡혔다 — plain 을 지우면 복사용 CSS 검사도 잡는다. 표 단정만 도는 임시 실행기로 쟀다(전체 게이트는 한 건에 10분).
@@ -529,8 +528,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - Figma 미반영 485 → 487건(Spec Chip Container 문구 · 새 Selected 행). Figma 의 Chip 은 아직 옅은 brand 선택 면이고 Solid · Neutral 변형이 없다 — 일괄 반영 때 그린다.
 
 
-2026-11-13 Steps 재구성 — 외부 컴포넌트 Stepper 참고(사람의 요청 · 결정 다섯) — contrast 1440 → 1434 · advisory 460 → 455 · behave 1236 → 1274(`behave.stepper.js` 37 · 온보딩 1) · react 721+6 → 732+6(`tests/stepper.test.tsx` 9 · 예제 262 → 264 에 따른 구조 비교 2). pages 수는 그대로.
-- **참고 출처:** 외부 컴포넌트.io/bootstrap/docs/forms/stepper · 로컬 `외부 참고 자료`(`scss/_stepper.scss` · `js/src/stepper.js`). **외부 컴포넌트 PRO 는 상용**("This is commercial software")이라 코드 · 클래스 이름 · 아이콘은 옮기지 않고 구조와 동작만 참고했다(사람의 확인).
+2026-11-13 Steps 재구성(사람의 요청 · 결정 다섯) — contrast 1440 → 1434 · advisory 460 → 455 · behave 1236 → 1274(`behave.stepper.js` 37 · 온보딩 1) · react 721+6 → 732+6(`tests/stepper.test.tsx` 9 · 예제 262 → 264 에 따른 구조 비교 2). pages 수는 그대로.
 - **표시 + 마법사 동작**(사람의 결정) — `.stepper > .steps + .step-panel × 단계 수 + .step-actions`. '다음'(폼 안 Enter 포함)은 그 패널의 `form[data-validate]` 를 기존 `vRun` 으로 검사하고 막히면 첫 오류로, 통과하면 완료 표시 · 다음 패널 · 패널로 포커스. 패널은 숨기기만 해서 입력값이 남는다. 저장 · 전송은 제품(`ds:step {index, from, trigger}` · `ds:step-finish` · `DS.stepper.go`). React `Stepper` · `StepButton`, `Form bare`(카드 안 폼).
 - **배치 셋**(사람의 결정) — 가로(연결선이 남는 폭을 나눔, 기본) · `.label-below` · `.vertical`(각 li 안에 패널 — 단계 아래에 내용이 펼쳐짐). 세로에도 연결선이 생겼다.
   **좁으면 세로로**(사람의 결정 — 캡처에서 390 의 가로 · 라벨 아래가 미리보기를 넘쳐 잘려 보였다) — 가로 · 라벨 아래가 자리에 안 들어가면 ds.js `fitSteps` · React `useStacked` 가 `.stacked` 를 붙여 세로 배치의 목록 규칙으로 쌓는다(패널은 목록 아래 그대로). `.stacked` 를 뗀 모양에서 넘치는지 재고, 처음 그릴 때 · 글꼴 준비 뒤 · 창 크기가 바뀔 때(React 는 부모 폭이 바뀔 때) 다시 잰다. 숨은 자리(offsetParent 없음)는 재지 않는다. 예제에 직접 적으면 verify 가 막는다.
@@ -563,15 +561,15 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **고정폭 글자는 Code 에만** — `.field.mono` 를 없앴고 Copy Field 값도 본문 글자 + `tabular-nums`. React `TextField mono` 는 경고하고 무시한다. verify 가 `.field.mono` 와 Code 밖 `--font-mono` 를 막는다. 기존 단정 셋(IP 필드 · Copy Field 두 곳의 '고정폭')을 반대로 고쳤다.
 - **Page Header 제목 = Title 2 28/38**(11-12 의 Title 1 32/44 를 바꿈). **Tab 기본 16/24 · sm 14/20** — 높이는 기본 44 · pill 탭 34 그대로, sm 은 34 → 38(Figma 메타의 sm 38 과 같아짐).
 - **Tag** — 중립 면 `--surface-neutral-tertiary`, Info 면 `--surface-neutral-secondary`(이제 둘이 갈린다), outline 테두리는 톤마다 그 색의 선 토큰. contrast +18 = Info 글자 secondary / secondary 면 쌍(× 바탕 3 × 맥락 6).
-- **상태 틴트 12 → 8%**(사람의 결정 '함께 내림') — positive · cautionary · negative · accent 가족이 참조값 8% 가 되어 `DEVIATIONS` 의 12% 를 지웠다. negative 단계는 라이트 8 · 12 · 16(hover 8 · pressed 12), 다크 8 · 16 · 22(hover 16 · pressed 22), 다크 strong 만 참조 22 → 16 을 `DEVIATIONS` 로. **advisory −6** = 다크 negative-strong 글자 / negative hover · strong 면 + 회색 바탕 쌍(맥락 셋 × 2)이 4.5 를 넘었다 — 옛 틴트 값을 생성 CSS 에 넣어 다시 재면 455 로 돌아오는 것으로 확인했다.
+- **상태 틴트 12 → 8%**(사람의 결정 '함께 내림') — positive · cautionary · negative · accent 가족이 기준 값 8% 가 되어 `DEVIATIONS` 의 12% 를 지웠다. negative 단계는 라이트 8 · 12 · 16(hover 8 · pressed 12), 다크 8 · 16 · 22(hover 16 · pressed 22), 다크 strong 만 기준 22 → 16 을 `DEVIATIONS` 로. **advisory −6** = 다크 negative-strong 글자 / negative hover · strong 면 + 회색 바탕 쌍(맥락 셋 × 2)이 4.5 를 넘었다 — 옛 틴트 값을 생성 CSS 에 넣어 다시 재면 455 로 돌아오는 것으로 확인했다.
 - **누적 영역 = 세로 그라데이션**(ds-chart `areaFill` — 계열의 가장 높은 점에서 바닥까지 알파 0.32 → 0.06, 사람이 정하지 않은 제안값. 첫 배치처럼 chartArea 가 없으면 단색).
 - **'표로 보기' 는 옵션**(사람의 결정 — 11-10 의 '늘 있음' 을 바꿈) — `chartCanvas(…, {table:true})` · React `ChartCanvas table`(기본 false). 켠 예제는 data-visual timeseries 하나, 대시보드는 끔. verify 는 버튼이 `.chart-view` 첫 자식 `.chart-tools` 에만 · 차트 수 이하인지를 본다.
 - **Top Navigation 선택 = 제품 색 면 + `--brand-label`**(hover 도 같음), **Notice · Banner 아이콘 = filled**(폼 요약 상자 포함, verify), **Combobox 활성 항목 = 면만**(외곽선 없음).
 - **표 hover 는 옵션** — `.tbl.hover` · React `hover`. 켠 곳: 행을 고르거나 행 동작이 있는 Data Table 예제 넷 · 로그 뷰어. Table 예제는 끔. Data Table Rules '행 동작' 에 '행 hover' 줄(5 → 6).
 - **Avatar Group**(사람의 결정 '이니셜만 + 외 N명') — `.avatar-group[role=group][aria-label]` · 겹침 -8(sm -6) · 경계 링 2px `--avatar-ring`(놓인 면) · 5개까지 · 넘친 수는 `.avatar-group-more` 글자 또는 목록을 여는 글자 버튼. React `AvatarGroup`. verify 가 개수 · 이름 · '외 N명' 형식과 자리를 본다.
-- **Time Picker 신규**(사람의 결정 '입력칸 + 열 목록, 바로 반영') — 외부 컴포넌트 Time Picker 를 참고했고 **외부 컴포넌트 PRO 는 상용이라 구조 · 동작만, 코드 · 클래스 이름 · 아이콘은 옮기지 않았다**. `.field.timepicker > .affix > input + .tp-btn`, 열 목록 `.time-panel > .time-col[role=listbox] > .time-opt[role=option]` 은 ds.js 가 열 때 그린다. 24시간제 HH:mm · `data-seconds` · `data-step`(분 열 간격, 입력은 받음) · `data-min/max`(밖 칸은 끄고 입력은 받아 오류) · `data-messages` · `data-labels` · `ds:time {value, text, validity}` · `form[data-validate]` 참여. React `TimePicker` · `checkTime`(폼에는 `setCustomValidity` 로 — `validationMessage` 가 customError 를 읽게 했다).
+- **Time Picker 신규**(사람의 결정 '입력칸 + 열 목록, 바로 반영') — `.field.timepicker > .affix > input + .tp-btn`, 열 목록 `.time-panel > .time-col[role=listbox] > .time-opt[role=option]` 은 ds.js 가 열 때 그린다. 24시간제 HH:mm · `data-seconds` · `data-step`(분 열 간격, 입력은 받음) · `data-min/max`(밖 칸은 끄고 입력은 받아 오류) · `data-messages` · `data-labels` · `ds:time {value, text, validity}` · `form[data-validate]` 참여. React `TimePicker` · `checkTime`(폼에는 `setCustomValidity` 로 — `validationMessage` 가 customError 를 읽게 했다).
   사람이 정하지 않은 기본값: 열 칸 56 × 32 · 8칸 높이, 고른 칸 = 제품 색 면 + 흰 글자, 빈 조각은 00 으로 채움, Tab 은 열 사이를 옮기고 필드를 떠나면 닫힘, 폭 160. Date Picker 시각 칸과 `clockBump` 를 함께 쓴다.
-- **측정에서 드러나 고친 것:** `pasteText` 가 시각 단위에서 첫 조각(시)을 채우지 않아 마크업 값 `2:0` 이 `20:0` 이 됐다(사이트 · React — Date Picker 시각 칸 붙여넣기도 같은 함수). 그 수정이 `noUncheckedIndexedAccess` 에 걸린 tsc 1건은 전체 게이트에서 잡혔다(vitest 는 타입을 안 봄). About 페이지 '컴포넌트 43개 · 패턴 11개' 와 build.js 문서의 '패턴 11개' 는 실제 10개였다 — 44 · 10 으로.
+- **측정에서 드러나 고친 것:** `pasteText` 가 시각 단위에서 첫 조각(시)을 채우지 않아 마크업 값 `2:0` 이 `20:0` 이 됐다(사이트 · React — Date Picker 시각 칸 붙여넣기도 같은 함수). 그 수정이 strict 타입 검사(undefined 일 수 있는 값)에 걸린 tsc 1건은 — 2026-11-15 바로잡음: tsconfig 의 noUncheckedIndexedAccess 는 false 다 — 전체 게이트에서 잡혔다(vitest 는 타입을 안 봄). About 페이지 '컴포넌트 43개 · 패턴 11개' 와 build.js 문서의 '패턴 11개' 는 실제 10개였다 — 44 · 10 으로.
 - **Figma audit 도구:** Tag 중립과 Info 의 칠이 같다고 가정하고 다르면 멈추던 것을 Neutral 을 제 톤으로 대조하게 바꿨다(Figma 에 Neutral 변형이 없으니 '없는 변형' 으로 센다). `tag.figma.variants` 의 info · neutral 면을 새 토큰으로.
 - 음성 시험: 사이트 21건 · React 7건, 모두 실패로 잡혔다. 첫 회 2건을 고쳤다 — 끈 칸 단정이 빈 결과에서 예외로 멈춘 것(값 없음으로 실패하게), React 폼 문구 연결을 지워도 통과한 것(입력 경로가 문구를 따로 넣어서 — 처음 값이 잘못된 채 저장하는 테스트를 더함).
 - **덤으로 본 것(고치지 않음):** 390 폭에서 Top Navigation 예제가 미리보기 오른쪽으로 잘린다 — 이번 선택 면 변경과 무관한 기존 가로 넘침으로 보인다.
@@ -701,7 +699,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 
 2026-11-15 Data Visual 한 세트 — 한 톤 · 차트 카드 한 틀 · 새 차트 넷(사람의 요청 · 결정 여덟) — contrast 2940 → 3120 · advisory 920 → 944 · behave 1412 → 1432(`behave.chart.js` 20) · react 798+6 → 820+6(`tests/data-visual-set.test.tsx` 15 · 예제 284 → 291 에 따른 구조 비교 7). pages · verify 수는 그대로.
 - **목표(사람의 요청):** 디자인 시스템 사용자가 차트를 쉽게 넣고, 어느 차트를 골라도 한 화면에 한 세트로 어울리게. 심각도 · 요소 구분이 아니면 한 톤.
-- **라이브러리는 Chart.js 4.6.1 유지**(사람의 결정) — 검토 결과는 Data Visual 사용 절 '차트 라이브러리를 고른 이유'. 다른 차트 라이브러리 는 듀얼 라이선스(조직 매출 · 예산 200만 달러 이상이면 개발자당 유료, 일부 기능 Pro · Premium, 제품 배포 따로)라 쓰지 않는다. 다른 차트 라이브러리(Apache-2.0)는 게이지 · 히트맵 · 생키 · 지도가 기본이지만 몇 배 크고 어댑터 · React · 단정을 다시 짜야 해 지도 · 생키가 필요할 때 다시 본다. 게이지는 doughnut 반원, 강조 · 그라데이션은 scriptable 색이라 의존성이 늘지 않았다.
+- **라이브러리는 Chart.js 4.6.1 유지**(사람의 결정) — MIT 라이선스이고 토큰 · 사이트 · React · 단정이 이미 붙어 있다. 게이지는 doughnut 반원, 강조 · 그라데이션은 scriptable 색이라 의존성이 늘지 않았다.
 - **한 톤 = 제품과 무관한 고정 파랑**(사람의 결정 — 빨강 · 주황 제품에서도 경고 · 위험처럼 읽히지 않게) `--chart-mono-1~4` — 라이트 blue-40 · 50 · 60 · 70, 다크 blue-80 · 70 · 60 · 45. dataviz 검증기(ordinal)로 한 색상 · 명도 단조 · 이웃 ΔL ≥ 0.06 · 옅은 끝 ≥ 2:1 을 라이트 · 다크 각각 통과한 단계다.
 - **색 모드** spec `color`: `"mono"`(기본) · `"categorical"`(계열 1~6). tone 없는 계열 수에 따라 1 → 1단계, 2 → 1 · 4, 3 → 1 · 2 · 4, 4 → 1~4(`MONO_STEPS`), **5개부터는 계열 색**(사람의 결정 — 넘으면 범주색). `tone` 을 준 계열은 늘 그 톤이고 남은 것만 센다. **도넛 조각도 같은 규칙**(사람의 질문에 답한 결정) — 정적 `.donut.mono` · `.categorical` 은 조각 비율을 `--d1~--d5` 로 받고, 클래스 없는 도넛은 지금처럼 심각도 다섯 색. React `Donut` 은 tone 없는 조각 수로 고른다.
 - **새 프리셋 둘** `gauge`(반원 doughnut · 회전 −90 · 180° · 구멍 78% · data = [값, max − 값] · 가운데 큰 값 + 설명 · 범례 · 툴팁 없음, max 를 넘으면 멈추고 경고) · `spark`(축 · 격자 · 범례 없는 선, KPI 안 `.kpi > .chart-canvas.spark` 높이 40). 프리셋은 넷 → 여섯. React `SparkCanvas`.
@@ -722,14 +720,31 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 음성 시험(좁은 화면 · 구조 비교): `.row-2` · `.row-3` 한 칸 규칙 지움 · 부제 keep-all 지움 · `.tbl.nowrap` 지움(behave.chart 각 1), React Table 의 nowrap 클래스 빼기(대시보드 구조 비교) · React 진행 막대 단위 빼기 — 모두 잡혔다.
 - audit: CHART_EX 에 gauge · spark, 카드 정규식 · 부제 `.chart-sub`, 최대 폭 없는 카드는 격자 폭 ÷ 카드 수, 계열 색 기대값이 MONO_STEPS 를 따름, 도넛 `var(--dN)` 정지점, 중첩 div 를 세는 KPI 블록, 증감 Figma 변형 None · Bad · Good. Figma 미반영 693 → 732건 — 한 톤 계열 색 · Gauge · Spark 변형 없음 · 카드 폭 · Spec 문구 · 저장소에만 있는 chart-mono 토큰. Figma 의 차트 · KPI 는 옛 모양 그대로다 — 일괄 반영 때 그린다.
 
-`advisory 944` 는 기준 시스템 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
+2026-11-15 전체 점검 · 정리(사람의 요청 · 결정 열둘) — contrast 3120 → 3192 · advisory 944 → 943 · behave 1432 → 1440(`behave.review.js` 8) · react 820+6 → 828+6(`tests/labels-parity.test.ts` 8). verify 수는 그대로.
+- **버그 일곱(단정 먼저, 음성 시험으로 실패 확인)** — Select Button `ds:select` 의 detail 이 null 이라 Resources 예시 `e.detail.value` 가 TypeError 였다(`{value}` · `ds:tab` 도 `{value, index}`), `data-debounce="0"` 이 300ms 가 됐다, outline Pagination 의 hover · 눌림 면이 쉬는 상태 규칙에 덮였다, 고른 List 행이 hover 에 brand 틴트를 잃었다, Notice 닫기의 인라인 160ms → `--motion-fast` · 줄인 모션이면 바로 지움.
+- **사이트에 없던 이벤트 셋**(사람의 결정) — `ds:chip-toggle {selected, value}` · `ds:chip-remove {value}` · `ds:notice-close`(계획의 `ds:change` · `ds:remove` · `ds:close` 는 다른 컴포넌트와 이름이 겹쳐 컴포넌트 이름을 붙였다). React 콜백과 짝. 표시 개수 Select 는 전체 건수가 가장 작은 표시 개수 이하이면 사이트에서도 숨긴다(사람의 결정 — React 와 같게). 칩 지우기 이름 '제거'(사람의 결정).
+- **정리** — 하드코딩 반경 0.375 · 0.25rem 을 반경 토큰으로(값 같음), 쓸모없는 선언(음성 시험으로 확인), React 운영 모드에서도 찍히던 `console.warn` 을 개발 모드 가드로, Banner 아이콘을 톤에 따라, 금지 라벨 `more:"더 보기"` 문구 지움, Tree 실패 문구에 다음 행동, `DS.version` = 데이터의 버전, 빈 단정 덩어리 · 없는 선택자 · 남은 설정 파일 줄 지움, Table zebra 예제를 `density` · `rowStyle` 로(옛 prop shim 은 1.0 때까지 — 사람의 결정, MIGRATION '1.0 정리 목록'), 런타임 CSS 변수 허용 목록을 `lib.js` 한 상수로 · 줄인 모션 블록을 sync-css 가 원본에서 떠 감, `grammarOnly` 를 실제 소비자에 맞게(사람의 결정 — 토큰은 그대로).
+- **수의 근거:** contrast +72 = 경고 · 위험 Banner 의 글자 · 아이콘 · 버튼 라벨 / 틴트 면 2 × 합성 바탕 3 × 맥락 12(틴트 면 위라 재지 않고 있었다 — 모두 통과). advisory −1 = `--foreground-neutral-strong` 의 '소비자 0' 경고를 이유와 함께 `grammarOnly` 로. 같은 날 WBS 를 지워 `--company-mark` 의 CSS 소비자가 0 이 되어 이유와 함께 `grammarOnly` 에 더했다(제품 로고 자리 · Foundations 그림이 씀 — 그대로 두면 +1). behave +8 = 위 버그 · 이벤트 단정. react +8 = 사이트 ds.js 와 React 의 UI 문구 여덟 묶음이 같은지 대조(지금도 같지만 지켜 주는 것이 없었다).
+- **문서 수치 · 기술 표** — Usage 문단의 없는 토큰 이름, About 의 수(데이터에서 셈), Radius 목록, ds.js 동작 표를 실제 이벤트에서(verify 가 `ds.src.js` 가 내는 이벤트와 표를 대조), Spec 값(Button 삭제 = 중립 · 차트 카드 제목 Body 1/Normal 16 SemiBold · 달력 14 · Empty State 아이콘 · 포커스 링 · Breadcrumb 간격 · Tag 높이 · Steps), 빠진 Props 줄, README 두 개의 수를 데이터에서 계산.
+- **미정 기본값**(Time Picker 칸 · 영역 그라데이션 알파 · AI 그라데이션 끝 색 · 상단 내비 40 · 알림 항목 여백 · Tag 최대 폭 · Copy Field · Number Input · 행 펼침 · Date Picker 시각 동작)을 선택지로 물어 **모두 그대로 유지**(사람의 결정).
+- 이 날의 CLAUDE.md 11-13 항목의 `noUncheckedIndexedAccess` 설명을 tsconfig(false)대로 바로잡았다.
+
+2026-11-15 전 페이지 설명 문구 · v0.9 · WBS 삭제(사람의 요청 · 결정) — pages 77 → 76. 게이트의 다른 수는 위 항목 그대로.
+- **본문만 서술형으로**(사람의 결정) — 컴포넌트 46 · 패턴 10 의 정의 · 고르기 표 · Rules · 예제 설명, Foundations 8 페이지의 소개와 표 설명, Home(시작하기 · About · Principles), 공통 문단(Usage · Props 소개 · Composition). 합니다체 · 한 문장에 한 가지 · 토큰 · 클래스 · 속성 · 이벤트 · `<code>` · 날짜 · 결정 이력 · 빌드 언급 없음 · 괄호는 한 문장에 하나까지. **Spec · Props 표와 Resources 개발 페이지(React Package · Design Token · Figma Library)는 기술 문서로 둔다.** 고르기 표의 Placement 행은 Figma 대조가 읽는 자리라 글은 그대로 두고 클래스 이름 괄호만 걷었다.
+- **잰 값**(`scratchpad prose-survey` — 본문 덩어리 705): 코드 306 → 0 · 개발 언급 153 → 4(링크 주소 `data-…` 를 잘못 센 것) · 괄호 273 → 9(Placement 행 8 · 글자 그대로 읽히는 '(새 창)' 1) · 토큰 14 → 0 · 날짜 9 → 0 · 결정 이력 2 → 0.
+- **지운 내용:** 규칙의 근거였던 이력('전에는 …였다' · '…정비 때' · 결정 날짜), 구현 설명(Props 에 같은 내용이 있는 속성 · 이벤트 이름), '빌드가 검사합니다' 꼬리. 규칙 자체는 지우지 않았다. 다시 쓰다 원문 수치가 코드와 다른 것을 찾아 고쳤다 — Data Table Compact 의 '시간 · IP 는 모노스페이스'(고정폭은 Code 에만), Data Visual 의 '5개를 넘으면'(→ 5개 이상), Elevation 의 단계별 쓰임(실제 소비자로 — xs · lg · spread 는 쓰는 컴포넌트가 없다), Grid 의 카드 간격.
+- **verify 더함** — 위 본문 자리(컴포넌트 · 패턴 데이터)와 Foundations · Home 의 소개 문단에서 토큰 · 코드 · 날짜 · 결정 이력 · 빌드 언급 · 한 문장 괄호 둘 이상을 막는다(Placement 행은 괄호 수만 보지 않음). 음성 시험 9건 모두 잡혔다.
+- **v0.9**(사람의 결정) — Changelog 에 11-09 ~ 11-15 항목, `VERSION` v0.9 · 패키지 0.9.0(check-version), MIGRATION 제목 0.6.x → 0.9.0. **WBS 페이지를 지웠다**(사람의 결정 — 메뉴 · render 함수 · `table.wbs` · `.wbs-legend` CSS). Changelog 의 옛 항목(v0.1 ~ v0.8)도 토큰 · 파일 경로 없이 서술형으로 다시 썼다(내용은 그대로).
+- Figma 미반영 732 → 736건 — 클래스 이름 괄호를 걷은 Placement 행 넷(Checkbox · Dropdown · Select · Top Navigation, Figma 는 옛 글). 차트 카드 제목 Spec 은 이미 어긋난 행이라 수에 없다.
+
+`advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
 ## 토큰 체계 (v0.8)
 
 - **Atomic** `--{램프}-{단계}` — 램프 13개, **숫자가 클수록 밝습니다**. 컴포넌트에서 직접 쓰지 않습니다.
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
-  여섯 그룹 **90개**(참조 75 + 더한 15) + 트리 밖 19개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 16) = **109**.
+  여섯 그룹 **90개**(기준 75 + 더한 15) + 트리 밖 19개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 16) = **109**.
   더한 것 중 6개는 Tag 글자용 `--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy`(2026-11-11),
   5개는 입력 링 `--line-field-focus` · `-halo` 와 AI 면 `--surface-brand-gradient` · `-strong` · `-heavy`(2026-11-14).
 - **차트 토큰** `--chart-mono-1~4`(한 톤 — 기본, 제품과 무관한 고정 파랑 명도 단계, 2026-11-15) · `--chart-series-1~6`(범주색 — tone 없는 계열 5개부터 · 순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는

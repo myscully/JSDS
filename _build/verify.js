@@ -666,7 +666,7 @@ if (!fs.existsSync(path.join(OUT, "resources/react.html"))) fails.push("resource
 if (!fs.existsSync(path.join(OUT, "home/getting-started.html"))) fails.push("home/getting-started.html 없음");
 else { const gs = article(read("home/getting-started.html")); for (const m of gs.matchAll(/data-copy="([^"]+)"/g)) if (!new RegExp(`id="${m[1]}"`).test(gs)) fails.push(`home/getting-started.html: data-copy 대상 #${m[1]} 없음`); if (/href="#\//.test(gs)) fails.push('home/getting-started.html: 변환되지 않은 href="#/"'); if (!/data-doctab="designer"/.test(gs) || !/class="guide-steps"/.test(gs)) fails.push("home/getting-started.html: 대상별 탭·단계 목록 없음"); if (!/id="platforms"/.test(gs) || !/1024–1279/.test(gs)) fails.push("home/getting-started.html: 지원 환경 표 없음"); }
 if (!/href="home\/getting-started\.html"/.test(read("index.html"))) fails.push("index.html: Getting started 링크 없음");
-// Foundations: 참조 구성(Overview + Base material 5) + Writing · Interaction, 옛 페이지 없음
+// Foundations: 기본 구성(Overview + Base material 5) + Writing · Interaction, 옛 페이지 없음
 const fnd = fs.readdirSync(path.join(OUT, "foundations")).filter(f => f.endsWith(".html")).sort().join(",");
 /* writing · interaction 은 우리가 더한 페이지(2026-11-05 taste-skill copy 규칙을 옮김 · 2026-11-09 공통 동작 규칙) */
 if (fnd !== "colors.html,elevation.html,grid.html,icons.html,index.html,interaction.html,overview.html,typography.html,writing.html") fails.push("foundations/ 페이지 구성이 다름: " + fnd);
@@ -776,10 +776,10 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
     if (!css0.includes(`:root[data-accent="${p.key}"]{--brand-40:`)) fails.push(`style.src.css: 중립 제품 '${p.key}' 의 :root[data-accent="${p.key}"] 블록이 없다`);
 }
 
-/* 값 대조 — 시멘틱 75×2 와 램프가 기준 시스템의 정의와 한 글자까지 같은지.
+/* 값 대조 — 시멘틱 75×2 와 램프가 기준 토큰의 정의와 한 글자까지 같은지.
    "값까지 동일하게 교체"가 이번 설계의 정의이므로 이것이 1차 방어선이다:
    여기가 틀리면 대비·행동 검사가 다 통과해도 틀린 것이다. 정의는 base-tokens.js 에 코드로 있다 */
-for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스템과 다름 — ${d}`);
+for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 토큰과 다름 — ${d}`);
 
 /* CSS 안의 var() 가 전부 선언된 토큰을 가리키는지.
    센티넬 가드는 '쌍 선언에 등장하는 토큰'만 보고, data-token 가드는 HTML 속성만 본다 —
@@ -789,12 +789,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
 {
   const cut = css.indexOf("*{box-sizing");
   const declared = new Set([...css.slice(0, cut).matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
-  /* --float-*: 스크롤 영역 안 메뉴의 자리 · 폭 — ds.js · React 가 열 때 재서 넣는다(2026-11-10) */
-  /* --tp-top · --tp-left 는 Time Picker 열 목록 자리(2026-11-13, 같은 방식). --dp-top · --dp-left: Date Picker 달력 자리 — ds.js · React 가 열 때 재서 host 에 넣고, CSS 는 늘 기본값(필드 아래 4px · 왼쪽 0)을 함께 쓴다(2026-10-27) */
-  /* --a: 정적 도넛 경계 구분선의 각도 — 마크업 인라인 style 이 넣고 CSS .donut i 가 기본값(0deg)과 함께 쓴다(2026-11-05) */
-  /* --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면 — 표 규칙 안에서 정하고 td 가 기본값(transparent)과 함께 쓴다(2026-11-11) */
-  /* --avatar-ring: Avatar Group 링 · 겹친 면의 밑색 — 놓인 자리의 면(2026-11-13) */
-  const LOCAL = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5"];   /* --d1~5: 정적 도넛 조각의 누적 % (2026-11-15) */
+  const LOCAL = LIB.LOCAL_VARS;   /* 런타임 · 지역 CSS 변수 — 목록과 이유는 lib.js 한 곳(sync-css 도 같은 목록) */
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
   const missing = [...used].filter((t) => !declared.has(t) && !t.startsWith("--prod-") && !LOCAL.includes(t)).sort();
   for (const t of missing) fails.push(`style.css: var(${t}) 를 쓰는데 선언이 없다 — 그 자리는 상속색으로 떨어진다`);
@@ -895,6 +890,50 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 시스
   const isScalar = (k) => /^--(space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row|code)-/.test(k) || /^--static-/.test(k) || k === "--brand-label" || k === "--company-mark" || k === "--company-mark-subtle";
   const orphan = [...declared].filter((t) => !isPrim(t) && !isScalar(t) && !pointed.has(t)).sort();
   if (orphan.length) warns.push(`Colors 페이지에 스와치가 없는 의미 토큰 ${orphan.length}개 — ${orphan.slice(0, 6).join(" ")}${orphan.length > 6 ? " …" : ""}`);
+}
+
+/* 본문 문구(사람의 요청 2026-11-15) — 정의 · 고르기 표 · Rules · 예제 설명 · 패턴 원칙과 Foundations · Home 의 소개 문단은 서술형으로 쓴다.
+   토큰 · 코드 · 날짜 · 결정 이력 · 빌드 언급을 두지 않고, 괄호는 한 문장에 하나까지. 정확한 이름은 Spec · Props 표가 나른다.
+   고르기 표의 Placement 행은 Figma 대조가 읽는 자리라 괄호 수만 보지 않는다(나머지 금지는 같다) */
+{
+  const BAD = [[/--[a-z][a-z0-9-]+/, "토큰 이름"], [/<code\b/, "코드"], [/\b20\d\d-\d\d/, "날짜"], [/사람의 결정|사람이 정/, "결정 이력"],
+    [/\bverify\b|\bbehave\b|ds\.js|빌드가 검사/, "빌드 언급"]];
+  const plain = (s) => String(s || "").replace(/<a\b[^>]*>|<\/a>|<\/?(b|strong|em|i)>/g, "").replace(/\$\{[^}]*\}/g, "X");
+  const check = (where, s, parens = true) => {
+    const p = plain(s); if (!p) return;
+    for (const [re, label] of BAD) { const m = p.match(re); if (m) fails.push(`${where}: 본문에 ${label} '${m[0]}' — 말로 풀고 정확한 이름은 Spec · Props 에 둡니다`); }
+    if (parens) for (const sen of p.split(/(?<=[.다])\s+/)) if ((sen.match(/\(/g) || []).length > 1) fails.push(`${where}: 한 문장에 괄호 둘 이상 — '${sen.slice(0, 60)}'`);
+  };
+  const rows = (pr) => (Array.isArray(pr) ? pr : Object.values(pr || {}).flat()).filter(Array.isArray);
+  for (const [k, c] of Object.entries(COMPONENTS)) {
+    check(`components/${k} 정의`, c.desc);
+    for (const r of c.choose || []) check(`components/${k} 고르기 표 '${r[0]}'`, r[1], r[0] !== "Placement");
+    for (const r of rows(c.principles)) check(`components/${k} Rules '${r[0]}'`, r[1]);
+    for (const e of c.examples || []) check(`components/${k} 예제 ${e.id}`, e.desc);
+  }
+  for (const [k, c] of Object.entries(PATTERNS)) {
+    check(`patterns/${k} 정의`, c.desc);
+    for (const r of rows(c.principles)) check(`patterns/${k} 원칙 '${r[0]}'`, r[1]);
+    for (const e of c.examples || []) check(`patterns/${k} 예제 ${e.id}`, e.desc);
+  }
+  for (const sec of ["foundations", "home"]) for (const n of fs.readdirSync(path.join(OUT, sec)).filter((x) => x.endsWith(".html"))) {
+    const html = fs.readFileSync(path.join(OUT, sec, n), "utf8");
+    for (const m of html.matchAll(/<p class="lead">([\s\S]*?)<\/p>/g)) check(`${sec}/${n} 소개 문단`, m[1]);
+  }
+}
+
+/* ds.js 이벤트 표 — ds.src.js 가 내는 "ds:*" 이벤트가 모두 React Package › 이벤트 표에 있고, 표에 없는 이벤트가 없다(2026-11-15).
+   손으로 쓰던 목록이 Tree · 알림 센터 · Time Picker 를 빠뜨리고 없어진 .onboard 를 남겨 두었다 */
+{
+  const src = fs.readFileSync(path.join(__dirname, "ds.src.js"), "utf8");
+  const fired = new Set([...src.matchAll(/"(ds:[a-z-]+)"/g)].map((m) => m[1]));
+  const page = fs.readFileSync(path.join(OUT, "resources", "react.html"), "utf8");
+  const tbl = (page.split('id="dsjs-events"')[1] || "").split("</table>")[0];
+  const listed = new Set([...tbl.matchAll(/<td><code>(ds:[a-z-]+)<\/code><\/td>/g)].map((m) => m[1]));
+  if (!listed.size) fails.push("resources/react.html: ds.js 이벤트 표(#dsjs-events)를 찾지 못했습니다");
+  for (const e of fired) if (!listed.has(e)) fails.push(`resources/react.html: ds.js 가 내는 ${e} 가 이벤트 표에 없습니다`);
+  for (const e of listed) if (!fired.has(e)) fails.push(`resources/react.html: 이벤트 표의 ${e} 는 ds.js 가 내지 않습니다`);
+  if (/\.onboard\b/.test(page)) fails.push("resources/react.html: 없어진 .onboard 동작이 남아 있습니다");
 }
 
 console.log(`verify: 실패 ${fails.length} · 경고 ${warns.length} · 남은 .ph ${phTotal}개(${phPages.join(", ") || "없음"})`);

@@ -7,7 +7,7 @@
 @font-face{font-family:"Pretendard";font-weight:45 920;font-style:normal;font-display:swap;src:url("PretendardVariable.woff2") format("woff2-variations")}
 :root{
   /* ── Primitive · Atomic ───────────────────────────────────────
-     기준 시스템의 램프를 **값과 번호 체계까지 그대로** 쓴다.
+     기준 토큰의 램프를 **값과 번호 체계까지 그대로** 쓴다.
      번호는 숫자가 클수록 밝다(5 가 가장 어둡고 99 가 가장 밝다) — 우리 종전 체계와 방향이 반대다.
      의미 토큰만 이 이름을 참조한다. 컴포넌트가 직접 쓰면 verify 가 실패시킨다.
      출처: packages/theme 의 atomic 램프 파일 전부. 손으로 적지 않는다 */
@@ -24,18 +24,18 @@
   --purple-10:#290247;--purple-20:#580A7D;--purple-30:#861CB8;--purple-40:#AD36E3;--purple-50:#CB59FF;--purple-60:#D478FF;--purple-70:#DE96FF;--purple-80:#E9BAFF;--purple-90:#F2D6FF;--purple-95:#F9EDFF;--purple-99:#FEFBFF;
   --pink-10:#3D0133;--pink-20:#730560;--pink-30:#A81690;--pink-40:#D331B8;--pink-46:#E846CD;--pink-50:#F553DA;--pink-60:#FA73E3;--pink-70:#FF94ED;--pink-80:#FFB8F3;--pink-90:#FED3F7;--pink-95:#FEECFB;--pink-99:#FFFAFE;
   --red-orange-10:#290F00;--red-orange-20:#592100;--red-orange-30:#913500;--red-orange-40:#C94A00;--red-orange-48:#F55A00;--red-orange-50:#FF5E00;--red-orange-60:#FF7B2E;--red-orange-70:#FF9B61;--red-orange-80:#FFBD96;--red-orange-90:#FED9C4;--red-orange-95:#FEEEE5;--red-orange-99:#FFFAF7;
-  /* 제품 메인 컬러 슬롯 — 기준 시스템에서 고정 파랑이던 brand 가 우리에게는 '제품이 주입하는 색'이다.
+  /* 제품 메인 컬러 슬롯 — 기준 토큰에서 고정 파랑이던 brand 가 우리에게는 '제품이 주입하는 색'이다.
      applyAccent 가 --prod-* 를 인라인으로 넣으면 다섯 단계가 한꺼번에 갈린다.
-     기본값은 blue 램프와 같다 — 제품을 지정하지 않으면 참조 값과 픽셀까지 일치한다.
+     기본값은 blue 램프와 같다 — 제품을 지정하지 않으면 기준 값과 픽셀까지 일치한다.
      다섯 단계뿐인 이유: 시멘틱이 brand 를 40·45·50·55·60 에서만 집는다.
      파생 규칙은 blue 램프에서 읽어 냈다 — 단계 번호가 곧 HSL 명도 %다(40→41.0 · 45→46.1 · 50→50.0 · 55→55.1 · 60→60.0).
      그래서 제품 HEX 를 50 에 놓고 L 을 −9.0 · −3.9 · +5.1 · +10.0 %p 옮기면 blue 가 재현된다(55 만 반올림으로 1 단위 어긋난다: #1A76FF vs #1A75FF) */
   --brand-40:var(--prod-40,var(--blue-40));--brand-45:var(--prod-45,var(--blue-45));--brand-50:var(--prod-50,var(--blue-50));--brand-55:var(--prod-55,var(--blue-55));--brand-60:var(--prod-60,var(--blue-60));
   /* ── Semantic · Light ─────────────────────────────────────────
-     기준 시스템의 의미 층을 값까지 그대로 받았다. 75 토큰.
+     기준 토큰의 의미 층이다. 75 토큰.
      이름은 트리 경로를 그대로 편 것이다 — color/semantic/surface/brand/heavy → --surface-brand-heavy.
      Figma 변수 경로와 1:1 이고, 토큰 이름이 공개 API 라 줄이지 않는다.
-     알파가 들어간 토큰이 36개다. 글자에 알파를 쓰지 않는다는 우리 규칙은 기준 시스템이 이미 어긴다
+     알파가 들어간 토큰이 36개다. 글자에 알파를 쓰지 않는다는 우리 규칙은 기준 토큰이 이미 어긴다
      (foreground-neutral-secondary 가 88% 알파다) — 대신 그 글자들을 세 바탕 전부에서 재도록 쌍 선언에 넣는다 */
   --foreground-neutral-primary:var(--cool-neutral-10);--foreground-neutral-strong:var(--cool-neutral-20);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-22) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-25) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-25) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-99);
   --foreground-brand-primary:var(--brand-40);--foreground-brand-inverse:var(--brand-60);
@@ -65,7 +65,7 @@
   --effect-transparent-primary:color-mix(in srgb,var(--static-white) 8%,transparent);--effect-transparent-secondary:color-mix(in srgb,var(--static-white) 28%,transparent);
   --static-white:#FFFFFF;
   --static-black:#000000;
-  /* ── Chart(트리 밖) · 탐색형 차트(Chart.js) 전용 — 기준 시스템에 없어 우리가 더했다(base-tokens.js ADDITIONS, 사람의 결정 2026-11-03).
+  /* ── Chart(트리 밖) · 탐색형 차트(Chart.js) 전용 — 기준 토큰에 없어 우리가 더했다(base-tokens.js ADDITIONS, 사람의 결정 2026-11-03).
      계열 6색은 제품색(brand)과 무관한 고정 램프이고 순서가 고정이다. 상태색과 같은 단계는 피했다(orange-39 ≠ cautionary orange-50 · light-blue ≠ Medium cyan · lime ≠ positive green).
      dataviz 검증기(validate_palette.js) 라이트, 바탕 #FFFFFF · #F7F7F8: 명도 띠 PASS · 채도 PASS · 색각 분리 worst 13.1(violet↔light-blue, deutan) PASS · 정상 시각 20.4 PASS · 3:1 전부 PASS.
      캔버스는 CSS 변수를 못 읽는다 — ds-chart.js 가 계산값으로 읽어 칠한다. 심각도 계열은 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰을 그대로 쓴다(5단계, 2026-11-06 · Critical · Medium 톤 2026-11-09 · Medium ↔ Low 색 교체 2026-11-11)
@@ -77,10 +77,10 @@
      다크 blue-80 · 70 · 60 · 45 / #212225 — 같은 검사 PASS(옅은 끝 2.88). 둘째 · 넷째 계열 순서 규칙은 ds-chart.js MONO_STEPS(2계열 = 1 · 4 단계) */
   --chart-mono-1:var(--blue-40);--chart-mono-2:var(--blue-50);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-70);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
-  /* 참조 트리 밖 — 셋뿐이고, 왜 밖인지가 각각 적혀 있다 */
+  /* 기준 트리 밖 — 셋뿐이고, 왜 밖인지가 각각 적혀 있다 */
   /* 지란지교시큐리티 회사 마크. 이 시스템의 brand 는 제품 색이라 회사 정체성 표기가 들어갈 자리가 없다 */
   --company-mark:#FF7F00;--company-mark-subtle:#FFF4E8;
-  /* brand 면 위의 글자. 기준 시스템은 늘 static.white 지만, 제품이 밝은 색이면 그 흰 글자가 뜬다 —
+  /* brand 면 위의 글자. 기준 토큰은 늘 static.white 지만, 제품이 밝은 색이면 그 흰 글자가 뜬다 —
      제품 색은 흰 글자가 4.5 를 넘어야 한다는 제약이 있고 빌드가 검사한다 — 그래서 라이트에서는 늘 흰색이다.
      남는 예외는 다크 + 중립 전환 하나뿐이다: 거기선 면이 밝은 회색이라 글자가 어두워야 한다 */
   --brand-label:var(--static-white);
@@ -119,7 +119,7 @@
 :root[data-accent="neutral"]{--brand-40:var(--cool-neutral-15);--brand-45:var(--cool-neutral-22);--brand-50:var(--cool-neutral-30);--brand-55:var(--cool-neutral-40);--brand-60:var(--cool-neutral-50);--foreground-brand-inverse:var(--cool-neutral-60);--surface-brand-primary:var(--brand-40);--surface-brand-strong:var(--brand-45);--surface-brand-heavy:var(--brand-50)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   /* ── Semantic · Dark ──────────────────────────────────────────
-     라이트와 같은 75 토큰이다. 값의 출처도 같다 — 기준 시스템의 dark 테마를 그대로 받았다.
+     라이트와 같은 75 토큰이다. 값은 기준 토큰의 dark 테마다.
      이 블록은 아래 :root[data-theme="dark"] 에 **한 글자까지 같게** 한 번 더 들어간다.
      verify 가 두 벌의 동일성을 검사한다 — 한쪽만 고치면 OS 설정으로 들어온 다크가 조용히 낡는다 */
   --foreground-neutral-primary:var(--cool-neutral-99);--foreground-neutral-strong:var(--cool-neutral-90);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-90) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-80) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-80) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-10);
@@ -161,7 +161,7 @@
 }}
 :root[data-theme="dark"]{
   /* ── Semantic · Dark ──────────────────────────────────────────
-     라이트와 같은 75 토큰이다. 값의 출처도 같다 — 기준 시스템의 dark 테마를 그대로 받았다.
+     라이트와 같은 75 토큰이다. 값은 기준 토큰의 dark 테마다.
      이 블록은 아래 :root[data-theme="dark"] 에 **한 글자까지 같게** 한 번 더 들어간다.
      verify 가 두 벌의 동일성을 검사한다 — 한쪽만 고치면 OS 설정으로 들어온 다크가 조용히 낡는다 */
   --foreground-neutral-primary:var(--cool-neutral-99);--foreground-neutral-strong:var(--cool-neutral-90);--foreground-neutral-secondary:color-mix(in srgb,var(--cool-neutral-90) 88%,transparent);--foreground-neutral-tertiary:color-mix(in srgb,var(--cool-neutral-80) 61%,transparent);--foreground-neutral-quaternary:color-mix(in srgb,var(--cool-neutral-80) 28%,transparent);--foreground-neutral-inverse:var(--cool-neutral-10);
@@ -388,33 +388,7 @@ ul:where(:not(.example-preview *)),ol:where(:not(.example-preview *)){padding-le
 .guide-steps>li b{color:var(--foreground-neutral-primary)}
 .guide-steps .code-block{margin:var(--space-3) 0 0}
 .guide-steps>li:last-child{padding-bottom:0}
-/* Resources › WBS (임시 · v1.0 공개 시 제거) — 주차 간트 표 */
-table.wbs{table-layout:fixed;min-width:55rem;font-size:var(--font-size-12)}
-table.wbs th{height:auto;padding:0.5rem 0.375rem;text-align:center;line-height:1.3;white-space:normal}
-table.wbs th:first-child{text-align:left;width:11.875rem;padding-left:var(--space-4)}
-table.wbs th small{display:block;font-weight:400;font-size:max(0.625rem,10px);color:var(--foreground-neutral-tertiary);}
-table.wbs th.end{color:var(--company-mark)}
-table.wbs td{height:2.375rem;padding:0 0.375rem;border-left:1px solid var(--line-neutral-tertiary)}
-table.wbs td:first-child{border-left:0;padding:0.375rem var(--space-4);white-space:nowrap}
-table.wbs td:first-child b{display:block;font-size:0.8125rem}
-table.wbs td:first-child span{font-size:max(0.6875rem,11px);color:var(--foreground-neutral-tertiary)}
-table.wbs tr.sub td:first-child b{font-weight:500;color:var(--foreground-neutral-secondary);padding-left:0.75rem}
-table.wbs td.hol,table.wbs th.hol{background:var(--background-neutral-secondary)}
-table.wbs td.bar,table.wbs td.sub,table.wbs td.base,table.wbs td.final{position:relative}
-table.wbs td.bar::before,table.wbs td.sub::before,table.wbs td.base::before,table.wbs td.final::before{content:"";position:absolute;inset:0.5rem 0;background:var(--foreground-brand-primary)}
-table.wbs td.sub::before{background:var(--line-brand-strong)}
-table.wbs td.base::before{background:var(--foreground-inactive-primary)}
-table.wbs td.final::before{background:var(--company-mark)}
-table.wbs td.always::before{content:"";position:absolute;inset:0.625rem 0;border-top:1px dashed var(--line-neutral-primary);border-bottom:1px dashed var(--line-neutral-primary)}
-table.wbs td.always{position:relative}
-table.wbs td span.l{position:relative;z-index:1;color:var(--brand-label);font-size:max(0.6875rem,11px);font-weight:600;white-space:nowrap;padding-left:2px}
-table.wbs td.sub span.l{color:var(--foreground-neutral-primary)}
-table.wbs td.always span.l{color:var(--foreground-neutral-tertiary);font-weight:500}
-table.wbs td.ms{box-shadow:inset -2px 0 var(--company-mark)}
-.wbs-legend{display:flex;flex-wrap:wrap;gap:0.375rem 1.125rem;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);margin:var(--space-3) 0 var(--space-8)}
-.wbs-legend i{display:inline-block;width:0.875rem;height:0.625rem;border-radius:2px;background:var(--foreground-brand-primary);vertical-align:-1px;margin-right:0.375rem}
-.wbs-legend i.sub{background:var(--line-brand-strong)}.wbs-legend i.final{background:var(--company-mark)}.wbs-legend i.hol{background:var(--background-neutral-secondary);border:1px solid var(--line-neutral-secondary)}.wbs-legend i.ms{width:0.1875rem;border-radius:0;background:var(--company-mark)}
-/* 컬러바 — 기준 시스템과 같은 형태: 높이 32, 가로 간격 0(바가 붙어 한 줄), 직각 + 위아래 1px hairline, 라벨은 8px 아래 가운데.
+/* 컬러바 — 높이 32, 가로 간격 0(바가 붙어 한 줄), 직각 + 위아래 1px hairline, 라벨은 8px 아래 가운데.
    hover·팝오버 열림에서는 **바 상자 자체가** 8px 위로 자란다. 자라는 주체가 중요하다 —
    체커 배경(--checker-bg)과 위아래 hairline, .faint 외곽선이 전부 .bar 에 붙어 있어서,
    종전처럼 색 레이어(i)만 키우면 자란 8px 에는 체커가 없고 윗 라인이 색을 가로질렀다.
@@ -780,7 +754,6 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])),.field textarea{height:2.5rem;border:1px solid var(--line-neutral-primary);border-radius:var(--radius-md);padding:0 0.875rem;font:inherit;font-size:var(--font-size-14);background:var(--surface-elevated-primary);color:var(--foreground-neutral-primary);width:100%;transition:border-color var(--motion-fast),box-shadow var(--motion-fast);line-height:1.375rem;letter-spacing:0.0145em}
 .field textarea{height:auto;min-height:6rem;padding:0.625rem 0.875rem;resize:vertical;line-height:1.375rem}
 .field input::placeholder,.field textarea::placeholder{color:var(--foreground-neutral-tertiary)}
-.field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):hover,.field textarea:hover{border-color:var(--line-neutral-primary)}
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):focus,.field textarea:focus-within{border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo);outline:none}   /* 값 입력 필드의 포커스 — 테두리 1px 불투명 --line-field-focus(기본 brand · 빨강 · 주황 제품은 중립) + 바깥 4px 후광(장식). 전역 :focus-visible 외곽선과 겹치지 않게 끈다(사람의 결정 2026-10-26 — 안쪽 1px 를 더한 2px 가장자리에서 1px 로) */
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):disabled,.field textarea:disabled{background:var(--surface-disable-primary);color:var(--foreground-disable-primary);cursor:not-allowed}
 .field input:where(:not([type=checkbox]):not([type=radio]):not([type=range])):read-only:not(:disabled){background:var(--background-neutral-secondary)}   /* :read-only 는 disabled 입력에도 맞는다 — 뒤에 있어 비활성 면(--surface-disable-primary)을 읽기 전용 색으로 덮었다(2026-10-27 실측 rgb 247 ≠ 244) */
@@ -848,7 +821,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .searchbar:has(input:focus){border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo);outline:none}   /* 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 함께 나왔다(사람의 결정 2026-10-26) */
 .searchbar .clear{border:0;padding:0;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);width:1.25rem;height:1.25rem;border-radius:50%;font:inherit;font-size:var(--font-size-12);line-height:0;cursor:pointer;display:grid;place-items:center;flex:none}
 .searchbar .clear svg{display:block;width:0.75rem;height:0.75rem}
-.searchbar kbd{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:0.25rem;padding:1px 0.3125rem;background:var(--background-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
+.searchbar kbd{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-sm);padding:1px 0.3125rem;background:var(--background-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .searchbar input::-webkit-search-cancel-button,.searchbar input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}   /* 브라우저 기본 ×가 .clear 와 나란히 두 개 떴다 */
 .searchbar.lg{height:3rem}
 .searchbar.lg input{font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
@@ -1012,7 +985,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .notify-more .msg:empty{display:none}
 .calendar{width:18.5rem;padding:1.25rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}   /* 패딩 20(사람의 결정 2026-11-09) · 글자 14 — 11-09 의 13 을 단계 14 로 묶음(사람의 결정 2026-11-11) */
 .calendar .cal-head{display:flex;align-items:center;justify-content:space-between;font-weight:600;padding:0 0.25rem 1rem}   /* 아래 16(사람의 결정 2026-11-09) */
-.calendar .cal-head button{border:0;background:transparent;font:inherit;letter-spacing:inherit;cursor:pointer;width:1.75rem;height:1.75rem;border-radius:0.375rem;color:var(--foreground-neutral-secondary)}
+.calendar .cal-head button{border:0;background:transparent;font:inherit;letter-spacing:inherit;cursor:pointer;width:1.75rem;height:1.75rem;border-radius:var(--radius-md);color:var(--foreground-neutral-secondary)}
 .calendar .cal-head button:hover{background:var(--surface-neutral-secondary)}
 .calendar .cal-head button:active{background:var(--surface-neutral-strong)}
 .calendar .cal-head button{display:grid;place-items:center}
@@ -1041,7 +1014,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .calendar .day:focus-visible{outline:none}
 .calendar .day:focus-visible::before{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}   /* 포커스도 원을 따라(전역 외곽선과 같은 1px · 2px 띄움) */
 .calendar .cal-grid.years,.calendar .cal-grid.months{grid-template-columns:repeat(3,1fr);gap:0.25rem}
-.calendar .cell{height:2.5rem;border:0;border-radius:0.375rem;background:transparent;font:inherit;letter-spacing:inherit;color:var(--foreground-neutral-primary);cursor:pointer}
+.calendar .cell{height:2.5rem;border:0;border-radius:var(--radius-md);background:transparent;font:inherit;letter-spacing:inherit;color:var(--foreground-neutral-primary);cursor:pointer}
 .calendar .cell:hover:not(.on,.in-range,[aria-disabled="true"]){background:var(--surface-neutral-secondary)}
 .calendar .cell:active:not(.on,.in-range,[aria-disabled="true"]){background:var(--surface-neutral-strong)}
 .calendar .cell.today{font-weight:700;color:var(--foreground-brand-primary)}
@@ -1136,14 +1109,12 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
 .chip:focus-within .lbl{max-width:none;overflow:visible}   /* 줄인 값은 지우기 버튼에 포커스가 오면 펼친다 — 키보드용. 마우스는 잘린 값에만 붙는 Tooltip(2026-11-12 — title 은 키보드로 볼 수 없어 쓰지 않는다, Interaction › Overflow) */
 .chip-group{display:flex;flex-wrap:wrap;gap:0.5rem;line-height:1.6}
 
-/* Tag — 기준 시스템의 Chip 패턴을 따른다: 바탕은 상태 틴트이고 **라벨은 중립 글자색**이다.
-   상태색을 라벨에 쓰면 라이트에서 2.1~3.4 로 떨어진다(주의 2.24 · 긍정 2.46 · 부정 3.44).
-   기준 시스템도 그 색을 배너의 제목·아이콘에만 쓰고 칩 라벨에는 쓰지 않는다 — 밀도 높은 표가 기본 화면이라 그 구분을 따른다.
-   색은 점(::before)과 테두리가 나른다. 심각도 다섯 등급은 Critical=negative · High=cautionary · Medium=accent lime · Low=accent light blue · Info=중립이고
+/* Tag — 바탕은 상태 틴트이고 라벨은 같은 색상의 heavy 글자다(사람의 결정 2026-11-11 — primary 글자는 틴트 위 2.1~3.4 라 4.5 를 넘는 heavy 단계를 더함).
+   점(::before)은 .dot 일 때만 나온다. 심각도 다섯 등급은 Critical=negative · High=cautionary · Medium=accent light blue · Low=accent lime · Info=중립이고(2026-11-11 Medium ↔ Low 교체)
    (사람의 결정 2026-11-06 — 4단계의 Medium 청록 자리를 라임 · 라이트 블루 두 단계가 대신하고, 옛 Low 의 회색은 Info 가 됐다),
-   마크업은 그대로다(class="tag critical" · React tone="critical"). 점 · 지표 색은 Critical=foreground/negative/strong · Medium=foreground/accent/lime(라이트 lime-40)이다(사람의 결정 2026-11-09 — 진한 빨강 · 진한 라임).
+   마크업은 그대로다(class="tag critical" · React tone="critical"). 점 · 지표 색은 Critical=foreground/negative/strong · Low=foreground/accent/lime(라이트 lime-40)이다(사람의 결정 2026-11-09 — 진한 빨강 · 진한 라임).
    pending 은 심각도가 아니라 상태 톤이다('검토 대기' — 옛 Medium 의 청록을 물려받는다. 심각도와 상태가 한 클래스를 나눠 쓰지 않게 갈랐다)
-   solid 는 '채운 태그'였다 — 기준 시스템에 솔리드 상태 면이 없어 같은 틴트 + 테두리로 한 단계 강조하도록 다시 디자인했다.
+   solid 는 솔리드 상태 면이 없어 같은 틴트 + 테두리로 한 단계 강조하도록 다시 디자인했다.
    색만으로 의미를 전달하지 않는다(1.4.1)는 라벨 병기가 담당하고 verify 가 그것을 검사한다 */
 .tag{display:inline-flex;align-items:center;gap:0.375rem;font-size:var(--font-size-12);font-weight:600;padding:0.1875rem 0.625rem;border-radius:var(--radius-full);line-height:max(1rem,16px);background:var(--surface-neutral-tertiary);color:var(--foreground-neutral-primary);flex:none;width:max-content;max-width:10rem;word-break:keep-all;letter-spacing:0.0252em}   /* 160 을 넘는 라벨만 줄바꿈 — 포커스를 받지 않아 잘라 내면 읽을 길이 없다 */
 .tag-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:0.25rem;max-width:100%;line-height:1.6}
@@ -1184,7 +1155,7 @@ td .tag-group{flex-wrap:nowrap}
 .tag.solid.low{box-shadow:inset 0 0 0 1px var(--line-accent-lime)}
 .tag.solid.pending{box-shadow:inset 0 0 0 1px var(--line-accent-cyan)}
 .tag.solid.ok{box-shadow:inset 0 0 0 1px var(--line-positive-primary)}
-/* accent 만 솔리드 면이 남는다 — 제품 브랜드 면은 기준 시스템에도 있다(surface/brand/primary) */
+/* accent 만 솔리드 면이 남는다 — 제품 브랜드 면은 기준 토큰에도 있다(surface/brand/primary) */
 .tag.solid.accent{background:var(--surface-brand-primary);color:var(--brand-label);box-shadow:none}
 .tag.solid.accent::before{background:var(--brand-label)}
 
@@ -1207,7 +1178,7 @@ td .tag-group{flex-wrap:nowrap}
 .dropdown.float .menu,.combobox.float .menu{position:fixed;top:var(--float-y,0)!important;bottom:auto!important;left:var(--float-x,0)!important;right:auto!important;min-width:var(--float-w,0);z-index:30}
 .dropdown.up .menu{top:auto;bottom:calc(100% + 0.25rem)}   /* 아래 공간이 모자라면 위로 뒤집어 연다(ds.js 가 열 때 계산) */
 .menu{min-width:12.5rem;padding:0.375rem;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);box-shadow:var(--shadow-2);list-style:none;margin:0;max-height:min(20rem,60vh);overflow-y:auto;overscroll-behavior:contain;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}   /* 항목 약 8개까지 보이고 그 뒤로는 메뉴 안에서 스크롤 */
-.menu-item{display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:0.375rem;font-size:var(--font-size-14);cursor:pointer;color:var(--foreground-neutral-primary);white-space:nowrap;line-height:1.375rem;letter-spacing:0.0145em}
+.menu-item{display:flex;align-items:center;gap:0.625rem;padding:0.5rem 0.625rem;border-radius:var(--radius-md);font-size:var(--font-size-14);cursor:pointer;color:var(--foreground-neutral-primary);white-space:nowrap;line-height:1.375rem;letter-spacing:0.0145em}
 a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decoration:none}   /* 이동 항목 — 진짜 링크(사람의 결정 2026-11-10). 글 안 링크 모양을 입지 않는다 */
 .menu-item:where(:not([aria-disabled="true"])):hover{background:var(--surface-neutral-tertiary)}   /* 메뉴 항목 호버는 tertiary(사람의 결정 2026-10-27 — Figma 에서 바꾼 것을 저장소로). 눌림은 strong */
 .menu-item:where(:not([aria-disabled="true"])):active{background:var(--surface-neutral-strong)}
@@ -1233,7 +1204,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tabs .tab.on .count{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
 .tabs.accent .tab.on{color:var(--foreground-brand-primary);border-bottom-color:var(--foreground-brand-primary)}
 .tabs.pill{display:inline-flex;gap:0.25rem;box-shadow:none;background:var(--surface-neutral-secondary);padding:0.1875rem;border-radius:var(--radius-md);width:auto;max-width:100%}
-.tabs.pill .tab{padding:0.3125rem 0.875rem;border:0;border-radius:0.375rem;margin:0;font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}
+.tabs.pill .tab{padding:0.3125rem 0.875rem;border:0;border-radius:var(--radius-md);margin:0;font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}
 .tabs.pill .tab.on{background:var(--surface-elevated-primary);box-shadow:var(--shadow-1);font-weight:600}
 .tabs.sm .tab{font-size:var(--font-size-14);padding:0.5rem 0.75rem;line-height:1.25rem;letter-spacing:0.0145em}   /* = Label 1/Normal 14/20, 높이 38(사람의 결정 2026-11-13) */
 .tab-panel{padding:1.25rem 0;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.375rem;letter-spacing:0.0145em}
@@ -1267,7 +1238,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .pagination.compact button{min-width:2rem;height:2rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .pagination.cursor button{display:inline-flex;align-items:center;justify-content:center;gap:0.25rem}
 .pagination.cursor .range{padding:0 0.5rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);font-variant-numeric:tabular-nums;line-height:1.375rem;letter-spacing:0.0145em}
-.pagination.outline button{border-color:var(--line-neutral-secondary);background:var(--surface-elevated-primary)}
+.pagination.outline button{border-color:var(--line-neutral-secondary)}
+.pagination.outline button:where(:not(:hover,:active),.on,[disabled]){background:var(--surface-elevated-primary)}   /* 쉬는 면만 — hover · 눌림 면을 덮지 않게(2026-11-15). 고른 칸은 hover 에도 흰 면 + brand 글자 */
 .pagination.outline button.on{border-color:var(--surface-brand-primary); color:var(--foreground-brand-primary);}
 .pagination-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%;font-size:var(--font-size-12);color:var(--foreground-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .pagination-bar .dropdown .trigger{height:2rem;min-width:7.5rem;font-size:var(--font-size-12);border-radius:var(--radius-sm);line-height:max(1rem,16px);letter-spacing:0.0252em}
@@ -1296,7 +1268,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* Top Navigation */
 .topbar{display:flex;align-items:center;gap:1rem;height:3.5rem;padding:0 1.25rem;background:var(--surface-elevated-primary);border-bottom:1px solid var(--line-neutral-secondary);width:100%;min-width:max-content;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}   /* 자리보다 좁으면 바가 내용 폭만큼 늘어 면 · 선이 끝까지 가고 바깥이 가로로 스크롤(사람의 결정 2026-11-13 — 데스크톱 콘솔 기준, 접기 · 메뉴 줄 스크롤 대신) */
 .topbar .logo{font-weight:700;display:flex;align-items:center;gap:0.5rem;text-decoration:none;color:var(--foreground-neutral-primary);white-space:nowrap}
-.topbar .logo i{width:1.5rem;height:1.5rem;border-radius:0.375rem;background:var(--surface-brand-primary);display:inline-block}
+.topbar .logo i{width:1.5rem;height:1.5rem;border-radius:var(--radius-md);background:var(--surface-brand-primary);display:inline-block}
 .topbar .logo small{font-weight:500;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .topbar nav{display:flex;gap:0.5rem;margin-left:0.5rem}
 .topbar nav a{padding:0.5rem 0.75rem;border-bottom:2px solid transparent;text-decoration:none;color:var(--foreground-neutral-secondary);font-size:var(--font-size-14);font-weight:500;white-space:nowrap;line-height:1.375rem;letter-spacing:0.0145em}
@@ -1426,7 +1398,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 
 /* Tooltip */
 .tooltip-wrap{position:relative;display:inline-flex;line-height:inherit}   /* 둘레 줄 높이를 따른다(2026-11-12 — 1.6 이면 칸 · 칩 · Breadcrumb 의 잘린 글자가 텍스트 스타일 밖 22.4 · 19.2 가 됐다) */
-.tooltip{position:absolute;left:50%;bottom:calc(100% + 0.5rem);transform:translateX(-50%);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-12);font-weight:500;line-height:max(1rem,16px);letter-spacing:0.0252em;padding:0.375rem 0.625rem;border-radius:0.375rem;white-space:nowrap;box-shadow:var(--shadow-2);z-index:10;pointer-events:none;opacity:0;transition:opacity var(--motion-fast)}
+.tooltip{position:absolute;left:50%;bottom:calc(100% + 0.5rem);transform:translateX(-50%);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-12);font-weight:500;line-height:max(1rem,16px);letter-spacing:0.0252em;padding:0.375rem 0.625rem;border-radius:var(--radius-md);white-space:nowrap;box-shadow:var(--shadow-2);z-index:10;pointer-events:none;opacity:0;transition:opacity var(--motion-fast)}
 .tooltip::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--surface-neutral-inverse)}
 .tooltip.bottom{bottom:auto;top:calc(100% + 0.5rem)}
 .tooltip.bottom::after{top:auto;bottom:100%;border-top-color:transparent;border-bottom-color:var(--surface-neutral-inverse)}
@@ -1464,7 +1436,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .toast.danger .ico{color:var(--foreground-negative-primary)}
 .toast .action{margin-left:auto;background:none;border:0;color:var(--foreground-brand-inverse);font:inherit;font-size:var(--font-size-12);font-weight:600;cursor:pointer;white-space:nowrap;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .toast .action:hover{text-decoration:underline}
-.toast .close,.banner .close{flex:none;margin-left:auto;border:0;background:transparent;color:inherit;font:inherit;line-height:1;cursor:pointer;padding:2px;display:grid;place-items:center;border-radius:0.25rem}
+.toast .close,.banner .close{flex:none;margin-left:auto;border:0;background:transparent;color:inherit;font:inherit;line-height:1;cursor:pointer;padding:2px;display:grid;place-items:center;border-radius:var(--radius-sm)}
 .toast .close svg,.banner .close svg{width:0.875rem;height:0.875rem}
 .toast .action~.close,.banner .btn~.close{margin-left:0}
 .toast button:focus-visible,.banner .close:focus-visible{outline-color:currentColor}   /* 기본 외곽선(brand)은 어두운 Toast · 제품 색 Banner 면에서 보이지 않는다 */
@@ -1491,7 +1463,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .spinner.lg{width:2.5rem;height:2.5rem;border-width:4px}
 .spinner-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:0.75rem;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 @keyframes spin{to{transform:rotate(360deg)}}
-.skeleton{display:block;height:0.875rem;border-radius:0.375rem;background:linear-gradient(90deg,var(--surface-neutral-strong) 25%,var(--background-neutral-secondary) 50%,var(--surface-neutral-strong) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;line-height:1.6}
+.skeleton{display:block;height:0.875rem;border-radius:var(--radius-md);background:linear-gradient(90deg,var(--surface-neutral-strong) 25%,var(--background-neutral-secondary) 50%,var(--surface-neutral-strong) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;line-height:1.6}
 .skeleton.title{height:1.25rem;width:40%}
 .skeleton.text{width:100%}
 .skeleton.text.short{width:70%}
@@ -1533,7 +1505,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .with-count .count.dot{top:-0.125rem;right:-0.125rem}   /* 점은 숫자 배지보다 모서리 안쪽(사람의 결정 2026-11-14) */
 /* 화면에는 보이지 않고 보조기기만 읽는 문구 — Steps 의 완료처럼 시각 신호(체크 아이콘)만 있던 상태를 알린다 */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-/* Steps — 진행 표시(.steps) + 마법사(.stepper). 외부 컴포넌트 Stepper(상용 — 구조 · 동작만 참고, 코드는 옮기지 않음)를 참고해 다시 짬(사람의 요청 2026-11-13).
+/* Steps — 진행 표시(.steps) + 마법사(.stepper). 다시 짬(사람의 요청 2026-11-13).
    배치 셋: 가로(기본 — 연결선이 남는 폭을 나눔) · .label-below(원 위 · 라벨 아래) · .vertical(세로선 · 단계 아래 내용).
    색은 모두 브랜드(사람의 결정): 완료 = 제품 색 원 + 흰 체크, 현재 = 제품 색 테두리 원 + 옅은 제품 면 + 제품 색 숫자, 완료한 단계 뒤 연결선 = 제품 색.
    테두리는 불투명 면 토큰(--surface-brand-primary) — 선 토큰은 반투명이라 옅다(칩 · Select Button 과 같은 이유) */
@@ -1586,7 +1558,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 
 /* Table / Data Table */
 /* 바깥 테두리 · radius 없음(사람의 결정 2026-11-11) — 위 경계는 회색 헤더 면, 아래 경계는 마지막 행 아래 선. 표는 놓인 자리(페이지 · 카드)의 면을 쓴다.
-   밀도 세 단계(참고: 외부 글 의 40 · 48 · 56) — 행 48 · .compact 40 · .relaxed 56, 헤더 44 · 40 · 48.
+   밀도 세 단계 — 행 48 · .compact 40 · .relaxed 56, 헤더 44 · 40 · 48.
    행 상태의 면은 --tbl-tint 로 칠한다 — 고정 열(.sticky-col)이 불투명 면 위에 같은 색을 겹쳐 칠하려고. 숫자는 표 전체가 고정폭이다 */
 .tbl-wrap{overflow-x:auto;width:100%;line-height:1.6}
 .tbl{width:100%;border-collapse:collapse;font-size:var(--font-size-14);margin:0;line-height:1.375rem;font-variant-numeric:tabular-nums;letter-spacing:0.0145em}
@@ -1704,13 +1676,13 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .list li:last-child{border-bottom:0}
 .list.hover li:hover{background:var(--surface-neutral-tertiary);cursor:pointer}   /* 표 행 hover 와 같다(2026-11-12) */
 .list.hover li:active{background:var(--surface-neutral-strong)}
-.list li.on{background:var(--surface-brand-subtle)}
+.list li.on,.list.hover li.on:hover{background:var(--surface-brand-subtle)}   /* 고른 행은 hover 에도 틴트를 잃지 않는다(표 행과 같다, 2026-11-15) */
 .list .primary{font-weight:500;display:block}
 .list .meta{display:block;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .list .end{margin-left:auto;display:flex;gap:0.5rem;align-items:center;flex:none}
 .list.plain{border:0;background:transparent;border-radius:0}
 .list.plain li{padding:0.625rem 0}
-.list.dense li{padding:0.5rem 1rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
+.list.dense li{padding:0.5rem 1rem}
 
 /* Item Tile */
 .tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(11.25rem,1fr));gap:0.75rem;width:100%;line-height:1.6}
@@ -1893,7 +1865,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .field .affix .num-btn:active:not(:disabled){background:var(--surface-neutral-strong)}
 .field .affix .num-btn:disabled{color:var(--foreground-disable-primary);cursor:not-allowed}   /* 끈 컨트롤의 커서는 모두 not-allowed(2026-11-12 — default 였다) */
 /* Code · Copy Field — 새 색 쌍 없이 기존 토큰만. 복사 결과는 버튼 자리에서 2초 */
-.code-inline{font-family:var(--font-mono);font-size:.9em;font-variant-numeric:tabular-nums;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);padding:1px 0.375rem;border-radius:0.25rem;overflow-wrap:anywhere}
+.code-inline{font-family:var(--font-mono);font-size:.9em;font-variant-numeric:tabular-nums;background:var(--surface-neutral-strong);color:var(--foreground-neutral-primary);padding:1px 0.375rem;border-radius:var(--radius-sm);overflow-wrap:anywhere}
 .code-view{display:flex;flex-direction:column;width:100%;min-width:0;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);overflow:hidden}
 .code-view .head{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.25rem 0.5rem 0.25rem 1rem;border-bottom:1px solid var(--line-neutral-secondary)}
 .code-view .title{min-width:0;font-size:var(--font-size-14);line-height:1.375rem;font-weight:500;color:var(--foreground-neutral-secondary);letter-spacing:0.0145em}

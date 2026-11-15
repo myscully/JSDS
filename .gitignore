@@ -5,7 +5,6 @@ node_modules/
 .claude/*
 !.claude/agents/
 _build/.behave/
-_build/_edit.tmp.js
 _react/.visual/
 _react/dist/
 _react/demo/dist/

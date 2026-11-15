@@ -58,7 +58,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
   const items = paginate(page, total, { siblings, boundaries });
   const go = (p: number) => { if (p >= 1 && p <= total && p !== page) onChange?.(p); };
   const slots = boundaries === 0 ? siblings * 2 + 1 : boundaries * 2 + siblings * 2 + 3;
-  useEffect(() => { if (slots > MAX_SLOTS) console.warn(`[ds-react] Pagination 번호 칸은 ${MAX_SLOTS}칸 이하입니다(지금 ${slots}칸) — siblings · boundaries 를 줄이세요.`); }, [slots]);
+  useEffect(() => { if (process.env.NODE_ENV !== "production" && slots > MAX_SLOTS) console.warn(`[ds-react] Pagination 번호 칸은 ${MAX_SLOTS}칸 이하입니다(지금 ${slots}칸) — siblings · boundaries 를 줄이세요.`); }, [slots]);
   const navEl = useRef<HTMLElement | null>(null);
   /* 끝에 닿아 꺼진 화살표에 포커스가 남으면 키보드가 갈 곳을 잃는다 */
   useLayoutEffect(() => {

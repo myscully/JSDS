@@ -11,7 +11,7 @@ const ROWS: [string, React.ReactNode, React.ReactNode][] = [
 
 export default function Example() {
   return (
-    <Table compact zebra wrapStyle={{ maxWidth: 640 }}>
+    <Table density="compact" rowStyle="zebra" wrapStyle={{ maxWidth: 640 }}>
       <TableHead>
         <TableRow><TableHeader>기능</TableHeader><TableHeader>Standard</TableHeader><TableHeader>Enterprise</TableHeader></TableRow>
       </TableHead>

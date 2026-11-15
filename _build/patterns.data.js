@@ -40,11 +40,11 @@ const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
     status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["text-field", "number-input", "select", "checkbox", "radio-button", "button", "notification"], css: [".form", ".form-legend", ".form-summary"], borrows: [".t-label-1-normal", ".t-semibold"],
-    desc: "정책·사용자·설정을 입력하는 폼의 기본 구조입니다. 라벨은 위, 필수는 *, 오류는 필드 아래, 저장은 오른쪽 아래.",
+    desc: "정책이나 사용자, 설정을 입력하는 폼의 기본 구조입니다. 라벨은 필드 위에 두고, 필수 항목에는 * 를 붙입니다. 오류는 필드 아래에 적고, 저장 버튼은 오른쪽 아래에 둡니다.",
     thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
-    principles: [["구성", "한 열 기본. 관련 짧은 필드(시작·종료)만 .form-row 로 2열"], ["검증", "<code>data-validate</code> — 포커스가 떠날 때 필드 단위로, 제출하면 첫 오류로 이동, 오류 3개 이상이면 위에 요약. 고치면 바로 지웁니다"], ["필수", "필수 항목이 있으면 폼 위에 <code>.form-legend</code>"], ["액션", "취소 · 저장 순서, 저장은 Primary 하나. 파괴적 액션은 왼콤(.left)"]],
+    principles: [["구성", "한 열이 기본입니다. 시작과 종료처럼 서로 관련된 짧은 필드만 두 열로 나란히 둡니다."], ["검증", "폼 검증을 켜면 포커스가 떠날 때 그 필드를 검사합니다. 제출하면 첫 오류로 옮기고, 오류가 3개 이상이면 폼 위에 요약합니다. 고치면 문구를 바로 지웁니다."], ["필수", "필수 항목이 있으면 폼 위에 '* 필수 항목' 안내를 둡니다."], ["액션", "버튼은 취소 · 저장 순서로 두고, 주 버튼은 저장 하나입니다. 삭제처럼 되돌리기 어려운 동작은 왼쪽 끝에 따로 둡니다."]],
     examples: [
-      { id: "basic", title: "기본 폼", desc: "섹션 제목(.form-section)으로 그룹을 나누고, 마지막에 .form-actions.", html: `
+      { id: "basic", title: "기본 폼", desc: "섹션 제목으로 필드 묶음을 나누고, 맨 아래에 버튼 줄을 둡니다.", html: `
         <form class="form">
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="form-section">기본 정보</div>
@@ -62,7 +62,7 @@ const PATTERNS = {
           <label class="checkbox"><input type="checkbox" checked><span>저장 즉시 배포<small>에이전트가 다음 체크인에서 적용합니다</small></span></label>
           <div class="form-actions"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
-      { id: "error", title: "오류 상태", desc: "제출 후 오류. 필드 오류 + 상단 요약 Notice(오류 3개 이상일 때).", html: `
+      { id: "error", title: "오류 상태", desc: "제출한 뒤 오류가 난 모습입니다. 필드마다 오류를 적고, 오류가 3개 이상이면 폼 위에 요약을 둡니다.", html: `
         <form class="form" novalidate>
           <div class="notice danger form-summary" role="alert" data-form-summary><span class="ico">${I("alert-circle",20,{style:"filled"})}</span><div><b>입력값 3개를 확인하세요</b>정책 이름, 허용 IP, 보관 기간</div></div>
           <p class="form-legend"><em>*</em> 필수 항목</p>
@@ -71,7 +71,7 @@ const PATTERNS = {
           <div class="field number-field error"><label for="e3">보관 기간</label><div class="affix"><input id="e3" type="number" value="500" min="1" max="365" aria-invalid="true" aria-describedby="e3h" aria-valuetext="500일"><span>일</span><button type="button" class="num-btn down" tabindex="-1" aria-label="보관 기간 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="보관 기간 늘리기" disabled>${I("plus",16)}</button></div><span class="help" id="e3h">값이 너무 큽니다. 365 이하 입력하세요.</span></div>
           <div class="form-actions"><button type="button" class="btn md outline negative left">삭제</button><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
-      { id: "validate", title: "제출 검증", desc: "폼에 data-validate 를 달면 포커스가 떠날 때 필드 단위로 검사합니다. 빈 채로 정책 저장을 누르면 막고, 첫 오류로 이동하며, 오류가 3개 이상이면 위에 요약합니다. 고치면 문구를 바로 지웁니다.", html: `
+      { id: "validate", title: "제출 검증", desc: "폼 검증을 켜면 포커스가 떠날 때 필드 단위로 검사합니다. 빈 채로 정책 저장을 누르면 막고 첫 오류로 옮깁니다. 오류가 3개 이상이면 위에 요약하고, 고치면 문구를 바로 지웁니다.", html: `
         <form class="form" data-validate novalidate>
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field"><label for="v1">정책 이름 <em>*</em></label><input id="v1" required minlength="2" data-maxlength="40"><span class="help" aria-live="polite">2~40자</span></div>
@@ -85,10 +85,10 @@ const PATTERNS = {
 
   "terms-agreement": {
     status: "ready", react: ["Terms","TermsAll","TermsItem","TermsMessage"], uses: ["checkbox", "accordion", "button"], css: [".terms"],
-    desc: "약관·개인정보 처리 동의 화면입니다. 전체 동의 + 개별 항목, 필수/선택 표시, 전문 보기.",
+    desc: "약관과 개인정보 처리에 동의를 받는 화면입니다. 전체 동의와 개별 항목을 두고, 항목마다 필수인지 선택인지 표시합니다. 약관 전문은 같은 화면에서 펼쳐 봅니다.",
     thumb: `<div class="terms" style="max-width:200px"><div class="all"><label class="checkbox"><input type="checkbox" class="mixed"><span style="font-size:12px">전체 동의</span></label></div><div class="item" style="padding:4px 8px"><label class="checkbox"><input type="checkbox" checked><span style="font-size:12px">이용약관</span></label><span class="req">필수</span></div></div>`,
     examples: [
-      { id: "basic", title: "전체 동의 + 개별 항목", desc: "전체 동의는 부분 선택 상태(.mixed)를 표현. '다음' 은 늘 켜 둡니다. 필수 항목을 비운 채 누르면 넘어가지 않고, 남은 개수를 알린 뒤 첫 항목으로 포커스를 옮깁니다. 체크하면 문구를 바로 줄이거나 지웁니다.", html: `
+      { id: "basic", title: "전체 동의 + 개별 항목", desc: "일부만 체크하면 전체 동의가 부분 선택으로 보입니다. '다음' 은 늘 켜 둡니다. 필수 항목을 비운 채 누르면 넘어가지 않고, 남은 개수를 알린 뒤 첫 항목으로 포커스를 옮깁니다. 체크하면 문구를 바로 줄이거나 지웁니다.", html: `
         <div class="terms">
           <div class="all"><label class="checkbox"><input type="checkbox" class="mixed" aria-label="전체 동의"><span>전체 동의</span></label></div>
           <div class="item"><label class="checkbox"><input type="checkbox" checked><span>서비스 이용약관</span></label><span class="req">필수</span><button type="button" class="view">보기</button></div>
@@ -109,7 +109,7 @@ const PATTERNS = {
     desc: "화면 하단이나 폼 옆에 두는 유의사항·안내 문구입니다. 읽지 않아도 진행할 수 있는 정보를 담습니다.",
     thumb: `<div class="notes" style="padding:10px 12px;font-size:12px"><b style="font-size:12px">유의사항</b><ul><li>배포 후 5분 내 적용</li><li>격리 파일 30일 보관</li></ul></div>`,
     examples: [
-      { id: "basic", title: "기본", desc: "제목 + 불릿 3~5개. 배경 subtle, 보더 없음.", html: `
+      { id: "basic", title: "기본", desc: "제목과 3~5개의 글머리 항목으로 씁니다. 옅은 면 위에 두고 테두리는 없습니다.", html: `
         <div class="notes" style="max-width:600px">
           <b>유의사항</b>
           <ul>
@@ -118,7 +118,7 @@ const PATTERNS = {
             <li>예외 목록은 해시 또는 경로 기준이며 와일드카드(*)를 지원합니다.</li>
           </ul>
         </div>` },
-      { id: "warning", title: "주의", desc: "되돌리기 어려운 영향은 .warning. 즉시 조치가 필요하면 Notification(danger).", html: `
+      { id: "warning", title: "주의", desc: "되돌리기 어려운 영향을 알릴 때는 주의 모양을 씁니다. 바로 조치해야 하면 <a href=\"#/components/notification\">Notification</a> 의 위험 알림을 씁니다.", html: `
         <div class="notes warning" style="max-width:600px">
           <b>정책 삭제 전 확인</b>
           <ul>
@@ -134,10 +134,10 @@ const PATTERNS = {
   /* ------------------------------------------------ Service Pattern */
   "onboarding": {
     status: "ready", react: ["Onboard","Stepper","StepButton","Steps"], uses: ["steps", "indicator", "card", "radio-button", "text-field", "button"], css: [".onboard"], borrows: [".keep-all", ".form-legend"],
-    desc: "첫 사용자가 콘솔을 설정하는 단계형 흐름입니다. 진행 단계 표시, 한 단계 한 결정, 건너뛰기 허용.",
+    desc: "처음 온 사용자가 콘솔을 설정하는 단계형 흐름입니다. 진행 단계를 보여 주고, 한 단계에서는 한 가지만 정하게 합니다. 단계를 건너뛸 수 있습니다.",
     thumb: `<ol class="steps" aria-label="진행 단계" style="width:200px"><li class="done"><i style="width:18px;height:18px">${I("check",10)}</i></li><li class="on"><i style="width:18px;height:18px;font-size:10px">2</i></li><li><i style="width:18px;height:18px;font-size:10px">3</i></li></ol>`,
     examples: [
-      { id: "step", title: "단계 화면", desc: "Steps 마법사(.stepper) — 단계마다 카드 한 장, 카드 아래에 이전 · 다음. 선택형 단계는 Card Radio. '다음'은 그 단계 폼을 검사하고, 단계를 옮겨도 입력값은 남습니다.", html: `
+      { id: "step", title: "단계 화면", desc: "Steps 마법사로 단계마다 카드 한 장을 보여 주고, 카드 아래에 이전 · 다음 버튼을 둡니다. 고르는 단계는 Card Radio 를 씁니다. '다음' 은 그 단계의 폼을 검사하고, 단계를 옮겨도 입력값은 남습니다.", html: `
         <div class="onboard">
           <div class="stepper">
             <ol class="steps" aria-label="진행 단계"><li class="done"><button type="button" class="step-btn"><i>${I("check",16)}</i><span class="label">조직 정보</span><span class="sr-only"> (완료)</span></button></li><li class="on" aria-current="step"><i>2</i><span class="label">보호 수준</span></li><li><i>3</i><span class="label">에이전트 배포</span></li><li><i>4</i><span class="label">완료</span></li></ol>
@@ -175,7 +175,7 @@ const PATTERNS = {
             </div>
           </div>
         </div>` },
-      { id: "done", title: "완료", desc: "요약 + 첫 행동으로 이어지는 Primary.", html: `
+      { id: "done", title: "완료", desc: "설정한 내용을 요약하고, 첫 행동으로 이어지는 주 버튼을 둡니다.", html: `
         <div class="onboard">
           <ol class="steps" aria-label="진행 단계"><li class="done"><i>${I("check",16)}</i><span class="label">조직 정보</span><span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",16)}</i><span class="label">보호 수준</span><span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",16)}</i><span class="label">에이전트 배포</span><span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>4</i><span class="label">완료</span></li></ol>
           <div class="card" style="align-items:center;text-align:center">
@@ -189,9 +189,9 @@ const PATTERNS = {
 
   "search": {
     status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "chip", "select", "date-picker", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack"], borrows: [".field", ".link"],
-    desc: "검색 + 필터 + 결과 목록의 조회 화면 패턴입니다. 조건은 항상 보이고, 결과 수와 적용 중인 필터를 함께 보여줍니다.",
+    desc: "검색과 필터로 결과 목록을 조회하는 화면입니다. 조건은 늘 보이게 두고, 결과 수와 적용 중인 필터를 함께 보여 줍니다.",
     thumb: `<div class="toolbar" style="width:240px"><div class="searchbar sm" style="min-width:0;flex:1">${I("search")}<input placeholder="검색"></div><button class="chip sm on">Critical</button></div>`,
-    principles: [["툴바", "검색(좌) · 필터 드롭다운 · 기간 · 여백 · 액션(우)"], ["필터 표시", "적용 중인 필터는 Chip 으로, 결과 수는 툴바 아래"], ["빈 결과", "빈 화면 패턴 + 필터 초기화"]],
+    principles: [["툴바", "검색칸을 왼쪽에 두고 필터 드롭다운과 기간을 잇습니다. 동작 버튼은 여백 뒤 오른쪽 끝에 둡니다."], ["필터 표시", "적용 중인 필터는 Chip 으로 보여 주고, 결과 수는 툴바 아래에 적습니다."], ["빈 결과", "결과가 없으면 <a href=\"#/components/empty-state\">Empty State</a> 와 필터 초기화 버튼을 보여 줍니다."]],
     examples: [
       { id: "toolbar", title: "검색 툴바 + 결과", html: `
         <div class="stack">
@@ -225,7 +225,7 @@ const PATTERNS = {
 
   "system-status": {
     status: "ready", react: ["StatusList","StatusItem"], uses: ["indicator", "card", "tag", "notification", "loading", "button"], css: [".status-list", ".status-item", ".stack"], borrows: [".row-2"],
-    desc: "에이전트·서버·연동 서비스의 상태를 한눈에 보여줍니다. 정상은 조용하게, 이상은 눈에 띄게.",
+    desc: "에이전트와 서버, 연동 서비스의 상태를 한눈에 보여 줍니다. 정상인 항목은 조용하게 두고, 이상이 있는 항목은 눈에 띄게 합니다.",
     thumb: `<div class="status-list" style="grid-template-columns:1fr;width:200px;gap:6px"><div class="status-item" style="padding:8px 10px;font-size:12px"><span class="indicator ok">수집 서버</span><span class="meta">99.9%</span></div><div class="status-item" style="padding:8px 10px;font-size:12px"><span class="indicator danger">SIEM</span><span class="meta">끊김</span></div></div>`,
     examples: [
       { id: "overview", title: "서비스 상태 보드", html: `
@@ -240,7 +240,7 @@ const PATTERNS = {
             <div class="status-item"><span class="indicator ok">라이선스</span><span class="meta">842 / 1,000</span></div>
           </div>
         </div>`, layout: "stack" },
-      { id: "agents", title: "에이전트 상태 요약", desc: "연결 상태 비율 + 진행 중 작업.", html: `
+      { id: "agents", title: "에이전트 상태 요약", desc: "온라인 에이전트의 비율과 진행 중인 작업을 보여 줍니다.", html: `
         <div class="row-2" style="max-width:800px">
           <div class="card"><div class="card-head"><h3 class="title">에이전트 연결</h3><span class="tag ok">정상</span></div><div class="progress-row"><div class="row"><span>온라인</span><span>1,247 / 1,284</span></div><div class="progress success" role="progressbar" aria-valuenow="97"><i style="width:97%"></i></div></div><p class="desc">오프라인 37대 · 10분 이상 미체크인 12대</p></div>
           <div class="card"><div class="card-head"><h3 class="title">진행 중 작업</h3><span class="spinner sm" role="status" aria-label="작업 진행 중"></span></div><div class="progress-row"><div class="row"><span>정책 rev 2041 배포</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66"><i style="width:66%"></i></div></div><p class="desc">842 / 1,284대 완료 · 예상 3분</p></div>
@@ -251,9 +251,9 @@ const PATTERNS = {
   /* ------------------------------------------------ Security Console */
   "dashboard": {
     status: "ready", react: ["PageHead","Stack","Row3","Row2"], uses: ["data-visual", "card", "tag", "data-table", "select-button", "button"], css: [".page-head", ".stack", ".row-2", ".row-3"], borrows: [".sr-only", ".progress-row", ".progress"],
-    desc: "보안 관리자의 첫 화면. 상단 KPI 4개, 아래 추이·분포 차트, 비교 · 목표 대비 차트, 최근 이벤트 표. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
+    desc: "보안 관리자가 처음 보는 화면입니다. 위에 KPI 4개를 두고, 그 아래에 추이 · 분포 차트, 비교 · 목표 대비 차트, 최근 이벤트 표를 차례로 둡니다. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
     thumb: `<div class="kpi-grid" style="width:240px;gap:6px"><div class="kpi critical" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">Critical</span><span class="value" style="font-size:18px">1,284</span></div><div class="kpi" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">차단률</span><span class="value" style="font-size:18px">99.2%</span></div></div>`,
-    principles: [["위계", "KPI(무슨 일) → 차트(어디서·얼마나) → 표(무엇을 할지)"], ["기간", "화면 우상단 Select Button 하나로 전체 기간을 바꿈"], ["밀도", "카드 gap 16, 카드 내부 24(KPI 는 좌우 20). 스크롤 없이 첫 화면에 KPI+차트"]],
+    principles: [["위계", "KPI 로 무슨 일이 있는지, 차트로 어디서 얼마나 일어났는지, 표로 무엇을 할지를 차례로 보여 줍니다."], ["기간", "화면 오른쪽 위의 Select Button 하나로 화면 전체의 기간을 바꿉니다."], ["밀도", "카드 사이 간격은 16px, 카드 안 여백은 24px 입니다. KPI 카드만 좌우 여백이 20px 입니다. 스크롤하지 않아도 첫 화면에 KPI 와 차트가 들어오게 합니다."]],
     examples: [
       { id: "full", title: "대시보드", html: `
         <div class="stack">
@@ -286,9 +286,9 @@ const PATTERNS = {
 
   "log-viewer": {
     status: "ready", react: ["Toolbar","Stack"], uses: ["search", "date-picker", "chip", "select-button", "data-table", "tag", "pagination", "button"], css: [".toolbar", ".stack", ".log-row"], borrows: [".field"],
-    desc: "대량 로그를 빠르게 훑고 필터링하는 화면입니다. Compact 표 + 모노스페이스 시간/IP + 심각도 태그 + 실시간/일시정지 전환.",
+    desc: "대량의 로그를 빠르게 훑고 거르는 화면입니다. 촘촘한 표에 로그 한 건을 한 줄로 보여 주고, 심각도는 Tag 로 적습니다. 실시간과 일시정지를 오갈 수 있습니다.",
     thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><tbody><tr class="log-row"><td style="height:32px">09:41:12</td><td><span class="tag critical sm">CRIT</span></td></tr><tr class="log-row"><td style="height:32px">09:41:11</td><td><span class="tag medium sm">WARN</span></td></tr></tbody></table></div>`,
-    principles: [["밀도", ".tbl.compact 40 행, 로그 한 건은 한 줄(.log-row). 시간 · IP 는 숫자 tabular 이고 고정폭 글자는 쓰지 않는다(고정폭은 Code 에만). 행 동작이 있어 행 hover 를 켠다(.tbl.hover)"], ["필터", "심각도 Chip 다중 선택 + 검색 + 실시간/일시정지"], ["조회 구간", "시각까지 입력합니다. 달력이나 프리셋으로 고른 날짜는 첫날 00:00 부터 마지막 날 23:59 까지입니다"], ["상세", "행 클릭 → 우측 패널(표는 그대로)"]],
+    principles: [["밀도", "행 높이 40px 의 촘촘한 표를 쓰고, 로그 한 건은 한 줄로 보여 줍니다. 시간과 IP 는 숫자 폭을 맞춘 본문 글자로 씁니다. 고정폭 글자는 Code 에만 씁니다. 행마다 동작이 있으므로 마우스를 올린 행에 면을 칠합니다."], ["필터", "심각도 Chip 을 여러 개 골라 거르고, 검색으로 좁힙니다. 실시간과 일시정지를 전환할 수 있습니다."], ["조회 구간", "시각까지 입력합니다. 달력이나 프리셋으로 고른 날짜는 첫날 00:00 부터 마지막 날 23:59 까지입니다"], ["상세", "행을 누르면 표는 그대로 둔 채 오른쪽 <a href=\"#/components/side-panel\">Side Panel</a> 에 상세를 엽니다."]],
     examples: [
       { id: "viewer", title: "로그 뷰어", html: `
         <div class="stack">
@@ -310,7 +310,7 @@ const PATTERNS = {
 
   "policy-settings": {
     status: "ready", react: ["SettingsSection","Setting","PageHead","Breadcrumb"], uses: ["breadcrumb", "switch", "select", "slider", "text-field", "radio-button", "notification", "button"], css: [".settings-section", ".setting", ".page-head", ".stack"],
-    desc: "정책·시스템 설정 화면입니다. 섹션별 카드에 '라벨+설명 | 컨트롤' 행을 쌓고, 즉시 적용(Switch)과 저장 필요(폼)를 구분합니다.",
+    desc: "정책과 시스템을 설정하는 화면입니다. 섹션마다 카드를 두고, 왼쪽에 라벨과 설명, 오른쪽에 컨트롤이 있는 행을 쌓습니다. 바로 적용되는 Switch 와 저장해야 적용되는 폼 입력을 구분합니다.",
     thumb: `<div class="settings-section" style="padding:4px 12px;width:220px"><div class="setting" style="padding:8px 0"><div class="info"><b style="font-size:12px">실시간 보호</b></div><label class="switch sm"><input type="checkbox" checked></label></div><div class="setting" style="padding:8px 0"><div class="info"><b style="font-size:12px">USB 검사</b></div><label class="switch sm"><input type="checkbox"></label></div></div>`,
     examples: [
       { id: "sections", title: "설정 섹션", html: `
@@ -344,21 +344,21 @@ const PATTERNS = {
 
   "severity": {
     status: "ready", react: ["SevBand"], uses: ["tag", "indicator", "data-visual", "data-table"], css: [".sev-band", ".stack"],
-    desc: "위협 심각도 5단계(Critical · High · Medium · Low · Info)를 화면 전반에서 일관되게 표현하는 규칙입니다. 색·태그·밴드·정렬 순서를 통일합니다.",
+    desc: "위협 심각도 5단계인 Critical · High · Medium · Low · Info 를 화면 어디서나 같게 표현하는 규칙입니다. 색과 Tag, 분포 밴드, 정렬 순서를 통일합니다.",
     thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:19"></i><i class="low" style="flex:11"></i><i class="info" style="flex:25"></i></div>`,
-    principles: [["토큰", "심각도는 독립 축이 아니라 <b>상태·강조 의도 매핑</b>입니다 — Critical=<code>negative</code>(점 · 지표는 진한 <code>--foreground-negative-strong</code>) · High=<code>cautionary</code> · Medium=<code>accent light blue</code> · Low=<code>accent lime</code> · Info=중립(사람의 결정 2026-11-06 · 2026-11-09 · Medium ↔ Low 교체 2026-11-11 — 도넛 · 누적 막대에서 맞붙는 High 주황과 Medium 이 적록 색각에서 같은 색으로 보였다). 면은 틴트(<code>--surface-*</code>), 점·지표는 솔리드 전경(<code>--foreground-*</code>)을 씁니다. 토큰 전체는 <a href=\"#/foundations/colors\">Colors › Semantic</a>"], ["표현", "표·목록은 Tag, 요약은 밴드/도넛. Tag 의 글자가 색을 나르므로 행 좌측 색 막대는 두지 않는다(2026-11-11 사람의 결정 — .sev-cell 을 없앰)"], ["정렬", "항상 Critical → Info. <b>라벨을 반드시 함께</b> 둡니다 — 색조가 주된 단서이고, 색만으로 의미를 전달하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다"]],
+    principles: [["토큰", "심각도는 따로 만든 색이 아니라 <b>기존 상태색과 강조색에 맞춘 것</b>입니다. Critical 은 위험 빨강이고, 점과 지표에는 더 진한 빨강을 씁니다. High 는 경고 주황, Medium 은 라이트 블루 강조색, Low 는 라임 강조색, Info 는 중립 회색입니다. 도넛이나 누적 막대에서 맞붙는 이웃 등급은 색각 이상에서도 갈리도록 배치했습니다. 면에는 옅은 틴트를, 점과 지표에는 진한 단색을 씁니다. 색 토큰 전체는 <a href=\"#/foundations/colors\">Colors › Semantic</a> 에 있습니다."], ["표현", "표와 목록에는 Tag 를, 요약에는 분포 밴드나 도넛을 씁니다. Tag 의 글자가 색을 나르므로 행 왼쪽에 색 막대를 따로 두지 않습니다."], ["정렬", "늘 Critical 에서 Info 순서로 놓습니다. <b>라벨을 반드시 함께</b> 둡니다. 색조가 주된 단서이므로, 색만으로 의미를 전달하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다."]],
     examples: [
-      { id: "scale", title: "5단계 스케일", desc: "Tag 기본 · Solid. 글자는 틴트와 같은 색상의 진한 톤이고 점은 없습니다.", html: `
+      { id: "scale", title: "5단계 스케일", desc: "Tag 의 기본 모양과 Solid 모양입니다. 글자는 틴트와 같은 색상의 진한 톤이고 점은 없습니다.", html: `
         <div class="stack" style="max-width:640px;gap:20px">
           <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag critical solid">Critical</span><span class="tag high solid">High</span><span class="tag medium solid">Medium</span><span class="tag low solid">Low</span><span class="tag info solid">Info</span></div>
         </div>`, layout: "left" },
-      { id: "band", title: "분포 밴드", desc: "전체 대비 비율. flex 값이 비율, 아래 범례로 수치.", html: `
+      { id: "band", title: "분포 밴드", desc: "전체에서 각 등급이 차지하는 비율을 띠 하나로 보여 줍니다. 조각의 길이가 비율이고, 수치는 아래 범례에 적습니다.", html: `
         <div class="stack" style="max-width:640px;gap:10px">
           <div class="sev-band" role="img" aria-label="Critical 18%, High 27%, Medium 19%, Low 11%, Info 25%"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:19"></i><i class="low" style="flex:11"></i><i class="info" style="flex:25"></i></div>
           <div class="chart-legend"><span><i class="critical"></i>Critical <b>190</b></span><span><i class="high"></i>High <b>285</b></span><span><i class="medium"></i>Medium <b>196</b></span><span><i class="low"></i>Low <b>120</b></span><span><i class="info"></i>Info <b>263</b></span></div>
         </div>` },
-      { id: "table", title: "표 안의 심각도", desc: "심각도 칸은 Tag 하나로 씁니다(행 좌측 색 막대 .sev-cell 은 2026-11-11 에 없앴습니다 — Tag 글자가 색을 나릅니다). 정렬 기본값은 심각도 내림차순.", html: `
+      { id: "table", title: "표 안의 심각도", desc: "심각도 칸은 Tag 하나로 씁니다. Tag 의 글자가 색을 나르므로 행 왼쪽에 색 막대를 두지 않습니다. 기본 정렬은 심각도가 높은 순서입니다.", html: `
         <div class="tbl-wrap" style="max-width:720px">
           <table class="tbl compact">
             <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">심각도</button></th><th>이벤트</th><th>대상</th><th class="num">건수</th></tr></thead>

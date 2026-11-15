@@ -373,7 +373,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 6 · components/button.html", async () => {
 
-    /* 제품 슬롯 — 기준 시스템의 brand 자리에 제품 색이 들어간다. 단계는 다섯(40·45·50·55·60)이고 50 이 제품 HEX 다.
+    /* 제품 슬롯 — 기준 토큰의 brand 자리에 제품 색이 들어간다. 단계는 다섯(40·45·50·55·60)이고 50 이 제품 HEX 다.
        팔레트 여섯(data.js PRODUCTS — 2026-11-14 사람의 결정)을 헤더 메뉴로 하나씩 고른다. 상태색과 겹쳐도(빨강) 제품 색 그대로다 —
        예전의 자동 중립 전환(data-accent-neutral)은 걷어냈고, 중립은 팔레트에서 고른다 */
     await go("components/button.html");
@@ -573,7 +573,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         return { sf: cs.color, sbStack: backdrop(solid), of: co.color, obStack: backdrop(outline) };
       });
       const dc = { solid: ratio(col.sf, bedOf(col.sbStack)), outline: ratio(col.of, bedOf(col.obStack)) };
-      /* 파괴적 버튼의 라벨은 기준 시스템과 같은 상태색이다(태그는 중립 라벨을 쓴다 — 밀도가 다르다).
+      /* 파괴적 버튼의 라벨은 기준 토큰과 같은 상태색이다(태그는 중립 라벨을 쓴다 — 밀도가 다르다).
          그 값이 라이트에서 AA 아래라는 사실은 숨기지 않고 여기서도 숫자로 남기고, 게이트가 advisory 로 보고한다.
          대신 '라벨이 바탕에서 보이기는 하는가'(3:1)는 양쪽 테마에서 요구한다 — 그 아래로 가면 버튼이 비활성으로 읽힌다 */
       ok(`negative button label stays visible on its tint (${theme})`, dc.solid >= 3 && dc.outline >= 3, JSON.stringify(dc));
@@ -792,7 +792,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     }
     await accent("");
 
-    /* 상태색 세 가족 — 기준 시스템에는 솔리드 상태 면도 그 위 글자(-on)도 없다.
+    /* 상태색 세 가족 — 기준 토큰에는 솔리드 상태 면도 그 위 글자(-on)도 없다.
        면은 8%·12% 틴트뿐이고, 색은 전경(foreground)과 보더(line)가 나른다.
        그래서 여기서 보는 것은 세 가지다: 틴트가 바탕에서 보이는가 · 전경이 솔리드인가 ·
        **그 틴트 위에 올라앉는 실제 라벨이 읽히는가**. 세 번째가 틴트 재디자인의 핵심 보증이다 */
@@ -817,13 +817,13 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const st = await statusTokens();
       for (const f of FAM) {
         const t = st[f];
-        /* 면·전경·보더 셋이 다 있어야 한다. 면과 보더는 알파, 전경은 솔리드 — 기준 시스템이 그렇게 선언한다 */
+        /* 면·전경·보더 셋이 다 있어야 한다. 면과 보더는 알파, 전경은 솔리드 — 기준 토큰이 그렇게 선언한다 */
         ok(`${theme} ${f} has a tint, a foreground and a line`, !!(t.surface && t.fg && t.line), JSON.stringify([t.surface, t.fg, t.line]));
         ok(`${theme} ${f} foreground is opaque`, !/rgba|\/\s*0?\.\d/.test(t.fgRgb), t.fgRgb);
         /* 틴트가 세 바탕 모두에서 보여야 한다 — 안 보이면 태그가 아예 없는 것과 같다 */
         const seen = Math.min(ratio(t.surfaceRgb, st.canvas, st.canvas), ratio(t.surfaceRgb, st.surface, st.surface), ratio(t.surfaceRgb, st.subtle, st.subtle));
         ok(`${theme} ${f} tint stays visible on every surface`, seen >= 1.05, String(seen));
-        /* 틴트 위의 **라벨**이 읽히는가 — 라벨은 중립 글자색이다(기준 시스템의 Chip 패턴).
+        /* 틴트 위의 **라벨**이 읽히는가 — 라벨은 중립 글자색이다.
            상태색 전경을 라벨로 쓰면 라이트에서 2.1~3.4 로 떨어진다. 그 차이를 숫자로 같이 남긴다 */
         const onTint = Math.min(ratio(st.label, t.surfaceRgb, st.canvas), ratio(st.label, t.surfaceRgb, st.subtle));
         const ifColoured = Math.min(ratio(t.fgRgb, t.surfaceRgb, st.canvas), ratio(t.fgRgb, t.surfaceRgb, st.subtle));
@@ -985,9 +985,6 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const LV_WANT = { CRIT: "critical", HIGH: "high", WARN: "medium", LOW: "low", INFO: "info" };
     ok("log levels map onto the five severity ranks (INFO = info, LOW = low)", logLv.length >= 5 && logLv.every(([lv, c]) => LV_WANT[lv] === c) && new Set(logLv.map(([, c]) => c)).size === 5, JSON.stringify(logLv));
   });
-  await part("part 12 · components/tag.html", async () => {
-    await go("components/tag.html");
-  });
   await part("part 13 · components/accordion.html", async () => {
 
     // Accordion: disabled 는 마우스·키보드 양쪽을 막고 보조기기에도 알려야 한다 + name 그룹 단일 개방 + flat 마지막 줄
@@ -1117,7 +1114,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const P = ex("chip", "input"), xs = page.locator(P + " .chip .x"), fx = () => page.evaluate(() => { const a = document.activeElement; return (a.getAttribute("aria-label") || a.textContent || a.tagName).trim(); });
       ok("input chip remove is a named real button", await xs.evaluateAll((k) => k.length === 3 && k.every((x) => x.tagName === "BUTTON" && x.tabIndex === 0) && new Set(k.map((x) => x.getAttribute("aria-label"))).size === 3));
       await xs.first().focus(); await page.keyboard.press("Enter"); await page.waitForTimeout(250);
-      ok("removing a chip moves focus to the next chip", (await fx()) === "10.0.0.13 삭제" && (await xs.count()) === 2, await fx());
+      ok("removing a chip moves focus to the next chip", (await fx()) === "10.0.0.13 제거" && (await xs.count()) === 2, await fx());
       await xs.nth(1).focus(); await xs.nth(1).click(); await page.waitForTimeout(250);
       const lastTo = await fx(); await page.keyboard.press("Enter"); await page.waitForTimeout(250);
       ok("removing a middle chip goes to the next spot, the add button once chips are gone", lastTo === "추가" && (await xs.count()) === 1, lastTo);
@@ -1127,7 +1124,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       ok("a long chip value truncates at 240 and opens on keyboard focus", closed.w === 240 && closed.sw > 240 && open.w >= closed.sw && open.sw === open.w, JSON.stringify({ closed, open }));
       await lx.blur();
       await page.locator(L + " .x").nth(1).click(); await page.waitForTimeout(250);
-      ok("removing the last chip moves focus to the one before it", (await fx()).endsWith("corp.example.com 삭제"), await fx());
+      ok("removing the last chip moves focus to the one before it", (await fx()).endsWith("corp.example.com 제거"), await fx());
       await page.locator(L + " .x").first().click(); await page.waitForTimeout(250);
       ok("removing the only chip leaves focus on the group, not the page", await page.evaluate((sel) => document.activeElement === document.querySelector(sel + " .chip-group"), L));
       const F = page.locator(ex("chip", "filter") + " .chip-group"), R = F.locator("[data-chip-reset]");
@@ -2027,7 +2024,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await require("./behave.chip.js")({ page, ok, go });   // Chip 형태 둘 · 색 둘(2026-11-13)
   });
   await part("part 58 · behave.stepper.js", async () => {
-    await require("./behave.stepper.js")({ page, ok, go });   // Steps 마법사 — 외부 컴포넌트 Stepper 참고(2026-11-13)
+    await require("./behave.stepper.js")({ page, ok, go });   // Steps 마법사(2026-11-13)
   });
   await part("part 59 · behave.revise.js", async () => {
     await require("./behave.revise.js")({ page, ok, go });   // 수정 묶음 — Tab 글자 · 상단 내비 선택 · Notice 아이콘 · Mono(2026-11-13)
@@ -2092,7 +2089,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       order: [...document.querySelectorAll("#content h2[id]")].filter((h) => !h.closest(".example")).map((h) => h.id).join(","),
       defaultH3: !!document.querySelector("#default + h3, #default + p + h3"),
       placement: !!document.querySelector("#placement"),
-      anatomy: !!document.querySelector('#anatomy, .legend, .marker'),
+      anatomy: !!document.querySelector('#anatomy, .legend'),
       examplesH2: !!document.querySelector('#examples'),
       toc: [...document.querySelectorAll("#toc a")].map((a) => a.textContent).join(" / "),
       panes: [...document.querySelector(".example").querySelectorAll("[data-pane]")].map((x) => x.dataset.pane).join(","),
@@ -2246,7 +2243,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     ok("outline follows the theme (dark: black faint, white not)", (await faint("--static-black")) && !(await faint("--static-white")));
     await page.click("#themeBtn"); await page.waitForTimeout(150);
 
-    // 컬러바 형태 — 기준 시스템과 같게: 높이 32 · 가로 간격 0 · 직각 · 라벨은 8px 아래 가운데
+    // 컬러바 형태: 높이 32 · 가로 간격 0 · 직각 · 라벨은 8px 아래 가운데
     const barGeo = await page.evaluate(() => {
       const row = document.querySelector(".sem-row"), cells = [...row.querySelectorAll(".val-cell")];
       const a = cells[0].querySelector(".bar").getBoundingClientRect(), b = cells[1].querySelector(".bar").getBoundingClientRect();
@@ -2281,7 +2278,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       g1.barH - g0.barH === 8 && g0.barTop - g1.barTop === 8, `${g0.barH}@${g0.barTop} → ${g1.barH}@${g1.barTop}`);
     ok("the colour layer fills the bar exactly", g0.fills && g1.fills, `기본 ${g0.fills} · hover ${g1.fills}`);
     ok("the label does not move while the bar grows", g0.label === g1.label, `${g0.label} → ${g1.label}`);
-    /* Semantic 탭 — 기준 시스템의 Colors › Semantic 과 같은 구성이어야 한다.
+    /* Semantic 탭 — 토큰 트리와 같은 구성이어야 한다.
        절 26개(Foreground 8 · Background 1 · Surface 8 · Line 6 · Effect 2 · Static 1) + 우리가 더한 회사 마크 1.
        빈 칸이 생기면(토큰 이름 오타·미선언) 색이 없는 칩이 되므로 배경이 전부 칠해졌는지 함께 본다 */
     const semPage = await page.evaluate(() => {
@@ -2377,7 +2374,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       brm.inPane && brm.afterMark && brm.rows === 5 && brm.dodont === 2 && !brm.side, JSON.stringify(brm));
 
     // Atomic 팔레트 칸 수 + 반응형 블록이 실제로 적용되는지 (한동안 컴포넌트 규칙에 덮여 죽어 있었다)
-    /* Common 2 · Brand 5(제품 슬롯) · Cool Neutral 21(기준 시스템 램프) */
+    /* Common 2 · Brand 5(제품 슬롯) · Cool Neutral 21(기준 토큰 램프) */
     for (const [w, want] of [[1440, [2, 5, 21]], [760, [2, 5, 7]], [390, [2, 5, 5]]]) {
       await page.setViewportSize({ width: w, height: 900 });
       await go("foundations/colors.html");
@@ -2536,6 +2533,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 90 · behave.scale.js", async () => {
     await require("./behave.scale.js")({ b, ok, SITE, path });   // 글자 크기 체계 — 화면 폭 단계(2026-11-11)
+  });
+  await part("part 92 · behave.review.js", async () => {
+    await require("./behave.review.js")({ page, ok, go });   // 전체 점검에서 찾은 결함(2026-11-15)
   });
   await part("part 91 · behave.system.js", async () => {
     /* 모션 · 한 시스템 · 패턴 정렬 — taste-skill 규칙을 콘솔에 맞게 옮긴 것(2026-11-05) */

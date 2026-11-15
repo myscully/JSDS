@@ -156,9 +156,9 @@ async function run() {
     }
     if (toks.some((t) => !C[t])) continue;   /* 색으로 못 읽은 게 있으면 이 맥락은 더 재지 않는다 */
 
-    /* 기준 시스템이 불투명으로 선언한 토큰에 알파가 섞여 들어오지 않았는지.
-       '글자는 솔리드' 규칙은 더 이상 성립하지 않는다 — 기준 시스템이 글자에도 알파를 쓴다 */
-    for (const t of P.OPAQUE_ONLY) if (C[t] && C[t].a < 0.999) fails.push(`${ctx.label}: ${t} 에 알파가 있다(${C[t].a}) — 기준 시스템은 이 토큰을 불투명으로 선언한다`);
+    /* 기준 토큰이 불투명으로 선언한 토큰에 알파가 섞여 들어오지 않았는지.
+       '글자는 솔리드' 규칙은 더 이상 성립하지 않는다 — 기준 토큰이 글자에도 알파를 쓴다 */
+    for (const t of P.OPAQUE_ONLY) if (C[t] && C[t].a < 0.999) fails.push(`${ctx.label}: ${t} 에 알파가 있다(${C[t].a}) — 기준 토큰은 이 토큰을 불투명으로 선언한다`);
 
     /* 선언한 쌍 전수 */
     for (const [fg, bgs, min, note, opt] of P.pairs) {

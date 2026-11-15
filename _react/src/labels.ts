@@ -6,7 +6,7 @@ export const LABELS = {
   prevMonth: "이전 달",
   nextMonth: "다음 달",
   close: "닫기",
-  remove: "삭제",
+  remove: "제거",
   clearFilters: "필터 초기화",
   switchFailed: "설정을 바꾸지 못했습니다. 다시 시도하세요.",
   clear: "지우기",
@@ -56,7 +56,6 @@ export const LABELS = {
   startTime: "시작 시각",
   endTime: "종료 시각",
   timeOpen: "선택",
-  more: "더 보기",
   undo: "실행 취소",
 } as const;
 export type LabelKey = keyof typeof LABELS;

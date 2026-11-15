@@ -13,7 +13,7 @@ export interface TagProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: TagVariant;
   /** 글자 앞 점(등급 색). 기본은 점 없음 — 색은 글자가 나른다 */
   dot?: boolean;
-  /** sm 20 · md 24 · lg 28 */
+  /** 높이 sm 18 · md 22 · lg 26 */
   size?: Size;
 }
 

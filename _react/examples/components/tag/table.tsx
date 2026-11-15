@@ -7,7 +7,7 @@ const ROWS: [string, string[]][] = [
 
 export default function Example() {
   return (
-    <Table compact wrapStyle={{ maxWidth: 480 }}>
+    <Table density="compact" wrapStyle={{ maxWidth: 480 }}>
       <TableHead>
         <TableRow>
           <TableHeader>정책</TableHeader>
