@@ -64,10 +64,10 @@ module.exports = async function review({ page, ok, go }) {
     ok("review: data-debounce=\"0\" fires ds:search at once, an empty data-debounce still waits 300ms", zero === 1 && early === 0 && late === 1, JSON.stringify({ zero, early, late }));
   });
 
-  await part("4 · Pagination outline · 고른 List 행 hover", async () => {
+  await part("4 · Pagination 기본(outline) · ghost · 고른 List 행 hover", async () => {
     await go("components/pagination.html");
     const W = { sec: await tok("--surface-neutral-secondary"), strong: await tok("--surface-neutral-strong"), elev: await tok("--surface-elevated-primary"), sub: await tok("--surface-brand-subtle") };
-    const nav = "#ex-pagination-variant .example-preview .pagination.outline";
+    const nav = "#ex-pagination-basic .example-preview .pagination";   // 기본이 outline(2026-11-16)
     const plain = page.locator(`${nav} button:not(.on):not([disabled]):not([aria-label])`).first();
     const bg = (l) => l.evaluate((e) => getComputedStyle(e).backgroundColor);
     /* locator.hover · scrollIntoViewIfNeeded 는 비활성 버튼에서 기다린다 — 요소에서 바로(부드러운 스크롤 없이) 옮기고 포인터를 놓는다 */
@@ -80,6 +80,16 @@ module.exports = async function review({ page, ok, go }) {
     await page.mouse.down(); await wait(200); const act = await bg(plain); await page.mouse.up();
     ok("review: outline pagination shows the hover and pressed faces; the current page and a disabled arrow keep the white face on hover",
       rest === W.elev && hov === W.sec && act === W.strong && onHov === W.elev && disHov === W.elev, JSON.stringify({ rest, hov, act, onHov, disHov, W }));
+    await page.mouse.move(2, 2); await wait(200);
+    /* 기본 = 회색 선 + 흰 면 · 고른 칸 brand 선 + brand 글자, .ghost = 선 · 면 없음 · 고른 칸 제품 색 면 + brand-label(옛 기본) */
+    const T = { line: await tok("--line-neutral-secondary", "borderTopColor"), brand: await tok("--surface-brand-primary"), brandBd: await tok("--surface-brand-primary", "borderTopColor"), brandFg: await tok("--foreground-brand-primary", "color"), label: await tok("--brand-label", "color") };
+    const pg = await page.evaluate(() => { const cs = (e) => { const c = getComputedStyle(e); return { bd: c.borderTopColor, bg: c.backgroundColor, fg: c.color }; };
+      const d = document.querySelector("#ex-pagination-basic .example-preview .pagination"), g = document.querySelector("#ex-pagination-variant .example-preview .pagination.ghost");
+      return { dRest: cs(d.querySelector("button:not(.on):not([disabled])")), dOn: cs(d.querySelector("button.on")), gRest: cs(g.querySelector("button:not(.on):not([disabled])")), gOn: cs(g.querySelector("button.on")),
+        outlineClass: document.querySelectorAll(".example-preview .pagination.outline").length }; });
+    ok("pagination: the default is outline (grey line, white face; current = brand line + brand text) and .ghost keeps the old faceless look (current = product face) (2026-11-16)",
+      pg.dRest.bd === T.line && pg.dRest.bg === W.elev && pg.dOn.bd === T.brandBd && pg.dOn.fg === T.brandFg && pg.dOn.bg === W.elev &&
+      pg.gRest.bd === "rgba(0, 0, 0, 0)" && pg.gRest.bg === "rgba(0, 0, 0, 0)" && pg.gOn.bg === T.brand && pg.gOn.fg === T.label && pg.outlineClass === 0, JSON.stringify({ pg, T, W }));
     await go("components/list.html");
     const li = page.locator("#ex-list-select .example-preview .list.hover li.on").first();
     const r = await bg(li); await over(li); await wait(200); const h = await bg(li);

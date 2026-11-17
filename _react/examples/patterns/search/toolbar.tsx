@@ -20,19 +20,17 @@ const today = new Date();
 const daysAgo = (n: number) => new Date(today.getFullYear(), today.getMonth(), today.getDate() - n);
 const PRESETS = [{ label: "최근 7일", range: (): [Date, Date] => [daysAgo(6), today] }, { label: "최근 30일", range: (): [Date, Date] => [daysAgo(29), today] }];
 
-/* 툴바 두 줄 = 검색 · 기간 / 심각도(여러 개). 대시보드에서 넘어온 조건은 결과 줄의 입력값 Chip — 하나씩 지운다 */
+/* 툴바 한 줄 = 검색 · 심각도(여러 개) · 기간 — 검색칸이 남는 폭을 맞춘다(2026-11-16). 대시보드에서 넘어온 조건은 결과 줄의 입력값 Chip — 하나씩 지운다 */
 export default function Example() {
-  const [sev, setSev] = useState<string[]>(["Critical", "High"]);
+  const [sev, setSev] = useState<string[]>(["Critical"]);
   const [conds, setConds] = useState(["대상: PC-2041", "정책: 랜섬웨어 행위 차단"]);
   const [page, setPage] = useState(1);
   return (
     <Stack>
       <Toolbar>
         <SearchBar placeholder="이벤트, 단말, IP 검색" label="이벤트 검색" />
-        <DateRangePicker aria-label="조회 기간" max={today} presets={PRESETS} defaultValue={{ start: daysAgo(6), end: today }} />
-      </Toolbar>
-      <Toolbar>
         <Combobox multiple options={SEVS} value={sev} onChange={(v) => setSev(v as string[])} placeholder="심각도" label="심각도" />
+        <DateRangePicker aria-label="조회 기간" max={today} presets={PRESETS} defaultValue={{ start: daysAgo(6), end: today }} />
       </Toolbar>
       <Toolbar className="sub">
         <span>결과 <b>128</b>건</span>

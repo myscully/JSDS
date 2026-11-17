@@ -9,7 +9,7 @@ export default function Example() {
         <WithCount count={<Count dot />}>
           <Tooltip content="알림" position="bottom"><Button color="assistive" iconOnly size="sm" aria-label="알림"><Icon name="bell" /></Button></Tooltip>
         </WithCount>
-        <Avatar initials="JH" />
+        <Avatar initials="JH" name="정희" />
       </TopBarRight>
     </TopBar>
   );

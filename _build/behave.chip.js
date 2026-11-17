@@ -60,5 +60,16 @@ module.exports = async function chip({ page, ok, go }) {
       document.querySelector("#content").append(b); const r = [...b.children].map((e) => getComputedStyle(e).backgroundColor); b.remove(); return r; });
     const dis = await tok("--surface-disable-primary");
     ok("chip: a disabled chip uses the disable face whatever its form, color or selection", off.every((c) => c === dis), JSON.stringify({ off, dis }));
+  });  await part("6 · 고른 칩 글자 600 · 체크 선 2.5(사람의 요청 2026-11-16)", async () => {
+    /* 고른 칩만 600 이고 고르지 않은 칩 · 입력값 칩은 그대로다. 체크는 ::before 의 mask SVG 선 굵기를 읽는다 */
+    const w = await page.evaluate(([O, S]) => {
+      const pick = (s) => [...document.querySelectorAll(s)].map((e) => getComputedStyle(e).fontWeight);
+      const b = getComputedStyle(document.querySelector(`${O} .chip.on`), "::before");
+      return { on: pick(`${O} .chip.on, ${S} .chip.on`), off: pick(`${O} .chip[aria-pressed]:not(.on), ${S} .chip[aria-pressed]:not(.on)`), input: pick(`${S} span.chip`),
+        mask: (b.webkitMaskImage || b.maskImage || "") };
+    }, [O, S]);
+    ok("chip: a selected chip label is 600, unselected and input chips stay at the base weight, and the check is drawn with a 2.5 stroke",
+      w.on.length === 8 && w.on.every((x) => x === "600") && w.off.length === 4 && w.off.every((x) => x !== "600" && x !== "700") && w.input.every((x) => x !== "600") &&
+      /stroke-width=(%22|\\?"|")2\.5/.test(w.mask), JSON.stringify(w));
   });
 };

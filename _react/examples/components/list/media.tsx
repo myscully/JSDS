@@ -10,8 +10,8 @@ const actions = (name: string) => (
 export default function Example() {
   return (
     <List style={{ maxWidth: 560 }}>
-      <ListItem leading={<Avatar initials="김" />} primary="김민준" meta="보안팀 · 관리자" end={actions("김민준")} />
-      <ListItem leading={<Avatar initials="이" />} primary="이서연" meta="인프라팀 · 운영자" end={actions("이서연")} />
+      <ListItem leading={<Avatar initials="김" name="김민준" />} primary="김민준" meta="보안팀 · 관리자" end={actions("김민준")} />
+      <ListItem leading={<Avatar initials="이" name="이서연" />} primary="이서연" meta="인프라팀 · 운영자" end={actions("이서연")} />
     </List>
   );
 }

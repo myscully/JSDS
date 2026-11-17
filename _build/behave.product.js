@@ -1,5 +1,5 @@
-/* 제품 색 팔레트(사람의 결정 2026-11-14) — 파랑(기본) · 빨강 · 시안 · 주황 · 중립 · AI 를 헤더 메뉴로 고른다. behave.js 가 부른다.
-   - 삭제 버튼(.negative)은 모든 제품에서 중립 — 빨강 제품의 주 버튼과 헷갈리지 않게. 빨강은 위험 확인 팝업 제목 · 메뉴 위험 항목 글자에만 남는다
+/* 제품 색 팔레트(사람의 결정 2026-11-14 · 11-17 이름 기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI, 제품3 남색 추가) — 헤더 메뉴로 고른다. behave.js 가 부른다.
+   - Negative(.negative)는 빨강, 위험 확인 팝업의 확정 버튼에만 — 화면의 삭제는 Assistive(2026-11-16 — 11-14 의 '중립' 을 되돌림)
    - AI 만 넓은 브랜드 면(주 버튼 · Banner)이 그라데이션이고, 비활성 주 버튼에는 그라데이션이 없다. 다른 제품은 background-image 가 none
    - 입력 포커스 · 열린 필드 링은 빨강 · 주황 제품에서만 중립(오류 링 · 경고색과 헷갈리지 않게), 그 밖은 제품 색. 오류 필드는 늘 빨강
    - 고른 색은 새로 읽어도 남는다 */
@@ -16,26 +16,36 @@ module.exports = async function product({ page, ok, go }) {
   const part = require("./behave.part")(ok, "behave.product", () => page);
   let RED;
 
-  await part("1 · 삭제 버튼은 중립 · 빨강은 위험 글자에만", async () => {
+  await part("1 · Negative 는 빨강 · 화면의 삭제는 Assistive", async () => {
+    /* 사람의 결정 2026-11-16 — 11-14 의 '삭제 버튼 중립' 을 되돌림. Negative 는 위험 확인 팝업의 확정 버튼에만, 화면의 삭제는 Assistive */
     await go("components/button.html"); await page.mouse.move(2, 2);
     await pick("red");
     RED = rgb(PAL.find((p) => p.key === "red").hex);
-    const W = { tert: await tok("--surface-neutral-tertiary", "backgroundColor"), fg: await tok("--foreground-neutral-primary"), line: await tok("--line-neutral-primary", "borderTopColor"),
-      sec: await tok("--foreground-neutral-secondary"), brand: await tok("--surface-brand-primary", "backgroundColor") };
-    const neg = await page.evaluate(() => {
-      const one = (s) => { const e = document.querySelector(s); if (!e) return null; const c = getComputedStyle(e); return { bg: c.backgroundColor, fg: c.color, bd: c.borderTopColor }; };
-      const spin = document.querySelector(".btn.solid.negative.loading");
-      return { solid: one(".btn.solid.negative:not([disabled]):not(.loading)"), outline: one(".btn.outline.negative:not([disabled])"), icon: one(".btn.negative.icon-only:not(.solid):not(.outline)"),
-        spinner: spin ? getComputedStyle(spin, "::after").color : null,
-        assistSolid: one(".btn.solid.assistive:not([disabled]):not(.loading)") };
-    });
-    ok("red product: delete buttons are neutral — solid = tertiary face, outline = gray line, icon-only = secondary glyph, spinner = neutral text",
-      neg.solid && neg.solid.bg === W.tert && neg.solid.fg === W.fg && neg.outline && neg.outline.bd === W.line && neg.outline.fg === W.fg && neg.icon && neg.icon.fg === W.sec && neg.spinner === W.fg,
-      JSON.stringify({ neg, W }));
-    ok("red product: no delete button carries the product red", W.brand === RED && ![neg.solid, neg.outline, neg.icon].some((x) => x && [x.bg, x.fg, x.bd].includes(RED)), JSON.stringify({ neg, RED }));
-    ok("delete solid = assistive solid", neg.assistSolid && neg.solid.bg === neg.assistSolid.bg && neg.solid.fg === neg.assistSolid.fg, JSON.stringify(neg));
-    const danger = await tok("--foreground-negative-strong");
+    const theme = (t) => page.evaluate((t) => t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"), t);
+    const res = {};
+    for (const t of [null, "dark"]) {
+      await theme(t); await wait(300);
+      const W = { face: await tok("--surface-negative-primary", "backgroundColor"), fg: await tok("--foreground-negative-strong"), line: await tok("--line-negative-primary", "borderTopColor") };
+      const neg = await page.evaluate(() => {
+        const one = (s) => { const e = document.querySelector(s); if (!e) return null; const c = getComputedStyle(e); return { bg: c.backgroundColor, fg: c.color, bd: c.borderTopColor }; };
+        const ic = document.createElement("button"); ic.className = "btn md negative icon-only"; ic.setAttribute("aria-label", "x"); document.querySelector("#ex-button-variant .example-preview").append(ic);
+        const icon = getComputedStyle(ic).color; ic.remove();
+        const spin = document.querySelector(".btn.solid.negative.loading");
+        return { solid: one("#ex-button-variant .btn.solid.negative"), outline: one("#ex-button-variant .btn.outline.negative"), icon, spinner: spin ? getComputedStyle(spin, "::after").color : null };
+      });
+      res[t || "light"] = { neg, W };
+    }
+    await theme(null);
+    const red = (r) => r.neg.solid && r.neg.solid.bg === r.W.face && r.neg.solid.fg === r.W.fg && r.neg.outline && r.neg.outline.bd === r.W.line && r.neg.outline.fg === r.W.fg && r.neg.icon === r.W.fg && r.neg.spinner === r.W.fg;
+    ok("red product, light: Negative is red — solid = negative tint + negative-strong text, outline = negative line, icon-only glyph and spinner = negative-strong", red(res.light), JSON.stringify(res.light));
+    ok("red product, dark: Negative is red the same way", red(res.dark), JSON.stringify(res.dark));
+    await go("components/form.html"); await wait(100);
+    const del = await page.evaluate(() => { const b = [...document.querySelectorAll("#ex-form-actions .btn")].find((x) => x.textContent.trim() === "삭제"); return b ? b.className : null; });
     await go("components/popup.html"); await wait(100);
+    const conf = await page.evaluate(() => { const d = document.querySelector("#ex-popup-danger .popup.danger"); const b = d && d.querySelector(".popup-actions .btn.solid"); return d ? { role: d.getAttribute("role"), cls: b && b.className } : null; });
+    ok("a delete button on the screen is Assistive; the confirm button inside the alertdialog is Negative",
+      del && /\bassistive\b/.test(del) && !/\bnegative\b/.test(del) && conf && conf.role === "alertdialog" && /\bnegative\b/.test(conf.cls), JSON.stringify({ del, conf }));
+    const danger = await tok("--foreground-negative-strong");
     const title = await page.evaluate(() => { const e = document.querySelector("#ex-popup-danger .popup.danger .popup-title"); return e ? getComputedStyle(e).color : null; });
     await go("components/dropdown.html"); await wait(100);
     const item = await page.evaluate(() => { const e = document.querySelector(".menu-item.danger"); return e ? getComputedStyle(e).color : null; });
@@ -106,6 +116,25 @@ module.exports = async function product({ page, ok, go }) {
     await pick("");
     const back = await page.evaluate(() => ({ has: document.documentElement.hasAttribute("data-accent"), prod: getComputedStyle(document.documentElement).getPropertyValue("--prod-50").trim() }));
     ok("blue clears the attribute and the injected --prod-*", !back.has && back.prod === "", JSON.stringify(back));
+  });
+  await part("5 · 제품3 남색 — 다크 주 면만 밝힘(2026-11-17)", async () => {
+    /* 다크 주 면은 제품 HEX 그대로인데 남색 #10367D 은 다크 카드 면 위 1.40 이었다 — 다크만 1.5 를 넘는 50d(#113B88)로, 라이트는 그대로.
+       다른 제품은 50d 가 없어 다크 주 면 = 제품 HEX. 다른 제품으로 바꾸면 --prod-50d 를 지운다 */
+    await go("components/button.html");
+    const th = (t) => page.evaluate((t) => t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"), t);
+    const look = () => page.evaluate(() => { const b = document.querySelector("#ex-button-variant .btn.solid.primary"); const r = getComputedStyle(document.documentElement);
+      return { btn: getComputedStyle(b).backgroundColor, d: r.getPropertyValue("--prod-50d").trim(), card: r.getPropertyValue("--surface-elevated-primary").trim() }; });
+    await pick("navy");
+    await th(null); await wait(200); const light = await look();
+    await th("dark"); await wait(200); const dark = await look();
+    const lum = (c) => { const v = c.match(/\d+/g).slice(0, 3).map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+    const hexLum = (h) => lum(rgb(h));
+    const sep = (lum(dark.btn) + 0.05) / (hexLum(dark.card) + 0.05);
+    ok("product 3 (navy): light primary = #10367D, dark primary = #113B88 and clears the dark card by 1.5",
+      light.btn === rgb("#10367D") && dark.btn === rgb("#113B88") && dark.d.toUpperCase() === "#113B88" && +sep.toFixed(2) >= 1.5, JSON.stringify({ light, dark, sep: sep.toFixed(2) }));
+    await pick("cyan"); await wait(150); const cy = await look();
+    ok("other products have no dark surface step — cyan dark primary = its hex, --prod-50d cleared", cy.d === "" && cy.btn === rgb("#00828B"), JSON.stringify(cy));
+    await th(null); await pick("");
   });
   await page.evaluate(() => document.documentElement.removeAttribute("data-theme"));
 };

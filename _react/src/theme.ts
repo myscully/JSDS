@@ -1,6 +1,7 @@
 /* 테마 · 제품 색 유틸 — 사이트 assets/app.js 의 accentScale · 팔레트 적용과 같은 계산 */
 
-export type AccentScale = Record<40 | 45 | 50 | 55 | 60, string>;
+/** 50d — 다크 주 면. 제품 HEX 가 다크 바탕 셋과 1.5 넘게 갈리지 않을 때만 생긴다(2026-11-17) */
+export type AccentScale = Record<40 | 45 | 50 | 55 | 60, string> & { "50d"?: string };
 
 function hexToHsl(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
@@ -41,13 +42,20 @@ const BRAND_DL: Record<number, number> = { 40: -9.02, 45: -3.922, 50: 0, 55: 5.0
  *  사이트 app.js 와 같은 규칙이다. 파랑 · 시안 · 주황은 이미 넘어 그대로다 */
 const DARK_BEDS = ["#1B1C1E", "#212225", "#0F0F10"];
 const DARK_TEXT_MIN = 4.5;
+/** 다크 면 단계 보정(사람의 결정 2026-11-17) — 다크 주 면은 제품 HEX 그대로라 어두운 제품(제품3 남색 #10367D)이 다크 카드 면과 1.40 이었다.
+ *  그 바탕 셋 위 1.5 를 넘을 때까지 0.5 씩 밝힌 값을 50d 로 둔다(CSS --brand-50d). 이미 넘는 제품은 만들지 않는다. 사이트 app.js 와 같은 규칙 */
+const DARK_SURFACE_MIN = 1.5;
 export function accentScale(hex: string): AccentScale {
   const [h, s, l] = hexToHsl(hex);
   const out = {} as Record<number, string>;
   for (const k of Object.keys(BRAND_DL).map(Number)) out[k] = hslToHex(h, s, Math.max(0, Math.min(100, l + (BRAND_DL[k] ?? 0))));
   for (let dl = BRAND_DL[60] ?? 10; dl <= 100 && Math.min(...DARK_BEDS.map((b) => +ratio(out[60] ?? "#000000", b).toFixed(2))) < DARK_TEXT_MIN; dl += 0.5) out[60] = hslToHex(h, s, Math.min(100, l + dl));
   out[50] = hex.toUpperCase();
-  return out as AccentScale;
+  const res = out as AccentScale;
+  let d50 = res[50];
+  for (let dl = 0.5; dl <= 100 && Math.min(...DARK_BEDS.map((b) => +ratio(d50, b).toFixed(2))) < DARK_SURFACE_MIN; dl += 0.5) d50 = hslToHex(h, s, Math.min(100, l + dl));
+  if (d50 !== res[50]) res["50d"] = d50;
+  return res;
 }
 
 function relLum(hex: string): number {
@@ -75,6 +83,7 @@ export function isLightAccent(hex: string): boolean {
  *  기준 토큰에는 면 위 글자 역할이 없어 라벨이 늘 흰색이다 — 그래서 제품 색에 제약이 걸린다(isLightAccent). */
 export function applyAccent(hex: string, root: HTMLElement = document.documentElement): AccentScale {
   const sc = accentScale(hex);
+  root.style.removeProperty("--prod-50d");   // 앞 제품이 남긴 다크 면 단계를 지운다
   for (const [k, v] of Object.entries(sc)) root.style.setProperty(`--prod-${k}`, v);
   root.dataset.accent = hex.toUpperCase();
   /* 밝은 제품에 맞춰 뒤집던 규칙(data-accent-light)을 걷어냈다 — 이제는 제약이고, 못 넘으면 알린다 */
@@ -83,18 +92,18 @@ export function applyAccent(hex: string, root: HTMLElement = document.documentEl
   return sc;
 }
 
-/** 제품 색 팔레트(2026-11-14 사람의 결정) — 1.0 전에는 이 여섯 가지만 쓴다. 사이트 _build/data.js 의 PRODUCTS 와 같은 값이다(테스트가 대조).
+/** 제품 색 팔레트(2026-11-14 사람의 결정 · 2026-11-17 이름을 역할로 · 제품3 navy 추가) — 1.0 전에는 이 일곱 가지만 쓴다. 사이트 _build/data.js 의 PRODUCTS 와 같은 값이다(테스트가 대조).
  *  - base: CSS 기본(Blue 램프) — 아무것도 넣지 않는다
  *  - ramp: hex 로 --prod-40~60 을 만든다. 상태색과 겹쳐도 그대로 쓴다(자동 중립 전환은 없다)
  *  - neutral: --prod-* 없이 CSS 의 [data-accent="neutral"] 블록이 brand 를 중립 램프로 갈아끼운다
  *  - ai: 대표 단색 violet-50 으로 다섯 단계 + 주 버튼 · Banner 만 그라데이션(CSS 의 [data-accent="ai"])
  *  neutralFocus 인 빨강 · 주황은 입력 필드 포커스 링이 중립이다(CSS 의 [data-accent="red"|"orange"]).
  *  exception 은 흰 글자 4.5 를 넘지 못하는 것을 알고 정한 사람의 결정이다(주황) — 경고하지 않는다. */
-export type ProductColorKey = "blue" | "red" | "cyan" | "orange" | "neutral" | "ai";
+export type ProductColorKey = "blue" | "red" | "cyan" | "navy" | "orange" | "neutral" | "ai";
 export interface ProductColor {
   key: ProductColorKey;
+  /** 보이는 이름(역할 — 기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI). key 는 색 이름 그대로다 */
   name: string;
-  group: string;
   kind: "base" | "ramp" | "neutral" | "ai";
   hex: string;
   neutralFocus?: boolean;
@@ -102,13 +111,14 @@ export interface ProductColor {
   gradient?: { rest: [string, string]; strong: [string, string]; heavy: [string, string] };
 }
 export const PRODUCT_COLORS: readonly ProductColor[] = [
-  { key: "blue", name: "파랑", group: "기본", kind: "base", hex: "#0066FF" },
-  { key: "red", name: "빨강", group: "제품별", kind: "ramp", hex: "#C30D2A", neutralFocus: true },
-  { key: "cyan", name: "시안", group: "제품별", kind: "ramp", hex: "#00828B" },
-  { key: "orange", name: "주황", group: "Company", kind: "ramp", hex: "#FF7F00", neutralFocus: true,
+  { key: "blue", name: "기본", kind: "base", hex: "#0066FF" },
+  { key: "red", name: "제품1", kind: "ramp", hex: "#C30D2A", neutralFocus: true },
+  { key: "cyan", name: "제품2", kind: "ramp", hex: "#00828B" },
+  { key: "navy", name: "제품3", kind: "ramp", hex: "#10367D" },
+  { key: "orange", name: "브랜드", kind: "ramp", hex: "#FF7F00", neutralFocus: true,
     exception: "회사 색(--company-mark)을 제품 색으로 그대로 쓴다 — 흰 글자와 제품 색 글자가 4.5 에 못 미치는 것을 알고 정한 사람의 결정(2026-11-14)" },
-  { key: "neutral", name: "중립", group: "중립", kind: "neutral", hex: "#1B1C1E" },
-  { key: "ai", name: "AI", group: "AI", kind: "ai", hex: "#6541F2",
+  { key: "neutral", name: "중립", kind: "neutral", hex: "#1B1C1E" },
+  { key: "ai", name: "AI", kind: "ai", hex: "#6541F2",
     gradient: { rest: ["purple-40", "violet-45"], strong: ["purple-30", "violet-40"], heavy: ["purple-30", "violet-30"] } },
 ];
 
@@ -116,7 +126,7 @@ export const PRODUCT_COLORS: readonly ProductColor[] = [
  *  blue 는 기본이라 --prod-* 와 data-accent 를 지운다. 그 밖은 data-accent=키 — 중립 램프 · AI 그라데이션 · 중립 입력 링은 그 속성으로 CSS 가 건다.
  *  1.0 뒤에는 사용자가 색을 더하는 팔레트를 제공한다 — 그 전까지 팔레트 밖 색은 applyAccent(hex) 로 넣는다(속성 이름이 hex 라 위 CSS 분기는 타지 않는다). */
 export function applyProductColor(key: ProductColorKey, root: HTMLElement = document.documentElement): AccentScale | null {
-  for (const k of [40, 45, 50, 55, 60]) root.style.removeProperty(`--prod-${k}`);
+  for (const k of [40, 45, 50, 55, 60, "50d"]) root.style.removeProperty(`--prod-${k}`);
   const p = PRODUCT_COLORS.find((x) => x.key === key);
   if (process.env.NODE_ENV !== "production" && !p) console.warn(`[ds-react] applyProductColor: 모르는 키 "${key}" — ${PRODUCT_COLORS.map((x) => x.key).join(" · ")} 중 하나입니다. 기본(파랑)으로 둡니다`);
   if (!p || p.kind === "base") { delete root.dataset.accent; return null; }

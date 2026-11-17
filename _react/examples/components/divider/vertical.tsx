@@ -8,7 +8,7 @@ export default function Example() {
       <Divider orientation="vertical" />
       <Button variant="solid" color="assistive" size="sm">내보내기</Button>
       <Divider orientation="vertical" />
-      <Button variant="outline" color="negative" size="sm">삭제</Button>
+      <Button variant="outline" color="assistive" size="sm">삭제</Button>
     </div>
   );
 }

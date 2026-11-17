@@ -30,7 +30,7 @@ export default function Example() {
         <ActionBar count={sel.size}>
           <Button variant="outline" color="assistive" size="sm">허용 처리</Button>
           <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>내보내기</Button>
-          <Button variant="outline" color="negative" size="sm">삭제</Button>
+          <Button variant="outline" color="assistive" size="sm">삭제</Button>
         </ActionBar>
       )}
     />

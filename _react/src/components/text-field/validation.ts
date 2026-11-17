@@ -25,6 +25,7 @@ export const VALIDATION_MESSAGES = {
   minlength: "글자 수가 모자랍니다. {minlength}자 이상 입력하세요.",
   step: "입력할 수 없는 값입니다. {step} 단위로 입력하세요.",
   length: "글자 수가 {over}자 넘었습니다. {limit}자 이하로 줄이세요.",
+  code: "코드가 덜 입력됐습니다. {length}자리를 모두 입력하세요.",
 };
 export type ValidationMessages = Partial<Record<keyof typeof VALIDATION_MESSAGES, string>>;
 
@@ -51,6 +52,10 @@ function ownMessages(el: Element): ValidationMessages {
 
 /** 표준 제약과 글자 수 한도 — 맞으면 "" */
 export function validationMessage(el: TextControl, messages?: ValidationMessages): string {
+  if (el.hasAttribute("data-ds-code")) {   // 인증 코드 칸 묶음(CodeInput) — 칸을 이은 값으로 잰다. 사이트 ds.js 의 .code-inputs 와 같다
+    const cells = Array.from(el.querySelectorAll<HTMLInputElement>(".code-cell")), v = cells.map((c) => c.value).join(""), m = { ...VALIDATION_MESSAGES, ...messages, ...ownMessages(el) };
+    return !v ? (el.hasAttribute("data-required") ? m.required : "") : v.length < cells.length ? fill(m.code, { length: cells.length }) : "";
+  }
   if (el.hasAttribute("data-ds-upload")) {
     const s = el.getAttribute("data-ds-upload"), m = { ...VALIDATION_MESSAGES, ...messages, ...ownMessages(el) };
     return s === "busy" ? m.fileBusy : s === "failed" ? m.fileFailed : el.hasAttribute("data-ds-required") && el.hasAttribute("data-ds-empty") ? m.fileRequired : "";
@@ -67,7 +72,7 @@ export function validationMessage(el: TextControl, messages?: ValidationMessages
 }
 
 const labelOf = (field: Element) => ((field.querySelector("legend") ?? field.querySelector("label"))?.textContent ?? "").replace(/\*\s*$/, "").trim();
-const isField = (t: EventTarget): t is TextControl => t instanceof Element && t.matches("[data-ds-field]") && ((t as TextControl).willValidate || isChoice(t));
+const isField = (t: EventTarget): t is TextControl => t instanceof Element && t.matches("[data-ds-field]") && ((t as TextControl).willValidate || isChoice(t) || t.hasAttribute("data-ds-code"));
 
 interface Options {
   enabled: boolean;
@@ -82,7 +87,6 @@ export function useFormValidation({ enabled, messages, onValidate }: Options) {
   const tried = useRef(false);
   const latest = useRef<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [summary, setSummary] = useState<{ count: number; items: string[] } | null>(null);
 
   /* 틀린 필드를 화면 순서로 — 시스템이 재는 필드는 새 결과로, Date Picker 처럼 스스로 재는 필드는 .error 로 본다 */
   const collect = (next: Record<string, string>) =>
@@ -93,10 +97,7 @@ export function useFormValidation({ enabled, messages, onValidate }: Options) {
     });
   const commit = (next: Record<string, string>) => {
     latest.current = next;
-    setErrors(next);
-    if (!tried.current) return;
-    const bad = collect(next);
-    setSummary(bad.length >= 3 ? { count: bad.length, items: bad.map((b) => b.label).filter(Boolean) } : null);
+    setErrors(next);   // 폼 위 오류 요약은 없다(사람의 결정 2026-11-16)
   };
   const measured = (el: TextControl, base: Record<string, string>) => {
     const { [el.id]: _old, ...next } = base;
@@ -122,14 +123,15 @@ export function useFormValidation({ enabled, messages, onValidate }: Options) {
     commit(next);
     const bad = collect(next);
     onValidate?.({ valid: !bad.length, errors: bad.map(({ label, message }) => ({ label, message })) });
-    const first = bad[0]?.field.querySelector<HTMLElement>("input:not([type=hidden]),textarea,button");
+    const cells = Array.from(bad[0]?.field.querySelectorAll<HTMLInputElement>(".code-cell") ?? []);   // 인증 코드는 첫 빈 칸으로
+    const first = cells.find((c) => !c.value) ?? bad[0]?.field.querySelector<HTMLElement>("input:not([type=hidden]),textarea,button");
     if (first) {
       first.focus({ preventScroll: true });
       first.scrollIntoView?.({ block: "center" });
     }
     return !bad.length;
   };
-  /** Select · Combobox — 고르거나 떠난 뒤 이 필드만 다시 잰다 */
+  /** Select · Combobox · CodeInput — 고르거나 떠난 뒤 이 필드만 다시 잰다 */
   const touch = (el: HTMLElement) => {
     if (enabled) commit(measured(el as TextControl, latest.current));
   };
@@ -142,5 +144,5 @@ export function useFormValidation({ enabled, messages, onValidate }: Options) {
     const { [el.id]: _old, ...next } = latest.current;
     commit(next);
   };
-  return { form, errors, summary, handleBlur, handleInput, validateAll, touch, refresh };
+  return { form, errors, handleBlur, handleInput, validateAll, touch, refresh };
 }

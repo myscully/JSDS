@@ -72,12 +72,17 @@
       if (ol.offsetParent !== null && ol.scrollWidth > ol.clientWidth + 1) ol.classList.add("stacked");
     });
   }
+  /* Avatar 색 — 이름으로 정하는 6색(사람의 결정 2026-11-16). 이름은 data-name → aria-label → 글자 순. 같은 이름은 어디서나 같은 tone 이다.
+     React avatarTone(_react/src/components/avatar/tone.ts)과 같은 식이고 테스트가 대조한다. 빌드도 같은 식으로 예제에 미리 적는다(render.js) */
+  function avatarTone(name) { var h = 0, s = String(name || "").trim(); for (var i = 0; i < s.length; i++) { var c = s.codePointAt(i); if (c > 0xffff) i++; h = (Math.imul(h, 31) + c) >>> 0; } return h % 6 + 1; }
+  function avTone(el) { if (!el.hasAttribute("data-tone")) el.setAttribute("data-tone", String(avatarTone(el.getAttribute("data-name") || el.getAttribute("aria-label") || el.textContent))); }
   var fitTimer = 0;
   window.addEventListener("resize", function () { fitSteps(); clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitCells(); }, 150); });
   function init(root) {
     fitSteps(root);
     doc.fonts.ready.then(function () { fitCrumbs(root); fitCells(root); fitChips(root); fitSteps(root); });
     $$(".number-field input", root || doc).forEach(numSync);
+    $$(".avatar", root || doc).forEach(avTone);
     dsLive();   // 알림 영역은 미리 — 복사하는 순간 새로 넣으면 대개 읽히지 않는다
     root = root || doc;
     $$("input.mixed", root).forEach(function (i) { i.indeterminate = true; });
@@ -100,6 +105,7 @@
     /* Date Picker — 확정 값을 처음부터 data-* 에 둔다(필드 글자 · 정적 달력에서 읽어). 단독 달력만 host 다 */
     $$(".datepicker", root).forEach(function (h) { S(h); });
     $$(".timepicker", root).forEach(tpInit);
+    $$(".code-inputs", root).forEach(codeInit);
     $$(".tree", root).forEach(trInit);
     $$(".notify", root).forEach(nfInit);
     $$(".calendar", root).forEach(function (c) { if (!closest(c, ".datepicker")) { S(c); dpFitStatic(c); } });
@@ -122,6 +128,35 @@
     }
   }
   function inClipper(el) { for (var p = el.parentElement; p && p !== doc.body; p = p.parentElement) { var c = getComputedStyle(p); if (/auto|scroll|hidden|clip/.test(c.overflowX + c.overflowY)) return true; } return false; }
+  /* Date Picker 달력 · Time Picker 열 목록의 자리(사람의 요청 2026-11-17 — 팝업 안에서 잘렸다). 넘침을 자르는 영역(팝업 · 패널 본문 · 표) 안이면 화면 기준(.float)으로 띄운다.
+     화면 기준으로 뜬 조상(달력 안의 시각 칸)을 만나면 거기서 멈춘다 — 그 바깥 영역은 더는 자르지 않는다. 아래 자리가 모자라고 위가 더 넓으면 위로, 오른쪽으로 넘치면 왼쪽으로 당긴다 */
+  function pickerClip(el, each) { for (var p = el.parentElement; p && p !== doc.body; p = p.parentElement) { var c = getComputedStyle(p); if (c.position === "fixed") return false; if (/auto|scroll|hidden|clip/.test(c.overflowX + c.overflowY) && each(p)) return true; } return false; }
+  function pickerSpot(host, panel, up0) {
+    var anchor = $(":scope > .affix", host) || host, hr = host.getBoundingClientRect(), r = anchor.getBoundingClientRect(), h = panel.offsetHeight, w = panel.offsetWidth, gap = 4, vw = doc.documentElement.clientWidth;
+    var below = window.innerHeight - r.bottom - gap, above = r.top - gap, up = up0 == null ? below < h && above > below : up0;
+    var fl = pickerClip(host, function () { return true; }), top = up ? r.top - gap - h : r.bottom + gap, left = Math.max(8, Math.min(hr.left, vw - 8 - w));
+    return { up: up, float: fl, top: fl ? top : top - hr.top, left: fl ? left : left - hr.left };
+  }
+  /* 필드가 자르는 영역 밖으로 나갔는지 — 나갔으면 띄운 목록이 엉뚱한 자리에 남지 않게 닫는다 */
+  function pickerHidden(host) {
+    var r = ($(":scope > .affix", host) || host).getBoundingClientRect();
+    if (r.bottom <= 0 || r.top >= window.innerHeight) return true;
+    return pickerClip(host, function (p) { var q = p.getBoundingClientRect(); return r.bottom <= q.top || r.top >= q.bottom || r.right <= q.left || r.left >= q.right; });
+  }
+  /* 띄운 달력 · 시각 목록은 바깥이 스크롤되면 필드를 따라간다(방향은 그대로). 목록 자신의 스크롤은 그대로 */
+  function followPickers(e) {
+    $$(".datepicker.float.open, .timepicker.float.open").forEach(function (h) {
+      var dp = h.matches(".datepicker"), panel = dp ? calOf(h) : $(":scope > .time-panel", h);
+      if (e.type === "scroll" && e.target instanceof Node && panel && panel.contains(e.target)) return;
+      if (pickerHidden(h)) {
+        var had = h.contains(doc.activeElement), inp = $(":scope > .affix input", h);
+        if (dp) closeDP(h, false); else tpClose(h, false);
+        if (had && inp) inp.focus({ preventScroll: true });
+        return;
+      }
+      if (dp) place(h, true); else tpPlace(h, true);
+    });
+  }
   /* 띄운 메뉴는 트리거를 따라가지 못하므로 스크롤 · 창 크기 변경에 닫는다. 메뉴 자신의 스크롤은 그대로 */
   function closeFloats(e) {
     $$(".tooltip.float").forEach(function (tip) { var w = tip.parentNode; if (!w._dsTip) return; if (e.type === "scroll" && w.contains(doc.activeElement)) placeTip(w); else w.classList.add("quiet"); });   // 포커스로 온 툴팁은 따라간다 — 포커스가 일으킨 스크롤에 사라지면 키보드로는 볼 수 없다
@@ -577,17 +612,16 @@
   }
   function closeDP(host, restore) {
     var st = S(host);
-    host.classList.remove("open", "up"); delete host.dataset.dsOpened; setExpanded(host, false);
+    host.classList.remove("open", "up", "float"); delete host.dataset.dsOpened; setExpanded(host, false);
     st.hover = null; st.draft = null;
     if (restore) { var o = st.opener || $(".cal-btn", host); if (o) o.focus(); }
   }
   /* 아래 자리가 모자라고 위가 더 넓으면 필드 위로(.up). 기준은 필드 상자 — 도움말이 달력을 밀지 않게. 오른쪽으로 넘치면 왼쪽으로 당긴다 */
   function place(host, keep) {
-    var cal = calOf(host), anchor = $(".affix", host) || host, hr = host.getBoundingClientRect(), r = anchor.getBoundingClientRect(), h = cal.offsetHeight, w = cal.offsetWidth, gap = 4;
-    var below = window.innerHeight - r.bottom - gap, above = r.top - gap, up = keep ? host.classList.contains("up") : below < h && above > below, vw = doc.documentElement.clientWidth;   // 열린 뒤에는 방향을 바꾸지 않고 높이만 다시 잰다
-    host.classList.toggle("up", up);
-    host.style.setProperty("--dp-top", (up ? r.top - hr.top - gap - h : r.bottom - hr.top + gap) + "px");
-    host.style.setProperty("--dp-left", Math.max(8 - hr.left, Math.min(0, vw - 8 - w - hr.left)) + "px");
+    var sp = pickerSpot(host, calOf(host), keep ? host.classList.contains("up") : null);   // 열린 뒤에는 방향을 바꾸지 않고 높이만 다시 잰다
+    host.classList.toggle("up", sp.up); host.classList.toggle("float", sp.float);
+    host.style.setProperty("--dp-top", sp.top + "px");
+    host.style.setProperty("--dp-left", sp.left + "px");
   }
   /* ds:date — value · start · end 는 기계 형식, date 는 기준 시간대의 0시 · data-time 이면 그 시각(미완성 · 없는 날짜는 Invalid Date, 빈 값은 null), text 는 필드 글자,
      기간은 sides {start, end} — 쪽마다의 상태(달력에서 고른 값은 늘 valid · 비운 쪽 empty) */
@@ -1063,7 +1097,7 @@
     if (name) { $$("input[type=hidden]", h).forEach(function (x) { x.remove(); }); (multi ? on.map(cbValue) : [on[0] ? cbValue(on[0]) : ""]).forEach(function (v) { var x = doc.createElement("input"); x.type = "hidden"; x.name = name; x.value = v; h.appendChild(x); }); }
   }
   function cbFire(h) { var on = cbOn(h); fire(h, "ds:select", { value: cbMulti(h) ? on.map(cbValue) : on[0] ? cbValue(on[0]) : "" }); }
-  function cbCheck(h) { var inp = cbInput(h), form = closest(inp, "form[data-validate]"); if (form && h._dsTouched && closest(inp, ".field")) { vShow(inp, vMessage(inp)); vChanged(form); } }
+  function cbCheck(h) { var inp = cbInput(h), form = closest(inp, "form[data-validate]"); if (form && h._dsTouched && closest(inp, ".field")) { vShow(inp, vMessage(inp)); } }
   function cbOpen(h, open) {
     var inp = cbInput(h); if (inp.disabled || h.classList.contains("open") === open) return;
     h.classList.toggle("open", open); inp.setAttribute("aria-expanded", String(open));
@@ -1111,13 +1145,13 @@
   /* ---------- 입력 검증 — form[data-validate] ----------
      Interaction › Input errors(사람의 결정 2026-11-09). 표준 제약(required · pattern · min · max · minlength · type)과 글자 수 한도(data-maxlength), Select · Combobox 의 data-required 를 본다.
      포커스가 떠날 때 필드 단위 — 건드리지 않은 빈 필드는 탭으로 지나가도 오류를 내지 않는다. 오류가 있는 필드는 입력할 때마다 다시 재 바로 지운다.
-     제출하면 전부 재고, 막으면 첫 오류로 포커스 · 스크롤, 3개 이상이면 폼 위에 요약. Date Picker 는 스스로 재므로 .error 만 센다.
+     제출하면 전부 재고, 막으면 첫 오류로 포커스 · 스크롤(폼 위 요약은 없다 — 사람의 결정 2026-11-16). Date Picker 는 스스로 재므로 .error 만 센다.
      Checkbox · Radio 그룹은 .field 안 fieldset 의 data-required — 하나 이상 고른다. 문구는 React validation.ts 와 같아야 한다 */
-  var V_MSG = { fileRequired: "필수 항목입니다. 파일을 선택하세요.", fileBusy: "파일을 전송하고 있습니다. 끝난 뒤 다시 저장하세요.", fileFailed: "올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.", fileType: "올릴 수 없는 형식입니다. {types} 파일을 고르세요.", fileSize: "파일이 너무 큽니다. {max} 이하 파일을 고르세요.", fileEmpty: "빈 파일입니다. 내용이 있는 파일을 고르세요.", fileDuplicate: "이미 추가한 파일입니다. 다른 파일을 고르세요.", fileCount: "파일이 너무 많습니다. {max}개까지 올릴 수 있습니다.", fileSend: "전송하지 못했습니다. 다시 시도하세요.", fileAdded: "파일 {ok}개를 추가했습니다.", fileRejected: "{bad}개는 올릴 수 없습니다.", fileRemoved: "{name} 파일을 지웠습니다.", required: "필수 항목입니다. 값을 입력하세요.", choose: "필수 항목입니다. 항목을 선택하세요.", number: "숫자가 아닙니다. 숫자를 입력하세요.", email: "이메일 형식이 아닙니다. 예: admin@example.com", url: "URL 형식이 아닙니다. 예: https://example.com", pattern: "형식이 맞지 않습니다. 도움말을 확인하세요.", min: "값이 너무 작습니다. {min} 이상 입력하세요.", max: "값이 너무 큽니다. {max} 이하 입력하세요.", minlength: "글자 수가 모자랍니다. {minlength}자 이상 입력하세요.", step: "입력할 수 없는 값입니다. {step} 단위로 입력하세요.", length: "글자 수가 {over}자 넘었습니다. {limit}자 이하로 줄이세요." };
-  function vIsField(t) { return !!(t && t.matches && t.matches(".field input, .field textarea") && !closest(t, ".datepicker") && ["checkbox", "radio", "hidden", "file"].indexOf(t.type) < 0); }
+  var V_MSG = { fileRequired: "필수 항목입니다. 파일을 선택하세요.", fileBusy: "파일을 전송하고 있습니다. 끝난 뒤 다시 저장하세요.", fileFailed: "올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.", fileType: "올릴 수 없는 형식입니다. {types} 파일을 고르세요.", fileSize: "파일이 너무 큽니다. {max} 이하 파일을 고르세요.", fileEmpty: "빈 파일입니다. 내용이 있는 파일을 고르세요.", fileDuplicate: "이미 추가한 파일입니다. 다른 파일을 고르세요.", fileCount: "파일이 너무 많습니다. {max}개까지 올릴 수 있습니다.", fileSend: "전송하지 못했습니다. 다시 시도하세요.", fileAdded: "파일 {ok}개를 추가했습니다.", fileRejected: "{bad}개는 올릴 수 없습니다.", fileRemoved: "{name} 파일을 지웠습니다.", required: "필수 항목입니다. 값을 입력하세요.", choose: "필수 항목입니다. 항목을 선택하세요.", number: "숫자가 아닙니다. 숫자를 입력하세요.", email: "이메일 형식이 아닙니다. 예: admin@example.com", url: "URL 형식이 아닙니다. 예: https://example.com", pattern: "형식이 맞지 않습니다. 도움말을 확인하세요.", min: "값이 너무 작습니다. {min} 이상 입력하세요.", max: "값이 너무 큽니다. {max} 이하 입력하세요.", minlength: "글자 수가 모자랍니다. {minlength}자 이상 입력하세요.", step: "입력할 수 없는 값입니다. {step} 단위로 입력하세요.", length: "글자 수가 {over}자 넘었습니다. {limit}자 이하로 줄이세요.", code: "코드가 덜 입력됐습니다. {length}자리를 모두 입력하세요." };
+  function vIsField(t) { return !!(t && t.matches && t.matches(".field input, .field textarea") && !closest(t, ".datepicker, .code-inputs") && ["checkbox", "radio", "hidden", "file"].indexOf(t.type) < 0); }   // 인증 코드 칸은 묶음(.code-inputs) 하나로 잰다
   function vChoice(el) { return closest(el, ".dropdown[data-required], .combobox[data-required], .checkbox-group[data-required], .radio-group[data-required], .upload"); }
   function vEmpty(host) { if (host.matches(".combobox")) return !cbOn(host).length; if (host.matches(".checkbox-group, .radio-group")) return !$("input:checked", host); var on = $(".menu-item.on", host); return !on || on.dataset.value === ""; }
-  function vFields(form) { return $$(".field input, .field textarea, .field .dropdown[data-required] .trigger, .field .checkbox-group[data-required], .field .radio-group[data-required], .field .upload .upload-pick", form).filter(function (i) { return !i.disabled && i.type !== "checkbox" && i.type !== "radio" && i.type !== "file" && ((vIsField(i) && i.willValidate) || vChoice(i)); }); }
+  function vFields(form) { return $$(".field input, .field textarea, .field .dropdown[data-required] .trigger, .field .checkbox-group[data-required], .field .radio-group[data-required], .field .upload .upload-pick, .field .code-inputs", form).filter(function (i) { if (i.matches(".code-inputs")) return codeCells(i).some(function (c) { return !c.disabled; }); return !i.disabled && i.type !== "checkbox" && i.type !== "radio" && i.type !== "file" && ((vIsField(i) && i.willValidate) || vChoice(i)); }); }
   function vMsgs(inp) {
     var out = {}, k; for (k in V_MSG) out[k] = V_MSG[k];
     [closest(inp, "form[data-validate]"), inp].forEach(function (el) {
@@ -1129,6 +1163,7 @@
   }
   function vLimit(inp) { return Number(inp.getAttribute("data-maxlength")) || 0; }
   function vMessage(inp) {
+    if (inp.matches(".code-inputs")) { var cv = codeValue(inp), cn = codeCells(inp).length, cm = vMsgs(inp); return !cv ? (inp.hasAttribute("data-required") ? cm.required : "") : cv.length < cn ? cm.code.replace(/\{length\}/g, cn) : ""; }
     var tph = closest(inp, ".timepicker"); if (tph) return !inp.value.trim() ? (inp.required ? vMsgs(inp).required : "") : tpCheck(tph, inp.value).msg || "";
     var host = vChoice(inp); if (host) return host.matches(".upload") ? upMessage(host) : vEmpty(host) ? vMsgs(inp).choose : "";
     var v = inp.validity, limit = vLimit(inp), over = limit ? inp.value.length - limit : 0;
@@ -1148,31 +1183,75 @@
   }
   function vShow(inp, msg) {
     var f = closest(inp, ".field"), help = vHelp(inp), on = f.classList.contains("error");
-    if (msg) { if (!on) help._orig = help.textContent; help.textContent = msg; f.classList.add("error"); inp.setAttribute("aria-invalid", "true"); }
-    else if (on) { f.classList.remove("error"); help.textContent = help._orig || ""; inp.removeAttribute("aria-invalid"); }
+    var marks = inp.matches(".code-inputs") ? codeCells(inp) : [inp];   // 인증 코드는 칸마다 aria-invalid
+    if (msg) { if (!on) help._orig = help.textContent; help.textContent = msg; f.classList.add("error"); marks.forEach(function (m) { m.setAttribute("aria-invalid", "true"); }); }
+    else if (on) { f.classList.remove("error"); help.textContent = help._orig || ""; marks.forEach(function (m) { m.removeAttribute("aria-invalid"); }); }
   }
   var V_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>';
   function vLabel(f) { var l = $("legend", f) || $("label", f); return l ? l.textContent.replace(/\*\s*$/, "").trim() : ""; }
-  function vSummary(form) {
-    if (!form._tried) return;
-    var bad = $$(".field.error", form), box = $(":scope > [data-form-summary]", form);
-    if (bad.length < 3) { if (box) box.remove(); return; }
-    if (!box) { box = doc.createElement("div"); box.className = "notice danger form-summary"; box.setAttribute("role", "alert"); box.setAttribute("data-form-summary", ""); box.innerHTML = '<span class="ico">' + V_ICON + '</span><div><b></b><span></span></div>'; form.insertBefore(box, form.firstChild); }
-    $("b", box).textContent = "입력값 " + bad.length + "개를 확인하세요"; $(":scope > div > span", box).textContent = bad.map(vLabel).filter(Boolean).join(", ");
-  }
   /** 폼 전체 검증 — 통과하면 true. 제출 버튼이 아닌 곳에서 부를 때 DS.validate(form) */
   function vRun(form) {
     form._tried = true;
     vFields(form).forEach(function (i) { vShow(i, vMessage(i)); });
-    vSummary(form);
     var bad = $$(".field.error", form);
     form.dispatchEvent(new CustomEvent("ds:validate", { bubbles: true, detail: { valid: !bad.length, errors: bad.map(function (f) { return { label: vLabel(f), message: ($(":scope > .help", f) || {}).textContent || "" }; }) } }));
-    if (bad.length) { var first = $("input:not([type=hidden]),textarea,button", bad[0]); if (first) { first.focus({ preventScroll: true }); first.scrollIntoView({ block: "center" }); } }
+    if (bad.length) { var first = $("input:not([type=hidden]),textarea,button", bad[0]), cg0 = $(".code-inputs", bad[0]); if (cg0) first = codeCells(cg0).filter(function (c) { return !c.value; })[0] || first; if (first) { first.focus({ preventScroll: true }); first.scrollIntoView({ block: "center" }); } }   // 인증 코드는 첫 빈 칸으로
     return !bad.length;
   }
-  function vChanged(form) { if (form) vSummary(form); }
   /* Select — 열었다가 고르지 않고 닫으면 알린다. 건드리지 않은 필드는 제출할 때 */
-  function vTouch(dd) { var tr = $(".trigger", dd), form = closest(dd, "form[data-validate]"); if (tr && form && dd.hasAttribute("data-required") && closest(dd, ".field")) { vShow(tr, vMessage(tr)); vChanged(form); } }
+  function vTouch(dd) { var tr = $(".trigger", dd), form = closest(dd, "form[data-validate]"); if (tr && form && dd.hasAttribute("data-required") && closest(dd, ".field")) { vShow(tr, vMessage(tr)); } }
+
+  /* ---------- Text Field Code — .code-inputs(사람의 요청 · 결정 2026-11-17) ----------
+     인증 코드처럼 자리 수가 정해진 숫자를 칸마다 한 자리씩. 치면 다음 칸, 빈 칸에서 Backspace 는 앞 칸을 지우고 그리로, ← → Home End 로 옮긴다.
+     붙여넣기 · 문자 자동 채우기(첫 칸 autocomplete=one-time-code)는 그 칸부터 나눠 채운다. 숫자가 아닌 글자는 받지 않는다. 앞에 빈 칸이 있으면 빈 칸에 포커스를 주지 않고 첫 빈 칸으로 보낸다.
+     값은 칸을 이은 글자 — 안의 hidden 입력(name)에 담고, 바뀔 때마다 ds:code {value, complete}. 검증은 묶음 하나로(필수 data-required · 덜 친 값 code 문구) */
+  function codeCells(g) { return $$(".code-cell", g); }
+  function codeValue(g) { return codeCells(g).map(function (c) { return c.value; }).join(""); }
+  /* Tab 칸은 하나 — 첫 빈 칸(다 차면 마지막 칸). 칸마다 Tab 이 멈추면 빈 칸으로 되돌리는 규칙과 맞물려 묶음을 빠져나갈 수 없다. 안에서는 화살표로 옮긴다 */
+  function codeRove(g) { var cs = codeCells(g), k = cs.findIndex(function (c) { return !c.value; }); if (k < 0) k = cs.length - 1; cs.forEach(function (c, i) { if (i === k) c.removeAttribute("tabindex"); else c.setAttribute("tabindex", "-1"); }); }
+  function codeInit(g) { var hid = $(":scope > input[type=hidden]", g); g._dsCode = codeValue(g); if (hid) hid.value = g._dsCode; codeCells(g).forEach(function (c) { c._dsPrev = c.value; }); codeRove(g); }
+  function codeSync(g) {
+    var v = codeValue(g), hid = $(":scope > input[type=hidden]", g); if (hid) hid.value = v;
+    codeCells(g).forEach(function (c) { c._dsPrev = c.value; }); codeRove(g);
+    g._dsDirty = true;
+    var f = closest(g, ".field"); if (closest(g, "form[data-validate]") && f.classList.contains("error")) vShow(g, vMessage(g));   // 오류가 떠 있으면 고치는 대로 다시 잰다
+    if (v === g._dsCode) return; g._dsCode = v;
+    fire(g, "ds:code", { value: v, complete: v.length === codeCells(g).length });
+  }
+  function codeFill(cell, digits) {   // cell 부터 한 자리씩 — 마지막으로 채운 다음 칸(없으면 마지막 칸)으로
+    var g = closest(cell, ".code-inputs"), cs = codeCells(g), i = cs.indexOf(cell), k = 0;
+    for (; k < digits.length && i + k < cs.length; k++) cs[i + k].value = digits.charAt(k);
+    var next = cs[Math.min(i + k, cs.length - 1)]; next.focus(); next.select();
+    codeSync(g);
+  }
+  doc.addEventListener("input", function (e) {
+    var t = e.target; if (!(t instanceof Element) || !t.matches(".code-inputs .code-cell") || e.isComposing) return;
+    var g = closest(t, ".code-inputs"), typed = e.inputType === "insertText" && e.data != null, d = (typed ? e.data : t.value).replace(/\D/g, "");
+    if (d) { codeFill(t, d); return; }
+    if (typed || /^insert/.test(e.inputType || "") || t.value) t.value = t._dsPrev || "";   // 숫자가 아닌 글자 — 전 값으로 되돌린다
+    codeSync(g);
+  });
+  doc.addEventListener("compositionend", function (e) { var t = e.target; if (t instanceof Element && t.matches(".code-inputs .code-cell")) { var d = t.value.replace(/\D/g, ""); if (d) codeFill(t, d); else t.value = t._dsPrev || ""; } });
+  doc.addEventListener("paste", function (e) {
+    var t = e.target; if (!(t instanceof Element) || !t.matches(".code-inputs .code-cell")) return;
+    e.preventDefault(); var d = ((e.clipboardData && e.clipboardData.getData("text")) || "").replace(/\D/g, ""); if (d) codeFill(t, d);
+  });
+  doc.addEventListener("keydown", function (e) {
+    var t = e.target; if (!(t instanceof Element) || !t.matches(".code-inputs .code-cell") || e.isComposing || e.altKey || e.ctrlKey || e.metaKey) return;
+    var g = closest(t, ".code-inputs"), cs = codeCells(g), i = cs.indexOf(t), go = function (j) { var c = cs[j]; e.preventDefault(); if (c) { c.focus(); c.select(); } };
+    if (e.key === "Backspace" && !t.value && i > 0) { e.preventDefault(); cs[i - 1].value = ""; cs[i - 1].focus(); codeSync(g); }
+    else if (e.key === "ArrowLeft") go(i - 1); else if (e.key === "ArrowRight") go(i + 1); else if (e.key === "Home") go(0); else if (e.key === "End") go(cs.length - 1);
+  });
+  doc.addEventListener("focusin", function (e) {
+    var t = e.target; if (!(t instanceof Element) || !t.matches(".code-inputs .code-cell")) return;
+    var cs = codeCells(closest(t, ".code-inputs")), gap = cs.filter(function (c) { return !c.value; })[0];
+    if (!t.value && gap && cs.indexOf(gap) < cs.indexOf(t)) { gap.focus(); return; }
+    t.select();
+  });
+  doc.addEventListener("focusout", function (e) {   // 묶음을 떠날 때 — 다른 필드처럼 건드렸거나 값이 있거나 이미 오류일 때만
+    var g = e.target instanceof Element && closest(e.target, ".code-inputs"); if (!g || (e.relatedTarget && g.contains(e.relatedTarget)) || !closest(g, "form[data-validate]")) return;
+    if (g._dsDirty || codeValue(g) || closest(g, ".field").classList.contains("error")) vShow(g, vMessage(g));
+  });
 
   /* ---------- Steps 마법사 — .stepper(2026-11-13) ----------
      단계(.steps li)와 패널(.step-panel)은 문서 순서로 짝짓는다(세로 배치는 패널이 li 안). 현재 = li.on + aria-current, 완료 = li.done(+ 숨긴 '(완료)').
@@ -1416,12 +1495,12 @@
   /* Steps 마법사 — 패널 안 폼의 Enter 제출은 '다음'(마지막이면 '완료'). 검증은 위 캡처가 이미 했고 막히면 여기까지 오지 않는다 */
   doc.addEventListener("submit", function (e) { var f = e.target, p = f && f.closest && f.closest(".stepper .step-panel"), sp = p && closest(p, ".stepper"); if (!sp) return; e.preventDefault();   /* 막힌 제출은 위 캡처가 멈춘다. defaultPrevented 는 보지 않는다 — 제출 기본 동작을 막는 제품 · 문서 미리보기 처리기가 먼저 돌아도 단계는 넘어가야 한다 */ if (spPanels(sp).indexOf(p) === spCur(sp)) spNext(sp, true); });
   doc.addEventListener("focusout", function (e) { var cb = closest(e.target, ".combobox"); if (cb && !cb.contains(e.relatedTarget)) cbLeave(cb); });
-  doc.addEventListener("focusout", function (e) { var t = e.target; if (!vIsField(t) || closest(t, ".combobox, .timepicker")) return; var form = closest(t, "form[data-validate]"); if (!form || !t.willValidate) return; if (t._dsDirty || t.value || closest(t, ".field").classList.contains("error")) { vShow(t, vMessage(t)); vChanged(form); } });
+  doc.addEventListener("focusout", function (e) { var t = e.target; if (!vIsField(t) || closest(t, ".combobox, .timepicker")) return; var form = closest(t, "form[data-validate]"); if (!form || !t.willValidate) return; if (t._dsDirty || t.value || closest(t, ".field").classList.contains("error")) { vShow(t, vMessage(t)); } });
   doc.addEventListener("input", function (e) {
     var t = e.target; if (!vIsField(t) || closest(t, ".combobox, .timepicker")) return; t._dsDirty = true;   // Time Picker 는 글자를 끊은 뒤 스스로 잰다
     if (t.hasAttribute("data-maxlength")) syncCounter(t);
     var form = closest(t, "form[data-validate]"), limit = vLimit(t), over = limit > 0 && t.value.length > limit;
-    if (form) { if (t.willValidate && (over || closest(t, ".field").classList.contains("error"))) { vShow(t, vMessage(t)); vChanged(form); } }
+    if (form) { if (t.willValidate && (over || closest(t, ".field").classList.contains("error"))) { vShow(t, vMessage(t)); } }
     else if (limit) { if (over) { vShow(t, vMessage(t)); t._dsOver = true; } else if (t._dsOver) { vShow(t, ""); t._dsOver = false; } }   // 폼 밖 — 한도 오류만, 제품이 건 오류는 건드리지 않는다
   });
   doc.addEventListener("focusout", function (e) {
@@ -1446,6 +1525,8 @@
   });
   window.addEventListener("scroll", closeFloats, true);
   window.addEventListener("resize", closeFloats);
+  window.addEventListener("scroll", followPickers, true);
+  window.addEventListener("resize", followPickers);
   doc.addEventListener("mousedown", function (e) { var t = e.target; if (t instanceof Element && (closest(t, ".combobox .menu") || (closest(t, ".combobox .control") && !t.matches("input")))) e.preventDefault(); });   // 목록 · 빈 자리를 눌러도 입력의 포커스를 잃지 않는다
   /* Switch 응답 후 반영(사람의 결정 2026-11-10) — .switch[data-async] 는 눌러도 바뀌지 않고 처리 중이 된다. 제품이 ds:switch 의 resolve() 를 불러야 바뀌고,
      reject(문구) 는 그대로 두고 닫을 때까지 남는 Toast 로 알리며, cancel() 은 조용히 그대로 둔다(보안 기능을 끄는 확인 Popup 의 취소). 포커스를 잃지 않게 disabled 대신 aria-disabled */
@@ -1481,7 +1562,7 @@
   });
   doc.addEventListener("change", function (e) {
     var vg = e.target instanceof Element && closest(e.target, ".field .checkbox-group[data-required], .field .radio-group[data-required]"), vf = vg && closest(vg, "form[data-validate]");
-    if (vf) { vShow(vg, vMessage(vg)); vChanged(vf); }   // 그룹은 고르면 바로 지우고, 마지막 하나를 풀면 바로 알린다. 지나가기만 하면 조용하다
+    if (vf) { vShow(vg, vMessage(vg)); }   // 그룹은 고르면 바로 지우고, 마지막 하나를 풀면 바로 알린다. 지나가기만 하면 조용하다
     var t = e.target; if (!(t instanceof Element) || t.type !== "checkbox") return;
     var kids = childrenOf(t);
     if (kids.length) { kids.forEach(function (c) { c.checked = t.checked; var tr = closest(c, "tr"); if (tr) tr.classList.toggle("on", c.checked); }); t.indeterminate = false; t.classList.remove("mixed"); }
@@ -1558,7 +1639,7 @@
     var inp = tpInp(host), st = tpS(host), f = closest(inp, ".field"), r = tpCheck(host, inp.value), form = closest(inp, "form[data-validate]");
     if (r.value) { inp.value = r.value; inp._dpPrev = r.value; }
     host.dataset.validity = r.validity;
-    if (form) { if (inp.value || inp._dsDirty || f.classList.contains("error")) { vShow(inp, vMessage(inp)); vChanged(form); } }
+    if (form) { if (inp.value || inp._dsDirty || f.classList.contains("error")) { vShow(inp, vMessage(inp)); } }
     else if (r.msg) { vShow(inp, r.msg); st.err = true; }
     else if (st.err) { vShow(inp, ""); st.err = false; }
     if (inp.value.trim() !== st.text) { st.text = inp.value.trim(); fire(host, "ds:time", { value: r.value, text: st.text, validity: r.validity }); }
@@ -1602,12 +1683,11 @@
       opts.forEach(function (o) { o.tabIndex = o === act ? 0 : -1; });
     });
   }
-  function tpPlace(host) {
-    var p = $(":scope > .time-panel", host), anchor = $(".affix", host), hr = host.getBoundingClientRect(), r = anchor.getBoundingClientRect(), h = p.offsetHeight, w = p.offsetWidth, gap = 4;
-    var below = window.innerHeight - r.bottom - gap, above = r.top - gap, up = below < h && above > below, vw = doc.documentElement.clientWidth;
-    host.classList.toggle("up", up);
-    host.style.setProperty("--tp-top", (up ? r.top - hr.top - gap - h : r.bottom - hr.top + gap) + "px");
-    host.style.setProperty("--tp-left", Math.max(8 - hr.left, Math.min(0, vw - 8 - w - hr.left)) + "px");
+  function tpPlace(host, keep) {
+    var sp = pickerSpot(host, $(":scope > .time-panel", host), keep ? host.classList.contains("up") : null);
+    host.classList.toggle("up", sp.up); host.classList.toggle("float", sp.float);
+    host.style.setProperty("--tp-top", sp.top + "px");
+    host.style.setProperty("--tp-left", sp.left + "px");
   }
   function tpOpen(host, focus) {
     var inp = tpInp(host); if (inp.value.trim() !== tpS(host).text) tpCommit(host);   // 열기 전에 친 글자를 먼저 반영한다
@@ -1618,7 +1698,7 @@
     if (focus) { var first = $(".time-opt[tabindex='0']", host); if (first) first.focus({ preventScroll: true }); }
   }
   function tpClose(host, restore) {
-    host.classList.remove("open", "up"); delete host.dataset.dsOpened;
+    host.classList.remove("open", "up", "float"); delete host.dataset.dsOpened;
     $$(".tp-btn", host).forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
     if (restore) tpInp(host).focus();
   }
@@ -1646,7 +1726,7 @@
     var t = e.target; if (!t.matches || !t.matches(".timepicker .affix input") || e.isComposing) return;
     var host = closest(t, ".timepicker"), form = closest(t, "form[data-validate]");
     reflow(t, e, tpUnit(host), false); t._dsDirty = true;
-    if (closest(t, ".field").classList.contains("error")) { if (form) { vShow(t, vMessage(t)); vChanged(form); } else vShow(t, tpCheck(host, t.value).msg || ""); }   // 오류가 있는 동안은 칠 때마다 다시 재 바로 지운다
+    if (closest(t, ".field").classList.contains("error")) { if (form) { vShow(t, vMessage(t)); } else vShow(t, tpCheck(host, t.value).msg || ""); }   // 오류가 있는 동안은 칠 때마다 다시 재 바로 지운다
     if (host.classList.contains("open")) tpMarks(host);
   });
   doc.addEventListener("keydown", function (e) {
@@ -1760,7 +1840,7 @@
     /* 전송 중으로 바뀐 것은 실패가 아니다 — 앞선 오류만 지운다. 제출이 막혀 띄운 안내는 끝날 때까지 둔다 */
     var msg = vMessage(pick), busy = msg && msg === vMsgs(h).fileBusy, help = $(":scope > .help", f);
     if (busy && f.classList.contains("error") && help && help.textContent === msg) return;
-    vShow(pick, busy ? "" : msg); vChanged(form);
+    vShow(pick, busy ? "" : msg);
   }
   function upDrop(h, li) {
     if (!li.hasAttribute("data-rejected")) fire(h, "ds:upload-remove", { id: li.dataset.id, file: (h._dsFiles || {})[li.dataset.id] });
@@ -2123,5 +2203,5 @@
 
   /* 맨 끝에서 부른다 — 뒤에 선언한 문구 상수(NF_LABEL 등)가 init 때 아직 undefined 이지 않게 */
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
-  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, notify: { add: nfApiAdd, sync: function (el) { var h = closest(el, ".notify") || el; nfFilter(h); return nfSync(h); } }, version: "0.9" };
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, avatarTone: avatarTone, notify: { add: nfApiAdd, sync: function (el) { var h = closest(el, ".notify") || el; nfFilter(h); return nfSync(h); } }, version: "0.9" };
 })();

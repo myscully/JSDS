@@ -102,7 +102,6 @@ export const Form = forwardRef<HTMLFormElement, FormProps>(function Form({ class
         }}
         {...rest}
       >
-        {v.summary && <ErrorSummary count={v.summary.count} items={v.summary.items} />}
         {children}
       </form>
     </FormValidationContext.Provider>
@@ -117,11 +116,13 @@ export interface ErrorSummaryProps extends Omit<NoticeProps, "tone" | "title" | 
   /** 제목. 기본 '입력값 n개를 확인하세요' */
   title?: ReactNode;
 }
-/** 폼 맨 위 오류 요약 — 오류 3개 이상일 때. Form validate 는 자동으로 그린다 */
+let warnedSummary = false;
+/** @deprecated 폼 위 오류 요약은 없앴다(사람의 결정 2026-11-16) — 오류는 필드 아래(TextField error)에, 필드에 붙일 수 없으면 Toast.
+ *  제품의 서버 오류가 조용히 사라지지 않게 한 번 경고하고 위험 Notice 로 그린다(1.0 에서 지움 — MIGRATION) */
 export const ErrorSummary = forwardRef<HTMLDivElement, ErrorSummaryProps>(function ErrorSummary({ items, count = items.length, title, className, ...rest }, ref) {
-  if (process.env.NODE_ENV !== "production" && count < 3) console.warn("[ds] ErrorSummary 는 오류가 3개 이상일 때 씁니다. 그보다 적으면 필드 아래 문구로 충분합니다.");
+  if (process.env.NODE_ENV !== "production" && !warnedSummary) { warnedSummary = true; console.warn("[ds] ErrorSummary 는 없어졌습니다 — 오류는 필드 아래에, 필드에 붙일 수 없으면 Toast 로 알리세요. 1.0 에서 지웁니다."); }
   return (
-    <Notice ref={ref} tone="danger" title={title ?? `입력값 ${count}개를 확인하세요`} className={cx("form-summary", className)} data-form-summary="" {...rest}>
+    <Notice ref={ref} tone="danger" title={title ?? `입력값 ${count}개를 확인하세요`} className={className} {...rest}>
       {items.map((it, i) => (i ? [", ", it] : it))}
     </Notice>
   );
@@ -171,10 +172,10 @@ export interface NotesProps extends Omit<HTMLAttributes<HTMLDivElement>, "title"
   /** 되돌리기 어려운 영향 */
   warning?: boolean;
 }
-/** 유의사항 블록 — Notice(role=note) 위에 목록을 그린다. 사이트 마크업 `.notice[role=note] > .ico + div > b + ul` 과 같다 */
+/** 유의사항 블록 — Notice(role=note) 위에 목록을 그린다. 아이콘은 message-2(경고면 경고 아이콘, 사람의 요청 2026-11-16). 사이트 마크업 `.notice[role=note] > .ico + div > b + ul` 과 같다 */
 export const Notes = forwardRef<HTMLDivElement, NotesProps>(function Notes({ title, items, warning, role, ...rest }, ref) {
   return (
-    <Notice ref={ref} tone={warning ? "warning" : undefined} role={role ?? "note"} title={title} {...rest}>
+    <Notice ref={ref} tone={warning ? "warning" : undefined} icon={warning ? undefined : "message-2"} role={role ?? "note"} title={title} {...rest}>
       <ul>
         {items.map((it, i) => <li key={i}>{it}</li>)}
       </ul>

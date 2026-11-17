@@ -23,7 +23,7 @@ const SITE = {
   ] },
   resources: { title: "Resources", desc: "라이브러리, 토큰, 변경 이력", pages: { react: "React Package", "design-token": "Design Token", figma: "Figma Library", tokens: "Token Download", changelog: "Changelog", contribution: "Contribution" } },
 };
-/* 제품 색 팔레트(2026-11-14 사람의 결정) — 1.0 전에는 이 여섯 가지만 쓴다. 1.0 뒤에는 사용자가 색을 더하거나 고치는 팔레트를 준다.
+/* 제품 색 팔레트(2026-11-14 사람의 결정 · 2026-11-17 이름을 역할로 바꾸고 제품3 #10367D 을 더함 — 일곱) — 1.0 전에는 이 일곱 가지만 쓴다. 1.0 뒤에는 사용자가 색을 더하거나 고치는 팔레트를 준다.
    사이트(app.src.js) · React(theme.ts PRODUCT_COLORS — 테스트가 이 표와 같은지 대조) · contrast 맥락 · verify 가 모두 이 표를 읽는다.
    - kind: base(CSS 기본 = Blue 램프, 주입 없음) · ramp(hex 로 --prod-40~60 을 만든다) · neutral(중립 CSS 블록) · ai(ramp + 넓은 면 그라데이션)
    - **제약: 흰 글자가 4.5 를 넘는 색이어야 한다** — Brand 면 위 글자는 늘 흰색이고 verify 가 검사한다.
@@ -31,15 +31,17 @@ const SITE = {
    - 상태색과 겹쳐도 제품 색을 그대로 쓴다 — 예전에는 색상환 15° 안이면 중립으로 바꿨는데(STATUS_HUES) 제품의 독립성을 위해 걷어냈다
    - neutralFocus: 입력 포커스 링을 중립으로 — 빨강은 오류 링, 주황은 경고색과 헷갈리지 않게(사람의 결정)
    - gradient: AI 의 넓은 브랜드 면(주 버튼 · Banner) 그라데이션 두 끝 — 램프 이름. 면 위 흰 글자는 끝마다 4.5 를 verify 가 잰다
+   name 은 메뉴 · Colors 표에 보이는 이름(역할)이고 key 는 API(data-accent · applyProductColor)라 색 이름 그대로 둔다(2026-11-17 — 키는 바꾸지 않음).
    시안은 #00AAB6(흰 글자 2.83)에서 같은 색상 · 채도로 밝기만 낮춘 값이다 */
 const PRODUCTS = [
-  { key: "blue", name: "파랑", group: "기본", kind: "base", hex: "#0066FF" },
-  { key: "red", name: "빨강", group: "제품별", kind: "ramp", hex: "#C30D2A", neutralFocus: true },
-  { key: "cyan", name: "시안", group: "제품별", kind: "ramp", hex: "#00828B" },
-  { key: "orange", name: "주황", group: "Company", kind: "ramp", hex: "#FF7F00", neutralFocus: true,
+  { key: "blue", name: "기본", kind: "base", hex: "#0066FF" },
+  { key: "red", name: "제품1", kind: "ramp", hex: "#C30D2A", neutralFocus: true },
+  { key: "cyan", name: "제품2", kind: "ramp", hex: "#00828B" },
+  { key: "navy", name: "제품3", kind: "ramp", hex: "#10367D" },
+  { key: "orange", name: "브랜드", kind: "ramp", hex: "#FF7F00", neutralFocus: true,
     exception: "회사 색(--company-mark)을 제품 색으로 그대로 쓴다 — 흰 글자와 제품 색 글자가 4.5 에 못 미치는 것을 알고 정한 사람의 결정(2026-11-14)" },
-  { key: "neutral", name: "중립", group: "중립", kind: "neutral", hex: "#1B1C1E" },
-  { key: "ai", name: "AI", group: "AI", kind: "ai", hex: "#6541F2",
+  { key: "neutral", name: "중립", kind: "neutral", hex: "#1B1C1E" },
+  { key: "ai", name: "AI", kind: "ai", hex: "#6541F2",
     gradient: { rest: ["purple-40", "violet-45"], strong: ["purple-30", "violet-40"], heavy: ["purple-30", "violet-30"] } },
 ];
 const CHANGELOG = [

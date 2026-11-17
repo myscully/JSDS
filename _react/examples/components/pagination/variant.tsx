@@ -7,7 +7,7 @@ export default function Example() {
   return (
     <>
       <Pagination compact boundaries={0} page={a} total={20} onChange={setA} />
-      <Pagination outline page={b} total={3} onChange={setB} />
+      <Pagination variant="ghost" page={b} total={3} onChange={setB} />
     </>
   );
 }

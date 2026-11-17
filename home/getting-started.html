@@ -52,13 +52,13 @@
 <li><b>변형·상태 바꾸기</b>인스턴스를 선택하면 오른쪽 패널에 변형 · 크기 · 상태를 고르는 드롭다운이 보입니다. 이름은 이 사이트 각 컴포넌트 페이지의 Props 표와 같아서, 개발자와 같은 말로 이야기할 수 있습니다.</li>
 <li><b>색·글자·그림자는 스타일만</b>직접 색을 고르지 말고 채우기의 <b>Variables</b> 탭에서 foreground · background · surface · line · effect · static 변수를 씁니다. 글자는 Text Style, 그림자는 Effect Style 을 씁니다. 이렇게 해야 제품 색과 다크 테마가 자동으로 맞춰집니다.</li>
 </ol></div><div data-docpane="react" hidden=""><ol class="guide-steps">
-<li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyProductColor</code> 에 제품 색 팔레트 키 하나(파랑 · 빨강 · 시안 · 주황 · 중립 · AI)를 넣으면 나머지 색은 자동입니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-react-install" data-label="복사">복사</button><pre><code id="gs-react-install">npm i @jiran/ds-react
+<li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyProductColor</code> 에 제품 색 팔레트 키 하나(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI)를 넣으면 나머지 색은 자동입니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-react-install" data-label="복사">복사</button><pre><code id="gs-react-install">npm i @jiran/ds-react
 
 <span class="tk-cmt">// main.tsx — 앱 진입점에서 한 번</span>
 <span class="tk-kw">import</span> <span class="tk-str">"@jiran/ds-react/style.css"</span>;   <span class="tk-cmt">// 토큰 + 컴포넌트 CSS (사이트 크롬 제외)</span>
 <span class="tk-kw">import</span> { ToastProvider, applyProductColor } <span class="tk-kw">from</span> <span class="tk-str">"@jiran/ds-react"</span>;
 
-applyProductColor(<span class="tk-str">"red"</span>);            <span class="tk-cmt">// 제품 색 팔레트 키(blue · red · cyan · orange · neutral · ai) → --prod-40~60 · data-accent</span>
+applyProductColor(<span class="tk-str">"red"</span>);            <span class="tk-cmt">// 제품 색 팔레트 키(blue · red · cyan · navy · orange · neutral · ai) → --prod-40~60 · data-accent</span>
 
 createRoot(document.getElementById(<span class="tk-str">"root"</span>)!).render(
   <span class="tk-punc">&lt;</span><span class="tk-tag">ToastProvider</span><span class="tk-punc">&gt;</span>
@@ -86,7 +86,7 @@ createRoot(document.getElementById(<span class="tk-str">"root"</span>)!).render(
 <span class="tk-punc">&lt;</span><span class="tk-tag">script</span><span class="tk-punc">&gt;</span>
   DS.init(document.getElementById("dynamic-area")); // 나중에 DOM 에 넣은 마크업만 한 번
 <span class="tk-punc">&lt;/</span><span class="tk-tag">script</span><span class="tk-punc">&gt;</span></code></pre></div></li>
-<li><b>제품 색 적용</b>팔레트 여섯(파랑 · 빨강 · 시안 · 주황 · 중립 · AI) 중 하나를 고릅니다. 다섯 단계 값은 <a href="../foundations/colors.html">Colors › Product color</a> 표에 있고, 적용하는 함수는 <a href="../resources/design-token.html#accent-js">Design Token › Product color 적용</a> 에 있습니다. 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-accent" data-label="CSS 복사">CSS 복사</button><pre><code id="gs-accent"><span class="tk-cmt">/* 1) html 요소에 data-accent="키" — red · cyan · orange · neutral · ai. 파랑(기본)은 적지 않습니다.
+<li><b>제품 색 적용</b>팔레트 일곱(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI) 중 하나를 고릅니다. 다섯 단계 값은 <a href="../foundations/colors.html">Colors › Product color</a> 표에 있고, 적용하는 함수는 <a href="../resources/design-token.html#accent-js">Design Token › Product color 적용</a> 에 있습니다. 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다.<div class="code-block"><button type="button" class="copy-btn" data-copy="gs-accent" data-label="CSS 복사">CSS 복사</button><pre><code id="gs-accent"><span class="tk-cmt">/* 1) html 요소에 data-accent="키" — red · cyan · orange · neutral · ai. 파랑(기본)은 적지 않습니다.
       빨강 · 주황의 중립 입력 링, AI 의 그라데이션 면, 중립 제품의 회색 단계가 이 속성으로 걸립니다 */</span>
 <span class="tk-cmt">/* 2) 빨강 · 시안 · 주황 · AI 는 다섯 단계를 :root 에 넣습니다. 아래는 빨강(#C30D2A)의 값입니다 */</span><span class="tk-tag">
 :root</span><span class="tk-punc">{</span>

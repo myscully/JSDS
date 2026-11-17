@@ -108,16 +108,36 @@ module.exports = async function patterns({ page, ok, go }) {
       !disabled && empty.inv === "true" && empty.help === "연동 이름을 입력하세요." && wrong.inv === "true" && /연동 이름이 다릅니다/.test(wrong.help) && right.inv !== "true" && !/다릅니다|입력하세요\./.test(right.help), JSON.stringify({ disabled, empty, wrong, right }));
   });
 
-  await part("8 · 로그인 — 2단계 인증 한 칸의 속성 · 숫자 6자리 검사 · 로그인 줄 글자 14", async () => {
+  await part("8 · 로그인 — 2단계 인증 코드 칸 여섯(Text Field Code) · 치기 · 지우기 · 붙여넣기 · 검사 · 로그인 줄 글자 14", async () => {
     await go("patterns/sign-in.html");
-    const attrs = await page.evaluate(() => { const i = document.getElementById("si-otp"); return [i.getAttribute("inputmode"), i.getAttribute("autocomplete"), i.getAttribute("pattern"), i.required, document.querySelectorAll("#ex-sign-in-two-step input:not([type=checkbox])").length]; });
-    const btn = page.locator(`${ex("sign-in", "two-step")} button[type="submit"]`), help = () => page.evaluate(() => { const i = document.getElementById("si-otp"); return [i.getAttribute("aria-invalid"), i.closest(".field").querySelector(".help").textContent.trim()]; });
-    await page.locator("#si-otp").fill("12a"); await btn.click(); await wait(100); const badCode = await help();
-    await page.locator("#si-otp").fill("123456"); await btn.click(); await wait(100); const goodCode = await help();
+    const G = "#ex-sign-in-two-step .code-inputs";
+    const attrs = await page.evaluate((G) => { const g = document.querySelector(G), cs = [...g.querySelectorAll(".code-cell")], r = cs.map((c) => c.getBoundingClientRect()), st = getComputedStyle(cs[0]);
+      return { n: cs.length, role: g.getAttribute("role"), name: document.getElementById(g.getAttribute("aria-labelledby")).textContent.trim(), first: [cs[0].getAttribute("inputmode"), cs[0].getAttribute("autocomplete"), document.querySelector('label[for="' + cs[0].id + '"]') ? 1 : 0].join(), rest: cs.slice(1).every((c) => c.getAttribute("autocomplete") === "off" && c.getAttribute("inputmode") === "numeric"), labels: cs.map((c) => c.getAttribute("aria-label")).join("|"), w: r.map((x) => Math.round(x.width * 10) / 10), h: Math.round(r[0].height * 10) / 10, gap: Math.round((r[1].left - r[0].right) * 10) / 10, font: [st.fontSize, st.lineHeight, st.fontWeight, st.textAlign].join(), others: document.querySelectorAll("#ex-sign-in-two-step input:not([type=checkbox]):not([type=hidden]):not(.code-cell)").length }; }, G);
+    ok("sign-in: the one-time code is six boxes 48 × 56 (gap 8, digits Title 2 28/38 600 centred) in a named group; the first has numeric · one-time-code and the label, the rest numeric · off; each box is named 'n자리 중 m번째'; no other text field",
+      attrs.n === 6 && attrs.role === "group" && attrs.name === "인증 코드" && attrs.first === "numeric,one-time-code,1" && attrs.rest && attrs.labels === [1, 2, 3, 4, 5, 6].map((i) => "6자리 중 " + i + "번째").join("|") && attrs.w.every((x) => x === 48) && attrs.h === 56 && attrs.gap === 8 && attrs.font === "28px,38px,600,center" && attrs.others === 0, JSON.stringify(attrs));
+    const cell = (i) => page.locator(`${G} .code-cell`).nth(i), val = () => page.evaluate((G) => [...document.querySelectorAll(G + " .code-cell")].map((c) => c.value).join(""), G), at = () => page.evaluate((G) => [...document.querySelectorAll(G + " .code-cell")].indexOf(document.activeElement), G);
+    await page.evaluate((G) => { window.__code = []; document.querySelector(G).addEventListener("ds:code", (e) => window.__code.push(e.detail)); }, G);
+    await cell(3).click(); const redirect = await at();
+    await page.keyboard.type("4a8"); const typed = [await val(), await at()];
+    await page.keyboard.press("Backspace"); const back = [await val(), await at()];
+    await cell(0).click();
+    await page.evaluate((G) => { const c = document.querySelector(G + " .code-cell"), dt = new DataTransfer(); dt.setData("text/plain", "48 21-93"); c.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true })); }, G);
+    const pasted = [await val(), await at(), await page.evaluate((G) => document.querySelector(G + " input[type=hidden]").value, G), await page.evaluate(() => JSON.stringify(window.__code.slice(-1)[0]))];
+    await page.keyboard.press("Home"); const home = await at(); await page.keyboard.press("End"); const end = await at(); await page.keyboard.press("ArrowLeft"); const left = await at();
+    ok("sign-in code boxes: a click on a later box goes to the first empty one; typing moves on and refuses letters; Backspace on an empty box clears the previous one; a paste fills every box from that box, focuses the last, mirrors the hidden value and fires ds:code {value, complete}; Home · End · ← move",
+      redirect === 0 && typed.join() === "48,2" && back.join() === "4,1" && home === 0 && end === 5 && left === 4 && pasted[0] === "482193" && pasted[1] === 5 && pasted[2] === "482193" && pasted[3] === JSON.stringify({ value: "482193", complete: true }), JSON.stringify({ redirect, typed, back, home, end, left, pasted }));
+    const btn = page.locator(`${ex("sign-in", "two-step")} button[type="submit"]`), help = () => page.evaluate((G) => { const g = document.querySelector(G); return [[...g.querySelectorAll(".code-cell")].filter((c) => c.getAttribute("aria-invalid") === "true").length, g.closest(".field").querySelector(".help").textContent.trim()]; }, G);
+    await page.evaluate((G) => document.querySelectorAll(G + " .code-cell").forEach((c) => { c.value = ""; c.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "deleteContentBackward" })); }), G);
+    await btn.click(); await wait(100); const empty = [...await help(), await at()];
+    await page.keyboard.type("4821"); await btn.click(); await wait(100); const partial = [...await help(), await at()];
+    await page.keyboard.type("93"); await wait(50); const fixed = await help();
+    await page.keyboard.press("Backspace"); await page.keyboard.press("Backspace"); await page.keyboard.press("Tab"); await wait(50);
+    const out = [...await help(), await page.evaluate(() => document.activeElement.closest(".checkbox") ? "checkbox" : document.activeElement.className)];
+    await page.keyboard.press("Shift+Tab"); const backIn = await at();
     const row = await page.evaluate(() => [...document.querySelectorAll("#ex-sign-in-sign-in .auth-row .checkbox, #ex-sign-in-sign-in .auth-row .link")].map((e) => parseFloat(getComputedStyle(e).fontSize)));
     const auto = await page.evaluate(() => [document.getElementById("si-id").getAttribute("autocomplete"), document.getElementById("si-pw").getAttribute("autocomplete")]);
-    ok("sign-in: the one-time code is a single numeric field (inputmode numeric · one-time-code · [0-9]{6}); '12a' is blocked with '숫자 6자리를 입력하세요.', 123456 passes; username/current-password autocomplete; the remember/find row is 14px",
-      attrs.join() === "numeric,one-time-code,[0-9]{6},true,1" && badCode[0] === "true" && badCode[1] === "숫자 6자리를 입력하세요." && goodCode[0] !== "true" && auto.join() === "username,current-password" && row.length === 2 && row.every((x) => x === 14), JSON.stringify({ attrs, badCode, goodCode, auto, row }));
+    ok("sign-in code validation: empty → '인증 코드를 입력하세요.' on all six boxes and focus on the first; 4 digits → '숫자 6자리를 모두 입력하세요.' and focus on the first empty box; typing the rest clears it back to the help; only one box is a Tab stop — after deleting two digits Tab leaves the group (to the checkbox) and announces the code message, Shift+Tab comes back to the first empty box; username/current-password autocomplete; the remember/find row is 14px",
+      empty.join() === "6,인증 코드를 입력하세요.,0" && partial.join() === "6,숫자 6자리를 모두 입력하세요.,4" && fixed.join() === "0,코드는 30초마다 바뀝니다." && out.join() === "6,숫자 6자리를 모두 입력하세요.,checkbox" && backIn === 4 && auto.join() === "username,current-password" && row.length === 2 && row.every((x) => x === 14), JSON.stringify({ empty, partial, fixed, out, backIn, auto, row }));
   });
 
   await part("9 · 오류 화면 — 화면마다 다음 행동 하나", async () => {
@@ -192,11 +212,26 @@ module.exports = async function patterns({ page, ok, go }) {
       comps.length >= 45 && pats.length >= 22 && Object.keys(r).length === 0, JSON.stringify(r));
   });
 
-  await part("16 · 검색 툴바 — 첫 줄 검색 · 기간, 둘째 줄 심각도", async () => {
-    await go("patterns/search.html");
-    const r = await page.evaluate(() => { const bars = [...document.querySelectorAll("#ex-search-toolbar .example-preview .toolbar:not(.sub)")]; const top = (sel, b) => { const e = b && b.querySelector(sel); return e ? Math.round(e.getBoundingClientRect().top) : null; }; return { n: bars.length, s: top(".searchbar", bars[0]), d: top(".datepicker", bars[0]), c: top(".combobox", bars[1]), c0: !!(bars[0] && bars[0].querySelector(".combobox")) }; });
-    ok("search toolbar: two rows — search and date range share the first line, the severity Combobox sits alone on the second",
-      r.n === 2 && r.s !== null && r.s === r.d && r.c > r.s && !r.c0, JSON.stringify(r));
+  await part("16 · 검색 툴바 — 한 줄, 검색칸이 남는 폭을 맞춤(2026-11-16)", async () => {
+    /* 검색 · 심각도 Combobox · 기간이 한 줄, 옆 컨트롤은 제 폭이고 검색칸 = 툴바 폭 − 나머지 − 간격. 좁아지면 검색칸이 200 까지 줄고 그래도 넘치면 줄을 바꾼다(넘침 0).
+       로그 뷰어 · 감사 로그의 검색 + 기간도 같은 규칙 */
+    const tb = () => page.evaluate(() => [["search", "#ex-search-toolbar"], ["log", "#ex-log-viewer-viewer"], ["audit", "#ex-audit-log-list"]].map(([k, id]) => {
+      const t = document.querySelector(`${id} .example-preview .toolbar:not(.sub)`); if (!t) return { k, missing: true };
+      const kids = [...t.children].filter((e) => e.getClientRects().length && getComputedStyle(e).position !== "absolute"), R = (e) => e.getBoundingClientRect(), sb = t.querySelector(":scope > .searchbar");
+      const gap = parseFloat(getComputedStyle(t).columnGap), rest = kids.filter((e) => e !== sb).reduce((a, e) => a + R(e).width, 0) + gap * (kids.length - 1);
+      return { k, rows: new Set(kids.map((e) => Math.round(R(e).top))).size, sb: Math.round(R(sb).width), left: Math.round(t.clientWidth - rest), min: Math.round(parseFloat(getComputedStyle(sb).minWidth)), over: t.scrollWidth > t.clientWidth + 1, hs: [...new Set(kids.filter((e) => R(e).top === R(sb).top).map((e) => Math.round(R(e.querySelector(".control, .affix, .trigger") || e).height)))] };
+    }));
+    const out = {};
+    for (const [w, page_] of [[1920, "patterns/search.html"], [1440, null], [1024, null], [768, null]]) {
+      await page.setViewportSize({ width: w, height: 900 });
+      const rows = [];
+      for (const p of ["patterns/search.html", "patterns/log-viewer.html", "patterns/audit-log.html"]) { await go(p); rows.push(...(await tb()).filter((x) => p.includes(x.k === "search" ? "search" : x.k === "log" ? "log-viewer" : "audit-log"))); }
+      out[w] = rows;
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const wide = [1920, 1440, 1024].flatMap((w) => out[w]);
+    ok("search toolbar: search, severity Combobox and date range on one line at 1024–1920 with the search box taking exactly the space left (log viewer and audit log too); at 768 the box stays ≥ 200 and the row wraps without overflow",
+      wide.every((x) => !x.missing && x.rows === 1 && Math.abs(x.sb - x.left) <= 1 && x.sb >= x.min && x.hs.length === 1 && !x.over) && out[768].every((x) => !x.missing && x.sb >= x.min && !x.over) && out[768].some((x) => x.rows > 1), JSON.stringify(out));
   });
 
   await part("17 · 일괄 작업 진행 — 진행 막대 이름 · 값, 실패 수가 표 행 수와 다시 실행 버튼에 같음", async () => {
@@ -247,5 +282,60 @@ module.exports = async function patterns({ page, ok, go }) {
     await page.setViewportSize({ width: 1440, height: 900 }); await go("components/date-picker.html"); await wait(200); const fresh = await m();
     ok("range calendar: one month at 390 (no .two), two after widening to 1440, one again after narrowing, two when opened wide; the selected start stays drawn",
       !narrow.two && narrow.grids === 1 && narrow.start && wide.two && wide.grids === 2 && !back.two && back.grids === 1 && fresh.two && fresh.grids === 2 && fresh.start, JSON.stringify({ narrow, wide, back, fresh }));
+  });
+
+  await part("22 · 팝업 안 Date Picker · Time Picker — 달력 · 열 목록이 팝업 본문에 잘리지 않고 위로 뜸, 바깥 스크롤을 따라가고 필드가 사라지면 닫힘(사람의 요청 2026-11-17)", async () => {
+    /* 패널이 잘리지 않았는지 = 네 모서리 안쪽 점이 모두 그 패널을 맞힘(팝업 본문이 자르면 바깥 점이 다른 요소를 맞힌다) */
+    const probe = (host, panel) => page.evaluate(([h, p]) => {
+      const host = document.querySelector(h), el = host.querySelector(p), r = el.getBoundingClientRect(), a = host.querySelector(":scope > .affix").getBoundingClientRect();
+      const pts = [[r.left + 12, r.top + 12], [r.right - 12, r.top + 12], [r.left + 12, r.bottom - 12], [r.right - 12, r.bottom - 12]];
+      return { open: host.classList.contains("open"), float: host.classList.contains("float"), pos: getComputedStyle(el).position, hits: pts.map(([x, y]) => el.contains(document.elementFromPoint(x, y))).every(Boolean), gap: Math.round(host.classList.contains("up") ? a.top - r.bottom : r.top - a.bottom) };
+    }, [host, panel]);
+    const dpSel = "#ex-import-export-export .datepicker", tpSel = "#ex-import-export-export .timepicker";
+    await go("patterns/import-export.html");
+    await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: "center", behavior: "instant" }), dpSel); await wait(120);
+    await page.locator(`${dpSel} .cal-btn`).click(); await wait(150);
+    const dp = await probe(dpSel, ":scope > .calendar");
+    const y0 = await page.evaluate((s) => { const h = document.querySelector(s); return [h.querySelector(":scope > .affix").getBoundingClientRect().top, h.querySelector(":scope > .calendar").getBoundingClientRect().top]; }, dpSel);
+    await page.mouse.wheel(0, 60); await wait(200);
+    const y1 = await page.evaluate((s) => { const h = document.querySelector(s); return [h.querySelector(":scope > .affix").getBoundingClientRect().top, h.querySelector(":scope > .calendar").getBoundingClientRect().top, h.classList.contains("open")]; }, dpSel);
+    const follow = Math.abs((y1[0] - y1[1]) - (y0[0] - y0[1])) < 1 && Math.abs(y1[0] - y0[0]) > 20 && y1[2];
+    await page.evaluate(() => window.scrollBy({ top: 3000, behavior: "instant" })); await wait(200);
+    const gone = await page.evaluate((s) => { const h = document.querySelector(s); return { open: h.classList.contains("open"), float: h.classList.contains("float"), focus: document.activeElement === h.querySelector(":scope > .affix input") }; }, dpSel);
+    ok("in the export popup the Date Picker calendar floats (.float, fixed) above the popup body — all four corners are visible, 4px from the field; an outer scroll moves it with the field; scrolling the field away closes it and focus returns to the field",
+      dp.open && dp.float && dp.pos === "fixed" && dp.hits && dp.gap === 4 && follow && !gone.open && !gone.float && gone.focus, JSON.stringify({ dp, y0, y1, gone }));
+
+    await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: "center", behavior: "instant" }), tpSel); await wait(120);
+    await page.locator(`${tpSel} .tp-btn`).click(); await wait(150);
+    const tp = await probe(tpSel, ":scope > .time-panel");
+    await page.evaluate((s) => { document.querySelector(s).querySelector(".time-col").scrollTop += 96; }, tpSel); await wait(150);
+    const tpCol = await page.evaluate((s) => document.querySelector(s).classList.contains("open"), tpSel);
+    await page.keyboard.press("Escape"); await wait(80);
+    const tpOff = await page.evaluate((s) => { const h = document.querySelector(s); return !h.classList.contains("open") && !h.classList.contains("float"); }, tpSel);
+    ok("in the same popup the Time Picker listboxes float the same way (all corners visible), scrolling a column keeps them open, closing drops .float",
+      tp.open && tp.float && tp.pos === "fixed" && tp.hits && tp.gap === 4 && tpCol && tpOff, JSON.stringify({ tp, tpCol, tpOff }));
+
+    /* 시각 있는 Date Picker 를 팝업 본문에 넣어 — 띄운 달력 안의 시각 칸은 다시 띄우지 않는다(화면 기준 조상에서 멈춤) */
+    await page.evaluate((s) => {
+      const src = document.querySelector(s), c = src.cloneNode(true); c.setAttribute("data-time", ""); c.removeAttribute("data-max-days");
+      const i = c.querySelector(":scope > .affix input"); i.id = "exp-range-t"; i.value = "2026. 11. 08 00:00 ~ 2026. 11. 14 23:59"; i.placeholder = "YYYY. MM. DD HH:mm ~ YYYY. MM. DD HH:mm";
+      c.querySelector("label").setAttribute("for", "exp-range-t"); src.after(c); window.DS.init(c.parentNode); c.scrollIntoView({ block: "center", behavior: "instant" });
+    }, dpSel); await wait(150);
+    const tSel = "#ex-import-export-export .datepicker[data-time]";
+    await page.locator(`${tSel} .cal-btn`).click(); await wait(150);
+    await page.locator(`${tSel} .cal-time .tp-btn`).first().click(); await wait(150);
+    const inner = await page.evaluate((s) => { const h = document.querySelector(s), t = h.querySelector(".cal-time .timepicker"), p = t.querySelector(".time-panel"); return { cal: h.classList.contains("float"), open: t.classList.contains("open"), float: t.classList.contains("float"), pos: getComputedStyle(p).position }; }, tSel);
+    ok("a time Date Picker in the popup body: the calendar floats, its own time field opens its listboxes inside the floated calendar (absolute, no second .float)",
+      inner.cal && inner.open && !inner.float && inner.pos === "absolute", JSON.stringify(inner));
+
+    await go("patterns/secrets.html");
+    await page.evaluate(() => document.querySelector("#ex-secrets-create .datepicker").scrollIntoView({ block: "center", behavior: "instant" })); await wait(120);
+    await page.locator("#ex-secrets-create .datepicker .cal-btn").click(); await wait(150);
+    const sec = await probe("#ex-secrets-create .datepicker", ":scope > .calendar");
+    await go("components/date-picker.html");
+    await page.locator("#ex-date-picker-default .datepicker .cal-btn").first().click(); await wait(150);
+    const plain = await page.evaluate(() => { const h = document.querySelector("#ex-date-picker-default .datepicker"); return { open: h.classList.contains("open"), float: h.classList.contains("float"), pos: getComputedStyle(h.querySelector(":scope > .calendar")).position }; });
+    ok("the key creation popup floats its expiry calendar too (all corners visible); a Date Picker outside any scroll area keeps the absolute calendar (no .float)",
+      sec.open && sec.float && sec.hits && plain.open && !plain.float && plain.pos === "absolute", JSON.stringify({ sec, plain }));
   });
 };

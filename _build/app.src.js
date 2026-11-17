@@ -19,15 +19,22 @@
      그래서 60 만 그 바탕 셋(cool-neutral-15 · 17 · 5 = 다크 캔버스 · 카드 · 들어간 면, 라이트 반전 면도 15) 위 4.5 를 넘을 때까지 0.5 씩 밝힌다.
      파랑 · 시안 · 주황은 이미 넘어 그대로다. contrast.js 가 매 빌드 실제 토큰으로 다시 재므로 바탕 값이 바뀌면 드러난다 */
   const DARK_BEDS = ["#1B1C1E", "#212225", "#0F0F10"], DARK_TEXT_MIN = 4.5;
+  /* 다크 면 단계 보정(사람의 결정 2026-11-17) — 다크의 주 면(--surface-brand-primary)은 제품 HEX 그대로라, 어두운 제품(제품3 남색 #10367D)은
+     다크 카드 면과 1.40 밖에 갈리지 않았다(기준 1.5 — contrast 의 면 분리). 그래서 그 바탕 셋 위 1.5 를 넘을 때까지 0.5 씩 밝힌 값을 50d 로 따로 둔다.
+     라이트는 제품 HEX 그대로이고, 이미 넘는 제품(기본 · 제품1 · 제품2 · 브랜드 · AI)은 50d 를 만들지 않아 --brand-50 으로 돌아간다 */
+  const DARK_SURFACE_MIN = 1.5;
   function accentScale(hex) {
     const [h, s, l] = hexToHsl(hex);
     const out = {};
     for (const k of Object.keys(BRAND_DL)) out[k] = hslToHex(h, s, Math.max(0, Math.min(100, l + BRAND_DL[k])));
     for (let dl = BRAND_DL[60]; dl <= 100 && Math.min(...DARK_BEDS.map(b => +ratio(out[60], b).toFixed(2))) < DARK_TEXT_MIN; dl += 0.5) out[60] = hslToHex(h, s, Math.min(100, l + dl));
     out[50] = hex.toUpperCase();
+    let d50 = out[50];
+    for (let dl = 0.5; dl <= 100 && Math.min(...DARK_BEDS.map(b => +ratio(d50, b).toFixed(2))) < DARK_SURFACE_MIN; dl += 0.5) d50 = hslToHex(h, s, Math.min(100, l + dl));
+    if (d50 !== out[50]) out["50d"] = d50;
     return out;
   }
-  const STEPS = [40, 45, 50, 55, 60];
+  const STEPS = [40, 45, 50, 55, 60, "50d"];
   /* 제품 색 제약 — Brand 면 위 글자는 늘 흰색이므로, 제품 색이 흰 글자를 받칠 수 있어야 한다.
      종전에는 밝은 제품에 맞춰 글자를 어둡게 뒤집었지만(data-accent-light) 그 적응을 걷어냈다:
      면을 어둡게 내려 흰 글자를 세우는 길은 다크에서 버튼이 캔버스에 묻혀(분리 1.11) 막혀 있고,
@@ -48,7 +55,7 @@
     const p = products.find(x => x.key === key && x.kind !== "base");
     for (const k of STEPS) root.style.removeProperty("--prod-" + k);
     if (!p) { delete root.dataset.accent; try { localStorage.removeItem("jsds-accent"); } catch (e) { } paintAccent(); return; }
-    if (p.kind !== "neutral") { const sc = accentScale(p.hex); for (const k of STEPS) root.style.setProperty("--prod-" + k, sc[k]); }
+    if (p.kind !== "neutral") { const sc = accentScale(p.hex); for (const k of STEPS) if (sc[k]) root.style.setProperty("--prod-" + k, sc[k]); }
     root.dataset.accent = p.key;
     if (p.kind !== "neutral" && !p.exception && isLightAccent(p.hex))
       console.warn(`[ds] 제품 색 ${p.hex} 위에서 흰 글자가 ${ratio(p.hex, "#FFFFFF").toFixed(2)} 로 ${BRAND_LABEL_MIN} 에 못 미칩니다 — 어두운 변형을 쓰세요`);
@@ -82,8 +89,8 @@
     markFaintSwatches();
   }
   if (accentPop) {
-    /* 기본(파랑)은 data-accent="" — 속성을 지운다. 이름 옆 작은 글자는 갈래(기본 · 제품별 · Company · 중립 · AI) */
-    accentPop.innerHTML = products.map(p => '<button type="button" role="menuitemradio" aria-checked="false" data-accent="' + (p.kind === "base" ? "" : p.key) + '"><i style="background:' + swatch(p) + '"></i>' + p.name + '<small>' + p.group + "</small></button>").join("");
+    /* 기본(파랑)은 data-accent="" — 속성을 지운다. 견본 점 + 이름(역할)만 — 옆의 작은 갈래 글자는 2026-11-17 에 뺐다(사람의 결정) */
+    accentPop.innerHTML = products.map(p => '<button type="button" role="menuitemradio" aria-checked="false" data-accent="' + (p.kind === "base" ? "" : p.key) + '"><i style="background:' + swatch(p) + '"></i>' + p.name + "</button>").join("");
     /* stopPropagation 금지 — 바깥 클릭 닫기가 이 이벤트에 얹혀 있다 */
     accentPop.addEventListener("click", e => { const b = e.target.closest("[data-accent]"); if (b) { applyAccent(b.dataset.accent); closePop(accentBtn, accentPop); accentBtn.focus(); } });
   }

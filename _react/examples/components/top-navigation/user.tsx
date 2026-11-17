@@ -8,7 +8,7 @@ export default function Example() {
         <Tooltip content="알림" position="bottom"><Button color="assistive" iconOnly size="sm" aria-label="알림"><Icon name="bell" /></Button></Tooltip>
         <Dropdown kind="menu" align="end" keepMounted>
           <DropdownTrigger asChild>
-            <button type="button" className="topbar-user" aria-label="사용자 메뉴"><Avatar initials="JH" /></button>
+            <button type="button" className="topbar-user" aria-label="사용자 메뉴"><Avatar initials="JH" name="정희" /></button>
           </DropdownTrigger>
           <Menu>
             <MenuItem onSelect={() => {}}>내 정보</MenuItem>

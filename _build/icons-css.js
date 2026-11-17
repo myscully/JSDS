@@ -22,7 +22,7 @@ const RULES = [
   [".switch.sm input::after", "width:1rem;height:1rem"],
   [".switch.sm input:checked::after", "left:1.125rem"],
   [".checkbox input:indeterminate::after,.checkbox input.mixed::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("minus", "outline", { strokeWidth: 3.5 })}`],
-  [".chip[aria-pressed]::before", `content:"";width:0.875rem;height:0.875rem;flex:none;background:var(--foreground-disable-primary);${mask("check")}`],
+  [".chip[aria-pressed]::before", `content:"";width:0.875rem;height:0.875rem;flex:none;background:var(--foreground-disable-primary);${mask("check", "outline", { strokeWidth: 2.5 })}`],   // 체크 선 2.5 — 기본 2 에서 한 단계(사람의 요청 2026-11-16)
   [".dropdown .trigger::after", `content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast)`],
   [".dropdown.open .trigger::after", "transform:rotate(180deg)"],
   [".accordion summary::after", `content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast);margin-left:auto`],   // 셰브론만 오른쪽 끝 — 앞 아이콘 뒤에 제목이 붙는다,

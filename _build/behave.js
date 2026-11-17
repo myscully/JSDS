@@ -374,7 +374,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 6 · components/button.html", async () => {
 
     /* 제품 슬롯 — 기준 토큰의 brand 자리에 제품 색이 들어간다. 단계는 다섯(40·45·50·55·60)이고 50 이 제품 HEX 다.
-       팔레트 여섯(data.js PRODUCTS — 2026-11-14 사람의 결정)을 헤더 메뉴로 하나씩 고른다. 상태색과 겹쳐도(빨강) 제품 색 그대로다 —
+       팔레트 일곱(data.js PRODUCTS — 2026-11-14 사람의 결정 · 11-17 제품3)을 헤더 메뉴로 하나씩 고른다. 상태색과 겹쳐도(빨강) 제품 색 그대로다 —
        예전의 자동 중립 전환(data-accent-neutral)은 걷어냈고, 중립은 팔레트에서 고른다 */
     await go("components/button.html");
     accent = async (key) => {
@@ -398,16 +398,16 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     };
     const PAL = require("./data.js").PRODUCTS;
     const KEY = (p) => (p.kind === "base" ? "" : p.key);
-    /* 팝오버 — 여섯 항목이 팔레트 순서대로, 고른 것 하나만 aria-checked */
+    /* 팝오버 — 일곱 항목이 팔레트 순서대로, 고른 것 하나만 aria-checked */
     await page.click("#accentBtn"); await page.waitForTimeout(80);
     const items = await page.evaluate(() => [...document.querySelectorAll("#accentPop [data-accent]")].map((b) => ({ k: b.dataset.accent, t: b.textContent.trim() })));
     await page.keyboard.press("Escape"); await page.waitForTimeout(80);
-    ok("the product color menu lists the six palette colors in order", items.map((i) => i.k).join() === PAL.map(KEY).join() && items.every((i, n) => i.t.startsWith(PAL[n].name)), JSON.stringify(items));
+    ok("the product color menu lists the seven palette colors in order, name only (2026-11-17)", items.length === 7 && items.map((i) => i.k).join() === PAL.map(KEY).join() && items.every((i, n) => i.t === PAL[n].name) && PAL.map((p) => p.name).join() === "기본,제품1,제품2,제품3,브랜드,중립,AI", JSON.stringify(items));
     const got = {};
     for (const p of PAL) got[p.key] = await accent(KEY(p));
     const checked = await page.evaluate(() => [...document.querySelectorAll('#accentPop [aria-checked="true"]')].map((b) => b.dataset.accent));
     ok("only the chosen palette item is checked", checked.length === 1 && checked[0] === "ai", JSON.stringify(checked));
-    /* 여섯 색마다 Brand 면 = 팔레트 값. 중립은 라이트 면이 중립 램프의 어두운 단계 */
+    /* 일곱 색마다 Brand 면 = 팔레트 값. 중립은 라이트 면이 중립 램프의 어두운 단계 */
     for (const p of PAL) {
       const t = got[p.key];
       ok(`palette ${p.key}: brand surface is ${p.hex} and the attribute is the key`,
@@ -435,7 +435,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       return {
         surface: g("--surface-brand-primary"), strong: g("--surface-brand-strong"), heavy: g("--surface-brand-heavy"),
         light: document.documentElement.hasAttribute("data-accent-light"), neutral: document.documentElement.dataset.accent === "neutral",
-        ramp: [40, 45, 50, 55, 60].map((k) => g("--brand-" + k)),
+        ramp: [40, 45, 50, 55, 60].map((k) => g("--brand-" + k)), d50d: g("--brand-50d"),
         surfaceRgb: res("var(--surface-brand-primary)"), strongRgb: res("var(--surface-brand-strong)"), heavyRgb: res("var(--surface-brand-heavy)"),
         labelRgb: res("var(--brand-label)"), fgRgb: res("var(--foreground-brand-primary)"),
         subtleRgb: res("var(--surface-brand-subtle)"), invRgb: res("var(--foreground-brand-inverse)"),
@@ -456,7 +456,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       /* 라이트는 50 이 면이고 상태가 짙어지는 쪽(45·40)으로 간다. 다크도 50 이 면이고 밝아지는 쪽(55·60)으로 간다.
          중립 제품만 라이트가 거의 검정에서 시작해 밝아진다(40 → 45 → 50) */
       const wantL = L.neutral ? [s40, s45, s50] : [s50, s45, s40];
-      const wantD = [d50, d55, d60];
+      /* 다크 면은 50d(어두운 제품만 밝힌 단계 — 지금은 navy #113B88, 2026-11-17), 없으면 50 그대로 */
+      const wantD = [p.key === "navy" ? D.d50d : d50, d55, d60];
+      if (p.key === "navy") ok("navy dark surface is the lifted 50d, not the product hex", D.d50d.toUpperCase() === "#113B88" && d50.toUpperCase() === "#10367D", JSON.stringify({ d50d: D.d50d, d50 }));
+      else if (p.kind !== "neutral" && D.d50d !== d50) ok(`the ${n} product has no lifted dark surface`, false, JSON.stringify({ d50d: D.d50d, d50 }));
       ok(`the ${n} product follows the base-step rule in both themes`,
         L.surface === wantL[0] && L.strong === wantL[1] && L.heavy === wantL[2]
         && D.surface === wantD[0] && D.strong === wantD[1] && D.heavy === wantD[2],
@@ -775,7 +778,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     await page.waitForTimeout(200);
 
     // --foreground-brand-primary 는 두 테마 모두 봐야 한다 — 밝은 제품은 라이트에서 600 으로 쓰면 패널 위 2.58 이었다
-    for (const key of ["", "red", "cyan", "neutral", "ai"]) {   // 주황은 사람의 결정으로 선언한 예외(data.js exception) — contrast 가 advisory 로 보고한다
+    for (const key of ["", "red", "cyan", "navy", "neutral", "ai"]) {   // 제품3 navy(2026-11-17) · 주황은 사람의 결정으로 선언한 예외(data.js exception) — contrast 가 advisory 로 보고한다
       await accent(key);
       for (const [theme, set] of [["light", null], ["dark", "dark"]]) {
         await page.evaluate((t) => { t ? document.documentElement.setAttribute("data-theme", t) : document.documentElement.removeAttribute("data-theme"); }, set);
@@ -1491,12 +1494,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     ok("validate: fixing clears the error at once and restores the help", !vFix.err && vFix.help === "IPv4 형식" && vFix.invalid === null, JSON.stringify(vFix));
     const vSubmit = () => vf.locator('button[type="submit"]').click();
     await vSubmit();
-    const vBlocked = await page.evaluate(() => { const f = document.querySelector("#ex-input-form-validate form"), s = f.querySelector(":scope > [data-form-summary]"); return { reached: window.__reached, focus: document.activeElement.id, title: s && s.querySelector("b").textContent, labels: s && s.querySelector(":scope > div > span").textContent, icon: !!(s && s.querySelector(":scope > .ico > svg")), first: f.firstElementChild === s, role: s && s.getAttribute("role"), errs: f.querySelectorAll(".field.error").length, ev: window.__ev[window.__ev.length - 1] }; });
+    const vBlocked = await page.evaluate(() => { const f = document.querySelector("#ex-input-form-validate form"), box = f.querySelectorAll(":scope > .notice, [data-form-summary], .form-summary").length; return { reached: window.__reached, focus: document.activeElement.id, box, first: f.firstElementChild.className, errs: f.querySelectorAll(".field.error").length, ev: window.__ev[window.__ev.length - 1] }; });
     ok("validate: submit is blocked before product handlers, focus on first error", vBlocked.reached === 0 && vBlocked.focus === "v1" && vBlocked.errs === 3, JSON.stringify(vBlocked));
-    ok("validate: three or more errors get a summary on top", vBlocked.first && vBlocked.icon && vBlocked.role === "alert" && vBlocked.title === "입력값 3개를 확인하세요" && vBlocked.labels === "정책 이름, 보관 기간, 알림 이메일", JSON.stringify(vBlocked));
+    ok("validate: three errors draw no summary above the form — the legend stays first (2026-11-16)", vBlocked.box === 0 && vBlocked.first === "form-legend", JSON.stringify(vBlocked));
     ok("validate: ds:validate reports the errors", vBlocked.ev && vBlocked.ev.valid === false && vBlocked.ev.errors.length === 3 && vBlocked.ev.errors[0].message === "필수 항목입니다. 값을 입력하세요.", JSON.stringify(vBlocked.ev));
     await vin("v1").fill("외부 USB 차단");
-    ok("validate: summary goes away under three errors", (await vf.locator(":scope > [data-form-summary]").count()) === 0);
+    ok("validate: fixing one field clears only that field's error and still no summary", (await vf.locator(".field.error").count()) === 2 && (await vf.locator(":scope > .notice, [data-form-summary]").count()) === 0);
     await vin("v3").fill("500"); await page.keyboard.press("Tab");
     const vMax = await vst("v3");
     ok("validate: range message carries the limit", vMax.help === "값이 너무 큽니다. 365 이하 입력하세요.", JSON.stringify(vMax));
@@ -2299,9 +2302,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         checker: pane.querySelectorAll(".sem-row.checker").length,
         titles: [...pane.querySelectorAll("h2")].slice(0, 3).map((h) => h.textContent) };
     });
-    /* 27 → 28: 트리 밖 Chart 절(탐색형 차트 토큰, 2026-11-03) */
-    ok("semantic tab is 28 sections, each a heading + one paragraph + a swatch row",
-      semPage.sections === 28 && semPage.paras === 28, JSON.stringify(semPage).slice(0, 220));
+    /* 27 → 28: 트리 밖 Chart 절(탐색형 차트 토큰, 2026-11-03). 28 → 29: 트리 밖 Avatar 절(아바타 6색, 2026-11-16) */
+    ok("semantic tab is 29 sections, each a heading + one paragraph + a swatch row",
+      semPage.sections === 29 && semPage.paras === 29, JSON.stringify(semPage).slice(0, 220));
     ok("no swatch is blank", semPage.blank.length === 0, semPage.blank.join(" ") || "없음");
     /* 알파가 든 절만 체커 바탕 — 솔리드 절에 체커가 깔리면 반투명으로 오독된다 */
     ok("only the alpha sections are checkered", semPage.checker === 15, String(semPage.checker));   // 14 → 15: Line - Field Focus 의 후광이 반투명(2026-11-14)

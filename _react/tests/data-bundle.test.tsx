@@ -159,6 +159,22 @@ describe("DataTable", () => {
 });
 
 describe("Pagination", () => {
+  it("기본은 outline(클래스 없음), variant=ghost 는 .ghost, 옛 outline prop 은 한 번 경고하고 무시한다(2026-11-16)", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { container, rerender } = render(<Pagination page={1} total={3} />);
+    const nav = () => container.querySelector("nav.pagination")!;
+    expect(nav().classList.contains("ghost")).toBe(false);
+    expect(nav().classList.contains("outline")).toBe(false);
+    rerender(<Pagination page={1} total={3} variant="ghost" />);
+    expect(nav().classList.contains("ghost")).toBe(true);
+    rerender(<Pagination page={1} total={3} outline />);
+    expect(nav().classList.contains("outline")).toBe(false);
+    expect(nav().classList.contains("ghost")).toBe(false);
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes("outline prop")).length).toBe(1);
+    rerender(<CursorPagination hasPrev={false} hasNext variant="ghost" />);
+    expect(container.querySelector("nav.pagination.cursor.ghost")).not.toBeNull();
+    warn.mockRestore();
+  });
   it("끝에 닿아 꺼진 화살표에서 현재 페이지로 포커스를 옮긴다", () => {
     function P() { const [p, s] = useState(2); return <Pagination page={p} total={3} onChange={s} />; }
     render(<P />);

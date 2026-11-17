@@ -33,7 +33,7 @@ module.exports = async function revise({ page, ok, go }) {
       await theme(t); await wait(400);
       const B = await tok("--foreground-brand-primary", "color");
       const on = page.locator("#ex-top-navigation-basic .topbar nav a.on").first();
-      const look = () => on.evaluate((a) => { const c = getComputedStyle(a); return { bg: c.backgroundColor, fg: c.color, bw: c.borderBottomWidth, bs: c.borderBottomStyle, bc: c.borderBottomColor, r: c.borderTopLeftRadius }; });
+      const look = () => on.evaluate((a) => { const c = getComputedStyle(a); return { bg: c.backgroundColor, fg: c.color, bw: c.borderBottomWidth, bs: c.borderBottomStyle, bc: c.borderBottomColor, r: c.borderTopLeftRadius, w: c.fontWeight }; });
       await page.mouse.move(2, 2); await wait(200); const rest = await look();
       await on.hover(); await wait(200); const hov = await look();
       const nav = await page.locator("#ex-top-navigation-basic .topbar nav").first().evaluate((n) => {
@@ -41,11 +41,28 @@ module.exports = async function revise({ page, ok, go }) {
         return { gap: getComputedStyle(n).columnGap, offB: c.borderBottomWidth + " " + c.borderBottomStyle + " " + c.borderBottomColor, radii: a.map((x) => getComputedStyle(x).borderTopLeftRadius).every((v) => v === "0px"),
           tops: new Set(a.map((x) => Math.round(x.getBoundingClientRect().top))).size, heights: new Set(a.map((x) => Math.round(x.getBoundingClientRect().height))).size };
       });
-      const same = (x) => x.fg === B && x.bc === B && x.bw === "2px" && x.bs === "solid" && x.bg === "rgba(0, 0, 0, 0)" && x.r === "0px";
-      ok(`top navigation ${t || "light"}: the selected item is brand text with a 2px brand bottom line and no face, hover keeps it; other items carry a transparent 2px line, gap 8, no radius`,
+      const same = (x) => x.fg === B && x.bc === B && x.bw === "2px" && x.bs === "solid" && x.bg === "rgba(0, 0, 0, 0)" && x.r === "0px" && x.w === "700";   // 굵기 700(2026-11-16)
+      ok(`top navigation ${t || "light"}: the selected item is brand text weight 700 with a 2px brand bottom line and no face, hover keeps it; other items carry a transparent 2px line, gap 8, no radius`,
         same(rest) && same(hov) && nav.gap === "8px" && nav.offB === "2px solid rgba(0, 0, 0, 0)" && nav.radii && nav.tops === 1 && nav.heights === 1, JSON.stringify({ rest, hov, nav, B }));
     }
     await theme(null);
+  });
+  await part("2b · 내비 굵기 · 사이드 패널 표 · Time Picker 폭(2026-11-16)", async () => {
+    /* Navigation 선택(상위 · 하위)은 700, 다른 항목은 500 */
+    await go("components/navigation.html");
+    const nv = await page.evaluate(() => { const a = [...document.querySelectorAll(".example-preview .sidenav a")]; return { on: a.filter((x) => x.classList.contains("on")).map((x) => getComputedStyle(x).fontWeight + (x.classList.contains("sub") ? "s" : "")), off: [...new Set(a.filter((x) => !x.classList.contains("on")).map((x) => getComputedStyle(x).fontWeight))] }; });
+    ok("navigation: the selected item (and a selected sub item) is weight 700, the rest 500 (2026-11-16)", nv.on.length > 0 && nv.on.every((w) => /^700/.test(w)) && JSON.stringify(nv.off) === '["500"]', JSON.stringify(nv));
+    /* 사이드 패널 안 속성 표 머리글은 오른쪽 선 없음, 다른 자리의 속성 표는 그대로 */
+    await go("components/side-panel.html");
+    const sp = await page.evaluate(() => [...document.querySelectorAll(".side-panel .tbl.kv th")].map((th) => getComputedStyle(th).borderRightWidth));
+    await go("components/table.html");
+    const kv = await page.evaluate(() => [...document.querySelectorAll(".example-preview .tbl.kv th")].filter((th) => !th.closest(".side-panel")).map((th) => getComputedStyle(th).borderRightWidth));
+    ok("a key-value table inside a side panel has no header right border; elsewhere it keeps 1px (2026-11-16)", sp.length > 0 && sp.every((w) => w === "0px") && kv.length > 0 && kv.every((w) => w === "1px"), JSON.stringify({ sp, kv }));
+    /* Time Picker — 단독은 최소 160, 폼 안에서는 칸 폭을 채운다(설정 행은 160 고정 그대로) */
+    await go("components/time-picker.html");
+    const tp = await page.evaluate(() => { const w = (e) => Math.round(e.getBoundingClientRect().width); const solo = [...document.querySelectorAll("#ex-time-picker-default .field.timepicker, #ex-time-picker-size .field.timepicker")].map(w);
+      const f = document.querySelector("#ex-time-picker-form .field.timepicker"), sib = f.parentElement.querySelector(".field:not(.timepicker)"); const pc = getComputedStyle(f.parentElement); return { solo, form: w(f), col: Math.round(f.parentElement.clientWidth - parseFloat(pc.paddingLeft) - parseFloat(pc.paddingRight)), sib: sib ? w(sib) : null }; });
+    ok("time picker: alone it is the 160 minimum at every size, in a form it fills the column like the other fields (2026-11-16)", tp.solo.length === 4 && tp.solo.every((x) => x === 160) && tp.form > 160 && (tp.sib === null ? tp.form === tp.col : tp.form === tp.sib), JSON.stringify(tp));
   });
   await part("3 · components/tag.html", async () => {
 
@@ -62,9 +79,32 @@ module.exports = async function revise({ page, ok, go }) {
     ok("count dot sits 2px outside the wrapper corner, the numeric badge 6px (2026-11-14)",
       dot.some((d) => d.dot) && dot.some((d) => !d.dot) && dot.every((d) => d.dot ? d.top === -2 && d.right === -2 : d.top === -6 && d.right === -6), JSON.stringify(dot));
   });
+  await part("4b · components/indicator.html — 아이콘 원", async () => {
+    /* Indicator = 아이콘이 든 색 원(2026-11-16 사람의 요청 · 결정 — 원 16 · 아이콘 10). 원 면 = 톤 토큰, 아이콘 = 흰색(accent 는 brand-label) mask, 톤마다 다른 모양, 줄 높이 22 그대로 · 라이트 · 다크 · 중립 제품 */
+    await go("components/indicator.html");
+    for (const [t, acc] of [[null, null], ["dark", null], ["dark", "neutral"]]) {
+      await page.evaluate(([t, a]) => { const h = document.documentElement; t ? h.setAttribute("data-theme", t) : h.removeAttribute("data-theme"); a ? h.setAttribute("data-accent", a) : h.removeAttribute("data-accent"); }, [t, acc]); await wait(300);
+      const r = await page.evaluate(() => {
+        const tk = (v) => { const e = document.createElement("i"); e.style.color = `var(${v})`; document.body.append(e); const c = getComputedStyle(e).color; e.remove(); return c; };
+        const pv = document.querySelector("#ex-indicator-status .example-preview");
+        const acc = document.createElement("span"); acc.className = "indicator accent"; acc.textContent = "제품"; pv.append(acc);
+        const WANT = { ok: "--foreground-positive-primary", warn: "--foreground-cautionary-primary", danger: "--foreground-negative-primary", info: "--foreground-accent-cyan", accent: "--surface-brand-primary", "": "--foreground-inactive-primary" };
+        const rows = [...pv.querySelectorAll(".indicator")].map((el) => { const k = ["ok", "warn", "danger", "info", "accent"].find((c) => el.classList.contains(c)) || "", b = getComputedStyle(el, "::before"), a = getComputedStyle(el, "::after"), r = el.getBoundingClientRect();
+          const icon = { x: Math.round((r.left + parseFloat(a.left) + 5) * 10) / 10 }; return { k, w: b.width, h: b.height, bg: b.backgroundColor, want: tk(WANT[k]), aw: a.width, ah: a.height, ink: a.backgroundColor, inkWant: tk(k === "accent" ? "--brand-label" : "--static-white"), mask: a.maskImage || a.webkitMaskImage, lh: Math.round(r.height * 10) / 10, cx: Math.round((r.left + parseFloat(b.width) / 2) * 10) / 10, icon: icon.x }; });
+        acc.remove();
+        return { rows, shapes: new Set(rows.filter((x) => x.k !== "accent").map((x) => x.mask)).size };
+      });
+      ok(`indicator ${t || "light"}${acc ? " · " + acc : ""}: a 16 circle in the tone token with a 10 icon (white, brand-label on accent) centred on it, a shape per state, row 22 (2026-11-16)`,
+        r.rows.length === 7 && r.rows.every((x) => x.w === "16px" && x.h === "16px" && x.bg === x.want && x.aw === "10px" && x.ah === "10px" && x.ink === x.inkWant && /url\(/.test(x.mask) && x.lh === 22 && Math.abs(x.cx - x.icon) <= 0.5) && r.shapes === 5, JSON.stringify(r));
+    }
+    await page.evaluate(() => { document.documentElement.removeAttribute("data-theme"); document.documentElement.removeAttribute("data-accent"); });
+    await go("components/data-table.html");
+    const off = await page.evaluate(() => { const i = document.querySelector("#ex-data-table-basic tr.disabled .indicator"); return { after: getComputedStyle(i, "::after").display, img: getComputedStyle(i, "::before").backgroundImage }; });
+    ok("a disabled row's indicator is a plain grey circle with no icon (2026-11-16)", off.after === "none" && off.img === "none", JSON.stringify(off));
+  });
   await part("5 · components/notification.html", async () => {
 
-    /* Notice · Banner 아이콘은 filled — 정적 예제와 ds.js 가 만드는 폼 오류 요약까지(Toast 는 그대로) */
+    /* Notice · Banner 아이콘은 filled — 정적 예제(Toast 는 그대로) */
     await go("components/notification.html");
     ico = await page.evaluate(() => {
       const filled = (s) => !!s && s.getAttribute("fill") === "currentColor" && !s.getAttribute("stroke");
@@ -72,15 +112,28 @@ module.exports = async function revise({ page, ok, go }) {
       return { notice: n.length, nf: n.filter(filled).length, banner: b.length, bf: b.filter(filled).length, toastOutline: t.length > 0 && t.every((s) => !filled(s)) };
     });
   });
+  await part("5b · 톤 없는 Notice 아이콘 = 회색 · 정보 톤은 시안 · 유의사항은 message-2(사람의 요청 2026-11-16)", async () => {
+    for (const t of [null, "dark"]) {
+      await go("patterns/notes.html"); await theme(t); await wait(300);
+      const nm = t || "light", grey = await tok("--foreground-neutral-secondary", "color"), cyan = await tok("--foreground-accent-cyan", "color");
+      const n = await page.evaluate(() => { const i = document.querySelector("#ex-notes-basic .notice:not(.info):not(.success):not(.warning):not(.danger) > .ico"); const p = i && i.querySelector("svg path");
+        return i ? { c: getComputedStyle(i).color, d: p ? p.getAttribute("d").slice(0, 10) : "" } : null; });
+      await go("components/notification.html"); await theme(t); await wait(300);
+      const info = await page.evaluate(() => getComputedStyle(document.querySelector(".example-preview .notice.info > .ico")).color);
+      ok(`notice ${nm}: a toneless notice icon is neutral-secondary, the notes pattern uses message-2, and the info tone keeps cyan`,
+        !!n && n.c === grey && n.d === "M18 3a4 4 " && info === cyan && grey !== cyan, JSON.stringify({ n, info, grey, cyan }));
+    }
+    await theme(null);
+  });
   await part("6 · patterns/input-form.html", async () => {
     await go("patterns/input-form.html");
   });
-  await part("7 · 정적 요약을 지우고 비운 채 제출 — ds.js 가 요약을 새로 만든다(3개 이상일 때)", async () => {
-    /* 정적 요약을 지우고 비운 채 제출 — ds.js 가 요약을 새로 만든다(3개 이상일 때) */
-    await page.locator("form[data-validate]").first().evaluate((f) => { f.querySelectorAll("[data-form-summary]").forEach((x) => x.remove()); f.querySelectorAll("input:not([type=checkbox]):not([type=radio]):not([type=hidden]), textarea").forEach((i) => { i.value = ""; }); f.requestSubmit(); }); await wait(200);
-    const sum = await page.evaluate(() => { const s = document.querySelector("[data-form-summary] > .ico > svg"); return s ? s.getAttribute("fill") === "currentColor" && !s.getAttribute("stroke") : null; });
-    ok("notice and banner icons are filled — static examples and the generated form summary; toast stays outline (2026-11-13)",
-      ico.notice >= 4 && ico.nf === ico.notice && ico.banner >= 1 && ico.bf === ico.banner && ico.toastOutline && sum === true, JSON.stringify({ ico, sum }));
+  await part("7 · 비운 채 제출해도 폼 위 요약을 만들지 않는다(사람의 결정 2026-11-16 — 요약을 통째로 없앰)", async () => {
+    /* 오류 3개 이상이 되도록 비운 채 제출 — 필드 오류만 나고 요약 상자는 생기지 않는다 */
+    await page.locator("form[data-validate]").first().evaluate((f) => { f.querySelectorAll("input:not([type=checkbox]):not([type=radio]):not([type=hidden]), textarea").forEach((i) => { i.value = ""; }); f.requestSubmit(); }); await wait(200);
+    const sum = await page.evaluate(() => { const f = document.querySelector("form[data-validate]"); return { errors: f.querySelectorAll(".field.error").length, box: document.querySelectorAll("[data-form-summary], .form-summary").length }; });
+    ok("notice and banner icons are filled and toast stays outline (2026-11-13); a form with three or more errors draws no summary (2026-11-16)",
+      ico.notice >= 4 && ico.nf === ico.notice && ico.banner >= 1 && ico.bf === ico.banner && ico.toastOutline && sum.errors >= 3 && sum.box === 0, JSON.stringify({ ico, sum }));
   });
   await part("8 · components/tag.html", async () => {
 
@@ -149,6 +202,24 @@ module.exports = async function revise({ page, ok, go }) {
       ok(`avatar group ${t || "light"}: overlap 8 (sm 6), a 2px ring and an opaque base in the place's surface, five avatars then '외 N명' last — text 8 after, button 4 after (2026-11-13)`,
         r.md.every((x) => x === -8) && r.sm.every((x) => x === -6) && r.ring.includes(elev) && r.ring.includes("2px") && r.img && r.base === elev && r.role === "group" && r.name === "담당자" &&
         r.count === 5 && r.text.last && r.text.gap === 8 && r.text.fs === "14px" && r.text.tag === "SPAN" && r.btn.last && r.btn.gap === 4 && r.btn.tag === "BUTTON" && /외 3명/.test(r.btnName), JSON.stringify({ r, elev }));
+    }
+    /* Avatar 색(2026-11-16) — 이름으로 정한 tone 의 면 · 글자 토큰, 겹친 묶음의 셋이 서로 다른 면, 이니셜 4.5 이상, ds.js 가 새 아바타에도 이름으로 tone 을 단다 · 라이트 · 다크 */
+    for (const t of [null, "dark"]) {
+      await theme(t); await wait(300);
+      const r = await page.evaluate(() => {
+        const rgb = (s) => s.match(/[\d.]+/g).slice(0, 3).map(Number), lum = (c) => { const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+        const ratio = (a, b) => { const [x, y] = [lum(rgb(a)), lum(rgb(b))].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+        const tk = (v, p) => { const e = document.createElement("i"); e.style[p] = `var(${v})`; document.body.append(e); const c = getComputedStyle(e)[p]; e.remove(); return c; };
+        const avs = [...document.querySelectorAll("#ex-avatar-group .avatar-group")[0].querySelectorAll(".avatar")];
+        const rows = avs.map((a) => { const n = a.dataset.tone, c = getComputedStyle(a), face = (c.backgroundImage.match(/rgba?\([^)]*\)/) || [c.backgroundImage])[0];
+          return { n, tone: DS.avatarTone(a.getAttribute("aria-label")), face, faceTok: tk(`--avatar-${n}-surface`, "color"), text: c.color, textTok: tk(`--avatar-${n}-text`, "color"), cr: Math.round(ratio(c.color, face) * 100) / 100 }; });
+        const solo = document.querySelector("#ex-avatar-name .avatar"), sc = getComputedStyle(solo);
+        const d = document.createElement("div"); d.innerHTML = '<span class="avatar" role="img" aria-label="박지호">박</span>'; document.body.append(d); DS.init(d);
+        const fresh = d.firstChild.dataset.tone; d.remove();
+        return { rows, distinct: new Set(rows.map((x) => x.face)).size, solo: { n: solo.dataset.tone, bg: sc.backgroundColor, tok: tk(`--avatar-${solo.dataset.tone}-surface`, "color") }, fresh, freshWant: DS.avatarTone("박지호") };
+      });
+      ok(`avatar ${t || "light"}: tone from the name, face · initials = --avatar-N tokens, three people in a group get three faces, initials ≥ 4.5, DS.init tones a new avatar (2026-11-16)`,
+        r.rows.every((x) => +x.n === x.tone && x.face === x.faceTok && x.text === x.textTok && x.cr >= 4.5) && r.distinct === 3 && r.solo.bg === r.solo.tok && r.fresh === String(r.freshWant), JSON.stringify(r));
     }
     await theme(null);
   });

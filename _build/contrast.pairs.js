@@ -1,6 +1,6 @@
 /* 대비 계약 — '한 화면에서 만날 수 있는 쌍'만 선언하고 값은 빌드가 잰다(contrast.js).
    사람이 숫자를 적지 않는다: 종전에는 페이지의 대비 수치가 네 번 낡았다.
-   측정은 실제 생성 사이트에서 라이트·다크 × 제품 색 팔레트 여섯(data.js PRODUCTS — 2026-11-14)으로 전수 수행한다.
+   측정은 실제 생성 사이트에서 라이트·다크 × 제품 색 팔레트 일곱(data.js PRODUCTS — 2026-11-14 · 11-17 제품3)으로 전수 수행한다.
 
    이번 라운드부터 토큰 값이 기준 토큰의 것이다.
    그 값은 소비자 제품용이라 **우리 기준을 여럿 넘기지 못한다** — 라이트에서 상태색 글자가 2.2~3.4 다.
@@ -45,7 +45,7 @@ const pairs = [
   ["--foreground-accent-cyan-heavy", ["--surface-accent-cyan", ...SURFACES], 4.5, "Pending Tag 글자 — 틴트 · outline"],
   ["--foreground-positive-heavy", ["--surface-positive-primary", ...SURFACES], 4.5, "ok Tag 글자 — 틴트 · outline"],
   ["--foreground-neutral-strong", SURFACES, 4.5, "가장 높은 대비가 필요할 때"],
-  ["--foreground-neutral-secondary", [...SURFACES, "--surface-neutral-strong"], 4.5, "보조 본문 · 중립 칩 라벨"],
+  ["--foreground-neutral-secondary", [...SURFACES, "--surface-neutral-strong"], 4.5, "보조 본문 · 중립 칩 라벨 · 톤 없는 Notice 아이콘(회색 면 위, 2026-11-16)"],
   /* 라이트 3.67 · 다크 3.78 — 기준 토큰의 설명·캡션 단계다. 종전 우리 값(5.15)보다 연하다.
      placeholder 도 이 단계다(사람의 결정 2026-11-09 — disable 1.33 은 보이지 않았고, secondary 9.09 는 입력한 값과 구분되지 않는다) */
   ["--foreground-neutral-tertiary", [...SURFACES, "--surface-neutral-strong"], 4.5, "설명·캡션·placeholder", REF("기준 토큰 값 — 라이트 3.67 · 다크 3.78")],
@@ -106,6 +106,10 @@ const pairs = [
   ["--foreground-inactive-primary", SURFACES, 3, "Info 지표 · 비활성 점", REF("기준 토큰 값 — 라이트 2.78 · 다크 2.55")],
   ["--foreground-accent-cyan", SURFACES, 3, "Pending 상태 점(태그) · info 알림 아이콘"],
   ["--foreground-positive-primary", SURFACES, 3, "긍정 지표", REF("기준 토큰 값 — 라이트 2.46")],
+  /* Indicator 아이콘 원(2026-11-16) — 톤 원 위 정적 흰 아이콘. 그래픽 3:1 */
+  ["--brand-label", ["--surface-brand-primary"], 3, "Indicator accent 원의 아이콘(제품 면 + 제품 면 위 글자색)"],
+  ["--static-white", ["--foreground-positive-primary", "--foreground-cautionary-primary", "--foreground-negative-primary", "--foreground-accent-cyan", "--foreground-inactive-primary"], 3, "Indicator 원의 흰 아이콘",
+    REF("사람의 요청(2026-11-16 — 색 원 + 흰 아이콘) — 라이트 초록 2.46 · 주황 2.24 · 회색 2.78, 다크는 초록 1.98 · 주황 1.91 · 빨강 2.91 · 시안 2.25. 상태의 뜻은 옆 라벨이 나르고 원 색 · 아이콘 모양은 보조다")],
   ["--foreground-brand-primary", SURFACES, 3, "제품색 지표 · 포커스 링"],
   /* 탐색형 차트 계열 — 글자 없는 마크(선 · 막대 · 조각)라 3:1. 라이트 · 다크 각각 세 바탕에서 넘기는 단계를 골랐다(dataviz 검증기 — style.src.css 주석) */
   ...[1, 2, 3, 4, 5, 6].map((i) => [`--chart-series-${i}`, SURFACES, 3, `차트 계열 ${i}`]),
@@ -116,6 +120,13 @@ const pairs = [
   ["--chart-mono-3", SURFACES, 3, "차트 한 톤 3단계"],
   ["--chart-mono-4", SURFACES, 3, "차트 한 톤 4단계(가장 옅음) — 비교 기간 · 강조 밖 막대 · 정적 스파크라인", { advisory: true, why: "사람의 결정(2026-11-15 한 톤) — 라이트 blue-70 2.49 · 회색 2.33, 다크 blue-45 카드 2.88. 명도로 계열을 가르는 옅은 끝이라 3:1 아래이고(검증기 바닥 2:1 은 넘음), 값은 범례 · 툴팁 · 표로 보기가 나른다" }],
   /* 게이지 · 진행 막대 · 정적 막대 — 채움이 트랙(--surface-neutral-strong) 위에서 보여야 한다 */
+  /* 아바타 이니셜 / tone 면(사람의 결정 2026-11-16 — 이름으로 정하는 6색) */
+  ["--avatar-1-text", ["--avatar-1-surface"], 4.5, "아바타 tone 1 이니셜"],
+  ["--avatar-2-text", ["--avatar-2-surface"], 4.5, "아바타 tone 2 이니셜"],
+  ["--avatar-3-text", ["--avatar-3-surface"], 4.5, "아바타 tone 3 이니셜"],
+  ["--avatar-4-text", ["--avatar-4-surface"], 4.5, "아바타 tone 4 이니셜"],
+  ["--avatar-5-text", ["--avatar-5-surface"], 4.5, "아바타 tone 5 이니셜"],
+  ["--avatar-6-text", ["--avatar-6-surface"], 4.5, "아바타 tone 6 이니셜"],
   ["--chart-mono-1", ["--surface-neutral-strong"], 3, "게이지 · 진행 막대 · 정적 막대의 채움 / 트랙"],
   ["--chart-series-1-subtle", SURFACES, 3, "차트 비교 기간 막대(계열 1 옅은 톤)", { advisory: true, why: "사람의 결정(2026-11-05) — 비교 기간은 같은 색상의 옅은 톤으로 나누는 관례를 따른다. 계열 1 과의 대비 2.74 로 둘이 갈리고, 값은 툴팁 · 범례로 읽는다" }],
   ["--chart-series-1-strong", SURFACES, 3, "차트 막대 위 선(계열 1 진한 톤)"],
@@ -180,8 +191,6 @@ const grammarOnly = [
     .filter((t) => !["--foreground-accent-lime", "--line-accent-lime", "--line-accent-cyan", "--foreground-accent-light-blue", "--line-accent-light-blue"].includes(t)),
   ...ACCENTS.filter((c) => !["cyan", "lime", "light-blue"].includes(c)).map((c) => `--surface-accent-${c}`),
   "--line-neutral-primary-opaque", "--line-neutral-secondary-opaque", "--line-neutral-tertiary-opaque",
-  /* 삭제 버튼이 중립이 되며(2026-11-14 사람의 결정) 소비자가 0 이 된 우리 추가 틴트 셋 — Figma 변수와 짝이라 일괄 반영 때 함께 정리한다 */
-  "--surface-negative-heavy", "--surface-negative-hover", "--surface-negative-pressed",
   "--effect-transparent-primary", "--effect-transparent-secondary",
   /* 회사 정체성 색 — 제품 화면의 로고 자리와 Foundations 그림(인라인 스타일)이 쓴다. style.src.css 의 마지막 소비자였던 WBS 표를 2026-11-15 에 지웠다 */
   "--company-mark", "--company-mark-subtle",

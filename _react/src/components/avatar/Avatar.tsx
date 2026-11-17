@@ -1,16 +1,25 @@
 import { Children, forwardRef, isValidElement, cloneElement, type HTMLAttributes, type ReactElement, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { Button } from "../button/Button";
+import { avatarTone, type AvatarTone } from "./tone";
+export { avatarTone, type AvatarTone } from "./tone";
 
 export interface AvatarProps extends HTMLAttributes<HTMLSpanElement> {
   /** 이니셜 1~2자 */
   initials?: string;
   size?: "md" | "sm";
+  /** 색을 정하는 이름(사람의 결정 2026-11-16) — 없으면 aria-label, 그것도 없으면 이니셜. 같은 사람이 어디서나 같은 색이 되려면 이름을 준다 */
+  name?: string;
+  /** 색을 직접 고름(1 파랑 · 2 시안 · 3 라임 · 4 바이올렛 · 5 퍼플 · 6 핑크) — 주면 이름으로 정하지 않는다 */
+  tone?: AvatarTone;
 }
-/** 이니셜 아바타 32 (sm 24) */
-export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(function Avatar({ initials, size = "md", className, children, ...rest }, ref) {
+/** 이니셜 아바타 32 (sm 24). 색은 이름으로 정하는 6색 */
+export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(function Avatar({ initials, size = "md", name, tone, className, children, ...rest }, ref) {
+  const label = (rest as { "aria-label"?: string })["aria-label"];
+  const text = typeof children === "string" ? children : initials;
+  const t = tone ?? avatarTone(name || label || text);
   return (
-    <span ref={ref} className={cx("avatar", size === "sm" && "sm", className)} {...rest}>
+    <span ref={ref} className={cx("avatar", size === "sm" && "sm", className)} data-tone={t} data-name={name} {...rest}>
       {children ?? initials}
     </span>
   );

@@ -29,6 +29,7 @@ export function paginate(page: number, total: number, opts: { siblings?: number;
   return [...out, ...right];
 }
 
+let warnedOutline = false;
 /** 번호 칸 상한(화살표 제외). 앞뒤 경계 1 + 양옆 2 + 생략 2 가 9칸이다 */
 const MAX_SLOTS = 9;
 /** 표시 개수 표준 */
@@ -43,6 +44,9 @@ export interface PaginationProps extends Omit<HTMLAttributes<HTMLElement>, "onCh
   /** 앞뒤 고정 개수. 0 = 경계·생략 없음 */
   boundaries?: number;
   compact?: boolean;
+  /** 모양 — 기본 outline(회색 선 칸), ghost 는 선 · 면 없음(사람의 요청 2026-11-16) */
+  variant?: "outline" | "ghost";
+  /** @deprecated 이제 기본이 outline — 경고하고 무시한다(1.0 에서 지움) */
   outline?: boolean;
   /** nav aria-label */
   label?: string;
@@ -52,13 +56,14 @@ export interface PaginationProps extends Omit<HTMLAttributes<HTMLElement>, "onCh
 
 /** 페이지 이동. 현재 페이지 .on + aria-current */
 export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagination(
-  { page, total, onChange, siblings = 1, boundaries = 1, compact, outline, label = LABELS.pagination, prevLabel = LABELS.prev, nextLabel = LABELS.next, className, ...rest },
+  { page, total, onChange, siblings = 1, boundaries = 1, compact, variant = "outline", outline, label = LABELS.pagination, prevLabel = LABELS.prev, nextLabel = LABELS.next, className, ...rest },
   ref,
 ) {
   const items = paginate(page, total, { siblings, boundaries });
   const go = (p: number) => { if (p >= 1 && p <= total && p !== page) onChange?.(p); };
   const slots = boundaries === 0 ? siblings * 2 + 1 : boundaries * 2 + siblings * 2 + 3;
   useEffect(() => { if (process.env.NODE_ENV !== "production" && slots > MAX_SLOTS) console.warn(`[ds-react] Pagination 번호 칸은 ${MAX_SLOTS}칸 이하입니다(지금 ${slots}칸) — siblings · boundaries 를 줄이세요.`); }, [slots]);
+  useEffect(() => { if (process.env.NODE_ENV !== "production" && outline !== undefined && !warnedOutline) { warnedOutline = true; console.warn("[ds-react] Pagination outline prop 은 없어졌습니다 — 이제 기본이 outline 입니다. 면 없는 모양은 variant=\"ghost\"."); } }, [outline]);
   const navEl = useRef<HTMLElement | null>(null);
   /* 끝에 닿아 꺼진 화살표에 포커스가 남으면 키보드가 갈 곳을 잃는다 */
   useLayoutEffect(() => {
@@ -66,7 +71,7 @@ export const Pagination = forwardRef<HTMLElement, PaginationProps>(function Pagi
     if (a?.disabled && navEl.current?.contains(a)) navEl.current.querySelector<HTMLElement>("button.on")?.focus();
   }, [page]);
   return (
-    <nav ref={mergeRefs(ref, navEl)} className={cx("pagination", { compact, outline }, className)} aria-label={label} {...rest}>
+    <nav ref={mergeRefs(ref, navEl)} className={cx("pagination", { compact, ghost: variant === "ghost" }, className)} aria-label={label} {...rest}>
       <button type="button" aria-label={prevLabel} disabled={page <= 1} onClick={() => go(page - 1)}>
         <Icon name="chevron-left" size={16} />
       </button>
@@ -142,13 +147,15 @@ export interface CursorPaginationProps extends Omit<HTMLAttributes<HTMLElement>,
   /** 현재 범위. 예) 1–100 */
   range?: ReactNode;
   compact?: boolean;
+  /** 모양 — 기본 outline, ghost 는 선 · 면 없음 */
+  variant?: "outline" | "ghost";
   label?: string;
   prevLabel?: string;
   nextLabel?: string;
 }
 /** 전체 쪽수를 모르는 목록의 이전 · 다음 */
 export const CursorPagination = forwardRef<HTMLElement, CursorPaginationProps>(function CursorPagination(
-  { hasPrev, hasNext, onPrev, onNext, range, compact, label = LABELS.pagination, prevLabel = LABELS.prev, nextLabel = LABELS.next, className, ...rest },
+  { hasPrev, hasNext, onPrev, onNext, range, compact, variant = "outline", label = LABELS.pagination, prevLabel = LABELS.prev, nextLabel = LABELS.next, className, ...rest },
   ref,
 ) {
   const navEl = useRef<HTMLElement | null>(null);
@@ -157,7 +164,7 @@ export const CursorPagination = forwardRef<HTMLElement, CursorPaginationProps>(f
     if (a?.disabled && navEl.current?.contains(a)) navEl.current.querySelector<HTMLElement>("button:not(:disabled)")?.focus();
   }, [hasPrev, hasNext]);
   return (
-    <nav ref={mergeRefs(ref, navEl)} className={cx("pagination", "cursor", { compact }, className)} aria-label={label} {...rest}>
+    <nav ref={mergeRefs(ref, navEl)} className={cx("pagination", "cursor", { compact, ghost: variant === "ghost" }, className)} aria-label={label} {...rest}>
       <button type="button" data-cursor="prev" disabled={!hasPrev} onClick={onPrev}><Icon name="chevron-left" size={16} />{prevLabel}</button>
       {range !== undefined && <span className="range">{range}</span>}
       <button type="button" data-cursor="next" disabled={!hasNext} onClick={onNext}>{nextLabel}<Icon name="chevron-right" size={16} /></button>

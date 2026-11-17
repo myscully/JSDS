@@ -36,7 +36,7 @@ describe("Form validate", () => {
     expect(help(ip).textContent).toBe("IPv4 형식");
   });
 
-  it("제출을 막고 첫 오류로 포커스, 3개 이상이면 요약, 줄면 지운다", () => {
+  it("제출을 막고 첫 오류로 포커스, 오류가 3개여도 요약 없음, 고치면 그 필드 오류를 지운다", () => {
     const onSubmit = vi.fn();
     const onValidate = vi.fn();
     const { container } = render(
@@ -50,13 +50,11 @@ describe("Form validate", () => {
     save();
     expect(onSubmit).not.toHaveBeenCalled();
     expect(document.activeElement).toBe(container.querySelector("#a"));
-    const summary = () => container.querySelector("form > [data-form-summary]");
-    expect(summary()!.textContent).toContain("입력값 3개를 확인하세요");
-    expect(summary()!.textContent).toContain("가, 나, 다");
+    expect(container.querySelector("form > .notice, [data-form-summary]")).toBeNull();   // 폼 위 요약은 없다(2026-11-16)
     expect(onValidate.mock.calls[0][0].valid).toBe(false);
     expect(onValidate.mock.calls[0][0].errors).toHaveLength(3);
     type(container.querySelector("#a") as HTMLInputElement, "값");
-    expect(summary()).toBeNull();
+    expect(container.querySelector("#a")!.getAttribute("aria-invalid")).toBeNull();
   });
 
   it("맞으면 onSubmit 이 불린다", () => {

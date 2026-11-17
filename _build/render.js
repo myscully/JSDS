@@ -2,7 +2,7 @@
    render.js — 페이지 렌더러 + 해시 라우터 (브라우저 전용)
    data.js · components.data.js · patterns.data.js · lib.js 가 먼저 로드되어야 합니다.
    ========================================================= */
-const { esc, dedent, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl } = LIB;
+const { esc, dedent, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, withAvatarTone } = LIB;
 const $ = s => document.querySelector(s);
 const STYLE = () => window.STYLE_TEXT || "";
 const nb = (sec, key) => NEW.has(`${sec}/${key}`) ? '<span class="n">N</span>' : "";
@@ -55,7 +55,7 @@ function codeBlock(id, code, lang, label) {
 }
 function exampleBlock(sec, pageKey, ex, css, cssLabel) {
   const id = `ex-${pageKey}-${ex.id}`;
-  const html = dedent(ex.html); const fromPkg = (window.REACT_EXAMPLES || {})[`${sec}/${pageKey}/${ex.id}`]; const react = fromPkg || (ex.react ? dedent(ex.react) : htmlToJsx(html, ex.name)); const reactLabel = fromPkg ? "React · @jiran/ds-react" : "React · TSX (자동 변환)";
+  const html = withAvatarTone(dedent(ex.html)); const fromPkg = (window.REACT_EXAMPLES || {})[`${sec}/${pageKey}/${ex.id}`]; const react = fromPkg || (ex.react ? dedent(ex.react) : htmlToJsx(html, ex.name)); const reactLabel = fromPkg ? "React · @jiran/ds-react" : "React · TSX (자동 변환)";
   const cls = ["example-preview", "panel", ex.layout || ""].join(" ").trim();
   return `<section class="example" id="${id}">
 <div class="${cls}"${ex.style ? ` style="${ex.style}"` : ""}>${html}</div>
@@ -98,6 +98,7 @@ const baseCss = () => { const s = STYLE(); if (!s) return ""; const pick = (re) 
 /* 사이트 예제 수 — React 예제 파일과 1:1(examples-coverage 가 검사). 문서에 숫자를 손으로 적지 않는다 */
 const exampleCount = () => [...Object.values(COMPONENTS), ...Object.values(PATTERNS)].reduce((n, c) => n + (c.examples || []).length, 0);
 const semanticCount = () => new Set([...rootBlock(STYLE(), ":root").matchAll(/(--(?:foreground|background|surface|line|effect|static)-[a-z0-9-]+)\s*:/g)].map((m) => m[1])).size;
+const avatarCount = () => new Set([...rootBlock(STYLE(), ":root").matchAll(/(--avatar-[0-9]+-[a-z]+)\s*:/g)].map((m) => m[1])).size;
 /* 트리 밖 chart 토큰 수 — 손으로 적지 않는다 */
 const chartCount = () => new Set([...rootBlock(STYLE(), ":root").matchAll(/(--chart-[a-z0-9-]+)\s*:/g)].map((m) => m[1])).size;
 function usageBlock(key, css, label, names = []) {
@@ -211,7 +212,7 @@ const REACT_INSTALL = `npm i @jiran/ds-react
 import "@jiran/ds-react/style.css";   // 토큰 + 컴포넌트 CSS (사이트 크롬 제외)
 import { ToastProvider, applyProductColor } from "@jiran/ds-react";
 
-applyProductColor("red");            // 제품 색 팔레트 키(blue · red · cyan · orange · neutral · ai) → --prod-40~60 · data-accent
+applyProductColor("red");            // 제품 색 팔레트 키(blue · red · cyan · navy · orange · neutral · ai) → --prod-40~60 · data-accent
 
 createRoot(document.getElementById("root")!).render(
   <ToastProvider>
@@ -259,6 +260,7 @@ const DS_EVENTS = [
   ["ds:switch", "Switch(응답 뒤 반영)", "{checked, resolve, reject, cancel}"],
   ["ds:date", "Date Picker", "{value, start, end, date, text, validity, sides}"],
   ["ds:time", "Time Picker", "{value, text, validity}"],
+  ["ds:code", "Text Field Code", "{value, complete}"],
   ["ds:validate", "입력 폼(form[data-validate])", "{valid, errors}"],
   ["ds:upload", "File Upload", "{files}"],
   ["ds:upload-retry", "File Upload 다시 시도", "{id, file}"],
@@ -296,7 +298,7 @@ const PAGES = {
 <li><b>색·글자·그림자는 스타일만</b>직접 색을 고르지 말고 채우기의 <b>Variables</b> 탭에서 foreground · background · surface · line · effect · static 변수를 씁니다. 글자는 Text Style, 그림자는 Effect Style 을 씁니다. 이렇게 해야 제품 색과 다크 테마가 자동으로 맞춰집니다.</li>
 </ol>`;
     const react = `<ol class="guide-steps">
-<li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyProductColor</code> 에 제품 색 팔레트 키 하나(파랑 · 빨강 · 시안 · 주황 · 중립 · AI)를 넣으면 나머지 색은 자동입니다.${codeBlock("gs-react-install", REACT_INSTALL, "tsx", "복사")}</li>
+<li><b>패키지 설치 + 앱 진입점 설정</b>스타일시트를 한 번 import 하고, 토스트를 쓰려면 앱을 <code>ToastProvider</code> 로 감쌉니다. <code>applyProductColor</code> 에 제품 색 팔레트 키 하나(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI)를 넣으면 나머지 색은 자동입니다.${codeBlock("gs-react-install", REACT_INSTALL, "tsx", "복사")}</li>
 <li><b>컴포넌트 가져다 쓰기</b>변형은 HTML 클래스와 같은 이름의 prop 입니다. 전체 목록은 <a href="#/resources/react#map">React Package › 컴포넌트 ↔ 클래스</a>.${codeBlock("gs-react-use", GS_REACT_USE, "tsx", "복사")}</li>
 <li><b>테마·서체</b>다크 테마는 <code>html</code> 요소의 <code>data-theme</code> 로 정하고(또는 <code>setTheme("dark")</code>), 앱 루트에 <code>.ds-root</code> 를 붙입니다.${codeBlock("gs-react-theme", GS_REACT_THEME, "html", "복사")}</li>
 </ol>`;
@@ -304,7 +306,7 @@ const PAGES = {
 <li><b>assets 폴더 복사</b><a href="https://github.com/myscully/JSDS" target="_blank" rel="noopener">저장소 ↗</a>의 <code>assets/style.css</code> · <code>assets/ds.js</code> · <code>assets/fonts/</code> 세 가지를 함께 프로젝트에 넣습니다. <code>style.css</code> 가 <code>fonts/PretendardVariable.woff2</code> 를 상대 경로로 참조하므로 폴더 구조를 유지하고, 서버에 <code>.woff2</code> MIME(<code>font/woff2</code>)이 등록돼 있어야 기본 서체로 보이지 않습니다.</li>
 <li><b>HTML 에 연결</b>스타일시트 한 줄, 동작 스크립트 한 줄입니다. <code>ds.js</code> 는 의존성 없는 순수 JS 로 드롭다운·탭·달력·표 정렬·토스트 등을 붙여 주며, <code>defer</code> 로 싣고 나중에 DOM 에 넣은 마크업에는 <code>DS.init(요소)</code> 를 한 번 호출합니다. 다크 테마는 <code>body</code> 가 아니라 <code>html</code> 요소의 <code>data-theme="dark"</code> 로 정합니다.${codeBlock("gs-html-link", GS_HTML_LINK, "html", "복사")}</li>
 <li><b>컴포넌트 페이지에서 복사</b>예제 아래 <b>코드 보기 → 복사</b>. 전체 CSS 대신 일부만 쓰려면 같은 곳의 <b>Component CSS</b> 와 <a href="#/resources/design-token">Design Token</a> 의 <code>:root</code> 토큰만 가져갑니다. 이벤트(<code>ds:select</code> · <code>ds:tab</code> 등)와 API 는 <a href="#/resources/react#dsjs">React Package › assets/ds.js</a>.${codeBlock("gs-html-use", GS_HTML_USE, "html", "복사")}</li>
-<li><b>제품 색 적용</b>팔레트 여섯(파랑 · 빨강 · 시안 · 주황 · 중립 · AI) 중 하나를 고릅니다. 다섯 단계 값은 <a href="#/foundations/colors">Colors › Product color</a> 표에 있고, 적용하는 함수는 <a href="#/resources/design-token#accent-js">Design Token › Product color 적용</a> 에 있습니다. 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다.${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}</li>
+<li><b>제품 색 적용</b>팔레트 일곱(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI) 중 하나를 고릅니다. 다섯 단계 값은 <a href="#/foundations/colors">Colors › Product color</a> 표에 있고, 적용하는 함수는 <a href="#/resources/design-token#accent-js">Design Token › Product color 적용</a> 에 있습니다. 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다.${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}</li>
 </ol>`;
     return `<h1>Getting started${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 뺀 색 · 글자 · 간격 · 컴포넌트 · 패턴을 모두 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
 <p class="t-label-1-reading t-regular">어느 역할이든 각 <a href="#/components/overview">컴포넌트 페이지</a>가 사용법의 단일 출처입니다. 예제로 실제 동작과 상태를, Props 표로 허용되는 변형을, 코드 보기로 HTML+CSS · React 코드를 확인합니다. 필요한 컴포넌트가 없으면 <a href="#/resources/contribution">Contribution</a> 절차로 제안합니다.</p>
@@ -328,7 +330,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
   },
   "home/about": () => `<h1>About</h1><p class="lead">지란지교시큐리티 디자인 시스템은 보안 솔루션 제품군이 공유하는 하나의 UI 언어입니다.</p>
 <h2 id="why">왜 만드나</h2><p>제품마다 메인 컬러가 다르고 출시 시기도 다르지만, 사용자는 같은 회사의 제품을 씁니다. 리뉴얼이나 신규 제품을 시작할 때마다 무채색·서체·간격·컴포넌트를 새로 정하지 않도록, <b>메인 컬러를 제외한 나머지 기본 구성</b>을 이 시스템이 제공합니다.</p>
-<h2 id="how">어떻게 쓰나</h2><dl class="kv"><dt>디자이너</dt><dd>Figma 라이브러리의 컴포넌트를 쓰고, 이 가이드의 예제·Props 로 변형과 상태를 확인합니다</dd><dt>개발자</dt><dd>React 제품은 <a href="#/resources/react">React 패키지</a>를 설치하고 각 페이지의 React 탭 코드를 그대로 씁니다. 그 밖의 제품은 HTML+CSS 탭 코드에 공통 스타일 파일과 동작 스크립트를 함께 씁니다</dd><dt>제품 적용</dt><dd>제품 색 팔레트 여섯(파랑 · 빨강 · 시안 · 주황 · 중립 · AI) 중 하나를 고르면 제품 색을 쓰는 자리가 모두 따라옵니다. 고르지 않으면 파랑입니다</dd></dl>
+<h2 id="how">어떻게 쓰나</h2><dl class="kv"><dt>디자이너</dt><dd>Figma 라이브러리의 컴포넌트를 쓰고, 이 가이드의 예제·Props 로 변형과 상태를 확인합니다</dd><dt>개발자</dt><dd>React 제품은 <a href="#/resources/react">React 패키지</a>를 설치하고 각 페이지의 React 탭 코드를 그대로 씁니다. 그 밖의 제품은 HTML+CSS 탭 코드에 공통 스타일 파일과 동작 스크립트를 함께 씁니다</dd><dt>제품 적용</dt><dd>제품 색 팔레트 일곱(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI) 중 하나를 고르면 제품 색을 쓰는 자리가 모두 따라옵니다. 고르지 않으면 파랑입니다</dd></dl>
 <p>역할별 단계 안내는 <a href="#/home/getting-started">Getting started</a>를 참고하세요.</p>
 <h2 id="scope">범위</h2><dl class="kv"><dt>제공하는 것</dt><dd>중립 램프, 타이포그래피, 간격 · 반경 · 엘리베이션, 아이콘 규칙, 코드가 함께 있는 데스크톱 컴포넌트 ${allPages("components").filter((p) => p.key !== "overview").length}개, 패턴 ${allPages("patterns").filter((p) => p.key !== "overview").length}개, 토큰</dd><dt>제품이 정하는 것</dt><dd>팔레트 중 어느 제품 색을 쓸지. 헤더의 제품 색 메뉴로 팔레트마다 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd>회사 색 #FF7F00 은 팔레트의 주황으로 쓸 수 있습니다. 그 위 흰 글자 대비가 기준에 못 미쳐 예외로 선언되어 있습니다. 이 시스템은 관리자 웹 제품 기준이며, 브랜드 디자인 시스템은 별도로 제작합니다</dd><dt>플랫폼</dt><dd>관리 콘솔인 데스크톱 웹 우선</dd></dl>
 <h2 id="team">운영</h2><p>기획팀 디자인파트가 운영하며, Figma 라이브러리와 이 가이드를 함께 갱신합니다. 제안·기여 절차는 <a href="#/resources/contribution">Contribution</a>을 참고하세요.</p>`,
@@ -342,7 +344,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
     const css = STYLE(); const root = css.slice(css.indexOf(":root{"), css.indexOf("*{box-sizing")).trim();
     return `<h1>Design Token${nb("resources", "design-token")}</h1><p class="lead">이 가이드가 쓰는 토큰 원본(CSS 변수 · Light/Dark)과 Radius · Motion · Accessibility 규칙입니다. 제품 색 팔레트 하나를 고르면 나머지는 그대로 씁니다. 색의 의미와 사용 규칙은 <a href="#/foundations/colors">Foundations › Colors</a> 를 참고하세요.</p>
 <p><button class="btn sm outline assistive" type="button" data-copy="tokencss" data-label="전체 CSS 복사">전체 CSS 복사</button></p>
-<h2 id="layers">Token Layers</h2><dl class="kv"><dt>Primitive</dt><dd><code>--cool-neutral-*</code> <code>--blue-*</code> <code>--red-*</code> <code>--orange-*</code>… 기준 토큰의 Atomic 램프 13개를 값과 번호까지 그대로. 숫자가 클수록 밝습니다. 컴포넌트에서 직접 쓰지 않음 (<a href="#/foundations/colors">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--{그룹}-{하위}-{이름}</code> — 그룹은 <code>foreground</code> · <code>background</code> · <code>surface</code> · <code>line</code> · <code>effect</code> · <code>static</code> 여섯입니다(<code>--foreground-neutral-primary</code> · <code>--surface-brand-heavy</code> · <code>--line-negative-focus</code> …). ${semanticCount()}개이고 Figma 변수 경로와 1:1 입니다. 컴포넌트는 이것만 참조하고, 프리미티브 직접 참조는 빌드가 막습니다 (<a href="#/foundations/colors">Colors › Semantic</a>)</dd><dt>트리 밖</dt><dd><code>--brand-label</code> · <code>--company-mark</code> · <code>--company-mark-subtle</code>, 그리고 탐색형 차트의 <code>--chart-*</code> ${chartCount()}개(한 톤 4 · 계열 6 · 계열 1 의 옅은 · 진한 톤 · 격자 · 축 글자 · 툴팁 면 · 글자). 차트 토큰은 CSS 가 아니라 <code>ds-chart.js</code> 가 계산값으로 읽어 캔버스에 칠합니다 (<a href="#/components/data-visual">Data Visual</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--prod-40~60</code> 다섯 단계를 생성해 주입 → 나머지 토큰은 공통. 면 위 글자가 늘 흰색이라 <b>제품 색 위에서 흰 글자가 4.5 를 넘어야</b> 합니다</dd></dl>
+<h2 id="layers">Token Layers</h2><dl class="kv"><dt>Primitive</dt><dd><code>--cool-neutral-*</code> <code>--blue-*</code> <code>--red-*</code> <code>--orange-*</code>… 기준 토큰의 Atomic 램프 13개를 값과 번호까지 그대로. 숫자가 클수록 밝습니다. 컴포넌트에서 직접 쓰지 않음 (<a href="#/foundations/colors">Colors › Atomic</a>)</dd><dt>Semantic</dt><dd><code>--{그룹}-{하위}-{이름}</code> — 그룹은 <code>foreground</code> · <code>background</code> · <code>surface</code> · <code>line</code> · <code>effect</code> · <code>static</code> 여섯입니다(<code>--foreground-neutral-primary</code> · <code>--surface-brand-heavy</code> · <code>--line-negative-focus</code> …). ${semanticCount()}개이고 Figma 변수 경로와 1:1 입니다. 컴포넌트는 이것만 참조하고, 프리미티브 직접 참조는 빌드가 막습니다 (<a href="#/foundations/colors">Colors › Semantic</a>)</dd><dt>트리 밖</dt><dd><code>--brand-label</code> · <code>--company-mark</code> · <code>--company-mark-subtle</code>, 그리고 탐색형 차트의 <code>--chart-*</code> ${chartCount()}개(한 톤 4 · 계열 6 · 계열 1 의 옅은 · 진한 톤 · 격자 · 축 글자 · 툴팁 면 · 글자). 차트 토큰은 CSS 가 아니라 <code>ds-chart.js</code> 가 계산값으로 읽어 캔버스에 칠합니다 (<a href="#/components/data-visual">Data Visual</a>). 아바타 6색의 <code>--avatar-*</code> ${avatarCount()}개(면 · 이니셜) — 이름에서 정하는 tone 이 고릅니다 (<a href="#/components/avatar">Avatar</a>)</dd><dt>제품 적용</dt><dd>제품 메인 컬러 HEX 하나로 <code>--prod-40~60</code> 다섯 단계를 생성해 주입 → 나머지 토큰은 공통. 면 위 글자가 늘 흰색이라 <b>제품 색 위에서 흰 글자가 4.5 를 넘어야</b> 합니다</dd></dl>
 <h2 id="css">CSS Variables</h2><p>Light 기본값 + Dark 오버라이드(<code>prefers-color-scheme</code> 및 <code>[data-theme="dark"]</code>)를 포함합니다.</p>${codeBlock("tokencss", root, "css", "CSS 복사")}
 <h2 id="radius">Radius</h2><p>역할별로 반경을 정해 두고, 모든 블록에 같은 반경을 찍지 않습니다. 타일을 클릭하면 토큰이 복사됩니다.</p>
 <div class="tiles radius">${RADII().map(([n, v]) => `<div style="border-radius:${v}px" data-copy-text="var(--radius-${n})" title="복사">${n} ${v === 999 ? "" : v}</div>`).join("")}</div>
@@ -357,8 +359,8 @@ ${codeBlock("motion-use", `.btn{transition:background var(--motion-fast),border-
 <h2 id="a11y">Accessibility</h2><p>WCAG 2.1 AA 를 기준으로 합니다.</p>
 <ul><li>텍스트 대비 4.5:1, 대형 텍스트·UI 요소 3:1. 글자색은 <code>--foreground-*</code> 토큰으로 칠하고, 채운 면 위 글자만 <code>--brand-label</code>(Brand 면) · <code>--static-white</code>(Count) 를 씁니다 — 대비는 빌드가 잽니다</li><li>모든 인터랙션 키보드 접근, 포커스 링 항상 표시 — 기본은 <code>:focus-visible</code> 1px <code>--foreground-brand-primary</code> 외곽선(2px 띄움), 값 입력 필드(Text Field · Search · Select · Date Picker)는 테두리 1px <code>--line-field-focus</code> + 바깥 4px <code>--line-field-focus-halo</code> 후광 — 기본은 brand 와 같고 빨강 · 주황 제품은 중립(오류 필드는 <code>--foreground-negative-primary</code> · <code>--line-negative-focus</code>)</li><li>색만으로 상태를 전달하지 않음(태그 라벨, 아이콘 병행)</li><li>클릭 타깃 최소 32px</li><li>동적 알림은 <code>aria-live</code>, 아이콘 전용 버튼은 <code>aria-label</code></li></ul>
 ${codeBlock("a11y-css", `:focus-visible{outline:1px solid var(--foreground-brand-primary);outline-offset:2px}\n.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}`, "css", "CSS 복사")}
-<h2 id="accent-js">Product color 적용 (JS)</h2><p>제품 색은 팔레트 여섯(파랑 · 빨강 · 시안 · 주황 · 중립 · AI) 중 하나의 키로 적용합니다. 키에 따라 <code>--prod-40~60</code> 다섯 단계를 <code>:root</code> 에 넣고 <code>data-accent</code> 를 켭니다 — 중립 램프 · AI 그라데이션 · 빨강 · 주황의 중립 입력 링은 그 속성으로 CSS 가 겁니다. 상태색과 겹쳐도 제품 색을 그대로 씁니다(자동 중립 전환은 2026-11-14 에 걷어냈습니다). <b>제품 색에는 제약이 있습니다</b> — Brand 면 위 글자는 늘 흰색이므로 제품 색 위에서 흰 글자가 <b>4.5</b> 를 넘어야 하고 빌드가 검사합니다(주황은 사람의 결정으로 선언한 예외). 1.0 뒤에는 사용자가 색을 더하는 팔레트를 제공합니다.</p>${codeBlock("accentjs", `// 제품 색 팔레트(1.0 전) — 키 하나로 적용합니다. React 는 applyProductColor("red") 가 같은 일을 합니다
-const PRODUCT_COLORS = { blue: null, red: "#C30D2A", cyan: "#00828B", orange: "#FF7F00", neutral: "neutral", ai: "#6541F2" };
+<h2 id="accent-js">Product color 적용 (JS)</h2><p>제품 색은 팔레트 일곱(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI) 중 하나의 키로 적용합니다. 키에 따라 <code>--prod-40~60</code> 다섯 단계를 <code>:root</code> 에 넣고 <code>data-accent</code> 를 켭니다 — 중립 램프 · AI 그라데이션 · 제품1(빨강) · 브랜드(주황)의 중립 입력 링은 그 속성으로 CSS 가 겁니다. 상태색과 겹쳐도 제품 색을 그대로 씁니다(자동 중립 전환은 2026-11-14 에 걷어냈습니다). <b>제품 색에는 제약이 있습니다</b> — Brand 면 위 글자는 늘 흰색이므로 제품 색 위에서 흰 글자가 <b>4.5</b> 를 넘어야 하고 빌드가 검사합니다(브랜드 주황은 사람의 결정으로 선언한 예외). 1.0 뒤에는 사용자가 색을 더하는 팔레트를 제공합니다.</p>${codeBlock("accentjs", `// 제품 색 팔레트(1.0 전) — 키 하나로 적용합니다. React 는 applyProductColor("red") 가 같은 일을 합니다
+const PRODUCT_COLORS = { blue: null, red: "#C30D2A", cyan: "#00828B", navy: "#10367D", orange: "#FF7F00", neutral: "neutral", ai: "#6541F2" };   // 기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI
 function hexToHsl(hex){const n=parseInt(hex.slice(1),16);const r=((n>>16)&255)/255,g=((n>>8)&255)/255,b=(n&255)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0;const l=(mx+mn)/2;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4;}h/=6;}return [h*360,s*100,l*100];}
 function hslToHex(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12;const a=s*Math.min(l,1-l);const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return "#"+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,"0")).join("").toUpperCase();}
 const lum=h=>{const c=[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255).map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*c[0]+.7152*c[1]+.0722*c[2];};
@@ -366,9 +368,11 @@ const ratio=(a,b)=>{const x=lum(a)+.05,y=lum(b)+.05;return Math.max(x,y)/Math.mi
 const DL={40:-9.0,45:-3.9,50:0,55:5.1,60:10.0}, DARK_BEDS=["#1B1C1E","#212225","#0F0F10"];
 export function accentScale(hex){const [h,s,l]=hexToHsl(hex);const out={};for(const k in DL) out[k]=hslToHex(h,s,Math.max(0,Math.min(100,l+DL[k])));
   for(let d=DL[60];d<=100&&Math.min(...DARK_BEDS.map(b=>ratio(out[60],b)))<4.5;d+=.5) out[60]=hslToHex(h,s,Math.min(100,l+d));   // 다크 글자 단계 보정
-  out[50]=hex.toUpperCase();return out;}
+  out[50]=hex.toUpperCase();let d=out[50];
+  for(let dl=.5;dl<=100&&Math.min(...DARK_BEDS.map(b=>ratio(d,b)))<1.5;dl+=.5) d=hslToHex(h,s,Math.min(100,l+dl));   // 다크 면 단계 보정(어두운 제품만)
+  if(d!==out[50]) out["50d"]=d;return out;}
 export function applyProductColor(key,root=document.documentElement){
-  for(const k in DL) root.style.removeProperty("--prod-"+k);
+  for(const k of [...Object.keys(DL),"50d"]) root.style.removeProperty("--prod-"+k);
   const v=PRODUCT_COLORS[key];
   if(!v){root.removeAttribute("data-accent");return;}                  // 파랑 = 기본 토큰 값
   if(v!=="neutral"){const sc=accentScale(v);for(const k in sc) root.style.setProperty("--prod-"+k,sc[k]);}

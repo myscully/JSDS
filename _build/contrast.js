@@ -56,7 +56,7 @@ function parse(s) {
   return null;
 }
 
-/* 맥락 = 라이트 · 다크 × 제품 색 팔레트 여섯(data.js PRODUCTS — 2026-11-14 부터. 그 전에는 기본 · 다른 제품 · 상태색과 겹치는 제품 셋).
+/* 맥락 = 라이트 · 다크 × 제품 색 팔레트 일곱(data.js PRODUCTS — 2026-11-14 · 11-17 제품3 부터. 그 전에는 기본 · 다른 제품 · 상태색과 겹치는 제품 셋).
    팔레트의 exception(주황 — 사람의 결정)은 그 맥락에서 brand 가 낀 쌍의 미달을 advisory 로 내린다 — 이유는 data.js 의 문장 그대로 */
 const PRODUCTS = require("./data.js").PRODUCTS;
 const CONTEXTS = ["light", "dark"].flatMap((theme) => PRODUCTS.map((p) => ({

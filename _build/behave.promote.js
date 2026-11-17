@@ -74,8 +74,8 @@ module.exports = async function promote({ page, ok, go }) {
 
     /* ── Form ── */
     await go("components/form.html");
-    const sum = await page.locator("#ex-form-summary form").evaluate((f) => { const s = f.firstElementChild, n = s.nextElementSibling; return { sum: s.hasAttribute("data-form-summary"), role: s.getAttribute("role"), gap: Math.round(n.getBoundingClientRect().top - s.getBoundingClientRect().bottom) }; });
-    ok("the error summary is first in the form with a 16 gap below", sum.sum && sum.role === "alert" && sum.gap === 16, JSON.stringify(sum));
+    const sum = await page.locator("#ex-form-error form").evaluate((f) => ({ first: f.firstElementChild.className, errs: f.querySelectorAll(".field.error").length, box: f.querySelectorAll(".notice, [data-form-summary], .form-summary").length }));
+    ok("server errors sit under their fields — no summary box above the form (2026-11-16)", sum.first === "field error" && sum.errs === 3 && sum.box === 0, JSON.stringify(sum));
     const rowInfo = await page.locator("#ex-form-default .form-row").evaluate((r) => { const [a, c] = [...r.children].map((x) => x.getBoundingClientRect()); return { same: Math.abs(a.width - c.width) < 0.5, gap: Math.round(c.left - a.right), top: a.top === c.top }; });
     ok("form-row is two equal columns 16 apart", rowInfo.same && rowInfo.gap === 16 && rowInfo.top, JSON.stringify(rowInfo));
     const acts = await page.locator("#ex-form-actions form").evaluate((f) => { const fr = f.getBoundingClientRect(), p = parseFloat(getComputedStyle(f).paddingLeft), b = [...f.querySelectorAll(".form-actions .btn")].map((x) => x.getBoundingClientRect()), a = f.querySelector(".form-actions"); return { l: Math.round(b[0].left - fr.left - p - 1), r: Math.round(fr.right - b[2].right - p - 1), gap: Math.round(b[2].left - b[1].right), last: f.lastElementChild === a, solid: f.querySelectorAll(".form-actions .solid.primary").length }; });
@@ -85,7 +85,7 @@ module.exports = async function promote({ page, ok, go }) {
     await go("patterns/input-form.html");
     const vf = page.locator("#ex-input-form-validate form");
     await vf.locator('button[type="submit"]').evaluate((b) => b.click()); await wait(60);
-    const auto = await vf.evaluate((f) => { const s = f.firstElementChild, n = s.nextElementSibling; return { cls: s.className, style: s.getAttribute("style"), gap: Math.round(n.getBoundingClientRect().top - s.getBoundingClientRect().bottom) }; });
-    ok("the automatic summary uses the same .form-summary look", /\bform-summary\b/.test(auto.cls) && !auto.style && auto.gap === 16, JSON.stringify(auto));
+    const auto = await vf.evaluate((f) => ({ first: f.firstElementChild.className, errs: f.querySelectorAll(".field.error").length, box: f.querySelectorAll(":scope > .notice, [data-form-summary], .form-summary").length }));
+    ok("submitting the empty form adds no summary — field errors only (2026-11-16)", auto.first === "form-legend" && auto.errs >= 3 && auto.box === 0, JSON.stringify(auto));
   });
 };

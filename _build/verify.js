@@ -170,6 +170,11 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (main && !title.includes(text(main[1]).replace(/^다시 /, ""))) fails.push(`${f}: Popup 주 버튼 "${text(main[1])}" 이 제목 "${title}" 의 동작이 아니다(Popup › 주 버튼)`);
         if (danger && acts.indexOf("data-popup-close") > acts.indexOf("negative")) fails.push(`${f}: 위험 확인은 취소가 위험 실행 버튼보다 앞(Popup › 첫 포커스)`);
       }
+      /* Negative(빨강) 버튼은 위험 확인 팝업의 확정 버튼에만(사람의 결정 2026-11-16) — 화면의 삭제는 Assistive. Button 페이지는 색 자체를 보이는 곳이라 뺀다 */
+      if (k !== "button") {
+        const outside = pv.replace(/<div class="popup danger[^"]*"[^>]*role="alertdialog"[^>]*>[\s\S]*?<div class="popup-actions">[\s\S]*?<\/div>/g, "");
+        for (const m of outside.matchAll(/<(?:button|a)\b[^>]*class="(?=[^"]*\bbtn\b)[^"]*\bnegative\b[^"]*"[^>]*>([\s\S]*?)<\/(?:button|a)>/g)) fails.push(`${f}: 위험 확인 팝업 밖의 Negative 버튼 "${text(m[1].replace(/<svg[\s\S]*?<\/svg>/g, "")) || "아이콘"}" — 화면의 삭제는 Assistive(Button › 삭제와 Negative)`);
+      }
       for (const m of pv.matchAll(/<section class="side-panel[^"]*"[^>]*>([\s\S]*?)<\/section>/g)) {
         if (!/role="dialog"/.test(m[0].slice(0, m[0].indexOf(">"))) || !/aria-labelledby="/.test(m[0].slice(0, m[0].indexOf(">")))) fails.push(`${f}: Side Panel 은 role=dialog + aria-labelledby`);
         if (!/class="[^"]*\bside-panel-close\b[^"]*"[^>]*aria-label="/.test(m[1])) fails.push(`${f}: Side Panel 에 이름 있는 닫기(X)가 없다(Side Panel › 닫기)`);
@@ -225,6 +230,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (!/role="listbox"/.test(m[1])) fails.push(`${f}: role=option 은 listbox 안에서만(List › listbox)`);
         for (const li of m[2].matchAll(/<li\b([^>]*)>([\s\S]*?)<\/li>/g)) { if (!/tabindex="0"/.test(li[1])) fails.push(`${f}: 고르는 목록의 항목은 tabindex=0(List › listbox)`); if (/<(a|button)\b/.test(li[2])) fails.push(`${f}: listbox 항목 안에 버튼 · 링크(List › listbox)`); }
       }
+      if (/class="pagination(?:\s[\w-]+)*\s+outline[\s"]/.test(pv)) fails.push(`${f}: Pagination 은 기본이 outline — .outline 을 붙이지 않는다(면 없는 모양은 .ghost, 2026-11-16)`);
       for (const m of pv.matchAll(/<nav class="pagination(?! cursor)[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) { const slots = [...m[1].matchAll(/<button\b(?![^>]*aria-label)/g)].length + [...m[1].matchAll(/class="gap"/g)].length; if (slots > 9) fails.push(`${f}: Pagination 번호 칸 ${slots}개 — 9칸 이하(Pagination › 번호 칸)`); }
       if (/\bdata-single\b/.test(pv)) fails.push(`${f}: Tile 은 다중 선택 — 하나만 고르면 Card Radio(Item Tile › 선택의 뜻)`);
       /* Date Picker 기간 상한 · Breadcrumb 잘림 · 차트 표로 보기(2026-11-10) */
@@ -456,6 +462,14 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (/target="_blank"/.test(m[2]) && (!/rel="[^"]*noopener/.test(m[2]) || !/<svg/.test(m[3]) || !/class="sr-only"/.test(m[3]))) fails.push(`${f}: 새 창 링크는 rel · 아이콘 · 숨긴 문구(Link › 새 창)`);
       }
       for (const m of pv.matchAll(/<span class="avatar(?: sm)?"[^>]*>([^<]*)<\/span>/g)) if ([...m[1].trim()].length < 1 || [...m[1].trim()].length > 2) fails.push(`${f}: Avatar 이니셜은 1~2자 "${m[1]}"`);
+      /* Avatar 색(2026-11-16) — 예제의 아바타마다 data-tone 1~6, 값은 이름(data-name → aria-label → 글자)에서 정한 것과 같다.
+         식은 ds.src.js · render.js · React avatarTone 과 같다(React 테스트가 셋을 대조) */
+      const avTone = (n) => { let h = 0; for (const ch of String(n || "").trim()) h = (Math.imul(h, 31) + ch.codePointAt(0)) >>> 0; return h % 6 + 1; };
+      for (const m of pv.matchAll(/<span class="avatar(?: sm)?"([^>]*)>([^<]*)<\/span>/g)) {
+        const tone = (/\sdata-tone="([^"]*)"/.exec(m[1]) || [])[1], name = (/data-name="([^"]*)"/.exec(m[1]) || /aria-label="([^"]*)"/.exec(m[1]) || [])[1] || m[2];
+        if (!/^[1-6]$/.test(tone || "")) fails.push(`${f}: Avatar 에 data-tone 1~6 이 없다 "${m[2]}"(Avatar › 색)`);
+        else if (+tone !== avTone(name)) fails.push(`${f}: Avatar data-tone ${tone} ≠ 이름 "${name}" 의 tone ${avTone(name)}(Avatar › 색)`);
+      }
       /* Avatar Group(2026-11-13) — role=group + 이름, 아바타 5개까지 · 아바타마다 role=img + 이름, '외 N명' 은 맨 뒤(버튼이면 이름에 그 글자) */
       const groups = [...pv.matchAll(/<span class="avatar-group"([^>]*)>((?:\s|<span class="avatar(?:-group-more| sm)?"[^>]*>[^<]*<\/span>|<button\b[^>]*>[^<]*<\/button>)*)<\/span>/g)];
       if (groups.length !== (pv.match(/<span class="avatar-group"/g) || []).length) fails.push(`${f}: .avatar-group 의 자식은 .avatar 와 맨 뒤 '외 N명' 뿐이다`);
@@ -480,11 +494,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       });
       each(/<div class="form-row"[^>]*>/g, (b) => { const n = (b.match(/class="(?:[\w-]+ )*field[ "]/g) || []).length; if (n !== 2) fails.push(`${f}: .form-row 는 필드 2개(${n}개)`); });
       for (const m of pv.matchAll(/<form\b[^>]*>([\s\S]*?)<\/form>/g)) {
-        const s = m[1].indexOf("data-form-summary");
-        if (s > -1) {
-          if (!/^\s*<div class="notice danger form-summary" role="alert" data-form-summary/.test(m[1])) fails.push(`${f}: 오류 요약은 폼 맨 위 · role=alert(Form › 오류 요약)`);
-          const c = /입력값 (\d+)개/.exec(m[1]); if (c && +c[1] < 3) fails.push(`${f}: 오류 요약은 3개 이상일 때(Form › 오류 요약)`);
-        }
+        /* 폼 위 오류 요약은 없앴다(사람의 결정 2026-11-16) — 오류는 필드 아래에, 필드에 붙일 수 없으면 Toast */
+        if (/data-form-summary|\bform-summary\b/.test(m[1])) fails.push(`${f}: 폼 위 오류 요약은 쓰지 않는다(Form › 서버 오류)`);
         const fa = m[1].lastIndexOf('<div class="form-actions"');
         if (fa > -1 && m[1].slice(fa + blockAt(m.index + m[0].indexOf(">") + 1 + fa).length).trim()) fails.push(`${f}: .form-actions 는 폼 맨 아래(Form › 동작)`);
       }
@@ -771,7 +782,7 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
       fails.push(`${m[1].trim()} 이 hover 에 --background-neutral-secondary 를 쓴다 — 상호작용 면은 틴트 쌍(--surface-neutral-secondary → -strong)이어야 다크에서 방향이 뒤집히지 않는다`);
 }
 
-/* 제품 색 팔레트(data.js PRODUCTS — 2026-11-14 사람의 결정: 파랑 · 빨강 · 시안 · 주황 · 중립 · AI).
+/* 제품 색 팔레트(data.js PRODUCTS — 2026-11-14 사람의 결정 · 2026-11-17 이름 기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI, 제품3 navy #10367D 추가).
    ① 제약 — Brand 면 위 글자(--brand-label)는 늘 흰색이므로 제품 색이 그 흰 글자를 받쳐야 한다(4.5). 기준은 제품 HEX 자체(brand-50)이고
       다크 rest 도 같은 단계라 이 검사 하나가 두 테마의 rest 를 받친다. AI 는 그라데이션 끝마다 잰다(주 버튼 · Banner 의 흰 글자가 그 위에 선다).
       못 넘는 색은 exception 에 이유가 있어야 한다(주황 — 사람의 결정). 이유 없는 미달은 빌드를 막는다.
@@ -784,13 +795,15 @@ for (const f of walk(OUT).filter(f => f.endsWith(".html"))) {
   const src = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8");
   const ramp = (n) => { const m = new RegExp("--" + n + ":(#[0-9A-Fa-f]{6})").exec(src); return m ? m[1] : null; };
   const PR = DATA.PRODUCTS;
-  const KEYS = ["blue", "red", "cyan", "orange", "neutral", "ai"];
-  if (PR.map((p) => p.key).join() !== KEYS.join()) fails.push(`data.js PRODUCTS 의 키가 팔레트와 다르다 — ${PR.map((p) => p.key).join(" · ")} (사람의 결정 2026-11-14: ${KEYS.join(" · ")}). 바꾸려면 사람에게 묻고 이 목록 · React PRODUCT_COLORS 를 함께 고친다`);
+  const KEYS = ["blue", "red", "cyan", "navy", "orange", "neutral", "ai"];
+  if (PR.map((p) => p.key).join() !== KEYS.join()) fails.push(`data.js PRODUCTS 의 키가 팔레트와 다르다 — ${PR.map((p) => p.key).join(" · ")} (사람의 결정 2026-11-14 · 11-17: ${KEYS.join(" · ")}). 바꾸려면 사람에게 묻고 이 목록 · React PRODUCT_COLORS 를 함께 고친다`);
   const KINDS = ["base", "ramp", "neutral", "ai"];
   for (const p of PR) {
     if (!KINDS.includes(p.kind)) { fails.push(`제품 색 ${p.key}: kind "${p.kind}" 는 ${KINDS.join(" · ")} 중 하나여야 한다`); continue; }
     if (!/^#[0-9A-F]{6}$/.test(p.hex || "")) fails.push(`제품 색 ${p.key}: hex 는 대문자 #RRGGBB 여야 한다 — "${p.hex}"`);
-    if (!p.name || !p.group) fails.push(`제품 색 ${p.key}: name · group(팝오버 · Colors 의 갈래)이 없다`);
+    if (!p.name) fails.push(`제품 색 ${p.key}: name(메뉴 · Colors 표의 이름)이 없다`);
+    if (p.group !== undefined) fails.push(`제품 색 ${p.key}: group(갈래)은 2026-11-17 에 뺐다 — 메뉴 · Colors 표는 이름만 보인다`);
+    if (PR.filter((q) => q.name === p.name).length > 1) fails.push(`제품 색 이름 '${p.name}' 이 둘 이상이다`);
     if (p.exception !== undefined && !(typeof p.exception === "string" && p.exception.trim().length >= 10)) fails.push(`제품 색 ${p.key}: exception 은 이유 문장이어야 한다 — 비운 예외는 선언이 아니다`);
     if (p.kind === "neutral") continue;   // 중립은 CSS 블록이 고른 단계라 아래 contrast 맥락이 잰다
     const stops = [["hex", p.hex]];
@@ -939,7 +952,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 토큰
   }
   /* 반대 방향 — 의미 토큰 전수가 Colors 페이지에 스와치로 나와야 한다.
      4차에서 절을 채워 가며 0 으로 만든다. 그때 fails 로 승격한다 */
-  const isPrim = (k) => /^--(cool-neutral|neutral|brand|blue|green|orange|red|lime|cyan|light-blue|violet|purple|pink|red-orange|prod)-\d+$/.test(k);
+  const isPrim = (k) => /^--(cool-neutral|neutral|brand|blue|green|orange|red|lime|cyan|light-blue|violet|purple|pink|red-orange|prod)-\d+d?$/.test(k);   // d — 다크 면 단계 --brand-50d(2026-11-17)
   const isScalar = (k) => /^--(space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row|code)-/.test(k) || /^--static-/.test(k) || k === "--brand-label" || k === "--company-mark" || k === "--company-mark-subtle";
   const orphan = [...declared].filter((t) => !isPrim(t) && !isScalar(t) && !pointed.has(t)).sort();
   if (orphan.length) warns.push(`Colors 페이지에 스와치가 없는 의미 토큰 ${orphan.length}개 — ${orphan.slice(0, 6).join(" ")}${orphan.length > 6 ? " …" : ""}`);

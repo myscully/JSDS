@@ -49,18 +49,19 @@ window.FOUNDATION_PAGES = function (H) {
       const val = g ? `<code>${p.hex}</code> · 그라데이션 <code>${g[0]}</code> → <code>${g[1]}</code>` : `<code>${p.hex}</code>`;
       const ratio = p.kind === "neutral" ? "라이트 " + white(p.hex) + " · 다크는 어두운 글자" : g ? `${white(p.hex)} · 끝 ${white(g[0])} · ${white(g[1])}` : white(p.hex);
       const notes = [NOTE[p.kind], p.neutralFocus ? "입력 필드 포커스 링은 중립" : "", p.exception ? `<b>예외</b> — ${p.exception}` : ""].filter(Boolean).join(". ");
-      return [`<span class="pc-sw" style="background:${swatch}"></span>${p.group}`, `<b>${p.name}</b>`, val, ratio, notes,
+      return [`<span class="pc-sw" style="background:${swatch}"></span><b>${p.name}</b>`, val, ratio, notes,
         `<button type="button" class="btn sm outline assistive" data-accent="${p.kind === "base" ? "" : p.key}" aria-label="${p.name} 적용">적용</button>`];
     });
     return `<h2 id="product-color">Product color</h2>
-<p>제품 색은 아래 팔레트에서 하나를 고릅니다. 고른 색이 <code>--prod-40~60</code> 다섯 단계로 들어가 brand 토큰을 쓰는 곳 — 저장 · 설정 · 추가 같은 주 버튼, 링크, 내비게이션의 선택, 탭, 체크박스 · 라디오 · 스위치, 포커스 링 — 이 모두 그 색으로 바뀝니다. 1.0 전에는 제공된 여섯 가지만 쓰고, <b>1.0 뒤에는 사용자가 색을 더하거나 고칠 수 있는 팔레트</b>를 제공합니다.</p>
-${tbl(["갈래", "이름", "값", "흰 글자 대비", "적용", "미리보기"], rows, "product-colors")}
+<p>제품 색은 아래 팔레트에서 하나를 고릅니다. 고른 색이 <code>--prod-40~60</code> 다섯 단계로 들어가 brand 토큰을 쓰는 곳 — 저장 · 설정 · 추가 같은 주 버튼, 링크, 내비게이션의 선택, 탭, 체크박스 · 라디오 · 스위치, 포커스 링 — 이 모두 그 색으로 바뀝니다. 1.0 전에는 제공된 일곱 가지만 쓰고, <b>1.0 뒤에는 사용자가 색을 더하거나 고칠 수 있는 팔레트</b>를 제공합니다.</p>
+${tbl(["이름", "값", "흰 글자 대비", "설명", "적용"], rows, "product-colors")}
 <ul class="bullets">
 <li><b>상태색과 겹쳐도 제품 색 그대로</b> — 예전에는 제품 색이 상태색과 색상환 15° 안이면 자동으로 중립으로 바꿨습니다. 제품의 독립성을 위해 걷어냈고, 중립은 팔레트에서 고릅니다.</li>
-<li><b>삭제 버튼은 모든 제품에서 중립</b> — <code>.btn.negative</code> 는 Assistive 와 같은 색입니다. 빨강 제품의 주 버튼과 헷갈리지 않게 합니다. 빨강은 위험 확인 팝업의 제목 · 메뉴의 위험 항목 글자에만 남습니다.</li>
-<li><b>빨강 · 주황 제품의 입력 포커스 링은 중립</b> — 오류 링(빨강) · 경고색(주황)과 헷갈리지 않게 합니다. 체크박스 · 버튼의 포커스 외곽선은 제품 색 그대로입니다.</li>
-<li><b>흰 글자 4.5</b> — Brand 면의 글자는 늘 흰색이라 제품 색이 그 흰 글자를 받쳐야 하고 빌드가 검사합니다. 넘지 못하는 색은 사람의 결정으로 이유를 선언해야 합니다(주황).</li>
+<li><b>화면의 삭제 버튼은 Assistive</b> — 빨강 Negative 버튼은 위험 확인 팝업에서 되돌릴 수 없는 일을 확정하는 버튼에만 씁니다. 빨강 제품(제품1)에서도 주 버튼과 빨강 확정 버튼이 한 화면에 함께 놓이지 않습니다.</li>
+<li><b>제품1(빨강) · 브랜드(주황)의 입력 포커스 링은 중립</b> — 오류 링(빨강) · 경고색(주황)과 헷갈리지 않게 합니다. 체크박스 · 버튼의 포커스 외곽선은 제품 색 그대로입니다.</li>
+<li><b>흰 글자 4.5</b> — Brand 면의 글자는 늘 흰색이라 제품 색이 그 흰 글자를 받쳐야 하고 빌드가 검사합니다. 넘지 못하는 색은 사람의 결정으로 이유를 선언해야 합니다(브랜드 주황).</li>
 <li><b>다크 글자 단계는 자동으로 밝힘</b> — 다크의 brand 글자(60 단계)가 어두운 바탕 셋 위 4.5 를 넘을 때까지 밝힙니다. 채도 높은 빨강 · 보라가 여기에 걸립니다.</li>
+<li><b>다크 주 면도 자동으로 밝힘</b> — 다크에서 주 버튼 같은 채운 제품 면이 어두운 바탕 셋과 구분되지 않으면, 구분될 때까지 그 면만 밝힙니다. 어두운 남색인 제품3이 여기에 걸리고, 라이트에서는 제품 색 그대로입니다.</li>
 </ul>`;
   }
   /* o.h3 — 상위 h2 아래 묶이는 절(Theme 의 구성원들). 포함 관계가 ToC 에 드러나야 한다 */
@@ -146,7 +147,7 @@ ${dodont(form("", '<div class="help">정책 이름을 입력하세요.</div>'), 
 <h2 id="input-errors">Input errors</h2><p>오류 문구를 쓰는 법은 <a href="#/foundations/writing">Writing</a> 에 있습니다. 여기서는 언제 보여 주고 언제 지우는지를 정합니다.</p>
 ${rules([
   ["포커스가 떠날 때 필드 단위로 검증합니다. 건드리지 않은 빈 필드는 제출할 때 알립니다", `적용 — <a href="#/patterns/input-form">입력 폼</a>처럼 검증을 켠 폼`],
-  ["제출하면 첫 오류로 스크롤하고, 오류가 3개 이상이면 폼 위에 요약합니다", "적용"],
+  ["제출하면 첫 오류로 스크롤합니다. 오류를 폼 위에 모아 요약하지 않습니다", "적용"],
   ["입력을 고치면 오류를 바로 지웁니다", "적용"],
   ["오류가 나도 입력값을 지우지 않습니다", "적용"],
   ["오류 문구는 나타날 때 스크린 리더가 읽어 줍니다", "적용 — 검증을 켠 폼과 글자 수 한도가 있는 필드"],
@@ -230,7 +231,7 @@ ${sem("sf-brand", "Surface - Brand", "화면 내에서 가장 중요한 요소�
 ${sem("sf-brand-gradient", "Surface - Brand Gradient", "AI 제품의 주 버튼과 Banner 처럼 넓은 브랜드 면에만 칠하는 그라데이션입니다. 다른 제품에는 그라데이션이 없고 Surface - Brand 단색을 씁니다. 견본은 AI 제품의 값을 보여 주고, 값 보기에는 지금 고른 제품의 값이 나옵니다.", [["Rest", "--surface-brand-gradient"], ["Strong", "--surface-brand-gradient-strong"], ["Heavy", "--surface-brand-gradient-heavy"]], { h3: true, preview: (t) => ({ "--surface-brand-gradient": "linear-gradient(90deg,var(--purple-40),var(--violet-45))", "--surface-brand-gradient-strong": "linear-gradient(90deg,var(--purple-30),var(--violet-40))", "--surface-brand-gradient-heavy": "linear-gradient(90deg,var(--purple-30),var(--violet-30))" })[t] })}
 ${sem("sf-positive", "Surface - Positive", "긍정적인 상태를 배경으로 표현할 때 사용합니다.", [["Primary", "--surface-positive-primary"]], { alpha: true })}
 ${sem("sf-cautionary", "Surface - Cautionary", "주의가 필요한 상태를 배경으로 표현할 때 사용합니다.", [["Primary", "--surface-cautionary-primary"]], { alpha: true })}
-${sem("sf-negative", "Surface - Negative", "부정적인 상태나 오류를 배경으로 표현할 때 사용합니다. 더 강한 강조가 필요한 경우 Strong을 사용합니다. Heavy · Hover · Pressed 는 지금 쓰는 컴포넌트가 없습니다. 삭제 버튼은 모든 제품에서 중립색입니다.", [["Primary", "--surface-negative-primary"], ["Strong", "--surface-negative-strong"], ["Heavy", "--surface-negative-heavy"], ["Hover", "--surface-negative-hover"], ["Pressed", "--surface-negative-pressed"]], { alpha: true })}
+${sem("sf-negative", "Surface - Negative", "부정적인 상태나 오류를 배경으로 표현할 때 사용합니다. 더 강한 강조가 필요한 경우 Strong을 사용합니다. Heavy · Hover · Pressed 는 Negative 버튼의 눌림과 hover 에 씁니다.", [["Primary", "--surface-negative-primary"], ["Strong", "--surface-negative-strong"], ["Heavy", "--surface-negative-heavy"], ["Hover", "--surface-negative-hover"], ["Pressed", "--surface-negative-pressed"]], { alpha: true })}
 ${sem("sf-disable", "Surface - Disable", "상호작용이 불가능한 비활성 상태의 표면에 사용합니다.", [["Primary", "--surface-disable-primary"]])}
 ${sem("sf-accent", "Surface - Accent", "시각적 대비를 명확하게 유지하기 위해 배경과 같은 뒤쪽 요소에 사용하는 색상입니다. Opaque는 투명도가 없는 색상으로 표면이 겹치는 경우 사용합니다.", A.flatMap(n => [[n, `--surface-accent-${akey(n)}`], [`${n} Opaque`, `--surface-accent-${akey(n)}-opaque`]]), { alpha: true })}
 ${sem("ln-neutral", "Line - Neutral", "Divider, Border 등 요소 간의 구분이 필요한 경우 사용합니다. 투명 값이 포함된 색상으로 라인이 중첩되는 경우 투명도가 없는 Opaque를 사용하여 중첩을 방지합니다.", [["Primary", "--line-neutral-primary"], ["Primary Opaque", "--line-neutral-primary-opaque"], ["Secondary", "--line-neutral-secondary"], ["Secondary Opaque", "--line-neutral-secondary-opaque"], ["Tertiary", "--line-neutral-tertiary"], ["Tertiary Opaque", "--line-neutral-tertiary-opaque"]], { alpha: true })}
@@ -244,12 +245,13 @@ ${sem("ef-dimmer", "Effect - Dimmer", "모달과 같이 층위가 생길 때 배
 ${sem("ef-transparent", "Effect - Transparent", "Chrome 효과를 적용할 때 사용하는 투명도가 포함 된 배경 색상입니다.", [["Primary", "--effect-transparent-primary"], ["Secondary", "--effect-transparent-secondary"]], { alpha: true })}
 ${sem("static", "Static", "Light, Dark 테마에 상관없이 고정된 고유 색으로 테마가 변경되더라도 색상을 유지하여 해당 요소에 대비를 줄 때 사용합니다.", [["White", "--static-white"], ["Black", "--static-black"]])}
 ${sem("chart", "Chart", "탐색형 차트와 정적 요약의 계열 · 격자 · 축 · 툴팁 색입니다. <b>기본은 한 톤</b>입니다. Mono 1~4 는 진한 쪽부터 옅은 쪽으로 가는 고정 파랑 명도 단계이고, 계열 수에 맞춰 단계를 골라 씁니다. 순서 없는 범주가 5개 이상이면 계열 1~6 을 씁니다. 계열 1~6 은 <b>순서가 고정</b>이고 제품 색과 무관하며, 라이트와 다크 각각에서 색각 이상으로도 갈리도록 고른 단계입니다. 상태색과 같은 단계는 피했습니다. 심각도 5단계는 Foreground 의 Negative Strong · Cautionary · Accent Light Blue · Accent Lime · Inactive 를 그대로 씁니다. 차트 토큰은 토큰 트리 밖에 두며, 쓰는 법은 <a href=\"#/components/data-visual\">Data Visual</a> 에 있습니다.", [["Mono 1", "--chart-mono-1"], ["Mono 2", "--chart-mono-2"], ["Mono 3", "--chart-mono-3"], ["Mono 4", "--chart-mono-4"], ["Series 1", "--chart-series-1"], ["Series 2", "--chart-series-2"], ["Series 3", "--chart-series-3"], ["Series 4", "--chart-series-4"], ["Series 5", "--chart-series-5"], ["Series 6", "--chart-series-6"], ["Series 1 subtle", "--chart-series-1-subtle"], ["Series 1 strong", "--chart-series-1-strong"], ["Grid", "--chart-grid-primary"], ["Axis text", "--chart-axis-text"], ["Tooltip surface", "--chart-tooltip-surface"], ["Tooltip text", "--chart-tooltip-text"]])}
+${sem("avatar", "Avatar", "아바타 이니셜의 면과 글자 색입니다. 사람의 이름으로 여섯 색 중 하나가 정해져, 같은 사람은 어느 화면에서나 같은 색입니다. 색은 사람을 가르는 데만 쓰고 뜻이 없습니다. 상태로 읽히지 않도록 빨강 · 주황 · 초록은 쓰지 않습니다. 토큰 트리 밖에 두며, 쓰는 법은 <a href=\"#/components/avatar\">Avatar</a> 에 있습니다.", [["1 파랑 면", "--avatar-1-surface"], ["1 파랑 글자", "--avatar-1-text"], ["2 시안 면", "--avatar-2-surface"], ["2 시안 글자", "--avatar-2-text"], ["3 라임 면", "--avatar-3-surface"], ["3 라임 글자", "--avatar-3-text"], ["4 바이올렛 면", "--avatar-4-surface"], ["4 바이올렛 글자", "--avatar-4-text"], ["5 퍼플 면", "--avatar-5-surface"], ["5 퍼플 글자", "--avatar-5-text"], ["6 핑크 면", "--avatar-6-surface"], ["6 핑크 글자", "--avatar-6-text"]])}
 ${sem("company", "Brand Mark", "지란지교시큐리티 브랜드 색입니다. 기준 토큰의 Brand 는 제품 색이라 회사 정체성을 표기할 자리가 없어, 토큰 트리 밖에 따로 둡니다. 로고·헤더 마크에만 쓰고 제품 UI 의 Brand 로 쓰지 않습니다.", [["Mark", "--company-mark"], ["Subtle", "--company-mark-subtle"]])}
 ${productColor()}
 <h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>Product Brand</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand Mark</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다.</p>
 ${tbl(["축", "쓰는 곳", "쓰지 않는 곳"], [
-  ["<b>Product Brand</b>", "화면당 하나인 주요 행동 버튼, 링크, 활성·선택 상태, 포커스 링. 빨강 · 주황 제품의 입력 필드 링은 중립", "위험도나 처리 결과 표현, 삭제 버튼, 넓은 면의 장식 배경, 로고"],
-  ["<b>Status</b>", "성공·실패·검토 대기 알림, 입력 검증 오류, 위험 확인 팝업의 제목 · 메뉴의 위험 항목 글자", "탐색·선택 상태, 브랜드 강조, 삭제 버튼. 삭제 버튼은 모든 제품에서 중립"],
+  ["<b>Product Brand</b>", "화면당 하나인 주요 행동 버튼, 링크, 활성·선택 상태, 포커스 링. 제품1(빨강) · 브랜드(주황)의 입력 필드 링은 중립", "위험도나 처리 결과 표현, 삭제 버튼, 넓은 면의 장식 배경, 로고"],
+  ["<b>Status</b>", "성공·실패·검토 대기 알림, 입력 검증 오류, 위험 확인 팝업의 제목과 확정 버튼, 메뉴의 위험 항목 글자", "탐색·선택 상태, 브랜드 강조, 화면의 삭제 버튼. 화면의 삭제 버튼은 Assistive"],
   ["<b>Severity</b>", "위협·이벤트 등급 태그, 점·밴드, 표 행 강조, 대시보드 KPI. 항상 Critical 같은 등급 라벨을 병기", "버튼·링크, 일반 처리 결과, 색만 있는 점·배경, 한 칸에 Status 와 함께"],
   ["<b>Brand Mark</b>", "로고 · 헤더 마크, 로그인 · 온보딩의 회사 정체성 표기", "위험도 · 상태. 같은 #FF7F00 을 제품 색으로 쓰려면 팔레트의 '주황'을 고르고, 마크 토큰을 제품 UI 에 직접 쓰지 않습니다"],
   ["<b>Neutral</b>", "화면 바탕, 텍스트, 구분선, 비활성 상태. 정보 밀도가 높은 콘솔의 기본 색", "강조. 회색 톤 차이만으로 상태나 등급을 표현"]

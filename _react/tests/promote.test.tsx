@@ -74,31 +74,20 @@ describe("PageHead", () => {
   });
 });
 
-describe("ErrorSummary", () => {
-  it("기본 제목은 항목 수, 항목은 쉼표로 잇는다", () => {
-    const { container } = render(<ErrorSummary items={["이름", "IP", "기간"]} />);
-    const s = screen.getByRole("alert");
-    expect(s.className).toContain("form-summary");
-    expect(s.hasAttribute("data-form-summary")).toBe(true);
-    expect(container.querySelector("b")?.textContent).toBe("입력값 3개를 확인하세요");
-    expect(s.textContent).toContain("이름, IP, 기간");
-  });
-  it("count · title 을 바꿀 수 있다", () => {
-    const { container, rerender } = render(<ErrorSummary items={["이름", "IP"]} count={5} />);
-    expect(container.querySelector("b")?.textContent).toBe("입력값 5개를 확인하세요");
-    rerender(<ErrorSummary items={["이름", "IP", "기간"]} title="저장하지 못했습니다" />);
-    expect(container.querySelector("b")?.textContent).toBe("저장하지 못했습니다");
-  });
-  it("3개 미만이면 경고, 3개면 경고하지 않는다", () => {
+describe("ErrorSummary — 없어짐(사람의 결정 2026-11-16)", () => {
+  it("한 번 경고하고 위험 Notice 로 그린다 — 요약 클래스 · 표식 없음", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const { rerender } = render(<ErrorSummary items={["이름", "IP"]} />);
+    const { container, rerender } = render(<ErrorSummary items={["이름", "IP", "기간"]} />);
+    rerender(<ErrorSummary items={["이름", "IP"]} title="저장하지 못했습니다" />);
     expect(warn).toHaveBeenCalledTimes(1);
-    warn.mockClear();
-    rerender(<ErrorSummary items={["이름", "IP", "기간"]} />);
-    expect(warn).not.toHaveBeenCalled();
+    const s = screen.getByRole("alert");
+    expect(s.className).toContain("danger");
+    expect(s.className).not.toContain("form-summary");
+    expect(s.hasAttribute("data-form-summary")).toBe(false);
+    expect(container.querySelector("b")?.textContent).toBe("저장하지 못했습니다");
     warn.mockRestore();
   });
-  it("Form validate 의 자동 요약도 같은 모양이다", () => {
+  it("Form validate 는 오류가 3개여도 폼 위에 요약을 그리지 않는다", () => {
     const { container } = render(
       <Form validate>
         <TextField id="a" label="가" required />
@@ -108,10 +97,8 @@ describe("ErrorSummary", () => {
       </Form>,
     );
     fireEvent.submit(container.querySelector("form")!);
-    const s = container.querySelector("form > .form-summary");
-    expect(s?.querySelector("b")?.textContent).toBe("입력값 3개를 확인하세요");
-    expect(s?.textContent).toContain("가, 나, 다");
-    expect(s?.getAttribute("style")).toBeNull();
+    expect(container.querySelectorAll(".field.error")).toHaveLength(3);
+    expect(container.querySelector("form > .notice, [data-form-summary], .form-summary")).toBeNull();
   });
 });
 

@@ -13,6 +13,13 @@ const pCopy = (name, iconOnly) => `<button type="button" class="btn sm text assi
 const pCopyInline = (name, value) => `<span class="copy-field inline"><span class="value">${value}</span>${pCopy(name, true)}</span>`;
 const pClose = (cls, attr) => `<button type="button" class="btn sm text assistive icon-only ${cls}" aria-label="닫기" ${attr}>${I("x")}</button>`;
 const pNum = (name, down, up) => `<button type="button" class="num-btn down" tabindex="-1" aria-label="${name} 줄이기"${down ? " disabled" : ""}>${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="${name} 늘리기"${up ? " disabled" : ""}>${I("plus",16)}</button>`;
+/* 인증 코드 칸 — components.data.js codeField 와 같은 마크업 */
+const pCode = (o) => {
+  const n = o.length || 6, v = (o.value || "").split(""), rove = Math.min(v.length, n - 1), bad = /error/.test(o.cls || ""), help = o.help !== undefined || o.live;
+  const msgs = o.messages ? ` data-messages='${JSON.stringify(o.messages)}'` : "";
+  const cells = Array.from({ length: n }, (_, i) => `<input${i ? "" : ` id="${o.id}-1"`} class="code-cell" type="text" inputmode="numeric" autocomplete="${i ? "off" : "one-time-code"}" aria-label="${n}자리 중 ${i + 1}번째"${i === rove ? "" : ' tabindex="-1"'}${v[i] ? ` value="${v[i]}"` : ""}${bad ? ' aria-invalid="true"' : ""}${o.disabled ? " disabled" : ""}>`).join("");
+  return `<div class="field code-field${o.cls ? " " + o.cls : ""}"><label id="${o.id}-l" for="${o.id}-1">${o.label}${o.mark ? " <em>*</em>" : ""}</label><div class="code-inputs" role="group" aria-labelledby="${o.id}-l"${help ? ` aria-describedby="${o.id}-help"` : ""}${o.name ? ` data-name="${o.name}"` : ""}${o.req ? " data-required" : ""}${msgs}>${o.name ? `<input type="hidden" name="${o.name}" value="${o.value || ""}">` : ""}${cells}</div>${help ? `<span class="help" id="${o.id}-help" aria-live="polite">${o.help || ""}</span>` : ""}</div>`;
+};
 /* Select — o: id, label, opts[[value,label]], value, placeholder, name, req, help, live, sm, labelledby(필드 밖에서 이름을 가리킬 id) */
 const pSel = (o) => {
   const cur = o.opts.find(([v]) => v === o.value);
@@ -91,11 +98,11 @@ const POLICY_TARGETS = [
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
-    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["form", "text-field", "number-input", "select", "combobox", "date-picker", "time-picker", "file-upload", "checkbox", "radio-button", "button", "notification"], css: [], borrows: [".t-label-1-normal", ".t-semibold", ".chip", ".sr-only"],
+    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["form", "text-field", "number-input", "select", "combobox", "date-picker", "time-picker", "file-upload", "checkbox", "radio-button", "button"], css: [], borrows: [".t-label-1-normal", ".t-semibold", ".chip", ".sr-only"],
     desc: "정책이나 사용자, 설정을 입력하는 폼의 기본 구조입니다. 라벨은 필드 위에 두고, 필수 항목에는 별표를 붙입니다. 오류는 필드 아래에 적고, 저장 버튼은 오른쪽 아래에 둡니다.",
     thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
     choose: [["언제 쓰는가", "정책이나 사용자, 연동처럼 여러 값을 한 번에 입력하고 저장하는 화면에 씁니다."], ["비슷한 패턴", "값을 하나씩 바로 바꾸는 화면은 <a href=\"#/patterns/policy-settings\">정책 설정</a>을, 순서대로 나눠 받는 처음 설정은 <a href=\"#/patterns/onboarding\">온보딩</a>을 씁니다."]],
-    principles: [["구성", "한 열이 기본입니다. 시작과 종료처럼 서로 관련된 짧은 필드만 두 열로 나란히 둡니다. 필드가 많으면 섹션 제목으로 묶습니다."], ["입력 컨트롤", "날짜는 Date Picker, 시각은 Time Picker, 숫자는 Number Input 으로 받습니다. 정해진 목록에서 하나를 고르면 Select, 여럿을 고르거나 목록이 길면 Combobox, 파일은 File Upload 를 씁니다."], ["검증", "폼 검증을 켜면 포커스가 떠날 때 그 필드를 검사합니다. 제출하면 첫 오류로 옮기고, 오류가 3개 이상이면 폼 위에 요약합니다. 고치면 문구를 바로 지웁니다."], ["필수", "필수 항목이 있으면 폼 위에 필수 항목 안내를 둡니다."], ["액션", "버튼은 취소, 저장 순서로 두고 주 버튼은 저장 하나입니다. 삭제처럼 되돌리기 어려운 동작은 왼쪽 끝에 따로 둡니다."]],
+    principles: [["구성", "한 열이 기본입니다. 시작과 종료처럼 서로 관련된 짧은 필드만 두 열로 나란히 둡니다. 필드가 많으면 섹션 제목으로 묶습니다."], ["입력 컨트롤", "날짜는 Date Picker, 시각은 Time Picker, 숫자는 Number Input 으로 받습니다. 정해진 목록에서 하나를 고르면 Select, 여럿을 고르거나 목록이 길면 Combobox, 파일은 File Upload 를 씁니다."], ["검증", "폼 검증을 켜면 포커스가 떠날 때 그 필드를 검사합니다. 제출하면 첫 오류로 옮기고, 오류를 폼 위에 모아 요약하지 않습니다. 서버가 돌려준 오류도 그 필드 아래에 적습니다. 고치면 문구를 바로 지웁니다."], ["필수", "필수 항목이 있으면 폼 위에 필수 항목 안내를 둡니다."], ["액션", "버튼은 취소, 저장 순서로 두고 주 버튼은 저장 하나입니다. 삭제처럼 되돌리기 어려운 동작은 왼쪽 끝에 따로 둡니다."]],
     examples: [
       { id: "basic", title: "기본 폼", desc: "섹션 제목으로 필드 묶음을 나누고, 맨 아래에 버튼 줄을 둡니다. 날짜와 시각, 여러 부서, 첨부 파일처럼 값의 종류마다 맞는 컨트롤을 씁니다.", html: `
         <form class="form">
@@ -122,16 +129,15 @@ const PATTERNS = {
           <label class="checkbox"><input type="checkbox" checked><span>저장 즉시 배포<small>에이전트가 다음 체크인에서 적용합니다</small></span></label>
           <div class="form-actions"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
-      { id: "error", title: "오류 상태", desc: "제출한 뒤 오류가 난 모습입니다. 필드마다 오류를 적고, 오류가 3개 이상이면 폼 위에 요약을 둡니다.", html: `
+      { id: "error", title: "오류 상태", desc: "제출한 뒤 오류가 난 모습입니다. 오류는 필드마다 그 아래에 적고, 폼 위에 모아 요약하지 않습니다.", html: `
         <form class="form" novalidate>
-          <div class="notice danger form-summary" role="alert" data-form-summary><span class="ico">${I("alert-circle",20,{style:"filled"})}</span><div><b>입력값 3개를 확인하세요</b>정책 이름, 허용 IP, 보관 기간</div></div>
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field error"><label for="e1">정책 이름 <em>*</em></label><input id="e1" aria-invalid="true" aria-describedby="e1h"><span class="help" id="e1h">정책 이름을 입력하세요</span></div>
           <div class="field error"><label for="e2">허용 IP</label><input id="e2" value="10.0.0" aria-invalid="true" aria-describedby="e2h"><span class="help" id="e2h">올바른 IPv4 형식이 아닙니다. 예: 10.0.0.12</span></div>
           <div class="field number-field error"><label for="e3">보관 기간</label><div class="affix"><input id="e3" type="number" value="500" min="1" max="365" aria-invalid="true" aria-describedby="e3h" aria-valuetext="500일"><span>일</span><button type="button" class="num-btn down" tabindex="-1" aria-label="보관 기간 줄이기">${I("minus",16)}</button><button type="button" class="num-btn up" tabindex="-1" aria-label="보관 기간 늘리기" disabled>${I("plus",16)}</button></div><span class="help" id="e3h">값이 너무 큽니다. 365 이하 입력하세요.</span></div>
-          <div class="form-actions"><button type="button" class="btn md outline negative left">삭제</button><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
+          <div class="form-actions"><button type="button" class="btn md outline assistive left">삭제</button><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div>
         </form>` },
-      { id: "validate", title: "제출 검증", desc: "폼 검증을 켜면 포커스가 떠날 때 필드 단위로 검사합니다. 빈 채로 정책 저장을 누르면 막고 첫 오류로 옮깁니다. 오류가 3개 이상이면 위에 요약하고, 고치면 문구를 바로 지웁니다.", html: `
+      { id: "validate", title: "제출 검증", desc: "폼 검증을 켜면 포커스가 떠날 때 필드 단위로 검사합니다. 빈 채로 정책 저장을 누르면 막고 첫 오류로 옮깁니다. 고치면 문구를 바로 지웁니다.", html: `
         <form class="form" data-validate novalidate>
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field"><label for="v1">정책 이름 <em>*</em></label><input id="v1" required minlength="2" data-maxlength="40"><span class="help" aria-live="polite">2~40자</span></div>
@@ -180,12 +186,12 @@ const PATTERNS = {
   "notes": {
     status: "ready", react: ["Notes"], uses: ["notification", "accordion"], css: [],
     desc: "화면 아래나 폼 옆에 두는 유의사항과 안내 문구입니다. 읽지 않아도 진행할 수 있는 정보를 Notice 안에 글머리 목록으로 담습니다.",
-    thumb: `<div class="notice" style="padding:10px 12px;font-size:12px"><span class="ico">${I("info-circle",16,{style:"filled"})}</span><div><b style="font-size:12px">유의사항</b>배포 후 5분 내 적용</div></div>`,
+    thumb: `<div class="notice" style="padding:10px 12px;font-size:12px"><span class="ico">${I("message-2",16,{style:"filled"})}</span><div><b style="font-size:12px">유의사항</b>배포 후 5분 내 적용</div></div>`,
     choose: [["언제 쓰는가", "적용 시점이나 보관 기간처럼 알아 두면 좋지만 진행을 막지 않는 안내를 화면에 남길 때 씁니다."], ["비슷한 패턴", "지금 조치해야 하는 문제는 <a href=\"#/components/notification\">Notification</a> 의 위험 알림으로, 되돌릴 수 없는 동작의 확인은 <a href=\"#/patterns/danger-confirm\">위험 작업 확인</a>으로 받습니다."]],
-    principles: [["모양", "톤 없는 Notice 위에 제목과 글머리 목록을 둡니다. 회색 면에 정보 아이콘이 붙고 테두리는 없습니다."], ["분량", "항목은 3~5개입니다. 한 항목은 완전한 한 문장으로 쓰고, 그보다 길면 Accordion 으로 접습니다."], ["주의", "되돌리기 어려운 영향을 알릴 때만 경고 톤을 씁니다. 경고 톤이 늘 보이면 정말 중요한 경고가 묻힙니다."], ["자리", "관련된 폼이나 표 바로 아래에 둡니다. 화면 맨 위는 상태 알림의 자리라 유의사항을 두지 않습니다."]],
+    principles: [["모양", "톤 없는 Notice 위에 제목과 글머리 목록을 둡니다. 회색 면에 회색 말풍선 아이콘이 붙고 테두리는 없습니다."], ["분량", "항목은 3~5개입니다. 한 항목은 완전한 한 문장으로 쓰고, 그보다 길면 Accordion 으로 접습니다."], ["주의", "되돌리기 어려운 영향을 알릴 때만 경고 톤을 씁니다. 경고 톤이 늘 보이면 정말 중요한 경고가 묻힙니다."], ["자리", "관련된 폼이나 표 바로 아래에 둡니다. 화면 맨 위는 상태 알림의 자리라 유의사항을 두지 않습니다."]],
     examples: [
       { id: "basic", title: "기본", desc: "제목과 3~5개의 글머리 항목으로 씁니다. 회색 면 위에 두고 테두리는 없습니다.", html: `
-        <div class="notice" role="note"><span class="ico">${I("info-circle",20,{style:"filled"})}</span><div><b>유의사항</b><ul><li>정책은 배포 후 에이전트의 다음 체크인(최대 5분)에 적용됩니다.</li><li>차단된 파일은 격리 저장소에 30일 보관 후 자동 삭제됩니다.</li><li>예외 목록은 해시 또는 경로 기준이며 와일드카드(*)를 지원합니다.</li></ul></div></div>` },
+        <div class="notice" role="note"><span class="ico">${I("message-2",20,{style:"filled"})}</span><div><b>유의사항</b><ul><li>정책은 배포 후 에이전트의 다음 체크인(최대 5분)에 적용됩니다.</li><li>차단된 파일은 격리 저장소에 30일 보관 후 자동 삭제됩니다.</li><li>예외 목록은 해시 또는 경로 기준이며 와일드카드(*)를 지원합니다.</li></ul></div></div>` },
       { id: "warning", title: "주의", desc: "되돌리기 어려운 영향을 알릴 때는 경고 톤을 씁니다. 바로 조치해야 하면 <a href=\"#/components/notification\">Notification</a> 의 위험 알림을 씁니다.", html: `
         <div class="notice warning" role="note"><span class="ico">${I("alert-triangle",20,{style:"filled"})}</span><div><b>정책 삭제 전 확인</b><ul><li>삭제한 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</li><li>감사 로그는 유지되지만 정책 이름은 ID 로 표시됩니다.</li></ul></div></div>` },
       { id: "collapsed", title: "접힌 유의사항", desc: "길거나 부차적인 안내는 Accordion 으로 접습니다.", html: `
@@ -364,16 +370,14 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
     desc: "검색과 필터로 결과 목록을 조회하는 화면입니다. 조건은 늘 보이게 두고, 결과 수와 적용 중인 조건을 함께 보여 줍니다.",
     thumb: `<div class="toolbar" style="width:240px"><div class="searchbar sm" style="min-width:0;flex:1">${I("search")}<input placeholder="검색"></div><button class="chip sm on">Critical</button></div>`,
     choose: [["언제 쓰는가", "이벤트나 단말, 정책처럼 많은 항목에서 조건으로 좁혀 찾는 목록 화면에 씁니다."], ["비슷한 패턴", "초 단위로 쌓이는 로그를 훑는 화면은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>를 씁니다."]],
-    principles: [["툴바", "첫 줄에는 검색칸과 기간을 두고, 둘째 줄에는 필터를 둡니다. 한 줄에 놓인 컨트롤은 같은 높이로 맞추고, 동작 버튼은 결과 줄 오른쪽 끝에 둡니다."], ["필터", "여러 값을 고르는 필터는 Combobox 로 받습니다. 대시보드처럼 다른 화면에서 넘어온 조건은 결과 줄에 Chip 으로 보여 주고, 하나씩 지울 수 있게 합니다."], ["결과 줄", "결과 수를 툴바 아래 첫머리에 적습니다. 조건을 하나라도 바꿨으면 필터 초기화를 둡니다."], ["빈 결과", "결과가 없으면 표 대신 <a href=\"#/components/empty-state\">Empty State</a> 를 두고, 무엇을 바꾸면 되는지와 필터 초기화를 함께 보여 줍니다."], ["갱신", "글자를 칠 때마다 조회하면 입력을 잠시 기다렸다가 조회합니다. 결과 수가 바뀌면 화면 읽기 프로그램에도 알립니다."]],
+    principles: [["툴바", "검색칸 옆에 필터와 기간을 두고 되도록 한 줄에 놓습니다. 옆 컨트롤은 제 폭을 지키고 검색칸이 남는 폭을 가집니다. 자리가 모자라면 검색칸이 최소 폭까지 줄고, 그래도 넘칠 때만 줄을 바꿉니다. 한 줄에 놓인 컨트롤은 같은 높이로 맞추고, 동작 버튼은 결과 줄 오른쪽 끝에 둡니다."], ["필터", "여러 값을 고르는 필터는 Combobox 로 받습니다. 대시보드처럼 다른 화면에서 넘어온 조건은 결과 줄에 Chip 으로 보여 주고, 하나씩 지울 수 있게 합니다."], ["결과 줄", "결과 수를 툴바 아래 첫머리에 적습니다. 조건을 하나라도 바꿨으면 필터 초기화를 둡니다."], ["빈 결과", "결과가 없으면 표 대신 <a href=\"#/components/empty-state\">Empty State</a> 를 두고, 무엇을 바꾸면 되는지와 필터 초기화를 함께 보여 줍니다."], ["갱신", "글자를 칠 때마다 조회하면 입력을 잠시 기다렸다가 조회합니다. 결과 수가 바뀌면 화면 읽기 프로그램에도 알립니다."]],
     examples: [
-      { id: "toolbar", title: "검색 툴바 + 결과", desc: "툴바 첫 줄에 검색칸과 기간을, 둘째 줄에 심각도 필터를 둡니다. 대시보드에서 넘어온 조건은 결과 줄의 Chip 으로 보여 줍니다.", html: `
+      { id: "toolbar", title: "검색 툴바 + 결과", desc: "검색칸 옆에 심각도 필터와 기간을 한 줄로 둡니다. 검색칸이 남는 폭을 맞추고, 자리가 모자라면 검색칸이 먼저 줄어듭니다. 대시보드에서 넘어온 조건은 결과 줄의 Chip 으로 보여 줍니다.", html: `
         <div class="stack">
           <div class="toolbar">
             <div class="searchbar" role="search">${I("search")}<input type="search" placeholder="이벤트, 단말, IP 검색" aria-label="이벤트 검색"></div>
+            ${pCombo({ id: "sr-sev", label: "심각도", items: SEVS, selected: ["Critical"], multiple: true, placeholder: "심각도" })}
             ${pDate({ id: "sr-range", aria: "조회 기간", range: true, value: "2026. 10. 21 ~ 2026. 10. 27", attrs: 'data-max="today" data-presets="7 30" data-default-preset="7"' })}
-          </div>
-          <div class="toolbar">
-            ${pCombo({ id: "sr-sev", label: "심각도", items: SEVS, selected: ["Critical", "High"], multiple: true, placeholder: "심각도" })}
           </div>
           <div class="toolbar sub">
             <span>결과 <b>128</b>건</span>
@@ -412,7 +416,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
     choose: [["언제 쓰는가", "수집 서버나 연동, 에이전트처럼 늘 돌아가야 하는 것들이 정상인지 한 화면에서 확인할 때 씁니다."], ["비슷한 패턴", "위협과 이벤트의 흐름은 <a href=\"#/patterns/dashboard\">대시보드</a>에서, 한 대상의 자세한 상태는 <a href=\"#/patterns/detail\">상세 화면</a>에서 봅니다."]],
     principles: [["이상 먼저", "끊김이나 실패가 있으면 맨 위에 위험 알림을 두고, 고치는 화면으로 가는 버튼을 붙입니다. 정상인 항목은 점과 짧은 수치만 둡니다."], ["상태 점", "항목마다 Indicator 점과 이름, 짧은 수치를 한 줄에 둡니다. 점의 색만으로 알리지 않고 수치나 문구를 함께 씁니다."], ["측정값", "온라인 비율이나 디스크 사용량처럼 한도가 있는 값은 진행 막대 목록으로 보여 줍니다. 값과 한도를 숫자로 함께 적습니다."], ["갱신", "상태는 자동으로 갱신하고 마지막 갱신 시각을 적습니다. 화면을 가만히 둔 사람을 방해하지 않게 상태가 바뀔 때만 알립니다."]],
     examples: [
-      { id: "overview", title: "서비스 상태 보드", desc: "이상이 있는 연동을 맨 위 위험 알림으로 올리고, 나머지는 상태 점과 수치로 조용히 보여 줍니다.", html: `
+      { id: "overview", title: "서비스 상태 보드", desc: "이상이 있는 연동을 맨 위 위험 알림으로 올리고, 나머지는 상태 원과 수치로 조용히 보여 줍니다.", html: `
         <div class="stack">
           <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20,{style:"filled"})}</span><div><b>SIEM 연동 연결 끊김</b>09:12 부터 이벤트 전송이 실패하고 있습니다. 인증 토큰을 확인하세요.<div class="actions"><button type="button" class="btn sm solid primary">연동 설정</button><button type="button" class="btn sm text">다시 시도</button></div></div></div>
           <div class="status-list">
@@ -437,7 +441,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
     desc: "관리 콘솔에 들어오는 로그인과 2단계 인증, 오래 쓰지 않은 세션의 만료 안내입니다. 실패 이유와 남은 횟수를 알리고, 입력한 값은 지우지 않습니다.",
     thumb: `<div class="form" style="padding:12px;gap:8px;width:200px"><div class="field sm"><label>아이디</label><input></div><button class="btn sm solid primary">로그인</button></div>`,
     choose: [["언제 쓰는가", "관리 콘솔에 로그인하거나, 2단계 인증 코드를 받거나, 세션이 곧 끝난다고 알릴 때 씁니다."], ["비슷한 패턴", "로그인 뒤 처음 하는 설정은 <a href=\"#/patterns/onboarding\">온보딩</a>으로, 권한이 없는 화면은 <a href=\"#/patterns/error-pages\">오류 화면</a>으로 보여 줍니다."]],
-    principles: [["실패 안내", "아이디와 비밀번호 중 무엇이 틀렸는지는 알리지 않고, 둘 중 하나가 맞지 않는다고 적습니다. 잠금까지 남은 횟수와 잠기는 시간을 함께 씁니다."], ["입력 유지", "실패해도 아이디는 남기고 비밀번호만 비웁니다. 포커스는 비밀번호 칸으로 옮깁니다."], ["자동 완성", "아이디와 비밀번호, 일회용 코드 칸에 맞는 자동 완성 속성을 줘 비밀번호 관리자와 문자 코드 채우기가 동작하게 합니다."], ["비밀번호 보기", "비밀번호 칸에는 보기 버튼을 둡니다. 붙여넣기를 막지 않습니다."], ["2단계 인증", "숫자 6자리를 한 칸에 받습니다. 칸을 여섯 개로 나누지 않아 붙여넣기와 자동 채우기가 한 번에 됩니다."], ["세션 만료", "끝나기 2분 전에 대화상자로 알리고 남은 시간을 보여 줍니다. 시간 세기와 연장은 제품 서버가 맡고, 시간이 다 되면 로그인 화면으로 보낸 뒤 원래 화면으로 돌아오게 합니다."]],
+    principles: [["실패 안내", "아이디와 비밀번호 중 무엇이 틀렸는지는 알리지 않고, 둘 중 하나가 맞지 않는다고 적습니다. 잠금까지 남은 횟수와 잠기는 시간을 함께 씁니다."], ["입력 유지", "실패해도 아이디는 남기고 비밀번호만 비웁니다. 포커스는 비밀번호 칸으로 옮깁니다."], ["자동 완성", "아이디와 비밀번호, 일회용 코드 칸에 맞는 자동 완성 속성을 줘 비밀번호 관리자와 문자 코드 채우기가 동작하게 합니다."], ["비밀번호 보기", "비밀번호 칸에는 보기 버튼을 둡니다. 붙여넣기를 막지 않습니다."], ["2단계 인증", "숫자 6자리를 Text Field 의 인증 코드 칸 여섯에 한 자리씩 받습니다. 붙여넣기와 자동 채우기는 칸을 나눠도 한 번에 채워집니다. 다 채워도 저절로 제출하지 않고 확인 버튼을 누르게 합니다."], ["세션 만료", "끝나기 2분 전에 대화상자로 알리고 남은 시간을 보여 줍니다. 시간 세기와 연장은 제품 서버가 맡고, 시간이 다 되면 로그인 화면으로 보낸 뒤 원래 화면으로 돌아오게 합니다."]],
     examples: [
       { id: "sign-in", title: "로그인", desc: "실패하면 폼 위에 이유와 남은 횟수를 적고, 아이디는 남긴 채 비밀번호 칸으로 포커스를 옮깁니다.", html: `
         <form class="form auth" data-validate novalidate>
@@ -448,11 +452,11 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           <div class="auth-row"><label class="checkbox"><input type="checkbox" checked><span>아이디 저장</span></label><a href="#" class="link standalone">비밀번호 찾기</a></div>
           <button type="submit" class="btn lg solid primary">로그인</button>
         </form>`, layout: "stack" },
-      { id: "two-step", title: "2단계 인증", desc: "숫자 6자리를 한 칸에 받습니다. 일회용 코드 자동 채우기 속성을 줘 문자로 받은 코드가 바로 들어갑니다.", html: `
+      { id: "two-step", title: "2단계 인증", desc: "숫자 6자리를 큰 칸 여섯에 한 자리씩 받습니다. 치면 다음 칸으로 가고, 붙여넣기와 문자로 받은 코드 자동 채우기는 모든 칸을 한 번에 채웁니다.", html: `
         <form class="form auth" data-validate novalidate>
           <h2 class="auth-title t-title-3">2단계 인증</h2>
           <p class="auth-desc">인증 앱에 표시된 6자리 숫자를 입력하세요.</p>
-          <div class="field"><label for="si-otp">인증 코드</label><input id="si-otp" inputmode="numeric" autocomplete="one-time-code" required pattern="[0-9]{6}" data-messages='{"required":"인증 코드를 입력하세요.","pattern":"숫자 6자리를 입력하세요."}'><span class="help" aria-live="polite">코드는 30초마다 바뀝니다.</span></div>
+          ${pCode({ id: "si-otp", label: "인증 코드", name: "otp", req: true, help: "코드는 30초마다 바뀝니다.", messages: { required: "인증 코드를 입력하세요.", code: "숫자 6자리를 모두 입력하세요." } })}
           <label class="checkbox"><input type="checkbox"><span>이 기기에서 30일 동안 묻지 않기</span></label>
           <button type="submit" class="btn lg solid primary">확인</button>
           <a href="#" class="link standalone">다른 방법으로 인증</a>

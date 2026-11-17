@@ -115,6 +115,18 @@ describe("applyProductColor · PRODUCT_COLORS", () => {
     expect(accentScale("#6541F2")[60]).toBe("#9076F6");
     expect(accentScale("#0066FF")[60]).toBe("#3385FF");
   });
+
+  /* 다크 주 면 단계(50d)는 어두운 제품만 — 제품3 남색 #10367D 은 다크 카드 면 위 1.40 이라 1.5 를 넘는 #113B88 로 밝힌다(2026-11-17, 사이트와 같은 값) */
+  it("다크 면 50d 는 제품3 만 만들고, 다른 제품으로 바꾸면 지운다", () => {
+    expect(accentScale("#10367D")["50d"]).toBe("#113B88");
+    for (const h of ["#0066FF", "#C30D2A", "#00828B", "#FF7F00", "#6541F2"]) expect(accentScale(h)["50d"]).toBeUndefined();
+    expect(PRODUCT_COLORS.map((p) => p.name).join()).toBe("기본,제품1,제품2,제품3,브랜드,중립,AI");
+    applyProductColor("navy");
+    expect(root.style.getPropertyValue("--prod-50d")).toBe("#113B88");
+    expect(root.style.getPropertyValue("--prod-50")).toBe("#10367D");
+    applyProductColor("cyan");
+    expect(root.style.getPropertyValue("--prod-50d")).toBe("");
+  });
 });
 
 describe("setTheme / getTheme", () => {

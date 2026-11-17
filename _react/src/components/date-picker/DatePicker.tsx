@@ -12,6 +12,7 @@ import type { Size } from "../../types";
 import { Calendar, addMonths, baseView, isRange, labelsFor, outOf, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
 import { checkText, clockOf, formatMonth, spanDays, isValidDate, pasteText, placeholderOf, reformat, showOf, stepText, unitStart, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity, type TextUnit } from "./format";
 import { calendarDateOf, clockDateOf, instantOf, resolveZone, todayIn } from "./tz";
+import { pickerSpot, usePickerFollow, type PickerSpot } from "../../utils/pickerPlace";
 
 export { Calendar, type CalendarProps, type CalendarView, type DatePickerFooterItem, type DatePickerLabels, type DatePickerMode, type DateRange, type DateValue } from "./Calendar";
 export { formatDate, formatMonth, parseDate, parseMonth, parseYear, type DatePickerMessages, type DateSideValidity, type DateUnit, type DateValidity } from "./format";
@@ -160,7 +161,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   const [draft, setDraft] = useState<DateValue>(null);
   const [session, setSession] = useState(0);
   const [view, setView] = useState<CalendarView>(baseView(unit));
-  const [place, setPlace] = useState<{ up: boolean; top: number; left: number } | null>(null);
+  const [place, setPlace] = useState<PickerSpot | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -274,15 +275,18 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   );
   const hasFoot = (range && unit === "day" && !!presets?.length) || items.some((k) => k !== "today" || !range);
 
-  /* 아래 자리가 모자라고 위가 더 넓으면 필드 위로(.up). 기준은 필드 상자 — 도움말이 달력을 밀지 않게. 오른쪽으로 넘치면 왼쪽으로 당긴다 */
+  /* 아래 자리가 모자라고 위가 더 넓으면 필드 위로(.up). 기준은 필드 상자 — 도움말이 달력을 밀지 않게. 오른쪽으로 넘치면 왼쪽으로 당긴다.
+     팝업 · 패널 본문처럼 넘침을 자르는 영역 안이면 화면 기준(.float)으로 띄우고 바깥 스크롤을 따라간다(2026-11-17, utils/pickerPlace) */
+  const calEl = () => root.current?.querySelector<HTMLElement>(":scope > .calendar");
   useLayoutEffect(() => {
     if (!isOpen) { setPlace(null); return; }
-    const el = root.current, cal = el?.querySelector<HTMLElement>(":scope > .calendar"), anchor = el?.querySelector<HTMLElement>(".affix");
-    if (!el || !cal || !anchor) return;
-    const hr = el.getBoundingClientRect(), r = anchor.getBoundingClientRect(), h = cal.offsetHeight, w = cal.offsetWidth, gap = 4;
-    const below = window.innerHeight - r.bottom - gap, above = r.top - gap, up = below < h && above > below, vw = document.documentElement.clientWidth || window.innerWidth;
-    setPlace({ up, top: up ? r.top - hr.top - gap - h : r.bottom - hr.top + gap, left: Math.max(8 - hr.left, Math.min(0, vw - 8 - w - hr.left)) });
+    const el = root.current, cal = calEl();
+    if (!el || !cal) return;
+    setPlace(pickerSpot(el, cal));
   }, [isOpen, session, months]);
+  usePickerFollow(isOpen && !!place?.float, root, calEl,
+    () => { const el = root.current, cal = calEl(); if (el && cal) setPlace((p) => pickerSpot(el, cal, p?.up)); },
+    () => { const had = !!root.current?.contains(document.activeElement); setOpen(false); if (had) input.current?.focus({ preventScroll: true }); });
 
   const rootKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(e);
@@ -369,7 +373,7 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
           <Icon name="calendar" />
         </button>
       }
-      wrapperClassName={cx("datepicker", isOpen && "open", place?.up && "up", className)}
+      wrapperClassName={cx("datepicker", isOpen && "open", place?.up && "up", place?.float && "float", className)}
       wrapperStyle={rootStyle}
       wrapperProps={{
         ...rest,

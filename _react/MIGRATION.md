@@ -177,6 +177,8 @@ isLightAccent("#008760");  // false — 4.53, 같은 색상에서 통과하는 �
 | `Steps vertical` | `layout="vertical"` | 있음 |
 | `Table compact` · `DataTable compact` | `density="compact"` | 없음 |
 | `Table zebra` · `DataTable zebra` | `rowStyle="zebra"` | 없음 |
+| `ErrorSummary` | 없음 — 오류는 필드 아래(`TextField error`), 필드에 붙일 수 없으면 Toast | 있음 |
+| `Pagination outline` | 기본(outline) · 면 없는 모양은 `variant="ghost"` | 있음 |
 
 사이트 CSS 에도 호환용 클래스가 셋 남아 있습니다 — `.card.compact`(= `.sm`), `.card.bordered` · `.card.bordered.on`(기본 카드와 같음). 1.0 에서 지웁니다.
 
@@ -789,3 +791,48 @@ Steps 를 다시 짰습니다.
 - 버튼 묶음(`.btn-group`)과 가로 체크박스 묶음(`.checkbox-group.row`)은 자리에 안 들어가면 줄바꿈합니다. 가로 라디오 묶음과 같은 줄 사이 12 입니다.
 - `PaginationBar` 의 표시 개수 + 페이지 이동 묶음은 인라인 스타일 대신 CSS(`.pagination-bar > div`)로 배치하고, 바와 묶음 모두 좁으면 줄바꿈합니다. 패키지 CSS 를 함께 올리세요 — 옛 CSS 에서는 묶음이 세로로 쌓입니다.
 - `Slider withInput`(`.field.slider-field`)의 최소 폭 416 은 자리가 좁으면 자리 폭까지 줄어듭니다.
+
+## 컴포넌트 수정 일곱 (2026-11-16)
+
+**보이는 모양이 바뀐 것**
+- **`color="negative"` · `.negative` 버튼이 다시 빨강**입니다(빨강 틴트 면 + `--foreground-negative-strong` 글자 — 2026-11-14 의 '모든 제품에서 중립' 을 되돌림). 대신 **화면의 삭제 버튼은 `color="assistive"`** 로 둡니다. Negative 는 위험 확인 팝업(alertdialog)에서 되돌릴 수 없는 일을 확정하는 버튼에만 씁니다. 표 · 카드 · 상세 화면에서 `negative` 로 그린 삭제 버튼은 `assistive` 로 바꾸세요.
+- **Avatar 색이 이름으로 정해집니다** — 옅은 면 + 같은 색 진한 이니셜, 상태색을 피한 6색(1 파랑 · 2 시안 · 3 라임 · 4 바이올렛 · 5 퍼플 · 6 핑크). 같은 이름은 어디서나 같은 색입니다.
+  `Avatar` 에 `name`(색을 정하는 이름 — 없으면 `aria-label`, 그것도 없으면 이니셜) · `tone`(1~6 직접 지정)이 생겼고, 마크업에 `data-tone` · `data-name` 이 붙습니다. 이니셜만 같은 두 사람을 가르려면 `name` 을 주세요.
+  같은 식을 `avatarTone(name)`(패키지) · `DS.avatarTone`(사이트)으로 씁니다. `data-tone` 이 없는 `.avatar` 는 전처럼 brand 면입니다(사이트는 ds.js 가 이름으로 정해 답니다).
+- **Indicator = 아이콘이 든 색 원** — 점 8 → 원 16 + 흰 아이콘 10(ok 체크 · warn ! · danger × · info · accent i · 톤 없음 가로선). 마크업 · props 는 그대로이고 `.indicator::after` 를 아이콘이 씁니다(제품 CSS 가 `.indicator::after` 를 쓰고 있었다면 지우세요). accent 원은 `--surface-brand-primary` 면 + `--brand-label` 아이콘. 비활성 행 안은 아이콘 없는 회색 원.
+- **Side Panel 안 속성 표(`.tbl.kv`) 머리글의 오른쪽 선이 없어졌습니다**(다른 자리는 그대로).
+- **Time Picker 폭** — 고정 160 → 최소 160. 폼 안에서는 다른 필드처럼 칸 폭을 채웁니다. 160 이 꼭 필요한 자리는 폭을 직접 주세요.
+- **Navigation · Top Navigation 선택 항목 굵기 700**(600 · 500 이었다). 선택된 상단 메뉴가 몇 px 넓어집니다.
+- **Toolbar 안 검색칸** — `flex:1 1 17.5rem; min-width:17.5rem` → `flex:1 1 0; min-width:12.5rem`. 옆 Select · Combobox · Date Picker 는 제 폭이고 검색칸이 남는 폭을 가집니다. 툴바 안 Combobox 는 제 폭(최소 200 — 밖은 260)이고 입력칸 글자 폭이 폭을 밀지 않습니다.
+
+## 추가 수정 넷 (2026-11-16)
+
+- **Chip** — 고른 칩(`.on`)의 글자가 600 이 되고, 글자 앞 체크 아이콘의 선이 2 에서 2.5 로 굵어집니다. 고른 칩이 몇 px 넓어집니다. 마크업은 그대로입니다.
+- **Notice** — 톤 없는(회색 면) Notice 의 아이콘이 시안에서 `--foreground-neutral-secondary` 로 바뀝니다. `tone="info"` 는 시안 그대로입니다. `Notes`(유의사항)는 아이콘이 `message-2` 입니다(경고면 경고 아이콘).
+- **폼 위 오류 요약을 없앴습니다(사람의 결정).** `Form validate` 는 오류가 몇 개여도 요약을 그리지 않고, 필드마다 오류를 적고 첫 오류로 포커스만 옮깁니다. 사이트 `form[data-validate]` 도 같습니다.
+  `.form-summary` CSS 를 지웠습니다. `ErrorSummary` 는 한 번 경고하고 위험 Notice 로 그립니다(서버 오류가 조용히 사라지지 않게). 1.0 에서 지웁니다. 서버 오류는 `TextField error` 로 그 필드에, 필드에 붙일 수 없으면 Toast 로 알리세요.
+  `useFormValidation` 이 돌려주던 `summary` 는 없어졌습니다.
+- **Pagination 기본 = outline** — 클래스 없이 회색 선 칸 + 흰 면, 지금 쪽은 brand 선 + brand 글자입니다. 면 없는 옛 기본은 `.ghost` · `variant="ghost"`(`Pagination` · `CursorPagination`)입니다.
+  `outline` prop 은 한 번 경고하고 무시합니다. 사이트에서 `.pagination.outline` 을 쓰던 곳은 클래스를 떼세요(이제 효과가 없습니다).
+
+## 제품 색 이름 · 제품3 (2026-11-17)
+
+- **이름이 역할로 바뀝니다** — `PRODUCT_COLORS` 의 `name` 이 기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI 가 됩니다. **키는 그대로**(`blue` · `red` · `cyan` · `orange` · `neutral` · `ai`)라 `applyProductColor` 호출은 고칠 것이 없습니다.
+- **`group` 필드를 없앴습니다** — 메뉴 · Colors 표에 이름만 보입니다. `p.group` 을 읽던 코드는 `p.name` 을 씁니다.
+- **제품3 = 키 `navy` · `#10367D`** — `ProductColorKey` 에 `"navy"` 가 더해졌습니다.
+- **다크 주 면 단계 `50d`** — `accentScale` 이 어두운 제품(지금은 제품3 하나)에만 `"50d"` 를 돌려주고 `--prod-50d` 로 넣습니다. 다크의 `--surface-brand-primary` 가 `var(--brand-50d)`(없으면 `--brand-50`)를 씁니다. 남색은 다크 카드 면과 1.40 밖에 갈리지 않아 1.5 를 넘는 `#113B88` 로 밝힙니다. 라이트와 다른 제품은 그대로입니다. `--prod-*` 를 직접 넣는 제품은 `--prod-50d` 도 함께 넣거나 지웁니다.
+
+## Text Field Code — 인증 코드 칸 (2026-11-17)
+
+- **새 컴포넌트 `CodeInput`** — 자리 수가 정해진 숫자 코드를 칸마다 한 자리씩 받습니다(`length` 기본 6). 칸 48 × 56 · 간격 8 · 숫자 Title 2 28/38 SemiBold. 사이트 마크업은 `.field.code-field > label + .code-inputs[role=group] > input[type=hidden][name] + input.code-cell × n`.
+- 치면 다음 칸, 빈 칸에서 Backspace 는 앞 칸을 지우고 그리로, ← → Home End 로 옮깁니다. 붙여넣기와 문자 코드 자동 채우기(첫 칸만 `autocomplete="one-time-code"`)는 그 칸부터 모든 칸을 채웁니다. 숫자가 아닌 글자는 받지 않습니다. 칸에 `maxlength` 를 두지 않습니다 — 자동 채우기가 첫 칸에 코드 전체를 넣기 때문입니다.
+- **Tab 칸은 하나** — 첫 빈 칸(다 차면 마지막 칸)만 Tab 에 멈추고 나머지는 `tabindex="-1"` 입니다. 앞에 빈 칸이 있는 칸을 누르면 첫 빈 칸으로 옮깁니다.
+- 값은 칸을 이은 글자입니다. React `onChange(value, {complete})`, 사이트 `ds:code {value, complete}` · hidden 입력(`data-name` 과 같은 name). 다 채워도 저절로 제출하지 않습니다.
+- 폼 검증에 낍니다 — 비우면 `required`, 덜 채우면 새 문구 키 `code`("코드가 덜 입력됐습니다. {length}자리를 모두 입력하세요."). 제출이 막히면 첫 빈 칸으로 포커스가 갑니다. 사이트는 `data-required` · `data-messages`, React 는 `required` · `messages`. 오류는 칸마다 `aria-invalid`.
+- 로그인 패턴의 2단계 인증이 한 칸 `TextField`(`pattern="[0-9]{6}"`)에서 `CodeInput` 으로 바뀌었습니다. 같은 화면을 쓰는 제품은 값을 `onChange` 나 hidden 입력에서 읽습니다.
+
+## 팝업 안 Date Picker · Time Picker (2026-11-17)
+
+- **넘침을 자르는 영역 안에서는 달력 · 열 목록을 화면 기준으로 띄웁니다** — 팝업 · 패널 본문처럼 `overflow` 가 auto · hidden 인 조상 안이면 피커 바깥 요소에 `.float` 가 붙고 달력(`.calendar`) · 열 목록(`.time-panel`)이 `position:fixed` 가 됩니다. `--dp-top` · `--dp-left` · `--tp-top` · `--tp-left` 는 그때 화면 좌표입니다. 전에는 본문에 잘렸습니다.
+- 띄운 목록은 바깥이 스크롤되면 필드를 따라가고(열린 방향은 그대로), 필드가 화면이나 자르는 영역 밖으로 나가면 닫히며 포커스가 안에 있었으면 입력칸으로 돌아갑니다. 목록 자신의 스크롤은 닫지 않습니다.
+- 띄운 달력 안의 시각 칸은 다시 띄우지 않습니다. `.datepicker` · `.timepicker` 의 클래스를 셀렉터로 쓰는 제품은 `.float` 를 함께 고려합니다.

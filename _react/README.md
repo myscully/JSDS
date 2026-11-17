@@ -15,7 +15,7 @@ npm i @jiran/ds-react
 import "@jiran/ds-react/style.css";
 import { ToastProvider, applyProductColor } from "@jiran/ds-react";
 
-applyProductColor("red"); // 팔레트 여섯(blue · red · cyan · orange · neutral · ai) 중 하나 → --prod-40~60 + data-accent
+applyProductColor("red"); // 팔레트 일곱(blue · red · cyan · navy · orange · neutral · ai — 이름은 기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI) 중 하나 → --prod-40~60 + data-accent
 
 createRoot(document.getElementById("root")!).render(
   <ToastProvider><App /></ToastProvider>

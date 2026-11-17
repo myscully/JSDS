@@ -20,10 +20,11 @@ export { TagGroup, type TagGroupProps } from "./components/tag/Tag";
 export { Indicator, Count, WithCount, type IndicatorProps, type CountProps, type WithCountProps } from "./components/indicator/Indicator";
 export { Steps, Stepper, StepButton, type StepsProps, type StepsLayout, type StepperProps, type StepperStep, type StepButtonProps, type StepTrigger } from "./components/steps/Steps";
 export { Divider, type DividerProps } from "./components/divider/Divider";
-export { Avatar, AvatarGroup, type AvatarProps, type AvatarGroupProps } from "./components/avatar/Avatar";
+export { Avatar, AvatarGroup, avatarTone, type AvatarProps, type AvatarGroupProps, type AvatarTone } from "./components/avatar/Avatar";
 
 // B. form controls
 export { Field, TextField, TextArea, type FieldProps, type FieldOwnProps, type TextFieldProps, type TextAreaProps } from "./components/text-field/TextField";
+export { CodeInput, type CodeInputProps, type CodeInputChangeInfo } from "./components/text-field/CodeInput";
 export { VALIDATION_MESSAGES, type ValidationMessages, type FormValidationResult } from "./components/text-field/validation";
 export { Checkbox, CheckboxGroup, type CheckboxProps, type CheckboxGroupProps } from "./components/checkbox/Checkbox";
 export { Radio, RadioGroup, type RadioProps, type RadioGroupProps } from "./components/radio-button/Radio";

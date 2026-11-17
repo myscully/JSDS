@@ -45,7 +45,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 88 · verify 0/0 · contrast 3192쌍 실패 0 · advisory 943 · behave 1461/1461 · react 859+6 · tsc 0
+pages 88 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1497/1497 · react 875+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -788,6 +788,63 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **음성 시험 9건(CSS 4 · 예제 3 · ds.js 2)과 React 1건이 모두 잡혔다.** 390 캡처로 달력 · 상태 표 · Pagination Bar · Slider · Flat 카드를 보았다.
 - Figma 미반영 736건(그대로 — 넘침 고침은 audit 대조 밖).
 
+2026-11-16 컴포넌트 수정 일곱(사람의 요청 · 결정 넷) — contrast 3192 → 3336 · advisory 943 → 987 · behave 1461 → 1470 · react 859+6 → 861+6. pages · verify 수는 그대로.
+- **Negative 버튼은 다시 빨강, 화면의 삭제는 Assistive**(사람의 결정 — 11-14 의 '삭제 버튼 중립' 을 사람이 바로잡음: 뜻은 '제품의 삭제 버튼에 Assistive 를 쓴다' 였다). Negative 는 되돌릴 수 없는 일을 확정하는 위험 확인 팝업(alertdialog)의 버튼에만 쓴다.
+  solid · outline · 면 없는 아이콘 · 스피너 규칙을 되살렸고 `--surface-negative-heavy · hover · pressed` 를 `grammarOnly` 에서 뺐다. 표 · 카드 · 폼 · Tooltip · Divider · 액션 바의 삭제 버튼을 assistive 로(사이트 · React). verify 가 Button 페이지 밖 예제의 `.btn.negative` 를 alertdialog 의 버튼 줄 안에만 받는다. 빨강 제품에서는 확정 버튼과 주 버튼이 같은 계열 빨강이 되지만 확정 버튼이 위험 확인 팝업 안에만 있어 받아들였다. behave.product 1 부를 '빨강 세 형태 · 화면 삭제 assistive · 팝업 확정 negative' 로 다시 썼다.
+- **Avatar 색 = 이름으로 정하는 6색**(사람의 결정 셋 — 이름으로 · 옅은 면 + 진한 이니셜 · 상태색을 피한 파랑 · 시안 · 라임 · 바이올렛 · 퍼플 · 핑크). 토큰 12개 `--avatar-1~6-surface · -text`(`ADDITIONS`, 라이트 면 90 · 글자 30(lime 20 — 30 은 4.43), 다크 면 20 · 글자 80). `.avatar[data-tone="1~6"]`, 그룹의 불투명 바탕 합성은 `--avatar-face`(LOCAL_VARS).
+  식 하나 `h = imul(h,31) + 코드값 → h % 6 + 1`, 이름 = data-name → aria-label → 글자. 사이트 ds.js(`DS.avatarTone` · 처음 그릴 때 `data-tone` 을 단다) · 빌드 `lib.js withAvatarTone`(예제 HTML 에 미리 적음 — render.js 와 React 구조 비교가 같이 씀) · React `avatarTone` · `Avatar name · tone`. verify 가 예제마다 tone = 식의 값인지, `tests/avatar-tone.test.tsx` 가 세 곳의 식이 같은지 본다. 구조 비교에 `data-tone`. 이름이 옆에 있어 aria-hidden 인 아바타 · 이니셜만 있는 JH 는 `data-name` 으로 이름을 준다.
+- **Indicator = 아이콘이 든 색 원**(사람의 요청 · 결정 — 원 16 · 아이콘 10). ::before 가 원, ::after 가 mask 아이콘(ok 체크 · warn ! · danger × · info · accent i · 톤 없음 가로선). 처음엔 data-URI 흰 아이콘이었으나 중립 · 시안 제품 다크에서 accent 원(brand 글자색)이 흰색에 가까워 사라져(2.59 · 1.07 — contrast 실패 2) 아이콘 색을 토큰으로 칠하게 둘로 나눴고 accent 원은 `--surface-brand-primary` + `--brand-label`. 비활성 행은 아이콘 없는 회색 원.
+  **측정에서 드러나 고친 것:** inline-flex 의 기준선이 첫 항목(원)의 아래 끝이 되어 390 대시보드 표 행이 45 → 48 이 됐다(전체 게이트가 잡음) — `align-items:baseline` + 원만 `align-self:center` 로 기준선을 라벨 글자에서.
+- **사이드 패널 안 속성 표 머리글의 오른쪽 선 없음**(다른 자리 그대로). **Time Picker 폭 = 최소 160**, 폼 안에서는 칸 폭을 채운다(입력칸 `width:0` 으로 글자 폭이 필드를 밀지 않게 — 그러지 않으면 단독이 206 이 됐다). 정책 설정 행의 160 고정은 그대로. **Navigation · Top Navigation 선택 굵기 700.**
+- **검색 툴바 = 한 줄, 검색칸이 남는 폭을 맞춤**(사람의 요청 — 11-15 의 두 줄을 바꿈). `.toolbar > .searchbar{flex:1 1 0;min-width:12.5rem}`, 툴바 안 Combobox 는 제 폭 · 최소 200 · 입력칸 `width:0`. 검색 패턴 툴바를 검색 · 심각도 · 기간 한 줄로(사이트 · React), Search Rules '툴바' 행.
+  **사람이 정하지 않은 것:** 심각도 태그 둘(Critical · High)이면 1440 에서 검색 200 + 필터 277 + 기간 300 이 758 에 들지 않아 줄이 바뀐다. 검색칸 최소 200 은 지키고 패턴 예시의 기본 선택을 Critical 하나로 줄였다(사이트 · React).
+- contrast +144 = 아바타 이니셜 / 면 6쌍 × 맥락 12 + Indicator 아이콘 / 원 6쌍(흰 / 톤 5 · brand-label / 제품 면) × 12. advisory +44 = 흰 아이콘 / 톤 원 3:1 미달(라이트 초록 2.46 · 주황 2.24 · 회색 2.78, 다크 초록 1.98 · 주황 1.91 · 빨강 2.91 · 시안 2.25 — 사람의 요청한 표현이라 REF, 뜻은 라벨이 나름)과 주황 제품 예외. behave +9 = 아바타 2 · Indicator 4(라이트 · 다크 · 중립 다크 · 비활성 행) · 내비 굵기 · 패널 표 선 · Time Picker 폭 3(상단 내비 단정에 굵기를 더함, 검색 툴바 단정은 두 줄 → 한 줄로 다시 씀). react +2(`avatar-tone.test`).
+- 음성 시험: 아바타 tone 규칙 지움(2) · Indicator 원 크기 · accent 아이콘 · 비활성 아이콘(4) · 내비 600 · 상단 내비 굵기 · 패널 선 · Time Picker 두 규칙(5) · 툴바 검색칸 · Combobox 입력 폭(각 1) 모두 잡혔다. 폼 안 Time Picker 최소 폭 규칙(`.form .timepicker.field`)만 지워도 넓은 예제에서는 결과가 같아 단정이 없다(좁은 폼 칸에서만 드러남).
+- Figma 미반영 605건 — 같은 날 HEAD 사본에서 재면 726(위 항목의 736 은 그날 측정)이고, Negative 버튼 변형이 Figma(빨강)와 다시 맞은 몫이 줄었다. 새로 어긋난 것은 Indicator 원 · accent 면 · Spec(Indicator · Navigation · Top Navigation · Button State)이다. 아바타 색 · Time Picker 폭 · 검색 툴바는 audit 대조 밖 — 일괄 반영 때 그린다.
+
+2026-11-16 추가 수정 넷(사람의 요청 · 결정 셋) — behave 1470 → 1474 · react 861+6 → 860+6. contrast · advisory · verify · pages 수는 그대로.
+- **Chip** — 고른 칩 글자 600, 글자 앞 체크 선 2 → 2.5(시스템의 선 단계 1.5 · 2 · 2.5 에서 한 단계). 체크 mask 는 `icons-css.js` 가 `style.src.css` 에 써 넣는다 — CSS 만 고치면 빌드가 되돌린다(처음에 그렇게 놓쳤고 단정이 잡음). 고른 칩이 몇 px 넓어진다.
+- **톤 없는 Notice 아이콘 = `--foreground-neutral-secondary`**(사람의 결정 — 유의사항만이 아니라 전체), `.notice.info` 는 시안 그대로. 유의사항 패턴 · React `Notes` 의 아이콘 = `message-2`(filled, 경고면 경고 아이콘). 회색 아이콘 / 회색 면은 기존 neutral-secondary 4.5 쌍이 잰다(설명만 고침). 접힌 유의사항(Accordion 머리)의 info-circle 은 Notice 가 아니라 그대로다.
+- **폼 위 오류 요약을 통째로 없앴다**(사람의 결정 — '3개 이상이면 요약' 만이 아니라 자동 요약 · ErrorSummary · `.form-summary` 모두). 사이트 `vSummary` · React `useFormValidation` 의 summary 를 지웠고, 검증은 필드 오류 + 첫 오류로 포커스 + `ds:validate` 만 한다. 서버 오류는 그 필드 아래에, 필드에 붙일 수 없으면 Toast(Form Rules '서버 오류' · Foundations › Interaction).
+  React `ErrorSummary` 는 한 번 경고하고 위험 Notice 로 그린다(제품의 서버 오류가 조용히 사라지지 않게 — MIGRATION '1.0 정리 목록'). Form 페이지의 'Error Summary' 예제를 'Error'(필드 아래 오류만, id `error` — React 예제 파일도 이름을 바꿈)로, 입력 폼 패턴의 요약 상자 · 문구를 지웠고 uses 에서 notification 을 뺐다. verify 가 예제의 `.form-summary` · `data-form-summary` 를 막는다.
+- **Pagination 기본 = outline**(사람의 결정 — 면 없는 옛 기본은 `.ghost` 변형으로). `.pagination:not(.ghost)` 가 옛 `.pagination.outline` 과 같은 명시도(0,2,1)라 고른 칸의 제품 색 면을 쉬는 면 규칙이 이긴다. React `Pagination` · `CursorPagination` `variant="outline" | "ghost"`, 옛 `outline` prop 은 경고하고 무시. verify 가 예제의 `.pagination.outline` 을 막는다. 표 · 패턴의 모든 Pagination 이 outline 이 된다.
+- behave +4 = 칩 굵기 · 체크 선 1 · Notice 아이콘 색 라이트 · 다크 2 · Pagination 기본 · ghost 1(기존 단정 고침 — 요약 단정 넷을 '요약 없음' 으로: behave.js 둘 · behave.promote 둘 · behave.revise 하나, Pagination hover 단정의 선택자를 기본으로). react −1 = ErrorSummary 단정 4 → 2(경고 후 Notice · 자동 요약 없음) + Pagination variant 1.
+- 음성 시험: 사이트 6건(칩 굵기 · 체크 선 · Notice 회색 · 유의사항 아이콘 · Pagination 기본 · 옛 ds.js 의 자동 요약) · verify 2건(`.pagination.outline` · `.form-summary`) · React 3건(ghost 클래스 · ErrorSummary 클래스 · Form 자동 요약 되살림) 모두 실패로 잡혔다. behave.js 의 제출 검증 요약 단정은 전체 게이트에서만 돌아 음성 시험을 따로 하지 않았다.
+- Figma 미반영 605 → 606건(Pagination Spec Container 문구). Figma 의 Pagination 기본은 아직 면 없는 모양이고 Chip 선택 굵기 · Notice 아이콘은 audit 대조 밖 — 일괄 반영 때 그린다.
+
+2026-11-17 제품 색 이름 · 제품3 남색(사람의 요청 · 결정 둘) — contrast 3336 → 3892 · advisory 987 → 1149 · behave 1474 → 1491 · react 860+6 → 861+6. pages · verify 수는 그대로.
+- **이름 = 역할** — 메뉴 · Colors 표의 이름을 기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI 로(파랑 · 빨강 · 시안 · 주황 · 중립 · AI 였다). **키는 그대로**(`blue` · `red` · `cyan` · `orange` · `neutral` · `ai`) — `data-accent` · `applyProductColor` 는 API 라서.
+  메뉴 옆 작은 갈래 글자와 `group` 필드를 없앴다(사람의 결정 — '작은 글자 없앰'). Colors 표의 '갈래' 열도 없어졌다. verify 가 `group` 되살림 · 같은 이름 둘을 막는다.
+- **제품3 = 키 `navy` · `#10367D`**(제품2 다음) — 흰 글자 11.39. 팔레트 여섯 → 일곱(`data.js` · React `PRODUCT_COLORS` · verify `KEYS` · 문서의 수).
+- **다크 주 면 자동 밝힘**(사람의 결정 — 예외 선언 · 값 바꾸기 대신) — 다크 주 면(`--surface-brand-primary`)은 제품 HEX 그대로라 남색이 다크 카드 면과 1.40 이었다(면 분리 기준 1.5 — 첫 빌드 contrast 실패 1).
+  `accentScale` 이 다크 바탕 셋 위 1.5 를 넘을 때까지 0.5 씩 밝힌 `50d` 를 만들고(어두운 제품만 — 지금은 제품3 하나, `#113B88` · 카드 1.52 · 흰 글자 10.47 · hover 55 `#134094` 가 더 밝음) `--prod-50d` → `--brand-50d:var(--prod-50d,var(--brand-50))` 를 다크의 주 면이 쓴다. 다크 글자 단계(60) 보정과 같은 방식이고 사이트 · React · Design Token 예시 코드가 같은 식이다. `DEVIATIONS` 의 다크 `surface-brand-primary` 를 `var(--brand-50d)` 로, verify 의 원시 토큰 이름 규칙에 `d` 접미.
+- 문서: 빨강 · 주황의 중립 입력 링 문장에 역할 이름(제품1 · 브랜드)을 더했고, Colors 'Product color' 에 '다크 주 면도 자동으로 밝힘'.
+- **수의 근거:** contrast · advisory 는 맥락이 12 → 14(라이트 · 다크 × 일곱) — 맥락당 278쌍 · advisory 약 81. behave +17 = 팔레트를 도는 기존 단정에 제품3 이 한 번씩 더 돎 12(Brand 면 · 단계 규칙 등 — 단계 규칙의 다크 면 기대값을 50d 로 고침) · 다크 · 라이트 brand 글자 AA 루프에 navy 2 · 새 단정 3(behave.product 제품3 주 면 · 다른 제품 50d 없음, behave.js navy 다크 면 = 50d). 메뉴 단정은 '일곱 · 이름만' 으로 고침. react +1 = 50d 와 이름 단정.
+- 음성 시험: 빌드된 app.js 에서 50d 를 빼면 behave.product 15/16(그리고 원본에서 빼면 contrast 실패 1 — 처음 빌드가 그 상태였다).
+- Colors 'Product color' 표의 머리글이 한 칸씩 밀려 있었다(설명 열이 '적용', 버튼 열이 '미리보기') — 이름 · 값 · 흰 글자 대비 · 설명 · 적용으로 고치고 이름 칸을 줄바꿈하지 않게 했다(캡처에서 발견).
+- Figma 미반영 606건(그대로 — 팔레트는 Figma 대조 밖).
+
+2026-11-17 팝업 안 Date Picker · Time Picker(사람의 요청 — 달력이 팝업 본문 안에서 잘림) — behave 1491 → 1495(`behave.patterns.js` 21 → 25) · react 861+6 → 864+6(`tests/picker-float.test.tsx` 3). contrast · advisory · verify · pages 수는 그대로.
+- **잰 원인:** 팝업 본문(`.popup-body` · `.popup-form`)과 패널 본문은 `overflow-y:auto` 라, 그 안의 달력 · 열 목록(absolute)이 본문 밖에서 잘렸다. 내보내기 팝업에서는 위로 열린 달력의 위쪽이 잘렸다.
+- **넘침을 자르는 영역 안이면 화면 기준(`.float`)으로 띄운다** — Dropdown · Combobox 와 같은 방식이다. `.datepicker.float>.calendar` · `.timepicker.float>.time-panel{position:fixed;z-index:30}`, 자리 변수(`--dp-*` · `--tp-*`)가 화면 좌표가 된다. 사이트 ds.js `pickerSpot` · React `utils/pickerPlace.ts` 가 같은 식이다. 화면 기준으로 뜬 조상(띄운 달력 안의 시각 칸)을 만나면 거기서 멈춘다 — 그 칸은 다시 띄우지 않는다.
+- **사람이 정하지 않은 기본값:** 띄운 목록은 바깥이 스크롤되면 필드를 따라간다(열린 방향은 그대로). 필드가 화면이나 자르는 영역 밖으로 나가면 닫고, 포커스가 안에 있었으면 입력칸으로 돌린다(Dropdown 은 스크롤하면 바로 닫는다 — 피커는 시각을 치는 중일 수 있어 따라가게 함). 목록 자신의 스크롤(시각 열)은 닫지 않는다.
+- **문서:** Date Picker 고르기 표 Placement 에 '팝업 · 패널 본문 안에서도 본문에 잘리지 않고 그 위로 뜸', Time Picker Rules '팝업 안' 행(7 → 8행), MIGRATION.
+- behave +4(part 22: 내보내기 팝업의 달력 — 네 모서리가 보임 · 필드에서 4 · 바깥 스크롤을 따라감 · 필드가 사라지면 닫힘과 포커스 복귀, 시각 목록 — 같은 방식 · 열 스크롤에도 열림 · 닫으면 `.float` 없음, 시각 있는 Date Picker 를 팝업에 넣어 안쪽 시각 칸은 absolute, 비밀값 생성 팝업 · 스크롤 영역 밖 Date Picker 는 absolute). react +3(Date Picker · Time Picker 의 `.float` · 목록 스크롤 유지 · 바깥 스크롤로 닫힘, 스크롤 영역 밖은 `.float` 없음).
+- 측정에서 드러난 것: 이 사이트는 부드러운 스크롤이라 스크롤 도중에 열면 그 순간 자리로 방향을 정한다 — 단정은 즉시 스크롤 뒤에 연다.
+- 음성 시험: 사이트 4건(fixed 지움 · 따라가기 지움 · fixed 조상에서 멈춤 지움 · 띄우기 끔) · React 4건(두 피커의 `.float` 클래스 · 닫기 경로 · 목록 자신 스크롤) 모두 실패로 잡혔다.
+- Figma 미반영 606 → 607건(Date Picker Placement 문구).
+
+2026-11-17 Text Field Code — 2단계 인증 코드 칸 여섯(사람의 요청 · 결정 둘) — behave 1495 → 1497(`behave.patterns.js` part 8 의 단정 1 → 3) · react 864+6 → 875+6(`tests/code-input.test.tsx` 10 · 예제 320 → 321 에 따른 구조 비교 1). contrast · advisory · verify · pages 수는 그대로(새 색 쌍 없음 — 입력 테두리 · 링 · 오류 · 비활성 그대로).
+- **Text Field 의 변형으로**(사람의 결정 — 별도 컴포넌트 대신, 컴포넌트 수 그대로) — 사이트 `.field.code-field > label[for=첫 칸] + .code-inputs[role=group][aria-labelledby] > input[type=hidden][name] + input.code-cell × n`, React `CodeInput`(`length` 기본 6 · `onChange(value, {complete})` · `required` · `requiredMark` · `messages` · `help` · `error` · `disabled`). Text Field 페이지 Code 예제(검증 폼 · 오류 · 비활성), Rules '인증 코드' 행, Props · Spec Code 행.
+- **칸 48 × 56 · 간격 8 · 숫자 Title 2 28/38 SemiBold**(사람의 결정) — 묶음 최대 328. 테두리 · 포커스 링 · 오류 · 비활성은 `.field input` 을 그대로 받는다.
+- **동작** — 치면 다음 칸, 숫자가 아닌 글자는 받지 않음, 빈 칸에서 Backspace 는 앞 칸을 지우고 그리로, ← → Home End. 붙여넣기 · 문자 코드 자동 채우기는 그 칸부터 나눠 채운다 — 자동 채우기가 첫 칸에 코드 전체를 넣으므로 칸에 maxlength 를 두지 않고, `autocomplete="one-time-code"` 는 첫 칸에만. 앞에 빈 칸이 있는 칸을 누르면 첫 빈 칸으로. 값은 칸을 이은 글자(hidden · `ds:code {value, complete}`). 다 채워도 저절로 제출하지 않는다(사람이 정하지 않은 기본값).
+- **검증** — 묶음 하나로 잰다(ds.js `vIsField` 에서 칸을 빼고 `vFields` · `vMessage` · `vShow` 가 `.code-inputs` 를, React `validationMessage` 가 `data-ds-code` 를). 비우면 `required`, 덜 채우면 **새 문구 키 `code`**("코드가 덜 입력됐습니다. {length}자리를 모두 입력하세요." — 사이트 · React 같음, labels-parity 가 대조). 칸마다 `aria-invalid`, 제출이 막히면 **첫 빈 칸**으로 포커스, 묶음을 떠날 때(칸 사이 이동은 제외) 건드렸거나 값이 있거나 이미 오류면 잰다.
+- **로그인 패턴** 2단계 인증을 한 칸 `pattern="[0-9]{6}"` 에서 여섯 칸으로(사이트 `pCode` — `codeField` 와 같은 마크업 · React `CodeInput`). 원칙 '2단계 인증' 행의 '칸을 여섯 개로 나누지 않아' 를 고쳤다.
+- **단정을 쓰다 드러나 고친 것 — 키보드 갇힘:** 칸마다 Tab 이 멈추니 빈 칸에서 Tab → 다음 칸 → '첫 빈 칸으로' 규칙이 되돌려 묶음을 빠져나갈 수 없었다. **Tab 칸을 하나로**(첫 빈 칸, 다 차면 마지막 칸 — 나머지 `tabindex="-1"`, 사이트 `codeRove` · React `rove`, 정적 마크업에도 적음). 단정이 Tab 으로 체크박스로 나가 오류를 알리고 Shift+Tab 이 첫 빈 칸으로 돌아오는지 잰다. React 에서는 다음 칸 포커스가 다시 그리기 전에 와 옛 값으로 '빈 칸' 을 판정해 되돌렸다(최신 값 ref 로).
+- **문서 예제:** 처음엔 Code 예제를 `.form` 으로 감싸 카드 틀이 그려졌다(캡처에서 발견) — 클래스 없는 `form[data-validate]` · React `Form bare`.
+- 음성 시험: 사이트 9건(나눠 채우기 · Tab 칸 하나 · 글자 거부 · code 문구 · 빈 칸으로 보내기 · Backspace · CSS 크기 · 첫 빈 칸 포커스 · 떠날 때 재기) · React 8건 모두 잡혔다. React '떠날 때 재기' 는 처음에 못 잡아(제출 뒤 경로만 있었다) 제출 전 테스트를 더해 잡았다. 전체 게이트에서 예제 수 고정 단정(`examples-coverage` 320)이 걸려 321 로 고쳤다.
+- Figma 미반영 607 → 608건(Text Field Spec Code 행). Text Field 의 Code 변형은 Figma 에 없다 — 일괄 반영 때 그린다.
+
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
@@ -795,12 +852,12 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 
 - **Atomic** `--{램프}-{단계}` — 램프 13개, **숫자가 클수록 밝습니다**. 컴포넌트에서 직접 쓰지 않습니다.
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
-  여섯 그룹 **90개**(기준 75 + 더한 15) + 트리 밖 19개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 16) = **109**.
+  여섯 그룹 **90개**(기준 75 + 더한 15) + 트리 밖 31개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 16 · 아바타 `--avatar-1~6-surface · -text` 12 — 2026-11-16) = **121**.
   더한 것 중 6개는 Tag 글자용 `--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy`(2026-11-11),
   5개는 입력 링 `--line-field-focus` · `-halo` 와 AI 면 `--surface-brand-gradient` · `-strong` · `-heavy`(2026-11-14).
 - **차트 토큰** `--chart-mono-1~4`(한 톤 — 기본, 제품과 무관한 고정 파랑 명도 단계, 2026-11-15) · `--chart-series-1~6`(범주색 — tone 없는 계열 5개부터 · 순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
   `ds-chart.js` 가 계산값으로 읽어 캔버스에 칠합니다(허용 목록 `grammarOnly` — mono 는 정적 막대 · 진행 막대 · 도넛 CSS 도 씀). 심각도 계열은 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 그대로(5단계 — Medium 라이트 블루 · Low 라임, 2026-11-11 교체).
-- **제품 색**은 팔레트 여섯(`data.js` PRODUCTS — 파랑 기본 · 빨강 · 시안 · 주황 · 중립 · AI)에서 고르고 `<html data-accent="키">` 로 적용합니다.
+- **제품 색**은 팔레트 일곱(`data.js` PRODUCTS — 기본 파랑 · 제품1 빨강 · 제품2 시안 · 제품3 남색 · 브랜드 주황 · 중립 · AI, 키는 색 이름)에서 고르고 `<html data-accent="키">` 로 적용합니다.
   `--prod-40~60` 다섯 단계로 주입되고 `brand` 계열이 따라옵니다. 상태색과 겹쳐도 제품 색 그대로입니다(자동 중립은 2026-11-14 에 없앰).
   **제품 색 위의 흰 글자가 4.5 를 넘어야 하고 빌드가 검사합니다**(`verify.js`) — 넘지 못하면 `exception` 에 사람의 결정으로 이유를 적습니다(주황).
   삭제 버튼은 모든 제품에서 중립, 입력 포커스 링은 빨강 · 주황 제품만 중립입니다.

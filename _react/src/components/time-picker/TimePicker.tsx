@@ -6,6 +6,7 @@ import { useEscape, useOutsideClick } from "../../utils/hooks";
 import { TextField, type TextFieldProps } from "../text-field/TextField";
 import { FormValidationContext } from "../text-field/validation";
 import { pasteText, reformat, stepClock } from "../date-picker/format";
+import { pickerSpot, usePickerFollow, type PickerSpot } from "../../utils/pickerPlace";
 
 /* Time Picker — 입력칸 + 열 목록(2026-11-13). 사이트 ds.js 의 .timepicker 와 같은 규칙:
    24시간제 HH:mm(seconds 면 HH:mm:ss), 열에서 고르면 바로 값, step 은 분 열의 간격, min · max 밖 칸은 고를 수 없고 입력은 받아 오류로 알린다 */
@@ -100,7 +101,7 @@ export const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(function
   const [local, setLocal] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<(number | null)[]>([null, null, null]);
-  const [place, setPlace] = useState<{ top: number; left: number; up: boolean } | null>(null);
+  const [place, setPlace] = useState<PickerSpot | null>(null);
   const check = (t: string) => checkTime(t, { seconds, min, max, messages });
   const off = !!disabled || !!readOnly;
 
@@ -155,13 +156,14 @@ export const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(function
   useLayoutEffect(() => {
     if (!open || !panel.current || !host.current) return;
     if (!place) {
-      const hr = host.current.getBoundingClientRect(), anchor = host.current.querySelector(".affix") ?? host.current, r = anchor.getBoundingClientRect(), h = panel.current.offsetHeight, w = panel.current.offsetWidth, gap = 4;
-      const below = window.innerHeight - r.bottom - gap, above = r.top - gap, up = below < h && above > below, vw = document.documentElement.clientWidth;
-      setPlace({ up, top: up ? r.top - hr.top - gap - h : r.bottom - hr.top + gap, left: Math.max(8 - hr.left, Math.min(0, vw - 8 - w - hr.left)) });
+      setPlace(pickerSpot(host.current, panel.current));   // 넘침을 자르는 영역 안이면 화면 기준(.float — 2026-11-17, utils/pickerPlace)
       panel.current.querySelectorAll<HTMLElement>(".time-col").forEach((col) => { const on = col.querySelector<HTMLElement>(".time-opt.on"); col.scrollTop = on ? on.offsetTop - parseFloat(getComputedStyle(col).paddingTop || "0") : 0; });   // 고른 칸을 맨 위로
       if (pendingFocus.current) { pendingFocus.current = false; panel.current.querySelector<HTMLElement>('.time-opt[tabindex="0"]')?.focus({ preventScroll: true }); }
     }
   }, [open, place]);
+  usePickerFollow(open && !!place?.float, host, () => panel.current,
+    () => { const h = host.current, p = panel.current; if (h && p) setPlace((s) => pickerSpot(h, p, s?.up)); },
+    () => { const had = !!host.current?.contains(document.activeElement); close(false); if (had) input.current?.focus({ preventScroll: true }); });
   useOutsideClick([host], () => close(false), open);
   useEscape(() => close(true), open);   // 가장 안쪽 하나만 — 대화상자는 다음 Esc 에
 
@@ -226,7 +228,7 @@ export const TimePicker = forwardRef<HTMLInputElement, TimePickerProps>(function
       readOnly={readOnly}
       error={error || local || undefined}
       wrapperStyle={place ? ({ ...wrapperStyle, "--tp-top": `${place.top}px`, "--tp-left": `${place.left}px` } as CSSProperties) : wrapperStyle}
-      wrapperClassName={cx("timepicker", open && "open", place?.up && "up", wrapperClassName)}
+      wrapperClassName={cx("timepicker", open && "open", place?.up && "up", place?.float && "float", wrapperClassName)}
       wrapperProps={{
         ...wrapperProps,
         ref: host,
