@@ -2480,6 +2480,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const c = await page.evaluate(sig); await st.evaluate((s) => s.remove());
       for (const k of Object.keys(a)) if (a[k] !== c[k] && !ADAPTIVE.includes(k)) leaned.push(k.replace(/^ex-/, "")); }
   });
+  await part("part 81b · behave.home.js", async () => {
+    await require("./behave.home.js")({ page, ok, go });   // 메인 화면 — B4 Balance: 구성 · 로고 · 들어오기 · 줄인 모션 · 패럴랙스 · 겹침 · 제품 색 · 배너(2026-11-18)
+  });
   await part("part 82 · index.html", async () => {
     await go("index.html");
     ok("all pages load without JS errors", errors.length === 0, errors.slice(0, 3).join(" | "));

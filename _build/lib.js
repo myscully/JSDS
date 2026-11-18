@@ -233,7 +233,7 @@
      --checker-bg · --cols* · --p: 문서 셸 · 격자 · 진행 막대 비율. --dp-top · --dp-left · --tp-top · --tp-left: Date Picker 달력 · Time Picker 열 목록 자리(열 때 잼).
      --a: 정적 도넛 경계 구분선 각도. --d1~--d5: 정적 도넛 조각의 누적 비율. --float-*: 스크롤 영역 안에서 화면 기준으로 띄운 메뉴 · Tooltip 의 자리 · 폭.
      --ds-delay: Loading 지연 시간. --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면. --avatar-ring: Avatar Group 링(놓인 면). --avatar-face: 그 아바타의 tone 면(링 합성이 따라감). --nf-dx: 알림 패널을 화면 안으로 미는 거리 */
-  const LOCAL_VARS = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--avatar-face", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5"];
+  const LOCAL_VARS = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--avatar-face", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5", "--hm-sy", "--hm-k", "--hm-kr", "--hm-rot", "--hm-fx", "--hm-fy", "--hm-d", "--hm-i"];   // --hm-* — 메인 히어로 도형의 자리 · 움직임(2026-11-18)
 
   /* Avatar 색 — 이름으로 정하는 tone 1~6 을 예제에 미리 적는다(사람의 결정 2026-11-16). 정적 HTML · 복사한 HTML 이 ds.js 가 켠 뒤와 같은 모양이게(11-10 결정).
      식은 ds.src.js avatarTone · React avatarTone 과 같다(verify · React 테스트가 대조). 빌드(render.js)와 React 구조 비교 테스트가 함께 쓴다 */

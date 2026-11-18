@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSDS Concept B2 · Visual</title>
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="concepts.css">
+<style>
+/* B2 Visual — 왼쪽 큰 두 줄 + 화면 가장자리로 잘려 나가는 기울어진 도형 셋(부채꼴 · 알약 · 콘솔 창) + 아래 목록과 미리보기 두 칸 */
+.b2-hero{display:block;position:relative;overflow:hidden;min-height:calc(100vh - 5rem);min-height:calc(100svh - 5rem);--sy:0}
+.b2-copy{position:relative;z-index:2;max-width:90rem;margin:0 auto;padding:clamp(3rem,9vh,7rem) clamp(1rem,4vw,4rem) 0}
+.b2-copy h1{display:block;margin:0;font-size:clamp(2.5rem,6vw,6rem);font-weight:700;letter-spacing:-0.045em;line-height:1.04}
+.b2-copy h1 .ln{display:block}
+.b2-copy p{margin:1.5rem 0 0;max-width:30rem;font-size:clamp(1rem,1.3vw,1.1875rem);line-height:1.6;color:var(--foreground-neutral-secondary)}
+.b2-copy .cx-btn{margin-top:2rem;height:3rem;padding:0 1.375rem;font-size:0.9375rem;border-radius:var(--radius-full)}
+
+/* 도형 — 바깥: 자리 + 스크롤 패럴랙스, .fl: 느린 떠 있기, .in: 들어오는 회전과 기본 기울기 */
+.b2-sh{position:absolute;z-index:1;pointer-events:none;translate:0 calc(var(--sy) * var(--k,0) * -1px);rotate:calc(var(--sy) * var(--kr,0) * 1deg)}
+.b2-sh .fl{width:100%;height:100%}
+.b2-sh .in{width:100%;height:100%;transform:rotate(var(--rot,0deg))}
+.js .b2-sh .in{opacity:0}
+.js .go .b2-sh .in{animation:b2-in 1.3s var(--ease-out) calc(.25s + var(--d,0s)) both}
+.js .go .b2-sh .fl{animation:b2-float 8s ease-in-out calc(1.8s + var(--d,0s)) infinite alternate}
+@keyframes b2-in{from{opacity:0;transform:translate(var(--fx,30vw),var(--fy,-20vh)) rotate(calc(var(--rot,0deg) + 70deg))}to{opacity:1;transform:rotate(var(--rot,0deg))}}
+@keyframes b2-float{from{transform:translateY(-6px)}to{transform:translateY(6px)}}
+
+.b2-wedge{width:clamp(14rem,30vw,30rem);aspect-ratio:1;top:calc(clamp(14rem,30vw,30rem) * -0.38);right:calc(clamp(14rem,30vw,30rem) * -0.22);--rot:-14deg;--k:.35;--kr:.04;--fx:20vw;--fy:-30vh}
+.b2-wedge .in{background:var(--c-coral);border-radius:0 0 0 100%}
+.b2-pill{width:clamp(12rem,27vw,27rem);height:clamp(4.5rem,10vw,10rem);top:40%;right:calc(clamp(12rem,27vw,27rem) * -0.32);--rot:-20deg;--k:.55;--kr:-.03;--fx:30vw;--fy:0vh;--d:.12s}
+.b2-pill .in{background:var(--c-green);border-radius:var(--radius-full)}
+
+/* 콘솔 창 — 제품 색 머리띠 + 말풍선 꼭지 + 옅은 제품 색 몸통 + 방패 */
+.b2-console{width:clamp(17.5rem,31vw,29rem);aspect-ratio:1.18;top:clamp(15rem,34%,22rem);right:clamp(-3rem,15vw,17rem);--rot:-18deg;--k:.8;--kr:.025;--fx:10vw;--fy:40vh;--d:.24s;pointer-events:auto}
+.b2-console .in{display:flex;flex-direction:column;filter:drop-shadow(0 24px 40px rgba(16,24,40,.14))}
+.b2-bar{position:relative;flex:none;height:24%;border-radius:1.75rem 1.75rem 0 0;background:var(--c-prod);background-image:var(--c-prod-img);display:flex;align-items:center;gap:0.5em;padding:0 8%;font-size:clamp(0.5rem,0.9vw,0.875rem)}
+.b2-bar::after{content:"";position:absolute;left:16%;top:100%;width:12%;aspect-ratio:1.4;background:inherit;clip-path:polygon(0 0,100% 0,0 100%);z-index:1}
+.b2-bar i{width:0.875em;height:0.875em;border-radius:50%;background:var(--brand-label);opacity:.45}
+.b2-bar b{margin-left:auto;height:0.75em;width:32%;border-radius:var(--radius-full);background:var(--brand-label);opacity:.35}
+.b2-body{flex:1;border-radius:0 0 1.75rem 1.75rem;background:var(--surface-brand-subtle);display:grid;place-items:center;position:relative;overflow:hidden}
+.b2-body::before,.b2-body::after{content:"";position:absolute;left:10%;right:10%;height:5%;border-radius:var(--radius-full);background:var(--surface-brand-primary);opacity:.12;bottom:22%}
+.b2-body::after{bottom:12%;right:38%}
+.b2-shield{width:34%;aspect-ratio:1;color:var(--c-prod);transition:scale .5s var(--ease-pop);margin-bottom:12%}
+.b2-shield svg{width:100%;height:100%}
+.b2-console:hover .b2-shield{scale:1.1}
+.b2-console:hover .b2-bar i{animation:b2-blink 1s steps(1) infinite}
+.b2-console:hover .b2-bar i:nth-child(2){animation-delay:.2s}
+.b2-console:hover .b2-bar i:nth-child(3){animation-delay:.4s}
+@keyframes b2-blink{50%{opacity:1}}
+
+/* 아래 두 칸 — 목록에 올리거나 포커스하면 오른쪽 미리보기가 바뀜 */
+.b2-more{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:1.5rem;margin:clamp(2rem,6vw,4rem) 0 clamp(3.5rem,8vw,6rem)}
+.b2-list{background:var(--background-neutral-secondary);border-radius:1.75rem;padding:clamp(1.25rem,2.4vw,2rem);display:flex;flex-direction:column}
+.b2-list h2{display:block;margin:0 0 1rem 0.75rem;font-size:0.8125rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--foreground-neutral-tertiary)}
+.b2-meta{margin:auto 0 0;padding:1.5rem 0.75rem 0;font-size:0.8125rem;color:var(--foreground-neutral-tertiary);font-variant-numeric:tabular-nums}
+.b2-list ul{list-style:none;margin:0;padding:0;max-width:none;display:flex;flex-direction:column;gap:0.25rem}
+.b2-item{display:grid;grid-template-columns:2.75rem 1fr auto;gap:1rem;align-items:center;padding:1rem 0.75rem;border-radius:var(--radius-xl);transition:background-color .2s}
+.b2-item:hover,.b2-item.on{background:var(--background-neutral-primary)}
+.b2-item:focus-visible{outline:2px solid var(--c-ink);outline-offset:2px}
+.b2-ico{width:2.75rem;height:2.75rem;border-radius:var(--radius-full);display:grid;place-items:center;background:var(--tint);color:var(--hue)}
+.b2-ico svg{width:1.25rem;height:1.25rem}
+.b2-item b{display:block;font-size:1.0625rem;letter-spacing:-0.015em}
+.b2-item span{display:block;margin-top:0.125rem;font-size:0.875rem;line-height:1.5;color:var(--foreground-neutral-secondary)}
+.b2-item > svg{width:1.125rem;height:1.125rem;color:var(--foreground-neutral-tertiary);transition:translate .3s var(--ease-pop),color .2s}
+.b2-item:hover > svg,.b2-item.on > svg{translate:0.25rem 0;color:var(--c-ink)}
+.b2-preview{position:relative;border-radius:1.75rem;background:var(--tint);transition:background-color .45s;padding:clamp(1.25rem,3vw,2.75rem) 0 0 clamp(1.25rem,3vw,2.75rem);overflow:hidden;height:clamp(20rem,32vw,28rem)}
+.b2-preview figure{margin:0;height:100%;border-radius:var(--radius-xl) 0 0 0;overflow:hidden;background:var(--static-white);box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 40px rgba(16,24,40,.12)}
+.b2-preview img{display:block;width:100%;height:100%;object-fit:cover;object-position:top left;transition:opacity .25s}
+.b2-preview img.swap{opacity:0}
+.b2-preview figcaption{position:absolute;right:1.25rem;bottom:1.25rem;padding:0.375rem 0.75rem;border-radius:var(--radius-full);background:var(--c-ink);color:var(--c-paper);font-size:0.8125rem;font-weight:600}
+[data-tint="blue"]{--hue:var(--blue-50);--tint:color-mix(in srgb,var(--blue-50) 14%,var(--background-neutral-primary))}
+[data-tint="green"]{--hue:var(--green-50);--tint:color-mix(in srgb,var(--green-50) 16%,var(--background-neutral-primary))}
+[data-tint="coral"]{--hue:var(--red-50);--tint:color-mix(in srgb,var(--red-50) 13%,var(--background-neutral-primary))}
+
+@media (prefers-reduced-motion: reduce){.js .b2-sh .in{opacity:1;animation:none!important}.js .go .b2-sh .fl{animation:none}.b2-sh{translate:none;rotate:none}.b2-preview,.b2-preview img{transition:none}}
+@media (max-width:1023px){
+  .b2-more{grid-template-columns:1fr}
+  .b2-console{top:auto;bottom:2rem;right:-1rem}
+  .b2-preview{height:clamp(18rem,60vw,26rem)}
+  .b2-hero{min-height:calc(100svh - 5rem)}
+}
+@media (max-width:767px){
+  .b2-hero{min-height:40rem}
+  .b2-copy h1{font-size:clamp(2.25rem,10.5vw,3rem)}
+  .b2-wedge{width:11rem;top:-4.5rem;right:-3rem}
+  .b2-pill{width:10rem;height:3.75rem;top:auto;bottom:16rem;right:-4rem}
+  .b2-console{width:17.5rem;bottom:-3.5rem;right:auto;left:22%}
+  .b2-item{grid-template-columns:2.5rem 1fr;}
+  .b2-item > svg{display:none}
+}
+</style>
+<script src="../assets/app.js" defer></script>
+<script src="concepts.js" defer></script>
+</head>
+<body class="cx">
+<div class="cx-frame" style="min-height:0">
+  <header class="cx-head">
+    <a class="cx-logo" href="index.html" aria-label="JSDS concepts">JSDS<i></i></a>
+    <nav class="cx-nav" aria-label="Site">
+      <a href="../index.html" aria-label="Search the site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></a>
+      <a href="../components/button.html" aria-label="Components"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg></a>
+    </nav>
+  </header>
+</div>
+
+<main class="cx-stage b2-hero" data-b2-hero>
+  <div class="b2-copy">
+    <h1 aria-label="Design that helps you secure faster"><span class="ln cx-w" aria-hidden="true">Design that helps you</span><span class="ln cx-w" aria-hidden="true">secure faster</span></h1>
+    <p class="rise">A unified design system built to help teams detect, decide, and respond faster.</p>
+    <a class="cx-btn rise" href="../home/getting-started.html">Get started <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+  <div class="b2-sh b2-wedge" aria-hidden="true"><div class="fl"><div class="in"></div></div></div>
+  <div class="b2-sh b2-pill" aria-hidden="true"><div class="fl"><div class="in"></div></div></div>
+  <div class="b2-sh b2-console" aria-hidden="true"><div class="fl"><div class="in">
+    <div class="b2-bar"><i></i><i></i><i></i><b></b></div>
+    <div class="b2-body"><span class="b2-shield"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.998 2l.118 .007l.059 .008l.061 .013l.111 .034a.993 .993 0 0 1 .217 .112l.104 .082l.255 .218a11 11 0 0 0 7.189 2.537l.342 -.01a1 1 0 0 1 1.005 .717a13 13 0 0 1 -9.208 16.25a1 1 0 0 1 -.502 0a13 13 0 0 1 -9.209 -16.25a1 1 0 0 1 1.005 -.717a11 11 0 0 0 7.531 -2.527l.263 -.225l.096 -.075a.993 .993 0 0 1 .217 -.112l.112 -.034a.97 .97 0 0 1 .119 -.021l.115 -.007zm3.71 7.293a1 1 0 0 0 -1.415 0l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.32 1.497l2 2l.094 .083a1 1 0 0 0 1.32 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z"/></svg></span></div>
+  </div></div></div>
+</main>
+
+<div class="cx-frame" style="min-height:0">
+  <section class="b2-more" aria-label="Start with JSDS">
+    <div class="b2-list">
+      <h2>Start here</h2>
+      <ul>
+        <li><a class="b2-item on" href="../home/getting-started.html" data-tint="blue" data-shot="dashboard" data-cap="Dashboard pattern"><span class="b2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></span><span><b>Guide site</b><span>Rules, examples and specs for every component and pattern.</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+        <li><a class="b2-item" href="../resources/react.html" data-tint="green" data-shot="policy-settings" data-cap="Policy settings pattern"><span class="b2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></svg></span><span><b>React package</b><span>The same components, ready to drop into a product.</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+        <li><a class="b2-item" href="../resources/figma.html" data-tint="coral" data-shot="log-viewer" data-cap="Log viewer pattern"><span class="b2-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="15" cy="12" r="3"/><path d="M9 3h3v6H9a3 3 0 0 1 0-6zM12 3h3a3 3 0 0 1 0 6h-3zM9 9h3v6H9a3 3 0 0 1 0-6zM12 15H9a3 3 0 1 0 3 3z"/></svg></span><span><b>Figma library</b><span>Tokens, styles and components for design work.</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+      </ul>
+      <p class="b2-meta" data-b2-meta>v0.9</p>
+    </div>
+    <div class="b2-preview" data-tint="blue" data-b2-preview>
+      <figure><img src="img/dashboard.png" alt="Dashboard pattern built with JSDS"></figure>
+      <figcaption aria-hidden="true">Dashboard pattern</figcaption>
+    </div>
+  </section>
+  <footer class="cx-foot">
+    <div class="cx-chips" data-cx-chips role="group" aria-label="Product color"><span>Product color</span></div>
+    <nav class="cx-switch" aria-label="Concepts"><a href="a1-build.html">A1</a><a href="a2-tokens.html">A2</a><a href="a3-jsds.html">A3</a><a href="b1-simple.html">B1</a><a href="b2-visual.html" aria-current="page">B2</a><a href="b3-signal.html">B3</a><a href="b4-balance.html">B4</a><a href="index.html">All</a></nav>
+  </footer>
+</div>
+<script>
+addEventListener("DOMContentLoaded", function () {
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* 스크롤 패럴랙스 — 히어로가 보이는 동안 도형마다 다른 속도로 위로 · 조금 더 회전 */
+  var hero = document.querySelector("[data-b2-hero]");
+  if (!reduce) {
+    var ticking = false;
+    addEventListener("scroll", function () {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(function () { ticking = false; hero.style.setProperty("--sy", Math.min(scrollY, innerHeight * 1.2).toFixed(1)); });
+    }, { passive: true });
+  }
+  /* 목록 아래 수 — SEARCH_INDEX(app.js)에서 센다 */
+  var idx = typeof SEARCH_INDEX !== "undefined" ? SEARCH_INDEX : [];
+  var n = function (sec) { return idx.filter(function (x) { return x.s === sec && x.t !== "Overview"; }).length; };
+  document.querySelector("[data-b2-meta]").textContent = "v0.9 · " + n("Components") + " components · " + n("Patterns") + " patterns";
+  /* 목록 → 미리보기. 올리거나 포커스하면 그 항목의 캡처와 바탕 틴트로 */
+  var pv = document.querySelector("[data-b2-preview]"), img = pv.querySelector("img"), cap = pv.querySelector("figcaption");
+  var items = document.querySelectorAll(".b2-item");
+  items.forEach(function (it) { new Image().src = "img/" + it.dataset.shot + ".png"; });
+  function show(it) {
+    if (it.classList.contains("on")) return;
+    items.forEach(function (x) { x.classList.toggle("on", x === it); });
+    pv.dataset.tint = it.dataset.tint; cap.textContent = it.dataset.cap;
+    var next = function () { img.src = "img/" + it.dataset.shot + ".png"; img.alt = it.dataset.cap + " built with JSDS"; img.classList.remove("swap"); };
+    if (reduce) return next();
+    img.classList.add("swap"); setTimeout(next, 180);
+  }
+  items.forEach(function (it) { it.addEventListener("pointerenter", function () { show(it); }); it.addEventListener("focus", function () { show(it); }); });
+});
+</script>
+</body>
+</html>

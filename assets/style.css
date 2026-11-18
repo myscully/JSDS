@@ -257,6 +257,8 @@ code{font-size:inherit}
 /* ---------- Header (브랜드 · 버전 · 상단 메뉴 · 아이콘 버튼) ---------- */
 .header{position:sticky;top:0;z-index:20;height:var(--header-h);display:flex;align-items:stretch;gap:var(--space-3);padding:0 var(--space-6);background:var(--background-neutral-primary);max-width:var(--shell-max);margin:0 auto}
 .brand{display:flex;align-items:center;gap:0.625rem;text-decoration:none;font-weight:700;font-size:var(--font-size-18);letter-spacing:-.01em;white-space:nowrap}
+.brand .logo{display:inline-flex;align-items:baseline;gap:0.0625rem;font-size:var(--font-size-22);font-weight:800;letter-spacing:-0.03em}   /* JSDS + 제품 색 점(사람의 결정 2026-11-18 — B4 의 로고를 모든 페이지에) */
+.brand .logo i{width:0.375rem;height:0.375rem;border-radius:50%;background:var(--surface-brand-primary);background-image:var(--surface-brand-gradient)}
 .ver{display:flex;align-items:center;font-size:var(--font-size-12);color:var(--foreground-neutral-secondary);padding:0 var(--space-3);white-space:nowrap}
 /* 상단 섹션 메뉴: 우측 정렬 */
 .topnav{display:flex;align-items:stretch;margin-left:auto;min-width:0;overflow-x:auto;scrollbar-width:none}
@@ -491,20 +493,99 @@ table.type-table td .smp{display:block;color:var(--foreground-neutral-primary)}
 .ov-card .thumb .mini{transform:scale(.85);pointer-events:none;display:flex;gap:0.5rem;align-items:center;justify-content:center;flex-wrap:wrap;max-width:100%}
 .ov-card .label{padding:0.875rem 1rem;font-size:var(--font-size-16);font-weight:600;display:flex;align-items:center;gap:0.5rem}
 .ov-card .label small{margin-left:auto;font-weight:500;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12)}
-/* Home hero + section cards */
-.hero{padding:var(--space-20) var(--space-16) var(--space-16);text-align:center;position:relative;overflow:hidden}
-.hero h1{justify-content:center;font-size:var(--font-size-56);line-height:4.5rem;letter-spacing:-0.0319em;margin:0 0 var(--space-4)}   /* Display 1 (사람의 결정 2026-11-12) — 좁은 화면은 아래 767 에서 Title 1 */
-.hero .sub{color:var(--foreground-neutral-secondary);margin:0 auto}
-.hero svg.wave{position:absolute;left:0;right:0;bottom:-0.625rem;width:100%;height:10rem;z-index:-1;opacity:.9;color:var(--line-neutral-secondary)}
-.home-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--card-gap);padding:var(--space-12) var(--space-16) var(--space-20);max-width:70rem;margin:0 auto}
-.home-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);overflow:hidden;background:var(--surface-elevated-primary);transition:box-shadow var(--motion-fast),border-color var(--motion-fast)}
-.home-card:hover{border-color:var(--line-neutral-primary);box-shadow:var(--shadow-2)}
-.home-card .art{height:13.75rem;background:var(--background-neutral-secondary);padding:var(--space-8);display:flex;flex-direction:column;justify-content:flex-end;gap:0.375rem}
-.home-card .art b{font-size:var(--font-size-28);line-height:1.25;letter-spacing:-.02em;font-weight:800;text-wrap:balance}
-.home-card .art span{font-size:var(--font-size-24);font-weight:700;color:var(--foreground-disable-primary);letter-spacing:-.01em}
-.home-card .body{padding:1.125rem 1.25rem}
-.home-card .body b{display:block;font-size:var(--font-size-16);margin-bottom:0.25rem}
-.home-card .body span{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary)}
+/* Home — B4 Balance(사람의 결정 2026-11-18). 가운데 정렬 카피 + 양쪽 대각선으로 균형 잡은 도형 넷
+   (왼쪽 위 주황 반원 · 왼쪽 아래 방패 / 오른쪽 위 빨강 부채꼴 · 오른쪽 아래 초록 알약) + 바로가기 배너 셋.
+   방패 · 배너 아이콘의 포인트만 제품 색(AI 는 면 그라데이션)이고 도형 셋은 고정 램프 색 — 제품 색을 바꿔도 그대로다.
+   움직임은 메인 히어로만 예외(사람의 결정 2026-11-18 — verify 의 HOME_MOTION): 글자 떠오르기 0.9초 · 도형 들어오기 1.3초(순차) · 도형 떠 있기 8초 반복.
+   data-hm 은 index 의 head 스크립트가 줄인 모션이 아닐 때만 붙이므로, 줄인 모션 · 스크립트 없음이면 처음부터 마지막 모습이다.
+   스크롤 패럴랙스는 app.js 가 루트에 --hm-sy(스크롤 px)를 적는다. 글자 위 도형은 스크롤보다 빨리 올라가고(--hm-k 양수),
+   아래 도형은 느리게(음수) — 어느 쪽도 글자 쪽으로 오지 않는다. 배너 hover 는 --motion-* 토큰 */
+.hm{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;min-height:calc(100vh - var(--header-h));min-height:calc(100svh - var(--header-h))}
+.hm svg,.hm-more svg{display:block}
+.hm-copy{position:relative;z-index:3;width:100%;max-width:90rem;margin:0 auto;padding:0 clamp(1rem,4vw,4rem) clamp(2rem,6vh,4rem);text-align:center}
+.hm h1{display:block;margin:0;font-size:clamp(2.5rem,6vw,6rem);font-weight:700;letter-spacing:-0.045em;line-height:1.04}   /* 화면 폭에 따라 40 ~ 96 — 텍스트 스타일 표 밖(사람의 결정 2026-11-18, behave.type 예외) */
+.hm-copy p{margin:1.5rem auto 0;max-width:54rem;font-size:clamp(1rem,1.3vw,1.1875rem);line-height:1.6;color:var(--foreground-neutral-secondary);word-break:keep-all}
+.hm-copy p span{display:block}
+.hm-copy p span+span{margin-top:0.25rem}
+.hm-copy>:nth-child(2){--hm-i:1}
+.hm-copy>:nth-child(3){--hm-i:2}
+.hm-btn{display:inline-flex;align-items:center;gap:0.625rem;margin-top:2rem;height:3rem;padding:0 1.375rem;border-radius:var(--radius-full);background:var(--foreground-neutral-primary);color:var(--background-neutral-primary);font-size:var(--font-size-15);font-weight:600;text-decoration:none;transition:gap var(--motion-slow)}
+.hm-btn:hover{gap:1rem;text-decoration:none}
+.hm-btn svg{width:1rem;height:1rem}
+.hm-btn:focus-visible,.hm-ban:focus-visible{outline:2px solid var(--foreground-neutral-primary);outline-offset:2px}
+/* 도형 — 바깥: 자리 + 스크롤 패럴랙스, .hm-fl: 느린 떠 있기, .hm-in: 들어오는 회전과 기본 기울기 */
+.hm-sh{position:absolute;z-index:1;pointer-events:none;translate:0 calc(var(--hm-sy,0) * var(--hm-k,0) * -1px);rotate:calc(var(--hm-sy,0) * var(--hm-kr,0) * 1deg)}
+.hm-fl,.hm-in{display:block;width:100%;height:100%}
+.hm-in{transform:rotate(var(--hm-rot,0deg))}
+:root[data-hm] .hm:not(.go) .hm-in,:root[data-hm] .hm:not(.go) .hm-rise{opacity:0}
+:root[data-hm] .hm.go .hm-rise{animation:hm-rise .9s cubic-bezier(.16,1,.3,1) calc(var(--hm-i,0) * 80ms) both}
+:root[data-hm] .hm.go .hm-in{animation:hm-in 1.3s cubic-bezier(.16,1,.3,1) calc(.25s + var(--hm-d,0s)) both}
+:root[data-hm] .hm.go .hm-fl{animation:hm-float 8s ease-in-out calc(1.8s + var(--hm-d,0s)) infinite alternate}
+@keyframes hm-rise{from{transform:translateY(0.5em);opacity:0}to{transform:none;opacity:1}}
+@keyframes hm-in{from{opacity:0;transform:translate(var(--hm-fx,30vw),var(--hm-fy,-20vh)) rotate(calc(var(--hm-rot,0deg) + 70deg))}to{opacity:1;transform:rotate(var(--hm-rot,0deg))}}
+@keyframes hm-float{from{transform:translateY(-0.375rem)}to{transform:translateY(0.375rem)}}
+.hm-half{width:clamp(4.5rem,5vw,5rem);height:clamp(9rem,10vw,10rem);top:clamp(5rem,16%,9rem);left:clamp(-2.5rem,-2vw,-1rem);--hm-k:.3;--hm-kr:.03;--hm-fx:-20vw;--hm-fy:-10vh;--hm-d:.06s}
+.hm-half .hm-in{background:var(--orange-50);border-radius:0 var(--radius-full) var(--radius-full) 0}
+.hm-wedge{width:clamp(14rem,30vw,30rem);aspect-ratio:1;top:calc(clamp(14rem,30vw,30rem) * -0.38);right:calc(clamp(14rem,30vw,30rem) * -0.22);--hm-rot:-14deg;--hm-k:.35;--hm-kr:.04;--hm-fx:20vw;--hm-fy:-30vh}
+.hm-wedge .hm-in{background:var(--red-50);border-radius:0 0 0 100%}
+.hm-pill{width:clamp(12rem,27vw,27rem);height:clamp(4.5rem,10vw,10rem);top:58%;right:calc(clamp(12rem,27vw,27rem) * -0.32);--hm-rot:-20deg;--hm-k:-.2;--hm-kr:-.03;--hm-fx:30vw;--hm-fy:0vh;--hm-d:.12s}
+.hm-pill .hm-in{background:var(--green-50);border-radius:var(--radius-full)}
+/* 방패 그림 — 옅은 제품 색 원 + 점선 궤도 + 체크가 든 방패, 궤도 위 위협(빨강) · 해결(초록) 점 */
+.hm-guard{z-index:2;width:clamp(16rem,23vw,22rem);aspect-ratio:1;bottom:clamp(1.5rem,5%,3rem);left:clamp(1rem,4vw,5rem);--hm-k:-.1;--hm-fx:-12vw;--hm-fy:30vh;--hm-d:.24s}
+.hm-guard .hm-in{position:relative}
+.hm-orbit{position:absolute;inset:3%;border-radius:50%;border:1.5px dashed var(--line-neutral-primary)}
+.hm-disc{position:absolute;inset:14%;border-radius:50%;background:linear-gradient(var(--surface-brand-subtle),var(--surface-brand-subtle)),var(--background-neutral-primary)}   /* 옅은 틴트가 반투명이라 바탕 위에 합성 — 뒤의 알약이 비치지 않게 */
+.hm-shield{position:absolute;left:29%;top:28%;width:42%;aspect-ratio:1;background:var(--surface-brand-primary);background-image:var(--surface-brand-gradient);-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11.884%202.007l.114%20-.007l.118%20.007l.059%20.008l.061%20.013l.111%20.034a.993%20.993%200%200%201%20.217%20.112l.104%20.082l.255%20.218a11%2011%200%200%200%207.189%202.537l.342%20-.01a1%201%200%200%201%201.005%20.717a13%2013%200%200%201%20-9.208%2016.25a1%201%200%200%201%20-.502%200a13%2013%200%200%201%20-9.209%20-16.25a1%201%200%200%201%201.005%20-.717a11%2011%200%200%200%207.531%20-2.527l.263%20-.225l.096%20-.075a.993%20.993%200%200%201%20.217%20-.112l.112%20-.034a.97%20.97%200%200%201%20.119%20-.021z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11.884%202.007l.114%20-.007l.118%20.007l.059%20.008l.061%20.013l.111%20.034a.993%20.993%200%200%201%20.217%20.112l.104%20.082l.255%20.218a11%2011%200%200%200%207.189%202.537l.342%20-.01a1%201%200%200%201%201.005%20.717a13%2013%200%200%201%20-9.208%2016.25a1%201%200%200%201%20-.502%200a13%2013%200%200%201%20-9.209%20-16.25a1%201%200%200%201%201.005%20-.717a11%2011%200%200%200%207.531%20-2.527l.263%20-.225l.096%20-.075a.993%20.993%200%200%201%20.217%20-.112l.112%20-.034a.97%20.97%200%200%201%20.119%20-.021z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat}
+.hm-check{position:absolute;left:39%;top:39%;width:22%;aspect-ratio:1;color:var(--brand-label)}
+.hm-check svg{width:100%;height:100%}
+.hm-dot{position:absolute;width:1.5rem;height:1.5rem;margin:-0.75rem 0 0 -0.75rem;border-radius:50%;box-shadow:0 0 0 0.5rem var(--background-neutral-primary)}
+.hm-dot.r{left:83%;top:17%;background:var(--red-50)}
+.hm-dot.g{left:17%;top:83%;background:var(--green-50)}
+/* 바로가기 배너 셋 — 그림은 포인트 하나만 제품 색인 큰 평면 아이콘. 올리면 면 색이 바뀌고 아이콘이 움직인다(카드는 뜨지 않음) */
+.hm-more{max-width:90rem;margin:0 auto;padding:0 clamp(1rem,4vw,4rem)}
+.hm-bans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;list-style:none;margin:clamp(1rem,4vw,3rem) 0 clamp(3.5rem,8vw,6rem);padding:0;max-width:none}
+.hm-bans li{margin:0}
+.hm-ban{display:flex;flex-direction:column;height:100%;border-radius:1.5rem;background:var(--background-neutral-secondary);overflow:hidden;color:inherit;text-decoration:none;transition:background-color var(--motion-base)}
+.hm-ban:hover{background:var(--surface-neutral-secondary);text-decoration:none}
+.hm-art{height:9.5rem;margin:1.5rem 1.5rem 0;display:flex;align-items:flex-end}
+.hm-txt{display:grid;grid-template-columns:1fr auto;gap:0.25rem 1rem;padding:1.5rem}
+.hm-txt b{font-size:var(--font-size-22);letter-spacing:-0.02em}
+.hm-txt>svg{grid-row:1/3;grid-column:2;align-self:start;width:1.5rem;height:1.5rem;transition:translate var(--motion-slow)}
+.hm-ban:hover .hm-txt>svg{translate:0.25rem 0}
+.hm-txt span{font-size:var(--font-size-14);line-height:1.55;color:var(--foreground-neutral-secondary)}
+.hm-txt em{grid-column:1/-1;margin-top:0.75rem;font-style:normal;font-size:var(--font-size-13);color:var(--foreground-neutral-tertiary);font-variant-numeric:tabular-nums}
+.hm-ic-f{display:flex}   /* Foundations — 겹친 색 원 셋, 제품 색은 앞의 하나. 올리면 벌어짐 */
+.hm-ic-f i{width:4.75rem;height:4.75rem;border-radius:50%;transition:margin-left var(--motion-slow)}
+.hm-ic-f i+i{margin-left:-1.75rem}
+.hm-ic-f i:nth-child(1){background:var(--red-50)}
+.hm-ic-f i:nth-child(2){background:var(--orange-50)}
+.hm-ic-f i:nth-child(3){background:var(--surface-brand-primary);background-image:var(--surface-brand-gradient)}
+.hm-ban:hover .hm-ic-f i+i{margin-left:-0.75rem}
+.hm-ic-c{position:relative;width:8.5rem;height:4.75rem;border-radius:var(--radius-full);background:var(--surface-brand-primary);background-image:var(--surface-brand-gradient)}   /* Components — 켜진 큰 스위치. 올리면 손잡이가 늘어남 */
+.hm-ic-c::after{content:"";position:absolute;right:0.5rem;top:0.5rem;width:3.75rem;height:3.75rem;border-radius:var(--radius-full);background:var(--static-white);box-shadow:var(--shadow-sm);transition:width var(--motion-slow)}
+.hm-ban:hover .hm-ic-c::after{width:5rem}
+.hm-ic-p{width:9rem;height:6.5rem;border-radius:1rem;background:var(--surface-neutral-strong);padding:0.625rem;display:grid;grid-template-columns:1.75rem 1fr;grid-template-rows:1fr 1fr;gap:0.5rem}   /* Patterns — 회색 창 하나, 본문 블록 하나만 제품 색. 올리면 그 블록이 커짐 */
+.hm-ic-p i{border-radius:0.5rem;background:var(--background-neutral-primary)}
+.hm-ic-p i:first-child{grid-row:1/3}
+.hm-ic-p b{border-radius:0.5rem;background:var(--surface-brand-primary);background-image:var(--surface-brand-gradient);width:62%;transition:width var(--motion-slow)}
+.hm-ban:hover .hm-ic-p b{width:100%}
+@media (max-width:1023px){
+  .hm{justify-content:flex-start;min-height:48rem}
+  .hm-copy{padding-top:clamp(3rem,8vh,5rem)}
+  .hm-bans{grid-template-columns:minmax(0,1fr)}
+  .hm-guard{bottom:2rem;left:calc(50% - 9rem);width:18rem}
+  .hm-pill{top:auto;bottom:6rem}
+  .hm-half{top:auto;bottom:9rem;width:3.5rem;height:7rem}
+}
+@media (max-width:767px){
+  .hm{min-height:46rem}
+  .hm h1{font-size:clamp(2.25rem,10.5vw,3rem)}
+  .hm-copy p{font-size:1rem}
+  .hm-wedge{width:11rem;top:-6rem;right:-3.5rem}
+  .hm-pill{width:9rem;height:3.5rem;bottom:13rem;right:-3.5rem}
+  .hm-guard{width:17.5rem;bottom:1.5rem;left:calc(50% - 8.75rem)}
+  .hm-half{width:2.5rem;height:5rem;bottom:3rem;left:-0.75rem}
+}
 
 /* Anatomy / demo panel */
 /* 예제 캔버스는 영역이지 옅은 면이 아니다 — 알파로 두면 그 위의 태그가 두 겹으로 쌓여 라벨이 AA 아래로 떨어진다 */
@@ -622,9 +703,6 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
   .header{padding:0 var(--space-4);gap:var(--space-2)}
   .page{padding:var(--space-8) var(--space-5) var(--space-12)}
   .drawer{padding:var(--space-5) var(--space-5) var(--space-16)}
-  .home-grid{grid-template-columns:1fr;padding:var(--space-8) var(--space-5) var(--space-12)}
-  .hero{padding:var(--space-12) var(--space-5) var(--space-10)}
-  .hero h1{font-size:var(--font-size-32);line-height:2.75rem;letter-spacing:-0.0253em}   /* Title 1 — 56 은 375 에서 두 줄 넘게 끊긴다 */
   dl.kv{grid-template-columns:minmax(0,1fr);gap:2px 0}
   dl.kv dt{margin-top:var(--space-3)}
   dl.kv dd{min-width:0}
@@ -1362,7 +1440,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .accordion::details-content{height:0;overflow:hidden;transition:height var(--motion-base),content-visibility var(--motion-base);transition-behavior:allow-discrete}
 .accordion[open]::details-content{height:auto}
 
-/* Card — .card 는 이름을 공유한다: .radio.card(Radio) · .chart-card(Data Visual) · .ov-card/.home-card(크롬).
+/* Card — .card 는 이름을 공유한다: .radio.card(Radio) · .chart-card(Data Visual) · .ov-card(크롬).
    아래에 선언을 추가하면 label.radio.card 가 함께 받으므로 Radio Button 페이지를 확인할 것.
    .card .title 은 .skeleton.title 과도 겹친다(loading 예제) — 뒤에 오는 .skeleton.title 이 height·width 를 이겨 지금은 무해 */
 .card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:var(--card-pad);display:flex;flex-direction:column;gap:0.75rem;min-width:16.25rem;position:relative;line-height:1.6}

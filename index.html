@@ -7,13 +7,14 @@
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/font-jp.css">
 <script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.setAttribute("data-hm","")</script>
 <script src="assets/app.js" defer></script>
 <script src="assets/ds.js" defer></script>
 </head>
 <body data-section="home" data-page="index" data-root="./">
 <a class="skip-link" href="#content">본문 바로가기</a>
 <header class="header">
-  <a class="brand" href="index.html"><span>JS Design System</span></a>
+  <a class="brand" href="index.html" aria-label="JS Design System 홈"><span class="logo" aria-hidden="true">JSDS<i></i></span></a>
   <span class="ver">v0.9</span>
   <nav class="topnav" aria-label="섹션"><a href="home/getting-started.html" class="">Home</a><a href="foundations/overview.html" class="">Foundations</a><a href="components/overview.html" class="">Components<span class="n">N</span></a><a href="patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="resources/react.html" class="">Resources</a></nav>
   <div class="header-right">
@@ -41,9 +42,24 @@
 <div class="shell full">
   <div class="main">
 <div id="content" class="home">
-<section class="hero"><h1>JS Design System</h1><p class="sub">제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다.<br>모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</p>
-  <svg class="wave" viewBox="0 0 1440 160" preserveAspectRatio="none"><path d="M0 90C240 20 480 20 720 80s480 90 720 10v70H0z" fill="url(#g)"></path><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".6"></stop><stop offset="1" stop-color="currentColor" stop-opacity="0"></stop></linearGradient></defs></svg></section>
-  <div class="home-grid"><a class="home-card" href="foundations/overview.html"><div class="art"><b>일관된 기반을 만드는<br>규칙과 토큰</b><span>Foundations</span></div><div class="body"><b>Foundations</b><span>모든 디자인 요소의 기반이 되는 가장 원자적인 단위</span></div></a><a class="home-card" href="components/overview.html"><div class="art"><b>복사해서 바로 쓰는<br>UI 컴포넌트 코드</b><span>Components</span></div><div class="body"><b>Components</b><span>사용자 인터페이스를 구성하는 재사용 가능한 요소</span></div></a><a class="home-card" href="patterns/overview.html"><div class="art"><b>반복 업무를 해결하는<br>화면 패턴</b><span>Patterns</span></div><div class="body"><b>Patterns</b><span>반복되는 업무 단위와 문제를 해결하는 가이드라인</span></div></a><a class="home-card" href="resources/react.html"><div class="art"><b>바로 가져다 쓰는<br>라이브러리와 토큰</b><span>Resources</span></div><div class="body"><b>Resources</b><span>라이브러리, 토큰, 변경 이력</span></div></a></div>
+<section class="hm" aria-labelledby="hm-title">
+  <div class="hm-copy">
+    <h1 id="hm-title" class="hm-rise">JS Design System</h1>
+    <p class="hm-rise"><span>제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다.</span><span>모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</span></p>
+    <a class="hm-btn hm-rise" href="home/getting-started.html">Get started <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+  </div>
+  <div class="hm-sh hm-half" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
+  <div class="hm-sh hm-wedge" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
+  <div class="hm-sh hm-pill" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
+  <div class="hm-sh hm-guard" role="img" aria-label="A solid shield with a check sits on a soft circle, with a red threat dot and a green resolved dot on the orbit around it."><span class="hm-fl"><span class="hm-in">
+    <span class="hm-orbit"></span><span class="hm-disc"></span><span class="hm-shield"></span><span class="hm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span><span class="hm-dot r"></span><span class="hm-dot g"></span>
+  </span></span></div>
+</section>
+<div class="hm-more"><ul class="hm-bans" aria-label="Shortcuts">
+<li><a class="hm-ban" href="foundations/overview.html"><span class="hm-art" aria-hidden="true"><span class="hm-ic-f"><i></i><i></i><i></i></span></span><span class="hm-txt"><b>Foundations</b><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><span>Color, type, grid and motion tokens shared by every product.</span><em>7 pages</em></span></a></li>
+<li><a class="hm-ban" href="components/overview.html"><span class="hm-art" aria-hidden="true"><span class="hm-ic-c"></span></span><span class="hm-txt"><b>Components</b><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><span>Accessible building blocks for dense security consoles.</span><em>46 components</em></span></a></li>
+<li><a class="hm-ban" href="patterns/overview.html"><span class="hm-art" aria-hidden="true"><span class="hm-ic-p"><i></i><i></i><b></b></span></span><span class="hm-txt"><b>Patterns</b><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><span>Whole screens for detecting, deciding and responding.</span><em>22 patterns</em></span></a></li>
+</ul></div>
 </div>
   </div>
 </div>

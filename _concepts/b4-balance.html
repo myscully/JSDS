@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSDS Concept B4 · Balance</title>
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="concepts.css">
+<style>
+/* B4 Balance — B2 의 틀(도형 들어오기 · 떠 있기 · 패럴랙스)에 가운데 정렬 카피, 양쪽 대각선으로 균형 잡은 도형
+   (왼쪽 위 주황 반원 · 왼쪽 아래 방패 / 오른쪽 위 빨강 부채꼴 · 오른쪽 아래 초록 알약), 아래는 아이콘형 바로가기 배너 셋.
+   B2 에서 가져온 규칙 뒤에 '가운데 정렬 · 양쪽 균형판' 블록이 자리 · 크기를 덮어쓴다. */
+.b2-hero{display:block;position:relative;overflow:hidden;min-height:calc(100vh - var(--header-h));min-height:calc(100svh - var(--header-h));--sy:0}
+.b2-copy{position:relative;z-index:2;max-width:90rem;margin:0 auto;padding:clamp(3rem,9vh,7rem) clamp(1rem,4vw,4rem) 0}
+.b2-copy h1{display:block;margin:0;font-size:clamp(2.5rem,6vw,6rem);font-weight:700;letter-spacing:-0.045em;line-height:1.04}
+.b2-copy h1 .ln{display:block}
+.b2-copy p{margin:1.5rem 0 0;max-width:30rem;font-size:clamp(1rem,1.3vw,1.1875rem);line-height:1.6;color:var(--foreground-neutral-secondary)}
+.b2-copy .cx-btn{margin-top:2rem;height:3rem;padding:0 1.375rem;font-size:0.9375rem;border-radius:var(--radius-full)}
+
+/* 도형 — 바깥: 자리 + 스크롤 패럴랙스, .fl: 느린 떠 있기, .in: 들어오는 회전과 기본 기울기 */
+.b2-sh{position:absolute;z-index:1;pointer-events:none;translate:0 calc(var(--sy) * var(--k,0) * -1px);rotate:calc(var(--sy) * var(--kr,0) * 1deg)}
+.b2-sh .fl{width:100%;height:100%}
+.b2-sh .in{width:100%;height:100%;transform:rotate(var(--rot,0deg))}
+.js .b2-sh .in{opacity:0}
+.js .go .b2-sh .in{animation:b2-in 1.3s var(--ease-out) calc(.25s + var(--d,0s)) both}
+.js .go .b2-sh .fl{animation:b2-float 8s ease-in-out calc(1.8s + var(--d,0s)) infinite alternate}
+@keyframes b2-in{from{opacity:0;transform:translate(var(--fx,30vw),var(--fy,-20vh)) rotate(calc(var(--rot,0deg) + 70deg))}to{opacity:1;transform:rotate(var(--rot,0deg))}}
+@keyframes b2-float{from{transform:translateY(-6px)}to{transform:translateY(6px)}}
+
+.b2-wedge{width:clamp(14rem,30vw,30rem);aspect-ratio:1;top:calc(clamp(14rem,30vw,30rem) * -0.38);right:calc(clamp(14rem,30vw,30rem) * -0.22);--rot:-14deg;--k:.35;--kr:.04;--fx:20vw;--fy:-30vh}
+.b2-wedge .in{background:var(--c-coral);border-radius:0 0 0 100%}
+.b2-pill{width:clamp(12rem,27vw,27rem);height:clamp(4.5rem,10vw,10rem);top:40%;right:calc(clamp(12rem,27vw,27rem) * -0.32);--rot:-20deg;--k:.55;--kr:-.03;--fx:30vw;--fy:0vh;--d:.12s}
+.b2-pill .in{background:var(--c-green);border-radius:var(--radius-full)}
+
+/* 방패 그림 — 옅은 제품 색 원 + 점선 궤도 + 체크가 든 방패, 궤도 위 위협(빨강) · 해결(초록) 점. 바로 세움 */
+.b2-guard{z-index:2;width:clamp(18rem,30vw,28rem);aspect-ratio:1;top:clamp(9rem,22%,14rem);right:clamp(1rem,9vw,10rem);--rot:0deg;--k:.8;--kr:0;--fx:10vw;--fy:40vh;--d:.24s}
+.b2-guard .in{position:relative}
+.p-orbit{position:absolute;inset:3%;border-radius:50%;border:1.5px dashed var(--line-neutral-primary)}
+.p-disc{position:absolute;inset:14%;border-radius:50%;background:linear-gradient(var(--surface-brand-subtle),var(--surface-brand-subtle)),var(--c-paper)} /* 옅은 틴트가 반투명이라 바탕 위에 합성 — 뒤의 알약이 비치지 않게 */
+.p-shield{position:absolute;left:29%;top:28%;width:42%;aspect-ratio:1;background:var(--c-prod);background-image:var(--c-prod-img);-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11.884%202.007l.114%20-.007l.118%20.007l.059%20.008l.061%20.013l.111%20.034a.993%20.993%200%200%201%20.217%20.112l.104%20.082l.255%20.218a11%2011%200%200%200%207.189%202.537l.342%20-.01a1%201%200%200%201%201.005%20.717a13%2013%200%200%201%20-9.208%2016.25a1%201%200%200%201%20-.502%200a13%2013%200%200%201%20-9.209%20-16.25a1%201%200%200%201%201.005%20-.717a11%2011%200%200%200%207.531%20-2.527l.263%20-.225l.096%20-.075a.993%20.993%200%200%201%20.217%20-.112l.112%20-.034a.97%20.97%200%200%201%20.119%20-.021z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20d%3D%22M11.884%202.007l.114%20-.007l.118%20.007l.059%20.008l.061%20.013l.111%20.034a.993%20.993%200%200%201%20.217%20.112l.104%20.082l.255%20.218a11%2011%200%200%200%207.189%202.537l.342%20-.01a1%201%200%200%201%201.005%20.717a13%2013%200%200%201%20-9.208%2016.25a1%201%200%200%201%20-.502%200a13%2013%200%200%201%20-9.209%20-16.25a1%201%200%200%201%201.005%20-.717a11%2011%200%200%200%207.531%20-2.527l.263%20-.225l.096%20-.075a.993%20.993%200%200%201%20.217%20-.112l.112%20-.034a.97%20.97%200%200%201%20.119%20-.021z%22%2F%3E%3C%2Fsvg%3E") center/contain no-repeat}
+.p-check{position:absolute;left:39%;top:39%;width:22%;aspect-ratio:1;color:var(--brand-label)}
+.p-check svg{width:100%;height:100%}
+.p-dot{position:absolute;width:1.5rem;height:1.5rem;margin:-0.75rem 0 0 -0.75rem;border-radius:50%;box-shadow:0 0 0 0.5rem var(--c-paper)}
+.p-dot.r{left:83%;top:17%;background:var(--c-coral)}
+.p-dot.g{left:17%;top:83%;background:var(--c-green)}
+
+/* 아래 — 바로가기 배너 셋(B3 틀), 그림은 포인트 하나짜리 큰 평면 아이콘 */
+.b3-banners{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;list-style:none;margin:clamp(1rem,4vw,3rem) 0 clamp(3.5rem,8vw,6rem);padding:0;max-width:none}
+.b3-ban{display:flex;flex-direction:column;height:100%;border-radius:1.5rem;background:var(--background-neutral-secondary);overflow:hidden;transition:background-color .25s}
+.b3-ban:hover{background:var(--surface-neutral-secondary)}
+.b3-ban:focus-visible{outline:2px solid var(--c-ink);outline-offset:3px}
+.b3-art{height:9.5rem;margin:1.5rem 1.5rem 0;display:flex;align-items:flex-end}
+.b3-txt{display:grid;grid-template-columns:1fr auto;gap:0.25rem 1rem;padding:1.5rem}
+.b3-txt b{font-size:1.375rem;letter-spacing:-0.02em}
+.b3-txt > svg{grid-row:1/3;grid-column:2;align-self:start;width:1.5rem;height:1.5rem;transition:translate .3s var(--ease-pop)}
+.b3-ban:hover .b3-txt > svg{translate:0.25rem 0}
+.b3-txt span{font-size:0.875rem;line-height:1.55;color:var(--foreground-neutral-secondary)}
+.b3-txt em{grid-column:1/-1;margin-top:0.75rem;font-style:normal;font-size:0.8125rem;color:var(--foreground-neutral-tertiary);font-variant-numeric:tabular-nums}
+/* Foundations — 겹친 색 원 셋, 제품 색은 앞의 하나. 올리면 벌어짐 */
+.ic-f{display:flex}
+.ic-f i{width:4.75rem;height:4.75rem;border-radius:50%;background:var(--c);transition:margin .45s var(--ease-pop)}
+.ic-f i + i{margin-left:-1.75rem}
+.ic-f i:nth-child(1){--c:var(--c-coral)}.ic-f i:nth-child(2){--c:var(--c-amber)}
+.ic-f i:nth-child(3){background:var(--c-prod);background-image:var(--c-prod-img)}
+.b3-ban:hover .ic-f i + i{margin-left:-0.75rem}
+/* Components — 켜진 큰 스위치. 올리면 손잡이가 늘었다 돌아옴 */
+.ic-c{position:relative;width:8.5rem;height:4.75rem;border-radius:var(--radius-full);background:var(--c-prod);background-image:var(--c-prod-img)}
+.ic-c::after{content:"";position:absolute;right:0.5rem;top:0.5rem;width:3.75rem;height:3.75rem;border-radius:var(--radius-full);background:var(--static-white);box-shadow:0 2px 6px rgba(0,0,0,.18);transition:width .35s var(--ease-pop)}
+.b3-ban:hover .ic-c::after{width:5rem}
+/* Patterns — 회색 창 하나, 본문 블록 하나만 제품 색. 올리면 그 블록이 커짐 */
+.ic-p{width:9rem;height:6.5rem;border-radius:1rem;background:var(--surface-neutral-strong);padding:0.625rem;display:grid;grid-template-columns:1.75rem 1fr;grid-template-rows:1fr 1fr;gap:0.5rem}
+.ic-p i{border-radius:0.5rem;background:var(--background-neutral-primary)}
+.ic-p i:first-child{grid-row:1/3}
+.ic-p b{border-radius:0.5rem;background:var(--c-prod);background-image:var(--c-prod-img);width:62%;transition:width .5s var(--ease-out)}
+.b3-ban:hover .ic-p b{width:100%}
+
+@media (prefers-reduced-motion: reduce){.js .b2-sh .in{opacity:1;animation:none!important}.js .go .b2-sh .fl{animation:none}.b2-sh{translate:none;rotate:none}.ic-f i,.ic-c::after,.ic-p b,.b3-txt > svg{transition:none}}
+@media (max-width:1023px){
+  .b3-banners{grid-template-columns:1fr}
+  .b2-guard{top:auto;bottom:1.5rem;right:2rem;width:clamp(16rem,36vw,22rem)}
+  .b2-hero{min-height:calc(100svh - var(--header-h))}
+}
+@media (max-width:767px){
+  .b2-hero{min-height:44rem}
+  .b2-copy h1{font-size:clamp(2.25rem,10.5vw,3rem)}
+  .b2-wedge{width:11rem;top:-4.5rem;right:-3rem}
+  .b2-pill{width:10rem;height:3.75rem;top:auto;bottom:16rem;right:-4rem}
+  .b2-guard{width:16rem;bottom:1rem;right:auto;left:calc(50% - 8rem)}
+}
+
+/* 가운데 정렬 · 양쪽 균형판 — 앞의 규칙을 덮어씀.
+   패럴랙스: 글자 위 도형(반원 · 부채꼴)은 스크롤보다 빨리 올라가고(--k 양수), 아래 도형(방패 · 알약)은 느리게(--k 음수) — 어느 쪽도 글자 쪽으로 오지 않게 */
+.b2-hero{display:flex;flex-direction:column;justify-content:center}
+.b2-copy{z-index:3;width:100%;text-align:center;padding-top:0;padding-bottom:clamp(2rem,6vh,4rem)}
+.b2-copy p{margin-left:auto;margin-right:auto;max-width:54rem;word-break:keep-all}
+.b2-copy p .s{display:block}
+.b2-copy p .s + .s{margin-top:0.25rem}
+.b2-half{width:clamp(4.5rem,5vw,5rem);height:clamp(9rem,10vw,10rem);top:clamp(5rem,16%,9rem);left:clamp(-2.5rem,-2vw,-1rem);--rot:0deg;--k:.3;--kr:.03;--fx:-20vw;--fy:-10vh;--d:.06s}
+.b2-half .in{background:var(--c-amber);border-radius:0 999px 999px 0}
+.b2-pill{top:58%;--k:-.2}
+.b2-guard{top:auto;right:auto;bottom:clamp(1.5rem,5%,3rem);left:clamp(1rem,4vw,5rem);width:clamp(16rem,23vw,22rem);--fx:-12vw;--fy:30vh;--k:-.1}
+@media (max-width:1023px){
+  .b2-hero{justify-content:flex-start;min-height:48rem}
+  .b2-copy{padding-top:clamp(3rem,8vh,5rem)}
+  .b2-guard{bottom:2rem;left:calc(50% - 9rem);width:18rem}
+  .b2-pill{top:auto;bottom:6rem}
+  .b2-half{top:auto;bottom:9rem;width:3.5rem;height:7rem}
+}
+@media (max-width:767px){
+  .b2-hero{min-height:46rem}
+  .b2-wedge{top:-6rem;right:-3.5rem}
+  .b2-copy p{font-size:1rem}
+  .b2-guard{width:17.5rem;bottom:1.5rem;left:calc(50% - 8.75rem)}
+  .b2-pill{width:9rem;height:3.5rem;bottom:13rem;right:-3.5rem}
+  .b2-half{width:2.5rem;height:5rem;bottom:3rem;left:-0.75rem}
+}
+</style>
+<script src="../assets/app.js" defer></script>
+<script src="concepts.js" defer></script>
+</head>
+<body class="cx" data-root="../">
+<header class="header">
+  <a class="brand" href="../index.html" aria-label="JS Design System 홈"><span class="cx-logo" aria-hidden="true">JSDS<i></i></span></a>
+  <span class="ver">v0.9</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/getting-started.html" class="">Home</a><a href="../foundations/overview.html" class="">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../resources/react.html" class="">Resources</a></nav>
+  <div class="header-right">
+    <div class="hmenu">
+      <button class="hbtn" id="accentBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="제품 색 선택" title="제품 색"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"/><path d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg><span class="dot"></span></button>
+      <div class="pop accent-pop" id="accentPop" role="menu" aria-label="제품 색" hidden></div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="searchBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="검색 (/)" title="검색 (/)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg></button>
+      <div class="pop search-pop" id="searchPop" hidden>
+        <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="themeBtn" type="button" aria-label="테마 전환" title="테마 전환"><span class="i-sun"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656"/><path d="M6.343 17.657l-1.414 1.414"/><path d="M6.343 6.343l-1.414 -1.414"/><path d="M17.657 6.343l1.414 -1.414"/><path d="M17.657 17.657l1.414 1.414"/><path d="M4 12h-2"/><path d="M12 4v-2"/><path d="M20 12h2"/><path d="M12 20v2"/></svg></span><span class="i-moon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg></span></button>
+    </div>
+    <div class="hmenu hmenu-nav">
+      <button class="hbtn" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="메뉴" title="메뉴"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="drawer-dim" id="menuDim" hidden></div>
+<div class="drawer" id="menuPop" role="dialog" aria-label="메뉴" hidden></div>
+
+<main class="cx-stage b2-hero" data-b2-hero>
+  <div class="b2-copy">
+    <h1 aria-label="JS Design System"><span class="ln cx-w" aria-hidden="true">JS Design System</span></h1>
+    <p class="rise" lang="ko"><span class="s">제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다.</span><span class="s">모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</span></p>
+    <a class="cx-btn rise" href="../home/getting-started.html">Get started <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+  <div class="b2-sh b2-half" aria-hidden="true"><div class="fl"><div class="in"></div></div></div>
+  <div class="b2-sh b2-wedge" aria-hidden="true"><div class="fl"><div class="in"></div></div></div>
+  <div class="b2-sh b2-pill" aria-hidden="true"><div class="fl"><div class="in"></div></div></div>
+  <div class="b2-sh b2-guard" role="img" aria-label="A solid shield with a check sits on a soft circle, with a red threat dot and a green resolved dot on the orbit around it."><div class="fl"><div class="in">
+    <span class="p-orbit" aria-hidden="true"></span>
+    <span class="p-disc" aria-hidden="true"></span>
+    <span class="p-shield" aria-hidden="true"></span>
+    <span class="p-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+    <span class="p-dot r" aria-hidden="true"></span>
+    <span class="p-dot g" aria-hidden="true"></span>
+  </div></div></div>
+</main>
+
+<div class="cx-frame" style="min-height:0">
+  <ul class="b3-banners" aria-label="Shortcuts">
+    <li><a class="b3-ban" href="../foundations/overview.html"><span class="b3-art" aria-hidden="true"><span class="ic-f"><i></i><i></i><i></i></span></span><span class="b3-txt"><b>Foundations</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span>Color, type, grid and motion tokens shared by every product.</span><em data-count="Foundations">pages</em></span></a></li>
+    <li><a class="b3-ban" href="../components/button.html"><span class="b3-art" aria-hidden="true"><span class="ic-c"></span></span><span class="b3-txt"><b>Components</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span>Accessible building blocks for dense security consoles.</span><em data-count="Components">components</em></span></a></li>
+    <li><a class="b3-ban" href="../patterns/overview.html"><span class="b3-art" aria-hidden="true"><span class="ic-p"><i></i><i></i><b></b></span></span><span class="b3-txt"><b>Patterns</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span>Whole screens for detecting, deciding and responding.</span><em data-count="Patterns">patterns</em></span></a></li>
+  </ul>
+  <footer class="cx-foot">
+    <div class="cx-chips" data-cx-chips role="group" aria-label="Product color"><span>Product color</span></div>
+    <nav class="cx-switch" aria-label="Concepts"><a href="a1-build.html">A1</a><a href="a2-tokens.html">A2</a><a href="a3-jsds.html">A3</a><a href="b1-simple.html">B1</a><a href="b2-visual.html">B2</a><a href="b3-signal.html">B3</a><a href="b4-balance.html" aria-current="page">B4</a><a href="index.html">All</a></nav>
+  </footer>
+</div>
+<script>
+addEventListener("DOMContentLoaded", function () {
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* 스크롤 패럴랙스 — 히어로가 보이는 동안 도형마다 다른 속도로 위로 · 조금 더 회전 */
+  var hero = document.querySelector("[data-b2-hero]");
+  if (!reduce) {
+    var ticking = false;
+    addEventListener("scroll", function () {
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(function () { ticking = false; hero.style.setProperty("--sy", Math.min(scrollY, innerHeight * 1.2).toFixed(1)); });
+    }, { passive: true });
+  }
+  /* 배너의 수 — SEARCH_INDEX(app.js)에서 센다 */
+  var idx = typeof SEARCH_INDEX !== "undefined" ? SEARCH_INDEX : [];
+  document.querySelectorAll("[data-count]").forEach(function (el) { var n = idx.filter(function (x) { return x.s === el.dataset.count && x.t !== "Overview"; }).length; el.textContent = n + " " + el.textContent; });
+});
+</script>
+</body>
+</html>

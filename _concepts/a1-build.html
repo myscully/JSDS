@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSDS Concept A1 · Build</title>
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="concepts.css">
+<style>
+/* A1 Build — 큰 단어 넷 사이에 도형. 들어올 때 차례로 · 알약 토글 · 패럴랙스 · 단어 hover 에 짝 도형 · 도형 누르면 색 */
+.a1{--fs:clamp(3rem,min(9.6vw,16vh),9.5rem)}
+.a1-type{font-size:var(--fs);display:flex;flex-direction:column;gap:0.04em}
+.a1 .l3,.a1 .l4{margin-left:22%}
+.a1-key{position:relative;width:1.3em;height:0.62em;flex:none;display:inline-block}
+.a1-key .sh.c{position:absolute;right:0.12em;top:0}
+.a1-key svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke:var(--c-ink);stroke-width:9;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.a1-key svg path,.a1-key svg circle{stroke-dasharray:var(--len);--len:200}
+.js .go .a1-key svg path,.js .go .a1-key svg circle{animation:cx-draw 1s var(--ease-out) .55s both}
+.a1-up{width:0.5em;height:0.62em;flex:none;margin:0 0.06em;transition:translate .35s var(--ease-pop)}
+.a1-up svg{width:100%;height:100%;fill:none;stroke:var(--c-ink);stroke-width:11;stroke-linecap:butt;stroke-linejoin:miter}
+.l1:hover .a1-up{translate:0.08em -0.08em}
+.a1-x{width:0.26em;height:0.26em;flex:none}
+.a1-x svg{width:100%;height:100%;fill:none;stroke:var(--c-ink);stroke-width:5;stroke-linecap:round}
+.a1-pill{width:1.42em;height:0.66em;border-radius:999px;margin-left:0.1em;display:inline-flex;align-items:center;padding:0 0.07em;transition:background-color .45s var(--ease-out),translate .6s var(--ease-out)}
+.a1-pill.off{background-color:var(--c-amber);background-image:none}
+.a1-pill .ball{width:0.5em;height:0.5em;border-radius:50%;background:var(--c-coral);flex:none;transition:opacity .4s,scale .5s var(--ease-pop)}
+.a1-pill .dash{flex:1;height:0;border-top:0.05em dashed var(--c-ink);margin:0 0.06em;opacity:.85}
+.a1-pill .knob{position:absolute;right:0.07em;top:50%;width:0.44em;height:0.44em;margin-top:-0.22em;border-radius:50%;border:0.075em solid var(--c-ink);background:var(--static-white);transition:right .55s var(--ease-pop)}
+.a1-pill.off .knob{right:calc(100% - 0.51em)}
+.a1-pill.off .ball{opacity:0;scale:.3}
+.a1-word-u{position:relative}
+.a1-word-u::after{content:"";position:absolute;left:0;right:0;bottom:-0.06em;height:0.07em;border-radius:999px;background:var(--c-ink);transform-origin:left}
+.js .go .a1-word-u::after{animation:a1-line .9s var(--ease-out) .9s both}
+@keyframes a1-line{from{transform:scaleX(0)}}
+.a1-star{width:0.26em;height:0.26em;margin-left:0.06em}
+.a1-star svg{width:100%;height:100%;fill:none;stroke:var(--c-ink);stroke-width:3.2;stroke-linecap:round}
+.a1-tris{display:inline-flex;gap:0.03em;margin-left:0.14em}
+.a1-tris .sh.tri{width:0.72em;height:0.72em}
+.a1-intro{position:absolute;left:0;bottom:clamp(2rem,5vw,4rem)}
+@media (prefers-reduced-motion: reduce){.a1-pill,.a1-pill .knob,.a1-pill .ball{transition:none}}
+@media (max-width:1023px){.a1 .l3,.a1 .l4{margin-left:12%}.a1-intro{position:static;margin-top:2.5rem}}
+@media (max-width:767px){.a1 .l3,.a1 .l4{margin-left:0}.a1 .cx-line{flex-wrap:nowrap;white-space:nowrap}}
+</style>
+<script src="../assets/app.js" defer></script>
+<script src="concepts.js" defer></script>
+</head>
+<body class="cx" data-parallax>
+<div class="cx-frame">
+  <header class="cx-head">
+    <a class="cx-logo" href="index.html" aria-label="JSDS concepts">JSDS<i></i></a>
+    <nav class="cx-nav" aria-label="Site">
+      <a href="../index.html" aria-label="Search the site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></a>
+      <a href="../components/button.html" aria-label="Components"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg></a>
+    </nav>
+  </header>
+
+  <main class="cx-stage a1">
+    <h1 class="cx-type a1-type" aria-label="Build secure products faster.">
+      <span class="cx-line l1" aria-hidden="true">
+        <span class="a1-key"><span class="sh c" id="s-coral" data-cycle style="--z:.9"></span><svg viewBox="0 0 130 62"><circle cx="16" cy="31" r="12"/><path d="M28 31H118M98 12l20 19-20 19"/></svg></span>
+        <span class="cx-w" data-kick="s-blue s-green">build</span>
+        <span class="a1-up rise"><svg viewBox="0 0 50 62"><path d="M8 40 40 8M14 8h26v26M6 56h38"/></svg></span>
+        <span class="sh d" id="s-blue" data-cycle style="--c:var(--c-blue);--z:1.4"></span>
+        <span class="a1-x rise"><svg viewBox="0 0 26 26"><path d="M5 5l16 16M21 5 5 21"/></svg></span>
+        <span class="sh d" id="s-green" data-cycle style="--c:var(--c-green);--z:.7"></span>
+      </span>
+      <span class="cx-line l2" aria-hidden="true">
+        <span class="cx-w" data-kick="s-pill">secure</span>
+        <span class="sh prod a1-pill" id="s-pill" data-cycle style="--z:.5" title="Click: next product color"><i class="ball"></i><i class="dash"></i><i class="knob"></i></span>
+      </span>
+      <span class="cx-line l3" aria-hidden="true">
+        <span class="sh half-l" id="s-purple" data-cycle style="--z:1.1"></span><span class="sh half-r" id="s-green2" data-cycle style="--z:1.1;margin-right:.08em"></span>
+        <span class="cx-w" data-kick="s-purple s-green2">products</span>
+      </span>
+      <span class="cx-line l4" aria-hidden="true">
+        <span class="cx-w a1-word-u" data-kick="s-tri1 s-tri2">faster.</span>
+        <span class="a1-star rise"><svg viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></svg></span>
+        <span class="a1-tris"><span class="sh tri" id="s-tri1" data-cycle style="--z:1.6"></span><span class="sh tri flip" id="s-tri2" data-cycle style="--c:var(--c-blue);--z:.8"></span></span>
+      </span>
+    </h1>
+    <div class="cx-intro a1-intro rise">
+      <p>JSDS is the <em>( security console )</em> design system behind every Jiran security product. One token, three outputs.</p>
+      <a class="cx-btn" href="../home/getting-started.html">Get started <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
+    </div>
+  </main>
+
+  <footer class="cx-foot">
+    <div class="cx-chips" data-cx-chips role="group" aria-label="Product color"><span>Product color</span></div>
+    <nav class="cx-switch" aria-label="Concepts"><a href="a1-build.html" aria-current="page">A1</a><a href="a2-tokens.html">A2</a><a href="a3-jsds.html">A3</a><a href="b1-simple.html">B1</a><a href="b2-visual.html">B2</a><a href="b3-signal.html">B3</a><a href="b4-balance.html">B4</a><a href="index.html">All</a></nav>
+  </footer>
+</div>
+<script>
+/* 알약 토글 — 3초마다 켜짐 ↔ 꺼짐. 줄인 모션이면 켜진 채 */
+addEventListener("DOMContentLoaded", function () {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var p = document.getElementById("s-pill");
+  setTimeout(function tick() { p.classList.toggle("off"); setTimeout(tick, 3000); }, 2600);
+});
+</script>
+</body>
+</html>

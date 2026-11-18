@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSDS Main Concepts</title>
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="concepts.css">
+<style>
+/* 시안 셋을 고르는 자리 — 사이트 밖 */
+.hub{padding:clamp(2.5rem,6vw,5rem) 0;justify-content:flex-start}
+.hub h1{font-size:clamp(2.5rem,6vw,5rem);font-weight:800;letter-spacing:-0.05em;line-height:1;margin:0 0 1rem;display:block}
+.hub > p{margin:0 0 clamp(2rem,5vw,3.5rem);color:var(--foreground-neutral-secondary);max-width:36rem}
+.hub-list{width:100%;max-width:none;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;list-style:none;margin:0;padding:0}
+.hub-card{display:flex;flex-direction:column;border:1px solid var(--c-ink);height:100%;transition:background-color .25s}
+.hub-card:hover{background:var(--surface-neutral-secondary)}
+.hub-card:focus-visible{outline:2px solid var(--c-ink);outline-offset:3px}
+.hub-art{height:13rem;border-bottom:1px solid var(--c-ink);display:flex;align-items:center;justify-content:center;gap:0.06em;font-size:4.5rem;font-weight:800;letter-spacing:-0.06em;overflow:hidden}
+.hub-art.dark{background:var(--cool-neutral-15);color:var(--static-white)}
+.hub-art .sh{opacity:1!important;animation:none!important}
+.hub-card:hover .hub-art .sh{animation:cx-kick .7s var(--ease-pop)!important}
+.hub-body{padding:1.25rem 1.5rem 1.5rem}
+.hub-body b{display:block;font-size:1.25rem;letter-spacing:-0.02em;margin-bottom:0.375rem}
+.hub-body span{font-size:0.875rem;color:var(--foreground-neutral-secondary);line-height:1.55;display:block}
+.hub-art.b1{font-size:3rem;letter-spacing:-0.05em;flex-direction:column;gap:0}
+.hub-art.b1 u{text-decoration:none;box-shadow:inset 0 -0.12em 0 var(--c-prod)}
+.hub-art.b2{position:relative;justify-content:flex-start;padding-left:1.5rem;font-size:2.5rem;line-height:1}
+.hub-art.b2 .w{position:absolute;right:-2.5rem;top:-2.5rem;width:7rem;height:7rem;border-radius:0 0 0 100%;background:var(--c-coral)}
+.hub-art.b2 .k{position:absolute;right:1.25rem;bottom:-1rem;width:7.5rem;height:6rem;rotate:-18deg;border-radius:0.75rem;background:var(--surface-brand-subtle);box-shadow:inset 0 1.5rem 0 var(--c-prod)}
+.hub-art.b3{position:relative}
+.hub-art.b3 .r{position:absolute;width:9rem;height:9rem;border-radius:50%;border:1px solid var(--line-neutral-primary);box-shadow:0 0 0 1.5rem var(--background-neutral-primary),0 0 0 calc(1.5rem + 1px) var(--line-neutral-primary)}
+.hub-art.b3 .r::after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 200deg,transparent,color-mix(in srgb,var(--surface-brand-primary) 32%,transparent) 70deg,transparent 70.5deg)}
+.hub-art.b3 .c{position:absolute;width:1.5rem;height:1.5rem;border-radius:50%;background:var(--c-prod);background-image:var(--c-prod-img)}
+.hub-art.b3 .d{position:absolute;width:0.75rem;height:0.75rem;border-radius:50%;background:var(--foreground-negative-strong);translate:-3.5rem -2rem}
+.hub-art.b3 .d.o{background:var(--foreground-cautionary-primary);translate:3rem -3rem}
+.hub-art.b3 .d.g{background:var(--foreground-positive-primary);translate:2.5rem 3rem}
+.hub-art.b4{position:relative;flex-direction:column;gap:0;font-size:2rem;letter-spacing:-0.05em;line-height:1}
+.hub-art.b4 .w{position:absolute;right:-2.5rem;top:-2.5rem;width:6.5rem;height:6.5rem;border-radius:0 0 0 100%;background:var(--c-coral)}
+.hub-art.b4 .h{position:absolute;left:-0.75rem;top:1.25rem;width:1.75rem;height:3.5rem;border-radius:0 999px 999px 0;background:var(--c-amber)}
+.hub-art.b4 .p{position:absolute;right:-1.5rem;bottom:2rem;width:6rem;height:2rem;rotate:-20deg;border-radius:var(--radius-full);background:var(--c-green)}
+.hub-art.b4 .g{position:absolute;left:1.5rem;bottom:1rem;width:3.5rem;height:3.5rem;border-radius:50%;background:linear-gradient(var(--surface-brand-subtle),var(--surface-brand-subtle)),var(--c-paper)}
+.hub-art.b4 .g::after{content:"";position:absolute;inset:0.875rem;border-radius:0.375rem 0.375rem 50% 50%;background:var(--c-prod);background-image:var(--c-prod-img)}
+@media (max-width:1023px){.hub-list{grid-template-columns:1fr}}
+</style>
+<script src="../assets/app.js" defer></script>
+<script src="concepts.js" defer></script>
+</head>
+<body class="cx">
+<div class="cx-frame">
+  <header class="cx-head">
+    <a class="cx-logo" href="../index.html" aria-label="JSDS site">JSDS<i></i></a>
+    <nav class="cx-nav" aria-label="Site"><a href="../index.html" aria-label="Back to the site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a></nav>
+  </header>
+  <main class="cx-stage hub">
+    <h1>Main page concepts</h1>
+    <p>Shape typography in three takes (A), plus four heroes (B): simple, visual and signal with the new copy, and a centered balance. Each page loads the real JSDS tokens and product colors.</p>
+    <ul class="hub-list">
+      <li><a class="hub-card" href="a1-build.html"><span class="hub-art" aria-hidden="true"><span class="sh c" style="font-size:4.5rem"></span>build<span class="sh d" style="--c:var(--c-blue)"></span></span><span class="hub-body"><b>A1 · Build</b><span>Four big words with shapes in between. Words rise in, a switch pill toggles, shapes follow the cursor and change color on click.</span></span></a></li>
+      <li><a class="hub-card" href="a2-tokens.html"><span class="hub-art dark" aria-hidden="true"><span class="sh prod" style="width:.62em;height:.62em;border-radius:0 100% 0 0"></span>token</span><span class="hub-body"><b>A2 · Tokens</b><span>Dark stage where every shape is a token. Scroll turns the radius, opens the spacing and fans the colors. Component names stream below.</span></span></a></li>
+      <li><a class="hub-card" href="a3-jsds.html"><span class="hub-art" aria-hidden="true">JSDS<span class="sh tri" style="--c:var(--c-amber)"></span></span><span class="hub-body"><b>A3 · JSDS</b><span>Four giant letters with shapes dropped on top. The tagline word and its shape keep changing. Drag a shape and it springs back.</span></span></a></li>
+      <li><a class="hub-card" href="b1-simple.html"><span class="hub-art b1" aria-hidden="true"><span><u>secure</u> faster</span></span><span class="hub-body"><b>B1 · Simple</b><span>The new copy, centered and calm. Real pattern screens stream in two rows below, then three entry cards.</span></span></a></li>
+      <li><a class="hub-card" href="b2-visual.html"><span class="hub-art b2" aria-hidden="true">secure<br>faster<span class="w"></span><span class="k"></span></span><span class="hub-body"><b>B2 · Visual</b><span>Big left headline with tilted shapes bleeding off the edge and a shield console. Below, a list that swaps the preview.</span></span></a></li>
+      <li><a class="hub-card" href="b3-signal.html"><span class="hub-art b3" aria-hidden="true"><span class="r"></span><span class="c"></span><span class="d"></span><span class="d o"></span><span class="d g"></span></span><span class="hub-body"><b>B3 · Signal</b><span>The new copy beside a radar that detects an event, offers a decision and blocks it, in severity colors. Three shortcut banners below.</span></span></a></li>
+      <li><a class="hub-card" href="b4-balance.html"><span class="hub-art b4" aria-hidden="true">JS Design<br>System<span class="w"></span><span class="h"></span><span class="p"></span><span class="g"></span></span><span class="hub-body"><b>B4 · Balance</b><span>The JS Design System title and Korean copy centered, with a shield, wedge, pill and half disc balanced on both sides. Three icon banners below.</span></span></a></li>
+    </ul>
+  </main>
+  <footer class="cx-foot">
+    <div class="cx-chips" data-cx-chips role="group" aria-label="Product color"><span>Product color</span></div>
+  </footer>
+</div>
+</body>
+</html>

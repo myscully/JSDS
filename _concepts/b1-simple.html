@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSDS Concept B1 · Simple</title>
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="concepts.css">
+<style>
+/* B1 Simple — 글 위주 가운데 히어로 + 패턴 화면이 흐르는 두 줄 + 세 칸 링크. 도형 없음 */
+.b1-hero{text-align:center;padding:clamp(3.5rem,9vh,7rem) 0 clamp(3rem,7vh,4.5rem);display:flex;flex-direction:column;align-items:center}
+.b1-hero h1{display:block;margin:0;font-size:clamp(2.5rem,6.2vw,5.75rem);font-weight:700;letter-spacing:-0.045em;line-height:1.05;text-wrap:balance}
+.b1-hero h1 .ln{display:block}
+.b1-mark{position:relative;display:inline-block}
+.b1-mark::after{content:"";position:absolute;left:0.02em;right:0.02em;bottom:0.04em;height:0.1em;border-radius:999px;background:var(--c-prod);background-image:var(--c-prod-img);z-index:-1;transform-origin:left;opacity:.9}
+.js .b1-mark::after{transform:scaleX(0)}
+.js .go .b1-mark::after{transform:none;transition:transform .9s var(--ease-out) .75s}
+.b1-hero p{margin:1.5rem 0 0;max-width:38rem;font-size:clamp(1rem,1.4vw,1.25rem);line-height:1.6;color:var(--foreground-neutral-secondary)}
+.b1-cta{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:2.25rem}
+.cx-btn.line{background:transparent;color:var(--c-ink);box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
+.cx-btn.line:hover{box-shadow:inset 0 0 0 1px var(--c-ink)}
+.b1-cta .cx-btn{height:3rem;padding:0 1.375rem;font-size:0.9375rem;border-radius:var(--radius-full)}
+
+/* 흐르는 두 줄 — 화면 끝에서 흐려짐, 올리면 멈춤, 줄인 모션이면 멈춘 채 */
+.b1-flow{display:flex;flex-direction:column;gap:1.25rem;overflow:hidden;padding:0.5rem 0 1rem;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.b1-track{display:flex;gap:1.25rem;width:max-content;animation:b1-left 80s linear infinite}
+.b1-track.rev{animation-name:b1-right;animation-duration:95s}
+.b1-flow:hover .b1-track{animation-play-state:paused}
+@keyframes b1-left{to{transform:translateX(-50%)}}
+@keyframes b1-right{from{transform:translateX(-50%)}to{transform:none}}
+.b1-shot{flex:none;width:clamp(16rem,26vw,24rem);aspect-ratio:1.45;border-radius:var(--radius-xl);border:1px solid var(--line-neutral-primary);background:var(--static-white);overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);transition:translate .4s var(--ease-out)}
+.b1-shot:hover{translate:0 -4px}
+.b1-shot img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+.js .b1-flow{opacity:0}
+.js .b1-flow.go{animation:cx-rise 1s var(--ease-out) .5s both}
+
+/* 세 칸 링크 */
+.b1-links{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:clamp(3.5rem,8vw,6rem) 0;list-style:none;padding:0;max-width:none}
+.b1-link{display:flex;flex-direction:column;gap:0.5rem;padding:1.75rem;border-radius:var(--radius-xl);background:var(--background-neutral-secondary);height:100%;transition:background-color .25s}
+.b1-link:hover{background:var(--surface-neutral-secondary)}
+.b1-link:focus-visible{outline:2px solid var(--c-ink);outline-offset:2px}
+.b1-link b{font-size:1.25rem;letter-spacing:-0.02em;display:flex;justify-content:space-between;align-items:center}
+.b1-link b svg{width:1.25rem;height:1.25rem;transition:translate .3s var(--ease-pop)}
+.b1-link:hover b svg{translate:0.25rem 0}
+.b1-link span{font-size:0.875rem;color:var(--foreground-neutral-secondary);line-height:1.55}
+.b1-link em{font-style:normal;font-size:0.8125rem;color:var(--foreground-neutral-tertiary);margin-top:auto;padding-top:1rem;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce){.b1-track{animation:none}.js .b1-flow{opacity:1;animation:none!important}.js .b1-mark::after{transform:none}}
+@media (max-width:1023px){.b1-links{grid-template-columns:1fr}}
+</style>
+<script src="../assets/app.js" defer></script>
+<script src="concepts.js" defer></script>
+</head>
+<body class="cx">
+<div class="cx-frame" style="min-height:0">
+  <header class="cx-head">
+    <a class="cx-logo" href="index.html" aria-label="JSDS concepts">JSDS<i></i></a>
+    <nav class="cx-nav" aria-label="Site">
+      <a href="../index.html" aria-label="Search the site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></a>
+      <a href="../components/button.html" aria-label="Components"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg></a>
+    </nav>
+  </header>
+  <main class="cx-stage b1-hero">
+    <h1 aria-label="Design that helps you secure faster"><span class="ln cx-w" aria-hidden="true">Design that helps you</span><span class="ln cx-w" aria-hidden="true"><span class="b1-mark">secure</span> faster</span></h1>
+    <p class="rise">A unified design system built to help teams detect, decide, and respond faster.</p>
+    <div class="b1-cta rise">
+      <a class="cx-btn" href="../home/getting-started.html">Get started</a>
+      <a class="cx-btn line" href="../components/button.html">Browse components</a>
+    </div>
+  </main>
+</div>
+
+<section class="b1-flow" aria-label="Screens built with JSDS" data-b1-flow>
+  <div class="b1-track" data-row="0"></div>
+  <div class="b1-track rev" data-row="1"></div>
+</section>
+
+<div class="cx-frame" style="min-height:0">
+  <ul class="b1-links">
+    <li><a class="b1-link" href="../foundations/overview.html"><b>Foundations <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></b><span>Color, type, grid and motion tokens shared by every product.</span><em data-count="Foundations">pages</em></a></li>
+    <li><a class="b1-link" href="../components/button.html"><b>Components <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></b><span>Accessible building blocks for dense security consoles.</span><em data-count="Components">components</em></a></li>
+    <li><a class="b1-link" href="../patterns/overview.html"><b>Patterns <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></b><span>Whole screens for detecting, deciding and responding.</span><em data-count="Patterns">patterns</em></a></li>
+  </ul>
+  <footer class="cx-foot">
+    <div class="cx-chips" data-cx-chips role="group" aria-label="Product color"><span>Product color</span></div>
+    <nav class="cx-switch" aria-label="Concepts"><a href="a1-build.html">A1</a><a href="a2-tokens.html">A2</a><a href="a3-jsds.html">A3</a><a href="b1-simple.html" aria-current="page">B1</a><a href="b2-visual.html">B2</a><a href="b3-signal.html">B3</a><a href="b4-balance.html">B4</a><a href="index.html">All</a></nav>
+  </footer>
+</div>
+<script>
+addEventListener("DOMContentLoaded", function () {
+  /* 패턴 화면 — capture.mjs 가 찍은 img/*.png. 줄마다 다섯 장을 두 벌 이어 -50% 로 끝없이 */
+  var SHOTS = [["dashboard", "Dashboard"], ["log-viewer", "Log viewer"], ["policy-settings", "Policy settings"], ["incident", "Incident"], ["alert-rules", "Alert rules"],
+               ["audit-log", "Audit log"], ["roles", "Roles"], ["secrets", "Secrets"], ["system-status", "System status"], ["search", "Search"]];
+  document.querySelectorAll("[data-row]").forEach(function (row) {
+    var set = SHOTS.slice(row.dataset.row * 5, row.dataset.row * 5 + 5);
+    var one = function (hidden) { return set.map(function (s) { return '<figure class="b1-shot" style="margin:0"' + (hidden ? ' aria-hidden="true"' : "") + '><img src="img/' + s[0] + '.png" alt="' + (hidden ? "" : s[1] + " pattern") + '" loading="lazy"></figure>'; }).join(""); };
+    row.innerHTML = one(false) + one(true);
+  });
+  /* 세 칸의 수 — SEARCH_INDEX(app.js)에서 센다 */
+  var idx = typeof SEARCH_INDEX !== "undefined" ? SEARCH_INDEX : [];
+  document.querySelectorAll("[data-count]").forEach(function (el) { var n = idx.filter(function (x) { return x.s === el.dataset.count && x.t !== "Overview"; }).length; el.textContent = n + " " + el.textContent; });
+  requestAnimationFrame(function () { document.querySelector("[data-b1-flow]").classList.add("go"); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSDS Concept A3 · JSDS</title>
+<script>document.documentElement.classList.add("js");try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="concepts.css">
+<style>
+/* A3 JSDS — 화면 폭을 채우는 네 글자에 도형이 얹힘. 글자는 한 자씩 커지며 자리, 도형은 위에서 떨어져 튐.
+   아래 한 줄의 단어가 2.5초마다 바뀌고 옆 도형이 원 → 사각 → 삼각. 커서를 따라오는 원 · 도형 끌기(놓으면 제자리로) */
+.a3{--fs:clamp(6rem,min(27vw,44vh),24rem);align-items:flex-start}
+.a3-word{position:relative;font-size:var(--fs);font-weight:800;letter-spacing:-0.09em;line-height:0.82;margin:0;display:flex;align-items:flex-end;padding-top:0.18em;align-self:center}
+.a3-l{display:inline-block;position:relative;z-index:1}
+@keyframes a3-in{0%{transform:translateY(0.25em) scale(.55);opacity:0}70%{transform:translateY(-0.02em) scale(1.04);opacity:1}100%{transform:none;opacity:1}}
+.js .a3-l{opacity:0}
+.js .a3.go .a3-l{animation:a3-in .95s var(--ease-pop) both;animation-delay:calc(var(--i) * 90ms)}
+.js .a3.go .sh{animation:cx-drop 1.1s cubic-bezier(.3,0,.3,1) both;animation-delay:calc(520ms + var(--i,0) * 110ms);opacity:1}
+.a3-word .sh{position:absolute;z-index:2;touch-action:none;cursor:grab}
+.a3-word .sh:active{cursor:grabbing}
+.a3-word .sh.dragging{transition:none!important}
+.a3-word .sh.back{transition:translate .7s var(--ease-pop)!important}
+.a3-s1{left:3%;top:0;width:0.2em!important;height:0.2em!important}
+.a3-halves{left:31%;top:-0.04em;display:flex!important;gap:0.015em;background:none!important}
+.a3-halves i{width:0.11em;height:0.22em;display:block}
+.a3-halves i:first-child{border-radius:0.22em 0 0 0.22em;background:var(--c-purple)}
+.a3-halves i:last-child{border-radius:0 0.22em 0.22em 0;background:var(--c-green)}
+.a3-big{left:52%;top:0.14em;width:0.52em!important;height:0.52em!important;z-index:0!important}
+.a3-tri{right:-0.3em;top:0.1em;width:0.24em!important;height:0.24em!important;--c:var(--c-amber)}
+.a3-dot{right:-0.32em;bottom:0.02em;width:0.15em!important;height:0.15em!important;--c:var(--c-green)}
+
+.a3-row{display:flex;align-items:flex-end;justify-content:space-between;gap:2rem 3rem;flex-wrap:wrap;margin-top:clamp(2rem,5vh,3.5rem);width:100%}
+.a3-tag{font-size:clamp(1.75rem,4vw,3.5rem);font-weight:700;letter-spacing:-0.04em;line-height:1.1;margin:0;display:flex;align-items:center;gap:0.25em;flex-wrap:wrap}
+.a3-swap{display:inline-grid;overflow:hidden;height:1.15em;vertical-align:bottom}
+.a3-swap > span{grid-area:1/1;transition:transform .6s var(--ease-out),opacity .6s;transform:translateY(110%);opacity:0;color:var(--c-ink)}
+.a3-swap > span.on{transform:none;opacity:1}
+.a3-swap > span.out{transform:translateY(-110%);opacity:0}
+.a3-swap > span u{text-decoration:none;box-shadow:inset 0 -0.12em 0 var(--c-sw,var(--c-amber))}
+.a3-morph{width:0.8em;height:0.8em;flex:none;background:var(--c-coral);border-radius:50%;clip-path:polygon(0 0,100% 0,100% 100%,0 100%);transition:border-radius .6s var(--ease-pop),clip-path .6s var(--ease-pop),background-color .6s,rotate .6s var(--ease-pop)}
+.a3-morph.square{border-radius:0.12em;background:var(--c-blue);rotate:45deg}
+.a3-morph.tri{border-radius:0;background:var(--c-green);clip-path:polygon(50% 0,50% 0,100% 100%,0 100%)}
+.a3-morph.prod{border-radius:50%;background:var(--c-prod);background-image:var(--c-prod-img)}
+
+/* 커서를 따라오는 원 — 마우스가 있는 기기 · 줄인 모션 아님에서만 */
+.a3-cursor{position:fixed;left:0;top:0;width:0.875rem;height:0.875rem;margin:-0.4375rem;border-radius:50%;background:var(--c-prod);background-image:var(--c-prod-img);pointer-events:none;z-index:50;opacity:0;transition:width .35s var(--ease-pop),height .35s var(--ease-pop),margin .35s var(--ease-pop),opacity .2s,background-color .3s,border-radius .35s}
+.a3-cursor.on{opacity:1}
+.a3-cursor.big{width:3.5rem;height:3.5rem;margin:-1.75rem;background:transparent;background-image:none;border:2px solid var(--c-ink)}
+.a3-cursor.grab{border-radius:0.5rem}
+@media (prefers-reduced-motion: reduce){.js .a3-l{opacity:1}.js .a3.go .a3-l,.js .a3.go .sh{animation:none}.a3-swap > span,.a3-morph{transition:none}.a3-cursor{display:none}}
+@media (max-width:767px){.a3-word{align-self:flex-start;margin-left:0}.a3-tri,.a3-dot{right:-0.2em}}
+</style>
+<script src="../assets/app.js" defer></script>
+<script src="concepts.js" defer></script>
+</head>
+<body class="cx">
+<div class="cx-frame">
+  <header class="cx-head">
+    <a class="cx-logo" href="index.html" aria-label="JSDS concepts">JSDS<i></i></a>
+    <nav class="cx-nav" aria-label="Site">
+      <a href="../index.html" aria-label="Search the site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></a>
+      <a href="../components/button.html" aria-label="Components"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg></a>
+    </nav>
+  </header>
+
+  <main class="cx-stage a3">
+    <h1 class="a3-word" aria-label="JSDS">
+      <span class="a3-l" style="--i:0" aria-hidden="true">J</span><span class="a3-l" style="--i:1" aria-hidden="true">S</span><span class="a3-l" style="--i:2" aria-hidden="true">D</span><span class="a3-l" style="--i:3" aria-hidden="true">S</span>
+      <span class="sh c a3-s1" data-drag data-cycle style="--i:0" aria-hidden="true"></span>
+      <span class="sh a3-halves" data-drag style="--i:1" aria-hidden="true"><i></i><i></i></span>
+      <span class="sh c prod a3-big" data-drag data-cycle style="--i:2" aria-hidden="true" title="Click: next product color"></span>
+      <span class="sh tri a3-tri" data-drag data-cycle style="--i:3" aria-hidden="true"></span>
+      <span class="sh c a3-dot" data-drag data-cycle style="--i:4" aria-hidden="true"></span>
+    </h1>
+    <div class="a3-row">
+      <p class="a3-tag rise">Design that helps you
+        <span class="a3-swap" data-a3-swap aria-live="polite"><span class="on"><u style="--c-sw:var(--c-coral)">build</u></span><span><u style="--c-sw:var(--c-blue)">secure</u></span><span><u style="--c-sw:var(--c-green)">ship</u></span><span><u style="--c-sw:var(--c-purple)">scale</u></span></span>
+        <i class="a3-morph" data-a3-morph aria-hidden="true"></i>
+        faster.</p>
+      <div class="cx-intro rise">
+        <p>JSDS is the <em>( security console )</em> design system behind every Jiran security product.</p>
+        <a class="cx-btn" href="../home/getting-started.html">Get started <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="cx-foot">
+    <div class="cx-chips" data-cx-chips role="group" aria-label="Product color"><span>Product color</span></div>
+    <nav class="cx-switch" aria-label="Concepts"><a href="a1-build.html">A1</a><a href="a2-tokens.html">A2</a><a href="a3-jsds.html" aria-current="page">A3</a><a href="b1-simple.html">B1</a><a href="b2-visual.html">B2</a><a href="b3-signal.html">B3</a><a href="b4-balance.html">B4</a><a href="index.html">All</a></nav>
+  </footer>
+</div>
+<div class="a3-cursor" aria-hidden="true"></div>
+<script>
+addEventListener("DOMContentLoaded", function () {
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, fine = matchMedia("(pointer: fine)").matches;
+
+  /* 단어 바꾸기 + 도형 모양 — 2.5초마다. 줄인 모션이면 첫 단어 그대로 */
+  var swap = document.querySelector("[data-a3-swap]"), words = [].slice.call(swap.children), morph = document.querySelector("[data-a3-morph]");
+  var SHAPES = ["", "square", "tri", "prod"], n = 0;
+  if (!reduce) setInterval(function () {
+    var cur = words[n]; n = (n + 1) % words.length;
+    cur.classList.remove("on"); cur.classList.add("out");
+    var nx = words[n]; nx.classList.remove("out"); void nx.offsetWidth; nx.classList.add("on");
+    setTimeout(function () { cur.classList.remove("out"); }, 650);
+    morph.className = "a3-morph " + SHAPES[n];
+  }, 2500);
+
+  /* 도형 끌기 — 놓으면 튕기며 제자리로. 조금만 움직였으면 클릭(색 바꾸기)으로 둔다 */
+  var drag = null;
+  document.querySelectorAll("[data-drag]").forEach(function (s) {
+    s.addEventListener("pointerdown", function (e) {
+      drag = { s: s, x: e.clientX, y: e.clientY, moved: false };
+      s.setPointerCapture(e.pointerId); s.classList.remove("back"); s.classList.add("dragging");
+      document.querySelector(".a3-cursor").classList.add("grab");
+    });
+    s.addEventListener("pointermove", function (e) {
+      if (!drag || drag.s !== s) return;
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+      s.style.translate = dx + "px " + dy + "px";
+    });
+    function end() {
+      if (!drag || drag.s !== s) return;
+      var moved = drag.moved; drag = null;
+      s.classList.remove("dragging"); s.classList.add("back"); s.style.translate = "";
+      document.querySelector(".a3-cursor").classList.remove("grab");
+      if (moved) s.addEventListener("click", function stop(ev) { ev.stopPropagation(); }, { once: true, capture: true });
+    }
+    s.addEventListener("pointerup", end); s.addEventListener("pointercancel", end);
+  });
+
+  /* 커서를 따라오는 원 */
+  var c = document.querySelector(".a3-cursor");
+  if (fine && !reduce) {
+    var tx = -100, ty = -100, x = -100, y = -100;
+    addEventListener("pointermove", function (e) {
+      tx = e.clientX; ty = e.clientY; c.classList.add("on");
+      c.classList.toggle("big", !!e.target.closest("a,button,.sh"));
+    });
+    document.addEventListener("pointerleave", function () { c.classList.remove("on"); });
+    (function loop() { x += (tx - x) * 0.2; y += (ty - y) * 0.2; c.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)"; requestAnimationFrame(loop); })();
+  }
+});
+</script>
+</body>
+</html>

@@ -85,11 +85,14 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   const src = fs.readFileSync(path.join(__dirname, "style.src.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "));
   const lineOf = (i) => src.slice(0, i).split("\n").length;
   const LOOPS = ["spin .8s linear infinite", "shimmer 1.4s infinite", "pulse 1.6s infinite"];
-  const DELAY = "ds-delay 0s var(--ds-delay,1s) both";   // Loading 지연 표시(2026-11-11) — 반복이 아니라 한 번 보이게 할 뿐이고 상태 표시 루프와 함께만 쓴다
+  const DELAY = "ds-delay 0s var(--ds-delay,1s) both";
+  /* 메인 히어로(B4)의 움직임 — 사람의 결정 2026-11-18. 첫 화면에 한 번 들어오는 연출과 도형의 느린 떠 있기는 상태 표시가 아니라 사이트의 얼굴이라 토큰 밖을 허용한다.
+     index 에서만 data-hm 이 붙어 돌고, 줄인 모션이면 data-hm 이 없어 처음부터 마지막 모습이다(behave.home 이 잰다) */
+  const HOME_MOTION = ["hm-rise .9s cubic-bezier(.16,1,.3,1) calc(var(--hm-i,0) * 80ms) both", "hm-in 1.3s cubic-bezier(.16,1,.3,1) calc(.25s + var(--hm-d,0s)) both", "hm-float 8s ease-in-out calc(1.8s + var(--hm-d,0s)) infinite alternate"];   // Loading 지연 표시(2026-11-11) — 반복이 아니라 한 번 보이게 할 뿐이고 상태 표시 루프와 함께만 쓴다
   for (const m of src.matchAll(/(?<![-\w])(transition|animation):([^;}]*)/g)) {
     const [, prop, val] = m; const v = val.trim(), at = `style.src.css:${lineOf(m.index)}`;
     if (v === "none!important") continue;
-    if (prop === "animation") { if (!v.replace(/!important$/, "").split(/,(?![^(]*\))/).every((p) => LOOPS.includes(p) || p === DELAY) && !/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
+    if (prop === "animation") { if (HOME_MOTION.includes(v)) continue; if (!v.replace(/!important$/, "").split(/,(?![^(]*\))/).every((p) => LOOPS.includes(p) || p === DELAY) && !/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
     for (const part of v.split(/,(?![^(]*\))/).map((x) => x.trim())) {
       if (!/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(part)) fails.push(`${at}: transition "${part}" — 속성 하나 + var(--motion-*) 하나만(숫자 · 이징을 덧붙이면 무효가 되거나 토큰을 벗어난다)`);
     }

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSDS Concept A2 · Tokens</title>
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="concepts.css">
+<style>
+/* A2 Tokens — 어두운 바탕(고정). 도형 = 토큰: 사분원(radius) · 점 격자(space) · 겹친 원(color).
+   글자는 마스크 안에서 올라오고, 스크롤 양(--p 0~1)에 따라 도형이 변한다. 아래 띠는 실제 컴포넌트 이름 */
+.a2{--fs:clamp(3rem,min(9vw,15vh),9rem);justify-content:center}
+.a2-type{font-size:var(--fs);display:flex;flex-direction:column;gap:0.06em}
+.a2 .mask{display:inline-block;overflow:hidden;padding-bottom:0.08em;margin-bottom:-0.08em}
+@keyframes a2-up{from{transform:translateY(105%)}to{transform:none}}
+.js .a2 .cx-w{opacity:1}
+.js .a2.go .cx-w{animation:a2-up 1s var(--ease-out) both;animation-delay:calc(var(--i,0) * 110ms)}
+.a2 .l2{margin-left:14%}
+.a2 .l3{margin-left:30%}
+.a2-big{font-size:1.5em;letter-spacing:-0.06em;font-weight:800}
+.a2-quarter{width:0.72em;height:0.72em;border-radius:0 100% 0 0;transform-origin:0 100%;rotate:calc(var(--p,0) * -180deg)}
+.a2-grid{display:grid;grid-template-columns:repeat(3,0.12em);gap:calc(0.05em + var(--p,0) * 0.12em);transition:gap .2s linear}
+.a2-grid i{width:0.12em;height:0.12em;border-radius:50%;background:var(--c-green)}
+.a2-trio{position:relative;width:1.44em;height:0.72em;flex:none;margin-right:0.04em}
+.a2-trio i{position:absolute;top:0;width:0.72em;height:0.72em;border-radius:50%;mix-blend-mode:screen;transition:left .2s linear}
+.a2-trio i:nth-child(1){left:calc(0.36em - 0.2em - var(--p,0) * 0.16em);background:var(--c-coral)}
+.a2-trio i:nth-child(2){left:0.36em;background:var(--c-green)}
+.a2-trio i:nth-child(3){left:calc(0.36em + 0.2em + var(--p,0) * 0.16em);background:var(--c-blue)}
+.a2-intro{position:absolute;right:0;bottom:clamp(2rem,5vw,4rem);text-align:left}
+.a2-intro em{color:var(--c-amber)}
+.cx .cx-btn{background:var(--c-ink);color:var(--c-paper)}
+
+/* 컴포넌트 이름 띠 — 무한 마키, 올리면 멈춤 */
+.a2-band{background:var(--c-prod);background-image:var(--c-prod-img);color:var(--brand-label);overflow:hidden;white-space:nowrap;border-block:1px solid var(--c-ink);margin:0 calc(-1 * clamp(1rem,4vw,4rem))}
+.a2-track{display:inline-flex;gap:2.5rem;padding:1.25rem 0;font-size:clamp(1.5rem,3vw,2.5rem);font-weight:700;letter-spacing:-0.03em;animation:a2-marquee 60s linear infinite}
+.a2-band:hover .a2-track{animation-play-state:paused}
+.a2-track span{display:inline-flex;align-items:center;gap:2.5rem}
+.a2-track span::after{content:"";width:0.4em;height:0.4em;border-radius:50%;background:currentColor;opacity:.5}
+@keyframes a2-marquee{to{transform:translateX(-50%)}}
+
+/* 둘째 화면 — Radius · Space · Color */
+.a2-tokens{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-neutral-primary);border:1px solid var(--line-neutral-primary);margin:clamp(3rem,7vw,6rem) 0}
+.a2-cell{background:var(--c-paper);padding:clamp(1.5rem,3vw,2.5rem);min-height:24rem;display:flex;flex-direction:column;justify-content:space-between;gap:2rem}
+.a2-cell h2{margin:0;font-size:clamp(2rem,4vw,3.5rem);font-weight:700;letter-spacing:-0.04em;line-height:1}
+.a2-cell p{margin:0;font-size:0.875rem;color:var(--foreground-neutral-secondary);font-variant-numeric:tabular-nums}
+.a2-cell b{color:var(--c-ink);font-weight:600}
+.a2-art{height:10rem;display:flex;align-items:center;justify-content:center}
+.a2-sq{width:9rem;height:9rem;background:var(--c-amber);border-radius:var(--r,0)}
+.a2-dots{display:flex;align-items:center;gap:var(--g,4px)}
+.a2-dots i{width:1.25rem;height:5rem;border-radius:999px;background:var(--c-blue)}
+.a2-fan{position:relative;width:13rem;height:9rem}
+.a2-fan i{position:absolute;left:50%;top:50%;width:4rem;height:4rem;margin:-2rem;border-radius:50%;border:2px solid var(--c-paper);translate:calc(cos(var(--a)) * (0.25 + var(--p,0) * 0.75) * 4.5rem) calc(sin(var(--a)) * (0.25 + var(--p,0) * 0.75) * 3rem);transition:translate .3s var(--ease-out)}
+.a2-fan button{cursor:pointer;padding:0}
+
+@media (prefers-reduced-motion: reduce){.a2-track{animation:none}.a2-quarter{rotate:-90deg}.a2-grid,.a2-trio i{transition:none}}
+@media (max-width:1023px){.a2-tokens{grid-template-columns:1fr}.a2-intro{position:static;margin-top:2.5rem}.a2 .l3{margin-left:14%}}
+@media (max-width:767px){.a2 .l2,.a2 .l3{margin-left:0}.a2 .cx-line{flex-wrap:nowrap;white-space:nowrap}.a2-cell{min-height:18rem}}
+</style>
+<script src="../assets/app.js" defer></script>
+<script src="concepts.js" defer></script>
+</head>
+<body class="cx" data-force-theme="dark">
+<div class="cx-frame">
+  <header class="cx-head">
+    <a class="cx-logo" href="index.html" aria-label="JSDS concepts">JSDS<i></i></a>
+    <nav class="cx-nav" aria-label="Site">
+      <a href="../index.html" aria-label="Search the site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></a>
+      <a href="../components/button.html" aria-label="Components"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg></a>
+    </nav>
+  </header>
+
+  <main class="cx-stage a2" data-scroll-p>
+    <h1 class="cx-type a2-type" aria-label="One token, every product. JSDS">
+      <span class="cx-line l1" aria-hidden="true">
+        <span class="sh prod a2-quarter" data-cycle title="Click: next product color"></span>
+        <span class="mask"><span class="cx-w">one token,</span></span>
+      </span>
+      <span class="cx-line l2" aria-hidden="true">
+        <span class="mask"><span class="cx-w">every product.</span></span>
+        <span class="sh a2-grid" style="background:none"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      </span>
+      <span class="cx-line l3" aria-hidden="true">
+        <span class="sh a2-trio" style="background:none"><i></i><i></i><i></i></span>
+        <span class="mask"><span class="cx-w a2-big">JSDS</span></span>
+      </span>
+    </h1>
+    <div class="cx-intro a2-intro rise">
+      <p>Change a token once. The guide, the <em>( React package )</em> and the Figma library follow.</p>
+      <a class="cx-btn" href="../foundations/overview.html">See the tokens <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </main>
+
+  <div class="a2-band" aria-label="Components"><div class="a2-track" data-a2-track></div></div>
+
+  <section class="a2-tokens" aria-label="Tokens">
+    <div class="a2-cell" data-scroll-p>
+      <h2>Radius</h2>
+      <div class="a2-art"><i class="a2-sq" data-a2-radius></i></div>
+      <p>Scroll to step through <b data-a2-radius-label>radius</b></p>
+    </div>
+    <div class="a2-cell" data-scroll-p>
+      <h2>Space</h2>
+      <div class="a2-art"><span class="a2-dots" data-a2-space><i></i><i></i><i></i><i></i><i></i></span></div>
+      <p>Scroll to step through <b data-a2-space-label>space</b></p>
+    </div>
+    <div class="a2-cell" data-scroll-p>
+      <h2>Color</h2>
+      <div class="a2-art"><span class="a2-fan" data-a2-fan></span></div>
+      <p>Seven product colors. <b>Click one</b> to repaint the page.</p>
+    </div>
+  </section>
+
+  <footer class="cx-foot">
+    <div class="cx-chips" data-cx-chips role="group" aria-label="Product color"><span>Product color</span></div>
+    <nav class="cx-switch" aria-label="Concepts"><a href="a1-build.html">A1</a><a href="a2-tokens.html" aria-current="page">A2</a><a href="a3-jsds.html">A3</a><a href="b1-simple.html">B1</a><a href="b2-visual.html">B2</a><a href="b3-signal.html">B3</a><a href="b4-balance.html">B4</a><a href="index.html">All</a></nav>
+  </footer>
+</div>
+<script>
+addEventListener("DOMContentLoaded", function () {
+  var root = document.documentElement, cs = getComputedStyle(root);
+  /* 띠 — SEARCH_INDEX(app.js)의 Components 페이지 이름. 손으로 적지 않는다. 두 벌 이어 -50% 로 끝없이 */
+  var names = (typeof SEARCH_INDEX !== "undefined" ? SEARCH_INDEX : []).filter(function (x) { return x.s === "Components" && x.t !== "Overview"; }).map(function (x) { return x.t; });
+  var one = names.map(function (n) { return "<span>" + n + "</span>"; }).join("");
+  var tr = document.querySelector("[data-a2-track]");
+  tr.innerHTML = one + '<span aria-hidden="true" style="display:contents">' + one + "</span>";
+  tr.dataset.count = names.length;
+
+  /* 토큰 단계 — CSS 에서 읽는다 */
+  var R = ["xs", "sm", "md", "lg", "xl", "full"].map(function (k) { return [k, cs.getPropertyValue("--radius-" + k).trim()]; });
+  var S = [1, 2, 3, 4, 5, 6, 8, 10, 12].map(function (k) { return [k, cs.getPropertyValue("--space-" + k).trim()]; });
+  var fan = document.querySelector("[data-a2-fan]");
+  var list = typeof PRODUCTS !== "undefined" ? PRODUCTS : [];
+  fan.innerHTML = list.map(function (p, i) {
+    var bg = p.kind === "ai" ? "linear-gradient(135deg,var(--purple-40),var(--violet-45))" : p.kind === "neutral" ? "var(--cool-neutral-50)" : p.hex;
+    return '<i role="button" tabindex="-1" data-accent="' + p.key + '" title="' + p.name + '" style="--a:' + (i * 360 / list.length - 90) + 'deg;background:' + bg + ';cursor:pointer"></i>';
+  }).join("");
+
+  var els = [].slice.call(document.querySelectorAll("[data-scroll-p]"));
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, raf = 0;
+  function paint() {
+    raf = 0;
+    els.forEach(function (el) {
+      var r = el.getBoundingClientRect(), vh = innerHeight;
+      /* 히어로는 내려간 만큼, 칸은 화면 아래에서 들어와 가운데에 올 때까지 0 → 1 */
+      var p = el.classList.contains("a2") ? -r.top / (r.height * 0.8) : (vh - r.top) / (vh * 0.75);
+      p = reduce ? 1 : Math.max(0, Math.min(1, p));
+      el.style.setProperty("--p", p.toFixed(3));
+      var rad = el.querySelector("[data-a2-radius]");
+      if (rad) { var k = R[Math.min(R.length - 1, Math.floor(p * R.length))]; rad.style.setProperty("--r", k[1]); el.querySelector("[data-a2-radius-label]").textContent = "radius " + k[0] + " · " + k[1]; }
+      var sp = el.querySelector("[data-a2-space]");
+      if (sp) { var s = S[Math.min(S.length - 1, Math.floor(p * S.length))]; sp.style.setProperty("--g", s[1]); el.querySelector("[data-a2-space-label]").textContent = "space " + s[0] + " · " + s[1]; }
+    });
+  }
+  addEventListener("scroll", function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
+  addEventListener("resize", paint);
+  paint();
+});
+</script>
+</body>
+</html>

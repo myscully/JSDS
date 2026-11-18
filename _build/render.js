@@ -288,6 +288,43 @@ const DS_EVENTS = [
 /* 텍스트 스타일 수 — Typography 표와 같은 원본(.t-* 크기 클래스)에서 센다 */
 const typeStyleCount = () => new Set([...STYLE().matchAll(/\.t-((?:display|title|heading|headline|body|label|caption)-\d(?:-(?:normal|reading))?)\{/g)].map((m) => m[1])).size;
 const dsEventTable = () => `<div class="tablewrap"><table class="tbl compact"><thead><tr><th>이벤트</th><th>컴포넌트</th><th>detail</th></tr></thead><tbody>${DS_EVENTS.map(([n, c, d]) => `<tr><td><code>${n}</code></td><td>${c}</td><td><code>${esc(d)}</code></td></tr>`).join("")}</tbody></table></div>`;
+/* ---------- Home(index.html) — B4 Balance(사람의 결정 2026-11-18) ----------
+   가운데 정렬 카피 + 양쪽 대각선으로 균형 잡은 도형 넷(왼쪽 위 주황 반원 · 왼쪽 아래 방패 / 오른쪽 위 빨강 부채꼴 · 오른쪽 아래 초록 알약)
+   + 바로가기 배너 셋. 버튼 · 배너 문구는 영어 그대로(사람의 결정). 움직임은 style.src.css 의 Home 블록 · app.src.js(.go · --hm-sy).
+   PRINCIPLES 는 Home › Principles 페이지가 쓴다 */
+const PRINCIPLES = [
+  ["p1", "위험은 한눈에", "심각도와 상태는 색과 함께 태그 · 밴드 같은 형태와 라벨로 나타냅니다. 색만으로 의미를 전달하지 않습니다.",
+    `<span class="tag critical">Critical</span><span class="tag high">High</span><span class="tag medium">Medium</span><span class="tag low">Low</span><span class="tag info">Info</span>`],
+  ["p2", "밀도는 높게, 위계는 분명하게", "테이블과 로그 중심 화면은 정보 밀도를 우선하되, 텍스트 스타일과 간격 단계로 위계를 유지합니다.",
+    `<div class="tbl-wrap"><table class="tbl compact nowrap"><thead><tr><th>시간</th><th>이벤트</th><th>심각도</th></tr></thead><tbody><tr><td>09:41</td><td>USB 쓰기 차단</td><td><span class="tag critical sm">Critical</span></td></tr><tr><td>09:38</td><td>정책 변경</td><td><span class="tag medium sm">Medium</span></td></tr><tr><td>09:35</td><td>로그인 성공</td><td><span class="tag info sm">Info</span></td></tr></tbody></table></div>`],
+  ["p3", "되돌릴 수 있게", "차단 · 삭제 · 배포처럼 파급이 큰 동작은 되돌릴 수 있는지에 따라 확인 단계를 고릅니다. 되돌릴 수 있으면 바로 실행하고 실행 취소를 주며, 되돌리기 어려우면 확인을 받은 뒤 실행하고 결과를 알립니다.",
+    `<div class="toast"><span class="ico">${I("circle-check", 20)}</span>정책 'USB 차단' 을 지웠습니다<button type="button" class="action">실행 취소</button></div>`],
+  ["p4", "하나의 언어", "제품이 달라도 같은 컴포넌트와 같은 용어, 같은 토큰을 씁니다. 메인 컬러만 제품마다 다릅니다.",
+    `<button type="button" class="btn solid primary">저장</button><button type="button" class="chip on" aria-pressed="true">사용 중</button><label class="switch"><input type="checkbox" role="switch" checked><span>실시간 보호</span></label>`],
+];
+function homePage() {
+  const cnt = sec => allPages(sec).filter(p => p.key !== "overview").length;
+  const ARROW = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+  const ban = (sec, art, desc, unit) => `<li><a class="hm-ban" href="#/${sec.toLowerCase()}/overview"><span class="hm-art" aria-hidden="true">${art}</span><span class="hm-txt"><b>${sec}</b>${ARROW}<span>${desc}</span><em>${cnt(sec.toLowerCase())} ${unit}</em></span></a></li>`;
+  return `<section class="hm" aria-labelledby="hm-title">
+  <div class="hm-copy">
+    <h1 id="hm-title" class="hm-rise">JS Design System</h1>
+    <p class="hm-rise"><span>제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다.</span><span>모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</span></p>
+    <a class="hm-btn hm-rise" href="#/home/getting-started">Get started ${ARROW}</a>
+  </div>
+  <div class="hm-sh hm-half" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
+  <div class="hm-sh hm-wedge" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
+  <div class="hm-sh hm-pill" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
+  <div class="hm-sh hm-guard" role="img" aria-label="A solid shield with a check sits on a soft circle, with a red threat dot and a green resolved dot on the orbit around it."><span class="hm-fl"><span class="hm-in">
+    <span class="hm-orbit"></span><span class="hm-disc"></span><span class="hm-shield"></span><span class="hm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><span class="hm-dot r"></span><span class="hm-dot g"></span>
+  </span></span></div>
+</section>
+<div class="hm-more"><ul class="hm-bans" aria-label="Shortcuts">
+${ban("Foundations", '<span class="hm-ic-f"><i></i><i></i><i></i></span>', "Color, type, grid and motion tokens shared by every product.", "pages")}
+${ban("Components", '<span class="hm-ic-c"></span>', "Accessible building blocks for dense security consoles.", "components")}
+${ban("Patterns", '<span class="hm-ic-p"><i></i><i></i><b></b></span>', "Whole screens for detecting, deciding and responding.", "patterns")}
+</ul></div>`;
+}
 const PAGES = {
   "home/getting-started": () => {
     const designer = `<ol class="guide-steps">
@@ -321,13 +358,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
 <p>1023 이하인 모바일과 태블릿은 <b>지원하지 않습니다</b>. 데스크톱 콘솔을 축소해 제공하지 않으며, 터치 현장 업무가 확인되면 그때 별도 규칙과 업무 범위를 정의합니다. 미지원 범위를 "반응형 완료" 로 표기하지 않습니다.</p>
 <dl class="kv"><dt>이 가이드 사이트</dt><dd>휴대폰까지 볼 수 있습니다. 1600px 이상에서는 오른쪽에 페이지 목차가, 1200px 미만에서는 상단·좌측 메뉴가 ☰ 버튼 안으로 들어갑니다. 위 표는 제품 UI 의 지원 기준이며, 가이드 사이트의 표시 폭과는 별개입니다</dd><dt>표준 스냅샷</dt><dd>1024 · 1280 · 1440 · 1920 네 폭을 매 릴리스에서 확인합니다</dd><dt>브라우저</dt><dd>Chrome 111+ · Safari 16.2+ · Firefox 113+. 100% 와 200% 확대에서 핵심 조치가 가능해야 합니다</dd><dt>입력 방식</dt><dd>마우스 · 키보드. 모든 인터랙션은 키보드로 도달·실행 가능해야 하고, 터치 전용 동작은 두지 않습니다</dd><dt>기준 갱신</dt><dd>실제 사용자 기기·브라우저 로그와 제품 책임자의 결정으로 확정·갱신하며, 변경 전까지 위 표를 공식 약속으로 봅니다</dd><dt>React 패키지</dt><dd>React 18 · 19 · TypeScript · ESM/CJS 지원. 패키지 버전의 major.minor 는 이 가이드 버전(${VERSION})과 같습니다 — <a href="#/resources/react">React Package</a></dd></dl>`;
   },
-  "home/overview": () => {
-    const secs = Object.entries(SITE).filter(([s]) => s !== "home");
-    const art = { foundations: ["일관된 기반을 만드는", "규칙과 토큰"], components: ["복사해서 바로 쓰는", "UI 컴포넌트 코드"], patterns: ["반복 업무를 해결하는", "화면 패턴"], resources: ["바로 가져다 쓰는", "라이브러리와 토큰"] };
-    return `<section class="hero"><h1>JS Design System</h1><p class="sub">제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다.<br>모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</p>
-  <svg class="wave" viewBox="0 0 1440 160" preserveAspectRatio="none"><path d="M0 90C240 20 480 20 720 80s480 90 720 10v70H0z" fill="url(#g)"/><defs><linearGradient id="g" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".6"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs></svg></section>
-  <div class="home-grid">${secs.map(([s, d]) => `<a class="home-card" href="${firstPage(s)}"><div class="art"><b>${art[s][0]}<br>${art[s][1]}</b><span>${d.title}</span></div><div class="body"><b>${d.title}</b><span>${d.desc}</span></div></a>`).join("")}</div>`;
-  },
+  "home/overview": () => homePage(),
   "home/about": () => `<h1>About</h1><p class="lead">지란지교시큐리티 디자인 시스템은 보안 솔루션 제품군이 공유하는 하나의 UI 언어입니다.</p>
 <h2 id="why">왜 만드나</h2><p>제품마다 메인 컬러가 다르고 출시 시기도 다르지만, 사용자는 같은 회사의 제품을 씁니다. 리뉴얼이나 신규 제품을 시작할 때마다 무채색·서체·간격·컴포넌트를 새로 정하지 않도록, <b>메인 컬러를 제외한 나머지 기본 구성</b>을 이 시스템이 제공합니다.</p>
 <h2 id="how">어떻게 쓰나</h2><dl class="kv"><dt>디자이너</dt><dd>Figma 라이브러리의 컴포넌트를 쓰고, 이 가이드의 예제·Props 로 변형과 상태를 확인합니다</dd><dt>개발자</dt><dd>React 제품은 <a href="#/resources/react">React 패키지</a>를 설치하고 각 페이지의 React 탭 코드를 그대로 씁니다. 그 밖의 제품은 HTML+CSS 탭 코드에 공통 스타일 파일과 동작 스크립트를 함께 씁니다</dd><dt>제품 적용</dt><dd>제품 색 팔레트 일곱(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI) 중 하나를 고르면 제품 색을 쓰는 자리가 모두 따라옵니다. 고르지 않으면 파랑입니다</dd></dl>
@@ -335,10 +366,7 @@ ${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자
 <h2 id="scope">범위</h2><dl class="kv"><dt>제공하는 것</dt><dd>중립 램프, 타이포그래피, 간격 · 반경 · 엘리베이션, 아이콘 규칙, 코드가 함께 있는 데스크톱 컴포넌트 ${allPages("components").filter((p) => p.key !== "overview").length}개, 패턴 ${allPages("patterns").filter((p) => p.key !== "overview").length}개, 토큰</dd><dt>제품이 정하는 것</dt><dd>팔레트 중 어느 제품 색을 쓸지. 헤더의 제품 색 메뉴로 팔레트마다 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd>회사 색 #FF7F00 은 팔레트의 주황으로 쓸 수 있습니다. 그 위 흰 글자 대비가 기준에 못 미쳐 예외로 선언되어 있습니다. 이 시스템은 관리자 웹 제품 기준이며, 브랜드 디자인 시스템은 별도로 제작합니다</dd><dt>플랫폼</dt><dd>관리 콘솔인 데스크톱 웹 우선</dd></dl>
 <h2 id="team">운영</h2><p>기획팀 디자인파트가 운영하며, Figma 라이브러리와 이 가이드를 함께 갱신합니다. 제안·기여 절차는 <a href="#/resources/contribution">Contribution</a>을 참고하세요.</p>`,
   "home/principles": () => `<h1>UX Principles</h1><p class="lead">보안 관리자는 하루 종일 콘솔을 봅니다. 화려함보다 정확함, 밀도, 예측 가능성이 우선입니다.</p>
-<h2 id="p1">1. 위험은 한눈에</h2><p>심각도와 상태는 색과 함께 태그 · 밴드 같은 형태와 라벨로 나타냅니다. 색만으로 의미를 전달하지 않습니다.</p>
-<h2 id="p2">2. 밀도는 높게, 위계는 분명하게</h2><p>테이블과 로그 중심 화면은 정보 밀도를 우선하되, 텍스트 스타일과 간격 단계로 위계를 유지합니다.</p>
-<h2 id="p3">3. 되돌릴 수 있게</h2><p>차단 · 삭제 · 배포처럼 파급이 큰 동작은 되돌릴 수 있는지에 따라 확인 단계를 고릅니다. 되돌릴 수 있으면 바로 실행하고 실행 취소를 주며, 되돌리기 어려우면 확인을 받은 뒤 실행하고 결과를 알립니다.</p>
-<h2 id="p4">4. 하나의 언어</h2><p>제품이 달라도 같은 컴포넌트와 같은 용어, 같은 토큰을 씁니다. 메인 컬러만 제품마다 다릅니다.</p>`,
+${PRINCIPLES.map(([id, t, b], i) => `<h2 id="${id}">${i + 1}. ${t}</h2><p>${b}</p>`).join("\n")}`,
 
   "resources/design-token": () => {
     const css = STYLE(); const root = css.slice(css.indexOf(":root{"), css.indexOf("*{box-sizing")).trim();

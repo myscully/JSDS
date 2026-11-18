@@ -51,12 +51,16 @@ module.exports = async function type({ page, ok, go }) {
   });
   await part("5 · index.html", async () => {
 
-    /* 사이트 홈 제목 = Display 1, 좁은 화면(767 이하)은 Title 1 */
+    /* 사이트 홈 제목 — 텍스트 스타일 표 밖의 선언된 예외(사람의 결정 2026-11-18, B4 메인 화면): 화면 폭을 따르는 clamp(2.5rem, 6vw, 6rem) · 행간 1.04 · 700 · 자간 -0.045em,
+       767 이하는 clamp(2.25rem, 10.5vw, 3rem). 이 둘 말고 다른 값이 들어오면 실패한다 */
     await go("index.html");
-    const hero = async () => page.evaluate(() => { const c = getComputedStyle(document.querySelector(".hero h1")); return [parseFloat(c.fontSize), parseFloat(c.lineHeight), +c.fontWeight, +(parseFloat(c.letterSpacing) / parseFloat(c.fontSize)).toFixed(4)].join("/"); });
-    const wide = await hero(), vp = page.viewportSize(); await page.setViewportSize({ width: 375, height: 800 });
-    const narrow = await hero(), root = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize) / 16); await page.setViewportSize(vp);   // 좁은 화면은 루트가 93.75% — rem 이라 같이 준다
-    ok("home hero title is Display 1 (Title 1 at 767 and below)", wide === "56/72/700/-0.0319" && narrow === `${32 * root}/${44 * root}/700/-0.0253`, `${wide} · ${narrow} · root ${root}`);
+    const hero = async () => page.evaluate(() => { const c = getComputedStyle(document.querySelector(".hm h1")), r = parseFloat(getComputedStyle(document.documentElement).fontSize), w = innerWidth;
+      const want = w <= 767 ? Math.min(Math.max(2.25 * r, 0.105 * w), 3 * r) : Math.min(Math.max(2.5 * r, 0.06 * w), 6 * r), fs = parseFloat(c.fontSize);
+      return { ok: Math.abs(fs - want) < 0.05 && Math.abs(parseFloat(c.lineHeight) / fs - 1.04) < 0.002 && c.fontWeight === "700" && Math.abs(parseFloat(c.letterSpacing) / fs + 0.045) < 0.0005, got: [fs, parseFloat(c.lineHeight), c.fontWeight, c.letterSpacing].join("/"), want: +want.toFixed(2) }; });
+    const vp = page.viewportSize(), seen = [];
+    for (const w of [2560, 1440, 1024, 768, 375]) { await page.setViewportSize({ width: w, height: 800 }); await page.waitForTimeout(80); seen.push([w, await hero()]); }
+    await page.setViewportSize(vp);
+    ok("home hero title follows its declared exception (fluid 2.5–6rem at 6vw, 1.04, 700, -0.045em; 2.25–3rem at 10.5vw from 767 down)", seen.every(([, h]) => h.ok), JSON.stringify(seen));
   });
   await part("6 · 컴포넌트 · 패턴 예제의 글자 — 표 밖의 (크기, 행간, 자간) 이 없다. 예외는 이유와 함께: - 고정폭", async () => {
 

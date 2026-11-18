@@ -96,7 +96,8 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 <title>${parts.title}</title>
 <link rel="stylesheet" href="${root}assets/style.css">
 <link rel="stylesheet" href="${root}assets/font-jp.css">
-<script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>${full ? `
+<script>if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.setAttribute("data-hm","")</script>` : ""}
 <script src="${root}assets/app.js" defer></script>
 <script src="${root}assets/ds.js" defer></script>${chartPage ? `
 <script src="${root}assets/vendor/chart.umd.js" defer></script>
@@ -108,7 +109,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 <body data-section="${r.sec}" data-page="${full ? "index" : r.key}" data-root="${root || "./"}">
 <a class="skip-link" href="#content">본문 바로가기</a>
 <header class="header">
-  <a class="brand" href="${root}index.html"><span>JS Design System</span></a>
+  <a class="brand" href="${root}index.html" aria-label="JS Design System 홈"><span class="logo" aria-hidden="true">JSDS<i></i></span></a>
   <span class="ver">${VERSION}</span>
   <nav class="topnav" aria-label="섹션">${topActive ? topnavOf(root) : topnavOf(root).replace(/ class="active"/g, ' class=""')}</nav>
   <div class="header-right">

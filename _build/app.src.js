@@ -102,6 +102,18 @@
   let saved = null; try { saved = localStorage.getItem("jsds-accent"); } catch (e) { }
   applyAccent(saved || "");
 
+  /* 홈(index) B4 — 글꼴이 준비되면 들어오기 시작(.go, data-hm 이 있을 때만 — head 스크립트가 줄인 모션이 아닐 때 붙임),
+     스크롤 패럴랙스는 루트에 --hm-sy(스크롤 px, 화면 높이의 1.2배까지). 미리보기 셸에서도 같은 핸들러가 지금 화면의 .hm 을 본다 */
+  const hm = document.querySelector(".hm");
+  if (hm && root.hasAttribute("data-hm")) (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => requestAnimationFrame(() => hm.classList.add("go")));
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let hmTick = false;
+    addEventListener("scroll", () => {
+      if (hmTick || !document.querySelector(".hm")) return; hmTick = true;
+      requestAnimationFrame(() => { hmTick = false; root.style.setProperty("--hm-sy", Math.min(scrollY, innerHeight * 1.2).toFixed(1)); });
+    }, { passive: true });
+  }
+
   /* 팝오버 공통 (검색 · Accent) */
   const q = document.getElementById("q"), box = document.getElementById("searchResults");
   const searchBtn = document.getElementById("searchBtn"), searchPop = document.getElementById("searchPop");
