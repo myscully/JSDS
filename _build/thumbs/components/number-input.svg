@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 265 200" fill="none"><!-- Figma Overview › _Local components › Thumbnails › Thumbnail / Number Input -->
+<g>
+<path d="M193.16 81H71.1599C67.8462 81 65.1599 83.6863 65.1599 87V113C65.1599 116.314 67.8462 119 71.1599 119H193.16C196.474 119 199.16 116.314 199.16 113V87C199.16 83.6863 196.474 81 193.16 81Z" fill="white"/>
+<path d="M80.1599 100H88.1599" stroke="#292A2D" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M103.16 110V90" stroke="#37383C" stroke-opacity="0.278431" stroke-width="0.5"/>
+<path d="M128.098 105.5V104.031L132.098 100.172C133.238 99.0313 133.832 98.3594 133.832 97.4062C133.832 96.3594 133.004 95.6876 131.894 95.6876C130.723 95.6876 129.973 96.422 129.988 97.5626H128.051C128.035 95.422 129.644 94.0312 131.91 94.0312C134.223 94.0312 135.785 95.4063 135.785 97.3126C135.785 98.5939 135.16 99.6251 132.941 101.719L130.926 103.719V103.797H135.957V105.5H128.098Z" fill="#292A2D"/>
+<path d="M161.16 110V90" stroke="#37383C" stroke-opacity="0.278431" stroke-width="0.5"/>
+<path d="M176.16 100H184.16" stroke="#292A2D" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M180.16 96V104" stroke="#292A2D" stroke-width="1.5" stroke-linecap="round"/>
+</g>
+</svg>

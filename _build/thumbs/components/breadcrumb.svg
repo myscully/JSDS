@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 265 200" fill="none"><!-- Figma Overview › _Local components › Thumbnails › Thumbnail / Breadcrumb -->
+<g>
+<path d="M83.5 91H49.5C47.8431 91 46.5 92.3431 46.5 94V106C46.5 107.657 47.8431 109 49.5 109H83.5C85.1569 109 86.5 107.657 86.5 106V94C86.5 92.3431 85.1569 91 83.5 91Z" fill="#37383C" fill-opacity="0.2784"/>
+<path d="M97 105L102 100L97 95" stroke="#292A2D" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M149.5 91H115.5C113.843 91 112.5 92.3431 112.5 94V106C112.5 107.657 113.843 109 115.5 109H149.5C151.157 109 152.5 107.657 152.5 106V94C152.5 92.3431 151.157 91 149.5 91Z" fill="#37383C" fill-opacity="0.2784"/>
+<path d="M163 105L168 100L163 95" stroke="#292A2D" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M215.5 91H181.5C179.843 91 178.5 92.3431 178.5 94V106C178.5 107.657 179.843 109 181.5 109H215.5C217.157 109 218.5 107.657 218.5 106V94C218.5 92.3431 217.157 91 215.5 91Z" fill="#37383C" fill-opacity="0.2784"/>
+</g>
+</svg>

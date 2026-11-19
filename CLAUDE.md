@@ -18,6 +18,7 @@
 | `_concepts/` | **원본 · 시안.** 메인 화면 비주얼 시안(도형 타이포 A1 · A2 · A3, 정한 카피의 B1 Simple · B2 Visual · B3 Signal, 가운데 정렬 B4 Balance + 고르는 `index.html`). **B4 는 2026-11-18 사이트 메인 화면이 됐다**(`_build/render.js` `homePage` · `style.src.css` Home 블록 — 시안 파일은 기록으로 남김). B 의 띠 · 미리보기 이미지 `img/*.png` 는 `capture.mjs` 가 패턴 예제를 찍은 것(패턴이 바뀌면 다시 돌림). `../assets/style.css` 의 토큰 · Pretendard 와 `../assets/app.js` 의 제품 색 · `SEARCH_INDEX` 를 불러 쓰고, 루트의 `_` 폴더라 빌드 · verify · 게이트 밖이다(반복 애니메이션도 씀). 사이트로 옮길 때 게이트 규칙에 맞게 다듬는다 |
 | `_build/templates.data.js` · `templates.build.js` · `templates.src.css` · `templates.src.js` | **원본.** Templates 메뉴(2026-11-18 — 옛 `_templates/` 를 옮기고 지움). `templates.data.js` 는 문서 페이지의 글(정의 · 고르기 표 · 쓴 컴포넌트 · 패턴 · Rules · 개요 한 줄), `templates.build.js` 는 `_build/*.data.js` 의 예제 문자열 · 헬퍼를 읽어 화면 일곱 `templates/screen/<key>.html` 을 쓰는 생성기(`build.js` 가 부름 — route 가 아니라 pages 수에 들지 않음), `templates.src.css` → `assets/templates.css` 는 앱 틀 배치만(패키지 CSS 에 섞이지 않게 style.css 와 따로), `templates.src.js` → `assets/templates.js` 는 둘러보기용 흉내 동작이다 |
 | `_build/uidict.data.js` | **원본.** Resources › UI Dictionary(2026-11-19)의 항목 — 분류 10 · 추천 검색어 · 항목(`src` = 예제 · 화면 주소, 이름 · 영문 · 대표 클래스 · React 이름 · 다른 이름 `aka` · 생김새 검색어 `kw`). 미리보기 · 코드 · 비슷한 것 · 문서 링크는 `render.js` `uiDictPage` 가 예제 데이터에서 만든다. `verify.js` 가 src · 클래스 · React · 범위를, `behave.uidict.js` 가 동작을 본다 |
+| `_build/thumbs/components/*.svg` · `_build/thumbs.js` | **원본.** Components Overview 카드 썸네일 46개(2026-11-19) — Figma `Thumbnail / <이름>` 을 SVG 로 내보낸 것(손으로 고치지 않음)과, 그 색을 토큰으로 바꿔 빌드에 넣는 변환기(표에 없는 색이면 빌드가 멈춤). Figma 썸네일이 바뀌면 다시 내보낸다 |
 | `assets/vendor/dayjs.min.js` · `dayjs.utc.js` · `dayjs.timezone.js` · `dayjs.LICENSE` | **생성물.** Date Picker 기준 시간대용 dayjs(MIT, 1.11.13 고정)를 `build.js` 가 `_build/node_modules/dayjs` 에서 복사하고 Date Picker 가 있는 페이지에만 붙입니다(`verify.js` 가 동반 · 부재를 봄). React 는 패키지 dependency 로 `date-picker/tz.ts` 에서 extend |
 
 ## 일하는 방식
@@ -1024,6 +1025,14 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - behave +4(part 17): 템플릿 대시보드 1440 펼침 → 1024 접힘(4rem · '메뉴 펼치기' · trigger width) → 버튼으로 펴면 1100 에서도 그대로 → 1440 펼침 → 접으면 1600 에서도 그대로 → 1024 접힘(이벤트 없음), 1279 · 1024 · 768 로 열면 접힘 · 1280 은 펼침, 문서 1024 에서 접기 버튼이 가리키는 내비만 접힘, `data-auto-collapse="false"` 는 그대로.
 - 음성 시험: ds.js 4건(change 리스너 · 처음 접기 · 대상 거르기 · opt-out) · React 2건(경계 무시 · auto:false 무시) · verify 1건(값 "no") 모두 잡혔다. 첫 실행의 실패 2건은 단정 쪽 실수였다(같은 단계 이름 'click' 이 덮임 · Navigation 내비 수를 3 으로 가정).
 - **하지 않은 것:** 접은 상태의 저장(제품 몫 그대로). Templates 문서 페이지의 iframe 은 늘 1440 폭이라 접히지 않는다(의도). Figma 는 동작이라 대조 밖 — Figma 미반영 1건(그대로 — Home 잘림).
+
+2026-11-19 Components Overview 카드 썸네일 = Figma 썸네일(사람의 요청 '피그마에 만든 컴포넌트 오버뷰 썸네일을 사이트에') — 게이트 수는 그대로(verify 검사 한 묶음을 더함 · 실패 0).
+- **원본** `_build/thumbs/components/<페이지 키>.svg` 46개 — Figma Overview › `_Local components` › Thumbnails 의 `Thumbnail / <이름>` 을 `download_assets`(svg)로 내보내 썸네일 그룹만 남겼다(옆 섹션 테두리 · 회색 면 사각 · 레이어 id 를 걷음, 색은 Figma 값 그대로 — 손으로 고치지 않음). 글자는 윤곽선이다.
+- **색은 빌드가 토큰으로** — `_build/thumbs.js` 의 표(Figma 색 · 불투명도 열 가지 → `--surface-elevated-primary` · `--foreground-neutral-strong · secondary · tertiary · quaternary` · `--line-neutral-secondary` · `--surface-neutral-secondary` · `--foreground-negative-strong` · `--foreground-brand-primary`). 칠은 `style="fill:var(…)"` 로 바꿔 다크 테마에서 면과 글자가 함께 뒤집히고(잰 값: 면 흰 → cool-17) Link 썸네일은 제품 색을 따른다(빨강 제품 brand-40). 표에 없는 색이 나오면 빌드가 멈춘다. 마스크 id(Navigation · Page Header · Side Panel)는 키를 붙여 겹치지 않게.
+- `build.js` 가 `window.COMPONENT_THUMBS` 로 넣고 `render.js thumbOf` 가 컴포넌트 카드에 쓴다(`.thumb.figma` — 여백 0, SVG 가 칸을 채움 · 265 × 199 at 1440). 빌드가 넣지 않은 단독 셸은 기본 그림. 쓰이지 않게 된 컴포넌트 데이터의 `thumb` 46줄(라이브 HTML 미니 썸네일)을 지웠다 — 패턴 개요는 그대로 `thumb` 를 쓴다.
+- **verify 더함:** 컴포넌트 페이지 ↔ 원본 SVG 가 하나씩 짝, 개요 카드 수 = 컴포넌트 수 · 카드마다 Figma SVG, 칠이 전부 토큰, 마스크 id 겹침 없음. 첫 빌드에서 `radio.svg`(페이지 키는 `radio-button`)를 이 검사가 잡았다. 음성 시험: 변환기에 새 색 · 새 불투명도를 넣으면 빌드가 멈춤(둘 다 잡힘).
+- 잰 것: 1440 라이트 · 다크 · 빨강 제품 · 390 에서 카드 46 · 빈 썸네일 0 · 가로 넘침 0 · 콘솔 오류 0, 캡처로 다크에서 버튼 · 아바타 · 달력의 진한 면과 흰 글자가 함께 뒤집혀 읽히는 것을 보았다.
+- **알고 둔 것:** Figma 의 raw 색 일부는 토큰과 몇 단계 다르다(#292A2D 88% → cool-22 88% · #E72727 → red-40 #E52222 · Link #0066FF(blue-50) → brand-40 · Accordion 구분선 #37383C 12% → line-neutral-secondary). 패턴 · Foundations 개요 썸네일은 Figma 에 없어 그대로다. 개요 페이지가 SVG 를 실어 188KB 가 됐다.
 
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

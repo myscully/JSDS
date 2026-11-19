@@ -755,6 +755,24 @@ for (const [k, c] of Object.entries(PATTERNS)) {
   }
 }
 
+/* Components Overview 썸네일(2026-11-19) — Figma 의 Thumbnail / <이름> 을 SVG 로 옮긴 원본(thumbs/components)이 컴포넌트 페이지와 하나씩 짝이고,
+   생성 페이지의 카드마다 그 썸네일이 들어 있으며, 칠이 전부 토큰인지(라이트 고정 raw 색이면 다크 테마에서 흰 면이 뜬다) */
+{
+  const keys = LIB.allPages(DATA.SITE, "components").map(p => p.key).filter(k => k !== "overview");
+  const files = fs.readdirSync(path.join(__dirname, "thumbs", "components")).filter(f => f.endsWith(".svg")).map(f => f.slice(0, -4));
+  for (const k of keys) if (!files.includes(k)) fails.push(`thumbs/components/${k}.svg 없음 — Components Overview 카드에 Figma 썸네일이 없다`);
+  for (const k of files) if (!keys.includes(k)) fails.push(`thumbs/components/${k}.svg — 그런 컴포넌트 페이지가 없다`);
+  const ov = article(read("components/overview.html"));
+  const cards = [...ov.matchAll(/<a class="ov-card" href="([^"]*)"><div class="thumb([^"]*)">([\s\S]*?)<\/div><div class="label">/g)];
+  if (cards.length !== keys.length) fails.push(`components/overview: 카드 ${cards.length}개 ≠ 컴포넌트 ${keys.length}개`);
+  for (const [, href, cls, inner] of cards) {
+    const at = `components/overview: ${href}`;
+    if (cls !== " figma" || !/^<svg class="ov-thumb" aria-hidden="true"/.test(inner)) { fails.push(`${at} — 썸네일이 Figma SVG 가 아니다`); continue; }
+    if (/#[0-9A-Fa-f]{3,8}\b|(?:fill|stroke)="(?!none")[^"]*"/.test(inner.replace(/url\(#[^)]*\)/g, ""))) fails.push(`${at} — 썸네일에 토큰이 아닌 칠이 남았다`);
+  }
+  const mids = [...ov.matchAll(/<mask id="([^"]*)"/g)].map(m => m[1]); if (new Set(mids).size !== mids.length) fails.push("components/overview: 썸네일 마스크 id 가 겹친다");
+}
+
 /* UI Dictionary(2026-11-19) — Resources › UI Dictionary 의 항목 원본 uidict.data.js 가 실제 예제 · 화면을 가리키는지.
    src 가 있는 예제(컴포넌트 · 패턴) · 화면(템플릿)이고, 대표 클래스가 그 미리보기에 있고, React 이름이 그 페이지 exports 에 있다.
    컴포넌트 · 패턴 · 템플릿이 모두 한 장 이상, 분류는 cats 안에서 하나도 남김없이, 다른 이름은 다른 항목의 공식 이름과 겹치지 않는다.

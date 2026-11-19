@@ -1,6 +1,6 @@
 /* =========================================================
    components.data.js — 컴포넌트 상세(수는 세어 쓴다 — render.js 가 Object.keys 로)
-   shape: { status, desc, css:[접두어…], thumb, examples:[{id,title,desc,html,react?,layout?,style?}],
+   shape: { status, desc, css:[접두어…], examples:[{id,title,desc,html,react?,layout?,style?}],
             props:[[name, type, default, desc]], spec:[[k,v]], figma:{…}, principles? }
    choose:[[항목, 문장]] 는 정의 바로 아래 표 — '언제 쓰는가'(필수) · '비슷한 것'(선택) · 'Placement'(필수), 3행 이하(2026-11-13 사람의 결정).
    principles:[[항목, 규칙]] 는 컴포넌트별 규칙 — 예제 뒤 · Spec 앞의 Rules 절. 8행을 넘으면 { 소제목: [[항목, 규칙]] } 으로 묶어 h3 로 그린다
@@ -238,7 +238,6 @@ const COMPONENTS = {
   "button": {
     status: "ready", react: ["Button","ButtonGroup"], css: [".btn", ".btn-group"],
     desc: "사용자의 의도를 명확하게 전달하고 행동을 유도합니다.",
-    thumb: `<button type="button" class="btn md outline assistive">취소</button><button type="button" class="btn md solid primary">저장</button>`,
     choose: [
       ["언제 쓰는가", "다른 화면으로 가면 링크를, 지금 화면에서 일어나는 동작이면 버튼을 씁니다. 새 탭 열기와 주소 복사가 되어야 하면 링크입니다. 버튼 모양이 필요한 링크는 링크 요소에 버튼 모양을 입혀 만듭니다."],
       ["Placement", "수평은 주 행동이 오른쪽 · 수직은 주 행동이 위 · Lv.4 는 카드 · 폼 · 대화상자당 하나"],
@@ -381,7 +380,6 @@ const COMPONENTS = {
         ["인증 코드", "자리 수가 정해진 숫자 코드는 자리마다 칸을 나눠 받습니다. 숫자가 아닌 글자는 받지 않고, 붙여넣기와 문자 코드 자동 채우기는 모든 칸을 한 번에 채웁니다. 다 채워도 저절로 제출하지 않습니다"],
       ],
     },
-    thumb: `<div class="field" style="min-width:200px"><label>정책 이름</label><input placeholder="예: USB 차단"></div>`,
     examples: [
       { id: "basic", group: "default", title: "Default / Error", desc: "오류가 나면 필드를 오류 상태로 바꾸고 도움말 자리에 오류 메시지를 씁니다. 원인과 해결 방법을 함께 씁니다.", html: `
         <div class="field"><label for="ip1">허용 IP</label><input id="ip1" value="10.0.0.12"><span class="help">IPv4 형식</span></div>
@@ -446,7 +444,6 @@ const COMPONENTS = {
       ["결과 없음", "<a href=\"#/components/empty-state\">Empty State</a> 의 검색 결과 없음으로 잇습니다. 조건을 보여 주고 초기화 · 완화를 제안합니다"],
       ["조건 유지", "검색어와 필터를 URL 에 남겨 공유 · 새로고침해도 유지합니다. 제품이 구현합니다"],
     ],
-    thumb: `<div class="searchbar" style="min-width:220px">${I("search")}<input placeholder="검색"></div>`,
     examples: [
       { id: "basic", group: "default", title: "Default", desc: "아이콘과 입력칸으로 된 조회형입니다. Enter 를 누르면 검색을 실행했다는 이벤트를 냅니다.", html: `
         <div class="searchbar" role="search">${I("search")}<input type="search" placeholder="정책 이름 검색" aria-label="정책 검색"></div>` },
@@ -502,7 +499,6 @@ const COMPONENTS = {
       ["라벨", "1~2단어로 쓰고 항목끼리 길이를 비슷하게 맞춥니다"],
       ["키보드", "Tab 은 묶음에 한 번만 멈춥니다. 좌우 · 상하 화살표로 옮기면 바로 고르고, 비활성은 건너뛰며 끝에서 처음으로 돌아옵니다"],
     ],
-    thumb: `<div class="select-btn"><button class="on">24시간</button><button>7일</button><button>30일</button></div>`,
     examples: [
       { id: "basic", group: "default", title: "Default", desc: "고른 항목이 강조됩니다. 묶음 전체가 라디오 묶음으로 읽히고, Tab 은 묶음에 한 번만 멈추며 화살표로 옮깁니다.", html: `
         <div class="select-btn" role="radiogroup" aria-label="기간">
@@ -562,7 +558,6 @@ const COMPONENTS = {
       ["단위", "현재 값에 단위를 붙여 보이고, 스크린 리더도 값을 단위와 함께 읽게 합니다"],
       ["범위", "값은 하나입니다. 두 끝을 고르는 범위 슬라이더는 지원하지 않습니다. 시작 · 끝 값을 Text Field 둘로 받습니다"],
     ],
-    thumb: `<div class="slider" style="min-width:200px"><input type="range" value="60" style="--p:60%"></div>`,
     examples: [
       { id: "basic", group: "default", title: "Default", desc: "트랙은 현재 값까지 채워 그립니다. 값을 코드로 바꿀 때는 채운 길이도 함께 바꿉니다.", html: `
         <div class="slider">
@@ -611,7 +606,6 @@ const COMPONENTS = {
   "date-picker": {
     status: "ready", react: ["Calendar","DatePicker","DateRangePicker","formatDate","parseDate"], css: [".datepicker", ".calendar"], borrows: [".btn", ".field", ".sr-only"],
     desc: "날짜를 YYYY. MM. DD 순서로 입력하거나 달력에서 고릅니다. Text Field 를 바탕으로 만들어 숫자만 쳐도 형식이 채워집니다. 고르는 단위와 기간, 달력 표기 언어, 기준 시간대를 정할 수 있습니다. 입력한 값이 늘 올바른 날짜는 아닙니다. 덜 친 날짜, 달력에 없는 날짜, 범위 밖 날짜도 그 상태 그대로 남겨 알립니다.",
-    thumb: dpField({ id: "dp-thumb", label: "조회 기간", range: true, value: "2026. 09. 01 ~ 2026. 09. 07" }),
     choose: [
       ["언제 쓰는가", "날짜나 기간, 또는 날짜와 시각을 받을 때 씁니다. 미리 정해 둔 기간 몇 개 중에서만 고르게 하려면 <a href=\"#/components/select-button\">Select Button</a> 이 낫습니다."],
       ["Placement", "필드 아래 4px. 아래 자리가 모자라고 위가 더 넓으면 필드 위 4px. 팝업 · 패널 본문 안에서도 본문에 잘리지 않고 그 위로 뜸"],
@@ -676,7 +670,6 @@ const COMPONENTS = {
       ["라벨", "끝에 마침표를 찍지 않습니다. 선택하면 일어날 일을 긍정형으로 씁니다"],
       ["표의 행 선택", "행마다 '외부 USB 차단 선택' 처럼 다른 접근 이름을 줍니다. 전부 '선택' 이면 어느 행인지 들리지 않습니다"],
     ],
-    thumb: `${cb("이메일 알림", "checked")}${cb("SMS 알림")}`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "선택하지 않은 기본 상태입니다.", html: `<label class="checkbox"><input type="checkbox"><span>정책 배포 시 알림</span></label>` },
       { id: "state", group: "state", title: "State", desc: "Unchecked · Checked · Indeterminate · Disabled 네 가지입니다. Indeterminate 는 하위 항목 중 일부만 고른 부분 선택 상태입니다.", html: `
@@ -731,7 +724,6 @@ const COMPONENTS = {
       ["긴 값", "값은 240px 에서 말줄임합니다. 지우기 버튼에 포커스가 오면 펼치고, 버튼 이름에 전체 값이 들어갑니다. 마우스로는 잘린 값에만 붙는 Tooltip 으로 전체를 봅니다. 브라우저 기본 말풍선은 쓰지 않습니다"],
       ["형태와 색", "형태는 회색 선의 Outline 과 회색 면의 Solid 둘이고, Outline 이 기본입니다. 고른 칩은 두 형태 모두 같은 진한 면입니다. 색은 제품 색 면의 brand 와 반전 면의 neutral 둘이고, brand 가 기본입니다. 색은 고른 모양만 바꾸므로 고르지 않은 칩은 둘 다 중립입니다. 입력값 칩은 고를 수 없어 형태만 받고 색은 중립입니다"],
     ],
-    thumb: `<button class="chip on" aria-pressed="true">Critical</button><button class="chip" aria-pressed="false">High</button><button class="chip" aria-pressed="false">Medium</button>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "선택하지 않은 기본 칩입니다.", html: `<button type="button" class="chip" aria-pressed="false">Critical</button>` },
       { id: "outline", group: "variant", title: "Outline", desc: "기본 형태입니다. 고르지 않은 칩은 회색 선, 고른 칩은 진한 면입니다. 위 줄은 기본 색인 brand 로 제품 색 면이고, 아래 줄은 neutral 로 반전 면입니다. 색은 고른 모양만 바꿉니다.", html: `
@@ -827,7 +819,6 @@ const COMPONENTS = {
       ["범위 옵션", "겹치거나 빠지는 구간이 없어야 합니다. 전부 나열할 수 없으면 '기타'를 둡니다"],
       ["필수 그룹", "필수로 표시한 묶음은 제출할 때 알리고, 고르면 바로 지웁니다"],
     ],
-    thumb: `<label class="radio"><input type="radio" name="t" checked><span>차단</span></label><label class="radio"><input type="radio" name="t"><span>허용</span></label>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "선택하지 않은 기본 상태입니다.", html: `<label class="radio"><input type="radio" name="rd"><span>표준 모드</span></label>` },
       { id: "state", group: "state", title: "State", html: `
@@ -895,7 +886,6 @@ const COMPONENTS = {
       ["비활성", "왜 바꿀 수 없는지 설명 자리에 적습니다. 비활성 요소에는 Tooltip 을 달지 않습니다"],
       ["표 안", "'사용' 열의 Switch 는 '외부 USB 차단 사용' 처럼 행마다 다른 접근 이름을 줍니다"],
     ],
-    thumb: `<label class="switch"><input type="checkbox" role="switch" checked><span>실시간 보호</span></label>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "꺼진 기본 상태입니다.", html: `<label class="switch"><input type="checkbox" role="switch"><span>실시간 보호</span></label>` },
       { id: "state", group: "state", title: "State", desc: "상태는 Off · On · Disabled 세 가지입니다.", html: `
@@ -947,7 +937,6 @@ const COMPONENTS = {
       ["누를 수 없음", "Tag 는 표시 전용입니다. 선택 · 삭제는 Chip 을 씁니다."],
       ["여러 개", "표 칸에서는 앞 2개와 남은 개수 '+N' 을 보이고, 나머지는 Tooltip 으로 보여 줍니다. '+N' 은 포커스를 받는 버튼입니다. 표 밖에서는 줄바꿈해 전부 보입니다."],
     ],
-    thumb: `<span class="tag critical">Critical</span><span class="tag medium">Medium</span><span class="tag ok">정상</span>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "의미 색을 지정하지 않은 중립 태그입니다.", html: `<span class="tag">Tag</span>` },
       { id: "severity", group: "variant", title: "Severity", desc: "위협 심각도 5단계입니다. Critical 은 빨강, High 는 주황, Medium 은 라이트 블루, Low 는 라임, Info 는 중립입니다. 글자는 틴트와 같은 색상의 진한 톤이고 점은 없습니다.", html: `
@@ -1005,7 +994,6 @@ const COMPONENTS = {
       ["비활성 항목", "권한 때문에 못 쓰는 항목은 비활성으로 두고, 항목 안 보조 글에 이유를 적습니다"],
       ["키보드", "열면 첫 항목으로 포커스가 갑니다. ↑↓ Home End 로 옮기고, 글자를 치면 그 글자로 시작하는 항목으로 갑니다. Esc 는 닫고 트리거로, Tab 은 닫고 다음 칸으로 갑니다"],
     ],
-    thumb: `<div class="dropdown open" style="height:60px"><ul class="menu" style="position:static;min-width:120px"><li class="menu-item">편집</li><li class="menu-item danger">삭제</li></ul></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "닫힌 기본 상태입니다. ⋯ 버튼을 누르면 동작 목록이 열립니다.", html: `
         <div class="dropdown">
@@ -1074,7 +1062,6 @@ const COMPONENTS = {
       ["키보드", "닫힌 트리거에서 ↑↓ 로 엽니다. 열리면 ↑↓ Home End 로 옮기고, 글자를 치면 그 글자로 시작하는 항목으로 갑니다. 초성으로도 찾습니다. Tab 은 닫고 다음 칸으로 갑니다"],
       ["폼 안에서", "필드로 감싸면 필드 폭을 채우고, 필드 라벨이 Select 의 이름으로 읽힙니다. 필수로 두면 Text Field 와 같은 검증에 참여합니다"],
     ],
-    thumb: `<div class="dropdown"><button class="trigger" style="min-width:160px">전체 그룹</button></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "닫힌 기본 상태입니다. 고른 값이 없으면 트리거에 placeholder 를 둡니다. 항목이 8개를 넘으면 열린 목록은 최대 높이 320px 안에서 스크롤됩니다.", html: `
         <div class="dropdown">
@@ -1155,7 +1142,6 @@ const COMPONENTS = {
       ["목록 상태", "불러오는 중 · 실패 · 항목 없음을 목록 안 한 줄로 보여 줍니다. 실패하면 다시 시도 버튼을 함께 둡니다"],
       ["결과 알림", "결과 수와 선택 · 해제를 화면에 보이지 않는 알림으로 스크린 리더에 전합니다"],
     ],
-    thumb: `<div class="combobox" style="min-width:200px"><div class="control"><input placeholder="부서 검색" aria-label="부서"></div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "입력하면 목록이 좁혀지고 첫 후보가 표시됩니다. ↑↓ 로 옮기고 Enter 로 고릅니다.", html: `<div class="field" style="width:320px"><label for="cb-d">담당 부서</label>${cbBox({ id: "cb-d", name: "부서", placeholder: "부서 검색" })}</div>`, layout: "tall top" },
       { id: "multiple", group: "variant", title: "Multiple", desc: "여러 개 고르기입니다. 고른 항목이 태그로 쌓이고 목록은 열린 채 있습니다.", html: `<div class="field" style="width:320px"><label for="cb-m">알림 받을 부서</label>${cbBox({ id: "cb-m", name: "알림 받을 부서", placeholder: "부서 검색", multi: true, on: ["영업팀", "보안팀"] })}</div>`, layout: "tall top" },
@@ -1188,7 +1174,6 @@ const COMPONENTS = {
       ["패널의 입력", "탭을 옮겨도 패널을 숨기기만 하고 입력은 남겨 둡니다. 패널을 지워야 하는 제품은 확인 Popup 을 띄웁니다."],
       ["URL", "활성 탭을 URL 에 남겨 공유와 새로고침에 유지합니다. 제품이 구현합니다."],
     ],
-    thumb: `<div class="tabs sm" style="width:auto"><button class="tab on">개요</button><button class="tab">이벤트</button><button class="tab">정책</button></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "밑줄 스타일의 기본 탭입니다.", html: `
         <div class="tabs" role="tablist" aria-label="보기 전환">
@@ -1263,7 +1248,6 @@ const COMPONENTS = {
   "breadcrumb": {
     status: "ready", react: ["Breadcrumb","BreadcrumbHome","BreadcrumbItem","BreadcrumbMore"], css: [".breadcrumb"], borrows: [".page-head", ".btn", ".tooltip-wrap", ".tooltip"],
     desc: "지금 화면이 메뉴 계층의 어디인지 보여 주고 상위로 한 번에 돌아가게 합니다.",
-    thumb: `<ol class="breadcrumb"><li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li><li><a href="#">정책</a></li><li aria-current="page"><span>외부 저장장치 차단</span></li></ol>`,
     choose: [
       ["언제 쓰는가", "좌측 메뉴에서 한 단계 이상 들어간 상세, 편집, 하위 화면에 둡니다. 메뉴에서 바로 열리는 화면에는 두지 않습니다."],
       ["Placement", "메뉴 아래 상세 · 편집 화면의 페이지 타이틀 위 8px · 모달 · 탭 패널 안 금지"],
@@ -1344,7 +1328,6 @@ const COMPONENTS = {
   "pagination": {
     status: "ready", react: ["Pagination","PaginationBar","CursorPagination","paginate","PAGE_SIZES"], css: [".pagination", ".pagination-bar", ".dropdown", ".menu", ".menu-item"],
     desc: "긴 목록을 페이지로 나누어 이동합니다. 총 건수와 페이지 크기 선택을 함께 둡니다.",
-    thumb: `<div class="pagination compact"><button>${I("chevron-left",16)}</button><button class="on">1</button><button>2</button><button>3</button><button>${I("chevron-right",16)}</button></div>`,
     choose: [
       ["언제 쓰는가", "전체 건수를 아는 긴 목록이나 표를 여러 쪽으로 나눌 때 씁니다. 전체 쪽수를 셀 수 없다면 이전과 다음만 있는 커서 방식을 씁니다."],
       ["Placement", "테이블 하단 우측, 총 건수는 좌측. 표시 개수 20 · 50 · 100"],
@@ -1426,7 +1409,6 @@ const COMPONENTS = {
       ["좁은 화면", "화면 폭이 1280px 아래로 줄면 접기 버튼이 있는 사이드 내비가 접히고, 다시 넓히면 펼쳐집니다. 그 사이 사용자가 바꾼 상태는 다음에 폭이 경계를 넘을 때까지 그대로 둡니다."],
       ["본문 바로가기", "페이지의 첫 포커스에 둡니다. 포커스가 오면 나타납니다."],
     ],
-    thumb: `<div class="sidenav" style="width:180px;min-height:0;border:1px solid var(--line-neutral-secondary);border-radius:8px"><a href="#" class="on" aria-current="page">${I("home")}<span>대시보드</span></a><a href="#">${I("list")}<span>이벤트</span></a><a href="#">${I("shield")}<span>정책</span></a></div>`,
     examples: [
       { id: "basic", group: "default", title: "Default", desc: "그룹 라벨 아래에 링크를 둡니다. 아이콘은 18px 이고, 건수와 하위 항목을 함께 둘 수 있습니다.", html: `
         <nav class="sidenav" aria-label="주 메뉴" style="border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg)">
@@ -1474,7 +1456,6 @@ const COMPONENTS = {
       ["사용자 메뉴", "로그아웃은 메뉴 맨 아래, 구분선 뒤에 둡니다."],
       ["아이콘 버튼", "기본 크기 40 이고, 모두 접근 이름과 Tooltip 을 둡니다. 옆의 전역 검색도 같은 높이 40 입니다. 라이트와 다크 전환 버튼은 지금 테마를 아이콘으로 보입니다. 라이트면 해, 다크면 달입니다."],
     ],
-    thumb: `<div class="topbar" style="height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--line-neutral-secondary);width:260px"><span class="logo"><i>${I("shield-check",24,{style:"filled"})}</i>Console</span><span class="right"><span class="avatar sm" data-name="정희">JH</span></span></div>`,
     examples: [
       { id: "basic", group: "default", title: "Default", desc: "로고와 메뉴, 오른쪽 동작으로 이루어집니다. 현재 메뉴는 강조해 보여 줍니다. 사이드 내비게이션이 없는 제품이라 접기 버튼이 없습니다.", html: `
         <header class="topbar" style="border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary)">
@@ -1526,7 +1507,6 @@ const COMPONENTS = {
   "accordion": {
     status: "ready", react: ["Accordion","AccordionGroup"], css: [".accordion", ".accordion-group"],
     desc: "정보를 접어 두었다가 필요할 때 펼칩니다. 핵심 정보와 필수 입력은 펼쳐 둡니다.",
-    thumb: `<details class="accordion sm outline" open style="min-width:200px"><summary style="padding:10px 14px;font-size:12px">고급 설정</summary><div class="body" style="padding:0 14px 10px;font-size:12px">내용</div></details>`,
     choose: [
       ["언제 쓰는가", "긴 설명, 고급 설정, 자주 묻는 질문처럼 당장 보지 않아도 되는 정보를 접어 둘 때 씁니다. 같은 층위의 내용을 바꿔 보여 주려면 <a href=\"#/components/tab\">Tab</a> 을, 순서대로 진행해야 하면 <a href=\"#/components/steps\">Steps</a> 를 씁니다."],
       ["Placement", "설정 폼의 고급 옵션, FAQ · 헤더 안 조작 요소 금지(약관 동의만 예외)"],
@@ -1592,7 +1572,6 @@ const COMPONENTS = {
   "card": {
     status: "ready", react: ["Card","CardHead","CardTitle","CardDesc","CardMeta","CardFoot","CardGrid"], css: [".card", ".card-grid"], borrows: [".tag", ".btn", ".select-btn", ".sparkline", ".skeleton", ".tbl", ".indicator", ".empty"],
     desc: "관련 정보와 그 정보에 대한 액션을 한 덩어리로 묶는 컨테이너입니다. 대시보드 위젯 · 상세 화면의 정보 블록 · 선택지 묶음에 씁니다.",
-    thumb: `<div class="card sm" style="min-width:200px"><div class="card-head"><h3 class="title" style="font-size:14px">라이선스</h3><span class="tag ok sm">정상</span></div><p class="desc" style="font-size:12px">2026-12-31 만료</p></div>`,
     choose: [
       ["언제 쓰는가", "관련된 정보와 그 정보로 할 수 있는 동작을 한 덩어리로 묶을 때 씁니다. 숫자 하나를 강조하려면 KPI 를, 그래프를 담으려면 <a href=\"#/components/data-visual\">Chart Card</a> 를 씁니다. 화면 전체를 감싸는 틀로는 쓰지 않습니다."],
       ["Placement", "대시보드 그리드(minmax 260 · gap 20) · 상세 정보 블록 · 선택지 묶음 · 카드 안 카드 금지"],
@@ -1725,7 +1704,6 @@ const COMPONENTS = {
       ["폭", "폭은 기본 440px 입니다. 넓은 640px 은 필드가 두 열이거나 미리보기를 함께 보여 줄 때만 씁니다."],
       ["겹침", "모달 위에 모달을 띄우지 않습니다."],
     ],
-    thumb: `<div class="popup" style="width:220px;padding:14px;gap:6px"><h3 class="popup-title" style="font-size:12px">정책 삭제</h3><p class="popup-body" style="font-size:12px">되돌릴 수 없습니다.</p><div class="popup-actions" style="margin-top:4px"><button class="btn sm outline assistive" style="height:26px;font-size:12px">취소</button><button class="btn sm solid negative" style="height:26px;font-size:12px">삭제</button></div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "제목 · 본문 · 액션으로 이루어진 기본 구성입니다.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="d-title">
@@ -1813,7 +1791,6 @@ const COMPONENTS = {
       ["개수", "한 번에 하나입니다. 다른 패널을 열면 바꿔 끼웁니다."],
       ["위에 띄우는 것", "패널 안에서 <a href=\"#/components/popup\">Popup</a> 을 띄울 수 있습니다. 모달 패널 위에는 띄우지 않습니다."],
     ],
-    thumb: `<div class="side-panel" style="width:200px"><div class="side-panel-header" style="min-height:0;padding:8px 12px"><span class="side-panel-title" style="font-size:12px;line-height:16px">이벤트 상세</span></div><div class="side-panel-body" style="padding:12px;font-size:12px">외부 USB 차단</div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "머리글 · 본문 · 바닥글로 이루어집니다. 예제는 띄우지 않은 모습입니다.", html: `
         <section class="side-panel" role="dialog" aria-labelledby="sp-d">
@@ -1868,7 +1845,6 @@ const COMPONENTS = {
       ["동작", "마우스는 0.3초 뒤, 키보드 포커스는 바로 보입니다. Esc 로 닫습니다. 화면 끝이면 반대쪽으로 뒤집고, 스크롤되는 영역 안에서도 잘리지 않습니다."],
       ["차트 값", "차트의 값 표시는 <a href=\"#/components/data-visual\">Data Visual</a> 의 몫입니다. 이 컴포넌트를 쓰지 않습니다."],
     ],
-    thumb: `<span class="tooltip-wrap show"><button class="btn sm outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button><span class="tooltip" role="tooltip">새로 고침</span></span>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "요소 위쪽에 뜨는 기본 위치입니다.", html: `<span class="tooltip-wrap show"><button type="button" class="btn md outline assistive">새로 고침</button><span class="tooltip" role="tooltip">목록을 다시 불러옵니다</span></span>` },
       { id: "position", group: "variant", title: "Position", desc: "기본은 위쪽이고 아래 · 왼쪽 · 오른쪽에도 띄울 수 있습니다. 예제는 늘 보이게 띄워 두었습니다.", html: `
@@ -1905,7 +1881,6 @@ const COMPONENTS = {
       ["알리는 세기", "화면 낭독기가 하던 말을 끊고 바로 읽는 알림은 바로 알아야 하는 위험에만 씁니다. Toast 는 읽던 말이 끝난 뒤에 읽힙니다."],
       ["문구", "오류에는 원인과 다음 행동을 함께 적습니다. 폼 필드 오류는 Toast 로 알리지 않고 필드 아래에 적습니다."],
     ],
-    thumb: `<div class="notice warning" style="max-width:240px;padding:10px 12px;font-size:12px"><span class="ico">${I("alert-triangle",20,{style:"filled"})}</span><div><b>라이선스 만료 임박</b>3일 후 만료</div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "본문 안에 머무는 기본 인라인 알림입니다.", html: `<div class="notice info" role="status" style="max-width:600px"><span class="ico">${I("info-circle",18,{style:"filled"})}</span><div><b>정책이 아직 배포되지 않았습니다</b>변경 사항은 '배포'를 눌러야 에이전트에 적용됩니다.</div></div>` },
       { id: "notice", group: "variant", title: "Notice (Inline)", desc: "페이지 안에 머무는 알림입니다. Info · Success · Warning · Danger 네 가지가 있습니다. 정보는 화면 낭독기가 읽던 말을 마친 뒤 읽고, 위험은 바로 읽습니다.", html: `
@@ -1943,7 +1918,6 @@ const COMPONENTS = {
       ["오래 걸리는 작업", "취소하거나 백그라운드로 돌릴 길을 제공합니다."],
       ["줄인 모션", "모션을 줄이는 설정에서도 Spinner, 버튼의 로딩 표시, Switch 의 처리 중 표시는 계속 돕니다. 멈춘 스피너는 고장으로 보이기 때문입니다. Skeleton 과 맥박 표시는 멈춥니다."],
     ],
-    thumb: `<span class="spinner"></span><div style="width:120px;display:flex;flex-direction:column;gap:6px"><span class="skeleton title" style="width:60%"></span><span class="skeleton text"></span></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "기본 크기 24px 의 스피너입니다.", html: `<span class="spinner" role="status" aria-label="이벤트 불러오는 중"></span>` },
       { id: "spinner", group: "variant", title: "Spinner", desc: "크기는 작게 16px · 기본 24px · 크게 40px 입니다. 버튼 안에서는 Spinner 대신 Button 의 로딩 상태를 씁니다.", html: `
@@ -1985,7 +1959,6 @@ const COMPONENTS = {
       ["Pulse", "실제로 진행 중일 때만 씁니다. 지난 일이나 강조에 쓰지 않습니다."],
       ["Count", "99 를 넘으면 99+ 로 적습니다. 0 은 표시하지 않습니다."],
     ],
-    thumb: `<span class="indicator ok">정상</span><span class="indicator danger">차단</span><span class="count">3</span>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "상태 원과 라벨을 함께 쓰는 기본 형태입니다.", html: `<span class="indicator ok">정상</span>` },
       { id: "status", group: "variant", title: "Status", desc: "에이전트와 서비스의 상태를 보여 줍니다. 정상은 체크, 주의는 느낌표, 장애는 엑스, 점검 중은 i, 오프라인은 가로선입니다. 라벨은 꼭 함께 둡니다. 지금 진행 중인 위험은 원 둘레가 맥박처럼 퍼져 알립니다.", html: `
@@ -2028,7 +2001,6 @@ const COMPONENTS = {
       ["포커스", "단계를 옮기면 새 패널로 포커스가 갑니다."],
       ["저장", "Steps 는 이동과 검사까지 맡습니다. 저장과 전송은 단계가 바뀌었다는 이벤트와 마쳤다는 이벤트를 받아 제품이 합니다."],
     ],
-    thumb: `<ol class="steps" aria-label="진행 단계" style="width:200px"><li class="done"><i style="width:18px;height:18px">${I("check",10)}</i></li><li class="on"><i style="width:18px;height:18px;font-size:10px">2</i></li><li><i style="width:18px;height:18px;font-size:10px">3</i></li></ol>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "가로 마법사입니다. '다음'은 그 단계의 폼을 검사합니다. 이 예제는 적용 그룹이 비어 있어 막힙니다. 완료한 '기본 정보'는 눌러 돌아갈 수 있고, 단계를 옮겨도 입력값은 남습니다.", html: `
         <div class="stepper">
@@ -2085,7 +2057,6 @@ const COMPONENTS = {
     principles: [
       ["중복 금지", "표 · 목록 · 메뉴처럼 이미 구분선이 있는 컴포넌트 안에 더하지 않습니다."],
     ],
-    thumb: `<div style="width:160px"><hr class="divider" style="margin:6px 0"><hr class="divider label" style="margin:6px 0">또는</hr></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "영역을 나누는 기본 가로 구분선입니다.", html: `
         <div style="width:100%;max-width:480px">
@@ -2124,7 +2095,6 @@ const COMPONENTS = {
   "data-table": {
     status: "ready", react: ["DataTable","ActionBar"], css: [".tbl-wrap", ".tbl", ".action-bar", ".select-notice", ".tag", ".checkbox", ".indicator"], borrows: [".link", ".btn", ".switch", ".log-row", ".empty", ".dropdown", ".menu", ".menu-item", ".menu-sep", ".skeleton", ".sr-only", ".code-view", ".spinner", ".spinner-wrap", ".stack", ".toolbar", ".spacer", ".select-btn"],
     desc: "로그 · 이벤트 · 정책 목록처럼 행이 많은 데이터를 다룹니다. 정렬, 선택, 행 동작을 갖춘 콘솔의 핵심 컴포넌트입니다. 읽기만 하는 단순한 표는 Table 을 씁니다.",
-    thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><thead><tr><th>시간</th><th>심각도</th></tr></thead><tbody><tr><td>09:41</td><td><span class="tag critical sm">Critical</span></td></tr><tr><td>09:40</td><td><span class="tag medium sm">Medium</span></td></tr></tbody></table></div>`,
     choose: [
       ["언제 쓰는가", "정렬, 선택, 행 동작이 필요한 목록에 씁니다. 몇 줄을 읽기만 하면 <a href=\"#/components/table\">Table</a> 을, 열이 2~3개이고 항목마다 제목과 부제가 있으면 <a href=\"#/components/list\">List</a> 를 씁니다."],
       ["Placement", "툴바(검색·필터) 위, 페이지네이션 아래"],
@@ -2316,7 +2286,6 @@ const COMPONENTS = {
   "table": {
     status: "ready", react: ["Table","TableHead","TableBody","TableRow","TableHeader","TableCell","SelectButton"], css: [".tbl-wrap", ".tbl"], borrows: [".indicator", ".stack", ".toolbar", ".spacer", ".select-btn", ".sr-only"],
     desc: "정렬이나 선택이 필요 없는 단순한 표입니다. 한 대상의 속성을 적는 키-값 표, 비교표, 요약 통계에 씁니다.",
-    thumb: `<div class="tbl-wrap" style="width:220px"><table class="tbl compact kv"><tbody><tr><th style="width:80px">이름</th><td>USB 차단</td></tr><tr><th>상태</th><td>사용</td></tr></tbody></table></div>`,
     choose: [
       ["언제 쓰는가", "데이터를 보여 줄 때만 씁니다. 레이아웃을 잡는 데는 쓰지 않습니다."],
       ["비슷한 것", "한 대상의 속성은 키-값 표로, 카드 안의 짧은 속성 몇 줄은 Card Meta 로, 같은 종류의 항목을 나열하면 <a href=\"#/components/list\">List</a> 로 보여 줍니다. 행이 많아 정렬이나 선택, 페이지 나눔이 필요해지면 <a href=\"#/components/data-table\">Data Table</a> 로 옮깁니다."],
@@ -2449,7 +2418,6 @@ const COMPONENTS = {
   "list": {
     status: "ready", react: ["List","ListItem"], css: [".list", ".avatar", ".tag", ".indicator"], borrows: [".btn"],
     desc: "같은 종류의 항목을 세로로 나열합니다. 열이 2~3개 이하이고 항목마다 제목 · 부제 · 동작이 있으면 표 대신 List 를 씁니다.",
-    thumb: `<ul class="list dense" style="width:220px"><li><span class="primary">PC-2041</span><span class="end"><span class="tag ok sm">정상</span></span></li><li><span class="primary">PC-1187</span><span class="end"><span class="tag medium sm">주의</span></span></li></ul>`,
     choose: [
       ["언제 쓰는가", "열이 2~3개이고 항목마다 제목, 부제, 동작이 있을 때 씁니다. 값을 열로 비교하면 표를, 항목이 각각 독립된 묶음이면 Card 를 씁니다."],
       ["Placement", "상세 패널 목록, 설정의 항목 목록"],
@@ -2487,7 +2455,6 @@ const COMPONENTS = {
   "item-tile": {
     status: "ready", react: ["Tile","TileGrid"], css: [".tile", ".tile-grid", ".tag"],
     desc: "아이콘·제목·설명을 담은 작은 선택지입니다. 연동 모듈이나 보호 기능처럼 여러 개를 고르거나, 눌러서 바로 이동할 때 씁니다.",
-    thumb: `<div class="tile-grid" style="width:240px;grid-template-columns:1fr 1fr"><button class="tile on"><span class="ico">U</span><b>USB</b></button><button class="tile"><span class="ico">N</span><b>네트워크</b></button></div>`,
     choose: [
       ["언제 쓰는가", "아이콘이 앞서는 작은 선택지를 여러 개 고르거나, 눌러서 바로 이동할 때 씁니다."],
       ["비슷한 것", "하나만 고르면 <a href=\"#/components/radio-button\">Card Radio</a> 를, 내용이 많은 카드를 고르면 <a href=\"#/components/card\">Card Selection</a> 을 씁니다."],
@@ -2526,7 +2493,6 @@ const COMPONENTS = {
   "data-visual": {
     status: "ready", react: ["Kpi","KpiGrid","ChartCard","BarChart","Donut","DonutRow","ChartLegend","Sparkline","ProgressList"], css: [".kpi", ".kpi-grid", ".kpi-foot", ".delta", ".delta-note", ".chart", ".progress-list", ".chart-card", ".chart-head", ".chart-sub", ".chart-action", ".chart-figure", ".chart-view", ".chart-tools", ".chart-table", ".chart-canvas", ".chart-state", ".donut", ".donut-row", ".chart-legend", ".sparkline"], borrows: [".btn", ".tbl", ".tbl-wrap", ".progress-row", ".progress", ".skeleton", ".empty", ".sr-only"],
     desc: "대시보드의 수치 · 추이 · 비율을 <b>한 세트</b>로 보여 줍니다. 모든 차트는 같은 카드 틀에 들어갑니다. 카드는 높이 32px 머리, 큰 값, 정해진 단계의 본문으로 이루어집니다. 색은 <b>한 톤</b>이 기본입니다. 제품 색과 상관없는 고정 파랑을 명도 4단계로 씁니다. 그래서 어느 차트를 골라 옆에 두어도 줄과 색이 맞습니다. KPI · 스파크라인 · 가로 막대 · 진행 막대 · 도넛 같은 <b>정적 요약</b>은 CSS 만으로 그립니다. 시계열 · 막대 · 도넛 · 혼합 · 게이지 · 스파크 같은 <b>탐색형 차트</b>는 Chart.js 위에 디자인 토큰을 입혀 그립니다.",
-    thumb: `<div class="kpi compact"><span class="label">Critical</span><span class="value" style="color:var(--foreground-negative-strong)">1,284</span></div>`,
     choose: [
       ["언제 쓰는가", "숫자 하나는 KPI, 기간에 따른 변화는 Timeseries, 항목 비교는 Bar, 구성비는 Donut, 목표 대비는 Gauge 나 진행 막대 목록을 씁니다. 값 몇 개를 요약만 하면 정적 차트로, 툴팁 · 기간 비교가 필요하면 탐색형 차트로 그립니다."],
       ["비슷한 것", "정확한 값을 서로 견주어야 하면 <a href=\"#/components/table\">Table</a> 이 낫습니다. 작업이 얼마나 진행됐는지는 <a href=\"#/components/loading\">Loading</a> 의 진행 막대입니다."],
@@ -2780,7 +2746,6 @@ const COMPONENTS = {
       ["구성", "제목은 필수입니다. 동작은 2개까지 두고, 그중 Solid Primary 는 하나만 씁니다."],
       ["좁은 자리", "카드 · 사이드 패널에서는 가로로 놓는 작은 모양을 씁니다. 표 안은 표의 빈 상태 칸을, 카드 본문은 <a href=\"#/components/card\">Card</a> 의 빈 상태를 따릅니다."],
     ],
-    thumb: `<div class="empty" style="padding:16px;gap:2px"><span class="ico" style="width:28px;height:28px;font-size:12px">${I("inbox")}</span><b style="font-size:12px">이벤트 없음</b></div>`,
     examples: [
       { id: "first", group: "default", title: "First Use", html: `
         <div class="empty" style="max-width:560px">
@@ -2818,7 +2783,6 @@ const COMPONENTS = {
       ["서버 오류", "폼 위에 오류를 모아 요약하지 않습니다. 서버가 돌려준 오류도 그 필드 아래에 적고, 필드에 붙일 수 없는 오류는 Toast 로 알립니다."],
       ["동작", "동작 버튼 줄은 폼 맨 아래에 두고, 주 버튼은 오른쪽 끝에 둡니다. 삭제는 왼쪽에 떼어 둡니다."],
     ],
-    thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "필수 항목 안내, 필드, 2열 줄, 동작 버튼을 차례로 둔 기본 폼입니다.", html: `
         <form class="form">
@@ -2870,7 +2834,6 @@ const COMPONENTS = {
       ["동작", "3개까지입니다. 주 버튼은 하나이고 오른쪽 끝입니다. 나머지는 <a href=\"#/components/dropdown\">Dropdown</a> 으로 묶습니다."],
       ["긴 제목", "제목 칸에서 줄바꿈합니다. 동작은 오른쪽 위에 남습니다."],
     ],
-    thumb: `<div class="page-head" style="width:200px"><div><span class="title" style="font-size:14px">정책</span></div><div class="actions"><span class="btn sm solid primary">저장</span></div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "제목과 설명, 동작으로 이루어집니다.", html: `
         <div class="page-head"><div><h1 class="title">정책</h1><p class="sub">전체 24개 · 최근 배포 09:41</p></div><div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">내보내기</button><button type="button" class="btn md solid primary">정책 만들기</button></div></div></div>` },
@@ -2908,7 +2871,6 @@ const COMPONENTS = {
       ["Group", "여러 사람은 Avatar Group 으로 겹쳐 놓습니다. 묶음에는 '담당자' 처럼 무엇의 사람들인지 알리는 이름을 주고, 아바타마다 이름을 줍니다."],
       ["Group 개수", "아바타는 5개까지 보이고 나머지는 뒤에 '외 N명' 으로 적습니다. 전체 목록을 열어야 하면 '외 N명' 을 글자 버튼으로 두고, 목록은 제품이 그립니다."],
     ],
-    thumb: `<span style="display:flex;gap:8px;align-items:center"><span class="avatar" data-name="정희">JH</span><span class="avatar sm" data-name="정희">JH</span></span>`,
     examples: [
       { id: "sizes", group: "size", title: "Size", desc: "기본 32px 과 작은 크기 24px 두 가지입니다.", html: `
         <div style="display:flex;gap:12px;align-items:center"><span class="avatar" role="img" aria-label="김민준">김</span><span class="avatar sm" role="img" aria-label="김민준">김</span></div>` },
@@ -2942,7 +2904,6 @@ const COMPONENTS = {
       ["새 창", "되도록 같은 창에서 엽니다. 새 창으로 열면 아이콘을 두고, 스크린 리더만 읽는 '(새 창)' 문구를 숨겨 둡니다."],
       ["비활성", "링크는 비활성으로 두지 않습니다. 갈 곳이 없으면 글자로 둡니다."],
     ],
-    thumb: `<a class="link" href="#" tabindex="-1">배포 상태</a>`,
     examples: [
       { id: "inline", group: "default", title: "Inline", desc: "문장 안 링크는 늘 밑줄입니다.", html: `
         <p class="t-label-1-reading t-regular" style="margin:0">에이전트가 오프라인이면 <a href="#" class="link">배포 상태</a> 에서 다시 배포하세요.</p>` },
@@ -2972,7 +2933,6 @@ const COMPONENTS = {
       ["모양", "기본은 드롭 영역입니다. 파일 하나를 받는 좁은 폼 칸에는 버튼형을 씁니다. 버튼형도 드롭은 받습니다."],
       ["보안", "화면의 형식 검사는 안내입니다. 서버에서 다시 검사합니다."],
     ],
-    thumb: `<div class="upload" style="width:180px"><div class="upload-zone" style="padding:12px"><span class="ico">${I("upload",24)}</span><span class="btn sm outline assistive">파일 선택</span></div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "파일 하나를 받습니다. 영역을 누르거나 끌어다 놓습니다. 이 예제의 전송은 흉내입니다.", html: `
         <div class="field" style="width:100%;max-width:480px">
@@ -3107,7 +3067,6 @@ const COMPONENTS = {
       ["키보드", "넘친 내용은 키보드로 스크롤합니다. 코드 영역은 포커스를 받고, 제목과 같은 이름으로 읽힙니다."],
       ["민감한 값", "API 키 · 토큰은 Code 에 넣지 않습니다. 가릴 수 있는 Copy Field 를 씁니다."],
     ],
-    thumb: `<div class="code-view" style="width:180px"><pre style="padding:8px 12px"><code>sudo sh install.sh</code></pre></div>`,
     examples: [
       { id: "block", group: "default", title: "Block", desc: "제목과 복사 버튼이 있는 블록입니다. 긴 줄은 가로로 스크롤합니다.", html: `
         <div class="code-view">
@@ -3158,7 +3117,6 @@ sudo systemctl enable --now js-agent</code></pre>
       ["표 안", "표 · 키-값 목록에서는 인라인 모양을 씁니다. 가리는 기능이 없어 민감한 값에는 쓰지 않습니다."],
       ["보안", "가려도 값은 브라우저에 있습니다. 한 번만 보여 줄 키는 화면에 내려보낼지 제품이 정합니다."],
     ],
-    thumb: `<div class="field copy-field" style="width:180px;min-width:0"><div class="affix"><input readonly value="9f86d081" aria-label="해시"></div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "읽기 전용 값과 복사 버튼입니다.", html: `
         <div class="field copy-field" style="width:100%;max-width:480px"><label for="cf1">SHA-256</label><div class="affix"><input id="cf1" readonly autocomplete="off" value="9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08">${copyBtn("SHA-256")}</div></div>` },
@@ -3189,7 +3147,6 @@ sudo systemctl enable --now js-agent</code></pre>
       ["키보드", "증감 버튼은 Tab 에서 뺍니다. 화살표 키가 같은 일을 합니다."],
       ["표준 입력", "브라우저의 표준 숫자 입력 위에 만듭니다. 숫자 입력은 전부 이 컴포넌트를 씁니다."],
     ],
-    thumb: `<div class="field number-field" style="width:180px;min-width:0"><div class="affix"><input type="number" value="30" aria-label="값" aria-valuetext="30분"><span>분</span>${numBtns("값")}</div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "단위 · 범위가 있는 기본 입력입니다. 범위 밖 값은 떠날 때 오류로 알립니다.", html: `
         <div class="field number-field" style="width:280px"><label for="n1">세션 만료</label><div class="affix"><input id="n1" type="number" value="30" min="5" max="1440" aria-valuetext="30분"><span>분</span>${numBtns("세션 만료")}</div><span class="help">5분부터 1440분까지 입력할 수 있습니다.</span></div>` },
@@ -3229,7 +3186,6 @@ sudo systemctl enable --now js-agent</code></pre>
       ["범위", "최소 · 최대 시각 밖의 칸은 고를 수 없습니다. 직접 친 범위 밖 값은 받고, 필드를 떠날 때 오류로 알립니다. 받을 수 있는 범위는 도움말에 미리 적습니다."],
       ["키보드", "열 안에서는 위 · 아래 화살표와 Home · End 로 옮기고, 왼쪽 · 오른쪽 화살표로 열을 바꿉니다. Enter 는 고르고 다음 열로 가며, 마지막 열에서는 닫고 입력칸으로 돌아갑니다. Esc 는 닫습니다. Tab 은 열 사이를 옮기고, 필드를 떠나면 닫힙니다."],
     ],
-    thumb: `<div class="field timepicker" style="width:160px"><div class="affix"><input type="text" value="09:30" aria-label="시각"><button type="button" class="tp-btn" aria-label="시각 선택" tabindex="-1">${I("clock")}</button></div></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "직접 치거나 시계 버튼으로 열 목록을 엽니다. 칸을 고르면 바로 값이 됩니다.", html: `
         ${tpField({ id: "tp1", label: "백업 시각", value: "02:00", help: "매일 이 시각에 백업합니다." })}` },
@@ -3276,7 +3232,6 @@ sudo systemctl enable --now js-agent</code></pre>
       ["키보드", "위 · 아래 화살표로 보이는 항목을 옮기고 Home · End 로 처음과 끝으로 갑니다. 글자를 치면 그 글자로 시작하는 항목으로 가고, * 는 같은 단계를 모두 펼칩니다. Tab 키는 트리 전체에서 한 번만 멈춥니다. 검색칸에서 아래 화살표를 누르면 첫 항목으로 갑니다."],
       ["구성", "8단계까지 들여씁니다. 긴 이름은 자르지 않고 줄을 바꿉니다. 행 안에는 버튼이나 링크를 두지 않고, 항목에 대한 동작은 트리 밖 툴바나 오른쪽 내용에 둡니다. 끌어다 놓아 옮기는 기능은 없으므로 옮기기도 오른쪽 내용의 동작으로 합니다."],
     ],
-    thumb: `<div style="width:200px">${treeHtml([{ label: "본사", open: true, children: [{ label: "보안팀", selected: true }, { label: "개발팀" }] }], { id: "tth", label: "조직" })}</div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "하나를 골라 오른쪽 내용을 바꾸는 탐색형입니다. 셰브론으로 펼치고, 행을 누르면 고릅니다. 행 끝에는 인원 같은 짧은 수를 둘 수 있습니다.", html: `
         <div style="width:280px">${treeHtml(TREE_ORG(), { id: "tr1", label: "조직" })}</div>` },
@@ -3331,7 +3286,6 @@ sudo systemctl enable --now js-agent</code></pre>
       ["목록", "'전체' 와 '안 읽음' 탭으로 거르고, 목록 안은 오늘 · 어제 · 이전 같은 날짜 묶음으로 나눕니다. 묶음 이름과 '10분 전' 같은 시각 글자는 제품이 정합니다. 심각도가 있는 알림만 앞에 심각도 Tag 를 둡니다."],
       ["이전 알림", "목록 끝의 '이전 알림 보기' 를 누르면 더 불러 달라는 이벤트가 납니다. 불러오는 동안 버튼에 스피너가 돕니다. 실패하면 버튼 위에 알리고 버튼이 '다시 시도' 로 바뀝니다. 제품이 더 없다고 알려 주면 버튼을 없앱니다."],
     ],
-    thumb: `<div style="display:flex;justify-content:flex-end;width:200px"><span class="with-count"><span class="btn sm assistive icon-only" aria-hidden="true">${I("bell")}</span><span class="count" aria-hidden="true">3</span></span></div>`,
     examples: [
       { id: "default", group: "default", title: "Default", desc: "벨을 누르면 열립니다. 안 읽은 항목은 점과 굵은 제목으로 보이고, 누르면 읽음이 되며 관련 화면으로 갑니다. 이 예제는 열린 채로 시작합니다.", html: `
         <div style="display:flex;justify-content:flex-end;width:100%;min-height:36rem">
