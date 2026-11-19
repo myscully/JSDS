@@ -40,6 +40,7 @@ export { Breadcrumb, BreadcrumbHome, BreadcrumbItem, BreadcrumbMore, type Breadc
 export { Pagination, PaginationBar, CursorPagination, PAGE_SIZES, paginate, type CursorPaginationProps, type PaginationProps, type PaginationBarProps, type PageItem } from "./components/pagination/Pagination";
 export { SideNav, SideNavGroup, SideNavItem, type SideNavProps, type SideNavGroupProps, type SideNavItemProps } from "./components/navigation/SideNav";
 export { SkipLink, type SkipLinkProps } from "./components/navigation/SideNav";
+export { useSideNavCollapse, SIDENAV_NARROW_QUERY, type UseSideNavCollapseOptions } from "./components/navigation/useSideNavCollapse";
 export { Link, type LinkProps } from "./components/link/Link";
 export { NumberInput, type NumberInputProps } from "./components/number-input/NumberInput";
 export { CodeBlock, InlineCode, type CodeBlockProps } from "./components/code/Code";

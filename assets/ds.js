@@ -91,6 +91,7 @@
     $$(".select-btn[role=radiogroup]", root).forEach(function (g) { var kids = $$(":scope > button", g), live = kids.filter(function (b) { return !b.disabled; }), cur = live.filter(function (b) { return b.classList.contains("on"); })[0] || live[0]; kids.forEach(function (b) { b.tabIndex = b === cur ? 0 : -1; }); });
     $$(".chip-group", root).forEach(syncChipReset);
     $$("[data-sidenav-toggle]", root).forEach(navSync);
+    if (NAV_MQ) navAutoList(root).forEach(function (n) { if (!n._dsAuto) { n._dsAuto = true; if (NAV_MQ.matches) navSet(n, true, "width"); } });   // 처음 그릴 때 한 번 — 다시 init 해도 사용자가 편 상태를 되돌리지 않는다
     themeSync();
     $$(".tbl th.check input, .checkbox-group > .checkbox:first-child input", root).forEach(syncMaster);
     $$(".tbl-wrap > .action-bar", root).forEach(function (bar) { var w = bar.parentNode, t = $("table.tbl", w); barOff(bar, !(t && $("tbody td.check input:checked", t)) && !w._dsAll); });
@@ -1319,7 +1320,13 @@
   var NAV_LABEL = { collapse: "메뉴 접기", expand: "메뉴 펼치기" };
   function navTarget(btn) { var id = btn.getAttribute("aria-controls"); return id ? doc.getElementById(id) : null; }
   function navSync(btn) { var nav = navTarget(btn); if (!nav) return; var c = nav.classList.contains("collapsed"), name = c ? NAV_LABEL.expand : NAV_LABEL.collapse; btn.setAttribute("aria-expanded", String(!c)); btn.setAttribute("aria-label", name); $$("a.has-on", nav).forEach(function (x) { if (c) x.setAttribute("aria-current", "true"); else if (x.getAttribute("aria-current") === "true") x.removeAttribute("aria-current"); });   /* 하위가 현재인 부모 — 접힌 레일에서만 현재를 잇는다(React SideNavItem hasActiveChild 와 같음) */ var w = btn.parentNode, tip = w && w.classList.contains("tooltip-wrap") && $(".tooltip", w); if (tip) tip.textContent = name; }
-  function navToggle(btn) { var nav = navTarget(btn); if (!nav) return; var c = nav.classList.toggle("collapsed"); $$("[data-sidenav-toggle]").forEach(function (b) { if (navTarget(b) === nav) navSync(b); }); fire(nav, "ds:sidenav", { collapsed: c }); }
+  function navSet(nav, c, trigger) { if (nav.classList.contains("collapsed") === c) return; nav.classList.toggle("collapsed", c); $$("[data-sidenav-toggle]").forEach(function (b) { if (navTarget(b) === nav) navSync(b); }); fire(nav, "ds:sidenav", { collapsed: c, trigger: trigger }); }
+  function navToggle(btn) { var nav = navTarget(btn); if (nav) navSet(nav, !nav.classList.contains("collapsed"), "button"); }
+  /* 좁은 화면(2026-11-19 사람의 결정) — 화면 폭이 1280 아래로 줄면 접기 버튼이 가리키는 사이드 내비를 접고, 다시 넓히면 편다.
+     경계를 넘을 때만 맞추므로 그 사이 사용자가 바꾼 상태는 남는다. 접기 버튼이 없는 내비(펼 길이 없음)와 data-auto-collapse="false" 는 건드리지 않는다 */
+  var NAV_MQ = window.matchMedia ? window.matchMedia("(max-width:1279.98px)") : null;
+  function navAutoList(root) { var seen = []; $$("[data-sidenav-toggle]", root || doc).forEach(function (b) { var n = navTarget(b); if (n && seen.indexOf(n) < 0 && n.getAttribute("data-auto-collapse") !== "false") seen.push(n); }); return seen; }
+  if (NAV_MQ && NAV_MQ.addEventListener) NAV_MQ.addEventListener("change", function (e) { navAutoList().forEach(function (n) { n._dsAuto = true; navSet(n, e.matches, "width"); }); });
   /* 라이트/다크(2026-11-18) — [data-theme-toggle] 이 <html data-theme> 를 바꾸고 ds:theme {theme} 를 낸다. aria-pressed = 다크. 저장은 제품 몫.
      다른 곳에서 테마를 바꿔도 버튼이 따라오게 data-theme 를 지켜본다 */
   function themeNow() { var t = doc.documentElement.getAttribute("data-theme"); return t === "dark" || t === "light" ? t : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); }

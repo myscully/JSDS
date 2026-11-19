@@ -7,9 +7,6 @@
   const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const toast = (m) => window.DS && window.DS.toast(m);
 
-  /* 1280 미만은 사이드 내비를 처음부터 접는다(Navigation 규칙) — 상단 바의 접기 버튼으로 다시 편다. 접은 상태의 저장은 제품 몫 */
-  if (window.innerWidth < 1280) { const t = $("[data-sidenav-toggle]"); if (t && t.getAttribute("aria-expanded") === "true") t.click(); }
-
   /* 검토용 링크 — href="#" 는 이동하지 않는다 */
   document.addEventListener("click", (e) => { const a = e.target.closest('a[href="#"]'); if (a) e.preventDefault(); });
 

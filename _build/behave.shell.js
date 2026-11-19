@@ -326,4 +326,44 @@ module.exports = async function shell({ page, ok, go }) {
     });
     ok("folding the side nav keeps the first item at the same height and the rail item fills 64 − 10 − 10 − the 1px right line (2026-11-18)", t.col && Math.abs(t.before - t.after) < 0.6 && Math.abs(t.w - (2.75 * rs - 1)) < 0.6, JSON.stringify(t));
   });
+
+  /* 17 · 좁은 화면(2026-11-19 사람의 결정) — 화면 폭이 1280 아래로 줄면 접기 버튼이 가리키는 사이드 내비가 접히고, 다시 넓히면 펴진다.
+     경계를 넘을 때만 맞추므로 그 사이 사용자가 바꾼 상태는 남는다. 접기 버튼이 없는 내비 · data-auto-collapse="false" 는 그대로 */
+  await part("17 · 좁은 화면에서 사이드 내비 접힘", async () => {
+    const path = require("path"), ROOT = path.resolve(__dirname, "..");
+    const c = await page.context().browser().newContext({ viewport: { width: 1440, height: 900 } }); const p = await c.newPage();
+    try {
+      const st = () => p.evaluate(() => { const n = document.querySelector(".sidenav"), t = document.querySelector("[data-sidenav-toggle]"), rs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        return { col: n.classList.contains("collapsed"), w: n.getBoundingClientRect().width / rs, exp: t.getAttribute("aria-expanded"), name: t.getAttribute("aria-label"), ev: (window.__ev || []).join(",") }; });
+      const scr = (k) => "file://" + path.join(ROOT, "templates", "screen", k + ".html");
+      await p.goto(scr("dashboard")); await p.waitForTimeout(300);
+      await p.evaluate(() => { window.__ev = []; document.addEventListener("ds:sidenav", (e) => window.__ev.push(e.detail.collapsed + ":" + e.detail.trigger)); });
+      const seq = [["load 1440", await st()]];
+      const step = async (lbl, f) => { await f(); await p.waitForTimeout(200); seq.push([lbl, await st()]); };
+      const vw = (w) => () => p.setViewportSize({ width: w, height: 900 }), tg = () => p.click("[data-sidenav-toggle]");
+      await step("1024", vw(1024)); await step("click1", tg); await step("1100", vw(1100)); await step("1440", vw(1440));
+      await step("click2", tg); await step("1600", vw(1600)); await step("1024b", vw(1024));
+      const g = Object.fromEntries(seq), near = (x, v) => Math.abs(x - v) < 0.05;
+      ok("templates: narrowing below 1280 collapses the side nav (4rem rail, '메뉴 펼치기', ds:sidenav trigger width); widening back to 1280+ expands it; a manual change inside a range stays until the next crossing (2026-11-19)",
+        !g["load 1440"].col && near(g["load 1440"].w, 15) && g["1024"].col && near(g["1024"].w, 4) && g["1024"].exp === "false" && g["1024"].name === "메뉴 펼치기"
+        && !g.click1.col && !g["1100"].col && !g["1440"].col && g.click2.col && g["1600"].col && g["1024b"].col
+        && g["1024b"].ev === "true:width,false:button,true:button", JSON.stringify(seq));
+      const loads = [];
+      for (const [w, k] of [[1279, "dashboard"], [1024, "list"], [768, "org"], [1280, "policy"]]) { await p.setViewportSize({ width: w, height: 900 }); await p.goto(scr(k)); await p.waitForTimeout(250); loads.push([w, k, (await st()).col]); }
+      ok("templates: a screen opened below 1280 starts collapsed, at 1280 starts expanded (2026-11-19)", loads.every(([w, , col]) => col === (w < 1280)), JSON.stringify(loads));
+      /* 문서 페이지 — 접기 버튼이 있는 예제만 접히고 정적 Expanded 시연은 그대로 */
+      await p.setViewportSize({ width: 1024, height: 900 }); await p.goto("file://" + path.join(ROOT, "components", "navigation.html")); await p.waitForTimeout(300);
+      const nv = await p.evaluate(() => [...document.querySelectorAll(".example-preview .sidenav")].map((n) => [n.closest("section.example").id, n.classList.contains("collapsed")]));
+      await p.goto("file://" + path.join(ROOT, "components", "top-navigation.html")); await p.waitForTimeout(300);
+      const tn = await p.evaluate(() => [...document.querySelectorAll(".example-preview .sidenav")].map((n) => [n.closest("section.example").id, n.classList.contains("collapsed"), !!document.querySelector(`[data-sidenav-toggle][aria-controls="${n.id}"]`)]));
+      ok("docs at 1024: only side navs a collapse button points at fold; static Navigation demos keep their own state (2026-11-19)",
+        nv.length >= 2 && nv.some(([id, col]) => id === "ex-navigation-basic" && !col) && tn.length >= 1 && tn.every(([, col, hasBtn]) => col === hasBtn), JSON.stringify({ nv, tn }));
+      /* data-auto-collapse="false" — 같은 화면에 달고 경계를 넘긴다 */
+      await p.setViewportSize({ width: 1440, height: 900 }); await p.goto(scr("dashboard")); await p.waitForTimeout(250);
+      await p.evaluate(() => document.querySelector(".sidenav").setAttribute("data-auto-collapse", "false"));
+      await p.setViewportSize({ width: 1024, height: 900 }); await p.waitForTimeout(200);
+      const off = await st();
+      ok("data-auto-collapse=\"false\" keeps the side nav as it is across the 1280 boundary (2026-11-19)", !off.col && off.exp === "true", JSON.stringify(off));
+    } finally { await c.close(); }
+  });
 };

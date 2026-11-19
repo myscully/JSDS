@@ -527,6 +527,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (!/<div class="topbar-start">(?:(?!<\/div>)[\s\S])*$/.test(pv.slice(0, m.index))) fails.push(`${f}: 접기 버튼은 .topbar-start 안(Top Navigation › 왼쪽 영역)`);
         if (!/aria-expanded="(true|false)"/.test(m[0])) fails.push(`${f}: 접기 버튼의 aria-expanded 없음(Top Navigation › 왼쪽 영역)`);
       }
+      /* 화면 폭으로 접지 않는 내비(2026-11-19) — 값은 "false" 하나. 다른 값은 ds.js 가 무시해 쓴 사람의 뜻과 달라진다 */
+      for (const m of pv.matchAll(/data-auto-collapse(?:="([^"]*)")?/g)) if (m[1] !== "false") fails.push(`${f}: data-auto-collapse 값은 "false" 만(Navigation › 좁은 화면)`);
       for (const m of pv.matchAll(/<span class="tag (critical|medium|low|info)\b[^"]*"[^>]*>([^<]*)</g)) if (!/^(Critical|High|Medium|Low|Info|CRIT|HIGH|WARN|LOW|INFO|심각|높음|중간|낮음|정보)$/.test(m[2].trim())) fails.push(`${f}: 심각도 색은 심각도 어휘에만 "${m[2]}"(Tag › 톤)`);
       for (const m of pv.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)) { const n = [...m[1].matchAll(/class="tag[ "](?![^"]*tag-more)/g)].length; if (n > 3) fails.push(`${f}: 표 칸의 Tag ${n}개 — 앞 2개 + +N(Tag › 여러 개)`); }
       for (const m of pv.matchAll(/class="tag[^"]*tag-more[^"]*"/g)) { const before = pv.slice(Math.max(0, m.index - 40), m.index); if (!/<button type="button" $/.test(before)) fails.push(`${f}: +N 은 버튼(Tag › 여러 개)`); }
@@ -750,6 +752,55 @@ for (const [k, c] of Object.entries(PATTERNS)) {
       if (has && !listed && strict) fails.push(`templates/${k}: 화면이 ${u} 를 쓰는데 uses 에 없다`);
       if (!has && listed) fails.push(`templates/${k}: uses 에 ${u} 가 있는데 화면이 쓰지 않는다`);
     }
+  }
+}
+
+/* UI Dictionary(2026-11-19) — Resources › UI Dictionary 의 항목 원본 uidict.data.js 가 실제 예제 · 화면을 가리키는지.
+   src 가 있는 예제(컴포넌트 · 패턴) · 화면(템플릿)이고, 대표 클래스가 그 미리보기에 있고, React 이름이 그 페이지 exports 에 있다.
+   컴포넌트 · 패턴 · 템플릿이 모두 한 장 이상, 분류는 cats 안에서 하나도 남김없이, 다른 이름은 다른 항목의 공식 이름과 겹치지 않는다.
+   페이지의 수 글자 · 탭 건수가 데이터와 같고, 미리보기에 접두어를 붙여 페이지 안 id 가 겹치지 않는다 */
+{
+  const UD = require("./uidict.data.js"), TEMPLATES = require("./templates.data.js");
+  const f = "resources/ui-dictionary.html";
+  if (!fs.existsSync(path.join(OUT, f))) fails.push(`${f}: 페이지가 없다`);
+  else {
+    const b = read(f), cards = b.split('<li class="ud-item"').slice(1);
+    if (cards.length !== UD.items.length) fails.push(`${f}: 카드 ${cards.length}장 ≠ 데이터 ${UD.items.length}개`);
+    const bar = (/<div class="ud-tabbar">([\s\S]*?)<\/div>/.exec(b) || [])[1] || "", tabs = [...bar.matchAll(/data-value="([^"]+)">([^<]*)<\/button>/g)];
+    if (tabs.map((m) => m[1]).join() !== UD.cats.join() || tabs.some((m) => m[2] !== m[1])) fails.push(`${f}: 분류 탭 ${tabs.map((m) => m[1]).join(" · ")} ≠ 데이터 ${UD.cats.join(" · ")}(탭 안에는 분류 이름만)`);
+    const ids = [...b.replace(/(<code\b[^>]*>)[\s\S]*?<\/code>/g, "$1").matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]), dup = [...new Set(ids.filter((x, i) => ids.indexOf(x) !== i))];
+    if (dup.length) fails.push(`${f}: 겹치는 id ${dup.length}개 — ${dup.slice(0, 5).join(" ")}`);
+    const names = new Map(UD.items.map((x) => [x.name, x.src]));
+    if (names.size !== UD.items.length) fails.push(`uidict: 같은 이름이 둘 이상인 항목이 있다`);
+    const seen = { components: new Set(), patterns: new Set(), templates: new Set() };
+    UD.items.forEach((x, i) => {
+      const at = `uidict: ${x.name}(${x.src})`, [sec, page, id] = x.src.split("/");
+      if (!UD.cats.includes(x.cat)) fails.push(`${at}: 분류 '${x.cat}' 가 cats 에 없다`);
+      if (!x.name || !x.en || !x.kw) fails.push(`${at}: name · en · kw 는 비울 수 없다`);
+      const aka = x.aka || [];
+      if (!aka.length) fails.push(`${at}: 다른 이름(aka)이 없다`);
+      if (new Set(aka).size !== aka.length) fails.push(`${at}: 다른 이름이 겹친다`);
+      for (const a of aka) if (names.has(a) && names.get(a) !== x.src) fails.push(`${at}: 다른 이름 '${a}' 가 다른 항목의 공식 이름이다`);
+      if (!seen[sec]) { fails.push(`${at}: src 의 구역 '${sec}' 은 components · patterns · templates 중 하나여야 한다`); return; }
+      seen[sec].add(page);
+      if (sec === "templates") { if (!TEMPLATES[page]) fails.push(`${at}: 없는 템플릿`); return; }
+      const c = (sec === "components" ? COMPONENTS : PATTERNS)[page];
+      if (!c || !(c.examples || []).some((e) => e.id === id)) { fails.push(`${at}: 가리키는 예제가 없다`); return; }
+      const stage = (cards[i] || "").split('class="ud-txt"')[0];
+      if (x.cls) for (const comp of x.cls.trim().split(/\s+/)) {
+        const tag = (/^[a-z][a-z0-9]*/.exec(comp) || [])[0], cls = [...comp.matchAll(/\.([\w-]+)/g)].map((m) => m[1]);
+        const hit = [...stage.matchAll(/<([a-z][a-z0-9]*)\b([^>]*)>/g)].some((m) => (!tag || m[1] === tag) && cls.every((k) => (" " + ((/\sclass="([^"]*)"/.exec(m[2]) || [])[1] || "") + " ").includes(" " + k + " ")));
+        if (!hit) fails.push(`${at}: 대표 클래스 '${comp}' 가 미리보기에 없다`);
+      }
+      if (x.react) {
+        const all = sec === "components" ? c.react || [] : Object.values(COMPONENTS).flatMap((k) => k.react || []);
+        if (!all.includes(x.react)) fails.push(`${at}: React 이름 ${x.react} 가 ${sec === "components" ? page + " 페이지 exports" : "컴포넌트 exports"} 에 없다`);
+      }
+    });
+    for (const c of UD.cats) if (!UD.items.some((x) => x.cat === c)) fails.push(`uidict: 분류 '${c}' 에 항목이 없다`);
+    for (const sec of ["components", "patterns"]) for (const p of LIB.allPages(DATA.SITE, sec).map((q) => q.key).filter((k) => k !== "overview"))
+      if (!seen[sec].has(p)) fails.push(`uidict: ${sec}/${p} 가 사전에 한 장도 없다`);
+    for (const k of Object.keys(TEMPLATES)) if (!seen.templates.has(k)) fails.push(`uidict: templates/${k} 가 사전에 한 장도 없다`);
   }
 }
 
@@ -1060,6 +1111,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 토큰
     for (const r of c.choose || []) check(`templates/${k} 고르기 표 '${r[0]}'`, r[1]);
     for (const r of rows(c.principles)) check(`templates/${k} Rules '${r[0]}'`, r[1]);
   }
+  if (fs.existsSync(path.join(OUT, "resources", "ui-dictionary.html"))) for (const m of read("resources/ui-dictionary.html").matchAll(/<p class="lead">([\s\S]*?)<\/p>/g)) check("resources/ui-dictionary.html 소개 문단", m[1]);
   for (const sec of ["foundations", "home", "templates"]) for (const n of fs.readdirSync(path.join(OUT, sec)).filter((x) => x.endsWith(".html"))) {
     const html = fs.readFileSync(path.join(OUT, sec, n), "utf8");
     for (const m of html.matchAll(/<p class="lead">([\s\S]*?)<\/p>/g)) check(`${sec}/${n} 소개 문단`, m[1]);

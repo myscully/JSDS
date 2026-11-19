@@ -17,6 +17,7 @@
 | `_build/font-jp.src.css` · `_build/fonts-jp/` | **원본.** 일본어 한자용 Pretendard JP Variable v1.3.9(OFL) — 조각 woff2 119개 · `OFL.txt` 와 그 `@font-face`(unicode-range). 내려받은 원본 CSS 에서 만들었고 손으로 고치지 않습니다. `build.js` 가 `assets/font-jp.css` · `assets/fonts/jp/`(생성물)로, `sync-css.mjs` 가 패키지 `dist/font-jp.css`(선택 import)로 복사 |
 | `_concepts/` | **원본 · 시안.** 메인 화면 비주얼 시안(도형 타이포 A1 · A2 · A3, 정한 카피의 B1 Simple · B2 Visual · B3 Signal, 가운데 정렬 B4 Balance + 고르는 `index.html`). **B4 는 2026-11-18 사이트 메인 화면이 됐다**(`_build/render.js` `homePage` · `style.src.css` Home 블록 — 시안 파일은 기록으로 남김). B 의 띠 · 미리보기 이미지 `img/*.png` 는 `capture.mjs` 가 패턴 예제를 찍은 것(패턴이 바뀌면 다시 돌림). `../assets/style.css` 의 토큰 · Pretendard 와 `../assets/app.js` 의 제품 색 · `SEARCH_INDEX` 를 불러 쓰고, 루트의 `_` 폴더라 빌드 · verify · 게이트 밖이다(반복 애니메이션도 씀). 사이트로 옮길 때 게이트 규칙에 맞게 다듬는다 |
 | `_build/templates.data.js` · `templates.build.js` · `templates.src.css` · `templates.src.js` | **원본.** Templates 메뉴(2026-11-18 — 옛 `_templates/` 를 옮기고 지움). `templates.data.js` 는 문서 페이지의 글(정의 · 고르기 표 · 쓴 컴포넌트 · 패턴 · Rules · 개요 한 줄), `templates.build.js` 는 `_build/*.data.js` 의 예제 문자열 · 헬퍼를 읽어 화면 일곱 `templates/screen/<key>.html` 을 쓰는 생성기(`build.js` 가 부름 — route 가 아니라 pages 수에 들지 않음), `templates.src.css` → `assets/templates.css` 는 앱 틀 배치만(패키지 CSS 에 섞이지 않게 style.css 와 따로), `templates.src.js` → `assets/templates.js` 는 둘러보기용 흉내 동작이다 |
+| `_build/uidict.data.js` | **원본.** Resources › UI Dictionary(2026-11-19)의 항목 — 분류 10 · 추천 검색어 · 항목(`src` = 예제 · 화면 주소, 이름 · 영문 · 대표 클래스 · React 이름 · 다른 이름 `aka` · 생김새 검색어 `kw`). 미리보기 · 코드 · 비슷한 것 · 문서 링크는 `render.js` `uiDictPage` 가 예제 데이터에서 만든다. `verify.js` 가 src · 클래스 · React · 범위를, `behave.uidict.js` 가 동작을 본다 |
 | `assets/vendor/dayjs.min.js` · `dayjs.utc.js` · `dayjs.timezone.js` · `dayjs.LICENSE` | **생성물.** Date Picker 기준 시간대용 dayjs(MIT, 1.11.13 고정)를 `build.js` 가 `_build/node_modules/dayjs` 에서 복사하고 Date Picker 가 있는 페이지에만 붙입니다(`verify.js` 가 동반 · 부재를 봄). React 는 패키지 dependency 로 `date-picker/tz.ts` 에서 extend |
 
 ## 일하는 방식
@@ -47,7 +48,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 96 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1550/1550 · react 885+6 · tsc 0
+pages 97 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1565/1565 · react 890+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1000,6 +1001,29 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - `_react/README.md` 의 낡은 문구: 머리말 '0.8.0 은 깨지는 변경' → 0.6.x → 0.9.0 기준, 차트 프리셋 넷 → 여섯 · 한 톤 기본, '사이트 일치 118' 숫자 지움. `.ds-root` 를 빼면 기본 서체 · `scale.css` · TS 7 의 CSS import(TS2882) · .tgz 설치를 더했다.
 - 패키지 `files` 에 `MIGRATION.md` — README 의 링크가 패키지 안에서 깨져 있었다(파일 143개).
 - 전달본은 `_handoff/ds-react-0.9.0/`(.tgz · Vite 예제 앱 · 안내 README · MIGRATION)과 같은 이름의 zip 이다. 글(안내 · 예제 앱 · MIGRATION 사본)만 커밋하고 .tgz · zip 은 `.gitignore`(사람의 결정 — 바이너리는 `_react` 에서 `npm pack` 으로 다시 만듦). 새 폴더에서 설치 · 빌드, 브라우저에서 제품 색 · 다크 · Popup · Toast 를 확인했다.
+
+2026-11-19 UI Dictionary — Resources 안 UI 이름 사전(사람의 요청 · 결정 셋: Resources 안 · 예제 단위 · 다른 이름 · 비슷한 것 · React 이름 · 복사) — pages 96 → 97 · behave 1550 → 1561(`behave.uidict.js` 11). contrast · advisory · react · tsc 수는 그대로(새 색 쌍 없음 · 패키지는 바꾸지 않음).
+- **참고 파일**(디자인팀의 단독 HTML 'UI 이름 사전' — 요소 81 · 분류 9)의 분류 · 이름 · 영문 · 생김새 검색어를 시작점으로 옮겼다. 그 파일은 예제를 손으로 복사해 넣어 없어진 '오류 요약' 과 옛 CSS 값이 남아 있었고, 패턴은 10개뿐 · 템플릿은 없었다. 파일은 저장소에 넣지 않았다.
+- **원본** `_build/uidict.data.js` — 분류 10(참고 파일의 9 + '화면 전체') · 항목 101(컴포넌트 46 · 패턴 22 · 템플릿 7 이 모두 한 장 이상) · 추천 검색어 4. 미리보기 · HTML · React 코드 · 비슷한 것(고르기 표의 '비슷한 것 · 비슷한 패턴 · 비슷한 템플릿' 행) · 문서 링크는 예제 데이터에서 만든다 — 사이트가 바뀌면 사전도 따라온다.
+- **페이지** — 검색(`.searchbar.lg` · 300ms · `/` 단축키 · Esc · placeholder '이름이 안 떠오르면 생김새로 찾아보세요') · 추천 검색어(텍스트 버튼) · 분류 탭(이름만) · 카드 격자 · 빈 상태. 같은 날 사람의 요청으로 '10개 분류 · 101개 이름' 줄과 탭의 건수 Count 를 지우고 추천 검색어를 outline 에서 텍스트 버튼으로 바꿨다(1440 에서 탭 줄이 넘쳐 '화면 전체' 는 Tab 규칙대로 가로 스크롤). 카드를 누르면 비모달 Side Panel 에 큰 미리보기 · 영문 · 다른 이름 · 클래스(inline Copy Field) · React 이름 · 비슷한 것 · 쓰는 컴포넌트 · HTML / React 복사 · 문서 링크. 검색은 띄어쓰기를 무시하고 이름 · 다른 이름 · 클래스 · React 이름이 생김새 말보다 앞선다. 주소의 `?q=` · `?cat=` 를 기억한다.
+- **미리보기** — 예제 HTML 을 `inert` 틀에 넣어 칸에 맞게 줄인다(ResizeObserver · 글꼴 준비 뒤 다시 잼). 템플릿은 `loading="lazy"` iframe 을 줄인다. 미리보기의 id · for · aria 참조 · `#` 링크에 카드마다 접두어를 붙이고 `data-hotkey` · `autofocus` 를 걷는다(`lib.js udPrefix` — 상세의 큰 미리보기도 같은 함수를 app.js 에서). 미리보기는 `.example-preview` 를 달아 사이트 셸의 문서 규칙(ul · h2 · h3)에서 빠진다.
+- **다른 이름은 초안을 사람이 보고 고쳤다(사람의 결정)** — '뱃지' 는 카운트 배지에만(태그에서 뺌), 시스템 안의 다른 뜻과 겹치는 넷을 뺐다(표의 '그리드' — Foundations Grid, 입력 칩의 '토큰' — 디자인 토큰, 카드의 '패널' — 사이드 패널, 구분선의 'HR'). 분류 '화면 전체' 와 추천 검색어 넷은 그대로(사람의 결정). 나머지 다른 이름 · 리드 문장 · 카드 미리보기 크기(컴포넌트 최대 520 · 패턴 1160 폭을 줄임)는 사람이 정하지 않은 초안이다.
+- **verify 더함:** src 가 있는 예제 · 템플릿, 대표 클래스가 그 카드 미리보기에 있음, React 이름이 그 페이지 exports(패턴은 전체 exports)에, 분류 · 범위(컴포넌트 · 패턴 · 템플릿 각 한 장 이상 · 쓰지 않는 분류 없음), 분류 탭 = cats 순서 · 탭 안은 이름만, 다른 이름이 한 항목 안에서 겹치지 않고 다른 항목의 공식 이름이 아님, 이름이 하나씩, 카드 수 = 데이터, 페이지 안 id 겹침 없음(코드 글자는 뺌), 리드 문구 규칙. 음성 시험 7건(없는 예제 · 없는 클래스 · 없는 React · 없는 분류 · aka 중복 · aka = 다른 이름 · 페이지 겹친 id)과 항목 빠짐이 모두 잡혔다.
+- **behave.uidict 11** — 카드 수 · 수 글자 없음 · 탭은 이름만 · 추천 검색어는 텍스트 버튼 · placeholder, 탭(누르기 · 방향키 · End · URL), 검색(모달 → 팝업 · 점세개 → 드롭다운 메뉴 · 빈 결과 · Esc · 추천 검색어), `/`, 패널(오른쪽 · 제목 · 포커스 · 큰 미리보기 · 겹친 id 없음) · Esc 로 닫고 카드로 복귀, 복사 셋(HTML = 카드 코드 · React = 예제 파일 · 클래스), 모든 분류의 미리보기가 inert · 칸 안(1440 · 1024 · 768 · 390) · 넘침 없음, 다크 · 제품 색, `?q=` · `?cat=` 복원. 음성 시험 9건(분류 거르기 · 모달 aka 지움 · hotkey 지움 · 상세 복귀 끔 · fit 끔 · q 복원 끔 · 카드 면 고정색 · 복사 대상 틀림)과 화면 수정 뒤 셋(탭 숫자 되살림 · 추천 버튼 outline · placeholder 옛 글) 모두 잡혔다.
+- **측정에서 드러나 고친 것:** app.js 가 ds.js 보다 먼저 실려 주소의 분류 복원이 탭 처리기보다 앞서 아무 일도 하지 않았다(DOMContentLoaded 뒤로). 템플릿 iframe 을 감싼 틀을 줄이면 빈 화면이 됐다(Templates 문서처럼 iframe 자체를 줄임). 숨은 상세 안에서 차트를 붙여 폭 0 이었다(패널을 연 뒤 그림). 예제 안 탭 · 검색이 사전의 탭 선택자에 걸렸다(단정을 `.ud-tabbar > .tabs` 로).
+- **보인 것(고치지 않음):** 패턴 · 화면 카드의 미리보기는 0.12 ~ 0.3 배라 글자를 읽을 수 없다 — 생김새를 알아보는 썸네일이고, 패널의 큰 미리보기 · 문서 링크로 본다.
+- Figma 미반영 1건(그대로 — Home 잘림. 사전은 사이트 문서 페이지라 audit 대조 밖).
+
+2026-11-19 좁은 화면의 사이드 내비 접힘 — 시스템 동작으로(사람의 요청 '관리자 콘솔 md 해상도에서 접힘이 안 됨', 결정 둘) — behave 1561 → 1565(`behave.shell.js` 35 → 39) · react 885+6 → 890+6(`tests/sidenav-collapse.test.tsx` 5). contrast · advisory · verify · pages 수는 그대로(색 변화 없음).
+- **잰 원인:** 템플릿 화면을 1440 으로 연 뒤 창을 1024 로 줄여도 사이드 내비가 펼친 채였다(w 240). 접기는 `templates.src.js` 의 흉내 코드가 처음 읽을 때 한 번만 했고, ds.js · React 에는 이 동작이 없었다 — Navigation 예제 설명의 '1280px 미만이면 접힘' 은 약속만 있었다.
+- **시스템이 맡는다**(사람의 결정 — 흉내 코드는 지움). ds.js 가 `matchMedia("(max-width:1279.98px)")` 로 `[data-sidenav-toggle]` 이 가리키는 내비를 처음 그릴 때 좁으면 접고, 경계를 넘을 때마다 접거나 편다(`navSet` — 바뀔 때만 `ds:sidenav {collapsed, trigger}` · trigger 는 button · width).
+- **다시 넓히면 펼친다 · 그 사이 사용자가 바꾼 상태는 다음 경계까지 둔다**(사람의 결정). 처음 접기는 내비마다 한 번(`_dsAuto`)이라 다시 init 해도 편 상태를 되돌리지 않는다.
+- **사람이 정하지 않은 기본값:** 접기 버튼이 없는 내비(Navigation 의 정적 Expanded · Collapsed 시연)는 건드리지 않는다 — 버튼 없이 접히면 펼 길이 없다. 내비에 `data-auto-collapse="false"` 를 달면 폭으로 접지 않는다(verify 가 값을 "false" 하나로 막음).
+- **React** — 새 훅 `useSideNavCollapse({ auto?, defaultCollapsed? }) → [collapsed, setCollapsed]`(같은 경계 · `SIDENAV_NARROW_QUERY`), Top Navigation 'search' 예제가 쓴다. `useState` 로 들고 있던 제품은 그대로 동작하지만 폭으로 접히지 않는다(MIGRATION · README).
+- 문서: Navigation Rules '좁은 화면' 행(6 → 7행) · Collapsed 예제 설명 · Props `.collapsed` 와 `[data-auto-collapse="false"]`, Top Navigation 접기 버튼 Props, Resources › React Package ds.js 표와 이벤트 표의 `ds:sidenav`.
+- behave +4(part 17): 템플릿 대시보드 1440 펼침 → 1024 접힘(4rem · '메뉴 펼치기' · trigger width) → 버튼으로 펴면 1100 에서도 그대로 → 1440 펼침 → 접으면 1600 에서도 그대로 → 1024 접힘(이벤트 없음), 1279 · 1024 · 768 로 열면 접힘 · 1280 은 펼침, 문서 1024 에서 접기 버튼이 가리키는 내비만 접힘, `data-auto-collapse="false"` 는 그대로.
+- 음성 시험: ds.js 4건(change 리스너 · 처음 접기 · 대상 거르기 · opt-out) · React 2건(경계 무시 · auto:false 무시) · verify 1건(값 "no") 모두 잡혔다. 첫 실행의 실패 2건은 단정 쪽 실수였다(같은 단계 이름 'click' 이 덮임 · Navigation 내비 수를 3 으로 가정).
+- **하지 않은 것:** 접은 상태의 저장(제품 몫 그대로). Templates 문서 페이지의 iframe 은 늘 1440 폭이라 접히지 않는다(의도). Figma 는 동작이라 대조 밖 — Figma 미반영 1건(그대로 — Home 잘림).
 
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

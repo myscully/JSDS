@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Avatar, Button, ButtonGroup, Count, Divider, Icon, SearchBar, SideNav, SideNavItem, Tooltip, TopBar, TopBarLogo, TopBarNavToggle, TopBarRight, TopBarStart, TopBarThemeToggle, WithCount } from "@jiran/ds-react";
+import { Avatar, Button, ButtonGroup, Count, Divider, Icon, SearchBar, SideNav, SideNavItem, Tooltip, TopBar, TopBarLogo, TopBarNavToggle, TopBarRight, TopBarStart, TopBarThemeToggle, useSideNavCollapse, WithCount } from "@jiran/ds-react";
 
 /* 사이드 내비가 있는 제품 — 왼쪽 영역(로고 + 접기)은 내비와 같은 240 이고, 접으면 아래 내비만 64 로 줄어든다(2026-11-18) */
 export default function Example() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useSideNavCollapse();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   return (
     <div style={{ width: "100%", border: "1px solid var(--line-neutral-secondary)", borderRadius: "var(--radius-lg)", overflow: "hidden" }}>

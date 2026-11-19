@@ -121,6 +121,109 @@
     tplFrames.forEach(el => { fit(el); ro.observe(el); });
   }
 
+  /* Resources › UI Dictionary(2026-11-19) — 카드 미리보기 맞춤 · 검색 · 분류 · 상세 패널.
+     미리보기: 예제의 실제 크기를 재서 칸 안에 들게 줄이고 가운데 둔다(.fit 이 붙을 때까지 숨김).
+     검색: 띄어쓰기를 무시하고 이름 · 영문 · 클래스 · React · 다른 이름(data-s3) 3점, 생김새 말(data-s2) 2점, 그 말과 꼭 같으면 +10.
+     낱말이 여럿이면 문구 전체가 맞거나 낱말마다 어딘가 맞아야 한다. 탭 · 입력 지연 · Esc · / 는 ds.js(ds:tab · ds:search).
+     상세: 카드의 .ud-detail 을 Side Panel 본문으로 옮겨 열고, 닫히면(ds:panel-close) 카드로 되돌린다 — 복사 대상 id 가 페이지에 하나로 남는다 */
+  const ud = document.querySelector(".ud");
+  if (ud) {
+    const grid = ud.querySelector(".ud-grid"), tabs = ud.querySelector(".tabs"), input = document.getElementById("ud-q");
+    const rhead = ud.querySelector(".ud-rhead"), rcount = ud.querySelector(".ud-rcount"), empty = ud.querySelector(".ud-empty");
+    const status = document.getElementById("ud-status"), panelEl = document.getElementById("ud-panel"), body = document.getElementById("ud-panel-body");
+    const items = [].slice.call(grid.children), cats = [].slice.call(tabs.querySelectorAll(".tab")).map(t => t.dataset.value);
+    const st = { cat: cats[0], q: "" }; let ready = false;
+    const fitShot = shot => {
+      const s = shot.firstElementChild; if (!s || !shot.clientWidth) return;
+      const f = s.classList.contains("ud-tpl") && s.querySelector("iframe");
+      s.style.transform = "none"; if (f) f.style.transform = "none";
+      const w = s.scrollWidth, h = s.scrollHeight; if (!w || !h) return;
+      const k = Math.min(shot.clientWidth / w, shot.clientHeight / h, 1), tf = `translate(${(shot.clientWidth - w * k) / 2}px,${(shot.clientHeight - h * k) / 2}px) scale(${k})`;
+      /* 화면 전체(iframe)는 iframe 자신을 줄인다 — 감싼 틀을 줄이면 Chromium 이 iframe 을 그리지 않는 경우가 있었다(Templates 문서 틀과 같은 방식) */
+      if (f) f.style.transform = tf; else s.style.transform = tf;
+      s.classList.add("fit");
+    };
+    const ro = "ResizeObserver" in window ? new ResizeObserver(es => es.forEach(en => fitShot(en.target))) : null;
+    const watch = shot => { fitShot(shot); if (ro) ro.observe(shot); };
+    ud.querySelectorAll(".ud-shot").forEach(watch);
+    if (document.fonts) document.fonts.ready.then(() => ud.querySelectorAll(".ud-shot").forEach(fitShot));
+    const norm = s => String(s || "").toLowerCase().replace(/\s+/g, "");
+    const index = items.map(li => ({ li, s3: (li.dataset.s3 || "").split("|").map(norm).filter(Boolean), s2: norm(li.dataset.s2) }));
+    const score = (x, q, words) => {
+      let n = 0; const hit3 = w => x.s3.some(t => t.includes(w)), hit2 = w => x.s2.includes(w);
+      if (x.s3.some(t => t === q)) n += 10;
+      if (hit3(q)) n += 3; if (hit2(q)) n += 2;
+      if (n) return n;
+      if (words.length < 2 || !words.every(w => hit3(w) || hit2(w))) return 0;
+      return words.reduce((a, w) => a + (hit3(w) ? 3 : 0) + (hit2(w) ? 2 : 0), 0);
+    };
+    const writeURL = () => {
+      if (!ready) return;
+      try { const u = new URL(location.href); u.searchParams.delete("q"); u.searchParams.delete("cat"); if (st.q) u.searchParams.set("q", st.q); else if (st.cat !== cats[0]) u.searchParams.set("cat", st.cat); history.replaceState(history.state, "", u); } catch (e) { }
+    };
+    const apply = () => {
+      const q = norm(st.q);
+      if (q) {
+        const words = st.q.trim().toLowerCase().split(/\s+/).map(norm).filter(Boolean);
+        const hits = index.map((x, i) => ({ x, i, n: score(x, q, words) })).filter(h => h.n).sort((a, b) => b.n - a.n || a.i - b.i);
+        index.forEach(x => { x.li.hidden = true; });
+        hits.forEach(h => { h.x.li.hidden = false; grid.appendChild(h.x.li); });
+        tabs.hidden = true; rhead.hidden = false; rcount.textContent = hits.length; grid.classList.remove("wide");
+        grid.setAttribute("role", "list"); grid.removeAttribute("tabindex"); grid.removeAttribute("aria-labelledby");
+        empty.hidden = hits.length > 0; grid.hidden = !hits.length;
+        status.textContent = hits.length ? `검색 결과 ${hits.length}개` : "검색 결과가 없습니다";
+      } else {
+        items.forEach(li => { grid.appendChild(li); li.hidden = li.dataset.cat !== st.cat; });
+        tabs.hidden = false; rhead.hidden = true; empty.hidden = true; grid.hidden = false;
+        grid.classList.toggle("wide", items.filter(li => li.dataset.cat === st.cat).every(li => li.querySelector(".ud-shot.wide")));
+        grid.setAttribute("role", "tabpanel"); grid.tabIndex = 0;
+        status.textContent = "";
+      }
+      writeURL();
+    };
+    const setQuery = (v, focus) => { input.value = v; input.dispatchEvent(new Event("input", { bubbles: true })); st.q = v; apply(); if (focus) input.focus(); };
+    document.addEventListener("ds:tab", e => { if (e.target.closest && e.target.closest(".ud .tabs") === tabs) { st.cat = e.detail && e.detail.value; apply(); } });
+    document.addEventListener("ds:search", e => { if (e.target.closest && e.target.closest(".ud-search")) { st.q = e.detail ? e.detail.value : input.value; apply(); } });
+    ud.addEventListener("click", e => {
+      const hint = e.target.closest("[data-ud-hint]"); if (hint) { setQuery(hint.dataset.udHint, true); return; }
+      if (e.target.closest("[data-ud-reset]")) { setQuery("", true); return; }
+      const open = e.target.closest(".ud-open"); if (open) openDetail(open.closest(".ud-item"));
+    });
+    /* 상세 — 큰 미리보기는 처음 열 때 복사용 HTML 에서 새로 만든다(id 접두어를 카드와 다르게 해 겹치지 않게) */
+    let shown = null;
+    const putBack = () => { if (!shown) return; const d = body.querySelector(".ud-detail"); if (d) { d.hidden = true; shown.appendChild(d); } shown = null; };
+    function openDetail(li) {
+      if (!li) return;
+      putBack();
+      const d = li.querySelector(".ud-detail"), big = d.querySelector(".ud-big");
+      d.hidden = false; body.appendChild(d); shown = li;
+      document.getElementById("ud-panel-title").textContent = d.dataset.name;
+      if (window.DS) DS.panel.open(panelEl); else panelEl.hidden = false;
+      body.scrollTop = 0;
+      /* 차트 캔버스는 보이는 자리에서 그려야 크기를 잰다 — 패널을 연 뒤에 만든다 */
+      if (!big.firstChild) {
+        const src = li.querySelector(".ud-stage"), code = d.querySelector('.ud-codes code[id$="code-html"]');
+        const shot = document.createElement("div"); shot.className = "ud-shot big" + (li.querySelector(".ud-shot.wide") ? " wide" : "");
+        const stage = document.createElement("div"); stage.className = src.className.replace(/\s*\bfit\b/, ""); stage.setAttribute("inert", ""); stage.style.cssText = src.style.cssText; stage.style.transform = "";
+        if (code) stage.innerHTML = UD_PREFIX(code.textContent, "udp" + li.dataset.i + "-");
+        else { const f = src.querySelector("iframe").cloneNode(); f.removeAttribute("loading"); f.removeAttribute("style"); stage.appendChild(f); }
+        shot.appendChild(stage); big.appendChild(shot);
+        if (code) { if (window.DS) DS.init(stage); if (window.DSChart && window.Chart) DSChart.auto(window.Chart, stage); }
+      }
+      watch(big.firstChild);
+    }
+    document.addEventListener("ds:panel-close", e => { if (e.target === panelEl) putBack(); });
+    /* 주소의 ?q= · ?cat= 로 시작 — 탭을 누르는 일은 ds.js 가 붙은 뒤에(이 파일이 먼저 실린다) */
+    let start = null; try { const u = new URL(location.href); start = { q: u.searchParams.get("q") || "", c: u.searchParams.get("cat") }; } catch (e) { }
+    apply();
+    const restore = () => setTimeout(() => {
+      if (start && start.c && cats.includes(start.c) && start.c !== st.cat) { const t = tabs.querySelector(`.tab[data-value="${start.c}"]`); if (t) t.click(); }
+      ready = true;
+      if (start && start.q) setQuery(start.q);
+    });
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", restore); else restore();
+  }
+
   /* 홈(index) B4 — 글꼴이 준비되면 들어오기 시작(.go, data-hm 이 있을 때만 — head 스크립트가 줄인 모션이 아닐 때 붙임),
      스크롤 패럴랙스는 루트에 --hm-sy(스크롤 px, 화면 높이의 1.2배까지). 미리보기 셸에서도 같은 핸들러가 지금 화면의 .hm 을 본다 */
   const hm = document.querySelector(".hm");
@@ -405,7 +508,7 @@
     if (!toc) return;
     if (tocSpy) { tocSpy.disconnect(); tocSpy = null; }
     /* 예제 미리보기 안의 제목(.page-head .title 등)은 섹션이 아니므로 제외 */
-    const hs = art ? [].slice.call(art.querySelectorAll("h2[id], h3[id]")).filter(h => !h.closest(".example")) : [];
+    const hs = art ? [].slice.call(art.querySelectorAll("h2[id], h3[id]")).filter(h => !h.closest(".example, .ud, .side-panel")) : [];
     if (hs.length < 2) { toc.innerHTML = ""; toc.hidden = true; return; }
     toc.innerHTML = '<h6>이 페이지</h6>' + hs.map(h =>
       '<a href="#' + h.id + '"' + (h.tagName === "H3" ? ' class="sub"' : "") + ">" + h.textContent.trim() + "</a>").join("");

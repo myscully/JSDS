@@ -869,3 +869,8 @@ Steps 를 다시 짰습니다.
   - 컴포넌트가 그리는 버튼 줄도 바뀌었습니다 — `Stepper` 의 이전 · 다음 · 완료, Date Picker 달력 아래(글자 버튼 묶음 · 취소 · 적용 묶음 — 하나뿐이면 묶지 않음), `FileUpload` 실패 줄의 다시 시도 · 지우기. 이 줄을 `:scope >` 같은 자식 선택자로 집던 제품 코드는 한 단계 안쪽을 봅니다.
 - **사이드 내비 접기 버튼의 아이콘이 돕니다** — 접으면(`aria-expanded="false"`) 180°, 펼치면 0°, `--motion-base`(줄인 모션은 바로). CSS 만 바뀌었고 `TopBarNavToggle` 사용법은 그대로입니다.
 - **상단 바 로고 마크 = shield-check 면 아이콘 24**(제품 색 사각을 없앰, 색은 로고 글자색 — 로그인 로고와 같음). `TopBarLogo` 가 기본으로 그리고, 다른 마크는 새 prop **`mark`** 로 넘깁니다. 사이트 마크업을 복사한 제품은 `.logo > i` 안에 아이콘 svg 를 넣습니다(빈 `<i>` 는 이제 아무것도 보이지 않음).
+
+## 사이드 내비 — 좁은 화면 (2026-11-19)
+
+- **새 훅 `useSideNavCollapse(options?) → [collapsed, setCollapsed]`.** 화면 폭이 1280 아래로 줄면 접고, 다시 넓히면 폅니다. 경계를 넘을 때만 맞추므로 그 사이 `setCollapsed` 로 바꾼 값은 다음 경계까지 남습니다. `TopBarNavToggle collapsed onCollapsedChange` 와 `SideNav collapsed` 에 그대로 넘깁니다. `{ auto: false }` 이면 폭을 보지 않습니다. 직접 `useState` 로 들고 있던 제품은 그대로 동작하지만 폭으로 접히지 않습니다.
+- 사이트 ds.js 도 `[data-sidenav-toggle]` 이 가리키는 내비에 같은 일을 합니다. `ds:sidenav` 의 detail 에 `trigger`(button · width)가 더해졌고, 내비에 `data-auto-collapse="false"` 를 달면 폭으로 접지 않습니다. 접기 버튼이 없는 내비는 건드리지 않습니다.

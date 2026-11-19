@@ -243,6 +243,15 @@
     const name = (/data-name="([^"]*)"/.exec(attrs) || /aria-label="([^"]*)"/.exec(attrs) || [])[1] || txt;
     return m.replace(/^<span class="avatar(?: sm)?"/, (o) => `${o} data-tone="${avatarTone(name)}"`);
   });
-  const api = { LOCAL_VARS, avatarTone, withAvatarTone, esc, dedent, toPx, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  /* UI Dictionary(2026-11-19) — 한 페이지에 예제 백여 개를 함께 그리므로 미리보기마다 id 와 그 참조(for · aria-* · href="#…" · data-*), 라디오 묶음 name 에 접두어를 붙인다.
+     id 를 가리키는 값만 바꾸고 aria-label 같은 글자는 건드리지 않는다. 빌드(render.js 카드)와 상세 패널의 큰 미리보기(app.js — build.js 가 이 함수를 옮겨 적음)가 같은 함수를 쓴다 */
+  function udPrefix(html, p) {
+    var ids = {}; html.replace(/\sid="([^"]+)"/g, function (m, v) { ids[v] = 1; return m; });
+    return html.replace(/(\s)(id|for|form|list|name|href|aria-(?:labelledby|describedby|controls|owns|activedescendant|details|errormessage|flowto)|data-[a-z-]+)="([^"]*)"/g, function (m, sp, a, v) {
+      if (a === "name") return sp + a + '="' + p + v + '"';
+      return sp + a + '="' + v.split(" ").map(function (t) { return ids[t] ? p + t : (t.charAt(0) === "#" && ids[t.slice(1)]) ? "#" + p + t.slice(1) : t; }).join(" ") + '"';
+    }).replace(/\sdata-hotkey(?:="[^"]*")?/g, "").replace(/\sautofocus(?:="[^"]*")?/g, "");
+  }
+  const api = { LOCAL_VARS, udPrefix, avatarTone, withAvatarTone, esc, dedent, toPx, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);

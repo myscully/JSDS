@@ -64,7 +64,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   for (const [from, to] of [["dayjs.min.js", "dayjs.min.js"], ["plugin/utc.js", "dayjs.utc.js"], ["plugin/timezone.js", "dayjs.timezone.js"], ["LICENSE", "dayjs.LICENSE"]]) fs.copyFileSync(path.join(DAYJS_PKG, from), path.join(OUT, "assets", "vendor", to));
   const index = routes.map(r => ({ t: r.title, s: r.secTitle, g: r.group, u: rel(r.sec, r.key, "") }));
   fs.writeFileSync(path.join(OUT, "assets", "app.js"),
-    `// 공용 스크립트(생성됨): 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭. 원본은 _build/app.src.js\nconst SEARCH_INDEX=${JSON.stringify(index)};\nconst PRODUCTS=${JSON.stringify(PRODUCTS)};\nconst ROOT=document.body.dataset.root||'../';\n` + fs.readFileSync(path.join(__dirname, "app.src.js"), "utf8"));
+    `// 공용 스크립트(생성됨): 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭. 원본은 _build/app.src.js\nconst SEARCH_INDEX=${JSON.stringify(index)};\nconst PRODUCTS=${JSON.stringify(PRODUCTS)};\nconst ROOT=document.body.dataset.root||'../';\nconst UD_PREFIX=${LIB.udPrefix.toString()};\n` + fs.readFileSync(path.join(__dirname, "app.src.js"), "utf8"));
 
   /* 대비 게이트를 페이지 렌더보다 먼저 돌린다 — 그래야 Colors 페이지가 측정 결과를 표로 쓸 수 있다.
      사람이 숫자를 적으면 또 낡는다(종전에 네 번 낡았다). 게이트는 전용 푸트페이지에서 재므로 생성 페이지가 없어도 된다 */

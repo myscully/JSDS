@@ -1,7 +1,14 @@
 // 공용 스크립트(생성됨): 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭. 원본은 _build/app.src.js
-const SEARCH_INDEX=[{"t":"Overview","s":"Home","g":"","u":"index.html"},{"t":"Getting started","s":"Home","g":"","u":"home/getting-started.html"},{"t":"About","s":"Home","g":"","u":"home/about.html"},{"t":"UX Principles","s":"Home","g":"","u":"home/principles.html"},{"t":"Overview","s":"Foundations","g":"","u":"foundations/overview.html"},{"t":"Colors","s":"Foundations","g":"Base material","u":"foundations/colors.html"},{"t":"Elevation","s":"Foundations","g":"Base material","u":"foundations/elevation.html"},{"t":"Grid","s":"Foundations","g":"Base material","u":"foundations/grid.html"},{"t":"Icons","s":"Foundations","g":"Base material","u":"foundations/icons.html"},{"t":"Interaction","s":"Foundations","g":"Base material","u":"foundations/interaction.html"},{"t":"Typography","s":"Foundations","g":"Base material","u":"foundations/typography.html"},{"t":"Writing","s":"Foundations","g":"Base material","u":"foundations/writing.html"},{"t":"Overview","s":"Components","g":"","u":"components/overview.html"},{"t":"Accordion","s":"Components","g":"","u":"components/accordion.html"},{"t":"Avatar","s":"Components","g":"","u":"components/avatar.html"},{"t":"Breadcrumb","s":"Components","g":"","u":"components/breadcrumb.html"},{"t":"Button","s":"Components","g":"","u":"components/button.html"},{"t":"Card","s":"Components","g":"","u":"components/card.html"},{"t":"Code","s":"Components","g":"","u":"components/code.html"},{"t":"Copy Field","s":"Components","g":"","u":"components/copy-field.html"},{"t":"Data Visual","s":"Components","g":"","u":"components/data-visual.html"},{"t":"Date Picker","s":"Components","g":"","u":"components/date-picker.html"},{"t":"Divider","s":"Components","g":"","u":"components/divider.html"},{"t":"Dropdown","s":"Components","g":"","u":"components/dropdown.html"},{"t":"Empty State","s":"Components","g":"","u":"components/empty-state.html"},{"t":"File Upload","s":"Components","g":"","u":"components/file-upload.html"},{"t":"Form","s":"Components","g":"","u":"components/form.html"},{"t":"Indicator","s":"Components","g":"","u":"components/indicator.html"},{"t":"Item Tile","s":"Components","g":"","u":"components/item-tile.html"},{"t":"Link","s":"Components","g":"","u":"components/link.html"},{"t":"List","s":"Components","g":"","u":"components/list.html"},{"t":"Loading","s":"Components","g":"","u":"components/loading.html"},{"t":"Navigation","s":"Components","g":"","u":"components/navigation.html"},{"t":"Notification","s":"Components","g":"","u":"components/notification.html"},{"t":"Notification Center","s":"Components","g":"","u":"components/notification-center.html"},{"t":"Number Input","s":"Components","g":"","u":"components/number-input.html"},{"t":"Page Header","s":"Components","g":"","u":"components/page-header.html"},{"t":"Pagination","s":"Components","g":"","u":"components/pagination.html"},{"t":"Popup","s":"Components","g":"","u":"components/popup.html"},{"t":"Checkbox","s":"Components","g":"Selection Controls","u":"components/checkbox.html"},{"t":"Chip","s":"Components","g":"Selection Controls","u":"components/chip.html"},{"t":"Combobox","s":"Components","g":"Selection Controls","u":"components/combobox.html"},{"t":"Radio Button","s":"Components","g":"Selection Controls","u":"components/radio-button.html"},{"t":"Select Button","s":"Components","g":"Selection Controls","u":"components/select-button.html"},{"t":"Search","s":"Components","g":"","u":"components/search.html"},{"t":"Select","s":"Components","g":"","u":"components/select.html"},{"t":"Side Panel","s":"Components","g":"","u":"components/side-panel.html"},{"t":"Slider","s":"Components","g":"","u":"components/slider.html"},{"t":"Steps","s":"Components","g":"","u":"components/steps.html"},{"t":"Switch","s":"Components","g":"","u":"components/switch.html"},{"t":"Tab","s":"Components","g":"","u":"components/tab.html"},{"t":"Data Table","s":"Components","g":"Table","u":"components/data-table.html"},{"t":"Table","s":"Components","g":"Table","u":"components/table.html"},{"t":"Tag","s":"Components","g":"","u":"components/tag.html"},{"t":"Text Field","s":"Components","g":"","u":"components/text-field.html"},{"t":"Time Picker","s":"Components","g":"","u":"components/time-picker.html"},{"t":"Tooltip","s":"Components","g":"","u":"components/tooltip.html"},{"t":"Top Navigation","s":"Components","g":"","u":"components/top-navigation.html"},{"t":"Tree","s":"Components","g":"","u":"components/tree.html"},{"t":"Overview","s":"Patterns","g":"","u":"patterns/overview.html"},{"t":"입력 폼","s":"Patterns","g":"Common UI","u":"patterns/input-form.html"},{"t":"약관 동의","s":"Patterns","g":"Common UI","u":"patterns/terms-agreement.html"},{"t":"유의사항","s":"Patterns","g":"Common UI","u":"patterns/notes.html"},{"t":"오류 · 권한 없음","s":"Patterns","g":"Common UI","u":"patterns/error-pages.html"},{"t":"위험 작업 확인","s":"Patterns","g":"Common UI","u":"patterns/danger-confirm.html"},{"t":"가져오기 · 내보내기","s":"Patterns","g":"Common UI","u":"patterns/import-export.html"},{"t":"일괄 작업 진행","s":"Patterns","g":"Common UI","u":"patterns/bulk-progress.html"},{"t":"온보딩","s":"Patterns","g":"Service Pattern","u":"patterns/onboarding.html"},{"t":"검색","s":"Patterns","g":"Service Pattern","u":"patterns/search.html"},{"t":"시스템 상태","s":"Patterns","g":"Service Pattern","u":"patterns/system-status.html"},{"t":"로그인 · 세션","s":"Patterns","g":"Service Pattern","u":"patterns/sign-in.html"},{"t":"보고서 · 예약 발송","s":"Patterns","g":"Service Pattern","u":"patterns/report-schedule.html"},{"t":"대시보드","s":"Patterns","g":"Security Console","u":"patterns/dashboard.html"},{"t":"로그 뷰어","s":"Patterns","g":"Security Console","u":"patterns/log-viewer.html"},{"t":"정책 설정","s":"Patterns","g":"Security Console","u":"patterns/policy-settings.html"},{"t":"심각도 표시","s":"Patterns","g":"Security Console","u":"patterns/severity.html"},{"t":"상세 화면","s":"Patterns","g":"Security Console","u":"patterns/detail.html"},{"t":"권한 · 역할","s":"Patterns","g":"Security Console","u":"patterns/roles.html"},{"t":"API 키 · 비밀값","s":"Patterns","g":"Security Console","u":"patterns/secrets.html"},{"t":"사고 처리","s":"Patterns","g":"Security Console","u":"patterns/incident.html"},{"t":"감사 로그 · 변경 이력","s":"Patterns","g":"Security Console","u":"patterns/audit-log.html"},{"t":"알림 규칙","s":"Patterns","g":"Security Console","u":"patterns/alert-rules.html"},{"t":"Overview","s":"Templates","g":"","u":"templates/overview.html"},{"t":"로그인","s":"Templates","g":"","u":"templates/login.html"},{"t":"대시보드","s":"Templates","g":"","u":"templates/dashboard.html"},{"t":"리스트","s":"Templates","g":"","u":"templates/list.html"},{"t":"정책 설정","s":"Templates","g":"","u":"templates/policy.html"},{"t":"위저드","s":"Templates","g":"","u":"templates/wizard.html"},{"t":"탭이 있는 리스트","s":"Templates","g":"","u":"templates/tabs-list.html"},{"t":"조직도","s":"Templates","g":"","u":"templates/org.html"},{"t":"React Package","s":"Resources","g":"","u":"resources/react.html"},{"t":"Design Token","s":"Resources","g":"","u":"resources/design-token.html"},{"t":"Figma Library","s":"Resources","g":"","u":"resources/figma.html"},{"t":"Token Download","s":"Resources","g":"","u":"resources/tokens.html"},{"t":"Changelog","s":"Resources","g":"","u":"resources/changelog.html"},{"t":"Contribution","s":"Resources","g":"","u":"resources/contribution.html"}];
+const SEARCH_INDEX=[{"t":"Overview","s":"Home","g":"","u":"index.html"},{"t":"Getting started","s":"Home","g":"","u":"home/getting-started.html"},{"t":"About","s":"Home","g":"","u":"home/about.html"},{"t":"UX Principles","s":"Home","g":"","u":"home/principles.html"},{"t":"Overview","s":"Foundations","g":"","u":"foundations/overview.html"},{"t":"Colors","s":"Foundations","g":"Base material","u":"foundations/colors.html"},{"t":"Elevation","s":"Foundations","g":"Base material","u":"foundations/elevation.html"},{"t":"Grid","s":"Foundations","g":"Base material","u":"foundations/grid.html"},{"t":"Icons","s":"Foundations","g":"Base material","u":"foundations/icons.html"},{"t":"Interaction","s":"Foundations","g":"Base material","u":"foundations/interaction.html"},{"t":"Typography","s":"Foundations","g":"Base material","u":"foundations/typography.html"},{"t":"Writing","s":"Foundations","g":"Base material","u":"foundations/writing.html"},{"t":"Overview","s":"Components","g":"","u":"components/overview.html"},{"t":"Accordion","s":"Components","g":"","u":"components/accordion.html"},{"t":"Avatar","s":"Components","g":"","u":"components/avatar.html"},{"t":"Breadcrumb","s":"Components","g":"","u":"components/breadcrumb.html"},{"t":"Button","s":"Components","g":"","u":"components/button.html"},{"t":"Card","s":"Components","g":"","u":"components/card.html"},{"t":"Code","s":"Components","g":"","u":"components/code.html"},{"t":"Copy Field","s":"Components","g":"","u":"components/copy-field.html"},{"t":"Data Visual","s":"Components","g":"","u":"components/data-visual.html"},{"t":"Date Picker","s":"Components","g":"","u":"components/date-picker.html"},{"t":"Divider","s":"Components","g":"","u":"components/divider.html"},{"t":"Dropdown","s":"Components","g":"","u":"components/dropdown.html"},{"t":"Empty State","s":"Components","g":"","u":"components/empty-state.html"},{"t":"File Upload","s":"Components","g":"","u":"components/file-upload.html"},{"t":"Form","s":"Components","g":"","u":"components/form.html"},{"t":"Indicator","s":"Components","g":"","u":"components/indicator.html"},{"t":"Item Tile","s":"Components","g":"","u":"components/item-tile.html"},{"t":"Link","s":"Components","g":"","u":"components/link.html"},{"t":"List","s":"Components","g":"","u":"components/list.html"},{"t":"Loading","s":"Components","g":"","u":"components/loading.html"},{"t":"Navigation","s":"Components","g":"","u":"components/navigation.html"},{"t":"Notification","s":"Components","g":"","u":"components/notification.html"},{"t":"Notification Center","s":"Components","g":"","u":"components/notification-center.html"},{"t":"Number Input","s":"Components","g":"","u":"components/number-input.html"},{"t":"Page Header","s":"Components","g":"","u":"components/page-header.html"},{"t":"Pagination","s":"Components","g":"","u":"components/pagination.html"},{"t":"Popup","s":"Components","g":"","u":"components/popup.html"},{"t":"Checkbox","s":"Components","g":"Selection Controls","u":"components/checkbox.html"},{"t":"Chip","s":"Components","g":"Selection Controls","u":"components/chip.html"},{"t":"Combobox","s":"Components","g":"Selection Controls","u":"components/combobox.html"},{"t":"Radio Button","s":"Components","g":"Selection Controls","u":"components/radio-button.html"},{"t":"Select Button","s":"Components","g":"Selection Controls","u":"components/select-button.html"},{"t":"Search","s":"Components","g":"","u":"components/search.html"},{"t":"Select","s":"Components","g":"","u":"components/select.html"},{"t":"Side Panel","s":"Components","g":"","u":"components/side-panel.html"},{"t":"Slider","s":"Components","g":"","u":"components/slider.html"},{"t":"Steps","s":"Components","g":"","u":"components/steps.html"},{"t":"Switch","s":"Components","g":"","u":"components/switch.html"},{"t":"Tab","s":"Components","g":"","u":"components/tab.html"},{"t":"Data Table","s":"Components","g":"Table","u":"components/data-table.html"},{"t":"Table","s":"Components","g":"Table","u":"components/table.html"},{"t":"Tag","s":"Components","g":"","u":"components/tag.html"},{"t":"Text Field","s":"Components","g":"","u":"components/text-field.html"},{"t":"Time Picker","s":"Components","g":"","u":"components/time-picker.html"},{"t":"Tooltip","s":"Components","g":"","u":"components/tooltip.html"},{"t":"Top Navigation","s":"Components","g":"","u":"components/top-navigation.html"},{"t":"Tree","s":"Components","g":"","u":"components/tree.html"},{"t":"Overview","s":"Patterns","g":"","u":"patterns/overview.html"},{"t":"입력 폼","s":"Patterns","g":"Common UI","u":"patterns/input-form.html"},{"t":"약관 동의","s":"Patterns","g":"Common UI","u":"patterns/terms-agreement.html"},{"t":"유의사항","s":"Patterns","g":"Common UI","u":"patterns/notes.html"},{"t":"오류 · 권한 없음","s":"Patterns","g":"Common UI","u":"patterns/error-pages.html"},{"t":"위험 작업 확인","s":"Patterns","g":"Common UI","u":"patterns/danger-confirm.html"},{"t":"가져오기 · 내보내기","s":"Patterns","g":"Common UI","u":"patterns/import-export.html"},{"t":"일괄 작업 진행","s":"Patterns","g":"Common UI","u":"patterns/bulk-progress.html"},{"t":"온보딩","s":"Patterns","g":"Service Pattern","u":"patterns/onboarding.html"},{"t":"검색","s":"Patterns","g":"Service Pattern","u":"patterns/search.html"},{"t":"시스템 상태","s":"Patterns","g":"Service Pattern","u":"patterns/system-status.html"},{"t":"로그인 · 세션","s":"Patterns","g":"Service Pattern","u":"patterns/sign-in.html"},{"t":"보고서 · 예약 발송","s":"Patterns","g":"Service Pattern","u":"patterns/report-schedule.html"},{"t":"대시보드","s":"Patterns","g":"Security Console","u":"patterns/dashboard.html"},{"t":"로그 뷰어","s":"Patterns","g":"Security Console","u":"patterns/log-viewer.html"},{"t":"정책 설정","s":"Patterns","g":"Security Console","u":"patterns/policy-settings.html"},{"t":"심각도 표시","s":"Patterns","g":"Security Console","u":"patterns/severity.html"},{"t":"상세 화면","s":"Patterns","g":"Security Console","u":"patterns/detail.html"},{"t":"권한 · 역할","s":"Patterns","g":"Security Console","u":"patterns/roles.html"},{"t":"API 키 · 비밀값","s":"Patterns","g":"Security Console","u":"patterns/secrets.html"},{"t":"사고 처리","s":"Patterns","g":"Security Console","u":"patterns/incident.html"},{"t":"감사 로그 · 변경 이력","s":"Patterns","g":"Security Console","u":"patterns/audit-log.html"},{"t":"알림 규칙","s":"Patterns","g":"Security Console","u":"patterns/alert-rules.html"},{"t":"Overview","s":"Templates","g":"","u":"templates/overview.html"},{"t":"로그인","s":"Templates","g":"","u":"templates/login.html"},{"t":"대시보드","s":"Templates","g":"","u":"templates/dashboard.html"},{"t":"리스트","s":"Templates","g":"","u":"templates/list.html"},{"t":"정책 설정","s":"Templates","g":"","u":"templates/policy.html"},{"t":"위저드","s":"Templates","g":"","u":"templates/wizard.html"},{"t":"탭이 있는 리스트","s":"Templates","g":"","u":"templates/tabs-list.html"},{"t":"조직도","s":"Templates","g":"","u":"templates/org.html"},{"t":"UI Dictionary","s":"Resources","g":"","u":"resources/ui-dictionary.html"},{"t":"React Package","s":"Resources","g":"","u":"resources/react.html"},{"t":"Design Token","s":"Resources","g":"","u":"resources/design-token.html"},{"t":"Figma Library","s":"Resources","g":"","u":"resources/figma.html"},{"t":"Token Download","s":"Resources","g":"","u":"resources/tokens.html"},{"t":"Changelog","s":"Resources","g":"","u":"resources/changelog.html"},{"t":"Contribution","s":"Resources","g":"","u":"resources/contribution.html"}];
 const PRODUCTS=[{"key":"blue","name":"기본","kind":"base","hex":"#0066FF"},{"key":"red","name":"제품1","kind":"ramp","hex":"#C30D2A","neutralFocus":true},{"key":"cyan","name":"제품2","kind":"ramp","hex":"#00828B"},{"key":"navy","name":"제품3","kind":"ramp","hex":"#10367D"},{"key":"orange","name":"브랜드","kind":"ramp","hex":"#FF7F00","neutralFocus":true,"exception":"회사 색(--company-mark)을 제품 색으로 그대로 쓴다 — 흰 글자와 제품 색 글자가 4.5 에 못 미치는 것을 알고 정한 사람의 결정(2026-11-14)"},{"key":"neutral","name":"중립","kind":"neutral","hex":"#1B1C1E"},{"key":"ai","name":"AI","kind":"ai","hex":"#6541F2","gradient":{"rest":["purple-40","violet-45"],"strong":["purple-30","violet-40"],"heavy":["purple-30","violet-30"]}}];
 const ROOT=document.body.dataset.root||'../';
+const UD_PREFIX=function udPrefix(html, p) {
+    var ids = {}; html.replace(/\sid="([^"]+)"/g, function (m, v) { ids[v] = 1; return m; });
+    return html.replace(/(\s)(id|for|form|list|name|href|aria-(?:labelledby|describedby|controls|owns|activedescendant|details|errormessage|flowto)|data-[a-z-]+)="([^"]*)"/g, function (m, sp, a, v) {
+      if (a === "name") return sp + a + '="' + p + v + '"';
+      return sp + a + '="' + v.split(" ").map(function (t) { return ids[t] ? p + t : (t.charAt(0) === "#" && ids[t.slice(1)]) ? "#" + p + t.slice(1) : t; }).join(" ") + '"';
+    }).replace(/\sdata-hotkey(?:="[^"]*")?/g, "").replace(/\sautofocus(?:="[^"]*")?/g, "");
+  };
 /* 공용 런타임: 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭/접기
    - 생성 사이트: build.js 가 SEARCH_INDEX / PRODUCTS / ROOT 상수를 앞에 붙여 assets/app.js 로 기록
    - 미리보기(standalone): data.js 의 PRODUCTS 사용, 검색은 render.js 가 사이드바 필터로 처리 */
@@ -123,6 +130,109 @@ const ROOT=document.body.dataset.root||'../';
     const fit = el => { const w = el.clientWidth; if (!w) return; const sc = Math.min(1, w / TPL_W); el.style.setProperty("--tpl-s", String(sc)); const cs = getComputedStyle(el); el.style.height = (TPL_H * sc + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)) + "px"; el.classList.add("scaled"); };
     const ro = new ResizeObserver(es => es.forEach(en => fit(en.target)));
     tplFrames.forEach(el => { fit(el); ro.observe(el); });
+  }
+
+  /* Resources › UI Dictionary(2026-11-19) — 카드 미리보기 맞춤 · 검색 · 분류 · 상세 패널.
+     미리보기: 예제의 실제 크기를 재서 칸 안에 들게 줄이고 가운데 둔다(.fit 이 붙을 때까지 숨김).
+     검색: 띄어쓰기를 무시하고 이름 · 영문 · 클래스 · React · 다른 이름(data-s3) 3점, 생김새 말(data-s2) 2점, 그 말과 꼭 같으면 +10.
+     낱말이 여럿이면 문구 전체가 맞거나 낱말마다 어딘가 맞아야 한다. 탭 · 입력 지연 · Esc · / 는 ds.js(ds:tab · ds:search).
+     상세: 카드의 .ud-detail 을 Side Panel 본문으로 옮겨 열고, 닫히면(ds:panel-close) 카드로 되돌린다 — 복사 대상 id 가 페이지에 하나로 남는다 */
+  const ud = document.querySelector(".ud");
+  if (ud) {
+    const grid = ud.querySelector(".ud-grid"), tabs = ud.querySelector(".tabs"), input = document.getElementById("ud-q");
+    const rhead = ud.querySelector(".ud-rhead"), rcount = ud.querySelector(".ud-rcount"), empty = ud.querySelector(".ud-empty");
+    const status = document.getElementById("ud-status"), panelEl = document.getElementById("ud-panel"), body = document.getElementById("ud-panel-body");
+    const items = [].slice.call(grid.children), cats = [].slice.call(tabs.querySelectorAll(".tab")).map(t => t.dataset.value);
+    const st = { cat: cats[0], q: "" }; let ready = false;
+    const fitShot = shot => {
+      const s = shot.firstElementChild; if (!s || !shot.clientWidth) return;
+      const f = s.classList.contains("ud-tpl") && s.querySelector("iframe");
+      s.style.transform = "none"; if (f) f.style.transform = "none";
+      const w = s.scrollWidth, h = s.scrollHeight; if (!w || !h) return;
+      const k = Math.min(shot.clientWidth / w, shot.clientHeight / h, 1), tf = `translate(${(shot.clientWidth - w * k) / 2}px,${(shot.clientHeight - h * k) / 2}px) scale(${k})`;
+      /* 화면 전체(iframe)는 iframe 자신을 줄인다 — 감싼 틀을 줄이면 Chromium 이 iframe 을 그리지 않는 경우가 있었다(Templates 문서 틀과 같은 방식) */
+      if (f) f.style.transform = tf; else s.style.transform = tf;
+      s.classList.add("fit");
+    };
+    const ro = "ResizeObserver" in window ? new ResizeObserver(es => es.forEach(en => fitShot(en.target))) : null;
+    const watch = shot => { fitShot(shot); if (ro) ro.observe(shot); };
+    ud.querySelectorAll(".ud-shot").forEach(watch);
+    if (document.fonts) document.fonts.ready.then(() => ud.querySelectorAll(".ud-shot").forEach(fitShot));
+    const norm = s => String(s || "").toLowerCase().replace(/\s+/g, "");
+    const index = items.map(li => ({ li, s3: (li.dataset.s3 || "").split("|").map(norm).filter(Boolean), s2: norm(li.dataset.s2) }));
+    const score = (x, q, words) => {
+      let n = 0; const hit3 = w => x.s3.some(t => t.includes(w)), hit2 = w => x.s2.includes(w);
+      if (x.s3.some(t => t === q)) n += 10;
+      if (hit3(q)) n += 3; if (hit2(q)) n += 2;
+      if (n) return n;
+      if (words.length < 2 || !words.every(w => hit3(w) || hit2(w))) return 0;
+      return words.reduce((a, w) => a + (hit3(w) ? 3 : 0) + (hit2(w) ? 2 : 0), 0);
+    };
+    const writeURL = () => {
+      if (!ready) return;
+      try { const u = new URL(location.href); u.searchParams.delete("q"); u.searchParams.delete("cat"); if (st.q) u.searchParams.set("q", st.q); else if (st.cat !== cats[0]) u.searchParams.set("cat", st.cat); history.replaceState(history.state, "", u); } catch (e) { }
+    };
+    const apply = () => {
+      const q = norm(st.q);
+      if (q) {
+        const words = st.q.trim().toLowerCase().split(/\s+/).map(norm).filter(Boolean);
+        const hits = index.map((x, i) => ({ x, i, n: score(x, q, words) })).filter(h => h.n).sort((a, b) => b.n - a.n || a.i - b.i);
+        index.forEach(x => { x.li.hidden = true; });
+        hits.forEach(h => { h.x.li.hidden = false; grid.appendChild(h.x.li); });
+        tabs.hidden = true; rhead.hidden = false; rcount.textContent = hits.length; grid.classList.remove("wide");
+        grid.setAttribute("role", "list"); grid.removeAttribute("tabindex"); grid.removeAttribute("aria-labelledby");
+        empty.hidden = hits.length > 0; grid.hidden = !hits.length;
+        status.textContent = hits.length ? `검색 결과 ${hits.length}개` : "검색 결과가 없습니다";
+      } else {
+        items.forEach(li => { grid.appendChild(li); li.hidden = li.dataset.cat !== st.cat; });
+        tabs.hidden = false; rhead.hidden = true; empty.hidden = true; grid.hidden = false;
+        grid.classList.toggle("wide", items.filter(li => li.dataset.cat === st.cat).every(li => li.querySelector(".ud-shot.wide")));
+        grid.setAttribute("role", "tabpanel"); grid.tabIndex = 0;
+        status.textContent = "";
+      }
+      writeURL();
+    };
+    const setQuery = (v, focus) => { input.value = v; input.dispatchEvent(new Event("input", { bubbles: true })); st.q = v; apply(); if (focus) input.focus(); };
+    document.addEventListener("ds:tab", e => { if (e.target.closest && e.target.closest(".ud .tabs") === tabs) { st.cat = e.detail && e.detail.value; apply(); } });
+    document.addEventListener("ds:search", e => { if (e.target.closest && e.target.closest(".ud-search")) { st.q = e.detail ? e.detail.value : input.value; apply(); } });
+    ud.addEventListener("click", e => {
+      const hint = e.target.closest("[data-ud-hint]"); if (hint) { setQuery(hint.dataset.udHint, true); return; }
+      if (e.target.closest("[data-ud-reset]")) { setQuery("", true); return; }
+      const open = e.target.closest(".ud-open"); if (open) openDetail(open.closest(".ud-item"));
+    });
+    /* 상세 — 큰 미리보기는 처음 열 때 복사용 HTML 에서 새로 만든다(id 접두어를 카드와 다르게 해 겹치지 않게) */
+    let shown = null;
+    const putBack = () => { if (!shown) return; const d = body.querySelector(".ud-detail"); if (d) { d.hidden = true; shown.appendChild(d); } shown = null; };
+    function openDetail(li) {
+      if (!li) return;
+      putBack();
+      const d = li.querySelector(".ud-detail"), big = d.querySelector(".ud-big");
+      d.hidden = false; body.appendChild(d); shown = li;
+      document.getElementById("ud-panel-title").textContent = d.dataset.name;
+      if (window.DS) DS.panel.open(panelEl); else panelEl.hidden = false;
+      body.scrollTop = 0;
+      /* 차트 캔버스는 보이는 자리에서 그려야 크기를 잰다 — 패널을 연 뒤에 만든다 */
+      if (!big.firstChild) {
+        const src = li.querySelector(".ud-stage"), code = d.querySelector('.ud-codes code[id$="code-html"]');
+        const shot = document.createElement("div"); shot.className = "ud-shot big" + (li.querySelector(".ud-shot.wide") ? " wide" : "");
+        const stage = document.createElement("div"); stage.className = src.className.replace(/\s*\bfit\b/, ""); stage.setAttribute("inert", ""); stage.style.cssText = src.style.cssText; stage.style.transform = "";
+        if (code) stage.innerHTML = UD_PREFIX(code.textContent, "udp" + li.dataset.i + "-");
+        else { const f = src.querySelector("iframe").cloneNode(); f.removeAttribute("loading"); f.removeAttribute("style"); stage.appendChild(f); }
+        shot.appendChild(stage); big.appendChild(shot);
+        if (code) { if (window.DS) DS.init(stage); if (window.DSChart && window.Chart) DSChart.auto(window.Chart, stage); }
+      }
+      watch(big.firstChild);
+    }
+    document.addEventListener("ds:panel-close", e => { if (e.target === panelEl) putBack(); });
+    /* 주소의 ?q= · ?cat= 로 시작 — 탭을 누르는 일은 ds.js 가 붙은 뒤에(이 파일이 먼저 실린다) */
+    let start = null; try { const u = new URL(location.href); start = { q: u.searchParams.get("q") || "", c: u.searchParams.get("cat") }; } catch (e) { }
+    apply();
+    const restore = () => setTimeout(() => {
+      if (start && start.c && cats.includes(start.c) && start.c !== st.cat) { const t = tabs.querySelector(`.tab[data-value="${start.c}"]`); if (t) t.click(); }
+      ready = true;
+      if (start && start.q) setQuery(start.q);
+    });
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", restore); else restore();
   }
 
   /* 홈(index) B4 — 글꼴이 준비되면 들어오기 시작(.go, data-hm 이 있을 때만 — head 스크립트가 줄인 모션이 아닐 때 붙임),
@@ -409,7 +519,7 @@ const ROOT=document.body.dataset.root||'../';
     if (!toc) return;
     if (tocSpy) { tocSpy.disconnect(); tocSpy = null; }
     /* 예제 미리보기 안의 제목(.page-head .title 등)은 섹션이 아니므로 제외 */
-    const hs = art ? [].slice.call(art.querySelectorAll("h2[id], h3[id]")).filter(h => !h.closest(".example")) : [];
+    const hs = art ? [].slice.call(art.querySelectorAll("h2[id], h3[id]")).filter(h => !h.closest(".example, .ud, .side-panel")) : [];
     if (hs.length < 2) { toc.innerHTML = ""; toc.hidden = true; return; }
     toc.innerHTML = '<h6>이 페이지</h6>' + hs.map(h =>
       '<a href="#' + h.id + '"' + (h.tagName === "H3" ? ' class="sub"' : "") + ">" + h.textContent.trim() + "</a>").join("");

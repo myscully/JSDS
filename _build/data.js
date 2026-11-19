@@ -5,7 +5,7 @@
 const FIGMA = "https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV";
 const VERSION = "v0.9";
 /* 사이드바·헤더에 N 배지를 붙일 페이지 */
-const NEW = new Set(["home/getting-started", "foundations/colors", "foundations/icons", "resources/design-token", "components/select", "foundations/writing", "foundations/interaction", "components/combobox", "components/side-panel", "components/tree", "components/notification-center"]);
+const NEW = new Set(["home/getting-started", "foundations/colors", "foundations/icons", "resources/design-token", "components/select", "foundations/writing", "foundations/interaction", "components/combobox", "components/side-panel", "components/tree", "components/notification-center", "resources/ui-dictionary"]);
 const SITE = {
   home: { title: "Home", desc: "지란지교시큐리티 디자인 시스템 소개", pages: { overview: "Overview", "getting-started": "Getting started", about: "About", principles: "UX Principles" } },
   foundations: { title: "Foundations", desc: "모든 디자인 요소의 기반이 되는 가장 원자적인 단위", pages: { overview: "Overview" }, groups: [["Base material", [["colors", "Colors"], ["elevation", "Elevation"], ["grid", "Grid"], ["icons", "Icons"], ["interaction", "Interaction"], ["typography", "Typography"], ["writing", "Writing"]]]] },
@@ -23,7 +23,7 @@ const SITE = {
   ] },
   /* Templates(2026-11-18) — 컴포넌트와 패턴으로 조립한 콘솔 화면 전체. 글은 templates.data.js, 화면은 templates.build.js */
   templates: { title: "Templates", desc: "컴포넌트와 패턴으로 조립한 콘솔 화면 전체", isNew: true, pages: { overview: "Overview", login: "로그인", dashboard: "대시보드", list: "리스트", policy: "정책 설정", wizard: "위저드", "tabs-list": "탭이 있는 리스트", org: "조직도" } },
-  resources: { title: "Resources", desc: "라이브러리, 토큰, 변경 이력", pages: { react: "React Package", "design-token": "Design Token", figma: "Figma Library", tokens: "Token Download", changelog: "Changelog", contribution: "Contribution" } },
+  resources: { title: "Resources", desc: "라이브러리, 토큰, 변경 이력", pages: { "ui-dictionary": "UI Dictionary", react: "React Package", "design-token": "Design Token", figma: "Figma Library", tokens: "Token Download", changelog: "Changelog", contribution: "Contribution" } },
 };
 /* 제품 색 팔레트(2026-11-14 사람의 결정 · 2026-11-17 이름을 역할로 바꾸고 제품3 #10367D 을 더함 — 일곱) — 1.0 전에는 이 일곱 가지만 쓴다. 1.0 뒤에는 사용자가 색을 더하거나 고치는 팔레트를 준다.
    사이트(app.src.js) · React(theme.ts PRODUCT_COLORS — 테스트가 이 표와 같은지 대조) · contrast 맥락 · verify 가 모두 이 표를 읽는다.

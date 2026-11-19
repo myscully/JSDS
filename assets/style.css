@@ -407,6 +407,43 @@ ul:where(:not(.example-preview *)),ol:where(:not(.example-preview *)){padding-le
 .tpl-code .tpl-frame{border:0;border-radius:0}
 .tpl-code .example-code pre{max-height:37.5rem;overflow:auto}   /* 화면 전체 HTML 은 길다 — 코드 칸 안에서 스크롤 */
 .tpl-frame.scaled iframe{position:absolute;top:0;left:0;transform:scale(var(--tpl-s));transform-origin:0 0}
+/* Resources › UI Dictionary(2026-11-19) — 사이트 셸 전용 배치. 카드 모양 · 검색 · 탭 · 패널은 기존 컴포넌트 클래스 그대로이고 여기는 배치만.
+   미리보기 틀 .ud-stage 는 .example-preview 를 함께 달아 문서 목록 · 제목 규칙(:where(:not(.example-preview *)))에서 빠진다 — 예제 페이지와 같은 모양.
+   app.js 가 실제 크기를 재서 칸에 맞게 줄이고 가운데 둔 뒤 .fit 을 붙인다(그 전에는 숨김). 카드 전체를 이름 버튼의 ::after 가 덮는다 */
+.ud-search{width:100%}
+.ud-suggest{display:flex;flex-wrap:wrap;align-items:center;gap:0.5rem 0.75rem;margin:var(--space-3) 0 var(--space-8)}
+.ud-suggest-label{font-size:var(--font-size-13);color:var(--foreground-neutral-tertiary)}
+.ud-suggest .btn-group{flex-wrap:wrap}
+.ud .tabs{margin-bottom:var(--space-5)}
+h2.ud-rhead{margin:0 0 var(--space-5);font-size:var(--font-size-16)}
+.ud-rcount{color:var(--foreground-brand-primary)}
+.ud-grid{list-style:none;padding:0;margin:0;max-width:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(14.5rem,1fr));gap:var(--space-4)}
+.ud-grid.wide{grid-template-columns:repeat(auto-fill,minmax(21rem,1fr))}
+.ud-grid:focus-visible{outline-offset:4px}
+.ud-item{position:relative;display:flex;flex-direction:column;gap:0.75rem;margin:0;padding:0.5rem 0.5rem 0.875rem;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);background:var(--surface-elevated-primary);transition:border-color var(--motion-fast)}
+.ud-item:hover{border-color:var(--line-neutral-primary)}
+.ud-item:has(.ud-open:focus-visible){outline:1px solid var(--foreground-brand-primary);outline-offset:2px}
+.ud-shot{position:relative;height:8.5rem;border-radius:var(--radius-md);background:var(--background-neutral-secondary);overflow:hidden}
+.ud-shot.wide,.ud-grid.wide .ud-shot{height:11rem}
+.ud-shot.big{height:15rem}
+.ud-shot.big.wide{height:18rem}
+.ud-stage.example-preview{position:absolute;left:0;top:0;display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem;width:max-content;padding:0.75rem;overflow:visible;transform-origin:0 0;visibility:hidden;font-size:var(--font-size-14)}
+.ud-stage.example-preview.stack{flex-direction:column;align-items:stretch}
+.ud-stage.fit{visibility:visible}
+.ud-stage.ud-tpl{padding:0}
+.ud-stage iframe{display:block;border:0;transform-origin:0 0}
+.ud-txt{display:grid;gap:0.375rem;padding:0 0.25rem;min-width:0}
+.ud-open{display:grid;gap:0.125rem;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.ud-open::after{content:"";position:absolute;inset:0;border-radius:inherit}
+.ud-open:focus-visible{outline:none}
+.ud-name{font-size:var(--font-size-14);line-height:1.25rem;font-weight:600;color:var(--foreground-neutral-primary)}
+.ud-en{font-size:var(--font-size-12);line-height:1rem;color:var(--foreground-neutral-tertiary)}
+.ud-txt code{justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--font-size-12)}
+.ud-detail{display:flex;flex-direction:column;gap:var(--space-5)}
+.ud-detail[hidden]{display:none}
+.ud-detail .kv{margin:0}
+.ud-detail .uses{margin:0}
+.ud-doc{margin:0}
 /* Getting Started (Home › 시작하기) — 번호 단계 목록 */
 .guide-steps{list-style:none;padding:0;margin:var(--space-4) 0 var(--space-8);counter-reset:gs;max-width:none}
 .guide-steps>li{position:relative;padding:0 0 var(--space-6) 2.5rem;counter-increment:gs;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary)}
