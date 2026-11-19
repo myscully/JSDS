@@ -999,7 +999,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 2026-11-19 React 개발자 테스트용 전달본 · 패키지 README(사람의 요청) — react 885+6 · tsc 0, 다른 게이트 수는 그대로(사이트 밖 파일만).
 - `_react/README.md` 의 낡은 문구: 머리말 '0.8.0 은 깨지는 변경' → 0.6.x → 0.9.0 기준, 차트 프리셋 넷 → 여섯 · 한 톤 기본, '사이트 일치 118' 숫자 지움. `.ds-root` 를 빼면 기본 서체 · `scale.css` · TS 7 의 CSS import(TS2882) · .tgz 설치를 더했다.
 - 패키지 `files` 에 `MIGRATION.md` — README 의 링크가 패키지 안에서 깨져 있었다(파일 143개).
-- 전달본은 `_handoff/ds-react-0.9.0/`(.tgz · Vite 예제 앱 · 안내 README · MIGRATION)과 같은 이름의 zip 이고 git 에 올리지 않았다. 새 폴더에서 설치 · 빌드, 브라우저에서 제품 색 · 다크 · Popup · Toast 를 확인했다.
+- 전달본은 `_handoff/ds-react-0.9.0/`(.tgz · Vite 예제 앱 · 안내 README · MIGRATION)과 같은 이름의 zip 이다. 글(안내 · 예제 앱 · MIGRATION 사본)만 커밋하고 .tgz · zip 은 `.gitignore`(사람의 결정 — 바이너리는 `_react` 에서 `npm pack` 으로 다시 만듦). 새 폴더에서 설치 · 빌드, 브라우저에서 제품 색 · 다크 · Popup · Toast 를 확인했다.
 
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

@@ -11,3 +11,6 @@ _react/demo/dist/
 _build/contrast.json
 _build/.contrast-probe.html
 _react/src/chart/ds-chart.js
+# 전달 묶음의 바이너리(.tgz · zip)는 _react 에서 npm pack 으로 다시 만든다
+_handoff/**/*.tgz
+_handoff/*.zip
