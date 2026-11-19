@@ -1,4 +1,4 @@
-import { Button, Checkbox, DateRangePicker, PopupActions, PopupForm, PopupSurface, PopupTitle, Radio, RadioGroup, TimePicker } from "@jiran/ds-react";
+import { Button, ButtonGroup, Checkbox, DateRangePicker, PopupActions, PopupForm, PopupSurface, PopupTitle, Radio, RadioGroup, TimePicker } from "@jiran/ds-react";
 
 const day = (n: number) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - n); return d; };
 const PRESETS = [7, 30].map((n) => ({ label: `최근 ${n}일`, range: (): [Date, Date] => [day(n - 1), day(0)] }));
@@ -19,8 +19,10 @@ export default function Example() {
         <TimePicker id="exp-time" label="예약 시각" defaultValue="02:00" help="30일이 넘는 기간은 이 시각에 보냅니다." />
       </PopupForm>
       <PopupActions>
-        <Button variant="outline" color="assistive" onClick={close}>취소</Button>
-        <Button>내보내기</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive" onClick={close}>취소</Button>
+          <Button>내보내기</Button>
+        </ButtonGroup>
       </PopupActions>
     </PopupSurface>
   );

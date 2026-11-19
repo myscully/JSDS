@@ -144,8 +144,8 @@ module.exports = async function chart({ page, ok, go }) {
         bar: bar.data.datasets.map((d) => d.backgroundColor), mono: [T.mono[0], T.mono[3]], meters: document.querySelectorAll('#ex-dashboard-full .progress-list [role="meter"]').length };
     });
     const same = (cs) => cs.length === 2 && cs[0].top === cs[1].top && cs[0].head === cs[1].head && cs[0].body === cs[1].body && cs[0].card === cs[1].card;
-    ok("dashboard: both chart rows line up (head bottom · body top · card height), two KPI sparks, meaning-coloured deltas, mono weekly bars, four meters",
-      same(r.r3) && same(r.r2) && r.sparks === 2 && JSON.stringify(r.deltas) === JSON.stringify(["delta bad", "delta good", "delta bad"]) && JSON.stringify(r.bar) === JSON.stringify(r.mono) && r.meters === 4, JSON.stringify(r));
+    ok("dashboard: both chart rows line up (head bottom · body top · card height), no KPI sparks (2026-11-18 — KPI 기본은 스파크 없음), meaning-coloured deltas, mono weekly bars, four meters",
+      same(r.r3) && same(r.r2) && r.sparks === 0 && JSON.stringify(r.deltas) === JSON.stringify(["delta bad", "delta good", "delta bad"]) && JSON.stringify(r.bar) === JSON.stringify(r.mono) && r.meters === 4, JSON.stringify(r));
     /* 390 — 두 줄 모두 한 칸으로 쌓이고 카드 · 도넛 · 제목이 잘리지 않는다 */
     const vp = page.viewportSize(); await page.setViewportSize({ width: 390, height: 900 }); await wait(500);
     const n = await page.evaluate(() => { const rows = [".row-3", ".row-2"].map((s) => [...document.querySelectorAll(`#ex-dashboard-full ${s} > .chart-card`)]);

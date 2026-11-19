@@ -190,6 +190,37 @@ ${examplesBlock("patterns", key, c)}${rulesBlock(c)}
 ${usageBlock(key, css, label, [...new Set([...(c.react || []), ...uses.flatMap(u => (COMPONENTS[u] || {}).react || [])])])}`;
 }
 
+/* Templates 문서 페이지(2026-11-18, 사람의 결정) — 정의 · 고르기 표 · 미리보기 · Composition · Rules.
+   미리보기는 실제 화면(templates/screen/<key>.html, templates.build.js 가 만듦)을 1440×900 iframe 으로 싣고 틀 폭에 맞게 줄인다 —
+   비율은 app.js 가 --tpl-s 로 넣는다(스크립트가 없으면 틀 안에서 스크롤). 크게 볼 때는 새 창.
+   코드 보기(2026-11-19, 사람의 요청) — 미리보기 아래 예제와 같은 막대(HTML · CSS 탭 · 복사 · 코드 보기). HTML 은 화면 파일 전체, CSS 는 앱 틀 배치(templates.css).
+   React 탭은 없다(템플릿은 패키지 예제가 아님). 글자는 build.js 가 window.TEMPLATE_HTML · TEMPLATE_CSS 로 넣고, 없으면(단독 셸) 미리보기만 그린다 */
+function tplCode(key, t) {
+  const frame = `<div class="tpl-frame"><iframe src="screen/${key}.html" title="${t} 화면 미리보기" width="1440" height="900" loading="lazy"></iframe></div>`;
+  const html = (window.TEMPLATE_HTML || {})[key], css = window.TEMPLATE_CSS;
+  if (!html || !css) return frame;
+  const id = `tpl-${key}`;
+  return `<section class="example tpl-code" id="${id}">${frame}
+<div class="example-bar"><div class="code-tabs" role="tablist"><button type="button" class="on" data-tab="html" role="tab" aria-selected="true">HTML</button><button type="button" data-tab="css" role="tab" aria-selected="false">CSS</button></div><div class="example-actions"><button type="button" data-copy="${id}-html" data-label="복사">복사</button><button type="button" data-toggle aria-expanded="false">코드 보기</button></div></div>
+<div class="example-code" hidden>
+<div data-pane="html"><div class="code-head"><span>HTML · templates/screen/${key}.html</span></div><pre><code id="${id}-html">${hl(html.trim(), "html")}</code></pre></div>
+<div data-pane="css" hidden><div class="code-head"><span>CSS · assets/templates.css — 앱 틀 배치</span></div><pre><code id="${id}-css">${hl(css.trim(), "css")}</code></pre></div>
+</div>
+</section>`;
+}
+function tplDocPage(key) {
+  const c = TEMPLATES[key]; const t = titleOf("templates", key);
+  const chip = (sec, k) => `<a href="#/${sec}/${k}">${titleOf(sec, k)}</a>`;
+  return `<h1>${t}${nb("templates", key)}</h1><p class="lead">${c.desc}</p>${chooseBlock(c)}
+<h2 id="preview">Preview</h2><p>실제 화면을 줄여 보여 줍니다. 안의 버튼과 메뉴도 동작합니다. 코드 보기를 누르면 화면 전체의 HTML 과 앱 틀 배치 CSS 를 볼 수 있습니다. 컴포넌트 모양은 사이트 스타일시트가 맡습니다.</p>
+<div class="tpl-frame-head"><a href="screen/${key}.html" class="link standalone" target="_blank" rel="noopener noreferrer">새 창에서 열기${I("external-link", 14)}<span class="sr-only"> (새 창)</span></a></div>
+${tplCode(key, t)}
+<h2 id="composition">Composition</h2><p>이 화면이 조합하는 컴포넌트와 패턴입니다. 세부 옵션은 각 페이지에 있습니다.</p>
+<h3>Components</h3><div class="uses">${(c.uses || []).map((u) => chip("components", u)).join("")}</div>
+<h3>Patterns</h3><div class="uses">${(c.patterns || []).map((u) => chip("patterns", u)).join("")}</div>
+${rulesBlock(c)}`;
+}
+
 /* ---------- Foundations 공용 ---------- */
 /* Radius 값은 스타일시트에서 끌어온다 — 타일에 숫자를 박아 두면 토큰을 고칠 때마다 따로 손봐야 한다 */
 const RADII = () => Object.entries(parseVars(rootBlock(STYLE(), ":root")))
@@ -284,6 +315,8 @@ const DS_EVENTS = [
   ["ds:notify-open", "Notification Center", "{open}"],
   ["ds:notify-read", "Notification Center 읽음", "{ids, all}"],
   ["ds:notify-more", "Notification Center 이전 알림", "{resolve(items, {done}), reject(msg)}"],
+  ["ds:sidenav", "Top Navigation 사이드 내비 접기", "{collapsed}"],
+  ["ds:theme", "Top Navigation 라이트/다크", "{theme}"],
 ];
 /* 텍스트 스타일 수 — Typography 표와 같은 원본(.t-* 크기 클래스)에서 센다 */
 const typeStyleCount = () => new Set([...STYLE().matchAll(/\.t-((?:display|title|heading|headline|body|label|caption)-\d(?:-(?:normal|reading))?)\{/g)].map((m) => m[1])).size;
@@ -376,7 +409,7 @@ ${PRINCIPLES.map(([id, t, b], i) => `<h2 id="${id}">${i + 1}. ${t}</h2><p>${b}</
 <h2 id="css">CSS Variables</h2><p>Light 기본값 + Dark 오버라이드(<code>prefers-color-scheme</code> 및 <code>[data-theme="dark"]</code>)를 포함합니다.</p>${codeBlock("tokencss", root, "css", "CSS 복사")}
 <h2 id="radius">Radius</h2><p>역할별로 반경을 정해 두고, 모든 블록에 같은 반경을 찍지 않습니다. 타일을 클릭하면 토큰이 복사됩니다.</p>
 <div class="tiles radius">${RADII().map(([n, v]) => `<div style="border-radius:${v}px" data-copy-text="var(--radius-${n})" title="복사">${n} ${v === 999 ? "" : v}</div>`).join("")}</div>
-<dl class="kv"><dt>md ${rpx("md")}</dt><dd>높이 40 · 48 의 버튼 · 입력 필드 · 드롭다운, 메뉴, Tooltip</dd><dt>lg ${rpx("lg")}</dt><dd>카드, 패널, 알림, 달력, 아코디언</dd><dt>xl ${rpx("xl")}</dt><dd>팝업</dd><dt>full</dt><dd>태그, 칩, 아바타, 스위치</dd><dt>sm ${rpx("sm")}</dt><dd>높이 32 의 버튼 · 입력 필드, 체크박스, 트리 행</dd></dl>
+<dl class="kv"><dt>md ${rpx("md")}</dt><dd>높이 40 · 48 의 버튼 · 입력 필드 · 드롭다운, 메뉴, Tooltip</dd><dt>lg ${rpx("lg")}</dt><dd>카드, 패널, 알림, 달력, 아코디언</dd><dt>xl ${rpx("xl")}</dt><dd>팝업, 로그인 카드</dd><dt>full</dt><dd>태그, 칩, 아바타, 스위치</dd><dt>sm ${rpx("sm")}</dt><dd>높이 32 의 버튼 · 입력 필드, 체크박스, 트리 행</dd></dl>
 ${tokenSection("radius-css", "CSS", "radius")}
 <h2 id="motion">Motion</h2><p>전환·피드백 애니메이션의 지속 시간과 이징입니다. 컴포넌트 CSS 의 <code>transition</code> 은 <code>--motion-*</code> 토큰만 참조하고(빌드가 검사), <code>prefers-reduced-motion</code> 일 때 가상 요소까지 모든 전환 · 애니메이션을 멈춥니다.</p>
 <div class="tablewrap"><table><thead><tr><th>토큰</th><th>값</th><th>쓰는 곳</th></tr></thead><tbody><tr><td><code>--motion-fast</code></td><td>120ms ease-out</td><td>hover · 누름 · 선택의 색 변화(버튼 · 필드 · 체크박스 · 라디오 · 스위치 · 칩 · 탭 · 선택 카드 · 툴팁), 셰브론 회전</td></tr><tr><td><code>--motion-base</code></td><td>200ms ease-in-out</td><td>Accordion 펼침 높이 · Progress 채움</td></tr><tr><td><code>--motion-slow</code></td><td>320ms cubic-bezier(.2,.8,.2,1)</td><td>컴포넌트 소비자 없음 — 사이트 Colors 페이지의 막대 높이에만 씁니다</td></tr></tbody></table></div>
@@ -435,6 +468,12 @@ ${codeBlock("react-usage", `import { Button, TextField, Tag, DataTable, useToast
 ${codeBlock("tok-json", `{\n  "color": {\n    "atomic": { "blue": { "50": { "value": "#0066FF" } } },\n    "semantic": { "surface": { "brand": { "primary": { "value": "{product.main}" } } } }\n  },\n  "space": { "4": { "value": "16px" } }, "radius": { "md": { "value": "6px" } }\n}`, "tsx")}<p>Figma Variables → JSON 내보내기 연동은 예정입니다.</p>`,
   "resources/changelog": () => `<h1>Changelog</h1><p class="lead">버전별 변경 이력입니다. 가이드와 Figma 파일의 버전을 함께 올립니다.</p>
 <div class="tablewrap"><table><thead><tr><th>버전</th><th>날짜</th><th>내용</th></tr></thead><tbody>${CHANGELOG.map(c => `<tr><td><code>${c[0]}</code></td><td>${c[1]}</td><td>${c[2]}</td></tr>`).join("")}</tbody></table></div>`,
+  /* Templates 개요 — Foundations 개요처럼 그림 한 줄 + 목록 행(사람의 결정 2026-11-18). 그림은 토큰으로 그린 화면 조각 다섯 */
+  "templates/overview": () => `<h1>Templates${nb("templates", "overview")}</h1><p class="lead">컴포넌트와 패턴으로 조립한 콘솔 화면 전체입니다. 로그인을 뺀 여섯 화면은 상단 바와 사이드 내비를 함께 쓰며, 새 화면을 시작할 때 가장 가까운 것을 골라 출발점으로 씁니다.</p>
+<div class="fnd-hero tpl-hero" aria-hidden="true"><div class="th-login"><b></b><i></i><i></i><s></s></div><div class="th-kpi"><b></b><i></i><s></s></div><div class="th-rows"><i></i><i></i><i></i><i></i></div><div class="th-form"><b></b><i></i><b></b><i></i></div><div class="th-tree"><i></i><i></i><i></i><i></i></div></div>
+<h2 id="screens">Screens</h2>
+<div class="base-list">${allPages("templates").filter((p) => p.key !== "overview").map((p) => `<a href="#/templates/${p.key}"><b>${p.title}${nb("templates", p.key)}</b><span>${TEMPLATES[p.key].line}</span>${I("chevron-right", 18)}</a>`).join("")}</div>
+<p>화면에 쓴 컴포넌트와 패턴은 각 화면 페이지의 Composition 에 있습니다. 화면 하나를 크게 보려면 그 페이지에서 새 창으로 엽니다.</p>`,
   "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><p>이 문서는 아직 작업 중입니다. 아래 절차는 큰 흐름이며, 각 단계의 서식과 기준이 확정되면 이 페이지를 갱신합니다.</p><ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인파트 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
 };
 
@@ -447,6 +486,7 @@ function render() {
   if (PAGES[`${sec}/${key}`]) html = PAGES[`${sec}/${key}`]();
   else if (sec === "components" && allPages("components").some(p => p.key === key)) html = componentPage(key);
   else if (sec === "patterns" && allPages("patterns").some(p => p.key === key)) html = patternPage(key);
+  else if (sec === "templates" && TEMPLATES[key]) html = tplDocPage(key);
   else if (SITE[sec] && allPages(sec).some(p => p.key === key)) html = templatePage(sec, key);
   if (!html) { html = `<h1>페이지를 찾을 수 없습니다</h1><p><a href="#/home/overview">홈으로</a></p>`; }
   $("#main").innerHTML = isHome ? `<div id="content" class="home">${html}</div>` : `<div class="page"><article id="content">${html}</article></div>`;

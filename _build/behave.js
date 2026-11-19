@@ -709,7 +709,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const r = b2.getBoundingClientRect(), svg = b2.querySelector("svg").getBoundingClientRect();
       return { 버튼: Math.round(r.width) + "x" + Math.round(r.height), 아이콘: Math.round(svg.width) };
     });
-    ok("lg icon button renders at 48 with a 20px icon", lgIcon.버튼 === "48x48" && lgIcon.아이콘 === 20, JSON.stringify(lgIcon));
+    ok("lg icon button renders at 48 with a 28px icon (2026-11-18 — 20 → 28)", lgIcon.버튼 === "48x48" && lgIcon.아이콘 === 28, JSON.stringify(lgIcon));
     /* State 예제의 고정 상태(data-state, 사이트 전용 — build.js 가 :hover · :active 에서 생성)가 실제 hover · pressed 와 같은 색인가 */
     const forced = [];
     for (const v of ["solid.primary", "outline.primary", "solid.assistive", "outline.assistive"]) {
@@ -1813,8 +1813,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 42 · patterns/dashboard.html", async () => {
     await go("patterns/dashboard.html");
     await page.waitForFunction(() => [...document.querySelectorAll("canvas[data-chart]")].every((c) => c.__dsChart && c.__dsChart.chart.ctx), null, { timeout: 5000 }).catch(() => {});
-    const dash = await page.evaluate(() => ({ trend: !!(document.querySelector('.row-3 canvas[data-chart="timeseries"]') || {}).__dsChart, donut: document.querySelector(".row-3 .donut").getAttribute("aria-label"), script: !!document.querySelector('script[src$="assets/ds-chart.js"]') }));
-    ok("dashboard pattern draws a timeseries trend and names donut shares", dash.trend && /%/.test(dash.donut) && dash.script, JSON.stringify(dash));
+    const dash = await page.evaluate(() => ({ trend: !!(document.querySelector('.row-3 canvas[data-chart="timeseries"]') || {}).__dsChart, donut: !!(document.querySelector('.row-3 canvas[data-chart="donut"]') || {}).__dsChart, label: (document.querySelector('.row-3 canvas[data-chart="donut"]') || { getAttribute: () => "" }).getAttribute("aria-label"), script: !!document.querySelector('script[src$="assets/ds-chart.js"]') }));
+    /* 일별 탐지 = 계열 하나인 추이 · 심각도 분포 = 탐색형 도넛(2026-11-18 — 전에는 심각도 누적 추이 · 정적 도넛) */
+    ok("dashboard pattern draws a daily trend and an explorable donut that names every severity", dash.trend && dash.donut && /Critical 190.*Info 263/.test(dash.label) && dash.script, JSON.stringify(dash));
   });
   await part("part 43 · components/data-visual.html", async () => {
     await go("components/data-visual.html");
@@ -2116,9 +2117,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         afterEx: !!(rules && ex) && !!(ex.compareDocumentPosition(rules) & 4) && !document.querySelector("#rules ~ .example, #rules ~ * .example"), toSpec: !!rules && n === spec, seq: seq.join(","),
         divKv: document.querySelectorAll("div.kv").length };
     });
-    const chB = await chooseOf();   // Button Rules 2 → 3행: '삭제는 중립'(2026-11-14)
+    const chB = await chooseOf();   // Button Rules 2 → 3행: '삭제는 중립'(2026-11-14) → 4행: '버튼 묶음'(2026-11-18)
     ok("choose list (dl.kv, 3 rows max) sits right under the lead above the first example; Rules follows the examples and leads straight into Spec",
-      chB.kv === "DL.kv" && chB.keys === "언제 쓰는가|Placement" && chB.above && chB.afterEx && chB.toSpec && chB.seq === "DL.kv3" && !chB.divKv, JSON.stringify(chB));
+      chB.kv === "DL.kv" && chB.keys === "언제 쓰는가|Placement" && chB.above && chB.afterEx && chB.toSpec && chB.seq === "DL.kv4" && !chB.divKv, JSON.stringify(chB));
   });
   await part("part 69 · components/data-table.html", async () => {
     await go("components/data-table.html");
@@ -2492,7 +2493,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     for (const w of [1440, 1280, 1024, 768, 390]) {
       await page.setViewportSize({ width: w, height: 900 });
       const wide = [];
-      for (const sec of ["", "home", "foundations", "components", "patterns", "resources"]) for (const f of fs.readdirSync(path.join(SITE, sec))) {
+      /* templates/ 는 문서 페이지만 — 화면(templates/screen/)은 최소 폭 1024 의 콘솔 화면이라 좁은 폭의 가로 넘침이 정상이다(폴더라 .html 거르기에서 빠짐). 화면 넘침은 behave.templates 가 1440 에서 잰다 */
+      for (const sec of ["", "home", "foundations", "components", "patterns", "templates", "resources"]) for (const f of fs.readdirSync(path.join(SITE, sec))) {
         if (!f.endsWith(".html") || f.includes("standalone")) continue;
         await go(path.join(sec, f));
         const over = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
@@ -2508,7 +2510,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const hamVisible = await page.evaluate(() => { const b = document.getElementById("menuBtn"); return !!b && b.getBoundingClientRect().width > 0; });
     await page.click("#menuBtn");
     const step1 = await page.evaluate(() => { const p = document.getElementById("menuPop"); return { open: !p.hidden, secs: p.querySelectorAll("[data-drawer-sec]").length, back: !!p.querySelector("[data-drawer-back]"), dim: !document.getElementById("menuDim").hidden }; });
-    ok("drawer step 1 lists sections", hamVisible && step1.open && step1.secs === 5 && !step1.back && step1.dim, JSON.stringify(step1));
+    ok("drawer step 1 lists sections", hamVisible && step1.open && step1.secs === 6 && !step1.back && step1.dim, JSON.stringify(step1));
     const url0 = page.url();
     await page.click('[data-drawer-sec="Foundations"]');
     await page.waitForSelector("[data-drawer-back]", { timeout: 3000 });   /* 화면 전환은 다음 틱에 그려진다 */
@@ -2516,7 +2518,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     ok("drawer step 2 shows section pages without navigating", step2.links >= 5 && step2.back && step2.title === "Foundations" && page.url() === url0, JSON.stringify(step2));
     await page.click("[data-drawer-back]");
     await page.waitForSelector("[data-drawer-sec]", { timeout: 3000 });
-    ok("drawer back returns to step 1", await page.evaluate(() => document.getElementById("menuPop").querySelectorAll("[data-drawer-sec]").length === 5));
+    ok("drawer back returns to step 1", await page.evaluate(() => document.getElementById("menuPop").querySelectorAll("[data-drawer-sec]").length === 6));   // 섹션 여섯 — Templates(2026-11-18)
     await page.keyboard.press("Escape");
     ok("drawer closes on Escape", await page.evaluate(() => document.getElementById("menuPop").hidden && document.getElementById("menuDim").hidden));
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -2547,6 +2549,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 92 · behave.review.js", async () => {
     await require("./behave.review.js")({ page, ok, go });   // 전체 점검에서 찾은 결함(2026-11-15)
+  });
+  await part("part 93b · behave.templates.js", async () => {
+    await require("./behave.templates.js")({ page, ok, go });   // Templates 메뉴 — 개요 · 문서 페이지 · 축소 미리보기 · 새 창 · 화면 흉내 동작 · 색 · 테마 따라가기(2026-11-18)
+  });
+  await part("part 93 · behave.shell.js", async () => {
+    await require("./behave.shell.js")({ page, ok, go });   // 템플릿 검토 수정 일곱 — 상단 바 · 접기 · 테마 · 알림 점 · flush 표 · 로그인 · 버튼 묶음 · 대시보드(2026-11-18)
   });
   await part("part 91 · behave.system.js", async () => {
     /* 모션 · 한 시스템 · 패턴 정렬 — taste-skill 규칙을 콘솔에 맞게 옮긴 것(2026-11-05) */

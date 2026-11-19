@@ -1,4 +1,4 @@
-import { Button, DatePicker, Form, FormLegend, PopupActions, PopupSurface, PopupTitle, Radio, RadioGroup, TextField } from "@jiran/ds-react";
+import { Button, ButtonGroup, DatePicker, Form, FormLegend, PopupActions, PopupSurface, PopupTitle, Radio, RadioGroup, TextField } from "@jiran/ds-react";
 
 /* 만료가 없는 키는 만들 수 없게 기본값을 둔다 — 최대 1년. 범위는 읽기 전용을 미리 골라 둔다 */
 export default function Example() {
@@ -15,8 +15,10 @@ export default function Example() {
         </RadioGroup>
       </Form>
       <PopupActions>
-        <Button variant="outline" color="assistive">취소</Button>
-        <Button type="submit" form="sec-create-form">만들기</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">취소</Button>
+          <Button type="submit" form="sec-create-form">만들기</Button>
+        </ButtonGroup>
       </PopupActions>
     </PopupSurface>
   );

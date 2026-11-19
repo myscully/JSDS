@@ -69,9 +69,9 @@ module.exports = async function nav({ page, ok, go }) {
     const openRail = await page.locator("#ex-navigation-basic .sidenav").evaluate((n) => ({ tips: n.querySelectorAll(".tooltip").length, w: Math.round(n.getBoundingClientRect().width) }));
     ok("an expanded rail has no tooltips", openRail.tips === 0 && openRail.w === 240, JSON.stringify(openRail));
     await page.locator("#ex-navigation-collapsed .sidenav").evaluate((n) => { n.classList.remove("collapsed"); });
-    const expanded = await rail.evaluate((n) => { const t = n.querySelector(".tooltip"), a = n.querySelector("a"); return { d: getComputedStyle(t).display, w: Math.round(a.getBoundingClientRect().width) }; });
+    const expanded = await rail.evaluate((n) => { const t = n.querySelector(".tooltip"), a = n.querySelector("a"), cs = getComputedStyle(n); return { d: getComputedStyle(t).display, w: a.getBoundingClientRect().width, row: n.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) }; });
     await page.locator("#ex-navigation-collapsed .sidenav").evaluate((n) => { n.classList.add("collapsed"); });
-    ok("a rail expanded in place hides its tooltips and fills the row", expanded.d === "none" && expanded.w === 214, JSON.stringify(expanded));
+    ok("a rail expanded in place hides its tooltips and fills the row", expanded.d === "none" && Math.abs(expanded.w - expanded.row) < 0.6, JSON.stringify(expanded));   /* 폭은 내비 안쪽 폭(2026-11-18 여백 20 — 전에는 214 를 박아 두었다) */
 
     const shown = await page.locator("#ex-navigation-skip .skip-link").evaluate((a) => { const r = a.getBoundingClientRect(), p = a.parentElement.getBoundingClientRect(); return { in: r.top >= p.top && r.bottom <= p.bottom }; });
     ok("the skip link example shows it pinned inside its box", shown.in, JSON.stringify(shown));
@@ -94,7 +94,7 @@ module.exports = async function nav({ page, ok, go }) {
     const topTip = await bar.evaluate((b) => { const t = b.querySelector("button[aria-label=설정]").parentElement.querySelector(".tooltip"), r = t.getBoundingClientRect(), a = t.previousElementSibling.getBoundingClientRect(); return { op: getComputedStyle(t).opacity, below: r.top >= a.bottom, text: t.textContent }; });
     ok("top bar icon buttons show their name below on keyboard focus", topTip.op === "1" && topTip.below && topTip.text === "설정", JSON.stringify(topTip));
     const count = await bar.evaluate((b) => { const w = b.querySelector(".with-count").getBoundingClientRect(), c = b.querySelector(".with-count .count").getBoundingClientRect(), btn = b.querySelector(".with-count button").getBoundingClientRect(); return { top: Math.round(c.top - w.top), right: Math.round(c.right - w.right), same: Math.round(btn.width) === Math.round(w.width) }; });
-    ok("the count badge keeps its corner around a tooltip-wrapped button", count.top === -6 && count.right === 6 && count.same, JSON.stringify(count));
+    ok("the count dot keeps its corner around a tooltip-wrapped button (bell is a dot — 4 inside the corner, 2026-11-18)", count.top === 4 && count.right === -4 && count.same, JSON.stringify(count));
     const userEx = page.locator("#ex-top-navigation-user");
     await userEx.locator(".topbar-user").click(); await wait(40);
     const um = await userEx.evaluate((e) => { const k = [...e.querySelector(".menu").children]; return { open: e.querySelector(".dropdown").classList.contains("open"), last: k[k.length - 1].textContent, sep: k[k.length - 2].classList.contains("menu-sep"), expanded: e.querySelector(".topbar-user").getAttribute("aria-expanded") }; });
@@ -104,8 +104,8 @@ module.exports = async function nav({ page, ok, go }) {
     ok("user menu opens from the avatar, logout last after a separator, Esc returns", um.open && um.last === "로그아웃" && um.sep && um.expanded === "true" && (await active()).cls === "topbar-user", JSON.stringify(um));
   });
   await part("5 · 좁은 자리 — 바가 내용 폭만큼 늘어 면 · 선이 내용 끝까지, 미리보기가 가로로 스크롤(2026-11-13", async () => {
-    /* 좁은 자리 — 바가 내용 폭만큼 늘어 면 · 선이 내용 끝까지, 미리보기가 가로로 스크롤(2026-11-13). 넓은 자리에서는 폭을 채움 그대로 */
-    const fitBar = () => page.evaluate(() => [...document.querySelectorAll(".example-preview .topbar")].map((b) => { const r = b.getBoundingClientRect(), k = [...b.children].map((c) => c.getBoundingClientRect().right), pv = b.closest(".example-preview"), ps = getComputedStyle(b.parentElement); return { id: b.closest(".example").id, inside: Math.max(...k) <= r.right + 0.5, fill: r.width >= b.parentElement.clientWidth - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight) - 0.5, scroll: pv.scrollWidth > pv.clientWidth, h: Math.abs(r.height - 3.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)) <= 0.5 }; }));
+    /* 좁은 자리 — 바가 내용 폭만큼 늘어 면 · 선이 내용 끝까지, 미리보기가 가로로 스크롤(2026-11-13). 넓은 자리에서는 폭을 채움 그대로. 높이 3.875rem(2026-11-18) */
+    const fitBar = () => page.evaluate(() => [...document.querySelectorAll(".example-preview .topbar")].map((b) => { const r = b.getBoundingClientRect(), k = [...b.children].map((c) => c.getBoundingClientRect().right), pv = b.closest(".example-preview"), ps = getComputedStyle(b.parentElement); return { id: b.closest(".example").id, inside: Math.max(...k) <= r.right + 0.5, fill: r.width >= b.parentElement.clientWidth - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight) - 0.5, scroll: pv.scrollWidth > pv.clientWidth, h: Math.abs(r.height - 3.875 * parseFloat(getComputedStyle(document.documentElement).fontSize)) <= 0.5 }; }));
     const wideBar = await fitBar();
     const vpN = page.viewportSize(); await page.setViewportSize({ width: 390, height: 900 }); await wait(120);
     const narrowBar = await fitBar(); await page.setViewportSize(vpN); await wait(120);

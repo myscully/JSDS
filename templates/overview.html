@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Templates · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/font-jp.css">
+<script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="templates" data-page="overview" data-root="../">
+<a class="skip-link" href="#content">본문 바로가기</a>
+<header class="header">
+  <a class="brand" href="../index.html" aria-label="JS Design System 홈"><span class="logo" aria-hidden="true">JSDS<i></i></span></a>
+  <span class="ver">v0.9</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/getting-started.html" class="">Home</a><a href="../foundations/overview.html" class="">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../templates/overview.html" class="active">Templates<span class="n">N</span></a><a href="../resources/react.html" class="">Resources</a></nav>
+  <div class="header-right">
+    <div class="hmenu">
+      <button class="hbtn" id="accentBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="제품 색 선택" title="제품 색"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"/><path d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg><span class="dot"></span></button>
+      <div class="pop accent-pop" id="accentPop" role="menu" aria-label="제품 색" hidden></div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="searchBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="검색 (/)" title="검색 (/)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg></button>
+      <div class="pop search-pop" id="searchPop" hidden>
+        <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="themeBtn" type="button" aria-label="테마 전환" title="테마 전환"><span class="i-sun"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656"/><path d="M6.343 17.657l-1.414 1.414"/><path d="M6.343 6.343l-1.414 -1.414"/><path d="M17.657 6.343l1.414 -1.414"/><path d="M17.657 17.657l1.414 1.414"/><path d="M4 12h-2"/><path d="M12 4v-2"/><path d="M20 12h2"/><path d="M12 20v2"/></svg></span><span class="i-moon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg></span></button>
+    </div>
+    <div class="hmenu hmenu-nav">
+      <button class="hbtn" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="메뉴" title="메뉴"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="drawer-dim" id="menuDim" hidden></div>
+<div class="drawer" id="menuPop" role="dialog" aria-label="메뉴" hidden></div>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><a href="../templates/overview.html" class="active">Overview</a><a href="../templates/login.html">로그인</a><a href="../templates/dashboard.html">대시보드</a><a href="../templates/list.html">리스트</a><a href="../templates/policy.html">정책 설정</a><a href="../templates/wizard.html">위저드</a><a href="../templates/tabs-list.html">탭이 있는 리스트</a><a href="../templates/org.html">조직도</a></nav><div class="sidebar-foot">v0.9 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>Templates</h1><p class="lead">컴포넌트와 패턴으로 조립한 콘솔 화면 전체입니다. 로그인을 뺀 여섯 화면은 상단 바와 사이드 내비를 함께 쓰며, 새 화면을 시작할 때 가장 가까운 것을 골라 출발점으로 씁니다.</p>
+<div class="fnd-hero tpl-hero" aria-hidden="true"><div class="th-login"><b></b><i></i><i></i><s></s></div><div class="th-kpi"><b></b><i></i><s></s></div><div class="th-rows"><i></i><i></i><i></i><i></i></div><div class="th-form"><b></b><i></i><b></b><i></i></div><div class="th-tree"><i></i><i></i><i></i><i></i></div></div>
+<h2 id="screens">Screens</h2>
+<div class="base-list"><a href="../templates/login.html"><b>로그인</b><span>내비 없이 가운데 카드 하나. 로그인을 누르면 2단계 인증 코드 단계로 넘어갑니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../templates/dashboard.html"><b>대시보드</b><span>KPI 넷, 추이 · 분포 차트, 비교 · 목표 차트, 최근 이벤트 표. 대시보드 패턴을 그대로 담았습니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../templates/list.html"><b>리스트</b><span>보안 이벤트 목록. 검색 · 심각도 · 기간 툴바, 선택 표와 액션 바, 행 동작 메뉴, 페이지 이동.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../templates/policy.html"><b>정책 설정</b><span>설정 섹션과 적용 대상 Side Panel. 정책 설정 패턴을 그대로 담았습니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../templates/wizard.html"><b>위저드</b><span>정책 배포 4단계. 단계마다 입력을 검사하고, 마지막에 배포 내용을 확인합니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../templates/tabs-list.html"><b>탭이 있는 리스트</b><span>에이전트 목록을 상태 탭 넷으로 나눕니다. 탭마다 툴바 · 표 · 페이지 이동이 있습니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a><a href="../templates/org.html"><b>조직도</b><span>왼쪽 부서 트리, 오른쪽 부서 정보와 구성원. 부서 추가 · 이름 바꾸기 · 이동 · 삭제를 대화상자로 합니다.</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6l-6 6"></path></svg></a></div>
+<p>화면에 쓴 컴포넌트와 패턴은 각 화면 페이지의 Composition 에 있습니다. 화면 하나를 크게 보려면 그 페이지에서 새 창으로 엽니다.</p>
+    </article></div>
+  </div>
+  <aside class="toc" id="toc" aria-label="이 페이지 목차" hidden></aside>
+</div>
+</body>
+</html>

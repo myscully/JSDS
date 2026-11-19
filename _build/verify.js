@@ -369,8 +369,9 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (at(trig[0], "aria-label") !== name) bad(`벨 이름 = '${name}'`);
         const tip = (/<span class="tooltip[^"]*" role="tooltip">([^<]*)<\/span>/.exec(b) || [])[1];
         if (tip !== name) bad(`벨 Tooltip = '${name}'`);
-        const badge = /<span class="count" aria-hidden="true">([^<]*)<\/span>/.exec(b);
-        if (n ? !badge || badge[1] !== (n > 99 ? "99+" : String(n)) : badge) bad(n ? `벨 Count = ${n}` : "안 읽은 알림이 없으면 벨 Count 없음");
+        /* 벨 배지는 점이 기본, 숫자는 .notify[data-count="number"](2026-11-18) */
+        const num = /data-count="number"/.test(m[0]), badge = /<span class="count( dot)?" aria-hidden="true">([^<]*)<\/span>/.exec(b);
+        if (!n ? badge : num ? !badge || badge[1] || badge[2] !== (n > 99 ? "99+" : String(n)) : !badge || !badge[1] || badge[2]) bad(!n ? "안 읽은 알림이 없으면 벨 Count 없음" : num ? `벨 Count = ${n > 99 ? "99+" : n}` : "벨 배지는 글자 없는 .count.dot");
         const ra = /<button\b[^>]*class="[^"]*notify-read-all[^"]*"[^>]*>/.exec(b);
         if (!ra) bad("'모두 읽음' 버튼 .notify-read-all");
         else if (/aria-disabled="true"/.test(ra[0]) !== !n) bad("'모두 읽음' 은 안 읽은 알림이 없을 때만 aria-disabled");
@@ -514,6 +515,17 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         for (const b of m[1].matchAll(/<button\b[^>]*class="btn[^"]*icon-only[^"]*"[^>]*>/g)) { if (!/aria-label="/.test(b[0])) fails.push(`${f}: 상단 아이콘 버튼 이름 없음(Top Navigation › 아이콘 버튼)`); if (!m[1].slice(0, b.index).endsWith('<span class="tooltip-wrap">')) fails.push(`${f}: 상단 아이콘 버튼에 Tooltip 없음(Top Navigation › 아이콘 버튼)`); }
         const av = m[1].search(/class="(?:avatar|topbar-user)/), bell = m[1].indexOf('name="bell"') >= 0 ? m[1].indexOf('name="bell"') : m[1].search(/aria-label="알림/);
         if (av >= 0 && bell > av) fails.push(`${f}: 사용자는 오른쪽 맨 끝(Top Navigation › 오른쪽 순서)`);
+        /* 2026-11-18 — 아이콘 버튼 40(sm 금지) · 알림 → 설정 → 라이트/다크 → 사용자 · 테마 버튼은 aria-pressed + 두 아이콘 */
+        if (/<button\b[^>]*class="btn sm\b[^"]*icon-only/.test(m[1])) fails.push(`${f}: 상단 아이콘 버튼은 md 40(Top Navigation › 아이콘 버튼)`);
+        const set = m[1].search(/aria-label="설정"/), th = m[1].search(/data-theme-toggle/);
+        if (th >= 0 && (set < 0 || th < set || (bell >= 0 && th < bell) || (av >= 0 && th > av))) fails.push(`${f}: 라이트/다크는 설정 바로 뒤 · 사용자 앞(Top Navigation › 오른쪽 순서)`);
+      }
+      for (const m of pv.matchAll(/<button\b[^>]*data-theme-toggle[^>]*>([\s\S]*?)<\/button>/g)) if (!/aria-pressed="(true|false)"/.test(m[0]) || !/class="i-light"/.test(m[1]) || !/class="i-dark"/.test(m[1]) || /i-to-(dark|light)/.test(m[1])) fails.push(`${f}: 라이트/다크 버튼은 aria-pressed + .i-light · .i-dark(지금 테마의 아이콘 — 옛 .i-to-* 금지, Top Navigation › 라이트와 다크)`);
+      for (const m of pv.matchAll(/<button\b[^>]*data-sidenav-toggle[^>]*>/g)) {
+        const id = (/aria-controls="([^"]+)"/.exec(m[0]) || [])[1];
+        if (!id || !new RegExp(`<nav class="sidenav[^"]*" id="${id}"`).test(pv)) fails.push(`${f}: 접기 버튼의 aria-controls 가 사이드 내비 id 가 아님(Top Navigation › 왼쪽 영역)`);
+        if (!/<div class="topbar-start">(?:(?!<\/div>)[\s\S])*$/.test(pv.slice(0, m.index))) fails.push(`${f}: 접기 버튼은 .topbar-start 안(Top Navigation › 왼쪽 영역)`);
+        if (!/aria-expanded="(true|false)"/.test(m[0])) fails.push(`${f}: 접기 버튼의 aria-expanded 없음(Top Navigation › 왼쪽 영역)`);
       }
       for (const m of pv.matchAll(/<span class="tag (critical|medium|low|info)\b[^"]*"[^>]*>([^<]*)</g)) if (!/^(Critical|High|Medium|Low|Info|CRIT|HIGH|WARN|LOW|INFO|심각|높음|중간|낮음|정보)$/.test(m[2].trim())) fails.push(`${f}: 심각도 색은 심각도 어휘에만 "${m[2]}"(Tag › 톤)`);
       for (const m of pv.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)) { const n = [...m[1].matchAll(/class="tag[ "](?![^"]*tag-more)/g)].length; if (n > 3) fails.push(`${f}: 표 칸의 Tag ${n}개 — 앞 2개 + +N(Tag › 여러 개)`); }
@@ -682,6 +694,63 @@ for (const [k, c] of Object.entries(PATTERNS)) {
   }
   if (/class="tbl[ "]/.test(all) && !(c.uses || []).some((u) => u === "table" || u === "data-table")) fails.push(`patterns/${k}: 예제에 표가 있는데 uses 에 Table · Data Table 이 없다`);
   for (const u of c.uses || []) if (!USES_MARK[u] && !COMPONENTS[u]) fails.push(`patterns/${k}: uses 의 ${u} 는 없는 컴포넌트다`);
+}
+
+/* Templates(2026-11-18) — 콘솔 화면 일곱. 문서 페이지 templates/<key>.html(정의 · 고르기 표 · 미리보기 · Composition · Rules)과
+   실제 화면 templates/screen/<key>.html(templates.build.js 생성). 미리보기 iframe 이 가리키는 화면이 있어야 하고, 새 창 링크는 Link 규칙(rel · 숨긴 '(새 창)')을 따른다.
+   uses 는 화면 HTML 이 실제로 쓰는 컴포넌트와 같아야 한다 — 패턴의 USES_MARK 에 앱 틀 컴포넌트 넷을 더해 잰다 */
+{
+  const TEMPLATES = require("./templates.data.js");
+  const T_CHOOSE = ["언제 쓰는가", "비슷한 템플릿"];
+  const want = Object.keys((DATA.SITE.templates || {}).pages || {}).filter((k) => k !== "overview");
+  if (Object.keys(TEMPLATES).join() !== want.join()) fails.push(`templates: templates.data.js 의 키(${Object.keys(TEMPLATES).join()})가 SITE.templates 페이지(${want.join()})와 같은 순서가 아니다`);
+  const MARK = { ...USES_MARK, "top-navigation": [/class="topbar[ "]/, true], "navigation": [/class="sidenav[ "]/, true], "tooltip": [/class="tooltip-wrap[ "]/, true], "divider": [/class="divider[ "]/, true] };
+  for (const [k, c] of Object.entries(TEMPLATES)) {
+    const f = `templates/${k}.html`, sf = `templates/screen/${k}.html`;
+    if (!fs.existsSync(path.join(OUT, f))) { fails.push(`${f}: 문서 페이지가 없다`); continue; }
+    const b = read(f);
+    const ch = (c.choose || []).map(([n]) => n);
+    if (ch.join() !== T_CHOOSE.filter((x) => ch.includes(x)).join() || !ch.includes("언제 쓰는가") || ch.some((n) => !T_CHOOSE.includes(n))) fails.push(`templates/${k}: 고르기 표는 언제 쓰는가 → 비슷한 템플릿 만 — 지금 ${ch.join(" → ")}`);
+    if (!(c.principles || []).length) fails.push(`templates/${k}: Rules(principles)가 없다`);
+    if ((c.principles || []).length > 8) fails.push(`templates/${k}: Rules 가 ${c.principles.length}행 — 8행 이하로`);
+    if (!c.line) fails.push(`templates/${k}: 개요 목록의 한 줄 설명(line)이 없다`);
+    for (const u of c.uses || []) if (!COMPONENTS[u]) fails.push(`templates/${k}: uses 의 ${u} 는 없는 컴포넌트다`);
+    for (const u of c.patterns || []) if (!PATTERNS[u]) fails.push(`templates/${k}: patterns 의 ${u} 는 없는 패턴이다`);
+    const order = [...b.matchAll(/<h2 id="(preview|composition|rules)">/g)].map((m) => m[1]);
+    if (order.join() !== "preview,composition,rules") fails.push(`${f}: 절 순서가 ${order.join(" → ")} — preview → composition → rules`);
+    if (!/<p class="lead">[\s\S]*?<\/p><dl class="kv">/.test(b)) fails.push(`${f}: 고르기 표가 정의(lead) 바로 뒤에 없다`);
+    const fr = b.match(/<div class="tpl-frame">\s*<iframe ([^>]*)>/);
+    if (!fr) { fails.push(`${f}: 미리보기 틀(.tpl-frame > iframe)이 없다`); continue; }
+    const src = (fr[1].match(/(?:^|\s)src="([^"]+)"/) || [])[1];
+    if (src !== `screen/${k}.html`) fails.push(`${f}: 미리보기 iframe 의 src 가 '${src}' — screen/${k}.html`);
+    if (!/(?:^|\s)title="[^"]+"/.test(fr[1])) fails.push(`${f}: 미리보기 iframe 에 title(접근 이름)이 없다`);
+    if (!/(?:^|\s)width="1440"/.test(fr[1]) || !/(?:^|\s)height="900"/.test(fr[1])) fails.push(`${f}: 미리보기 iframe 은 width 1440 · height 900 속성으로 — 축소 기준`);
+    const nw = b.match(/<a href="screen\/[^"]+"[^>]*target="_blank"[^>]*>[\s\S]*?<\/a>/);
+    if (!nw) fails.push(`${f}: '새 창에서 열기' 링크가 없다`);
+    else { if (!/rel="noopener noreferrer"/.test(nw[0])) fails.push(`${f}: 새 창 링크에 rel="noopener noreferrer" 가 없다`); if (!/<span class="sr-only"> \(새 창\)<\/span>/.test(nw[0])) fails.push(`${f}: 새 창 링크에 숨긴 '(새 창)' 이 없다`); if (!nw[0].includes(`screen/${k}.html`)) fails.push(`${f}: 새 창 링크가 이 화면이 아니다`); }
+    if (!fs.existsSync(path.join(OUT, sf))) { fails.push(`${sf}: 화면이 없다`); continue; }
+    const s = read(sf);
+    if (/tpl-review|tpl-hub/.test(s)) fails.push(`${sf}: 검토 도구(.tpl-review)가 남아 있다 — 사이트 화면에는 두지 않는다`);
+    if (!/<title>[^<]+<\/title>/.test(s)) fails.push(`${sf}: <title> 이 없다`);
+    /* 코드 보기(2026-11-19) — 보이는 HTML 은 화면 파일 그대로, CSS 는 assets/templates.css 그대로. 복사 버튼은 HTML 칸부터 */
+    const tun = (t) => t.replace(/<[^>]+>/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+    const code = (sfx) => (b.match(new RegExp(`<code id="tpl-${k}-${sfx}">([\\s\\S]*?)</code>`)) || [])[1];
+    const ch1 = code("html"), cc1 = code("css");
+    if (!/<section class="example tpl-code" id="tpl-[^"]+">\s*<div class="tpl-frame">/.test(b)) fails.push(`${f}: 코드 보기 틀(section.example.tpl-code > .tpl-frame)이 없다`);
+    if (ch1 == null || tun(ch1) !== s.trim()) fails.push(`${f}: 코드 보기의 HTML 이 ${sf} 와 다르다`);
+    if (cc1 == null || tun(cc1) !== fs.readFileSync(path.join(OUT, "assets", "templates.css"), "utf8").trim()) fails.push(`${f}: 코드 보기의 CSS 가 assets/templates.css 와 다르다`);
+    if (!b.includes(`data-copy="tpl-${k}-html"`)) fails.push(`${f}: 코드 보기의 복사 버튼이 HTML 칸(tpl-${k}-html)을 가리키지 않는다`);
+    for (const m of s.matchAll(/href="([a-z-]+\.html)"/g)) if (!fs.existsSync(path.join(OUT, "templates", "screen", m[1]))) fails.push(`${sf}: 링크 대상 ${m[1]} 이 없다`);
+    if (/\sstyle="/.test(s.replace(/\sstyle="(?:--a:[\d.]+deg|--p:[\d.]+%|width:[\d.]+%|flex:[\d.]+)"/g, ""))) fails.push(`${sf}: 화면에 인라인 style — 클래스로`);
+    /* 알림 센터 패널 안의 탭 · 심각도 Tag 는 Notification Center 의 일부다 — 화면이 Tab · Tag 를 쓰는 것이 아니다 */
+    const own = s.replace(/<section class="notify-panel[\s\S]*?<\/section>/g, "").replace(/class="notify-text"><span class="tag /g, 'class="notify-text"><span class="nc-tag ');
+    const noCombo = own.replace(/<div class="combobox[\s\S]*?<\/ul>/g, "");
+    for (const [u, [re, strict]] of Object.entries(MARK)) {
+      const has = re.test(u === "chip" ? noCombo : own), listed = (c.uses || []).includes(u);
+      if (has && !listed && strict) fails.push(`templates/${k}: 화면이 ${u} 를 쓰는데 uses 에 없다`);
+      if (!has && listed) fails.push(`templates/${k}: uses 에 ${u} 가 있는데 화면이 쓰지 않는다`);
+    }
+  }
 }
 
 /* 주석 열림·닫힘이 짝인지 — 선언을 지울 때 여러 줄 주석의 한쪽만 남기기 쉽고,
@@ -986,7 +1055,12 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 토큰
     for (const r of rows(c.principles)) check(`patterns/${k} Rules '${r[0]}'`, r[1]);
     for (const e of c.examples || []) check(`patterns/${k} 예제 ${e.id}`, e.desc);
   }
-  for (const sec of ["foundations", "home"]) for (const n of fs.readdirSync(path.join(OUT, sec)).filter((x) => x.endsWith(".html"))) {
+  for (const [k, c] of Object.entries(require("./templates.data.js"))) {
+    check(`templates/${k} 정의`, c.desc); check(`templates/${k} 개요 한 줄`, c.line);
+    for (const r of c.choose || []) check(`templates/${k} 고르기 표 '${r[0]}'`, r[1]);
+    for (const r of rows(c.principles)) check(`templates/${k} Rules '${r[0]}'`, r[1]);
+  }
+  for (const sec of ["foundations", "home", "templates"]) for (const n of fs.readdirSync(path.join(OUT, sec)).filter((x) => x.endsWith(".html"))) {
     const html = fs.readFileSync(path.join(OUT, sec, n), "utf8");
     for (const m of html.matchAll(/<p class="lead">([\s\S]*?)<\/p>/g)) check(`${sec}/${n} 소개 문단`, m[1]);
   }

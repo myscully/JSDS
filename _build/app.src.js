@@ -76,6 +76,8 @@
     markFaintSwatches();
   });
   mql.addEventListener("change", markFaintSwatches);
+  /* 예제 안 상단 바의 라이트/다크 버튼(ds.js [data-theme-toggle], 2026-11-18)이 바꾼 테마도 사이트 테마로 저장한다 — 헤더 버튼과 어긋나지 않게(아이콘은 CSS 가 data-theme 를 따름) */
+  document.addEventListener("ds:theme", (e) => { const t = e.detail && e.detail.theme; if (t !== "dark" && t !== "light") return; try { localStorage.setItem("jsds-theme", t); } catch (er) { } markFaintSwatches(); });
 
   /* Accent 팝오버 (팔레트 아이콘의 점이 현재 색) */
   const accentBtn = document.getElementById("accentBtn"), accentPop = document.getElementById("accentPop");
@@ -101,6 +103,23 @@
   });
   let saved = null; try { saved = localStorage.getItem("jsds-accent"); } catch (e) { }
   applyAccent(saved || "");
+
+  /* 다른 문서가 바꾼 제품 색 · 테마를 따라간다(2026-11-18) — Templates 문서 페이지에서 색이나 테마를 바꾸면 그 안 iframe 화면이,
+     화면을 새 창으로 열어 둔 채 바꾸면 그 창도 같은 값이 된다. storage 이벤트는 값을 바꾼 문서에는 오지 않고, 같은 값을 다시 적으면 나지 않아 서로 되울리지 않는다 */
+  window.addEventListener("storage", e => {
+    if (e.key === "jsds-accent") applyAccent(e.newValue || "");
+    else if (e.key === "jsds-theme" && (e.newValue === "dark" || e.newValue === "light")) { root.setAttribute("data-theme", e.newValue); markFaintSwatches(); }
+  });
+
+  /* Templates 문서 페이지의 미리보기 — 실제 화면 iframe(1440 × 900)을 틀 폭에 맞게 줄인다. 비율 --tpl-s 를 넣고 .scaled 를 붙이면
+     틀 높이를 900 × 비율로 맞춘다. 스크립트가 없으면 .scaled 가 없어 틀 안에서 스크롤한다 */
+  const TPL_W = 1440, TPL_H = 900;
+  const tplFrames = document.querySelectorAll(".tpl-frame");
+  if (tplFrames.length && "ResizeObserver" in window) {
+    const fit = el => { const w = el.clientWidth; if (!w) return; const sc = Math.min(1, w / TPL_W); el.style.setProperty("--tpl-s", String(sc)); const cs = getComputedStyle(el); el.style.height = (TPL_H * sc + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)) + "px"; el.classList.add("scaled"); };
+    const ro = new ResizeObserver(es => es.forEach(en => fit(en.target)));
+    tplFrames.forEach(el => { fit(el); ro.observe(el); });
+  }
 
   /* 홈(index) B4 — 글꼴이 준비되면 들어오기 시작(.go, data-hm 이 있을 때만 — head 스크립트가 줄인 모션이 아닐 때 붙임),
      스크롤 패럴랙스는 루트에 --hm-sy(스크롤 px, 화면 높이의 1.2배까지). 미리보기 셸에서도 같은 핸들러가 지금 화면의 .hm 을 본다 */
@@ -257,7 +276,7 @@
       const ex = tab.closest(".example");
       ex.querySelectorAll(".code-tabs [data-tab]").forEach(b => { const on = b === tab; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
       ex.querySelectorAll("[data-pane]").forEach(p => { p.hidden = p.dataset.pane !== tab.dataset.tab; });
-      const c = ex.querySelector(".example-actions [data-copy]"); if (c) c.dataset.copy = c.dataset.copy.replace(/-(html|react)$/, "-" + tab.dataset.tab);
+      const c = ex.querySelector(".example-actions [data-copy]"); if (c) c.dataset.copy = c.dataset.copy.replace(/-(html|react|css)$/, "-" + tab.dataset.tab);   // css — Templates 코드 보기
       const code = ex.querySelector(".example-code"); if (code && code.hidden) toggle(ex);
       return;
     }

@@ -23,7 +23,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
           parseFloat(mk("t-caption-1").fontSize), parseFloat(mk("t-caption-1").lineHeight), parseFloat(mk("t-caption-2").fontSize)];
       });
       const k = root / 16;
-      want[w] = [root, 14 * k, 40 * k, 18 * k, Math.max(12, 12 * k), Math.max(16, 16 * k), Math.max(11, 11 * k)];
+      want[w] = [root, 14 * k, 40 * k, 20 * k, Math.max(12, 12 * k), Math.max(16, 16 * k), Math.max(11, 11 * k)];
     }
     ok("scale: each width step sets the root and everything follows it, 12px and smaller text keeps its minimum", JSON.stringify(got) === JSON.stringify(want), JSON.stringify({ got, want }));
   });

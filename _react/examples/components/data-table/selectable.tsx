@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionBar, Button, DataTable, Icon, Switch, type DataTableColumn } from "@jiran/ds-react";
+import { ActionBar, Button, ButtonGroup, DataTable, Icon, Switch, type DataTableColumn } from "@jiran/ds-react";
 
 type Policy = { id: string; name: string; group: string; targets: number; updated: string; enabled: boolean };
 const ROWS: Policy[] = [
@@ -28,9 +28,11 @@ export default function Example() {
       onSelectedChange={setSelected}
       actionBar={(sel) => (
         <ActionBar count={sel.size}>
-          <Button variant="outline" color="assistive" size="sm">허용 처리</Button>
-          <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>내보내기</Button>
-          <Button variant="outline" color="assistive" size="sm">삭제</Button>
+          <ButtonGroup>
+            <Button variant="outline" color="assistive" size="sm">허용 처리</Button>
+            <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>내보내기</Button>
+            <Button variant="outline" color="assistive" size="sm">삭제</Button>
+          </ButtonGroup>
         </ActionBar>
       )}
     />

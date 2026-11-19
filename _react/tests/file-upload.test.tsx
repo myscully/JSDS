@@ -105,6 +105,13 @@ describe("FileUpload", () => {
     expect(onRetry).toHaveBeenCalledWith("3");
   });
 
+  it("groups retry + remove in a ButtonGroup and leaves a lone remove ungrouped (2026-11-18, same as the site)", () => {
+    const { container } = render(<FileUpload onAdd={() => {}} onRetry={() => {}} items={[{ id: "1", name: "a.log", size: 10, status: "done" }, { id: "2", name: "b.log", size: 10, status: "error" }]} />);
+    const kids = (id: string) => Array.from(container.querySelector(`[data-id="${id}"]`)!.children).map((k) => k.matches(".btn-group") ? `[${Array.from(k.children).map((b) => b.classList.contains("retry") ? "retry" : "remove").join("|")}]` : k.matches(".remove") ? "remove" : k.className.split(" ")[0]);
+    expect(kids("1").slice(-1)).toEqual(["remove"]);
+    expect(kids("2").slice(-1)).toEqual(["[retry|remove]"]);
+  });
+
   it("has no retry unless the product gives onRetry", () => {
     const { container } = render(<FileUpload onAdd={() => {}} items={[{ id: "1", name: "a", status: "error" }]} />);
     expect(container.querySelector(".retry")).toBeNull();

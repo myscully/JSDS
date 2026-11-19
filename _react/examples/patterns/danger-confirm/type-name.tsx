@@ -1,4 +1,4 @@
-import { Button, Form, PopupActions, PopupBody, PopupSurface, PopupTitle, TextField } from "@jiran/ds-react";
+import { Button, ButtonGroup, Form, PopupActions, PopupBody, PopupSurface, PopupTitle, TextField } from "@jiran/ds-react";
 
 const NAME = "SIEM 연동";
 
@@ -22,8 +22,10 @@ export default function Example() {
         />
       </Form>
       <PopupActions>
-        <Button variant="outline" color="assistive" onClick={close}>취소</Button>
-        <Button type="submit" form="dc3-form" color="negative">삭제</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive" onClick={close}>취소</Button>
+          <Button type="submit" form="dc3-form" color="negative">삭제</Button>
+        </ButtonGroup>
       </PopupActions>
     </PopupSurface>
   );

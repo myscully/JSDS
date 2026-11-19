@@ -1,4 +1,4 @@
-import { Button, Checkbox, PopupActions, PopupForm, PopupSurface, PopupTitle, TextField } from "@jiran/ds-react";
+import { Button, ButtonGroup, Checkbox, PopupActions, PopupForm, PopupSurface, PopupTitle, TextField } from "@jiran/ds-react";
 
 export default function Example() {
   return (
@@ -10,8 +10,10 @@ export default function Example() {
         <Checkbox>모든 그룹에 적용</Checkbox>
       </PopupForm>
       <PopupActions>
-        <Button variant="outline" color="assistive">취소</Button>
-        <Button>추가</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">취소</Button>
+          <Button>추가</Button>
+        </ButtonGroup>
       </PopupActions>
     </PopupSurface>
   );

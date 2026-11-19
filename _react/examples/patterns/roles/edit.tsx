@@ -1,4 +1,4 @@
-import { Button, Notice, SidePanelSurface, Tree, type TreeNode } from "@jiran/ds-react";
+import { Button, ButtonGroup, Notice, SidePanelSurface, Tree, type TreeNode } from "@jiran/ds-react";
 
 /* 권한 편집을 누르면 열리는 패널 — 제품에서는 SidePanel open modal 로 띄운다. 저장하기 전에 바뀌는 것을 맨 위에 요약한다 */
 const PERMS: TreeNode[] = [
@@ -15,7 +15,7 @@ export default function Example() {
       modal
       title="운영자 권한"
       onClose={() => {}}
-      footer={<><Button variant="outline" color="assistive">취소</Button><Button>저장</Button></>}
+      footer={<><ButtonGroup><Button variant="outline" color="assistive">취소</Button><Button>저장</Button></ButtonGroup></>}
     >
       <Notice tone="info" title="변경 2건 · 12명에게 적용">이벤트 처리를 켜고 사용자 관리를 껐습니다.</Notice>
       <Tree label="운영자 권한" checkable items={PERMS} defaultExpanded={["event", "policy"]} defaultChecked={CHECKED} />

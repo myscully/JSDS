@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Calendar, type DateRange } from "@jiran/ds-react";
+import { Button, ButtonGroup, Calendar, type DateRange } from "@jiran/ds-react";
 
 const TODAY = new Date(2026, 9, 7);
 const daysAgo = (n: number) => new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() - n);
@@ -23,8 +23,10 @@ export default function Example() {
       today={TODAY}
       footer={
         <>
-          <Button variant="text" size="sm" onClick={() => preset(7)}>최근 7일</Button>
-          <Button variant="text" size="sm" onClick={() => preset(30)}>최근 30일</Button>
+          <ButtonGroup>
+            <Button variant="text" size="sm" onClick={() => preset(7)}>최근 7일</Button>
+            <Button variant="text" size="sm" onClick={() => preset(30)}>최근 30일</Button>
+          </ButtonGroup>
           <Button size="sm" data-cal="apply" disabled={!range.end || same} onClick={() => setApplied(range)}>적용</Button>
         </>
       }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Checkbox, Combobox, DatePicker, Field, FileUpload, Form, FormActions, FormLegend, FormRow, FormSection, NumberInput, Radio, RadioGroup, Select, TextArea, TextField, TimePicker, type UploadItem } from "@jiran/ds-react";
+import { Button, ButtonGroup, Checkbox, Combobox, DatePicker, Field, FileUpload, Form, FormActions, FormLegend, FormRow, FormSection, NumberInput, Radio, RadioGroup, Select, TextArea, TextField, TimePicker, type UploadItem } from "@jiran/ds-react";
 
 const GROUPS = [{ value: "all", label: "전체" }, { value: "sales", label: "영업팀" }, { value: "dev", label: "개발팀" }, { value: "sec", label: "보안팀" }];
 const DEPTS = ["영업팀", "개발팀", "인프라팀", "보안팀", "기획팀", "재무팀"].map((label) => ({ value: label, label }));
@@ -41,8 +41,10 @@ export default function Example() {
       </Field>
       <Checkbox defaultChecked description="에이전트가 다음 체크인에서 적용합니다">저장 즉시 배포</Checkbox>
       <FormActions>
-        <Button variant="outline" color="assistive">취소</Button>
-        <Button type="submit">정책 저장</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">취소</Button>
+          <Button type="submit">정책 저장</Button>
+        </ButtonGroup>
       </FormActions>
     </Form>
   );

@@ -286,6 +286,18 @@ describe("DatePicker — 단위 · 달력", () => {
     expect(b).not.toHaveClass("open");
   });
 
+  it("달력 아래 버튼 — 글자 버튼(프리셋 · 오늘 · 초기화)과 취소 · 적용을 각각 ButtonGroup 으로, 하나뿐이면 묶지 않는다(2026-11-18, 사이트 footHtml 과 같음)", async () => {
+    const week = { label: "최근 7일", range: (): [Date, Date] => [ymd(2026, 9, 1), TODAY] }, month = { label: "최근 30일", range: (): [Date, Date] => [ymd(2026, 8, 9), TODAY] };
+    render(<><DateRangePicker label="A" presets={[week, month]} footer={["reset", "cancel", "apply"]} today={TODAY} /><DatePicker label="B" footer={["today", "apply"]} today={TODAY} /></>);
+    const [a, b] = document.querySelectorAll<HTMLElement>(".datepicker");
+    const shape = (f: Element | null) => f ? [...f.children].map((k) => k.matches(".btn-group") ? `[${[...k.children].map((x) => x.textContent).join("|")}]` : k.textContent).join(" ") : "none";
+    await openField(a);
+    expect(shape(a.querySelector(".cal-foot"))).toBe("[최근 7일|최근 30일|초기화] [취소|적용]");
+    await userEvent.keyboard("{Escape}");
+    await openField(b);
+    expect(shape(b.querySelector(".cal-foot"))).toBe("오늘 적용");
+  });
+
   it("취소는 열기 전 값으로, 초기화는 값을 비운다, 오늘은 단일에만", async () => {
     const onChange = vi.fn();
     render(<><DatePicker label="A" footer={["today", "reset", "cancel", "apply"]} defaultValue={TODAY} today={TODAY} onChange={onChange} /><DateRangePicker label="B" footer={["today", "apply"]} today={TODAY} /></>);

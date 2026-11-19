@@ -1,4 +1,4 @@
-import { Button, Combobox, Field, Form, FormActions, FormLegend, FormRow, Notice, Radio, RadioGroup, Select, TextField, TimePicker } from "@jiran/ds-react";
+import { Button, ButtonGroup, Combobox, Field, Form, FormActions, FormLegend, FormRow, Notice, Radio, RadioGroup, Select, TextField, TimePicker } from "@jiran/ds-react";
 
 const KINDS = [{ value: "summary", label: "보안 요약" }, { value: "threat", label: "위협 상세" }, { value: "agent", label: "에이전트 상태" }];
 const RANGES = [{ value: "7", label: "지난 7일" }, { value: "30", label: "지난 30일" }, { value: "month", label: "지난달" }];
@@ -35,9 +35,11 @@ export default function Example() {
       </FormRow>
       <Notice title="다음 발송: 11월 16일 월요일 09:00">보안팀 외 1명에게 지난 7일의 보안 요약을 PDF 로 보냅니다.</Notice>
       <FormActions>
-        <Button variant="outline" color="assistive">미리보기</Button>
-        <Button variant="outline">지금 보내기</Button>
-        <Button type="submit">예약 저장</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">미리보기</Button>
+          <Button variant="outline">지금 보내기</Button>
+          <Button type="submit">예약 저장</Button>
+        </ButtonGroup>
       </FormActions>
     </Form>
   );

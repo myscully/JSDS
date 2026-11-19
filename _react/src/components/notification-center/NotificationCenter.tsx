@@ -52,6 +52,8 @@ export interface NotificationCenterProps {
   onOpenChange?: (open: boolean) => void;
   /** 링크 항목을 눌렀을 때 — 라우터로 옮기려면 e.preventDefault() 뒤 직접 */
   onNavigate?: (item: NotificationItem, e: MouseEvent<HTMLAnchorElement>) => void;
+  /** 벨의 안 읽음 표시(2026-11-18) — 기본 "dot"(점만), "number" 면 숫자(99 초과 99+). 이름 '알림 n건' 은 어느 쪽이든 같다 */
+  count?: "dot" | "number";
   labels?: Partial<NotifyLabels>;
   className?: string;
   style?: CSSProperties;
@@ -61,7 +63,7 @@ function clipRect(el: HTMLElement) { for (let p = el.parentElement; p && p !== d
 function clipped(el: HTMLElement) { for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) { const c = getComputedStyle(p); if (/auto|scroll|hidden|clip/.test(c.overflowX + c.overflowY)) return true; } return false; }
 const n99 = (n: number) => (n > 99 ? "99+" : String(n));
 
-export function NotificationCenter({ items, onRead, hasMore, onMore, open, defaultOpen = false, onOpenChange, onNavigate, labels, className, style }: NotificationCenterProps) {
+export function NotificationCenter({ items, onRead, hasMore, onMore, open, defaultOpen = false, onOpenChange, onNavigate, labels, count = "dot", className, style }: NotificationCenterProps) {
   const L = { ...NOTIFY_LABELS, ...labels };
   const uid = useId(undefined, "notify");
   const [isOpen, setOpen] = useControllable<boolean>({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
@@ -172,12 +174,12 @@ export function NotificationCenter({ items, onRead, hasMore, onMore, open, defau
   const panelStyle: CSSProperties = { ...(float ?? {}), ...(dx ? { ["--nf-dx" as string]: `${dx}px` } : {}), ...(maxW != null ? { maxWidth: maxW } : {}) };
 
   return (
-    <div ref={root} className={cx("notify", float && "float", className)} style={style} onBlur={leave}>
+    <div ref={root} className={cx("notify", float && "float", className)} style={style} onBlur={leave} data-count={count === "number" ? "number" : undefined}>
       <span className="with-count">
         <Tooltip content={name} position="bottom">
-          <Button ref={bell} size="sm" color="assistive" iconOnly aria-label={name} aria-haspopup="dialog" aria-expanded={isOpen} aria-controls={`${uid}-panel`} onClick={toggle}><Icon name="bell" /></Button>
+          <Button ref={bell} color="assistive" iconOnly aria-label={name} aria-haspopup="dialog" aria-expanded={isOpen} aria-controls={`${uid}-panel`} onClick={toggle}><Icon name="bell" /></Button>
         </Tooltip>
-        {n > 0 && <span className="count" aria-hidden="true">{n99(n)}</span>}
+        {n > 0 && (count === "number" ? <span className="count" aria-hidden="true">{n99(n)}</span> : <span className="count dot" aria-hidden="true" />)}
       </span>
       <section ref={panel} className="notify-panel" id={`${uid}-panel`} role="dialog" aria-labelledby={`${uid}-title`} tabIndex={-1} hidden={!isOpen} style={panelStyle}>
         <div className="notify-head">

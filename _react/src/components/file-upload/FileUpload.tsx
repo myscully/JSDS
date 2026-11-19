@@ -2,7 +2,7 @@ import { forwardRef, useContext, useEffect, useImperativeHandle, useLayoutEffect
 import { cx } from "../../utils/cx";
 import { useId } from "../../utils/useId";
 import { Icon } from "../../icons/Icon";
-import { Button } from "../button/Button";
+import { Button, ButtonGroup } from "../button/Button";
 import { Progress } from "../loading/Loading";
 import { FieldContext } from "../text-field/TextField";
 import { FormValidationContext, VALIDATION_MESSAGES, type ValidationMessages } from "../text-field/validation";
@@ -149,10 +149,17 @@ export const FileUpload = forwardRef<HTMLDivElement, FileUploadProps>(function F
             {r.status === "uploading" && <Progress size="sm" value={r.progress ?? 0} aria-label={`${r.name} ${L.progress}`} />}
             {r.status === "error" && <span className="msg">{r.error ?? m.fileSend}</span>}
           </div>
-          {r.status === "error" && !r.rejected && onRetry && (
-            <Button variant="text" color="assistive" size="sm" iconOnly className="retry" aria-label={`${r.name} ${L.retry}`} onClick={() => { focusAfter.current = { id: r.id }; onRetry(r.id); }}><Icon name="refresh" size={16} /></Button>
-          )}
-          <Button variant="text" color="assistive" size="sm" iconOnly className="remove" aria-label={`${r.name} ${L.remove}`} onClick={() => remove(r.id, r.name, r.rejected)}><Icon name="x" size={16} /></Button>
+          {(() => {
+            /* 다시 시도 + 지우기 = 나란한 버튼 둘이라 ButtonGroup(2026-11-18, 사이트 ds.js upState 와 같은 구조) */
+            const rm = <Button key="remove" variant="text" color="assistive" size="sm" iconOnly className="remove" aria-label={`${r.name} ${L.remove}`} onClick={() => remove(r.id, r.name, r.rejected)}><Icon name="x" size={16} /></Button>;
+            if (!(r.status === "error" && !r.rejected && onRetry)) return rm;
+            return (
+              <ButtonGroup>
+                <Button variant="text" color="assistive" size="sm" iconOnly className="retry" aria-label={`${r.name} ${L.retry}`} onClick={() => { focusAfter.current = { id: r.id }; onRetry(r.id); }}><Icon name="refresh" size={16} /></Button>
+                {rm}
+              </ButtonGroup>
+            );
+          })()}
         </li>
       ))}
     </ul>

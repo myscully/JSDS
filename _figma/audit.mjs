@@ -173,11 +173,20 @@ function tokens() {
     return "?" + val;
   };
   for (const k of Object.keys(light)) if (k.startsWith("--chart-")) chart[figPath(k)] = alias(light[k]) + "|" + alias(dark[k] !== undefined ? dark[k] : light[k]);
+  /* 아바타 토큰(2026-11-18 2단계 묶음 1 — 사람의 결정 '만들고 대조에도 넣음') — 트리 밖 --avatar-N-surface · -text(2026-11-16 ADDITIONS)가
+     color/semantic/avatar/N/surface · text 로 Semantic 컬렉션에 있고, 값은 atomic 별칭이어야 한다 */
+  const avatar = {};
+  for (const k of Object.keys(light)) if (/^--avatar-\d-(surface|text)$/.test(k)) avatar[figPath(k)] = alias(light[k]) + "|" + alias(dark[k] !== undefined ? dark[k] : light[k]);
+  /* AI 면 그라데이션(2026-11-14) — 값이 linear-gradient(다른 제품은 none)라 Figma COLOR 변수가 될 수 없다. 대조에서 빼고 NOTE 로 남긴다(diff) */
+  const gradient = Object.keys(semantic).filter((n) => /\/surface\/brand\/gradient/.test(n));
+  for (const n of gradient) delete semantic[n];
   return {
     primitives: Object.fromEntries(Object.entries(primitives).map(([p, hex]) => ["color/atomic/" + p, "H" + hex.slice(1).toUpperCase()])),
     semantic,
     space,
     chart,
+    avatar,
+    gradient,
   };
 }
 
@@ -876,6 +885,17 @@ function chartExpect() {
     const TONES = Object.fromEntries([...tb[1].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/"?([a-z0-9-]+)"?\s*:\s*"(--[a-z0-9-]+)"/g)].map((m) => [m[1], m[2]]));
     for (const [k, v] of Object.entries(fc.tones)) if (TONES[k] !== v) throw new Error(`figma.chart.tones.${k} ${v} ≠ ds-chart TONES.${k} ${TONES[k]}`);
     const cut = parseFloat(fc.cutout) / 100;
+    /* 게이지 · 스파크(2026-11-18 묶음 3) — 트랙 토큰 = ds-chart TOKENS.track, 가운데 글 = TOKENS.text · 설명 = TOKENS.sub, 구멍 = gauge 프리셋 cutout,
+       글자 = GAUGE_FONT(값 크기 · 굵기, 설명 크기 · 500), 스파크 캔버스 높이 = CSS .kpi > .chart-canvas.spark */
+    const tokOf = (k) => { const m = new RegExp("\\b" + k + ':\\s*"(--[a-z0-9-]+)"').exec(js); if (!m) throw new Error("ds-chart.src.js TOKENS 에서 " + k + " 를 읽지 못했습니다"); return figTok(`var(${m[1]})`); };
+    const gaugeTrack = tokOf("track"), gaugeText = tokOf("text"), gaugeSub = tokOf("sub");
+    const gaugeSrc = preset("gauge", "spark"), gcm = /cutout:\s*"(\d+)%"/.exec(gaugeSrc); if (!gcm) throw new Error("ds-chart gauge 프리셋의 cutout 을 읽지 못했습니다");
+    const gaugeCut = +gcm[1] / 100;
+    const gfm = /var GAUGE_FONT = \{\s*weight:\s*(\d+),\s*size:\s*(\d+),\s*caption:\s*(\d+)\s*\}/.exec(js); if (!gfm) throw new Error("ds-chart.src.js 의 GAUGE_FONT 를 읽지 못했습니다");
+    const tsAll = typeScale(), styleBy = (size, weight, what) => { const n = Object.entries(tsAll).filter(([, d]) => d.size === size && d.weight === weight).map(([k]) => k); if (n.length !== 1) throw new Error(`${what} ${size}/${weight} 에 맞는 타입 스케일 스타일이 ${n.length}개입니다 — ${n.join(" · ")}`); return n[0]; };
+    const gaugeFont = { value: styleBy(+gfm[2], +gfm[1], "게이지 가운데 글"), caption: styleBy(+gfm[3], 500, "게이지 설명") };
+    const sparkRule = cssRule(".kpi > .chart-canvas.spark"); if (!sparkRule.height) throw new Error(".kpi > .chart-canvas.spark height 를 읽지 못했습니다");
+    const sparkH = px(sparkRule.height);
     /* 카드 — CSS .chart-card · 제목 */
     const card = cssRule(".chart-card"), title = cssRule(".chart-card .chart-title");
     const bm = /([\d.]+)px solid (var\(--[a-z0-9-]+\))/.exec(card.border || ""); if (!bm) throw new Error(".chart-card border 를 읽지 못했습니다");
@@ -897,7 +917,7 @@ function chartExpect() {
       if (!fc.types.includes(type)) throw new Error(`audit CHART_EX 의 ${type} 가 figma.chart.types 에 없습니다`);
       const ex = (c.examples || []).find((e) => e.id === exId);
       if (!ex) throw new Error(`data-visual 예제 ${exId} 가 없습니다`);
-      const cards = type === "spark" ? [...ex.html.matchAll(/<div class="kpi([^"]*)"[^>]*>([\s\S]*?)<\/canvas>/g)] : [...ex.html.matchAll(/<div class="chart-card[^"]*"([^>]*)>([\s\S]*?)<\/canvas>/g)];   // 2026-11-15 spark 는 .kpi 안, 카드에 sm · lg 클래스
+      const cards = type === "spark" ? [...ex.html.matchAll(/<div class="kpi([^"]*)"[^>]*>((?:(?!<div class="kpi[" ])[\s\S])*?)<\/canvas>/g)] :[...ex.html.matchAll(/<div class="chart-card[^"]*"([^>]*)>([\s\S]*?)<\/canvas>/g)];   // 2026-11-15 spark 는 .kpi 안, 카드에 sm · lg 클래스. 2026-11-18 묶음 3 — 앞의 정적 스파크 KPI(캔버스 없음)부터 잡아 그 라벨을 읽던 것을 다른 .kpi 를 넘지 않게
       const cardHtml = cards[nth] && cards[nth][2], cardAttr = cards[nth] ? cards[nth][1] : "";
       if (!cardHtml) throw new Error(`예제 ${exId} 의 ${nth + 1}번째 chart-card 를 찾지 못했습니다`);
       const tm = type === "spark" ? /<span class="label">([\s\S]*?)<\/span>/.exec(cardHtml) : /<h3 class="chart-title">([\s\S]*?)<\/h3>/.exec(cardHtml), sm = /<span class="chart-sub">([\s\S]*?)<\/span>/.exec(cardHtml);   // 2026-11-15 보조 글은 제목 밖 .chart-sub
@@ -920,13 +940,18 @@ function chartExpect() {
       if (type === "timeseries") { v.series = spec.series.map((s) => s.label); v.colors = serTok(spec.series); v.lines = v.series.length; v.areas = spec.stacked ? v.series.length : 0; v.points = v.series.length; v.tooltip = true; }
       else if (type === "bar") { v.series = spec.series.map((s) => s.label); v.colors = serTok(spec.series); v.bars = spec.labels.length * spec.series.length; v.barsPer = spec.series.map((s) => spec.labels.length); v.lines = 0; v.stacked = !!spec.stacked; v.horizontal = !!spec.horizontal; v.nLabels = spec.labels.length; }
       else if (type === "donut") { v.series = spec.series.map((s) => s.label); v.colors = serTok(spec.series); const total = spec.series.reduce((a, s) => a + s.value, 0); let acc = -90; v.arcs = spec.series.map((s) => { const a0 = acc; acc += (s.value / total) * 360; return [+a0.toFixed(2), +acc.toFixed(2)]; }); v.center = spec.center != null ? String(spec.center) : null; v.lines = 0; v.legendWant = spec.legend || null; }
-      else if (type === "gauge") { v.series = []; v.colors = [figTok(`var(${fc.mono[0]})`)]; v.lines = 0; v.center = spec.label != null ? String(spec.label) : null; v.ratio = spec.value / (spec.max || 100); }
-      else if (type === "spark") { v.series = []; v.colors = [figTok(`var(${fc.mono[0]})`)]; v.lines = 1; v.areas = spec.area === false ? 0 : 1; }
-      else if (type === "mixed") { v.series = spec.bars.map((s) => s.label).concat(spec.lines.map((s) => s.label)); v.colors = serTok(spec.bars.concat(spec.lines)); v.bars = spec.labels.length * spec.bars.length; v.lines = spec.lines.length; v.lineColors = spec.lines.map((s, i) => tone(s.tone) || figTok(`var(${fc.series[spec.bars.length + i]})`)); v.barColors = spec.bars.map((s, i) => tone(s.tone) || figTok(`var(${fc.series[i]})`)); }
+      else if (type === "gauge") {
+        /* 2026-11-18 묶음 3 — ds-chart gauge 프리셋: 반원(rotation −90 · circumference 180 = 왼쪽 −180° 에서 위를 지나 0° 까지), 채운 호 = mono-1(또는 tone) · 나머지 = 트랙,
+           구멍 = 프리셋 cutout, 테두리 없음, 축 · 범례 · 툴팁 없음. 가운데 = label(GAUGE_FONT) · 그 위 caption(GAUGE_FONT.caption, 500) */
+        const max = +spec.max > 0 ? +spec.max : 100, r = Math.max(0, Math.min(max, +spec.value || 0)) / max, mid = +(-180 + 180 * r).toFixed(2);
+        v.series = []; v.colors = [tone(spec.tone) || figTok(`var(${fc.mono[0]})`), gaugeTrack]; v.lines = 0; v.gauge = true; v.noAxes = true;
+        v.arcs = [[-180, mid], [mid, 0]]; v.center = spec.label != null ? String(spec.label) : String(spec.value); v.caption = spec.caption != null ? String(spec.caption) : null; v.ratio = r; }
+      else if (type === "spark") { v.series = []; v.colors = [tone(spec.tone) || figTok(`var(${fc.mono[0]})`)]; v.lines = 1; v.areas = spec.area === false ? 0 : 1; v.noAxes = true; v.canvasH = sparkH; }
+      else if (type === "mixed") { v.series = spec.bars.map((s) => s.label).concat(spec.lines.map((s) => s.label)); v.colors = serTok(spec.bars.concat(spec.lines)); v.bars = spec.labels.length * spec.bars.length; v.lines = spec.lines.length; /* 2026-11-18 막대 · 선 색 = 위 serTok 과 같은 한 톤 규칙(ds-chart 는 mixed 도 막대 + 선을 한 목록으로 칠한다). 전에는 계열 색(series)을 따로 셌다 */ v.barColors = v.colors.slice(0, spec.bars.length); v.lineColors = v.colors.slice(spec.bars.length); }
       v.legend = v.series.length > 1;
       variants[v.name] = v;
     }
-    return { types: fc.types, variants, order, canvasH: fc.canvasH, line: fc.line, point: fc.point, barRadius: fc.barRadius, barStroke: fc.barStroke, barMax: fc.barMax, gap: fc.gap, stackGap, donutBw, sideRatio, legendPosition, cutout: cut, alpha, fontSize, styles12, titleStyle: titleStyles[0], tip, legend,
+    return { gaugeCut, gaugeFont, gaugeText, gaugeSub, types: fc.types, variants, order, canvasH: fc.canvasH, line: fc.line, point: fc.point, barRadius: fc.barRadius, barStroke: fc.barStroke, barMax: fc.barMax, gap: fc.gap, stackGap, donutBw, sideRatio, legendPosition, cutout: cut, alpha, fontSize, styles12, titleStyle: titleStyles[0], tip, legend,
       grid: figTok(`var(${fc.grid})`), axis: figTok(`var(${fc.axis})`), tipBg: figTok(`var(${fc.tooltip.bg})`), tipFg: figTok(`var(${fc.tooltip.fg})`), surface: figTok(card.background), stroke: figTok(bm[2]), sw: +bm[1], pad, gapPx: px(card.gap), radius: c.figma.radius };
   } catch (e) { return { error: String(e.message || e) }; }
 }
@@ -960,7 +985,8 @@ function staticChartExpect() {
     const angles = (h) => { const i = h.indexOf('class="donut'); const seg = i < 0 ? "" : h.slice(i, h.indexOf("</div>", i)); return [...seg.matchAll(/--a:([\d.]+)deg/g)].map((m) => +m[1]); };   // 첫 도넛(심각도) — 2026-11-15 예제에 한 톤 도넛이 더 있다
     const aDoc = angles(ex("donut")), aDash = angles(dash);
     if (!aDoc.length) throw new Error("data-visual 예제 donut 에 경계선(--a)이 없습니다");
-    if (aDoc.join() !== aDash.join()) throw new Error(`도넛 경계 각도 예제 [${aDoc}] ≠ 대시보드 [${aDash}]`);
+    /* 2026-11-15 대시보드의 심각도 도넛은 탐색형 차트(canvas)가 됐다 — 정적 도넛이 남아 있을 때만 각도를 맞춘다 */
+    if (aDash.length && aDoc.join() !== aDash.join()) throw new Error(`도넛 경계 각도 예제 [${aDoc}] ≠ 대시보드 [${aDash}]`);
     const labels = (h) => [...h.matchAll(/<div class="kpi(?: [^"]*)?"><span class="label">([^<]*)<\/span>/g)].map((m) => m[1].trim());
     const kpiEx = labels(ex("kpi")), dashOnly = labels(dash).filter((l) => !kpiEx.includes(l));
     /* KPI 카드 하나 = .kpi(.critical|.high) 의 label · value(<small> 단위) · delta(.up|.down, 앞의 I(이름) = 화살표). class="kpi-grid" 는 고르지 않는다 */
@@ -1008,15 +1034,15 @@ function staticChartExpect() {
     const row = { rowGap: drg[0], colGap: drg.length > 1 ? drg[1] : drg[0], wrap: dr["flex-wrap"] === "wrap", pa: AX[dr["justify-content"] || "normal"], ca: AX[dr["align-items"] || "normal"] };
     /* 대시보드 차트 줄(2026-11-06 k36 — 사람의 결정: Figma 도 사이트처럼) — patterns.data.js dashboard 에서 .donut-row 를 품은 줄 div 의 클래스(row-3)를 찾고
        그 CSS grid-template-columns(fr 만) · gap 을 읽는다. 도넛 카드가 그 줄의 몇 번째 chart-card 인지도 센다 */
-    const di0 = dash.indexOf('class="donut-row"'), rows = [...dash.slice(0, di0).matchAll(/<div class="(row-[a-z0-9-]+)">/g)], rowM = rows[rows.length - 1];
-    if (!rowM) throw new Error("patterns.data.js dashboard 에서 .donut-row 를 품은 줄(row-*)을 찾지 못했습니다");
+    /* 2026-11-18 대시보드에서 정적 도넛이 사라졌다(탐색형 도넛 · 누적 막대 · 진행 막대 목록) — chart-card 를 품은 줄(row-*)을 모두 읽는다(grids).
+       Figma 는 줄 프레임 이름 'Chart Row / <클래스>' 로 짝짓는다(probe components.dashRows) */
+    if (!(row.rowGap >= 0) || !(row.colGap >= 0)) throw new Error(`.donut-row gap ${dr.gap} 를 읽지 못했습니다`);
+    const grids = [...dash.matchAll(/<div class="(row-[a-z0-9-]+)">/g)].map((rowM) => {
     const gr = cssRule("." + rowM[1]), frs = String(gr["grid-template-columns"] || "").trim().split(/\s+/);
     if (!frs.length || frs.some((f) => !/^[\d.]+fr$/.test(f))) throw new Error(`.${rowM[1]} grid-template-columns ${gr["grid-template-columns"]} 가 fr 만으로 되어 있지 않습니다`);
-    const grid = { cls: rowM[1], fr: frs.map(parseFloat), gap: px(gr.gap || gr["column-gap"] || "0"), idx: [...dash.slice(rowM.index, di0).matchAll(/class="chart-card[ "]/g)].length - 1 };
-    if (grid.idx < 0 || grid.idx >= grid.fr.length) throw new Error(`대시보드 도넛 카드 위치 ${grid.idx} 가 .${rowM[1]} 열 ${grid.fr.length}개 밖입니다`);
-    if (!(row.rowGap >= 0) || !(row.colGap >= 0)) throw new Error(`.donut-row gap ${dr.gap} 를 읽지 못했습니다`);
+    const grid = { cls: rowM[1], fr: frs.map(parseFloat), gap: px(gr.gap || gr["column-gap"] || "0") };
     /* 줄의 카드 구성(2026-11-06 k37) — 줄 div 를 짝 맞춰 잘라 그 안의 chart-card 들(카드끼리는 중첩되지 않는다)을 순서대로 읽는다.
-       탐색형(canvas data-chart)은 같은 Type 의 data-visual 예제(CHART_EX) spec 과 같은지 — Figma Chart 변형은 그 예제 데이터를 그리므로 다르면 변형을 쓸 수 없다 */
+       탐색형(canvas data-chart)은 같은 Type 의 data-visual 예제(CHART_EX) spec 과 같은지 — Figma Chart 변형은 그 예제 데이터를 그리므로 다르면 변형을 쓸 수 없다(그때는 프레임으로 그린다) */
     { let depth = 0, end = -1; const tagRe = /<div\b|<\/div>/g; tagRe.lastIndex = rowM.index;
       for (let m; (m = tagRe.exec(dash)); ) { depth += m[0] === "</div>" ? -1 : 1; if (depth === 0) { end = tagRe.lastIndex; break; } }
       if (end < 0) throw new Error(`patterns.data.js dashboard .${rowM[1]} 줄의 끝을 찾지 못했습니다`);
@@ -1029,10 +1055,19 @@ function staticChartExpect() {
         const cm = /data-chart="([a-z]+)" data-spec='([^']+)'/.exec(h);
         if (cm) { const e = CHART_EX.find((x) => x[0] === cm[1]); if (!e) throw new Error(`대시보드 ${card.title} 의 data-chart ${cm[1]} 에 맞는 예제가 audit CHART_EX 에 없습니다`);
           const eh = [...ex(e[1]).matchAll(/data-chart="([a-z]+)" data-spec='([^']+)'/g)][e[2]]; if (!eh) throw new Error(`data-visual 예제 ${e[1]} 의 canvas 를 찾지 못했습니다`);
-          const spec = JSON.parse(cm[2]); Object.assign(card, { kind: cm[1], spec, specEx: e[1], specSame: canon(spec) === canon(JSON.parse(eh[2])) }); }
+          const spec = JSON.parse(cm[2]); Object.assign(card, { kind: cm[1], spec, specEx: e[1], specSame: canon(spec) === canon(JSON.parse(eh[2])) });
+          /* 프레임으로 그릴 때(예제와 spec 이 다름) 계열마다 칠 — tone 이면 ds-chart TONES 토큰 */
+          const tb2 = /var TONES = \{([\s\S]*?)\};/.exec(read("_build/ds-chart.src.js")), TN = Object.fromEntries([...tb2[1].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/"?([a-z0-9-]+)"?\s*:\s*"(--[a-z0-9-]+)"/g)].map((m2) => [m2[1], m2[2]]));
+          card.fills = (spec.series || []).map((s2) => (s2.tone && TN[s2.tone] ? figTok(`var(${TN[s2.tone]})`) : null)); }
+        else if (/class="progress-list"/.test(h)) { card.kind = "progress";   // 진행 막대 목록 — 행마다 라벨 · 값 · 목표(단위) · 채움 %
+          card.rows = [...h.matchAll(/<div class="progress-row"><div class="row"><span id="[^"]*">([^<]*)<\/span><span><b>([^<]*)<\/b><span class="target">([^<]*)<\/span><\/span><\/div><div class="progress"[^>]*><i style="width:([\d.]+)%"><\/i>/g)]
+            .map((m) => ({ label: txt(m[1]), value: txt(m[2]), target: txt(m[3]), pct: +m[4] }));
+          if (!card.rows.length) throw new Error(`대시보드 ${card.title} 의 진행 막대 행을 읽지 못했습니다`); }
         else card.kind = /class="donut"/.test(h) ? "donut" : /class="chart"/.test(h) ? "bars" : "other";
         return card; });
       if (grid.cards.length !== grid.fr.length) throw new Error(`patterns.data.js dashboard .${rowM[1]} chart-card ${grid.cards.length}개 ≠ 열 ${grid.fr.length}개`); }
+    return grid; }).filter((g) => g.cards.length);
+    if (!grids.length) throw new Error("patterns.data.js dashboard 에서 chart-card 를 품은 줄(row-*)을 찾지 못했습니다");
     /* 정적 막대 내용(2026-11-09 k42b — 사람의 결정: Figma Chart Card Bar 두 변형 = 사이트 data-visual bar 예제) — 제목 · 캡션(<span>), 행 순서 · 라벨 · 값 · 톤 · 채움 폭(%).
        톤 칠 = ds-chart TONES 의 토큰이고 .chart .bar.{톤} i 의 background 도 같아야 한다 */
     const bar = (() => { const h = ex("bar"), ENT = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", apos: "'", nbsp: " " };
@@ -1049,7 +1084,7 @@ function staticChartExpect() {
       const nRow = (h.match(/<div class="row">/g) || []).length;
       if (!rows.length || rows.length !== nRow) throw new Error(`data-visual 예제 bar 의 행 ${nRow}개 중 ${rows.length}개만 읽었습니다(.row > .lbl · .bar.{톤} > i width% · .num)`);
       return { title: tx(tm[1].replace(/<span[\s\S]*?<\/span>/, "")), caption: cm ? tx(cm[1]) : null, rows }; })();
-    return { barR: rad(".chart .bar"), fillR: rad(".chart .bar i"), sparkR: rad(".sparkline i"), bar, legend, row, grid, donut: { d: D, R: D / 2, divider: { ...dv, dist: D / 2 - dv.h / 2 }, angles: aDoc },
+    return { barR: rad(".chart .bar"), fillR: rad(".chart .bar i"), sparkR: rad(".sparkline i"), bar, legend, row, grids, donut: { d: D, R: D / 2, divider: { ...dv, dist: D / 2 - dv.h / 2 }, angles: aDoc },
       kpi: { n: kpiEx.length, labels: kpiEx, dashOnly, example, dash: dashK, tones, unit, delta, dirFill, needNone } };
   } catch (e) { return { error: String(e.message || e) }; }
 }
@@ -1160,9 +1195,23 @@ function specExpect() {
   const box = { I: () => "", module: { exports: {} } };
   vm.runInNewContext(read("_build/components.data.js"), box, { filename: "components.data.js" });
   const out = {};
-  /* Placement 는 2026-11-12 부터 spec 이 아니라 원칙 표의 행이고, 2026-11-13 부터는 정의 아래 고르기 표(choose)의 행이다(사람의 결정 — 페이지의 Placement 절을 없앰 · 규칙은 Rules 절로). Figma Spec 카드의 Placement 행은 그것과 대조한다 */
-  for (const [slug, c] of Object.entries(box.module.exports)) out[slug] = [...(c.spec || []), ...(c.choose || []).filter(([k]) => k === "Placement")].map(([k, v]) => [specNorm(k), specSite(v)]);
+  /* Placement 는 2026-11-13 부터 정의 아래 고르기 표(choose)의 행이다. 2026-11-18 Figma 카드도 사이트 순서로 고르기 표 패널을 따로 두어(사람의 결정)
+     Spec 패널에는 Placement 가 없다 — Placement 는 아래 docTextExpect 가 고르기 표 패널과 대조한다 */
+  for (const [slug, c] of Object.entries(box.module.exports)) out[slug] = (c.spec || []).map(([k, v]) => [specNorm(k), specSite(v)]);
   return out;
+}
+/* 문서 카드의 고르기 표 · Rules(2026-11-18 2단계 묶음 4 — 사람의 결정 '사이트 순서로 재구성'). 컴포넌트 46 · 패턴 22 카드의
+   '고르기 표' 패널 = choose 행([이름, 글]), 'Rules' 패널 = principles 행([묶음, 이름, 글] — 묶음이 없는 배열이면 묶음 ""). 글은 Spec 과 같은 규칙(specSite)으로 바꾼다.
+   패턴 카드 이름은 한글이라 data.js 메뉴의 [키, 이름] 으로 키를 찾는다 */
+function docTextExpect() {
+  const load = (f) => { const box = { I: () => "", module: { exports: {} }, require }; vm.runInNewContext(read(f), box, { filename: f }); return box.module.exports; };
+  const rows = (pr) => !pr ? [] : Array.isArray(pr) ? pr.map(([k, v]) => ["", specNorm(specSite(k)), specSite(v)]) : Object.entries(pr).flatMap(([g, rs]) => rs.map(([k, v]) => [specNorm(specSite(g)), specNorm(specSite(k)), specSite(v)]));
+  const one = (c) => ({ choose: (c.choose || []).map(([k, v]) => [specNorm(specSite(k)), specSite(v)]), rules: rows(c.principles) });
+  const comps = {}, pats = {}, pnames = {};
+  for (const [slug, c] of Object.entries(load("_build/components.data.js"))) if (c && typeof c === "object") comps[slug] = one(c);
+  for (const [slug, c] of Object.entries(load("_build/patterns.data.js"))) if (c && typeof c === "object") pats[slug] = one(c);
+  for (const m of read("_build/data.js").matchAll(/\["([a-z-]+)", "([^"]+)"\]/g)) if (pats[m[1]] && /[가-힣]/.test(m[2])) pnames[specNorm(m[2])] = m[1];
+  return { comps, pats, pnames };
 }
 
 /* Tag 톤 · 심각도 지표(2026-11-09 k42 — 심각도 5단계 Critical · High · Medium · Low · Info + 상태 톤 Pending, 사람의 결정 2026-11-06).
@@ -1188,9 +1237,11 @@ function severityExpect() {
   const css = (k) => { const s = k === "neutral" ? "" : "." + k, face = k === "neutral" ? base : has(`.tag${s}`);
     if (!face) throw new Error(`components.data.js tag.figma.variants.${k} 에 맞는 CSS .tag${s} 가 없습니다`);
     const dot = figTok((has(`.tag${s}::before`) || dotBase).background), sc = has(`.tag.solid${s}`) || {}, sd = has(`.tag.solid${s}::before`);
-    return { fill: figTok(face.background || base.background), dot,
+    /* 2026-11-18 라벨 = 톤의 글자색(.tag.{톤} color — heavy, 2026-11-11), Outline 테두리 = 톤의 선(.tag.outline.{톤}, 2026-11-13). 전에는 .tag 기본값 하나만 읽었다 */
+    const oc = has(`.tag.outline${s}`) || cssRule(".tag.outline");
+    return { fill: figTok(face.background || base.background), dot, label: figTok(face.color || base.color), outline: inset(oc["box-shadow"]),
       solid: { fill: figTok(sc.background || face.background || base.background), stroke: sc["box-shadow"] === "none" ? null : inset(sc["box-shadow"] || solidBase["box-shadow"]),
-        label: figTok(sc.color || base.color), dot: sd ? figTok(sd.background) : dot } }; };
+        label: figTok(sc.color || face.color || base.color), dot: sd ? figTok(sd.background) : dot } }; };
   const V = tf.variants, keys = Object.keys(V), alias = {};
   if (V.neutral && V.info) { const n = css("neutral"), i = css("info");
     /* 2026-11-13 부터 칠이 다르다(중립 tertiary · Info secondary, 사람의 결정) — 멈추지 않고 Neutral 을 제 톤으로 대조한다. Figma 에 Neutral 변형이 없으면 '없는 변형' 으로 센다 */
@@ -1206,7 +1257,7 @@ function severityExpect() {
       if (tok(v[f]) !== w) throw new Error(`tag.figma.variants.${k}.${f} ${v[f]} ≠ 사이트 CSS ${w}`);
     }
     if (v.fg && tok(v.fg) !== c.dot) notes.push(`components.data.js tag.figma.variants.${k}.fg ${v.fg} 가 사이트 점(.tag${k === "neutral" ? "" : "." + k}::before → ${c.dot})과 다릅니다 — Figma 는 사이트 화면(CSS)을 따릅니다. 저장소에서 어느 쪽이 맞는지 정해야 합니다`);
-    face[k] = c.fill; tones[k] = { dot: c.dot, solid: c.solid }; names.push(NAME(k));
+    face[k] = c.fill; tones[k] = { dot: c.dot, label: c.label, outline: c.outline, solid: c.solid }; names.push(NAME(k));
   }
   for (const [k, to] of Object.entries(alias)) if (V[k].fg && tok(V[k].fg) !== css(k).dot) notes.push(`components.data.js tag.figma.variants.${k}.fg ${V[k].fg} 가 사이트 점(${css(k).dot})과 다릅니다 — ${k} 는 Figma 에서 ${NAME(to)} 가 맡습니다`);
   const CAP = (s) => s[0].toUpperCase() + s.slice(1), SIZE = { sm: "Small", md: "Medium", lg: "Large" };
@@ -1289,6 +1340,8 @@ function componentsExpect() {
     navCollapsed: navExample("collapsed"),
     /* 문서 카드 Spec — 컴포넌트 키별 [행 이름, 사이트 글] (2026-10-26 k3) */
     specs: specExpect(),
+    /* 문서 카드 고르기 표 · Rules — components · patterns 데이터(2026-11-18) */
+    docText: docTextExpect(),
     /* 값 입력 필드 4종의 포커스 — 사이트 CSS (2026-10-26 k5) */
     focus: focusExpect(),
     /* Tag 기본 크기 — props 의 size 기본값(2026-10-26 k7) */
@@ -1308,7 +1361,7 @@ function componentsExpect() {
     /* 정적 차트 — 막대 · 트랙 · 스파크라인 모서리, 도넛 경계선, 범례 견본, KPI 예제 수(2026-11-05 k35, staticChartExpect) */
     staticChart: staticChartExpect(),
     /* Text Field 입력칸 높이 — .field input · .field.sm input · .field.lg input(2026-10-28 k16) */
-    textFieldH: (() => { try { const h = { Small: px(cssRule(".field.sm input:where(:not([type=checkbox]):not([type=radio]):not([type=range]))").height), Medium: px(cssRule(".field input:where(:not([type=checkbox]):not([type=radio]):not([type=range]))").height), Large: px(cssRule(".field.lg input:where(:not([type=checkbox]):not([type=radio]):not([type=range]))").height) }; return Object.values(h).every((x) => x > 0) ? h : { error: "높이를 읽지 못했습니다 " + JSON.stringify(h) }; } catch (e) { return { error: String(e.message || e) }; } })(),
+    textFieldH: (() => { try { const h = { Small: px(cssRule(".field.sm input:where(:not([type=checkbox]):not([type=radio]):not([type=range]))").height), Medium: px(cssRule(".field input:where(:not([type=checkbox]):not([type=radio]):not([type=range]))").height), Large: px(cssRule(".field.lg input:where(:not([type=checkbox]):not([type=radio]):not([type=range]))").height) }; h.Textarea = { Small: px(cssRule(".field.sm textarea")["min-height"]), Medium: px(cssRule(".field textarea")["min-height"]), Large: px(cssRule(".field.lg textarea")["min-height"]) }; if (!Object.values(h.Textarea).every((x) => x > 0)) h.Textarea = 0; return Object.values(h).every((x) => x && (typeof x === "object" || x > 0)) ? h : { error: "높이를 읽지 못했습니다 " + JSON.stringify(h) }; } catch (e) { return { error: String(e.message || e) }; } })(),
     /* 선택된 Radio · 비활성 Slider 글자의 칠 — 사이트 CSS (2026-10-27 k11) */
     controls: controlsExpect(),
     /* Chip 삭제(x) · 비활성 Item Tile — 사이트 CSS (2026-10-27 k12) */
@@ -1316,7 +1369,8 @@ function componentsExpect() {
     /* Date Picker 필드 · 날짜 칸 — 사이트 CSS (2026-10-27 k14) */
     datePicker: datePickerExpect(),
     /* 도넛 호 각도 — conic-gradient 정지점에서. CSS 0° 는 12시, Figma 0° 는 3시라 90° 를 뺀다. 면 색(틈) 구간은 호가 아니다 */
-    donutArcs: [...cssRule(".donut").background.matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
+    /* 2026-11-18 정지점이 조각 비율 변수(--d1~--d5, 2026-11-15)라 같은 규칙의 값으로 풀어 읽는다 */
+    donutArcs: [...(() => { const r = cssRule(".donut"); return r.background.replace(/var\(--(d\d)\)/g, (m, k) => r["--" + k] || m); })().matchAll(/var\(--([a-z0-9-]+)\)\s+([\d.]+)%?\s+([\d.]+)%/g)]
       .map((x) => ({ tok: figTok("var(--" + x[1] + ")"), from: +x[2] * 3.6 - 90, to: +x[3] * 3.6 - 90 }))
       .filter((s) => s.tok !== "surface/elevated/primary"),
     /* 체크 선 굵기 — 24 viewBox 의 stroke-width 를 아이콘 폭으로 줄인 실제 굵기(3 × 12/24 = 1.5). Figma 는 px 로 그린다 */
@@ -1645,7 +1699,8 @@ function diffComponents(c, want, bad, notes) {
     const w = want.tag.face[tone.toLowerCase()];
     if (!w) { bad.push(`Tag 톤 ${tone} 은 저장소에 없습니다 — ${v.name} (${v.id})`); continue; }
     if (!v.fill.includes("$" + w)) bad.push(`Tag ${tone} 바탕 ${v.fill} ≠ ${w} — ${v.name} (${v.id})`);
-    if (v.text && !v.text.includes("$" + want.tag.label)) bad.push(`Tag ${tone} 라벨 ${v.text} ≠ ${want.tag.label} — ${v.name} (${v.id})`);
+    const lw = (want.tagStyle.tones[tone.toLowerCase()] || {}).label || want.tag.label;
+    if (v.text && !v.text.includes("$" + lw)) bad.push(`Tag ${tone} 라벨 ${v.text} ≠ ${lw} — ${v.name} (${v.id})`);
   }
   const has$ = (got, w) => (w === null ? true : w === "-" ? got === "-" : !!got && got.includes("$" + w));
   for (const v of sets["Tag"] || []) {
@@ -1654,8 +1709,8 @@ function diffComponents(c, want, bad, notes) {
     if (style === "Subtle" && v.dot && !has$(v.dot, w.dot)) bad.push(`Tag ${tone} 점 ${v.dot} ≠ ${w.dot} — ${v.name} (${v.id})`);
     if (style === "Outline") {
       if (v.fill !== "-") bad.push(`Tag Outline 면이 있음 ${v.fill} — ${v.name} (${v.id})`);
-      if (!has$(v.stroke, want.tagStyle.outline.stroke)) bad.push(`Tag Outline 보더 ${v.stroke} ≠ ${want.tagStyle.outline.stroke} — ${v.name} (${v.id})`);
-      if (v.text && !has$(v.text, want.tag.label)) bad.push(`Tag Outline 라벨 ${v.text} ≠ ${want.tag.label} — ${v.name} (${v.id})`);
+      if (!has$(v.stroke, w.outline)) bad.push(`Tag Outline 보더 ${v.stroke} ≠ ${w.outline} — ${v.name} (${v.id})`);
+      if (v.text && !has$(v.text, w.label)) bad.push(`Tag Outline 라벨 ${v.text} ≠ ${w.label} — ${v.name} (${v.id})`);
       if (v.dot && !has$(v.dot, w.dot)) bad.push(`Tag Outline 점 ${v.dot} ≠ ${w.dot} — ${v.name} (${v.id})`);
     }
     if (style === "Solid") {
@@ -1854,7 +1909,7 @@ function diffComponents(c, want, bad, notes) {
   { const wc = want.donutCenter;
     if (wc.error) bad.push(`도넛 가운데 글 기대값을 읽지 못했습니다 — ${wc.error}`);
     else { const centers = (sets["Chart Card"] || []).filter((v) => v.donutGaps).map((v) => [`Chart Card ${v.name} (${v.id})`, v.donutCenter]);
-      for (const v of (c.chart && c.chart.variants) || []) if ((v.arcs || []).length) centers.push([`Chart ${v.name} (${v.id})`, v.centerType]);
+      for (const v of (c.chart && c.chart.variants) || []) if ((v.arcs || []).length && !/^Type=Gauge/.test(v.name)) centers.push([`Chart ${v.name} (${v.id})`, v.centerType]);   // 게이지 가운데 글은 diffChart 가 GAUGE_FONT 로 본다
       if (!centers.length) notes.push("도넛 가운데 글을 대조할 도넛이 없습니다");
       for (const [at, t] of centers) {
         if (t === undefined) { notes.push(`${at} 가운데 글 스타일 조사 없음 — k34 전 probe.js 로 만든 덤프입니다`); continue; }
@@ -1899,6 +1954,28 @@ function diffComponents(c, want, bad, notes) {
     }
     for (const [slug, s] of fig) if (!want.specs[slug]) bad.push(`Spec 카드 ${s.card}(${s.id}) 에 맞는 저장소 컴포넌트가 없습니다(키 ${slug})`);
   } else notes.push("덤프에 문서 카드 Spec 이 없습니다 — 2026-10-26 k3 전 probe.js 로 만든 덤프입니다");
+  /* 문서 카드 고르기 표 · Rules ↔ choose · principles(2026-11-18). 카드는 Spec 과 같은 키(컴포넌트) · 메뉴 이름(패턴)으로 맞댄다.
+     행은 고르기 표 = 행 이름, Rules = (묶음, 이름)으로 맞대고 글은 Spec 과 같은 규칙으로 비교한다. 순서는 보지 않는다. 한쪽에만 있는 행 · 패널도 어긋남이다 */
+  if (c.docText) {
+    const key = (card) => card.replace(/^Card\//, "").trim().toLowerCase().replace(/\s+/g, "-");
+    const W = want.docText, fig = new Map();
+    for (const d of c.docText) { const nm = specNorm(d.card.replace(/^Card\//, "")); const k = W.pnames[nm] ? "p:" + W.pnames[nm] : W.comps[key(d.card)] ? "c:" + key(d.card) : null; if (k) fig.set(k, d); else bad.push(`문서 카드 ${d.card}(${d.id}) 에 맞는 저장소 컴포넌트 · 패턴이 없습니다`); }
+    const cmp = (what, nm, want_, have_, keyOf, id) => {
+      const have = new Map((have_ || []).map((r) => [keyOf(r), r]));
+      for (const r of want_) { const k = keyOf(r), f = have.get(k), site = r[r.length - 1];
+        if (!f) bad.push(`${what} ${nm} · ${k}: 저장소에만 있는 행 — 저장소 [${site}] (카드 ${id})`);
+        else if (specNorm(f[f.length - 2]) !== site) bad.push(`${what} ${nm} · ${k}: 저장소 [${site}] ≠ Figma [${specNorm(f[f.length - 2])}] (${f[f.length - 1]})`); }
+      for (const [k, f] of have) if (!want_.some((r) => keyOf(r) === k)) bad.push(`${what} ${nm} · ${k}: Figma 에만 있는 행 — Figma [${specNorm(f[f.length - 2])}] (${f[f.length - 1]})`);
+    };
+    for (const [kind, all] of [["c", W.comps], ["p", W.pats]]) for (const [slug, w] of Object.entries(all)) {
+      const d = fig.get(kind + ":" + slug), nm = (kind === "p" ? "패턴 " : "") + slug;
+      if (!d) { bad.push(`문서 카드 없음: ${nm} — Figma 에 고르기 표 · Rules 를 대조할 "Card/…" 카드가 없습니다`); continue; }
+      if (!d.choose) bad.push(`고르기 표 ${nm}: 패널이 없습니다 (카드 ${d.id})`); else cmp("고르기 표", nm, w.choose, d.choose, (r) => specNorm(r[0]), d.id);
+      if (!w.rules.length) { if (d.rules) bad.push(`Rules ${nm}: 사이트에 Rules 가 없는데 Figma 에 패널이 있습니다 (카드 ${d.id})`); }
+      else if (!d.rules) bad.push(`Rules ${nm}: 패널이 없습니다 (카드 ${d.id})`);
+      else cmp("Rules", nm, w.rules, d.rules, (r) => (r[0] ? specNorm(r[0]) + " / " : "") + specNorm(r[1]), d.id);
+    }
+  } else notes.push("덤프에 문서 카드 고르기 표 · Rules 가 없습니다 — 2026-11-18 전 probe.js 로 만든 덤프입니다");
   /* 포커스(2026-10-26 k5 · k6 · k9) — 값 입력 필드는 테두리 · 안쪽 줄 · 후광의 토큰과 굵기를 사이트 CSS 와 맞춘다.
      Figma 는 안쪽 그림자를 INSIDE 테두리 밑에 그린다(임시 노드로 확인 — spread 1 은 1px 테두리에 완전히 가려지고, spread 2 라야
      테두리 안쪽에 1px 이 보인다). 그래서 CSS 의 inset Npx 는 Figma 안쪽 그림자 spread = N + 테두리 굵기 로 그린 것을 기대한다.
@@ -2097,10 +2174,11 @@ function diffComponents(c, want, bad, notes) {
     if (!th || th.error) bad.push(`Text Field 높이 기대값을 읽지 못했습니다 — ${th ? th.error : "없음"}`);
     else if (!c.textField || !c.textField.length) bad.push("Text Field 세트가 없어 입력칸 높이를 대조하지 못했습니다");
     else for (const v of c.textField) {
-      const z = pv(v.variant, "Size"), w = th[z], at = `Text Field ${v.variant} (${v.id})`;
+      /* Textarea 변형(2026-11-18 묶음 4 · 크기 셋)은 .field(.sm · .lg) textarea 의 min-height 72 · 96 · 120 — 한 줄 입력의 32 · 40 · 48 이 아니다 */
+      const ta = pv(v.variant, "Type") === "Textarea", z = pv(v.variant, "Size"), w = ta ? th.Textarea[z] : th[z], at = `Text Field ${v.variant} (${v.id})`;
       if (!w) bad.push(`${at} — 크기 ${z} 의 기대값이 없습니다`);
       else if (v.h === null) bad.push(`${at} — "Input" 칸을 찾지 못했습니다`);
-      else if (Math.abs(v.h - w) > 0.5) bad.push(`${at} 입력칸 높이 ${v.h} ≠ ${w} — 사이트 .field${z === "Medium" ? "" : z === "Small" ? ".sm" : ".lg"} input`);
+      else if (Math.abs(v.h - w) > 0.5) bad.push(`${at} 입력칸 높이 ${v.h} ≠ ${w} — 사이트 ${".field" + (z === "Medium" ? "" : z === "Small" ? ".sm" : ".lg") + (ta ? " textarea min-height" : " input")}`);
     }
   } else notes.push("덤프에 Text Field 입력칸 높이가 없습니다 — 2026-10-28 k16 전 probe.js 로 만든 덤프입니다");
   /* 버튼 상자(2026-10-26 k7) — 사람의 결정: 사이트 버튼의 1px 투명 테두리 몫을 Figma 에도 둔다. State=Normal · Loading=False 변형마다(k16 전에는 State=Default) 사이트에서 잰 같은 버튼과
@@ -2152,10 +2230,13 @@ function expect_() {
     typeScale: ts,
     components: componentsExpect(),
     chart: t.chart,
+    avatar: t.avatar,
+    gradient: t.gradient,
     counts: {
       primitives: Object.keys(t.primitives).length,
       semantic: Object.keys(t.semantic).length,
       chart: Object.keys(t.chart).length,
+      avatar: Object.keys(t.avatar).length,
       space: Object.keys(t.space).length,
       iconOutline: ic.outline.length,
       iconFilled: ic.filled.length,
@@ -2201,7 +2282,11 @@ const DOC_ROLES = {
   propList: { f: null, s: null }, propHead: { f: null, s: null }, propChip: { f: null, s: null }, propContent: { f: null, s: null },
   specRow: { f: null, s: null }, text: { f: null },
 };
-const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];   // 대조 대상(k38 4 Pattern, k39 + 3 Component · 2 Element). 나머지 현재 페이지는 현황 NOTE
+const DOC_PAGES = ["Patterns", "Components", "Foundations"];   // 대조 대상(k38 4 Pattern, k39 + 3 Component · 2 Element). 나머지 현재 페이지는 현황 NOTE
+/* 2026-11-18 Figma 페이지를 사이트 메뉴 넷으로(Overview · Foundations · Components · Patterns — 사람의 결정). 옛 덤프(baseline.json)의 페이지 이름은 새 이름으로 읽는다 —
+   2 Element 의 문서 카드 · 1 Theme 의 견본은 Foundations 로, 3 Component · 4 Pattern 은 Components · Patterns 로 옮겼다 */
+const PAGE_ALIAS = { "1 Theme": "Foundations", "2 Element": "Foundations", "3 Component": "Components", "4 Pattern": "Patterns" };
+const pageName = (n) => PAGE_ALIAS[n] || n;
 function docFrameExpect() {
   /* @media 블록은 뺀다 — 좁은 화면 규칙이 색을 바꾸지 않고, 남기면 바깥 셀렉터로 섞인다. 같은 셀렉터의 규칙은 전부 합친다(body 는 두 규칙 — cssRule 은 첫 규칙만 준다) */
   let css = read("_build/style.src.css").replace(/\/\*[\s\S]*?\*\//g, ""), top = "";
@@ -2227,7 +2312,8 @@ function docFrameExpect() {
 function diffDocFrames(c, w, bad, notes) {
   const d = c && c.docFrames;
   if (!d) { notes.push("덤프에 문서 틀 조사(docFrames)가 없습니다 — 2026-11-06 k38 전 probe.js 입니다"); return; }
-  const pages = d.pages || { "4 Pattern": d.pattern || [] };   // k38 덤프는 pattern 하나
+  const pages = {};   // k38 덤프는 pattern 하나 · 옛 이름은 새 이름으로 합친다
+  for (const [k, v] of Object.entries(d.pages || { "4 Pattern": d.pattern || [] })) pages[pageName(k)] = (pages[pageName(k)] || []).concat(v);
   for (const pg of DOC_PAGES) if (!(pages[pg] || []).some((n) => n.role === "card")) bad.push(`${pg} 문서 카드(Card/… = Header + Body)를 하나도 찾지 못했습니다${d.pages ? "" : " — k39 전 probe 덤프"}`);
   for (const [r, o] of Object.entries(w.roles)) for (const k of ["f", "s"]) if (o[k] && o[k].raw) notes.push(`문서 틀 ${r} 의 사이트 셸 값이 토큰이 아닙니다(${o[k].from}: ${o[k].raw}) — 대조하지 않고 알립니다. 하드코딩하지 않습니다`);
   const groups = new Map(), secStroke = []; let secN = 0;
@@ -2333,7 +2419,8 @@ function diffChart(c, w, variables, bad, notes) {
     if (!v.canvas) { bad.push(`${at} Canvas 없음`); continue; }
     if (wv.cardW != null && !near(v.w, wv.cardW, 0.5)) bad.push(`${at} 카드 폭 ${v.w} ≠ ${wv.cardW} — 예제 ${wv.ex} 의 chart-card max-width`);
     if (wv.canvasW != null && !near(v.canvas.w, wv.canvasW, 1)) bad.push(`${at} 캔버스 폭 ${v.canvas.w} ≠ ${wv.canvasW} — 예제 ${wv.ex} max-width ${wv.cardW} − padding − 보더`);
-    if (!near(v.canvas.h, w.canvasH, 0.5)) bad.push(`${at} 캔버스 높이 ${v.canvas.h} ≠ ${w.canvasH} — figma.chart.canvasH(.chart-canvas height)`);
+    const wantH = wv.canvasH != null ? wv.canvasH : w.canvasH;
+    if (!near(v.canvas.h, wantH, 0.5)) bad.push(`${at} 캔버스 높이 ${v.canvas.h} ≠ ${wantH} — ${wv.canvasH != null ? ".kpi > .chart-canvas.spark height" : "figma.chart.canvasH(.chart-canvas height)"}`);
     const lines = v.lines || [], areas = v.areas || [], bars = v.bars || [], arcs = v.arcs || [], pts = v.points || [];
     if (lines.length !== wv.lines) bad.push(`${at} 선 ${lines.length}개 ≠ ${wv.lines}(예제 계열)`);
     for (const l of lines) if (l.sw !== w.line) bad.push(`${at} 선 ${l.name} 굵기 ${l.sw} ≠ ${w.line} — figma.chart.line`);
@@ -2354,14 +2441,22 @@ function diffChart(c, w, variables, bad, notes) {
           for (let i = 1; i < segs.length; i++) { const g = +(segs[i][along[1]] - (segs[i - 1][along[1]] + segs[i - 1][along[2]])).toFixed(2); if (!near(g, w.stackGap, 0.5)) bad.push(`${at} 누적 세그먼트 ${segs[i - 1].name} → ${segs[i].name} 틈 ${g} ≠ ${w.stackGap} — ds-chart 누적 틈(figma.chart.gap)`); } }
       } else if (wv.stacked) notes.push(`${at} 누적 막대 위치 조사가 없습니다 — k35 전 probe.js 로 만든 덤프입니다`);
     } else if (bars.length) bad.push(`${at} 막대 ${bars.length}개 — 이 유형에는 막대가 없습니다`);
-    if (wv.arcs) {
+    if (wv.gauge) {
+      /* 게이지(2026-11-18 묶음 3) — 채운 호 + 트랙, 구멍 = gauge cutout, 테두리 없음, 가운데 값 · 그 위 설명 */
+      if (arcs.length !== 2) bad.push(`${at} 호 ${arcs.length}개 ≠ 2(채운 호 + 트랙)`);
+      const sorted = arcs.slice().sort((a, b) => a.deg[0] - b.deg[0]);
+      sorted.forEach((a, i) => { const e = wv.arcs[i]; if (!e) return; if (!near(a.deg[0], e[0], 0.6) || !near(a.deg[1], e[1], 0.6)) bad.push(`${at} 호 ${a.name} ${a.deg[0]}°~${a.deg[1]}° ≠ ${e[0]}°~${e[1]}°(value / max — 반원 −180°~0°)`); if (a.fill !== T(wv.colors[i])) bad.push(`${at} 호 ${a.name} 색 ${a.fill} ≠ ${wv.colors[i]}(${i ? "트랙 — ds-chart TOKENS.track" : "채운 호 — mono-1"})`); if (!near(a.inner, w.gaugeCut, 0.005)) bad.push(`${at} 호 ${a.name} 구멍 ${a.inner} ≠ ${w.gaugeCut} — ds-chart gauge cutout`); if (a.stroke !== "-" && a.sw) bad.push(`${at} 호 ${a.name} 테두리 ${a.stroke} ${a.sw}px — 게이지 호는 테두리 없음(borderWidth 0)`); });
+      const txt = (t, want, st, fill, what) => { if (!t) { bad.push(`${at} ${what} 없음`); return; } if (t.chars !== want) bad.push(`${at} ${what} [${t.chars}] ≠ [${want}]`); if (t.st !== st) bad.push(`${at} ${what} 스타일 ${t.st} ≠ ${st} — ds-chart GAUGE_FONT`); if (t.fill !== T(fill)) bad.push(`${at} ${what} 칠 ${t.fill} ≠ ${fill}`); };
+      txt(v.center, wv.center, w.gaugeFont.value, w.gaugeText, "가운데 값(Center)");
+      if (wv.caption) txt(v.caption, wv.caption, w.gaugeFont.caption, w.gaugeSub, "설명(Caption)");
+    } else if (wv.arcs) {
       if (arcs.length !== wv.arcs.length) bad.push(`${at} 호 ${arcs.length}개 ≠ ${wv.arcs.length}(조각)`);
       const sorted = arcs.slice().sort((a, b) => a.deg[0] - b.deg[0]);
       sorted.forEach((a, i) => { const e = wv.arcs[i]; if (!e) return; if (!near(a.deg[0], e[0], 0.6) || !near(a.deg[1], e[1], 0.6)) bad.push(`${at} 호 ${a.name} ${a.deg[0]}°~${a.deg[1]}° ≠ ${e[0]}°~${e[1]}°(값 비율)`); if (a.fill !== T(wv.colors[i])) bad.push(`${at} 호 ${a.name} 색 ${a.fill} ≠ ${wv.colors[i]}`); if (!near(a.inner, w.cutout, 0.005)) bad.push(`${at} 호 ${a.name} 구멍 ${a.inner} ≠ ${w.cutout} — figma.chart.cutout`); if (a.stroke !== T(w.surface) || a.sw !== w.donutBw) bad.push(`${at} 호 ${a.name} 테두리 ${a.stroke} ${a.sw}px ≠ ${w.surface} ${w.donutBw}px — 조각 사이 면 색 경계(ds-chart 도넛 borderWidth)`); });
       if (wv.center && (!v.center || v.center.chars !== wv.center)) bad.push(`${at} 가운데 글 [${v.center ? v.center.chars : "없음"}] ≠ [${wv.center}](spec.center)`);
     } else if (arcs.length) bad.push(`${at} 호 ${arcs.length}개 — 이 유형에는 호가 없습니다`);
     /* 격자 — y 축만(선 색 grid), 눈금 글자 — 12 · axis 토큰 · 스타일 */
-    if (wv.arcs) { if ((v.grid || []).length) bad.push(`${at} 격자 ${v.grid.length}개 — 도넛에는 축이 없습니다`); }
+    if (wv.arcs || wv.noAxes) { if ((v.grid || []).length) bad.push(`${at} 격자 ${v.grid.length}개 — ${wv.noAxes ? "게이지 · 스파크" : "도넛"}에는 축이 없습니다`); if (wv.noAxes && v.ticks && v.ticks.n) bad.push(`${at} 눈금 글자 ${v.ticks.n}개 — 게이지 · 스파크에는 축이 없습니다`); }
     else { if (!(v.grid || []).length) bad.push(`${at} 격자 없음`); for (const g of v.grid || []) if (g.stroke !== T(w.grid) || g.sw !== 1) bad.push(`${at} 격자 ${g.name} ${g.stroke} ${g.sw}px ≠ ${w.grid} 1px — figma.chart.grid`);
       if (!v.ticks || !v.ticks.n) bad.push(`${at} 눈금 글자 없음`); else for (const kind of v.ticks.kinds) { const [st, fs, fill] = kind.split("|"); if (+fs !== w.fontSize) bad.push(`${at} 눈금 글자 크기 ${fs} ≠ ${w.fontSize} — ds-chart font size`); if (!w.styles12.includes(st)) bad.push(`${at} 눈금 글자 스타일 ${st} — ${w.fontSize}px 타입 스케일 스타일(${w.styles12.join(" · ")})에 묶여야 합니다`); if (fill !== T(w.axis)) bad.push(`${at} 눈금 글자 칠 ${fill} ≠ ${w.axis} — figma.chart.axis`); } }
     /* 범례 — 2계열 이상일 때, 계열 순서 · 견본 색 · 글자 */
@@ -2455,41 +2550,55 @@ function diffStatic(c, w, bad, notes) {
   for (const v of kp) if (v.sparkR !== undefined && v.sparkR !== flatR(w.sparkR)) bad.push(`KPI ${v.name} (${v.id}) 스파크라인 모서리 ${v.sparkR} ≠ ${w.sparkR} — .sparkline i border-radius`);
   /* 세트 밖(4 Pattern 대시보드) — 도넛 · 트랙(Figma 의 옛 그림, 사이트는 진행 막대 목록 — 일괄 반영 때 다시 그림). 호 각도는 같은 .donut conic-gradient */
   /* 대시보드 차트 줄 카드 구성(k37) — 개수 · 순서 · 제목 · 기간 · 종류, 탐색형은 spec = 예제 · 범례 · 선 · 영역 · x 눈금 · Hover */
-  const cardsCheck = (g, G) => { const at = `4 Pattern 차트 줄 (${g.id})`;
-    if (g.cards === undefined) { notes.push(`${at} 카드 구성 조사(cards)가 없습니다 — 2026-11-06 k37 전 probe.js 로 만든 덤프입니다`); return; }
+  const cardsCheck = (g, G) => { const at = `Patterns 차트 줄 '${G.cls}' (${g.id})`;
     const sig = (x) => `${x.title}(${x.kind})`;
     if (g.cards.length !== G.cards.length || g.cards.some((x, i) => x.title !== G.cards[i].title || x.kind !== G.cards[i].kind)) {
       bad.push(`${at} 카드 ${g.cards.map(sig).join(" · ")} ≠ ${G.cards.map(sig).join(" · ")} — patterns.data.js dashboard .${G.cls} 의 chart-card 순서 · 제목 · 종류`); return; }
     G.cards.forEach((w, i) => { const x = g.cards[i], ct = `${at} ${i + 1}번째 '${w.title}' (${x.id})`;
-      if ((x.meta || null) !== w.meta) bad.push(`${ct} 기간 ${x.meta} ≠ ${w.meta} — .chart-title 의 <span>`);
+      if ((x.meta || null) !== w.meta) bad.push(`${ct} 보조 글 ${x.meta} ≠ ${w.meta} — .chart-sub`);
+      if (w.kind === "progress") {   // 진행 막대 목록 — 행 라벨 · 값 · 목표 · 채움 %(±0.5)
+        const xr = x.rows || [], sigR = (r) => `${r.label} ${r.value} ${r.target}`;
+        if (xr.length !== w.rows.length || xr.some((r, k) => sigR(r) !== sigR(w.rows[k]))) bad.push(`${ct} 진행 막대 행 ${xr.map(sigR).join(" · ") || "없음"} ≠ ${w.rows.map(sigR).join(" · ")}`);
+        else xr.forEach((r, k) => { if (Math.abs(r.pct - w.rows[k].pct) > 0.5) bad.push(`${ct} '${r.label}' 채움 ${r.pct}% ≠ ${w.rows[k].pct}%`); });
+        return; }
       if (!w.spec) return;
-      if (!x.chart) { bad.push(`${ct} Chart 세트 인스턴스가 아닙니다 — data-chart ${w.kind}`); return; }
-      if (!w.specSame) bad.push(`${ct} 대시보드 data-spec 이 예제 ${w.specEx} 의 spec 과 다릅니다 — Figma Chart 변형은 예제 데이터를 그리므로 그대로 쓸 수 없습니다`);
       const ser = (w.spec.series || []).map((s2) => s2.label);
+      if (!x.chart) {   // 프레임으로 그린 차트 — 예제와 spec 이 달라 변형을 쓸 수 없을 때만
+        if (w.specSame) { bad.push(`${ct} Chart 세트 인스턴스가 아닙니다 — spec 이 예제 ${w.specEx} 와 같으니 변형을 씁니다`); return; }
+        if (!x.drawn) { bad.push(`${ct} 차트(Canvas > Series)를 찾지 못했습니다 — data-chart ${w.kind}`); return; }
+        const labels = w.spec.labels || [], miss = labels.filter((t) => !x.drawn.ticksX.includes(t)), out = x.drawn.ticksX.filter((t) => !labels.includes(t));
+        if (miss.length || out.length) bad.push(`${ct} x 눈금 ${x.drawn.ticksX.join(" · ") || "없음"} ≠ labels ${labels.join(" · ")}`);
+        if (w.kind === "bar") ser.forEach((s2, k) => { const got = x.drawn.bars[s2] || { n: 0, fills: [] };
+          if (got.n !== labels.length) bad.push(`${ct} '${s2}' 막대 ${got.n}개 ≠ ${labels.length}개(labels)`);
+          if (w.fills[k] && (got.fills.length !== 1 || got.fills[0] !== w.fills[k])) bad.push(`${ct} '${s2}' 막대 칠 ${got.fills.join(" · ") || "없음"} ≠ ${w.fills[k]} — ds-chart TONES.${w.spec.series[k].tone}`); });
+        const wl = ser.length > 1 ? ser : []; if (x.drawn.legend.join() !== wl.join()) bad.push(`${ct} 범례 ${x.drawn.legend.join(" · ") || "없음"} ≠ ${wl.join(" · ") || "없음"}`);
+        return; }
+      if (!w.specSame) bad.push(`${ct} 대시보드 data-spec 이 예제 ${w.specEx} 의 spec 과 다릅니다 — Figma Chart 변형은 예제 데이터를 그리므로 프레임으로 그립니다`);
       if (w.kind === "timeseries") {
         if (x.lines.join() !== ser.join()) bad.push(`${ct} 선 ${x.lines.join(" · ") || "없음"} ≠ 계열 ${ser.join(" · ")}`);
         const wa = w.spec.stacked ? ser : []; if (x.areas.join() !== wa.join()) bad.push(`${ct} 영역 ${x.areas.join(" · ") || "없음"} ≠ ${wa.join(" · ") || "없음"} — stacked ${!!w.spec.stacked}`);
         const out = x.ticksX.filter((t) => !w.spec.labels.includes(t)); if (!x.ticksX.length || out.length) bad.push(`${ct} x 눈금 ${x.ticksX.join(" · ") || "없음"} — labels 밖 ${out.join(" · ") || "(없음)"}`);
       }
-      const wl = ser.length > 1 ? ser : []; if (x.legend.join() !== wl.join()) bad.push(`${ct} 범례 ${x.legend.join(" · ") || "없음"} ≠ ${wl.join(" · ") || "없음"} — 계열 2개 이상일 때 범례`);
+      const wl = w.kind === "donut" ? null : ser.length > 1 ? ser : []; if (wl && x.legend.join() !== wl.join()) bad.push(`${ct} 범례 ${x.legend.join(" · ") || "없음"} ≠ ${wl.join(" · ") || "없음"} — 계열 2개 이상일 때 범례`);
       if (x.hover) bad.push(`${ct} Hover(점 · 툴팁)가 보입니다 — 대시보드는 쉬는 상태라 사이트에 툴팁이 없습니다`); }); };
   const sc = c.staticCharts;
   for (const d of sc.donuts) { const at = `${d.page} 도넛 ${d.path} (${d.id})`;
     if (!near(d.d, w.donut.d, 0.5)) bad.push(`${at} 지름 ${d.d} ≠ ${w.donut.d} — .donut width`);
-    donutCheck(at, d.gaps, d.strokes, d.dividers); legendCheck(at, d.legendSw); if (d.row !== undefined) rowCheck(at, d.row);
-    /* 대시보드 차트 줄 비율(k36) — 카드 폭 = (줄 폭 − gap × (n − 1)) × fr / Σfr (±1), 간격 = gap, 도넛 카드 자리 = idx */
-    if (d.page === "4 Pattern") { const g = d.grid, G = w.grid;
-      if (g === undefined) notes.push(`${at} 차트 줄 조사(grid)가 없습니다 — 2026-11-06 k36 전 probe.js 로 만든 덤프입니다`);
-      else if (!g) bad.push(`${at} 차트 줄(카드의 부모)을 찾지 못했습니다`);
-      else { const sum = G.fr.reduce((a2, b2) => a2 + b2, 0), inner = g.w - g.pad - G.gap * (G.fr.length - 1), want = G.fr.map((f) => +((inner * f) / sum).toFixed(2));
-        if (g.ws.length !== G.fr.length) bad.push(`${at} 차트 줄 (${g.id}) 카드 ${g.ws.length}개 ≠ .${G.cls} 열 ${G.fr.length}개(${G.fr.join("fr ")}fr)`);
-        else { if (g.ws.some((x, i) => Math.abs(x - want[i]) > 1)) bad.push(`${at} 차트 줄 (${g.id}) 카드 폭 ${g.ws.join(" · ")} ≠ ${want.join(" · ")} — .${G.cls} ${G.fr.join("fr ")}fr · gap ${G.gap}(줄 폭 ${g.w})`);
-          if (g.gap !== G.gap) bad.push(`${at} 차트 줄 (${g.id}) 간격 ${g.gap} ≠ ${G.gap} — .${G.cls} gap`);
-          if (g.idx !== G.idx) bad.push(`${at} 도넛 카드가 차트 줄의 ${g.idx + 1}번째 ≠ ${G.idx + 1}번째(patterns.data.js dashboard)`); }
-        cardsCheck(g, G); } } }
+    donutCheck(at, d.gaps, d.strokes, d.dividers); legendCheck(at, d.legendSw); if (d.row !== undefined) rowCheck(at, d.row); }
+  /* 대시보드 차트 줄(2026-11-18 — 줄마다) — Figma 'Chart Row / <클래스>' 프레임 ↔ patterns.data.js dashboard 의 .row-*.
+     카드 폭 = (줄 폭 − gap × (n − 1)) × fr / Σfr (±1), 간격 = gap, 카드 구성 = cardsCheck */
+  if (c.dashRows === undefined) notes.push("덤프에 대시보드 차트 줄 조사(dashRows)가 없습니다 — 2026-11-18 전 probe.js 로 만든 덤프입니다");
+  else for (const G of w.grids) { const g = c.dashRows.find((r) => r.name === `Chart Row / ${G.cls}`), at = `Patterns 차트 줄 '${G.cls}'`;
+    if (!g) { bad.push(`${at} 프레임('Chart Row / ${G.cls}')이 없습니다 — patterns.data.js dashboard 의 .${G.cls}`); continue; }
+    const sum = G.fr.reduce((a2, b2) => a2 + b2, 0), inner = g.w - g.pad - G.gap * (G.fr.length - 1), want = G.fr.map((f) => +((inner * f) / sum).toFixed(2));
+    if (g.ws.length !== G.fr.length) { bad.push(`${at} (${g.id}) 카드 ${g.ws.length}개 ≠ .${G.cls} 열 ${G.fr.length}개(${G.fr.join("fr ")}fr)`); continue; }
+    if (g.ws.some((x, i) => Math.abs(x - want[i]) > 1)) bad.push(`${at} (${g.id}) 카드 폭 ${g.ws.join(" · ")} ≠ ${want.join(" · ")} — .${G.cls} ${G.fr.join("fr ")}fr · gap ${G.gap}(줄 폭 ${g.w})`);
+    if (g.gap !== G.gap) bad.push(`${at} (${g.id}) 간격 ${g.gap} ≠ ${G.gap} — .${G.cls} gap`);
+    if (g.hs.some((h) => Math.abs(h - g.hs[0]) > 0.5)) bad.push(`${at} (${g.id}) 카드 높이 ${g.hs.join(" · ")} — 같은 줄 카드는 높이가 같다(grid stretch)`);
+    cardsCheck(g, G); }
+  for (const r of (c.dashRows || []).filter((r2) => !w.grids.some((G) => r2.name === `Chart Row / ${G.cls}`))) bad.push(`Patterns 차트 줄 (${r.id}) '${r.name}' — 사이트 대시보드에 없는 줄입니다`);
   for (const r of sc.instRows || []) rowCheck(`${r.page} 인스턴스 ${r.inst} 도넛 (${r.id})`, r.row);
   for (const t of sc.tracks) if (t.r !== barMax) bad.push(`${t.page} 막대 트랙 (${t.id}) 모서리 ${t.r} ≠ ${barMax} — .chart .bar · .chart .bar i border-radius`);
-  if (!sc.donuts.length) notes.push("세트 밖 정적 도넛이 없습니다(4 Pattern 대시보드)");
   /* KPI 문서 목록 — 예제 kpi 의 카드 수, 대시보드에만 있는 라벨 없음 */
   if (c.kpiDoc === undefined || c.kpiDoc === null) notes.push("덤프에 Data Visual 문서 카드의 KPI 목록 조사(kpiDoc)가 없습니다");
   else if (c.kpiDoc.some((l) => l.kpi.some((k) => typeof k === "string"))) notes.push("덤프의 kpiDoc 이 라벨만 담고 있습니다 — 2026-11-05 k35b 전 probe.js 로 만든 덤프라 KPI 글 · 칠 대조를 건너뜁니다");
@@ -2557,9 +2666,9 @@ function diffStatic(c, w, bad, notes) {
       if (labs.length !== 1) bad.push(`Data Visual 문서 'KPI · Tone =' 라벨이 여럿입니다(${labs.join(" · ")}) — Tone 하나만 바꿔 보여 주는 행이라 라벨은 같아야 합니다`);
     }
     for (const l of c.kpiDoc) for (const k of l.kpi) if (w.kpi.dashOnly.includes(k.label)) bad.push(`Data Visual 문서 '${l.heading}' 에 예제 kpi 에 없는 카드 '${k.label}' — 대시보드 패턴에만 있는 라벨`);
-    if (c.kpiDash === undefined) notes.push("덤프에 4 Pattern 대시보드 KPI 조사(kpiDash)가 없습니다 — 2026-11-05 k35b 전 probe.js 로 만든 덤프입니다");
-    else if (!c.kpiDash) bad.push("4 Pattern 에 'Card/대시보드' 가 없습니다(patterns.data.js dashboard)");
-    else kpiCompare("4 Pattern 대시보드 KPI", c.kpiDash, w.kpi.dash, "patterns.data.js dashboard");
+    if (c.kpiDash === undefined) notes.push("덤프에 Patterns 대시보드 KPI 조사(kpiDash)가 없습니다 — 2026-11-05 k35b 전 probe.js 로 만든 덤프입니다");
+    else if (!c.kpiDash) bad.push("Patterns 에 'Card/대시보드' 가 없습니다(patterns.data.js dashboard)");
+    else kpiCompare("Patterns 대시보드 KPI", c.kpiDash, w.kpi.dash, "patterns.data.js dashboard");
     /* 문서의 다른 행(Tone · Delta · Variant) 카드도 단위 모양은 같다 */
     for (const l of c.kpiDoc) if (!/^KPI · 예제/.test(l.heading || "")) l.kpi.forEach((k, i) => { unitCheck(`Data Visual 문서 '${l.heading}' ${i + 1}번째 카드`, k.utype); deltaCheck(`Data Visual 문서 '${l.heading}' ${i + 1}번째 카드`, k); });
     /* KPI 세트 — Delta 속성 값 · 변형마다 증감 줄 · 단위(k35c) */
@@ -2615,7 +2724,7 @@ function diffCard(c, wc, variables, bad, notes) {
     if (!tx) { bad.push(`${at} ${what} 글자 없음`); return; }
     if (tx.st !== w.st) bad.push(`${at} ${what} 텍스트 스타일 ${tx.st || "없음"} ≠ ${w.st}`);
     if (w.fs !== undefined && tx.fs !== w.fs) bad.push(`${at} ${what} 크기 ${tx.fs} ≠ ${w.fs}`);
-    if (w.wt !== undefined) { const wt = W[String(tx.font).split(" ").pop()]; if (wt !== w.wt) bad.push(`${at} ${what} 굵기 ${wt} ≠ ${w.wt}(${tx.font})`); }
+    if (w.wt !== undefined) { const wt = W[String(tx.font).split(" ").pop()]; if (wt !== w.wt) { if (/^Noto Sans KR /.test(String(tx.font)) && w.wt === 600 && wt === 700) notes.push(`${at} ${what} 굵기 600 이 Noto Sans KR Bold(700)로 대체돼 있습니다 — 이 환경의 Noto 에 SemiBold 가 없음(스타일을 Pretendard SemiBold 로 되돌리면 해결 — _figma/font-revert.md 2026-11-18)`); else bad.push(`${at} ${what} 굵기 ${wt} ≠ ${w.wt}(${tx.font})`); } }
   };
   for (const [k, v] of have) {
     const o = ax(v.name), at = `Card ${v.name} (${v.id})`, list = o.Type === "List", sel = o.Type === "Selection";
@@ -2774,7 +2883,7 @@ function diff(dumpPath, site) {
   };
 
   const sem = (got.variables && got.variables.Semantic && got.variables.Semantic.values) || {};
-  const semFig = Object.keys(sem).filter((n) => n.startsWith("color/semantic/") && !n.startsWith("color/semantic/chart/"));   // chart/* 는 트리 밖 — 아래서 따로 본다(k33)
+  const semFig = Object.keys(sem).filter((n) => n.startsWith("color/semantic/") && !n.startsWith("color/semantic/chart/") && !n.startsWith("color/semantic/avatar/"));   // chart/* · avatar/* 는 트리 밖 — 아래서 따로 본다(k33 · 2026-11-18)
   list(Object.keys(want.semantic), semFig, "semantic 토큰");
   for (const [name, spec] of Object.entries(want.semantic)) {
     if (!(name in sem)) continue;
@@ -2785,6 +2894,12 @@ function diff(dumpPath, site) {
   for (const [name, spec] of Object.entries(want.chart)) {
     if (!(name in sem)) continue;
     if (sem[name] !== spec) bad.push(`chart 값 다름 ${name}: 저장소[${spec}] Figma[${sem[name]}]${/^[HO]/.test(sem[name]) ? " — 값을 복사했습니다. 별칭이어야 합니다" : ""}`);
+  }
+  /* 아바타 토큰(2026-11-18) — 차트와 같은 방식. 값은 atomic 별칭 */
+  list(Object.keys(want.avatar), Object.keys(sem).filter((n) => n.startsWith("color/semantic/avatar/")), "avatar 토큰");
+  for (const [name, spec] of Object.entries(want.avatar)) {
+    if (!(name in sem)) continue;
+    if (sem[name] !== spec) bad.push(`avatar 값 다름 ${name}: 저장소[${spec}] Figma[${sem[name]}]${/^[HO]/.test(sem[name]) ? " — 값을 복사했습니다. 별칭이어야 합니다" : ""}`);
   }
 
   const prim = (got.variables && got.variables.Primitive && got.variables.Primitive.values) || {};
@@ -2803,10 +2918,13 @@ function diff(dumpPath, site) {
   list(want.icons.outline, got.icons ? got.icons.outlineNames || [] : [], "outline 아이콘");
   list(want.icons.filled, got.icons ? got.icons.filledNames || [] : [], "filled 아이콘");
 
-  for (const o of got.overflow || []) bad.push(`넘침 ${o.page}${o.pageId ? "(" + o.pageId + ")" : ""} / ${o.node} +${o.by}${o.side ? " (" + (o.side === "left" ? "왼쪽" : "위") + ")" : ""}${o.clips ? " (잘림)" : ""}`);
+  /* 2026-11-18 묶음 3 — Chart Gauge 의 'Gauge' 프레임은 지름 310 의 호(ELLIPSE arcData — probe 가 호로 읽는 모양) 둘을 위 반쪽만 보이게 잘라 반원을 그린다.
+     넘침은 일부러 낸 것이라(호를 평평한 벡터로 바꾸면 audit 이 호를 읽지 못함) 잘린 Gauge 프레임만 넘침에서 뺀다 */
+  for (const o of (got.overflow || []).filter((o2) => !(o2.clips && o2.node === "Gauge"))) bad.push(`넘침 ${o.page}${o.pageId ? "(" + o.pageId + ")" : ""} / ${o.node} +${o.by}${o.side ? " (" + (o.side === "left" ? "왼쪽" : "위") + ")" : ""}${o.clips ? " (잘림)" : ""}`);
   for (const o of (got.overlap || []).filter((x) => x.current !== false)) bad.push(`겹침 ${o.page}${o.pageId ? "(" + o.pageId + ")" : ""}: ${o.a} ↔ ${o.b} (${o.by.join("×")})`);
 
   const notes = [];
+  if (want.gradient.length) notes.push(`AI 면 그라데이션 토큰 ${want.gradient.length}개(${want.gradient.map((n) => n.replace("color/semantic/", "")).join(" · ")})는 값이 linear-gradient 라 Figma 색 변수가 될 수 없어 대조하지 않습니다 — AI 주 버튼 · Banner 를 그릴 때 칠에 그라데이션을 직접 줍니다`);
   /* 서체 상태는 덤프의 실제 스타일 서체로 말한다 — 고정 문구를 찍다가 사람이 Pretendard 로 되돌린 뒤에도 "Noto 대체" 라고 했다 */
   if (got.fonts && !got.fonts.pretendard) {
     const noto = (got.textStyles || []).filter((t) => /^Noto Sans KR/.test(t.font)).map((t) => t.name);

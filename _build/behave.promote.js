@@ -79,7 +79,7 @@ module.exports = async function promote({ page, ok, go }) {
     const rowInfo = await page.locator("#ex-form-default .form-row").evaluate((r) => { const [a, c] = [...r.children].map((x) => x.getBoundingClientRect()); return { same: Math.abs(a.width - c.width) < 0.5, gap: Math.round(c.left - a.right), top: a.top === c.top }; });
     ok("form-row is two equal columns 16 apart", rowInfo.same && rowInfo.gap === 16 && rowInfo.top, JSON.stringify(rowInfo));
     const acts = await page.locator("#ex-form-actions form").evaluate((f) => { const fr = f.getBoundingClientRect(), p = parseFloat(getComputedStyle(f).paddingLeft), b = [...f.querySelectorAll(".form-actions .btn")].map((x) => x.getBoundingClientRect()), a = f.querySelector(".form-actions"); return { l: Math.round(b[0].left - fr.left - p - 1), r: Math.round(fr.right - b[2].right - p - 1), gap: Math.round(b[2].left - b[1].right), last: f.lastElementChild === a, solid: f.querySelectorAll(".form-actions .solid.primary").length }; });
-    ok("delete sits at the left, primary at the far right, buttons 12 apart, actions last", acts.l === 0 && acts.r === 0 && acts.gap === 12 && acts.last && acts.solid === 1, JSON.stringify(acts));
+    ok("delete sits at the left, primary at the far right, buttons 8 apart (the md .btn-group gap — 12 before 2026-11-18), actions last", acts.l === 0 && acts.r === 0 && acts.gap === 8 && acts.last && acts.solid === 1, JSON.stringify(acts));
   });
   await part("9 · patterns/input-form.html", async () => {
     await go("patterns/input-form.html");

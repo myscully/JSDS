@@ -1,4 +1,4 @@
-import { Button, SidePanelSurface, Tree, type TreeNode } from "@jiran/ds-react";
+import { Button, ButtonGroup, SidePanelSurface, Tree, type TreeNode } from "@jiran/ds-react";
 
 /* 적용 대상 바꾸기를 누르면 열리는 패널 — 제품에서는 SidePanel open modal 로 띄운다 */
 const TARGETS: TreeNode[] = [
@@ -19,7 +19,7 @@ export default function Example() {
       modal
       title="적용 대상"
       onClose={() => {}}
-      footer={<><Button variant="outline" color="assistive">취소</Button><Button>적용</Button></>}
+      footer={<><ButtonGroup><Button variant="outline" color="assistive">취소</Button><Button>적용</Button></ButtonGroup></>}
     >
       <Tree label="적용 대상 부서" checkable items={TARGETS} defaultExpanded={["hq"]} defaultChecked={["sec", "dev", "sales", "support"]} />
     </SidePanelSurface>

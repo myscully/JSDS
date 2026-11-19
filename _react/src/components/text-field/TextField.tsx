@@ -4,6 +4,7 @@ import { useId } from "../../utils/useId";
 import { Icon } from "../../icons/Icon";
 import { FormValidationContext, lengthMessage, type ValidationMessages } from "./validation";
 import type { Size } from "../../types";
+import type { IconName } from "../../icons/icons.data";
 
 export interface FieldOwnProps {
   label?: ReactNode;
@@ -111,6 +112,8 @@ function useTextControl<E extends HTMLInputElement | HTMLTextAreaElement>(p: { i
 
 type InputBase = Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix">;
 export interface TextFieldProps extends FieldOwnProps, InputBase {
+  /** 칸 안 앞 아이콘(2026-11-18 — 로그인의 아이디 · 비밀번호 등). 18 · tertiary · aria-hidden. 라벨을 대신하지 않는다 */
+  icon?: IconName;
   /** 접두어 (예: https://) — .affix 컨테이너로 감싼다 */
   prefix?: ReactNode;
   /** 접미어 (예: 일, %) */
@@ -144,7 +147,7 @@ export interface TextFieldProps extends FieldOwnProps, InputBase {
 let monoWarned = false;
 /** 한 줄 텍스트 입력 */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, labelHidden, required, help, error, size, prefix, suffix, showCount, wrapperStyle, wrapperClassName, trailing, wrapperProps, after, wrapControl, id: idProp, className, maxLength, value, defaultValue, onChange, mono, reveal, revealLabel = "비밀번호 표시", messages, requiredMark = true, ...rest },
+  { label, labelHidden, required, help, error, size, icon, prefix, suffix, showCount, wrapperStyle, wrapperClassName, trailing, wrapperProps, after, wrapControl, id: idProp, className, maxLength, value, defaultValue, onChange, mono, reveal, revealLabel = "비밀번호 표시", messages, requiredMark = true, ...rest },
   ref,
 ) {
   const id = useId(idProp);
@@ -173,8 +176,9 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
   );
   return (
     <Field {...wrapperProps} label={label} labelHidden={labelHidden} required={required && requiredMark} help={help} error={c.error} size={size} counter={c.counter} counterOver={c.over} live={c.live} htmlFor={id} helpId={c.helpId} style={wrapperStyle} className={wrapperClassName} after={after}>
-      {(wrapControl ?? ((x: ReactNode) => x))(prefix !== undefined || suffix !== undefined || trailing !== undefined || reveal ? (
+      {(wrapControl ?? ((x: ReactNode) => x))(icon !== undefined || prefix !== undefined || suffix !== undefined || trailing !== undefined || reveal ? (
         <div className="affix">
+          {icon !== undefined && <span className="field-icon" aria-hidden="true"><Icon name={icon} size={18} /></span>}
           {prefix !== undefined && <span>{prefix}</span>}
           {input}
           {suffix !== undefined && <span>{suffix}</span>}

@@ -29,7 +29,10 @@ describe("NotificationCenter — open and close", () => {
     expect(bell().getAttribute("aria-label")).toBe("알림 2건");
     expect(bell().getAttribute("aria-expanded")).toBe("false");
     expect(bell().getAttribute("aria-controls")).toBe(panel().id);
-    expect(document.querySelector(".with-count > .count")!.textContent).toBe("2");
+    const badge = document.querySelector(".with-count > .count")!;   // 벨은 점이 기본(2026-11-18) — 숫자 없음 · 이름은 '알림 n건' 그대로
+    expect(badge.classList.contains("dot")).toBe(true);
+    expect(badge.textContent).toBe("");
+    expect(document.querySelector(".notify")!.hasAttribute("data-count")).toBe(false);
     expect(panel().hidden).toBe(true);
     fireEvent.click(bell());
     expect(panel().hidden).toBe(false);
@@ -104,7 +107,10 @@ describe("NotificationCenter — list", () => {
     expect(document.querySelectorAll(".notify-item").length).toBe(3);
   });
   it("announces new unread items once — one by title, several by count — and reads 99+ past 99", async () => {
-    render(<Harness />);
+    render(<Harness count="number" />);
+    expect(document.querySelector(".notify")!.getAttribute("data-count")).toBe("number");
+    expect(document.querySelector(".with-count > .count")!.classList.contains("dot")).toBe(false);
+    expect(document.querySelector(".with-count > .count")!.textContent).toBe("2");
     setItems((xs) => [{ id: "x", group: "오늘", title: "관리자 로그인 실패", time: "방금", unread: true }, ...xs]);
     expect(await live()).toBe("새 알림: 관리자 로그인 실패");
     expect(bell().getAttribute("aria-label")).toBe("알림 3건");

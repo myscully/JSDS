@@ -16,7 +16,7 @@ module.exports = async function notify({ page, ok, go }) {
   const state = (id) => page.evaluate((sel) => {
     const h = document.querySelector(`${sel} .notify`), t = h.querySelector("[aria-haspopup=dialog]"), p = h.querySelector(".notify-panel"), c = h.querySelector(".with-count > .count"), tc = h.querySelector(".tab[data-filter=unread] .count");
     return { open: !p.hidden, exp: t.getAttribute("aria-expanded"), ctl: t.getAttribute("aria-controls") === p.id, name: t.getAttribute("aria-label"), tip: t.parentNode.querySelector(".tooltip").textContent,
-      count: c && !c.hidden ? c.textContent : null, tab: tc && !tc.hidden ? tc.textContent : null, readAll: h.querySelector(".notify-read-all").getAttribute("aria-disabled"),
+      count: c && !c.hidden ? (c.classList.contains("dot") ? "dot" : c.textContent) : null,   /* 벨은 점이 기본(2026-11-18) — 숫자는 data-count="number" 일 때만 */ tab: tc && !tc.hidden ? tc.textContent : null, readAll: h.querySelector(".notify-read-all").getAttribute("aria-disabled"),
       unread: [...h.querySelectorAll(".notify-item.unread")].map((li) => li.dataset.id), sr: [...h.querySelectorAll(".notify-item")].map((li) => li.querySelector(".notify-link > .sr-only").textContent) };
   }, ex(id));
   await go("components/notification-center.html");
@@ -25,8 +25,8 @@ module.exports = async function notify({ page, ok, go }) {
   /* 처음 상태 — 열린 예제는 aria-expanded · aria-controls, 안 읽은 수가 배지 · 접근 이름 · Tooltip · 탭 배지에 같이, 안 읽은 항목만 숨긴 ', 안 읽음'. 빈 예제는 배지 없음 · 모두 읽음 꺼짐 */
   await step("initial state", async () => {
     const s0 = await state("default"), e0 = await state("empty");
-    ok("notification center: the open example wires the bell to the dialog and shows the unread count on the badge, name, Tooltip and tab; only unread items say so; the empty one has no badge and read-all is off",
-      s0.open && s0.exp === "true" && s0.ctl && s0.count === "4" && s0.name === "알림 4건" && s0.tip === "알림 4건" && s0.tab === "4" && s0.readAll === null && s0.unread.join() === "n1,n2,n3,n5" &&
+    ok("notification center: the open example wires the bell to the dialog and shows the unread count on the name, Tooltip and tab with a dot on the bell; only unread items say so; the empty one has no badge and read-all is off",
+      s0.open && s0.exp === "true" && s0.ctl && s0.count === "dot" && s0.name === "알림 4건" && s0.tip === "알림 4건" && s0.tab === "4" && s0.readAll === null && s0.unread.join() === "n1,n2,n3,n5" &&
       s0.sr.join("|") === ", 안 읽음|, 안 읽음|, 안 읽음||, 안 읽음" && e0.count === null && e0.tab === null && e0.readAll === "true" && e0.name === "알림", JSON.stringify({ s0, e0 }));
   });
 
@@ -83,7 +83,7 @@ module.exports = async function notify({ page, ok, go }) {
     await page.locator(`${ex("default")} .notify-item[data-id="n1"] .notify-link`).click(); await wait(80);
     const r2 = await state("default"), ev2 = (await events()).filter((e) => e[0] === "ds:notify-read").map((e) => e[1]);
     ok("notification center: a no-link item only marks itself read and stays open with focus kept; a link item marks read and closes; one ds:notify-read each, none for an item already read",
-      r1.open && r1.count === "3" && r1.name === "알림 3건" && !r1.unread.includes("n5") && r1.sr[4] === "" && r1.sr[0] === ", 안 읽음" && rf === "n5" && !r15.open && r15.count === "3" && !r2.open && r2.count === "2" && r2.unread.join() === "n2,n3" &&
+      r1.open && r1.count === "dot" && r1.name === "알림 3건" && !r1.unread.includes("n5") && r1.sr[4] === "" && r1.sr[0] === ", 안 읽음" && rf === "n5" && !r15.open && r15.count === "dot" && !r2.open && r2.count === "dot" && r2.unread.join() === "n2,n3" &&
       JSON.stringify(ev2) === JSON.stringify([{ ids: ["n5"], all: false }, { ids: ["n1"], all: false }]), JSON.stringify({ r1, rf, r2, ev2 }));
   });
 
@@ -139,9 +139,9 @@ module.exports = async function notify({ page, ok, go }) {
     const n2Order = await page.evaluate((sel) => [...document.querySelector(`${sel} .notify-group`).querySelectorAll(".notify-item")].map((li) => li.dataset.id), ex("live"));
     await page.evaluate((sel) => window.DS.notify.add(document.querySelector(`${sel} .notify`), Array.from({ length: 100 }, (_, i) => ({ id: "x" + i, title: "대량 " + i }))), ex("live")); await wait(80);
     const n3 = await state("live");
-    ok("notification center: a new alert goes on top under a new today group, raises the badge and is announced; several at once keep their order and are announced once; past 99 the badge reads 99+",
-      n0.count === "1" && !n0.open && n1.count === "2" && n1.name === "알림 2건" && n1.sr[0] === ", 안 읽음" && nLive === "새 알림: 관리자 계정 로그인이 5회 실패했습니다" && nOrder.join() === "오늘:live-1,어제:n4+n5" &&
-      n2.count === "4" && nLive2 === "새 알림 2건" && n2Order.join() === "a,b,live-1" && n3.count === "99+" && n3.tab === "99+", JSON.stringify({ n0, n1, nLive, nOrder, n2, nLive2, n2Order, n3: n3.count }));
+    ok("notification center: a new alert goes on top under a new today group, keeps the dot and raises the name and tab count, and is announced; several at once keep their order and are announced once; past 99 the tab reads 99+",
+      n0.count === "dot" && !n0.open && n1.count === "dot" && n1.name === "알림 2건" && n1.sr[0] === ", 안 읽음" && nLive === "새 알림: 관리자 계정 로그인이 5회 실패했습니다" && nOrder.join() === "오늘:live-1,어제:n4+n5" &&
+      n2.count === "dot" && nLive2 === "새 알림 2건" && n2Order.join() === "a,b,live-1" && n3.count === "dot" && n3.tab === "99+", JSON.stringify({ n0, n1, nLive, nOrder, n2, nLive2, n2Order, n3: n3.count }));
   });
 
   /* 긴 목록 — 미리보기(넘침을 자름) 안에서는 화면 기준(fixed)으로 떠서 잘리지 않고, 목록은 본문 안에서 스크롤하며 본문 스크롤로는 닫히지 않는다 */

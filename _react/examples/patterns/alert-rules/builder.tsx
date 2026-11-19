@@ -34,8 +34,10 @@ export default function Example() {
       <ButtonGroup><Button variant="outline" color="assistive" size="sm">테스트 전송</Button></ButtonGroup>
       <Notice title="규칙 요약">Critical · High 이벤트가 전체 단말에서 10분 안에 5건 이상 생기면 보안팀에 메일을 보내고 웹훅을 호출합니다.</Notice>
       <FormActions>
-        <Button variant="outline" color="assistive">취소</Button>
-        <Button type="submit">저장</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">취소</Button>
+          <Button type="submit">저장</Button>
+        </ButtonGroup>
       </FormActions>
     </Form>
   );

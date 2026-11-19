@@ -836,3 +836,36 @@ Steps 를 다시 짰습니다.
 - **넘침을 자르는 영역 안에서는 달력 · 열 목록을 화면 기준으로 띄웁니다** — 팝업 · 패널 본문처럼 `overflow` 가 auto · hidden 인 조상 안이면 피커 바깥 요소에 `.float` 가 붙고 달력(`.calendar`) · 열 목록(`.time-panel`)이 `position:fixed` 가 됩니다. `--dp-top` · `--dp-left` · `--tp-top` · `--tp-left` 는 그때 화면 좌표입니다. 전에는 본문에 잘렸습니다.
 - 띄운 목록은 바깥이 스크롤되면 필드를 따라가고(열린 방향은 그대로), 필드가 화면이나 자르는 영역 밖으로 나가면 닫히며 포커스가 안에 있었으면 입력칸으로 돌아갑니다. 목록 자신의 스크롤은 닫지 않습니다.
 - 띄운 달력 안의 시각 칸은 다시 띄우지 않습니다. `.datepicker` · `.timepicker` 의 클래스를 셀렉터로 쓰는 제품은 `.float` 를 함께 고려합니다.
+
+## 상단 바 · 알림 점 · 버튼 묶음 간격 · 칸 안 아이콘 (2026-11-18)
+
+- **상단 바 높이 56 → 62**(`.topbar` 3.875rem). 제품이 바 높이를 빼서 본문 높이를 계산했다면 6px 를 더 뺍니다.
+- **새 컴포넌트 `TopBarStart` · `TopBarNavToggle` · `TopBarThemeToggle`.** 사이드 내비가 있는 제품은 로고와 접기 버튼을 `TopBarStart`(`.topbar-start`, 폭 240 — 사이드 내비와 같음) 안에 둡니다. 내비를 접어도 이 영역은 240 그대로이고 아래 내비만 64 로 줄어듭니다. `TopBarNavToggle collapsed onCollapsedChange controls` 는 제어형이고, 접는 내비에는 `SideNav collapsible` 을 줍니다(펼친 상태에서도 항목을 이름 + Tooltip 으로 감쌉니다). 사이트는 `button[data-sidenav-toggle][aria-controls=내비 id]` 를 ds.js 가 처리하고 `ds:sidenav {collapsed}` 를 냅니다. 접은 상태의 저장은 제품 몫입니다.
+- **라이트/다크 버튼**은 설정 바로 옆에 둡니다 — `TopBarThemeToggle theme onThemeChange`(제어형, `aria-pressed` = 다크). 사이트 `button[data-theme-toggle]` 은 ds.js 가 `<html data-theme>` 를 바꾸고 `ds:theme {theme}` 를 냅니다. 오른쪽 순서는 검색 · 알림 · 설정 · 라이트/다크 · 사용자입니다.
+- **상단 바 아이콘 버튼 sm 32 → md 40, 상단 바 검색 32 → 40**(최소 폭 220). 아바타 32 는 그대로입니다.
+- **`NotificationCenter` 벨은 점이 기본**입니다 — 전에는 숫자 배지였습니다. 숫자가 필요하면 `count="number"`(사이트 `.notify[data-count="number"]`). 벨 버튼도 sm → md 입니다. 이름 '알림 n건' 은 그대로입니다.
+- **아이콘 위 숫자 배지는 11px**(`.with-count .count:not(.dot)` — Caption 2 11/14). 99 를 넘으면 99+ 입니다. 사이드 내비 · 탭 안의 Count 는 12 그대로입니다.
+- **사이드 내비 아이콘 색** tertiary → `--foreground-neutral-secondary`.
+- **`ButtonGroup` 간격이 버튼 크기를 따릅니다** — sm 6 · md 8 · lg 12(전에는 모두 12). 클래스는 그대로입니다.
+- **`TextField icon`**(새 prop) — 칸 안 앞 아이콘 18 · tertiary · `aria-hidden`(사이트 `.field .affix > .field-icon`). 라벨을 대신하지 않습니다.
+- **액션 바 좌우 여백 0**(`.action-bar` 위아래 10 · 좌우 0). 표의 첫 칸 글자와 바 글자가 같은 선에서 시작하지 않을 수 있으니 바 안 배치를 확인합니다.
+- **flush 카드 바닥에 붙은 표는 마지막 행 아래 선이 없습니다** — 카드 테두리가 경계를 맡습니다.
+- **Steps 마법사 안 폼 카드는 패널 폭을 채웁니다**(`.stepper .form` 최대 폭 없음).
+
+## 버튼 아이콘 · 테마 아이콘 · 알림 점 · Page Header · 로그인 화면 (2026-11-18)
+
+- **버튼 아이콘이 커졌습니다** — sm 16 그대로, md 18 → 20, lg 20 → 28. lg 아이콘은 선 굵기 1.6 입니다(`.btn.lg svg{stroke-width:1.6}` — svg 의 `stroke-width="2"` 를 이깁니다, 면 아이콘은 영향 없음). loading 스피너도 같은 크기(16 · 20 · 28)입니다. 버튼 안에 아이콘 크기를 직접 정한 제품 CSS 가 있으면 확인합니다.
+- **라이트/다크 버튼은 지금 테마의 아이콘을 보입니다** — 라이트면 해, 다크면 달(전에는 갈 테마의 아이콘). 안쪽 클래스가 `.i-to-dark` · `.i-to-light` → **`.i-light`(해 — 라이트에서 보임) · `.i-dark`(달 — 다크에서 보임)** 로 바뀌었습니다. `TopBarThemeToggle` 은 그대로 쓰면 되고, 사이트 마크업을 복사한 제품은 클래스 이름을 바꿉니다. 이름 '다크 모드' · `aria-pressed` 는 그대로입니다.
+- **아이콘 위 Count 점은 모서리 안쪽 4**(`.with-count .count.dot{top:4px;right:4px}` — 전에는 바깥 -2). 숫자 배지는 -6 그대로입니다.
+- **`.page-head` 아래 여백 16**(`margin-bottom:1rem`). Page Header 바로 아래에 간격을 직접 준 제품은 겹쳐 두 배가 되지 않는지 봅니다.
+- **`--radius-xl` 10 → 14**(0.875rem). 이 토큰을 쓰는 팝업과 로그인 카드의 모서리가 둥글어집니다.
+- **로그인 화면 틀 `.auth-screen` · `.auth-copy`**(새 클래스) — `.auth-screen` 은 회색 바탕 · 가운데 정렬 · 최소 높이 640, `.auth-copy` 는 그 아래 고정 저작권 줄(12/16 tertiary, 아래 24)입니다. 화면 전체를 로그인으로 쓰는 제품은 `.auth-screen` 에 `min-height:100dvh` 를 더합니다. 로그인 폼 카드(`.form.auth`)는 테두리 없이 `--shadow-2` · `--radius-xl` 입니다.
+- 로그인 패턴 — 아이디 → **이메일**(`type="email"`, `autocomplete="username"` 그대로, id `si-email`), 두 칸은 라벨을 숨기고(`TextField labelHidden`) placeholder 로 보입니다. 로고 아이콘은 `shield-check` 면 48 · 글자색이고 면이 없습니다. 2단계 인증의 제목 · 설명은 `<div>` 한 묶음입니다.
+
+## 나란한 버튼은 늘 버튼 묶음 · 접기 아이콘 회전 · 상단 바 로고 (2026-11-18)
+
+- **버튼이 2개 이상 나란히 놓이면 늘 `ButtonGroup`(`.btn-group`) 안에 둡니다.** 팝업 · 폼 · 카드 · 사이드 패널 · 단계 · 표 액션 바 · 상단 바 오른쪽 같은 틀은 자리 · 선 · 여백 · 정렬을 그대로 맡고, 그 안에 묶음을 넣습니다. 폼 왼쪽 끝 삭제(`.left`)처럼 떨어져 놓이는 버튼은 묶음 밖입니다.
+  - 버튼 사이 간격은 묶음의 규칙(sm 6 · md 8 · lg 12)이 됩니다 — **팝업 · 폼 · 카드 아래 버튼 사이가 12 → 8**(카드 아래 sm 버튼은 6)입니다. 틀의 `gap` 에 기대던 제품 화면은 묶음을 넣으면 같은 간격이 됩니다.
+  - 컴포넌트가 그리는 버튼 줄도 바뀌었습니다 — `Stepper` 의 이전 · 다음 · 완료, Date Picker 달력 아래(글자 버튼 묶음 · 취소 · 적용 묶음 — 하나뿐이면 묶지 않음), `FileUpload` 실패 줄의 다시 시도 · 지우기. 이 줄을 `:scope >` 같은 자식 선택자로 집던 제품 코드는 한 단계 안쪽을 봅니다.
+- **사이드 내비 접기 버튼의 아이콘이 돕니다** — 접으면(`aria-expanded="false"`) 180°, 펼치면 0°, `--motion-base`(줄인 모션은 바로). CSS 만 바뀌었고 `TopBarNavToggle` 사용법은 그대로입니다.
+- **상단 바 로고 마크 = shield-check 면 아이콘 24**(제품 색 사각을 없앰, 색은 로고 글자색 — 로그인 로고와 같음). `TopBarLogo` 가 기본으로 그리고, 다른 마크는 새 prop **`mark`** 로 넘깁니다. 사이트 마크업을 복사한 제품은 `.logo > i` 안에 아이콘 svg 를 넣습니다(빈 `<i>` 는 이제 아무것도 보이지 않음).

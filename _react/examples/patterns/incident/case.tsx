@@ -23,7 +23,7 @@ export default function Example() {
         }
         title="랜섬웨어 행위 탐지"
         sub="INC-0412 · 접수 09:41 · PC-2041"
-        actions={<><Button variant="outline" color="assistive">단말 격리</Button><Button>조치 완료</Button></>}
+        actions={<><ButtonGroup><Button variant="outline" color="assistive">단말 격리</Button><Button>조치 완료</Button></ButtonGroup></>}
       />
       {/* 단계 이동은 제품의 처리 버튼이 맡고 Steps 는 표시만 한다 */}
       <Steps aria-label="처리 단계" items={["접수", "분석", "조치", "종료"]} current={2} />

@@ -37,9 +37,9 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   const rewrite = (html, root = "../") => html.split(/(<pre[\s\S]*?<\/pre>)/).map((seg, i) => i % 2 ? seg : rewriteSeg(seg, root)).join("");
 
   // 출력 폴더 초기화 + assets
-  for (const d of ["home", "foundations", "components", "patterns", "resources"]) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
+  for (const d of ["home", "foundations", "components", "patterns", "templates", "resources"]) fs.rmSync(path.join(OUT, d), { recursive: true, force: true });
   // assets/ 는 통째로 지우지 않는다 (assets/icons 는 사용자가 관리하는 원본). 생성물만 교체
-  for (const f of ["assets/style.css", "assets/font-jp.css", "assets/app.js", "assets/ds.js", "assets/ds-chart.js", "assets/vendor", "assets/fonts"]) fs.rmSync(path.join(OUT, f), { recursive: true, force: true });
+  for (const f of ["assets/style.css", "assets/font-jp.css", "assets/app.js", "assets/ds.js", "assets/ds-chart.js", "assets/templates.css", "assets/templates.js", "assets/vendor", "assets/fonts"]) fs.rmSync(path.join(OUT, f), { recursive: true, force: true });
   fs.mkdirSync(path.join(OUT, "assets", "fonts"), { recursive: true });
   fs.copyFileSync(FONT, path.join(OUT, "assets", "fonts", "PretendardVariable.woff2"));
   /* 일본어 한자용 Pretendard JP(2026-11-14) — 조각 woff2 + OFL 을 assets/fonts/jp 로, @font-face(unicode-range) 를 assets/font-jp.css 로.
@@ -55,6 +55,9 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   fs.copyFileSync(path.join(CHART_PKG, "dist", "chart.umd.js"), path.join(OUT, "assets", "vendor", "chart.umd.js"));
   fs.copyFileSync(path.join(CHART_PKG, "LICENSE.md"), path.join(OUT, "assets", "vendor", "chart.LICENSE.md"));
   fs.writeFileSync(path.join(OUT, "assets", "ds-chart.js"), fs.readFileSync(path.join(__dirname, "ds-chart.src.js"), "utf8"));
+  /* Templates(2026-11-18) — 화면 전체(templates/screen/*.html)만 쓰는 앱 틀 배치와 흉내 동작. 패키지 CSS 에 섞이지 않게 style.css 와 따로 둔다 */
+  fs.copyFileSync(path.join(__dirname, "templates.src.css"), path.join(OUT, "assets", "templates.css"));
+  fs.copyFileSync(path.join(__dirname, "templates.src.js"), path.join(OUT, "assets", "templates.js"));
   /* Date Picker 기준 시간대 — dayjs(MIT, 1.11.13 고정) + utc · timezone 플러그인. ds.js 는 data-timezone 이 있을 때 window.dayjs 를 쓴다(없으면 환경 시간대).
      Date Picker(.datepicker · .calendar)가 있는 페이지에만 싣는다(아래 datePage) */
   const DAYJS_PKG = path.join(__dirname, "node_modules", "dayjs");
@@ -73,7 +76,9 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } });
   p.on("pageerror", e => { console.error("page error:", e.message); process.exitCode = 1; });
-  await p.addInitScript(`window.STYLE_TEXT = ${JSON.stringify(cssSrc)}; window.REACT_EXAMPLES = ${JSON.stringify(REACT_EXAMPLES)}; window.DSJS_KB = ${Math.round(fs.statSync(path.join(OUT, "assets", "ds.js")).size / 1024)};`);
+  /* Templates 화면 HTML — 문서 페이지의 코드 보기(render.js tplDocPage)와 화면 파일이 같은 글자를 쓴다 */
+  const TPL = require("./templates.build.js"); const SCREEN_HTML = TPL.screens(); const TPL_CSS = fs.readFileSync(path.join(__dirname, "templates.src.css"), "utf8");
+  await p.addInitScript(`window.STYLE_TEXT = ${JSON.stringify(cssSrc)}; window.REACT_EXAMPLES = ${JSON.stringify(REACT_EXAMPLES)}; window.DSJS_KB = ${Math.round(fs.statSync(path.join(OUT, "assets", "ds.js")).size / 1024)}; window.TEMPLATE_HTML = ${JSON.stringify(SCREEN_HTML)}; window.TEMPLATE_CSS = ${JSON.stringify(TPL_CSS)};`);
   await p.goto("file://" + SRC + "#/home/overview");
   await p.waitForFunction(() => document.body.dataset.route === "home/overview");
 
@@ -150,6 +155,10 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
   for (const sec of [...new Set(routes.map(r => r.sec))]) { const first = routes.find(r => r.sec === sec && !isOverview(r.sec, r.key)); fs.writeFileSync(path.join(OUT, sec, "index.html"), `<!doctype html>\n<html lang="ko"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=${first.key}.html"><title>${first.secTitle}</title></head><body><a href="${first.key}.html">${first.secTitle}</a></body></html>\n`); }
   await b.close();
 
+  /* Templates 화면 일곱 — 문서 페이지(templates/<key>.html)의 iframe 이 이 화면을 줄여 보인다. route 가 아니라 pages 수에 들지 않는다 */
+  const SCREENS = TPL.build(OUT, SCREEN_HTML);
+  console.log(`templates: 화면 ${SCREENS.length}개`);
+
   // Figma 동기화용 데이터 (components.json)
   const light = LIB.parseVars(LIB.rootBlock(cssSrc, ":root")); const dark = LIB.parseVars(LIB.rootBlock(cssSrc, ':root[data-theme="dark"]'));
   const pageMeta = (sec, key) => { const pg = LIB.allPages(SITE, sec).find(p => p.key === key) || {}; return { title: pg.title || key, group: pg.group || "" }; };
@@ -172,7 +181,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 ## 폴더 구조
 - \`index.html\` — 첫 화면. 사이드 메뉴 없이 Home Overview 콘텐츠만 표시
 - 상단 Home 탭 → \`home/getting-started.html\`. Home 섹션 사이드 메뉴는 Getting started · About · UX Principles (Overview 는 첫 화면에만 있음)
-- \`home/\` \`foundations/\` \`components/\` \`patterns/\` \`resources/\` — 상단 메뉴 5개 섹션. 각 페이지가 개별 HTML 파일이며 섹션 폴더의 \`index.html\` 은 첫 페이지로 이동
+- \`home/\` \`foundations/\` \`components/\` \`patterns/\` \`templates/\` \`resources/\` — 상단 메뉴 ${Object.keys(SITE).length}개 섹션. 각 페이지가 개별 HTML 파일이며 섹션 폴더의 \`index.html\` 은 첫 페이지로 이동
 - \`assets/style.css\` — 디자인 토큰(\`:root\`) + 문서 레이아웃 + **컴포넌트 CSS**('Live component samples' 블록). Light/Dark 지원. 제품에서는 이 파일 하나를 연결하거나 각 페이지의 "컴포넌트 CSS"만 복사
 - \`assets/app.js\` — 테마 전환, 제품 색 미리보기, 검색, 코드 복사/탭
 - \`assets/ds.js\` — **컴포넌트 동작 스크립트**(순수 JS, 의존성 없음). 드롭다운·탭·페이지네이션·달력·테이블 정렬/선택·토스트 등. 사이트 프리뷰가 이 파일로 동작하며, HTML 을 복사해 쓰는 제품도 \`<script src="assets/ds.js" defer>\` 한 줄로 같은 동작을 얻습니다. React 제품은 불필요(@jiran/ds-react 가 동작 포함)
@@ -192,6 +201,7 @@ ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" h
 | \`data.js\` | 사이트 구조(SITE) · 제품 컬러(PRODUCTS) · 버전 · Changelog |
 | \`components.data.js\` | 컴포넌트 ${Object.keys(COMPONENTS).length}개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
 | \`patterns.data.js\` | 패턴 ${Object.keys(PATTERNS).length}개: 사용 컴포넌트(uses) · 예제 · 가이드라인 |
+| \`templates.data.js\` · \`templates.build.js\` | 템플릿 화면 ${Object.keys(require("./templates.data.js")).length}개: 문서 페이지의 글과 화면 생성기. 화면은 \`templates/screen/\`, 앱 틀 배치와 흉내 동작은 \`assets/templates.css\` · \`templates.js\` |
 | \`style.src.css\` | 스타일 원본. 컴포넌트 CSS 는 \`/* ---------- Live component samples ---------- */\` 블록 안에 평면 규칙으로 작성(코드 패널 추출 대상) |
 | \`lib.js\` | cssFor(컴포넌트 CSS 추출) · htmlToJsx(React 코드 생성) · hl(구문 강조) · tokenBlock |
 | \`icons.js\` | 사용 아이콘 목록(\`ICON_NAMES\`) + \`assets/icons\` SVG 를 읽어 \`I(name,size)\` 인라인 헬퍼 제공. 빌드 시 \`icons.gen.js\`(브라우저용, 생성물) 기록 |

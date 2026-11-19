@@ -10,7 +10,7 @@
 ## 폴더 구조
 - `index.html` — 첫 화면. 사이드 메뉴 없이 Home Overview 콘텐츠만 표시
 - 상단 Home 탭 → `home/getting-started.html`. Home 섹션 사이드 메뉴는 Getting started · About · UX Principles (Overview 는 첫 화면에만 있음)
-- `home/` `foundations/` `components/` `patterns/` `resources/` — 상단 메뉴 5개 섹션. 각 페이지가 개별 HTML 파일이며 섹션 폴더의 `index.html` 은 첫 페이지로 이동
+- `home/` `foundations/` `components/` `patterns/` `templates/` `resources/` — 상단 메뉴 6개 섹션. 각 페이지가 개별 HTML 파일이며 섹션 폴더의 `index.html` 은 첫 페이지로 이동
 - `assets/style.css` — 디자인 토큰(`:root`) + 문서 레이아웃 + **컴포넌트 CSS**('Live component samples' 블록). Light/Dark 지원. 제품에서는 이 파일 하나를 연결하거나 각 페이지의 "컴포넌트 CSS"만 복사
 - `assets/app.js` — 테마 전환, 제품 색 미리보기, 검색, 코드 복사/탭
 - `assets/ds.js` — **컴포넌트 동작 스크립트**(순수 JS, 의존성 없음). 드롭다운·탭·페이지네이션·달력·테이블 정렬/선택·토스트 등. 사이트 프리뷰가 이 파일로 동작하며, HTML 을 복사해 쓰는 제품도 `<script src="assets/ds.js" defer>` 한 줄로 같은 동작을 얻습니다. React 제품은 불필요(@jiran/ds-react 가 동작 포함)
@@ -30,6 +30,7 @@
 | `data.js` | 사이트 구조(SITE) · 제품 컬러(PRODUCTS) · 버전 · Changelog |
 | `components.data.js` | 컴포넌트 46개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
 | `patterns.data.js` | 패턴 22개: 사용 컴포넌트(uses) · 예제 · 가이드라인 |
+| `templates.data.js` · `templates.build.js` | 템플릿 화면 7개: 문서 페이지의 글과 화면 생성기. 화면은 `templates/screen/`, 앱 틀 배치와 흉내 동작은 `assets/templates.css` · `templates.js` |
 | `style.src.css` | 스타일 원본. 컴포넌트 CSS 는 `/* ---------- Live component samples ---------- */` 블록 안에 평면 규칙으로 작성(코드 패널 추출 대상) |
 | `lib.js` | cssFor(컴포넌트 CSS 추출) · htmlToJsx(React 코드 생성) · hl(구문 강조) · tokenBlock |
 | `icons.js` | 사용 아이콘 목록(`ICON_NAMES`) + `assets/icons` SVG 를 읽어 `I(name,size)` 인라인 헬퍼 제공. 빌드 시 `icons.gen.js`(브라우저용, 생성물) 기록 |

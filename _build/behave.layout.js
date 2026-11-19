@@ -32,7 +32,7 @@ module.exports = async function layout({ page, ok, go }) {
   await part("4 · components/top-navigation.html", async () => {
     await go("components/top-navigation.html");
     const tn = await page.evaluate((s) => { const bar = document.querySelector(s); return { search: bar.querySelector(".searchbar").getBoundingClientRect().height, btn: bar.querySelector(".btn.icon-only").getBoundingClientRect().height }; }, ex("top-navigation", "search"));
-    ok("top navigation search is 32, the same as the icon buttons beside it", tn.search === 32 && tn.btn === 32, JSON.stringify(tn));
+    ok("top navigation search is 40, the same as the md icon buttons beside it (2026-11-18 — 32 → 40)", tn.search === 40 && tn.btn === 40, JSON.stringify(tn));
   });
   await part("5 · 나란히 놓인 컨트롤은 높이가 같다 — 모든 컴포넌트 · 패턴 예제. 같은 flex · grid 부모 안에서 ", async () => {
 

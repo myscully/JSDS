@@ -1,9 +1,9 @@
-import { Button, Notice, Stack, StatusItem, StatusList } from "@jiran/ds-react";
+import { Button, ButtonGroup, Notice, Stack, StatusItem, StatusList } from "@jiran/ds-react";
 
 export default function Example() {
   return (
     <Stack>
-      <Notice tone="danger" title="SIEM 연동 연결 끊김" actions={<><Button size="sm">연동 설정</Button><Button variant="text" size="sm">다시 시도</Button></>}>
+      <Notice tone="danger" title="SIEM 연동 연결 끊김" actions={<><ButtonGroup><Button size="sm">연동 설정</Button><Button variant="text" size="sm">다시 시도</Button></ButtonGroup></>}>
         09:12 부터 이벤트 전송이 실패하고 있습니다. 인증 토큰을 확인하세요.
       </Notice>
       <StatusList>

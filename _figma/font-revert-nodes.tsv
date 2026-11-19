@@ -533,3 +533,73 @@ Patterns Overview	836:143	없음(새로 만듦)	Noto Sans KR Bold · 스타일 �
 # [k35d 해결] 4 Pattern	339:118	Pretendard SemiBold · Title/1 연결	Noto Sans KR Medium · 스타일 없음 · 16 · 행간 19.2px · 자간 -0.64px	/ 1,284	Card/대시보드 KPI 3번째 카드 Unit [→ Pretendard Medium 16 · 행간 19.2px · 자간 -0.64px · 스타일 없음]
 # [k35d 해결] 3 Component	I1031:4838;330:2294	Pretendard SemiBold · Title/1 연결(인스턴스 덮어쓰기)	Noto Sans KR Medium · 스타일 없음 · 16 · 행간 19.2px · 자간 -0.64px	%	Card/Data Visual 'KPI · 예제 =' 인스턴스 1031:4838 Unit — 글자 덮어쓰기가 있어 원본을 되돌려도 따라오지 않음 [→ Pretendard Medium 16 · 행간 19.2px · 자간 -0.64px · 스타일 없음]
 # [k35d 해결] 3 Component	I1039:4919;1039:4857	없음(k35c 새 인스턴스 — 1031:4859 대체)	Noto Sans KR Medium · 스타일 없음 · 16 · 행간 19.2px · 자간 -0.64px	/ 1,284	Card/Data Visual 'KPI · 예제 =' 인스턴스 1039:4919 Unit — 글자 덮어쓰기가 있어 원본을 되돌려도 따라오지 않음 [→ Pretendard Medium 16 · 행간 19.2px · 자간 -0.64px · 스타일 없음]
+# 2026-11-18 Figma 페이지 구성 1단계 — Overview 화면 넷 · _Site Header 를 새로 그리며 Noto Sans KR 로 남은 글자(맞는 텍스트 스타일이 없음). 사람이 Pretendard 로 바꿀 목록
+# 인스턴스 안 글자(I…)는 원본(_Site Header 1193:183)을 따르므로 원본만 적었다. 칸: page · node · 사이트 값 · 지금 · 글자
+Overview	1197:80	Pretendard 86.4/89.856/700 · 자간 -0.045em(텍스트 스타일 표 밖 — 홈 제목 예외)	Noto Sans KR Bold	JS Design System
+Overview	1197:82	Pretendard 18.72/29.952/400(홈 서브 — 표 밖)	Noto Sans KR Regular	제품 리뉴얼과 … (두 줄)
+Overview	1197:85	Pretendard 15/24/600(맞는 스타일 없음)	Noto Sans KR Bold	Get started
+Overview	1197:98	Pretendard 22/35.2/700 · 자간 -0.44px(배너 제목 — 표 밖)	Noto Sans KR Bold	Foundations
+Overview	1197:112	Pretendard 22/35.2/700 · 자간 -0.44px(배너 제목 — 표 밖)	Noto Sans KR Bold	Components
+Overview	1197:128	Pretendard 22/35.2/700 · 자간 -0.44px(배너 제목 — 표 밖)	Noto Sans KR Bold	Patterns
+Overview	1197:103	Pretendard 14/21.7/400(배너 설명 — 표 밖)	Noto Sans KR Regular	Color, type, grid …
+Overview	1197:117	Pretendard 14/21.7/400(배너 설명 — 표 밖)	Noto Sans KR Regular	Accessible building blocks …
+Overview	1197:133	Pretendard 14/21.7/400(배너 설명 — 표 밖)	Noto Sans KR Regular	Whole screens for …
+Overview	1197:105	Pretendard 13/20.8/400(배너 수 — 표 밖)	Noto Sans KR Regular	7 pages
+Overview	1197:119	Pretendard 13/20.8/400(배너 수 — 표 밖)	Noto Sans KR Regular	46 components
+Overview	1197:135	Pretendard 13/20.8/400(배너 수 — 표 밖)	Noto Sans KR Regular	22 patterns
+Overview	1193:6	Pretendard 22/800(로고 — 표 밖, 굵기 800 스타일 없음)	Noto Sans KR Black	JSDS
+Overview	1193:51	Pretendard 22/800(로고 — 표 밖, 굵기 800 스타일 없음)	Noto Sans KR Black	JSDS
+Overview	1193:96	Pretendard 22/800(로고 — 표 밖, 굵기 800 스타일 없음)	Noto Sans KR Black	JSDS
+Overview	1193:141	Pretendard 22/800(로고 — 표 밖, 굵기 800 스타일 없음)	Noto Sans KR Black	JSDS
+Overview	1198:121	Pretendard 22/800(로고 — 표 밖, 굵기 800 스타일 없음)	Noto Sans KR Black	JSDS
+Overview	1193:12	Pretendard 16/25.6/700(헤더 메뉴 선택 — 표 밖)	Noto Sans KR Bold	Home
+Overview	1193:59	Pretendard 16/25.6/700(헤더 메뉴 선택 — 표 밖)	Noto Sans KR Bold	Foundations
+Overview	1193:106	Pretendard 16/25.6/700(헤더 메뉴 선택 — 표 밖)	Noto Sans KR Bold	Components
+Overview	1193:155	Pretendard 16/25.6/700(헤더 메뉴 선택 — 표 밖)	Noto Sans KR Bold	Patterns
+Overview	1193:18	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1193:22	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1193:63	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1193:67	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1193:108	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1193:112	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1193:153	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1193:157	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1198:133	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Overview	1198:137	Pretendard 9/800(헤더 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:117	Pretendard 11/15.4/600(사이드바 묶음 이름 — 표 밖)	Noto Sans KR Bold	Base material
+Components	1194:5078	Pretendard 11/15.4/600(사이드바 묶음 이름 — 표 밖)	Noto Sans KR Bold	Selection Controls
+Components	1194:5110	Pretendard 11/15.4/600(사이드바 묶음 이름 — 표 밖)	Noto Sans KR Bold	Table
+Patterns	1195:355	Pretendard 11/15.4/600(사이드바 묶음 이름 — 표 밖)	Noto Sans KR Bold	Common UI
+Patterns	1195:371	Pretendard 11/15.4/600(사이드바 묶음 이름 — 표 밖)	Noto Sans KR Bold	Service Pattern
+Patterns	1195:383	Pretendard 11/15.4/600(사이드바 묶음 이름 — 표 밖)	Noto Sans KR Bold	Security Console
+Foundations	1196:121	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:129	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:133	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:139	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Components	1194:5068	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Components	1194:5086	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Components	1194:5096	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Components	1194:5100	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Components	1194:5128	Pretendard 10/800(사이드바 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:170	Pretendard 10/800(목록 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:184	Pretendard 10/800(목록 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:198	Pretendard 10/800(목록 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:206	Pretendard 10/800(목록 N 배지 — 표 밖)	Noto Sans KR Black	N
+Foundations	1196:151	Pretendard 44/800(Typography 그림 — 표 밖)	Noto Sans KR Black	Aa
+Foundations	1196:168	Pretendard 16/25.6/700(목록 이름 — 표 밖)	Noto Sans KR Bold	Colors
+Foundations	1196:176	Pretendard 16/25.6/700(목록 이름 — 표 밖)	Noto Sans KR Bold	Typography
+Foundations	1196:182	Pretendard 16/25.6/700(목록 이름 — 표 밖)	Noto Sans KR Bold	Writing
+Foundations	1196:190	Pretendard 16/25.6/700(목록 이름 — 표 밖)	Noto Sans KR Bold	Grid
+Foundations	1196:196	Pretendard 16/25.6/700(목록 이름 — 표 밖)	Noto Sans KR Bold	Icons
+Foundations	1196:204	Pretendard 16/25.6/700(목록 이름 — 표 밖)	Noto Sans KR Bold	Interaction
+Foundations	1196:212	Pretendard 16/25.6/700(목록 이름 — 표 밖)	Noto Sans KR Bold	Elevation
+Foundations	1196:171	Pretendard 14/22.4/400(목록 설명 — 표 밖)	Noto Sans KR Regular	Colors 설명
+Foundations	1196:177	Pretendard 14/22.4/400(목록 설명 — 표 밖)	Noto Sans KR Regular	Typography 설명
+Foundations	1196:185	Pretendard 14/22.4/400(목록 설명 — 표 밖)	Noto Sans KR Regular	Writing 설명
+Foundations	1196:191	Pretendard 14/22.4/400(목록 설명 — 표 밖)	Noto Sans KR Regular	Grid 설명
+Foundations	1196:199	Pretendard 14/22.4/400(목록 설명 — 표 밖)	Noto Sans KR Regular	Icons 설명
+Foundations	1196:207	Pretendard 14/22.4/400(목록 설명 — 표 밖)	Noto Sans KR Regular	Interaction 설명
+Foundations	1196:213	Pretendard 14/22.4/400(목록 설명 — 표 밖)	Noto Sans KR Regular	Elevation 설명
+Foundations	1196:216	Pretendard 16/25.6/400(문서 본문 — 표 밖)	Noto Sans KR Regular	색을 어느 자리에 쓰는지는 …
+Components	1194:5133	Pretendard 16/25.6/400 + 굵은 구절 600(문서 본문 — 표 밖)	Noto Sans KR Regular · Bold	모든 컴포넌트 페이지는 …
+Patterns	1195:408	Pretendard 16/25.6/400(문서 본문 — 표 밖)	Noto Sans KR Regular	패턴은 컴포넌트를 조합한 …

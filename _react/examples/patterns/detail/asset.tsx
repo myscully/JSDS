@@ -1,4 +1,4 @@
-import { Breadcrumb, BreadcrumbHome, BreadcrumbItem, Button, Card, CardHead, CardMeta, CardTitle, CopyField, Dropdown, DropdownTrigger, Icon, Indicator, Link, List, ListItem, Menu, MenuItem, MenuSep, PageHead, Row2, Stack, Tab, TabList, TabPanel, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, Tag } from "@jiran/ds-react";
+import { Breadcrumb, BreadcrumbHome, BreadcrumbItem, Button, ButtonGroup, Card, CardHead, CardMeta, CardTitle, CopyField, Dropdown, DropdownTrigger, Icon, Indicator, Link, List, ListItem, Menu, MenuItem, MenuSep, PageHead, Row2, Stack, Tab, TabList, TabPanel, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tabs, Tag } from "@jiran/ds-react";
 
 const EVENTS = [
   { time: "09:41:12", tone: "critical", sev: "Critical", name: "랜섬웨어 행위 탐지" },
@@ -21,8 +21,9 @@ export default function Example() {
         sub="김민준 · 개발팀 · Windows 11"
         actions={
           <>
-            <Button variant="outline" color="assistive">검사 실행</Button>
-            <Button>원격 점검</Button>
+            <ButtonGroup>
+              <Button variant="outline" color="assistive">검사 실행</Button>
+              <Button>원격 점검</Button>
             <Dropdown kind="menu" align="end" keepMounted>
               <DropdownTrigger asChild>
                 <Button variant="outline" color="assistive" iconOnly aria-label="PC-2041 동작 더 보기"><Icon name="dots" /></Button>
@@ -35,6 +36,7 @@ export default function Example() {
                 <MenuItem icon="trash" danger onSelect={() => {}}>자산 삭제</MenuItem>
               </Menu>
             </Dropdown>
+            </ButtonGroup>
           </>
         }
       />

@@ -1,4 +1,4 @@
-import { Button, Form, FormActions, FormLegend, TextField, NumberInput } from "@jiran/ds-react";
+import { Button, ButtonGroup, Form, FormActions, FormLegend, TextField, NumberInput } from "@jiran/ds-react";
 
 export default function Example() {
   return (
@@ -9,8 +9,10 @@ export default function Example() {
       <NumberInput id="v3" label="보관 기간" required min={1} max={365} unit="일" help="1~365일" />
       <TextField id="v4" label="알림 이메일" type="email" required />
       <FormActions>
-        <Button variant="outline" color="assistive">취소</Button>
-        <Button type="submit">정책 저장</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">취소</Button>
+          <Button type="submit">정책 저장</Button>
+        </ButtonGroup>
       </FormActions>
     </Form>
   );

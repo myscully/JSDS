@@ -1,9 +1,11 @@
-import { Avatar, Button, Icon, List, ListItem } from "@jiran/ds-react";
+import { Avatar, Button, ButtonGroup, Icon, List, ListItem } from "@jiran/ds-react";
 
 const actions = (name: string) => (
   <>
-    <Button color="assistive" iconOnly size="sm" aria-label={`${name} 편집`}><Icon name="pencil" /></Button>
-    <Button color="assistive" iconOnly size="sm" aria-label={`${name} 더 보기`}><Icon name="dots" /></Button>
+    <ButtonGroup>
+      <Button color="assistive" iconOnly size="sm" aria-label={`${name} 편집`}><Icon name="pencil" /></Button>
+      <Button color="assistive" iconOnly size="sm" aria-label={`${name} 더 보기`}><Icon name="dots" /></Button>
+    </ButtonGroup>
   </>
 );
 

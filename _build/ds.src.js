@@ -90,6 +90,8 @@
     $$(".tabs[role=tablist]", root).forEach(function (b) { tabSync(b); var on = $(".tab.on", b); if (on) tabReveal(on); });
     $$(".select-btn[role=radiogroup]", root).forEach(function (g) { var kids = $$(":scope > button", g), live = kids.filter(function (b) { return !b.disabled; }), cur = live.filter(function (b) { return b.classList.contains("on"); })[0] || live[0]; kids.forEach(function (b) { b.tabIndex = b === cur ? 0 : -1; }); });
     $$(".chip-group", root).forEach(syncChipReset);
+    $$("[data-sidenav-toggle]", root).forEach(navSync);
+    themeSync();
     $$(".tbl th.check input, .checkbox-group > .checkbox:first-child input", root).forEach(syncMaster);
     $$(".tbl-wrap > .action-bar", root).forEach(function (bar) { var w = bar.parentNode, t = $("table.tbl", w); barOff(bar, !(t && $("tbody td.check input:checked", t)) && !w._dsAll); });
     $$(".terms", root).forEach(syncTerms);
@@ -536,11 +538,14 @@
     return h + "</div>";
   }
   function footHtml(host) {
-    var st = S(host), list = dpFoot(host), h = "", t = dpToday(host), L = dpLabels(host);
-    if (st.mode === "range" && st.unit === "day") (host.getAttribute("data-presets") || "").split(/\s+/).filter(Boolean).forEach(function (n) { var s = addDays(t, -(+n - 1)); h += '<button type="button" class="btn sm text" data-preset="' + n + '"' + (outOf(host, s) || outOf(host, t) || (dpMaxDays(host) && +n > dpMaxDays(host)) ? " disabled" : "") + ">" + L.recent.replace("{n}", n) + "</button>"; });
-    ["today", "reset", "cancel", "apply"].forEach(function (k) { if (list.indexOf(k) < 0 || (k === "today" && st.mode !== "single")) return; h += '<button type="button" class="btn sm ' + FOOT[k] + '" data-cal="' + k + '"' + (k === "today" && outOf(host, t, st.unit) ? " disabled" : "") + ">" + L[k] + "</button>"; });
+    var st = S(host), list = dpFoot(host), lo = [], hi = [], t = dpToday(host), L = dpLabels(host);
+    if (st.mode === "range" && st.unit === "day") (host.getAttribute("data-presets") || "").split(/\s+/).filter(Boolean).forEach(function (n) { var s = addDays(t, -(+n - 1)); lo.push('<button type="button" class="btn sm text" data-preset="' + n + '"' + (outOf(host, s) || outOf(host, t) || (dpMaxDays(host) && +n > dpMaxDays(host)) ? " disabled" : "") + ">" + L.recent.replace("{n}", n) + "</button>"); });
+    ["today", "reset", "cancel", "apply"].forEach(function (k) { if (list.indexOf(k) < 0 || (k === "today" && st.mode !== "single")) return; (FOOT[k] === "text" ? lo : hi).push('<button type="button" class="btn sm ' + FOOT[k] + '" data-cal="' + k + '"' + (k === "today" && outOf(host, t, st.unit) ? " disabled" : "") + ">" + L[k] + "</button>"); });
+    var h = btnGroup(lo) + btnGroup(hi);
     return h ? '<div class="cal-foot">' + h + "</div>" : "";
   }
+  /* 나란한 버튼 2개 이상은 .btn-group(사람의 요청 2026-11-18) — 달력 아래는 글자 버튼(프리셋 · 오늘 · 초기화)과 취소 · 적용을 따로 묶는다 */
+  function btnGroup(list) { return list.length > 1 ? '<div class="btn-group">' + list.join("") + "</div>" : list.join(""); }
   /* 격자를 다시 그린다 — 달 · 뷰 · 달 수가 바뀔 때만. 고르기 · 미리보기 · 키 이동은 renderMarks 만 부른다(포인터 아래 DOM 을 갈지 않게) */
   function renderStructure(host) {
     var st = S(host), cal = calOf(host), act = doc.activeElement, key = cal.contains(act) ? focusKey(act) : null;
@@ -1309,6 +1314,18 @@
     fire(sp, "ds:step-finish", { index: cur });
   }
 
+  /* Top Navigation 의 사이드 내비 접기(2026-11-18) — [data-sidenav-toggle][aria-controls=사이드 내비 id] 가 .collapsed 를 붙였다 뗀다.
+     aria-expanded · 이름 · Tooltip 을 맞추고 ds:sidenav {collapsed} 를 낸다. 접은 상태를 기억하는 일은 제품 몫 */
+  var NAV_LABEL = { collapse: "메뉴 접기", expand: "메뉴 펼치기" };
+  function navTarget(btn) { var id = btn.getAttribute("aria-controls"); return id ? doc.getElementById(id) : null; }
+  function navSync(btn) { var nav = navTarget(btn); if (!nav) return; var c = nav.classList.contains("collapsed"), name = c ? NAV_LABEL.expand : NAV_LABEL.collapse; btn.setAttribute("aria-expanded", String(!c)); btn.setAttribute("aria-label", name); $$("a.has-on", nav).forEach(function (x) { if (c) x.setAttribute("aria-current", "true"); else if (x.getAttribute("aria-current") === "true") x.removeAttribute("aria-current"); });   /* 하위가 현재인 부모 — 접힌 레일에서만 현재를 잇는다(React SideNavItem hasActiveChild 와 같음) */ var w = btn.parentNode, tip = w && w.classList.contains("tooltip-wrap") && $(".tooltip", w); if (tip) tip.textContent = name; }
+  function navToggle(btn) { var nav = navTarget(btn); if (!nav) return; var c = nav.classList.toggle("collapsed"); $$("[data-sidenav-toggle]").forEach(function (b) { if (navTarget(b) === nav) navSync(b); }); fire(nav, "ds:sidenav", { collapsed: c }); }
+  /* 라이트/다크(2026-11-18) — [data-theme-toggle] 이 <html data-theme> 를 바꾸고 ds:theme {theme} 를 낸다. aria-pressed = 다크. 저장은 제품 몫.
+     다른 곳에서 테마를 바꿔도 버튼이 따라오게 data-theme 를 지켜본다 */
+  function themeNow() { var t = doc.documentElement.getAttribute("data-theme"); return t === "dark" || t === "light" ? t : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); }
+  function themeSync() { var d = String(themeNow() === "dark"); $$("[data-theme-toggle]").forEach(function (b) { if (b.getAttribute("aria-pressed") !== d) b.setAttribute("aria-pressed", d); }); }
+  function themeToggle(btn) { var next = themeNow() === "dark" ? "light" : "dark"; doc.documentElement.setAttribute("data-theme", next); themeSync(); fire(btn, "ds:theme", { theme: next }); }
+  if (window.MutationObserver) new MutationObserver(themeSync).observe(doc.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   function fire(el, name, detail) { if (el) el.dispatchEvent(new CustomEvent(name, { bubbles: true, detail: detail })); }
   /* Search — 필터형(data-debounce, 기본 300ms)은 입력이 멈춘 뒤, Enter · 지우기 · Esc 는 기다리지 않고 ds:search {value, trigger} */
   function searchFire(sb, inp, trigger) { clearTimeout(inp._dsSearch); fire(sb, "ds:search", { value: inp.value, trigger: trigger }); }
@@ -1364,6 +1381,9 @@
       // 하위 항목을 고르면 바로 위 부모가 .has-on — 접힌 레일은 하위 항목을 숨기므로 부모가 선택 모양과 aria-current="true" 를 이어받는다
       if (el.classList.contains("sub")) { var par = el.previousElementSibling; while (par && par.matches("a.sub")) par = par.previousElementSibling; if (par && par.tagName === "A") { par.classList.add("has-on"); if (nav.classList.contains("collapsed")) par.setAttribute("aria-current", "true"); } }
       return; }
+    // Top Navigation — 사이드 내비 접기 · 라이트/다크(2026-11-18). 포커스는 버튼에 남는다
+    if ((el = closest(t, "[data-sidenav-toggle]"))) { navToggle(el); return; }
+    if ((el = closest(t, "[data-theme-toggle]"))) { themeToggle(el); return; }
     // Text Field 비밀번호 표시 — 포커스는 버튼에 남는다
     if ((el = closest(t, ".number-field .num-btn"))) { numStep(el); return; }
     if ((el = closest(t, ".code-view .copy, .copy-field .copy"))) { copyRun(el); return; }
@@ -1816,7 +1836,15 @@
     } else if (bar) bar.remove();
     if (status === "error") { if (!m) { m = doc.createElement("span"); m.className = "msg"; body.appendChild(m); } m.textContent = msg; } else if (m) m.remove();
     if (status === "done") { if (!sr) { sr = doc.createElement("span"); sr.className = "sr-only"; sr.textContent = " (" + upL(h, "done") + ")"; row.appendChild(sr); } } else if (sr) sr.remove();
-    if (retry && !rt) li.insertBefore(upButton("retry", UP_ICON.retry, nm + " " + upL(h, "retry")), rm); else if (!retry && rt) { if (rt === doc.activeElement) rm.focus(); rt.remove(); }
+    /* 다시 시도 + 지우기 = 나란한 버튼 둘이라 .btn-group 으로 묶고, 하나로 돌아가면 푼다(2026-11-18). 옮긴 지우기 버튼의 포커스는 되돌린다 */
+    if (retry && !rt) {
+      var hadRm = rm === doc.activeElement, grp = doc.createElement("div"); grp.className = "btn-group";
+      li.insertBefore(grp, rm); grp.appendChild(upButton("retry", UP_ICON.retry, nm + " " + upL(h, "retry"))); grp.appendChild(rm); if (hadRm) rm.focus();
+    } else if (!retry && rt) {
+      if (rt === doc.activeElement) rm.focus();
+      var g = rt.parentNode; rt.remove();
+      if (g !== li && g.classList.contains("btn-group")) { var hadRm2 = rm === doc.activeElement; li.insertBefore(rm, g); g.remove(); if (hadRm2) rm.focus(); }
+    }
   }
   function upRow(h, id, name, size) {
     var ul = $(".upload-list", h);
@@ -2065,8 +2093,8 @@
   function nfItems(host) { return $$(".notify-item", host); }
   function nfSync(host) {   // 안 읽은 수 — 벨 배지 · 접근 이름 · Tooltip · 탭 배지 · 모두 읽음 버튼
     var n = nfItems(host).filter(function (li) { return li.classList.contains("unread"); }).length, t = nfTrigger(host), name = n ? nfL(host, "trigger").replace("{n}", n) : nfL(host, "triggerNone");
-    var wc = $(".with-count", host), c = wc && $(":scope > .count", wc); if (n && wc && !c) { c = doc.createElement("span"); c.className = "count"; c.setAttribute("aria-hidden", "true"); wc.appendChild(c); }   // 0 이면 배지를 두지 않는다 — 새 알림이 오면 만든다
-    if (c) { c.textContent = n > 99 ? "99+" : String(n); c.hidden = !n; }
+    var wc = $(".with-count", host), c = wc && $(":scope > .count", wc), num = host.getAttribute("data-count") === "number"; if (n && wc && !c) { c = doc.createElement("span"); c.className = "count"; c.setAttribute("aria-hidden", "true"); wc.appendChild(c); }   // 0 이면 배지를 두지 않는다 — 새 알림이 오면 만든다
+    if (c) { c.classList.toggle("dot", !num); c.textContent = num ? (n > 99 ? "99+" : String(n)) : ""; c.hidden = !n; }   // 벨은 점이 기본, 숫자는 data-count="number"(2026-11-18) — 접근 이름 '알림 n건' 은 점이어도 같다
     if (t) { t.setAttribute("aria-label", name); var tip = t.parentNode.classList.contains("tooltip-wrap") && $(".tooltip", t.parentNode); if (tip) tip.textContent = name; }
     var ut = $(".tabs .tab[data-filter=unread]", host), tc = ut && $(".count", ut); if (n && ut && !tc) { tc = doc.createElement("span"); tc.className = "count"; ut.appendChild(doc.createTextNode(" ")); ut.appendChild(tc); }
     if (tc) { tc.textContent = n > 99 ? "99+" : String(n); tc.hidden = !n; }

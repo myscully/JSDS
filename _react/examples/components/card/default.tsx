@@ -1,4 +1,4 @@
-import { Button, Card, CardDesc, CardFoot, CardHead, CardTitle, Tag } from "@jiran/ds-react";
+import { Button, ButtonGroup, Card, CardDesc, CardFoot, CardHead, CardTitle, Tag } from "@jiran/ds-react";
 
 export default function Example() {
   return (
@@ -9,8 +9,10 @@ export default function Example() {
       </CardHead>
       <CardDesc>1,000석 중 842석 사용 중. 2026-12-31 만료.</CardDesc>
       <CardFoot>
-        <Button variant="outline" color="assistive" size="sm">상세</Button>
-        <Button size="sm">갱신</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive" size="sm">상세</Button>
+          <Button size="sm">갱신</Button>
+        </ButtonGroup>
       </CardFoot>
     </Card>
   );

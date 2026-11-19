@@ -1,4 +1,4 @@
-import { Button, Form, FormActions, FormLegend, TextField, NumberInput } from "@jiran/ds-react";
+import { Button, ButtonGroup, Form, FormActions, FormLegend, TextField, NumberInput } from "@jiran/ds-react";
 
 export default function Example() {
   return (
@@ -9,8 +9,10 @@ export default function Example() {
       <NumberInput id="e3" label="보관 기간" unit="일" defaultValue="500" min={1} max={365} error="값이 너무 큽니다. 365 이하 입력하세요." />
       <FormActions>
         <Button variant="outline" color="assistive" className="left">삭제</Button>
-        <Button variant="outline" color="assistive">취소</Button>
-        <Button type="submit">정책 저장</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">취소</Button>
+          <Button type="submit">정책 저장</Button>
+        </ButtonGroup>
       </FormActions>
     </Form>
   );

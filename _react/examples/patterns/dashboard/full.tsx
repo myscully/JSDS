@@ -1,21 +1,14 @@
 import { Chart } from "chart.js/auto";
-import { Button, Card, CardHead, CardTitle, ChartCard, ChartLegend, Donut, DonutRow, Icon, Indicator, Kpi, KpiGrid, Link, PageHead, ProgressList, Row2, Row3, SelectButton, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
+import { Button, Card, CardHead, CardTitle, ChartCard, Icon, Indicator, Kpi, KpiGrid, Link, PageHead, ProgressList, Row2, Row3, SelectButton, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
 
-import { ChartCanvas, SparkCanvas, presets } from "@jiran/ds-react/chart";
+import { ChartCanvas, presets } from "@jiran/ds-react/chart";
 
-/* 추이 — 심각도 누적 영역(탐색형, Chart.js). 데이터는 사이트 예제(patterns.data.js)와 같다 */
-const TREND = {
+/* 일별 탐지 — 계열 하나인 추이(Data Visual Default 와 같은 데이터, 2026-11-18 — 그 전 심각도 누적 막대). 데이터는 사이트 예제(patterns.data.js DAILY14)와 같다 */
+const DAILY = {
   labels: ["10-21", "10-22", "10-23", "10-24", "10-25", "10-26", "10-27", "10-28", "10-29", "10-30", "10-31", "11-01", "11-02", "11-03"],
-  series: [
-    { label: "Critical", tone: "critical" as const, data: [12, 18, 9, 14, 22, 17, 11, 8, 15, 19, 24, 13, 10, 16] },
-    { label: "High", tone: "high" as const, data: [30, 24, 41, 35, 28, 33, 39, 27, 31, 36, 44, 29, 25, 32] },
-    { label: "Medium", tone: "medium" as const, data: [52, 48, 61, 55, 47, 58, 64, 49, 53, 60, 66, 51, 46, 57] },
-  ],
-  stacked: true,
+  series: [{ label: "탐지", data: [94, 90, 111, 104, 97, 108, 114, 84, 99, 115, 134, 93, 81, 105] }],
 };
-/* KPI 스파크 · 주간 비교(tone 없는 두 계열 → 한 톤 1 · 4 단계) — 사이트 patterns.data.js 의 DASH 와 같다 */
-const CRITICAL = { label: "Critical 이벤트", data: [1021, 1088, 1046, 1132, 1150, 1146, 1284] };
-const THREATS = { label: "신규 위협", data: [62, 70, 58, 81, 77, 96, 112] };
+/* 주간 비교(tone 없는 두 계열 → 한 톤 1 · 4 단계) · 심각도 분포 — 사이트 patterns.data.js 의 DASH 와 같다. KPI 는 스파크라인 없이(2026-11-18) */
 const WEEKS = {
   labels: ["랜섬웨어", "악성코드", "USB 위반", "정책 위반", "피싱"],
   series: [
@@ -23,13 +16,17 @@ const WEEKS = {
     { label: "지난 주", data: [349, 331, 198, 142, 97] },
   ],
 };
-const SEGMENTS = [
-  { label: "Critical", value: 190, tone: "critical" as const },
-  { label: "High", value: 285, tone: "high" as const },
-  { label: "Medium", value: 196, tone: "medium" as const },
-  { label: "Low", value: 120, tone: "low" as const },
-  { label: "Info", value: 263, tone: "info" as const },
-];
+const SEVERITY = {
+  series: [
+    { label: "Critical", tone: "critical" as const, value: 190 },
+    { label: "High", tone: "high" as const, value: 285 },
+    { label: "Medium", tone: "medium" as const, value: 196 },
+    { label: "Low", tone: "low" as const, value: 120 },
+    { label: "Info", tone: "info" as const, value: 263 },
+  ],
+  center: "1,054",
+  legend: "right" as const,
+};
 const RECENT = [
   ["09:41:12", "랜섬웨어 행위 탐지", "PC-2041 · 김민준", "blocked"],
   ["09:36:47", "알려진 악성코드 차단", "PC-0932 · 박지훈", "blocked"],
@@ -50,24 +47,17 @@ export default function Example() {
         }
       />
       <KpiGrid>
-        <Kpi tone="critical" label="Critical 이벤트" value="1,284" delta="12%" deltaDir="up" deltaTone="bad" note="전일 대비">
-          <SparkCanvas chart={Chart} config={presets.spark(CRITICAL)} aria-label="Critical 이벤트 — 최근 7일 1,021건에서 1,284건으로 증가" />
-        </Kpi>
+        <Kpi tone="critical" label="Critical 이벤트" value="1,284" delta="12%" deltaDir="up" deltaTone="bad" note="전일 대비" />
         <Kpi label="차단률" value="99.2" unit="%" delta="0.3%p" deltaDir="up" deltaTone="good" note="전일 대비" />
         <Kpi label="연결 에이전트" value="1,247" unit="/ 1,284" note="37대 오프라인" />
-        <Kpi label="신규 위협" value="112" delta="20%" deltaDir="up" deltaTone="bad" note="전일 대비">
-          <SparkCanvas chart={Chart} config={presets.spark(THREATS)} aria-label="신규 위협 — 최근 7일 62건에서 112건으로 증가" />
-        </Kpi>
+        <Kpi label="신규 위협" value="112" delta="20%" deltaDir="up" deltaTone="bad" note="전일 대비" />
       </KpiGrid>
       <Row3>
-        <ChartCard title="탐지 추이" sub="최근 14일">
-          <ChartCanvas chart={Chart} config={presets.timeseries(TREND)} aria-label="탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역" />
+        <ChartCard title="일별 탐지" sub="최근 14일">
+          <ChartCanvas chart={Chart} config={presets.timeseries(DAILY)} aria-label="일별 탐지 — 최근 14일 합계 1,429건, 지난 14일보다 8% 증가" />
         </ChartCard>
         <ChartCard title="심각도 분포">
-          <DonutRow>
-            <Donut segments={SEGMENTS} label="1,054" />
-            <ChartLegend className="column" items={SEGMENTS.map((s) => ({ label: s.label, value: s.value, tone: s.tone }))} />
-          </DonutRow>
+          <ChartCanvas chart={Chart} config={presets.donut(SEVERITY)} aria-label="심각도 분포 — Critical 190, High 285, Medium 196, Low 120, Info 263, 합계 1,054" />
         </ChartCard>
       </Row3>
       <Row2>

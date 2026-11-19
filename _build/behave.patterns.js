@@ -135,7 +135,7 @@ module.exports = async function patterns({ page, ok, go }) {
     const out = [...await help(), await page.evaluate(() => document.activeElement.closest(".checkbox") ? "checkbox" : document.activeElement.className)];
     await page.keyboard.press("Shift+Tab"); const backIn = await at();
     const row = await page.evaluate(() => [...document.querySelectorAll("#ex-sign-in-sign-in .auth-row .checkbox, #ex-sign-in-sign-in .auth-row .link")].map((e) => parseFloat(getComputedStyle(e).fontSize)));
-    const auto = await page.evaluate(() => [document.getElementById("si-id").getAttribute("autocomplete"), document.getElementById("si-pw").getAttribute("autocomplete")]);
+    const auto = await page.evaluate(() => [document.getElementById("si-email").getAttribute("autocomplete"), document.getElementById("si-pw").getAttribute("autocomplete")]);
     ok("sign-in code validation: empty → '인증 코드를 입력하세요.' on all six boxes and focus on the first; 4 digits → '숫자 6자리를 모두 입력하세요.' and focus on the first empty box; typing the rest clears it back to the help; only one box is a Tab stop — after deleting two digits Tab leaves the group (to the checkbox) and announces the code message, Shift+Tab comes back to the first empty box; username/current-password autocomplete; the remember/find row is 14px",
       empty.join() === "6,인증 코드를 입력하세요.,0" && partial.join() === "6,숫자 6자리를 모두 입력하세요.,4" && fixed.join() === "0,코드는 30초마다 바뀝니다." && out.join() === "6,숫자 6자리를 모두 입력하세요.,checkbox" && backIn === 4 && auto.join() === "username,current-password" && row.length === 2 && row.every((x) => x === 14), JSON.stringify({ empty, partial, fixed, out, backIn, auto, row }));
   });

@@ -24,7 +24,9 @@
    어느 Overview 인지 구분할 수 없었다. 그래서 넘침·겹침·섹션 항목에 pageId 를 함께 적는다.
    id 로 고르면 반대 구멍이 생긴다 — 페이지를 지우고 다시 만들어 id 가 바뀌면 그 페이지는 소리 없이 빠진다.
    그래서 이 표를 덤프의 scope 로 내보내고, audit 이 pages 와 맞춰 없는 id 는 어긋남으로, 같은 이름인데 범위 밖인 페이지는 NOTE 로 알린다 */
-const CURRENT_PAGES = { "302:2": "Overview", "302:3": "1 Theme", "302:4": "2 Element", "302:5": "3 Component", "302:6": "4 Pattern", "302:7": "Resource" };
+/* 2026-11-18 사이트 메뉴 넷으로(사람의 결정) — Overview 는 새 페이지 1184:2, 나머지 셋은 옛 1 Theme · 3 Component · 4 Pattern 의 id 를 그대로 쓴다.
+   옛 Overview(302:2) · 2 Element(302:4) · Resource(302:7)는 구분선 아래 아카이브라 범위 밖 */
+const CURRENT_PAGES = { "1184:2": "Overview", "302:3": "Foundations", "302:5": "Components", "302:6": "Patterns" };
 const isCurrent = (p) => Object.prototype.hasOwnProperty.call(CURRENT_PAGES, p.id);
 const OVERFLOW_MIN = 10;   // 도형 외곽선·그림자 번짐이 만드는 2~6px 는 잡지 않는다
 
@@ -190,7 +192,21 @@ const lineCard = (k) => { const tx = (n) => (n ? n.characters : null), vis = (n)
   const head = "children" in k ? k.children.find((x) => x.name === "Head" && vis(x)) : null, ht = head ? head.findAll((x) => x.type === "TEXT" && vis(x)) : [];
   const donut = "findOne" in k && k.findOne((x) => x.type === "FRAME" && x.children.filter((e) => e.type === "ELLIPSE" && e.arcData && e.arcData.innerRadius > 0).length >= 2);
   const bars = "findOne" in k && k.findOne((x) => x.name === "Bar" && x.type === "FRAME");
-  return { id: k.id, chart: false, kind: donut ? "donut" : bars ? "bars" : "other", title: ht[0] ? ht[0].characters : null, meta: ht[1] ? ht[1].characters : null }; };
+  const base = { id: k.id, chart: false, title: ht[0] ? ht[0].characters : null, meta: ht[1] ? ht[1].characters : null };
+  /* 2026-11-18 프레임으로 그린 탐색형 차트(예제와 데이터가 달라 변형을 못 쓸 때) — Canvas > Series 의 사각형 '<계열> <라벨>' 을 계열별로 세고 칠, x 눈금 · 범례 글 */
+  const cv = "children" in k ? k.children.find((x) => x.name === "Canvas" && x.type === "FRAME") : null, ser = cv && cv.children.find((x) => x.name === "Series" && "children" in x);
+  if (ser) { const bs = {}; for (const r of ser.children.filter((x) => x.type === "RECTANGLE" && vis(x))) { const lab = cv.children.find((t) => t.type === "TEXT" && /^Tick /.test(t.name) && r.name.endsWith(" " + t.characters));
+      const sn = lab ? r.name.slice(0, -(lab.characters.length + 1)) : r.name; const b = (bs[sn] = bs[sn] || { n: 0, fills: [] }); b.n++; const f = paint(r.fills); if (!b.fills.includes(f)) b.fills.push(f); }
+    const lg = cv.children.find((x) => x.name === "Legend" && vis(x));
+    /* 2026-11-18 묶음 3 — 사각형 없이 '<계열> Line' 벡터만 있으면 선 추이(timeseries — 대시보드 '일별 탐지') */
+    const ln = ser.children.filter((x) => x.type === "VECTOR" && / Line$/.test(x.name) && vis(x));
+    return Object.assign(base, { kind: ln.length && !Object.keys(bs).length ? "timeseries" : "bar", drawn: { bars: bs, lines: ln.map((x) => x.name.replace(/ Line$/, "")), ticksX: cv.children.filter((x) => x.type === "TEXT" && /^Tick /.test(x.name) && vis(x) && !/^[\d.,\s]+$/.test(x.characters)).map((x) => x.characters),
+      legend: lg ? lg.children.filter(vis).map((it) => tx(it.findOne((x) => x.type === "TEXT"))) : [] } }); }
+  /* 진행 막대 목록 — 'Progress List' > 행(Row: 라벨 · 값 · 목표 글 / Track > Fill) */
+  const pl = "findOne" in k && k.findOne((x) => x.name === "Progress List" && "children" in x);
+  if (pl) return Object.assign(base, { kind: "progress", rows: pl.children.filter(vis).map((r) => { const t = r.findAll((x) => x.type === "TEXT" && vis(x)), tr = r.findOne((x) => x.name === "Track"), fl = tr && tr.findOne((x) => x.name === "Fill");
+    return { label: t[0] ? t[0].characters : null, value: t[1] ? t[1].characters : null, target: t[2] ? t[2].characters : null, pct: tr && fl ? +((fl.width / tr.width) * 100).toFixed(1) : null }; }) });
+  return Object.assign(base, { kind: donut ? "donut" : bars ? "bars" : "other" }); };
 /* 도넛 + 범례 행(2026-11-06 k36 — .donut-row 가 flex-wrap: 한 줄에 안 들어가면 범례가 도넛 아래). 행의 방향 · 간격 · 정렬 · 크기,
    행이 쓸 수 있는 폭 avail(행 부모의 안쪽 폭 — 부모가 auto layout 이 아니면 행 폭), 도넛 · 범례 폭과 위치. audit 이 .donut-row gap 과 폭으로 옆 · 아래를 판정한다 */
 const rowGeo = (donut) => { const row = donut.parent; if (!row || !("layoutMode" in row)) return null; const up = row.parent, lg = row.children.find((k) => k.id !== donut.id && "children" in k && k.visible !== false); /* id 로 비교 — 인스턴스 안 노드는 찾은 경로마다 다른 객체라 !== 가 자기 자신을 범례로 잡았다(k36 330:2605) */
@@ -213,7 +229,7 @@ const paint = (arr) => {
   return o.join(",") || "-";
 };
 const shadows = (n) => ("effects" in n ? n.effects.filter((e) => e.visible !== false && e.type === "DROP_SHADOW").length : 0);
-const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, btnLoading: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null, accordion: null, accordionProps: null, breadcrumb: null, breadcrumbItem: null, card: null };
+const components = { sets: {}, missingSets: [], negText: [], textOnSurface: [], opaque: {}, legacy: {}, sections: [], specs: [], docText: [], focus: {}, tagHeights: null, effectColors: null, buttons: null, btnLoading: null, defaults: {}, translucent: [], controls: { radio: null, sliderDisabled: null }, disabledInner: [], chipX: null, tileDisabled: null, datePicker: null, calendarDay: null, calendar: null, textField: null, accordion: null, accordionProps: null, breadcrumb: null, breadcrumbItem: null, card: null };
 /* 포커스 칸(2026-10-26 k5) — 세트마다 포커스 모양을 지는 노드. Search 는 변형 자신이 칸이다.
    k6 에 선택 컨트롤 넷을 더했다 — 사이트의 전역 :focus-visible 외곽선이 감싸는 상자다(Checkbox · Radio 는 16 상자, Switch 는 트랙,
    Slider 는 엄지가 아니라 range 전체라 Track 280×20). k8 에 Button 을 더했다가 2026-10-28 k16 에 뺐다 — 사람의 정의로 버튼 포커스는 상태가 아니라
@@ -367,7 +383,7 @@ for (const p of figma.root.children) {
      opaque 토큰 자체는 저장소에 있다(기준 토큰). 대개 컴포넌트 CSS 가 쓰지 않으므로, 토큰 견본을 늘어놓는
      1 Theme 밖의 것은 모두 모아 보낸다 — 견본을 다른 토큰으로 묶으면 토큰 문서가 거짓이 된다.
      저장소가 실제로 소비하는 opaque(k42: Medium 심각도 lime-opaque)는 audit 이 CSS · ds-chart 에서 세어 허용한다 */
-  const swatchPage = p.name === "1 Theme";
+  const swatchPage = CURRENT_PAGES[p.id] === "Foundations";
   for (const n of p.findAll((k) => ("fills" in k || "strokes" in k) && !inInstance(k))) {
     for (const arr of [n.fills, n.strokes]) {
       if (!arr || arr === figma.mixed) continue;
@@ -401,6 +417,20 @@ for (const p of figma.root.children) {
       if (ts.length >= 2) rows.push([ts[0].characters, ts.slice(1).map((t) => t.characters).join(" "), ts[1].id]);
     }
     components.specs.push({ card: card.name, id: card.id, rows });
+  }
+  /* 문서 카드의 고르기 표 · Rules(2026-11-18) — audit 이 components · patterns 데이터의 choose · principles 와 맞춘다.
+     패널은 제목 글자가 패널 이름과 같은 프레임이다. 고르기 표 행 = 글자 둘인 자식 프레임 [이름, 글, 글 id],
+     Rules 행 = 글자 둘인 가로 프레임 [묶음, 이름, 글, 글 id] — 묶음은 행 목록을 감싼 프레임의 첫 글자(없으면 "") */
+  const panelOf = (card, nm) => card.findOne((n) => n.type === "FRAME" && n.name === nm && n.children.some((k) => k.type === "TEXT" && k.characters.trim() === nm));
+  for (const card of p.findAll((n) => n.type === "FRAME" && /^Card\//.test(n.name) && !inInstance(n) && n.children.some((k) => k.name === "Body"))) {
+    const cp = panelOf(card, "고르기 표"), rp = panelOf(card, "Rules");
+    if (!cp && !rp && !card.findOne((n) => n.type === "FRAME" && n.name === "Spec")) continue;
+    const vt = (r) => r.findAll((n) => n.type === "TEXT" && n.visible !== false);
+    const choose = cp ? cp.children.filter((r) => r.type === "FRAME" && r.visible !== false && vt(r).length >= 2).map((r) => { const ts = vt(r); return [ts[0].characters, ts.slice(1).map((t) => t.characters).join(" "), ts[1].id]; }) : null;
+    const rules = rp ? rp.findAll((r) => r.type === "FRAME" && r.layoutMode === "HORIZONTAL" && r.visible !== false && vt(r).length === 2).map((r) => {
+      const host = r.parent && r.parent.parent; const h = host && host !== rp ? host.children.find((k) => k.type === "TEXT") : null; const ts = vt(r);
+      return [h ? h.characters : "", ts[0].characters, ts[1].characters, ts[1].id]; }) : null;
+    components.docText.push({ card: card.name, id: card.id, choose, rules });
   }
   /* 포커스 변형(2026-10-26 k5) — audit 이 사이트 CSS 의 테두리 · inset · 후광(값 입력 필드), 전역 :focus-visible 외곽선(선택 컨트롤, k6)과 맞춘다.
      변형마다 칸의 테두리(토큰 · 굵기 · 정렬) · 면 · 안쪽 · 바깥 그림자([토큰, spread, blur, "x,y"] — 배열 순서 그대로, 뒤의 것이 위에 그려진다).
@@ -720,6 +750,7 @@ for (const p of figma.root.children) {
       e.tooltip = tip ? { fill: paint(tip.fills), r: tip.cornerRadius === figma.mixed ? "mixed" : tip.cornerRadius, pad: [tip.paddingTop, tip.paddingRight, tip.paddingBottom, tip.paddingLeft], title: tx(tip.findOne((k) => k.name === "Title" && k.type === "TEXT")),
         rows: tip.findAll((k) => k.name === "Row").map((row) => { const t = row.findOne((k) => k.type === "TEXT"), dot = row.findOne((k) => k.type === "ELLIPSE"); return { text: t ? t.characters : null, fill: t ? paint(t.fills) : null, st: t ? tsMap.get(t.textStyleId) || null : null, swatch: dot ? paint(dot.fills) : null, swD: dot ? +dot.width.toFixed(2) : null }; }) } : null;
       e.center = tx(canvas.findOne((k) => k.name === "Center" && k.type === "TEXT"));
+      e.caption = tx(canvas.findOne((k) => k.name === "Caption" && k.type === "TEXT"));   // 게이지 가운데 값 위 설명(2026-11-18 묶음 3)
       e.centerType = centerTx(canvas.findOne((k) => k.name === "Center" && k.type === "TEXT"));   // 스타일 · 행간 · 가운데(k34)
     }
     out.variants.push(e);
@@ -755,6 +786,11 @@ for (const p of figma.root.children) {
       gaps: a.map((x, i) => +((i + 1 < a.length ? a[i + 1][0] : a[0][0] + 360) - x[1]).toFixed(2)), strokes: arcs.reduce((n, e) => n + e.strokes.filter((x) => x.visible !== false).length, 0), dividers: donutDiv(f), legendSw: sw, row: rowGeo(f), grid: gridOf(f) });
   }
 }
+/* 대시보드 차트 줄(2026-11-18) — Patterns 의 'Chart Row / <사이트 줄 클래스>' 프레임. 줄 폭 · 안쪽 여백 · 간격 · 카드 폭 · 높이 · 카드 구성(lineCard) */
+components.dashRows = [];
+for (const p of figma.root.children) { if (!isCurrent(p) || p.name !== "Patterns") continue;
+  for (const f of p.findAll((n) => n.type === "FRAME" && /^Chart Row \/ /.test(n.name))) { const kids = f.children.filter((k) => k.visible !== false);
+    components.dashRows.push({ id: f.id, name: f.name, w: +f.width.toFixed(2), pad: (f.paddingLeft || 0) + (f.paddingRight || 0), gap: f.itemSpacing, ws: kids.map((k) => +k.width.toFixed(2)), hs: kids.map((k) => +k.height.toFixed(2)), cards: kids.map(lineCard) }); } }
 /* KPI 글(2026-11-05 k35 · k35b) — 라벨 / 값 줄(값 · 단위) / 증감 줄(화살표 아이콘 · 글)의 글 · 칠. 문서 카드의 KPI 인스턴스와 4 Pattern 대시보드의 raw 프레임이
    같은 모양이라 하나로 읽는다. 인스턴스 안 숨긴 노드는 플러그인이 돌려주지 않기도 해 visible 로 거른다(숨긴 단위 · 화살표 = null).
    audit 이 components.data.js data-visual 예제 kpi(문서 'KPI · 예제' 행) · patterns.data.js dashboard(대시보드 KPI)와 글 · 칠을 맞춘다 */
@@ -762,7 +798,11 @@ const kpiRead = (n) => {
   const kids = n.children.filter((k) => k.visible !== false);
   const label = kids[0] && kids[0].type === "TEXT" ? kids[0] : null;
   const vr = kids[1] && "children" in kids[1] ? kids[1].children.filter((k) => k.visible !== false && k.type === "TEXT") : [];
-  const dr = kids[2] && "children" in kids[2] ? kids[2] : null;
+  /* 2026-11-18 증감 = Foot > Delta(배지: 화살표 + 글) + Note — 사이트 .kpi-foot > .delta + .delta-note. 배지가 숨으면(증감 없음) 증감 글 · 화살표 = null. 옛 구조(증감 줄에 바로 글)도 읽는다 */
+  const foot = kids[2] && "children" in kids[2] ? kids[2] : null;
+  const badge = foot ? foot.children.find((k) => k.name === "Delta" && "children" in k) : null;
+  /* 숨긴 배지는 인스턴스 children 에서 빠지기도 한다 — Note 가 있는 새 구조면 증감 없음으로 읽는다 */
+const dr = badge ? (badge.visible !== false ? badge : null) : foot && foot.children.some((k) => k.name === "Note") ? null : foot;
   const dt = dr ? dr.children.find((k) => k.visible !== false && k.type === "TEXT") : null;
   const ic = dr ? dr.children.find((k) => k.visible !== false && k.type === "INSTANCE") : null;
   return { id: n.id, label: label ? label.characters : null, value: vr[0] ? vr[0].characters : null, unit: vr[1] ? vr[1].characters : null,
@@ -804,7 +844,8 @@ for (const p of figma.root.children) {
   const dash = p.findAllWithCriteria({ types: ["FRAME"] }).find((f) => f.name === "Card/대시보드");
   if (!dash) continue;
   components.kpiDash = dash.findAll((f) => (f.type === "FRAME" || f.type === "INSTANCE") && f.children && f.children.length >= 2 && f.children[0].type === "TEXT" && "children" in f.children[1] &&
-    f.children[1].children.some((t) => t.type === "TEXT" && TS_NAME.get(t.textStyleId) === "Display/2")).map(kpiRead);
+    f.children[1].children.some((t) => t.type === "TEXT" && ["Display/2", "Title 1"].includes(TS_NAME.get(t.textStyleId)))).map((f) => { const pr = f.type === "INSTANCE" ? f.componentProperties || {} : {};
+    return { ...kpiRead(f), tone: pr.Tone ? pr.Tone.value : null, dir: pr.Delta ? pr.Delta.value : null }; });   // 2026-11-18 값 = Title 1(19단계) · 대시보드 KPI 가 KPI 인스턴스가 됨
 }
 /* 문서 틀 색(2026-11-06 k38) — 사람의 결정: 4 Pattern 문서 틀(섹션 머리 글 · 카드 · 카드 머리 글 · Body · 패널 · 칩 · 예시 틀 · Do/Don't)의
    칠 · 선 · 글자 색이 다크에서도 맞게 시멘틱 변수에 묶여야 한다. 다크 캡처에서 '사용 컴포넌트' · '사용 가이드' 패널이 static/white 라 흰 바탕에 흐린 글자로 남았다.
@@ -816,7 +857,7 @@ const docFrames = { pages: {}, others: {} };
 /* k39(2026-11-06 — 사람의 결정): 3 Component · 2 Element 도 같은 대조 대상. 역할은 패널 이름 · 프레임 이름으로 정한다 —
    '사용 컴포넌트' 칩 · Do/Don't 상자(첫 글이 Do 면 doBox) · '개발 상태' 칩 · Table(첫 줄 = 머리) · Stage(그림자 무대)와 그 안 Surface ·
    Layout demo 와 그 안 Side nav · Properties(List > Heading · 칩 · Content) · Spec 줄. 인스턴스 · 컴포넌트 · 세트 · Example 안과 Component 칸 안은 기록하지 않는다 */
-const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];
+const DOC_PAGES = ["Patterns", "Components", "Foundations"];
 {
   const docCards = (p) => p.findAll((n) => n.type === "FRAME" && /^Card\//.test(n.name) && n.children.some((k) => k.name === "Header") && n.children.some((k) => k.name === "Body"));
   const texts = (n) => (n && "children" in n ? n.children.filter((k) => k.type === "TEXT" && k.visible !== false) : []);
@@ -853,11 +894,20 @@ const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];
       };
       for (const sec of p.children) {
         if (!("children" in sec)) continue;
+        /* 2026-11-18 Foundations 는 옛 1 Theme(Colors · Typography · Icons — 토큰 견본이라 atomic · raw 칠이 정상)와 옛 2 Element 카드가 합쳐진 페이지다.
+           대조는 예전처럼 2 Element 에서 온 섹션(Elevation · Grid · Interaction)만 — 견본까지 넣으면 어긋남이 아닌 것이 269건 늘었다 */
+        if (pname === "Foundations" && !["Elevation", "Grid", "Interaction"].includes(sec.name)) continue;
         put(sec, "section");
         const sh = sec.children.find((k) => k.name === "Header");
         if (sh) texts(sh).forEach((t, i) => put(t, i ? "secDesc" : "secTitle"));
       }
+      /* 2026-11-18 묶음 4 — 위 섹션 거르기가 섹션 머리만 걸러 견본 섹션의 카드(Card/Semantic · Primitive · Basic typography · Icon)가 그대로 대조됐다.
+         카드도 같은 섹션만 대조하고, 나머지는 아래 '세기만' 쪽에서 'Foundations 견본' 으로 센다 */
+      const topSec = (n) => { while (n.parent && n.parent.type !== "PAGE") n = n.parent; return n; };
+      const swatchCard = (c) => pname === "Foundations" && !["Elevation", "Grid", "Interaction"].includes(topSec(c).name);
+      if (pname === "Foundations") docFrames.swatchCards = docCards(p).filter(swatchCard).map((c) => c.id);
       for (const card of docCards(p)) {
+        if (swatchCard(card)) continue;
         put(card, "card");
         texts(card.children.find((k) => k.name === "Header")).forEach((t, i) => put(t, i ? "cardDesc" : "cardTitle"));
         const body = card.children.find((k) => k.name === "Body");
@@ -881,9 +931,11 @@ const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];
           rec(pn, 0, "panel");
         }
       }
-      continue;
+      if (pname !== "Foundations") continue;
     }
-    /* 다른 페이지 — 세기만. 틀: 섹션 머리 글 · 카드 · 카드 머리 글 · Body · 패널 프레임. 안: 패널 아래 노드(인스턴스 · 컴포넌트 · 세트 · Example · Component 칸 안은 뺌) */
+    /* 다른 페이지 — 세기만. 틀: 섹션 머리 글 · 카드 · 카드 머리 글 · Body · 패널 프레임. 안: 패널 아래 노드(인스턴스 · 컴포넌트 · 세트 · Example · Component 칸 안은 뺌).
+       Foundations 는 견본 카드만 세어 'Foundations 견본' 으로 적는다(묶음 4) */
+    const swOnly = pname === "Foundations";
     const cnt = { cards: 0, frame: { nodes: 0, raw: 0, static: 0, ids: [] }, inside: { nodes: 0, raw: 0, static: 0, ids: [] } };
     const tally = (bucket, n) => {
       const vals = [n.type === "TEXT" ? tf(n) : paint(n.fills)].concat(n.type === "TEXT" || !("strokes" in n) ? [] : [paint(n.strokes)]).join(",").split(",").filter((x) => x && x !== "-" && x !== "transparent");
@@ -893,8 +945,9 @@ const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];
       if (r) bucket.raw++; if (s) bucket.static++;
       if ((r || s) && bucket.ids.length < 6) bucket.ids.push(n.id + " " + n.name.slice(0, 20) + " " + vals.join("|"));
     };
-    for (const sec of p.children) { const sh = sec.children && sec.children.find((k) => k.name === "Header"); if (sh) texts(sh).forEach((t) => tally(cnt.frame, t)); }
+    if (!swOnly) for (const sec of p.children) { const sh = sec.children && sec.children.find((k) => k.name === "Header"); if (sh) texts(sh).forEach((t) => tally(cnt.frame, t)); }
     for (const card of docCards(p)) {
+      if (swOnly && !(docFrames.swatchCards || []).includes(card.id)) continue;
       cnt.cards++;
       tally(cnt.frame, card);
       texts(card.children.find((k) => k.name === "Header")).forEach((t) => tally(cnt.frame, t));
@@ -907,7 +960,7 @@ const DOC_PAGES = ["4 Pattern", "3 Component", "2 Element"];
         walk(pn);
       }
     }
-    docFrames.others[CURRENT_PAGES[p.id]] = cnt;
+    docFrames.others[swOnly ? "Foundations 견본" : CURRENT_PAGES[p.id]] = cnt;
   }
 }
 components.docFrames = docFrames;

@@ -3,7 +3,7 @@ import { cx } from "../../utils/cx";
 import { useOutsideClick, mergeRefs } from "../../utils/hooks";
 import { useId } from "../../utils/useId";
 import { Icon } from "../../icons/Icon";
-import { Button } from "../button/Button";
+import { Button, ButtonGroup } from "../button/Button";
 import { TextField } from "../text-field/TextField";
 import { FormValidationContext } from "../text-field/validation";
 import { LABELS } from "../../labels";
@@ -259,20 +259,21 @@ const Picker = forwardRef<HTMLDivElement, PickerProps>(function Picker(
   const half = maxDays && draftA && !draftB ? draftA : null;
   const spanMin = half ? [minD, shift(half, 1 - maxDays!)].filter(Boolean).sort((x, y) => y!.getTime() - x!.getTime())[0] : minD;
   const spanMax = half ? [maxD, shift(half, maxDays! - 1)].filter(Boolean).sort((x, y) => x!.getTime() - y!.getTime())[0] : maxD;
-  const foot = (
-    <>
-      {range && unit === "day" && presets?.map((p, i) => {
-        const [s, e] = p.range().map((x) => calendarDateOf(x, tz));
-        return <Button variant="text" key={`p${i}`} size="sm" data-preset={i} disabled={outOf(s, minD, maxD) || outOf(e, minD, maxD) || (!!maxDays && spanDays(s, e) > maxDays)} onClick={() => done({ start: s, end: e }, clockDefaults())}>{p.label}</Button>;
-      })}
-      {items.includes("today") && !range && (
-        <Button variant="text" size="sm" data-cal="today" disabled={outOf(todayD, minD, maxD, unit)} onClick={() => { const t = unitStart(todayD, unit); setMonth(firstOf(t)); setView(baseView(unit)); setDraft(t); if (instant) done(t); }}>{L.today}</Button>
-      )}
-      {items.includes("reset") && <Button variant="text" size="sm" data-cal="reset" onClick={() => { setDraft(null); setClock(clockDefaults()); if (instant) done(null); }}>{L.reset}</Button>}
-      {items.includes("cancel") && <Button variant="outline" color="assistive" size="sm" data-cal="cancel" onClick={() => setOpen(false, true)}>{L.cancel}</Button>}
-      {items.includes("apply") && <Button size="sm" data-cal="apply" disabled={!canApply} onClick={() => done(draft)}>{L.apply}</Button>}
-    </>
-  );
+  /* 글자 버튼(프리셋 · 오늘 · 초기화)과 취소 · 적용 — 나란한 버튼 2개 이상은 각각 ButtonGroup(2026-11-18, 사이트 ds.js footHtml 과 같은 구조) */
+  const lo: ReactNode[] = [
+    ...(range && unit === "day" && presets ? presets.map((p, i) => {
+      const [s, e] = p.range().map((x) => calendarDateOf(x, tz));
+      return <Button variant="text" key={`p${i}`} size="sm" data-preset={i} disabled={outOf(s, minD, maxD) || outOf(e, minD, maxD) || (!!maxDays && spanDays(s, e) > maxDays)} onClick={() => done({ start: s, end: e }, clockDefaults())}>{p.label}</Button>;
+    }) : []),
+    ...(items.includes("today") && !range ? [<Button variant="text" key="today" size="sm" data-cal="today" disabled={outOf(todayD, minD, maxD, unit)} onClick={() => { const t = unitStart(todayD, unit); setMonth(firstOf(t)); setView(baseView(unit)); setDraft(t); if (instant) done(t); }}>{L.today}</Button>] : []),
+    ...(items.includes("reset") ? [<Button variant="text" key="reset" size="sm" data-cal="reset" onClick={() => { setDraft(null); setClock(clockDefaults()); if (instant) done(null); }}>{L.reset}</Button>] : []),
+  ];
+  const hi: ReactNode[] = [
+    ...(items.includes("cancel") ? [<Button variant="outline" key="cancel" color="assistive" size="sm" data-cal="cancel" onClick={() => setOpen(false, true)}>{L.cancel}</Button>] : []),
+    ...(items.includes("apply") ? [<Button key="apply" size="sm" data-cal="apply" disabled={!canApply} onClick={() => done(draft)}>{L.apply}</Button>] : []),
+  ];
+  const grp = (list: ReactNode[]) => (list.length > 1 ? <ButtonGroup>{list}</ButtonGroup> : list);
+  const foot = <>{grp(lo)}{grp(hi)}</>;
   const hasFoot = (range && unit === "day" && !!presets?.length) || items.some((k) => k !== "today" || !range);
 
   /* 아래 자리가 모자라고 위가 더 넓으면 필드 위로(.up). 기준은 필드 상자 — 도움말이 달력을 밀지 않게. 오른쪽으로 넘치면 왼쪽으로 당긴다.

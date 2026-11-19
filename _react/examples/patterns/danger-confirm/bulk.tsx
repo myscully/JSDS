@@ -1,4 +1,4 @@
-import { Button, PopupActions, PopupSurface, PopupTitle } from "@jiran/ds-react";
+import { Button, ButtonGroup, PopupActions, PopupSurface, PopupTitle } from "@jiran/ds-react";
 
 const NAMES = ["외부 USB 차단", "스크립트 실행 제한", "원격 접속 허용 목록"];
 const TOTAL = 12;
@@ -17,8 +17,10 @@ export default function Example() {
         </ul>
       </div>
       <PopupActions>
-        <Button variant="outline" color="assistive" onClick={close}>취소</Button>
-        <Button color="negative">삭제</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive" onClick={close}>취소</Button>
+          <Button color="negative">삭제</Button>
+        </ButtonGroup>
       </PopupActions>
     </PopupSurface>
   );

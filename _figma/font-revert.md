@@ -308,3 +308,39 @@ Noto 에는 SemiBold 가 없어 Bold 로 간다. 다만 14단계 중 SemiBold �
 | Display/0 | Pretendard Bold 56 | 1 (Web / Home) |
 | Caption/0 | Noto Sans KR Medium 13 (원래 Pretendard Medium — 위 상태 참고) | 11 (3 Component 10 · Web / Home 1) |
 | Heading/0 | Pretendard Bold 48 (사람이 되돌림) | 1 (Web / Foundations) |
+
+## 2026-11-18 새 텍스트 스타일 19단계 — Noto 로 만듦, Pretendard 로 되돌릴 것(2단계 묶음 1)
+플러그인에 Pretendard 가 없어 저장소의 19단계를 **Noto Sans KR** 로 만들었다. 크기 · 행간 · 자간(%)은 저장소 값이다.
+사람이 데스크톱에서 각 스타일의 서체만 바꾸면 된다. 굵기는 Bold → Pretendard Bold, Regular → Pretendard Regular, Medium → Pretendard Medium.
+쓰는 노드는 아직 0개다. 묶음 2 에서 컴포넌트를 이 스타일로 옮기므로, 그 전에 되돌리면 옮긴 노드가 처음부터 Pretendard 가 된다.
+
+| 스타일 | 지금 서체 | 되돌릴 서체 | 크기/행간 · 자간 |
+| --- | --- | --- | --- |
+| Display 1 · 2 · 3 | Noto Sans KR Bold | Pretendard Bold | 56/72 −3.19% · 40/52 −2.82% · 36/48 −2.7% |
+| Title 1 · 2 · 3 | Noto Sans KR Bold | Pretendard Bold | 32/44 −2.53% · 28/38 −2.36% · 24/32 −2.3% |
+| Heading 1 · 2 | Noto Sans KR Bold | Pretendard Bold | 22/30 −1.94% · 20/28 −1.2% |
+| Headline 1 · 2 | Noto Sans KR Bold | Pretendard Bold | 18/26 −0.2% · 17/24 0% |
+| Body 1/Normal · Body 1/Reading | Noto Sans KR Regular | Pretendard Regular | 16/24 · 16/26, +0.57% |
+| Body 2/Normal · Body 2/Reading | Noto Sans KR Regular | Pretendard Regular | 15/22 · 15/24, +0.96% |
+| Label 1/Normal · Label 1/Reading | Noto Sans KR Medium | Pretendard Medium | 14/20 · 14/22, +1.45% |
+| Label 2 | Noto Sans KR Medium | Pretendard Medium | 13/18, +1.94% |
+| Caption 1 · 2 | Noto Sans KR Medium | Pretendard Medium | 12/16 +2.52% · 11/14 +3.11% |
+
+옛 스타일 19개(Display/0~2 · Heading/0~4 · Title/1 · Title/1 Medium · Title/2 · Body/1 · 2 · Label/1 · 2 · Label/2 SemiBold · Caption/0~2)는 사람의 결정('남기고 차차 옮김')대로 남겼다. 묶음 2 에서 쓰는 노드를 새 스타일로 옮기고, 쓰는 노드가 0 이 되면 마지막에 지운다.
+굵기 조합(예: 'Label 1/Normal SemiBold')은 쓰는 것만 묶음 2 에서 만든다(사람의 결정).
+
+## 2026-11-18 굵기 조합 7개 — 묶음 2
+Noto Sans KR 에는 SemiBold 가 없어 **SemiBold 조합은 Noto Bold 로 그렸다** — 되돌릴 때 Pretendard SemiBold 로 바꿔야 사이트(600)와 같다.
+이 조합들은 이미 쓰는 노드가 많다(Components 기준 Label 1/Normal SemiBold 624 · Caption 1 Regular 1,056 · Label 1/Reading Regular 788 등). 스타일의 서체만 바꾸면 노드가 따라온다.
+
+| 스타일 | 지금 서체 | 되돌릴 서체 | 크기/행간 · 자간 |
+| --- | --- | --- | --- |
+| Body 1/Normal SemiBold | Noto Sans KR Bold | Pretendard SemiBold | 16/24, +0.57% |
+| Body 1/Normal Medium | Noto Sans KR Medium | Pretendard Medium | 16/24, +0.57% |
+| Label 1/Normal SemiBold | Noto Sans KR Bold | Pretendard SemiBold | 14/20, +1.45% |
+| Label 1/Reading Regular | Noto Sans KR Regular | Pretendard Regular | 14/22, +1.45% |
+| Caption 1 Regular | Noto Sans KR Regular | Pretendard Regular | 12/16, +2.52% |
+| Caption 1 SemiBold | Noto Sans KR Bold | Pretendard SemiBold | 12/16, +2.52% |
+| Caption 2 SemiBold | Noto Sans KR Bold | Pretendard SemiBold | 11/14, +3.11% |
+
+현행 네 페이지에서 옛 스타일 19개를 쓰는 노드는 0이 됐다(2026-11-18). 아카이브 페이지는 세지 않았다.

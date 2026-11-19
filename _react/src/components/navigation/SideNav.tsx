@@ -5,7 +5,7 @@ import type { IconName } from "../../icons/icons.data";
 import { LABELS } from "../../labels";
 import { Tooltip } from "../tooltip/Tooltip";
 
-const Ctx = createContext<{ collapsed: boolean }>({ collapsed: false });
+const Ctx = createContext<{ collapsed: boolean; collapsible: boolean }>({ collapsed: false, collapsible: false });
 
 export interface SideNavProps extends HTMLAttributes<HTMLElement> {
   /** 폭 64, 아이콘만 */
@@ -14,11 +14,13 @@ export interface SideNavProps extends HTMLAttributes<HTMLElement> {
   label?: string;
   /** 하단 (.foot) */
   footer?: ReactNode;
+  /** 상단 바의 접기 버튼(TopBarNavToggle)으로 접었다 펴는 내비(2026-11-18) — 펼친 상태에서도 항목을 이름 + Tooltip 으로 감싸 둔다(사이트 마크업과 같음) */
+  collapsible?: boolean;
 }
 /** 콘솔 좌측 1차 내비게이션 (폭 240 / 접힘 64) */
-export const SideNav = forwardRef<HTMLElement, SideNavProps>(function SideNav({ collapsed = false, label = LABELS.mainMenu, footer, className, children, ...rest }, ref) {
+export const SideNav = forwardRef<HTMLElement, SideNavProps>(function SideNav({ collapsed = false, collapsible = false, label = LABELS.mainMenu, footer, className, children, ...rest }, ref) {
   return (
-    <Ctx.Provider value={{ collapsed }}>
+    <Ctx.Provider value={{ collapsed, collapsible }}>
       <nav ref={ref} className={cx("sidenav", { collapsed }, className)} aria-label={label} {...rest}>
         {children}
         {footer !== undefined && !collapsed && <div className="foot">{footer}</div>}
@@ -50,10 +52,10 @@ export interface SideNavItemProps extends AnchorHTMLAttributes<HTMLAnchorElement
   children?: ReactNode;
 }
 export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem({ icon, active, count, countTone, sub, hasActiveChild, as, className, children, title, ...rest }, ref) {
-  const { collapsed } = useContext(Ctx);
+  const { collapsed, collapsible } = useContext(Ctx);
   const Link: ElementType = as ?? "a";
   /* 접힌 레일은 이름이 안 보인다 — title 은 키보드로 볼 수 없어 Tooltip 으로 */
-  const railName = collapsed && !sub && typeof children === "string" ? children : undefined;
+  const railName = (collapsed || collapsible) && !sub && typeof children === "string" ? children : undefined;
   const current = active ? "page" : collapsed && hasActiveChild ? "true" : undefined;
   const link = (
     <Link ref={ref} className={cx(active && "on", hasActiveChild && "has-on", sub && "sub", className) || undefined} aria-current={current} aria-label={railName} title={title} {...rest}>

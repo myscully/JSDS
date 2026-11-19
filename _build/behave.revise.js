@@ -73,11 +73,11 @@ module.exports = async function revise({ page, ok, go }) {
   });
   await part("4 · components/indicator.html", async () => {
 
-    /* Count 점은 숫자 배지보다 모서리 안쪽 — 감싼 틀에서 위 -2 · 오른쪽 -2(2026-11-14 사람의 결정), 숫자는 -6 그대로 */
+    /* Count 점은 감싼 틀(아이콘 버튼) 모서리 안쪽 4(2026-11-18 사람의 요청 — 2026-11-14 의 -2 를 바꿈), 숫자는 -6 그대로 */
     await go("components/indicator.html");
     const dot = await page.evaluate(() => [...document.querySelectorAll(".example-preview .with-count")].map((w) => { const c = w.querySelector(".count"), a = w.getBoundingClientRect(), b = c.getBoundingClientRect(); return { dot: c.classList.contains("dot"), top: Math.round(b.top - a.top), right: Math.round(a.right - b.right) }; }));
-    ok("count dot sits 2px outside the wrapper corner, the numeric badge 6px (2026-11-14)",
-      dot.some((d) => d.dot) && dot.some((d) => !d.dot) && dot.every((d) => d.dot ? d.top === -2 && d.right === -2 : d.top === -6 && d.right === -6), JSON.stringify(dot));
+    ok("count dot sits 4px inside the wrapper corner, the numeric badge 6px outside (2026-11-18)",
+      dot.some((d) => d.dot) && dot.some((d) => !d.dot) && dot.every((d) => d.dot ? d.top === 4 && d.right === 4 : d.top === -6 && d.right === -6), JSON.stringify(dot));
   });
   await part("4b · components/indicator.html — 아이콘 원", async () => {
     /* Indicator = 아이콘이 든 색 원(2026-11-16 사람의 요청 · 결정 — 원 16 · 아이콘 10). 원 면 = 톤 토큰, 아이콘 = 흰색(accent 는 brand-label) mask, 톤마다 다른 모양, 줄 높이 22 그대로 · 라이트 · 다크 · 중립 제품 */

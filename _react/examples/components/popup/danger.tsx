@@ -1,4 +1,4 @@
-import { Button, Form, PopupActions, PopupBody, PopupSurface, PopupTitle, TextField } from "@jiran/ds-react";
+import { Button, ButtonGroup, Form, PopupActions, PopupBody, PopupSurface, PopupTitle, TextField } from "@jiran/ds-react";
 
 /* 삭제 버튼은 늘 켜 두고 누르면 확인 문구를 검사한다 — 비활성 대신 누르면 막고 고치는 법을 알린다(Interaction › Disabled) */
 export default function Example() {
@@ -19,8 +19,10 @@ export default function Example() {
         />
       </Form>
       <PopupActions>
-        <Button variant="outline" color="assistive">취소</Button>
-        <Button type="submit" form="dg-form" color="negative">삭제</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">취소</Button>
+          <Button type="submit" form="dg-form" color="negative">삭제</Button>
+        </ButtonGroup>
       </PopupActions>
     </PopupSurface>
   );

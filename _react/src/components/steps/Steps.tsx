@@ -1,7 +1,7 @@
 import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
-import { Button, type ButtonProps } from "../button/Button";
+import { Button, ButtonGroup, type ButtonProps } from "../button/Button";
 import { LABELS } from "../../labels";
 import { validationMessage } from "../text-field/validation";
 
@@ -184,7 +184,7 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper
     if (showAt.current === cur) { showAt.current = -1; mode.current = "finish"; p?.querySelector("form")?.requestSubmit(); mode.current = "next"; }
   }, [cur]);
 
-  const bar = <div className="step-actions"><StepButton step="prev" /><StepButton step="next" /><StepButton step="finish" /></div>;
+  const bar = <div className="step-actions"><ButtonGroup><StepButton step="prev" /><StepButton step="next" /><StepButton step="finish" /></ButtonGroup></div>;   // 나란한 버튼은 묶음(2026-11-18)
   const panel = (i: number) => (
     <div key={i} ref={(el) => { panels.current[i] = el; }} className="step-panel" tabIndex={-1} hidden={i !== cur} onSubmit={onPanelSubmit}>
       {steps[i].content}

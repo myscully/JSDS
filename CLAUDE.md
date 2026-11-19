@@ -13,9 +13,10 @@
 | `_build/ds-chart.src.js` | **원본.** 탐색형 차트(Chart.js) 테마 어댑터 + 프리셋. `assets/ds-chart.js` 로 복사되고 React 는 `_react/scripts/sync-chart.mjs` 가 `src/chart/ds-chart.js`(생성물)로 가져갑니다. Chart.js 본체는 `_build/node_modules` 에서 `assets/vendor/` 로 복사(MIT) |
 | `_react/` | **원본.** `@jiran/ds-react` 패키지. `dist/` 는 생성물이라 git 에 없습니다 |
 | `_figma/` | **원본.** Figma 작업 도구 — `font.js`(폰트 안전 로더) · `probe.js`(조사) · `audit.mjs`(대조) · `dumps/baseline.json`(audit 기준 덤프) · `font-revert.md`(Noto 대체 경과 · 되돌릴 노드 · 굵기를 고칠 노드 — 목록은 같은 폴더의 `.tsv` 셋) |
-| `assets/` `home/` `foundations/` `components/` `patterns/` `resources/` `index.html` | **전부 생성물.** 직접 고치지 말고 `_build/` 를 고친 뒤 빌드하세요. `assets/vendor/chart.umd.js` · `assets/ds-chart.js` 도 생성물 |
+| `assets/` `home/` `foundations/` `components/` `patterns/` `templates/` `resources/` `index.html` | **전부 생성물.** 직접 고치지 말고 `_build/` 를 고친 뒤 빌드하세요. `assets/vendor/chart.umd.js` · `assets/ds-chart.js` · `assets/templates.css` · `assets/templates.js` · `templates/screen/*.html` 도 생성물 |
 | `_build/font-jp.src.css` · `_build/fonts-jp/` | **원본.** 일본어 한자용 Pretendard JP Variable v1.3.9(OFL) — 조각 woff2 119개 · `OFL.txt` 와 그 `@font-face`(unicode-range). 내려받은 원본 CSS 에서 만들었고 손으로 고치지 않습니다. `build.js` 가 `assets/font-jp.css` · `assets/fonts/jp/`(생성물)로, `sync-css.mjs` 가 패키지 `dist/font-jp.css`(선택 import)로 복사 |
 | `_concepts/` | **원본 · 시안.** 메인 화면 비주얼 시안(도형 타이포 A1 · A2 · A3, 정한 카피의 B1 Simple · B2 Visual · B3 Signal, 가운데 정렬 B4 Balance + 고르는 `index.html`). **B4 는 2026-11-18 사이트 메인 화면이 됐다**(`_build/render.js` `homePage` · `style.src.css` Home 블록 — 시안 파일은 기록으로 남김). B 의 띠 · 미리보기 이미지 `img/*.png` 는 `capture.mjs` 가 패턴 예제를 찍은 것(패턴이 바뀌면 다시 돌림). `../assets/style.css` 의 토큰 · Pretendard 와 `../assets/app.js` 의 제품 색 · `SEARCH_INDEX` 를 불러 쓰고, 루트의 `_` 폴더라 빌드 · verify · 게이트 밖이다(반복 애니메이션도 씀). 사이트로 옮길 때 게이트 규칙에 맞게 다듬는다 |
+| `_build/templates.data.js` · `templates.build.js` · `templates.src.css` · `templates.src.js` | **원본.** Templates 메뉴(2026-11-18 — 옛 `_templates/` 를 옮기고 지움). `templates.data.js` 는 문서 페이지의 글(정의 · 고르기 표 · 쓴 컴포넌트 · 패턴 · Rules · 개요 한 줄), `templates.build.js` 는 `_build/*.data.js` 의 예제 문자열 · 헬퍼를 읽어 화면 일곱 `templates/screen/<key>.html` 을 쓰는 생성기(`build.js` 가 부름 — route 가 아니라 pages 수에 들지 않음), `templates.src.css` → `assets/templates.css` 는 앱 틀 배치만(패키지 CSS 에 섞이지 않게 style.css 와 따로), `templates.src.js` → `assets/templates.js` 는 둘러보기용 흉내 동작이다 |
 | `assets/vendor/dayjs.min.js` · `dayjs.utc.js` · `dayjs.timezone.js` · `dayjs.LICENSE` | **생성물.** Date Picker 기준 시간대용 dayjs(MIT, 1.11.13 고정)를 `build.js` 가 `_build/node_modules/dayjs` 에서 복사하고 Date Picker 가 있는 페이지에만 붙입니다(`verify.js` 가 동반 · 부재를 봄). React 는 패키지 dependency 로 `date-picker/tz.ts` 에서 extend |
 
 ## 일하는 방식
@@ -46,7 +47,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 88 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1505/1505 · react 875+6 · tsc 0
+pages 96 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1550/1550 · react 885+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -891,6 +892,102 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 음성 시험: behave 8건(부채꼴을 글자 위로 · 고정 도형이 제품 색 · 줄인 모션 무시 · 배너 들림 · 떠 있기 지움 · 패럴랙스 반대 · 로고 점 지움 · `.go` 안 붙임) 모두 7/8 로 잡혔고 verify 1건(예외 지움 → 실패 3).
 - Figma 미반영 608건(그대로 — 홈 · 헤더 로고는 audit 대조 밖).
 
+2026-11-18 템플릿 검토에서 나온 수정 일곱(사람의 요청 · 결정 넷) — behave 1505 → 1522(`behave.shell.js` 17) · react 875+6 → 882+6(`tests/topbar.test.tsx` 4 · labels-parity 1 · 예제 321 → 323 에 따른 구조 비교 2). contrast · advisory · verify · pages 수는 그대로(새 색 쌍 없음).
+- **Top Navigation 높이 3.5 → 3.875rem(62).**
+  - **왼쪽 영역 `.topbar-start`** — 로고와 사이드 내비 접기 버튼을 양끝에 두고, 바 왼쪽 끝부터 240(사이드 내비 폭)이다. **사이드 내비를 접어도 240 그대로**(사람의 결정)이고 아래 내비만 64 가 된다.
+  - 접기 버튼 `[data-sidenav-toggle][aria-controls][aria-expanded]` · 이름 '메뉴 접기' · '메뉴 펼치기' + Tooltip. ds.js 가 대상 `.sidenav` 의 `.collapsed` 를 바꾸고 `ds:sidenav {collapsed}` 를 낸다. 접힌 레일에서는 하위가 현재인 부모(`a.has-on`)가 `aria-current` 를 잇는다(React `hasActiveChild` 와 같게).
+  - React `TopBarStart` · `TopBarNavToggle` 이고 `SideNav collapsible` 은 펼친 상태에서도 이름 Tooltip 을 그린다. 사이드 내비가 없는 Default 예제에는 버튼이 없다.
+- **설정 옆 라이트/다크 버튼** `[data-theme-toggle][aria-pressed]` — 이름 '다크 모드', 갈 테마의 아이콘(moon · sun-high)을 보인다. ds.js 가 `html[data-theme]` 를 바꾸고 `ds:theme {theme}` 를 낸다. 저장은 제품 몫이다(문서 사이트는 `jsds-theme` 에 저장). React `TopBarThemeToggle`. 오른쪽 순서는 검색 · 알림 · 설정 · 테마 · 사용자(verify).
+- **오른쪽 아이콘 버튼 sm → md 40 · 검색 32 → 40**(사람의 결정 — 같은 줄 높이 규칙 때문에 검색을 함께 올림, 11-12 의 '검색 32' 를 바꿈). 아바타 32 는 그대로다. verify 가 상단 바의 sm 아이콘 버튼을 막는다.
+- **알림 벨은 점이 기본** — Top Navigation 예제와 Notification Center 모두. Notification Center 는 `.notify[data-count="number"]` · React `count="number"` 일 때만 숫자를 보인다(새 예제 Count). 접근 이름 '알림 n건' 과 안 읽음 탭의 숫자는 그대로다. **아이콘 위 숫자 배지는 Caption 2 11/14**이고 99 를 넘으면 99+ 다. 사이드 내비 · 탭 안의 Count 는 12 그대로다(사람이 정하지 않은 기본값).
+- **사이드 내비 아이콘 = `--foreground-neutral-secondary`**(tertiary 였다).
+- **위저드 안 폼은 폭 제한 없음** `.stepper .form{max-width:none}`.
+- **flush 카드의 마지막 표** — 마지막 행 아래 선을 지운다(카드 테두리와 겹쳐 두 줄이었다 — 조직도 · 대시보드). 마지막이 숨긴 상세 행이면 그 앞 행에서 지운다.
+- **로그인** — 'Security Console' 줄을 지우고 카드 위 가운데에 제품 로고 `.auth-logo`(제품 색 사각 + shield + 제품 이름, `role="img"`)를 둔다. '관리 콘솔 로그인' 제목은 `.sr-only` 로 남긴다(사람의 결정 — 라벨 유지 + 칸 안 아이콘). **Text Field 칸 안 앞 아이콘** `.field .affix > .field-icon`(18 · tertiary) · React `TextField icon` · 예제 With Icon, Rules '아이콘은 라벨을 대신하지 않음'. 참고 이미지의 언어 선택 · 아래 안내문 · 저작권 줄은 요청 밖이라 넣지 않았다.
+- **버튼 묶음 간격** sm 0.375 · md 0.5 · lg 0.75rem(`:has()`), Button Rules '버튼 묶음' 행(Rules 3 → 4행).
+- **액션 바 좌우 패딩 0**(위아래 10 그대로).
+- **대시보드** — '심각도 분포' 는 탐색형 도넛(가운데 1,054), '탐지 추이' 는 '일별 탐지' 누적 막대(사람의 결정 — 같은 14일 데이터 · 심각도 톤), KPI 넷은 스파크라인 없음(KPI 기본).
+- **템플릿** — 사이드 내비를 한 벌로 합치고(레일 사본을 지움) 상단 바 버튼으로 접는다. 1280 미만은 처음부터 접힌다(사람이 정하지 않은 기본값).
+- **측정에서 드러나 고친 것:** 칸 안 아이콘의 색 선언이 `.field .affix span`(tertiary)과 같은 쓸모없는 선언이었다(음성 시험으로 발견해 지움). Default 예제 바가 아이콘 버튼 · 테마 버튼 · 구분선이 늘어 1440 · 2560 미리보기를 9px 넘쳤다 — 예제의 1차 메뉴 넷 중 '에이전트' 를 뺐다(사이트 · React). 접힌 레일의 부모에 `aria-current` 가 없었다.
+- **기존 단정 고침 8:** 상단 검색 32 → 40(behave.layout), 벨 Count 숫자 → 점(behave.notify 셋 — 탭 숫자 · 99+ 는 그대로), 벨 점 모서리 -6 → -2(behave.nav), 대시보드 KPI 스파크 2 → 0(behave.chart), 대시보드 추이 선 · 정적 도넛 → 막대 · 탐색형 도넛(behave.js), 좁은 상단 바의 높이 3.5 → 3.875rem(behave.nav), Button Rules 3 → 4행. 좁은 상단 바 · 2560 넘침 단정은 예제를 고쳐 그대로 통과한다.
+- 음성 시험: 사이트 15건 · verify 4건 · React 6건 모두 실패로 잡혔다.
+- Figma 미반영 — 기준 덤프 721건 · 묶음 2 의 마지막 덤프(dump-b2f) 386건(묶음 2 가 잰 수와 같다 — 그 측정 때 이번 변경이 이미 저장소에 있었다). 이번 변경으로 새로 생긴 것은 Spec 의 저장소에만 있는 행 둘(Text Field · Icon, Navigation · Icon)이고, 나머지 Spec 문구 변경(Top Navigation · Search · Button · Card · Indicator · Steps · Data Table · Table)은 이미 어긋난 행이다. 상단 바 · 알림 점 · 로그인 · 대시보드는 Figma 에 그리지 않았다.
+
+2026-11-18 추가 수정 — 대시보드 일별 탐지 · Page Header 간격 · 로그인 화면 · 테마 아이콘 · 알림 점 · 버튼 아이콘(사람의 요청 · 결정 셋) — behave 1522 → 1530(`behave.shell.js` 17 → 25) · react 882+6 → 883+6(`tests/dashboard-chart.test.tsx` 1). contrast · advisory · verify · pages 수는 그대로(새 색 쌍 없음 — 저작권 줄 tertiary / 회색 바탕은 기존 쌍).
+- **요청 일곱 중 7번(상단 검색창 `min-width` 제거)은 사람이 취소했다** — 상단 검색 최소 폭 220 그대로.
+- **대시보드 '일별 탐지' = Data Visual Default 와 같은 계열 하나인 선 추이**(사람의 결정 — 차트만 같게. 큰 값 · 증감 · '전체 보기' 는 넣지 않아 같은 줄 '심각도 분포' 카드와 머리 구성이 같다). 데이터는 Data Visual 의 `daily14`(합계 1,429)를 패턴 상수 `DAILY14` 로 두고 옛 심각도 누적 막대 `TREND` 를 지웠다(사이트 · React · 템플릿). 같은 날 앞 항목의 '일별 탐지 누적 막대' 결정을 바꿨다.
+- **`.page-head` 아래 여백 16**(`margin-bottom:1rem`) · Page Header Spec Size 행.
+- **로그인 화면**
+  - 새 틀 `.auth-screen`(회색 바탕 · 가운데 정렬 · 최소 높이 40rem · 아래 여백 4.5rem) + `.auth-copy`(아래 24 에 고정 · 가운데 · Caption 1 12/16 · tertiary). 문구 `© 2026 JIRANSECURITY Co., Ltd. All rights reserved.`(사람의 결정). 패턴 예제 로그인 · 2단계 인증은 각각 이 틀 안에, 템플릿 로그인은 화면 전체가 틀(`min-height:100dvh`)이고 두 폼에 저작권 줄 하나.
+  - 카드 `.form.auth` — 테두리 없음 · `--shadow-2` · `--radius-xl`. **`--radius-xl` 0.625 → 0.875rem(14)** — 팝업 모서리도 14 가 된다(Popup Spec · Foundations › Radius 쓰임 · Elevation 의 shadow-2 쓰임에 로그인 카드).
+  - 로고 `.auth .auth-logo` margin 16 · gap 8, 아이콘 칸의 면 · 반경 · 색을 지우고 `shield-check` 면 아이콘 48(로고 글자색을 따름).
+  - 아이디 → **이메일**(`type="email"` · id `si-email` · `autocomplete="username"` 그대로), '이메일 저장', 실패 문구 · 원칙 · 썸네일도. 두 칸은 **라벨을 숨기고 placeholder** 로 보인다 — 숨긴 `<label class="sr-only">` · React `labelHidden` 으로 접근 이름은 남는다(verify 의 '글자 입력마다 접근 이름'). Text Field Rules '라벨' 행에 예외 한 문장(칸이 둘뿐이고 칸 안 아이콘이 뜻을 보탤 때만), 로그인 Rules 의 '로고' 행을 '화면' 행에 합치고 '칸' 행을 더했다(8행 유지 — 9행이면 소제목 규칙에 걸림).
+  - 2단계 인증의 제목 · 설명을 `<div>` 한 묶음으로.
+- **테마 버튼 = 지금 테마의 아이콘**(라이트 해 · 다크 달 — 앞 항목의 '갈 테마' 를 바꿈). 클래스 `.i-to-dark` · `.i-to-light` → `.i-light` · `.i-dark`(사이트 · React `TopBarThemeToggle` · 템플릿, verify 가 옛 이름을 막음, MIGRATION). 이름 '다크 모드' · `aria-pressed` 는 그대로.
+- **아이콘 위 Count 점 = 모서리 안쪽 4**(`.with-count .count.dot{top:.25rem;right:.25rem}` — 앞의 -2). 숫자 배지 -6 그대로. Indicator Spec.
+- **버튼 아이콘 16 · 20 · 28**(md 18 → 20 · lg 20 → 28), **lg 아이콘 선 1.6**(CSS `stroke-width` 가 svg 속성 2 를 이김 — 면 아이콘은 선이 없어 그대로). **loading 스피너도 16 · 20 · 28**(사람의 결정 — 11-12 의 '스피너 = 아이콘 크기'). Button Spec Size.
+- **기존 단정 고침:** 스피너 16 · 18 · 20 → 16 · 20 · 28(behave.button), md 아이콘 18k → 20k(behave.scale), lg 아이콘 전용 버튼의 아이콘 20 → 28(behave.js), 벨 점 모서리 -2 → 안쪽 4(behave.nav · behave.revise), 로그인 id `si-email`(behave.patterns), 대시보드 추이 막대 → 선(behave.js part 42), behave.shell 테마 아이콘(part 3) · 로그인(part 7 다시 씀 — 5 단정) · 대시보드(part 8 다시 씀 — 2 단정). 새 단정: Page Header 아래 16 · 점 위치와 테마 아이콘 · 버튼 아이콘 크기와 선.
+- **React 구조 비교는 차트 종류 · 데이터를 보지 않는다** — 대시보드 예제를 막대로 되돌려도 통과했다(음성 시험에서 발견). `tests/dashboard-chart.test.tsx` 가 `chart.js/auto` 를 흉내 내 대시보드와 Data Visual Default 가 Chart 에 넘기는 설정(종류 line · 계열 하나 · 같은 라벨 · 값 · 이름)을 대조한다. 처음에 `JSX.Element` 타입이 tsc 1건으로 잡혔다(vitest 는 타입을 안 봄).
+- 음성 시험: 사이트 CSS 13(md 20 · lg 28 · lg 선 · 테마 아이콘 · 점 위치 · page-head 여백 · 카드 테두리 · 그림자 · radius-xl · 로고 margin · gap · 로고 48 · 저작권 줄 고정) · 마크업 6(이메일 type · placeholder · 보이는 라벨 · 2단계 div · 대시보드 막대 · 로고 면) · verify 1(옛 `.i-to-*`) · React 6(테마 아이콘 클래스 · 라벨 보임 · email type · 2단계 div · 저작권 줄 · 대시보드 막대) 모두 실패로 잡혔다.
+- 템플릿 측정(scratchpad `measure.js`) 296/296 — 로그인 칸에 'admin' 을 치던 단정을 이메일로, 로그인 화면 1440 · 390(화면 높이 · 저작권 줄 하나 · 아래 24 × 루트 비율 · 카드와 겹침 없음 · 테두리 0 · 그림자 · 반경 14 × 루트 비율)과 테마 아이콘을 더했다.
+- **사람이 정하지 않은 기본값:** 로고 아이콘 색 = 로고 글자색(color 를 지우라 해서 따로 칠하지 않음), 저작권 줄 12 tertiary · 아래 24, `.auth-screen` 최소 높이 40rem(예제 미리보기용 — 화면 전체로 쓰면 제품이 100dvh), placeholder 예외의 범위 문구, 클래스 이름 `.i-light` · `.i-dark`.
+- **보인 것(고치지 않음):** 390 에서 실패 Notice 제목이 낱말 가운데서 끊긴다('않 / 습니다' — Notice 글자의 기존 줄바꿈), 템플릿 390 에서 검토용 떠 있는 도구 막대가 저작권 줄을 가린다(`templates.js` 의 흉내 — 사이트 밖).
+- Figma 미반영 — 기준 덤프 721 → 730건, dump-b2f 386 → 418건. dump-b2f 기준 +34 = Button loading 스피너 크기(md 18 ≠ 20 · lg 20 ≠ 28), −2 = 대시보드 차트 줄이 Figma 의 '탐지 추이(timeseries) · 심각도 분포' 와 맞게 됨. Spec 문구(Button Size · Indicator Size · Popup Container)는 이미 어긋난 행이다. **audit 은 radius 변수를 대조하지 않아 Figma `radius/xl` 10 은 수에 없다** — 일괄 반영 때 14 로. 로그인 · 테마 아이콘 · 알림 점 위치는 Figma 에 그리지 않았다.
+
+2026-11-18 나란한 버튼 = 버튼 묶음 · 사이드 내비 접기 아이콘 회전 · 상단 바 로고(사람의 요청 셋 · 결정 넷) — behave 1530 → 1536(`behave.shell.js` 25 → 31) · react 883+6 → 885+6(DatePicker.test 1 · file-upload.test 1). contrast · advisory · verify · pages 수는 그대로(새 색 쌍 없음).
+- **버튼이 2개 이상 나란히 놓이면 늘 `.btn-group`**(사람의 요청 — 공통 규칙). 범위는 **전부, Button State 의 상태 시연 표만 뺌**(사람의 결정 — 액션 줄 · 표 액션 바 · 달력 아래 · 행 안 아이콘 버튼 · 상단 바 오른쪽 아이콘까지).
+  **틀 안에 묶음을 넣는다**(사람의 결정) — `.popup-actions` · `.form-actions` · `.card-foot` · `.side-panel-footer` · `.step-actions` · `.page-head .actions` · `.cal-foot` · `.action-bar` · 상단 바 `.right` 는 자리 · 선 · 여백 · 정렬을 그대로 맡는다. 떨어진 버튼(폼 왼쪽 `.left` 삭제)은 묶음 밖.
+  - **간격이 바뀌었다(실측):** 버튼 사이가 묶음 규칙 sm 6 · md 8 · lg 12 를 따라 팝업 · 폼 12 → 8, 카드 아래(sm) 12 → 6, 표 액션 바(sm) 12 → 6, 구분선 툴바는 버튼과 구분선 사이에도 6 이 생겼다(전에는 틀에 gap 이 없었다). 상단 바 오른쪽 · 사이드 패널 · 단계 · Page Header 동작은 원래 8 이라 그대로.
+  - 사이트 데이터: 컴포넌트 · 패턴 예제의 나란한 버튼(스크립트로 감싼 뒤 손으로 — 상단 바 셋 · 구분선 툴바 · Tooltip hover · Count · 상세의 더 보기 Dropdown 까지), 정적 달력 `cal()`. ds.js: 달력 아래 `footHtml` 은 글자 버튼(프리셋 · 오늘 · 초기화) 묶음과 취소 · 적용 묶음을 따로(하나뿐이면 묶지 않음 — `margin-left:auto` 규칙을 묶음 기준으로), 파일 줄은 실패해 다시 시도가 생기면 묶고 하나로 돌아가면 푼다(옮긴 지우기 버튼의 포커스를 되돌림). React: `Stepper` · Date Picker 달력 아래 · `FileUpload` 실패 줄 · 예제 42개(구조 비교가 잡음). 템플릿: 상단 바 오른쪽 · Page Header 동작 · 팝업 버튼 · 표 액션 바 · 검토 도구 막대.
+  - 문서: Button Rules '버튼 묶음' 행, ButtonGroup Props(틀 안에 넣음 · `.left` 는 밖), Card · Form(Spec Actions) · Popup · Steps · 액션 바 · Top Navigation `.right` 의 Props 설명.
+- **사이드 내비 접기 아이콘은 180° 돈다**(사람의 요청) — 지금 아이콘 `layout-sidebar`(사람의 결정)를 `[data-sidenav-toggle][aria-expanded="false"] svg{transform:rotate(180deg)}` · `transition:transform var(--motion-base)` 로. 펼침은 막대가 왼쪽, 접힘은 오른쪽. 줄인 모션은 전역 규칙이 transition 을 꺼 바로 바뀐다. ds.js · React 는 이미 `aria-expanded` 를 맞춰 코드 변경이 없다. 상태가 정하는 svg 회전이라 hover · 누름 transform 금지 규칙과 무관하다(행 펼침 셰브론과 같은 방식).
+- **상단 바 로고 마크 = shield-check 면 아이콘 24**(사람의 요청 — 로그인 로고와 같게, 색은 로고 글자색 — 사람의 결정). 제품 색 사각을 지웠다. `tbStart` · Top Navigation 예제 · 썸네일 · 템플릿, React `TopBarLogo` 기본 + 새 prop `mark`(사람이 정하지 않은 기본값).
+- **behave.shell +6:** 모든 컴포넌트 · 패턴 예제(70쪽)에서 같은 줄 24 이내로 붙은 버튼(또는 버튼을 감싼 Tooltip · Dropdown · Count · 알림 틀) 둘 이상의 부모가 `.btn-group` — 떨어진 버튼(폼 왼쪽 삭제 · 툴바 spacer 뒤 · 달력의 오늘 | 적용 · Tooltip 위치 시연의 넓은 간격 104)은 붙어 있지 않아 세지 않고 예외는 Button State 표 하나, 열린 Date Picker 달력 아래 묶음 둘, 파일 줄 묶음 · 풀기 · 포커스 유지, 접기 아이콘 0° → 180°(--motion-base, 도중 각도) → 0°, 줄인 모션은 transition 없이 바로, 로고 면 없음 · svg 24 면 · 글자색. **기존 단정 고침 1:** Form actions 버튼 간격 12 → 8(behave.promote).
+- **React +2:** Date Picker 달력 아래 묶음 모양(구조 비교는 열린 달력을 보지 않는다), FileUpload 실패 줄 묶음(네 상태 예제는 구조 비교 밖이라 음성 시험에서 못 잡아 더함).
+- 음성 시험: 사이트 5건을 한 번에(팝업 예제 묶음 풀기 · ds.js 달력 묶음 끔 · 파일 줄 묶음 끔 · 회전 규칙 지움 · 로고 면 되살림) — behave.shell 25/31 로 여섯 단정이 각각 잡았다. React 3건(Date Picker 묶음 · Steps 묶음 · FileUpload 묶음) 모두 실패로 잡혔다(FileUpload 는 위 테스트를 더한 뒤).
+- 템플릿 측정 296/296, 템플릿 화면 전체를 같은 방식으로 훑어 묶이지 않은 버튼 0.
+- **사람이 정하지 않은 기본값:** 달력 아래 두 묶음을 따로 둠(글자 버튼 왼쪽 · 취소 적용 오른쪽), `TopBarLogo mark`, 회전 시간 `--motion-base`, behave 의 '붙어 있음' 기준(같은 줄 · 간격 24 이하).
+- Figma 미반영 — 기준 덤프 730건 · dump-b2f 418건(둘 다 그대로). 바꾼 Spec 문구(Form Actions)는 이미 어긋난 행이다. 버튼 묶음 간격 · 접기 아이콘 회전 · 상단 바 로고는 audit 대조 밖이다 — 일괄 반영 때 팝업 · 폼 · 카드 버튼 간격(8 · 6)과 로고를 그린다.
+
+2026-11-18 Textarea 크기 셋(사람의 요청 '사이트와 Figma 둘 다 Small · Large') — behave 1536 → 1538(`behave.shell.js` 31 → 33). contrast · advisory · verify · react · pages 수는 그대로(새 색 쌍 없음).
+- `.field.sm textarea` · `.field.lg textarea` — 글자 · 행간 · 자간 · 반경은 같은 크기 한 줄 입력과 같다(sm 12/16 · 반경 4, lg 16/26). 최소 높이 72 · 96 · 120, 안쪽 여백 8/12 · 10/14 · 12/16.
+- Text Field 'Textarea' 예제를 세 크기로(사이트 · React `TextArea size`), Spec Size 행에 Textarea 최소 높이를 더했다. React 는 이미 `size` 를 필드 클래스로 넘겨 코드 변경이 없다.
+- **사람이 정하지 않은 기본값:** 최소 높이 72 · 120(기본 96 에서 세 줄 반이 보이는 높이), 안쪽 여백, 예제의 placeholder 문구('Small · 최소 72px' 등).
+- behave +2 — 세 크기의 최소 높이 · 여백, 같은 크기 입력과 글자 · 행간 · 자간 · 반경이 같음. 음성 시험 2건(sm · lg 규칙 지움 — 그 덩어리만 도는 임시 실행기에서 CSSOM 으로 지움) 모두 두 단정이 실패로 잡았다.
+- Figma 는 같은 날 Text Field 세트에 Textarea Small · Large 를 그렸다(Figma 절 '묶음 4' 끝). 다시 잰 전체 probe 로 audit 1건(Home 히어로 부채꼴).
+
+2026-11-18 사이드 내비 안쪽 여백 20(사람의 요청 · 결정 하나) — behave 1538 → 1540(`behave.shell.js` 33 → 35). contrast · advisory · verify · react · pages 수는 그대로(색 변화 없음).
+- `.sidenav{padding}` 0.75 → **1.25rem**. 접힌 레일은 위아래만 1.25rem · 좌우 0.625rem 그대로(사람의 결정 '위아래만 20' — 접고 펼쳐도 항목이 위아래로 튀지 않고, 아이콘 칸 43(64 − 20 − 오른쪽 선 1)을 지킨다). 폭 240 · 64 는 그대로라 항목 폭이 215 → 199 가 된다.
+- 한 곳의 CSS 라 Navigation · Top Navigation 예제, React `SideNav`, 템플릿 샘플 여섯(`../assets/style.css` 를 씀 — 브라우저에서 펼친 · 접힌 상태 모두 첫 항목 위 끝 1.25rem 을 쟀다)이 함께 바뀐다. 패턴 예제에는 사이드 내비가 없다. Navigation Spec Size 에 안쪽 여백을 적었다.
+- behave +2 — 모든 예제 사이드 내비의 여백(펼침 사방 · 접힘 위아래 1.25rem · 좌우 0.625rem), 상단 바 버튼으로 접어도 첫 항목 위 끝이 같고 레일 항목이 43. 음성 시험 2건(`.sidenav.collapsed` 규칙 지움 · `.sidenav` 규칙 지움 — 임시 실행기에서 CSSOM 으로) 모두 두 단정이 실패로 잡았다.
+- **기존 단정 고침 1:** 펼친 레일 항목 폭 214 를 박아 둔 단정(behave.nav)을 '내비 안쪽 폭과 같음' 으로 — 첫 게이트에서 198 로 걸렸다.
+- Figma — Navigation 세트(332:2878)의 Expanded 변형 여백 사방 20 · Collapsed 위아래 20(인스턴스는 Navigation 카드의 둘뿐이고 따라옴), Spec Size 문구를 저장소대로(두 줄이 되어 Navigation 섹션을 22 늘리고 아래 섹션을 내려 간격 200). 다시 잰 전체 probe(`dump-b6`)로 audit 1건(Home 잘림)이고, 기준 덤프를 이것으로 바꿨다. 이번에도 조각 6 · 7 경계의 공백 하나가 잘려 되살린 뒤 길이 · 해시가 같았다.
+
+2026-11-18 Templates 메뉴 — 템플릿 샘플 일곱을 사이트 페이지로(사람의 요청 · 결정 여섯) — pages 88 → 96 · behave 1540 → 1549(`behave.templates.js` 9). contrast · advisory · react · tsc 수는 그대로(새 색 쌍 없음).
+- **Patterns 다음에 Templates 메뉴**(`SITE.templates` — 헤더 · 드로어 · 사이드바 · 검색이 데이터에서 따라온다). 개요 + 화면별 문서 페이지 일곱(로그인 · 대시보드 · 리스트 · 정책 설정 · 위저드 · 탭이 있는 리스트 · 조직도)이 route 여덟이라 pages +8.
+- **개요는 Foundations 개요처럼**(사람의 결정) — 머리글 · 리드 · 토큰으로 그린 화면 조각 다섯(로그인 카드 · KPI · 표 행 · 폼 · 트리) · `h2 Screens` 의 `.base-list` 행 일곱(이름 · 한 줄 설명). 썸네일 카드는 두지 않는다.
+- **문서 페이지 = 정의 → 고르기 표(언제 쓰는가 · 비슷한 템플릿) → Preview → Composition(쓴 컴포넌트 · 패턴 링크) → Rules.** React 탭은 없다(예제가 아님). 코드 보기는 같은 날 뒤 항목에서 더했다.
+  미리보기는 **실제 화면 iframe 을 줄여 넣는다**(사람의 결정) — iframe 은 width · height 속성 1440 × 900(루트 글자 단계와 무관하게 화면이 1440 폭으로 그려지게 rem 이 아니라 속성), app.js 의 ResizeObserver 가 틀 폭 ÷ 1440 을 `--tpl-s` 로 넣고 틀 높이를 900 × 비율 + 테두리로 맞춘다(`.scaled`). 스크립트가 없으면 틀 안에서 스크롤한다. 틀 위 '새 창에서 열기'(Link 규칙 — rel · 아이콘 · 숨긴 '(새 창)').
+- **문서 페이지에서 바꾼 제품 색 · 테마를 iframe 화면이 따라간다** — app.js 에 `storage` 이벤트 처리기(`jsds-accent` · `jsds-theme`). 바꾼 문서에는 오지 않고 같은 값이면 나지 않아 되울리지 않는다. 화면을 새 창으로 열어 둔 채 바꿔도 같다.
+- **생성기를 `_build` 로 합치고 `_templates/` 를 지웠다**(사람의 결정 — 추적되지 않던 폴더라 지우기 전 사본을 scratchpad 에 둠). 옮긴 생성기의 출력은 옛 출력과 검토 도구 막대 · 경로 · 제목 · `data-root` 말고는 같다(diff 로 확인). **검토 도구 막대(색 견본 · 화면 고르기)는 빼고 흉내 동작은 둔다**(사람의 결정) — 로그인 → 2단계 → 대시보드, 대화상자 제출 → 닫고 Toast, 조직도 고르기, 배포 완료 Toast, 1280 미만 내비 접기. 고르는 `index.html` 은 개요가 대신한다. CLAUDE.md 의 '확정된 화면만 옮긴다'(같은 날)는 이 요청이 일곱 모두로 바꿨다.
+- **verify 더함:** templates.data.js 키 = SITE.templates 순서, 고르기 표 키 · 순서, Rules 1 ~ 8행, 개요 한 줄, uses · patterns 가 있는 키, 절 순서 preview → composition → rules, 고르기 표가 lead 바로 뒤, iframe 의 src = 그 화면 · title · width 1440 · height 900, 새 창 링크의 rel · 숨긴 문구 · 대상, 화면의 `<title>` · 검토 도구 없음 · 화면끼리 링크 대상 · 인라인 style(막대 비율만), **uses = 화면 HTML 이 실제로 쓰는 컴포넌트**(패턴의 USES_MARK + 상단 바 · 사이드 내비 · Tooltip · Divider, 알림 센터 패널 안의 탭 · 심각도 Tag 는 빼고 잼). 본문 문구 검사에 템플릿 글과 문서 페이지 lead 를 더했다.
+- **behave.templates 9** — 헤더 여섯 한 줄 · Templates 현재, 개요 행 일곱 · 그림 다섯, 일곱 문서 페이지 × 1440 · 1024 · 768 에서 iframe 이 1440 × 900 으로 그 화면을 그리고 틀 폭에 맞게 줄어듦 · 높이 = 900 × 비율 · 문서 넘침 없음, 새 창 링크가 새 탭으로 그 화면, 화면 일곱을 직접 1440 에서 오류 · 넘침 · 검토 도구 없음, 로그인 → 2단계(첫 칸 포커스) → 대시보드, 1280 미만 접힘, 조직도 고르기 · 대화상자 제출 Toast · 배포 완료 Toast, 색 · 테마 따라가기(되돌림까지). **기존 단정 고침 2:** 드로어 섹션 5 → 6 · 가로 넘침 폴더에 `templates`(화면 폴더 `templates/screen` 은 최소 폭 1024 의 콘솔이라 빼고 1440 만 잼).
+- **측정에서 드러나 고친 것:** 처음 `uses` 는 짐작으로 적어 verify 가 13건을 잡았다(정책 설정에 Slider · Select · Notice · Tag 가 있고 체크박스 · 라디오 · 칩은 없음, 대시보드에 Select Button 이 있고 Tag 는 없음 등) — 화면대로 고치고 가나다순으로. 정책 설정 Rules '적용 대상' 의 '칩으로 돌아옴' 은 화면의 태그 묶음과 달라 고쳤다. 틀 높이가 테두리 2px 만큼 모자라 iframe 아래가 잘렸다. 런타임 변수 `--tpl-s` 를 `LOCAL_VARS` 에. 첫 전체 게이트에서 화면을 직접 여는 덩어리 셋이 던졌다 — behave.js 의 page 는 기본 컨텍스트라 탭을 더할 수 없어, 새 컨텍스트에서 연다.
+- 음성 시험 넷(축소 끔 · storage 처리기 지움 → behave 각 1, iframe src 틀림 · 화면에 `.tpl-review` 되살림 → verify 각 1) 모두 잡혔다. 1440 라이트 · 다크 · 390 캡처로 개요 · 문서 페이지를 보았다.
+- **사람이 정하지 않은 기본값:** 개요 그림(조각 다섯의 모양), 문서 페이지 순서와 절 이름(Preview · Composition), 축소 기준 1440 × 900, 문서 글 전부(정의 · 고르기 표 · 개요 한 줄 · Rules), 섹션 폴더 `templates/index.html` 은 다른 섹션처럼 첫 화면(로그인)으로 이동.
+- **하지 않은 것:** Figma Templates 페이지, React 패키지 템플릿, 메인 배너 넷(사람의 결정 — 셋 그대로). 문서 페이지는 390 에서도 넘치지 않지만 iframe 안 화면은 1440 을 줄인 것이라 좁은 화면에서는 글자를 읽기 어렵다 — 새 창으로 본다.
+- Figma 미반영 1건(그대로 — Home 잘림. Templates 는 audit 대조 밖).
+
+2026-11-19 Templates 코드 보기(사람의 요청 '코드값도 볼 수 있도록', 앞 항목의 사람이 정하지 않은 기본값은 모두 그대로 — 사람의 결정) — behave 1549 → 1550(`behave.templates.js` 9 → 10). contrast · advisory · verify · react · pages 수는 그대로.
+- 문서 페이지 미리보기 틀을 예제와 같은 `section.example.tpl-code` 로 감싸고 아래에 막대(HTML · CSS 탭 · 복사 · 코드 보기)를 둔다. HTML 은 화면 파일 전체, CSS 는 앱 틀 배치 `assets/templates.css`(컴포넌트 모양은 사이트 스타일시트). React 탭은 없다. 긴 코드는 칸 안에서 스크롤(최대 37.5rem).
+- **같은 글자를 한 곳에서** — `templates.build.js` 가 `screens()`(화면 HTML 문자열) · `build(OUT, html)`(파일 쓰기)로 나뉘었다. `build.js` 가 렌더 전에 `screens()` 를 `window.TEMPLATE_HTML` · `TEMPLATE_CSS` 로 넣고, 같은 문자열로 화면 파일을 쓴다. 넣지 않은 단독 셸에서는 미리보기만 그린다.
+- 예제의 탭 처리기가 복사 대상을 `-(html|react)` 만 바꿔, CSS 탭에서 HTML 로 돌아오면 복사 대상이 `-css` 에 남았다 — `css` 를 더했다(app.src.js).
+- **verify 더함:** 코드 틀 구조, 보이는 HTML = 화면 파일, CSS = `assets/templates.css`, 복사 버튼이 HTML 칸부터. 클래스가 `example tpl-code` 라 예제 검사(`<section class="example"` 로 쪼갬 — html/react pane 요구)에는 걸리지 않는다.
+- **behave +1** — 일곱 페이지에서 접힘으로 시작 · 열면 HTML 칸과 복사 글자 = 화면 파일 · CSS 탭 = templates.css · 다시 HTML 이면 복사 대상도 돌아옴 · 코드 칸 최대 37.5rem 에서 스크롤 · 넘침 없음.
+- 음성 시험 셋 모두 잡혔다 — 탭 처리기의 `css` 지움(behave — 처음엔 HTML → CSS 만 재서 통과해, 다시 HTML 로 돌아오는 단정을 더해 잡음) · 코드 칸 최대 높이 지움(behave) · 생성 페이지의 코드 글자 한 자 바꿈(verify — 처음엔 강조 span 태그 안에 넣어 글자가 그대로라 통과, 코드 첫 글자 앞에 넣어 잡음). 1440 라이트 · 다크 · 390 캡처로 보았다.
+- 문서 페이지가 화면 HTML 을 실어 커졌다(리스트 259KB · 대시보드 152KB).
+- Figma 미반영 1건(그대로 — Home 잘림).
+
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
@@ -914,15 +1011,145 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 
 ## Figma
 
-> **임시 규칙 — 2026-11-09 부터 사이트 완성 때까지 Figma 반영 보류(사람의 결정 — 일정).**
-> - `use_figma` 로 Figma 를 고치지 않습니다. 결정이 자주 뒤집히고 Figma 한 번이 10~34분이라, 사이트가 끝난 뒤 한 번에 검토 · 반영합니다.
-> - 대신 사이트를 고칠 때마다 기준 덤프로 audit 을 돌립니다: `node _figma/audit.mjs diff _figma/dumps/baseline.json`.
->   ✗ 수를(2026-11-12 까지는 알려진 `Label/2 SemiBold: 굵기 700 ≠ 600` 1건을 뺐다 — 19단계로 그 스타일이 없어져 이제 그대로) 커밋 메시지에 **'Figma 미반영 n건'** 으로 적습니다. 기준선(2026-11-09, k42b 덤프)은 0건입니다.
-> - 기대값은 대부분 저장소에서 읽으므로 사이트를 고치면 audit 이 저절로 따라옵니다. 새 검사에 Figma 쪽 데이터가 필요하면 `audit.mjs` 만 고치고, `probe.js` 수정은 일괄 반영 때 합니다.
-> - **끝나는 조건:** 사이트가 완성되면 전체 probe → audit 목록 → figma-sync 로 고침 → 어긋남 0 → 데스크톱 검토 한 번 → `baseline.json` 을 새 덤프로 바꾸고 이 블록을 지웁니다.
+> **Figma 반영 보류는 2026-11-18 에 끝났습니다(사람의 결정 '지금 교체').** 2026-11-09 부터 사이트를 고치는 동안 Figma 를 고치지 않던 임시 규칙을 지웠습니다.
+> - 기준 덤프 `_figma/dumps/baseline.json` 을 2026-11-18 의 전체 probe(`dump-b5`, 같은 날 사이드 내비 여백 뒤 `dump-b6`)로 바꿨습니다. 이 덤프로 audit 은 **1건**이고, 그 하나는 Home 히어로 부채꼴을 사이트처럼 일부러 잘라 둔 넘침입니다(어긋남이 아님).
+> - **아직 하지 않은 것:** 데스크톱 검토 한 번. Noto 로 그린 글자를 Pretendard 로 되돌리는 일(`_figma/font-revert.md` 끝 절 · `.tsv`)은 사람이 데스크톱에서 합니다. 사람이 검토 전에 기준 덤프를 바꾸기로 정했으므로, 되돌린 뒤의 글자 높이 · 줄바꿈은 기준 덤프에 들어 있지 않습니다.
+> - 사이트를 고친 뒤에도 기준 덤프로 audit 을 돌려 ✗ 수(Home 잘림 1건을 뺀 수)를 커밋 메시지에 'Figma 미반영 n건' 으로 적는 습관은 그대로 둡니다. 이제 Figma 는 그때그때 `use_figma`(figma-sync)로 고쳐도 됩니다.
+> - 지운 것: 보류 동안의 규칙(Figma 를 고치지 않음 · `probe.js` 수정은 일괄 반영 때 · 끝나는 조건). 위 사이트 항목들의 'Figma 미반영 n건' 은 그때의 기록으로 남겨 둡니다.
 
-파일 `ngyAZOP9Icjzw9KWyl4RdV`. 현재 쓰는 페이지는 `Overview` · `1 Theme` · `2 Element` ·
-`3 Component` · `4 Pattern` · `Resource` 이고, 구분선 아래 v0.3 페이지들은 아카이브입니다.
+파일 `ngyAZOP9Icjzw9KWyl4RdV`. 현재 쓰는 페이지는 사이트 메뉴와 같은 넷 — `Overview`(1184:2) · `Foundations`(302:3) ·
+`Components`(302:5) · `Patterns`(302:6)이고, 구분선 `------ 아카이브 ------` 아래는 `(old) …` 다섯과 v0.3 페이지들입니다.
+
+**2026-11-18 Figma 동기화 1단계 — 구성(사람의 결정 넷: 같은 파일에서 옮긴 뒤 사이트 기준으로 고침 · 옛 페이지는 지우지 않고 아카이브 · 구성 먼저, 내용은 2단계 · 썸네일은 빈 이미지 자리).**
+이 작업으로 옛 보류 블록의 '끝나는 조건' 이 시작됐고, 2단계 묶음 4 뒤 같은 날 보류를 끝냈습니다(위 인용 블록). 계획은 `~/.claude/plans/composed-tinkering-kahn.md`.
+- **옮기기만 했다** — `appendChild` 라 노드 id · 컴포넌트 키가 그대로이고(`components.json` 의 figma 연결 69곳도 그대로), 지운 노드는 없다. Foundations · Components · Patterns 는 옛 1 Theme · 3 Component · 4 Pattern 의 페이지 id 를 그대로 쓰고 이름만 바꿨다. Overview 만 새 페이지다.
+- **섹션 = 사이트 메뉴 순서**(스크립트로 대조 — 세 페이지 모두 같음, 섹션끼리 겹침 · 섹션 밖 넘침 0).
+  - Foundations: Overview · Colors · Elevation · Grid(Spacing · Grid · Radius 카드) · Icons · Interaction(Motion 카드) · Typography · Writing(빈 섹션). Radius · Motion 은 사이트에서 Resources › Design Token 에 있지만 메뉴가 넷뿐이라 이렇게 뒀다(사람이 정하지 않은 기본값).
+  - Components: Overview + 46(알파벳 순 · 그룹 Selection Controls · Table 은 섹션 이름 앞에 `그룹 / `). 없는 15개(Avatar · Code · Copy Field · Empty State · File Upload · Form · Link · Notification Center · Number Input · Page Header · Combobox · Side Panel · Steps · Time Picker · Tree)는 머리말만 있는 섹션. 옛 패턴 '빈 화면' 카드는 Empty State 섹션에 참고로.
+  - Patterns: Overview + Common UI 7 · Service Pattern 5 · Security Console 10(`묶음 / 이름`). 없는 12개는 머리말만.
+- **세는 값:** Components 페이지 세트 52 · 컴포넌트 738(옮기기 전과 같음), Foundations 컴포넌트 458(아이콘), Patterns 0. 아카이브 페이지의 컴포넌트는 0 — 다만 `(v0.3) Web / Home` 의 세트 1 · 컴포넌트 13 은 원래 거기 있던 것이다.
+- **Overview 화면 넷**(1440, 사이트를 헤드리스로 재서 그림) — Overview 화면 `Home · 1440`(1197:66 — 헤더 · 히어로 · 도형 넷 · 바로가기 배너 셋), `Foundations Overview · 1440`(1196:62 — 목록 7), `Components Overview · 1440`(1194:4969 — 카드 46), `Patterns Overview · 1440`(1195:300 — 카드 22).
+  카드의 썸네일은 `Thumbnail / <이름>` 사각형(높이 200 · `background/neutral/secondary`)이고 이미지는 사람이 넣는다. 사이드바는 사이트와 같은 항목 · 묶음 · N 배지.
+- **새로 만든 로컬 컴포넌트** — Overview 페이지의 섹션 `_Local components`(1193:2): `_Site Header`(1193:183, Active = Home · Foundations · Components · Patterns · None — 사이트 메인은 선택 메뉴가 없어 None) · `_Overview Card`(1193:184, Label · Group · Show group).
+- **사이트와 다른 것:** 사이트 카드의 N 배지('Notification CenterN' 처럼 글자에 붙어 보임)는 카드에 넣지 않았다. 본문 문단 안 `code` 글자의 모양은 그리지 않았다. 텍스트 스타일에 묶은 글자는 그 스타일의 행간을 받아 사이트와 다르다(사이드바 항목 16 → Label/1 20, 카드 이름 25.6 → Title/1 24).
+  Noto 는 SemiBold 가 없어 600 은 Bold · 800 은 Black 으로 그렸다 — 맞는 스타일이 없는 글자 68개를 `font-revert-nodes.tsv` 끝에 적었다(사람이 데스크톱에서 Pretendard 로). 그래서 '감사 로그 · 변경 이력' 처럼 긴 카드 이름 · 배너 설명이 사이트보다 한 줄 더 간다.
+- **도구:** `probe.js` 의 `CURRENT_PAGES` 를 새 넷(id)으로, `swatchPage` · `DOC_PAGES` 를 새 이름으로. `audit.mjs` 는 `DOC_PAGES` 를 새 이름으로 하고 옛 덤프의 페이지 이름을 `PAGE_ALIAS` 로 읽는다(1 Theme · 2 Element → Foundations 등). 기준 덤프로 다시 돌려 **608건 그대로**(바뀐 것은 메시지의 '4 Pattern' → 'Patterns' 10줄뿐).
+  **새 덤프는 뜨지 못했다** — `probe.js` 가 99,895자라 `use_figma` 의 코드 한도 50,000자를 넘는다. 2단계 시작 때 probe 를 나눠 돌리는 방법을 정해야 한다.
+
+**2026-11-18 2단계 묶음 1 — 기반(변수 · 텍스트 스타일 · 이펙트, 사람의 결정 셋: 옛 텍스트 스타일은 남기고 차차 옮김 · 19개 + 쓰는 굵기 조합만 · 아바타 토큰은 만들고 대조에도 넣음).** audit 608 → **573**.
+- **변수 24개를 새로 만들었다**(Semantic 컬렉션, 값은 atomic 별칭 · 후광만 rgba).
+  - Tag 글자 heavy 6, `line/field/focus` · `focus-halo`, `chart/mono/1~4`, `avatar/1~6/surface · text` 12.
+  - 범위(scope)는 같은 갈래 변수를 따랐다: heavy = `foreground/negative/strong` 과 같음, 선 = STROKE_COLOR(후광은 + EFFECT_COLOR), 차트 = ALL_FILLS + STROKE_COLOR, 아바타 면 = ALL_FILLS · 글자 = TEXT_FILL.
+  - 코드 문법(WEB)은 저장소 이름 `var(--…)` 이다.
+- **값을 고친 변수 14개:** `foreground/accent/lime` 라이트 lime-37 → 40, 상태 · accent 틴트 12 → 8%(positive · cautionary · negative · lime · cyan · light-blue · violet · purple · pink), negative strong · heavy · hover · pressed 의 라이트 · 다크 알파(11-13 결정).
+- **AI 면 그라데이션 3개는 만들지 않았다** — 값이 linear-gradient 라 Figma 색 변수가 될 수 없다. audit 은 대조에서 빼고 NOTE 로 알린다. AI 주 버튼 · Banner 를 그릴 때 칠에 그라데이션을 직접 준다.
+- **텍스트 스타일 19개를 Noto Sans KR 로 만들었다**(이름은 audit 기대값 그대로 — `Display 1` … `Body 1/Normal` … `Caption 2`, 자간은 % 로). **사람이 데스크톱에서 Pretendard 로 되돌릴 목록**은 `_figma/font-revert.md` 끝 절이다. 쓰는 노드는 아직 0이고, 옛 19개(`Title/1` 등)는 그대로다.
+- **이펙트 스타일은 어긋남이 없었다**(바꾸지 않음).
+- **audit 도구:** `tokens()` 가 `--avatar-N-*` 를 `avatar` 로 읽고, diff 가 차트처럼 목록 · 값(별칭)을 대조한다. 그라데이션 셋은 semantic 기대값에서 빼고 NOTE 로 남긴다. 그래서 기준 덤프로 돌리면 609건이다(그라데이션 줄 −1 · 아바타 없음 +1 · 기대값 줄 바뀜).
+- **덤프 뜨는 법(이번에 정함):**
+  - 바뀐 것이 변수 · 스타일뿐이라 probe 의 맨 앞(변수 · 텍스트 · 이펙트 스타일 · 게시 숨김)만 같은 식으로 읽었다.
+  - 그 결과를 기준 덤프에 덮어 audit 을 돌렸다(`components` 등은 기준 덤프 그대로).
+  - 전체 probe 는 esbuild 로 줄이면 47,128자라 한도 안에 든다(`globalThis.__p=async()=>{…}` 로 감싸 줄인 뒤 감싼 것을 떼어 냄). 다만 돌려받는 JSON 이 약 427KB 라 대화에 다 들어오지 않는다. 묶음 2 에서는 `components` 를 컴포넌트 묶음별로 나눠 받는 방법을 쓴다.
+- 남은 573건은 컴포넌트 · 문서 틀의 대조다. 텍스트 스타일 이름(옛 `Title/1` → 새 `Body 1/Normal SemiBold` 등)이 큰 몫이고, 묶음 2 에서 고친다.
+
+**2026-11-18 2단계 묶음 2 — 기존 컴포넌트 31개.** audit 573 → **386**(마지막 덤프 `dump-b2f`). 그 뒤에 Breadcrumb Hover · 섹션 간격을 고쳐 Figma 에서 직접 확인했고(다른 항목 1개 · 간격 모두 200), 덤프로는 다시 재지 않았다. 고쳤으니 4건이 줄어 382 가 될 것으로 본다.
+- **텍스트 스타일을 새 19단계로 옮겼다.**
+  - 굵기 조합 7개를 만들었다(쓰는 것만 — 사람의 결정): Body 1/Normal SemiBold · Medium, Label 1/Normal SemiBold, Label 1/Reading Regular, Caption 1 Regular · SemiBold, Caption 2 SemiBold.
+  - SemiBold 는 Noto 에 없어 Bold 로 그렸다 → `_figma/font-revert.md` 끝 절.
+  - 옛 스타일을 쓰던 노드를 새 스타일로 옮겼다: 먼저 3,812개, 끝에 인스턴스 안쪽 글자 141개(Components 88 · Patterns 53). 옮긴 짝은 Label/2 → Caption 1, Body/2 → Label 1/Reading, Title/1 → Body 1/Normal SemiBold 등이다.
+  - 이제 현행 네 페이지에서 옛 19개를 쓰는 노드는 0이다. 옛 스타일 자체는 아카이브 페이지가 쓸 수 있어 지우지 않았다(5단계에서 정리).
+- **컴포넌트 고친 것:**
+  - KPI 증감 배지 구조 · Navigation · Steps · Indicator · Breadcrumb · 포커스 링 · Chip 지우기 · Card 빈 상태 아이콘.
+  - 달력: Today · Preview End, In-range · Preview 모서리 0.
+  - 심각도 다섯 색 · 차트 한 톤(mono) · 스피너 크기와 색.
+  - 검은 기본 칠이 남은 노드 59개를 토큰으로.
+  - **Tag 세트(81변형):**
+    - 높이 18 · 22 · 26, 여백 2/8 · 3/10 · 5/12.
+    - 글자는 톤마다 heavy 색이고 sm 은 Caption 2 SemiBold, 나머지는 Caption 1 SemiBold 다.
+    - Outline 은 톤의 선 토큰, Solid Critical 은 negative strong 면 · 선, accent 는 brand 면 + brand-label 이다.
+    - Neutral 열을 더했고, 점은 기본에서 껐다.
+    - 측정에서 드러난 것: 안쪽 선이 레이아웃에 들어가 Outline · Solid 가 2px 높았다(`strokesIncludedInLayout=false`).
+  - Indicator 섹션이 넘쳐 2518 로 늘리고, 아래 섹션 31개를 +82 내려 간격 200 을 지켰다.
+  - Chart 세트(992:4826)가 넘치고 변형이 겹쳐 다시 배치했다(1040 × 1448).
+- **저장소 쪽:**
+  - `components.data.js` 의 Tag `figma` 를 사이트 CSS 대로 고쳤다(`solidFg` 톤마다 heavy, 크기 18 · 22 · 26). audit 이 '사이트 CSS 와 다름' 으로 멈췄다.
+  - `audit.mjs` 를 고쳤다.
+    - 심각도 Tag 기대값을 톤마다(label · outline) 읽는다.
+    - Mixed 차트 막대 · 선 색을 mono 규칙으로 나눠 기대한다.
+    - 정적 도넛 각도는 대시보드에 정적 도넛이 남아 있을 때만 잰다.
+    - `var(--dN)` 정지점을 `.donut` 규칙에서 풀어 읽는다.
+  - `probe.js kpiRead` 는 숨긴 증감 배지가 인스턴스 children 에서 빠져도 증감 없음으로 읽는다.
+- **덤프 뜨는 법(정함):**
+  1. esbuild 로 줄인 probe 를 PNG tEXt 덩어리에 넣어 `upload_assets` 로 올린다.
+  2. 플러그인에서 풀어 돌리고, 결과 JSON 을 조각으로 `setSharedPluginData("jsds.probe","dN")` 에 둔다. 조각 경계는 공백을 피한다 — 읽는 쪽이 끝 공백을 잘라 길이가 1 어긋난 적이 있다.
+  3. 조각을 받아 이어 붙이고 길이 · 해시를 대조한 뒤 audit 을 돌린다.
+- **남은 386건:**
+  - 문서 틀 269 · Spec 107 → 묶음 4.
+  - Chart 의 Gauge · Spark 변형 없음과 Data Visual 예시 순서, 대시보드 패턴의 차트 줄(사이트는 막대 + 진행 막대) → 묶음 3.
+  - Date Picker 의 Type=Button 18변형(사이트에서 2026-11-09 에 없앰) — **지웠다**(사람의 결정 '입력형으로 바꾸고 삭제'). 문서 예시의 인스턴스 4개는 같은 크기 · 상태의 Type=Input 으로 바꿨다. 값 글자는 그대로이고, 폭은 240 → 260 이다. 남은 `textAutoResize` override 가 기간 값을 가운데로 띄워 채움으로 되돌렸고, 굵기는 메인과 같은 Label 1/Reading Regular 로 맞췄다. 세트 위의 빈자리 577 · 섹션 높이를 줄이고 아래 섹션 37개를 올려 간격 200 을 지켰다(넘침 0). 이 1건은 덤프로 다시 재지 않았다.
+  - Home · 1440 위 +146 은 히어로 부채꼴(1197:68)을 사이트처럼 일부러 잘라 둔 것이다.
+
+**2026-11-18 2단계 묶음 3 — 새 컴포넌트 15개 · 새 패턴 12개.** audit 386 → **362**(마지막 덤프 `dump-b3c`).
+- **362 의 내역:** 문서 틀 269 · Spec 92 는 묶음 4 몫이다. 나머지 1건은 Home 히어로 부채꼴을 일부러 잘라 둔 넘침이다. 컴포넌트 · 패턴 · 차트 · 변수 대조의 어긋남은 0 이다.
+- 같은 날 다른 세션의 사이트 수정(버튼 스피너 16 · 20 · 28, 대시보드 '일별 탐지' 선 추이, `radius/xl` 14)이 이 묶음 중에 들어왔다. 그 몫도 여기서 맞췄다.
+- **새 컴포넌트 15개** — 1단계에서 머리말만 있던 섹션마다 Spec 카드와 세트를 그렸다(Avatar · Code · Copy Field · Empty State · File Upload · Form · Link · Notification Center · Number Input · Page Header · Combobox · Side Panel · Steps · Time Picker · Tree). 'Spec 카드 없음' 15건이 없어졌다.
+- **Chart 세트에 Gauge · Spark 변형을 더했다.**
+  - Gauge 는 지름 310 의 호(ELLIPSE `arcData`) 둘을 'Gauge' 프레임으로 잘라 반원을 그린다.
+  - 호를 평평한 벡터로 바꾸면 audit 이 호를 읽지 못한다(호 0개 · 영역 2개로 나옴). 그래서 audit 이 잘린 Gauge 프레임만 넘침에서 뺀다.
+- **패턴 카드 12개** — 오류 · 권한 없음 · 위험 작업 확인 · 가져오기 · 내보내기 · 일괄 작업 진행 · 로그인 · 세션 · 보고서 · 예약 발송 · 상세 화면 · 권한 · 역할 · API 키 · 비밀값 · 사고 처리 · 감사 로그 · 변경 이력 · 알림 규칙.
+  - 패턴 카드 틀(336:6)의 '사용 가이드' 자리는 사이트처럼 'Rules' 목록이다(항목 이름 · 설명 두 칸).
+  - 예시는 기존 컴포넌트 인스턴스로 조합했다. 예시 설명이 사이트에 비어 있는 사고 처리 · 알림 규칙은 내가 썼다(사람이 정하지 않음).
+  - Patterns 페이지는 섹션 23개 · 간격 200 · 넘침 · 겹침 0 이다.
+- **대시보드 '일별 탐지'** = 프레임으로 그린 선 추이다. 계열 하나 · 옅은 영역(chart/mono/1, 24%) · x 눈금 14개이고 범례는 없다.
+  - Chart 세트의 Timeseries 변형은 Data Visual 'timeseries' 예제(심각도 누적)를 그리므로 쓰지 못한다.
+  - `probe.js lineCard` 가 프레임 차트를 늘 bar 로 읽었다. 이제 사각형 없이 '<계열> Line' 벡터만 있으면 timeseries 로 읽는다.
+- **그 밖에 고친 것:**
+  - Button loading 스피너 md 20 · lg 28 — 34변형을 가운데로 다시 놓았다. 크기만 바꾸면 왼쪽 위 기준으로 커져 '가운데 아님' 34건이 났다.
+  - `radius/xl` 10 → 14.
+  - Select 컴포넌트의 Trigger 를 FILL 로 했다(5변형 — 인스턴스 폭이 240 고정이었다).
+  - Number Input 카드 폭 920 → 1176. 세트 952 가 카드 본문 밖으로 208 넘쳤다.
+  - 필수 별표 4개의 색을 `foreground/negative/strong` 으로, Form Spec 'Actions' 행을 저장소 문구로 바꿨다.
+- **audit 도구:** Spark 예제의 제목을 앞의 정적 스파크 KPI(캔버스 없음)에서 읽던 정규식을 고쳤다.
+- **알고 남긴 차이(인스턴스 · 세트가 못 하는 것):**
+  - Figma Notice 는 아직 테두리가 있다(사이트는 없음 — 묶음 4 의 Notice 세트에서).
+  - 로그인 칸에 앞 아이콘이 없다(Text Field 세트에 아이콘 슬롯이 없음).
+  - 상세 화면 Page Header 에 ⋯ 버튼이 없다.
+  - 사고 처리 메모 칸은 한 줄이다(Text Field 에 textarea 변형이 없고 인스턴스 안 높이는 바꿀 수 없음).
+  - List Item 앞 아바타는 18 이다(사이트 24 — 인스턴스 안 크기를 바꿀 수 없음).
+  - Button lg 아이콘 선 1.6 은 그리지 않았다(audit 대조 밖).
+- **덤프 뜨는 법 보탬:**
+  - 한 번에 돌려받는 한도는 48,000 **바이트**다. 한글이 섞이면 45,000자 조각이 넘친다. 조각을 UTF-8 40,000바이트로 자른다.
+  - 올린 probe 이미지는 이미지를 받친 노드를 지운 뒤 다음 호출에서는 `getImageByHash` 가 null 이다. 덤프마다 다시 올린다.
+  - PNG 는 1×1 IHDR 에 `tEXt`(키 `c`)로 줄인 probe 를 넣는다(`esbuild --minify --charset=ascii` 라 글자가 ASCII).
+
+**2026-11-18 2단계 묶음 4 — 문서 틀 · 고르기 표 · Rules · 세트 넷(사람의 결정 넷: 컴포넌트 카드를 사이트 순서로 다시 짬 · 패턴 카드도 Rules 와 고르기 표 · 세트 넷 모두 넓힘 · 옛 빈 화면 카드는 아카이브로).** audit 362 → **1**(덤프 `dump-b4b` — Home 히어로 부채꼴을 일부러 잘라 둔 넘침 하나).
+- **컴포넌트 카드 46개** — 패널을 사이트 순서로: 고르기 표(언제 쓰는가 · 비슷한 것 · Placement) → 예제 → Rules → Spec. Do/Don't 를 Rules 로 바꾸고, 행 수는 데이터의 `principles` 와 같다(묶음이 있으면 소제목). 모든 Spec 패널에서 Placement 행을 지웠다. Placement 는 이제 고르기 표에 있다.
+- **패턴 카드 22개** — 고르기 표(언제 쓰는가 · 비슷한 패턴)와 Rules. 고르기 표 행은 컴포넌트 카드와 같은 모양이다(행 사이 20 · 이름 칸 140 · 선 없음). 처음엔 패턴 쪽만 행 목록이 한 겹 더 있었고 Rules 처럼 선 · 위아래 12 를 줘서 probe 가 두 행을 한 행으로 읽었다(어긋남 44). 행을 패널로 올리고 모양을 맞춘 뒤 섹션 높이를 다시 맞췄다(간격 200 · 넘침 0).
+- **옛 '빈 화면' 패턴 카드**는 Components › Empty State 섹션에서 아카이브 페이지 `(old) Patterns Overview`(829:4419)로 옮겼다. 지우지는 않았다.
+- **세트 넷을 넓혔다:**
+  - Text Field 25변형 — 칸 안 앞 아이콘 슬롯, Type=Textarea(Medium × Default · Focused · Error · Disabled, 높이 96 = `.field textarea` 의 min-height). 크기가 셋인 한 줄 입력과 달리 Textarea 는 Medium 하나뿐이다.
+  - List Item 12변형 — 앞 아바타 24.
+  - Page Header 3변형 — ⋯ 동작 버튼(More).
+  - Button lg 아이콘 선 1.6.
+  - 넘침을 맞추느라 Text Field 세트를 3열(폭 1072)로, Page Header 변형을 632(세트 696)로, List Item 세트 여백을 32(1048)로, List 카드 본문을 1144 · 카드를 1272 로 넓혔다.
+  - 복제한 변형은 `componentPropertyReferences` 를 잃어 인스턴스에서 앞 요소가 안 보였다. 원래 변형에서 노드 경로로 다시 이었다.
+- **새 세트를 쓴 예제:** 로그인 칸의 앞 아이콘, 사고 처리 메모 = Textarea · 처리 기록 아바타 24, 상세 화면 Page Header 의 ⋯ — 묶음 3 의 '알고 남긴 차이' 넷(로그인 아이콘 · 메모 한 줄 · ⋯ 없음 · 아바타 18)과 Button lg 선을 이것으로 고쳤다.
+- **Notice 세트 다섯 변형을 사이트대로**(audit 대조 밖이라 끝에 찾아 고침): 테두리 없음, 위아래 여백 14 → 20(높이 74 → 84), Neutral 면 `surface/elevated/primary` → `background/neutral/secondary`. 아이콘은 outline → filled(info-circle · circle-check · alert-triangle · alert-circle)이고, Neutral 아이콘은 시안 → `foreground/neutral/secondary` 다. 바꾼 아이콘에 남은 선은 지웠다(원본 filled 아이콘은 선이 없음). 세트 넘침 0 은 스크린샷으로 확인했다. 이 수정 뒤에 덤프를 다시 뜨지 않아, 일반 검사(raw 색 · 넘침 등)는 이 다섯 변형을 다시 재지 않았다.
+- **audit 도구:**
+  - `specExpect` 는 Placement 를 빼고 `spec` 만 기대한다.
+  - 새 `docTextExpect()` 는 두 데이터 파일의 `choose` · `principles` 를 읽는다. 카드는 한글 이름으로 패턴을, 그 밖은 컴포넌트를 짝짓는다. 고르기 표는 행 이름으로, Rules 는 '묶음 / 이름' 으로 대조하고 저장소에만 · Figma 에만 있는 행, 없는 패널, 사이트에 없는 Rules 패널을 잡는다.
+  - Text Field 입력칸 높이는 Textarea 변형이면 `textarea` 의 min-height 와 대조한다(같은 날 크기 셋으로 — 아래).
+- **probe 도구:** `components.docText` — `Card/*` 의 고르기 표 · Rules 패널(패널 = 제목 글자가 패널 이름과 같은 프레임)을 `[이름, 글, 글 id]` · `[묶음, 이름, 글, 글 id]` 로 읽는다.
+- **덤프 뜨는 법(정함):**
+  1. 줄인 probe 를 담은 PNG 를 `upload_assets` 의 주소로 `curl -F file=@…` 올린다.
+  2. 플러그인이 `getImageByHash` 로 읽어 길이 · 해시를 대조하고 받친 노드를 지운 뒤 돌린다.
+  3. 결과 조각(UTF-8 40,000바이트 이하)을 `setSharedPluginData("jsds.probe","dN")` 에 둔다. 하위 에이전트 둘이 조각을 읽고, 그 기록에서 이어 붙여 길이 · 해시를 대조한다.
+- **이번 수의 근거:** 전체 probe(`dump-b4`)로 49건이었다. 패턴 고르기 표 44건은 위의 행을 올린 뒤 같은 probe 코드로 패턴 카드만 다시 읽어 덤프에 덮었다(`dump-b4b`). Textarea 4건은 audit 기대값을 고친 것이다. 행을 올린 뒤 전체 probe 는 다시 돌리지 않았다.
+- **같은 날 Textarea 크기 셋 · 다시 잰 전체 probe(`dump-b5`)** — audit **1**(Home 히어로 부채꼴 하나).
+  - Text Field 세트에 Type=Textarea 의 Small · Large(각 Default · Focused · Error · Disabled)를 더해 33변형(1072 × 1724)이 됐다. 높이는 72 · 120 이고 글자 · 반경은 같은 크기 입력과 같다(사이트 항목 '2026-11-18 Textarea 크기 셋'). Small 입력칸의 반경도 4 로 맞췄다.
+  - audit 은 Textarea 를 크기마다 `.field.sm` · `.field` · `.field.lg` 의 `textarea` min-height 와 대조한다.
+  - 이 probe 는 패턴 고르기 표를 올린 것 · Notice 세트 다섯 변형 · Textarea Small · Large 를 모두 다시 쟀다.
+  - 덤프를 이을 때 조각 6 끝의 공백 하나가 잘려 길이가 1 모자랐다('점 자리' → '점자리', Notification Center Spec 1건이 거짓으로 남). 그 공백을 되살리니 길이 · 해시가 probe 의 값과 같았다. 조각 경계는 여전히 공백을 피해야 한다.
 
 - `use_figma` 를 부르기 **전에 `/figma-use` 스킬을 반드시 불러옵니다.**
 - 텍스트를 만들거나 고칠 때는 `_figma/font.js` 의 `makeFont()` 만 씁니다.
@@ -932,7 +1159,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 ### 텍스트 편집 — Pretendard 없이 하는 법과 주의점
 
 **에이전트가 쓰는 Figma 플러그인 환경에는 Pretendard 가 없습니다**(보이는 1,938 패밀리 중 0건).
-2026-10-22 에 텍스트 스타일 14단계(지금 저장소는 19단계 — 2026-11-12, Figma 는 아직 16)를 `Noto Sans KR` 로 대체해 저장소 값(크기·행간·자간)으로 교정했고,
+2026-10-22 에 텍스트 스타일 14단계(지금 저장소는 19단계 — 2026-11-12. Figma 는 2026-11-18 에 새 19개를 Noto 로 만들었고 옛 스타일도 남아 있다)를 `Noto Sans KR` 로 대체해 저장소 값(크기·행간·자간)으로 교정했고,
 **같은 날 사람이 데스크톱에서 직접 Pretendard 로 되돌렸습니다**(교정값은 유지). 그래서 스타일은 Pretendard 이고 Pretendard 글자를
 그대로 고칠 수는 없습니다(`audit.mjs` 의 NOTE 가 실제 상태를 알려 줍니다).
 

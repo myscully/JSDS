@@ -102,7 +102,7 @@ module.exports = async function buttonFix({ page, ok, go }) {
     /* ── 스피너 = 그 크기의 아이콘(16 · 18 · 20) ── */
     await mount(["sm", "md", "lg"].map((z) => `<button type="button" class="btn ${z} solid primary loading" aria-busy="true">저장</button><button type="button" class="btn ${z} solid primary icon-only" aria-label="a"><svg width="${{ sm: 16, md: 18, lg: 20 }[z]}" height="${{ sm: 16, md: 18, lg: 20 }[z]}" viewBox="0 0 24 24"></svg></button>`).join(""));
     const spin = await page.evaluate(() => ["sm", "md", "lg"].map((z) => { const s = getComputedStyle(document.querySelector(`#__bt .btn.${z}.loading`), "::after"), ic = document.querySelector(`#__bt .btn.${z}.icon-only svg`).getBoundingClientRect(); const w = parseFloat(s.width) + (s.boxSizing === "border-box" ? 0 : 2 * parseFloat(s.borderTopWidth)); return { z, drawn: w, icon: Math.round(ic.width), sizing: s.boxSizing }; }));
-    ok("the loading spinner draws at the icon size of its button: 16 · 18 · 20", spin.every((s, i) => s.drawn === [16, 18, 20][i] && s.icon === s.drawn), JSON.stringify(spin));
+    ok("the loading spinner draws at the icon size of its button: 16 · 20 · 28 (2026-11-18 — 16 · 18 · 20 이었다)", spin.every((s, i) => s.drawn === [16, 20, 28][i] && s.icon === s.drawn), JSON.stringify(spin));
   });
   await part("9 · assistive 스피너 = foreground/brand/primary(면 토큰이던 것), 두 테마", async () => {
 

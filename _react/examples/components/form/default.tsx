@@ -1,4 +1,4 @@
-import { Button, Form, FormActions, FormLegend, FormRow, TextField } from "@jiran/ds-react";
+import { Button, ButtonGroup, Form, FormActions, FormLegend, FormRow, TextField } from "@jiran/ds-react";
 
 export default function Example() {
   return (
@@ -10,8 +10,10 @@ export default function Example() {
         <TextField id="fm-to" label="종료 IP" />
       </FormRow>
       <FormActions>
-        <Button variant="outline" color="assistive">취소</Button>
-        <Button type="submit">저장</Button>
+        <ButtonGroup>
+          <Button variant="outline" color="assistive">취소</Button>
+          <Button type="submit">저장</Button>
+        </ButtonGroup>
       </FormActions>
     </Form>
   );

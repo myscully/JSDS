@@ -45,7 +45,7 @@ export { NumberInput, type NumberInputProps } from "./components/number-input/Nu
 export { CodeBlock, InlineCode, type CodeBlockProps } from "./components/code/Code";
 export { CopyField, type CopyFieldProps } from "./components/copy-field/CopyField";
 export { FileUpload, type FileUploadProps, type UploadItem, type UploadAdded, type UploadStatus } from "./components/file-upload/FileUpload";
-export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, type TopBarProps, type TopBarLogoProps, type TopBarNavProps, type TopBarNavItemProps, type TopBarRightProps } from "./components/top-navigation/TopBar";
+export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, TopBarStart, TopBarNavToggle, TopBarThemeToggle, type TopBarProps, type TopBarLogoProps, type TopBarNavProps, type TopBarNavItemProps, type TopBarRightProps, type TopBarStartProps, type TopBarNavToggleProps, type TopBarThemeToggleProps } from "./components/top-navigation/TopBar";
 
 // D. overlays & behavior
 export { Combobox, type ComboboxProps } from "./components/combobox/Combobox";
