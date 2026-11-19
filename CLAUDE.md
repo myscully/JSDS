@@ -988,6 +988,14 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 문서 페이지가 화면 HTML 을 실어 커졌다(리스트 259KB · 대시보드 152KB).
 - Figma 미반영 1건(그대로 — Home 잘림).
 
+2026-11-19 사용법 문서 최종 정리 · Resources 문구 하나(사람의 요청 · 결정 넷) — 게이트 수는 그대로.
+- **Resources › React Package 의 ds.js 표 Form 행**에서 '3개 이상 요약' 을 지웠다. 폼 위 요약은 2026-11-16 에 없앴다. 이제 '제출 시 첫 오류로 이동(폼 위 요약 없음 — 오류는 필드 아래에), 고치면 바로 지움' 이다.
+- Claude Docs 의 사용법 문서를 사이트 기준으로 고쳤다(저장소 밖). 고친 것: 메뉴 여섯 · Templates 일곱, 제품 색 일곱(역할 이름), Figma 동기화 뒤의 상태, `.ds-root`, 차트 · dayjs 파일.
+- **React 설치를 다시 확인했다.** 이 저장소를 clone 해 `npm pack` 하고, 새 Vite React 18 앱에 설치해 Button · TextField 를 그렸다. 제품 색(남색 면 · 흰 글자), 높이 40, Pretendard 를 확인했다.
+  - **`.ds-root` 를 빼면 글꼴이 브라우저 기본(Times)이 된다** — 패키지 CSS 는 글꼴 · 본문 색 · 배경을 `.ds-root` 아래에만 준다. README 에는 있었는데 사용법 문서에 빠져 있었다.
+  - TypeScript 7 에서 `import "@jiran/ds-react/style.css"` 가 TS2882 로 막혔다. `src/vite-env.d.ts`(`/// <reference types="vite/client" />`, Vite 템플릿 기본 파일)를 두면 통과한다.
+- **고치지 않은 것:** 같은 표의 'ToastProvider … 최대 3개' 는 오류 Toast 가 3개를 넘을 수 있어(11-10 결정) 낡았을 수 있다 — 요청 밖이라 그대로 두었다.
+
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
