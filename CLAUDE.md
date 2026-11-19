@@ -1188,6 +1188,21 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
   - 이 probe 는 패턴 고르기 표를 올린 것 · Notice 세트 다섯 변형 · Textarea Small · Large 를 모두 다시 쟀다.
   - 덤프를 이을 때 조각 6 끝의 공백 하나가 잘려 길이가 1 모자랐다('점 자리' → '점자리', Notification Center Spec 1건이 거짓으로 남). 그 공백을 되살리니 길이 · 해시가 probe 의 값과 같았다. 조각 경계는 여전히 공백을 피해야 한다.
 
+**2026-11-19 Components Overview 카드 썸네일 = SVG 컴포넌트(사람의 결정 셋: 원본은 ov-grid 의 사이트 썸네일 · 썸네일을 컴포넌트로 만들어 교체 속성 · 글자는 윤곽선).**
+- **시작할 때의 상태:** `Components Overview · 1440`(1194:4969)의 원래 카드 격자 `Grid`(1194:5134)는 숨겨져 있었다. 그 아래에 사이트 썸네일을 편집 가능한 레이어(Pretendard)로 담은 `ov-grid`(1325:5462)와 SVG 시험 `Accordion 1`(1325:5438)이 있었다(1단계 뒤에 사람이 넣은 것).
+- **썸네일 컴포넌트 47개** — Overview 페이지 `_Local components` › `Thumbnails`(1331:133, 5열 자동 배치). `Thumbnail / Empty`(회색 면)와 `Thumbnail / <이름>` 46개(265 × 200, clip, 면 = `background/neutral/secondary`).
+  - 그림 `Art` 는 ov-card 썸네일을 `exportAsync({format:"SVG_STRING", svgOutlineText:true})` → `createNodeFromSvg` 로 만들었다. 맨 앞 260 × 200 배경은 지웠다(컴포넌트 면이 대신함). 가로로 +2.5 옮겨 가운데에 둔다. 윤곽 글자는 Pretendard 모양 그대로 나왔다(스크린샷 확인).
+  - 칠은 raw 색이라 **라이트로 고정**된다. 면만 변수에 묶었다.
+  - 배경 지우기는 '맨 앞 자식이 260 × 200 이고 자식이 없을 때만' 이다. Navigation · Page Header 는 썸네일이 clip 이라 SVG 가 clip 묶음 하나로 나왔다. 처음에 묶음째 지워 빈 그림이 됐고, 묶음 안 배경만 지워 다시 만들었다.
+- **`_Overview Card`(1193:184)** — 빈 `Thumbnail` 프레임 자리에 `Thumbnail / Empty` 인스턴스(이름 Thumbnail · 폭 FILL)를 두고 INSTANCE_SWAP 속성 `Thumbnail#1332:0` 을 더했다(preferredValues 47). 카드 46개는 **라벨 글자로** 짝지어 이 속성을 바꿨다 — 46/46, 어긋남 0(스크립트로 대조).
+- **ov-grid 의 이름 어긋남 셋(손대지 않음):** 5 · 6번째 카드의 이름이 둘 다 'Card'(라벨 Card · Code)이고, 둘 다 맨 앞에 어긋난 `ov-card / Breadcrumb` 사본(260 × 247, y −277)이 끼어 있다. 7번째는 이름 'Data Visual' · 라벨 'Copy Field' 다. 썸네일은 '이름이 ov-card 가 아닌 260 × 200 프레임' 으로 골랐다.
+- **보이기 정리:** `Grid` 를 다시 보이고 `ov-grid` 는 숨기기만 했다. `Accordion 1` 은 격자 배치를 밀어내서 Overview 섹션 안 오버뷰 프레임 오른쪽으로 옮겼다. 지운 것은 없다.
+  - 섹션 폭을 1640 → 1980 으로 늘렸다. 오버뷰 프레임 높이는 ov-grid 에 맞춰 4984 였는데, 격자 + 100 인 4828 로 줄였다. 섹션 높이는 5188 이다.
+  - Overview → Accordion 섹션 사이가 355 였다(이전부터). 아래 섹션 46개를 올려 200 으로 맞췄다. 페이지의 모든 섹션 간격은 200 이고, `_Local components` 섹션은 3248 로 늘렸다.
+- **잰 것:** probe 의 넘침 · 겹침 식을 Overview · Components 두 페이지에 그대로 돌렸다. 새로 만든 노드는 0건이다.
+  - 나온 것은 Home 잘림(기준값) · Gauge(audit 이 뺌)와, 이전부터 있던 셋이다: Overview 의 `Thumbnail` 프레임(1316:6500, 사이트 메인 그림 — 아래로 99), 숨긴 ov-grid 의 Card · Code 카드(어긋난 사본 — 오른쪽으로 290). probe 는 숨긴 조상을 건너뛰지 않으므로, ov-grid 를 지우거나 사본을 치우기 전까지 audit 에 2건이 더 나올 수 있다.
+  - **전체 probe 덤프 · audit 은 다시 돌리지 않았다.** 썸네일 컴포넌트에는 글자 · 세트 변형 · 변수 어긋남이 없어서, audit 이 대조하는 항목에 들지 않는다고 보았다.
+
 - `use_figma` 를 부르기 **전에 `/figma-use` 스킬을 반드시 불러옵니다.**
 - 텍스트를 만들거나 고칠 때는 `_figma/font.js` 의 `makeFont()` 만 씁니다.
 - 조사는 `_figma/probe.js` 를 붙여 넣고, 결과를 `node _figma/audit.mjs diff <덤프>` 로 대조합니다.
