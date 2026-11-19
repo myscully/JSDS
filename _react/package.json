@@ -9,7 +9,8 @@
     "*.css"
   ],
   "files": [
-    "dist"
+    "dist",
+    "MIGRATION.md"
   ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

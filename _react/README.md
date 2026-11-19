@@ -1,13 +1,15 @@
 # @jiran/ds-react
 
-> **0.8.0 은 깨지는 변경입니다** — 제품 색 위에서 흰 글자가 4.5 를 넘어야 하고, `data-accent-light` 가 사라집니다.
-> (0.8.0 에서 CSS 변수 이름이 전부 바뀌었습니다 — 의미 층째 교체.)
-> 마크업과 props 는 그대로입니다. 전환표는 [MIGRATION.md](./MIGRATION.md) 에 있습니다.
+> **0.6.x 에서 0.9.0 으로 올리면 깨지는 변경이 있습니다.** CSS 변수 이름이 전부 바뀌었고(0.7), 제품 색은 팔레트 일곱에서 고릅니다(0.8 · 0.9).
+> 0.9.0 은 컴포넌트 정비 묶음이라 props · 클래스 · 모양이 컴포넌트마다 바뀌었습니다. 옛 prop 은 개발 모드 콘솔에 한 번 경고하고 새 방식으로 그립니다.
+> 컴포넌트별 전환표는 [MIGRATION.md](./MIGRATION.md) 에 있습니다.
 
 지란지교시큐리티 Design System 의 React 컴포넌트 패키지입니다. 사이트(제품가이드)의 모든 컴포넌트와 패턴 래퍼를 **같은 클래스 마크업**으로 렌더링하는 실제 React 컴포넌트로 구현했습니다. 스타일은 `dist/style.css` 하나(토큰 + 컴포넌트 CSS, 사이트 크롬 제외)이고, 각 컴포넌트 페이지의 React 탭 코드가 곧 사용법입니다.
 
 ```bash
 npm i @jiran/ds-react
+# npm 에 올리기 전에는 npm pack 으로 만든 파일로 설치합니다
+npm i ./jiran-ds-react-0.9.0.tgz
 ```
 
 ```tsx
@@ -23,7 +25,9 @@ createRoot(document.getElementById("root")!).render(
 ```
 
 - 테마: `<html data-theme="dark">` 또는 `setTheme("dark")`. Popup·Toast 포털도 `<html>` 에서 토큰을 상속합니다.
-- 서체·배경: 앱 루트에 `.ds-root` 클래스를 붙이면 Pretendard · 본문 색 · 배경이 적용됩니다.
+- 서체·배경: 앱 루트에 `.ds-root` 클래스를 붙이면 Pretendard · 본문 색 · 배경이 적용됩니다. 빼면 글자가 브라우저 기본 서체로 나옵니다.
+- 화면 폭 단계(선택): `import "@jiran/ds-react/scale.css"` 는 화면 폭에 따라 루트 글자 크기를 93.75 · 100 · 106.25 · 112.5% 로 바꿉니다. `html` 에 걸리므로 제품이 고릅니다.
+- TypeScript 7 은 `import "….css"` 에 TS2882 를 냅니다. `src/vite-env.d.ts` 에 `/// <reference types="vite/client" />` 를 두면 통과합니다.
 - 일본어: Pretendard 에는 한자가 없습니다. 일본어를 쓰는 제품은 `import "@jiran/ds-react/font-jp.css"` 를 더합니다. Pretendard JP 의 조각 파일이고, 한자가 화면에 나올 때만 그 조각을 내려받습니다.
 - 브라우저: `color-mix()` 사용 — Chrome 111+ · Safari 16.2+ · Firefox 113+.
 - React 18.2+ / 19. TypeScript 타입 포함. ESM + CJS.
@@ -59,13 +63,13 @@ import { ChartCanvas, presets } from "@jiran/ds-react/chart";
 </ChartCard>
 ```
 
-프리셋은 `timeseries` · `bar` · `donut` · `mixed` 넷이고 결과는 보통의 Chart.js config 입니다. 색은 토큰(`--chart-series-1~6` · 심각도)을 계산값으로 읽어 칠하고, 테마 · 제품 색이 바뀌면 다시 칠합니다. 원본은 `_build/ds-chart.src.js` 하나이고 `scripts/sync-chart.mjs` 가 복사합니다.
+프리셋은 `timeseries` · `bar` · `donut` · `mixed` · `gauge` · `spark` 여섯이고 결과는 보통의 Chart.js config 입니다. 색은 토큰을 계산값으로 읽어 칠하고, 테마가 바뀌면 다시 칠합니다. 기본은 한 톤(`--chart-mono-1~4` — 제품 색과 무관한 고정 파랑)이고, 계열이 5개 이상이거나 `color: "categorical"` 이면 범주색(`--chart-series-1~6`), `tone` 을 준 계열은 그 톤(심각도 등)입니다. 원본은 `_build/ds-chart.src.js` 하나이고 `scripts/sync-chart.mjs` 가 복사합니다.
 
 ## 스크립트
 
 ```bash
 npm run typecheck   # tsc
-npm test            # vitest (컴포넌트 동작 + 사이트 일치 118 + 커버리지)
+npm test            # vitest (컴포넌트 동작 + 사이트 예제와 구조 비교 + 예제 커버리지)
 npm run build       # dist/ (index.js · index.cjs · index.d.ts · style.css · fonts/)
 npm run demo        # http://localhost:5180
 npm run demo:build && npm run visual   # 사이트 ↔ React 스크린샷 비교 → .visual/
