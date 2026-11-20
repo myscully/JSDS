@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 200" fill="none"><!-- Figma Patterns › Overview › Patterns Overview · 1440 › ov-grid › ov-card / 로그 뷰어 -->
+<g>
+<g>
+<path d="M30 51.8C30 48.4863 32.6863 45.8 36 45.8H224C227.314 45.8 230 48.4863 230 51.8V81.8H30V51.8Z" fill="#70737C" fill-opacity="0.1216"/>
+<rect x="60" y="56.3" width="20" height="15" rx="4" fill="#37383C" fill-opacity="0.2784"/>
+<rect x="90" y="56.3" width="23" height="15" rx="4" fill="#37383C" fill-opacity="0.2784"/>
+<rect x="123" y="56.3" width="31" height="15" rx="4" fill="#37383C" fill-opacity="0.2784"/>
+<rect x="164" y="56.3" width="50" height="15" rx="4" fill="#37383C" fill-opacity="0.2784"/>
+</g>
+<g>
+<rect width="200" height="36" transform="translate(30 81.8)" fill="white"/>
+<g>
+<path d="M47 101.8L49 99.8L47 97.8" stroke="#37383C" stroke-opacity="0.611765" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<rect x="60" y="92.3" width="20" height="15" rx="4" fill="#70737C" fill-opacity="0.1216"/>
+<rect x="90" y="92.3" width="23" height="15" rx="4" fill="#70737C" fill-opacity="0.1216"/>
+<g>
+<rect x="123" y="92.3" width="31" height="15" rx="7.5" fill="#70737C" fill-opacity="0.121569"/>
+</g>
+<rect x="164" y="92.3" width="50" height="15" rx="4" fill="#70737C" fill-opacity="0.1216"/>
+</g>
+<path d="M45 117.8H215" stroke="#37383C" stroke-opacity="0.278431" stroke-width="0.5"/>
+<g>
+<path d="M30 117.8H230V147.8C230 151.114 227.314 153.8 224 153.8H36C32.6863 153.8 30 151.114 30 147.8V117.8Z" fill="white"/>
+<g>
+<path d="M47 137.8L49 135.8L47 133.8" stroke="#37383C" stroke-opacity="0.611765" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<rect x="60" y="128.3" width="20" height="15" rx="4" fill="#70737C" fill-opacity="0.1216"/>
+<rect x="90" y="128.3" width="23" height="15" rx="4" fill="#70737C" fill-opacity="0.1216"/>
+<g>
+<rect x="123" y="128.3" width="31" height="15" rx="7.5" fill="#70737C" fill-opacity="0.121569"/>
+</g>
+<rect x="164" y="128.3" width="50" height="15" rx="4" fill="#70737C" fill-opacity="0.1216"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 200" fill="none"><!-- Figma Patterns › Overview › Patterns Overview · 1440 › ov-grid › ov-card / 심각도 -->
+<g>
+<g>
+<path d="M35 100C35 97.2386 37.2386 95 40 95H73V105H40C37.2386 105 35 102.761 35 100Z" fill="#292A2D"/>
+<path d="M73 95H111V105H73V95Z" fill="#2E2F33" fill-opacity="0.8784"/>
+<path d="M111 95H149V105H111V95Z" fill="#37383C" fill-opacity="0.6118"/>
+<path d="M149 95H187V105H149V95Z" fill="#37383C" fill-opacity="0.2784"/>
+<path d="M187 95H220C222.761 95 225 97.2386 225 100C225 102.761 222.761 105 220 105H187V95Z" fill="#70737C" fill-opacity="0.1216"/>
+</g>
+</g>
+</svg>

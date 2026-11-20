@@ -19,7 +19,7 @@
 | `_build/templates.data.js` · `templates.build.js` · `templates.src.css` · `templates.src.js` | **원본.** Templates 메뉴(2026-11-18 — 옛 `_templates/` 를 옮기고 지움). `templates.data.js` 는 문서 페이지의 글(정의 · 고르기 표 · 쓴 컴포넌트 · 패턴 · Rules · 개요 한 줄), `templates.build.js` 는 `_build/*.data.js` 의 예제 문자열 · 헬퍼를 읽어 화면 일곱 `templates/screen/<key>.html` 을 쓰는 생성기(`build.js` 가 부름 — route 가 아니라 pages 수에 들지 않음), `templates.src.css` → `assets/templates.css` 는 앱 틀 배치만(패키지 CSS 에 섞이지 않게 style.css 와 따로), `templates.src.js` → `assets/templates.js` 는 둘러보기용 흉내 동작이다 |
 | `_build/guide.data.js` | **원본.** Home › Guide(2026-11-20)의 글 — 트랙 다섯(공통 · 디자이너 · 기획자 · 개발자 · 함께 만들기)의 단계(제목 · 무엇 · 왜 · 해보기 · 관련 문서 · 개발자 code key · 함께 만들기 lead 역할). 렌더는 `render.js` `guideTrackPage` · `guideOverviewPage`, 개발자 코드는 `GUIDE_CODE`, 진행 저장은 `app.src.js`(jsds-guide). `verify.js` 가 순서 · 단계 수 · 링크 대상 · 문구를, `behave.guide.js` 가 동작을 본다 |
 | `_build/uidict.data.js` | **원본.** Resources › UI Dictionary(2026-11-19)의 항목 — 분류 10 · 추천 검색어 · 항목(`src` = 예제 · 화면 주소, 이름 · 영문 · 대표 클래스 · React 이름 · 다른 이름 `aka` · 생김새 검색어 `kw`). 미리보기 · 코드 · 비슷한 것 · 문서 링크는 `render.js` `uiDictPage` 가 예제 데이터에서 만든다. `verify.js` 가 src · 클래스 · React · 범위를, `behave.uidict.js` 가 동작을 본다 |
-| `_build/thumbs/components/*.svg` · `_build/thumbs.js` | **원본.** Components Overview 카드 썸네일 46개(2026-11-19) — Figma `Thumbnail / <이름>` 을 SVG 로 내보낸 것(손으로 고치지 않음)과, 그 색을 토큰으로 바꿔 빌드에 넣는 변환기(표에 없는 색이면 빌드가 멈춤). Figma 썸네일이 바뀌면 다시 내보낸다 |
+| `_build/thumbs/components/*.svg` · `_build/thumbs/patterns/*.svg` · `_build/thumbs.js` | **원본.** Overview 카드 썸네일 — 컴포넌트 46개(2026-11-19, Figma `Thumbnail / <이름>`) · 패턴 22개(2026-11-20, Figma Patterns › Overview 의 `ov-grid` 카드)를 SVG 로 내보낸 것(손으로 고치지 않음)과, 그 색을 토큰으로 바꿔 빌드에 넣는 변환기(표에 없는 색이면 빌드가 멈춤 · 명도 마스크 안은 흰색 그대로). Figma 썸네일이 바뀌면 다시 내보낸다 |
 | `assets/vendor/dayjs.min.js` · `dayjs.utc.js` · `dayjs.timezone.js` · `dayjs.LICENSE` | **생성물.** Date Picker 기준 시간대용 dayjs(MIT, 1.11.13 고정)를 `build.js` 가 `_build/node_modules/dayjs` 에서 복사하고 Date Picker 가 있는 페이지에만 붙입니다(`verify.js` 가 동반 · 부재를 봄). React 는 패키지 dependency 로 `date-picker/tz.ts` 에서 extend |
 
 ## 일하는 방식
@@ -50,7 +50,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 103 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1630/1630 · react 898+6 · tsc 0
+pages 103 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1631/1631 · react 898+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1108,6 +1108,17 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 음성 시험: behave.p2 의 생성 파일 11곳을 하나씩 되돌려 모두 실패로 잡혔다. 아이콘 선 단정은 처음에 16px 규칙을 지워도 띠 안이라 통과해, 원래 값 2px 가 아닌지를 더 잰다.
 - **고치지 않은 것과 이유:** #4(사람의 결정), #6 의 레이아웃 전환 넷(위), 차트 축의 짧은 날짜(Chart.js 눈금 — 날짜 형식 규칙은 화면 글자에), 로그인 화면의 h1 둘(숨긴 2단계 폼의 제목 — 둘 중 하나만 보임), Colors 제품 색 표는 틀 안에서 가로 스크롤.
 - Figma 미반영 1 → 6건(Home 잘림 포함) — 이번 몫 넷(Select Spec Size · 위험 확인 Rules '이름 입력' · 달력 Day Hover 면 secondary · 패턴의 '필수' Tag 톤 High), 하나(Navigation Rules '좁은 화면')는 11-19 부터 있었는데 그때 세지 못했다.
+
+2026-11-20 Patterns Overview 카드 썸네일 = Figma 썸네일(사람의 요청 '컴포넌트처럼 패턴 Overview 썸네일도 Figma 에서 SVG 로') — behave 1630 → 1631(behave.js part 47 에 1). contrast · advisory · verify · react · pages 수는 그대로(verify 검사를 넓힘 · 실패 0).
+- **원본** `_build/thumbs/patterns/<페이지 키>.svg` 22개 — Figma Patterns › Overview › `Patterns Overview · 1440` › `ov-grid`(1343:6891) 의 카드 썸네일(260 × 200, 검색만 265). 썸네일 프레임을 페이지 맨 위로 복제해 `download_assets`(svg)로 내보냈다 — 카드 안에 있는 채로 내보내면 조상 프레임까지 그려졌다. 복제본 22개는 지웠다(남은 것 0).
+  내보낸 파일에서 바깥 바탕 사각형 · 복제본 그룹 · 카드 바탕(#F7F7F8 — CSS 카드 면이 대신함) · 레이어 id 를 걷었다. 색은 Figma 값 그대로이고 글자는 윤곽선이다.
+- **`thumbs.js` 를 두 섹션으로** — `load("components" | "patterns")`, 표에 넷을 더했다: `#2E2F33@0.88` → `--foreground-neutral-secondary`(값 그대로), `#2E2F33@0.12` → `--surface-neutral-secondary`, `#E72727@0.1` → `--surface-negative-primary`(위험 작업 확인 삭제 버튼 면), `white@0.12` → `--surface-elevated-primary` 에 불투명도 0.12(입력 폼 진한 주 버튼 위 — 버튼과 함께 뒤집힘, 표의 새 형식 "토큰/불투명도"). 표에 없는 색이면 빌드가 멈춘다(그대로).
+  `build.js` 가 `window.PATTERN_THUMBS` 로 넣고 `render.js thumbOf` 가 패턴 카드에도 `.thumb.figma` 로 쓴다. 쓰이지 않게 된 패턴 데이터의 `thumb` 22줄(라이브 HTML 미니 썸네일)과 CSS `.ov-card .thumb .mini` 를 지웠다.
+- **명도 마스크는 흰색 그대로** — 변환기가 `<mask>` 안을 바꾸지 않는다. **측정에서 드러난 기존 결함:** 컴포넌트 썸네일 셋(Navigation · Page Header · Side Panel)의 마스크 흰색이 `--surface-elevated-primary` 로 바뀌어, 다크에서 마스크가 rgb(33,34,37)이 되며 그림이 거의 사라졌다(11-19 부터 — 그때 다크 캡처는 버튼 · 아바타 · 달력만 봤다). 이제 다크에서도 보인다(캡처로 확인). 대시보드 패턴의 도넛 조각 넷도 마스크를 쓴다(id `thm-dashboard-1~4`).
+- **verify** — 썸네일 검사를 두 섹션으로: 파일 ↔ 페이지 짝, 카드 수, 칠이 토큰(마스크 안은 빼고), 마스크 안 칠은 흰색, 썸네일 안 id 겹침 없음(마스크 id 만이 아니라 모든 id). 음성 시험 다섯(raw 색 · 마스크 칠 토큰 · id 겹침 · 파일 빠짐 · 표에 없는 색 → 빌드 멈춤) 모두 잡혔다.
+- **behave part 47** — 옛 단정 'KPI 값이 썸네일 안에서도 primary' 는 썸네일에 KPI 가 없어져 tertiary 글자 부모를 만들어 잰다(같은 결함을 그대로 잡음). 새 단정: 두 Overview 의 카드마다 Figma SVG 하나 · 다크에서 면이 뒤집힘 · 마스크 안 칠이 다크에서도 흰색 · 패턴 22장. 처음엔 마스크 요소 자체(칠 없음 = none)까지 읽어 실패했다 — 마스크 안 path 만 읽게 고쳤다.
+- 잰 것: 1440 라이트 · 다크 · 빨강 제품 · 390 에서 카드 22 · 빈 썸네일 0 · 가로 넘침 0 · 콘솔 오류 0. 썸네일은 제품 색을 쓰지 않아(Figma 에 brand 색이 없음) 빨강 제품에서도 같다.
+- Figma 쪽은 임시 복제본을 만들고 지웠을 뿐 바꾼 것이 없다 — Figma 미반영은 앞 항목 그대로.
 
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

@@ -1963,12 +1963,32 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 47 · patterns/overview.html", async () => {
 
-    // KPI 값 — 색이 없어 부모 색을 물려받았다. 패턴 개요 썸네일(.ov-card .thumb 은 tertiary 글자)에서 99.2% 만 회색이었다
+    // KPI 값 — 색이 없어 부모 색을 물려받았다. 옛 패턴 개요 썸네일(.ov-card .thumb 은 tertiary 글자)에서 99.2% 만 회색이었다.
+    // 썸네일이 Figma SVG 가 된 뒤(2026-11-20)에는 같은 자리(tertiary 글자 안)를 만들어 잰다
     await go("patterns/overview.html");
-    const kpiInk = await page.evaluate(() => { const v = document.querySelector(".ov-card .thumb .kpi:not(.critical):not(.high) .value");
-      const d = document.createElement("div"); d.style.color = "var(--foreground-neutral-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove();
-      return v ? { color: getComputedStyle(v).color, want } : null; });
-    ok("KPI value keeps the primary text colour inside a thumbnail", !!kpiInk && kpiInk.color === kpiInk.want, JSON.stringify(kpiInk));
+    const kpiInk = await page.evaluate(() => { const box = document.createElement("div"); box.style.color = "var(--foreground-neutral-tertiary)";
+      box.innerHTML = '<div class="kpi"><div class="label">탐지</div><div class="value">1,247</div></div>'; document.body.append(box);
+      const d = document.createElement("div"); d.style.color = "var(--foreground-neutral-primary)"; document.body.append(d); const want = getComputedStyle(d).color;
+      const color = getComputedStyle(box.querySelector(".value")).color; d.remove(); box.remove(); return { color, want }; });
+    ok("KPI value keeps the primary text colour inside a tertiary-coloured parent", kpiInk.color === kpiInk.want, JSON.stringify(kpiInk));
+
+    // Overview 카드 썸네일(컴포넌트 2026-11-19 · 패턴 2026-11-20) — 카드마다 Figma SVG 하나, 칠이 토큰이라 다크에서 면이 뒤집히고,
+    // 명도 마스크 안은 다크에서도 흰색(토큰이면 다크에서 마스크가 어두워져 그림이 사라진다 — 컴포넌트 Navigation · Page Header · Side Panel 이 그랬다)
+    const thumbRead = () => page.evaluate(() => { const cards = [...document.querySelectorAll(".ov-grid .ov-card")];
+      const svgs = cards.map(c => c.querySelector(".thumb.figma > svg.ov-thumb")).filter(Boolean);
+      const face = svgs.map(s => s.querySelector('[style*="--surface-elevated-primary"]')).filter(Boolean).map(e => getComputedStyle(e).fill);
+      const mask = [...document.querySelectorAll(".ov-grid mask path")].map(e => getComputedStyle(e).fill);
+      const vis = svgs.every(s => { const r = s.getBoundingClientRect(); return r.width > 200 && r.height > 150; });
+      return { cards: cards.length, svgs: svgs.length, face: face[0], faces: face.length, mask: [...new Set(mask)], vis }; });
+    const th = {};
+    for (const sec of ["patterns", "components"]) {
+      await go(`${sec}/overview.html`); const light = await thumbRead();
+      await page.evaluate(() => document.documentElement.setAttribute("data-theme", "dark")); const dark = await thumbRead();
+      await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); th[sec] = { light, dark };
+    }
+    ok("overview thumbnails are Figma SVGs that follow the theme, masks stay white in dark",
+      Object.values(th).every(({ light, dark }) => light.cards > 0 && light.svgs === light.cards && light.vis && light.faces > 0 && light.face !== dark.face
+        && dark.mask.length > 0 && dark.mask.every(c => c === "rgb(255, 255, 255)")) && th.patterns.light.cards === 22, JSON.stringify(th));
   });
   await part("part 48 · components/notification.html", async () => {
 

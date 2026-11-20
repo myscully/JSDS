@@ -793,22 +793,26 @@ for (const [k, c] of Object.entries(PATTERNS)) {
   if (fs.existsSync(path.join(OUT, "home/guide.html"))) { const ov = article(read("home/guide.html")); const rows = ov.match(/data-guide-prog="[a-z]+"/g) || []; if (rows.length !== GUIDE.order.length) fails.push(`home/guide: 트랙 행의 진행 표시 ${rows.length}개 ≠ 트랙 ${GUIDE.order.length}개`); }
 }
 
-/* Components Overview 썸네일(2026-11-19) — Figma 의 Thumbnail / <이름> 을 SVG 로 옮긴 원본(thumbs/components)이 컴포넌트 페이지와 하나씩 짝이고,
-   생성 페이지의 카드마다 그 썸네일이 들어 있으며, 칠이 전부 토큰인지(라이트 고정 raw 색이면 다크 테마에서 흰 면이 뜬다) */
-{
-  const keys = LIB.allPages(DATA.SITE, "components").map(p => p.key).filter(k => k !== "overview");
-  const files = fs.readdirSync(path.join(__dirname, "thumbs", "components")).filter(f => f.endsWith(".svg")).map(f => f.slice(0, -4));
-  for (const k of keys) if (!files.includes(k)) fails.push(`thumbs/components/${k}.svg 없음 — Components Overview 카드에 Figma 썸네일이 없다`);
-  for (const k of files) if (!keys.includes(k)) fails.push(`thumbs/components/${k}.svg — 그런 컴포넌트 페이지가 없다`);
-  const ov = article(read("components/overview.html"));
+/* Overview 카드 썸네일 — Figma 썸네일을 SVG 로 옮긴 원본(thumbs/components 2026-11-19 · thumbs/patterns 2026-11-20)이 그 섹션 페이지와 하나씩 짝이고,
+   생성 페이지의 카드마다 그 썸네일이 들어 있으며, 칠이 전부 토큰인지(라이트 고정 raw 색이면 다크 테마에서 흰 면이 뜬다).
+   마스크 안의 흰색은 명도 마스크라 그대로다(thumbs.js stripMasks — 빼고 잰다) */
+for (const sec of require("./thumbs.js").SECTIONS) {
+  const { stripMasks, dirOf } = require("./thumbs.js");
+  const keys = LIB.allPages(DATA.SITE, sec).map(p => p.key).filter(k => k !== "overview");
+  const files = fs.readdirSync(dirOf(sec)).filter(f => f.endsWith(".svg")).map(f => f.slice(0, -4));
+  for (const k of keys) if (!files.includes(k)) fails.push(`thumbs/${sec}/${k}.svg 없음 — ${sec} Overview 카드에 Figma 썸네일이 없다`);
+  for (const k of files) if (!keys.includes(k)) fails.push(`thumbs/${sec}/${k}.svg — 그런 ${sec} 페이지가 없다`);
+  const ov = article(read(`${sec}/overview.html`));
   const cards = [...ov.matchAll(/<a class="ov-card" href="([^"]*)"><div class="thumb([^"]*)" aria-hidden="true" inert(?:="")?>([\s\S]*?)<\/div><div class="label">/g)];
-  if (cards.length !== keys.length) fails.push(`components/overview: 카드 ${cards.length}개 ≠ 컴포넌트 ${keys.length}개`);
+  if (cards.length !== keys.length) fails.push(`${sec}/overview: 카드 ${cards.length}개 ≠ 페이지 ${keys.length}개`);
   for (const [, href, cls, inner] of cards) {
-    const at = `components/overview: ${href}`;
+    const at = `${sec}/overview: ${href}`;
     if (cls !== " figma" || !/^<svg class="ov-thumb" aria-hidden="true"/.test(inner)) { fails.push(`${at} — 썸네일이 Figma SVG 가 아니다`); continue; }
-    if (/#[0-9A-Fa-f]{3,8}\b|(?:fill|stroke)="(?!none")[^"]*"/.test(inner.replace(/url\(#[^)]*\)/g, ""))) fails.push(`${at} — 썸네일에 토큰이 아닌 칠이 남았다`);
+    if (/#[0-9A-Fa-f]{3,8}\b|(?:fill|stroke)="(?!none")[^"]*"/.test(stripMasks(inner).replace(/url\(#[^)]*\)/g, ""))) fails.push(`${at} — 썸네일에 토큰이 아닌 칠이 남았다`);
+    for (const m of inner.matchAll(/<mask\b[\s\S]*?<\/mask>/g)) if (/(?:fill|stroke)="(?!white"|none")[^"]*"|style="[^"]*(?:fill|stroke):var/.test(m[0])) fails.push(`${at} — 마스크 안 칠이 흰색이 아니다(명도 마스크라 토큰으로 바꾸면 다크에서 그림이 사라진다)`);
   }
-  const mids = [...ov.matchAll(/<mask id="([^"]*)"/g)].map(m => m[1]); if (new Set(mids).size !== mids.length) fails.push("components/overview: 썸네일 마스크 id 가 겹친다");
+  const ids = [...ov.matchAll(/<svg class="ov-thumb"[\s\S]*?<\/svg>/g)].flatMap(m => [...m[0].matchAll(/\sid="([^"]*)"/g)].map(x => x[1]));
+  if (new Set(ids).size !== ids.length) fails.push(`${sec}/overview: 썸네일 안 id 가 겹친다`);
 }
 
 /* UI Dictionary(2026-11-19) — Resources › UI Dictionary 의 항목 원본 uidict.data.js 가 실제 예제 · 화면을 가리키는지.

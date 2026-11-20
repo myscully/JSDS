@@ -1,6 +1,6 @@
 /* =========================================================
    patterns.data.js — 패턴 22개. 컴포넌트를 조합한 화면 단위 예시
-   shape: { status, desc, uses:[컴포넌트 key…], css:[패턴 전용 접두어…], thumb, choose:[[k,v]], principles:[[k,v]], examples:[…] }
+   shape: { status, desc, uses:[컴포넌트 key…], css:[패턴 전용 접두어…], choose:[[k,v]], principles:[[k,v]], examples:[…] }
    페이지 구성은 컴포넌트와 같다(사람의 결정 2026-11-15) — 정의 · 고르기 표(choose) · Composition · 예제 · Rules(principles) · Usage.
    코드 패널의 CSS 는 uses 컴포넌트의 CSS + css 접두어의 합집합으로 추출됩니다.
    예제에는 인라인 style 을 쓰지 않는다(빌드가 검사) — 값이 곧 데이터인 기하(도넛 각도 · 막대 비율 · 밴드 조각)만 예외.
@@ -111,7 +111,6 @@ const PATTERNS = {
   "input-form": {
     status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["form", "text-field", "number-input", "select", "combobox", "date-picker", "time-picker", "file-upload", "checkbox", "radio-button", "button"], css: [], borrows: [".t-label-1-normal", ".t-semibold", ".chip", ".sr-only"],
     desc: "정책이나 사용자, 설정을 입력하는 폼의 기본 구조입니다. 라벨은 필드 위에 두고, 필수 항목에는 별표를 붙입니다. 오류는 필드 아래에 적고, 저장 버튼은 오른쪽 아래에 둡니다.",
-    thumb: `<div class="form" style="padding:12px;gap:8px;min-width:200px"><div class="field sm"><label>이름</label><input placeholder="정책 이름"></div><div class="form-actions" style="padding-top:8px"><button class="btn sm solid primary">저장</button></div></div>`,
     choose: [["언제 쓰는가", "정책이나 사용자, 연동처럼 여러 값을 한 번에 입력하고 저장하는 화면에 씁니다."], ["비슷한 패턴", "값을 하나씩 바로 바꾸는 화면은 <a href=\"#/patterns/policy-settings\">정책 설정</a>을, 순서대로 나눠 받는 처음 설정은 <a href=\"#/patterns/onboarding\">온보딩</a>을 씁니다."]],
     principles: [["구성", "한 열이 기본입니다. 시작과 종료처럼 서로 관련된 짧은 필드만 두 열로 나란히 둡니다. 필드가 많으면 섹션 제목으로 묶습니다."], ["입력 컨트롤", "날짜는 Date Picker, 시각은 Time Picker, 숫자는 Number Input 으로 받습니다. 정해진 목록에서 하나를 고르면 Select, 여럿을 고르거나 목록이 길면 Combobox, 파일은 File Upload 를 씁니다."], ["검증", "폼 검증을 켜면 포커스가 떠날 때 그 필드를 검사합니다. 제출하면 첫 오류로 옮기고, 오류를 폼 위에 모아 요약하지 않습니다. 서버가 돌려준 오류도 그 필드 아래에 적습니다. 고치면 문구를 바로 지웁니다."], ["필수", "필수 항목이 있으면 폼 위에 필수 항목 안내를 둡니다."], ["액션", "버튼은 취소, 저장 순서로 두고 주 버튼은 저장 하나입니다. 삭제처럼 되돌리기 어려운 동작은 왼쪽 끝에 따로 둡니다."]],
     examples: [
@@ -163,7 +162,6 @@ const PATTERNS = {
   "terms-agreement": {
     status: "ready", react: ["Terms","TermsAll","TermsItem","TermsMessage"], uses: ["checkbox", "tag", "accordion", "popup", "button"], css: [".terms", ".terms-doc"],
     desc: "약관과 개인정보 처리에 동의를 받는 화면입니다. 전체 동의와 개별 항목을 두고, 항목마다 필수인지 선택인지 표시합니다. 약관 전문은 대화상자로 열거나 같은 화면에서 펼쳐 봅니다.",
-    thumb: `<div class="terms" style="max-width:200px"><div class="all"><label class="checkbox"><input type="checkbox" class="mixed"><span style="font-size:12px">전체 동의</span></label></div><div class="item" style="padding:4px 8px"><label class="checkbox"><input type="checkbox" checked><span style="font-size:12px">이용약관</span></label><span class="tag accent sm">필수</span></div></div>`,
     choose: [["언제 쓰는가", "서비스를 쓰기 전에 약관과 개인정보 처리에 동의를 받아야 할 때 씁니다."], ["비슷한 패턴", "동의가 처음 설정의 한 단계라면 <a href=\"#/patterns/onboarding\">온보딩</a> 안에 넣습니다."]],
     principles: [["필수 표시", "항목마다 필수인지 선택인지 Tag 로 적습니다. 필수는 강조 Tag, 선택은 중립 Tag 입니다."], ["전체 동의", "일부만 체크하면 전체 동의가 부분 선택으로 보입니다. 전체 동의를 누르면 선택 항목까지 모두 켜집니다."], ["진행", "다음 버튼은 늘 켜 둡니다. 필수를 비운 채 누르면 넘어가지 않고 남은 개수를 알린 뒤 첫 항목으로 포커스를 옮깁니다."], ["전문", "항목 옆 보기는 전문을 대화상자로 엽니다. 전문이 짧거나 한 항목뿐이면 Accordion 으로 같은 화면에서 펼칩니다. 스크롤되는 전문 영역은 키보드로도 스크롤할 수 있게 합니다."]],
     examples: [
@@ -197,7 +195,6 @@ const PATTERNS = {
   "notes": {
     status: "ready", react: ["Notes"], uses: ["notification", "accordion"], css: [],
     desc: "화면 아래나 폼 옆에 두는 유의사항과 안내 문구입니다. 읽지 않아도 진행할 수 있는 정보를 Notice 안에 글머리 목록으로 담습니다.",
-    thumb: `<div class="notice" style="padding:10px 12px;font-size:12px"><span class="ico">${I("message-2",16,{style:"filled"})}</span><div><b style="font-size:12px">유의사항</b>배포 후 5분 내 적용</div></div>`,
     choose: [["언제 쓰는가", "적용 시점이나 보관 기간처럼 알아 두면 좋지만 진행을 막지 않는 안내를 화면에 남길 때 씁니다."], ["비슷한 패턴", "지금 조치해야 하는 문제는 <a href=\"#/components/notification\">Notification</a> 의 위험 알림으로, 되돌릴 수 없는 동작의 확인은 <a href=\"#/patterns/danger-confirm\">위험 작업 확인</a>으로 받습니다."]],
     principles: [["모양", "톤 없는 Notice 위에 제목과 글머리 목록을 둡니다. 회색 면에 회색 말풍선 아이콘이 붙고 테두리는 없습니다."], ["분량", "항목은 3~5개입니다. 한 항목은 완전한 한 문장으로 쓰고, 그보다 길면 Accordion 으로 접습니다."], ["주의", "되돌리기 어려운 영향을 알릴 때만 경고 톤을 씁니다. 경고 톤이 늘 보이면 정말 중요한 경고가 묻힙니다."], ["자리", "관련된 폼이나 표 바로 아래에 둡니다. 화면 맨 위는 상태 알림의 자리라 유의사항을 두지 않습니다."]],
     examples: [
@@ -213,7 +210,6 @@ const PATTERNS = {
   "error-pages": {
     status: "new", react: ["Empty","Card"], uses: ["empty-state", "card", "button", "link"], css: [".row-2"],
     desc: "권한이 없거나 페이지가 없을 때, 서버 오류나 점검 중일 때 보여 주는 화면입니다. 무엇이 일어났는지 한 줄로 알리고 다음에 할 일 하나를 둡니다.",
-    thumb: `<div class="empty compact" style="padding:12px;max-width:220px"><span class="ico">${I("lock")}</span><div><b style="font-size:12px">권한이 없습니다</b></div></div>`,
     choose: [["언제 쓰는가", "화면 전체나 카드 하나를 보여 줄 수 없을 때 그 자리를 대신합니다. 권한 없음, 없는 주소, 서버 오류, 점검 중의 네 가지입니다."], ["비슷한 패턴", "검색 결과가 없는 것은 오류가 아니므로 <a href=\"#/patterns/search\">검색</a>의 빈 결과를 씁니다. 처음이라 데이터가 없는 화면은 <a href=\"#/components/empty-state\">Empty State</a> 를 씁니다."]],
     principles: [["문구", "무엇이 일어났는지와 고치는 법을 한 줄씩 씁니다. 오류 번호는 지원 문의에 필요할 때만 문구 끝에 둡니다."], ["동작", "다음에 할 일 하나만 버튼으로 둡니다. 권한 없음은 권한 요청, 없는 주소는 대시보드로 이동, 서버 오류는 다시 시도입니다."], ["권한 없음", "권한이 없다는 사실은 알리되 무엇이 있는지는 보이지 않습니다. 메뉴에서 그 화면을 숨기는 것이 먼저이고, 주소로 직접 들어온 경우에만 이 화면을 봅니다."], ["카드 안", "화면의 일부만 볼 수 없으면 그 카드 안에만 작게 둡니다. 나머지 카드는 그대로 씁니다."], ["점검", "점검 시간은 시작과 끝을 날짜와 함께 적습니다. 점검 중에는 다시 시도 버튼을 두지 않습니다."]],
     examples: [
@@ -235,7 +231,6 @@ const PATTERNS = {
   "danger-confirm": {
     status: "new", react: ["Popup","PopupSurface","Toast"], uses: ["popup", "text-field", "notification", "button"], css: [".danger-list"],
     desc: "삭제나 재발급처럼 되돌리기 어려운 동작을 실행하기 전에 확인을 받는 화면입니다. 무엇이 사라지는지와 영향 범위를 제목과 본문에 적고, 취소를 먼저 둡니다.",
-    thumb: `<div class="popup danger" style="padding:12px;width:200px;gap:6px"><b style="font-size:12px">정책을 삭제할까요?</b><div style="display:flex;gap:4px;justify-content:flex-end"><button class="btn sm outline assistive">취소</button><button class="btn sm solid negative">삭제</button></div></div>`,
     choose: [["언제 쓰는가", "지우면 복구할 수 없거나, 다른 사용자와 단말에 영향이 가는 동작을 실행하기 직전에 씁니다."], ["비슷한 패턴", "되돌릴 수 있는 동작은 확인을 묻지 않고 실행한 뒤 실행 취소가 있는 Toast 를 띄웁니다. 진행을 막지 않는 안내는 <a href=\"#/patterns/notes\">유의사항</a>으로 남깁니다."]],
     principles: [["제목", "무엇을 하는지 물음으로 씁니다. 대상의 이름이나 개수를 넣고, 주 버튼의 글자가 제목의 동작과 같게 합니다."], ["본문", "사라지는 것과 영향 범위를 적습니다. 복구할 수 없으면 그렇다고 적고, 영향을 받는 단말이나 연동의 수를 숫자로 씁니다."], ["버튼 순서", "취소가 먼저이고 위험 실행 버튼이 뒤입니다. 처음 포커스는 취소나 입력칸에 가고 위험 실행 버튼에는 가지 않습니다."], ["일괄 작업", "여럿을 한 번에 지우면 개수와 이름 몇 개를 보여 주고 나머지는 외 n개로 줄입니다."], ["이름 입력", "연동이나 조직처럼 지우면 넓게 영향을 주는 것만 이름을 입력하게 합니다. 입력할 이름은 라벨에서 굵게 보이고, 앞뒤 공백은 비교하지 않습니다. 버튼은 늘 켜 두고 누르면 검사해, 이름이 다르면 입력칸 아래에 고치는 법을 적습니다."], ["되돌리기", "보관함으로 옮기기처럼 되돌릴 수 있으면 확인을 묻지 않습니다. 바로 실행하고 실행 취소가 있는 Toast 를 10초 동안 띄웁니다."], ["닫기", "위험 확인은 바깥을 눌러도 닫히지 않습니다. 취소와 닫기, Esc 로만 닫습니다."]],
     examples: [
@@ -268,7 +263,6 @@ const PATTERNS = {
   "import-export": {
     status: "new", react: ["FileUpload","Table","Popup"], uses: ["file-upload", "notification", "table", "tag", "popup", "radio-button", "date-picker", "time-picker", "checkbox", "button"], borrows: [".sr-only", ".help", ".field", ".t-label-1-normal", ".t-semibold"], css: [".stack", ".btn-group"],
     desc: "목록을 파일로 한 번에 들여오거나 내보내는 화면입니다. 가져오기는 줄마다 검사해 결과를 보여 준 뒤 실행하고, 내보내기는 형식과 범위를 정해 받습니다.",
-    thumb: `<div class="upload" style="width:220px"><div class="upload-zone" style="padding:12px"><span class="ico">${I("upload",20)}</span><span style="font-size:12px">CSV 올리기</span></div></div>`,
     choose: [["언제 쓰는가", "단말이나 사용자, 예외 목록처럼 수십 건 이상을 한 번에 넣거나 꺼낼 때 씁니다."], ["비슷한 패턴", "한 건씩 넣는 것은 <a href=\"#/patterns/input-form\">입력 폼</a>을, 파일 하나를 첨부하는 것은 <a href=\"#/components/file-upload\">File Upload</a> 를 씁니다."]],
     principles: [["가져오기 순서", "파일을 올리면 먼저 줄마다 검사하고, 결과를 보여 준 뒤 사용자가 가져오기를 누를 때 실행합니다. 올리자마자 바로 반영하지 않습니다."], ["검사 결과", "전체 줄 수와 오류 줄 수를 Notice 에 적고, 오류 줄만 표로 보여 줍니다. 줄 번호와 값, 고치는 법을 함께 적습니다."], ["부분 가져오기", "오류가 있어도 올바른 줄만 가져올 수 있게 합니다. 주 버튼에 가져올 줄 수를 적고, 오류 줄은 파일로 내려받아 고칠 수 있게 합니다."], ["양식", "가져오기 영역 옆에 열 이름이 맞는 양식 파일을 둡니다. 허용하는 형식과 용량은 도움말에 적습니다."], ["내보내기", "형식과 기간을 대화상자에서 고릅니다. 기간이 길어 오래 걸리면 예약해서 보내고, 끝나면 알림으로 알립니다."], ["개인정보", "개인정보가 들어간 열은 기본으로 빼고, 넣으려면 따로 체크하게 합니다. 내보낸 기록은 감사 로그에 남깁니다."]],
     examples: [
@@ -300,7 +294,6 @@ const PATTERNS = {
   "bulk-progress": {
     status: "new", react: ["Progress", "Notice", "Table", "DataTable", "Card"], uses: ["card", "loading", "notification", "table", "tag", "button", "data-table", "empty-state"], borrows: [".sr-only"], css: [".stack", ".btn-group"],
     desc: "여러 대상에 같은 작업을 한 번에 실행하고 끝날 때까지 지켜보는 화면입니다. 얼마나 진행됐는지와 실패한 대상을 보여 주고, 실패한 대상만 다시 실행합니다.",
-    thumb: `<div class="progress-row" style="width:200px"><div class="row"><span>정책 배포</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="정책 배포"><i style="width:66%"></i></div></div>`,
     choose: [["언제 쓰는가", "정책 배포나 에이전트 업데이트처럼 수십 대 이상에 같은 작업을 실행하고, 끝나기까지 몇 분 이상 걸릴 때 씁니다."], ["비슷한 패턴", "실행하기 전에 영향 범위를 확인하는 것은 <a href=\"#/patterns/danger-confirm\">위험 작업 확인</a>을, 파일로 목록을 들여오는 것은 <a href=\"#/patterns/import-export\">가져오기 · 내보내기</a>를 씁니다."]],
     principles: [["진행 표시", "전체 수와 끝난 수를 함께 적고 진행 막대로 보여 줍니다. 남은 시간은 잴 수 있을 때만 적습니다."], ["성공과 실패", "성공, 실패, 남은 수를 따로 셉니다. 실패가 생기면 작업이 끝나기 전에도 실패 수를 보여 줍니다."], ["화면을 떠나도 계속", "작업은 서버에서 이어집니다. 사용자가 다른 화면으로 가도 멈추지 않고, 끝나면 알림 센터로 알립니다."], ["취소", "취소는 아직 시작하지 않은 대상만 멈춥니다. 이미 끝난 대상은 되돌리지 않는다고 버튼 옆에 적습니다."], ["실패 목록", "끝나면 실패한 대상과 이유를 표로 보여 줍니다. 실패한 대상만 다시 실행하는 버튼을 두고, 실패 목록은 파일로도 내려받게 합니다."], ["읽어 주기", "진행 수가 바뀔 때마다 읽지 않습니다. 처음 실패했을 때와 끝났을 때만 화면 읽기 프로그램에 알립니다."]],
     examples: [
@@ -331,7 +324,6 @@ const PATTERNS = {
   "onboarding": {
     status: "ready", react: ["Stepper","StepButton","Steps"], uses: ["steps", "card", "form", "text-field", "radio-button", "code", "copy-field", "indicator", "button"], css: [".onboard"], borrows: [".keep-all", ".t-body-1-normal", ".t-semibold"],
     desc: "처음 온 사용자가 콘솔을 설정하는 단계형 흐름입니다. 진행 단계를 보여 주고, 한 단계에서는 한 가지만 정하게 합니다. 꼭 필요하지 않은 단계는 건너뛸 수 있습니다.",
-    thumb: `<ol class="steps" aria-label="진행 단계" style="width:200px"><li class="done"><i style="width:18px;height:18px">${I("check",10)}</i></li><li class="on"><i style="width:18px;height:18px;font-size:10px">2</i></li><li><i style="width:18px;height:18px;font-size:10px">3</i></li></ol>`,
     choose: [["언제 쓰는가", "처음 쓰는 사람이 조직 정보와 보호 수준, 에이전트 배포처럼 순서가 있는 설정을 마쳐야 콘솔을 쓸 수 있을 때 씁니다."], ["비슷한 패턴", "순서 없이 언제든 바꾸는 설정은 <a href=\"#/patterns/policy-settings\">정책 설정</a>으로, 한 화면에서 끝나는 입력은 <a href=\"#/patterns/input-form\">입력 폼</a>으로 받습니다."]],
     principles: [["단계 수", "3~6단계로 나눕니다. 한 단계에서는 한 가지만 정하고, 단계 이름은 무엇을 정하는지로 씁니다."], ["진행", "다음은 그 단계의 폼을 검사하고, 통과하면 다음 단계로 갑니다. 단계를 옮겨도 입력값은 남고, 완료한 단계는 눌러서 돌아갈 수 있습니다."], ["건너뛰기", "나중에 해도 되는 단계만 건너뛸 수 있습니다. 건너뛴 일은 마지막 단계와 대시보드에서 다시 알립니다."], ["선택 단계", "보호 수준처럼 하나를 고르는 단계는 Card Radio 로 보여 주고, 권장하는 것을 미리 골라 둡니다."], ["설치 안내", "설치 명령은 Code 로, 등록 키는 Copy Field 로 보여 줘 복사 한 번으로 쓰게 합니다. 키는 기본으로 가립니다."], ["완료", "마지막 단계는 정한 것을 요약하고, 첫 행동으로 이어지는 버튼 하나를 둡니다."]],
     examples: [
@@ -380,7 +372,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "search": {
     status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "combobox", "date-picker", "chip", "data-table", "tag", "indicator", "pagination", "empty-state", "button", "link"], borrows: [".field"], css: [".toolbar", ".stack"],
     desc: "검색과 필터로 결과 목록을 조회하는 화면입니다. 조건은 늘 보이게 두고, 결과 수와 적용 중인 조건을 함께 보여 줍니다.",
-    thumb: `<div class="toolbar" style="width:240px"><div class="searchbar sm" style="min-width:0;flex:1">${I("search")}<input placeholder="검색"></div><button class="chip sm on">Critical</button></div>`,
     choose: [["언제 쓰는가", "이벤트나 단말, 정책처럼 많은 항목에서 조건으로 좁혀 찾는 목록 화면에 씁니다."], ["비슷한 패턴", "초 단위로 쌓이는 로그를 훑는 화면은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>를 씁니다."]],
     principles: [["툴바", "검색칸 옆에 필터와 기간을 두고 되도록 한 줄에 놓습니다. 옆 컨트롤은 제 폭을 지키고 검색칸이 남는 폭을 가집니다. 자리가 모자라면 검색칸이 최소 폭까지 줄고, 그래도 넘칠 때만 줄을 바꿉니다. 한 줄에 놓인 컨트롤은 같은 높이로 맞추고, 동작 버튼은 결과 줄 오른쪽 끝에 둡니다."], ["필터", "여러 값을 고르는 필터는 Combobox 로 받습니다. 대시보드처럼 다른 화면에서 넘어온 조건은 결과 줄에 Chip 으로 보여 주고, 하나씩 지울 수 있게 합니다."], ["결과 줄", "결과 수를 툴바 아래 첫머리에 적습니다. 조건을 하나라도 바꿨으면 필터 초기화를 둡니다."], ["빈 결과", "결과가 없으면 표 대신 <a href=\"#/components/empty-state\">Empty State</a> 를 두고, 무엇을 바꾸면 되는지와 필터 초기화를 함께 보여 줍니다."], ["갱신", "글자를 칠 때마다 조회하면 입력을 잠시 기다렸다가 조회합니다. 결과 수가 바뀌면 화면 읽기 프로그램에도 알립니다."]],
     examples: [
@@ -424,7 +415,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "system-status": {
     status: "ready", react: ["StatusList","StatusItem"], uses: ["indicator", "notification", "card", "data-visual", "button"], borrows: [".progress-row", ".progress", ".keep-all"], css: [".status-list", ".status-item", ".stack", ".row-2"],
     desc: "에이전트와 서버, 연동 서비스의 상태를 한눈에 보여 줍니다. 정상인 항목은 조용하게 두고, 이상이 있는 항목은 눈에 띄게 합니다.",
-    thumb: `<div class="status-list" style="grid-template-columns:1fr;width:200px;gap:6px"><div class="status-item" style="padding:8px 10px;font-size:12px"><span class="indicator ok">수집 서버</span><span class="meta">99.9%</span></div><div class="status-item" style="padding:8px 10px;font-size:12px"><span class="indicator danger">SIEM</span><span class="meta">끊김</span></div></div>`,
     choose: [["언제 쓰는가", "수집 서버나 연동, 에이전트처럼 늘 돌아가야 하는 것들이 정상인지 한 화면에서 확인할 때 씁니다."], ["비슷한 패턴", "위협과 이벤트의 흐름은 <a href=\"#/patterns/dashboard\">대시보드</a>에서, 한 대상의 자세한 상태는 <a href=\"#/patterns/detail\">상세 화면</a>에서 봅니다."]],
     principles: [["이상 먼저", "끊김이나 실패가 있으면 맨 위에 위험 알림을 두고, 고치는 화면으로 가는 버튼을 붙입니다. 정상인 항목은 점과 짧은 수치만 둡니다."], ["상태 점", "항목마다 Indicator 점과 이름, 짧은 수치를 한 줄에 둡니다. 점의 색만으로 알리지 않고 수치나 문구를 함께 씁니다."], ["측정값", "온라인 비율이나 디스크 사용량처럼 한도가 있는 값은 진행 막대 목록으로 보여 줍니다. 값과 한도를 숫자로 함께 적습니다."], ["갱신", "상태는 자동으로 갱신하고 마지막 갱신 시각을 적습니다. 화면을 가만히 둔 사람을 방해하지 않게 상태가 바뀔 때만 알립니다."]],
     examples: [
@@ -451,7 +441,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "sign-in": {
     status: "new", react: ["Form","TextField","Popup"], uses: ["form", "text-field", "checkbox", "notification", "popup", "button", "link"], borrows: [".t-title-3", ".sr-only"], css: [".auth", ".auth-logo", ".auth-timer", ".auth-screen", ".auth-copy"],
     desc: "관리 콘솔에 들어오는 로그인과 2단계 인증, 오래 쓰지 않은 세션의 만료 안내입니다. 실패 이유와 남은 횟수를 알리고, 입력한 값은 지우지 않습니다.",
-    thumb: `<div class="form" style="padding:12px;gap:8px;width:200px"><div class="field sm"><input placeholder="이메일" aria-label="이메일"></div><button class="btn sm solid primary">로그인</button></div>`,
     choose: [["언제 쓰는가", "관리 콘솔에 로그인하거나, 2단계 인증 코드를 받거나, 세션이 곧 끝난다고 알릴 때 씁니다."], ["비슷한 패턴", "로그인 뒤 처음 하는 설정은 <a href=\"#/patterns/onboarding\">온보딩</a>으로, 권한이 없는 화면은 <a href=\"#/patterns/error-pages\">오류 화면</a>으로 보여 줍니다."]],
     principles: [["실패 안내", "이메일과 비밀번호 중 무엇이 틀렸는지는 알리지 않고, 둘 중 하나가 맞지 않는다고 적습니다. 잠금까지 남은 횟수와 잠기는 시간을 함께 씁니다."], ["입력 유지", "실패해도 이메일은 남기고 비밀번호만 비웁니다. 포커스는 비밀번호 칸으로 옮깁니다."], ["자동 완성", "이메일과 비밀번호, 일회용 코드 칸에 맞는 자동 완성 속성을 줘 비밀번호 관리자와 문자 코드 채우기가 동작하게 합니다."], ["비밀번호 보기", "비밀번호 칸에는 보기 버튼을 둡니다. 붙여넣기를 막지 않습니다."], ["칸", "이메일과 비밀번호 두 칸은 라벨을 숨기고 placeholder 와 칸 안 아이콘으로 보입니다. 숨긴 라벨은 화면 읽기 프로그램이 읽습니다. 칸이 더 많은 폼은 보이는 라벨을 씁니다."], ["화면", "바탕색 위에 테두리 없이 그림자로 띄운 카드를 가운데 둡니다. 카드 위쪽 가운데에는 제품 로고를 두고, 화면 제목은 숨겨서 화면 읽기 프로그램이 읽게 남깁니다. 화면 아래에는 저작권 줄을 고정합니다."], ["2단계 인증", "숫자 6자리를 Text Field 의 인증 코드 칸 여섯에 한 자리씩 받습니다. 붙여넣기와 자동 채우기는 칸을 나눠도 한 번에 채워집니다. 다 채워도 저절로 제출하지 않고 확인 버튼을 누르게 합니다."], ["세션 만료", "끝나기 2분 전에 대화상자로 알리고 남은 시간을 보여 줍니다. 시간 세기와 연장은 제품 서버가 맡고, 시간이 다 되면 로그인 화면으로 보낸 뒤 원래 화면으로 돌아오게 합니다."]],
     examples: [
@@ -493,7 +482,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "report-schedule": {
     status: "new", react: ["Form", "TextField", "Select", "Combobox", "TimePicker", "Table", "DataTable", "Card"], uses: ["form", "text-field", "select", "radio-button", "combobox", "time-picker", "notification", "button", "table", "link", "avatar", "indicator", "switch", "data-table", "card", "loading", "empty-state"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold", ".chip"], css: [".stack", ".toolbar"],
     desc: "보고서의 내용과 받는 사람, 보내는 때를 정해 정기적으로 보내는 화면입니다. 저장하기 전에 다음 발송이 언제 누구에게 가는지 한 문장으로 보여 줍니다.",
-    thumb: `<div class="tbl-wrap" style="width:220px"><table class="tbl compact"><tbody><tr><td style="font-size:12px">주간 보안 요약</td><td style="font-size:12px">월 09:00</td></tr><tr><td style="font-size:12px">에이전트 상태</td><td style="font-size:12px">매월 1일</td></tr></tbody></table></div>`,
     choose: [["언제 쓰는가", "주간 보안 요약처럼 같은 보고서를 정해진 때마다 여러 사람에게 보내야 할 때 씁니다."], ["비슷한 패턴", "한 번만 파일로 받는 것은 <a href=\"#/patterns/import-export\">가져오기 · 내보내기</a>를, 이벤트가 생길 때 바로 알리는 것은 <a href=\"#/patterns/alert-rules\">알림 규칙</a>을 씁니다."]],
     principles: [["기간", "정기 보고서의 기간은 날짜가 아니라 '지난 7일' 처럼 보내는 때를 기준으로 고릅니다."], ["받는 사람", "사람과 부서를 Combobox 로 함께 받습니다. 부서를 고르면 그 부서에 새로 온 사람도 받습니다."], ["보내는 때", "반복 주기와 시각을 한 줄에 둡니다. 시각은 콘솔에 정한 시간대를 따르고, 그 시간대를 도움말에 적습니다."], ["요약 문장", "저장 버튼 위에 다음 발송이 언제 누구에게 어떤 형식으로 가는지 한 문장으로 보여 줍니다. 값을 바꾸면 바로 고칩니다."], ["미리보기와 지금 보내기", "미리보기는 지금 데이터로 보고서를 만들어 보여 주기만 합니다. 지금 보내기는 예약과 별개로 한 번 보냅니다."], ["목록", "예약 목록에는 주기와 다음 발송, 마지막 발송 결과를 둡니다. 잠시 멈출 때는 지우지 않고 사용을 끕니다."], ["실패", "발송에 실패하면 목록에 실패를 표시하고 만든 사람에게 알립니다. 다음 주기에는 다시 보냅니다."]],
     examples: [
@@ -530,7 +518,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "dashboard": {
     status: "ready", react: ["PageHead","Stack","Row3","Row2"], uses: ["page-header", "select-button", "button", "data-visual", "card", "table", "indicator", "link"], css: [".stack", ".row-2", ".row-3"], borrows: [".sr-only", ".progress-row", ".progress"],
     desc: "보안 관리자가 처음 보는 화면입니다. 위에 KPI 4개를 두고, 그 아래에 일별 탐지 · 분포 차트, 비교 · 목표 대비 차트, 최근 이벤트 표를 차례로 둡니다. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
-    thumb: `<div class="kpi-grid" style="width:240px;gap:6px;grid-template-columns:1fr 1fr"><div class="kpi critical" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">Critical</span><span class="value" style="font-size:18px">1,284</span></div><div class="kpi" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">차단률</span><span class="value" style="font-size:18px">99.2%</span></div></div>`,
     choose: [["언제 쓰는가", "로그인한 관리자가 지금 위험이 얼마나 있는지 훑고, 손볼 곳으로 바로 내려가야 하는 첫 화면에 씁니다."], ["비슷한 패턴", "연동과 서버가 살아 있는지는 <a href=\"#/patterns/system-status\">시스템 상태</a>에서, 로그 한 건 한 건은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>에서 봅니다."]],
     principles: [["위계", "KPI 로 무슨 일이 있는지, 차트로 어디서 얼마나 일어났는지, 표로 무엇을 할지를 차례로 보여 줍니다. KPI 카드는 숫자와 증감만 두고 스파크라인은 넣지 않습니다. 흐름은 아래 차트가 보여 줍니다."], ["기간", "화면 오른쪽 위의 Select Button 하나로 화면 전체의 기간을 바꿉니다. 카드마다 기간을 따로 두지 않습니다."], ["밀도", "카드 사이 간격은 16px, 카드 안 여백은 24px 입니다. KPI 카드만 좌우 여백이 20px 입니다. 스크롤하지 않아도 첫 화면에 KPI 와 차트가 들어오게 합니다."], ["한 세트", "차트는 한 톤으로 그리고, 심각도처럼 등급이 있을 때만 등급 색을 씁니다. 같은 줄 카드는 머리와 본문 높이를 맞춥니다."], ["내려가기", "표의 이벤트 이름은 그 이벤트의 상세로 가는 링크입니다. 카드의 전체 보기는 같은 조건이 걸린 목록 화면으로 갑니다."], ["증감", "증감 배지의 색은 방향이 아니라 좋고 나쁨을 따릅니다. 비교 기준을 배지 옆에 함께 적습니다."]],
     examples: [
@@ -566,7 +553,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "log-viewer": {
     status: "ready", react: ["Toolbar","Stack"], uses: ["search", "date-picker", "chip", "select-button", "notification", "data-table", "tag", "code", "pagination", "button"], borrows: [".sr-only", ".field"], css: [".toolbar", ".stack", ".log-row", ".log-table"],
     desc: "대량의 로그를 빠르게 훑고 거르는 화면입니다. 촘촘한 표에 로그 한 건을 한 줄로 보여 주고, 행을 펼쳐 상세와 원본 로그를 봅니다. 실시간과 일시정지를 오갈 수 있습니다.",
-    thumb: `<div class="tbl-wrap" style="width:240px"><table class="tbl compact"><tbody><tr class="log-row"><td style="height:32px">09:41:12</td><td><span class="tag critical sm">CRIT</span></td></tr><tr class="log-row"><td style="height:32px">09:41:11</td><td><span class="tag medium sm">WARN</span></td></tr></tbody></table></div>`,
     choose: [["언제 쓰는가", "초 단위로 쌓이는 탐지 · 감사 로그를 시간 순서로 훑고, 조건으로 걸러 한 건의 원본까지 확인할 때 씁니다."], ["비슷한 패턴", "로그가 아니라 이벤트나 단말을 찾는 목록은 <a href=\"#/patterns/search\">검색 · 필터</a>를 씁니다."]],
     principles: [["밀도", "행 높이 40px 의 촘촘한 표를 쓰고, 로그 한 건은 한 줄로 보여 줍니다. 시간과 IP 는 숫자 폭을 맞춘 본문 글자로 씁니다. 고정폭 글자는 원본 로그에만 씁니다."], ["필터", "심각도 Chip 을 여러 개 골라 거르고, 검색으로 좁힙니다. 조회 구간은 시각까지 입력하고, 달력이나 프리셋으로 고른 날짜는 첫날 00:00 부터 마지막 날 23:59 까지입니다."], ["상세", "행 맨 앞의 셰브론으로 그 행 아래에 상세를 펼칩니다. 탐지 정책과 단말, 프로세스를 키-값으로 보여 주고 원본 로그를 복사할 수 있게 둡니다. 여러 행을 함께 펼칠 수 있습니다."], ["실시간", "실시간이면 새 로그를 위에 쌓습니다. 읽는 중에 표가 밀리지 않게, 스크롤을 내렸거나 행을 펼쳤으면 쌓지 않고 표 위에 새 로그 건수를 알립니다. 누르면 맨 위로 가서 쌓습니다."], ["일시정지", "일시정지하면 새 로그를 받지 않습니다. 다시 실시간으로 바꾸면 쌓인 건수를 먼저 알립니다."], ["내보내기", "지금 걸린 조건 그대로 CSV 로 내보냅니다. 큰 내보내기는 <a href=\"#/patterns/import-export\">가져오기 · 내보내기</a>의 예약으로 보냅니다."]],
     examples: [
@@ -594,7 +580,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "policy-settings": {
     status: "ready", react: ["SettingsSection","Setting","PageHead","Breadcrumb"], uses: ["page-header", "breadcrumb", "notification", "switch", "slider", "select", "number-input", "time-picker", "combobox", "copy-field", "tag", "side-panel", "tree", "button"], borrows: [".chip", ".sr-only", ".field", ".tooltip-wrap", ".tooltip"], css: [".settings-section", ".setting", ".stack"],
     desc: "정책과 시스템을 설정하는 화면입니다. 섹션마다 카드를 두고, 왼쪽에 라벨과 설명, 오른쪽에 컨트롤이 있는 행을 쌓습니다. 바로 적용되는 Switch 와 배포해야 적용되는 입력을 구분합니다.",
-    thumb: `<div class="settings-section" style="padding:4px 12px;width:220px"><div class="setting" style="padding:8px 0"><div class="info"><b style="font-size:12px">실시간 보호</b></div><label class="switch sm"><input type="checkbox" checked></label></div><div class="setting" style="padding:8px 0"><div class="info"><b style="font-size:12px">USB 검사</b></div><label class="switch sm"><input type="checkbox"></label></div></div>`,
     choose: [["언제 쓰는가", "정책 하나의 동작이나 시스템 설정처럼, 언제든 돌아와 값을 바꾸는 설정 화면에 씁니다."], ["비슷한 패턴", "처음 한 번 순서대로 정하는 설정은 <a href=\"#/patterns/onboarding\">온보딩</a>으로, 새 항목을 만드는 입력은 <a href=\"#/patterns/input-form\">입력 폼</a>으로 받습니다."]],
     principles: [["행 구성", "왼쪽에 이름과 한 줄 설명, 오른쪽에 컨트롤 하나를 둡니다. 설명에는 바꾸면 무엇이 달라지는지를 씁니다."], ["바로 적용과 배포", "Switch 는 누르면 바로 서버에 반영합니다. 그 섹션 머리에 바로 적용된다고 적습니다. 나머지 입력은 모아 두었다가 배포를 눌러야 에이전트에 갑니다."], ["배포 전 변경", "배포하지 않은 변경이 있으면 맨 위 경고 알림에 건수를 적습니다. 화면을 떠나려 하면 버릴지 묻습니다."], ["컨트롤 고르기", "켜고 끄기는 Switch, 정도는 Slider, 정확한 수는 Number Input, 시각은 Time Picker, 여럿 고르기는 Combobox 로 받습니다."], ["적용 대상", "부서처럼 계층이 있는 대상은 지금 고른 것을 Tag 로 보여 주고, 바꿀 때는 Side Panel 의 체크박스 Tree 에서 고릅니다."], ["연결 정보", "에이전트 등록 키처럼 복사해 쓰는 값은 Copy Field 로 보여 줍니다."]],
     examples: [
@@ -643,7 +628,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "severity": {
     status: "ready", react: ["SevBand"], uses: ["tag", "data-visual", "data-table"], css: [".sev-band", ".stack"],
     desc: "위협 심각도 5단계인 Critical · High · Medium · Low · Info 를 화면 어디서나 같게 표현하는 규칙입니다. 색과 Tag, 분포 밴드, 정렬 순서를 통일합니다.",
-    thumb: `<div class="sev-band" aria-hidden="true" style="width:200px"><i class="critical" style="flex:18"></i><i class="high" style="flex:27"></i><i class="medium" style="flex:19"></i><i class="low" style="flex:11"></i><i class="info" style="flex:25"></i></div>`,
     choose: [["언제 쓰는가", "이벤트나 로그, 취약점처럼 위험의 크기를 등급으로 나눠 보여 주는 모든 자리에 씁니다."], ["비슷한 패턴", "처리 상태처럼 등급이 아닌 단계는 Tag 의 상태 톤과 <a href=\"#/components/indicator\">Indicator</a> 로 보여 줍니다."]],
     principles: [["색", "심각도는 따로 만든 색이 아니라 기존 상태색과 강조색에 맞춘 것입니다. Critical 은 위험 빨강, High 는 경고 주황, Medium 은 라이트 블루, Low 는 라임, Info 는 중립 회색입니다. 색 전체는 <a href=\"#/foundations/colors\">Colors</a> 에 있습니다."], ["이웃 등급", "도넛이나 누적 막대에서 맞붙는 이웃 등급은 색각 이상에서도 갈리도록 배치했습니다. 면에는 옅은 틴트를, 점과 지표에는 진한 단색을 씁니다."], ["표현", "표와 목록에는 Tag 를, 요약에는 분포 밴드나 도넛을 씁니다. Tag 의 글자가 색을 나르므로 행 왼쪽에 색 막대를 따로 두지 않습니다."], ["정렬", "늘 Critical 에서 Info 순서로 놓습니다. 표의 기본 정렬도 심각도가 높은 순서입니다."], ["라벨", "등급 이름을 반드시 함께 둡니다. 색조가 주된 단서라서, 색만으로 뜻을 전하지 않는다는 규칙이 여기서는 권고가 아니라 제약입니다."]],
     examples: [
@@ -676,7 +660,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "detail": {
     status: "new", react: ["PageHead","Tabs","Card","Table"], uses: ["page-header", "breadcrumb", "button", "dropdown", "tab", "card", "table", "copy-field", "indicator", "tag", "link", "list", "loading", "empty-state"], css: [".stack", ".row-2"],
     desc: "자산이나 정책, 사용자처럼 한 대상의 모든 것을 보여 주는 화면입니다. 위에는 이름과 그 대상에 할 동작을, 아래에는 탭으로 나눈 정보를 둡니다.",
-    thumb: `<div style="width:220px;display:flex;flex-direction:column;gap:6px"><b style="font-size:13px">PC-2041</b><div class="tabs sm" style="font-size:11px"><span class="tab on">개요</span><span class="tab">활동</span></div></div>`,
     choose: [["언제 쓰는가", "목록에서 한 항목을 눌러 들어가, 그 대상의 상태와 이력을 보고 동작을 실행하는 화면에 씁니다."], ["비슷한 패턴", "목록을 떠나지 않고 잠깐 보는 상세는 <a href=\"#/components/side-panel\">Side Panel</a> 이나 표의 행 펼침으로 보여 줍니다."]],
     principles: [["머리", "Page Header 에 위치와 이름, 상태 한 줄을 둡니다. 동작은 세 개까지이고 가장 많이 하는 동작 하나만 주 버튼입니다."], ["위험 동작", "격리나 삭제처럼 되돌리기 어려운 동작은 ⋯ 메뉴 맨 아래 구분선 뒤에 둡니다. 누르면 <a href=\"#/patterns/danger-confirm\">위험 작업 확인</a>으로 묻습니다."], ["탭", "개요 · 활동 · 설정처럼 성격이 다른 정보를 탭으로 나눕니다. 첫 탭인 개요에는 가장 자주 보는 정보만 둡니다."], ["키-값", "카드 안 속성은 키-값 목록으로 보여 줍니다. IP 처럼 복사해 쓰는 값에는 복사 버튼을 붙입니다."], ["관련 항목", "관련 이벤트나 로그는 최근 몇 건만 보여 주고, 같은 조건의 목록 화면으로 가는 링크를 둡니다."], ["상태", "불러오는 동안은 내용 자리에 Skeleton 을 두고, 없는 대상이면 Empty State 로 알리며 목록으로 돌아갈 길을 줍니다."]],
     examples: [
@@ -721,7 +704,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "roles": {
     status: "new", react: ["DataTable", "AvatarGroup", "SidePanel", "Tree", "Card"], uses: ["button", "data-table", "avatar", "tag", "side-panel", "notification", "tree", "card", "loading", "empty-state"], borrows: [".sr-only"], css: [".toolbar", ".stack"],
     desc: "관리자 역할과 그 역할이 할 수 있는 일을 정하는 화면입니다. 역할 목록에서 하나를 골라 Side Panel 에서 권한을 고칩니다.",
-    thumb: `<div style="width:220px;display:flex;flex-direction:column;gap:6px;font-size:12px"><div style="display:flex;justify-content:space-between"><b>보안 관리자</b><span class="tag sm">기본</span></div><div style="display:flex;justify-content:space-between"><b>감사자</b><span class="tag accent sm">사용자 정의</span></div></div>`,
     choose: [["언제 쓰는가", "콘솔을 쓰는 사람에게 역할을 주고, 역할마다 보기 · 처리 · 배포 같은 권한을 정할 때 씁니다."], ["비슷한 패턴", "정책이 적용될 부서나 단말을 고르는 일은 <a href=\"#/patterns/policy-settings\">정책 설정</a>의 적용 대상에서 합니다."]],
     principles: [["목록", "역할마다 이름과 설명, 그 역할을 가진 사람, 기본 · 사용자 정의 구분을 한 줄에 둡니다. 사람은 Avatar Group 으로 다섯까지 보여 주고 나머지는 수로 적습니다."], ["기본 역할", "시스템이 만든 기본 역할은 이름을 바꾸거나 지울 수 없습니다. 권한을 바꾸려면 복제해서 사용자 정의 역할로 만듭니다."], ["권한 트리", "권한은 화면별로 묶은 체크박스 Tree 로 고릅니다. 묶음을 켜면 그 안의 권한이 함께 켜지고, 일부만 켜지면 묶음은 일부 선택으로 보입니다."], ["변경 요약", "저장하기 전에 무엇이 늘고 줄었는지 Side Panel 위에 요약합니다. 영향을 받는 사람 수를 함께 적습니다."], ["저장", "저장해야 반영되고, 취소하면 열기 전 상태로 돌아갑니다. 바뀐 권한은 그 사람이 다음에 화면을 열 때부터 적용됩니다."], ["감사", "역할을 바꾼 기록은 감사 로그에 남습니다. 누가 언제 무엇을 바꿨는지는 제품 서버가 기록합니다."]],
     examples: [
@@ -755,7 +737,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "secrets": {
     status: "new", react: ["DataTable", "CopyField", "Popup", "Card"], uses: ["button", "data-table", "copy-field", "indicator", "popup", "form", "text-field", "date-picker", "radio-button", "notification", "card", "loading", "empty-state"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold"], css: [".toolbar", ".stack"],
     desc: "외부 연동에 쓰는 API 키와 비밀값을 만들고 재발급하는 화면입니다. 비밀값은 만든 순간 한 번만 보여 주고, 목록에는 알아볼 수 있는 앞자리만 둡니다.",
-    thumb: `<div style="width:220px;display:flex;flex-direction:column;gap:6px;font-size:12px"><div style="display:flex;justify-content:space-between"><b>SIEM 연동</b><span class="indicator danger">7일 남음</span></div><span style="color:var(--foreground-neutral-secondary)">jsk_live_8c2e••••</span></div>`,
     choose: [["언제 쓰는가", "SIEM 이나 티켓 시스템처럼 콘솔과 연결되는 외부 서비스에 줄 키를 만들고, 만료를 관리할 때 씁니다."], ["비슷한 패턴", "에이전트 등록처럼 가려서 다시 볼 수 있는 값은 <a href=\"#/components/copy-field\">Copy Field</a> 하나로 충분합니다."]],
     principles: [["한 번만 보임", "비밀값은 만든 직후 대화상자에서 한 번만 보여 줍니다. 다시 볼 수 없다는 경고를 함께 두고, 닫으면 서버에 남지 않습니다."], ["목록", "목록에는 키 이름과 키 ID, 알아볼 수 있는 앞자리, 만료일, 마지막 사용을 둡니다. 비밀값 전체는 목록에 두지 않습니다."], ["만료", "만료가 30일 안이면 남은 날을 경고 점으로, 7일 안이면 위험 점으로 보여 줍니다. 그보다 멀면 날짜만 적습니다. 만료가 없는 키는 만들 수 없게 기본값을 정해 둡니다."], ["재발급", "재발급하면 옛 키가 바로 멈춥니다. 그래서 alertdialog 로 묻고, 무엇이 끊기는지 적습니다."], ["범위", "키마다 할 수 있는 일을 정합니다. 읽기 전용을 기본으로 고르고, 쓰기는 필요한 연동에만 줍니다."], ["복사", "복사해도 값은 알림이나 로그에 남기지 않습니다. 복사했다는 사실만 버튼 자리에서 알립니다."]],
     examples: [
@@ -806,7 +787,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "incident": {
     status: "new", react: ["PageHead", "Steps", "Card", "Combobox", "DataTable"], uses: ["page-header", "breadcrumb", "button", "steps", "card", "list", "text-field", "table", "tag", "avatar", "combobox", "link", "data-table", "loading", "empty-state"], borrows: [".menu", ".menu-item", ".chip", ".sr-only"], css: [".stack", ".row-2"],
     desc: "탐지된 사고를 접수부터 종료까지 처리하는 화면입니다. 지금 어느 단계인지와 담당자를 보여 주고, 처리한 일을 기록으로 남깁니다.",
-    thumb: `<ol class="steps" aria-label="진행 단계" style="width:200px"><li class="done"><i style="width:18px;height:18px">${I("check",10)}</i></li><li class="done"><i style="width:18px;height:18px">${I("check",10)}</i></li><li class="on"><i style="width:18px;height:18px;font-size:10px">3</i></li><li><i style="width:18px;height:18px;font-size:10px">4</i></li></ol>`,
     choose: [["언제 쓰는가", "Critical 탐지처럼 사람이 맡아 분석하고 조치해야 하는 사고를 한 화면에서 처리할 때 씁니다."], ["비슷한 패턴", "사고가 아닌 자산이나 정책 하나를 보는 화면은 <a href=\"#/patterns/detail\">상세 화면</a>을 씁니다."]],
     principles: [["단계", "접수 · 분석 · 조치 · 종료 네 단계를 Steps 로 보여 줍니다. 단계를 옮기는 일은 제품의 처리 버튼이 맡고, Steps 는 표시만 합니다."], ["요약", "오른쪽에 심각도와 상태, 담당자, 대상을 키-값으로 둡니다. 담당자는 Combobox 로 바로 바꿀 수 있습니다."], ["처리 기록", "누가 언제 무엇을 했는지 시간 순서로 쌓습니다. 메모를 남기는 칸은 기록 맨 위에 둡니다."], ["관련 로그", "사고를 일으킨 로그를 몇 건 보여 주고, 같은 조건의 로그 뷰어로 가는 링크를 둡니다."], ["알림에서 오기", "담당자로 지정되거나 단계가 바뀌면 알림 센터에 알림이 옵니다. 알림을 누르면 이 화면으로 옵니다."], ["종료", "종료할 때는 원인과 조치를 남기게 합니다. 종료한 사고는 기록만 남고 담당자와 단계를 바꿀 수 없습니다."]],
     examples: [
@@ -847,7 +827,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "audit-log": {
     status: "new", react: ["DataTable", "Table", "Card"], uses: ["search", "date-picker", "data-table", "table", "indicator", "card", "tag", "link", "button", "loading", "empty-state"], borrows: [".sr-only", ".field"], css: [".stack", ".toolbar"],
     desc: "누가 언제 무엇을 바꿨는지 남기고 찾아보는 화면입니다. 기록은 고칠 수 없고, 바꾼 내용은 변경 전과 변경 후를 나란히 보여 줍니다.",
-    thumb: `<div class="tbl-wrap" style="width:220px"><table class="tbl compact"><tbody><tr><td style="font-size:12px">이서연</td><td style="font-size:12px">정책 변경</td></tr><tr><td style="font-size:12px">김민준</td><td style="font-size:12px">로그인 실패</td></tr></tbody></table></div>`,
     choose: [["언제 쓰는가", "정책 변경이나 로그인, 내보내기처럼 관리자가 한 일을 감사하거나, 설정이 언제 왜 바뀌었는지 찾을 때 씁니다."], ["비슷한 패턴", "단말과 보안 이벤트의 기록은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>를, 사고 하나의 처리 기록은 <a href=\"#/patterns/incident\">사고 처리</a>를 씁니다."]],
     principles: [["남기는 것", "누가, 언제, 어디서, 무엇을 했는지와 결과를 남깁니다. 실패한 시도도 남깁니다."], ["고칠 수 없음", "감사 기록은 고치거나 지울 수 없습니다. 화면에 편집이나 삭제 동작을 두지 않습니다."], ["찾기", "검색칸과 기간을 툴바에 둡니다. 기간의 처음 값은 최근 7일입니다."], ["자세히 보기", "행을 펼쳐 접속 IP와 사유, 바뀐 항목을 보여 줍니다. 바뀐 항목은 변경 전에서 변경 후로 읽히게 적습니다."], ["변경 이력", "설정 하나의 이력은 버전마다 바꾼 사람과 시각, 요약을 표로 보여 주고, 두 버전을 나란히 비교합니다."], ["되돌리기", "지난 버전으로 되돌리는 일도 새 버전을 하나 만듭니다. 이력을 지우지 않고, 누르면 <a href=\"#/patterns/danger-confirm\">위험 작업 확인</a>을 거칩니다."], ["보관", "보관 기간과 내보내기 방법은 화면 아래에 적습니다. 내보낸 일도 감사 기록에 남습니다."]],
     examples: [
@@ -894,7 +873,6 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   "alert-rules": {
     status: "new", react: ["Form", "Combobox", "NumberInput", "Checkbox", "DataTable", "Card"], uses: ["form", "text-field", "combobox", "select", "number-input", "checkbox", "notification", "button", "data-table", "card", "loading", "empty-state"], borrows: [".sr-only", ".chip"], css: [".btn-group", ".stack"],
     desc: "어떤 이벤트가 생기면 누구에게 어떻게 알릴지 정하는 화면입니다. 조건과 동작을 나눠 받고, 저장하기 전에 규칙을 한 문장으로 보여 줍니다.",
-    thumb: `<div class="notice" style="width:220px;padding:10px 12px"><div style="font-size:12px">Critical 5건 이상이면 메일</div></div>`,
     choose: [["언제 쓰는가", "Critical 이벤트가 짧은 시간에 몰리는 것처럼 사람이 바로 알아야 하는 조건을 정해 메일이나 웹훅으로 알릴 때 씁니다."], ["비슷한 패턴", "정해진 때마다 요약을 보내는 것은 <a href=\"#/patterns/report-schedule\">보고서 · 예약 발송</a>을, 탐지와 차단 동작 자체를 정하는 것은 <a href=\"#/patterns/policy-settings\">정책 설정</a>을 씁니다."]],
     principles: [["조건과 동작", "조건과 동작을 섹션으로 나눕니다. 조건은 모두 맞아야 하고, 동작은 하나 이상 고릅니다."], ["조건", "심각도와 대상, 횟수와 시간 창을 받습니다. 횟수와 시간 창은 '10분 안에 5건 이상' 처럼 한 줄로 읽히게 둡니다."], ["동작", "메일은 받는 사람을, 웹훅은 주소를 받습니다. 웹훅은 저장하기 전에 테스트 전송으로 확인할 수 있게 합니다."], ["요약 문장", "저장 버튼 위에 규칙을 한 문장으로 보여 주고, 값을 바꾸면 바로 고칩니다."], ["알림 묶기", "같은 규칙의 알림은 시간 창 안에서 한 번만 보냅니다. 같은 이벤트로 알림이 쏟아지지 않게 합니다."], ["검증", "필수 값과 웹훅 주소 형식은 입력 검증으로 확인합니다. 저장을 누르면 첫 오류로 이동합니다."]],
     examples: [

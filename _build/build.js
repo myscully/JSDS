@@ -85,7 +85,7 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
   p.on("pageerror", e => { console.error("page error:", e.message); process.exitCode = 1; });
   /* Templates 화면 HTML — 문서 페이지의 코드 보기(render.js tplDocPage)와 화면 파일이 같은 글자를 쓴다 */
   const TPL = require("./templates.build.js"); const SCREEN_HTML = TPL.screens(); const TPL_CSS = fs.readFileSync(path.join(__dirname, "templates.src.css"), "utf8");
-  await p.addInitScript(`window.STYLE_TEXT = ${JSON.stringify(cssSrc)}; window.REACT_EXAMPLES = ${JSON.stringify(REACT_EXAMPLES)}; window.DSJS_KB = ${Math.round(fs.statSync(path.join(OUT, "assets", "ds.js")).size / 1024)}; window.COMPONENT_THUMBS = ${JSON.stringify(require("./thumbs.js").load())}; window.TEMPLATE_HTML = ${JSON.stringify(SCREEN_HTML)}; window.TEMPLATE_CSS = ${JSON.stringify(TPL_CSS)};`);
+  await p.addInitScript(`window.STYLE_TEXT = ${JSON.stringify(cssSrc)}; window.REACT_EXAMPLES = ${JSON.stringify(REACT_EXAMPLES)}; window.DSJS_KB = ${Math.round(fs.statSync(path.join(OUT, "assets", "ds.js")).size / 1024)}; window.COMPONENT_THUMBS = ${JSON.stringify(require("./thumbs.js").load("components"))}; window.PATTERN_THUMBS = ${JSON.stringify(require("./thumbs.js").load("patterns"))}; window.TEMPLATE_HTML = ${JSON.stringify(SCREEN_HTML)}; window.TEMPLATE_CSS = ${JSON.stringify(TPL_CSS)};`);
   await p.goto("file://" + SRC + "#/home/overview");
   await p.waitForFunction(() => document.body.dataset.route === "home/overview");
 
