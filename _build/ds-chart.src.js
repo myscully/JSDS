@@ -104,10 +104,17 @@
     });
   }
   function font(t, weight) { return { family: t.font.family, size: t.font.size, weight: weight || 400 }; }
+  /* 애니메이션 중에 들어온 크기 변경은 Chart.js 가 '다음 그리기' 로 미뤄 둔다(_resizeBeforeDraw — 4.6.1 고정). 그런데 애니메이션은 그리기 없이 끝나는
+     프레임이 있어서(마지막 항목을 치우는 틱), 그 틈에 들어온 변경은 영영 적용되지 않았다 — 부하가 걸린 채 창을 1440 → 390 으로 줄이면
+     대시보드 '일별 탐지' 캔버스가 445 로 남았다(hover 애니메이션 도중, 2026-11-20 측정). 애니메이션이 끝날 때 미뤄 둔 변경을 적용한다 */
+  function flushResize(ctx) {
+    var c = ctx && ctx.chart, p = c && c._resizeBeforeDraw;
+    if (p && c.canvas) { c._resizeBeforeDraw = null; c.resize(p.width, p.height); }
+  }
   function baseOptions(t, n) {
     var s = t.scale || 1;
     return {
-      responsive: true, maintainAspectRatio: false, animation: t.reduced ? false : { duration: 200 },
+      responsive: true, maintainAspectRatio: false, animation: t.reduced ? false : { duration: 200, onComplete: flushResize },
       interaction: { mode: "index", intersect: false },
       color: t.axis,
       plugins: {
@@ -300,6 +307,9 @@
     config.options = config.options || {};
     /* 프리셋 · 사용자 옵션은 Chart 생성 전에 떠 둔다 — new Chart 가 config.options 에 기본값(격자 rgba(0,0,0,.1) 등)을 합쳐 넣는다 */
     var own = JSON.parse(JSON.stringify(config.options || {}));
+    /* 첫 등장 애니메이션도 이 어댑터의 값으로 — paint 는 Chart 를 만든 뒤에 옵션을 넣어서, 첫 애니메이션은 Chart.js 기본 1000ms 로 돌고
+       줄인 모션에서도 돌았다(2026-11-20 측정). 사용자가 준 animation 은 그대로 둔다 */
+    if (config.options.animation === undefined) config.options.animation = baseOptions(t, 1).animation;
     var chart = new Chart(canvas, config);
     chart.$ds = config._ds || {}; chart.$ds.options = own;
     /* 2d 컨텍스트가 없는 환경(jsdom 테스트)에서는 Chart.js 가 ctx 없이 만들어지고 update 가 던진다 — 칠하지 않고 handle 만 돌려준다 */

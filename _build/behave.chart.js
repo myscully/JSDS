@@ -146,6 +146,22 @@ module.exports = async function chart({ page, ok, go }) {
     const same = (cs) => cs.length === 2 && cs[0].top === cs[1].top && cs[0].head === cs[1].head && cs[0].body === cs[1].body && cs[0].card === cs[1].card;
     ok("dashboard: both chart rows line up (head bottom · body top · card height), no KPI sparks (2026-11-18 — KPI 기본은 스파크 없음), meaning-coloured deltas, mono weekly bars, four meters",
       same(r.r3) && same(r.r2) && r.sparks === 0 && JSON.stringify(r.deltas) === JSON.stringify(["delta bad", "delta good", "delta bad"]) && JSON.stringify(r.bar) === JSON.stringify(r.mono) && r.meters === 4, JSON.stringify(r));
+    /* 애니메이션 도중 들어와 미뤄진 크기 변경은 애니메이션이 끝날 때 적용된다(2026-11-20 — 그리기 없이 끝나는 틱에 들어온 변경이 영영 남아
+       부하가 걸리면 390 에서 선 차트가 445 로 남았다). 경합 자체는 시간에 달려 있어, 끝날 때 부르는 콜백이 미뤄 둔 값을 적용하는지를 직접 잰다 */
+    const fl = await page.evaluate(() => [...document.querySelectorAll("#ex-dashboard-full canvas[data-chart]")].map((cv) => { const ch = cv.__dsChart.chart; window.Chart.animator.stop(ch); const w0 = ch.width, h0 = ch.height, on = ch.options.animation && ch.options.animation.onComplete;
+      if (typeof on !== "function") return { kind: cv.dataset.chart, on: false };
+      ch._resizeBeforeDraw = { width: w0 - 40, height: h0 }; on({ chart: ch }); const r = { kind: cv.dataset.chart, on: true, applied: Math.round(ch.width) === Math.round(w0 - 40), cleared: ch._resizeBeforeDraw === null };
+      ch.resize(); return r; }));
+    ok("dashboard: a resize deferred during an animation is applied when the animation completes (every chart)", fl.length >= 3 && fl.every((f) => f.on && f.applied && f.cleared), JSON.stringify(fl));
+    /* 첫 등장 애니메이션 — 200ms 로 돌고(항목마다 프레임만큼 더해 재면 230 ~ 252 — Chart.js 기본 1000ms 가 아님), 줄인 모션이면 아예 없다(2026-11-20) */
+    const firstAnim = async () => { await go("patterns/dashboard.html"); await wait(80);
+      return page.evaluate(() => [...document.querySelectorAll("#ex-dashboard-full canvas[data-chart]")].map((cv) => { const ch = cv.__dsChart.chart, a = window.Chart.animator._charts.get(ch);
+        return { kind: cv.dataset.chart, running: window.Chart.animator.running(ch), dur: a ? a.duration : 0 }; })); };
+    const normal = await firstAnim();
+    await page.emulateMedia({ reducedMotion: "reduce" }); const reduced = await firstAnim(); await page.emulateMedia({ reducedMotion: null });
+    ok("dashboard: the first chart animation is the adapter's 200ms (under 300 measured, not Chart.js's 1000ms default), and with reduced motion no chart animates at all",
+      normal.length >= 3 && normal.every((c) => c.dur > 0 && c.dur < 300) && reduced.length === normal.length && reduced.every((c) => !c.running), JSON.stringify({ normal, reduced }));
+    await go("patterns/dashboard.html"); await wait(700);
     /* 390 — 두 줄 모두 한 칸으로 쌓이고 카드 · 도넛 · 제목이 잘리지 않는다 */
     const vp = page.viewportSize(); await page.setViewportSize({ width: 390, height: 900 }); await wait(500);
     const n = await page.evaluate(() => { const rows = [".row-3", ".row-2"].map((s) => [...document.querySelectorAll(`#ex-dashboard-full ${s} > .chart-card`)]);
