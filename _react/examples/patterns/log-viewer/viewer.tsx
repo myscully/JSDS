@@ -11,7 +11,7 @@ const ROWS: Log[] = [
   { id: 6, t: "09:39:57.980", level: "info", lv: "INFO", ip: "10.0.7.10", host: "PC-0932", msg: "scan.scheduled completed files=48213 threats=0", policy: "예약 검사", proc: "js-agent" },
 ];
 const COLUMNS: DataTableColumn<Log>[] = [
-  { key: "t", header: "시간", sortable: true, render: (r) => `2026-09-07 ${r.t}` },
+  { key: "t", header: "시간", sortable: true, render: (r) => `2026. 09. 07 ${r.t}` },
   { key: "level", header: "심각도", render: (r) => <Tag tone={r.level} size="sm">{r.lv}</Tag> },
   { key: "ip", header: "소스 IP" },
   { key: "host", header: "단말" },
@@ -60,7 +60,7 @@ export default function Example() {
         </ChipGroup>
         <Spacer />
         <SelectButton outline size="sm" label="갱신" value={live} onChange={setLive} options={[{ value: "live", label: "실시간" }, { value: "pause", label: "일시정지" }]} />
-        <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>CSV</Button>
+        <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>CSV 내보내기</Button>
       </Toolbar>
       {live === "pause" && (
         <Notice tone="info" title="새 로그 24건" actions={<Button variant="outline" color="assistive" size="sm">맨 위로 이동해 보기</Button>}>

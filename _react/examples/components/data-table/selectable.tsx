@@ -3,9 +3,9 @@ import { ActionBar, Button, ButtonGroup, DataTable, Icon, Switch, type DataTable
 
 type Policy = { id: string; name: string; group: string; targets: number; updated: string; enabled: boolean };
 const ROWS: Policy[] = [
-  { id: "p1", name: "외부 USB 차단", group: "전체", targets: 1284, updated: "2026-09-06", enabled: true },
-  { id: "p2", name: "스크립트 실행 제한", group: "개발팀 제외", targets: 1102, updated: "2026-09-02", enabled: true },
-  { id: "p3", name: "원격 접속 허용 목록", group: "인프라팀", targets: 48, updated: "2026-08-21", enabled: false },
+  { id: "p1", name: "외부 USB 차단", group: "전체", targets: 1284, updated: "2026. 09. 06", enabled: true },
+  { id: "p2", name: "스크립트 실행 제한", group: "개발팀 제외", targets: 1102, updated: "2026. 09. 02", enabled: true },
+  { id: "p3", name: "원격 접속 허용 목록", group: "인프라팀", targets: 48, updated: "2026. 08. 21", enabled: false },
 ];
 const COLUMNS: DataTableColumn<Policy>[] = [
   { key: "name", header: "정책" },

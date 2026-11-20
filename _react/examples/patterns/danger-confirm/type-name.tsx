@@ -12,13 +12,13 @@ export default function Example() {
       <Form bare validate className="popup-form" id="dc3-form" onSubmit={(e) => { e.preventDefault(); /* 삭제 실행 */ }}>
         <TextField
           id="dc3-name"
-          label={`확인을 위해 ${NAME} 을 입력하세요`}
+          label={<>확인을 위해 <b>{NAME}</b>을 입력하세요</>}
           required
           requiredMark={false}
-          pattern={NAME}
+          pattern={`\\s*${NAME}\\s*`}
           autoComplete="off"
           help="이름이 같아야 삭제됩니다."
-          messages={{ required: "연동 이름을 입력하세요.", pattern: `연동 이름이 다릅니다. ${NAME} 을 그대로 입력하세요.` }}
+          messages={{ required: "연동 이름을 입력하세요.", pattern: `연동 이름이 다릅니다. ${NAME}을 그대로 입력하세요.` }}
         />
       </Form>
       <PopupActions>

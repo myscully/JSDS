@@ -76,13 +76,13 @@ describe("CodeInput", () => {
   it("폼 안 — 덜 채우고 떠나면 code 문구, 다 채우면 지운다 · 제출하면 비어 있으면 required 와 첫 빈 칸 포커스", () => {
     render(<TwoStep />);
     const help = () => field().querySelector(":scope > .help")!.textContent;
-    fireEvent.click(screen.getByRole("button", { name: "확인" }));
+    fireEvent.click(screen.getByRole("button", { name: "인증하고 로그인" }));
     expect(help()).toBe("인증 코드를 입력하세요.");
     expect(document.activeElement).toBe(cells()[0]);
     expect(cells().every((c) => c.getAttribute("aria-invalid") === "true")).toBe(true);
     fireEvent.paste(cells()[0], { clipboardData: { getData: () => "4821" } });
     expect(help()).toBe("숫자 6자리를 모두 입력하세요.");
-    fireEvent.click(screen.getByRole("button", { name: "확인" }));
+    fireEvent.click(screen.getByRole("button", { name: "인증하고 로그인" }));
     expect(document.activeElement).toBe(cells()[4]);
     fireEvent.paste(cells()[4], { clipboardData: { getData: () => "93" } });
     expect(help()).toBe("코드는 30초마다 바뀝니다.");

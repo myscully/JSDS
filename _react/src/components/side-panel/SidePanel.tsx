@@ -1,8 +1,9 @@
-import { forwardRef, useEffect, useRef, type HTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useEffect, useLayoutEffect, useRef, type HTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { useId } from "../../utils/useId";
 import { mergeRefs, useEscape, useFocusTrap } from "../../utils/hooks";
 import { Portal } from "../../utils/Portal";
+import { ghostOut } from "../../utils/ghost";
 import { Button } from "../button/Button";
 import { Icon } from "../../icons/Icon";
 import { LABELS } from "../../labels";
@@ -75,9 +76,11 @@ const SidePanelLayer = forwardRef<HTMLElement, Omit<SidePanelProps, "open" | "co
       if ((document.activeElement === document.body || document.activeElement === null) && prev?.isConnected) prev.focus({ preventScroll: true });
     };
   }, [modal]);
+  const dim = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => { const d = dim.current, p = inner.current; return () => ghostOut([d, p]); }, []);   // 나갈 때 흐려지는 사본(사이트와 같음)
   return (
     <>
-      {modal && <div className="side-panel-dim" onMouseDown={onClose} />}
+      {modal && <div ref={dim} className="side-panel-dim" onMouseDown={onClose} />}
       <SidePanelSurface ref={mergeRefs(inner, ref)} fixed modal={modal} onClose={onClose} tabIndex={-1} {...surface}>
         {children}
       </SidePanelSurface>

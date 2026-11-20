@@ -61,14 +61,14 @@ const TEMPLATES = {
     desc: "정책 하나의 설정을 섹션으로 나눠 고치는 화면입니다. 적용 대상은 오른쪽에서 열리는 사이드 패널에서 고릅니다.",
     line: "설정 섹션과 적용 대상 Side Panel. 정책 설정 패턴을 그대로 담았습니다.",
     choose: [
-      ["언제 쓰는가", "항목이 많은 설정을 주제별로 묶어 한 화면에서 고치고 한 번에 저장할 때 씁니다."],
+      ["언제 쓰는가", "항목이 많은 설정을 주제별로 묶어 한 화면에서 고치고 한 번에 배포할 때 씁니다."],
       ["비슷한 템플릿", "정해진 순서대로 입력해야 하면 위저드입니다."],
     ],
     uses: ["avatar", "breadcrumb", "button", "combobox", "copy-field", "divider", "dropdown", "indicator", "link", "navigation", "notification", "notification-center", "number-input", "page-header", "search", "select", "side-panel", "slider", "switch", "tag", "text-field", "time-picker", "tooltip", "top-navigation", "tree"],
     patterns: ["policy-settings", "input-form"],
     principles: [
       ["섹션", "설정을 주제마다 제목 있는 섹션으로 나누고, 섹션마다 설명 한 줄을 둡니다."],
-      ["저장", "저장과 취소는 화면 아래 한 곳에 둡니다. 섹션마다 따로 저장하지 않습니다."],
+      ["배포", "고친 내용은 머리글의 배포 버튼 하나로 에이전트에 보냅니다. 섹션마다 따로 저장하지 않고, 배포하지 않은 변경은 위 안내에 건수로 보입니다."],
       ["적용 대상", "적용 대상은 사이드 패널의 트리에서 고르고, 고른 부서는 설정 화면에 태그로 보입니다."],
       ["사이드 패널", "패널이 열린 동안 뒤 화면은 누를 수 없고, 닫으면 연 버튼으로 포커스가 돌아옵니다."],
     ],

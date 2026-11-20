@@ -53,7 +53,7 @@ const UIDICT = {
     { src: "components/indicator/status", cat: "알림과 상태", name: "상태 점", en: "Status Dot", cls: ".indicator", aka: ["상태 표시등","인디케이터"], kw: "초록 빨강 점 온라인 오프라인 신호" },
     { src: "components/indicator/count", cat: "알림과 상태", name: "카운트 배지", en: "Count Badge", cls: ".count", react: "Count", aka: ["뱃지","알림 숫자","숫자 배지"], kw: "숫자 동그라미 빨간 숫자 안 읽음 개수 뱃지" },
     { src: "components/loading/progress", cat: "알림과 상태", name: "진행 막대", en: "Progress", cls: ".progress", react: "Progress", aka: ["프로그레스 바","진행률"], kw: "채워지는 막대 퍼센트 진행률 게이지" },
-    { src: "components/popup/confirm", cat: "겹쳐 뜨는 창", name: "팝업", en: "Popup", cls: ".popup", aka: ["모달","다이얼로그","팝업창","레이어 팝업"], kw: "가운데 뜨는 창 모달 확인 대화상자 다이얼로그" },
+    { src: "components/popup/confirm", cat: "겹쳐 뜨는 창", name: "팝업", en: "Popup", cls: ".popup", aka: ["모달","다이얼로그","팝업창","레이어 팝업","Modal","Dialog"], kw: "가운데 뜨는 창 모달 확인 대화상자 다이얼로그" },
     { src: "components/popup/danger", cat: "겹쳐 뜨는 창", name: "위험 확인 팝업", en: "Danger Confirm", cls: ".popup", aka: ["삭제 확인창","경고 모달","얼럿 다이얼로그"], kw: "삭제할까요 빨간 버튼 되돌릴 수 없음 경고 창" },
     { src: "components/popup/form", cat: "겹쳐 뜨는 창", name: "입력 팝업", en: "Form Popup", cls: ".popup", aka: ["입력 모달","폼 모달"], kw: "창 안에 입력칸 짧은 입력 받기 추가" },
     { src: "components/side-panel/default", cat: "겹쳐 뜨는 창", name: "사이드 패널", en: "Side Panel", cls: ".side-panel", aka: ["드로어","슬라이드 패널","오프캔버스"], kw: "오른쪽에서 나오는 창 서랍 상세 보기 드로어" },

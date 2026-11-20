@@ -874,3 +874,17 @@ Steps 를 다시 짰습니다.
 
 - **새 훅 `useSideNavCollapse(options?) → [collapsed, setCollapsed]`.** 화면 폭이 1280 아래로 줄면 접고, 다시 넓히면 폅니다. 경계를 넘을 때만 맞추므로 그 사이 `setCollapsed` 로 바꾼 값은 다음 경계까지 남습니다. `TopBarNavToggle collapsed onCollapsedChange` 와 `SideNav collapsed` 에 그대로 넘깁니다. `{ auto: false }` 이면 폭을 보지 않습니다. 직접 `useState` 로 들고 있던 제품은 그대로 동작하지만 폭으로 접히지 않습니다.
 - 사이트 ds.js 도 `[data-sidenav-toggle]` 이 가리키는 내비에 같은 일을 합니다. `ds:sidenav` 의 detail 에 `trigger`(button · width)가 더해졌고, 내비에 `data-auto-collapse="false"` 를 달면 폭으로 접지 않습니다. 접기 버튼이 없는 내비는 건드리지 않습니다.
+
+## 디자인 검토 P2 · P3 정리 (2026-11-20)
+
+- **`Stepper async`**(새 prop) — 켜면 `onFinish` 가 돌려준 Promise 가 끝날 때까지 완료 버튼이 loading 이 되어 다시 눌리지 않습니다. 던지면 그 문구(없으면 '작업을 끝내지 못했습니다. 다시 시도하세요.')로 오류 Toast 를 띄웁니다(`ToastProvider` 안에서). `onFinish` 의 반환 타입이 `void | Promise<unknown>` 으로 넓어졌습니다. 사이트는 `.stepper[data-async]` + `ds:step-finish` 의 `resolve()` · `reject(문구)` 입니다.
+- **완료 버튼 라벨은 결과를 말합니다** — 예제가 `labels={{ finish: "정책 만들기" }}` 를 씁니다. 기본값 '완료' 는 그대로이니 제품에서 할 일을 적어 주세요.
+- **오버레이가 들어오고 나갑니다** — Popup · Side Panel · Toast 가 `--motion-base` 로 나타나고(페이드 + 8px), 닫으면 같은 모양의 사본이 `--motion-fast` 로 흐려집니다. 닫힌 요소 자체는 바로 지워지므로 포커스 · 상태 · 선택자는 전과 같습니다. 사본(`.ds-ghost`)은 `aria-hidden` · `inert` 이고, 줄인 모션이면 둘 다 없습니다.
+- **Switch 노브는 `transform` 으로 움직입니다**(`left` 전환을 지움). 노브 위치를 CSS 로 덮어쓴 제품은 `transform` 도 확인합니다.
+- **Skeleton 의 빛은 의사 요소(`::after`)의 `transform` 애니메이션입니다**(`background-position` 을 매 프레임 칠하던 것). `.skeleton` 에 `position:relative` · `overflow:hidden` 이 붙었습니다. `background` 를 덮어쓴 제품도 빛은 그대로 지나갑니다.
+- **`Progress` 의 접근 이름** — `label` 이 글자면 `aria-label` 로도 씁니다(`aria-label` · `aria-labelledby` 를 직접 주면 그쪽이 이김).
+- **`Calendar` 의 `lang`** — 한국어가 아닌 `locale` 이면 달력 루트에 `lang` 을 답니다(스크린 리더 발음 · 일본어 서체). 사이트 ds.js 도 같습니다.
+- **Date Picker 날짜 칸 hover = `--surface-neutral-tertiary`**(시각 칸 hover 와 같은 토큰).
+- **예제의 `PageHead` 는 `as="h2"`** — 문서 페이지 안의 미리보기라 페이지 제목(h1)과 겹치지 않게 했습니다. 제품 화면에서는 기본 h1 그대로 씁니다.
+- **예제 날짜는 `YYYY. MM. DD`** 로 통일했습니다(Date Picker 형식과 같음).
+- **데이터 패턴 일곱에 상태 예제** — 감사 로그 · 권한 · API 키 · 보고서 · 알림 규칙 · 일괄 작업 · 사고 처리가 `DataTable status="loading"` · `empty` · `status="error"` 를 보입니다. 로그 뷰어에 실시간 연결이 끊긴 `Banner tone="warning"` 예제를 더했습니다.

@@ -38,6 +38,17 @@ const pCombo = (o) => {
 /* Time Picker · Date Picker — components.data.js 의 tpField · dpField 와 같은 마크업. pTime live = 검증 폼의 도움말 칸에 aria-live */
 const pTime = (o) => `<div class="field timepicker${o.cls ? " " + o.cls : ""}"><label for="${o.id}"${o.srLabel ? ' class="sr-only"' : ""}>${o.label}${o.req ? " <em>*</em>" : ""}</label><div class="affix"><input id="${o.id}" type="text" inputmode="numeric" autocomplete="off" placeholder="HH:mm"${o.value ? ` value="${o.value}"` : ""}${o.req ? " required" : ""}${o.help ? ` aria-describedby="${o.id}-help"` : ""}><button type="button" class="tp-btn" aria-label="${o.label} 선택" aria-haspopup="dialog" aria-expanded="false">${I("clock")}</button></div>${o.help ? `<span class="help" id="${o.id}-help"${o.live ? ' aria-live="polite"' : ""}>${o.help}</span>` : ""}</div>`;
 const pDate = (o) => { const one = "YYYY. MM. DD" + (o.time ? " HH:mm" : ""); return `<div class="datepicker field"${[o.range && "data-range", o.time && "data-time", o.attrs].filter(Boolean).map((a) => " " + a).join("")}>${o.label ? `<label for="${o.id}">${o.label}</label>` : ""}<div class="affix"><input id="${o.id}"${o.value ? ` value="${o.value}"` : ""} placeholder="${o.range ? `${one} ~ ${one}` : one}" inputmode="numeric" autocomplete="off"${o.label ? "" : ` aria-label="${o.aria}"`}${o.help ? ` aria-describedby="${o.id}-help"` : ""}><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div>${o.help ? `<span class="help" id="${o.id}-help">${o.help}</span>` : ""}</div>`; };
+/* 데이터 패턴의 상태 셋(2026-11-20) — 불러오는 중(Skeleton 행) · 빈 결과 · 오류(다시 시도). Data Table 의 Loading · First Use · Load Error 예제와 같은 마크업. "#이름" 은 숫자 열 */
+const pStates = (o) => {
+  const th = o.cols.map((c) => c[0] === "#" ? `<th class="num">${c.slice(1)}</th>` : `<th>${c}</th>`).join(""), n = o.cols.length;
+  const card = (t, body) => `<div class="card flush"><div class="card-head"><h3 class="title">${t}</h3></div><div class="tbl-wrap">${body}</div></div>`;
+  const btn = o.emptyBtn ? ` <button type="button" class="btn sm ${o.emptyBtn[1] ? "solid primary" : "outline assistive"}">${o.emptyBtn[0]}</button>` : "";
+  return `<div class="stack">
+          ${card("불러오는 중", `<span class="sr-only" role="status">${o.loading}</span><table class="tbl" aria-busy="true"><thead><tr>${th}</tr></thead><tbody>${[1, 2, 3].map(() => `<tr>${o.cols.map(() => '<td><span class="skeleton text"></span></td>').join("")}</tr>`).join("")}</tbody></table>`)}
+          ${card(o.emptyTitle, `<table class="tbl"><thead><tr>${th}</tr></thead><tbody><tr><td colspan="${n}" class="empty"><div class="empty">${o.empty}${btn}</div></td></tr></tbody></table>`)}
+          ${card("불러오기 실패", `<table class="tbl"><thead><tr>${th}</tr></thead><tbody><tr><td colspan="${n}" class="empty"><div class="empty" role="alert">${o.error} <button type="button" class="btn sm outline assistive" data-retry>다시 시도</button></div></td></tr></tbody></table>`)}
+        </div>`;
+};
 const pBreadcrumb = (items) => `<nav aria-label="현재 위치"><ol class="breadcrumb"><li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li>${items.slice(0, -1).map((t) => `<li><a href="#">${t}</a></li>`).join("")}<li aria-current="page"><span>${items[items.length - 1]}</span></li></ol></nav>`;
 const pAvatars = (label, names, more, sm) => `<span class="avatar-group" role="group" aria-label="${label}">${names.map((n) => `<span class="avatar${sm ? " sm" : ""}" role="img" aria-label="${n}">${n[0]}</span>`).join("")}${more ? `<span class="avatar-group-more">외 ${more}명</span>` : ""}</span>`;
 const pNotice = (tone, title, body, extra = "") => { const ico = { info: ["info-circle"], warning: ["alert-triangle"], danger: ["alert-circle"], success: ["circle-check"], "": ["info-circle"] }[tone][0]; return `<div class="notice${tone ? " " + tone : ""}" role="${tone === "danger" ? "alert" : "status"}"><span class="ico">${I(ico,20,{style:"filled"})}</span><div><b>${title}</b>${body}${extra}</div></div>`; };
@@ -56,7 +67,7 @@ const logTable = (rows) => `
             <table class="tbl compact hover" id="log-tbl">
               <thead><tr><th class="expand"><span class="sr-only">상세</span></th><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>심각도</th><th>소스 IP</th><th>단말</th><th>메시지</th></tr></thead>
               <tbody>
-                ${rows.map(([t, tone, lv, ip, host, msg, pol, proc], i) => `<tr class="log-row"><td class="expand"><button type="button" class="expand-btn" aria-expanded="${i === 0}" aria-controls="lv${i}-d" aria-label="${t} 로그 상세">${I("chevron-right",16)}</button></td><td>2026-09-07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td class="truncate">${msg}</td></tr><tr class="row-detail" id="lv${i}-d"${i === 0 ? "" : " hidden"}><td colspan="6"><div class="row-detail-body"><dl class="detail-meta"><dt>탐지 정책</dt><dd>${pol}</dd><dt>단말</dt><dd>${host} · ${ip}</dd><dt>프로세스</dt><dd>${proc}</dd></dl><div class="code-view wrap"><div class="head"><span class="title">${t} 원본 로그</span>${pCopy(t + " 원본 로그")}</div><pre tabindex="0" aria-label="${t} 원본 로그"><code>2026-09-07T${t} ${ip} ${lv} ${msg} host=${host} proc=${proc}</code></pre></div></div></td></tr>`).join("\n                ")}
+                ${rows.map(([t, tone, lv, ip, host, msg, pol, proc], i) => `<tr class="log-row"><td class="expand"><button type="button" class="expand-btn" aria-expanded="${i === 0}" aria-controls="lv${i}-d" aria-label="${t} 로그 상세">${I("chevron-right",16)}</button></td><td>2026. 09. 07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td class="truncate">${msg}</td></tr><tr class="row-detail" id="lv${i}-d"${i === 0 ? "" : " hidden"}><td colspan="6"><div class="row-detail-body"><dl class="detail-meta"><dt>탐지 정책</dt><dd>${pol}</dd><dt>단말</dt><dd>${host} · ${ip}</dd><dt>프로세스</dt><dd>${proc}</dd></dl><div class="code-view wrap"><div class="head"><span class="title">${t} 원본 로그</span>${pCopy(t + " 원본 로그")}</div><pre tabindex="0" aria-label="${t} 원본 로그"><code>2026-09-07T${t} ${ip} ${lv} ${msg} host=${host} proc=${proc}</code></pre></div></div></td></tr>`).join("\n                ")}
               </tbody>
             </table>
           </div>`;
@@ -226,7 +237,7 @@ const PATTERNS = {
     desc: "삭제나 재발급처럼 되돌리기 어려운 동작을 실행하기 전에 확인을 받는 화면입니다. 무엇이 사라지는지와 영향 범위를 제목과 본문에 적고, 취소를 먼저 둡니다.",
     thumb: `<div class="popup danger" style="padding:12px;width:200px;gap:6px"><b style="font-size:12px">정책을 삭제할까요?</b><div style="display:flex;gap:4px;justify-content:flex-end"><button class="btn sm outline assistive">취소</button><button class="btn sm solid negative">삭제</button></div></div>`,
     choose: [["언제 쓰는가", "지우면 복구할 수 없거나, 다른 사용자와 단말에 영향이 가는 동작을 실행하기 직전에 씁니다."], ["비슷한 패턴", "되돌릴 수 있는 동작은 확인을 묻지 않고 실행한 뒤 실행 취소가 있는 Toast 를 띄웁니다. 진행을 막지 않는 안내는 <a href=\"#/patterns/notes\">유의사항</a>으로 남깁니다."]],
-    principles: [["제목", "무엇을 하는지 물음으로 씁니다. 대상의 이름이나 개수를 넣고, 주 버튼의 글자가 제목의 동작과 같게 합니다."], ["본문", "사라지는 것과 영향 범위를 적습니다. 복구할 수 없으면 그렇다고 적고, 영향을 받는 단말이나 연동의 수를 숫자로 씁니다."], ["버튼 순서", "취소가 먼저이고 위험 실행 버튼이 뒤입니다. 처음 포커스는 취소나 입력칸에 가고 위험 실행 버튼에는 가지 않습니다."], ["일괄 작업", "여럿을 한 번에 지우면 개수와 이름 몇 개를 보여 주고 나머지는 외 n개로 줄입니다."], ["이름 입력", "연동이나 조직처럼 지우면 넓게 영향을 주는 것만 이름을 입력하게 합니다. 버튼은 늘 켜 두고 누르면 검사해, 이름이 다르면 입력칸 아래에 고치는 법을 적습니다."], ["되돌리기", "보관함으로 옮기기처럼 되돌릴 수 있으면 확인을 묻지 않습니다. 바로 실행하고 실행 취소가 있는 Toast 를 10초 동안 띄웁니다."], ["닫기", "위험 확인은 바깥을 눌러도 닫히지 않습니다. 취소와 닫기, Esc 로만 닫습니다."]],
+    principles: [["제목", "무엇을 하는지 물음으로 씁니다. 대상의 이름이나 개수를 넣고, 주 버튼의 글자가 제목의 동작과 같게 합니다."], ["본문", "사라지는 것과 영향 범위를 적습니다. 복구할 수 없으면 그렇다고 적고, 영향을 받는 단말이나 연동의 수를 숫자로 씁니다."], ["버튼 순서", "취소가 먼저이고 위험 실행 버튼이 뒤입니다. 처음 포커스는 취소나 입력칸에 가고 위험 실행 버튼에는 가지 않습니다."], ["일괄 작업", "여럿을 한 번에 지우면 개수와 이름 몇 개를 보여 주고 나머지는 외 n개로 줄입니다."], ["이름 입력", "연동이나 조직처럼 지우면 넓게 영향을 주는 것만 이름을 입력하게 합니다. 입력할 이름은 라벨에서 굵게 보이고, 앞뒤 공백은 비교하지 않습니다. 버튼은 늘 켜 두고 누르면 검사해, 이름이 다르면 입력칸 아래에 고치는 법을 적습니다."], ["되돌리기", "보관함으로 옮기기처럼 되돌릴 수 있으면 확인을 묻지 않습니다. 바로 실행하고 실행 취소가 있는 Toast 를 10초 동안 띄웁니다."], ["닫기", "위험 확인은 바깥을 눌러도 닫히지 않습니다. 취소와 닫기, Esc 로만 닫습니다."]],
     examples: [
       { id: "single", title: "단건 삭제", desc: "대상의 이름을 제목에 넣고, 사라지는 것과 영향을 본문에 적습니다.", html: `
         <div class="popup danger" role="alertdialog" aria-modal="true" aria-labelledby="dc1-t" aria-describedby="dc1-b">
@@ -244,7 +255,7 @@ const PATTERNS = {
         <div class="popup danger" role="alertdialog" aria-modal="true" aria-labelledby="dc3-t" aria-describedby="dc3-b">
           <h3 class="popup-title" id="dc3-t">'SIEM 연동'을 삭제할까요?</h3>${pClose("popup-close", "data-popup-close")}
           <p class="popup-body" id="dc3-b">연동을 지우면 이벤트 전송이 바로 멈추고, 이 연동을 쓰는 보고서 3개가 비게 됩니다. 복구할 수 없습니다.</p>
-          <form class="popup-form" id="dc3-form" data-validate novalidate><div class="field"><label for="dc3-name">확인을 위해 SIEM 연동 을 입력하세요</label><input id="dc3-name" required pattern="SIEM 연동" autocomplete="off" data-messages='{"required":"연동 이름을 입력하세요.","pattern":"연동 이름이 다릅니다. SIEM 연동 을 그대로 입력하세요."}'><span class="help" aria-live="polite">이름이 같아야 삭제됩니다.</span></div></form>
+          <form class="popup-form" id="dc3-form" data-validate novalidate><div class="field"><label for="dc3-name">확인을 위해 <b>SIEM 연동</b>을 입력하세요</label><input id="dc3-name" required pattern="\\s*SIEM 연동\\s*" autocomplete="off" data-messages='{"required":"연동 이름을 입력하세요.","pattern":"연동 이름이 다릅니다. SIEM 연동을 그대로 입력하세요."}'><span class="help" aria-live="polite">이름이 같아야 삭제됩니다.</span></div></form>
           <div class="popup-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="submit" form="dc3-form" class="btn md solid negative">삭제</button></div></div>
         </div>` },
       { id: "undo", title: "되돌리기", desc: "되돌릴 수 있는 동작은 확인을 묻지 않습니다. 바로 실행하고 실행 취소가 있는 Toast 를 띄웁니다.", html: `
@@ -265,10 +276,10 @@ const PATTERNS = {
         <div class="stack">
           <div class="field"><label id="imp-l">단말 목록 파일</label><div class="upload" data-max-size="5MB"><div class="upload-zone"><span class="ico">${I("upload",24)}</span><span class="upload-msg">CSV 파일을 끌어다 놓거나</span><button type="button" id="imp-p" class="btn sm outline assistive upload-pick" aria-labelledby="imp-l imp-p">파일 선택</button><input type="file" hidden accept=".csv"></div><span class="sr-only upload-status" role="status"></span><ul class="upload-list" aria-label="첨부 파일"><li class="upload-item done" data-id="imp1"><span class="ico">${I("circle-check",20)}</span><div class="body"><div class="row"><span class="name">agents-2026-11.csv</span><span class="size">212 KB</span><span class="sr-only"> (완료)</span></div></div><button type="button" class="btn sm text assistive icon-only remove" aria-label="agents-2026-11.csv 지우기">${I("x",16)}</button></li></ul></div><span class="help">CSV, 5MB 이하. 첫 줄은 단말 이름, IP, 그룹 열입니다.</span></div>
           ${pNotice("warning", "1,284줄 중 3줄을 가져올 수 없습니다", "오류 줄을 고쳐 다시 올리거나, 올바른 1,281줄만 가져오세요.", `<div class="actions"><button type="button" class="btn sm outline assistive">${I("download")}오류 줄 내려받기</button></div>`)}
-          <div class="tbl-wrap"><table class="tbl compact"><thead><tr><th class="num">줄</th><th>단말 이름</th><th>IP</th><th>오류</th></tr></thead><tbody>
+          <div class="tbl-wrap"><table class="tbl compact nowrap"><thead><tr><th class="num">줄</th><th>단말 이름</th><th>IP</th><th>오류</th></tr></thead><tbody>
             <tr><td class="num">18</td><td>PC-2041</td><td>10.0.4.256</td><td><span class="tag high sm">IP 형식</span> 0~255 사이 숫자로 고치세요</td></tr>
-            <tr><td class="num">342</td><td>PC-0932</td><td>10.0.7.10</td><td><span class="tag high sm">중복</span> 18줄과 같은 IP 입니다</td></tr>
-            <tr><td class="num">1,107</td><td>(비어 있음)</td><td>10.0.9.44</td><td><span class="tag high sm">필수</span> 단말 이름을 채우세요</td></tr>
+            <tr><td class="num">342</td><td>PC-0932</td><td>10.0.7.10</td><td><span class="tag high sm">중복</span> 57줄과 같은 IP 입니다</td></tr>
+            <tr><td class="num">1,107</td><td>(비어 있음)</td><td>10.0.9.44</td><td><span class="tag high sm">빈 값</span> 단말 이름을 채우세요</td></tr>
           </tbody></table></div>
           <div class="btn-group end"><button type="button" class="btn md outline assistive">취소</button><button type="button" class="btn md solid primary">1,281줄 가져오기</button></div>
         </div>`, layout: "stack" },
@@ -287,7 +298,7 @@ const PATTERNS = {
   },
 
   "bulk-progress": {
-    status: "new", react: ["Progress","Notice","Table"], uses: ["card", "loading", "notification", "table", "tag", "button"], borrows: [".sr-only"], css: [".stack", ".btn-group"],
+    status: "new", react: ["Progress", "Notice", "Table", "DataTable", "Card"], uses: ["card", "loading", "notification", "table", "tag", "button", "data-table", "empty-state"], borrows: [".sr-only"], css: [".stack", ".btn-group"],
     desc: "여러 대상에 같은 작업을 한 번에 실행하고 끝날 때까지 지켜보는 화면입니다. 얼마나 진행됐는지와 실패한 대상을 보여 주고, 실패한 대상만 다시 실행합니다.",
     thumb: `<div class="progress-row" style="width:200px"><div class="row"><span>정책 배포</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="정책 배포"><i style="width:66%"></i></div></div>`,
     choose: [["언제 쓰는가", "정책 배포나 에이전트 업데이트처럼 수십 대 이상에 같은 작업을 실행하고, 끝나기까지 몇 분 이상 걸릴 때 씁니다."], ["비슷한 패턴", "실행하기 전에 영향 범위를 확인하는 것은 <a href=\"#/patterns/danger-confirm\">위험 작업 확인</a>을, 파일로 목록을 들여오는 것은 <a href=\"#/patterns/import-export\">가져오기 · 내보내기</a>를 씁니다."]],
@@ -312,6 +323,7 @@ const PATTERNS = {
           </tbody></table></div>
           <div class="btn-group end"><button type="button" class="btn md outline assistive">닫기</button><button type="button" class="btn md solid primary">실패한 3대 다시 배포</button></div>
         </div>`, layout: "stack" },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "작업 결과를 불러오는 동안과 실패한 항목이 없을 때, 결과를 불러오지 못했을 때의 화면입니다.", html: pStates({"cols": ["대상", "결과", "사유"], "loading": "작업 결과 불러오는 중", "emptyTitle": "실패 없음", "empty": "실패한 항목이 없습니다.", "error": "작업 결과를 불러오지 못했습니다. 작업은 서버에서 계속되니 잠시 뒤 다시 시도하세요."}), layout: "stack" },
     ],
   },
 
@@ -449,8 +461,8 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           <p class="auth-logo" role="img" aria-label="Security Console"><i>${I("shield-check",48,{style:"filled"})}</i><span aria-hidden="true">Security Console</span></p>
           <h2 class="sr-only">관리 콘솔 로그인</h2>
           <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20,{style:"filled"})}</span><div><b>이메일 또는 비밀번호가 맞지 않습니다</b>5번 틀리면 10분 동안 로그인할 수 없습니다. 남은 횟수는 3번입니다.</div></div>
-          <div class="field"><label for="si-email" class="sr-only">이메일</label><div class="affix"><span class="field-icon" aria-hidden="true">${I("user",18)}</span><input id="si-email" type="email" value="admin@jiran.com" placeholder="이메일" autocomplete="username" required></div><span class="help" aria-live="polite"></span></div>
-          <div class="field"><label for="si-pw" class="sr-only">비밀번호</label><div class="affix"><span class="field-icon" aria-hidden="true">${I("lock",18)}</span><input id="si-pw" type="password" placeholder="비밀번호" autocomplete="current-password" required><button type="button" class="reveal" aria-label="비밀번호 표시" aria-pressed="false"><span class="i-show">${I("eye",18)}</span><span class="i-hide">${I("eye-off",18)}</span></button></div><span class="help" aria-live="polite"></span></div>
+          <div class="field"><label for="si-email" class="sr-only">이메일</label><div class="affix"><span class="field-icon" aria-hidden="true">${I("user",18)}</span><input id="si-email" type="email" value="admin@jiran.com" placeholder="이메일" autocomplete="username" required data-messages='{"required":"이메일을 입력하세요."}'></div><span class="help" aria-live="polite"></span></div>
+          <div class="field"><label for="si-pw" class="sr-only">비밀번호</label><div class="affix"><span class="field-icon" aria-hidden="true">${I("lock",18)}</span><input id="si-pw" type="password" placeholder="비밀번호" autocomplete="current-password" required data-messages='{"required":"비밀번호를 입력하세요."}'><button type="button" class="reveal" aria-label="비밀번호 표시" aria-pressed="false"><span class="i-show">${I("eye",18)}</span><span class="i-hide">${I("eye-off",18)}</span></button></div><span class="help" aria-live="polite"></span></div>
           <div class="auth-row"><label class="checkbox"><input type="checkbox" checked><span>이메일 저장</span></label><a href="#" class="link standalone">비밀번호 찾기</a></div>
           <button type="submit" class="btn lg solid primary">로그인</button>
         </form>
@@ -460,10 +472,10 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         <div class="auth-screen">
         <form class="form auth" data-validate novalidate>
           <p class="auth-logo" role="img" aria-label="Security Console"><i>${I("shield-check",48,{style:"filled"})}</i><span aria-hidden="true">Security Console</span></p>
-          <div><h2 class="auth-title t-title-3">2단계 인증</h2><p class="auth-desc">인증 앱에 표시된 6자리 숫자를 입력하세요.</p></div>
+          <div><h2 class="auth-title t-title-3">2단계 인증</h2><p class="auth-desc">인증 앱에 표시된 6자리 숫자를 입력하세요.</p><p class="auth-account"><b>admin@jiran.com</b><a href="#" class="link standalone">다른 계정으로 로그인</a></p></div>
           ${pCode({ id: "si-otp", label: "인증 코드", name: "otp", req: true, help: "코드는 30초마다 바뀝니다.", messages: { required: "인증 코드를 입력하세요.", code: "숫자 6자리를 모두 입력하세요." } })}
           <label class="checkbox"><input type="checkbox"><span>이 기기에서 30일 동안 묻지 않기</span></label>
-          <button type="submit" class="btn lg solid primary">확인</button>
+          <button type="submit" class="btn lg solid primary">인증하고 로그인</button>
           <a href="#" class="link standalone">다른 방법으로 인증</a>
         </form>
         <p class="auth-copy">© 2026 JIRANSECURITY Co., Ltd. All rights reserved.</p>
@@ -479,7 +491,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
 
   /* ------------------------------------------------ Security Console */
   "report-schedule": {
-    status: "new", react: ["Form","TextField","Select","Combobox","TimePicker","Table"], uses: ["form", "text-field", "select", "radio-button", "combobox", "time-picker", "notification", "button", "table", "link", "avatar", "indicator", "switch"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold", ".chip"], css: [".stack", ".toolbar"],
+    status: "new", react: ["Form", "TextField", "Select", "Combobox", "TimePicker", "Table", "DataTable", "Card"], uses: ["form", "text-field", "select", "radio-button", "combobox", "time-picker", "notification", "button", "table", "link", "avatar", "indicator", "switch", "data-table", "card", "loading", "empty-state"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold", ".chip"], css: [".stack", ".toolbar"],
     desc: "보고서의 내용과 받는 사람, 보내는 때를 정해 정기적으로 보내는 화면입니다. 저장하기 전에 다음 발송이 언제 누구에게 가는지 한 문장으로 보여 줍니다.",
     thumb: `<div class="tbl-wrap" style="width:220px"><table class="tbl compact"><tbody><tr><td style="font-size:12px">주간 보안 요약</td><td style="font-size:12px">월 09:00</td></tr><tr><td style="font-size:12px">에이전트 상태</td><td style="font-size:12px">매월 1일</td></tr></tbody></table></div>`,
     choose: [["언제 쓰는가", "주간 보안 요약처럼 같은 보고서를 정해진 때마다 여러 사람에게 보내야 할 때 씁니다."], ["비슷한 패턴", "한 번만 파일로 받는 것은 <a href=\"#/patterns/import-export\">가져오기 · 내보내기</a>를, 이벤트가 생길 때 바로 알리는 것은 <a href=\"#/patterns/alert-rules\">알림 규칙</a>을 씁니다."]],
@@ -504,26 +516,27 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         </form>` },
       { id: "list", title: "예약 목록", desc: "주기와 다음 발송, 받는 사람, 마지막 발송 결과를 보여 줍니다. 잠시 멈출 때는 사용을 끕니다.", html: `
         <div class="stack">
-          <div class="toolbar"><span class="spacer"></span><button type="button" class="btn md solid primary">${I("plus")}새 보고서</button></div>
+          <div class="toolbar"><span class="spacer"></span><button type="button" class="btn md solid primary">${I("plus")}보고서 만들기</button></div>
           <div class="tbl-wrap"><table class="tbl nowrap"><thead><tr><th>보고서</th><th>주기</th><th>다음 발송</th><th>받는 사람</th><th>마지막 발송</th><th>사용</th></tr></thead><tbody>
-            <tr><td><a href="#" class="link">주간 보안 요약</a></td><td>매주 월요일 09:00</td><td>11-16 09:00</td><td>${pAvatars("주간 보안 요약 받는 사람", ["김민준", "이서연"], 3, true)}</td><td><span class="indicator ok">보냄</span></td><td><label class="switch"><input type="checkbox" role="switch" checked aria-label="주간 보안 요약 사용"></label></td></tr>
-            <tr><td><a href="#" class="link">에이전트 상태</a></td><td>매월 1일 08:00</td><td>12-01 08:00</td><td>${pAvatars("에이전트 상태 받는 사람", ["박지훈"], 0, true)}</td><td><span class="indicator danger">실패</span></td><td><label class="switch"><input type="checkbox" role="switch" checked aria-label="에이전트 상태 사용"></label></td></tr>
+            <tr><td><a href="#" class="link">주간 보안 요약</a></td><td>매주 월요일 09:00</td><td>11. 16 09:00</td><td>${pAvatars("주간 보안 요약 받는 사람", ["김민준", "이서연"], 3, true)}</td><td><span class="indicator ok">보냄</span></td><td><label class="switch"><input type="checkbox" role="switch" checked aria-label="주간 보안 요약 사용"></label></td></tr>
+            <tr><td><a href="#" class="link">에이전트 상태</a></td><td>매월 1일 08:00</td><td>12. 01 08:00</td><td>${pAvatars("에이전트 상태 받는 사람", ["박지훈"], 0, true)}</td><td><span class="indicator danger">실패</span></td><td><label class="switch"><input type="checkbox" role="switch" checked aria-label="에이전트 상태 사용"></label></td></tr>
             <tr><td><a href="#" class="link">위협 상세</a></td><td>매일 02:00</td><td>—<span class="sr-only">없음</span></td><td>${pAvatars("위협 상세 받는 사람", ["최유진", "정다은"], 0, true)}</td><td><span class="indicator ok">보냄</span></td><td><label class="switch"><input type="checkbox" role="switch" aria-label="위협 상세 사용"></label></td></tr>
           </tbody></table></div>
         </div>`, layout: "stack" },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "예약 목록을 불러오는 동안과 예약한 보고서가 없을 때, 불러오지 못했을 때의 화면입니다. 첫 사용에는 예약하는 동작을 둡니다.", html: pStates({"cols": ["보고서", "주기", "다음 발송"], "loading": "예약 보고서 불러오는 중", "emptyTitle": "첫 사용", "empty": "아직 예약한 보고서가 없습니다.", "error": "예약 목록을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["보고서 예약", true]}), layout: "stack" },
     ],
   },
 
   "dashboard": {
     status: "ready", react: ["PageHead","Stack","Row3","Row2"], uses: ["page-header", "select-button", "button", "data-visual", "card", "table", "indicator", "link"], css: [".stack", ".row-2", ".row-3"], borrows: [".sr-only", ".progress-row", ".progress"],
     desc: "보안 관리자가 처음 보는 화면입니다. 위에 KPI 4개를 두고, 그 아래에 일별 탐지 · 분포 차트, 비교 · 목표 대비 차트, 최근 이벤트 표를 차례로 둡니다. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
-    thumb: `<div class="kpi-grid" style="width:240px;gap:6px"><div class="kpi critical" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">Critical</span><span class="value" style="font-size:18px">1,284</span></div><div class="kpi" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">차단률</span><span class="value" style="font-size:18px">99.2%</span></div></div>`,
+    thumb: `<div class="kpi-grid" style="width:240px;gap:6px;grid-template-columns:1fr 1fr"><div class="kpi critical" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">Critical</span><span class="value" style="font-size:18px">1,284</span></div><div class="kpi" style="padding:8px 10px;min-width:0"><span class="label" style="font-size:10px">차단률</span><span class="value" style="font-size:18px">99.2%</span></div></div>`,
     choose: [["언제 쓰는가", "로그인한 관리자가 지금 위험이 얼마나 있는지 훑고, 손볼 곳으로 바로 내려가야 하는 첫 화면에 씁니다."], ["비슷한 패턴", "연동과 서버가 살아 있는지는 <a href=\"#/patterns/system-status\">시스템 상태</a>에서, 로그 한 건 한 건은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>에서 봅니다."]],
     principles: [["위계", "KPI 로 무슨 일이 있는지, 차트로 어디서 얼마나 일어났는지, 표로 무엇을 할지를 차례로 보여 줍니다. KPI 카드는 숫자와 증감만 두고 스파크라인은 넣지 않습니다. 흐름은 아래 차트가 보여 줍니다."], ["기간", "화면 오른쪽 위의 Select Button 하나로 화면 전체의 기간을 바꿉니다. 카드마다 기간을 따로 두지 않습니다."], ["밀도", "카드 사이 간격은 16px, 카드 안 여백은 24px 입니다. KPI 카드만 좌우 여백이 20px 입니다. 스크롤하지 않아도 첫 화면에 KPI 와 차트가 들어오게 합니다."], ["한 세트", "차트는 한 톤으로 그리고, 심각도처럼 등급이 있을 때만 등급 색을 씁니다. 같은 줄 카드는 머리와 본문 높이를 맞춥니다."], ["내려가기", "표의 이벤트 이름은 그 이벤트의 상세로 가는 링크입니다. 카드의 전체 보기는 같은 조건이 걸린 목록 화면으로 갑니다."], ["증감", "증감 배지의 색은 방향이 아니라 좋고 나쁨을 따릅니다. 비교 기준을 배지 옆에 함께 적습니다."]],
     examples: [
       { id: "full", title: "대시보드", html: `
         <div class="stack">
-          <div class="page-head"><div><h1 class="title">대시보드</h1><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">24시간</button><button type="button" role="radio" aria-checked="false">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
+          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">24시간</button><button type="button" role="radio" aria-checked="false">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
           <div class="kpi-grid">
             <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><div class="kpi-foot">${pDelta("up", "bad", "12%")}<span class="delta-note">전일 대비</span></div></div>
             <div class="kpi"><span class="label">차단률</span><span class="value">99.2<small>%</small></span><div class="kpi-foot">${pDelta("up", "good", "0.3%p")}<span class="delta-note">전일 대비</span></div></div>
@@ -567,12 +580,14 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             <div class="chip-group"><button type="button" class="chip on" aria-pressed="true">CRIT</button><button type="button" class="chip on" aria-pressed="true">HIGH</button><button type="button" class="chip on" aria-pressed="true">WARN</button><button type="button" class="chip" aria-pressed="false">LOW</button><button type="button" class="chip" aria-pressed="false">INFO</button><button type="button" class="btn sm text assistive" data-chip-reset>필터 초기화</button></div>
             <span class="spacer"></span>
             <div class="select-btn outline sm" role="radiogroup" aria-label="갱신"><button type="button" role="radio" aria-checked="false">실시간</button><button type="button" class="on" role="radio" aria-checked="true">일시정지</button></div>
-            <button type="button" class="btn sm outline assistive">${I("download")}CSV</button>
+            <button type="button" class="btn sm outline assistive">${I("download")}CSV 내보내기</button>
           </div>
           ${pNotice("info", "새 로그 24건", "일시정지한 동안 들어왔습니다.", `<div class="actions"><button type="button" class="btn sm outline assistive">맨 위로 이동해 보기</button></div>`)}
           ${logTable(LOG_ROWS)}
           <div class="pagination-bar"><span>총 <b>48,213</b>건 · 최신 100건 표시</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><span class="gap">…</span><button type="button">483</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
         </div>`, layout: "stack" },
+      { id: "disconnected", title: "실시간 연결 끊김", desc: "실시간 갱신이 끊기면 표 위에 경고 Banner 를 띄우고, 마지막으로 받은 시각과 다시 연결하는 동작을 둡니다. 받아 둔 로그는 그대로 보여 줍니다.", html: `
+        <div class="banner warning" role="alert">${I("alert-triangle",18,{style:"filled"})}실시간 연결이 끊겼습니다. 09:41 까지 받은 로그를 보여 주고 있습니다.<button type="button" class="btn sm outline assistive">다시 연결</button></div>`, layout: "stack" },
     ],
   },
 
@@ -587,7 +602,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         <div class="stack">
           <div class="page-head">
             ${pBreadcrumb(["정책", "USB 제어", "외부 USB 차단"])}
-            <div><h1 class="title">외부 USB 차단</h1><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06</p></div><div class="actions"><div class="btn-group"><button type="button" class="btn md outline primary">복제</button><button type="button" class="btn md solid primary">배포</button></div></div>
+            <div><h2 class="title">외부 USB 차단</h2><p class="sub">POL-2041 · 전체 그룹 · 마지막 배포 2026. 09. 06</p></div><div class="actions"><div class="btn-group"><button type="button" class="btn md outline primary">복제</button><button type="button" class="btn md solid primary">배포</button></div></div>
           </div>
           ${pNotice("warning", "배포되지 않은 변경 2건", "변경 사항은 배포를 눌러야 에이전트에 적용됩니다.")}
           <div class="settings-section">
@@ -644,7 +659,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         </div>` },
       { id: "table", title: "표 안의 심각도", desc: "심각도 칸은 Tag 하나로 씁니다. Tag 의 글자가 색을 나르므로 행 왼쪽에 색 막대를 두지 않습니다. 기본 정렬은 심각도가 높은 순서입니다.", html: `
         <div class="tbl-wrap">
-          <table class="tbl compact">
+          <table class="tbl compact nowrap">
             <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">심각도</button></th><th>이벤트</th><th>대상</th><th class="num">건수</th></tr></thead>
             <tbody>
               <tr><td><span class="tag critical sm">Critical</span></td><td>랜섬웨어 행위 탐지</td><td>PC-2041</td><td class="num">3</td></tr>
@@ -669,15 +684,15 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         <div class="stack">
           <div class="page-head">
             ${pBreadcrumb(["자산", "PC-2041"])}
-            <div><h1 class="title">PC-2041</h1><p class="sub">김민준 · 개발팀 · Windows 11</p></div>
+            <div><h2 class="title">PC-2041</h2><p class="sub">김민준 · 개발팀 · Windows 11</p></div>
             <div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">검사 실행</button><button type="button" class="btn md solid primary">원격 점검</button><div class="dropdown"><button type="button" class="btn md outline assistive icon-only" aria-label="PC-2041 동작 더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button><ul class="menu" role="menu"><li class="menu-item" role="menuitem">${I("refresh")}에이전트 재설치</li><li class="menu-item" role="menuitem">${I("download")}정보 내보내기</li><li class="menu-item" role="menuitem">${I("lock")}네트워크 격리</li><li class="menu-sep" role="separator"></li><li class="menu-item danger" role="menuitem">${I("trash")}자산 삭제</li></ul></div></div></div>
           </div>
           <div class="tabs" role="tablist" aria-label="자산 정보"><button type="button" class="tab on" role="tab" aria-selected="true" id="ad-tab-a" aria-controls="ad-panel-a">개요</button><button type="button" class="tab" role="tab" aria-selected="false" id="ad-tab-b" aria-controls="ad-panel-b">활동</button><button type="button" class="tab" role="tab" aria-selected="false" id="ad-tab-c" aria-controls="ad-panel-c">설정</button></div>
           <div class="tab-panel" role="tabpanel" id="ad-panel-a" aria-labelledby="ad-tab-a">
             <div class="stack">
               <div class="row-2">
-                <div class="card"><div class="card-head"><h3 class="title">자산 정보</h3><span class="indicator ok">연결됨</span></div><dl class="card-meta"><dt>IP</dt><dd>${pCopyInline("IP", "10.0.4.21")}</dd><dt>에이전트</dt><dd>6.2.1</dd><dt>그룹</dt><dd>본사 · 개발팀</dd><dt>마지막 접속</dt><dd>2026-11-15 09:41</dd></dl></div>
-                <div class="card"><div class="card-head"><h3 class="title">보호 상태</h3><span class="tag high">위험 2건</span></div><dl class="card-meta"><dt>실시간 보호</dt><dd><span class="indicator ok">켜짐</span></dd><dt>정책</dt><dd><a href="#" class="link">외부 USB 차단</a> 외 11개</dd><dt>마지막 검사</dt><dd>2026-11-15 02:00 · 위협 0</dd></dl></div>
+                <div class="card"><div class="card-head"><h3 class="title">자산 정보</h3><span class="indicator ok">연결됨</span></div><dl class="card-meta"><dt>IP</dt><dd>${pCopyInline("IP", "10.0.4.21")}</dd><dt>에이전트</dt><dd>6.2.1</dd><dt>그룹</dt><dd>본사 · 개발팀</dd><dt>마지막 접속</dt><dd>2026. 11. 15 09:41</dd></dl></div>
+                <div class="card"><div class="card-head"><h3 class="title">보호 상태</h3><span class="tag high">위험 2건</span></div><dl class="card-meta"><dt>실시간 보호</dt><dd><span class="indicator ok">켜짐</span></dd><dt>정책</dt><dd><a href="#" class="link">외부 USB 차단</a> 외 11개</dd><dt>마지막 검사</dt><dd>2026. 11. 15 02:00 · 위협 0</dd></dl></div>
               </div>
               <div class="card flush">
                 <div class="card-head"><h3 class="title">최근 이벤트</h3><a href="#" class="btn sm text assistive">이벤트 목록에서 보기${I("chevron-right",16)}</a></div>
@@ -689,7 +704,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             </div>
           </div>
           <div class="tab-panel" role="tabpanel" id="ad-panel-b" aria-labelledby="ad-tab-b" hidden>
-            <ul class="list"><li><div><span class="primary">정책 배포 rev 2041</span><span class="meta">2026-11-15 08:00 · 자동</span></div></li><li><div><span class="primary">에이전트 6.2.1 업데이트</span><span class="meta">2026-11-12 14:20 · 이서연</span></div></li></ul>
+            <ul class="list"><li><div><span class="primary">정책 배포 rev 2041</span><span class="meta">2026. 11. 15 08:00 · 자동</span></div></li><li><div><span class="primary">에이전트 6.2.1 업데이트</span><span class="meta">2026. 11. 12 14:20 · 이서연</span></div></li></ul>
           </div>
           <div class="tab-panel" role="tabpanel" id="ad-panel-c" aria-labelledby="ad-tab-c" hidden>
             <ul class="list"><li><div><span class="primary">소속 그룹</span><span class="meta">본사 · 개발팀</span></div></li><li><div><span class="primary">예외 정책</span><span class="meta">없음</span></div></li></ul>
@@ -704,7 +719,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   },
 
   "roles": {
-    status: "new", react: ["DataTable","AvatarGroup","SidePanel","Tree"], uses: ["button", "data-table", "avatar", "tag", "side-panel", "notification", "tree"], borrows: [".sr-only"], css: [".toolbar", ".stack"],
+    status: "new", react: ["DataTable", "AvatarGroup", "SidePanel", "Tree", "Card"], uses: ["button", "data-table", "avatar", "tag", "side-panel", "notification", "tree", "card", "loading", "empty-state"], borrows: [".sr-only"], css: [".toolbar", ".stack"],
     desc: "관리자 역할과 그 역할이 할 수 있는 일을 정하는 화면입니다. 역할 목록에서 하나를 골라 Side Panel 에서 권한을 고칩니다.",
     thumb: `<div style="width:220px;display:flex;flex-direction:column;gap:6px;font-size:12px"><div style="display:flex;justify-content:space-between"><b>보안 관리자</b><span class="tag sm">기본</span></div><div style="display:flex;justify-content:space-between"><b>감사자</b><span class="tag accent sm">사용자 정의</span></div></div>`,
     choose: [["언제 쓰는가", "콘솔을 쓰는 사람에게 역할을 주고, 역할마다 보기 · 처리 · 배포 같은 권한을 정할 때 씁니다."], ["비슷한 패턴", "정책이 적용될 부서나 단말을 고르는 일은 <a href=\"#/patterns/policy-settings\">정책 설정</a>의 적용 대상에서 합니다."]],
@@ -733,11 +748,12 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           </div>
           <div class="side-panel-footer"><div class="btn-group"><button type="button" class="btn md outline assistive" data-panel-close>취소</button><button type="button" class="btn md solid primary" data-panel-close>저장</button></div></div>
         </section>` },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "역할 목록을 불러오는 동안과 아직 만든 역할이 없을 때, 불러오지 못했을 때의 화면입니다. 첫 사용에는 만드는 동작을 둡니다.", html: pStates({"cols": ["역할", "설명", "#사용자"], "loading": "역할 불러오는 중", "emptyTitle": "첫 사용", "empty": "아직 만든 역할이 없습니다.", "error": "역할 목록을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["역할 만들기", true]}), layout: "stack" },
     ],
   },
 
   "secrets": {
-    status: "new", react: ["DataTable","CopyField","Popup"], uses: ["button", "data-table", "copy-field", "indicator", "popup", "form", "text-field", "date-picker", "radio-button", "notification"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold"], css: [".toolbar", ".stack"],
+    status: "new", react: ["DataTable", "CopyField", "Popup", "Card"], uses: ["button", "data-table", "copy-field", "indicator", "popup", "form", "text-field", "date-picker", "radio-button", "notification", "card", "loading", "empty-state"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold"], css: [".toolbar", ".stack"],
     desc: "외부 연동에 쓰는 API 키와 비밀값을 만들고 재발급하는 화면입니다. 비밀값은 만든 순간 한 번만 보여 주고, 목록에는 알아볼 수 있는 앞자리만 둡니다.",
     thumb: `<div style="width:220px;display:flex;flex-direction:column;gap:6px;font-size:12px"><div style="display:flex;justify-content:space-between"><b>SIEM 연동</b><span class="indicator danger">7일 남음</span></div><span style="color:var(--foreground-neutral-secondary)">jsk_live_8c2e••••</span></div>`,
     choose: [["언제 쓰는가", "SIEM 이나 티켓 시스템처럼 콘솔과 연결되는 외부 서비스에 줄 키를 만들고, 만료를 관리할 때 씁니다."], ["비슷한 패턴", "에이전트 등록처럼 가려서 다시 볼 수 있는 값은 <a href=\"#/components/copy-field\">Copy Field</a> 하나로 충분합니다."]],
@@ -747,12 +763,12 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         <div class="stack">
           <div class="toolbar"><span class="spacer"></span><button type="button" class="btn md solid primary" data-popup-open="#sec-create">${I("plus")}API 키 만들기</button></div>
           <div class="tbl-wrap">
-            <table class="tbl hover">
+            <table class="tbl hover nowrap">
               <thead><tr><th>이름</th><th>키 ID</th><th>앞자리</th><th>만료</th><th>마지막 사용</th><th class="actions"><span class="sr-only">동작</span></th></tr></thead>
               <tbody>
                 <tr><td>SIEM 연동</td><td>${pCopyInline("SIEM 연동 키 ID", "key_01HF8Q")}</td><td>jsk_live_8c2e</td><td><span class="indicator danger">7일 남음</span></td><td>09:41</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="SIEM 연동 키 재발급" data-popup-open="#sec-reissue">재발급</button></td></tr>
                 <tr><td>티켓 시스템</td><td>${pCopyInline("티켓 시스템 키 ID", "key_01HD2K")}</td><td>jsk_live_41f7</td><td><span class="indicator warn">24일 남음</span></td><td>어제</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="티켓 시스템 키 재발급" data-popup-open="#sec-reissue">재발급</button></td></tr>
-                <tr><td>보고서 내보내기</td><td>${pCopyInline("보고서 내보내기 키 ID", "key_01HA9M")}</td><td>jsk_live_a9b3</td><td>2027-03-31</td><td>11-02</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="보고서 내보내기 키 재발급" data-popup-open="#sec-reissue">재발급</button></td></tr>
+                <tr><td>보고서 내보내기</td><td>${pCopyInline("보고서 내보내기 키 ID", "key_01HA9M")}</td><td>jsk_live_a9b3</td><td>2027. 03. 31</td><td>11. 02</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="보고서 내보내기 키 재발급" data-popup-open="#sec-reissue">재발급</button></td></tr>
               </tbody>
             </table>
           </div>
@@ -783,11 +799,12 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           <div class="popup-body" id="sec-re-b"><p>지금 키는 바로 멈춥니다. 새 키를 SIEM 에 넣기 전까지 이벤트 전송이 끊깁니다.</p></div>
           <div class="popup-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid negative">재발급</button></div></div>
         </div>` },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "키 목록을 불러오는 동안과 아직 만든 키가 없을 때, 불러오지 못했을 때의 화면입니다. 첫 사용에는 만드는 동작을 둡니다.", html: pStates({"cols": ["이름", "범위", "만든 날", "마지막 사용"], "loading": "API 키 불러오는 중", "emptyTitle": "첫 사용", "empty": "아직 만든 API 키가 없습니다.", "error": "API 키 목록을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["API 키 만들기", true]}), layout: "stack" },
     ],
   },
 
   "incident": {
-    status: "new", react: ["PageHead","Steps","Card","Combobox"], uses: ["page-header", "breadcrumb", "button", "steps", "card", "list", "text-field", "table", "tag", "avatar", "combobox", "link"], borrows: [".menu", ".menu-item", ".chip", ".sr-only"], css: [".stack", ".row-2"],
+    status: "new", react: ["PageHead", "Steps", "Card", "Combobox", "DataTable"], uses: ["page-header", "breadcrumb", "button", "steps", "card", "list", "text-field", "table", "tag", "avatar", "combobox", "link", "data-table", "loading", "empty-state"], borrows: [".menu", ".menu-item", ".chip", ".sr-only"], css: [".stack", ".row-2"],
     desc: "탐지된 사고를 접수부터 종료까지 처리하는 화면입니다. 지금 어느 단계인지와 담당자를 보여 주고, 처리한 일을 기록으로 남깁니다.",
     thumb: `<ol class="steps" aria-label="진행 단계" style="width:200px"><li class="done"><i style="width:18px;height:18px">${I("check",10)}</i></li><li class="done"><i style="width:18px;height:18px">${I("check",10)}</i></li><li class="on"><i style="width:18px;height:18px;font-size:10px">3</i></li><li><i style="width:18px;height:18px;font-size:10px">4</i></li></ol>`,
     choose: [["언제 쓰는가", "Critical 탐지처럼 사람이 맡아 분석하고 조치해야 하는 사고를 한 화면에서 처리할 때 씁니다."], ["비슷한 패턴", "사고가 아닌 자산이나 정책 하나를 보는 화면은 <a href=\"#/patterns/detail\">상세 화면</a>을 씁니다."]],
@@ -797,7 +814,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         <div class="stack">
           <div class="page-head">
             ${pBreadcrumb(["사고", "INC-0412"])}
-            <div><h1 class="title">랜섬웨어 행위 탐지</h1><p class="sub">INC-0412 · 접수 09:41 · PC-2041</p></div>
+            <div><h2 class="title">랜섬웨어 행위 탐지</h2><p class="sub">INC-0412 · 접수 09:41 · PC-2041</p></div>
             <div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">단말 격리</button><button type="button" class="btn md solid primary">조치 완료</button></div></div>
           </div>
           <ol class="steps" aria-label="처리 단계"><li class="done"><i>${I("check",16)}</i><span class="label">접수</span><span class="sr-only"> (완료)</span></li><li class="done"><i>${I("check",16)}</i><span class="label">분석</span><span class="sr-only"> (완료)</span></li><li class="on" aria-current="step"><i>3</i><span class="label">조치</span></li><li><i>4</i><span class="label">종료</span></li></ol>
@@ -823,11 +840,12 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             </div>
           </div>
         </div>`, layout: "stack" },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "사고 목록을 불러오는 동안과 조건에 맞는 사고가 없을 때, 불러오지 못했을 때의 화면입니다.", html: pStates({"cols": ["시간", "심각도", "사고", "담당자"], "loading": "사고 목록 불러오는 중", "emptyTitle": "빈 결과", "empty": "조건에 맞는 사고가 없습니다. 필터를 바꾸거나 지우세요.", "error": "사고 목록을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["필터 지우기", false]}), layout: "stack" },
     ],
   },
 
   "audit-log": {
-    status: "new", react: ["DataTable","Table","Card"], uses: ["search", "date-picker", "data-table", "table", "indicator", "card", "tag", "link", "button"], borrows: [".sr-only", ".field"], css: [".stack", ".toolbar"],
+    status: "new", react: ["DataTable", "Table", "Card"], uses: ["search", "date-picker", "data-table", "table", "indicator", "card", "tag", "link", "button", "loading", "empty-state"], borrows: [".sr-only", ".field"], css: [".stack", ".toolbar"],
     desc: "누가 언제 무엇을 바꿨는지 남기고 찾아보는 화면입니다. 기록은 고칠 수 없고, 바꾼 내용은 변경 전과 변경 후를 나란히 보여 줍니다.",
     thumb: `<div class="tbl-wrap" style="width:220px"><table class="tbl compact"><tbody><tr><td style="font-size:12px">이서연</td><td style="font-size:12px">정책 변경</td></tr><tr><td style="font-size:12px">김민준</td><td style="font-size:12px">로그인 실패</td></tr></tbody></table></div>`,
     choose: [["언제 쓰는가", "정책 변경이나 로그인, 내보내기처럼 관리자가 한 일을 감사하거나, 설정이 언제 왜 바뀌었는지 찾을 때 씁니다."], ["비슷한 패턴", "단말과 보안 이벤트의 기록은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>를, 사고 하나의 처리 기록은 <a href=\"#/patterns/incident\">사고 처리</a>를 씁니다."]],
@@ -842,11 +860,11 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           <div class="tbl-wrap"><table class="tbl compact nowrap">
             <thead><tr><th class="expand"><span class="sr-only">상세</span></th><th>시간</th><th>사용자</th><th>동작</th><th>대상</th><th>결과</th></tr></thead>
             <tbody>
-              <tr><td class="expand"><button type="button" class="expand-btn" aria-expanded="true" aria-controls="au0-d" aria-label="10:12 기록 상세">${I("chevron-right",16)}</button></td><td>11-15 10:12</td><td>이서연</td><td>정책 변경</td><td><a href="#" class="link">표준 보호</a></td><td><span class="indicator ok">성공</span></td></tr>
+              <tr><td class="expand"><button type="button" class="expand-btn" aria-expanded="true" aria-controls="au0-d" aria-label="10:12 기록 상세">${I("chevron-right",16)}</button></td><td>11. 15 10:12</td><td>이서연</td><td>정책 변경</td><td><a href="#" class="link">표준 보호</a></td><td><span class="indicator ok">성공</span></td></tr>
               <tr class="row-detail" id="au0-d"><td colspan="6"><div class="row-detail-body"><dl class="detail-meta"><dt>접속 IP</dt><dd>10.0.0.12</dd><dt>사유</dt><dd>PC-2041 USB 예외 요청</dd><dt>USB 저장장치 차단</dt><dd>켬 → 끔</dd><dt>예외 단말</dt><dd>2대 → 3대</dd></dl></div></td></tr>
-              <tr><td class="expand"><button type="button" class="expand-btn" aria-expanded="false" aria-controls="au1-d" aria-label="10:05 기록 상세">${I("chevron-right",16)}</button></td><td>11-15 10:05</td><td>김민준</td><td>로그인</td><td>콘솔</td><td><span class="indicator danger">실패</span></td></tr>
+              <tr><td class="expand"><button type="button" class="expand-btn" aria-expanded="false" aria-controls="au1-d" aria-label="10:05 기록 상세">${I("chevron-right",16)}</button></td><td>11. 15 10:05</td><td>김민준</td><td>로그인</td><td>콘솔</td><td><span class="indicator danger">실패</span></td></tr>
               <tr class="row-detail" id="au1-d" hidden><td colspan="6"><div class="row-detail-body"><dl class="detail-meta"><dt>접속 IP</dt><dd>203.0.113.7</dd><dt>사유</dt><dd>비밀번호 5회 틀림 · 계정 잠김</dd></dl></div></td></tr>
-              <tr><td class="expand"><button type="button" class="expand-btn" aria-expanded="false" aria-controls="au2-d" aria-label="09:58 기록 상세">${I("chevron-right",16)}</button></td><td>11-15 09:58</td><td>박지훈</td><td>내보내기</td><td>로그 7일</td><td><span class="indicator ok">성공</span></td></tr>
+              <tr><td class="expand"><button type="button" class="expand-btn" aria-expanded="false" aria-controls="au2-d" aria-label="09:58 기록 상세">${I("chevron-right",16)}</button></td><td>11. 15 09:58</td><td>박지훈</td><td>내보내기</td><td>로그 7일</td><td><span class="indicator ok">성공</span></td></tr>
               <tr class="row-detail" id="au2-d" hidden><td colspan="6"><div class="row-detail-body"><dl class="detail-meta"><dt>접속 IP</dt><dd>10.0.0.31</dd><dt>형식</dt><dd>CSV · 48,213줄</dd></dl></div></td></tr>
             </tbody>
           </table></div>
@@ -856,24 +874,25 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           <div class="card flush">
             <div class="card-head"><h3 class="title">표준 보호 · 변경 이력</h3></div>
             <div class="tbl-wrap"><table class="tbl nowrap"><thead><tr><th>버전</th><th>바꾼 사람</th><th>시각</th><th>내용</th><th><span class="sr-only">동작</span></th></tr></thead><tbody>
-              <tr><td>v12 <span class="tag accent sm">현재</span></td><td>이서연</td><td>11-15 10:12</td><td>USB 저장장치 차단 끔 외 1건</td><td class="actions"></td></tr>
-              <tr><td>v11</td><td>김민준</td><td>11-10 16:40</td><td>예약 검사 시각 02:00</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="v11 버전으로 되돌리기">되돌리기</button></td></tr>
-              <tr><td>v10</td><td>이서연</td><td>11-02 11:05</td><td>랜섬웨어 행위 차단 켬</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="v10 버전으로 되돌리기">되돌리기</button></td></tr>
+              <tr><td>v12 <span class="tag accent sm">현재</span></td><td>이서연</td><td>11. 15 10:12</td><td>USB 저장장치 차단 끔 외 1건</td><td class="actions"></td></tr>
+              <tr><td>v11</td><td>김민준</td><td>11. 10 16:40</td><td>예약 검사 시각 02:00</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="v11 버전으로 되돌리기">되돌리기</button></td></tr>
+              <tr><td>v10</td><td>이서연</td><td>11. 02 11:05</td><td>랜섬웨어 행위 차단 켬</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="v10 버전으로 되돌리기">되돌리기</button></td></tr>
             </tbody></table></div>
           </div>
           <div class="card flush">
             <div class="card-head"><h3 class="title">v11 과 v12 비교</h3></div>
-            <div class="tbl-wrap"><table class="tbl grid"><thead><tr><th>항목</th><th>변경 전 · v11</th><th>변경 후 · v12</th></tr></thead><tbody>
+            <div class="tbl-wrap"><table class="tbl grid nowrap"><thead><tr><th>항목</th><th>변경 전 · v11</th><th>변경 후 · v12</th></tr></thead><tbody>
               <tr><td>USB 저장장치 차단</td><td>켬</td><td>끔</td></tr>
               <tr><td>예외 단말</td><td>PC-0932, PC-1187</td><td>PC-0932, PC-1187, PC-2041</td></tr>
             </tbody></table></div>
           </div>
         </div>`, layout: "stack" },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "기록을 불러오는 동안은 같은 크기의 Skeleton 행을, 조건에 맞는 기록이 없으면 조건을 바꾸는 길을, 불러오지 못하면 원인과 다시 시도를 둡니다.", html: pStates({"cols": ["시간", "사용자", "동작", "대상"], "loading": "감사 로그 불러오는 중", "emptyTitle": "빈 결과", "empty": "조건에 맞는 기록이 없습니다. 기간을 넓히거나 검색어를 바꾸세요.", "error": "감사 로그를 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["검색 지우기", false]}), layout: "stack" },
     ],
   },
 
   "alert-rules": {
-    status: "new", react: ["Form","Combobox","NumberInput","Checkbox"], uses: ["form", "text-field", "combobox", "select", "number-input", "checkbox", "notification", "button"], borrows: [".sr-only", ".chip"], css: [".btn-group"],
+    status: "new", react: ["Form", "Combobox", "NumberInput", "Checkbox", "DataTable", "Card"], uses: ["form", "text-field", "combobox", "select", "number-input", "checkbox", "notification", "button", "data-table", "card", "loading", "empty-state"], borrows: [".sr-only", ".chip"], css: [".btn-group", ".stack"],
     desc: "어떤 이벤트가 생기면 누구에게 어떻게 알릴지 정하는 화면입니다. 조건과 동작을 나눠 받고, 저장하기 전에 규칙을 한 문장으로 보여 줍니다.",
     thumb: `<div class="notice" style="width:220px;padding:10px 12px"><div style="font-size:12px">Critical 5건 이상이면 메일</div></div>`,
     choose: [["언제 쓰는가", "Critical 이벤트가 짧은 시간에 몰리는 것처럼 사람이 바로 알아야 하는 조건을 정해 메일이나 웹훅으로 알릴 때 씁니다."], ["비슷한 패턴", "정해진 때마다 요약을 보내는 것은 <a href=\"#/patterns/report-schedule\">보고서 · 예약 발송</a>을, 탐지와 차단 동작 자체를 정하는 것은 <a href=\"#/patterns/policy-settings\">정책 설정</a>을 씁니다."]],
@@ -899,6 +918,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           ${pNotice("", "규칙 요약", "Critical · High 이벤트가 전체 단말에서 10분 안에 5건 이상 생기면 보안팀에 메일을 보내고 웹훅을 호출합니다.")}
           <div class="form-actions"><div class="btn-group"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">저장</button></div></div>
         </form>` },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "규칙 목록을 불러오는 동안과 아직 만든 규칙이 없을 때, 불러오지 못했을 때의 화면입니다. 첫 사용에는 만드는 동작을 둡니다.", html: pStates({"cols": ["규칙", "조건", "알림"], "loading": "알림 규칙 불러오는 중", "emptyTitle": "첫 사용", "empty": "아직 만든 알림 규칙이 없습니다.", "error": "알림 규칙을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["규칙 만들기", true]}), layout: "stack" },
     ],
   },
 };

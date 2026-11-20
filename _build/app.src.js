@@ -276,7 +276,7 @@
     if (!menuPop) return;
     let body;
     if (!title) {
-      body = sections().map(s => '<button class="d-item' + (s.on ? " on" : "") + '" type="button" data-drawer-sec="' + esc(s.title) + '">' + esc(s.title) + (s.badge ? ' <span class="n">N</span>' : "") + "</button>").join("");
+      body = sections().map(s => '<button class="d-item' + (s.on ? " on" : "") + '" type="button" data-drawer-sec="' + esc(s.title) + '">' + esc(s.title) + (s.badge ? ' <span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span>' : "") + "</button>").join("");
     } else {
       const here = location.pathname.split("/").pop() || "index.html", hash = location.hash;
       let g = null;
@@ -318,9 +318,19 @@
   }));
   /* 드로어는 링크를 눌러도 미리보기 셸에서는 페이지가 그대로라 수동으로 닫는다.
      창이 1200 이상으로 커지면 오버레이가 남지 않게 함께 닫는다. */
+  /* 상단 메뉴가 헤더 폭에 들지 않으면(글자 200% · 좁은 창) 숨은 스크롤 뒤로 메뉴가 사라졌다 — ☰ 로 바꾼다 */
+  const hdr = document.querySelector(".header"), topnav = hdr && hdr.querySelector(".topnav");
+  const fitTop = () => {
+    if (!topnav) return;
+    hdr.classList.remove("nav-tight");
+    if (getComputedStyle(topnav).display !== "none" && topnav.scrollWidth > topnav.clientWidth + 1) hdr.classList.add("nav-tight");
+  };
+  fitTop();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTop);
+  window.addEventListener("resize", fitTop);
   if (menuBtn && menuPop) {
     window.addEventListener("hashchange", () => closePop(menuBtn, menuPop));
-    window.addEventListener("resize", () => { if (window.innerWidth >= 1200) closePop(menuBtn, menuPop); });
+    window.addEventListener("resize", () => { if (window.innerWidth >= 1200 && !(hdr && hdr.classList.contains("nav-tight"))) closePop(menuBtn, menuPop); });
   }
   /* 미리보기의 폼은 실제로 보내지 않는다 — 통과한 제출이 페이지를 새로 읽었다 */
   document.addEventListener("submit", e => { if (e.target.closest(".example-preview")) e.preventDefault(); });
@@ -330,6 +340,8 @@
   document.addEventListener("ds:upload-retry", e => { if (e.target.closest(".example-preview") && e.target.hasAttribute("data-demo")) uploadDemo(e.target, e.detail.id, true); });
   /* Switch 예제 — 서버 대신 0.9초 뒤 응답한다. data-demo-fail 은 실패를 보여 주는 문서 전용 표시 */
   document.addEventListener("ds:switch", e => { if (!e.target.closest(".example-preview")) return; setTimeout(() => e.target.closest("[data-demo-fail]") ? e.detail.reject("정책 서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.") : e.detail.resolve(), 900); });
+  /* Steps 마법사 완료 처리 중(data-async) — 서버 대신 0.9초 뒤 응답한다 */
+  document.addEventListener("ds:step-finish", e => { if (!e.target.closest(".example-preview") || !e.detail.resolve) return; setTimeout(() => e.detail.resolve(), 900); });
   /* Tree 펼칠 때 불러오기 — 문서 예제의 응답을 흉내 낸다(조회는 제품 몫). data-demo-fail 항목은 실패 */
   document.addEventListener("ds:tree-load", e => { if (!e.target.closest(".example-preview")) return; setTimeout(() => e.target.closest("[data-demo-fail]") ? e.detail.reject() : e.detail.resolve([{ label: "WEB-01", value: e.detail.value + "-web" }, { label: "DB-01", value: e.detail.value + "-db" }]), 800); });
   /* Notification Center — 더 보기 응답과 새 알림 도착을 흉내 낸다(받아 오는 연결은 제품 몫). data-demo-fail 은 첫 더 보기 실패 */
@@ -345,15 +357,55 @@
     if (e.key === "/" && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && searchBtn && searchPop) { e.preventDefault(); openPop(searchBtn, searchPop); if (q) { q.focus(); q.select(); } }
   });
 
-  /* 검색 결과 (생성 사이트 전용 — 미리보기 셸은 render.js 가 같은 #q 로 사이드바를 필터한다) */
+  /* 검색 결과 (생성 사이트 전용 — 미리보기 셸은 render.js 가 같은 #q 로 사이드바를 필터한다)
+     입력은 combobox, 결과는 listbox(2026-11-20). ↑↓ 로 고르고 Enter 로 이동, 고른 항목은 aria-activedescendant.
+     제목 → 묶음 → 그 페이지 안 요소의 다른 이름(k) 순으로 찾고 띄어쓰기는 무시한다. 결과 수는 #searchStatus 가 읽는다.
+     0건이면 생김새로 찾는 UI Dictionary 로 같은 말을 넘긴다 */
   if (q && box && typeof SEARCH_INDEX !== "undefined") {
+    const status = document.getElementById("searchStatus");
+    const norm = t => String(t || "").toLowerCase().replace(/\s+/g, "");
+    let active = -1;
+    const opts = () => [].slice.call(box.querySelectorAll('[role="option"]'));
+    const setActive = n => {
+      const list = opts(); active = list.length ? (n + list.length) % list.length : -1;
+      list.forEach((o, k) => o.setAttribute("aria-selected", k === active ? "true" : "false"));
+      if (active < 0) { q.removeAttribute("aria-activedescendant"); return; }
+      q.setAttribute("aria-activedescendant", list[active].id); list[active].scrollIntoView({ block: "nearest" });
+    };
+    const show = open => { box.hidden = !open; q.setAttribute("aria-expanded", open ? "true" : "false"); if (!open) { active = -1; q.removeAttribute("aria-activedescendant"); } };
     const run = () => {
-      const f = q.value.trim().toLowerCase(); if (!f) { box.hidden = true; return; }
-      const hits = SEARCH_INDEX.filter(i => i.t.toLowerCase().includes(f) || i.g.toLowerCase().includes(f)).slice(0, 20);
-      box.innerHTML = hits.length ? hits.map(i => '<a href="' + siteRoot + i.u + '"><span>' + i.t + "</span><small>" + i.s + (i.g ? " · " + i.g : "") + "</small></a>").join("") : '<div class="empty">검색 결과가 없습니다.</div>';
-      box.hidden = false;
+      const raw = q.value.trim(), f = norm(raw);
+      if (!f) { show(false); if (status) status.textContent = ""; return; }
+      const hits = [];
+      SEARCH_INDEX.forEach((i, n) => {
+        const t = norm(i.t), g = norm(i.g);
+        let rank = t.indexOf(f) === 0 ? 0 : t.includes(f) ? 1 : g.includes(f) ? 2 : -1, via = "";
+        if (rank < 0 && i.k) { const m = i.k.find(v => norm(v) === f) || i.k.find(v => norm(v).includes(f)); if (m) { rank = norm(m) === f ? 3 : 4; via = m; } }   // 다른 이름이 그대로 맞으면 일부만 맞는 것보다 앞(스피너 → Loading 이 스피너 버튼보다 먼저)
+        if (rank >= 0) hits.push({ i, rank, n, via });
+      });
+      hits.sort((a, b) => a.rank - b.rank || a.n - b.n);
+      const top = hits.slice(0, 20);
+      box.innerHTML = top.length
+        ? top.map((h, k) => '<a role="option" id="sr-' + k + '" aria-selected="false" tabindex="-1" href="' + siteRoot + h.i.u + '"><span>' + esc(h.i.t) + "</span><small>" + (h.via ? esc(h.via) + " · " : "") + esc(h.i.s) + (h.i.g ? " · " + esc(h.i.g) : "") + "</small></a>").join("")
+        : '<div class="empty">검색 결과가 없습니다. <a href="' + siteRoot + "resources/ui-dictionary.html?q=" + encodeURIComponent(raw) + '">UI Dictionary 에서 생김새로 찾기</a></div>';
+      show(true); active = -1; q.removeAttribute("aria-activedescendant");
+      if (status) status.textContent = top.length ? "결과 " + hits.length + "개" + (hits.length > top.length ? ", 앞의 " + top.length + "개를 보여 줍니다" : "") : "검색 결과가 없습니다";
     };
     q.addEventListener("input", run); q.addEventListener("focus", run);
+    q.addEventListener("keydown", e => {
+      if (e.isComposing || e.keyCode === 229) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        if (box.hidden) run();
+        if (!opts().length) return;
+        e.preventDefault(); setActive(active < 0 ? (e.key === "ArrowDown" ? 0 : -1) : active + (e.key === "ArrowDown" ? 1 : -1));
+      } else if (e.key === "Enter") {
+        const list = opts(), o = list[active >= 0 ? active : 0];
+        if (o) { e.preventDefault(); location.href = o.href; }
+      } else if (e.key === "Home" || e.key === "End") {
+        if (active >= 0) { e.preventDefault(); setActive(e.key === "Home" ? 0 : opts().length - 1); }
+      }
+    });
+    box.addEventListener("mousemove", e => { const o = e.target.closest('[role="option"]'); if (o) { const k = opts().indexOf(o); if (k !== active) setActive(k); } });
   }
 
   /* 코드 패널: 복사 · 탭 · 접기 (이벤트 위임 — 해시 라우팅으로 DOM 이 다시 그려져도 유지) */

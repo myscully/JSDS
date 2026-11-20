@@ -188,7 +188,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await page.keyboard.press("ArrowLeft"); const focusKey = await dp.evaluate((e) => document.activeElement.closest(".day")?.dataset.date);
     const focus = await read(focusKey);
     await page.keyboard.press("Escape");
-    const [grey, strong, todayBg, line, neutral, brandText] = [await tok("--surface-neutral-secondary", "backgroundColor"), await tok("--surface-neutral-strong", "backgroundColor"), await tok("--surface-brand-subtle-strong", "backgroundColor"), await tok("--line-brand-primary"), await tok("--foreground-neutral-primary"), await tok("--foreground-brand-primary")];
+    const [grey, strong, todayBg, line, neutral, brandText] = [await tok("--surface-neutral-tertiary", "backgroundColor") /* hover 원 = tertiary(2026-11-20) */, await tok("--surface-neutral-strong", "backgroundColor"), await tok("--surface-brand-subtle-strong", "backgroundColor"), await tok("--line-brand-primary"), await tok("--foreground-neutral-primary"), await tok("--foreground-brand-primary")];
     const round = (x) => x.w === "34px" && x.h === "34px" && x.r === "50%" && x.cell === "rgba(0, 0, 0, 0)";
     ok("hover, press, today and keyboard focus are circles too",
       round(hover) && hover.bg === grey && round(press) && press.bg === strong && round(today) && today.bg === todayBg && today.color === brandText && today.color !== neutral && today.weight === "700"   /* 오늘 글자 = brand(사람의 결정 2026-11-11) */ &&

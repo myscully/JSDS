@@ -6,7 +6,7 @@ const DEVICES = ["SanDisk 4C530001", "SanDisk 4C530002", "Samsung T7 S6WB", "Kin
 export default function Example() {
   return (
     <Stack>
-      <PageHead
+      <PageHead as="h2"
         breadcrumb={
           <Breadcrumb>
             <BreadcrumbHome href="#" />
@@ -15,7 +15,7 @@ export default function Example() {
             <BreadcrumbItem current>외부 USB 차단</BreadcrumbItem>
           </Breadcrumb>
         }
-        title="외부 USB 차단" sub="POL-2041 · 전체 그룹 · 마지막 배포 2026-09-06" actions={<><ButtonGroup><Button variant="outline">복제</Button><Button>배포</Button></ButtonGroup></>}
+        title="외부 USB 차단" sub="POL-2041 · 전체 그룹 · 마지막 배포 2026. 09. 06" actions={<><ButtonGroup><Button variant="outline">복제</Button><Button>배포</Button></ButtonGroup></>}
       />
       <Notice tone="warning" title="배포되지 않은 변경 2건">변경 사항은 배포를 눌러야 에이전트에 적용됩니다.</Notice>
       {/* Switch 는 누르면 바로 반영된다 — 섹션 머리에 적는다 */}

@@ -1,6 +1,6 @@
 import { Button, ButtonGroup, SidePanelSurface } from "@jiran/ds-react";
 
-const FACTS = [["시각", "2026-09-07 14:22:05"], ["호스트", "DESKTOP-7F3K"], ["IP", "10.0.0.12"], ["정책", "외부 USB 차단"], ["처리", "차단"]];
+const FACTS = [["시각", "2026. 09. 07 14:22:05"], ["호스트", "DESKTOP-7F3K"], ["IP", "10.0.0.12"], ["정책", "외부 USB 차단"], ["처리", "차단"]];
 
 export default function Example() {
   return (

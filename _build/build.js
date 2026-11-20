@@ -62,7 +62,14 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
      Date Picker(.datepicker · .calendar)가 있는 페이지에만 싣는다(아래 datePage) */
   const DAYJS_PKG = path.join(__dirname, "node_modules", "dayjs");
   for (const [from, to] of [["dayjs.min.js", "dayjs.min.js"], ["plugin/utc.js", "dayjs.utc.js"], ["plugin/timezone.js", "dayjs.timezone.js"], ["LICENSE", "dayjs.LICENSE"]]) fs.copyFileSync(path.join(DAYJS_PKG, from), path.join(OUT, "assets", "vendor", to));
-  const index = routes.map(r => ({ t: r.title, s: r.secTitle, g: r.group, u: rel(r.sec, r.key, "") }));
+  /* 헤더 검색 색인 — 페이지 제목 · 묶음에 더해, 그 페이지 안 요소의 다른 이름(k)을 싣는다(2026-11-20).
+     '토스트' · 'Modal' 처럼 페이지 제목이 아닌 이름은 0건이었다. 원본은 UI Dictionary(이름 · 영문 · 다른 이름 · 대표 클래스 · React 이름)와
+     컴포넌트의 React 이름 — 생김새 말(kw)은 넓어서 싣지 않는다(그건 UI Dictionary 몫) */
+  const UD = require("./uidict.data.js"), KW = {};
+  const addKw = (k, list) => { const a = KW[k] || (KW[k] = []); for (const v of list) if (v && !a.includes(v)) a.push(v); };
+  for (const it of UD.items) { const [sec, key] = it.src.split("/"); addKw(sec + "/" + key, [it.name, it.en, ...(it.aka || []), it.cls, it.react]); }
+  for (const [key, c] of Object.entries(COMPONENTS)) if (c && c.react) addKw("components/" + key, c.react);
+  const index = routes.map(r => { const e = { t: r.title, s: r.secTitle, g: r.group, u: rel(r.sec, r.key, "") }, k = (KW[r.sec + "/" + r.key] || []).filter(v => v !== r.title); if (k.length) e.k = k; return e; });
   fs.writeFileSync(path.join(OUT, "assets", "app.js"),
     `// 공용 스크립트(생성됨): 테마 · Accent(제품 컬러) 미리보기 · 검색 · 코드 복사/탭. 원본은 _build/app.src.js\nconst SEARCH_INDEX=${JSON.stringify(index)};\nconst PRODUCTS=${JSON.stringify(PRODUCTS)};\nconst ROOT=document.body.dataset.root||'../';\nconst UD_PREFIX=${LIB.udPrefix.toString()};\n` + fs.readFileSync(path.join(__dirname, "app.src.js"), "utf8"));
 
@@ -125,8 +132,9 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
     <div class="hmenu">
       <button class="hbtn" id="searchBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="검색 (/)" title="검색 (/)">${I("search", 20)}</button>
       <div class="pop search-pop" id="searchPop" hidden>
-        <label class="search">${I("search", 18)}<input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
-        <div class="search-results" id="searchResults" hidden></div>
+        <label class="search">${I("search", 18)}<input id="q" type="search" placeholder="컴포넌트 · 패턴 검색" aria-label="사이트 검색" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchResults" aria-autocomplete="list"></label>
+        <div class="search-results" id="searchResults" role="listbox" aria-label="검색 결과" hidden></div>
+        <div class="sr-only" id="searchStatus" role="status"></div>
       </div>
     </div>
     <div class="hmenu">
@@ -140,9 +148,9 @@ for (const f of walkTsx(EX_DIR)) REACT_EXAMPLES[path.relative(EX_DIR, f).replace
 <div class="drawer-dim" id="menuDim" hidden></div>
 <div class="drawer" id="menuPop" role="dialog" aria-label="메뉴" hidden></div>
 <div class="shell${full ? " full" : ""}">
-${full ? "" : `  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴">${navOf(root)}</nav><div class="sidebar-foot">${parts.foot}</div></aside>\n`}  <div class="main">
+${full ? "" : `  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴">${navOf(root)}</nav><div class="sidebar-foot">${parts.foot}</div></aside>\n`}  <main class="main">
 ${isHome ? `<div id="content" class="home">\n${rewrite(parts.content, root)}\n</div>` : `    <div class="page"><article id="content">\n${rewrite(parts.content, root)}\n    </article></div>`}
-  </div>
+  </main>
 ${full ? "" : `  <aside class="toc" id="toc" aria-label="이 페이지 목차" hidden></aside>\n`}</div>
 </body>
 </html>

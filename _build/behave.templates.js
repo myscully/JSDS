@@ -113,7 +113,7 @@ module.exports = async function templates({ page, ok, go }) {
     const after = await p.evaluate(() => { const pp = document.getElementById("org-add"); return { closed: pp.hidden || !pp.classList.contains("open"), toast: [...document.querySelectorAll(".toast")].map((t) => t.textContent).join("|") }; });
     await p.goto("file://" + path.join(ROOT, "templates", "screen", "wizard.html")); await p.waitForTimeout(250);
     await p.evaluate(() => document.querySelector(".stepper").dispatchEvent(new CustomEvent("ds:step-finish", { bubbles: true })));
-    await p.waitForTimeout(200);
+    await p.waitForTimeout(800);   // 처리 중(600ms) 뒤에 Toast — 2026-11-20
     const wiz = await p.evaluate(() => [...document.querySelectorAll(".toast")].map((t) => t.textContent).join("|"));
     await p.done();
     ok("templates: org tree selection changes the right side, a dialog form closes with a toast, wizard finish shows a toast",

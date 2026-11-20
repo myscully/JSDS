@@ -10,7 +10,7 @@ const HOSTS = [
 export default function Example() {
   const [sel, setSel] = useState("PC-1187");
   return (
-    <List hover dense role="listbox" style={{ maxWidth: 480 }}>
+    <List hover dense role="listbox" aria-label="단말" style={{ maxWidth: 480 }}>
       {HOSTS.map((h) => (
         <ListItem key={h.id} role="option" selected={sel === h.id} onClick={() => setSel(h.id)} end={h.ip} endMeta>
           <Indicator tone={h.tone}>{h.id}</Indicator>

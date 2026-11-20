@@ -25,8 +25,9 @@
     <div class="hmenu">
       <button class="hbtn" id="searchBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="검색 (/)" title="검색 (/)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg></button>
       <div class="pop search-pop" id="searchPop" hidden>
-        <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
-        <div class="search-results" id="searchResults" hidden></div>
+        <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="컴포넌트 · 패턴 검색" aria-label="사이트 검색" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchResults" aria-autocomplete="list"></label>
+        <div class="search-results" id="searchResults" role="listbox" aria-label="검색 결과" hidden></div>
+        <div class="sr-only" id="searchStatus" role="status"></div>
       </div>
     </div>
     <div class="hmenu">
@@ -40,28 +41,28 @@
 <div class="drawer-dim" id="menuDim" hidden></div>
 <div class="drawer" id="menuPop" role="dialog" aria-label="메뉴" hidden></div>
 <div class="shell full">
-  <div class="main">
+  <main class="main">
 <div id="content" class="home">
 <section class="hm" aria-labelledby="hm-title">
   <div class="hm-copy">
     <h1 id="hm-title" class="hm-rise">JS Design System</h1>
     <p class="hm-rise"><span>제품 리뉴얼과 신규 개발에서 메인 컬러를 제외한 모든 기본 구성을 한 가지 기준으로 제공합니다.</span><span>모든 컴포넌트는 라이브 프리뷰와 함께 HTML+CSS · React 코드로 제공되어 그대로 복사해 사용할 수 있습니다.</span></p>
-    <a class="hm-btn hm-rise" href="home/getting-started.html">Get started <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+    <a class="hm-btn hm-rise" href="home/getting-started.html" lang="en">Get started <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
   </div>
   <div class="hm-sh hm-half" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
   <div class="hm-sh hm-wedge" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
   <div class="hm-sh hm-pill" aria-hidden="true"><span class="hm-fl"><span class="hm-in"></span></span></div>
-  <div class="hm-sh hm-guard" role="img" aria-label="A solid shield with a check sits on a soft circle, with a red threat dot and a green resolved dot on the orbit around it."><span class="hm-fl"><span class="hm-in">
+  <div class="hm-sh hm-guard" role="img" lang="en" aria-label="A solid shield with a check sits on a soft circle, with a red threat dot and a green resolved dot on the orbit around it."><span class="hm-fl"><span class="hm-in">
     <span class="hm-orbit"></span><span class="hm-disc"></span><span class="hm-shield"></span><span class="hm-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg></span><span class="hm-dot r"></span><span class="hm-dot g"></span>
   </span></span></div>
 </section>
-<div class="hm-more"><ul class="hm-bans" aria-label="Shortcuts">
+<div class="hm-more"><ul class="hm-bans" lang="en" aria-label="Shortcuts">
 <li><a class="hm-ban" href="foundations/overview.html"><span class="hm-art" aria-hidden="true"><span class="hm-ic-f"><i></i><i></i><i></i></span></span><span class="hm-txt"><b>Foundations</b><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><span>Color, type, grid and motion tokens shared by every product.</span><em>7 pages</em></span></a></li>
 <li><a class="hm-ban" href="components/overview.html"><span class="hm-art" aria-hidden="true"><span class="hm-ic-c"></span></span><span class="hm-txt"><b>Components</b><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><span>Accessible building blocks for dense security consoles.</span><em>46 components</em></span></a></li>
 <li><a class="hm-ban" href="patterns/overview.html"><span class="hm-art" aria-hidden="true"><span class="hm-ic-p"><i></i><i></i><b></b></span></span><span class="hm-txt"><b>Patterns</b><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg><span>Whole screens for detecting, deciding and responding.</span><em>22 patterns</em></span></a></li>
 </ul></div>
 </div>
-  </div>
+  </main>
 </div>
 </body>
 </html>

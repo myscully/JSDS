@@ -7,7 +7,7 @@ const ROWS: Entry[] = [
   { id: "3", time: "09:58", user: "박지훈", action: "내보내기", target: "로그 7일", ok: true, meta: [["접속 IP", "10.0.0.31"], ["형식", "CSV · 48,213줄"]] },
 ];
 const COLUMNS: DataTableColumn<Entry>[] = [
-  { key: "time", header: "시간", render: (r) => `11-15 ${r.time}` },
+  { key: "time", header: "시간", render: (r) => `11. 15 ${r.time}` },
   { key: "user", header: "사용자" },
   { key: "action", header: "동작" },
   { key: "target", header: "대상", render: (r) => (r.href ? <Link href={r.href}>{r.target}</Link> : r.target) },

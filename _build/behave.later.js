@@ -15,7 +15,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     const box = document.createElement("div"); box.innerHTML = html; document.querySelector("#ex-loading-default .example-preview").appendChild(box);
     const el = box.firstElementChild, t0 = performance.now(), out = [];
     for (const t of at) { await new Promise((r) => setTimeout(r, Math.max(0, t - (performance.now() - t0)))); out.push(getComputedStyle(el).visibility); }
-    const names = el.getAnimations().map((a) => a.animationName), r = { width: el.offsetWidth, height: el.offsetHeight };   // 도는 중이라 getBoundingClientRect 는 기울어진 상자
+    const names = el.getAnimations({ subtree: true }).map((a) => a.animationName), r = { width: el.offsetWidth, height: el.offsetHeight };   // 도는 중이라 getBoundingClientRect 는 기울어진 상자
     box.remove();
     return { out, names, w: r.width, h: r.height };
   }, { html, at });
@@ -30,7 +30,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
       const box = document.createElement("div"); box.innerHTML = '<div class="skeleton-row" data-delay style="--ds-delay:300ms"><span class="skeleton circle"></span><div class="lines"><span class="skeleton title"></span></div></div>';
       document.querySelector("#ex-loading-default .example-preview").appendChild(box); const row = box.firstElementChild, bar = row.querySelector(".skeleton.title");
       await new Promise((res) => setTimeout(res, 120)); const a = [getComputedStyle(row).visibility, getComputedStyle(bar).visibility];
-      await new Promise((res) => setTimeout(res, 330)); const c = [getComputedStyle(row).visibility, getComputedStyle(bar).visibility, bar.getAnimations().map((x) => x.animationName).join()];
+      await new Promise((res) => setTimeout(res, 330)); const c = [getComputedStyle(row).visibility, getComputedStyle(bar).visibility, bar.getAnimations({ subtree: true }).map((x) => x.animationName).join()];
       box.remove(); return { a, c };
     });
     ok("loading delay: --ds-delay changes the wait, skeleton rows hide their bars", r.a.join() === "hidden,hidden" && r.c[0] === "visible" && r.c[1] === "visible" && r.c[2] === "shimmer", JSON.stringify(r));

@@ -3,7 +3,7 @@ import { Breadcrumb, BreadcrumbHome, BreadcrumbItem, Button, ButtonGroup, PageHe
 /* Page Header 첫 칸 — 타이틀 바로 위 8px, 한 화면에 하나 */
 export default function Example() {
   return (
-    <PageHead
+    <PageHead as="h2"
       breadcrumb={
         <Breadcrumb>
           <BreadcrumbHome href="#" />

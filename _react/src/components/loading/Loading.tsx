@@ -98,7 +98,7 @@ export interface ProgressProps extends Omit<HTMLAttributes<HTMLDivElement>, "chi
 export const Progress = forwardRef<HTMLDivElement, ProgressProps>(function Progress({ value, max = 100, tone, size, label, valueText, className, ...rest }, ref) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   const bar = (
-    <div ref={ref} className={cx("progress", tone, size, className)} role="progressbar" aria-valuenow={Math.round(value)} aria-valuemin={0} aria-valuemax={max} {...rest}>
+    <div ref={ref} className={cx("progress", tone, size, className)} role="progressbar" aria-valuenow={Math.round(value)} aria-valuemin={0} aria-valuemax={max} aria-label={typeof label === "string" && !rest["aria-label"] && !rest["aria-labelledby"] ? label : undefined} {...rest}>
       <i style={{ width: `${pct}%` }} />
     </div>
   );

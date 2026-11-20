@@ -46,9 +46,9 @@ const pairs = [
   ["--foreground-positive-heavy", ["--surface-positive-primary", ...SURFACES], 4.5, "ok Tag 글자 — 틴트 · outline"],
   ["--foreground-neutral-strong", SURFACES, 4.5, "가장 높은 대비가 필요할 때"],
   ["--foreground-neutral-secondary", [...SURFACES, "--surface-neutral-strong"], 4.5, "보조 본문 · 중립 칩 라벨 · 톤 없는 Notice 아이콘(회색 면 위, 2026-11-16)"],
-  /* 라이트 3.67 · 다크 3.78 — 기준 토큰의 설명·캡션 단계다. 종전 우리 값(5.15)보다 연하다.
+  /* 라이트 3.66 · 다크 3.64 ~ 3.94(바탕에 따라) — 기준 토큰의 설명·캡션 단계다. 종전 우리 값(5.15)보다 연하다.
      placeholder 도 이 단계다(사람의 결정 2026-11-09 — disable 1.33 은 보이지 않았고, secondary 9.09 는 입력한 값과 구분되지 않는다) */
-  ["--foreground-neutral-tertiary", [...SURFACES, "--surface-neutral-strong"], 4.5, "설명·캡션·placeholder", REF("기준 토큰 값 — 라이트 3.67 · 다크 3.78")],
+  ["--foreground-neutral-tertiary", [...SURFACES, "--surface-neutral-strong"], 4.5, "설명·캡션·placeholder", REF("기준 토큰 값 — 흰 · 카드 면 라이트 3.56 ~ 3.66 · 다크 3.64 ~ 3.94, 회색 면(surface-neutral-strong) 위 라이트 3.19 ~ 3.27 · 다크 2.85 ~ 3.22(2026-11-20 실측). 비활성 코드 탭은 이 쌍이 2.85 라 secondary 로 옮겼다")],
   /* 1.68 — 네 번째 위계는 장식에 가깝다. 글자로 쓰면 읽히지 않는다 */
   ["--foreground-neutral-quaternary", SURFACES, 4.5, "네 번째 위계", REF("기준 토큰 값 — 장식 수준(1.68). 본문에 쓰지 않는다")],
   ["--foreground-neutral-inverse", ["--surface-neutral-inverse"], 4.5, "반전 표면 위 글자"],
@@ -62,7 +62,7 @@ const pairs = [
   ["--foreground-neutral-primary", ["--surface-neutral-tertiary", "--surface-neutral-secondary"], 4.5, "Assistive 버튼 라벨 — rest · hover 면 · 중립 Tag 라벨(tertiary 면, 2026-11-13)"],
   ["--foreground-neutral-secondary", ["--surface-neutral-secondary"], 4.5, "Info Tag 글자 — 중립 Tag 보다 한 단계 진한 secondary 면(사람의 결정 2026-11-13)"],
   /* Accordion 헤더 Hover(2026-10-29) — 제목은 위 쌍(neutral-primary on surface-neutral-secondary), 보조 정보 · 셰브론은 여기 */
-  ["--foreground-neutral-tertiary", ["--surface-neutral-secondary"], 4.5, "Accordion 헤더 보조 정보 — hover 면", REF("기준 토큰 값 — tertiary 는 바탕에서도 3.67 · 3.78")],
+  ["--foreground-neutral-tertiary", ["--surface-neutral-secondary"], 4.5, "회색 면(surface-neutral-secondary) 위 보조 글 — Accordion 헤더 hover 의 보조 정보 · pill 탭의 고르지 않은 라벨", REF("기준 토큰 값 — 이 면 위 라이트 3.36 ~ 3.45 · 다크 3.05 ~ 3.45(2026-11-20 실측)")],
   ["--foreground-neutral-tertiary", ["--surface-disable-primary"], 4.5, "Disabled 선택 카드의 이유 문구", REF("기준 토큰 tertiary — disable 면 위 라이트 3.53 · 다크 3.28. 제목 · 아이콘은 disable(1.4.3 면제)이고 이유만 읽히게 둔 사람의 결정(2026-11-03)")],
   ["--foreground-neutral-secondary", ["--surface-neutral-secondary"], 3, "Accordion 셰브론 — hover 면(그래픽 3:1)"],
   ["--foreground-neutral-secondary", ["--surface-neutral-tertiary", "--surface-brand-subtle"], 4.5, "표 하위 텍스트(.cell-sub) — 행 hover(2026-11-12 secondary → tertiary) · 선택 면. 누름 면 strong 은 위 보조 본문 쌍이 잰다"],

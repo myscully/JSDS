@@ -306,6 +306,7 @@ export const Calendar = forwardRef<HTMLDivElement, CalendarProps>(function Calen
     <div
       ref={mergeRefs(root, ref)}
       className={cx("calendar", { two: n === 2 }, className)}
+      lang={/^ko\b/i.test(locale) ? undefined : locale}
       role={dialog ? "dialog" : "group"}
       aria-modal={dialog || undefined}
       aria-label={label ?? L.dialog}

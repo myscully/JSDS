@@ -4,6 +4,7 @@ import { Icon } from "../../icons/Icon";
 import { Button, ButtonGroup, type ButtonProps } from "../button/Button";
 import { LABELS } from "../../labels";
 import { validationMessage } from "../text-field/validation";
+import { useOptionalToast } from "../notification/Notification";
 
 export type StepsLayout = "horizontal" | "label-below" | "vertical";
 
@@ -96,7 +97,7 @@ export const Steps = forwardRef<HTMLOListElement, StepsProps>(function Steps({ i
 
 export type StepTrigger = "next" | "prev" | "click" | "finish";
 
-interface Ctx { current: number; last: number; act: (kind: "prev" | "next" | "finish") => void; labels: StepLabels }
+interface Ctx { current: number; last: number; act: (kind: "prev" | "next" | "finish") => void; labels: StepLabels; busy: boolean }
 const StepperContext = createContext<Ctx | null>(null);
 type StepLabels = Record<"prev" | "next" | "finish", string>;
 const STEP_LABELS: StepLabels = { prev: LABELS.prev, next: LABELS.next, finish: LABELS.finish };
@@ -115,8 +116,10 @@ export interface StepperProps extends Omit<HTMLAttributes<HTMLDivElement>, "chil
   defaultCurrent?: number;
   /** 단계를 옮길 때 — trigger 는 next · prev · click · finish(자유 이동의 완료가 막힌 단계로 옮김) */
   onStepChange?: (index: number, info: { from: number; trigger: StepTrigger }) => void;
-  /** '완료' 가 검사를 통과하면. 저장 · 전송은 여기서 제품이 한다 */
-  onFinish?: (index: number) => void;
+  /** '완료' 가 검사를 통과하면. 저장 · 전송은 여기서 제품이 한다. async 면 Promise 를 돌려준다 */
+  onFinish?: (index: number) => void | Promise<unknown>;
+  /** 완료 처리 중 — onFinish 의 Promise 가 끝날 때까지 완료 버튼이 loading 이 되어 다시 눌리지 않는다. 던지면 그 문구(없으면 기본 문구)로 오류 Toast(ToastProvider 안에서). 사이트 .stepper[data-async] 와 같다 */
+  async?: boolean;
   layout?: StepsLayout;
   /** 어느 단계든 눌러 옮긴다. 떠날 때 폼이 통과하면 완료로 표시하고, '완료' 는 모든 단계를 재서 막힌 첫 단계로 간다 */
   nonLinear?: boolean;
@@ -134,7 +137,7 @@ const quiet = (panel: HTMLElement | null) =>
 
 /** Steps 마법사 — 단계 패널 · 이전/다음/완료 · 단계별 폼 검사. 패널은 늘 그려 두고 숨겨서 입력값이 남는다 */
 export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
-  { steps, current, defaultCurrent = 0, onStepChange, onFinish, layout = "horizontal", nonLinear, actions = true, labels, "aria-label": ariaLabel = "진행 단계", className, ...rest }, ref) {
+  { steps, current, defaultCurrent = 0, onStepChange, onFinish, async: isAsync, layout = "horizontal", nonLinear, actions = true, labels, "aria-label": ariaLabel = "진행 단계", className, ...rest }, ref) {
   useCountWarning(steps.length);
   const [inner, setInner] = useState(defaultCurrent);
   const cur = current ?? inner, last = steps.length - 1;
@@ -144,6 +147,11 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper
   const focusPanel = useRef(false);
   const showAt = useRef(-1);
   const L = { ...STEP_LABELS, ...labels };
+  const toast = useOptionalToast();
+  const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
+  const alive = useRef(true);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
 
   const mark = (i: number, on: boolean) => setDone((d) => { if (d.has(i) === on) return d; const n = new Set(d); on ? n.add(i) : n.delete(i); return n; });
   const go = (to: number, trigger: StepTrigger) => {
@@ -159,7 +167,15 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper
       if (i === cur || quiet(panels.current[i])) { mark(i, true); continue; }
       mark(i, false); showAt.current = i; go(i, "finish"); return;
     }
-    onFinish?.(cur);
+    if (!isAsync) { onFinish?.(cur); return; }
+    if (busyRef.current) return;
+    const result = onFinish?.(cur);
+    if (!result || typeof (result as Promise<unknown>).then !== "function") return;
+    busyRef.current = true; setBusy(true);
+    (result as Promise<unknown>).then(undefined, (err: unknown) => {
+      const message = err instanceof Error && err.message ? err.message : typeof err === "string" && err ? err : LABELS.stepFailed;
+      if (toast) toast.show({ message, tone: "danger" }); else warnOnce("stepper-toast", "[ds-react] Stepper async 의 실패를 알리려면 <ToastProvider> 안에서 쓰세요.");
+    }).finally(() => { busyRef.current = false; if (alive.current) setBusy(false); });
   };
   const passed = () => {
     if (mode.current === "finish" || cur === last) return finish();
@@ -171,7 +187,7 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper
     const form = panels.current[cur]?.querySelector("form");
     if (form) form.requestSubmit(); else passed();
   };
-  const act = (kind: "prev" | "next" | "finish") => { if (kind === "prev") { leave(); go(cur - 1, "prev"); } else check(kind); };
+  const act = (kind: "prev" | "next" | "finish") => { if (busyRef.current && kind !== "prev") return; if (kind === "prev") { leave(); go(cur - 1, "prev"); } else check(kind); };
   const onPanelSubmit = (e: FormEvent<HTMLDivElement>) => { e.preventDefault(); passed(); mode.current = "next"; };
 
   useEffect(() => {
@@ -192,7 +208,7 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper
     </div>
   );
   return (
-    <StepperContext.Provider value={{ current: cur, last, act, labels: L }}>
+    <StepperContext.Provider value={{ current: cur, last, act, labels: L, busy }}>
       <div ref={ref} className={cx("stepper", className)} data-nonlinear={nonLinear ? "" : undefined} {...rest}>
         <StepList aria-label={ariaLabel} items={steps.map((s) => s.label)} current={cur} layout={layout} isDone={(i) => done.has(i)} clickable={(i) => nonLinear || done.has(i)} onPick={(i) => { leave(); go(i, "click"); }} inner={layout === "vertical" ? panel : undefined} />
         {layout !== "vertical" && steps.map((_, i) => panel(i))}
@@ -214,6 +230,7 @@ export const StepButton = forwardRef<HTMLButtonElement, StepButtonProps>(functio
     <Button ref={ref} {...look} {...rest} data-step={step}
       disabled={step === "prev" ? ctx.current === 0 : rest.disabled}
       hidden={step === "next" ? ctx.current === ctx.last : step === "finish" ? ctx.current !== ctx.last : undefined}
+      loading={step === "finish" && ctx.busy ? true : rest.loading}
       onClick={() => ctx.act(step)}>
       {children ?? ctx.labels[step]}
     </Button>

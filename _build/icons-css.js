@@ -17,10 +17,10 @@ const mask = (name, style, opt = {}) => { const u = `url("${dataUri(name, style,
 const RULES = [
   [".checkbox input:checked::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })}`],
   [".radio input:checked", "box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary);background:var(--surface-brand-primary)"],   // 테두리는 안쪽 그림자(1.5px)로 그린다 — border-color 로 두면 선택된 Radio 의 brand 면 위에 기본 회색 띠가 남는다
-  [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:1.25rem;height:1.25rem;background:var(--static-white);${mask("circle", "filled", { size: "120%" })};transition:left var(--motion-fast)`],
-  [".switch input:checked::after", "left:1.375rem"],
+  [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:1.25rem;height:1.25rem;background:var(--static-white);${mask("circle", "filled", { size: "120%" })};transition:transform var(--motion-fast)`],
+  [".switch input:checked::after", "transform:translateX(1.25rem)"],   // 노브는 transform 으로 옮긴다(2026-11-20 — left 전환은 매 프레임 배치를 다시 잼)
   [".switch.sm input::after", "width:1rem;height:1rem"],
-  [".switch.sm input:checked::after", "left:1.125rem"],
+  [".switch.sm input:checked::after", "transform:translateX(1rem)"],
   [".checkbox input:indeterminate::after,.checkbox input.mixed::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("minus", "outline", { strokeWidth: 3.5 })}`],
   [".chip[aria-pressed]::before", `content:"";width:0.875rem;height:0.875rem;flex:none;background:var(--foreground-disable-primary);${mask("check", "outline", { strokeWidth: 2.5 })}`],   // 체크 선 2.5 — 기본 2 에서 한 단계(사람의 요청 2026-11-16)
   [".dropdown .trigger::after", `content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast)`],

@@ -22,5 +22,5 @@ const COLUMNS: DataTableColumn<Row>[] = [
 ];
 
 export default function Example() {
-  return <DataTable density="compact" columns={COLUMNS} rows={ROWS} rowKey={(r) => r.id} defaultSort={{ key: "sev", dir: "desc" }} />;
+  return <DataTable density="compact" nowrap columns={COLUMNS} rows={ROWS} rowKey={(r) => r.id} defaultSort={{ key: "sev", dir: "desc" }} />;
 }

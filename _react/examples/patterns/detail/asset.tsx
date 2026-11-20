@@ -9,7 +9,7 @@ export default function Example() {
   return (
     <Stack>
       {/* 동작은 세 개까지 — 되돌리기 어려운 동작은 ⋯ 메뉴 맨 아래 구분선 뒤 */}
-      <PageHead
+      <PageHead as="h2"
         breadcrumb={
           <Breadcrumb>
             <BreadcrumbHome href="#" />
@@ -55,7 +55,7 @@ export default function Example() {
                   { label: "IP", value: <CopyField inline label="IP" value="10.0.4.21" /> },
                   { label: "에이전트", value: "6.2.1" },
                   { label: "그룹", value: "본사 · 개발팀" },
-                  { label: "마지막 접속", value: "2026-11-15 09:41" },
+                  { label: "마지막 접속", value: "2026. 11. 15 09:41" },
                 ]} />
               </Card>
               <Card>
@@ -63,7 +63,7 @@ export default function Example() {
                 <CardMeta items={[
                   { label: "실시간 보호", value: <Indicator tone="ok">켜짐</Indicator> },
                   { label: "정책", value: <><Link href="#">외부 USB 차단</Link> 외 11개</> },
-                  { label: "마지막 검사", value: "2026-11-15 02:00 · 위협 0" },
+                  { label: "마지막 검사", value: "2026. 11. 15 02:00 · 위협 0" },
                 ]} />
               </Card>
             </Row2>
@@ -90,8 +90,8 @@ export default function Example() {
         </TabPanel>
         <TabPanel value="activity">
           <List>
-            <ListItem primary="정책 배포 rev 2041" meta="2026-11-15 08:00 · 자동" />
-            <ListItem primary="에이전트 6.2.1 업데이트" meta="2026-11-12 14:20 · 이서연" />
+            <ListItem primary="정책 배포 rev 2041" meta="2026. 11. 15 08:00 · 자동" />
+            <ListItem primary="에이전트 6.2.1 업데이트" meta="2026. 11. 12 14:20 · 이서연" />
           </List>
         </TabPanel>
         <TabPanel value="settings">

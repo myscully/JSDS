@@ -24,8 +24,9 @@
     <div class="hmenu">
       <button class="hbtn" id="searchBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="검색 (/)" title="검색 (/)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg></button>
       <div class="pop search-pop" id="searchPop" hidden>
-        <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
-        <div class="search-results" id="searchResults" hidden></div>
+        <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="컴포넌트 · 패턴 검색" aria-label="사이트 검색" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="searchResults" aria-autocomplete="list"></label>
+        <div class="search-results" id="searchResults" role="listbox" aria-label="검색 결과" hidden></div>
+        <div class="sr-only" id="searchStatus" role="status"></div>
       </div>
     </div>
     <div class="hmenu">
@@ -39,15 +40,15 @@
 <div class="drawer-dim" id="menuDim" hidden></div>
 <div class="drawer" id="menuPop" role="dialog" aria-label="메뉴" hidden></div>
 <div class="shell">
-  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><a href="../home/getting-started.html" class="active">Getting started<span class="n">N</span></a><a href="../home/about.html">About</a><a href="../home/principles.html">UX Principles</a><h5>Guide</h5><a href="../home/guide.html">개요<span class="n">N</span></a><a href="../home/guide-basics.html">공통<span class="n">N</span></a><a href="../home/guide-designer.html">디자이너<span class="n">N</span></a><a href="../home/guide-planner.html">기획자<span class="n">N</span></a><a href="../home/guide-developer.html">개발자<span class="n">N</span></a><a href="../home/guide-together.html">함께 만들기<span class="n">N</span></a></nav><div class="sidebar-foot">v0.9 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
-  <div class="main">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><a href="../home/getting-started.html" class="active">Getting started<span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span></a><a href="../home/about.html">About</a><a href="../home/principles.html">UX Principles</a><h5>Guide</h5><a href="../home/guide.html">개요<span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span></a><a href="../home/guide-basics.html">공통<span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span></a><a href="../home/guide-designer.html">디자이너<span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span></a><a href="../home/guide-planner.html">기획자<span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span></a><a href="../home/guide-developer.html">개발자<span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span></a><a href="../home/guide-together.html">함께 만들기<span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span></a></nav><div class="sidebar-foot">v0.9 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <main class="main">
     <div class="page"><article id="content">
-<h1>Getting started<span class="n">N</span></h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 뺀 색 · 글자 · 간격 · 컴포넌트 · 패턴을 모두 제공합니다. 이 페이지는 설치와 연결만 다룹니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
+<h1>Getting started<span class="n"><span aria-hidden="true">N</span><span class="sr-only">, 새 항목</span></span></h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 뺀 색 · 글자 · 간격 · 컴포넌트 · 패턴을 모두 제공합니다. 이 페이지는 설치와 연결만 다룹니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
 <p class="t-label-1-reading t-regular">시스템을 고르고 쓰는 법을 처음부터 단계별로 익히려면 <a href="../home/guide.html">Guide</a> 를 보세요. 기획자는 설치할 것이 없으므로 Guide 의 기획자 트랙에서 시작합니다.</p>
 <p class="t-label-1-reading t-regular">어느 역할이든 각 <a href="../components/overview.html">컴포넌트 페이지</a>가 사용법의 단일 출처입니다. 예제로 실제 동작과 상태를, Props 표로 허용되는 변형을, 코드 보기로 HTML+CSS · React 코드를 확인합니다. 필요한 컴포넌트가 없으면 <a href="../resources/contribution.html">Contribution</a> 절차로 제안합니다.</p>
 <p class="t-label-1-reading t-regular">헤더의 제품 색 메뉴로 팔레트별 색을, 테마 버튼으로 다크 모드를 미리 볼 수 있습니다. 키보드의 / 키를 누르면 검색창이 열립니다.</p>
 <div class="doc-tabset"><div class="doc-tabs" role="tablist"><button type="button" role="tab" data-doctab="designer" class="on" aria-selected="true">디자이너</button><button type="button" role="tab" data-doctab="react" class="" aria-selected="false">React 개발자</button><button type="button" role="tab" data-doctab="html" class="" aria-selected="false">HTML+CSS 개발자</button></div><div data-docpane="designer"><ol class="guide-steps">
-<li><b>Figma 파일 열기</b><a href="https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV" target="_blank" rel="noopener">JS Design System Figma 파일 ↗</a> — 페이지 구성(Home · Foundations · Components · Patterns · Resources)은 이 사이트와 같습니다. 어느 페이지에 무엇이 있는지는 <a href="../resources/figma.html">Figma Library</a> 표를 참고하세요.</li>
+<li><b>Figma 파일 열기</b><a href="https://www.figma.com/design/ngyAZOP9Icjzw9KWyl4RdV" target="_blank" rel="noopener">JS Design System Figma 파일 ↗</a> — 페이지는 Overview · Foundations · Components · Patterns 넷이고, 순서는 이 사이트 메뉴와 같습니다. 어느 페이지에 무엇이 있는지는 <a href="../resources/figma.html">Figma Library</a> 표를 참고하세요.</li>
 <li><b>내 디자인 파일에서 라이브러리 켜기</b>작업할 파일을 열고 왼쪽 <b>Assets</b> 패널 → 책 모양(Libraries) 아이콘 → <b>JS Design System</b> 을 켭니다. 한 번 켜 두면 그 파일에서 계속 쓸 수 있습니다.</li>
 <li><b>컴포넌트 넣기</b>Assets 검색창에 이름(예: Button, Tag, Data Table)을 입력하고 캔버스로 끌어다 놓습니다. 넣은 것은 인스턴스라 원본은 바뀌지 않고, 원본이 갱신되면 따라서 갱신됩니다.</li>
 <li><b>변형·상태 바꾸기</b>인스턴스를 선택하면 오른쪽 패널에 변형 · 크기 · 상태를 고르는 드롭다운이 보입니다. 이름은 이 사이트 각 컴포넌트 페이지의 Props 표와 같아서, 개발자와 같은 말로 이야기할 수 있습니다.</li>
@@ -105,7 +106,7 @@ createRoot(document.getElementById(<span class="tk-str">"root"</span>)!).render(
 <p>1023 이하인 모바일과 태블릿은 <b>지원하지 않습니다</b>. 데스크톱 콘솔을 축소해 제공하지 않으며, 터치 현장 업무가 확인되면 그때 별도 규칙과 업무 범위를 정의합니다. 미지원 범위를 "반응형 완료" 로 표기하지 않습니다.</p>
 <dl class="kv"><dt>이 가이드 사이트</dt><dd>휴대폰까지 볼 수 있습니다. 1600px 이상에서는 오른쪽에 페이지 목차가, 1200px 미만에서는 상단·좌측 메뉴가 ☰ 버튼 안으로 들어갑니다. 위 표는 제품 UI 의 지원 기준이며, 가이드 사이트의 표시 폭과는 별개입니다</dd><dt>표준 스냅샷</dt><dd>1024 · 1280 · 1440 · 1920 네 폭을 매 릴리스에서 확인합니다</dd><dt>브라우저</dt><dd>Chrome 111+ · Safari 16.2+ · Firefox 113+. 100% 와 200% 확대에서 핵심 조치가 가능해야 합니다</dd><dt>입력 방식</dt><dd>마우스 · 키보드. 모든 인터랙션은 키보드로 도달·실행 가능해야 하고, 터치 전용 동작은 두지 않습니다</dd><dt>기준 갱신</dt><dd>실제 사용자 기기·브라우저 로그와 제품 책임자의 결정으로 확정·갱신하며, 변경 전까지 위 표를 공식 약속으로 봅니다</dd><dt>React 패키지</dt><dd>React 18 · 19 · TypeScript · ESM/CJS 지원. 패키지 버전의 major.minor 는 이 가이드 버전(v0.9)과 같습니다 — <a href="../resources/react.html">React Package</a></dd></dl>
     </article></div>
-  </div>
+  </main>
   <aside class="toc" id="toc" aria-label="이 페이지 목차" hidden></aside>
 </div>
 </body>

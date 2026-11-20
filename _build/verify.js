@@ -726,6 +726,7 @@ for (const [k, c] of Object.entries(PATTERNS)) {
     const src = (fr[1].match(/(?:^|\s)src="([^"]+)"/) || [])[1];
     if (src !== `screen/${k}.html`) fails.push(`${f}: 미리보기 iframe 의 src 가 '${src}' — screen/${k}.html`);
     if (!/(?:^|\s)title="[^"]+"/.test(fr[1])) fails.push(`${f}: 미리보기 iframe 에 title(접근 이름)이 없다`);
+    if (!/(?:^|\s)tabindex="-1"/.test(fr[1])) fails.push(`${f}: 미리보기 iframe 은 tabindex="-1" — 축소 화면 안으로 Tab 이 들어가지 않게(새 창 링크가 대신한다)`);
     if (!/(?:^|\s)width="1440"/.test(fr[1]) || !/(?:^|\s)height="900"/.test(fr[1])) fails.push(`${f}: 미리보기 iframe 은 width 1440 · height 900 속성으로 — 축소 기준`);
     const nw = b.match(/<a href="screen\/[^"]+"[^>]*target="_blank"[^>]*>[\s\S]*?<\/a>/);
     if (!nw) fails.push(`${f}: '새 창에서 열기' 링크가 없다`);
@@ -800,7 +801,7 @@ for (const [k, c] of Object.entries(PATTERNS)) {
   for (const k of keys) if (!files.includes(k)) fails.push(`thumbs/components/${k}.svg 없음 — Components Overview 카드에 Figma 썸네일이 없다`);
   for (const k of files) if (!keys.includes(k)) fails.push(`thumbs/components/${k}.svg — 그런 컴포넌트 페이지가 없다`);
   const ov = article(read("components/overview.html"));
-  const cards = [...ov.matchAll(/<a class="ov-card" href="([^"]*)"><div class="thumb([^"]*)">([\s\S]*?)<\/div><div class="label">/g)];
+  const cards = [...ov.matchAll(/<a class="ov-card" href="([^"]*)"><div class="thumb([^"]*)" aria-hidden="true" inert(?:="")?>([\s\S]*?)<\/div><div class="label">/g)];
   if (cards.length !== keys.length) fails.push(`components/overview: 카드 ${cards.length}개 ≠ 컴포넌트 ${keys.length}개`);
   for (const [, href, cls, inner] of cards) {
     const at = `components/overview: ${href}`;
@@ -1131,7 +1132,7 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 토큰
   /* 반대 방향 — 의미 토큰 전수가 Colors 페이지에 스와치로 나와야 한다.
      4차에서 절을 채워 가며 0 으로 만든다. 그때 fails 로 승격한다 */
   const isPrim = (k) => /^--(cool-neutral|neutral|brand|blue|green|orange|red|lime|cyan|light-blue|violet|purple|pink|red-orange|prod)-\d+d?$/.test(k);   // d — 다크 면 단계 --brand-50d(2026-11-17)
-  const isScalar = (k) => /^--(space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row|code)-/.test(k) || /^--static-/.test(k) || k === "--brand-label" || k === "--company-mark" || k === "--company-mark-subtle";
+  const isScalar = (k) => /^--(space|radius|shadow|motion|font|header|sidebar|toc|shell|card|row|code|z)-/.test(k) || /^--static-/.test(k) || k === "--brand-label" || k === "--company-mark" || k === "--company-mark-subtle";
   const orphan = [...declared].filter((t) => !isPrim(t) && !isScalar(t) && !pointed.has(t)).sort();
   if (orphan.length) warns.push(`Colors 페이지에 스와치가 없는 의미 토큰 ${orphan.length}개 — ${orphan.slice(0, 6).join(" ")}${orphan.length > 6 ? " …" : ""}`);
 }

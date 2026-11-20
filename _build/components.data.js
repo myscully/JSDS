@@ -48,7 +48,7 @@ const meter = (id, label, value, max, unit = "") => { const pct = Math.round(val
 const popX = () => `<button type="button" class="btn sm text assistive icon-only popup-close" aria-label="닫기" data-popup-close>${I("x")}</button>`;
 const spHead = (id, title) => `<div class="side-panel-header"><h3 class="side-panel-title" id="${id}">${title}</h3><button type="button" class="btn sm text assistive icon-only side-panel-close" aria-label="닫기" data-panel-close>${I("x")}</button></div>`;
 const spFacts = (rows) => `<table class="tbl kv"><tbody>${rows.map(([k, v]) => `<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join("")}</tbody></table>`;
-const SP_EVENT = [["시각", "2026-09-07 14:22:05"], ["호스트", "DESKTOP-7F3K"], ["IP", "10.0.0.12"], ["정책", "외부 USB 차단"], ["처리", "차단"]];
+const SP_EVENT = [["시각", "2026. 09. 07 14:22:05"], ["호스트", "DESKTOP-7F3K"], ["IP", "10.0.0.12"], ["정책", "외부 USB 차단"], ["처리", "차단"]];
 const cb = (label, attrs = "", small = "") => `<label class="checkbox"><input type="checkbox"${attrs ? " " + attrs : ""}><span>${label}${small ? `<small>${small}</small>` : ""}</span></label>`;
 
 /* 정적 달력 — ds.js 가 그리는 마크업과 같다(behave 가 대조한다). 정적 데모도 클릭 · 키보드 · 달 이동이 그대로 동작한다.
@@ -91,7 +91,7 @@ const cal = (o) => {
   const grp = (a) => a.length > 1 ? `<div class="btn-group">${a.join("")}</div>` : a.join("");   // 나란한 버튼 2개 이상은 묶음(사람의 요청 2026-11-18)
   const foot = grp(footBtns.filter((h) => / text"/.test(h))) + grp(footBtns.filter((h) => !/ text"/.test(h)));
   const data = [rg && "data-range", rg && o.calendars === 1 && 'data-calendars="1"', rg ? `data-start="${a}" data-end="${b}"` : a ? `data-value="${a}"` : "", `data-month="${o.month}"`, o.locale && `data-locale="${o.locale}"`, o.labels && `data-labels='${JSON.stringify(o.labels).replace(/'/g, "&#39;")}'`, o.today && `data-today="${o.today}"`, o.min && `data-min="${o.min}"`, o.max && `data-max="${o.max}"`, `data-footer="${o.footer || "none"}"`, presets.length && `data-presets="${o.presets}"`].filter(Boolean).join(" ");
-  return `<div class="calendar${two ? " two" : ""}" role="group" aria-label="${L.dialog}" ${data}>
+  return `<div class="calendar${two ? " two" : ""}"${/^ko\b/i.test(loc) ? "" : ` lang="${loc}"`} role="group" aria-label="${L.dialog}" ${data}>
   ${two ? `<div class="cal-months">${months.map(month).join("")}</div>` : month(months[0], 0)}${foot ? `\n  <div class="cal-foot">${foot}</div>` : ""}
   <span class="sr-only" aria-live="polite"></span>
 </div>`;
@@ -230,7 +230,7 @@ const stepLi = (label, i, st, { btn = false, inner = "" } = {}) => {
 };
 const stepsOl = (cls, items) => `<ol class="steps${cls ? " " + cls : ""}" aria-label="진행 단계">${items.join("")}</ol>`;
 const stepPanel = (on, inner) => `<div class="step-panel" tabindex="-1"${on ? "" : " hidden"}>${inner}</div>`;
-const stepActs = (first, last) => `<div class="step-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-step="prev"${first ? " disabled" : ""}>이전</button><button type="button" class="btn md solid primary" data-step="next"${last ? " hidden" : ""}>다음</button><button type="button" class="btn md solid primary" data-step="finish"${last ? "" : " hidden"}>완료</button></div></div>`;
+const stepActs = (first, last, finish = "완료") => `<div class="step-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-step="prev"${first ? " disabled" : ""}>이전</button><button type="button" class="btn md solid primary" data-step="next"${last ? " hidden" : ""}>다음</button><button type="button" class="btn md solid primary" data-step="finish"${last ? "" : " hidden"}>${finish}</button></div></div>`;
 const stepForm = (id, label, help, value = "") => `<form class="form" data-validate novalidate><p class="form-legend"><em>*</em> 필수 항목</p><div class="field"><label for="${id}">${label} <em>*</em></label><input id="${id}"${value ? ` value="${value}"` : ""} required><span class="help" aria-live="polite">${help}</span></div></form>`;
 const stepNote = (t) => `<p class="t-body-2-reading">${t}</p>`;
 const COMPONENTS = {
@@ -285,7 +285,7 @@ const COMPONENTS = {
           <button type="button" class="btn lg solid primary icon-only" aria-label="설정">${I("settings")}</button>
         </div>` },
       { id: "state", group: "state", title: "State", desc: "상태는 <b>Normal · Hover · Pressed · Disabled</b> 네 가지입니다.", html: `
-        <div style="display:grid;grid-template-columns:repeat(4,auto);gap:12px;max-width:100%;overflow-x:auto">
+        <div style="display:grid;grid-template-columns:repeat(4,auto);gap:12px;max-width:100%;overflow-x:auto;padding:4px">
           <button type="button" class="btn md solid primary">Normal</button>
           <button type="button" class="btn md outline primary">Normal</button>
           <button type="button" class="btn md solid assistive">Normal</button>
@@ -1122,7 +1122,7 @@ const COMPONENTS = {
         </form>`, layout: "tall top" },
     ],
     props: [[".dropdown", "container", "—", "position:relative. 열림은 .open. inline-block 이라 상자 높이가 놓인 곳의 글자 크기를 따른다 — 단독이면 앱 기본 글자, 입력 폼(.field) 안 14, .pagination-bar 안 12"], [".trigger", "button", "—", "고른 값을 표시. 값이 없으면 안에 .placeholder"], ["size", "sm | (md) | lg", "md", ".dropdown.sm · .lg — 트리거 높이 32 / 40 / 48. .field.sm · .lg 안에서는 필드 크기를 따른다. React size"], [".menu", "ul", "—", "role=listbox · aria-label 필수"], [".menu-item", "li", "—", "role=option. 고른 항목 .on + aria-selected, 비활성 aria-disabled. data-value 가 ds:select 의 값 — 빈 값은 '선택 안 함'"], [".menu-state", "li", "—", "role=presentation. 불러오는 중 · 실패 · 항목 없음"], ["data-name", "attr", "—", "제출할 이름 — 안의 input[type=hidden] 값을 고른 값으로"], ["data-required", "attr", "—", "form[data-validate] 안에서 필수 검사"], ["ds:select", "event", "—", "detail.value"], ["ds:retry", "event", "—", "목록 상태의 다시 시도"]],
-    spec: [["Size", "트리거 높이 sm 32 · md 40 · lg 48(= Text Field · Button) · 항목 높이 38 · 메뉴 최소 폭 200 · 메뉴 최대 높이 320(약 8개, 넘으면 스크롤)"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Label 1/Reading 14 · placeholder foreground/neutral/tertiary"]],
+    spec: [["Size", "트리거 높이 sm 32 · md 40 · lg 48(= Text Field · Button) · 항목 높이 38 · 메뉴 폭은 트리거 폭 이상(항목 글자가 길면 글자에 맞춰 넓어짐) · 메뉴 최대 높이 320(약 8개, 넘으면 스크롤)"], ["Container", "radius/md 6 · shadow/2 · 트리거 아래 4px"], ["Label", "Label 1/Reading 14 · placeholder foreground/neutral/tertiary"]],
     figma: { frame: "Select", radius: "radius/md", sizes: { trigger: { h: 40 }, item: { h: 36 } }, variants: { select: {}, focused: { stroke: "--foreground-brand-primary", ring: "--line-brand-focus" } }, states: ["closed", "focused", "open", "selected", "disabled"] },
   },
 
@@ -1277,7 +1277,7 @@ const COMPONENTS = {
             <li><a href="#" class="icon" aria-label="홈">${I("home")}</a></li>
             <li><a href="#">정책</a></li>
             <li><a href="#">본사 개발팀 외부 저장장치 · 클라우드 업로드 통합 차단 정책</a></li>
-            <li aria-current="page"><span>예외 승인 요청 상세 — 2026-10-30 개발팀 김지란</span></li>
+            <li aria-current="page"><span>예외 승인 요청 상세 — 2026. 10. 30 개발팀 김지란</span></li>
           </ol>
         </nav>` },
       { id: "text-parent", group: "variant", title: "Non-link parent", desc: "메뉴 그룹처럼 눌러 갈 페이지가 없는 단계는 링크 없이 텍스트로만 둡니다. 갈 수 없는 단계를 비활성으로 칠하지 않습니다.", html: `
@@ -1308,7 +1308,7 @@ const COMPONENTS = {
               <li aria-current="page"><span>외부 저장장치 차단</span></li>
             </ol>
           </nav>
-          <div><h1 class="title">외부 저장장치 차단</h1><p class="sub">POL-2041 · 전체 그룹</p></div><div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">취소</button><button type="button" class="btn md solid primary">저장</button></div></div>
+          <div><h2 class="title">외부 저장장치 차단</h2><p class="sub">POL-2041 · 전체 그룹</p></div><div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">취소</button><button type="button" class="btn md solid primary">저장</button></div></div>
         </div>` },
     ],
     props: [
@@ -1550,7 +1550,7 @@ const COMPONENTS = {
       { id: "body", group: "variant", title: "Body", desc: "본문에는 텍스트와 폼 요소를 둘 수 있습니다. <b>아코디언 안에 아코디언을 넣지 않습니다</b>. 내용이 길면 높이를 제한하고 스크롤합니다.", layout: "top", html: `
         <details class="accordion md outline" open style="max-width:560px">
           <summary>변경 이력 <small>최근 30일</small></summary>
-          <div class="body" style="max-height:120px;overflow:auto">2026-10-28 실시간 보호 켬<br>2026-10-21 USB 검사 예외 추가<br>2026-10-14 스케줄 변경(평일 09–18)<br>2026-10-07 알림 채널 추가<br>2026-09-30 정책 생성</div>
+          <div class="body" style="max-height:120px;overflow:auto">2026. 10. 28 실시간 보호 켬<br>2026. 10. 21 USB 검사 예외 추가<br>2026. 10. 14 스케줄 변경(평일 09–18)<br>2026. 10. 07 알림 채널 추가<br>2026. 09. 30 정책 생성</div>
         </details>` },
     ],
     props: [
@@ -1580,7 +1580,7 @@ const COMPONENTS = {
       { id: "default", group: "default", title: "Default", desc: "헤더 · 본문 · 푸터 순서로 둡니다. 헤더에는 제목과 오른쪽 요소 하나를 둡니다. 푸터 동작은 오른쪽에 모으고 강조 버튼은 하나만 둡니다. 카드 면과 1px 테두리로 구획하고 그림자는 두지 않습니다.", html: `
         <div class="card" style="width:360px">
           <div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div>
-          <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
+          <p class="desc">1,000석 중 842석 사용 중. 2026. 12. 31 만료.</p>
           <div class="card-foot"><div class="btn-group"><button type="button" class="btn sm outline assistive">상세</button><button type="button" class="btn sm solid primary">갱신</button></div></div>
         </div>` },
       { id: "header", group: "variant", title: "Header", desc: "헤더 오른쪽에는 상태 Tag, 기간을 고르는 Select Button, '전체 보기' 텍스트 버튼 가운데 <b>하나만</b> 둡니다. 기간 선택은 바뀌는 패널이 없으므로 Tab 이 아니라 Select Button 을 씁니다.", html: `
@@ -1603,12 +1603,12 @@ const COMPONENTS = {
         <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
           <div class="card" style="width:320px">
             <div class="card-head"><h3 class="title">PC-2041</h3><span class="indicator ok">온라인</span></div>
-            <dl class="card-meta"><dt>에이전트</dt><dd>6.2.1</dd><dt>그룹</dt><dd>개발팀</dd><dt>IP</dt><dd>10.20.4.41</dd><dt>마지막 접속</dt><dd>2026-11-02 09:41</dd></dl>
+            <dl class="card-meta"><dt>에이전트</dt><dd>6.2.1</dd><dt>그룹</dt><dd>개발팀</dd><dt>IP</dt><dd>10.20.4.41</dd><dt>마지막 접속</dt><dd>2026. 11. 02 09:41</dd></dl>
             <div class="card-foot"><div class="btn-group"><button type="button" class="btn sm outline assistive">로그</button><button type="button" class="btn sm solid primary">원격 점검</button></div></div>
           </div>
           <div class="card" style="width:320px">
             <div class="card-head"><h3 class="title">SRV-DB-01</h3><span class="indicator warn">점검 필요</span></div>
-            <dl class="card-meta"><dt>에이전트</dt><dd>6.1.8 · 업데이트 필요</dd><dt>그룹</dt><dd>서버</dd><dt>IP</dt><dd>10.20.1.12</dd><dt>마지막 접속</dt><dd>2026-11-01 22:05</dd></dl>
+            <dl class="card-meta"><dt>에이전트</dt><dd>6.1.8 · 업데이트 필요</dd><dt>그룹</dt><dd>서버</dd><dt>IP</dt><dd>10.20.1.12</dd><dt>마지막 접속</dt><dd>2026. 11. 01 22:05</dd></dl>
             <div class="card-foot"><div class="btn-group"><button type="button" class="btn sm outline assistive">로그</button><button type="button" class="btn sm solid primary">업데이트</button></div></div>
           </div>
         </div>` },
@@ -1640,7 +1640,7 @@ const COMPONENTS = {
         <div style="background:var(--background-neutral-secondary);padding:24px;border-radius:var(--radius-lg);display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
           <div class="card flat" style="width:min(300px,100%)">
             <div class="card-head"><h3 class="title">라이선스</h3><span class="tag ok">정상</span></div>
-            <p class="desc">1,000석 중 842석 사용 중. 2026-12-31 만료.</p>
+            <p class="desc">1,000석 중 842석 사용 중. 2026. 12. 31 만료.</p>
           </div>
           <div class="card flat" style="width:min(300px,100%)">
             <div class="card-head"><h3 class="title">PC-2041</h3><span class="indicator ok">온라인</span></div>
@@ -1743,7 +1743,7 @@ const COMPONENTS = {
         <div class="popup danger" role="alertdialog" aria-modal="true" aria-labelledby="dg-title" aria-describedby="dg-body">
           <h3 class="popup-title" id="dg-title">정책 12개를 삭제할까요?</h3>${popX()}
           <p class="popup-body" id="dg-body">삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.</p>
-          <form class="popup-form" id="dg-form" data-validate novalidate><div class="field"><label for="confirm">확인을 위해 "삭제" 를 입력하세요</label><input id="confirm" placeholder="삭제" required pattern="삭제" autocomplete="off" data-messages='{"required":"확인 문구를 입력하세요.","pattern":"문구가 다릅니다. 삭제 를 그대로 입력하세요."}'><span class="help" aria-live="polite"></span></div></form>
+          <form class="popup-form" id="dg-form" data-validate novalidate><div class="field"><label for="confirm">확인을 위해 <b>삭제</b>를 입력하세요</label><input id="confirm" placeholder="삭제" required pattern="\\s*삭제\\s*" autocomplete="off" data-messages='{"required":"확인 문구를 입력하세요.","pattern":"문구가 다릅니다. 삭제를 그대로 입력하세요."}'><span class="help" aria-live="polite"></span></div></form>
           <div class="popup-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="submit" form="dg-form" class="btn md solid negative">삭제</button></div></div>
         </div>` },
       { id: "form", group: "variant", title: "Form", desc: "필드 1~3개의 짧은 입력을 받습니다. 그보다 많으면 별도 페이지로 보냅니다. 입력을 시작하면 배경을 눌러도 닫히지 않습니다.", html: `
@@ -1801,7 +1801,7 @@ const COMPONENTS = {
       { id: "long", group: "variant", title: "Long Body", desc: "본문만 스크롤합니다. 머리글과 바닥글은 그 자리에 있습니다.", html: `
         <section class="side-panel" role="dialog" aria-labelledby="sp-l" style="height:320px">
           ${spHead("sp-l", "에이전트 상세")}
-          <div class="side-panel-body">${spFacts([...SP_EVENT, ["그룹", "본사 · 개발"], ["운영체제", "Windows 11"], ["버전", "4.2.1"], ["마지막 체크인", "2026-09-07 14:20"], ["정책 수", "12"], ["라이선스", "2027-03-31 까지"]])}</div>
+          <div class="side-panel-body">${spFacts([...SP_EVENT, ["그룹", "본사 · 개발"], ["운영체제", "Windows 11"], ["버전", "4.2.1"], ["마지막 체크인", "2026. 09. 07 14:20"], ["정책 수", "12"], ["라이선스", "2027. 03. 31 까지"]])}</div>
           <div class="side-panel-footer"><button type="button" class="btn md solid primary">격리</button></div>
         </section>` },
       { id: "live", group: "variant", title: "Non-modal", desc: "실제 동작입니다. 패널이 열려 있어도 뒤 페이지를 누르고 스크롤할 수 있습니다.", html: `
@@ -1936,9 +1936,9 @@ const COMPONENTS = {
         <div style="width:100%;max-width:520px" aria-busy="true"><div class="skeleton-row" data-delay style="--ds-delay:300ms"><span class="skeleton circle"></span><div class="lines"><span class="skeleton title"></span><span class="skeleton text"></span></div></div></div>` },
       { id: "progress", group: "variant", title: "Progress", desc: "배포나 검사처럼 진행률을 아는 작업에 씁니다. 끝나면 성공 색, 실패하면 위험 색으로 칠합니다.", html: `
         <div style="width:100%;max-width:480px;display:flex;flex-direction:column;gap:20px">
-          <div class="progress-row"><div class="row"><span>정책 배포 중</span><span>842 / 1,284</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"><i style="width:66%"></i></div></div>
-          <div class="progress-row"><div class="row"><span>전체 검사 완료</span><span>100%</span></div><div class="progress success" role="progressbar" aria-valuenow="100"><i style="width:100%"></i></div></div>
-          <div class="progress-row"><div class="row"><span>업데이트 실패</span><span>38%</span></div><div class="progress danger" role="progressbar" aria-valuenow="38"><i style="width:38%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>정책 배포 중</span><span>842 / 1,284</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="정책 배포 중"><i style="width:66%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>전체 검사 완료</span><span>100%</span></div><div class="progress success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="전체 검사 완료"><i style="width:100%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>업데이트 실패</span><span>38%</span></div><div class="progress danger" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100" aria-label="업데이트 실패"><i style="width:38%"></i></div></div>
         </div>` },
     ],
     props: [[".spinner", "span", "—", "role=status · aria-label 은 실제 작업. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"], ["data-delay", "attr", "—", ".spinner · .spinner-wrap · .skeleton · .skeleton-row 에. <code>--ds-delay</code>(기본 1s) 동안 자리를 지킨 채 보이지 않는다 — 줄인 모션에서도. React <code>delay</code>(true | ms)"], ["DS.loading.start(el, {delay, min}) · stop(el)", "function", "1000 · 500 ms", "보일지를 정한다 — delay 안에 stop 하면 끝내 안 보이고, 보였으면 min 을 채운 뒤 숨긴다(el.hidden). stop 은 숨긴 뒤 풀리는 Promise. 이 요소에는 data-delay 를 달지 않는다. React <code>useLoadingDelay(loading, {delay, minDuration})</code>"]],
@@ -2003,13 +2003,13 @@ const COMPONENTS = {
     ],
     examples: [
       { id: "default", group: "default", title: "Default", desc: "가로 마법사입니다. '다음'은 그 단계의 폼을 검사합니다. 이 예제는 적용 그룹이 비어 있어 막힙니다. 완료한 '기본 정보'는 눌러 돌아갈 수 있고, 단계를 옮겨도 입력값은 남습니다.", html: `
-        <div class="stepper">
+        <div class="stepper" data-async>
           ${stepsOl("", [stepLi(STEP_L[0], 0, "done", { btn: true }), stepLi(STEP_L[1], 1, "on"), stepLi(STEP_L[2], 2, ""), stepLi(STEP_L[3], 3, "")])}
           ${stepPanel(false, stepForm("sd-name", "정책 이름", "2~40자", "외부 USB 차단"))}
           ${stepPanel(true, stepForm("sd-group", "적용 그룹", "예: 영업팀"))}
           ${stepPanel(false, stepNote("차단할 장치 종류와 예외를 정합니다."))}
-          ${stepPanel(false, stepNote("설정을 확인한 뒤 완료를 누릅니다."))}
-          ${stepActs(false, false)}
+          ${stepPanel(false, stepNote("설정을 확인한 뒤 정책 만들기를 누릅니다."))}
+          ${stepActs(false, false, "정책 만들기")}
         </div>` },
       { id: "label-below", group: "variant", title: "Label Below", desc: "원을 위에, 라벨을 그 아래 가운데에 둡니다. 라벨이 길거나 단계가 많을 때 폭을 아낍니다.", html: `
         <div class="stepper">
@@ -2018,16 +2018,16 @@ const COMPONENTS = {
           ${stepPanel(true, stepNote("기본 보호 수준을 고릅니다."))}
           ${stepPanel(false, stepNote("설치 파일을 받아 단말에 설치합니다."))}
           ${stepPanel(false, stepNote("위협을 알릴 채널을 고릅니다."))}
-          ${stepPanel(false, stepNote("설정을 확인한 뒤 완료를 누릅니다."))}
-          ${stepActs(false, false)}
+          ${stepPanel(false, stepNote("설정을 확인한 뒤 설정 마치기를 누릅니다."))}
+          ${stepActs(false, false, "설정 마치기")}
         </div>` },
       { id: "vertical", group: "variant", title: "Vertical", desc: "단계를 세로로 쌓고 현재 단계의 내용을 그 아래에 펼칩니다. 좁은 패널에 씁니다. 각 단계 안에 그 단계의 패널과 버튼을 둡니다.", html: `
         <div class="stepper">
           ${stepsOl("vertical", [
-            stepLi(STEP_L[0], 0, "done", { btn: true, inner: stepPanel(false, stepForm("sv-name", "정책 이름", "2~40자", "외부 USB 차단") + stepActs(false, false)) }),
-            stepLi(STEP_L[1], 1, "on", { inner: stepPanel(true, stepForm("sv-group", "적용 그룹", "예: 영업팀") + stepActs(false, false)) }),
-            stepLi(STEP_L[2], 2, "", { inner: stepPanel(false, stepNote("차단할 장치 종류와 예외를 정합니다.") + stepActs(false, false)) }),
-            stepLi(STEP_L[3], 3, "", { inner: stepPanel(false, stepNote("설정을 확인한 뒤 완료를 누릅니다.") + stepActs(false, false)) }),
+            stepLi(STEP_L[0], 0, "done", { btn: true, inner: stepPanel(false, stepForm("sv-name", "정책 이름", "2~40자", "외부 USB 차단") + stepActs(false, false, "정책 만들기")) }),
+            stepLi(STEP_L[1], 1, "on", { inner: stepPanel(true, stepForm("sv-group", "적용 그룹", "예: 영업팀") + stepActs(false, false, "정책 만들기")) }),
+            stepLi(STEP_L[2], 2, "", { inner: stepPanel(false, stepNote("차단할 장치 종류와 예외를 정합니다.") + stepActs(false, false, "정책 만들기")) }),
+            stepLi(STEP_L[3], 3, "", { inner: stepPanel(false, stepNote("설정을 확인한 뒤 정책 만들기를 누릅니다.") + stepActs(false, false, "정책 만들기")) }),
           ])}
         </div>` },
       { id: "nonlinear", group: "variant", title: "Non-linear", desc: "자유 이동입니다. 어느 단계든 눌러 옮기므로 순서가 상관없는 설정에 씁니다. 떠날 때 폼이 통과하면 완료로 표시합니다. '완료'는 모든 단계를 검사해 막힌 첫 단계로 가고, 이 예제에서는 적용 그룹 단계로 갑니다.", html: `
@@ -2036,13 +2036,13 @@ const COMPONENTS = {
           ${stepPanel(true, stepForm("sn-name", "정책 이름", "2~40자", "외부 USB 차단"))}
           ${stepPanel(false, stepForm("sn-group", "적용 그룹", "예: 영업팀"))}
           ${stepPanel(false, stepNote("차단할 장치 종류와 예외를 정합니다."))}
-          ${stepPanel(false, stepNote("설정을 확인한 뒤 완료를 누릅니다."))}
-          ${stepActs(true, false)}
+          ${stepPanel(false, stepNote("설정을 확인한 뒤 정책 만들기를 누릅니다."))}
+          ${stepActs(true, false, "정책 만들기")}
         </div>` },
       { id: "indicator", group: "variant", title: "Indicator Only", desc: "마법사 틀 없이 단계 목록만 쓰면 표시만 합니다. 단계 이동은 제품이 맡고, 완료한 단계를 누르면 몇 번째 단계를 눌렀는지 알리는 이벤트만 냅니다.", html: `
         ${stepsOl("", [stepLi(STEP_L[0], 0, "done", { btn: true }), stepLi(STEP_L[1], 1, "done", { btn: true }), stepLi(STEP_L[2], 2, "on"), stepLi(STEP_L[3], 3, "")])}` },
     ],
-    props: [[".stepper", "container", "—", "마법사. .steps + 단계 수만큼의 .step-panel + .step-actions(이전 · 다음 · 완료를 .btn-group 으로)"], [".steps", "ol", "—", "진행 단계. aria-label 필수. .stepper 밖에서 혼자 쓰면 표시만 한다(이동은 제품)"], [".steps li", "li", "—", ".done 완료(제품 색 원 + 체크 + 숨긴 '(완료)'), .on 현재(제품 색 테두리 원 + aria-current=\"step\"). 라벨은 .label"], [".label-below · .vertical", "class", "—", "배치. 없으면 가로. 세로는 각 li 안에 그 단계의 .step-panel 과 버튼"], [".stacked", "class", "—", "가로 · 라벨 아래가 자리에 안 들어가면 ds.js · React 가 붙여 세로로 쌓는다(창 크기가 바뀌면 다시 잰다). 직접 적지 않는다 — 빌드가 막는다"], [".step-btn", "button", "—", "누를 수 있는 단계 — 순서대로면 .done 안에만, data-nonlinear 면 현재가 아닌 모든 단계. ds.js 가 단계를 옮길 때마다 다시 그린다"], [".step-panel", "div", "—", "단계 내용. 현재만 보이고(hidden) 입력값은 남는다. 안의 form[data-validate] 를 '다음' · '완료'가 검사한다"], ["data-step", "prev | next | finish", "—", "이전 · 다음 · 완료 버튼. 첫 단계에서 이전은 disabled, 마지막 단계에서는 다음 대신 완료"], ["data-nonlinear", "attribute", "—", "어느 단계든 눌러 옮긴다. React nonLinear"], ["ds:step", "event", "—", ".stepper 에서 {index, from, trigger} — trigger 는 next · prev · click · finish · api. .stepper 밖 .steps 는 완료 단계 누름만 {index, from, trigger: \"click\"}. React onStepChange · Steps onStepClick"], ["ds:step-finish", "event", "—", "'완료'가 검사를 통과하면 {index}. React onFinish"], ["DS.stepper.go(el, index)", "function", "—", "제품이 단계를 옮긴다(검사 없음) — 서버 응답 뒤 등"]],
+    props: [[".stepper", "container", "—", "마법사. .steps + 단계 수만큼의 .step-panel + .step-actions(이전 · 다음 · 완료를 .btn-group 으로)"], [".steps", "ol", "—", "진행 단계. aria-label 필수. .stepper 밖에서 혼자 쓰면 표시만 한다(이동은 제품)"], [".steps li", "li", "—", ".done 완료(제품 색 원 + 체크 + 숨긴 '(완료)'), .on 현재(제품 색 테두리 원 + aria-current=\"step\"). 라벨은 .label"], [".label-below · .vertical", "class", "—", "배치. 없으면 가로. 세로는 각 li 안에 그 단계의 .step-panel 과 버튼"], [".stacked", "class", "—", "가로 · 라벨 아래가 자리에 안 들어가면 ds.js · React 가 붙여 세로로 쌓는다(창 크기가 바뀌면 다시 잰다). 직접 적지 않는다 — 빌드가 막는다"], [".step-btn", "button", "—", "누를 수 있는 단계 — 순서대로면 .done 안에만, data-nonlinear 면 현재가 아닌 모든 단계. ds.js 가 단계를 옮길 때마다 다시 그린다"], [".step-panel", "div", "—", "단계 내용. 현재만 보이고(hidden) 입력값은 남는다. 안의 form[data-validate] 를 '다음' · '완료'가 검사한다"], ["data-step", "prev | next | finish", "—", "이전 · 다음 · 완료 버튼. 첫 단계에서 이전은 disabled, 마지막 단계에서는 다음 대신 완료. 완료 버튼의 글자는 결과를 말하는 동사로 바꿔 쓴다(정책 만들기 · 배포). React labels.finish"], ["data-nonlinear", "attribute", "—", "어느 단계든 눌러 옮긴다. React nonLinear"], ["data-async", "attribute", "—", "완료 처리 중. 완료를 내면 완료 버튼이 loading 이 되어 다시 눌리지 않고, 제품이 ds:step-finish 의 resolve() 나 reject(문구) 를 불러야 풀린다. reject 는 오류 Toast(문구가 없으면 기본 문구). React async"], ["ds:step", "event", "—", ".stepper 에서 {index, from, trigger} — trigger 는 next · prev · click · finish · api. .stepper 밖 .steps 는 완료 단계 누름만 {index, from, trigger: \"click\"}. React onStepChange · Steps onStepClick"], ["ds:step-finish", "event", "—", "'완료'가 검사를 통과하면 {index}. data-async 면 {index, resolve, reject}. React onFinish(async 면 Promise 를 돌려줌 — 던지면 오류 Toast)"], ["DS.stepper.go(el, index)", "function", "—", "제품이 단계를 옮긴다(검사 없음) — 서버 응답 뒤 등"]],
     spec: [["Size", "원 32 · 체크 16 · 연결선 2(최소 16) · 간격 8 · 세로 단계 사이 24 · 마법사 안 폼 카드는 패널 폭을 채움(최대 폭 없음)"], ["Container", "원 radius/full · 완료 surface/brand/primary · 현재 surface/brand/primary 테두리 + surface/brand/subtle · 아직 line/neutral/primary 테두리 · 완료 뒤 연결선 surface/brand/primary"], ["Label", "Label 1/Normal 14 · 현재 SemiBold · 완료 secondary · 아직 tertiary"]],
   },
 
@@ -2075,7 +2075,7 @@ const COMPONENTS = {
           <hr class="divider dashed">
         </div>` },
       { id: "label", group: "variant", title: "With Label", desc: "구분의 의미를 알려야 할 때 가운데에 라벨을 둡니다.", html: `
-        <div style="width:100%;max-width:480px"><div class="divider label" role="separator">또는</div><div class="divider label" role="separator">2026-09-07</div></div>` },
+        <div style="width:100%;max-width:480px"><div class="divider label" role="separator">또는</div><div class="divider label" role="separator">2026. 09. 07</div></div>` },
       { id: "vertical", group: "variant", title: "Vertical", desc: "툴바에서 버튼 그룹을 나눕니다. 높이는 24px 입니다.", html: `
         <div class="btn-group">
           <button type="button" class="btn sm solid assistive">편집</button>
@@ -2135,7 +2135,7 @@ const COMPONENTS = {
     examples: [
       { id: "basic", group: "default", title: "Default (Sortable)", desc: "머리글을 눌러 정렬합니다. 정렬 중인 열은 머리글이 진해지고 방향 화살표가 붙습니다. 크기를 견주는 숫자 열은 오른쪽에 맞춥니다. 처리할 수 없는 행은 비활성 행으로 둡니다. 비활성 행은 글자 · 태그 · 링크 · 상태 원이 모두 비활성 색이 됩니다. 행 안 링크와 버튼은 Tab 순서에서 빠지고 눌러도 동작하지 않습니다. 행의 글자는 스크린 리더가 그대로 읽습니다.", html: `
         <div class="tbl-wrap">
-          <table class="tbl">
+          <table class="tbl nowrap">
             <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th class="sortable"><button type="button" class="sort">심각도</button></th><th>이벤트</th><th class="sortable"><button type="button" class="sort">대상</button></th><th class="num sortable"><button type="button" class="sort">횟수</button></th><th>상태</th></tr></thead>
             <tbody>
               <tr><td>09:41:12</td><td><span class="tag critical">Critical</span></td><td><a href="#" class="link">랜섬웨어 행위 탐지</a></td><td>PC-2041 · 김민준</td><td class="num">3</td><td><span class="indicator danger">차단</span></td></tr>
@@ -2151,9 +2151,9 @@ const COMPONENTS = {
           <table class="tbl hover">
             <thead><tr><th class="check"><label class="checkbox"><input type="checkbox" class="mixed" aria-label="전체 선택"></label></th><th>정책</th><th>적용 그룹</th><th class="num">대상</th><th>수정</th><th>사용</th></tr></thead>
             <tbody>
-              <tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="외부 USB 차단 선택"></label></td><td>외부 USB 차단</td><td>전체</td><td class="num">1,284</td><td>2026-09-06</td><td><label class="switch sm"><input type="checkbox" role="switch" checked aria-label="외부 USB 차단 사용"></label></td></tr>
-              <tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="스크립트 실행 제한 선택"></label></td><td>스크립트 실행 제한</td><td>개발팀 제외</td><td class="num">1,102</td><td>2026-09-02</td><td><label class="switch sm"><input type="checkbox" role="switch" checked aria-label="스크립트 실행 제한 사용"></label></td></tr>
-              <tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="원격 접속 허용 목록 선택"></label></td><td>원격 접속 허용 목록</td><td>인프라팀</td><td class="num">48</td><td>2026-08-21</td><td><label class="switch sm"><input type="checkbox" role="switch" aria-label="원격 접속 허용 목록 사용"></label></td></tr>
+              <tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="외부 USB 차단 선택"></label></td><td>외부 USB 차단</td><td>전체</td><td class="num">1,284</td><td>2026. 09. 06</td><td><label class="switch sm"><input type="checkbox" role="switch" checked aria-label="외부 USB 차단 사용"></label></td></tr>
+              <tr class="on"><td class="check"><label class="checkbox"><input type="checkbox" checked aria-label="스크립트 실행 제한 선택"></label></td><td>스크립트 실행 제한</td><td>개발팀 제외</td><td class="num">1,102</td><td>2026. 09. 02</td><td><label class="switch sm"><input type="checkbox" role="switch" checked aria-label="스크립트 실행 제한 사용"></label></td></tr>
+              <tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="원격 접속 허용 목록 선택"></label></td><td>원격 접속 허용 목록</td><td>인프라팀</td><td class="num">48</td><td>2026. 08. 21</td><td><label class="switch sm"><input type="checkbox" role="switch" aria-label="원격 접속 허용 목록 사용"></label></td></tr>
             </tbody>
           </table>
         </div>` },
@@ -2162,10 +2162,10 @@ const COMPONENTS = {
           <table class="tbl compact">
             <thead><tr><th>시간</th><th>레벨</th><th>소스</th><th>메시지</th></tr></thead>
             <tbody>
-              <tr class="log-row"><td>2026-09-07 09:41:12.031</td><td><span class="tag critical sm">CRIT</span></td><td>10.0.4.21</td><td>process.create blocked: rundll32.exe → cryptor.dll</td></tr>
-              <tr class="log-row"><td>2026-09-07 09:41:11.870</td><td><span class="tag medium sm">WARN</span></td><td>10.0.4.21</td><td>usb.attach vendor=0x0781 product=0x5583</td></tr>
-              <tr class="log-row"><td>2026-09-07 09:41:09.114</td><td><span class="tag info sm">INFO</span></td><td>10.0.0.3</td><td>policy.sync ok (rev 2041)</td></tr>
-              <tr class="log-row"><td>2026-09-07 09:41:08.552</td><td><span class="tag info sm">INFO</span></td><td>10.0.0.3</td><td>agent.checkin 1284/1284</td></tr>
+              <tr class="log-row"><td>2026. 09. 07 09:41:12.031</td><td><span class="tag critical sm">CRIT</span></td><td>10.0.4.21</td><td>process.create blocked: rundll32.exe → cryptor.dll</td></tr>
+              <tr class="log-row"><td>2026. 09. 07 09:41:11.870</td><td><span class="tag medium sm">WARN</span></td><td>10.0.4.21</td><td>usb.attach vendor=0x0781 product=0x5583</td></tr>
+              <tr class="log-row"><td>2026. 09. 07 09:41:09.114</td><td><span class="tag info sm">INFO</span></td><td>10.0.0.3</td><td>policy.sync ok (rev 2041)</td></tr>
+              <tr class="log-row"><td>2026. 09. 07 09:41:08.552</td><td><span class="tag info sm">INFO</span></td><td>10.0.0.3</td><td>agent.checkin 1284/1284</td></tr>
             </tbody>
           </table>
         </div>` },
@@ -2176,16 +2176,16 @@ const COMPONENTS = {
             <table class="tbl" id="dt-density">
               <thead><tr><th>정책</th><th>적용 그룹</th><th class="num">대상</th><th>수정</th></tr></thead>
               <tbody>
-                <tr><td>외부 USB 차단</td><td>전체</td><td class="num">1,284</td><td>2026-09-06</td></tr>
-                <tr><td>스크립트 실행 제한</td><td>개발팀 제외</td><td class="num">1,102</td><td>2026-09-02</td></tr>
-                <tr><td>원격 접속 허용 목록</td><td>인프라팀</td><td class="num">48</td><td>2026-08-21</td></tr>
+                <tr><td>외부 USB 차단</td><td>전체</td><td class="num">1,284</td><td>2026. 09. 06</td></tr>
+                <tr><td>스크립트 실행 제한</td><td>개발팀 제외</td><td class="num">1,102</td><td>2026. 09. 02</td></tr>
+                <tr><td>원격 접속 허용 목록</td><td>인프라팀</td><td class="num">48</td><td>2026. 08. 21</td></tr>
               </tbody>
             </table>
           </div>
         </div>`, layout: "top" },
       { id: "sub-text", group: "variant", title: "Sub Text", desc: "주 값 아래에 보조 글을 둡니다. 이름 아래 이메일, 단말 아래 IP 처럼 열을 늘리지 않고 맥락을 줍니다. 칸이 두 줄이라 넓은 밀도인 56px 행을 씁니다.", html: `
         <div class="tbl-wrap">
-          <table class="tbl relaxed">
+          <table class="tbl relaxed nowrap">
             <thead><tr><th>사용자</th><th>단말</th><th>역할</th><th class="num">위반</th></tr></thead>
             <tbody>
               <tr><td>김민준<span class="cell-sub">minjun.kim@corp.example.com</span></td><td>PC-2041<span class="cell-sub">10.0.4.21</span></td><td>영업팀</td><td class="num">3</td></tr>
@@ -2199,7 +2199,7 @@ const COMPONENTS = {
           <table class="tbl hover">
             <caption class="sr-only">단말 현황</caption>
             <thead><tr><th class="check"><label class="checkbox"><input type="checkbox" aria-label="전체 선택"></label></th><th>단말</th><th>사용자</th><th>그룹</th><th>IP</th><th>OS</th><th>에이전트</th><th class="num">위반</th><th>최근 접속</th></tr></thead>
-            <tbody>${[["PC-2041", "김민준", "영업팀", "10.0.4.21", "Windows 11", "5.2.1", "3", "2026-09-07 09:41"], ["PC-1187", "이서연", "개발팀", "10.0.4.37", "macOS 14", "5.2.1", "1", "2026-09-07 09:12"], ["PC-0932", "박지훈", "인프라팀", "10.0.2.8", "Windows 10", "5.1.8", "0", "2026-09-06 18:30"]].map(([n, u, g, ip, os, v, c, t]) => `<tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="${n} 선택"></label></td><td>${n}</td><td>${u}</td><td>${g}</td><td>${ip}</td><td>${os}</td><td>${v}</td><td class="num">${c}</td><td>${t}</td></tr>`).join("")}</tbody>
+            <tbody>${[["PC-2041", "김민준", "영업팀", "10.0.4.21", "Windows 11", "5.2.1", "3", "2026. 09. 07 09:41"], ["PC-1187", "이서연", "개발팀", "10.0.4.37", "macOS 14", "5.2.1", "1", "2026. 09. 07 09:12"], ["PC-0932", "박지훈", "인프라팀", "10.0.2.8", "Windows 10", "5.1.8", "0", "2026. 09. 06 18:30"]].map(([n, u, g, ip, os, v, c, t]) => `<tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="${n} 선택"></label></td><td>${n}</td><td>${u}</td><td>${g}</td><td>${ip}</td><td>${os}</td><td>${v}</td><td class="num">${c}</td><td>${t}</td></tr>`).join("")}</tbody>
           </table>
         </div>`, layout: "top" },
       { id: "total", group: "variant", title: "Total Row", desc: "합계 행은 회색 면에 굵은 글자이고, 위 선이 한 단계 진합니다. 이 페이지의 합계인지 전체의 합계인지 첫 칸에 적습니다.", html: `
@@ -2313,9 +2313,9 @@ const COMPONENTS = {
           <table class="tbl">
             <thead><tr><th>그룹</th><th class="num">에이전트</th><th class="num">정책</th><th>최근 배포</th></tr></thead>
             <tbody>
-              <tr><td>영업팀</td><td class="num">312</td><td class="num">8</td><td>2026-09-06</td></tr>
-              <tr><td>개발팀</td><td class="num">184</td><td class="num">11</td><td>2026-09-06</td></tr>
-              <tr><td>인프라팀</td><td class="num">48</td><td class="num">14</td><td>2026-09-02</td></tr>
+              <tr><td>영업팀</td><td class="num">312</td><td class="num">8</td><td>2026. 09. 06</td></tr>
+              <tr><td>개발팀</td><td class="num">184</td><td class="num">11</td><td>2026. 09. 06</td></tr>
+              <tr><td>인프라팀</td><td class="num">48</td><td class="num">14</td><td>2026. 09. 02</td></tr>
             </tbody>
           </table>
         </div>` },
@@ -2327,7 +2327,7 @@ const COMPONENTS = {
               <tr><th>이름</th><td>외부 USB 차단</td></tr>
               <tr><th>적용 그룹</th><td>전체 (1,284대)</td></tr>
               <tr><th>상태</th><td><span class="indicator ok">사용 중</span></td></tr>
-              <tr><th>최근 수정</th><td>2026-09-06 14:20 · admin@jiran.com</td></tr>
+              <tr><th>최근 수정</th><td>2026. 09. 06 14:20 · admin@jiran.com</td></tr>
             </tbody>
           </table>
         </div>` },
@@ -2374,9 +2374,9 @@ const COMPONENTS = {
             <table class="tbl" id="tb-density">
               <thead><tr><th>그룹</th><th class="num">에이전트</th><th class="num">정책</th><th>최근 배포</th></tr></thead>
               <tbody>
-                <tr><td>영업팀</td><td class="num">312</td><td class="num">8</td><td>2026-09-06</td></tr>
-                <tr><td>개발팀</td><td class="num">184</td><td class="num">11</td><td>2026-09-06</td></tr>
-                <tr><td>인프라팀</td><td class="num">48</td><td class="num">14</td><td>2026-09-02</td></tr>
+                <tr><td>영업팀</td><td class="num">312</td><td class="num">8</td><td>2026. 09. 06</td></tr>
+                <tr><td>개발팀</td><td class="num">184</td><td class="num">11</td><td>2026. 09. 06</td></tr>
+                <tr><td>인프라팀</td><td class="num">48</td><td class="num">14</td><td>2026. 09. 02</td></tr>
               </tbody>
             </table>
           </div>
@@ -2405,7 +2405,7 @@ const COMPONENTS = {
           <table class="tbl">
             <caption class="sr-only">그룹별 정책 적용</caption>
             <thead><tr><th>그룹</th><th class="num">에이전트</th><th class="num">USB 차단</th><th class="num">스크립트 제한</th><th class="num">원격 접속</th><th class="num">화면 캡처</th><th class="num">프린터</th><th>최근 배포</th></tr></thead>
-            <tbody>${[["영업팀", "312", "312", "298", "12", "312", "40", "2026-09-06"], ["개발팀", "184", "184", "0", "184", "120", "8", "2026-09-06"], ["인프라팀", "48", "48", "48", "48", "48", "2", "2026-09-02"]].map(([g, ...v]) => `<tr><td>${g}</td>${v.slice(0, 6).map((n) => `<td class="num">${n}</td>`).join("")}<td>${v[6]}</td></tr>`).join("")}</tbody>
+            <tbody>${[["영업팀", "312", "312", "298", "12", "312", "40", "2026. 09. 06"], ["개발팀", "184", "184", "0", "184", "120", "8", "2026. 09. 06"], ["인프라팀", "48", "48", "48", "48", "48", "2", "2026. 09. 02"]].map(([g, ...v]) => `<tr><td>${g}</td>${v.slice(0, 6).map((n) => `<td class="num">${n}</td>`).join("")}<td>${v[6]}</td></tr>`).join("")}</tbody>
           </table>
         </div>`, layout: "top" },
     ],
@@ -2430,7 +2430,7 @@ const COMPONENTS = {
     examples: [
       { id: "basic", group: "default", title: "Default", desc: "제목과 부제, 오른쪽 영역으로 이루어진 기본 목록입니다.", html: `
         <ul class="list" style="max-width:560px">
-          <li><div><span class="primary">외부 USB 차단</span><span class="meta">전체 · 1,284대 · 2026-09-06</span></div><span class="end"><span class="tag ok">사용</span></span></li>
+          <li><div><span class="primary">외부 USB 차단</span><span class="meta">전체 · 1,284대 · 2026. 09. 06</span></div><span class="end"><span class="tag ok">사용</span></span></li>
           <li><div><span class="primary">스크립트 실행 제한</span><span class="meta">개발팀 제외 · 1,102대</span></div><span class="end"><span class="tag ok">사용</span></span></li>
           <li><div><span class="primary">원격 접속 허용 목록</span><span class="meta">인프라팀 · 48대</span></div><span class="end"><span class="tag">중지</span></span></li>
         </ul>` },
@@ -2440,7 +2440,7 @@ const COMPONENTS = {
           <li><span class="avatar" data-name="이서연">이</span><div><span class="primary">이서연</span><span class="meta">인프라팀 · 운영자</span></div><span class="end"><div class="btn-group"><button type="button" class="btn sm assistive icon-only" aria-label="이서연 편집">${I("pencil")}</button><button type="button" class="btn sm assistive icon-only" aria-label="이서연 더 보기">${I("dots")}</button></div></span></li>
         </ul>` },
       { id: "select", group: "variant", title: "Selectable / Dense", desc: "행을 눌러 하나를 고르는 목록입니다. 고른 행에는 선택 면이 칠해집니다. 밀도가 높은 목록은 행 높이를 40px 로 줄입니다.", html: `
-        <ul class="list hover dense" style="max-width:480px" role="listbox">
+        <ul class="list hover dense" style="max-width:480px" role="listbox" aria-label="단말">
           <li role="option" tabindex="0"><span class="indicator ok">PC-2041</span><span class="end meta">10.0.4.21</span></li>
           <li role="option" tabindex="0" class="on" aria-selected="true"><span class="indicator danger">PC-1187</span><span class="end meta">10.0.4.33</span></li>
           <li role="option" tabindex="0"><span class="indicator">PC-0932</span><span class="end meta">오프라인</span></li>
@@ -2836,7 +2836,7 @@ const COMPONENTS = {
     ],
     examples: [
       { id: "default", group: "default", title: "Default", desc: "제목과 설명, 동작으로 이루어집니다.", html: `
-        <div class="page-head"><div><h1 class="title">정책</h1><p class="sub">전체 24개 · 최근 배포 09:41</p></div><div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">내보내기</button><button type="button" class="btn md solid primary">정책 만들기</button></div></div></div>` },
+        <div class="page-head"><div><h2 class="title">정책</h2><p class="sub">전체 24개 · 최근 배포 09:41</p></div><div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">내보내기</button><button type="button" class="btn md solid primary">정책 만들기</button></div></div></div>` },
       { id: "breadcrumb", group: "variant", title: "Breadcrumb", desc: "하위 페이지는 첫 칸에 Breadcrumb 를 넣습니다.", html: `
         <div class="page-head">
           <nav aria-label="현재 위치">
@@ -2846,10 +2846,10 @@ const COMPONENTS = {
               <li aria-current="page"><span>외부 USB 차단</span></li>
             </ol>
           </nav>
-          <div><h1 class="title">외부 USB 차단</h1><p class="sub">POL-2041 · 전체 그룹</p></div><div class="actions"><button type="button" class="btn md solid primary">배포</button></div>
+          <div><h2 class="title">외부 USB 차단</h2><p class="sub">POL-2041 · 전체 그룹</p></div><div class="actions"><button type="button" class="btn md solid primary">배포</button></div>
         </div>` },
       { id: "long", group: "variant", title: "Long Title", desc: "긴 제목은 줄바꿈하고 동작은 오른쪽 위에 남습니다.", html: `
-        <div class="page-head" style="max-width:520px"><div><h1 class="title">외부 저장장치 차단 및 예외 승인 정책의 부서별 적용 현황</h1><p class="sub">POL-2041</p></div><div class="actions"><button type="button" class="btn md solid primary">저장</button></div></div>` },
+        <div class="page-head" style="max-width:520px"><div><h2 class="title">외부 저장장치 차단 및 예외 승인 정책의 부서별 적용 현황</h2><p class="sub">POL-2041</p></div><div class="actions"><button type="button" class="btn md solid primary">저장</button></div></div>` },
     ],
     props: [[".page-head", "div", "—", "2열 격자. 줄 간격 · 열 간격 16"], ["nav", "Breadcrumb", "—", "첫 칸. React <code>breadcrumb</code>"], [".title", "h1", "—", "React <code>title</code> · 태그는 <code>as</code>(기본 h1)"], [".sub", "p", "—", "React <code>sub</code>"], [".actions", "div", "—", "동작 3개까지. React <code>actions</code>"]],
     spec: [["Size", "아래 내용과 16"], ["Title", "Title 2 28/38 Bold · 자간 -0.0236em"], ["Breadcrumb", "제목 위 · 아래 간격 16"], ["Description", "14 · foreground/neutral/secondary · 위 4"], ["Actions", "버튼 간격 8 · 오른쪽 위"]],

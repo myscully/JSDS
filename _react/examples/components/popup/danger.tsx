@@ -9,13 +9,13 @@ export default function Example() {
       <Form bare validate className="popup-form" id="dg-form" onSubmit={(e) => { e.preventDefault(); /* 삭제 실행 */ }}>
         <TextField
           id="confirm"
-          label='확인을 위해 "삭제" 를 입력하세요'
+          label={<>확인을 위해 <b>삭제</b>를 입력하세요</>}
           placeholder="삭제"
           required
           requiredMark={false}
-          pattern="삭제"
+          pattern="\s*삭제\s*"
           autoComplete="off"
-          messages={{ required: "확인 문구를 입력하세요.", pattern: "문구가 다릅니다. 삭제 를 그대로 입력하세요." }}
+          messages={{ required: "확인 문구를 입력하세요.", pattern: "문구가 다릅니다. 삭제를 그대로 입력하세요." }}
         />
       </Form>
       <PopupActions>

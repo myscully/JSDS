@@ -9,6 +9,7 @@ export const LABELS = {
   remove: "제거",
   clearFilters: "필터 초기화",
   switchFailed: "설정을 바꾸지 못했습니다. 다시 시도하세요.",
+  stepFailed: "작업을 끝내지 못했습니다. 다시 시도하세요.",
   clear: "지우기",
   search: "검색",
   loading: "불러오는 중",

@@ -22,5 +22,5 @@ const COLUMNS: DataTableColumn<Row>[] = [
 
 export default function Example() {
   /* 처리할 수 없는 행 — 글자 · 태그 · 링크 · 상태 점이 모두 비활성 색 */
-  return <DataTable columns={COLUMNS} rows={ROWS} rowKey={(r) => r.id} defaultSort={{ key: "time", dir: "desc" }} rowProps={(r) => ({ disabled: r.id === "4" })} />;
+  return <DataTable nowrap columns={COLUMNS} rows={ROWS} rowKey={(r) => r.id} defaultSort={{ key: "time", dir: "desc" }} rowProps={(r) => ({ disabled: r.id === "4" })} />;
 }

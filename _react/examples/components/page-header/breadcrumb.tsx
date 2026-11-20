@@ -2,7 +2,7 @@ import { Breadcrumb, BreadcrumbHome, BreadcrumbItem, Button, PageHead } from "@j
 
 export default function Example() {
   return (
-    <PageHead
+    <PageHead as="h2"
       breadcrumb={
         <Breadcrumb>
           <BreadcrumbHome href="#" />

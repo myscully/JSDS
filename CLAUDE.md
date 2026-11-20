@@ -50,7 +50,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 103 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1582/1582 · react 890+6 · tsc 0
+pages 103 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1630/1630 · react 898+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1064,6 +1064,50 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 목록의 70ch 를 되돌리려고 붙여 둔 `max-width:none` 다섯 곳(UI Dictionary 격자 · Guide 단계 · 관련 문서 · 길 카드 · 홈 배너)도 쓸모가 없어져 지웠다. 컴포넌트 CSS 의 `.notice ul` · `.steps` · `.list` 쪽은 패키지로도 나가므로 남겼다.
 - **그대로 둔 것(사람의 결정):** 홈 첫 화면 가운데 설명 문장의 54rem, 컴포넌트 예제 안의 폭(폼 640 · Accordion 560 · Notice 600 등 약 40곳 — 컴포넌트를 그리는 폭이지 글 폭이 아님). 본문 칸 자체(`.page` 최대 968)도 레이아웃이라 그대로다.
 - 다시 재면 본문에서 max-width 로 좁아진 글은 0이다(남은 것은 셸 · 칸 · 홈 히어로).
+
+2026-11-20 디자인 검토 P1 넷(사람의 요청 'P1 넷 고치기' — design-superpowers `/design-review` 방법으로 사이트 전체를 본 보고서의 P1) — behave 1582 → 1594(`behave.p1.js` 12). contrast · advisory · verify · react · pages 수는 그대로.
+- **헤더 검색** — 페이지 제목 · 묶음만 찾아 토스트 · Toast · 모달 · Modal · 스피너 · Spinner · 배너 · 날짜 가 모두 0건이었다.
+  - `build.js` 가 `SEARCH_INDEX` 항목마다 `k`(다른 이름)를 싣는다. UI Dictionary 의 이름 · 영문 · 다른 이름 · 대표 클래스 · React 이름과 컴포넌트 데이터의 React 이름이다. 생김새 검색어(`kw`)는 넓어서 넣지 않았다(사람이 정하지 않은 기본값).
+  - 순서는 제목 앞 일치 → 제목 안 → 묶음 → 다른 이름이 그대로 맞음 → 일부만 맞음이다. 다른 이름으로 찾은 결과는 작은 글자에 그 이름을 보인다. 결과는 20개까지다.
+  - UI Dictionary 팝업 항목의 다른 이름에 'Modal' · 'Dialog' 를 더했다(사람이 정하지 않은 기본값 — 영문 'Modal' 이 어디에도 없었다).
+  - 키보드: 검색칸은 `role=combobox` + 결과 `role=listbox`(`aria-activedescendant`). ↑↓ · Home · End 로 고르고 Enter 로 연다. 고른 것이 없으면 첫 결과로 간다(사람이 정하지 않은 기본값). 포커스는 칸에 남는다.
+  - 결과 수는 숨긴 `role=status` 가 알린다('결과 N개'). 0건이면 목록과 status 에 '검색 결과가 없습니다' 를 보이고 UI Dictionary(`?q=`)로 잇는다. placeholder 를 영문에서 '컴포넌트 · 패턴 검색' 으로 바꿨다.
+- **상단 메뉴 줄 포커스 링** — `.topnav` 의 `overflow-x:auto` 가 바깥 외곽선을 잘라 오른쪽 선만 남았다. `.topnav a:focus-visible{outline-offset:-2px}` 로 안쪽에 그린다(탭 줄과 같은 방식).
+- **알림 센터 본문** — Tab 이 멈추는 `.notify-body` 에 `outline:none` 이 있어 포커스가 보이지 않았다. 지우고 안쪽 링(`outline-offset:-2px`)으로 그린다.
+- **사이드바 · 목차 묶음 제목** — `.nav h5` · `.toc h6` 가 `opacity:.3` 이라 대비가 라이트 1.95 · 다크 2.62 였다. `--foreground-neutral-secondary` 로 바꿨다(사람이 정하지 않은 기본값 — 사이드바 항목과 같은 색이고 크기 · 굵기 11/600 으로 갈림).
+- **behave.p1 12** — 다른 이름 · 영문 · React 이름 열 개가 결과를 냄, 다른 이름이 그대로 맞는 쪽이 앞, 제목 앞 일치가 첫째, combobox · listbox · 한국어 placeholder · 결과 수 알림, ↓↑ 로 고르고 포커스 유지, Enter 가 고른 것을, 고른 것이 없으면 첫 결과를 엶, 0건 안내와 UI Dictionary 링크, Esc 로 닫힘, 상단 메뉴 링이 안쪽 · 메뉴 줄 안, 알림 본문 링, 묶음 제목 1600 라이트 · 다크의 불투명 · secondary · 4.5 이상.
+- 음성 시험 8건 중 7건이 잡혔다(다른 이름 끔 · 그대로 맞음 순위 끔 · 방향키 끔 · status 끔 · 메뉴 링 · 알림 outline:none · 제목 opacity). 못 잡은 1건(검색 팝을 닫을 때 aria-expanded · aria-activedescendant 를 지움)은 값을 비우는 input 이벤트가 이미 하는 쓸모없는 코드라 지웠다.
+- 1440 라이트 · 다크 캡처로 검색 결과 · 0건 안내를 보았다.
+- 보고서의 P2 · P3 는 이번에 고치지 않았다. Figma 미반영 1건(그대로 — Home 잘림. 문서 셸은 audit 대조 밖).
+
+2026-11-20 디자인 검토 P2 · P3(사람의 요청 'P2, P3도 함께 고쳐줘' · 결정 일곱) — behave 1594 → 1630(`behave.p2.js` 36) · react 890+6 → 898+6(예제 323 → 331 에 따른 구조 비교 8). contrast · advisory · verify · pages 수는 그대로.
+- **사람의 결정:** 간격 문서는 실제대로(#3) · 1440 의 오른쪽 목차는 그대로(#4 — 고치지 않음) · 날짜 표시 `YYYY. MM. DD`(#30) · 비활성 코드 탭 라벨을 secondary 로 올림(A8) · 아이콘 선 굵기 보정함(#16) · 오버레이 들어옴 · 나감 더함(#25) · Steps 마지막 단계는 옵션으로 처리 중 표시(#10). '사람의 결정과 다른 의견'(D1 ~ D11)은 고치지 않았다.
+- **글 · 문서:**
+  - 한국어 줄바꿈을 `body` 의 `word-break:keep-all` 하나로(#2). 컴포넌트마다 붙은 12곳은 패키지에도 나가므로 남겼다.
+  - Grid 의 간격 설명을 실제대로 — 컴포넌트 안쪽은 6 · 10 · 14 같은 2px 단계도 쓴다(#3). Design Token › Motion 문장 · 쓰임 표(#5), Figma 페이지 이름(#12), 정책 설정 Rules '배포 버튼은 머리글'(#7), Templates 옛 경로 주석(#31), 가져오기 예시 IP(#28), Select Spec 메뉴 폭(#22).
+  - 결과를 말하는 버튼 라벨(#8) — '인증하고 로그인' · '정책 만들기' · '설정 마치기' · 'CSV 내보내기' · '보고서 만들기'. React `Stepper labels.finish`.
+  - Writing 에 날짜 형식(`2026. 09. 07 14:30` · 올해면 `09. 07 14:30`, ISO 금지)과 용어 표(실행 취소 · 되돌리기 · 필수 · 삭제)를 더했다(#29 · #30). '필수' Tag 는 accent 하나, 삭제 확인에 개수.
+- **UX:**
+  - 2단계 인증에 계정 줄(`.auth-account` — 이메일 + '다른 계정으로 로그인')(#9).
+  - **Steps `data-async` · React `async`**(#10) — 완료를 누르면 버튼이 loading + `aria-busy`, 두 번째 누름은 이벤트를 내지 않는다. `ds:step-finish` 의 `resolve()` · `reject(문구)` 로 풀고 reject 는 Toast. 옵션이라 없으면 예전과 같다. Default · 템플릿 위저드가 쓴다.
+  - 데이터 패턴 일곱에 State 예제(불러오는 중 Skeleton 행 · 빈 결과 · 오류와 다시 시도 — `pStates`, 사이트 · React)(#11). 로그 뷰어에 연결이 끊긴 Banner(warning · `role=alert` · '다시 연결').
+  - 위험 작업 확인의 입력할 이름을 라벨에서 굵게, 앞뒤 공백은 비교하지 않음(`pattern="\s*…\s*"`, Popup 위험 확인도)(#27). 라벨 안 `b` 는 700 — UA 의 bolder 가 600 위에서 900 이 되어 굵기 넷 밖이었다(behave.type 이 잡음).
+- **시각:**
+  - 아이콘 선 보정(#16) — `ds:icons` 블록에 크기별 `stroke-width`(10 2.64 · 12 2.4 · 14 2.2 · 16 2.1 · 20 1.9 · 24 1.75 · 48 1.25, 18 은 2 그대로). 보이는 선이 10 ~ 24 에서 1.1 ~ 1.75px 이다. 명시도 0 이라 컴포넌트가 정한 선이 이긴다.
+  - Pagination compact 반경 4(#14) · `.empty b` 600(#20) · 펼침 칸 있는 행 = 밀도 높이(#21) · 차트 머리 부제 기준선(#17) · 날짜 hover 원 = tertiary(#24) · 표 칸 `.tbl.nowrap` · Indicator 줄바꿈 없음(#13) · 대시보드 썸네일 KPI(#15) · 조직도 두 칸 같은 높이(#19).
+  - 정책 설정 컨트롤 칸 폭 하나 17.5rem(#18). **767 이하에서는 컨트롤 칸이 설명 아래로** — 칸 폭 그대로 390 에서 26px 넘쳤다(전체 게이트의 넘침 검사가 잡음).
+  - 쌓임 단계 토큰 `--z-menu` · `tooltip` · `float` · `dim` · `panel` · `popup` · `toast` · `tooltip-float` · `skip`(#23). 컴포넌트 안의 1 · 2 · 3 은 그대로 숫자.
+- **모션:**
+  - Switch 노브는 `transform`(#6 — 원본은 `icons-css.js` 가 써 넣는다), Skeleton 빛 띠는 `::after` 의 transform(#26). Accordion 높이 · 진행 막대 폭 · Colors 막대 · 홈 배너 너비 전환은 바꾸지 않았다(홈 배너 아이콘 벌어짐만 transform).
+  - **오버레이 들어옴 · 나감**(#25) — Popup · 모달 Side Panel 배경 · 패널 · Toast 가 `--motion-base` 로 흐림에서 나타나며 8px 움직인다. 나갈 때는 ds.js · React `ghostOut` 이 같은 모양의 사본(`.ds-ghost`, aria-hidden · inert · id 없음)을 `--motion-fast` 로 흐리고 지운다. 진짜 오버레이는 바로 닫히므로 포커스 · 상태는 예전과 같다. 줄인 모션이면 사본을 만들지 않는다.
+  - **사본은 클래스를 지닌다** — 닫은 직후 `.popup-backdrop` · `.side-panel-dim` 선택자가 사본에도 맞는다. 단정은 `[data-ds-popup]` · `:not(.ds-ghost *)` 로 고쳤다. 제품 코드도 열린 것을 찾을 때 같은 방식을 쓴다.
+- **접근성:** A4 스크롤 조상 안 포커스 링을 안쪽으로, A5 Templates iframe `tabindex=-1`, A6 고른 면 위 보조 글 secondary, A7 위험 Notice 안 텍스트 버튼 중립 글자, A8 REF 수치를 실측으로, A9 progressbar · listbox 이름, A10 개요 카드 썸네일 aria-hidden · N 배지 숨긴 '새 항목', A11 문서 셸 `<main id="content">`, A12 헤더가 넘치면 ☰(`nav-tight`) · `dl.kv dd code` 줄바꿈 · Writing 배너 줄바꿈, A13 간격 막대 숫자 `--brand-label`, A14 예제 Page Header h2 · 템플릿 화면 h1 하나, A15 영문 블록 · locale 예제 `lang`.
+- **behave.p2 36**(9 부분) — 셸 · 글자 200% · lang · 이름과 제목 단계 · 포커스와 대비 · 크기와 선 · 모션과 사본 · Steps 처리 중 · 위험 확인 이름과 날짜 형식 · 데이터 State 와 390.
+- **기존 단정 고침 9:** 스켈레톤 애니메이션은 `::after` 에서(behave.js · behave.later 둘 — `getAnimations({subtree:true})`), 날짜 hover = tertiary(behave.dp), 패널 · 긴 팝업은 들어오는 움직임 뒤에 잼 · 사본을 빼고 찾음(behave.feedback 넷), 홈 배너 벌어짐을 원 사이 거리로(behave.home), 템플릿 위저드 Toast 는 처리 중 뒤(behave.templates), Guide 링크 이름에서 '새 항목' 을 뺌(behave.guide). React `code-input.test` 의 버튼 이름 '확인' → '인증하고 로그인'.
+- 템플릿 위저드의 흉내 처리기가 detail 없이 낸 `ds:step-finish` 에서 던졌다 — `e.detail && e.detail.resolve`.
+- 음성 시험: behave.p2 의 생성 파일 11곳을 하나씩 되돌려 모두 실패로 잡혔다. 아이콘 선 단정은 처음에 16px 규칙을 지워도 띠 안이라 통과해, 원래 값 2px 가 아닌지를 더 잰다.
+- **고치지 않은 것과 이유:** #4(사람의 결정), #6 의 레이아웃 전환 넷(위), 차트 축의 짧은 날짜(Chart.js 눈금 — 날짜 형식 규칙은 화면 글자에), 로그인 화면의 h1 둘(숨긴 2단계 폼의 제목 — 둘 중 하나만 보임), Colors 제품 색 표는 틀 안에서 가로 스크롤.
+- Figma 미반영 1 → 6건(Home 잘림 포함) — 이번 몫 넷(Select Spec Size · 위험 확인 Rules '이름 입력' · 달력 Day Hover 면 secondary · 패턴의 '필수' Tag 톤 High), 하나(Navigation Rules '좁은 화면')는 11-19 부터 있었는데 그때 세지 못했다.
 
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

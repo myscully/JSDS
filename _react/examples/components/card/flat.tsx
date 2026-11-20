@@ -9,7 +9,7 @@ export default function Example() {
           <CardTitle>라이선스</CardTitle>
           <Tag tone="ok">정상</Tag>
         </CardHead>
-        <CardDesc>1,000석 중 842석 사용 중. 2026-12-31 만료.</CardDesc>
+        <CardDesc>1,000석 중 842석 사용 중. 2026. 12. 31 만료.</CardDesc>
       </Card>
       <Card variant="flat" style={{ width: "min(300px, 100%)" }}>
         <CardHead>

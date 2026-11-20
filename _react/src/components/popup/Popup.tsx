@@ -1,4 +1,4 @@
-import { createContext, forwardRef, useContext, useEffect, useRef, type HTMLAttributes, type ReactNode, type RefObject } from "react";
+import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useRef, type HTMLAttributes, type ReactNode, type RefObject } from "react";
 import { cx } from "../../utils/cx";
 import { useId } from "../../utils/useId";
 import { Button } from "../button/Button";
@@ -6,6 +6,7 @@ import { Icon } from "../../icons/Icon";
 import { LABELS } from "../../labels";
 import { useEscape, useFocusTrap, mergeRefs } from "../../utils/hooks";
 import { Portal } from "../../utils/Portal";
+import { ghostOut } from "../../utils/ghost";
 
 interface PopupCtx { titleId?: string; bodyId?: string; onClose?: () => void; busy?: boolean; closeLabel?: string }
 const Ctx = createContext<PopupCtx>({});
@@ -103,8 +104,11 @@ const PopupLayer = forwardRef<HTMLDivElement, Omit<PopupProps, "open" | "contain
     document.body.style.overflow = "hidden";
     return () => { openPopups--; document.body.style.overflow = prev; };
   }, []);
+  const back = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => { const node = back.current; return () => ghostOut([node]); }, []);   // 나갈 때 흐려지는 사본(사이트와 같음)
   return (
     <div
+      ref={back}
       className="popup-backdrop"
       onInputCapture={mark}
       onChangeCapture={mark}

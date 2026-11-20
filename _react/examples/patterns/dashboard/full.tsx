@@ -36,7 +36,7 @@ const RECENT = [
 export default function Example() {
   return (
     <Stack>
-      <PageHead
+      <PageHead as="h2"
         title="대시보드"
         sub="최근 갱신 09:41 · 자동 갱신 1분"
         actions={

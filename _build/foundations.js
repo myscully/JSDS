@@ -96,9 +96,9 @@ ${tbl(["쓰는 자리", "끝맺음", "예"], [
   ["안내 목록", "완전한 문장이면 마침표", "격리 파일은 30일 보관됩니다."],
 ])}
 <h2 id="buttons">Buttons</h2><p>버튼에는 <b>누르면 일어날 동작</b>을 쓰고, 필요하면 대상을 앞에 붙입니다. 한 어절에서 네 어절 사이로 쓰고 명사형 동작어로 끝냅니다 — 저장 · 정책 저장 · 다시 시도 · 내보내기 · 필터 초기화.</p>
-${dd(`<span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;gap:8px">${b("outline assistive", "취소")}${b("solid negative", "삭제")}</span>`,
+${dd(`<span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;flex-wrap:wrap;gap:8px">${b("outline assistive", "취소")}${b("solid negative", "삭제")}</span>`,
   "확인 대화상자의 버튼은 일어날 동작을 그대로 씁니다. 제목이 질문이면 버튼이 그 답입니다.",
-  `<span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;gap:8px">${b("outline assistive", "아니요")}${b("solid negative", "확인")}</span>`,
+  `<span style="font-size:14px;font-weight:600">정책 12개를 삭제할까요?</span><span style="margin-left:auto;display:flex;flex-wrap:wrap;gap:8px">${b("outline assistive", "아니요")}${b("solid negative", "확인")}</span>`,
   "'확인' · '예' 는 무엇이 일어나는지 말하지 않습니다. '확인' 은 정보만 알리고 닫는 대화상자에서만 씁니다.")}
 <h2 id="labels">Vague labels</h2><p>어디로 가는지 · 무엇이 열리는지 말하지 않는 라벨은 쓰지 않습니다.</p>
 ${tbl(["쓰지 않음", "대신", "예외"], [
@@ -108,12 +108,12 @@ ${tbl(["쓰지 않음", "대신", "예외"], [
   ["더 보기", "펼쳐지는 것 — 이벤트 20건 더 보기", "⋯ 아이콘만 있는 Dropdown 동작 메뉴 버튼의 숨긴 이름으로는 허용"],
   ["전체 보기", "", "Card 머리에서 같은 목록 화면으로 가는 링크로는 허용"],
 ])}
-${dd(`<div class="banner" role="status" style="flex:1">${I("info-circle",18,{style:"filled"})}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button></div>`,
+${dd(`<div class="banner" role="status" style="flex:1;min-width:0;flex-wrap:wrap">${I("info-circle",18,{style:"filled"})}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button></div>`,
   "버튼만 읽어도 무엇이 열리는지 압니다. 스크린 리더의 버튼 목록에서도 구분됩니다.",
-  `<div class="banner" role="status" style="flex:1">${I("info-circle",18,{style:"filled"})}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">자세히</button></div>`,
+  `<div class="banner" role="status" style="flex:1;min-width:0;flex-wrap:wrap">${I("info-circle",18,{style:"filled"})}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">자세히</button></div>`,
   "'자세히' 가 여러 개면 버튼 목록에서 구분되지 않고, 무엇이 열리는지 눌러 봐야 압니다.")}
 <h2 id="titles">Titles</h2><p>페이지 · 카드 · 섹션 제목에는 <b>대상을 가리키는 명사</b>가 있습니다 — 정책 목록 · 에이전트 연결 · 일별 탐지 추이. 질문(빈 화면 · 확인 대화상자 제외) · 명령 · 분위기 문구로 쓰지 않습니다.</p>
-<h2 id="numbers">Numbers</h2><ul><li>숫자와 단위는 붙여 쓰고 줄이 갈라지지 않게 합니다 — 1,054건 · 18% · 240px. 표와 KPI 의 숫자는 자릿수가 맞는 숫자 글꼴로 씁니다</li><li>네 자리부터 쉼표를 찍습니다 — 1,054. 날짜는 2026-09-07, 기간은 2026-09-01 ~ 2026-09-07 처럼 씁니다</li><li>예제 데이터도 실제처럼 고르지 않은 값으로 씁니다. 100 · 50 · 25 대신 1,054 · 38 · 212 처럼 씁니다</li></ul>
+<h2 id="numbers">Numbers</h2><ul><li>숫자와 단위는 붙여 쓰고 줄이 갈라지지 않게 합니다 — 1,054건 · 18% · 240px. 표와 KPI 의 숫자는 자릿수가 맞는 숫자 글꼴로 씁니다</li><li>네 자리부터 쉼표를 찍습니다 — 1,054</li><li>날짜는 Date Picker 와 같은 형식으로 2026. 09. 07 처럼 씁니다. 시각은 24시간제로 붙여 2026. 09. 07 14:30, 기간은 2026. 09. 01 ~ 2026. 09. 07 입니다</li><li>한 해 안의 표처럼 자리가 좁으면 연도를 빼고 09. 07 14:30 으로 씁니다. 차트 축 눈금만 09-07 처럼 더 짧게 씁니다. 원본 로그처럼 기계가 읽는 값은 형식을 바꾸지 않습니다</li><li>예제 데이터도 실제처럼 고르지 않은 값으로 씁니다. 100 · 50 · 25 대신 1,054 · 38 · 212 처럼 씁니다</li></ul>
 <h2 id="errors">Errors and empty states</h2><p>오류 문구는 <b>무엇이 일어났는지</b>와 <b>어떻게 하면 되는지</b> 두 부분입니다. 빈 화면은 <b>지금 상태</b>와 <b>다음 행동</b>입니다.</p>
 ${tbl(["상황", "문구", "행동"], [
   ["불러오기 실패", "불러오지 못했습니다", "다시 시도"],
@@ -123,7 +123,13 @@ ${tbl(["상황", "문구", "행동"], [
   ["처음 쓰는 화면", "아직 정책이 없습니다", "정책 추가"],
 ])}
 <h2 id="placeholders">Placeholders</h2><p>lorem ipsum · TODO · 빈 대괄호 · '샘플' · '예시' 같은 표시를 화면에 남기지 않습니다. 실제 문구를 쓰거나 그 요소를 뺍니다.</p>
-<h2 id="terms">One fact, one wording</h2><p>같은 사실은 화면 전체에서 한 표현으로 씁니다. 같은 동작을 '차단' 과 '블록' 으로 섞지 않습니다. 상태 이름은 <a href="#/patterns/severity">Severity</a> 패턴의 용어를 따릅니다.</p>`;
+<h2 id="terms">One fact, one wording</h2><p>같은 사실은 화면 전체에서 한 표현으로 씁니다. 같은 동작을 '차단' 과 '블록' 으로 섞지 않습니다. 상태 이름은 <a href="#/patterns/severity">Severity</a> 패턴의 용어를 따릅니다.</p>
+${tbl(["말", "쓰는 뜻", "쓰지 않는 뜻"], [
+  ["실행 취소", "방금 한 동작을 바로 무를 때. Toast 의 동작 버튼에 씁니다", "옛 버전으로 돌아가기"],
+  ["되돌리기", "저장된 이전 버전으로 돌아갈 때. 되돌리기도 새 버전을 하나 만듭니다", "방금 한 동작을 무르기"],
+  ["필수", "꼭 채우거나 동의해야 하는 항목의 표시. Tag 는 accent 톤 하나만 씁니다", "검사 오류의 종류(빈 값 · 형식처럼 문제를 이름으로)"],
+  ["삭제", "복구할 수 없게 지울 때. 확인 문구에 지워지는 대상의 개수를 적습니다", "보관함으로 옮기기(보관)"],
+])}`;
     },
 
     /* ================= Interaction =================
@@ -324,7 +330,7 @@ ${tbl(["환경", "너비", "높이", "콘텐츠 최대 너비"], [["Web desktop 
 <h2 id="breakpoint">Breakpoint</h2><p>모바일·태블릿은 대응하지 않는 Desktop 전용 콘솔입니다. 1280 미만에서는 사이드 내비게이션을 접어 콘텐츠 폭을 확보합니다.</p>
 ${tbl(["명칭", "대응 환경", "너비", "레이아웃", "콘텐츠 최대 너비"], [["md", "데스크탑 소형 · 노트북", "1024 – 1279px", "사이드 내비 접힘 64 + 콘텐츠", "100% (Padding 20)"], ["lg", "데스크탑 (기준 1440)", "1280 – 1919px", "사이드 내비 240 + 콘텐츠", "1160px (Padding 24)"], ["xl", "데스크탑 대형", "1920px ~", "사이드 내비 240 + 콘텐츠", "1600px (Padding 24)"]])}
 ${codeBlock("bp-css", `/* Desktop-first */\n.app{display:grid;grid-template-columns:240px minmax(0,1fr)}\n.content{max-width:1160px;margin:0 auto;padding:0 24px}\n@media (max-width:1279px){.app{grid-template-columns:64px minmax(0,1fr)}.content{padding:0 20px}}\n@media (min-width:1920px){.content{max-width:1600px}}`, "css", "CSS 복사")}
-<h2 id="spacing">Spacing</h2><p>예측 가능한 디자인 규칙과 개발자와의 원활한 소통을 위해 <b>4배수 간격</b>으로 구성합니다. 기준은 4px 이며, 시각 보정이 필요할 때는 2px 단위로 움직이고 불가피할 때만 1px 씩 조정합니다. 카드 안쪽 여백 24, 카드 사이 간격 20, 섹션 사이 48~64 를 기본으로 넉넉히 잡아 답답한 밀도를 피합니다. 노란색은 4px 그리드를 벗어난 값으로, 시각 보정이 꼭 필요할 때만 씁니다. 토큰 원본 CSS 는 <a href="#/resources/design-token">Design Token</a> 에 있습니다.</p>
+<h2 id="spacing">Spacing</h2><p>예측 가능한 디자인 규칙과 개발자와의 원활한 소통을 위해 <b>4배수 간격</b>을 기본으로 구성합니다. 기준은 4px 입니다. 컴포넌트 안쪽에서는 6 · 10 · 14 처럼 2px 단위의 보정 값도 함께 씁니다. 버튼 묶음 사이 6 · 작은 칸 여백 10 · 입력칸 안 여백 14 가 그런 자리입니다. 1px 은 테두리를 맞출 때만 씁니다. 카드 안쪽 여백 24, 카드 사이 간격 16, 섹션 사이 48~64 를 기본으로 잡아 답답한 밀도를 피합니다. 노란색은 4px 그리드를 벗어난 보정 값입니다. 토큰 원본 CSS 는 <a href="#/resources/design-token">Design Token</a> 에 있습니다.</p>
 <div class="space-bars">${spaces.map(v => { const t = tokenOf[v]; const cls = v === 4 ? "base" : v % 4 ? "off" : ""; return `<div class="${cls}"><b>${v}</b><i style="width:${v}px"></i>${t ? `<small>${t}</small>` : ""}</div>`; }).join("")}</div>
 <h2 id="layout">Layout</h2><p>콘텐츠 영역 안은 24px 의 간격(gutter)을 두는 12단 컬럼 그리드를 사용하며, 화면 너비에 맞게 유연하게 대응합니다. 컬럼은 자유롭게 병합합니다. KPI 카드 넷은 3컬럼씩, 2단 폼은 6컬럼씩 차지합니다.</p>
 <h3>Desktop</h3><p>사이드 내비게이션 240px 을 뺀 콘텐츠 영역은 최대 1160px 이고, 좌우 여백 24px · 간격 24px 의 12단 컬럼을 씁니다.</p>

@@ -3,8 +3,8 @@ import { Avatar, AvatarGroup, Button, Icon, Indicator, Link, Spacer, Stack, Swit
 type Report = { id: string; name: string; cycle: string; next?: string; to: string[]; shown?: number; failed?: boolean; on: boolean };
 /* 받는 사람이 다섯을 넘지 않아도 칸이 좁으면 앞의 둘만 보이고 나머지는 '외 N명' 으로 적는다(max) */
 const REPORTS: Report[] = [
-  { id: "weekly", name: "주간 보안 요약", cycle: "매주 월요일 09:00", next: "11-16 09:00", to: ["김민준", "이서연", "박지훈", "최유진", "정다은"], shown: 2, on: true },
-  { id: "agent", name: "에이전트 상태", cycle: "매월 1일 08:00", next: "12-01 08:00", to: ["박지훈"], failed: true, on: true },
+  { id: "weekly", name: "주간 보안 요약", cycle: "매주 월요일 09:00", next: "11. 16 09:00", to: ["김민준", "이서연", "박지훈", "최유진", "정다은"], shown: 2, on: true },
+  { id: "agent", name: "에이전트 상태", cycle: "매월 1일 08:00", next: "12. 01 08:00", to: ["박지훈"], failed: true, on: true },
   { id: "threat", name: "위협 상세", cycle: "매일 02:00", to: ["최유진", "정다은"], on: false },
 ];
 
@@ -14,7 +14,7 @@ export default function Example() {
     <Stack>
       <Toolbar>
         <Spacer />
-        <Button iconLeft={<Icon name="plus" />}>새 보고서</Button>
+        <Button iconLeft={<Icon name="plus" />}>보고서 만들기</Button>
       </Toolbar>
       <Table nowrap>
         <TableHead>

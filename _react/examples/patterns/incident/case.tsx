@@ -13,7 +13,7 @@ const LOGS = [
 export default function Example() {
   return (
     <Stack>
-      <PageHead
+      <PageHead as="h2"
         breadcrumb={
           <Breadcrumb>
             <BreadcrumbHome href="#" />

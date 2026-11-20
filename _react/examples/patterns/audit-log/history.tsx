@@ -1,9 +1,9 @@
 import { Button, Card, CardHead, CardTitle, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Tag } from "@jiran/ds-react";
 
 const VERSIONS = [
-  { v: "v12", by: "이서연", at: "11-15 10:12", what: "USB 저장장치 차단 끔 외 1건", current: true },
-  { v: "v11", by: "김민준", at: "11-10 16:40", what: "예약 검사 시각 02:00" },
-  { v: "v10", by: "이서연", at: "11-02 11:05", what: "랜섬웨어 행위 차단 켬" },
+  { v: "v12", by: "이서연", at: "11. 15 10:12", what: "USB 저장장치 차단 끔 외 1건", current: true },
+  { v: "v11", by: "김민준", at: "11. 10 16:40", what: "예약 검사 시각 02:00" },
+  { v: "v10", by: "이서연", at: "11. 02 11:05", what: "랜섬웨어 행위 차단 켬" },
 ];
 const DIFF = [
   ["USB 저장장치 차단", "켬", "끔"],
@@ -33,7 +33,7 @@ export default function Example() {
       </Card>
       <Card flush>
         <CardHead><CardTitle>v11 과 v12 비교</CardTitle></CardHead>
-        <Table rowStyle="grid">
+        <Table rowStyle="grid" nowrap>
           <TableHead><TableRow><TableHeader>항목</TableHeader><TableHeader>변경 전 · v11</TableHeader><TableHeader>변경 후 · v12</TableHeader></TableRow></TableHead>
           <TableBody>
             {DIFF.map(([k, a, b]) => (

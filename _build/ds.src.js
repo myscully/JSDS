@@ -345,6 +345,8 @@
     if (!isPicker(host)) return host;
     var cal = $(".calendar", host);
     if (!cal) { cal = doc.createElement("div"); cal.className = "calendar"; cal.setAttribute("role", "dialog"); cal.setAttribute("aria-modal", "true"); cal.setAttribute("aria-label", dpLabels(host).dialog); host.appendChild(cal); }
+    /* 한국어가 아닌 표기면 달력에 lang — 스크린 리더가 그 언어로 읽는다(3.1.2) */
+    var lc = dpLocale(host); if (/^ko\b/i.test(lc)) cal.removeAttribute("lang"); else cal.setAttribute("lang", lc);
     return cal;
   }
   /* 표기 — Intl 이 지원하는 언어는 import 없이(사람의 요구 2026-11-09). 잘못된 태그는 ko-KR 로 */
@@ -945,6 +947,23 @@
     if (!ms || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { el.remove(); return; }
     el.style.transition = "opacity var(--motion-fast)"; el.style.opacity = "0"; setTimeout(function () { el.remove(); }, ms + 20);
   }
+  /* 오버레이가 나가는 모습(2026-11-20) — React utils/ghost.ts 와 같은 식. 닫힌 오버레이는 바로 지우고(포커스 · 상태 · 선택자는 그대로),
+     같은 모양의 사본이 --motion-fast 로 흐려진 뒤 지워진다. 사본은 aria-hidden · inert · id · role 없음. 줄인 모션이면 만들지 않는다 */
+  var GHOST_STRIP = ["id", "role", "name", "for", "tabindex", "aria-modal", "aria-labelledby", "aria-describedby", "aria-controls", "aria-live"];
+  function ghostOut(nodes) {
+    var ms = parseFloat(getComputedStyle(doc.documentElement).getPropertyValue("--motion-fast")) || 0;
+    if (!ms || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var wrap = doc.createElement("div"); wrap.className = "ds-ghost"; wrap.setAttribute("aria-hidden", "true"); wrap.inert = true;
+    nodes.forEach(function (n) {
+      if (!n || !n.getBoundingClientRect) return; var r = n.getBoundingClientRect(); if (!r.width && !r.height) return;
+      var c = n.cloneNode(true);
+      [c].concat($$("*", c)).forEach(function (e) { GHOST_STRIP.forEach(function (a) { e.removeAttribute(a); }); [].slice.call(e.attributes).forEach(function (a) { if (a.name.indexOf("data-ds") === 0) e.removeAttribute(a.name); }); });
+      if (getComputedStyle(n).position !== "fixed") { c.style.position = "fixed"; c.style.left = r.left + "px"; c.style.top = r.top + "px"; c.style.width = r.width + "px"; c.style.height = r.height + "px"; c.style.margin = "0"; }
+      wrap.appendChild(c);
+    });
+    if (!wrap.children.length) return;
+    doc.body.appendChild(wrap); setTimeout(function () { wrap.remove(); }, ms + 40);
+  }
   /* Select Button 의 값 — data-value, 없으면 글자 */
   function sbValue(b) { return b.dataset.value != null ? b.dataset.value : b.textContent.trim(); }
   /* Filter Chip — 켜진 칩이 있을 때만 '필터 초기화'를 보인다. 누르면 버튼이 사라지므로 포커스는 첫 칩으로 */
@@ -1001,6 +1020,7 @@
     },
     close: function () {
       var bd = $(".popup-backdrop[data-ds-popup]"); if (!bd) return;
+      ghostOut([bd]);
       var el = $(".popup", bd); if (el && el._dsPlaceholder) { el._dsPlaceholder.parentNode.replaceChild(el, el._dsPlaceholder); delete el._dsPlaceholder; }
       bd.remove(); doc.body.style.overflow = "";
       var prev = popup._prev; popup._prev = null; if (prev && prev.focus && doc.contains(prev)) prev.focus();
@@ -1029,6 +1049,7 @@
     close: function (el, swapping) {
       el = el || $(".side-panel.fixed:not([hidden])"); if (!el || !el.classList.contains("fixed")) return;   // 문서 예제처럼 띄우지 않은 패널은 닫을 것이 없다
       var inside = el.contains(doc.activeElement), modal = el.hasAttribute("data-modal"), prev = el._dsPrev;
+      if (!swapping) ghostOut([$(".side-panel-dim"), el]);
       el.hidden = el._dsWasHidden !== false; el.classList.remove("fixed"); delete el._dsWasHidden;
       if (el._dsPlaceholder) { el._dsPlaceholder.parentNode.replaceChild(el, el._dsPlaceholder); delete el._dsPlaceholder; }
       var dim = $(".side-panel-dim"); if (dim) { dim.remove(); doc.body.style.overflow = ""; }
@@ -1303,7 +1324,15 @@
     spGo(sp, cur + 1, "next");
   }
   /* 완료 — 현재 단계를 검사하고, 자유 이동이면 모든 단계를 순서대로 재서 막힌 첫 단계로 간다 */
+  /* 완료 처리 중(2026-11-20 — 사람의 결정 '옵션으로') — .stepper[data-async] 는 완료를 내면 완료 버튼이 loading 이 되어 다시 눌리지 않고,
+     제품이 ds:step-finish 의 resolve() · reject(문구) 를 불러야 풀린다(Switch data-async 와 같은 방식). reject 는 오류 Toast */
+  var STEP_FAIL = "작업을 끝내지 못했습니다. 다시 시도하세요.";
+  function spBusy(sp, on) {
+    sp._dsBusy = on;
+    $$('[data-step="finish"]', sp).forEach(function (b) { b.classList.toggle("loading", on); if (on) b.setAttribute("aria-busy", "true"); else b.removeAttribute("aria-busy"); });
+  }
   function spFinish(sp, checked) {
+    if (sp._dsBusy) return;
     var steps = spSteps(sp), panels = spPanels(sp), cur = spCur(sp), free = sp.hasAttribute("data-nonlinear");
     if (!checked) { var cf = spForm(panels[cur]); if (cf && !vRun(cf)) return; }
     steps[cur].classList.add("done");
@@ -1312,7 +1341,10 @@
       steps[i].classList.remove("done"); spGo(sp, i, "finish"); vRun(spForm(panels[i])); return;
     }
     spPaint(sp);
-    fire(sp, "ds:step-finish", { index: cur });
+    if (!sp.hasAttribute("data-async")) return fire(sp, "ds:step-finish", { index: cur });
+    spBusy(sp, true);
+    var settle = function () { if (!sp._dsBusy) return false; spBusy(sp, false); return true; };
+    fire(sp, "ds:step-finish", { index: cur, resolve: settle, reject: function (msg) { if (settle()) toast(msg || STEP_FAIL, { tone: "danger" }); } });
   }
 
   /* Top Navigation 의 사이드 내비 접기(2026-11-18) — [data-sidenav-toggle][aria-controls=사이드 내비 id] 가 .collapsed 를 붙였다 뗀다.

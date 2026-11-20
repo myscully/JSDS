@@ -1171,7 +1171,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       await okI.click(); await okI.evaluate((e) => e.click()); await page.waitForTimeout(1000);
       const once = await page.evaluate(() => window.__swn); await page.evaluate(() => document.removeEventListener("ds:switch", window.__sw));
       ok("a second press while busy starts nothing", once === 1, String(once));
-      const geo = await page.evaluate(() => { const out = []; for (const cls of ["", "sm"]) for (const on of [false, true]) { const l = document.createElement("label"); l.className = "switch " + cls; l.innerHTML = '<input type="checkbox" role="switch" aria-busy="true"' + (on ? " checked" : "") + ">"; document.querySelector(".example-preview").append(l); const i = l.firstChild, a = getComputedStyle(i, "::after"), b = getComputedStyle(i, "::before"); const c = (s2) => parseFloat(s2.left) + parseFloat(s2.width) / 2; const m = (s2) => parseFloat(s2.top) + parseFloat(s2.height) / 2; out.push({ dx: c(a) - c(b), dy: m(a) - m(b) }); l.remove(); } return out; });
+      const geo = await page.evaluate(() => { const out = []; for (const cls of ["", "sm"]) for (const on of [false, true]) { const l = document.createElement("label"); l.className = "switch " + cls; l.innerHTML = '<input type="checkbox" role="switch" aria-busy="true"' + (on ? " checked" : "") + ">"; document.querySelector(".example-preview").append(l); const i = l.firstChild, a = getComputedStyle(i, "::after"), b = getComputedStyle(i, "::before"); const c = (s2) => parseFloat(s2.left) + parseFloat(s2.width) / 2 + (s2.transform && s2.transform !== "none" ? new DOMMatrix(s2.transform).m41 : 0);   /* 노브는 transform 으로 옮긴다(2026-11-20) */ const m = (s2) => parseFloat(s2.top) + parseFloat(s2.height) / 2; out.push({ dx: c(a) - c(b), dy: m(a) - m(b) }); l.remove(); } return out; });
       ok("the busy spinner sits at the knob center on both sizes", geo.every((g) => Math.abs(g.dx) < 0.5 && Math.abs(g.dy) < 0.5), JSON.stringify(geo));
       const P = page.locator(ex("switch", "state") + " .switch input").first(), b4 = await P.isChecked(); await P.click();
       ok("a plain switch still applies at once", (await P.isChecked()) !== b4);
@@ -1705,7 +1705,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const c = document.querySelector("#ex-card-loading .card");
       const loaded = document.querySelector("#ex-card-default .card");
       return { busy: c.getAttribute("aria-busy"), 스켈레톤: c.querySelectorAll(".skeleton").length,
-        애니메이션: getComputedStyle(c.querySelector(".skeleton")).animationName,
+        애니메이션: getComputedStyle(c.querySelector(".skeleton"), "::after").animationName,   // 빛 띠는 ::after 가 움직인다(2026-11-20)
         높이: Math.round(c.getBoundingClientRect().height), 로드된높이: Math.round(loaded.getBoundingClientRect().height) };
     });
     ok("loading card is busy and shows skeletons", ld.busy === "true" && ld.스켈레톤 === 3 && ld.애니메이션 === "shimmer" && ld.높이 < ld.로드된높이, JSON.stringify(ld));
@@ -2558,6 +2558,12 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 93d · behave.guide.js", async () => {
     await require("./behave.guide.js")({ page, ok, go });   // Home › Guide — 사이드바 묶음 · 자유 이동 마법사 · 진행 저장 · 초기화 · 저장 막힘 · 개발자 탭 · 넘침(2026-11-20)
+  });
+  await part("part 93e · behave.p1.js", async () => {
+    await require("./behave.p1.js")({ page, ok, go });   // 디자인 검토 P1 넷 — 헤더 검색 · 상단 메뉴 포커스 링 · 알림 본문 포커스 · 묶음 제목 대비(2026-11-20)
+  });
+  await part("part 93f · behave.p2.js", async () => {
+    await require("./behave.p2.js")({ page, ok, go });   // 디자인 검토 P2 · P3 — 셸 · 접근 이름 · 제목 단계 · 시각 값 · 모션 · Steps 처리 중 · 상태 예제(2026-11-20)
   });
   await part("part 93 · behave.shell.js", async () => {
     await require("./behave.shell.js")({ page, ok, go });   // 템플릿 검토 수정 일곱 — 상단 바 · 접기 · 테마 · 알림 점 · flush 표 · 로그인 · 버튼 묶음 · 대시보드(2026-11-18)

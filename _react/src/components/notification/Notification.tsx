@@ -3,6 +3,7 @@ import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import type { IconName } from "../../icons/icons.data";
 import { Portal } from "../../utils/Portal";
+import { ghostOut } from "../../utils/ghost";
 import { focusPast, mergeRefs } from "../../utils/hooks";
 import { LABELS } from "../../labels";
 import type { FeedbackTone } from "../../types";
@@ -148,7 +149,12 @@ export function ToastProvider({ duration = 4000, max = 3, container, children }:
   const hover = useRef(false), inside = useRef(false), from = useRef<HTMLElement | null>(null);
   const commit = (next: ToastItem[]) => { list.current = next; setItems(next); };
   const stop = (id: number) => { const c = clocks.current.get(id); if (c) window.clearTimeout(c.handle); clocks.current.delete(id); };
-  const dismiss = useCallback((id: number) => { stop(id); commit(list.current.filter((t) => t.id !== id)); }, []);
+  const dismiss = useCallback((id: number) => {
+    stop(id);
+    const i = list.current.findIndex((t) => t.id === id);
+    if (i >= 0) ghostOut([stack.current?.children[i]]);   // 나갈 때 흐려지는 사본(사이트 Toast 와 같은 --motion-fast)
+    commit(list.current.filter((t) => t.id !== id));
+  }, []);
   /* 묶음에 마우스가 있거나 포커스가 든 동안 남은 시간을 멈춘다 — 다른 Toast 가 사라지면 보고 있던 Toast 가 밀리므로 전체를 */
   const sync = useCallback(() => {
     const held = hover.current || inside.current;

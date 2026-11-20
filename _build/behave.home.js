@@ -129,7 +129,7 @@ module.exports = async function home({ page, ok, go }) {
     await page.setViewportSize({ width: 1440, height: 900 });
     await go("index.html"); await wait(300);
     await page.evaluate(() => document.querySelector(".hm-bans").scrollIntoView({ block: "center", behavior: "instant" })); await wait(200);
-    const st = () => page.evaluate(() => { const a = document.querySelector(".hm-ban"), s = getComputedStyle(a); return { bg: s.backgroundColor, tf: s.transform, tr: s.translate, sh: s.boxShadow, dur: s.transitionDuration, gap: getComputedStyle(a.querySelector(".hm-ic-f i:nth-child(2)")).marginLeft }; });
+    const st = () => page.evaluate(() => { const a = document.querySelector(".hm-ban"), s = getComputedStyle(a); return { bg: s.backgroundColor, tf: s.transform, tr: s.translate, sh: s.boxShadow, dur: s.transitionDuration, gap: (() => { const f = a.querySelectorAll(".hm-ic-f i"); return f[f.length - 1].getBoundingClientRect().left - f[0].getBoundingClientRect().left; })() }; });   // gap = 원 사이 거리 — 벌어짐은 transform(2026-11-20)
     const a = await st();
     await page.hover(".hm-ban"); await wait(500);
     const b = await st();

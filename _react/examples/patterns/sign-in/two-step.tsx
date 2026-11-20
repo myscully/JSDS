@@ -10,10 +10,11 @@ export default function Example() {
         <div>
           <h2 className="auth-title t-title-3">2단계 인증</h2>
           <p className="auth-desc">인증 앱에 표시된 6자리 숫자를 입력하세요.</p>
+          <p className="auth-account"><b>admin@jiran.com</b><Link href="#" standalone>다른 계정으로 로그인</Link></p>
         </div>
         <CodeInput id="si-otp" label="인증 코드" name="otp" required requiredMark={false} help="코드는 30초마다 바뀝니다." messages={{ required: "인증 코드를 입력하세요.", code: "숫자 6자리를 모두 입력하세요." }} />
         <Checkbox>이 기기에서 30일 동안 묻지 않기</Checkbox>
-        <Button type="submit" size="lg">확인</Button>
+        <Button type="submit" size="lg">인증하고 로그인</Button>
         <Link href="#" standalone>다른 방법으로 인증</Link>
       </Form>
       <p className="auth-copy">© 2026 JIRANSECURITY Co., Ltd. All rights reserved.</p>

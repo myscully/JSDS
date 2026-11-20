@@ -2,9 +2,9 @@ import { useState } from "react";
 import { SelectButton, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, type TableDensity } from "@jiran/ds-react";
 
 const ROWS = [
-  ["영업팀", "312", "8", "2026-09-06"],
-  ["개발팀", "184", "11", "2026-09-06"],
-  ["인프라팀", "48", "14", "2026-09-02"],
+  ["영업팀", "312", "8", "2026. 09. 06"],
+  ["개발팀", "184", "11", "2026. 09. 06"],
+  ["인프라팀", "48", "14", "2026. 09. 02"],
 ];
 const DENSITY = [
   { value: "compact", label: "좁게" },

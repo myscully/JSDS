@@ -105,7 +105,13 @@ ${body}
 </html>
 `);
 
-const shell = (page, content, dialogs = "") => `<div class="tpl-app">
+/* 제목 단계(2026-11-20) — 화면 하나에 h1 하나, 그 아래 카드 · 대화상자 제목은 h2. 문서 예제는 문서의 h1 아래라 Page Header 를 h2 로,
+   카드 제목을 h3 로 적어 두었다 — 화면에서는 한 단계씩 올린다 */
+const levels = (c) => {
+  if (!/<h1\b/.test(c)) c = c.replace(/<h2 class="title">([\s\S]*?)<\/h2>/, '<h1 class="title">$1</h1>');
+  return c.replace(/<h3 class="(chart-title|title|popup-title|side-panel-title)"([^>]*)>([\s\S]*?)<\/h3>/g, '<h2 class="$1"$2>$3</h2>');
+};
+const shell = (page, content, dialogs = "") => (content = levels(content), dialogs = dialogs && levels(dialogs), `<div class="tpl-app">
   <a class="skip-link" href="#main">본문 바로가기</a>
   ${topBar()}
   <div class="tpl-body">
@@ -116,7 +122,7 @@ ${content}
       </div>
     </main>
   </div>
-</div>${dialogs ? `\n<div class="tpl-dialogs" hidden>\n${dialogs}\n</div>` : ""}`;
+</div>${dialogs ? `\n<div class="tpl-dialogs" hidden>\n${dialogs}\n</div>` : ""}`);
 
 const pageHead = (crumbs, title, sub, actions) => `<div class="page-head">
           ${crumbs ? H.pBreadcrumb(crumbs) : ""}
@@ -181,7 +187,7 @@ const list = () => {
             <table class="tbl hover nowrap">
               <thead><tr><th class="check"><label class="checkbox"><input type="checkbox" class="mixed" aria-label="전체 선택"></label></th><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>심각도</th><th>이벤트</th><th>대상</th><th>탐지 정책</th><th>상태</th><th class="actions"><span class="sr-only">동작</span></th></tr></thead>
               <tbody>
-                ${EVENTS.map(([t, tone, sev, ev, target, pol, st, stl, on]) => `<tr${on ? ' class="on"' : ""}><td class="check"><label class="checkbox"><input type="checkbox"${on ? " checked" : ""} aria-label="${t} ${ev} 선택"></label></td><td>2026-11-18 ${t}</td><td><span class="tag ${tone}">${sev}</span></td><td><a href="#" class="link">${ev}</a></td><td>${target}</td><td>${pol}</td><td><span class="indicator ${st}">${stl}</span></td><td class="actions">${rowMenu(`${t} ${ev}`)}</td></tr>`).join("\n                ")}
+                ${EVENTS.map(([t, tone, sev, ev, target, pol, st, stl, on]) => `<tr${on ? ' class="on"' : ""}><td class="check"><label class="checkbox"><input type="checkbox"${on ? " checked" : ""} aria-label="${t} ${ev} 선택"></label></td><td>2026. 11. 18 ${t}</td><td><span class="tag ${tone}">${sev}</span></td><td><a href="#" class="link">${ev}</a></td><td>${target}</td><td>${pol}</td><td><span class="indicator ${st}">${stl}</span></td><td class="actions">${rowMenu(`${t} ${ev}`)}</td></tr>`).join("\n                ")}
               </tbody>
             </table>
           </div>
@@ -215,17 +221,17 @@ const wizard = () => {
             </form>`;
   const step4 = `<div class="stack">
               ${H.pNotice("info", "배포 전에 확인하세요", "배포하면 대상 단말의 기존 USB 정책을 덮어씁니다.")}
-              <div class="card"><div class="card-head"><h3 class="title">배포 내용</h3></div><dl class="card-meta"><dt>정책</dt><dd>외부 USB 차단</dd><dt>대상</dt><dd>보안팀 · 개발팀 · 135대</dd><dt>시점</dt><dd>2026-11-20 02:00 예약</dd><dt>다시 시도</dt><dd>1시간 뒤 한 번</dd></dl></div>
+              <div class="card"><div class="card-head"><h3 class="title">배포 내용</h3></div><dl class="card-meta"><dt>정책</dt><dd>외부 USB 차단</dd><dt>대상</dt><dd>보안팀 · 개발팀 · 135대</dd><dt>시점</dt><dd>2026. 11. 20 02:00 예약</dd><dt>다시 시도</dt><dd>1시간 뒤 한 번</dd></dl></div>
             </div>`;
   const content = `        <div class="stack">
         ${pageHead(["정책", "정책 배포"], "정책 배포", "대상과 정책, 일정을 차례로 정한 뒤 배포합니다", "")}
-          <div class="stepper">
+          <div class="stepper" data-async>
             ${H.stepsOl("", [H.stepLi("대상 선택", 0, "on"), H.stepLi("정책 선택", 1), H.stepLi("일정", 2), H.stepLi("검토 · 배포", 3)])}
             ${H.stepPanel(true, step1)}
             ${H.stepPanel(false, step2)}
             ${H.stepPanel(false, step3)}
             ${H.stepPanel(false, step4)}
-            ${H.stepActs(true, false)}
+            ${H.stepActs(true, false, "정책 배포")}
           </div>
         </div>`;
   return doc({ id: "wizard", title: "정책 배포", date: true, body: shell("wizard", content) });
@@ -238,7 +244,7 @@ const AGENTS = [
   ["PC-0932", "박지훈", "영업팀", "10.20.7.10", "6.1.8", "warn", "업데이트 필요", "09:38"],
   ["SRV-DB-01", "—", "서버", "10.20.1.12", "6.1.8", "warn", "업데이트 필요", "09:12"],
   ["PC-1544", "최유진", "경영지원팀", "10.20.5.18", "6.2.1", "", "오프라인", "어제 18:20"],
-  ["PC-0711", "정다은", "기술지원팀", "10.30.2.7", "6.2.0", "", "오프라인", "11-16 09:02"],
+  ["PC-0711", "정다은", "기술지원팀", "10.30.2.7", "6.2.0", "", "오프라인", "11. 16 09:02"],
   ["SRV-WEB-02", "—", "서버", "10.20.1.21", "6.2.1", "ok", "온라인", "09:41"],
   ["PC-1820", "한지우", "개발팀", "10.20.4.58", "6.2.1", "ok", "온라인", "09:39"],
 ];
@@ -298,7 +304,10 @@ const orgInfo = (() => {
       const n = NAMES[(seed + i * 4) % NAMES.length];
       return { name: n, title: TITLES[i], email: `user${(seed * 7 + i * 13) % 900 + 100}@jiran.com`, role: ROLES[i], on: (seed + i) % 6 !== 5 };
     });
-    out[it.value] = { name: it.label, path: trail.length ? trail.join(" › ") : "최상위", lead: members[0].name, count: it.meta, code: `ORG-${it.value.toUpperCase()}`, members };
+    /* 삭제 확인에 지워지는 범위를 개수로(Writing 용어 표 '삭제') — 하위 부서는 모든 아래 단계를 센다 */
+    const subs = (function n(c) { return (c || []).reduce((a, x) => a + 1 + n(x.children), 0); })(it.children);
+    const scope = (subs ? `하위 부서 ${subs}개와 ` : "") + `구성원 ${it.meta}명`;
+    out[it.value] = { name: it.label, path: trail.length ? trail.join(" › ") : "최상위", lead: members[0].name, count: it.meta, code: `ORG-${it.value.toUpperCase()}`, scope, members };
     seed += 3;
     if (it.children) walk(it.children, [...trail, it.label]);
   });
@@ -362,7 +371,7 @@ const org = () => {
 </div>
 <div class="popup danger" id="org-delete" role="alertdialog" aria-modal="true" aria-labelledby="org-delete-t" aria-describedby="org-delete-b">
   <h3 class="popup-title" id="org-delete-t"><span data-org="name">${d.name}</span> 부서를 삭제할까요?</h3>${H.pClose("popup-close", "data-popup-close")}
-  <p class="popup-body" id="org-delete-b">구성원은 상위 부서로 옮겨집니다. 삭제한 부서는 되돌릴 수 없습니다.</p>
+  <p class="popup-body" id="org-delete-b"><span data-org="scope">${d.scope}</span>이 상위 부서로 옮겨집니다. 삭제한 부서는 되돌릴 수 없습니다.</p>
   <div class="popup-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="button" class="btn md solid negative" data-done="부서를 삭제했습니다.">삭제</button></div></div>
 </div>`;
   return doc({ id: "org", title: "조직도", body: shell("org", content, dialogs) });

@@ -134,7 +134,7 @@ module.exports = async function feedback({ page, ok, go }) {
     const active = () => page.evaluate(() => { const a = document.activeElement; return (a.className || a.tagName) + "|" + (a.textContent || "").trim() + "|" + (a.id || ""); });
 
     await open(0);
-    const geo = await page.evaluate(() => { const t = document.querySelector(".popup-backdrop .popup-title"), x = document.querySelector(".popup-backdrop .popup-close"), r = document.createRange(); r.selectNodeContents(t); const a = r.getClientRects()[0], b = x.getBoundingClientRect(); return { dy: Math.abs(a.top + a.height / 2 - (b.top + b.height / 2)), gap: b.left - a.right }; });
+    const geo = await page.evaluate(() => { const t = document.querySelector(".popup-backdrop[data-ds-popup] .popup-title"), x = document.querySelector(".popup-backdrop[data-ds-popup] .popup-close"), r = document.createRange(); r.selectNodeContents(t); const a = r.getClientRects()[0], b = x.getBoundingClientRect(); return { dy: Math.abs(a.top + a.height / 2 - (b.top + b.height / 2)), gap: b.left - a.right }; });
     ok("popup close sits on the title line", geo.dy <= 1.5 && geo.gap > 0, JSON.stringify(geo));
     const firstF = await active();
     ok("popup first focus skips the close button and lands on cancel", /취소/.test(firstF) && !/popup-close/.test(firstF), firstF);
@@ -150,13 +150,13 @@ module.exports = async function feedback({ page, ok, go }) {
     await open(3); await clickDim();
     ok("dirty state resets when the popup reopens", !(await isOpen()));
     await open(3);
-    await page.evaluate(() => { const b = document.createElement("button"); b.type = "button"; b.className = "menu-item"; b.textContent = "x"; document.querySelector(".popup-backdrop .popup-form").append(b); });
-    await page.locator(".popup-backdrop .menu-item").click(); await clickDim();
+    await page.evaluate(() => { const b = document.createElement("button"); b.type = "button"; b.className = "menu-item"; b.textContent = "x"; document.querySelector(".popup-backdrop[data-ds-popup] .popup-form").append(b); });
+    await page.locator(".popup-backdrop[data-ds-popup] .menu-item").click(); await clickDim();
     ok("picking from a list inside counts as input", await isOpen());
-    await page.evaluate(() => { document.querySelector(".popup-backdrop .menu-item").remove(); window.DS.popup.close(); });
+    await page.evaluate(() => { document.querySelector(".popup-backdrop[data-ds-popup] .menu-item").remove(); window.DS.popup.close(); });
 
     await open(2);
-    const dg = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop .popup"); return { role: p.getAttribute("role"), desc: !!document.getElementById(p.getAttribute("aria-describedby")) }; });
+    const dg = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop[data-ds-popup] .popup"); return { role: p.getAttribute("role"), desc: !!document.getElementById(p.getAttribute("aria-describedby")) }; });
     ok("danger popup is an alertdialog described by its body", dg.role === "alertdialog" && dg.desc, JSON.stringify(dg));
     ok("danger popup with a confirm field focuses the field", /\|confirm$/.test(await active()), await active());
     await clickDim();
@@ -175,22 +175,22 @@ module.exports = async function feedback({ page, ok, go }) {
     ok("opening a popup over a popup warns and does nothing", single === 1 && warned.some((t) => t.includes("모달 위에 모달")), JSON.stringify({ single, warned }));
 
     await page.evaluate(() => window.DS.popup.busy(true));
-    const busyA = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop .popup"); return { busy: p.getAttribute("aria-busy"), off: [...p.querySelectorAll("[data-popup-close]")].map((b) => b.disabled) }; });
+    const busyA = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop[data-ds-popup] .popup"); return { busy: p.getAttribute("aria-busy"), off: [...p.querySelectorAll("[data-popup-close]")].map((b) => b.disabled) }; });
     await page.keyboard.press("Escape"); await wait(30); const afterEsc = await isOpen(); await clickDim(); const afterDim = await isOpen();
     ok("busy popup disables close and cancel and ignores Esc and backdrop", busyA.busy === "true" && busyA.off.length === 2 && busyA.off.every(Boolean) && afterEsc && afterDim, JSON.stringify({ busyA, afterEsc, afterDim }));
     await page.evaluate(() => window.DS.popup.busy(false));
-    const busyB = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop .popup"); return { busy: p.getAttribute("aria-busy"), off: [...p.querySelectorAll("[data-popup-close]")].map((b) => b.disabled) }; });
+    const busyB = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop[data-ds-popup] .popup"); return { busy: p.getAttribute("aria-busy"), off: [...p.querySelectorAll("[data-popup-close]")].map((b) => b.disabled) }; });
     ok("busy(false) gives the close paths back", busyB.busy === null && !busyB.off.some(Boolean), JSON.stringify(busyB));
-    await page.locator(".popup-backdrop .popup-close").click(); await wait(30);
+    await page.locator(".popup-backdrop[data-ds-popup] .popup-close").click(); await wait(30);
     ok("the close button closes", !(await isOpen()));
 
     await page.evaluate(() => { const b = document.querySelector("#pp0 .popup-body"); window.__txt = b.textContent; b.textContent = "긴 본문입니다. ".repeat(900); });
-    await open(0);
-    const lng = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop .popup"), b = p.querySelector(".popup-body"), t = p.querySelector(".popup-title").getBoundingClientRect(), a = p.querySelector(".popup-actions").getBoundingClientRect(), r = p.getBoundingClientRect(); return { scroll: b.scrollHeight > b.clientHeight, top: r.top, bottom: innerHeight - r.bottom, tv: t.top >= r.top, av: a.bottom <= r.bottom }; });
+    await open(0); await wait(260); /* 떠오르는 움직임이 끝난 뒤 잰다 */
+    const lng = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop[data-ds-popup] .popup"), b = p.querySelector(".popup-body"), t = p.querySelector(".popup-title").getBoundingClientRect(), a = p.querySelector(".popup-actions").getBoundingClientRect(), r = p.getBoundingClientRect(); return { scroll: b.scrollHeight > b.clientHeight, top: r.top, bottom: innerHeight - r.bottom, tv: t.top >= r.top, av: a.bottom <= r.bottom }; });
     ok("a long popup stays on screen and only its body scrolls", lng.scroll && lng.top >= 23.5 && lng.bottom >= 23.5 && lng.tv && lng.av, JSON.stringify(lng));
     await page.evaluate(() => { window.DS.popup.close(); document.querySelector("#pp0 .popup-body").textContent = window.__txt; });
     await open(3);
-    const fm = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop .popup").getBoundingClientRect(), f = document.querySelector(".popup-backdrop .popup-form"), i = f.querySelector("input").getBoundingClientRect(), c = getComputedStyle(f); return { pad: c.paddingLeft, w: Math.round(i.width), left: Math.round(i.left - p.left) }; });
+    const fm = await page.evaluate(() => { const p = document.querySelector(".popup-backdrop[data-ds-popup] .popup").getBoundingClientRect(), f = document.querySelector(".popup-backdrop[data-ds-popup] .popup-form"), i = f.querySelector("input").getBoundingClientRect(), c = getComputedStyle(f); return { pad: c.paddingLeft, w: Math.round(i.width), left: Math.round(i.left - p.left) }; });
     ok("the popup form keeps room for the focus ring and its fields stay on the 24 padding", fm.pad === "4px" && fm.w === 392 && fm.left === 24, JSON.stringify(fm));
     await page.evaluate(() => { window.DS.popup.close(); document.getElementById("p-from").remove(); });
   });
@@ -255,7 +255,7 @@ module.exports = async function feedback({ page, ok, go }) {
 
     /* ── Side Panel ── */
     await go("components/side-panel.html"); await away();
-    const pnl = (id) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(), c = getComputedStyle(e); return { hidden: e.hidden, fixed: e.classList.contains("fixed"), pos: c.position, right: Math.round(innerWidth - r.right), top: Math.round(r.top), h: Math.round(r.height), w: Math.round(r.width), inPreview: !!e.closest(".example-preview"), overflow: document.body.style.overflow, dim: !!document.querySelector(".side-panel-dim") }; }, id);
+    const pnl = (id) => page.evaluate((s) => { const e = document.querySelector(s); if (!e) return null; const r = e.getBoundingClientRect(), c = getComputedStyle(e); return { hidden: e.hidden, fixed: e.classList.contains("fixed"), pos: c.position, right: Math.round(innerWidth - r.right), top: Math.round(r.top), h: Math.round(r.height), w: Math.round(r.width), inPreview: !!e.closest(".example-preview"), overflow: document.body.style.overflow, dim: !!document.querySelector(".side-panel-dim:not(.ds-ghost *)") }; }, id);
     const stat = await page.evaluate(() => { const e = document.querySelector("#ex-side-panel-default .side-panel"), r = e.getBoundingClientRect(), c = getComputedStyle(e); return { pos: c.position, w: Math.round(r.width) }; });
     ok("side panel example renders in place at width 400", stat.pos === "static" && stat.w === 400, JSON.stringify(stat));
     const lng2 = await page.evaluate(() => { const e = document.querySelector("#ex-side-panel-long .side-panel"), b = e.querySelector(".side-panel-body"), h = e.querySelector(".side-panel-header").getBoundingClientRect(), f = e.querySelector(".side-panel-footer").getBoundingClientRect(), r = e.getBoundingClientRect(); b.scrollTop = 40; return { scroll: b.scrollTop === 40, top: Math.round(h.top - r.top), bottom: Math.round(r.bottom - f.bottom) }; });
@@ -265,7 +265,7 @@ module.exports = async function feedback({ page, ok, go }) {
     ok("an in-page panel example is not closed", inPlace.join() === "false,0", inPlace.join());
 
     const liveBtn = page.locator('[data-panel-open="#sp-live"]');
-    await liveBtn.click(); await wait(30);
+    await liveBtn.click(); await wait(260); /* 들어오는 움직임(--motion-base)이 끝난 뒤 잰다 */
     const lv = await pnl("#sp-live");
     ok("non-modal panel opens at the right edge, full height, width 400", lv.fixed && !lv.hidden && lv.pos === "fixed" && lv.right === 0 && lv.top === 0 && lv.h === 900 && lv.w === 400, JSON.stringify(lv));
     ok("non-modal panel neither dims nor locks scrolling", !lv.dim && lv.overflow === "", JSON.stringify(lv));

@@ -30,8 +30,8 @@ module.exports = async function guide({ page, ok, go }) {
     await go("home/guide.html");
     const s = await page.evaluate(() => {
       const h5 = [...document.querySelectorAll("#nav h5, nav h5")].find((x) => x.textContent.trim() === "Guide");
-      const links = []; for (let n = h5 && h5.nextElementSibling; n && n.tagName === "A"; n = n.nextElementSibling) links.push([n.textContent.replace(/N$/, "").trim(), n.getAttribute("href")]);
-      return { links, rows: [...document.querySelectorAll(".guide-tracks a")].map((a) => [a.querySelector("b").textContent.replace(/N$/, "").trim(), a.getAttribute("href"), a.querySelector("[data-guide-prog]").textContent.trim()]), path: document.querySelectorAll(".guide-path > li").length };
+      const links = []; for (let n = h5 && h5.nextElementSibling; n && n.tagName === "A"; n = n.nextElementSibling) links.push([n.textContent.replace(/N(, 새 항목)?$/, "").trim(), n.getAttribute("href")]);
+      return { links, rows: [...document.querySelectorAll(".guide-tracks a")].map((a) => [a.querySelector("b").textContent.replace(/N(, 새 항목)?$/, "").trim(), a.getAttribute("href"), a.querySelector("[data-guide-prog]").textContent.trim()]), path: document.querySelectorAll(".guide-path > li").length };
     });
     const want = SITE.home.groups.find((g) => g[0] === "Guide")[1];
     ok("guide: sidebar has the Guide group with its six pages in order",

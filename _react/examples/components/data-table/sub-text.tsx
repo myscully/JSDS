@@ -14,5 +14,5 @@ const COLUMNS: DataTableColumn<User>[] = [
 ];
 
 export default function Example() {
-  return <DataTable density="relaxed" columns={COLUMNS} rows={ROWS} rowKey={(r) => r.id} />;
+  return <DataTable density="relaxed" nowrap columns={COLUMNS} rows={ROWS} rowKey={(r) => r.id} />;
 }

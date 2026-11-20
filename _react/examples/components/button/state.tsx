@@ -3,7 +3,7 @@ import { Button } from "@jiran/ds-react";
 /* data-state 는 사이트 전용 고정 상태(문서 예제용)다 — 제품 코드에서는 쓰지 않는다. Hover · Pressed 는 실제로는 CSS 가 처리한다 */
 export default function Example() {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, auto)", gap: 12, maxWidth: "100%", overflowX: "auto" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, auto)", gap: 12, maxWidth: "100%", overflowX: "auto", padding: 4 }}>
         <Button>Normal</Button>
         <Button variant="outline">Normal</Button>
         <Button color="assistive">Normal</Button>
