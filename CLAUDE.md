@@ -17,6 +17,7 @@
 | `_build/font-jp.src.css` · `_build/fonts-jp/` | **원본.** 일본어 한자용 Pretendard JP Variable v1.3.9(OFL) — 조각 woff2 119개 · `OFL.txt` 와 그 `@font-face`(unicode-range). 내려받은 원본 CSS 에서 만들었고 손으로 고치지 않습니다. `build.js` 가 `assets/font-jp.css` · `assets/fonts/jp/`(생성물)로, `sync-css.mjs` 가 패키지 `dist/font-jp.css`(선택 import)로 복사 |
 | `_concepts/` | **원본 · 시안.** 메인 화면 비주얼 시안(도형 타이포 A1 · A2 · A3, 정한 카피의 B1 Simple · B2 Visual · B3 Signal, 가운데 정렬 B4 Balance + 고르는 `index.html`). **B4 는 2026-11-18 사이트 메인 화면이 됐다**(`_build/render.js` `homePage` · `style.src.css` Home 블록 — 시안 파일은 기록으로 남김). B 의 띠 · 미리보기 이미지 `img/*.png` 는 `capture.mjs` 가 패턴 예제를 찍은 것(패턴이 바뀌면 다시 돌림). `../assets/style.css` 의 토큰 · Pretendard 와 `../assets/app.js` 의 제품 색 · `SEARCH_INDEX` 를 불러 쓰고, 루트의 `_` 폴더라 빌드 · verify · 게이트 밖이다(반복 애니메이션도 씀). 사이트로 옮길 때 게이트 규칙에 맞게 다듬는다 |
 | `_build/templates.data.js` · `templates.build.js` · `templates.src.css` · `templates.src.js` | **원본.** Templates 메뉴(2026-11-18 — 옛 `_templates/` 를 옮기고 지움). `templates.data.js` 는 문서 페이지의 글(정의 · 고르기 표 · 쓴 컴포넌트 · 패턴 · Rules · 개요 한 줄), `templates.build.js` 는 `_build/*.data.js` 의 예제 문자열 · 헬퍼를 읽어 화면 일곱 `templates/screen/<key>.html` 을 쓰는 생성기(`build.js` 가 부름 — route 가 아니라 pages 수에 들지 않음), `templates.src.css` → `assets/templates.css` 는 앱 틀 배치만(패키지 CSS 에 섞이지 않게 style.css 와 따로), `templates.src.js` → `assets/templates.js` 는 둘러보기용 흉내 동작이다 |
+| `_build/guide.data.js` | **원본.** Home › Guide(2026-11-20)의 글 — 트랙 다섯(공통 · 디자이너 · 기획자 · 개발자 · 함께 만들기)의 단계(제목 · 무엇 · 왜 · 해보기 · 관련 문서 · 개발자 code key · 함께 만들기 lead 역할). 렌더는 `render.js` `guideTrackPage` · `guideOverviewPage`, 개발자 코드는 `GUIDE_CODE`, 진행 저장은 `app.src.js`(jsds-guide). `verify.js` 가 순서 · 단계 수 · 링크 대상 · 문구를, `behave.guide.js` 가 동작을 본다 |
 | `_build/uidict.data.js` | **원본.** Resources › UI Dictionary(2026-11-19)의 항목 — 분류 10 · 추천 검색어 · 항목(`src` = 예제 · 화면 주소, 이름 · 영문 · 대표 클래스 · React 이름 · 다른 이름 `aka` · 생김새 검색어 `kw`). 미리보기 · 코드 · 비슷한 것 · 문서 링크는 `render.js` `uiDictPage` 가 예제 데이터에서 만든다. `verify.js` 가 src · 클래스 · React · 범위를, `behave.uidict.js` 가 동작을 본다 |
 | `_build/thumbs/components/*.svg` · `_build/thumbs.js` | **원본.** Components Overview 카드 썸네일 46개(2026-11-19) — Figma `Thumbnail / <이름>` 을 SVG 로 내보낸 것(손으로 고치지 않음)과, 그 색을 토큰으로 바꿔 빌드에 넣는 변환기(표에 없는 색이면 빌드가 멈춤). Figma 썸네일이 바뀌면 다시 내보낸다 |
 | `assets/vendor/dayjs.min.js` · `dayjs.utc.js` · `dayjs.timezone.js` · `dayjs.LICENSE` | **생성물.** Date Picker 기준 시간대용 dayjs(MIT, 1.11.13 고정)를 `build.js` 가 `_build/node_modules/dayjs` 에서 복사하고 Date Picker 가 있는 페이지에만 붙입니다(`verify.js` 가 동반 · 부재를 봄). React 는 패키지 dependency 로 `date-picker/tz.ts` 에서 extend |
@@ -49,7 +50,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 97 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1565/1565 · react 890+6 · tsc 0
+pages 103 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1580/1580 · react 890+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1033,6 +1034,18 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **verify 더함:** 컴포넌트 페이지 ↔ 원본 SVG 가 하나씩 짝, 개요 카드 수 = 컴포넌트 수 · 카드마다 Figma SVG, 칠이 전부 토큰, 마스크 id 겹침 없음. 첫 빌드에서 `radio.svg`(페이지 키는 `radio-button`)를 이 검사가 잡았다. 음성 시험: 변환기에 새 색 · 새 불투명도를 넣으면 빌드가 멈춤(둘 다 잡힘).
 - 잰 것: 1440 라이트 · 다크 · 빨강 제품 · 390 에서 카드 46 · 빈 썸네일 0 · 가로 넘침 0 · 콘솔 오류 0, 캡처로 다크에서 버튼 · 아바타 · 달력의 진한 면과 흰 글자가 함께 뒤집혀 읽히는 것을 보았다.
 - **알고 둔 것:** Figma 의 raw 색 일부는 토큰과 몇 단계 다르다(#292A2D 88% → cool-22 88% · #E72727 → red-40 #E52222 · Link #0066FF(blue-50) → brand-40 · Accordion 구분선 #37383C 12% → line-neutral-secondary). 패턴 · Foundations 개요 썸네일은 Figma 에 없어 그대로다. 개요 페이지가 SVG 를 실어 188KB 가 됐다.
+
+2026-11-20 Home › Guide — 단계별 사용 매뉴얼(사람의 요청 · 결정 넷) — pages 97 → 103 · behave 1565 → 1580(`behave.guide.js` 15). contrast · advisory · react · tsc 수는 그대로(새 색 쌍 없음 · 패키지는 바꾸지 않음).
+- **형태 = 공통 트랙 + 역할 트랙 + 함께 만드는 실습**(사람의 결정). Home 아래 새 묶음 **Guide** 여섯 페이지(개요 · 공통 5 · 디자이너 5 · 기획자 6 · 개발자 6 · 함께 만들기 6단계)이고 헤더 메뉴 여섯은 그대로다(사람의 결정). 개발자 트랙 안에서 React / HTML 을 탭으로 고른다(사람의 결정 — 역할은 디자이너 · 기획자 · 개발자 셋).
+- **넘기기 = 이 시스템의 Steps 마법사 + 진행 저장**(사람의 결정). 트랙 페이지는 `.stepper.guide-stepper[data-nonlinear]` · `label-below` 이고 한 단계 패널 = 단계 번호와 역할 · 제목 · 무엇 · 왜 · (코드) · 해보기(Notice) · 관련 문서. 마지막 단계의 완료는 다음 트랙을 권하는 안내(role=status)를 보인다. 함께 만들기는 단계마다 이끄는 역할을 Tag 로 보인다.
+- **진행 저장** `app.src.js` — 키 `jsds-guide`(`{트랙: [완료 단계], "트랙@": 마지막 단계}`), 모든 접근은 try/catch. `ds:step` · `ds:step-finish` 에서 저장하고, 읽을 때 단계의 `.done` · `.on` 을 ds.js 보다 먼저 되돌려 두어 마지막 단계가 그대로 보인다. 개요의 트랙 행에 'n / N 완료', 트랙마다 '처음부터 다시' · 개요의 '진행 모두 지우기'. 저장이 막힌 브라우저는 진행 표시 없이 그대로 동작한다.
+- **Getting started 는 설치 · 연결만** — 탭 '디자이너 · 기획자' → '디자이너'(기획자는 설치할 것이 없다), 리드에 Guide 링크. 개발자 단계의 코드는 Getting started 의 설치 · 제품 색 상수를 다시 쓴다(`GS_ACCENT_CSS` 에 남색 · 다크 면 단계 주석을 더함).
+- **verify 더함:** guide.data 순서 = SITE.home Guide 묶음 · tracks 키 순서, 트랙마다 3~6단계, 단계마다 제목 · 무엇 · 왜 · 해보기 · 관련 문서, 링크 대상이 있는 route, code 단계의 React · HTML 코드 블록, 함께 만들기 단계의 lead 역할(다른 트랙에는 없음), 생성 페이지의 단계 수 = 패널 수 = 데이터 · 진행 표시 · 완료 안내, 개요 행의 진행 표시 수. 본문 문구 검사에 Guide 글(소개 · 한 줄 · 단계 넷)을 더했다.
+- **behave.guide 15** — 사이드바 Guide 묶음 · 개요 행 다섯과 길 셋 · 트랙 구성(역할 Tag 는 함께 만들기만) · Getting started 탭과 링크, 첫 방문 · 다음 두 번(완료 · 패널 포커스 · 저장값) · 이전 · 단계 누름, 다시 읽어도 마지막 단계 · 개요 진행, 완료 안내와 다음 트랙 링크, 트랙 초기화 · 모두 지우기와 포커스, 저장 막힘(localStorage 가 던짐)에서도 오류 없이 넘김, 개발자 탭 전환 · 보이는 칸 복사, 여섯 페이지 × 1440 · 1024 · 768 · 390 × 라이트 · 다크의 모든 단계에서 넘침 없음 · 390 에서 길 카드가 한 칸.
+- 음성 시험: verify 6건(해보기 지움 · 링크 대상 틀림 · 순서 바꿈 · 단계 7개 · 토큰 이름 · 괄호 둘) · app.js 4건(저장 끔 · 복원 끔 · 모두 지우기 포커스 · 트랙 초기화 포커스) 모두 잡혔다. CSS 1건(390 의 길 한 칸 규칙 지움)은 처음에 못 잡아 — 세 칸이 줄어들 뿐 넘치지 않는다 — 390 에서 길 카드의 왼쪽이 같은지 재는 단정을 더해 잡았다.
+- **사람이 정하지 않은 것(초안):** 단계 글 전부와 해보기 과제, 함께 만들기의 예시 화면(로그 목록), 첫 트랙 말고의 메뉴 이름, 진행 저장 키 이름. 첫 트랙은 초안 '기본기' 를 같은 날 '공통' 으로 바꿨다(사람의 결정 — 역할 트랙과 짝, 예제 묶음 Default · Foundations 와 헷갈리지 않게).
+- **하지 않은 것:** Figma 에 Guide 페이지, React 패키지 변경. **본 것(고치지 않음):** React `Form` JSDoc(`_react/src/patterns/Patterns.tsx`)이 아직 '오류 3개 이상이면 위에 요약' 이다(11-16 에 없앤 기능).
+- **게이트에서 드러난 기존 결함(이번 변경과 무관):** behave.chart 의 '대시보드 390' 단정이 3회에 2회쯤 실패한다 — '일별 탐지' 선 차트 캔버스가 1440 에서 390 으로 줄여도 445 로 남는다(틀 274, 4초 뒤에도 그대로). HEAD 의 app.js 로 바꿔도 같은 비율로 실패해 이번 변경 전부터 있던 것이다. 이번 게이트는 그 하나로 1579/1580 이었다(나머지는 기준값과 같음).
 
 `advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

@@ -2556,6 +2556,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 93c · behave.uidict.js", async () => {
     await require("./behave.uidict.js")({ page, ok, go });   // UI Dictionary — 카드 · 탭 · 검색 · '/' · Side Panel · 복사 · 미리보기 맞춤 · 다크 · 제품 색 · URL(2026-11-19)
   });
+  await part("part 93d · behave.guide.js", async () => {
+    await require("./behave.guide.js")({ page, ok, go });   // Home › Guide — 사이드바 묶음 · 자유 이동 마법사 · 진행 저장 · 초기화 · 저장 막힘 · 개발자 탭 · 넘침(2026-11-20)
+  });
   await part("part 93 · behave.shell.js", async () => {
     await require("./behave.shell.js")({ page, ok, go });   // 템플릿 검토 수정 일곱 — 상단 바 · 접기 · 테마 · 알림 점 · flush 표 · 로그인 · 버튼 묶음 · 대시보드(2026-11-18)
   });

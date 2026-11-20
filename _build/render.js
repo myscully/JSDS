@@ -322,12 +322,13 @@ const GS_HTML_USE = `<!-- 컴포넌트 페이지 HTML+CSS 탭에서 복사한 �
 <script>
   DS.init(document.getElementById("dynamic-area")); // 나중에 DOM 에 넣은 마크업만 한 번
 </script>`;
-const GS_ACCENT_CSS = `/* 1) html 요소에 data-accent="키" — red · cyan · orange · neutral · ai. 파랑(기본)은 적지 않습니다.
+const GS_ACCENT_CSS = `/* 1) html 요소에 data-accent="키" — red · cyan · navy · orange · neutral · ai. 파랑(기본)은 적지 않습니다.
       빨강 · 주황의 중립 입력 링, AI 의 그라데이션 면, 중립 제품의 회색 단계가 이 속성으로 걸립니다 */
-/* 2) 빨강 · 시안 · 주황 · AI 는 다섯 단계를 :root 에 넣습니다. 아래는 빨강(#C30D2A)의 값입니다 */
+/* 2) 빨강 · 시안 · 남색 · 주황 · AI 는 다섯 단계를 :root 에 넣습니다. 아래는 빨강(#C30D2A)의 값입니다 */
 :root{
   --prod-40:#980A21; --prod-45:#B00C26; --prod-50:#C30D2A; --prod-55:#DB0F2F; --prod-60:#F34B65;
 }
+/* 남색처럼 어두운 제품 색은 다크 주 면용 --prod-50d 도 넣습니다. Design Token › Product color 적용의 함수가 계산해 줍니다 */
 /* 중립은 다섯 단계를 넣지 않습니다. 넣지 않으면 기본 파랑이 쓰입니다 */`;
 /* ds.js 가 내는 이벤트 — verify 가 ds.src.js 의 "ds:*" 이름이 모두 이 표에 있는지 본다 */
 const DS_EVENTS = [
@@ -410,7 +411,77 @@ ${ban("Components", '<span class="hm-ic-c"></span>', "Accessible building blocks
 ${ban("Patterns", '<span class="hm-ic-p"><i></i><i></i><b></b></span>', "Whole screens for detecting, deciding and responding.", "patterns")}
 </ul></div>`;
 }
+/* ============ Home › Guide(2026-11-20) — 단계별 사용 매뉴얼. 글 원본 guide.data.js ============
+   트랙 페이지 = Steps 마법사(.stepper[data-nonlinear] · .label-below) — 단계를 넘기며 읽고 아무 단계로나 옮긴다.
+   진행은 app.js 가 브라우저에 저장(jsds-guide)하고 다시 열면 이어서 보인다. 개발자 단계의 코드는 Getting started 와 같은 상수를 쓴다(한 곳) */
+const GUIDE_ICON = { basics: "map", designer: "palette", planner: "clipboard-list", developer: "code", together: "users-group" };
+const GS_REACT_EVENTS = `import { Form, TextField, Button } from "@jiran/ds-react";
+
+// 검증 · 포커스 · 오류 문구는 Form 이 맡고, 제품은 통과한 값만 저장합니다
+<Form validate onSubmit={(e) => { e.preventDefault(); save(new FormData(e.currentTarget)); }}>
+  <TextField label="정책 이름" name="name" required />
+  <Button type="submit" variant="solid" color="primary">저장</Button>
+</Form>`;
+const GS_HTML_EVENTS = `<!-- 동작은 ds.js 가 붙이고, 제품은 문서에서 이벤트를 듣습니다 -->
+<form class="form" data-validate> … </form>
+
+<script>
+  document.addEventListener("ds:select", (e) => load(e.detail.value)); // Select Button 값이 바뀜
+  document.addEventListener("ds:tab", (e) => remember(e.detail.index)); // 탭을 옮김
+  DS.init(document.getElementById("dynamic-area"));                    // 나중에 넣은 마크업만 한 번
+</script>`;
+const GUIDE_CODE = {
+  install: [REACT_INSTALL, "tsx", GS_HTML_LINK, "html"],
+  theme: [GS_REACT_THEME, "html", GS_ACCENT_CSS, "css"],
+  use: [GS_REACT_USE, "tsx", GS_HTML_USE, "html"],
+  events: [GS_REACT_EVENTS, "tsx", GS_HTML_EVENTS, "html"],
+};
+const guideKeys = () => GUIDE.order;
+function guideCode(track, i, key) {
+  const [r, rl, h, hl] = GUIDE_CODE[key], id = `gd-${track}-${i}`;
+  return docTabs([[`${id}-react`, "React"], [`${id}-html`, "HTML+CSS"]], [codeBlock(`${id}-r`, r, rl, "복사"), codeBlock(`${id}-h`, h, hl, "복사")]);
+}
+function guideStep(track, s, i, n) {
+  const roles = (s.lead || []).map((r) => `<span class="tag">${GUIDE.roles[r]}</span>`).join("");
+  return `<div class="guide-step-head"><span class="guide-step-no">${i + 1} / ${n} 단계</span>${roles ? `<span class="guide-roles" aria-label="이끄는 역할">${roles}</span>` : ""}</div>
+<h2 class="guide-step-title">${s.t}</h2>
+<p class="guide-what">${s.what}</p>
+<p class="guide-why"><b>왜</b>${s.why}</p>
+${s.code ? guideCode(track, i, s.code) : ""}
+<div class="notice guide-try"><span class="ico">${I("pencil", 20, { style: "filled" })}</span><div><b>해보기</b>${s.try}</div></div>
+<div class="guide-links"><span class="guide-links-title">관련 문서</span><ul>${s.links.map(([t, h]) => `<li><a class="link standalone" href="${h}">${t}${I("arrow-right", 14)}</a></li>`).join("")}</ul></div>`;
+}
+function guideTrackPage(track) {
+  const T = GUIDE.tracks[track], n = T.steps.length, ord = guideKeys(), at = ord.indexOf(track), next = ord[at + 1];
+  const nextHtml = next ? `다음은 <a href="#/home/guide-${next}">${GUIDE.tracks[next].title}</a> 입니다.` : `다른 역할의 트랙도 살펴보세요. <a href="#/home/guide">Guide 개요</a> 에서 고를 수 있습니다.`;
+  return `<h1>${T.title}${nb("home", `guide-${track}`)}</h1><p class="lead">${T.lead}</p>
+<div class="guide-bar"><span class="guide-who">${I(GUIDE_ICON[track], 18)}${T.who}</span><span class="guide-prog" data-guide-prog="${track}" data-total="${n}">${n}단계</span><button type="button" class="btn sm text assistive" data-guide-reset="${track}" hidden>처음부터 다시</button></div>
+<div class="stepper guide-stepper" data-nonlinear data-guide="${track}">
+${stepsOl("label-below", T.steps.map((s, i) => stepLi(s.t, i, i ? "" : "on", { btn: i > 0 })))}
+${T.steps.map((s, i) => `<div class="step-panel guide-panel" tabindex="-1"${i ? " hidden" : ""}>${guideStep(track, s, i, n)}</div>`).join("\n")}
+${stepActs(true, n === 1)}
+</div>
+<div class="notice positive guide-done" role="status" hidden><span class="ico">${I("circle-check", 20, { style: "filled" })}</span><div><b>${T.title} 트랙을 마쳤습니다</b>${nextHtml}</div></div>`;
+}
+function guideOverviewPage() {
+  const ord = guideKeys(), tr = GUIDE.tracks, role = ord.filter((k) => !["basics", "together"].includes(k));
+  const row = (k) => `<a href="#/home/guide-${k}"><b>${I(GUIDE_ICON[k], 18)}${tr[k].title}${nb("home", `guide-${k}`)}</b><span>${tr[k].line}</span><span class="guide-prog" data-guide-prog="${k}" data-total="${tr[k].steps.length}">${tr[k].steps.length}단계</span>${I("chevron-right", 18)}</a>`;
+  return `<h1>Guide${nb("home", "guide")}</h1><p class="lead">디자이너 · 기획자 · 개발자가 이 시스템을 순서대로 익히는 매뉴얼입니다. 모두가 공통 트랙을 먼저 읽고, 내 역할의 트랙을 따라간 뒤, 함께 만들기에서 화면 하나를 셋이 넘겨받으며 만들어 봅니다.</p>
+<ol class="guide-path" aria-label="읽는 순서">
+<li><span class="guide-path-no">1</span><b>공통</b><span>모두 · ${tr.basics.steps.length}단계</span></li>
+<li><span class="guide-path-no">2</span><b>내 역할</b><span>${role.map((k) => tr[k].title).join(" · ")} 중 하나</span></li>
+<li><span class="guide-path-no">3</span><b>함께 만들기</b><span>모두 · ${tr.together.steps.length}단계</span></li>
+</ol>
+<h2 id="tracks">Tracks</h2>
+<div class="base-list guide-tracks">${ord.map(row).join("")}</div>
+<p class="guide-reset-row"><button type="button" class="btn sm outline assistive" data-guide-reset="all" hidden>진행 모두 지우기</button></p>
+<h2 id="how">읽는 법</h2>
+<dl class="kv"><dt>한 단계</dt><dd>무엇을 하는지, 왜 그렇게 하는지, 직접 해볼 과제 하나, 관련 문서로 이루어져 있습니다. 과제는 이 사이트의 실제 페이지에서 합니다</dd><dt>넘기기</dt><dd>다음 · 이전 버튼으로 넘기거나 위의 단계 이름을 눌러 아무 단계로나 옮깁니다. 떠난 단계는 완료로 표시됩니다</dd><dt>진행</dt><dd>완료한 단계와 마지막으로 본 단계를 이 브라우저에 저장해 다시 열면 이어서 볼 수 있습니다. 다른 기기와는 이어지지 않습니다</dd><dt>설치와 연결</dt><dd>Figma 라이브러리를 켜는 법과 패키지 설치는 <a href="#/home/getting-started">Getting started</a> 에 있습니다. 개발자 트랙도 같은 코드를 씁니다</dd></dl>`;
+}
+
 const PAGES = {
+  "home/guide": () => guideOverviewPage(),
+  ...Object.fromEntries(GUIDE.order.map((k) => [`home/guide-${k}`, () => guideTrackPage(k)])),
   "home/getting-started": () => {
     const designer = `<ol class="guide-steps">
 <li><b>Figma 파일 열기</b><a href="${FIGMA}" target="_blank" rel="noopener">JS Design System Figma 파일 ↗</a> — 페이지 구성(Home · Foundations · Components · Patterns · Resources)은 이 사이트와 같습니다. 어느 페이지에 무엇이 있는지는 <a href="#/resources/figma">Figma Library</a> 표를 참고하세요.</li>
@@ -430,10 +501,11 @@ const PAGES = {
 <li><b>컴포넌트 페이지에서 복사</b>예제 아래 <b>코드 보기 → 복사</b>. 전체 CSS 대신 일부만 쓰려면 같은 곳의 <b>Component CSS</b> 와 <a href="#/resources/design-token">Design Token</a> 의 <code>:root</code> 토큰만 가져갑니다. 이벤트(<code>ds:select</code> · <code>ds:tab</code> 등)와 API 는 <a href="#/resources/react#dsjs">React Package › assets/ds.js</a>.${codeBlock("gs-html-use", GS_HTML_USE, "html", "복사")}</li>
 <li><b>제품 색 적용</b>팔레트 일곱(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI) 중 하나를 고릅니다. 다섯 단계 값은 <a href="#/foundations/colors">Colors › Product color</a> 표에 있고, 적용하는 함수는 <a href="#/resources/design-token#accent-js">Design Token › Product color 적용</a> 에 있습니다. 나머지 토큰(무채색 · 상태색 · 간격 · 반경)은 그대로 씁니다.${codeBlock("gs-accent", GS_ACCENT_CSS, "css", "CSS 복사")}</li>
 </ol>`;
-    return `<h1>Getting started${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 뺀 색 · 글자 · 간격 · 컴포넌트 · 패턴을 모두 제공합니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
+    return `<h1>Getting started${nb("home", "getting-started")}</h1><p class="lead">이 디자인 시스템은 제품 메인 컬러를 뺀 색 · 글자 · 간격 · 컴포넌트 · 패턴을 모두 제공합니다. 이 페이지는 설치와 연결만 다룹니다. 역할에 맞는 탭을 골라 순서대로 따라 하면 됩니다.</p>
+<p class="t-label-1-reading t-regular">시스템을 고르고 쓰는 법을 처음부터 단계별로 익히려면 <a href="#/home/guide">Guide</a> 를 보세요. 기획자는 설치할 것이 없으므로 Guide 의 기획자 트랙에서 시작합니다.</p>
 <p class="t-label-1-reading t-regular">어느 역할이든 각 <a href="#/components/overview">컴포넌트 페이지</a>가 사용법의 단일 출처입니다. 예제로 실제 동작과 상태를, Props 표로 허용되는 변형을, 코드 보기로 HTML+CSS · React 코드를 확인합니다. 필요한 컴포넌트가 없으면 <a href="#/resources/contribution">Contribution</a> 절차로 제안합니다.</p>
 <p class="t-label-1-reading t-regular">헤더의 제품 색 메뉴로 팔레트별 색을, 테마 버튼으로 다크 모드를 미리 볼 수 있습니다. 키보드의 / 키를 누르면 검색창이 열립니다.</p>
-${docTabs([["designer", "디자이너 · 기획자"], ["react", "React 개발자"], ["html", "HTML+CSS 개발자"]], [designer, react, html])}
+${docTabs([["designer", "디자이너"], ["react", "React 개발자"], ["html", "HTML+CSS 개발자"]], [designer, react, html])}
 <h2 id="platforms">지원 환경</h2><p>이 시스템은 <b>데스크톱 웹(관리 콘솔)</b> 만 공식 지원합니다. 아래 기준은 물리 해상도가 아니라 <b>브라우저 화면 영역의 CSS 픽셀</b> 기준이며, 새 화면은 이 표의 기준 프레임에서 시작합니다. 사이드 내비 폭·콘텐츠 최대 너비·컬럼 같은 레이아웃 값의 단일 출처는 <a href="#/foundations/grid">Foundations › Grid</a> 입니다.</p>
 <div class="tablewrap"><table><thead><tr><th>지원 등급</th><th>viewport</th><th>Figma · QA 기준 프레임</th></tr></thead><tbody>
 <tr><td>Compact desktop <code>md</code></td><td style="white-space:nowrap">1024–1279</td><td>1024×768 · 전환점 1280×800</td></tr>

@@ -452,6 +452,43 @@ h2.ud-rhead{margin:0 0 var(--space-5);font-size:var(--font-size-16)}
 .guide-steps>li b{color:var(--foreground-neutral-primary)}
 .guide-steps .code-block{margin:var(--space-3) 0 0}
 .guide-steps>li:last-child{padding-bottom:0}
+/* Home › Guide(2026-11-20) — 단계별 사용 매뉴얼. 트랙 페이지는 Steps 마법사(.stepper.guide-stepper), 개요는 읽는 순서 + 트랙 목록(.base-list).
+   진행 글자(.guide-prog) · 다시 보기 버튼 · 마침 안내는 app.js 가 브라우저 저장값으로 채운다 */
+.guide-bar{display:flex;align-items:center;flex-wrap:wrap;gap:0.75rem 1rem;margin:calc(var(--space-4) * -1) 0 var(--space-8)}
+.guide-who{display:inline-flex;align-items:center;gap:0.375rem;font-size:var(--font-size-14);line-height:1.25rem;letter-spacing:0.0145em;font-weight:500;color:var(--foreground-neutral-secondary)}
+.guide-who svg{color:var(--foreground-neutral-tertiary)}
+.guide-prog{font-size:var(--font-size-13);line-height:1.125rem;letter-spacing:0.0194em;font-weight:500;color:var(--foreground-neutral-tertiary);white-space:nowrap;font-variant-numeric:tabular-nums}
+.guide-prog.on{color:var(--foreground-brand-primary);font-weight:600}
+.guide-stepper{gap:var(--space-8)}
+.guide-panel{border-top:1px solid var(--line-neutral-secondary);padding-top:var(--space-8)}
+.guide-step-head{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:var(--space-2)}
+.guide-step-no{font-size:var(--font-size-13);line-height:1.125rem;letter-spacing:0.0194em;font-weight:500;color:var(--foreground-neutral-tertiary)}
+.guide-roles{display:inline-flex;flex-wrap:wrap;gap:0.375rem}
+.guide-panel .guide-step-title{margin:0 0 var(--space-4);font-size:var(--font-size-22);line-height:1.875rem;letter-spacing:-0.0194em}
+.guide-what{font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em;color:var(--foreground-neutral-primary);margin:0 0 var(--space-4);max-width:70ch}
+.guide-why{font-size:var(--font-size-15);line-height:1.5rem;letter-spacing:0.0096em;color:var(--foreground-neutral-secondary);margin:0 0 var(--space-6);max-width:70ch}
+.guide-why b{display:block;margin-bottom:0.25rem;color:var(--foreground-neutral-primary);font-size:var(--font-size-14);line-height:1.25rem;letter-spacing:0.0145em}
+.guide-panel .doc-tabset{margin:0 0 var(--space-6)}
+.guide-panel .doc-tabs{margin:0 0 var(--space-4)}
+.guide-panel .doc-tabs button{font-size:var(--font-size-14)}
+.guide-panel .code-block{margin:0}
+.guide-try{margin:0 0 var(--space-6)}
+.guide-links{display:flex;align-items:baseline;flex-wrap:wrap;gap:0.5rem 1rem}
+.guide-links-title{font-size:var(--font-size-13);line-height:1.125rem;letter-spacing:0.0194em;font-weight:500;color:var(--foreground-neutral-tertiary)}
+.guide-links ul{display:flex;flex-wrap:wrap;gap:0.5rem 1.25rem;list-style:none;padding:0;margin:0;max-width:none}
+.guide-links li{margin:0}
+.guide-links a{display:inline-flex;align-items:center;gap:0.25rem}
+.guide-done{margin-top:var(--space-8)}
+.guide-path{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4);list-style:none;padding:0;margin:0 0 var(--space-4);max-width:none}
+.guide-path li{margin:0;display:grid;grid-template-columns:auto 1fr;column-gap:0.75rem;row-gap:0.125rem;align-items:center;padding:var(--space-5);border-radius:var(--radius-xl);background:var(--background-neutral-secondary)}
+.guide-path-no{grid-row:span 2;width:2rem;height:2rem;border-radius:50%;display:grid;place-items:center;background:var(--surface-brand-primary);color:var(--brand-label);font-size:var(--font-size-14);line-height:1.25rem;font-weight:700}
+.guide-path b{font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}
+.guide-path span:not(.guide-path-no){font-size:var(--font-size-13);line-height:1.125rem;letter-spacing:0.0194em;color:var(--foreground-neutral-secondary)}
+.guide-tracks a{grid-template-columns:10rem 1fr auto auto}
+.guide-tracks a b svg{color:var(--foreground-neutral-secondary)}
+.base-list.guide-tracks a span.guide-prog{font-size:var(--font-size-13);color:var(--foreground-neutral-tertiary)}
+.base-list.guide-tracks a span.guide-prog.on{color:var(--foreground-brand-primary)}
+.guide-reset-row{margin:calc(var(--space-6) * -1) 0 var(--space-10)}
 /* 컬러바 — 높이 32, 가로 간격 0(바가 붙어 한 줄), 직각 + 위아래 1px hairline, 라벨은 8px 아래 가운데.
    hover·팝오버 열림에서는 **바 상자 자체가** 8px 위로 자란다. 자라는 주체가 중요하다 —
    체커 배경(--checker-bg)과 위아래 hairline, .faint 외곽선이 전부 .bar 에 붙어 있어서,
@@ -768,6 +805,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
   .page code,.page dd,.page li{overflow-wrap:anywhere}
   .page .popup,.page .popup.lg{width:100%;max-width:100%}
   .base-list a{grid-template-columns:1fr;gap:var(--space-2)}
+  .guide-path{grid-template-columns:1fr}
   .dodont,.elev-types{grid-template-columns:1fr}
   .elev-levels{grid-template-columns:repeat(3,1fr)}
   /* 칸 수는 팔레트마다 다르다 — pal() 이 --cols* 로 넘기므로 인라인 style 과 달리 여기서 덮을 수 있다 */

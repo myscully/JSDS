@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>함께 만들기 · 지란지교시큐리티 Design System</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="../assets/font-jp.css">
+<script>try{var t=localStorage.getItem("jsds-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script src="../assets/app.js" defer></script>
+<script src="../assets/ds.js" defer></script>
+</head>
+<body data-section="home" data-page="guide-together" data-root="../">
+<a class="skip-link" href="#content">본문 바로가기</a>
+<header class="header">
+  <a class="brand" href="../index.html" aria-label="JS Design System 홈"><span class="logo" aria-hidden="true">JSDS<i></i></span></a>
+  <span class="ver">v0.9</span>
+  <nav class="topnav" aria-label="섹션"><a href="../home/getting-started.html" class="active">Home</a><a href="../foundations/overview.html" class="">Foundations</a><a href="../components/overview.html" class="">Components<span class="n">N</span></a><a href="../patterns/overview.html" class="">Patterns<span class="n">N</span></a><a href="../templates/overview.html" class="">Templates<span class="n">N</span></a><a href="../resources/ui-dictionary.html" class="">Resources</a></nav>
+  <div class="header-right">
+    <div class="hmenu">
+      <button class="hbtn" id="accentBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="제품 색 선택" title="제품 색"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"/><path d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></svg><span class="dot"></span></button>
+      <div class="pop accent-pop" id="accentPop" role="menu" aria-label="제품 색" hidden></div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="searchBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="검색 (/)" title="검색 (/)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg></button>
+      <div class="pop search-pop" id="searchPop" hidden>
+        <label class="search"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg><input id="q" type="search" placeholder="Search" aria-label="검색" autocomplete="off"></label>
+        <div class="search-results" id="searchResults" hidden></div>
+      </div>
+    </div>
+    <div class="hmenu">
+      <button class="hbtn" id="themeBtn" type="button" aria-label="테마 전환" title="테마 전환"><span class="i-sun"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656"/><path d="M6.343 17.657l-1.414 1.414"/><path d="M6.343 6.343l-1.414 -1.414"/><path d="M17.657 6.343l1.414 -1.414"/><path d="M17.657 17.657l1.414 1.414"/><path d="M4 12h-2"/><path d="M12 4v-2"/><path d="M20 12h2"/><path d="M12 20v2"/></svg></span><span class="i-moon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/></svg></span></button>
+    </div>
+    <div class="hmenu hmenu-nav">
+      <button class="hbtn" id="menuBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label="메뉴" title="메뉴"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="drawer-dim" id="menuDim" hidden></div>
+<div class="drawer" id="menuPop" role="dialog" aria-label="메뉴" hidden></div>
+<div class="shell">
+  <aside class="sidebar"><nav class="nav" aria-label="서브메뉴"><a href="../home/getting-started.html">Getting started<span class="n">N</span></a><a href="../home/about.html">About</a><a href="../home/principles.html">UX Principles</a><h5>Guide</h5><a href="../home/guide.html">개요<span class="n">N</span></a><a href="../home/guide-basics.html">공통<span class="n">N</span></a><a href="../home/guide-designer.html">디자이너<span class="n">N</span></a><a href="../home/guide-planner.html">기획자<span class="n">N</span></a><a href="../home/guide-developer.html">개발자<span class="n">N</span></a><a href="../home/guide-together.html" class="active">함께 만들기<span class="n">N</span></a></nav><div class="sidebar-foot">v0.9 · 지란지교시큐리티 기획팀 디자인파트</div></aside>
+  <div class="main">
+    <div class="page"><article id="content">
+<h1>함께 만들기<span class="n">N</span></h1><p class="lead">로그 목록 화면 하나를 셋이 함께 만들어 봅니다. 단계마다 그 단계를 이끄는 역할이 적혀 있고, 넘겨받는 사람은 앞 단계에서 정한 이름을 그대로 씁니다.</p>
+<div class="guide-bar"><span class="guide-who"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1"></path><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M17 10h2a2 2 0 0 1 2 2v1"></path><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M3 13v-1a2 2 0 0 1 2 -2h2"></path></svg>모두</span><span class="guide-prog" data-guide-prog="together" data-total="6">6단계</span><button type="button" class="btn sm text assistive" data-guide-reset="together" hidden="">처음부터 다시</button></div>
+<div class="stepper guide-stepper" data-nonlinear="" data-guide="together">
+<ol class="steps label-below" aria-label="진행 단계"><li class="on" aria-current="step"><i>1</i><span class="label">요구 정리</span></li><li><button type="button" class="step-btn"><i>2</i><span class="label">패턴과 템플릿 고르기</span></button></li><li><button type="button" class="step-btn"><i>3</i><span class="label">이름 맞추기</span></button></li><li><button type="button" class="step-btn"><i>4</i><span class="label">상태와 문구</span></button></li><li><button type="button" class="step-btn"><i>5</i><span class="label">Figma 로 그리기</span></button></li><li><button type="button" class="step-btn"><i>6</i><span class="label">코드로 옮기기</span></button></li></ol>
+<div class="step-panel guide-panel" tabindex="-1"><div class="guide-step-head"><span class="guide-step-no">1 / 6 단계</span><span class="guide-roles" aria-label="이끄는 역할"><span class="tag">기획자</span></span></div>
+<h2 class="guide-step-title">요구 정리</h2>
+<p class="guide-what">누가 무엇을 보고 무엇을 하는 화면인지 한 문장으로 정합니다. 이 예시에서는 보안 관리자가 오늘 들어온 로그를 심각도와 기간으로 거르고, 한 건을 펼쳐 원본을 봅니다.</p>
+<p class="guide-why"><b>왜</b>한 문장이 있어야 다음 단계에서 고를 틀과 부품이 좁혀집니다.</p>
+
+<div class="notice guide-try"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.085 6.5l5.415 5.415l-8.793 8.792a1 1 0 0 1 -.707 .293h-4a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 .293 -.707zm5.406 -2.698a3.828 3.828 0 0 1 1.716 6.405l-.292 .293l-5.415 -5.415l.293 -.292a3.83 3.83 0 0 1 3.698 -.991"></path></svg></span><div><b>해보기</b>지금 만들 화면을 같은 형식으로 한 문장으로 적어 보세요.</div></div>
+<div class="guide-links"><span class="guide-links-title">관련 문서</span><ul><li><a class="link standalone" href="../patterns/log-viewer.html">로그 뷰어<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li></ul></div></div>
+<div class="step-panel guide-panel" tabindex="-1" hidden=""><div class="guide-step-head"><span class="guide-step-no">2 / 6 단계</span><span class="guide-roles" aria-label="이끄는 역할"><span class="tag">기획자</span><span class="tag">디자이너</span></span></div>
+<h2 class="guide-step-title">패턴과 템플릿 고르기</h2>
+<p class="guide-what">로그를 거르고 펼쳐 보는 일은 로그 뷰어 패턴이 풀고, 목록 화면의 틀은 리스트 템플릿이 줍니다. 둘을 고르면 화면의 뼈대가 정해집니다.</p>
+<p class="guide-why"><b>왜</b>기획자와 디자이너가 같은 틀을 보고 시작하면 화면 구성을 두고 다시 맞출 일이 없습니다.</p>
+
+<div class="notice guide-try"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.085 6.5l5.415 5.415l-8.793 8.792a1 1 0 0 1 -.707 .293h-4a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 .293 -.707zm5.406 -2.698a3.828 3.828 0 0 1 1.716 6.405l-.292 .293l-5.415 -5.415l.293 -.292a3.83 3.83 0 0 1 3.698 -.991"></path></svg></span><div><b>해보기</b>로그 뷰어 패턴의 예제와 리스트 템플릿 화면을 나란히 열어 공통된 부분을 찾아 보세요.</div></div>
+<div class="guide-links"><span class="guide-links-title">관련 문서</span><ul><li><a class="link standalone" href="../patterns/log-viewer.html">로그 뷰어<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li><li><a class="link standalone" href="../templates/list.html">리스트<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li></ul></div></div>
+<div class="step-panel guide-panel" tabindex="-1" hidden=""><div class="guide-step-head"><span class="guide-step-no">3 / 6 단계</span><span class="guide-roles" aria-label="이끄는 역할"><span class="tag">모두</span></span></div>
+<h2 class="guide-step-title">이름 맞추기</h2>
+<p class="guide-what">화면에 들어갈 부품의 이름을 셋이 같은 목록으로 정합니다. 이 예시에서는 Search · 필터 Chip · Date Picker 기간 · Data Table 행 펼침 · 심각도 Tag 입니다.</p>
+<p class="guide-why"><b>왜</b>같은 목록을 보면 기획서 · Figma · 코드가 한 이름으로 이어집니다.</p>
+
+<div class="notice guide-try"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.085 6.5l5.415 5.415l-8.793 8.792a1 1 0 0 1 -.707 .293h-4a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 .293 -.707zm5.406 -2.698a3.828 3.828 0 0 1 1.716 6.405l-.292 .293l-5.415 -5.415l.293 -.292a3.83 3.83 0 0 1 3.698 -.991"></path></svg></span><div><b>해보기</b>UI Dictionary 에서 '행 펼침' 을 검색해 어떤 컴포넌트의 어떤 예제인지 확인해 보세요.</div></div>
+<div class="guide-links"><span class="guide-links-title">관련 문서</span><ul><li><a class="link standalone" href="../resources/ui-dictionary.html">UI Dictionary<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li><li><a class="link standalone" href="../components/data-table.html">Data Table<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li></ul></div></div>
+<div class="step-panel guide-panel" tabindex="-1" hidden=""><div class="guide-step-head"><span class="guide-step-no">4 / 6 단계</span><span class="guide-roles" aria-label="이끄는 역할"><span class="tag">기획자</span></span></div>
+<h2 class="guide-step-title">상태와 문구</h2>
+<p class="guide-what">결과가 없을 때 · 불러오는 중 · 조회에 실패했을 때 · 권한이 없을 때의 화면과 문구를 정합니다. 버튼 이름과 오류 문구는 Writing 규칙으로 씁니다.</p>
+<p class="guide-why"><b>왜</b>이 단계에서 상태가 정해져야 디자이너가 상태 화면을 함께 그리고, 개발자가 같은 문구를 씁니다.</p>
+
+<div class="notice guide-try"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.085 6.5l5.415 5.415l-8.793 8.792a1 1 0 0 1 -.707 .293h-4a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 .293 -.707zm5.406 -2.698a3.828 3.828 0 0 1 1.716 6.405l-.292 .293l-5.415 -5.415l.293 -.292a3.83 3.83 0 0 1 3.698 -.991"></path></svg></span><div><b>해보기</b>검색 패턴의 빈 결과 예제를 보고, 로그 목록에서 결과가 없을 때 보일 문구를 써 보세요.</div></div>
+<div class="guide-links"><span class="guide-links-title">관련 문서</span><ul><li><a class="link standalone" href="../patterns/search.html">검색<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li><li><a class="link standalone" href="../foundations/writing.html">Writing<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li></ul></div></div>
+<div class="step-panel guide-panel" tabindex="-1" hidden=""><div class="guide-step-head"><span class="guide-step-no">5 / 6 단계</span><span class="guide-roles" aria-label="이끄는 역할"><span class="tag">디자이너</span></span></div>
+<h2 class="guide-step-title">Figma 로 그리기</h2>
+<p class="guide-what">리스트 템플릿의 구성대로 인스턴스를 놓고, 앞에서 정한 이름의 컴포넌트와 속성으로 그립니다. 정상 화면과 상태 화면 넷을 함께 그립니다.</p>
+<p class="guide-why"><b>왜</b>정한 이름 그대로 그리면 개발자가 Figma 를 열고 바로 같은 컴포넌트를 찾습니다.</p>
+
+<div class="notice guide-try"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.085 6.5l5.415 5.415l-8.793 8.792a1 1 0 0 1 -.707 .293h-4a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 .293 -.707zm5.406 -2.698a3.828 3.828 0 0 1 1.716 6.405l-.292 .293l-5.415 -5.415l.293 -.292a3.83 3.83 0 0 1 3.698 -.991"></path></svg></span><div><b>해보기</b>Data Table 인스턴스에서 행 펼침과 고정 헤더 속성을 켜 보세요.</div></div>
+<div class="guide-links"><span class="guide-links-title">관련 문서</span><ul><li><a class="link standalone" href="../resources/figma.html">Figma Library<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li><li><a class="link standalone" href="../components/data-table.html">Data Table<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li></ul></div></div>
+<div class="step-panel guide-panel" tabindex="-1" hidden=""><div class="guide-step-head"><span class="guide-step-no">6 / 6 단계</span><span class="guide-roles" aria-label="이끄는 역할"><span class="tag">개발자</span></span></div>
+<h2 class="guide-step-title">코드로 옮기기</h2>
+<p class="guide-what">리스트 템플릿의 코드에서 시작해 로그 뷰어 예제의 코드를 가져와 붙입니다. 거르기와 펼치기 동작은 시스템이 하고, 제품은 이벤트를 받아 조회만 연결합니다. 마치면 셋이 공통 트랙의 넘기기 전 확인으로 함께 점검합니다.</p>
+<p class="guide-why"><b>왜</b>같은 템플릿과 예제에서 출발하면 디자인과 코드가 처음부터 같은 모양입니다.</p>
+
+<div class="notice guide-try"><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.085 6.5l5.415 5.415l-8.793 8.792a1 1 0 0 1 -.707 .293h-4a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 .293 -.707zm5.406 -2.698a3.828 3.828 0 0 1 1.716 6.405l-.292 .293l-5.415 -5.415l.293 -.292a3.83 3.83 0 0 1 3.698 -.991"></path></svg></span><div><b>해보기</b>로그 뷰어 패턴의 예제에서 코드 보기를 열어 필터 칩과 표의 마크업을 확인해 보세요.</div></div>
+<div class="guide-links"><span class="guide-links-title">관련 문서</span><ul><li><a class="link standalone" href="../patterns/log-viewer.html">로그 뷰어<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li><li><a class="link standalone" href="../templates/list.html">리스트<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l14 0"></path><path d="M13 18l6 -6"></path><path d="M13 6l6 6"></path></svg></a></li></ul></div></div>
+<div class="step-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-step="prev" disabled="">이전</button><button type="button" class="btn md solid primary" data-step="next">다음</button><button type="button" class="btn md solid primary" data-step="finish" hidden="">완료</button></div></div>
+</div>
+<div class="notice positive guide-done" role="status" hidden=""><span class="ico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z"></path></svg></span><div><b>함께 만들기 트랙을 마쳤습니다</b>다른 역할의 트랙도 살펴보세요. <a href="../home/guide.html">Guide 개요</a> 에서 고를 수 있습니다.</div></div>
+    </article></div>
+  </div>
+  <aside class="toc" id="toc" aria-label="이 페이지 목차" hidden></aside>
+</div>
+</body>
+</html>

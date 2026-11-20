@@ -755,6 +755,43 @@ for (const [k, c] of Object.entries(PATTERNS)) {
   }
 }
 
+/* Home › Guide(2026-11-20) — 단계별 사용 매뉴얼. guide.data.js 트랙 순서 = SITE.home 의 Guide 묶음, 트랙마다 3~6단계(Steps 규칙),
+   단계마다 제목 · 무엇 · 왜 · 해보기 · 관련 문서, 관련 문서는 있는 route, code 가 있으면 생성 페이지에 그 코드 블록, 함께 만들기는 단계마다 이끄는 역할.
+   생성 페이지는 자유 이동 Steps 마법사(단계 수 = 패널 수) + 진행 표시 + 완료 안내 */
+{
+  const GUIDE = require("./guide.data.js");
+  const grp = ((DATA.SITE.home || {}).groups || []).find((g) => g[0] === "Guide");
+  const want = grp ? grp[1].map(([k]) => k).filter((k) => k !== "guide").map((k) => k.replace(/^guide-/, "")) : [];
+  if (!grp) fails.push("guide: SITE.home 에 Guide 묶음이 없다");
+  if (GUIDE.order.join() !== want.join()) fails.push(`guide: guide.data.js order(${GUIDE.order.join()})가 SITE.home Guide 묶음(${want.join()})과 같지 않다`);
+  if (Object.keys(GUIDE.tracks).join() !== GUIDE.order.join()) fails.push(`guide: tracks 키(${Object.keys(GUIDE.tracks).join()})가 order 와 같은 순서가 아니다`);
+  const routeOk = (h) => { const m = /^#\/([a-z]+)\/([a-z0-9-]+)$/.exec(h); return !!m && !!DATA.SITE[m[1]] && LIB.allPages(DATA.SITE, m[1]).some((p) => p.key === m[2]); };
+  for (const [k, t] of Object.entries(GUIDE.tracks)) {
+    const at = `guide/${k}`, n = (t.steps || []).length;
+    if (!t.title || !t.line || !t.lead || !t.who) fails.push(`${at}: title · who · line · lead 중 빠진 것이 있다`);
+    if (n < 3 || n > 6) fails.push(`${at}: 단계 ${n}개 — 3~6단계로(Steps 규칙)`);
+    (t.steps || []).forEach((s, i) => {
+      const w = `${at} ${i + 1}단계`;
+      for (const f of ["t", "what", "why", "try"]) if (!s[f]) fails.push(`${w}: ${f} 가 없다`);
+      if (!(s.links || []).length) fails.push(`${w}: 관련 문서(links)가 없다`);
+      for (const [lb, h] of s.links || []) { if (!lb) fails.push(`${w}: 이름 없는 링크`); if (!routeOk(h)) fails.push(`${w}: 링크 대상 ${h} 가 없는 페이지다`); }
+      if (k === "together") { if (!(s.lead || []).length) fails.push(`${w}: 이끄는 역할(lead)이 없다`); for (const r of s.lead || []) if (!GUIDE.roles[r]) fails.push(`${w}: 없는 역할 ${r}`); }
+      else if (s.lead) fails.push(`${w}: lead 는 함께 만들기에만`);
+    });
+    const f = `home/guide-${k}.html`;
+    if (!fs.existsSync(path.join(OUT, f))) { fails.push(`${f}: 페이지가 없다`); continue; }
+    const b = article(read(f));
+    if (!/<div class="stepper guide-stepper" data-nonlinear(?:="")? data-guide="[a-z]+">/.test(b) || !b.includes(`data-guide="${k}"`)) fails.push(`${f}: 자유 이동 Steps 마법사(.stepper.guide-stepper[data-nonlinear][data-guide="${k}"])가 없다`);
+    const lis = (b.match(/<ol class="steps[^"]*"[\s\S]*?<\/ol>/) || [""])[0].match(/<li\b/g) || [];
+    const panels = b.match(/class="step-panel guide-panel"/g) || [];
+    if (lis.length !== n || panels.length !== n) fails.push(`${f}: 단계 ${lis.length} · 패널 ${panels.length} ≠ 데이터 ${n}`);
+    (t.steps || []).forEach((s, i) => { if (s.code && !(b.includes(`id="gd-${k}-${i}-r"`) && b.includes(`id="gd-${k}-${i}-h"`))) fails.push(`${f}: ${i + 1}단계 code '${s.code}' 의 React · HTML 코드 블록이 없다(render.js GUIDE_CODE)`); });
+    if (!/data-guide-prog/.test(b)) fails.push(`${f}: 진행 표시(data-guide-prog)가 없다`);
+    if (!/class="notice positive guide-done"[^>]*role="status"/.test(b)) fails.push(`${f}: 완료 안내(.guide-done[role=status])가 없다`);
+  }
+  if (fs.existsSync(path.join(OUT, "home/guide.html"))) { const ov = article(read("home/guide.html")); const rows = ov.match(/data-guide-prog="[a-z]+"/g) || []; if (rows.length !== GUIDE.order.length) fails.push(`home/guide: 트랙 행의 진행 표시 ${rows.length}개 ≠ 트랙 ${GUIDE.order.length}개`); }
+}
+
 /* Components Overview 썸네일(2026-11-19) — Figma 의 Thumbnail / <이름> 을 SVG 로 옮긴 원본(thumbs/components)이 컴포넌트 페이지와 하나씩 짝이고,
    생성 페이지의 카드마다 그 썸네일이 들어 있으며, 칠이 전부 토큰인지(라이트 고정 raw 색이면 다크 테마에서 흰 면이 뜬다) */
 {
@@ -1128,6 +1165,10 @@ for (const d of require("./base-tokens.js").diff(css)) fails.push(`기준 토큰
     check(`templates/${k} 정의`, c.desc); check(`templates/${k} 개요 한 줄`, c.line);
     for (const r of c.choose || []) check(`templates/${k} 고르기 표 '${r[0]}'`, r[1]);
     for (const r of rows(c.principles)) check(`templates/${k} Rules '${r[0]}'`, r[1]);
+  }
+  for (const [k, t] of Object.entries(require("./guide.data.js").tracks)) {
+    check(`guide/${k} 소개`, t.lead); check(`guide/${k} 한 줄`, t.line);
+    (t.steps || []).forEach((s, i) => { for (const f of ["t", "what", "why", "try"]) check(`guide/${k} ${i + 1}단계 ${f}`, s[f]); });
   }
   if (fs.existsSync(path.join(OUT, "resources", "ui-dictionary.html"))) for (const m of read("resources/ui-dictionary.html").matchAll(/<p class="lead">([\s\S]*?)<\/p>/g)) check("resources/ui-dictionary.html 소개 문단", m[1]);
   for (const sec of ["foundations", "home", "templates"]) for (const n of fs.readdirSync(path.join(OUT, sec)).filter((x) => x.endsWith(".html"))) {

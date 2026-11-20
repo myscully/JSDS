@@ -584,4 +584,62 @@
     navScrollBox.addEventListener("scroll", () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; saveNavScroll(); }); }, { passive: true });
   }
   window.addEventListener("hashchange", restoreNavScroll); /* 미리보기 셸: buildNav 가 #nav 를 다시 그린 뒤 */
+
+  /* Home › Guide 진행(2026-11-20) — 트랙마다 완료한 단계와 마지막으로 본 단계를 이 브라우저에 저장한다(jsds-guide = {트랙: [단계 index], "트랙@": index}).
+     ds.js 보다 먼저 실리므로 단계(li)의 .done · .on 만 되돌려 두면 ds.js 가 처음 그릴 때 그 단계를 보인다(포커스를 옮기지 않음).
+     저장이 막히면(사생활 보호 모드 등) 진행 표시 없이 그대로 넘겨 읽는다 */
+  const GKEY = "jsds-guide";
+  const gRead = () => { try { const v = JSON.parse(localStorage.getItem(GKEY) || "{}"); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; } catch (e) { return {}; } };
+  const gWrite = (v) => { try { localStorage.setItem(GKEY, JSON.stringify(v)); } catch (e) { } };
+  const gSteps = (sp) => [].slice.call(sp.querySelectorAll(":scope > .steps > li"));
+  const gDone = (st, k, n) => (Array.isArray(st[k]) ? st[k] : []).filter((i) => Number.isInteger(i) && i >= 0 && i < n);
+  function gPaint() {
+    const st = gRead();
+    document.querySelectorAll("[data-guide-prog]").forEach((el) => {
+      const k = el.dataset.guideProg, n = +el.dataset.total, d = gDone(st, k, n).length;
+      el.textContent = d ? d + " / " + n + " 완료" : n + "단계";
+      el.classList.toggle("on", d > 0); el.classList.toggle("all", d === n);
+    });
+    document.querySelectorAll("[data-guide-reset]").forEach((b) => {
+      const k = b.dataset.guideReset;
+      b.hidden = k === "all" ? !Object.keys(st).length : !(gDone(st, k, 99).length || st[k + "@"]);
+    });
+    document.querySelectorAll(".guide-stepper").forEach((sp) => {
+      const li = gSteps(sp), note = sp.parentNode.querySelector(".guide-done");
+      if (note) note.hidden = !li.length || !li.every((x) => x.classList.contains("done"));
+    });
+  }
+  function gSave(sp, at) {
+    const st = gRead(), k = sp.dataset.guide;
+    st[k] = gSteps(sp).map((x, i) => (x.classList.contains("done") ? i : -1)).filter((i) => i >= 0);
+    st[k + "@"] = at;
+    gWrite(st); gPaint();
+  }
+  function gRestore(repaint) {
+    const st = gRead();
+    document.querySelectorAll(".guide-stepper").forEach((sp) => {
+      const k = sp.dataset.guide, li = gSteps(sp), done = gDone(st, k, li.length), at = Math.min(Math.max(parseInt(st[k + "@"], 10) || 0, 0), li.length - 1);
+      if (!done.length && !at) return;
+      li.forEach((x, i) => { x.classList.toggle("done", done.indexOf(i) >= 0); x.classList.toggle("on", i === at); });
+      if (repaint && window.DS) window.DS.init(sp.parentNode);
+    });
+    gPaint();
+  }
+  document.addEventListener("ds:step", (e) => { const sp = e.target.closest && e.target.closest(".guide-stepper"); if (sp) gSave(sp, e.detail.index); });
+  document.addEventListener("ds:step-finish", (e) => { const sp = e.target.closest && e.target.closest(".guide-stepper"); if (sp) gSave(sp, e.detail.index); });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-guide-reset]"); if (!b) return;
+    const k = b.dataset.guideReset, st = gRead();
+    if (k === "all") gWrite({}); else { delete st[k]; delete st[k + "@"]; gWrite(st); }
+    document.querySelectorAll(".guide-stepper").forEach((sp) => {
+      if (k !== "all" && sp.dataset.guide !== k) return;
+      gSteps(sp).forEach((x, i) => { x.classList.remove("done"); x.classList.toggle("on", i === 0); });
+      if (window.DS) window.DS.init(sp.parentNode);
+      const p = sp.querySelector(".step-panel"); if (p) p.focus({ preventScroll: true });
+    });
+    gPaint();
+    if (k === "all") { const first = document.querySelector(".guide-tracks a"); if (first) first.focus(); }
+  });
+  gRestore(false);
+  window.addEventListener("hashchange", () => setTimeout(() => gRestore(true), 0)); /* 미리보기 셸: render 가 #content 를 다시 그린 뒤 */
 })();
