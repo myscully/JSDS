@@ -1319,6 +1319,22 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
   - 나온 것은 Home 잘림(기준값) · Gauge(audit 이 뺌)와, 이전부터 있던 셋이다: Overview 의 `Thumbnail` 프레임(1316:6500, 사이트 메인 그림 — 아래로 99), 숨긴 ov-grid 의 Card · Code 카드(어긋난 사본 — 오른쪽으로 290). probe 는 숨긴 조상을 건너뛰지 않으므로, ov-grid 를 지우거나 사본을 치우기 전까지 audit 에 2건이 더 나올 수 있다.
   - **전체 probe 덤프 · audit 은 다시 돌리지 않았다.** 썸네일 컴포넌트에는 글자 · 세트 변형 · 변수 어긋남이 없어서, audit 이 대조하는 항목에 들지 않는다고 보았다.
 
+**2026-11-23 Figma 미반영 65건 반영(사람의 요청 '피그마에도 미반영 65건 반영해줘' — 2026-11-20 차트 마크 · 툴팁 · 대시보드 둘로 · 디자인 검토 P2 몫).** 65건은 모두 없어졌다. 다시 잰 전체 probe(`dump-c1`)로 audit 은 33건이고, 이번 반영과 무관한 것만 남았다(아래).
+- **변수** `chart/mono/track`(라이트 blue-90 · 다크 blue-20)을 만들고 진행 막대 · 게이지 트랙을 묶었다.
+- **Chart 세트** — 막대는 값 쪽 끝만 4 · 바닥 각짐 · 최대 24(Bar · Mixed), 영역 불투명도 0.1, 툴팁 행 = 짧은 선 키 + 값(굵게) + 계열 이름(옅게), 선 차트 Hover 에 세로 기준선 `Crosshair`(1px). KPI 스파크라인 끝 모서리 4.
+- **글 · 행** — Data Visual Spec 둘 · Rules 일곱, Select Spec Size, 대시보드 고르기 표 · Rules('기간' → '필터 없음'), 위험 작업 확인 Rules '이름 입력', Navigation Rules '좁은 화면', 달력 Day Hover 면 tertiary, 패턴의 '필수' Tag 톤 accent.
+- **대시보드 패턴** — 머리의 기간 Select Button 을 지웠다.
+- **분석 · 리포트 패턴 카드**(Patterns 섹션 1361:6753) — 고르기 표 · Rules 와 예제 기본 한 장: 필터 줄(기간 Date Picker 300 + 심각도), KPI 넷, 일별 탐지 추이(심각도 누적 막대 · 범례 다섯), 유형별 탐지(가로 막대 mono-1) · 탐지 경로(도넛 mono-1~4, 가운데 1,309), 유형별 상세 표(증감 배지). 섹션 높이 3073 이고 아래 섹션 아홉을 내려 간격 200 을 지켰다.
+- **다시 잰 덤프에서 찾아 고친 것:** 선 차트 Hover 의 Crosshair 가 `rotation -90` 이라 기준선 위가 아니라 아래로 그려져 Hover 프레임 밖으로 92 넘쳤다 — `rotation 90` 으로 그림 영역(y 15 ~ 174)을 덮게 했다(스크린샷 확인). 이 한 건은 덤프의 넘침 목록에서 지운 뒤 기준 덤프로 삼았다.
+- **기준 덤프** `_figma/dumps/baseline.json` 을 `dump-c1`(그 한 건을 지움)로 바꿨다.
+- **남은 33건(이번에 고치지 않음):**
+  - Home 히어로 부채꼴 잘림 1(기준값).
+  - 숨긴 ov-grid 의 Card · Code 카드에 낀 어긋난 사본 2 — 11-19 항목에 적어 둔 것이 이번 덤프에서 실제로 나왔다(사람이 넣은 프레임이라 손대지 않음).
+  - Card 제목 굵기 30 — 데스크톱에서 'SemiBold' 스타일 넷(Body 1/Normal · Label 1/Normal · Caption 1 · Caption 2 SemiBold)의 서체가 **Pretendard Bold** 로 되돌려졌다. `font-revert.md` 의 목록은 Pretendard SemiBold 다. audit 은 Card 제목에서만 굵기를 대조해 30건으로 드러났고, 같은 스타일을 쓰는 다른 글자도 700 이다. 에이전트 환경에는 Pretendard 가 없어 사람이 데스크톱에서 고친다.
+- **audit · probe 도구:** 툴팁 행을 키 · 값 · 이름으로 읽고 대조한다(값 굵기 600 · 이름 72% 400 · 키는 짧은 선), crosshair 를 읽어 색 · 굵기를 대조한다(격자 목록에서는 뺌), 막대 모서리는 값 쪽 끝만(누적은 마지막 조각만), 네 귀를 따로 적은 `border-radius` 는 가장 큰 귀로 읽는다.
+- **덤프 뜨는 법**은 묶음 4 와 같다(줄인 probe 를 PNG tEXt 로 올림 → 조각을 `jsds.probe` 에 → 하위 에이전트 둘이 읽어 이어 붙이고 길이 · 해시 대조).
+- **그리지 않은 것:** 분석 패턴의 불러오는 중 · 빈 결과 예제(사이트에는 있음 — audit 은 예제 수를 대조하지 않는다).
+
 - `use_figma` 를 부르기 **전에 `/figma-use` 스킬을 반드시 불러옵니다.**
 - 텍스트를 만들거나 고칠 때는 `_figma/font.js` 의 `makeFont()` 만 씁니다.
 - 조사는 `_figma/probe.js` 를 붙여 넣고, 결과를 `node _figma/audit.mjs diff <덤프>` 로 대조합니다.

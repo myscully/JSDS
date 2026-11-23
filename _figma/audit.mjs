@@ -954,7 +954,9 @@ function chartExpect() {
       v.legend = v.series.length > 1;
       variants[v.name] = v;
     }
-    return { gaugeCut, gaugeFont, gaugeText, gaugeSub, types: fc.types, variants, order, canvasH: fc.canvasH, line: fc.line, point: fc.point, barRadius: fc.barRadius, barStroke: fc.barStroke, barMax: fc.barMax, gap: fc.gap, stackGap, donutBw, sideRatio, legendPosition, cutout: cut, alpha, fontSize, styles12, titleStyle: titleStyles[0], tip, legend,
+    /* 2026-11-23 — 툴팁 한 줄 = 값(bodyFont 600) + 계열 이름(400, 글자색 72%), 선 · 혼합 차트의 crosshair = TOKENS.cross */
+    const tipStyle = { value: styleBy(fontSize, 600, "툴팁 값"), name: styleBy(fontSize, 400, "툴팁 계열 이름") }, cross = tokOf("cross");
+    return { gaugeCut, gaugeFont, gaugeText, gaugeSub, tipStyle, cross, types: fc.types, variants, order, canvasH: fc.canvasH, line: fc.line, point: fc.point, barRadius: fc.barRadius, barStroke: fc.barStroke, barMax: fc.barMax, gap: fc.gap, stackGap, donutBw, sideRatio, legendPosition, cutout: cut, alpha, fontSize, styles12, titleStyle: titleStyles[0], tip, legend,
       grid: figTok(`var(${fc.grid})`), axis: figTok(`var(${fc.axis})`), tipBg: figTok(`var(${fc.tooltip.bg})`), tipFg: figTok(`var(${fc.tooltip.fg})`), surface: figTok(card.background), stroke: figTok(bm[2]), sw: +bm[1], pad, gapPx: px(card.gap), radius: c.figma.radius };
   } catch (e) { return { error: String(e.message || e) }; }
 }
@@ -974,7 +976,8 @@ function chartExpect() {
           Delta=None = class 없는 .kpi .delta(화살표 없음 · 그 color) — 예제에 class 없는 증감이 있으면 KPI 세트 Delta 속성에 None 이 있어야 한다 */
 function staticChartExpect() {
   try {
-    const rad = (sel) => { const v = cssRule(sel)["border-radius"]; if (v == null) throw new Error(sel + " 에 border-radius 가 없습니다"); return /%$/.test(v) ? v : px(v); };
+    /* 2026-11-23 — 네 귀를 따로 적은 값(값 쪽 끝만 둥근 막대 "0 .25rem .25rem 0")은 가장 큰 귀로 읽는다(probe maxR 과 같은 식). 종전엔 첫 귀만 읽어 0 이 됐다 */
+    const rad = (sel) => { const v = cssRule(sel)["border-radius"]; if (v == null) throw new Error(sel + " 에 border-radius 가 없습니다"); return /%$/.test(v) ? v : Math.max(...String(v).trim().split(/\s+/).map(px)); };
     const leg = cssRule(".chart-legend i"), dn = cssRule(".donut"), di = cssRule(".donut i");
     const legend = { d: px(leg.width), h: px(leg.height), round: leg["border-radius"] === "50%" };
     if (legend.d !== legend.h) throw new Error(`.chart-legend i ${leg.width} × ${leg.height} 가 정사각이 아닙니다`);
@@ -2434,7 +2437,10 @@ function diffChart(c, w, variables, bad, notes) {
     if (wv.bars !== undefined) {
       if (bars.length !== wv.bars) bad.push(`${at} 막대 ${bars.length}개 ≠ ${wv.bars}(라벨 × 계열)`);
       const per = wv.barsPer || [wv.bars]; const barColors = wv.barColors || wv.colors; let k = 0;
-      per.forEach((n, s) => { for (let j = 0; j < n && k < bars.length; j++, k++) { const b = bars[k]; if (b.fill !== T(barColors[s])) bad.push(`${at} 막대 ${b.name} 색 ${b.fill} ≠ ${barColors[s]} — 계열 ${s + 1}`); if (b.r.some((r) => r !== w.barRadius)) bad.push(`${at} 막대 ${b.name} 모서리 ${JSON.stringify(b.r)} ≠ 네 귀 모두 ${w.barRadius} — figma.chart.barRadius(ds-chart borderRadius)`); if (b.st !== undefined && b.st !== w.barStroke) bad.push(`${at} 막대 ${b.name} 보이는 테두리 ${b.st}개 ≠ ${w.barStroke} — figma.chart.barStroke(막대는 stroke 없음)`); if (b.w > w.barMax + 0.01) bad.push(`${at} 막대 ${b.name} 두께 ${b.w} > ${w.barMax} — figma.chart.barMax`); } });
+      per.forEach((n, s) => { for (let j = 0; j < n && k < bars.length; j++, k++) { const b = bars[k]; if (b.fill !== T(barColors[s])) bad.push(`${at} 막대 ${b.name} 색 ${b.fill} ≠ ${barColors[s]} — 계열 ${s + 1}`); { /* 2026-11-20 — 값 쪽 끝만 BAR_END, 바닥은 각짐(borderSkipped "start"). 누적이면 그 칸의 마지막 조각만 둥글다. r = [TL, TR, BR, BL] */
+            const end = wv.horizontal ? [0, w.barRadius, w.barRadius, 0] : [w.barRadius, w.barRadius, 0, 0], flat = [0, 0, 0, 0];
+            const want = wv.stacked && s < per.length - 1 ? flat : end;
+            if (b.r.some((r, q) => r !== want[q])) bad.push(`${at} 막대 ${b.name} 모서리 ${JSON.stringify(b.r)} ≠ ${JSON.stringify(want)} — 값 쪽 끝만 ${w.barRadius}, 바닥 각짐(ds-chart BAR_END · borderSkipped "start")`); } if (b.st !== undefined && b.st !== w.barStroke) bad.push(`${at} 막대 ${b.name} 보이는 테두리 ${b.st}개 ≠ ${w.barStroke} — figma.chart.barStroke(막대는 stroke 없음)`); if (b.w > w.barMax + 0.01) bad.push(`${at} 막대 ${b.name} 두께 ${b.w} > ${w.barMax} — figma.chart.barMax`); } });
       if (bars.length && bars[0].st === undefined) notes.push(`${at} 막대 테두리 조사가 없습니다 — k35 전 probe.js 로 만든 덤프입니다`);
       /* 누적 막대 — 같은 라벨의 이웃 세그먼트 사이 틈 = stackGap(투명 — 그 자리에 칠한 노드가 없어야 한다). Figma 의 Bar 변형이 비누적(weeks)이면 대상이 없다 */
       if (wv.stacked && bars.length && bars[0].x !== undefined) {
@@ -2484,7 +2490,14 @@ function diffChart(c, w, variables, bad, notes) {
       if (t.pad.some((p) => p !== w.tip.pad)) bad.push(`${at} 툴팁 padding ${JSON.stringify(t.pad)} ≠ ${w.tip.pad} — ds-chart padding`);
       if (!t.title || t.title.fill !== T(w.tipFg) || t.title.fs !== w.fontSize) bad.push(`${at} 툴팁 제목 ${t.title ? t.title.fill + " " + t.title.fs : "없음"} ≠ ${w.tipFg} ${w.fontSize}`);
       if (t.rows.length !== wv.series.length) bad.push(`${at} 툴팁 행 ${t.rows.length}개 ≠ ${wv.series.length}(계열)`);
-      t.rows.forEach((r, i) => { if (r.fill !== T(w.tipFg)) bad.push(`${at} 툴팁 행 ${r.text} 칠 ${r.fill} ≠ ${w.tipFg}`); if (wv.colors[i] && r.swatch !== T(wv.colors[i])) bad.push(`${at} 툴팁 행 ${r.text} 견본 ${r.swatch} ≠ ${wv.colors[i]}`); if (r.swD !== w.tip.box) bad.push(`${at} 툴팁 행 ${r.text} 견본 지름 ${r.swD} ≠ ${w.tip.box} — ds-chart 툴팁 min(boxWidth, boxHeight)`); if (!r.text || !r.text.startsWith(wv.series[i] + ":")) bad.push(`${at} 툴팁 행 [${r.text}] 이 계열 ${wv.series[i]} 의 값이 아닙니다`); }); } }
+      t.rows.forEach((r, i) => { if (r.fill !== T(w.tipFg)) bad.push(`${at} 툴팁 행 ${r.text} 칠 ${r.fill} ≠ ${w.tipFg}`); if (wv.colors[i] && r.swatch !== T(wv.colors[i])) bad.push(`${at} 툴팁 행 ${r.text} 견본 ${r.swatch} ≠ ${wv.colors[i]}`); /* 2026-11-20 — 키는 짧은 선(길이 boxWidth · 두께 2), 값이 먼저(굵게) · 계열 이름이 뒤(옅게) */
+        if (r.swT === "ELLIPSE" || r.swD !== w.tip.box || r.swH !== 2) bad.push(`${at} 툴팁 행 ${r.text} 키 ${r.swT} ${r.swD}×${r.swH} ≠ 짧은 선 ${w.tip.box}×2 — ds-chart 툴팁 pointStyle "line" · boxWidth(tipBody)`);
+        if (!r.text || !/^[\d,.]+$/.test(r.text)) bad.push(`${at} 툴팁 행 [${r.text}] 이 값(숫자)으로 시작하지 않습니다 — ds-chart tipLabel 은 값이 먼저`);
+        if (r.st !== w.tipStyle.value) bad.push(`${at} 툴팁 행 값 [${r.text}] 스타일 ${r.st} ≠ ${w.tipStyle.value} — bodyFont 600`);
+        if (r.name !== wv.series[i]) bad.push(`${at} 툴팁 행 계열 이름 [${r.name}] ≠ ${wv.series[i]}`);
+        else { if (r.nameFill !== T(w.tipFg)) bad.push(`${at} 툴팁 행 계열 이름 칠 ${r.nameFill} ≠ ${w.tipFg}(72%)`); if (r.nameSt !== w.tipStyle.name) bad.push(`${at} 툴팁 행 계열 이름 스타일 ${r.nameSt} ≠ ${w.tipStyle.name} — tipBody 400`); } });
+      if (!v.cross) bad.push(`${at} crosshair 없음 — 선 · 영역 차트는 hover 에 세로 기준선(ds-chart crossPlugin)`);
+      else if (v.cross.stroke !== T(w.cross) || v.cross.sw !== 1) bad.push(`${at} crosshair ${v.cross.stroke} ${v.cross.sw}px ≠ ${w.cross} 1px — ds-chart TOKENS.cross`); } }
     else if (v.tooltip) bad.push(`${at} 툴팁이 있습니다 — 툴팁은 Timeseries 변형에만 고정`);
   }
   /* 문서(Card/Data Visual)의 Chart 인스턴스 — 예제 순서대로 변형 하나씩(k36: donut-live 바로 뒤에 donut-narrow) */

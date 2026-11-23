@@ -739,7 +739,7 @@ for (const p of figma.root.children) {
         /* 2026-11-05 k35 — stroke 수 · 굵기(막대는 stroke 없음), 자리(누적 세그먼트 사이 틈을 audit 이 잰다) */
         st: k.strokes.filter((x) => x.visible !== false && x.opacity !== 0).length, sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight, x: +k.x.toFixed(2), y: +k.y.toFixed(2) }));
       e.arcs = all.filter((k) => k.type === "ELLIPSE" && k.arcData && k.arcData.innerRadius > 0).map((k) => ({ name: k.name, fill: paint(k.fills), inner: +k.arcData.innerRadius.toFixed(3), deg: [deg(k.arcData.startingAngle), deg(k.arcData.endingAngle)], stroke: paint(k.strokes), sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight, d: +k.width.toFixed(2) }));
-      e.grid = all.filter((k) => k.type === "LINE").map((k) => ({ name: k.name, stroke: paint(k.strokes), sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight }));
+      e.grid = all.filter((k) => k.type === "LINE" && k.name !== "Crosshair").map((k) => ({ name: k.name, stroke: paint(k.strokes), sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight }));
       const ticks = all.filter((k) => k.type === "TEXT" && /^Tick /.test(k.name)).map(tx);
       e.ticks = { n: ticks.length, kinds: [...new Set(ticks.map((t) => t.st + "|" + t.fs + "|" + t.fill))], labels: ticks.map((t) => t.chars) };
       const legend = canvas.children.find((k) => k.name === "Legend");
@@ -748,7 +748,11 @@ for (const p of figma.root.children) {
       e.points = hover ? hover.children.filter((k) => k.type === "ELLIPSE").map((k) => ({ name: k.name, d: +k.width.toFixed(2), fill: paint(k.fills), stroke: paint(k.strokes), sw: k.strokeWeight === figma.mixed ? "mixed" : k.strokeWeight })) : [];
       const tip = hover ? hover.children.find((k) => k.name === "Tooltip") : null;
       e.tooltip = tip ? { fill: paint(tip.fills), r: tip.cornerRadius === figma.mixed ? "mixed" : tip.cornerRadius, pad: [tip.paddingTop, tip.paddingRight, tip.paddingBottom, tip.paddingLeft], title: tx(tip.findOne((k) => k.name === "Title" && k.type === "TEXT")),
-        rows: tip.findAll((k) => k.name === "Row").map((row) => { const t = row.findOne((k) => k.type === "TEXT"), dot = row.findOne((k) => k.type === "ELLIPSE"); return { text: t ? t.characters : null, fill: t ? paint(t.fills) : null, st: t ? tsMap.get(t.textStyleId) || null : null, swatch: dot ? paint(dot.fills) : null, swD: dot ? +dot.width.toFixed(2) : null }; }) } : null;
+        /* 2026-11-23 — 행 = 짧은 선 키(Key, RECTANGLE) + 값(Value, 굵게) + 계열 이름(Name, 옅게). 옛 행(원 견본 + '계열: 값' 한 글)도 읽는다 */
+        rows: tip.findAll((k) => k.name === "Row").map((row) => { const texts = row.findAll((k) => k.type === "TEXT"), t = row.findOne((k) => k.type === "TEXT" && k.name === "Value") || texts[0], nm = row.findOne((k) => k.type === "TEXT" && k.name === "Name"), dot = row.findOne((k) => k.name === "Key" || k.type === "ELLIPSE");
+          return { text: t ? t.characters : null, fill: t ? paint(t.fills) : null, st: t ? tsMap.get(t.textStyleId) || null : null, name: nm ? nm.characters : null, nameFill: nm ? paint(nm.fills) : null, nameSt: nm ? tsMap.get(nm.textStyleId) || null : null, swatch: dot ? paint(dot.fills) : null, swT: dot ? dot.type : null, swD: dot ? +dot.width.toFixed(2) : null, swH: dot ? +dot.height.toFixed(2) : null }; }) } : null;
+      const cross = hover ? hover.children.find((k) => k.name === "Crosshair") : null;
+      e.cross = cross ? { stroke: paint(cross.strokes), sw: cross.strokeWeight === figma.mixed ? "mixed" : cross.strokeWeight, len: +Math.max(cross.width, cross.height).toFixed(2) } : null;
       e.center = tx(canvas.findOne((k) => k.name === "Center" && k.type === "TEXT"));
       e.caption = tx(canvas.findOne((k) => k.name === "Caption" && k.type === "TEXT"));   // 게이지 가운데 값 위 설명(2026-11-18 묶음 3)
       e.centerType = centerTx(canvas.findOne((k) => k.name === "Center" && k.type === "TEXT"));   // 스타일 · 행간 · 가운데(k34)
