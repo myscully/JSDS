@@ -264,8 +264,21 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         const list = kind === "mixed" ? (spec.bars || []).concat(spec.lines || []) : spec.series || [], free = list.filter((s) => !s.tone).length;
         if (spec.color === "mono" && free > 4) bad(`한 톤은 tone 없는 계열 4개까지입니다(${free}개) — color 를 지우면 계열 색으로 그립니다`);
         if (spec.highlight != null && (kind !== "bar" || list.length !== 1 || !Number.isInteger(spec.highlight) || spec.highlight < 0 || spec.highlight >= (spec.labels || []).length)) bad("highlight 는 계열이 하나인 bar 의 막대 번호(0부터, 라벨 수 미만)입니다");
-        if (spec.gradient && (kind !== "bar" || spec.stacked)) bad("gradient 는 누적이 아닌 bar 에만 씁니다");
+        if ("gradient" in spec) bad("gradient 는 없앴습니다(2026-11-20 — 막대는 단색, 하나를 두드러지게 하려면 highlight)");
         if (kind === "gauge" && !(+spec.value >= 0 && +spec.value <= (spec.max == null ? 100 : +spec.max))) bad("gauge 의 value 는 0 이상 max 이하입니다");
+      }
+      /* 필터는 페이지 위 한 줄(2026-11-20, dataviz 'One row, above the charts') — 차트 카드 머리의 동작 칸에 기간 · 필터 컨트롤을 두지 않는다 */
+      for (const m of pv.matchAll(/<div class="chart-action">/g)) {
+        const body = pv.slice(m.index); let depth = 0, n = body.length; for (const t of body.matchAll(/<(\/?)div\b/g)) { depth += t[1] ? -1 : 1; if (!depth) { n = t.index; break; } }
+        if (/class="(?:select-btn|select|datepicker|combobox|searchbar)\b|class="[^"]*\b(?:datepicker|timepicker)\b/.test(body.slice(0, n))) fails.push(`${f}: 차트 카드 머리(.chart-action)에 기간 · 필터 컨트롤 금지 — 필터는 모든 카드 위 한 줄(Data Visual › 카드 머리)`);
+      }
+      /* 대시보드는 훑어보는 화면이라 기간 · 필터가 없고(2026-11-20), 분석 · 리포트는 필터 줄이 카드 밖 · 첫 차트 카드보다 위 · 기간이 맨 앞 */
+      if (f === "patterns/dashboard.html" && /class="(?:select-btn|toolbar)\b|class="[^"]*\bdatepicker\b|aria-label="(?:조회 )?기간"/.test(pv)) fails.push(`${f}: 대시보드에는 기간 · 필터를 두지 않습니다 — 분석 · 리포트 패턴으로(Dashboard › 필터 없음)`);
+      if (f === "patterns/analytics.html" && /class="chart-card\b/.test(pv)) {
+        const tb = pv.indexOf('<div class="toolbar">'), card = pv.search(/class="chart-card\b/);
+        if (tb < 0 || tb > card) fails.push(`${f}: 필터 줄(.toolbar)은 첫 차트 카드보다 위에 둡니다(분석 · 리포트 › 필터 한 줄)`);
+        else { if (/class="(?:card|chart-card)\b/.test(pv.slice(0, tb))) fails.push(`${f}: 필터 줄은 카드 밖에 둡니다(분석 · 리포트 › 필터 한 줄)`);
+          if (!/^<div class="toolbar">\s*<div class="datepicker field" data-range\b/.test(pv.slice(tb))) fails.push(`${f}: 필터 줄 맨 앞은 기간 Date Picker 입니다(분석 · 리포트 › 기간이 먼저)`); }
       }
       /* 진행 막대 목록은 측정값 — role=meter 와 값 속성 · 이름(2026-11-15) */
       for (const m of pv.matchAll(/<div class="progress-list">/g)) {
@@ -797,16 +810,19 @@ for (const [k, c] of Object.entries(PATTERNS)) {
    생성 페이지의 카드마다 그 썸네일이 들어 있으며, 칠이 전부 토큰인지(라이트 고정 raw 색이면 다크 테마에서 흰 면이 뜬다).
    마스크 안의 흰색은 명도 마스크라 그대로다(thumbs.js stripMasks — 빼고 잰다) */
 for (const sec of require("./thumbs.js").SECTIONS) {
-  const { stripMasks, dirOf } = require("./thumbs.js");
+  const { stripMasks, dirOf, PENDING } = require("./thumbs.js");
+  const pending = Object.keys(PENDING[sec] || {});
   const keys = LIB.allPages(DATA.SITE, sec).map(p => p.key).filter(k => k !== "overview");
   const files = fs.readdirSync(dirOf(sec)).filter(f => f.endsWith(".svg")).map(f => f.slice(0, -4));
-  for (const k of keys) if (!files.includes(k)) fails.push(`thumbs/${sec}/${k}.svg 없음 — ${sec} Overview 카드에 Figma 썸네일이 없다`);
+  for (const k of pending) if (files.includes(k)) fails.push(`thumbs.js PENDING.${sec}.${k} — 썸네일 파일이 생겼으니 PENDING 에서 지운다`); else if (!keys.includes(k)) fails.push(`thumbs.js PENDING.${sec}.${k} — 그런 페이지가 없다`); else if (!PENDING[sec][k]) fails.push(`thumbs.js PENDING.${sec}.${k} — 이유가 없다`);
+  for (const k of keys) if (!files.includes(k) && !pending.includes(k)) fails.push(`thumbs/${sec}/${k}.svg 없음 — ${sec} Overview 카드에 Figma 썸네일이 없다`);
   for (const k of files) if (!keys.includes(k)) fails.push(`thumbs/${sec}/${k}.svg — 그런 ${sec} 페이지가 없다`);
   const ov = article(read(`${sec}/overview.html`));
   const cards = [...ov.matchAll(/<a class="ov-card" href="([^"]*)"><div class="thumb([^"]*)" aria-hidden="true" inert(?:="")?>([\s\S]*?)<\/div><div class="label">/g)];
   if (cards.length !== keys.length) fails.push(`${sec}/overview: 카드 ${cards.length}개 ≠ 페이지 ${keys.length}개`);
   for (const [, href, cls, inner] of cards) {
     const at = `${sec}/overview: ${href}`;
+    if (pending.includes(href.split("/").pop().replace(/\.html$/, ""))) { if (cls === " figma") fails.push(`${at} — PENDING 인데 .figma 클래스가 붙었다`); continue; }
     if (cls !== " figma" || !/^<svg class="ov-thumb" aria-hidden="true"/.test(inner)) { fails.push(`${at} — 썸네일이 Figma SVG 가 아니다`); continue; }
     if (/#[0-9A-Fa-f]{3,8}\b|(?:fill|stroke)="(?!none")[^"]*"/.test(stripMasks(inner).replace(/url\(#[^)]*\)/g, ""))) fails.push(`${at} — 썸네일에 토큰이 아닌 칠이 남았다`);
     for (const m of inner.matchAll(/<mask\b[\s\S]*?<\/mask>/g)) if (/(?:fill|stroke)="(?!white"|none")[^"]*"|style="[^"]*(?:fill|stroke):var/.test(m[0])) fails.push(`${at} — 마스크 안 칠이 흰색이 아니다(명도 마스크라 토큰으로 바꾸면 다크에서 그림이 사라진다)`);
@@ -925,7 +941,7 @@ const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
   if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 46) fails.push(`components.json 컴포넌트 ${j.components.length}개(46 기대)`);
-  if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 22) fails.push(`components.json 패턴 ${j.patterns.length}개(22 기대)`);
+  if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 23) fails.push(`components.json 패턴 ${j.patterns.length}개(23 기대 — 2026-11-20 분석 · 리포트)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }
 /* 색만으로 의미를 전달하지 않는다 — 심각도 다섯 색은 회색조로 분리할 수 없으므로(상태색 램프를 공유하는 한

@@ -25,13 +25,16 @@ describe("presets", () => {
     expect((c.options as { scales: { y: { stacked: boolean } } }).scales.y.stacked).toBe(true);
     expect(presets.timeseries({ labels: ["a"], series }).data.datasets.every((d) => d.fill === false)).toBe(true);
   });
-  it("bar 는 각지고 stroke 없음 — 누적 세그먼트도 테두리 · 틈 없이 붙음, horizontal 은 indexAxis y", () => {
+  it("bar 는 값 쪽 끝만 4 둥글고 바닥 각짐 · 두께 24 이하 · stroke 없음 — 누적은 맨 위 조각만 둥글고 아래 조각 사이 2px 틈(dataviz), horizontal 은 indexAxis y", () => {
     const g = presets.bar({ labels: ["a"], series });
-    expect(g.type).toBe("bar"); expect(g.data.datasets.map((d) => [d.borderRadius, d.borderWidth])).toEqual([[0, 0], [0, 0]]); expect((g.options as { indexAxis: string }).indexAxis).toBe("x");
+    expect(g.type).toBe("bar"); expect(g.data.datasets.map((d) => [d.borderRadius, d.borderWidth, d.borderSkipped, d.maxBarThickness, d.inflateAmount])).toEqual([[4, 0, "start", 24, 0], [4, 0, "start", 24, 0]]); expect((g.options as { indexAxis: string }).indexAxis).toBe("x");
     const st = presets.bar({ labels: ["a"], series, stacked: true, horizontal: true });
-    expect(st.data.datasets.map((d) => d.borderWidth)).toEqual([0, 0]); expect((st.options as { indexAxis: string }).indexAxis).toBe("y");
-    expect(presets.bar({ labels: ["a"], series, stacked: true }).data.datasets.map((d) => d.borderWidth)).toEqual([0, 0]);
-    expect(st.data.datasets.every((d) => d.borderRadius === 0 && d.inflateAmount === undefined && d.maxBarThickness === 32)).toBe(true);   // inflate 는 기본(auto) — 이웃 세그먼트 사이 실금 없음
+    expect((st.options as { indexAxis: string }).indexAxis).toBe("y");
+    const ctx = (datasetIndex: number) => ({ datasetIndex, dataIndex: 0, chart: { config: { type: "bar" }, data: { datasets: st.data.datasets } } });
+    const r = st.data.datasets[0].borderRadius as unknown as (c: object) => unknown, w = st.data.datasets[0].borderWidth as unknown as (c: object) => unknown;
+    expect(typeof r).toBe("function"); expect(r(ctx(0))).toBe(0); expect(w(ctx(0))).toEqual({ right: 2 });   // 아래 조각 — 각지고 끝 쪽 2px 틈
+    expect(w(ctx(1))).toBe(0); expect(r(ctx(1))).not.toBe(0);   // 맨 위 조각 — 틈 없이 끝만 둥글게
+    expect(st.data.datasets.every((d) => d.inflateAmount === 0 && d.maxBarThickness === 24)).toBe(true);
   });
   it("donut 은 doughnut, 구멍 67%, 조각 톤과 center 를 메타에", () => {
     const d = presets.donut({ series: [{ label: "A", value: 1, tone: "critical" }, { label: "B", value: 2 }], center: "3", legend: "right" });
@@ -43,7 +46,7 @@ describe("presets", () => {
     const m = presets.mixed({ labels: ["a"], bars: [{ label: "탐지", data: [1] }], lines: [{ label: "차단", data: [1] }] });
     expect(m.type).toBe("bar"); expect(m.data.datasets.map((d) => d.type)).toEqual(["bar", "line"]);
     expect(m.data.datasets.map((d) => d.order)).toEqual([2, 0]);
-    expect([m.data.datasets[0].borderWidth, m.data.datasets[0].borderRadius]).toEqual([0, 0]);   // 막대 stroke · 둥글림 없음
+    expect([m.data.datasets[0].borderWidth, m.data.datasets[0].borderRadius, m.data.datasets[0].borderSkipped]).toEqual([0, 4, "start"]);   // 막대 stroke 없음 · 값 쪽 끝만 둥글게
     expect(Object.keys((m.options as { scales?: Record<string, unknown> }).scales ?? {}).filter((k) => k.startsWith("y"))).toHaveLength(0);   // y2 를 만들지 않는다
   });
 });
@@ -82,13 +85,16 @@ describe("ChartCanvas · mount", () => {
     unmount();
     expect(ch.destroyed).toBe(true);
   });
-  it("단일 계열은 범례를 끄고, config 가 바뀌면 다시 만든다", () => {
+  it("단일 계열은 범례를 끄고, config 가 바뀌면 같은 종류는 제자리 갱신 · 종류가 바뀌면 다시 만든다", () => {
     const one = presets.timeseries({ labels: ["a"], series: [{ label: "x", data: [1] }] });
     const { rerender } = render(<ChartCanvas chart={Chart} config={one} aria-label="x 추이" />);
     expect((FakeChart.instances[0].options as { plugins: { legend: { display: boolean } } }).plugins.legend.display).toBe(false);
     rerender(<ChartCanvas chart={Chart} config={presets.timeseries({ labels: ["a"], series: [{ label: "x", data: [1] }] })} aria-label="x 추이" />);
     expect(FakeChart.instances).toHaveLength(1);   // 내용이 같으면 그대로
     rerender(<ChartCanvas chart={Chart} config={presets.timeseries({ labels: ["a", "b"], series: [{ label: "x", data: [1, 2] }] })} aria-label="x 추이" />);
+    expect(FakeChart.instances).toHaveLength(1); expect(FakeChart.instances[0].destroyed).toBe(false);   // 다시 불러오기 — 지난 그림 위에서 갱신(dataviz)
+    expect((FakeChart.instances[0].data as { labels: string[] }).labels).toEqual(["a", "b"]); expect(FakeChart.instances[0].updates.length).toBeGreaterThan(0);
+    rerender(<ChartCanvas chart={Chart} config={presets.bar({ labels: ["a", "b"], series: [{ label: "x", data: [1, 2] }] })} aria-label="x 추이" />);
     expect(FakeChart.instances).toHaveLength(2); expect(FakeChart.instances[0].destroyed).toBe(true);
   });
   it("mountChart 는 Chart 없이 부르면 던지고, handle 로 destroy 한다", () => {

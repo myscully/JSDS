@@ -97,14 +97,14 @@ export interface ChartCardProps extends Omit<HTMLAttributes<HTMLDivElement>, "ti
   sub?: ReactNode;
   /** @deprecated sub 를 쓰세요 */
   extra?: ReactNode;
-  /** 머리 오른쪽 동작 — Select sm(기간) · 텍스트 assistive 버튼('전체 보기') */
+  /** 머리 오른쪽 동작 — 텍스트 assistive 버튼('전체 보기') 하나. 기간 · 필터는 카드에 두지 않고 페이지 위 한 줄에(dataviz) */
   action?: ReactNode;
   /** 머리 아래 큰 값. 같은 줄의 카드는 모두 갖거나 모두 갖지 않게 */
   figure?: ChartFigure;
   /** 본문 높이 단계 — sm 160 · md 240(기본) · lg 320 */
   size?: "sm" | "md" | "lg";
-  /** 본문 자리를 상태로 바꿈 — 머리는 남고 높이는 그대로 */
-  state?: "loading" | "empty" | "error";
+  /** 본문 자리를 상태로 바꿈 — 머리는 남고 높이는 그대로. refreshing 은 지난 그림(children)을 흐리게 둔 채 다시 불러옴 — 조건을 바꾼 뒤 쓰고 Skeleton 으로 바꾸지 않는다 */
+  state?: "loading" | "refreshing" | "empty" | "error";
   /** 빈 · 오류 상태의 제목 · 설명 */
   stateTitle?: ReactNode;
   stateText?: ReactNode;
@@ -119,7 +119,7 @@ export const ChartCard = forwardRef<HTMLDivElement, ChartCardProps>(function Cha
   if (process.env.NODE_ENV !== "production" && extra !== undefined && !warnedExtra) { warnedExtra = true; console.warn("[ds-react] ChartCard extra 는 sub 로 바뀌었습니다(MIGRATION.md)."); }
   const s = sub ?? extra;
   return (
-    <div ref={ref} className={cx("chart-card", size !== "md" && size, { flat: variant === "flat" }, className)} aria-busy={state === "loading" ? true : undefined} {...rest}>
+    <div ref={ref} className={cx("chart-card", size !== "md" && size, { flat: variant === "flat" }, className)} aria-busy={state === "loading" || state === "refreshing" ? true : undefined} {...rest}>
       <div className="chart-head">
         <h3 className="chart-title">{title}</h3>
         {s !== undefined && <span className="chart-sub">{s}</span>}
@@ -132,7 +132,8 @@ export const ChartCard = forwardRef<HTMLDivElement, ChartCardProps>(function Cha
           {figure.note !== undefined && <span className="delta-note">{figure.note}</span>}
         </div>
       )}
-      {state ? (
+      {state === "refreshing" ? <>{children}<span className="sr-only" role="status">새 조건으로 다시 불러오는 중</span></>
+      : state ? (
         <div className="chart-state">
           {state === "loading" ? <span className="skeleton rect" aria-label="차트를 불러오는 중" role="status" />
             : state === "empty" ? <div className="empty"><span className="ico"><Icon name="chart-bar" size={24} /></span><b>{stateTitle ?? "표시할 데이터 없음"}</b>{stateText !== undefined && <span>{stateText}</span>}</div>

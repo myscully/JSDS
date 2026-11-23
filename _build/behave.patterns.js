@@ -1,5 +1,5 @@
 /* 패턴 재정비(2026-11-15 사람의 결정: 컴포넌트처럼 맞춘 페이지 · 새 패턴 여덟) — behave.js 가 부른다.
-   패턴 22개의 절 순서와, 패턴이 약속하는 동작이 실제로 되는지를 잰다(기존 컴포넌트 동작의 조합 — 새 ds.js 동작은 Side Panel 의 처음 보임 되돌리기 하나). */
+   패턴 23개의 절 순서와, 패턴이 약속하는 동작이 실제로 되는지를 잰다(기존 컴포넌트 동작의 조합 — 새 ds.js 동작은 Side Panel 의 처음 보임 되돌리기 하나). */
 const P = (() => { global.I = global.I || require("./icons.js").I; return require("./patterns.data.js"); })();
 module.exports = async function patterns({ page, ok, go }) {
   const wait = (ms) => page.waitForTimeout(ms);
@@ -209,7 +209,7 @@ module.exports = async function patterns({ page, ok, go }) {
     for (const u of comps) { const o = await overflow(768, u); if (o.length) r["768 " + u] = o; }
     await page.setViewportSize({ width: 1440, height: 900 });
     ok(`narrow: at 390 no preview overflows on ${comps.length} component pages (Top Navigation scrolls by decision) and ${pats.length} pattern pages; at 768 none on the component pages`,
-      comps.length >= 45 && pats.length >= 22 && Object.keys(r).length === 0, JSON.stringify(r));
+      comps.length >= 45 && pats.length >= 23 && Object.keys(r).length === 0, JSON.stringify(r));
   });
 
   await part("16 · 검색 툴바 — 한 줄, 검색칸이 남는 폭을 맞춤(2026-11-16)", async () => {

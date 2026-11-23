@@ -76,7 +76,7 @@
   /* 한 톤(사람의 결정 2026-11-15 — 심각도 · 범주 구분이 필요 없는 차트의 기본, 제품 색과 무관한 고정 파랑) — 계열 순서대로 진한 → 옅은 명도 4단계.
      dataviz 검증기(ordinal 모드): 라이트 blue-40 · 50 · 60 · 70 / #F7F7F8 — 한 색상(3°) · 명도 단조 · 이웃 ΔL ≥ 0.06 · 옅은 끝 2.33:1(≥ 2) PASS,
      다크 blue-80 · 70 · 60 · 45 / #212225 — 같은 검사 PASS(옅은 끝 2.88). 둘째 · 넷째 계열 순서 규칙은 ds-chart.js MONO_STEPS(2계열 = 1 · 4 단계) */
-  --chart-mono-1:var(--blue-40);--chart-mono-2:var(--blue-50);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-70);
+  --chart-mono-1:var(--blue-40);--chart-mono-2:var(--blue-50);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-70);--chart-mono-track:var(--blue-90);
   /* 아바타 6색(사람의 결정 2026-11-16 — 이름으로 정함, 상태색 빨강 · 주황 · 초록을 피함). 라이트 90 면 + 30 글자(라임만 20 — 30 은 4.43), 다크 20 면 + 80 글자. 이니셜 대비는 contrast.pairs 가 잰다 */
   --avatar-1-surface:var(--blue-90);--avatar-1-text:var(--blue-30);--avatar-2-surface:var(--cyan-90);--avatar-2-text:var(--cyan-30);--avatar-3-surface:var(--lime-90);--avatar-3-text:var(--lime-20);--avatar-4-surface:var(--violet-90);--avatar-4-text:var(--violet-30);--avatar-5-surface:var(--purple-90);--avatar-5-text:var(--purple-30);--avatar-6-surface:var(--pink-90);--avatar-6-text:var(--pink-30);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
@@ -157,7 +157,7 @@
   /* Chart(트리 밖) 다크 — 같은 여섯 색상을 어두운 면에 맞는 단계로. 검증기 다크, 바탕 #212225 · #1B1C1E: 명도 띠 PASS · 채도 PASS ·
      색각 분리 worst 8.2(violet↔light-blue, deutan) PASS · 정상 시각 16.1 PASS · 3:1 전부 PASS(2026-11-03) */
   --chart-series-1:var(--blue-60);--chart-series-2:var(--orange-40);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-60);--chart-series-5:var(--lime-40);--chart-series-6:var(--pink-46);--chart-series-1-subtle:var(--blue-30);--chart-series-1-strong:var(--blue-80);
-  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);
+  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);--chart-mono-track:var(--blue-20);
   --avatar-1-surface:var(--blue-20);--avatar-1-text:var(--blue-80);--avatar-2-surface:var(--cyan-20);--avatar-2-text:var(--cyan-80);--avatar-3-surface:var(--lime-20);--avatar-3-text:var(--lime-80);--avatar-4-surface:var(--violet-20);--avatar-4-text:var(--violet-80);--avatar-5-surface:var(--purple-20);--avatar-5-text:var(--purple-80);--avatar-6-surface:var(--pink-20);--avatar-6-text:var(--pink-80);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   --company-mark-subtle:#3A2410;
@@ -200,7 +200,7 @@
   /* Chart(트리 밖) 다크 — 같은 여섯 색상을 어두운 면에 맞는 단계로. 검증기 다크, 바탕 #212225 · #1B1C1E: 명도 띠 PASS · 채도 PASS ·
      색각 분리 worst 8.2(violet↔light-blue, deutan) PASS · 정상 시각 16.1 PASS · 3:1 전부 PASS(2026-11-03) */
   --chart-series-1:var(--blue-60);--chart-series-2:var(--orange-40);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-60);--chart-series-5:var(--lime-40);--chart-series-6:var(--pink-46);--chart-series-1-subtle:var(--blue-30);--chart-series-1-strong:var(--blue-80);
-  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);
+  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);--chart-mono-track:var(--blue-20);
   --avatar-1-surface:var(--blue-20);--avatar-1-text:var(--blue-80);--avatar-2-surface:var(--cyan-20);--avatar-2-text:var(--cyan-80);--avatar-3-surface:var(--lime-20);--avatar-3-text:var(--lime-80);--avatar-4-surface:var(--violet-20);--avatar-4-text:var(--violet-80);--avatar-5-surface:var(--purple-20);--avatar-5-text:var(--purple-80);--avatar-6-surface:var(--pink-20);--avatar-6-text:var(--pink-80);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   --company-mark-subtle:#3A2410;
@@ -2009,23 +2009,27 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .chart{display:flex;flex-direction:column;gap:0.625rem;width:100%;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .chart .row{display:grid;grid-template-columns:7.5rem 1fr 3.5rem;align-items:center;gap:0.75rem}
 .chart .row .lbl{color:var(--foreground-neutral-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* 막대는 각지게(트랙 · 채움 · 스파크라인, 사람의 결정 2026-11-05 — 탐색형 막대와 같다). 채움 기본은 한 톤의 가장 진한 단계(2026-11-15 — 제품 색이던 것) */
+/* 막대는 값 쪽 끝만 4px 둥글게 · 바닥(시작)은 각지게(dataviz — 사람의 결정 2026-11-20, 11-05 의 '각지게' 를 바꿈 · 탐색형 막대와 같다).
+   트랙은 각진 채로 둔다. 채움 기본은 한 톤의 가장 진한 단계(2026-11-15 — 제품 색이던 것) */
 .chart .bar{height:0.75rem;border-radius:0;background:var(--surface-neutral-strong);overflow:hidden}
-.chart .bar i{display:block;height:100%;background:var(--chart-mono-1);border-radius:0}
+.chart .bar i{display:block;height:100%;background:var(--chart-mono-1);border-radius:0 0.25rem 0.25rem 0}
 .chart .bar.critical i{background:var(--foreground-negative-strong)}
 .chart .bar.high i{background:var(--foreground-cautionary-primary)}
 .chart .bar.medium i{background:var(--foreground-accent-light-blue)}
 .chart .bar.low i{background:var(--foreground-accent-lime)}
 .chart .bar.info i{background:var(--foreground-inactive-primary)}
-.chart .num{text-align:right;color:var(--foreground-neutral-secondary)}
+.chart .num{text-align:right;color:var(--foreground-neutral-secondary);font-variant-numeric:tabular-nums}   /* 세로로 맞추는 숫자 열 — 큰 값(KPI · figure)은 비례 숫자 그대로 */
 /* 진행 막대 목록(2026-11-15) — 항목마다 목표 대비 값. Loading 의 .progress-row 틀(윗줄 라벨 · 값, 아랫줄 트랙)을 그대로 쓰고, 데이터 막대라 각지고 한 톤으로 칠한다.
    작업 진행(progressbar)이 아니라 측정값이라 role=meter */
 .progress-list{display:flex;flex-direction:column;gap:1rem;width:100%;line-height:1.6}
 .progress-list .progress-row{gap:0.5rem}
 .progress-list .progress-row .row b{font-weight:600;color:var(--foreground-neutral-primary)}
 .progress-list .progress-row .row .target{color:var(--foreground-neutral-tertiary);margin-left:0.25rem}
-.progress-list .progress{border-radius:0}
-.progress-list .progress i{background:var(--chart-mono-1);border-radius:0}
+/* 트랙 = 채움과 같은 파랑의 옅은 단계(dataviz meter — 사람의 요청 2026-11-20, 회색 surface-neutral-strong 이던 것). 채움 / 트랙 3:1 은 contrast 가 잰다.
+   Loading 의 작업 진행 막대(progressbar)는 상태 표시라 회색 그대로 */
+.progress-list .progress{border-radius:0;background:var(--chart-mono-track)}
+.progress-list .progress i{background:var(--chart-mono-1);border-radius:0 0.25rem 0.25rem 0}
+.progress-list .progress-row .row{font-variant-numeric:tabular-nums}
 /* 차트 카드 — 머리(제목 · 보조 글자 · 동작) 높이 32 고정, 선택 figure(큰 값 · 증감), 본문은 높이 단계(sm 160 · 기본 240 · lg 320).
    같은 줄의 카드는 머리 아래 끝 · 본문 위 끝이 같다(behave.chart) — 동작(Select sm · 텍스트 버튼 32)이 없는 카드도 머리가 32 라 줄이 어긋나지 않는다 */
 .chart-card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;width:100%;min-width:0;line-height:1.6}
@@ -2058,6 +2062,9 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
    로딩은 aria-busy 카드 안 Skeleton, 빈 · 오류는 Card 의 빈 · 오류 틀과 같은 모양(점선 · 면 없음, 아이콘 36) */
 .chart-state{height:15rem;display:flex;flex-direction:column;justify-content:center}
 .chart-state > .skeleton.rect{height:100%}
+/* 다시 불러오기(2026-11-20, dataviz 'Refetch keeps the frame') — 이미 그린 차트가 있으면 Skeleton 대신 지난 그림을 흐리게 둔다. 레이아웃은 그대로 */
+.chart-view{transition:opacity var(--motion-base)}
+.chart-card[aria-busy="true"] .chart-view{opacity:.5}
 .chart-card .empty{border:0;background:none;padding:0;height:100%}
 .chart-card .empty b{font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
 .chart-card .empty .ico{width:2.25rem;height:2.25rem}
@@ -2104,7 +2111,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .chart-legend i.series-6{background:var(--chart-series-6)}
 .chart-legend b{color:var(--foreground-neutral-primary);}
 .sparkline{display:flex;align-items:flex-end;gap:0.1875rem;height:2rem;line-height:1.6}
-.sparkline i{display:block;width:0.375rem;background:var(--chart-mono-4);border-radius:0}   /* 일반 막대는 옅은 단계, .hi 는 진한 단계(같은 파랑 — 2026-11-15 제품 색이던 것) */
+.sparkline i{display:block;width:0.375rem;background:var(--chart-mono-4);border-radius:0.25rem 0.25rem 0 0}   /* 일반 막대는 옅은 단계, .hi 는 진한 단계(같은 파랑 — 2026-11-15 제품 색이던 것) */
 .sparkline i.hi{background:var(--chart-mono-1)}
 
 /* Patterns: layout helpers */

@@ -14,10 +14,10 @@ export interface ChartTableData { head: string[]; rows: Array<Array<string | nul
 export type Tone = "critical" | "high" | "medium" | "low" | "info" | "ok" | "brand" | "mono-1" | "mono-2" | "mono-3" | "mono-4" | "series-1" | "series-1-subtle" | "series-1-strong";
 /** tone 없는 계열의 색 — mono(기본, 고정 파랑 명도 단계 · 4개까지) · categorical(계열 색 1~6). 5개 이상이면 mono 를 적어도 categorical 로 그리고 경고 */
 export type ColorMode = "mono" | "categorical";
-export interface Series { label: string; data: number[]; tone?: Tone }
+export interface Series { label: string; data: number[]; tone?: Tone; /** 색 자리 고정(mono 1~4 · categorical 1~6) — 필터로 계열 수가 바뀌어도 남은 계열의 색이 그대로 */ slot?: number }
 export interface DonutSlice { label: string; value: number; tone?: Tone }
 export interface TimeseriesSpec { labels: string[]; series: Series[]; /** 누적 영역(심각도 누적 추이) */ stacked?: boolean; /** 계열이 하나일 때 선 아래 옅은 칠(기본 true) */ area?: boolean; color?: ColorMode }
-export interface BarSpec { labels: string[]; series: Series[]; stacked?: boolean; horizontal?: boolean; /** 이 막대(0부터)만 진하게 — 계열이 하나일 때 */ highlight?: number; /** 막대마다 기준선 → 값 끝 그라데이션 — 누적에는 쓰지 않음 */ gradient?: boolean; color?: ColorMode }
+export interface BarSpec { labels: string[]; series: Series[]; stacked?: boolean; horizontal?: boolean; /** 이 막대(0부터)만 진하게 — 계열이 하나일 때 */ highlight?: number; /** @deprecated 2026-11-20 에 없어졌다 — 경고하고 단색으로 그린다. 한 막대를 가리키려면 highlight */ gradient?: boolean; color?: ColorMode }
 export interface DonutSpec { series: DonutSlice[]; /** 구멍 가운데 글자(합계 등) */ center?: string | number; /** right 는 자리가 좁고 세로로 길면(폭 < 높이 × 1.5) 아래로 내려간다 */ legend?: "bottom" | "right"; color?: ColorMode }
 export interface MixedSpec { labels: string[]; bars: Series[]; lines: Series[]; color?: ColorMode }
 /** 반원 게이지 — 목표 대비 하나. 범례 · 툴팁 없음, 값은 가운데 글자와 aria-label 이 나른다 */
@@ -26,10 +26,10 @@ export interface GaugeSpec { value: number; /** 기본 100 */ max?: number; /** 
 export interface SparkSpec { data: number[]; labels?: string[]; /** 툴팁의 계열 이름 */ label?: string; tone?: Tone; /** 선 아래 옅은 칠(기본 true) */ area?: boolean }
 
 /** Chart.js config 에 ds-chart 메타(_ds)가 붙은 것. 보통의 Chart.js 옵션을 덧붙여도 된다 */
-export interface DsChartConfig { type: string; data: { labels?: unknown[]; datasets: Array<Record<string, unknown>> }; options?: Record<string, unknown>; plugins?: unknown[]; _ds?: { kind: "timeseries" | "bar" | "donut" | "mixed" | "gauge" | "spark"; color?: ColorMode; highlight?: number; gradient?: boolean; horizontal?: boolean; center?: string | number; caption?: string; legend?: string; text?: string; sub?: string } }
+export interface DsChartConfig { type: string; data: { labels?: unknown[]; datasets: Array<Record<string, unknown>> }; options?: Record<string, unknown>; plugins?: unknown[]; _ds?: { kind: "timeseries" | "bar" | "donut" | "mixed" | "gauge" | "spark"; color?: ColorMode; highlight?: number; horizontal?: boolean; center?: string | number; caption?: string; legend?: string; text?: string; sub?: string } }
 
 export interface DsTheme { series: string[]; /** 한 톤 4단계(진한 → 옅은) */ mono: string[]; tone: Record<Tone, string>; sub: string; track: string; /** 루트 글자 크기 비율(화면 폭 단계) */ scale: number; grid: string; axis: string; tipBg: string; tipFg: string; surface: string; text: string; font: { family: string; size: number }; reduced: boolean }
-export interface DsChartHandle { chart: InstanceType<ChartLike>; repaint(): void; destroy(): void }
+export interface DsChartHandle { chart: InstanceType<ChartLike>; repaint(): void; /** 같은 종류면 data · options 를 바꿔 다시 칠하고 true, 종류가 다르면 false */ update(config: DsChartConfig): boolean; destroy(): void }
 
 export interface Presets {
   timeseries(spec: TimeseriesSpec): DsChartConfig;
@@ -59,7 +59,9 @@ export interface DSChartApi {
   /** tone 없는 계열에 줄 색 — tone 을 준 자리는 그 톤 */
   palette(theme: DsTheme, mode: ColorMode | undefined, tones: Array<Tone | undefined>): string[];
   /** 영역 칠 — 선 색에서 바닥으로 옅어지는 그라데이션(scriptable) */
-  areaFill(color: string): unknown;
+  areaFill(color: string): string;
+  tickFormat(this: { max: number; min: number }, value: number | string): string;
+  BAR_MAX: number; BAR_END: number; BAR_GAP: number; AREA_ALPHA: number; COMPACT_FROM: number;
   CENTER_FONT: { weight: number; size: number };
   GAUGE_FONT: { weight: number; size: number; caption: number };
   TOKENS: { series: string[]; mono: string[]; sub: string; track: string; grid: string; axis: string; tipBg: string; tipFg: string; surface: string; text: string };

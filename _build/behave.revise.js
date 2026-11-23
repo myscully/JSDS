@@ -179,8 +179,9 @@ module.exports = async function revise({ page, ok, go }) {
         }
         return out;
       });
-      ok(`timeseries ${t || "light"}: each stacked area is a vertical gradient — more alpha near its top than near the bottom (2026-11-13)`,
-        !!g && g.length >= 2 && g.every((b) => b.fill === "object" && b.top > b.bot + 8), JSON.stringify(g));
+      /* 2026-11-20 — 영역은 계열 색 10% 단색(사람의 결정, dataviz 'a wash'). 11-13 의 세로 그라데이션을 바꿨다: 띠 위아래 알파가 같다 */
+      ok(`timeseries ${t || "light"}: each stacked area is a flat 10% wash — the same alpha near its top and its bottom (2026-11-20)`,
+        !!g && g.length >= 2 && g.every((b) => b.fill === "string" && Math.abs(b.top - b.bot) <= 3 && b.top >= 18 && b.top <= 34), JSON.stringify(g));
     }
     await theme(null);
   });

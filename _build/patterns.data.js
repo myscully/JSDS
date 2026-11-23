@@ -85,6 +85,26 @@ const DASH = {
   /* tone 없는 두 계열 → 한 톤 1 · 4 단계 */
   weeks: {"labels":["랜섬웨어","악성코드","USB 위반","정책 위반","피싱"],"series":[{"label":"이번 주","data":[412,306,221,115,88]},{"label":"지난 주","data":[349,331,198,142,97]}]},
 };
+/* 분석 · 리포트(2026-11-20) — 최근 7일. 추이 · 유형 · 경로 · 표의 합계가 모두 1,309 로 맞는다(필터가 아래 전체에 같이 걸리는 화면이라 숫자가 서로 맞아야 한다) */
+const ANALYTICS = {
+  trend: {"labels":["11-12","11-13","11-14","11-15","11-16","11-17","11-18"],"series":[{"label":"Critical","tone":"critical","data":[14,18,12,20,26,11,15]},{"label":"High","tone":"high","data":[38,42,40,44,49,36,39]},{"label":"Medium","tone":"medium","data":[61,66,64,68,72,60,62]},{"label":"Low","tone":"low","data":[38,42,43,40,41,42,39]},{"label":"Info","tone":"info","data":[22,25,20,27,30,19,24]}],"stacked":true},
+  types: {"labels":["랜섬웨어","악성코드","USB 위반","정책 위반","피싱"],"series":[{"label":"탐지","data":[472,351,253,132,101]}],"horizontal":true},
+  channels: {"series":[{"label":"엔드포인트","value":734},{"label":"메일","value":307},{"label":"네트워크","value":186},{"label":"USB","value":82}],"center":"1,309","legend":"right"},
+  rows: [["랜섬웨어", 472, 58, "99.4%", ["up", "bad", "12%"]], ["악성코드", 351, 31, "99.1%", ["down", "good", "4%"]], ["USB 위반", 253, 9, "97.6%", ["up", "bad", "9%"]], ["정책 위반", 132, 6, "96.2%", ["down", "good", "7%"]], ["피싱", 101, 12, "98.0%", ["up", "bad", "3%"]]],
+};
+/* 분석 화면의 필터 줄 — 기간이 맨 앞(프리셋 7 · 30 · 90일), 심각도 하나. 모든 카드 위 · 카드 밖에 한 줄 */
+const pFilters = (pre, sev = []) => `<div class="toolbar">
+            <div class="datepicker field" data-range data-max="today" data-presets="7 30 90"><div class="affix"><input id="${pre}-range" value="2026. 11. 12 ~ 2026. 11. 18" placeholder="YYYY. MM. DD ~ YYYY. MM. DD" inputmode="numeric" autocomplete="off" aria-label="조회 기간"><button type="button" class="cal-btn" aria-label="달력 열기" aria-haspopup="dialog" aria-expanded="false">${I("calendar")}</button></div></div>
+            ${pCombo({ id: `${pre}-sev`, label: "심각도", items: SEVS, selected: sev, multiple: true, placeholder: "심각도 전체" })}
+          </div>`;
+const pAnKpis = () => `<div class="kpi-grid">
+            <div class="kpi"><span class="label">전체 탐지</span><span class="value">1,309</span><div class="kpi-foot">${pDelta("up", "bad", "8%")}<span class="delta-note">지난 7일 대비</span></div></div>
+            <div class="kpi critical"><span class="label">Critical</span><span class="value">116</span><div class="kpi-foot">${pDelta("down", "good", "5%")}<span class="delta-note">지난 7일 대비</span></div></div>
+            <div class="kpi"><span class="label">평균 대응 시간</span><span class="value">42<small>분</small></span><div class="kpi-foot">${pDelta("down", "good", "6분")}<span class="delta-note">지난 7일 대비</span></div></div>
+            <div class="kpi"><span class="label">차단률</span><span class="value">98.7<small>%</small></span><div class="kpi-foot">${pDelta("up", "good", "0.4%p")}<span class="delta-note">지난 7일 대비</span></div></div>
+          </div>`;
+const AN_TREND_LABEL = "일별 탐지 추이 — 최근 7일 합계 1,309건, 11월 16일 218건이 가장 많음. Critical 116, High 288, Medium 453, Low 285, Info 167";
+const pAnTrend = (busy) => `<div class="chart-card lg"${busy ? ' aria-busy="true"' : ""}>${pChartHead("일별 탐지 추이", "심각도별")}<div class="chart-view"><div class="chart-canvas"><canvas data-chart="bar" data-spec='${JSON.stringify(ANALYTICS.trend)}' role="img" aria-label="${AN_TREND_LABEL}"></canvas></div></div>${busy ? '<span class="sr-only" role="status">새 조건으로 다시 불러오는 중</span>' : ""}</div>`;
 const DEPTS = ["영업팀", "개발팀", "인프라팀", "보안팀", "기획팀", "재무팀"];
 const SEVS = ["Critical", "High", "Medium", "Low", "Info"];
 /* 권한 트리 — 역할 편집 · 정책 적용 대상에서 쓴다. components.data.js 의 treeHtml 과 같은 구조(상위의 aria-checked 는 하위에서 계산) */
@@ -516,14 +536,14 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   },
 
   "dashboard": {
-    status: "ready", react: ["PageHead","Stack","Row3","Row2"], uses: ["page-header", "select-button", "button", "data-visual", "card", "table", "indicator", "link"], css: [".stack", ".row-2", ".row-3"], borrows: [".sr-only", ".progress-row", ".progress"],
+    status: "ready", react: ["PageHead","Stack","Row3","Row2"], uses: ["page-header", "button", "data-visual", "card", "table", "indicator", "link"], css: [".stack", ".row-2", ".row-3"], borrows: [".sr-only", ".progress-row", ".progress"],
     desc: "보안 관리자가 처음 보는 화면입니다. 위에 KPI 4개를 두고, 그 아래에 일별 탐지 · 분포 차트, 비교 · 목표 대비 차트, 최근 이벤트 표를 차례로 둡니다. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
-    choose: [["언제 쓰는가", "로그인한 관리자가 지금 위험이 얼마나 있는지 훑고, 손볼 곳으로 바로 내려가야 하는 첫 화면에 씁니다."], ["비슷한 패턴", "연동과 서버가 살아 있는지는 <a href=\"#/patterns/system-status\">시스템 상태</a>에서, 로그 한 건 한 건은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>에서 봅니다."]],
-    principles: [["위계", "KPI 로 무슨 일이 있는지, 차트로 어디서 얼마나 일어났는지, 표로 무엇을 할지를 차례로 보여 줍니다. KPI 카드는 숫자와 증감만 두고 스파크라인은 넣지 않습니다. 흐름은 아래 차트가 보여 줍니다."], ["기간", "화면 오른쪽 위의 Select Button 하나로 화면 전체의 기간을 바꿉니다. 카드마다 기간을 따로 두지 않습니다."], ["밀도", "카드 사이 간격은 16px, 카드 안 여백은 24px 입니다. KPI 카드만 좌우 여백이 20px 입니다. 스크롤하지 않아도 첫 화면에 KPI 와 차트가 들어오게 합니다."], ["한 세트", "차트는 한 톤으로 그리고, 심각도처럼 등급이 있을 때만 등급 색을 씁니다. 같은 줄 카드는 머리와 본문 높이를 맞춥니다."], ["내려가기", "표의 이벤트 이름은 그 이벤트의 상세로 가는 링크입니다. 카드의 전체 보기는 같은 조건이 걸린 목록 화면으로 갑니다."], ["증감", "증감 배지의 색은 방향이 아니라 좋고 나쁨을 따릅니다. 비교 기준을 배지 옆에 함께 적습니다."]],
+    choose: [["언제 쓰는가", "로그인한 관리자가 지금 위험이 얼마나 있는지 훑고, 손볼 곳으로 바로 내려가야 하는 첫 화면에 씁니다."], ["비슷한 패턴", "기간을 바꾸거나 조건으로 좁혀 들여다보는 화면은 <a href=\"#/patterns/analytics\">분석 · 리포트</a>입니다. 연동과 서버가 살아 있는지는 <a href=\"#/patterns/system-status\">시스템 상태</a>에서, 로그 한 건 한 건은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>에서 봅니다."]],
+    principles: [["위계", "KPI 로 무슨 일이 있는지, 차트로 어디서 얼마나 일어났는지, 표로 무엇을 할지를 차례로 보여 줍니다. KPI 카드는 숫자와 증감만 두고 스파크라인은 넣지 않습니다. 흐름은 아래 차트가 보여 줍니다."], ["필터 없음", "대시보드에는 기간이나 필터를 두지 않습니다. 늘 지금을 기준으로 훑어보는 화면입니다. 기간을 바꾸거나 조건으로 좁혀 보려면 <a href=\"#/patterns/analytics\">분석 · 리포트</a> 화면으로 갑니다. KPI 는 한 화면에 다섯 개를 넘기지 않습니다."], ["밀도", "카드 사이 간격은 16px, 카드 안 여백은 24px 입니다. KPI 카드만 좌우 여백이 20px 입니다. 스크롤하지 않아도 첫 화면에 KPI 와 차트가 들어오게 합니다."], ["한 세트", "차트는 한 톤으로 그리고, 심각도처럼 등급이 있을 때만 등급 색을 씁니다. 같은 줄 카드는 머리와 본문 높이를 맞춥니다."], ["내려가기", "표의 이벤트 이름은 그 이벤트의 상세로 가는 링크입니다. 카드의 전체 보기는 같은 조건이 걸린 목록 화면으로 갑니다."], ["증감", "증감 배지의 색은 방향이 아니라 좋고 나쁨을 따릅니다. 비교 기준을 배지 옆에 함께 적습니다."]],
     examples: [
       { id: "full", title: "대시보드", html: `
         <div class="stack">
-          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">24시간</button><button type="button" role="radio" aria-checked="false">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
+          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
           <div class="kpi-grid">
             <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><div class="kpi-foot">${pDelta("up", "bad", "12%")}<span class="delta-note">전일 대비</span></div></div>
             <div class="kpi"><span class="label">차단률</span><span class="value">99.2<small>%</small></span><div class="kpi-foot">${pDelta("up", "good", "0.3%p")}<span class="delta-note">전일 대비</span></div></div>
@@ -546,6 +566,43 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
               <tr><td>08:58:20</td><td><a href="#" class="link">C2 통신 시도</a></td><td>PC-0411 · 최유진</td><td><span class="indicator warn">검토 필요</span></td></tr>
             </tbody></table></div>
           </div>
+        </div>`, layout: "stack" },
+    ],
+  },
+
+  "analytics": {
+    status: "new", react: ["PageHead","Stack","Toolbar","Row2"], uses: ["page-header", "button", "date-picker", "combobox", "chip", "data-visual", "card", "table", "empty-state"], css: [".stack", ".row-2", ".toolbar"], borrows: [".field", ".menu", ".menu-item", ".sr-only"],
+    desc: "기간과 조건을 바꿔 가며 탐지를 들여다보는 화면입니다. 맨 위 필터 한 줄이 아래 KPI 와 차트, 표 전체에 같이 걸려서 숫자가 서로 맞습니다. 대시보드가 지금을 훑는 화면이라면, 이 화면은 원인을 찾고 보고서로 내보내는 화면입니다.",
+    choose: [["언제 쓰는가", "지난 기간과 견주거나 특정 심각도만 골라 추이를 보고, 그 결과를 내보내야 할 때 씁니다."], ["비슷한 패턴", "필터 없이 지금 상태만 훑는 첫 화면은 <a href=\"#/patterns/dashboard\">대시보드</a>입니다. 로그 한 건 한 건을 찾는 일은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>가 맡습니다."]],
+    principles: [["필터 한 줄", "필터는 모든 카드 위에 한 줄로 두고 카드 안에는 두지 않습니다. 카드마다 다른 기간을 두면 숫자가 서로 맞지 않습니다."], ["기간이 먼저", "기간을 필터 줄 맨 앞에 둡니다. 최근 7일 · 30일 · 90일 프리셋을 먼저 보이고, 직접 고르는 기간은 달력으로 엽니다."], ["같은 조각", "조건을 바꾸면 KPI 와 모든 차트, 표가 같은 기간과 조건으로 다시 그려집니다. 합계가 어디서나 같아야 합니다."], ["순서", "KPI, 주 차트, 보조 차트 둘, 상세 표 순서로 위에서 아래로 갑니다. 주 차트는 넓게 한 줄을 다 씁니다."], ["다시 불러오기", "조건을 바꾼 뒤 새 결과가 올 때까지 지난 차트를 흐리게 둡니다. Skeleton 으로 바꾸지 않아 화면이 흔들리지 않습니다."], ["빈 결과", "조건에 맞는 탐지가 없으면 무엇이 걸렸는지 칩으로 보이고, 필터를 지우는 버튼을 둡니다."], ["내보내기", "지금 걸린 조건 그대로 내보냅니다. 내보내기는 이 화면의 머리 오른쪽에 하나만 둡니다."]],
+    examples: [
+      { id: "default", title: "분석 · 리포트", desc: "필터 줄, KPI 넷, 심각도별 일별 탐지 추이, 유형별 탐지와 탐지 경로, 유형별 상세 표입니다. 추이와 유형, 경로, 표의 합계가 모두 같습니다.", html: `
+        <div class="stack">
+          <div class="page-head"><div><h2 class="title">탐지 분석</h2><p class="sub">조건을 바꾸면 아래 숫자와 차트가 모두 같은 조건으로 다시 그려집니다.</p></div><div class="actions"><button type="button" class="btn md outline assistive">${I("download")}CSV 내보내기</button></div></div>
+          ${pFilters("an")}
+          ${pAnKpis()}
+          ${pAnTrend(false)}
+          <div class="row-2">
+            <div class="chart-card">${pChartHead("유형별 탐지", "최근 7일")}<div class="chart-view"><div class="chart-canvas"><canvas data-chart="bar" data-spec='${JSON.stringify(ANALYTICS.types)}' role="img" aria-label="유형별 탐지 — 랜섬웨어 472, 악성코드 351, USB 위반 253, 정책 위반 132, 피싱 101"></canvas></div></div></div>
+            <div class="chart-card">${pChartHead("탐지 경로")}<div class="chart-view"><div class="chart-canvas"><canvas data-chart="donut" data-spec='${JSON.stringify(ANALYTICS.channels)}' role="img" aria-label="탐지 경로 — 엔드포인트 734, 메일 307, 네트워크 186, USB 82, 합계 1,309"></canvas></div></div></div>
+          </div>
+          <div class="card flush">
+            <div class="card-head"><h3 class="title">유형별 상세</h3></div>
+            <div class="tbl-wrap"><table class="tbl nowrap"><thead><tr><th>유형</th><th class="num">탐지</th><th class="num">Critical</th><th class="num">차단률</th><th>지난 7일 대비</th></tr></thead><tbody>
+              ${ANALYTICS.rows.map(([t, n, c, r, d]) => `<tr><td>${t}</td><td class="num">${n.toLocaleString("en-US")}</td><td class="num">${c}</td><td class="num">${r}</td><td>${pDelta(d[0], d[1], d[2])}</td></tr>`).join("")}
+            </tbody></table></div>
+          </div>
+        </div>`, layout: "stack" },
+      { id: "loading", title: "다시 불러오는 중", desc: "조건을 바꾼 직후입니다. 새 결과가 올 때까지 지난 차트를 흐리게 두고, 다시 불러오는 중이라는 것을 스크린 리더에도 알립니다. 카드 크기가 그대로라 화면이 흔들리지 않습니다.", html: `
+        <div class="stack">
+          ${pFilters("an-ld", ["Critical"])}
+          ${pAnTrend(true)}
+        </div>`, layout: "stack" },
+      { id: "empty", title: "빈 결과", desc: "조건에 맞는 탐지가 없을 때입니다. 걸린 조건을 칩으로 보이고 하나씩 지우거나 한 번에 초기화할 수 있게 둡니다.", html: `
+        <div class="stack">
+          ${pFilters("an-em", ["Critical"])}
+          <div class="toolbar sub"><span>적용된 조건</span><div class="chip-group"><span class="chip sm"><span class="lbl">단말: PC-2041</span><button type="button" class="x" aria-label="단말: PC-2041 제거">${I("x",10)}</button></span><span class="chip sm"><span class="lbl">정책: USB 차단</span><button type="button" class="x" aria-label="정책: USB 차단 제거">${I("x",10)}</button></span></div><button type="button" class="btn sm text assistive">필터 초기화</button></div>
+          <div class="chart-card lg">${pChartHead("일별 탐지 추이", "심각도별")}<div class="chart-state"><div class="empty"><span class="ico">${I("chart-bar",24)}</span><b>조건에 맞는 탐지가 없습니다</b><span>기간을 넓히거나 조건을 줄여 보세요.</span></div></div></div>
         </div>`, layout: "stack" },
     ],
   },

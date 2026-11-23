@@ -1,6 +1,6 @@
 /* Data Visual 한 세트(사람의 결정 2026-11-15) — behave.js 가 부른다.
    - 한 톤: tone 없는 계열 · 조각은 --chart-mono-1~4(계열 수에 따라 1 · 1·4 · 1·2·4 · 1~4 단계), 5개를 넘으면 --chart-series-1~6. 심각도는 tone 그대로. 제품 색과 무관
-   - 강조 막대 · 막대 그라데이션 · 계열 하나 영역 · 점선 격자 — 픽셀로 잰다
+   - 강조 막대(단색 — 그라데이션은 2026-11-20 에 없앰) · 계열 하나 영역 · 실선 격자 — 픽셀로 잰다
    - 게이지(반원 · 채운 비율 = value / max) · 스파크(높이 40 · 축 없음) · 진행 막대 목록(폭 = 값 / 목표 · meter)
    - 증감 배지(색 = 의미) · 차트 카드 틀(머리 32 · 같은 줄 정렬 · 높이 단계 · 상태) · 대시보드 */
 module.exports = async function chart({ page, ok, go }) {
@@ -60,29 +60,31 @@ module.exports = async function chart({ page, ok, go }) {
   const rgbOf = (s) => s.match(/\d+/g).slice(0, 3).map(Number);
   const near = (a, b, d = 14) => a.every((v, i) => Math.abs(v - b[i]) <= d);
 
-  await part("2 · 강조 · 그라데이션 · 영역 · 점선 격자", async () => {
+  await part("2 · 강조 · 영역 · 실선 격자", async () => {
     const hi = await page.evaluate(() => { const ch = document.querySelector("#ex-data-visual-bar-emphasis canvas[data-chart]").__dsChart.chart, T = window.DSChart.theme(document.documentElement);
       return { bg: ch.data.datasets[0].backgroundColor, m1: T.mono[0], m4: T.mono[3] }; });
     ok("bar highlight: only bar 4 (Friday) takes mono-1, the rest mono-4", Array.isArray(hi.bg) && hi.bg.length === 7 && hi.bg.every((c, i) => c === (i === 4 ? hi.m1 : hi.m4)), JSON.stringify(hi));
+    /* 그라데이션 옵션은 2026-11-20 에 없앴다(사람의 결정) — 둘째 카드(월별)도 단색 강조: 이번 달 막대가 위 · 아래 끝까지 불투명 mono-1 */
     const sel = "#ex-data-visual-bar-emphasis .chart-card:nth-child(2) canvas[data-chart]";
-    const geo = await page.evaluate((sel) => { const ch = document.querySelector(sel).__dsChart.chart, b = ch.getDatasetMeta(0).data[5]; return { x: b.x, top: b.y, base: b.base, m1: window.DSChart.theme(document.documentElement).mono[0] }; }, sel);
-    const [top, bottom] = await px(sel, [[geo.x, geo.top + 3], [geo.x, geo.base - 3]]);
+    const geo = await page.evaluate((sel) => { const ch = document.querySelector(sel).__dsChart.chart, b = ch.getDatasetMeta(0).data[5]; return { x: b.x, top: b.y, base: b.base, m1: window.DSChart.theme(document.documentElement).mono[0], spec: JSON.parse(document.querySelector(sel).dataset.spec) }; }, sel);
+    const [top, bottom] = await px(sel, [[geo.x, geo.top + 6], [geo.x, geo.base - 3]]);
     const m1 = rgbOf(geo.m1);
-    ok("bar gradient: the value end is opaque mono-1 and the baseline end is the same blue at about 55% alpha", near(top.slice(0, 3), m1) && top[3] > 240 && near(bottom.slice(0, 3), m1) && bottom[3] > 120 && bottom[3] < 160, JSON.stringify({ top, bottom, m1 }));
-    /* 다크로 바꾸면 그라데이션도 다크 mono-1 로 다시 칠한다 — 칠이 함수라 behave.js 의 색 대조에서 빠지므로 여기서 픽셀로 잰다 */
+    ok("bar emphasis is a solid colour — the highlighted bar is opaque mono-1 at the value end and at the baseline, and the spec has no gradient", near(top.slice(0, 3), m1) && top[3] > 240 && near(bottom.slice(0, 3), m1) && bottom[3] > 240 && !("gradient" in geo.spec), JSON.stringify({ top, bottom, m1, spec: Object.keys(geo.spec) }));
+    /* 다크로 바꾸면 다크 mono-1 로 다시 칠한다 */
     await theme("dark");
     const geoD = await page.evaluate((sel) => { const ch = document.querySelector(sel).__dsChart.chart, b = ch.getDatasetMeta(0).data[5]; return { x: b.x, top: b.y, base: b.base, m1: window.DSChart.theme(document.documentElement).mono[0] }; }, sel);
-    const [topD] = await px(sel, [[geoD.x, geoD.top + 3]]);
+    const [topD] = await px(sel, [[geoD.x, geoD.top + 6]]);
     await theme(null);
-    ok("bar gradient repaints in dark with the dark mono-1", geoD.m1 !== geo.m1 && near(topD.slice(0, 3), rgbOf(geoD.m1)) && topD[3] > 240, JSON.stringify({ topD, m1: geoD.m1 }));
+    ok("bar emphasis repaints in dark with the dark mono-1", geoD.m1 !== geo.m1 && near(topD.slice(0, 3), rgbOf(geoD.m1)) && topD[3] > 240, JSON.stringify({ topD, m1: geoD.m1 }));
     const area = await page.evaluate(() => { const ch = document.querySelector("#ex-data-visual-default canvas[data-chart]").__dsChart.chart, a = ch.chartArea, p = ch.getDatasetMeta(0).data[10]; return { fill: ch.data.datasets[0].fill, x: p.x, y: (p.y + a.bottom) / 2, bottom: a.bottom }; });
     const [under] = await px("#ex-data-visual-default canvas[data-chart]", [[area.x, area.y]]);
     ok("single-series timeseries fills under the line (fill origin, tinted pixel between line and axis)", area.fill === "origin" && under[3] > 0 && !(under[0] > 245 && under[1] > 245 && under[2] > 245), JSON.stringify({ area, under }));
+    /* 격자는 실선 hairline(2026-11-20 사람의 결정 — dataviz '점선은 투영 · 기준선으로 읽힘'). 11-15 의 점선 3 · 3 을 바꿨다 */
     const grid = await page.evaluate(() => { const ch = document.querySelector("#ex-data-visual-default canvas[data-chart]").__dsChart.chart, y = ch.scales.y, a = ch.chartArea;
-      return { y: y.getPixelForTick(y.ticks.length - 1), left: a.left, dash: ch.options.scales.y.border.dash }; });
+      return { y: y.getPixelForTick(y.ticks.length - 1), left: a.left, dash: ch.options.scales.y.border.dash, w: ch.options.scales.y.grid.lineWidth }; });
     const row = await px("#ex-data-visual-default canvas[data-chart]", Array.from({ length: 40 }, (_, i) => [grid.left + 4 + i, grid.y]));
-    let flips = 0; for (let i = 1; i < row.length; i++) if ((row[i][3] > 5) !== (row[i - 1][3] > 5)) flips++;   // 격자 알파 8% — 맨 위 눈금 줄(영역 칠 위)에서 잰다
-    ok("horizontal grid lines are dashed (3 · 3) — ink and gaps alternate along a grid line", Array.isArray(grid.dash) && grid.dash[0] > 0 && flips >= 6, JSON.stringify({ grid, flips }));
+    let flips = 0; for (let i = 1; i < row.length; i++) if ((row[i][3] > 5) !== (row[i - 1][3] > 5)) flips++;   // 맨 위 눈금 줄(영역 칠 위)에서 잰다
+    ok("horizontal grid lines are solid 1px hairlines — no dash pattern and the ink runs unbroken along a grid line", !(Array.isArray(grid.dash) && grid.dash.length) && (grid.w === undefined || grid.w === 1) && flips === 0 && row.every((p) => p[3] > 5), JSON.stringify({ grid, flips }));
   });
 
   await part("3 · 게이지 · 스파크 · 진행 막대 목록", async () => {
@@ -168,7 +170,14 @@ module.exports = async function chart({ page, ok, go }) {
       return { cols: rows.map((cs) => new Set(cs.map((c) => Math.round(c.getBoundingClientRect().left))).size),
         spill: [...document.querySelectorAll("#ex-dashboard-full .chart-card")].filter((c) => c.scrollWidth > c.clientWidth + 1 || [...c.querySelectorAll(".donut, canvas")].some((e) => e.getBoundingClientRect().right > c.getBoundingClientRect().right + 0.5)).length,
         cut: [...document.querySelectorAll("#ex-dashboard-full .chart-title")].filter((t) => t.scrollWidth > t.clientWidth + 1).map((t) => t.textContent) }; });
-    /* 같은 390 — 머리 부제는 띄어쓰기에서만 줄바꿈(낱말마다 글자들의 줄이 같음), 최근 이벤트 표는 칸이 한 줄이고 틀이 가로로 스크롤(2026-11-15) */
+    /* 같은 390 — 머리 부제는 띄어쓰기에서만 줄바꿈(낱말마다 글자들의 줄이 같음), 최근 이벤트 표는 칸이 한 줄이고 틀이 가로로 스크롤(2026-11-15).
+       부제는 분석 패턴에서 잰다 — 2026-11-20 대시보드 머리에서 기간 버튼을 빼자 대시보드 부제가 390 에서도 한 줄이 되어 줄바꿈을 잴 수 없다(같은 .page-head .sub 규칙) */
+    const subWrap = (sel) => page.evaluate((sel) => {
+      const sub = document.querySelector(sel), node = sub.firstChild, text = node.textContent, tops = [];
+      for (let i = 0; i < text.length; i++) { const r = document.createRange(); r.setStart(node, i); r.setEnd(node, i + 1); tops.push(Math.round(r.getBoundingClientRect().top)); }
+      let split = [], i = 0; for (const word of text.split(" ")) { const t = new Set(tops.slice(i, i + word.length)); if (t.size > 1) split.push(word); i += word.length + 1; }
+      return { lines: new Set(tops).size, split };
+    }, sel);
     const w = await page.evaluate(() => {
       const sub = document.querySelector("#ex-dashboard-full .page-head .sub"), node = sub.firstChild, text = node.textContent, tops = [];
       for (let i = 0; i < text.length; i++) { const r = document.createRange(); r.setStart(node, i); r.setEnd(node, i + 1); tops.push(Math.round(r.getBoundingClientRect().top)); }
@@ -177,8 +186,10 @@ module.exports = async function chart({ page, ok, go }) {
       return { lines: new Set(tops).size, split, wrapped: !!tbl, scrolls: wrap ? wrap.scrollWidth > wrap.clientWidth : false,
         rows: tbl ? [...tbl.tBodies[0].rows].map((r) => Math.round(r.getBoundingClientRect().height)) : [], row: Math.round(3 * parseFloat(getComputedStyle(document.documentElement).fontSize)) };   // 행 3rem — 1279 이하는 루트 93.75% 라 45
     });
+    await go("patterns/analytics.html"); await wait(500);
+    const aw = await subWrap("#ex-analytics-default .page-head .sub");
     await page.setViewportSize(vp); await wait(300);
     ok("dashboard at 390: chart rows stack into one column, nothing spills past its card and no card title is cut", n.cols.every((c) => c === 1) && n.spill === 0 && n.cut.length === 0, JSON.stringify(n));
-    ok("dashboard at 390: the page-head subtitle breaks only at spaces, and the recent-events table keeps one-line 3rem rows and scrolls sideways", w.lines > 1 && w.split.length === 0 && w.wrapped && w.scrolls && w.rows.length === 3 && w.rows.every((h) => h === w.row), JSON.stringify(w));
+    ok("at 390 the page-head subtitle breaks only at spaces (analytics), and the dashboard's recent-events table keeps one-line 3rem rows and scrolls sideways", aw.lines > 1 && aw.split.length === 0 && w.wrapped && w.scrolls && w.rows.length === 3 && w.rows.every((h) => h === w.row), JSON.stringify({ sub: aw, ...w }));
   });
 };

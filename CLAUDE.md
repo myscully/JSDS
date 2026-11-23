@@ -50,7 +50,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 103 · verify 0/0 · contrast 3892쌍 실패 0 · advisory 1149 · behave 1631/1631 · react 898+6 · tsc 0
+pages 105 · verify 0/0 · contrast 3906쌍 실패 0 · advisory 1149 · behave 1651/1651 · react 903+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1120,17 +1120,38 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 잰 것: 1440 라이트 · 다크 · 빨강 제품 · 390 에서 카드 22 · 빈 썸네일 0 · 가로 넘침 0 · 콘솔 오류 0. 썸네일은 제품 색을 쓰지 않아(Figma 에 brand 색이 없음) 빨강 제품에서도 같다.
 - Figma 쪽은 임시 복제본을 만들고 지웠을 뿐 바꾼 것이 없다 — Figma 미반영은 앞 항목 그대로.
 
-`advisory 943` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
+2026-11-20 차트 마크 · 툴팁 · 대시보드 둘로 — dataviz · design-elevation · page-patterns(사람의 요청 · 결정 아홉) — pages 103 → 105 · contrast 3892 → 3906 · behave 1631 → 1651(`behave.dataviz.js` 20) · react 898+6 → 903+6. advisory · verify 수는 그대로.
+- **색은 바꾸지 않았다** — 고치기 전에 dataviz 검증기(2.1.326)로 지금 팔레트를 재니 통과했다(계열 6색 CVD 최악 ΔE 라이트 13.1 · 다크 8.2, mono 4단계 ordinal 통과). 고친 뒤에도 같은 값이다. 바꾼 것은 마크 모양 · 상호작용 · 페이지 패턴이다.
+- **막대 = 값 쪽 끝만 4px 둥글고 바닥 각짐 · 최대 24 · 맞닿은 면 2px 바탕색 틈**(사람의 결정 — 11-05 의 '각지게' · 11-06 의 '틈 없이' 를 바꿈). ds-chart 상수 `BAR_MAX 24 · BAR_END 4 · BAR_GAP 2` · `borderSkipped "start"` · `inflateAmount 0`. 누적은 그 칸의 마지막 조각만 둥글고(`stackRadius`) 앞 조각 시작 쪽에 투명 border 2(`stackBorder` — 11-05 에 실측한 길), 묶은 막대는 계열 사이 2px(`groupSlot`). 정적 `.chart .bar i` · `.progress-list .progress i` 오른쪽 끝 · `.sparkline i` 위 끝 4(트랙은 각진 그대로).
+- **격자 = 1px 실선**(사람의 결정 — 11-15 의 점선 3·3 을 바꿈), **가로 막대는 격자 · `beginAtZero` 가 값 축(x)에**(전에는 범주 축에 있던 결함). 값 축 눈금은 ko-KR 천 단위, 축이 10,000 에 닿으면 축 전체가 만 단위(`COMPACT_FROM` · `tickFormat` — 한 축에 한 형식).
+- **선** 끝 · 꺾임 round · hover 점 바탕색 링 2. **영역 = 계열 색 10% 단색**(사람의 결정 — 11-13 의 세로 그라데이션 32 → 6% 를 바꿈, `AREA_ALPHA`). **스파크는 마지막 점**(r 3 · 바탕색 링 2).
+- **막대 그라데이션 옵션 삭제**(사람의 결정 — 11-15 의 `gradient`). spec 에 오면 한 번 경고하고 단색, verify 가 예제에서 막고 React `BarSpec.gradient` 는 `@deprecated`. 예제 `bar-emphasis` 는 Highlight 하나로.
+- **툴팁 = 값 먼저 굵게 · 계열 이름 옅게 · 짧은 선 키**(사람의 결정 — `tipLabel` · `tipBody` · `pointStyle "line"`), 선 · 혼합 차트에 세로 기준선(`crossPlugin`). 범례는 원 그대로(사람의 결정). 표로 보기는 옵션 그대로(사람의 결정).
+- **색 자리 `slot`** — 계열에 자리를 정해 두면 필터로 계열 수가 바뀌어도 남은 계열이 다시 칠해지지 않는다(dataviz 'Color follows the entity'). 사이트 spec · React `Series.slot`, Rules '색 자리'.
+- **다시 불러오기** — React `useDsChart` 가 종류가 같으면 지우지 않고 handle 의 새 `update(config)` 로 갈아 칠한다. `.chart-card[aria-busy="true"]` 위에 이미 차트가 있으면 Skeleton 대신 지난 그림을 흐리게(opacity .5) 둔다(사이트 · React).
+- **진행 막대 · 게이지 트랙 = 같은 파랑 옅은 단계**(사람의 요청 — dataviz meter 규칙) — 새 토큰 `--chart-mono-track`(라이트 blue-90 · 다크 blue-20, `ADDITIONS` · `grammarOnly`). 채움 / 트랙 3:1 이상 · 트랙 / 바탕 1.1 이상을 라이트 · 다크에서 잰다. Loading 의 진행 막대는 상태 표시라 회색 그대로. 토큰 121 → 122(차트 16 → 17 · 트리 밖 31 → 32).
+- **대시보드는 훑어보기만**(사람의 결정) — 머리의 기간 Select Button 을 지우고 순서를 KPI 넷 → 주 줄(일별 탐지 + 심각도 분포) → 보조 줄(유형별 탐지 + 부서별 패치) → 최근 Critical 표로. Rules '기간' 행을 '필터 없음' 으로.
+- **새 패턴 · 템플릿 '분석 · 리포트'**(`analytics`, Security Console — 사람의 결정) — 머리에 CSV 내보내기, 카드 밖 필터 한 줄(기간 Date Picker 맨 앞 + 심각도 Combobox), KPI 넷 → 심각도 누적 추이 → 유형별(가로 막대) · 탐지 경로(도넛) → 상세 표. 예제 기본 · 불러오는 중(지난 그림 흐림) · 빈 결과(사이트 · React). 새 ds.js 동작은 없다(필터 반영은 제품 몫). 템플릿 일곱 → 여덟, UI Dictionary 항목, 대시보드와 서로 '비슷한 패턴'. Patterns Overview 카드 썸네일은 Figma 에 없어 기본 그림이다 — `thumbs.js PENDING` 에 이유와 함께 두고, 파일이 생기면 verify 가 지우라고 알린다.
+- **verify 더함:** spec 의 `gradient`, 차트 카드 `.chart-action` 안의 Select · Select Button · Date Picker · Combobox · Search, 대시보드의 기간 · 필터 컨트롤, 분석 패턴의 필터 줄(첫 차트 카드보다 위 · 카드 밖 · 맨 앞이 기간), 패턴 23.
+- **수의 근거:** pages +2 = 분석 패턴 · 템플릿 문서 페이지. contrast +14 = 새 쌍 '진행 막대 · 게이지 채움 mono-1 / 트랙' 1 × 맥락 14(옛 'mono-1 / surface-neutral-strong' 쌍은 정적 막대 트랙으로 남김). behave +20 = `behave.dataviz` 20(막대 끝 · 바닥 픽셀 · 두께, 묶음 · 누적 틈 픽셀, 가로 막대 격자 축, 선 · 링, 영역 0.1, 눈금 형식, crosshair 픽셀, 툴팁 순서 · 굵기 · 선 키, slot 고정, 스파크 끝 점, 정적 막대 끝, 트랙 토큰 · 대비 라이트 · 다크, 불러오는 중 흐림, 필터 줄 위치, 1440 · 390 넘침, 대시보드에 기간 없음). react +5 = 테스트 순증 2(차트 update · slot · gradient 경고) + 분석 예제 셋의 구조 비교 3(예제 331 → 334).
+- **기존 단정 고침:** 각진 막대 · 반경 0(behave.js 둘), 점선 격자 · 그라데이션 영역 · 그라데이션 막대 픽셀 · 누적 '빈 픽셀 0'(behave.chart · behave.revise), 정적 막대 '모두 각짐' → 채움 끝 4 · 트랙 각짐, 탐색형 차트 격자 색은 값 축에서 읽음(가로 막대가 y 축 기본색을 읽어 라이트 · 다크 둘 다 실패), 패턴 22 → 23 · 템플릿 7 → 8, **390 부제 줄바꿈 단정을 분석 패턴으로** — 대시보드에서 기간 버튼을 빼자 부제가 390 에서도 한 줄이 되어 '띄어쓰기에서만 줄바꿈' 을 잴 수 없었다(같은 `.page-head .sub` 규칙).
+- 음성 시험 13건(생성 파일을 되돌리고 `cmp` 로 복원 확인) 모두 실패로 잡혔다 — 바닥 둥글게 17/20 · 틈 0 18/20 · crosshair 지움 · 영역 20% · 툴팁 이름 먼저 · 스파크 끝 점 지움 · 격자 범주 축 · slot 고정 끔 · 선 끝 butt · 정적 각짐 · 흐림 지움 19/20, 게이지 · 진행 막대 트랙 회색 18/20. slot 변형은 처음에 못 잡아(자리를 모두 주면 바로 그 색이 됨) 일부만 자리를 준 경우를 더해 잡았다.
+- 캡처: 1440 라이트 · 다크 · 빨강 제품 · 390 에서 Data Visual · 대시보드 · 분석 패턴 · 두 템플릿 화면 — 콘솔 오류 · 가로 넘침 0, 빨강 제품에서도 차트는 고정 파랑.
+- **audit 도구:** `chartExpect` 가 새 상수(`AREA_ALPHA` · `BAR_MAX` · `BAR_END` · `BAR_GAP`)와 툴팁 키 'line' 을 읽는다(옛 정규식이 상수 선언 한 줄을 못 읽어 Chart 대조 전체가 '읽지 못함' 하나로 줄어 있었다).
+- **하지 않은 것:** 색 토큰 · 팔레트, 표로 보기 기본값, 카드 제목을 결론문으로(design-elevation 권장 — Writing 규칙과 맞춰 볼 일), 게이지를 bullet 으로. **본 것(고치지 않음):** 1440 분석 화면에서 넷째 KPI(차단율)만 증감 줄이 두 줄로 내려간다(KPI 칸 폭 — 기존 KPI 규칙).
+- Figma 미반영 5 → 65건(Home 잘림 제외 — 앞 항목의 6 은 Home 포함) — 이번 몫 60: Chart 세트의 막대 모서리 · 두께(Bar · Mixed 34), 영역 불투명도 0.24(4), 툴팁 견본 3, 게이지 트랙 1, 스파크라인 모서리 4, 저장소에만 있는 `chart/mono/track` 1, Data Visual Spec 2 · Rules 7, 대시보드 고르기 표 · Rules 3, 분석 패턴 카드 없음 1. 앞서 있던 5(Select Spec · Navigation 좁은 화면 · 위험 확인 이름 입력 · 달력 Hover · 필수 Tag).
+
+`advisory 1149` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
 ## 토큰 체계 (v0.8)
 
 - **Atomic** `--{램프}-{단계}` — 램프 13개, **숫자가 클수록 밝습니다**. 컴포넌트에서 직접 쓰지 않습니다.
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
-  여섯 그룹 **90개**(기준 75 + 더한 15) + 트리 밖 31개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 16 · 아바타 `--avatar-1~6-surface · -text` 12 — 2026-11-16) = **121**.
+  여섯 그룹 **90개**(기준 75 + 더한 15) + 트리 밖 32개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 17 · 아바타 `--avatar-1~6-surface · -text` 12 — 2026-11-16, 차트 트랙 2026-11-20) = **122**.
   더한 것 중 6개는 Tag 글자용 `--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy`(2026-11-11),
   5개는 입력 링 `--line-field-focus` · `-halo` 와 AI 면 `--surface-brand-gradient` · `-strong` · `-heavy`(2026-11-14).
-- **차트 토큰** `--chart-mono-1~4`(한 톤 — 기본, 제품과 무관한 고정 파랑 명도 단계, 2026-11-15) · `--chart-series-1~6`(범주색 — tone 없는 계열 5개부터 · 순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
+- **차트 토큰** `--chart-mono-1~4`(한 톤 — 기본, 제품과 무관한 고정 파랑 명도 단계, 2026-11-15) · `--chart-mono-track`(진행 막대 · 게이지 트랙 — 같은 파랑 옅은 단계, 2026-11-20) · `--chart-series-1~6`(범주색 — tone 없는 계열 5개부터 · 순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
   `ds-chart.js` 가 계산값으로 읽어 캔버스에 칠합니다(허용 목록 `grammarOnly` — mono 는 정적 막대 · 진행 막대 · 도넛 CSS 도 씀). 심각도 계열은 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 그대로(5단계 — Medium 라이트 블루 · Low 라임, 2026-11-11 교체).
 - **제품 색**은 팔레트 일곱(`data.js` PRODUCTS — 기본 파랑 · 제품1 빨강 · 제품2 시안 · 제품3 남색 · 브랜드 주황 · 중립 · AI, 키는 색 이름)에서 고르고 `<html data-accent="키">` 로 적용합니다.
   `--prod-40~60` 다섯 단계로 주입되고 `brand` 계열이 따라옵니다. 상태색과 겹쳐도 제품 색 그대로입니다(자동 중립은 2026-11-14 에 없앰).

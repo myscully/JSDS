@@ -66,4 +66,8 @@ function load(sec = "components") {
   for (const f of fs.readdirSync(dir).filter(f => f.endsWith(".svg")).sort()) res[f.slice(0, -4)] = convert(f.slice(0, -4), fs.readFileSync(path.join(dir, f), "utf8"), sec);
   return res;
 }
-module.exports = { load, COLORS, DIR, SECTIONS, dirOf, stripMasks };
+/* Figma 에 아직 썸네일이 없는 페이지 — 이유와 함께. 카드는 기본 그림(.figma 클래스 없음)이고, verify 가 파일이 생기면 여기서 지우라고 알린다 */
+const PENDING = {
+  patterns: { analytics: "2026-11-20 새 패턴 — Figma Patterns › Overview 에 카드가 아직 없다(Figma 반영 때 내보냄)" },
+};
+module.exports = { load, COLORS, DIR, SECTIONS, PENDING, dirOf, stripMasks };

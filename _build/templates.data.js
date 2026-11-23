@@ -31,13 +31,31 @@ const TEMPLATES = {
       ["언제 쓰는가", "여러 지표를 한눈에 훑고, 이상한 곳을 눌러 자세한 목록으로 들어가게 할 때 씁니다."],
       ["비슷한 템플릿", "한 종류의 기록을 찾고 고르는 일이 주된 일이면 리스트입니다."],
     ],
-    uses: ["avatar", "button", "card", "data-visual", "divider", "dropdown", "indicator", "link", "navigation", "notification-center", "page-header", "search", "select-button", "table", "tooltip", "top-navigation"],
+    uses: ["avatar", "button", "card", "data-visual", "divider", "dropdown", "indicator", "link", "navigation", "notification-center", "page-header", "search", "table", "tooltip", "top-navigation"],
     patterns: ["dashboard"],
     principles: [
       ["틀", "위에 상단 바, 왼쪽에 사이드 내비, 오른쪽에 본문을 두고 본문만 스크롤합니다."],
       ["순서", "요약 숫자, 추이와 분포, 비교와 목표, 최근 이벤트 순으로 위에서 아래로 갑니다."],
       ["카드 높이", "같은 줄의 카드는 머리와 본문 높이를 맞춥니다."],
       ["이동", "카드의 전체 보기와 표의 링크는 해당 목록 화면으로 갑니다."],
+      ["필터 없음", "기간이나 필터를 두지 않습니다. 기간을 바꿔 들여다보는 일은 분석 화면이 맡습니다."],
+    ],
+  },
+  analytics: {
+    desc: "기간과 조건을 바꿔 가며 탐지를 들여다보고 결과를 내보내는 화면입니다. 맨 위 필터 한 줄이 아래 숫자와 차트, 표에 모두 같이 걸립니다.",
+    line: "필터 한 줄, KPI 넷, 심각도별 추이, 유형 · 경로 차트, 상세 표. 분석 · 리포트 패턴을 그대로 담았습니다.",
+    choose: [
+      ["언제 쓰는가", "지난 기간과 견주거나 조건으로 좁혀 원인을 찾고, 그 결과를 보고서로 내보내야 할 때 씁니다."],
+      ["비슷한 템플릿", "필터 없이 지금 상태만 훑는 첫 화면은 대시보드입니다."],
+    ],
+    uses: ["avatar", "button", "card", "combobox", "data-visual", "date-picker", "divider", "dropdown", "indicator", "navigation", "notification-center", "page-header", "search", "table", "tooltip", "top-navigation"],
+    patterns: ["analytics"],
+    principles: [
+      ["틀", "위에 상단 바, 왼쪽에 사이드 내비, 오른쪽에 본문을 두고 본문만 스크롤합니다."],
+      ["필터 한 줄", "기간을 맨 앞에 두고 필터는 모든 카드 위에 한 줄로 둡니다. 카드 안에는 두지 않습니다."],
+      ["같은 조각", "조건을 바꾸면 KPI 와 차트, 표가 같은 조건으로 다시 그려져 합계가 어디서나 같습니다."],
+      ["순서", "요약 숫자, 주 차트, 보조 차트 둘, 상세 표 순으로 위에서 아래로 갑니다."],
+      ["내보내기", "지금 걸린 조건 그대로 내보냅니다. 버튼은 화면 머리 오른쪽에 하나만 둡니다."],
     ],
   },
   list: {

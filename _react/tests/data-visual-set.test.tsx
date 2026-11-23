@@ -28,17 +28,22 @@ describe("한 톤 — palette", () => {
   });
 });
 
-describe("프리셋 — 영역 · 강조 · 그라데이션 · 게이지 · 스파크", () => {
+describe("프리셋 — 영역 · 강조 · 게이지 · 스파크", () => {
   const one = [{ label: "탐지", data: [1, 2, 3] }];
   it("계열 하나인 timeseries 는 선 아래를 칠하고(origin) area:false 로 끈다", () => {
     expect(presets.timeseries({ labels: ["a", "b", "c"], series: one }).data.datasets[0]!.fill).toBe("origin");
     expect(presets.timeseries({ labels: ["a", "b", "c"], series: one, area: false }).data.datasets[0]!.fill).toBe(false);
   });
-  it("bar 의 highlight · gradient 는 메타로, 누적과 gradient 는 경고하고 단색", () => {
-    expect(presets.bar({ labels: ["a", "b", "c"], series: one, highlight: 1, gradient: true })._ds).toMatchObject({ highlight: 1, gradient: true });
+  it("bar 의 highlight 는 메타로, 없어진 gradient 는 경고하고 단색(메타에 남지 않음)", () => {
+    expect(presets.bar({ labels: ["a", "b", "c"], series: one, highlight: 1 })._ds).toMatchObject({ highlight: 1 });
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    expect(presets.bar({ labels: ["a"], series: one, stacked: true, gradient: true })._ds?.gradient).toBe(false);
+    const g = presets.bar({ labels: ["a"], series: one, gradient: true } as never);
+    expect(g._ds).not.toHaveProperty("gradient");
     expect(warn).toHaveBeenCalled(); warn.mockRestore();
+  });
+  it("bar 마크 — 두께 최대 24 · 값 끝 4 · 바닥 각짐 · 틈을 메우지 않음(dataviz 2026-11-20)", () => {
+    const d = presets.bar({ labels: ["a", "b"], series: one }).data.datasets[0] as Record<string, unknown>;
+    expect(d).toMatchObject({ maxBarThickness: 24, borderSkipped: "start", inflateAmount: 0 });
   });
   it("gauge 는 반원 doughnut(회전 -90 · 180° · 구멍 78%), data = [값, 남은 값], max 를 넘으면 멈추고 경고", () => {
     const g = presets.gauge({ value: 842, max: 1284, label: "66%", caption: "패치 적용" });
@@ -75,6 +80,11 @@ describe("ChartCard 틀", () => {
     const retry = vi.fn();
     const err = render(<ChartCard title="t" state="error" onRetry={retry} />).container;
     fireEvent.click(err.querySelector(".empty.error [data-retry]")!); expect(retry).toHaveBeenCalledTimes(1);
+  });
+  it("다시 불러오는 중(refreshing) — aria-busy 이지만 Skeleton 없이 지난 본문을 그대로 두고 숨긴 상태 문구를 알린다(dataviz 'Refetch keeps the frame')", () => {
+    const c = render(<ChartCard title="t" state="refreshing"><p className="body" /></ChartCard>).container.firstElementChild!;
+    expect(c.getAttribute("aria-busy")).toBe("true"); expect(c.querySelector(".body")).not.toBeNull();
+    expect(c.querySelector(".chart-state, .skeleton")).toBeNull(); expect(c.querySelector(".sr-only[role=status]")!.textContent).toBe("새 조건으로 다시 불러오는 중");
   });
   it("옛 extra 는 sub 로 그리고 한 번 경고", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});

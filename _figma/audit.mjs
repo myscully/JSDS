@@ -837,7 +837,7 @@ function chartExpect() {
     if (!fc || !fc.types || !fc.series || !fc.tones || !fc.tooltip) throw new Error("components.data.js data-visual.figma.chart 를 읽지 못했습니다");
     const js = read("_build/ds-chart.src.js");
     const num = (re, what) => { const m = re.exec(js); if (!m) throw new Error("ds-chart.src.js 에서 " + what + " 를 읽지 못했습니다"); return +m[1]; };
-    const alpha = num(/alpha\(c,\s*([\d.]+)\)/, "영역 알파"), fontSize = num(/font:\s*\{[^}]*size:\s*(?:Math\.max\(FONT_MIN,\s*)?(\d+)/, "글자 크기");   // 2026-11-11 화면 폭 단계 — 기준 화면의 12 를 루트 비율로 곱한다(최소 FONT_MIN)
+    const alpha = num(/var AREA_ALPHA\s*=\s*([\d.]+)/, "영역 알파 AREA_ALPHA"), fontSize = num(/font:\s*\{[^}]*size:\s*(?:Math\.max\(FONT_MIN,\s*)?(\d+)/, "글자 크기");   // 2026-11-11 화면 폭 단계 — 기준 화면의 12 를 루트 비율로 곱한다(최소 FONT_MIN)
     /* 툴팁 · 범례 견본 — 둘 다 usePointStyle + pointStyle "circle"(figma.chart.legend). Chart.js 4.6.1 이 그리는 원의 지름(node_modules/chart.js 의 소스에서 확인, 2026-11-05 k35):
        범례 = boxHeight × √2(legend 의 drawLegendBox: radius = boxHeight · SQRT2 / 2) — 7 이면 9.9, 툴팁 = min(boxWidth, boxHeight)(tooltip 의 drawColorBox: radius = min / 2) — 6 이면 6.
        Figma 는 정수 px 로 그리므로 범례는 ±0.5 로 본다(정적 .chart-legend i 10 과 같은 원) */
@@ -847,15 +847,18 @@ function chartExpect() {
       box: Math.min(+inBlock(tipBlock, /boxWidth:\s*(\d+)/, "툴팁 boxWidth"), +inBlock(tipBlock, /boxHeight:\s*(\d+)/, "툴팁 boxHeight")), shape: inBlock(tipBlock, /pointStyle:\s*"([a-z]+)"/, "툴팁 pointStyle") };
     const legend = { d: +(+inBlock(legBlock, /boxHeight:\s*(\d+)/, "범례 boxHeight") * Math.SQRT2).toFixed(2), shape: inBlock(legBlock, /pointStyle:\s*"([a-z]+)"/, "범례 pointStyle") };
     if (!/usePointStyle:\s*true/.test(legBlock) || !/usePointStyle:\s*true/.test(tipBlock)) throw new Error("ds-chart 범례 · 툴팁에 usePointStyle: true 가 없습니다 — 견본이 원이 아니라 상자로 그려집니다");
-    if (legend.shape !== fc.legend || tip.shape !== fc.legend) throw new Error(`ds-chart 견본 모양 범례 ${legend.shape} · 툴팁 ${tip.shape} ≠ figma.chart.legend ${fc.legend}`);
-    const hoverR = num(/pointHoverRadius:\s*(\d+)/, "pointHoverRadius"), barMax = num(/maxBarThickness:\s*(\d+)/, "maxBarThickness");
+    /* 2026-11-20 — 툴팁의 계열 키는 짧은 선(사람의 결정, dataviz 'Line keys'), 범례는 원 그대로. tip.box 는 이제 선의 길이(boxWidth)다 */
+    if (legend.shape !== fc.legend) throw new Error(`ds-chart 범례 견본 모양 ${legend.shape} ≠ figma.chart.legend ${fc.legend}`);
+    if (tip.shape !== fc.tooltipKey) throw new Error(`ds-chart 툴팁 견본 모양 ${tip.shape} ≠ figma.chart.tooltipKey ${fc.tooltipKey}`);
+    const hoverR = num(/pointHoverRadius:\s*(\d+)/, "pointHoverRadius"), barMax = num(/\bBAR_MAX = (\d+)/, "BAR_MAX");   // 2026-11-20 막대 모양은 상수 셋 BAR_MAX · BAR_END · BAR_GAP
+    if ((js.match(/maxBarThickness:\s*BAR_MAX/g) || []).length < 2) throw new Error("ds-chart bar · mixed 프리셋이 maxBarThickness: BAR_MAX 를 쓰지 않습니다");
     if (hoverR * 2 !== fc.point) throw new Error(`ds-chart pointHoverRadius ${hoverR} × 2 ≠ figma.chart.point ${fc.point}`);
     if (barMax !== fc.barMax) throw new Error(`ds-chart maxBarThickness ${barMax} ≠ figma.chart.barMax ${fc.barMax}`);
-    /* 막대(2026-11-05 k35 — 사람의 결정: 각지고 stroke 없음. 2026-11-06 k36 — 사람의 요청: 누적 세그먼트는 틈 없이 이어 붙임). bar · mixed 프리셋의 borderRadius 는 모두 figma.chart.barRadius,
-       bar 프리셋 · 혼합 막대의 borderWidth 는 figma.chart.barStroke, 막대 테두리 색은 투명.
-       누적 틈 = bar 프리셋 안의 틈 식({ left | bottom: N })이 있으면 N, 없으면 bar 프리셋의 borderWidth(투명 테두리가 세그먼트 끝을 그만큼 비운다 — 0 이면 맞닿음) → figma.chart.gap 과 같아야 한다 */
-    const radii = [...js.matchAll(/borderRadius:\s*(\d+)/g)].map((m) => +m[1]);
-    if (radii.length < 2 || radii.some((r) => r !== fc.barRadius)) throw new Error(`ds-chart 막대 borderRadius [${radii.join(", ")}] ≠ figma.chart.barRadius ${fc.barRadius}(bar · mixed 프리셋 둘 다)`);
+    /* 막대 — 2026-11-05 k35 의 '각지게' · 11-06 k36 의 '틈 없이' 는 2026-11-20 사람의 결정으로 바뀜(dataviz: 값 끝 4 · 바닥 각짐 · 24 · 2px 틈).
+       bar 프리셋 · 혼합 막대의 borderWidth 는 figma.chart.barStroke(0 — 누적은 stackBorder 가 투명 틈을 준다), 막대 테두리 색은 투명 */
+    /* 2026-11-20 — 값 끝 반경 = BAR_END(바닥은 borderSkipped "start" 로 각짐). bar · mixed 프리셋 둘 다 그 상수를 써야 한다 */
+    const barEnd = num(/\bBAR_END = (\d+)/, "BAR_END"), radii = (js.match(/borderRadius:\s*BAR_END/g) || []).length;
+    if (radii < 2 || barEnd !== fc.barRadius) throw new Error(`ds-chart 막대 반경 BAR_END ${barEnd}(쓰는 곳 ${radii}) ≠ figma.chart.barRadius ${fc.barRadius}(bar · mixed 프리셋 둘 다)`);
     const preset = (name, next) => { const m = new RegExp("\\n\\s*" + name + ":\\s*function\\s*\\(spec\\)\\s*\\{([\\s\\S]*?)\\n\\s*" + next + ":\\s*function").exec(js); if (!m) throw new Error(`ds-chart.src.js 에서 ${name} 프리셋을 읽지 못했습니다`); return m[1]; };
     const barSrc = preset("bar", "donut"), donutSrc = preset("donut", "mixed");
     const bws = [...barSrc.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/borderWidth:\s*(\d+)/g)].map((m) => +m[1]);
@@ -863,10 +866,10 @@ function chartExpect() {
     const mixBw = num(/type:\s*"bar",\s*borderWidth:\s*(\d+)/, "혼합 막대 borderWidth"), plainBw = bws[0];
     if (mixBw !== fc.barStroke || plainBw !== fc.barStroke) throw new Error(`ds-chart 막대 테두리 혼합 ${mixBw} · bar 프리셋 ${plainBw} ≠ figma.chart.barStroke ${fc.barStroke}`);
     if (!/ds\.borderColor\s*=\s*"transparent"/.test(js)) throw new Error('ds-chart 막대 borderColor 가 "transparent" 가 아닙니다 — 막대는 stroke 없음(투명)이어야 합니다');
-    const gapExpr = [...barSrc.matchAll(/\{\s*(?:left|bottom):\s*(\d+)\s*\}/g)].map((m) => +m[1]);
-    const stackGap = gapExpr.length ? gapExpr[0] : plainBw;
-    if (gapExpr.some((g) => g !== stackGap)) throw new Error(`ds-chart 누적 틈 식이 서로 다릅니다 — ${gapExpr.join(" · ")}`);
-    if (stackGap !== fc.gap) throw new Error(`ds-chart 누적 틈 ${stackGap}(${gapExpr.length ? "틈 식" : "bar borderWidth — 틈 식 없음"}) ≠ figma.chart.gap ${fc.gap}`);
+    /* 2026-11-20 — 누적 틈 = BAR_GAP(stackBorder 가 값 끝이 아닌 조각의 값 쪽에 투명 테두리로 준다), 묶음 막대 사이도 같은 틈(groupSlot) */
+    const stackGap = num(/\bBAR_GAP = (\d+)/, "BAR_GAP");
+    if (!/o\.borderWidth = stackBorder\(hz\)/.test(barSrc) || !/\{ right: BAR_GAP \} : \{ top: BAR_GAP \}/.test(js)) throw new Error("ds-chart 누적 막대가 stackBorder(BAR_GAP) 로 틈을 주지 않습니다");
+    if (stackGap !== fc.gap) throw new Error(`ds-chart 누적 틈 BAR_GAP ${stackGap} ≠ figma.chart.gap ${fc.gap}`);
     /* 도넛 조각 사이 면 색 경계 — donut 프리셋 · paint 의 borderWidth(둘이 같아야 함). figma.chart.gap 은 이제 누적 틈이라(k36) 도넛 경계와 따로 읽는다.
        figma.variants.donut.gap 글(정적 도넛 경계 'Npx')과도 같아야 한다 */
     const dPre = /borderWidth:\s*(\d+)/.exec(donutSrc), dPaint = /ds\.borderColor\s*=\s*t\.surface;\s*ds\.borderWidth\s*=\s*(\d+)/.exec(js);

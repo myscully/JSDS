@@ -1,6 +1,6 @@
 /* =========================================================
-   templates.build.js — Templates 화면 일곱 생성기(2026-11-18, 옛 _templates/build.mjs 를 옮김)
-   build.js 가 부른다 → ../templates/screen/{login,dashboard,list,policy,wizard,tabs-list,org}.html (생성물)
+   templates.build.js — Templates 화면 여덟 생성기(2026-11-18, 옛 _templates/build.mjs 를 옮김)
+   build.js 가 부른다 → ../templates/screen/{login,dashboard,analytics,list,policy,wizard,tabs-list,org}.html (생성물)
    문서 페이지(templates/<key>.html)는 render.js 의 tplDocPage 가 사이트 셸 안에 그리고, 이 화면을 줄인 iframe 으로 싣는다.
 
    - 컴포넌트 · 패턴 마크업은 두 데이터 파일을 브라우저처럼 한 전역(vm 컨텍스트)에서 돌려 예제 문자열과 최상위 헬퍼
@@ -31,6 +31,7 @@ const ex = (src, key, id) => {
 /* ---------- 공통 ---------- */
 const NAV = [
   { id: "dashboard", icon: "layout-dashboard", label: "대시보드" },
+  { id: "analytics", icon: "chart-bar", label: "탐지 분석" },
   { group: "탐지" },
   { id: "list", icon: "alert-triangle", label: "보안 이벤트", count: 12 },
   { group: "정책" },
@@ -42,7 +43,7 @@ const NAV = [
   { group: "관리" },
   { id: "settings", icon: "settings", label: "설정" },
 ];
-const PAGES = ["dashboard", "list", "policy", "wizard", "tabs-list", "org"];
+const PAGES = ["dashboard", "analytics", "list", "policy", "wizard", "tabs-list", "org"];
 const href = (id) => (PAGES.includes(id) ? `${id}.html` : "#");
 const cur = (id, page) => (id === page ? ' class="on" aria-current="page"' : "");
 
@@ -155,6 +156,9 @@ const login = () => {
 
 /* ---------- 2. 대시보드 — 패턴 예제 그대로 ---------- */
 const dashboard = () => doc({ id: "dashboard", title: "대시보드", chart: true, body: shell("dashboard", ex("p", "dashboard", "full")) });
+
+/* ---------- 2-1. 분석 — 분석 · 리포트 패턴 기본 예제 그대로(2026-11-20) ---------- */
+const analytics = () => doc({ id: "analytics", title: "탐지 분석", chart: true, body: shell("analytics", ex("p", "analytics", "default")) });
 
 /* ---------- 3. 리스트 — 보안 이벤트 ---------- */
 const EVENTS = [
@@ -378,7 +382,7 @@ const org = () => {
 };
 
 
-const SCREENS = { login, dashboard, list, policy, wizard, "tabs-list": tabsList, org };
+const SCREENS = { login, dashboard, analytics, list, policy, wizard, "tabs-list": tabsList, org };
 return Object.fromEntries(Object.entries(SCREENS).map(([name, fn]) => [name, fn()]));
 }
 
@@ -390,4 +394,4 @@ function build(OUT, html = screens()) {
   return Object.keys(html);
 }
 
-module.exports = { build, screens, SCREEN_KEYS: ["login", "dashboard", "list", "policy", "wizard", "tabs-list", "org"] };
+module.exports = { build, screens, SCREEN_KEYS: ["login", "dashboard", "analytics", "list", "policy", "wizard", "tabs-list", "org"] };

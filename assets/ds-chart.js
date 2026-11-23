@@ -5,13 +5,16 @@
          <canvas data-chart="timeseries" data-spec='{…}' role="img" aria-label="…"></canvas>   → DOMContentLoaded 때 자동 mount
    또는: DSChart.mount(Chart, canvas, DSChart.presets.bar(spec))  /  React 는 @jiran/ds-react/chart 가 같은 함수를 쓴다.
    - theme(el)      : 토큰(--chart-* · 심각도 · 면 · 글꼴)을 계산값으로 읽어 Chart.js options 조각을 만든다. 캔버스는 CSS 변수를 못 읽는다
-   - presets.*      : timeseries(선/영역 · 누적) · bar(세로/가로 · 그룹/누적 · 강조 · 그라데이션) · donut · mixed(막대 + 선, y 축 하나) · gauge(반원 진행률) · spark(KPI 안 작은 추이) — spec → Chart.js config
+   - presets.*      : timeseries(선/영역 · 누적) · bar(세로/가로 · 그룹/누적 · 강조) · donut · mixed(막대 + 선, y 축 하나) · gauge(반원 진행률) · spark(KPI 안 작은 추이) — spec → Chart.js config
    - 색 모드(사람의 결정 2026-11-15): color "mono"(기본 — 고정 파랑 명도 4단계 --chart-mono-1~4, 제품 색과 무관) · "categorical"(--chart-series-1~6).
      tone 을 준 계열(심각도 · 상태)은 언제나 그 톤이다. tone 없는 계열(도넛은 조각)이 5개 이상이면 mono 대신 categorical 로 그린다
    - mount          : Chart 생성 + 라이트/다크 전환(data-theme · prefers-color-scheme) · 제품색 주입 · 화면 폭 단계 변화 때 다시 칠한다
    - auto           : canvas[data-chart] 를 찾아 data-spec(JSON) 으로 mount
-   마크 규격(사람의 결정 2026-11-03, 막대 · 범례는 2026-11-05 · 11-06 개정): 선 2px · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음 · 누적 세그먼트는 틈 없이 이어 붙임 ·
-   도넛 조각 사이 2px 면 색 경계 · 격자는 y 축만, 점선(2026-11-15) · 범례는 2계열 이상일 때 아래, 원형 아이콘(도넛의 옆 범례는 자리가 좁고 높으면 아래로) · y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정, 7번째부터는 '기타'로 묶는다
+   마크 규격(dataviz 기준 — 사람의 결정 2026-11-20, 11-05 · 11-06 · 11-15 의 결정을 바꿈): 선 2px · 끝과 꺾임은 둥글게 · 점은 hover 때만 지름 8 + 면 색 링 2 ·
+   막대는 최대 24 · 값 쪽 끝만 4px 둥글게(바닥은 각짐) · stroke 없음 · 누적 조각과 맞닿은 막대 사이 2px 면 색 틈 · 영역은 계열 색 10% ·
+   도넛 조각 사이 2px 면 색 경계 · 격자는 값 축만, 실선 hairline · 범례는 2계열 이상일 때 아래, 원형 아이콘(도넛의 옆 범례는 자리가 좁고 높으면 아래로) ·
+   툴팁은 값이 먼저(굵게) · 계열은 짧은 선 키 · 선 · 막대 차트는 세로 crosshair · 값 축 눈금은 ko-KR 천 단위(축이 1만에 닿으면 축 전체를 만 단위) ·
+   y 축은 하나(이중 축 금지) · 계열 색 6개 순서 고정(slot 으로 고정 가능), 7번째부터는 '기타'로 묶는다
    ========================================================= */
 (function (root) {
   "use strict";
@@ -22,7 +25,11 @@
     series: ["--chart-series-1", "--chart-series-2", "--chart-series-3", "--chart-series-4", "--chart-series-5", "--chart-series-6"],
     mono: ["--chart-mono-1", "--chart-mono-2", "--chart-mono-3", "--chart-mono-4"],
     grid: "--chart-grid-primary", axis: "--chart-axis-text", tipBg: "--chart-tooltip-surface", tipFg: "--chart-tooltip-text",
-    surface: "--surface-elevated-primary", text: "--foreground-neutral-primary", sub: "--foreground-neutral-tertiary", track: "--surface-neutral-strong",
+    surface: "--surface-elevated-primary", text: "--foreground-neutral-primary", sub: "--foreground-neutral-tertiary",
+    /* meter 트랙 = 채움과 같은 파랑의 옅은 단계(사람의 요청 2026-11-20 — dataviz meter 규칙, 종전 회색 --surface-neutral-strong). 게이지의 남은 호 · 진행 막대 목록의 트랙 */
+    track: "--chart-mono-track",
+    /* crosshair — 격자(--line-neutral-tertiary)보다 한 단계 진한 선. 격자와 구별되고 데이터보다는 조용하다 */
+    cross: "--line-neutral-primary",
   };
   /* 한 톤의 계열 수별 단계(사람의 결정 2026-11-15 '명도 단계') — 둘이면 가장 진한 것과 옅은 것으로 벌린다. 이웃 단계의 명도 차는 dataviz 검증기로 잰 값(0.06 이상) */
   var MONO_STEPS = { 1: [0], 2: [0, 3], 3: [0, 1, 3], 4: [0, 1, 2, 3] };
@@ -78,7 +85,7 @@
       mono: TOKENS.mono.map(function (k) { return resolve(el, k); }),
       tone: {}, grid: resolve(el, TOKENS.grid), axis: resolve(el, TOKENS.axis),
       tipBg: resolve(el, TOKENS.tipBg), tipFg: resolve(el, TOKENS.tipFg), surface: resolve(el, TOKENS.surface), text: resolve(el, TOKENS.text),
-      sub: resolve(el, TOKENS.sub), track: resolve(el, TOKENS.track),
+      sub: resolve(el, TOKENS.sub), track: resolve(el, TOKENS.track), cross: resolve(el, TOKENS.cross),
       scale: rootScale(),
       font: { family: cs.fontFamily, size: Math.max(FONT_MIN, 12 * rootScale()) },
       reduced: !!(root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches),
@@ -88,19 +95,25 @@
   }
   /* 색 정하기 — tone 이 있으면 그 토큰. tone 없는 것들만 모아 color 모드로 칠한다:
      mono(기본)는 개수에 맞는 명도 단계(MONO_STEPS), 5개 이상이거나 categorical 이면 계열 색 1~6 순서(넘치면 '기타'로 묶는 것이 규칙이라 경고).
-     tones 는 계열(도넛은 조각)마다 tone 또는 undefined. 돌려주는 값은 같은 길이의 색 배열 */
+     tones 는 계열(도넛은 조각)마다 tone 또는 undefined. 돌려주는 값은 같은 길이의 색 배열.
+     slots(선택)는 계열마다 1부터의 고정 자리 — 주면 그 계열은 개수와 무관하게 그 자리의 색이다(dataviz '색은 대상을 따른다': 필터로 계열이 빠져도
+     남은 계열이 다시 칠해지지 않게). mono 는 MONO_STEPS[4] 의 자리(1 = 가장 진함 … 4 = 가장 옅음), categorical 은 계열 색 순서 */
   function colorMode(mode, n) {
     if (mode === "categorical") return "categorical";
     if (n > MONO_MAX) { if (mode === "mono" && root.console) root.console.warn("[ds-chart] 한 톤(mono)은 " + MONO_MAX + "계열까지입니다 — " + n + "계열은 범주색(categorical)으로 그립니다"); return "categorical"; }
     return "mono";
   }
-  function palette(t, mode, tones) {
+  function palette(t, mode, tones, slots) {
+    slots = slots || [];
     var free = tones.filter(function (x) { return !(x && t.tone[x]); }).length, m = colorMode(mode, free), k = 0;
+    /* slot 을 하나라도 쓰면 mono 의 단계는 4계열 표(MONO_STEPS[4])로 고정한다 — 개수별 표를 쓰면 계열 수가 바뀔 때 단계가 바뀐다 */
+    var pinned = slots.some(function (x) { return +x > 0; });
     if (m === "categorical" && free > SERIES_MAX && root.console) root.console.warn("[ds-chart] 계열이 " + SERIES_MAX + "개를 넘습니다 — 7번째부터는 '기타'로 묶으세요");
-    return tones.map(function (x) {
+    return tones.map(function (x, i) {
       if (x && t.tone[x]) return t.tone[x];
-      var j = k++;
-      return m === "mono" ? t.mono[MONO_STEPS[free][j]] : t.series[Math.min(j, SERIES_MAX - 1)];
+      var j = k++, sl = +slots[i];
+      if (sl > 0) return m === "mono" ? t.mono[MONO_STEPS[MONO_MAX][Math.min(sl, MONO_MAX) - 1]] : t.series[Math.min(sl, SERIES_MAX) - 1];
+      return m === "mono" ? t.mono[(pinned ? MONO_STEPS[MONO_MAX] : MONO_STEPS[free])[j]] : t.series[Math.min(j, SERIES_MAX - 1)];
     });
   }
   function font(t, weight) { return { family: t.font.family, size: t.font.size, weight: weight || 400 }; }
@@ -111,8 +124,36 @@
     var c = ctx && ctx.chart, p = c && c._resizeBeforeDraw;
     if (p && c.canvas) { c._resizeBeforeDraw = null; c.resize(p.width, p.height); }
   }
-  function baseOptions(t, n) {
+  /* ---------- 숫자 ----------
+     값 축 눈금은 ko-KR 천 단위, 축이 1만에 닿으면 축 전체를 만 단위(1만 · 2.5만)로 — 한 축에 한 형식(dataviz 'Y-axis ticks'). 툴팁 값도 ko-KR */
+  var NUM = new Intl.NumberFormat("ko-KR"), COMPACT = new Intl.NumberFormat("ko-KR", { notation: "compact", maximumFractionDigits: 1 }), COMPACT_FROM = 10000;
+  function tickFormat(v) {
+    var sc = this, m = Math.max(Math.abs(+sc.max || 0), Math.abs(+sc.min || 0));
+    return typeof v !== "number" ? v : m >= COMPACT_FROM ? COMPACT.format(v) : NUM.format(v);
+  }
+  /* 툴팁 한 줄 = 값(굵게) + 계열 이름(옅게) — dataviz 'Values lead, labels follow'. Chart.js 는 한 줄을 한 글꼴로 그려서
+     label 은 '값 SEP 이름' 으로 넘기고 tipBody 가 둘을 나눠 그린다. 줄 폭은 Chart.js 가 굵은 글꼴(bodyFont 600)로 재므로 이름을 400 으로 그려도 넘치지 않는다 */
+  var TIP_SEP = "\u2002";
+  function tipValue(ctx) {
+    var ch = ctx.chart, kind = (ch.$ds || {}).kind, p = ctx.parsed;
+    var v = typeof p === "number" ? p : p == null ? null : ch.options.indexAxis === "y" ? p.x : p.y;
+    if (kind === "donut" && typeof p !== "number") v = ctx.raw;
+    return v == null || !isFinite(+v) ? TABLE_LABELS.empty : NUM.format(+v);
+  }
+  function tipLabel(ctx) {
+    var kind = (ctx.chart.$ds || {}).kind, name = kind === "donut" ? ctx.label : ctx.dataset.label;
+    return tipValue(ctx) + (name ? TIP_SEP + name : "");
+  }
+  /* 툴팁의 계열 키 = 그 계열의 단색(막대의 borderColor 는 투명, 영역의 backgroundColor 는 10% 라 그대로 쓰면 키가 안 보인다) */
+  function tipColor(ctx) {
+    var c = ctx.dataset._dsColor; if (Array.isArray(c)) c = c[ctx.dataIndex];
+    return { borderColor: c, backgroundColor: c, borderWidth: 2 };
+  }
+  function baseOptions(t, n, horizontal) {
     var s = t.scale || 1;
+    /* 격자는 값 축에만(가로 막대면 x) — 종전에는 가로 막대에서도 y(범주 축)에 격자가 있고 값 축에는 없었다(2026-11-20 발견) */
+    var valueAxis = { beginAtZero: true, grid: { display: true, color: t.grid, drawTicks: false, lineWidth: 1 }, border: { display: false, dash: [] }, ticks: { color: t.axis, font: font(t), padding: 8 * s, maxTicksLimit: 5, maxRotation: 0, callback: tickFormat } };
+    var catAxis = { grid: { display: false }, border: { display: true, color: t.grid, dash: [] }, ticks: { color: t.axis, font: font(t), maxRotation: 0, autoSkip: true, autoSkipPadding: 12 * s } };
     return {
       responsive: true, maintainAspectRatio: false, animation: t.reduced ? false : { duration: 200, onComplete: flushResize },
       interaction: { mode: "index", intersect: false },
@@ -121,13 +162,13 @@
         /* 원형 점의 지름 — 범례는 boxHeight × √2(7 이면 10, 정적 .chart-legend i 와 같음), 툴팁은 min(boxWidth, boxHeight)(6) — Chart.js 4.6.1 이 둘을 다른 식으로 그린다 */
         /* 범례는 데이터셋(도넛은 조각) 순서 — Chart.js 기본은 그리기 order 라 혼합 차트에서 선(위에 그림)이 먼저 왔다 */
         legend: { display: n > 1, position: "bottom", align: "start", labels: { color: t.axis, boxWidth: 7 * s, boxHeight: 7 * s, usePointStyle: true, pointStyle: "circle", padding: 16 * s, font: font(t), sort: function (a, b) { return ((a.datasetIndex || 0) - (b.datasetIndex || 0)) || ((a.index || 0) - (b.index || 0)); } } },
-        tooltip: { backgroundColor: t.tipBg, titleColor: t.tipFg, bodyColor: t.tipFg, padding: 10 * s, cornerRadius: 6 * s, boxWidth: 6 * s, boxHeight: 6 * s, boxPadding: 4 * s, usePointStyle: true, pointStyle: "circle", titleFont: font(t, 600), bodyFont: font(t) },
+        /* 툴팁: 제목 = x 라벨(600), 줄 = 값(600, 툴팁 글자색) + 계열 이름(400, 같은 색 72%) · 계열 키는 짧은 선 12 × 2(사람의 결정 2026-11-20 — 범례는 원 그대로).
+           pointStyle "line" 은 audit 이 읽는 표식이고, 실제 키는 tipBody 가 2px 둥근 끝 선으로 그린다 */
+        tooltip: { backgroundColor: t.tipBg, titleColor: t.tipFg, bodyColor: t.tipFg, padding: 10 * s, cornerRadius: 6 * s, boxWidth: 12 * s, boxHeight: 12 * s, boxPadding: 6 * s, usePointStyle: true, pointStyle: "line", titleFont: font(t, 600), bodyFont: font(t, 600),
+          callbacks: { label: tipLabel, labelColor: tipColor } },
       },
-      scales: {
-        x: { grid: { display: false }, border: { color: t.grid }, ticks: { color: t.axis, font: font(t), maxRotation: 0, autoSkip: true, autoSkipPadding: 12 * s } },
-        /* 가로 격자는 점선 3 · 3(사람의 결정 2026-11-15) — Chart.js 4 는 격자선 점선을 border.dash 로 받는다(축 선을 숨겨도 격자에 적용) */
-        y: { beginAtZero: true, grid: { color: t.grid, drawTicks: false }, border: { display: false, dash: [3 * s, 3 * s] }, ticks: { color: t.axis, font: font(t), padding: 8 * s, maxTicksLimit: 5 } },
-      },
+      /* 격자는 실선 hairline(dataviz — 사람의 결정 2026-11-20, 11-15 의 점선 3 · 3 을 바꿈). 점선은 '예측 · 기준선' 으로 읽힌다 */
+      scales: horizontal ? { x: valueAxis, y: catAxis } : { x: catAxis, y: valueAxis },
     };
   }
 
@@ -152,49 +193,87 @@
     var meta = chart.$ds || {}; if (meta.kind !== "donut") return;
     chart.options.plugins.legend.position = legendPosition(meta.legend, size.width, size.height);
   }
-  /* 누적 영역 = 계열마다 세로 그라데이션(사람의 결정 2026-11-13 — 단색 24% 대신). 그 계열의 가장 높은 값(누적이면 쌓은 값)에서 차트 바닥까지
-     위 32% → 아래 6%(사람이 정하지 않은 제안값 — 아래 띠도 보이게). 크기 · 값이 같으면 만든 것을 다시 쓴다. 배치 전(chartArea 없음)에는 단색.
-     범례 · 툴팁 마커는 점 색(pointBackgroundColor)이라 이 그라데이션을 쓰지 않는다 */
-  function areaFill(c) {
-    var cache = {};
-    return function (ctx) {
-      var chart = ctx.chart, a = chart.chartArea, y = chart.scales && chart.scales.y, i = ctx.datasetIndex;
-      if (!a || !y || i == null) return alpha(c, 0.24);
-      var ds = chart.data.datasets, stacked = !!(y.options && y.options.stacked), top = -Infinity;
-      (ds[i].data || []).forEach(function (_, j) { var v = 0; for (var k = stacked ? 0 : i; k <= i; k++) { var d = +(ds[k].data || [])[j]; if (isFinite(d)) v += d; } if (v > top) top = v; });
-      var py = isFinite(top) ? Math.max(a.top, Math.min(a.bottom - 1, y.getPixelForValue(top))) : a.top, key = py + "|" + a.bottom;
-      if (cache.key !== key) { var g = chart.ctx.createLinearGradient(0, py, 0, a.bottom); g.addColorStop(0, alpha(c, 0.32)); g.addColorStop(1, alpha(c, 0.06)); cache = { key: key, g: g }; }
-      return cache.g;
+  /* 영역 = 계열 색 10% 단색(dataviz 'a wash' — 사람의 결정 2026-11-20, 11-13 의 세로 그라데이션 32 → 6% 를 바꿈). 누적 · 단일 모두.
+     데이터 마크에 그라데이션을 쓰지 않는다(design-elevation). 범례 · 툴팁 키는 단색(_dsColor)이라 이 칠을 쓰지 않는다 */
+  var AREA_ALPHA = 0.1;
+  function areaFill(c) { return alpha(c, AREA_ALPHA); }
+
+  /* ---------- 막대 모양(dataviz — 사람의 결정 2026-11-20, 11-05 '각지게' · 11-06 '틈 없이' 를 바꿈) ----------
+     두께 최대 24 · 값 쪽 끝만 4px 둥글게(바닥은 각짐) · 누적 조각 사이와 맞닿은 묶음 막대 사이 2px 면 색 틈. 테두리로 가르지 않는다 —
+     틈은 투명 border 로 채움을 깎아 만든다(Chart.js 는 바깥 사각형을 borderColor 로, 안쪽을 backgroundColor 로 칠한다 — 투명이면 뒤의 카드 면이 보인다) */
+  var BAR_MAX = 24, BAR_END = 4, BAR_GAP = 2;
+  /* 그 칸에서 0 이 아닌 값을 가진 마지막(보이는) 막대 계열 = 쌓은 막대의 값 끝 */
+  function stackTop(ctx) {
+    var ch = ctx.chart, ds = ch.data.datasets, j = ctx.dataIndex, top = -1;
+    for (var k = 0; k < ds.length; k++) {
+      if ((ds[k].type || (ch.config && ch.config.type)) !== "bar" || (ch.isDatasetVisible && !ch.isDatasetVisible(k))) continue;
+      var v = +(ds[k].data || [])[j]; if (v) top = k;
+    }
+    return top;
+  }
+  function endCorners(horizontal, r) { return horizontal ? { topLeft: 0, bottomLeft: 0, topRight: r, bottomRight: r } : { topLeft: r, topRight: r, bottomLeft: 0, bottomRight: 0 }; }
+  /* 누적: 값 끝 조각만 둥글게, 나머지 조각은 값 쪽(위 · 오른쪽)에 투명 2px — 다음 조각과의 틈 */
+  function stackRadius(horizontal) { return function (ctx) { return ctx.datasetIndex === stackTop(ctx) ? endCorners(horizontal, BAR_END) : 0; }; }
+  function stackBorder(horizontal) { return function (ctx) { return ctx.datasetIndex === stackTop(ctx) ? 0 : horizontal ? { right: BAR_GAP } : { top: BAR_GAP }; }; }
+  /* 묶음(누적 아닌 여러 계열): 한 칸 안의 막대 사이가 2px 이 되게 칸 비율을 정한다. 막대가 24 에 닿으면 칸을 좁혀 묶음이 벌어지지 않게 한다.
+     Chart.js 는 칸 폭 × categoryPercentage ÷ 계열 수 = 한 막대 자리, 그 × barPercentage = 막대(최대 24) */
+  var CAT_PCT = 0.8, BAR_PCT = 0.9;
+  function groupSlot(horizontal, n) {
+    var w = function (ctx) {
+      var ch = ctx.chart, sc = ch.scales && ch.scales[horizontal ? "y" : "x"], len = (ch.data.labels || []).length || 1;
+      var size = sc ? (horizontal ? sc.height : sc.width) : 0;
+      return size > 0 ? size / len : 0;
+    };
+    return {
+      cat: function (ctx) { var cw = w(ctx); if (!cw) return CAT_PCT; var slot = cw * CAT_PCT / n; return slot - BAR_GAP > BAR_MAX ? Math.min(CAT_PCT, n * (BAR_MAX + BAR_GAP) / cw) : CAT_PCT; },
+      bar: function (ctx) { var cw = w(ctx); if (!cw) return BAR_PCT; var slot = Math.min(cw * CAT_PCT / n, BAR_MAX + BAR_GAP); return slot > BAR_GAP ? (slot - BAR_GAP) / slot : BAR_PCT; },
     };
   }
-  /* 막대 그라데이션(옵션, 사람의 결정 2026-11-15 — 기본은 단색) — 막대마다 값 끝(진한 색)에서 기준선(같은 색 55%)까지. 진한 끝이 그래픽 3:1 을 지킨다.
-     가로 막대는 왼쪽(기준선) → 오른쪽(값 끝). 위치 · 크기가 같으면 만든 것을 다시 쓴다 */
-  var BAR_FADE = 0.55;
-  function barFill(c, horizontal) {
-    var cache = {};
-    return function (ctx) {
-      var chart = ctx.chart, v = ctx.raw;
-      var axis = chart.scales && chart.scales[horizontal ? "x" : "y"];
-      if (!axis || !chart.chartArea || !isFinite(+v)) return c;
-      var end = axis.getPixelForValue(+v), base = axis.getPixelForValue(0), key = end + "|" + base;
-      if (!cache[key]) { var g = horizontal ? chart.ctx.createLinearGradient(base, 0, end, 0) : chart.ctx.createLinearGradient(0, base, 0, end); g.addColorStop(0, alpha(c, BAR_FADE)); g.addColorStop(1, c); cache[key] = g; }
-      return cache[key];
-    };
+
+  /* ---------- 플러그인: 툴팁 줄 · crosshair ---------- */
+  function tipBody(pt, ctx, o) {
+    var self = this, ch = self.chart, s = rootScale(), size = o.bodyFont.size, fam = o.bodyFont.family, lh = size * 1.2;
+    var pad = typeof o.padding === "number" ? o.padding : (o.padding && o.padding.left) || 0, x0 = self.x + pad, kw = o.boxWidth, sub = (ch.$ds || {}).tipSub || o.bodyColor;
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    (self.body || []).forEach(function (item, i) {
+      (item.lines || []).forEach(function (line, j) {
+        var cy = pt.y + lh / 2, x = x0;
+        if (o.displayColors) {
+          if (j === 0) { var c = self.labelColors[i] || {}; ctx.save(); ctx.strokeStyle = c.borderColor || c.backgroundColor; ctx.lineWidth = 2 * s; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(x + s, cy); ctx.lineTo(x + kw - s, cy); ctx.stroke(); ctx.restore(); }
+          x += kw + 2 + o.boxPadding;
+        }
+        var k = line.indexOf(TIP_SEP), val = k < 0 ? line : line.slice(0, k), name = k < 0 ? "" : line.slice(k + TIP_SEP.length);
+        ctx.font = "600 " + size + "px " + fam; ctx.fillStyle = o.bodyColor; ctx.fillText(val, x, cy);
+        if (name) { x += ctx.measureText(val).width + size * 0.5; ctx.font = "400 " + size + "px " + fam; ctx.fillStyle = sub; ctx.fillText(name, x, cy); }
+        pt.y += lh + o.bodySpacing;
+      });
+    });
+    pt.y -= o.bodySpacing;
   }
+  var tipPlugin = { id: "dsTip", beforeTooltipDraw: function (chart, args) { var tt = args.tooltip; if (tt && tt.drawBody !== tipBody) tt.drawBody = tipBody; } };
+  /* 선 · 영역(혼합 포함)은 세로 crosshair 가 포인터에 가장 가까운 x 를 잡는다(dataviz 'The crosshair finds the X'). 막대만 있는 차트는 막대가 hover 대상이라 없다 */
+  var crossPlugin = { id: "dsCross", afterDatasetsDraw: function (chart) {
+    var meta = chart.$ds || {}; if (meta.kind !== "timeseries" && meta.kind !== "mixed") return;
+    var tt = chart.tooltip, act = tt && tt.getActiveElements ? tt.getActiveElements() : [], a = chart.chartArea;
+    if (!act.length || !a) return;
+    var x = Math.round(act[0].element.x) + 0.5, ctx = chart.ctx;
+    ctx.save(); ctx.strokeStyle = meta.cross || "rgba(0,0,0,.2)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, a.top); ctx.lineTo(x, a.bottom); ctx.stroke(); ctx.restore();
+  } };
   function paint(chart, t) {
     /* Chart.js 의 chart.config 는 Config 래퍼라 config 에 붙인 _ds 가 보이지 않는다 — mount 가 chart.$ds 로 옮겨 둔다 */
     var meta = chart.$ds || {}, kind = meta.kind, data = chart.data, n = data.datasets.length, round = kind === "donut" || kind === "gauge";
-    deepAssign(chart.options, baseOptions(t, kind === "donut" ? data.labels.length : kind === "gauge" || kind === "spark" ? 1 : n));
+    deepAssign(chart.options, baseOptions(t, kind === "donut" ? data.labels.length : kind === "gauge" || kind === "spark" ? 1 : n, !!meta.horizontal));
     /* 프리셋 · 사용자가 config.options 에 준 것이 기본 옵션 위에 남아야 한다 — 종전에는 기본이 덮어 bar 의 autoSkip:false 가 사라졌다(Figma 대조에서 발견, 2026-11-04) */
     if (meta.options) deepAssign(chart.options, meta.options);
     if (round) { chart.options.scales = {}; chart.options.interaction = { mode: "nearest", intersect: true }; }
     if (kind === "donut") { chart.options.plugins.legend.position = legendPosition(meta.legend, chart.width, chart.height); chart.options.onResize = relayout; }
     if (kind === "gauge") { chart.options.plugins.tooltip.enabled = false; }
     if (kind === "spark") { chart.options.scales = { x: { display: false }, y: { display: false, beginAtZero: false } }; }
-    var cols = kind === "donut" ? palette(t, meta.color, data.datasets[0]._dsTones || [])
-      : palette(t, meta.color, data.datasets.map(function (ds) { return ds.tone; }));
+    var cols = kind === "donut" ? palette(t, meta.color, data.datasets[0]._dsTones || [], data.datasets[0]._dsSlots)
+      : palette(t, meta.color, data.datasets.map(function (ds) { return ds.tone; }), data.datasets.map(function (ds) { return ds.slot; }));
     data.datasets.forEach(function (ds, i) {
       var c = cols[i];
+      ds._dsColor = kind === "donut" ? cols : c;
       if (kind === "donut") {
         ds.backgroundColor = cols;
         ds.borderColor = t.surface; ds.borderWidth = 2; ds.hoverBorderColor = t.surface; ds.hoverOffset = 4;
@@ -204,43 +283,49 @@
         ds.backgroundColor = [g, t.track]; ds.hoverBackgroundColor = [g, t.track]; ds.borderWidth = 0;
       } else if (ds.type === "line" || kind === "timeseries" || kind === "spark") {
         ds.borderColor = c; ds.backgroundColor = ds.fill ? areaFill(c) : c; ds.pointBackgroundColor = c; ds.pointBorderColor = t.surface;
+        ds.pointHoverBackgroundColor = c; ds.pointHoverBorderColor = t.surface;   // hover 점 = 계열 색 + 면 색 링 2(dataviz 'Surface ring')
       } else {
         /* 강조(highlight) — 한 계열 막대에서 그 막대만 가장 진한 단계, 나머지는 가장 옅은 단계(같은 파랑). tone 을 준 계열은 강조하지 않는다 */
         var hi = meta.highlight;
         if (hi != null && n === 1 && !(ds.tone && t.tone[ds.tone])) {
           ds.backgroundColor = (ds.data || []).map(function (_, j) { return j === hi ? t.mono[0] : t.mono[MONO_MAX - 1]; });
-        } else ds.backgroundColor = meta.gradient ? barFill(c, !!meta.horizontal) : c;
-        ds.borderColor = "transparent";   // 막대는 stroke 없음
+        } else ds.backgroundColor = c;
+        ds.borderColor = "transparent";   // 막대는 stroke 없음 — 투명 border 는 틈(누적)에만 쓰인다
       }
     });
-    meta.text = t.text; meta.sub = t.sub;
+    meta.text = t.text; meta.sub = t.sub; meta.cross = t.cross;
+    /* 툴팁의 계열 이름 = 툴팁 글자색 72% — 반전 면 위에서 값보다 한 단계 옅다(라이트 · 다크 모두 대비 7 이상, 캔버스라 contrast 게이트 밖) */
+    meta.tipSub = alpha(t.tipFg, 0.72);
   }
 
   /* ---------- presets ---------- */
-  function seriesOf(spec) { return (spec.series || []).map(function (s) { return { label: s.label, data: s.data, tone: s.tone }; }); }
+  function seriesOf(spec) { return (spec.series || []).map(function (s) { return { label: s.label, data: s.data, tone: s.tone, slot: s.slot }; }); }
+  var LINE = { borderWidth: 2, borderCapStyle: "round", borderJoinStyle: "round", tension: 0.3, pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 12, pointBorderWidth: 2, pointHoverBorderWidth: 2 };
   function warn(msg) { if (root.console) root.console.warn("[ds-chart] " + msg); }
   var presets = {
-    /* 시계열 — 선, stacked 면 누적 영역(심각도 누적 추이 같은). 점은 hover 때만 지름 8.
-       계열이 하나면 선 아래를 옅은 그라데이션으로 칠한다(사람의 결정 2026-11-15) — area:false 로 끈다. 여러 계열의 겹친 영역은 서로 가려 칠하지 않는다 */
+    /* 시계열 — 선, stacked 면 누적 영역(심각도 누적 추이 같은). 점은 hover 때만 지름 8 + 면 색 링 2, 선 끝 · 꺾임은 둥글게.
+       계열이 하나면 선 아래를 계열 색 10% 로 칠한다(사람의 결정 2026-11-15 · 11-20) — area:false 로 끈다. 여러 계열의 겹친 영역은 서로 가려 칠하지 않는다 */
     timeseries: function (spec) {
       var stacked = !!spec.stacked, list = seriesOf(spec), area = !stacked && list.length === 1 && spec.area !== false;
       return { type: "line", _ds: { kind: "timeseries", color: spec.color },
         data: { labels: spec.labels, datasets: list.map(function (s, i) {
-          return deepAssign(s, { borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 12, pointBorderWidth: 2, fill: stacked ? (i === 0 ? "origin" : "-1") : area ? "origin" : false, order: i });
+          return deepAssign(deepAssign(s, LINE), { fill: stacked ? (i === 0 ? "origin" : "-1") : area ? "origin" : false, order: i });
         }) },
         options: { scales: { x: { stacked: stacked }, y: { stacked: stacked } } } };
     },
-    /* 막대 — horizontal 로 가로, stacked 로 누적. 각지고 stroke 없음, 누적 세그먼트는 틈 없이 이어 붙임.
-       highlight: n(0부터) — 한 계열에서 그 막대만 진하게. gradient: true — 막대마다 세로(가로) 그라데이션, 누적에는 쓰지 않는다(세그먼트끼리 갈리지 않음) */
+    /* 막대 — horizontal 로 가로, stacked 로 누적. 최대 24 · 값 끝 4px · 누적과 묶음 사이 2px 면 색 틈(위 '막대 모양').
+       highlight: n(0부터) — 한 계열에서 그 막대만 진하게. gradient 옵션은 없어졌다(사람의 결정 2026-11-20 — 데이터 마크에 그라데이션을 쓰지 않음) */
     bar: function (spec) {
-      var stacked = !!spec.stacked, list = seriesOf(spec), gradient = !!spec.gradient;
-      if (gradient && stacked) { warn("누적 막대에는 gradient 를 쓰지 않습니다 — 단색으로 그립니다"); gradient = false; }
+      var stacked = !!spec.stacked, list = seriesOf(spec), hz = !!spec.horizontal, group = !stacked && list.length > 1 ? groupSlot(hz, list.length) : null;
+      if (spec.gradient) warn("gradient 옵션은 없어졌습니다 — 단색으로 그립니다. 한 막대를 가리키려면 highlight 를 씁니다");
       if (spec.highlight != null && list.length !== 1) warn("highlight 는 계열이 하나인 막대에만 씁니다");
-      return { type: "bar", _ds: { kind: "bar", color: spec.color, highlight: spec.highlight, gradient: gradient, horizontal: !!spec.horizontal },
-        data: { labels: spec.labels, datasets: list.map(function (s, i) {
-          /* 막대는 각지고 stroke 가 없다(사람의 결정 2026-11-05). 누적 세그먼트는 틈 없이 이어 붙인다(사람의 요청 2026-11-06 — 종전 2px 투명 틈을 지움).
-             inflateAmount 는 기본(auto)이라 이웃 세그먼트 사이에 안티에일리어싱 실금이 생기지 않는다 */
-          return deepAssign(s, { borderWidth: 0, borderRadius: 0, maxBarThickness: 32 });
+      return { type: "bar", _ds: { kind: "bar", color: spec.color, highlight: spec.highlight, horizontal: hz },
+        data: { labels: spec.labels, datasets: list.map(function (s) {
+          /* 바닥 쪽 모서리는 각지게(borderSkipped 'start' 가 그 모서리의 반경을 0 으로) · inflateAmount 0 — 기본(auto)은 막대를 0.33px 부풀려 2px 틈을 메운다 */
+          var o = { borderWidth: 0, borderRadius: BAR_END, borderSkipped: "start", maxBarThickness: BAR_MAX, inflateAmount: 0 };
+          if (stacked) { o.borderRadius = stackRadius(hz); o.borderWidth = stackBorder(hz); }
+          if (group) { o.categoryPercentage = group.cat; o.barPercentage = group.bar; }
+          return deepAssign(s, o);
         }) },
         /* 범주 축은 라벨을 건너뛰지 않는다(autoSkip 은 시계열용) — 좁으면 글자가 돌아가는 대신 maxRotation 0 이라 겹칠 수 있으니 카드 폭을 준다 */
         options: { indexAxis: spec.horizontal ? "y" : "x", scales: { x: { stacked: stacked, ticks: spec.horizontal ? {} : { autoSkip: false } }, y: { stacked: stacked, ticks: spec.horizontal ? { autoSkip: false } : {} } } } };
@@ -255,8 +340,8 @@
     },
     /* 혼합 — bars + lines, y 축은 하나(두 값의 단위가 다르면 차트를 둘로 나눈다) */
     mixed: function (spec) {
-      var bars = (spec.bars || []).map(function (s, i) { return { label: s.label, data: s.data, tone: s.tone, type: "bar", borderWidth: 0, borderRadius: 0, maxBarThickness: 32, order: 2 + i }; });
-      var lines = (spec.lines || []).map(function (s, i) { return { label: s.label, data: s.data, tone: s.tone, type: "line", borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 12, pointBorderWidth: 2, fill: false, order: i }; });
+      var bars = (spec.bars || []).map(function (s, i) { return { label: s.label, data: s.data, tone: s.tone, slot: s.slot, type: "bar", borderWidth: 0, borderRadius: BAR_END, borderSkipped: "start", maxBarThickness: BAR_MAX, inflateAmount: 0, order: 2 + i }; });
+      var lines = (spec.lines || []).map(function (s, i) { return deepAssign({ label: s.label, data: s.data, tone: s.tone, slot: s.slot, type: "line", fill: false, order: i }, LINE); });
       return { type: "bar", _ds: { kind: "mixed", color: spec.color }, data: { labels: spec.labels, datasets: bars.concat(lines) }, options: {} };
     },
     /* 게이지 — 목표 대비 하나(사람의 결정 2026-11-15). value · max(기본 100) · label(가운데 큰 글자, 없으면 값) · caption(그 위 작은 설명) · tone.
@@ -269,12 +354,13 @@
         options: { rotation: -90, circumference: 180, cutout: "78%" },
         plugins: [centerPlugin] };
     },
-    /* 스파크 — KPI 안 작은 추이. 축 · 격자 · 범례 없이 선과 옅은 영역만, hover 점과 툴팁은 남긴다. data · labels? · tone · area(기본 true) */
+    /* 스파크 — KPI 안 작은 추이. 축 · 격자 · 범례 없이 선과 옅은 영역만, hover 점과 툴팁은 남긴다. data · labels? · tone · area(기본 true).
+       마지막 점(지금)에 끝 점 — 반지름 3 + 면 색 링 2(보이는 지름 8, dataviz 'end-dot'). 끝 점이 잘리지 않게 여백 4 */
     spark: function (spec) {
-      var data = spec.data || [], labels = spec.labels || data.map(function (_, i) { return String(i + 1); });
+      var data = spec.data || [], labels = spec.labels || data.map(function (_, i) { return String(i + 1); }), last = data.length - 1;
       return { type: "line", _ds: { kind: "spark" },
-        data: { labels: labels, datasets: [{ label: spec.label || "값", data: data, tone: spec.tone, borderWidth: 2, tension: 0.3, pointRadius: 0, pointHoverRadius: 3, pointHitRadius: 8, pointBorderWidth: 2, fill: spec.area === false ? false : "origin" }] },
-        options: { layout: { padding: 2 } } };
+        data: { labels: labels, datasets: [deepAssign(deepAssign({ label: spec.label || "값", data: data, tone: spec.tone }, LINE), { pointRadius: function (ctx) { return ctx.dataIndex === last ? 3 : 0; }, pointHoverRadius: 3, pointHitRadius: 8, fill: spec.area === false ? false : "origin" })] },
+        options: { layout: { padding: 4 } } };
     },
   };
   /* 가운데 글자 — 도넛은 CSS .donut::after 와 같은 Body 1 Normal 16/600, 게이지는 반원 안 Title 2 28/700 + 그 위 설명 12(Label 2) tertiary.
@@ -310,12 +396,28 @@
     /* 첫 등장 애니메이션도 이 어댑터의 값으로 — paint 는 Chart 를 만든 뒤에 옵션을 넣어서, 첫 애니메이션은 Chart.js 기본 1000ms 로 돌고
        줄인 모션에서도 돌았다(2026-11-20 측정). 사용자가 준 animation 은 그대로 둔다 */
     if (config.options.animation === undefined) config.options.animation = baseOptions(t, 1).animation;
-    var chart = new Chart(canvas, config);
+    /* 툴팁 줄 · crosshair 플러그인 — 차트마다(전역 등록을 하지 않아 제품의 다른 Chart.js 차트를 건드리지 않는다) */
+    var plugs = config.plugins || [];
+    [tipPlugin, crossPlugin].forEach(function (p) { if (plugs.indexOf(p) < 0) plugs = plugs.concat([p]); });
+    config.plugins = plugs;
+    var kind = config.type, chart = new Chart(canvas, config);
     chart.$ds = config._ds || {}; chart.$ds.options = own;
     /* 2d 컨텍스트가 없는 환경(jsdom 테스트)에서는 Chart.js 가 ctx 없이 만들어지고 update 가 던진다 — 칠하지 않고 handle 만 돌려준다 */
     var live = function () { return !!chart.ctx; };
     if (live()) { paint(chart, t); chart.update("none"); }
-    var handle = { chart: chart, repaint: function () { if (live()) { paint(chart, theme(canvas)); chart.update("none"); } }, destroy: function () {
+    var handle = { chart: chart, repaint: function () { if (live()) { paint(chart, theme(canvas)); chart.update("none"); } },
+      /* 같은 종류면 지우지 않고 data · options 만 바꿔 다시 칠한다(2026-11-20, dataviz 'Refetch keeps the frame') — 캔버스가 비었다 다시 그려지며
+         깜빡이거나 높이가 흔들리지 않고, 바뀐 값으로 옮겨 가는 애니메이션이 돈다. 종류가 다르면 false — 부르는 쪽이 다시 만든다 */
+      update: function (next) {
+        if (!next || next.type !== kind) return false;   // 처음 만든 종류와 대조 — chart.config 는 Chart.js 내부라 기대지 않는다
+        var o = next.options || {}, mine = JSON.parse(JSON.stringify(o));
+        if (o.animation === undefined) o.animation = baseOptions(theme(canvas), 1).animation;
+        chart.data.labels = next.data.labels; chart.data.datasets = next.data.datasets; chart.options = o;
+        chart.$ds = next._ds || {}; chart.$ds.options = mine;
+        if (live()) { paint(chart, theme(canvas)); chart.update(); }
+        return true;
+      },
+      destroy: function () {
       var i = mounted.indexOf(handle); if (i >= 0) mounted.splice(i, 1);
       chart.destroy(); delete canvas.__dsChart;
     } };
@@ -373,6 +475,7 @@
   }
 
   var DSChart = { tableData: tableData, TABLE_LABELS: TABLE_LABELS, theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, legendPosition: legendPosition, palette: palette, areaFill: areaFill,
+    tickFormat: tickFormat, tipLabel: tipLabel, BAR_MAX: BAR_MAX, BAR_END: BAR_END, BAR_GAP: BAR_GAP, AREA_ALPHA: AREA_ALPHA, COMPACT_FROM: COMPACT_FROM,
     SERIES_MAX: SERIES_MAX, MONO_MAX: MONO_MAX, MONO_STEPS: MONO_STEPS, CENTER_FONT: CENTER_FONT, GAUGE_FONT: GAUGE_FONT, TOKENS: TOKENS, TONES: TONES };
   if (typeof module !== "undefined" && module.exports) module.exports = DSChart;
   root.DSChart = DSChart;

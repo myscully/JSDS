@@ -1,5 +1,5 @@
 import { Chart } from "chart.js/auto";
-import { Button, Card, CardHead, CardTitle, ChartCard, Icon, Indicator, Kpi, KpiGrid, Link, PageHead, ProgressList, Row2, Row3, SelectButton, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
+import { Button, Card, CardHead, CardTitle, ChartCard, Icon, Indicator, Kpi, KpiGrid, Link, PageHead, ProgressList, Row2, Row3, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
 
 import { ChartCanvas, presets } from "@jiran/ds-react/chart";
 
@@ -33,18 +33,14 @@ const RECENT = [
   ["08:58:20", "C2 통신 시도", "PC-0411 · 최유진", "review"],
 ] as const;
 
+/* 훑어보는 화면이라 기간 · 필터가 없다(2026-11-20) — 기간을 바꿔 보려면 분석 · 리포트(examples/patterns/analytics) */
 export default function Example() {
   return (
     <Stack>
       <PageHead as="h2"
         title="대시보드"
         sub="최근 갱신 09:41 · 자동 갱신 1분"
-        actions={
-          <>
-            <SelectButton label="기간" defaultValue="24h" options={[{ value: "24h", label: "24시간" }, { value: "7d", label: "7일" }, { value: "30d", label: "30일" }]} />
-            <Button variant="outline" color="assistive" iconOnly aria-label="새로 고침"><Icon name="refresh" /></Button>
-          </>
-        }
+        actions={<Button variant="outline" color="assistive" iconOnly aria-label="새로 고침"><Icon name="refresh" /></Button>}
       />
       <KpiGrid>
         <Kpi tone="critical" label="Critical 이벤트" value="1,284" delta="12%" deltaDir="up" deltaTone="bad" note="전일 대비" />

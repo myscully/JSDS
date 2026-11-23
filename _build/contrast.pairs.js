@@ -127,7 +127,8 @@ const pairs = [
   ["--avatar-4-text", ["--avatar-4-surface"], 4.5, "아바타 tone 4 이니셜"],
   ["--avatar-5-text", ["--avatar-5-surface"], 4.5, "아바타 tone 5 이니셜"],
   ["--avatar-6-text", ["--avatar-6-surface"], 4.5, "아바타 tone 6 이니셜"],
-  ["--chart-mono-1", ["--surface-neutral-strong"], 3, "게이지 · 진행 막대 · 정적 막대의 채움 / 트랙"],
+  ["--chart-mono-1", ["--surface-neutral-strong"], 3, "정적 막대의 채움 / 트랙"],
+  ["--chart-mono-1", ["--chart-mono-track"], 3, "진행 막대 · 게이지의 채움 / 같은 파랑 트랙(2026-11-20)"],
   ["--chart-series-1-subtle", SURFACES, 3, "차트 비교 기간 막대(계열 1 옅은 톤)", { advisory: true, why: "사람의 결정(2026-11-05) — 비교 기간은 같은 색상의 옅은 톤으로 나누는 관례를 따른다. 계열 1 과의 대비 2.74 로 둘이 갈리고, 값은 툴팁 · 범례로 읽는다" }],
   ["--chart-series-1-strong", SURFACES, 3, "차트 막대 위 선(계열 1 진한 톤)"],
   ["--chart-axis-text", SURFACES, 4.5, "차트 축 · 범례 글자", REF("foreground/neutral/tertiary 를 참조 — 기준 토큰 값(61% 알파)이라 글자 쌍과 같은 예외")],
@@ -195,7 +196,7 @@ const grammarOnly = [
   /* 회사 정체성 색 — 제품 화면의 로고 자리와 Foundations 그림(인라인 스타일)이 쓴다. style.src.css 의 마지막 소비자였던 WBS 표를 2026-11-15 에 지웠다 */
   "--company-mark", "--company-mark-subtle",
   /* 탐색형 차트 토큰은 CSS 가 아니라 ds-chart.js 가 계산값으로 읽는다(캔버스) — CSS 소비자가 0 이어도 살아 있는 토큰이다 */
-  ...[1, 2, 3, 4].map((i) => `--chart-mono-${i}`), ...[1, 2, 3, 4, 5, 6].map((i) => `--chart-series-${i}`), "--chart-series-1-subtle", "--chart-series-1-strong", "--chart-grid-primary", "--chart-axis-text", "--chart-tooltip-surface", "--chart-tooltip-text",
+  ...[1, 2, 3, 4].map((i) => `--chart-mono-${i}`), "--chart-mono-track", ...[1, 2, 3, 4, 5, 6].map((i) => `--chart-series-${i}`), "--chart-series-1-subtle", "--chart-series-1-strong", "--chart-grid-primary", "--chart-axis-text", "--chart-tooltip-surface", "--chart-tooltip-text",
   /* 램프는 의미 토큰이 고르는 재료라 단계별 소비자를 요구하지 않는다 */
 ];
 

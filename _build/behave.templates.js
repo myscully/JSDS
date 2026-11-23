@@ -1,6 +1,6 @@
 /* Templates 메뉴(2026-11-18 사람의 요청) — behave.js 가 부른다.
-   헤더 메뉴 여섯 · 개요 행 일곱, 문서 페이지의 축소 미리보기(1440 · 1024 · 768 에서 틀 폭에 맞음 · 높이 = 900 × 비율) · 새 창 링크,
-   화면 일곱을 직접 열어 오류 · 넘침 없음, 흉내 동작(로그인 → 2단계 → 대시보드 · 대화상자 제출 → Toast · 조직도 고르기 · 배포 완료 Toast · 1280 미만 접기),
+   헤더 메뉴 여섯 · 개요 행 여덟, 문서 페이지의 축소 미리보기(1440 · 1024 · 768 에서 틀 폭에 맞음 · 높이 = 900 × 비율) · 새 창 링크,
+   화면 여덟을 직접 열어 오류 · 넘침 없음, 흉내 동작(로그인 → 2단계 → 대시보드 · 대화상자 제출 → Toast · 조직도 고르기 · 배포 완료 Toast · 1280 미만 접기),
    문서 페이지에서 제품 색 · 테마를 바꾸면 iframe 화면이 따라감, 코드 보기(2026-11-19 — HTML · CSS 탭 · 복사가 화면 파일 · templates.css 와 같음) */
 const fs = require("fs");
 const path = require("path");
@@ -15,7 +15,7 @@ module.exports = async function templates({ page, ok, go }) {
   const newTab = async () => { const c = await page.context().browser().newContext(); const p = await c.newPage(); p.done = () => c.close(); return p; };
   const frameOf = async (key) => { const h = await page.$(".tpl-frame iframe"); const f = h && (await h.contentFrame()); if (f) await f.waitForLoadState("load"); return f; };
 
-  await part("1 · 헤더 메뉴 여섯 · Templates 는 Patterns 다음 · 1200 이상 한 줄, 개요 행 일곱과 링크 대상", async () => {
+  await part("1 · 헤더 메뉴 여섯 · Templates 는 Patterns 다음 · 1200 이상 한 줄, 개요 행 여덟과 링크 대상", async () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await go("templates/overview.html");
     const s = await page.evaluate(() => {
@@ -28,7 +28,7 @@ module.exports = async function templates({ page, ok, go }) {
     ok("templates: header has the six sections in order on one line at 1440, Templates current",
       s.menu.join() === want.join() && want.indexOf("Templates") === want.indexOf("Patterns") + 1 && s.oneLine && /Templates/.test(s.current || ""), JSON.stringify({ menu: s.menu, oneLine: s.oneLine, current: s.current }));
     const missing = s.rows.filter(([, h]) => !fs.existsSync(path.join(ROOT, "templates", path.basename(h))));
-    ok("templates: overview lists the seven screens in order, each link has a page, hero has five tiles",
+    ok("templates: overview lists the eight screens in order, each link has a page, hero has five tiles",
       s.rows.map((r) => r[0]).join() === titles.join() && s.rows.map((r) => r[1]).join() === KEYS.map((k) => "../templates/" + k + ".html").join() && !missing.length && s.hero === 5, JSON.stringify({ rows: s.rows, missing, hero: s.hero }));
   });
 
@@ -65,7 +65,7 @@ module.exports = async function templates({ page, ok, go }) {
       a.href === "screen/list.html" && a.target === "_blank" && a.rel === "noopener noreferrer" && a.sr === " (새 창)" && /새 창에서 열기/.test(a.name) && /templates\/screen\/list\.html$/.test(url), JSON.stringify({ a, url }));
   });
 
-  await part("4 · 화면 일곱을 직접 — 1440 에서 오류 · 가로 넘침 없음, 검토 도구 없음, 로그인 말고는 상단 바 · 사이드 내비", async () => {
+  await part("4 · 화면 여덟을 직접 — 1440 에서 오류 · 가로 넘침 없음, 검토 도구 없음, 로그인 말고는 상단 바 · 사이드 내비", async () => {
     const p = await newTab(); const errs = [];
     p.on("pageerror", (e) => errs.push(e.message));
     await p.setViewportSize({ width: 1440, height: 900 });
@@ -76,7 +76,7 @@ module.exports = async function templates({ page, ok, go }) {
       if (m.over > 1 || m.review || (k === "login" ? m.top || m.nav : !m.top || !m.nav)) bad.push(k + " " + JSON.stringify(m));
     }
     await p.done();
-    ok("templates: the seven screens load without errors or overflow at 1440, no review toolbar", !bad.length && !errs.length, bad.concat(errs).slice(0, 3).join(" | "));
+    ok("templates: the eight screens load without errors or overflow at 1440, no review toolbar", !bad.length && !errs.length, bad.concat(errs).slice(0, 3).join(" | "));
   });
 
   await part("5 · 흉내 동작 — 로그인 → 2단계(첫 칸 포커스) → 대시보드, 1280 미만 내비 접힘", async () => {

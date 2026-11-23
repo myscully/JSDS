@@ -25,7 +25,7 @@ const CHART_DATA = {
   weeks: {"labels":["랜섬웨어","악성코드","USB 위반","정책 위반","피싱"],"series":[{"label":"이번 주","data":[412,306,221,115,88]},{"label":"지난 주","data":[349,331,198,142,97]}]},
   depts: {"labels":["개발팀","영업팀","운영팀","재무팀","인사팀"],"series":[{"label":"Critical","tone":"critical","data":[42,18,25,9,6]},{"label":"High","tone":"high","data":[88,51,64,23,17]},{"label":"Medium","tone":"medium","data":[74,60,62,30,24]},{"label":"Low","tone":"low","data":[46,36,39,18,15]},{"label":"Info","tone":"info","data":[64,70,58,41,33]}],"stacked":true,"horizontal":true},
   weekday: {"labels":["월","화","수","목","금","토","일"],"series":[{"label":"차단","data":[182,204,196,221,268,94,71]}],"highlight":4},
-  monthly: {"labels":["5월","6월","7월","8월","9월","10월"],"series":[{"label":"탐지","data":[2140,2385,2210,2560,2470,2920]}],"gradient":true},
+  monthly: {"labels":["5월","6월","7월","8월","9월","10월"],"series":[{"label":"탐지","data":[2140,2385,2210,2560,2470,2920]}],"highlight":5},
   severity: {"series":[{"label":"Critical","tone":"critical","value":190},{"label":"High","tone":"high","value":285},{"label":"Medium","tone":"medium","value":196},{"label":"Low","tone":"low","value":120},{"label":"Info","tone":"info","value":263}],"center":"1,054","legend":"right"},
   /* tone 없는 조각 4개 → 한 톤 1~4 단계(spec 순서) */
   channels: {"series":[{"label":"엔드포인트","value":612},{"label":"메일","value":248},{"label":"네트워크","value":131},{"label":"USB","value":63}],"center":"1,054","legend":"right"},
@@ -2499,7 +2499,7 @@ const COMPONENTS = {
       ["Placement", "대시보드 상단 KPI 4개, 아래 차트 카드 2열(추이 · 분포) — 같은 줄의 카드는 같은 높이 단계와 같은 머리 구성(큰 값이 있으면 모두 있게)으로 맞춥니다"],
     ],
     examples: [
-      { id: "default", group: "default", title: "Default", desc: "차트 카드 하나입니다. 머리에 제목 · 보조 글자 · 동작을, 그 아래 큰 값과 증감을, 맨 아래 차트를 둡니다. 계열이 하나인 추이는 한 톤의 가장 진한 단계로 선을 긋고, 선 아래를 옅은 그라데이션으로 칠합니다.", html: `
+      { id: "default", group: "default", title: "Default", desc: "차트 카드 하나입니다. 머리에 제목 · 보조 글자 · 동작을, 그 아래 큰 값과 증감을, 맨 아래 차트를 둡니다. 계열이 하나인 추이는 한 톤의 가장 진한 단계로 선을 긋고, 선 아래를 같은 색으로 옅게 칠합니다.", html: `
         <div class="chart-card" style="max-width:640px">
           ${chartHead("일별 탐지", "최근 14일", `<button type="button" class="btn sm text assistive">전체 보기</button>`)}
           <div class="chart-figure"><span class="value">1,429<small>건</small></span>${delta("up", "bad", "8%")}<span class="delta-note">지난 14일 대비</span></div>
@@ -2516,12 +2516,12 @@ const COMPONENTS = {
           <div class="kpi"><span class="label">일별 탐지</span><span class="value">412</span><div class="sparkline" aria-hidden="true"><i style="height:30%"></i><i style="height:45%"></i><i style="height:38%"></i><i style="height:70%"></i><i style="height:55%"></i><i style="height:90%" class="hi"></i><i style="height:62%"></i></div></div>
           <div class="kpi"><span class="label">신규 위협</span><span class="value">112</span><div class="kpi-foot">${delta("up", "bad", "20%")}<span class="delta-note">전일 대비</span></div>${sparkCanvas(CHART_DATA.spark, "신규 위협 — 최근 10일 62건에서 112건으로 증가")}</div>
         </div>` },
-      { id: "timeseries", group: "variant", title: "Timeseries", desc: "기간에 따른 추이입니다. 선은 2px 이고, 점은 포인터를 올렸을 때만 지름 8px 로 나타납니다. 가로 격자는 점선입니다. 심각도 계열은 누적 영역으로 쌓고 심각도 색을 그대로 씁니다. 심각도는 한 톤 규칙의 예외입니다. 범례는 계열이 2개 이상일 때 아래에 붙고, 눌러서 계열을 끌 수 있습니다. 표로 보기 옵션을 켜면 같은 값을 표로 바꿔 볼 수 있습니다.", html: `
+      { id: "timeseries", group: "variant", title: "Timeseries", desc: "기간에 따른 추이입니다. 선은 2px 이고 끝과 꺾임이 둥급니다. 포인터를 올리면 세로 기준선이 가장 가까운 날짜를 잡고, 그 날짜의 점이 지름 8px 로 나타나며, 툴팁에 모든 계열의 값이 나옵니다. 가로 격자는 실선입니다. 심각도 계열은 누적 영역으로 쌓고 심각도 색을 그대로 씁니다. 심각도는 한 톤 규칙의 예외입니다. 범례는 계열이 2개 이상일 때 아래에 붙고, 눌러서 계열을 끌 수 있습니다. 표로 보기 옵션을 켜면 같은 값을 표로 바꿔 볼 수 있습니다.", html: `
         <div class="chart-card" style="max-width:640px">
           ${chartHead("일별 탐지 추이", "최근 14일")}
           ${chartCanvas("timeseries", CHART_DATA.trend, "일별 탐지 추이 — 최근 14일, Critical · High · Medium 누적 영역", { table: true })}
         </div>`, js: chartJs("timeseries", CHART_DATA.trend, ".chart-canvas canvas") },
-      { id: "bars", group: "variant", title: "Bars", desc: "범주 비교는 세로 막대로 그립니다. 라벨이 길거나 순위를 보일 때는 가로 막대를, 구성을 보일 때는 누적 막대를 씁니다. 심각도가 아닌 계열은 <b>한 톤의 명도 단계</b>를 받습니다. 이번 주와 지난 주처럼 계열이 둘이면 가장 진한 단계와 옅은 단계입니다. 심각도 계열은 심각도 색을 받습니다. 막대는 각지고 테두리가 없으며 두께는 최대 32px 입니다.", html: `
+      { id: "bars", group: "variant", title: "Bars", desc: "범주 비교는 세로 막대로 그립니다. 라벨이 길거나 순위를 보일 때는 가로 막대를, 구성을 보일 때는 누적 막대를 씁니다. 심각도가 아닌 계열은 <b>한 톤의 명도 단계</b>를 받습니다. 이번 주와 지난 주처럼 계열이 둘이면 가장 진한 단계와 옅은 단계입니다. 심각도 계열은 심각도 색을 받습니다. 막대는 두께가 최대 24px 이고 값 쪽 끝만 둥급니다. 누적 막대의 조각 사이와 나란한 막대 사이에는 2px 틈을 둡니다. 가로 막대는 격자도 세로로 긋습니다.", html: `
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:16px;width:100%;max-width:960px">
           <div class="chart-card">
             ${chartHead("유형별 탐지", "주간 비교")}
@@ -2532,7 +2532,7 @@ const COMPONENTS = {
             ${chartCanvas("bar", CHART_DATA.depts, "부서별 심각도 — Critical · High · Medium · Low · Info 누적")}
           </div>
         </div>`, js: chartJs("bar", CHART_DATA.weeks, ".chart-canvas canvas") },
-      { id: "bar-emphasis", group: "variant", title: "Highlight · Gradient", desc: "막대 하나를 말할 때는 그 막대를 강조합니다. 강조한 막대만 진한 단계이고 나머지는 옅은 단계입니다. 그라데이션은 막대마다 기준선에서 55% 농도로 시작해 값 끝의 진한 색까지 칠합니다. 둘 다 계열이 하나인 막대에만 씁니다. 누적 막대에 그라데이션을 쓰면 조각끼리 갈리지 않으므로 쓰지 않습니다.", html: `
+      { id: "bar-emphasis", group: "variant", title: "Highlight", desc: "막대 하나를 말할 때는 그 막대를 강조합니다. 강조한 막대만 진한 단계이고 나머지는 옅은 단계입니다. 가장 많은 날이나 이번 달처럼 이야기의 중심이 되는 막대 하나에만 쓰고, 계열이 하나인 막대에만 씁니다. 막대에 그라데이션은 쓰지 않습니다.", html: `
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:16px;width:100%;max-width:960px">
           <div class="chart-card">
             ${chartHead("요일별 차단", "이번 주")}
@@ -2540,7 +2540,7 @@ const COMPONENTS = {
           </div>
           <div class="chart-card">
             ${chartHead("월별 탐지", "최근 6개월")}
-            ${chartCanvas("bar", CHART_DATA.monthly, "월별 탐지 — 최근 6개월, 10월 2,920건이 가장 많음")}
+            ${chartCanvas("bar", CHART_DATA.monthly, "월별 탐지 — 최근 6개월, 이번 달 10월 2,920건이 가장 많음")}
           </div>
         </div>`, js: chartJs("bar", CHART_DATA.weekday, ".chart-canvas canvas") },
       { id: "bar", group: "variant", title: "Bar Chart", desc: "상위 몇 개를 요약하는 정적 막대입니다. 막대 길이가 값이고, 색은 한 톤의 가장 진한 단계입니다. 막대가 심각도를 나타낼 때만 심각도 색을 씁니다.", html: `
@@ -2692,17 +2692,19 @@ const COMPONENTS = {
         ["심각도 · 상태", "심각도와 상태를 나타낼 때만 심각도 · 상태 색을 씁니다. 그 밖의 계열에는 빨강 · 주황을 쓰지 않습니다."],
         ["제품 색", "차트는 제품 색을 따르지 않고 늘 같은 파랑입니다. 빨강 · 주황 제품에서도 차트가 경고나 위험처럼 읽히지 않게 하기 위해서입니다."],
         ["글자", "값 · 라벨 · 범례 글자는 글자 색을 씁니다. 계열 색은 차트 마크와 범례 견본에만 씁니다."],
+        ["색 자리", "필터로 계열 수가 바뀌는 차트는 계열마다 색 자리를 정해 둡니다. 그러면 계열 하나를 빼도 남은 계열의 색이 바뀌지 않습니다."],
       ],
       "카드": [
-        ["머리", "제목, 기간 같은 보조 글자, 동작 순서로 놓습니다. 동작에는 작은 Select 나 텍스트 버튼을 씁니다. 머리 높이는 32px 로 고정입니다."],
+        ["머리", "제목, 기간 같은 보조 글자, 동작 순서로 놓습니다. 동작에는 텍스트 버튼을 씁니다. 기간이나 필터는 카드 안에 두지 않고, 그것이 정하는 차트 전체 위에 한 줄로 둡니다. 머리 높이는 32px 로 고정입니다."],
         ["높이", "본문 높이는 작게 160px, 기본 240px, 크게 320px 입니다. 같은 줄의 카드는 같은 높이 단계로 맞춥니다. 머리 구성도 맞춰서, 한 카드에 큰 값이 있으면 모두 둡니다."],
         ["증감", "배지 색은 방향이 아니라 나쁨 · 좋음 · 중립의 의미를 나릅니다. 방향은 화살표와 숨긴 '증가' · '감소' 글자가 나릅니다. 비교 기준은 배지 밖에 적습니다."],
-        ["상태", "로딩 · 빈 · 오류 상태는 본문 자리만 바꾸고 머리는 남깁니다."],
+        ["상태", "로딩 · 빈 · 오류 상태는 본문 자리만 바꾸고 머리는 남깁니다. 이미 그린 차트를 다시 불러올 때는 지난 그림을 흐리게 두고 다 오면 바꿉니다."],
       ],
       "마크": [
-        ["선 · 점", "선은 2px 입니다. 점은 포인터를 올렸을 때만 지름 8px 로 나타납니다. 곡선 장력은 0.3 입니다."],
-        ["막대", "막대는 각지고 테두리가 없으며 두께는 최대 32px 입니다. 누적 막대의 조각은 틈 없이 붙습니다. 그라데이션은 강조용 옵션이고 누적 막대에는 쓰지 않습니다."],
-        ["격자 · 축", "격자는 가로로만 긋고, 3px 선과 3px 틈의 점선입니다. y 축은 하나만 두고 이중 축은 쓰지 않습니다. 범례는 계열이 2개 이상일 때 원형 견본으로 아래에 둡니다."],
+        ["선 · 점", "선은 2px 이고 끝과 꺾임이 둥급니다. 점은 포인터를 올렸을 때만 지름 8px 로 나타나고, 바탕색 링을 두릅니다. 곡선 장력은 0.3 입니다. 스파크는 마지막 점을 늘 보입니다."],
+        ["막대", "막대는 두께가 최대 24px 이고 값 쪽 끝만 4px 둥급니다. 바닥 쪽은 각집니다. 누적 조각 사이와 나란한 막대 사이에는 2px 틈을 두고, 테두리로 가르지 않습니다. 막대와 영역에는 그라데이션을 쓰지 않고, 영역은 계열 색을 옅게 칠합니다."],
+        ["격자 · 축", "격자는 값 축에만 1px 실선으로 긋습니다. 가로 막대면 격자도 세로입니다. 값 축의 숫자는 천 단위로 끊고, 축이 1만에 닿으면 축 전체를 만 단위로 줄여 씁니다. 값 축은 하나만 두고 이중 축은 쓰지 않습니다. 범례는 계열이 2개 이상일 때 원형 견본으로 아래에 둡니다."],
+        ["툴팁", "툴팁은 값을 먼저 굵게 적고 계열 이름을 옅게 뒤에 둡니다. 계열은 짧은 선으로 표시합니다. 선과 영역 차트는 세로 기준선이 가장 가까운 날짜를 잡고, 막대는 막대 자체가 대상입니다."],
         ["접근성", "차트는 그림으로 읽히게 하고, 읽는 이름에 제목 · 요약 · 가장 중요한 값을 적습니다. 값을 하나하나 읽어야 하는 차트는 표로 보기를 켭니다. 진행 막대는 측정값으로 읽히게 합니다."],
       ],
     },
@@ -2722,13 +2724,13 @@ const COMPONENTS = {
       [".sparkline", "div", "—", "i height% 막대(옅은 단계), .hi 강조(진한 단계). .kpi 의 자식이면 값 오른쪽(밑변 = 숫자 기준선), 좁으면 값 아래"],
       [".chart-view", "div", "—", "<code>.chart-canvas</code> 를 감싸는 틀. 표로 보기는 옵션이라 필요할 때만 <code>.chart-tools</code> 안에 버튼(<code>data-chart-table</code>)을 앞에 둡니다. React <code>ChartCanvas table</code>(기본 false). 문구는 <code>data-labels</code>(JSON — table · chart · head · value · empty), React <code>labels</code>"],
       ["canvas[data-chart] / ChartCanvas", "\"timeseries\" | \"bar\" | \"donut\" | \"mixed\" | \"gauge\" | \"spark\"", "—", "탐색형 차트(Chart.js) 자리 — <code>.chart-canvas</code> 안의 canvas(KPI 안 스파크는 <code>.kpi &gt; .chart-canvas.spark</code>). HTML 은 <code>data-spec</code>(JSON) 으로 <code>ds-chart.js</code> 가 자동으로 그리고, React 는 <code>chart</code>(Chart.js 생성자) · <code>config</code>(presets.*) · <code>aria-label</code>(필수) prop 입니다"],
-      ["DSChart.presets.* / presets", "spec → config", "—", "공통 <code>color</code>(\"mono\" 기본 | \"categorical\") · <code>series[{label, data, tone?}]</code> · <code>labels</code>. timeseries <code>stacked</code> · <code>area</code>(계열 하나일 때 기본 true), bar <code>stacked</code> · <code>horizontal</code> · <code>highlight</code>(막대 번호) · <code>gradient</code>, donut <code>{label, value, tone?}</code> · <code>center</code> · <code>legend</code>(\"bottom\" | \"right\"), mixed <code>bars</code> · <code>lines</code>, gauge <code>value</code> · <code>max</code>(100) · <code>label</code> · <code>caption</code>, spark <code>data</code> · <code>area</code>. tone 은 심각도 · 상태(critical · high · medium · low · info · ok · brand) · 한 톤 단계(mono-1~4) · 계열 1의 톤(series-1 · series-1-subtle · series-1-strong). 비교 기간(지난 주 · 전월)은 이제 한 톤의 mono-1 · mono-4 입니다 — series-1-subtle 은 이미 쓰는 화면을 위해 남긴 값이라 새로 쓰지 않습니다"],
-      ["DSChart.theme · mount · auto / chartTheme · useDsChart · mountChart", "(el) → theme · (Chart, canvas, config) → handle", "—", "theme 은 <code>--chart-*</code> · 심각도 · 면 · 글꼴 토큰을 계산값으로 읽은 것(캔버스는 CSS 변수를 못 읽습니다). mount 는 Chart 를 만들고 라이트/다크 전환 때 다시 칠하며 <code>destroy()</code> 를 돌려줍니다. auto 는 <code>canvas[data-chart]</code> 를 모두 mount"],
+      ["DSChart.presets.* / presets", "spec → config", "—", "공통 <code>color</code>(\"mono\" 기본 | \"categorical\") · <code>series[{label, data, tone?, slot?}]</code>(<code>slot</code> = 색 자리 고정 — mono 1~4 · categorical 1~6) · <code>labels</code>. timeseries <code>stacked</code> · <code>area</code>(계열 하나일 때 기본 true), bar <code>stacked</code> · <code>horizontal</code> · <code>highlight</code>(막대 번호 — <code>gradient</code> 는 2026-11-20 에 없어져 경고하고 단색), donut <code>{label, value, tone?}</code> · <code>center</code> · <code>legend</code>(\"bottom\" | \"right\"), mixed <code>bars</code> · <code>lines</code>, gauge <code>value</code> · <code>max</code>(100) · <code>label</code> · <code>caption</code>, spark <code>data</code> · <code>area</code>. tone 은 심각도 · 상태(critical · high · medium · low · info · ok · brand) · 한 톤 단계(mono-1~4) · 계열 1의 톤(series-1 · series-1-subtle · series-1-strong). 비교 기간(지난 주 · 전월)은 이제 한 톤의 mono-1 · mono-4 입니다 — series-1-subtle 은 이미 쓰는 화면을 위해 남긴 값이라 새로 쓰지 않습니다"],
+      ["DSChart.theme · mount · auto / chartTheme · useDsChart · mountChart", "(el) → theme · (Chart, canvas, config) → handle", "—", "theme 은 <code>--chart-*</code> · 심각도 · 면 · 글꼴 토큰을 계산값으로 읽은 것(캔버스는 CSS 변수를 못 읽습니다). mount 는 Chart 를 만들고 라이트/다크 전환 때 다시 칠하며 handle(<code>update(config)</code> — 같은 종류면 지우지 않고 바꿔 칠함 · <code>repaint()</code> · <code>destroy()</code>)을 돌려줍니다. React <code>useDsChart</code> 는 config 가 바뀌면 update 를 씁니다. auto 는 <code>canvas[data-chart]</code> 를 모두 mount"],
     ],
-    spec: [["Size", "KPI 값 Title 1 32 · 막대 12 · 진행 막대 8 · 도넛 120 · 차트 본문 sm 160 · 기본 240 · lg 320 · 스파크 40"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·1px 보더, padding 20 24 · gap 16 · 머리 높이 32 · flat 은 보더 색 없음(background/neutral/secondary 위 전용). KPI 는 padding 20 24 · 최소 폭 180, kpi-grid 안에서는 padding 20 · 칸 최소 176 · gap 16"], ["Label", "카드 제목 Body 1/Normal 16 SemiBold · 보조 글자 12 tertiary · KPI 라벨 12 Medium tertiary · 값 32 Bold · 증감 배지 Caption 2 11 SemiBold · 차트 축 · 범례 · 툴팁 글자 12 · 게이지 가운데 28 Bold + 설명 12"], ["Chart", "선 2 · 점은 hover 때만 지름 8 · 막대는 각지고 stroke 없음(정적 막대 · 트랙 · 진행 막대 · 스파크라인도 각짐) · 누적 세그먼트는 틈 없이 이어 붙임 · 도넛 조각 사이 2px 면 색 경계 · 막대 두께 최대 32 · 가로 격자만 점선 3 · 3 · y 축 하나(이중 축 금지) · 범례는 2계열 이상, 원형 아이콘 · 옆 범례는 자리가 좁고 세로로 길면 아래로 · 게이지 반원 구멍 78%"], ["Color", "기본은 한 톤 --chart-mono-1~4(고정 파랑, 라이트 blue-40 · 50 · 60 · 70 / 다크 blue-80 · 70 · 60 · 45 — 제품색과 무관, 계열 수에 따라 1 · 1·4 · 1·2·4 · 1~4 단계) · 순서 없는 범주 5개 이상은 --chart-series-1~6 · 심각도 5단계는 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 · 트랙 --surface-neutral-strong · 격자 --chart-grid-primary · 축 글자 --chart-axis-text · 툴팁 --chart-tooltip-* · 증감 배지 = Tag 의 틴트 · heavy 쌍"], ["A11y", "canvas 는 role=img + aria-label(제목 · 요약) 필수 · 표로 보기 옵션 · 진행 막대 role=meter + aria-valuetext · 증감 방향은 숨긴 글자로"]],
+    spec: [["Size", "KPI 값 Title 1 32 · 막대 12 · 진행 막대 8 · 도넛 120 · 차트 본문 sm 160 · 기본 240 · lg 320 · 스파크 40"], ["Container", "chart-card = Card 와 같은 Surface·radius/lg·1px 보더, padding 20 24 · gap 16 · 머리 높이 32 · flat 은 보더 색 없음(background/neutral/secondary 위 전용). KPI 는 padding 20 24 · 최소 폭 180, kpi-grid 안에서는 padding 20 · 칸 최소 176 · gap 16"], ["Label", "카드 제목 Body 1/Normal 16 SemiBold · 보조 글자 12 tertiary · KPI 라벨 12 Medium tertiary · 값 32 Bold · 증감 배지 Caption 2 11 SemiBold · 차트 축 · 범례 · 툴팁 글자 12 · 게이지 가운데 28 Bold + 설명 12"], ["Chart", "선 2 · 끝 · 꺾임 round · 점은 hover 때만 지름 8 + 면 색 링 2 · 스파크 끝 점 r 3 · 막대 두께 최대 24 · 값 끝 radius 4(바닥 0, 정적 막대 · 진행 막대 · 스파크라인 채움도) · 누적 조각 · 묶음 막대 사이 2px 면 색 틈 · stroke 없음 · 영역 계열 색 10% · 도넛 조각 사이 2px 면 색 경계 · 격자는 값 축에만 실선 1px · 값 축 눈금 ko-KR 천 단위, 1만 이상이면 만 단위 · crosshair 1px --line-neutral-primary(선 · 영역 · 혼합) · 툴팁 줄 = 값 600 + 계열 이름(글자색 72%) · 키 선 12 × 2 · 값 축 하나(이중 축 금지) · 범례는 2계열 이상, 원형 아이콘 · 옆 범례는 자리가 좁고 세로로 길면 아래로 · 게이지 반원 구멍 78%"], ["Color", "기본은 한 톤 --chart-mono-1~4(고정 파랑, 라이트 blue-40 · 50 · 60 · 70 / 다크 blue-80 · 70 · 60 · 45 — 제품색과 무관, 계열 수에 따라 1 · 1·4 · 1·2·4 · 1~4 단계) · 순서 없는 범주 5개 이상은 --chart-series-1~6 · 심각도 5단계는 negative-strong · cautionary · accent-light-blue · accent-lime · inactive 토큰 · 정적 막대 트랙 --surface-neutral-strong · 진행 막대 · 게이지 트랙 --chart-mono-track(라이트 blue-90 · 다크 blue-20) · 격자 --chart-grid-primary · 축 글자 --chart-axis-text · 툴팁 --chart-tooltip-* · 증감 배지 = Tag 의 틴트 · heavy 쌍"], ["A11y", "canvas 는 role=img + aria-label(제목 · 요약) 필수 · 표로 보기 옵션 · 진행 막대 role=meter + aria-valuetext · 증감 방향은 숨긴 글자로"]],
     figma: { frame: "Data Visual", radius: "radius/lg", sizes: { kpi: { pad: 20 }, bar: { h: 12 }, donut: 120 }, variants: { kpi: {}, kpiSparkline: { layout: "라벨 한 줄 · 값 + 그래프 한 줄(밑변 = 숫자 기준선, 좁으면 그래프가 값 아래)" }, bar: {}, donut: { gap: "경계마다 2px 직선 --surface-elevated-primary(폭 일정)" }, sparkline: { bar: "--chart-mono-4", hi: "--chart-mono-1" } }, variant: { outline: { stroke: "--line-neutral-secondary" }, flat: { stroke: "transparent", canvas: "--background-neutral-secondary" } }, states: ["default", "loading", "empty", "error"],
       /* 탐색형 차트(Chart.js) — Figma 의 Chart 세트가 따르는 마크 규격과 색 */
-      chart: { types: ["timeseries", "bar", "donut", "mixed", "gauge", "spark"], canvasH: 240, line: 2, point: 8, barRadius: 0, barStroke: 0, barMax: 32, gap: 0, legend: "circle", cutout: "67%", gridDash: [3, 3], mono: ["--chart-mono-1", "--chart-mono-2", "--chart-mono-3", "--chart-mono-4"], series: ["--chart-series-1", "--chart-series-2", "--chart-series-3", "--chart-series-4", "--chart-series-5", "--chart-series-6"], grid: "--chart-grid-primary", axis: "--chart-axis-text", tooltip: { bg: "--chart-tooltip-surface", fg: "--chart-tooltip-text" }, tones: { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary", medium: "--foreground-accent-light-blue", low: "--foreground-accent-lime", info: "--foreground-inactive-primary", "series-1": "--chart-series-1", "series-1-subtle": "--chart-series-1-subtle", "series-1-strong": "--chart-series-1-strong" } } },
+      chart: { types: ["timeseries", "bar", "donut", "mixed", "gauge", "spark"], canvasH: 240, line: 2, point: 8, barRadius: 4, barStroke: 0, barMax: 24, gap: 2, legend: "circle", tooltipKey: "line", cutout: "67%", gridDash: [], area: 0.1, track: "--chart-mono-track", mono: ["--chart-mono-1", "--chart-mono-2", "--chart-mono-3", "--chart-mono-4"], series: ["--chart-series-1", "--chart-series-2", "--chart-series-3", "--chart-series-4", "--chart-series-5", "--chart-series-6"], grid: "--chart-grid-primary", axis: "--chart-axis-text", tooltip: { bg: "--chart-tooltip-surface", fg: "--chart-tooltip-text" }, tones: { critical: "--foreground-negative-strong", high: "--foreground-cautionary-primary", medium: "--foreground-accent-light-blue", low: "--foreground-accent-lime", info: "--foreground-inactive-primary", "series-1": "--chart-series-1", "series-1-subtle": "--chart-series-1-subtle", "series-1-strong": "--chart-series-1-strong" } } },
   },
 
   /* ------------------------------------------------ Empty State (패턴에서 올림 2026-11-10) */

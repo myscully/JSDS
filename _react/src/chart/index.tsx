@@ -19,13 +19,24 @@ export const mountChart = DSChart.mount;
 /** canvas ref 에 차트를 올리고 언마운트 때 지운다. config 가 바뀌면(내용 기준) 다시 만든다 */
 export function useDsChart(ref: RefObject<HTMLCanvasElement | null>, chart: ChartLike, config: DsChartConfig): void {
   const key = JSON.stringify(config);   // 프리셋은 매 렌더 새 객체를 돌려준다 — 함수(plugins)는 빠지지만 데이터 · 옵션이 같으면 같은 키
+  const handle = useRef<DsChartHandle | null>(null);
+  /* 만들기 · 지우기는 캔버스와 Chart 생성자가 바뀔 때만 */
   useEffect(() => {
     const el = ref.current; if (!el) return;
-    let handle: DsChartHandle | null = null;
-    try { handle = DSChart.mount(chart, el, config); } catch (e) { if (process.env.NODE_ENV !== "production") console.error(e); }
-    return () => { handle?.destroy(); };
+    try { handle.current = DSChart.mount(chart, el, config); } catch (e) { if (process.env.NODE_ENV !== "production") console.error(e); }
+    return () => { handle.current?.destroy(); handle.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref, chart, key]);
+  }, [ref, chart]);
+  /* config 가 바뀌면 같은 종류는 그 자리에서 바꾼다(2026-11-20 — 전에는 지우고 다시 만들어 다시 불러올 때 빈 캔버스가 한 번 보였다). 종류가 바뀌면 다시 만든다 */
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    const el = ref.current; if (!el) return;
+    if (handle.current && handle.current.update(config)) return;
+    handle.current?.destroy();
+    try { handle.current = DSChart.mount(chart, el, config); } catch (e) { if (process.env.NODE_ENV !== "production") console.error(e); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
 }
 
 export interface ChartCanvasProps extends Omit<HTMLAttributes<HTMLDivElement>, "aria-label"> {

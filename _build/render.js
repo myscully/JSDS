@@ -33,6 +33,8 @@ const thumbs = {
   generic: `<svg viewBox="0 0 96 64"><rect x="16" y="16" width="64" height="32" rx="6" fill="#fff" stroke="#C2C4C8"/><rect x="26" y="29" width="30" height="6" rx="3" fill="#171719"/></svg>`,
 };
 const figmaThumb = (sec) => sec === "components" || sec === "patterns";
+/* Figma 썸네일이 아직 없는 새 페이지(thumbs.js PENDING)는 기본 그림 — .figma 클래스도 붙이지 않는다 */
+const hasFigmaThumb = (sec, key) => !!(sec === "components" ? window.COMPONENT_THUMBS : window.PATTERN_THUMBS || {})?.[key];
 function thumbOf(sec, key) {
   /* 컴포넌트 · 패턴은 Figma 썸네일(컴포넌트 2026-11-19 · 패턴 2026-11-20 — 원본 _build/thumbs/<섹션>, 색은 빌드가 토큰으로). 빌드가 넣지 않은 단독 셸에서는 기본 그림 */
   if (sec === "components") return (window.COMPONENT_THUMBS || {})[key] || thumbs.generic;
@@ -43,7 +45,7 @@ function overviewPage(sec) {
   const d = SITE[sec]; const pages = allPages(sec).filter(p => p.key !== "overview");
   const intro = sec === "components" ? `<p>모든 컴포넌트 페이지는 <b>동작하는 라이브 프리뷰 + 복사 가능한 코드(HTML+CSS / React) + Props</b>로 구성됩니다. 프리뷰의 드롭다운·탭·달력·표 정렬 등은 <code>assets/ds.js</code>(순수 JS)로, React 탭 코드는 <code>@jiran/ds-react</code> 로 같은 동작을 합니다. 스타일은 <code>assets/style.css</code> 하나로 동작하며, 색은 토큰(<code>var(--surface-brand-primary)</code> 등)만 참조합니다.</p>` : sec === "patterns" ? `<p>패턴은 컴포넌트를 조합한 화면 단위 예시입니다. 각 예시의 코드를 그대로 복사해 시작점으로 쓸 수 있습니다.</p>` : "";
   return `<h1>${d.title}${nb(sec, "overview")}</h1><p class="lead">${d.desc}입니다.</p>${intro}
-  <div class="ov-grid">${pages.map(p => `<a class="ov-card" href="#/${sec}/${p.key}"><div class="thumb${figmaThumb(sec) ? " figma" : ""}" aria-hidden="true" inert>${thumbOf(sec, p.key)}</div><div class="label">${p.title}${nb(sec, p.key)}${p.group ? `<small>${p.group}</small>` : ""}</div></a>`).join("")}</div>`;
+  <div class="ov-grid">${pages.map(p => `<a class="ov-card" href="#/${sec}/${p.key}"><div class="thumb${figmaThumb(sec) && hasFigmaThumb(sec, p.key) ? " figma" : ""}" aria-hidden="true" inert>${thumbOf(sec, p.key)}</div><div class="label">${p.title}${nb(sec, p.key)}${p.group ? `<small>${p.group}</small>` : ""}</div></a>`).join("")}</div>`;
 }
 function templatePage(sec, key) {
   const d = SITE[sec]; const t = titleOf(sec, key);

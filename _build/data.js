@@ -19,10 +19,10 @@ const SITE = {
   patterns: { title: "Patterns", desc: "반복되는 업무 단위와 문제를 해결하는 가이드라인", isNew: true, pages: { overview: "Overview" }, groups: [
     ["Common UI", [["input-form", "입력 폼"], ["terms-agreement", "약관 동의"], ["notes", "유의사항"], ["error-pages", "오류 · 권한 없음"], ["danger-confirm", "위험 작업 확인"], ["import-export", "가져오기 · 내보내기"], ["bulk-progress", "일괄 작업 진행"]]],
     ["Service Pattern", [["onboarding", "온보딩"], ["search", "검색"], ["system-status", "시스템 상태"], ["sign-in", "로그인 · 세션"], ["report-schedule", "보고서 · 예약 발송"]]],
-    ["Security Console", [["dashboard", "대시보드"], ["log-viewer", "로그 뷰어"], ["policy-settings", "정책 설정"], ["severity", "심각도 표시"], ["detail", "상세 화면"], ["roles", "권한 · 역할"], ["secrets", "API 키 · 비밀값"], ["incident", "사고 처리"], ["audit-log", "감사 로그 · 변경 이력"], ["alert-rules", "알림 규칙"]]],
+    ["Security Console", [["dashboard", "대시보드"], ["analytics", "분석 · 리포트"], ["log-viewer", "로그 뷰어"], ["policy-settings", "정책 설정"], ["severity", "심각도 표시"], ["detail", "상세 화면"], ["roles", "권한 · 역할"], ["secrets", "API 키 · 비밀값"], ["incident", "사고 처리"], ["audit-log", "감사 로그 · 변경 이력"], ["alert-rules", "알림 규칙"]]],
   ] },
   /* Templates(2026-11-18) — 컴포넌트와 패턴으로 조립한 콘솔 화면 전체. 글은 templates.data.js, 화면은 templates.build.js */
-  templates: { title: "Templates", desc: "컴포넌트와 패턴으로 조립한 콘솔 화면 전체", isNew: true, pages: { overview: "Overview", login: "로그인", dashboard: "대시보드", list: "리스트", policy: "정책 설정", wizard: "위저드", "tabs-list": "탭이 있는 리스트", org: "조직도" } },
+  templates: { title: "Templates", desc: "컴포넌트와 패턴으로 조립한 콘솔 화면 전체", isNew: true, pages: { overview: "Overview", login: "로그인", dashboard: "대시보드", analytics: "분석", list: "리스트", policy: "정책 설정", wizard: "위저드", "tabs-list": "탭이 있는 리스트", org: "조직도" } },
   resources: { title: "Resources", desc: "라이브러리, 토큰, 변경 이력", pages: { "ui-dictionary": "UI Dictionary", react: "React Package", "design-token": "Design Token", figma: "Figma Library", tokens: "Token Download", changelog: "Changelog", contribution: "Contribution" } },
 };
 /* 제품 색 팔레트(2026-11-14 사람의 결정 · 2026-11-17 이름을 역할로 바꾸고 제품3 #10367D 을 더함 — 일곱) — 1.0 전에는 이 일곱 가지만 쓴다. 1.0 뒤에는 사용자가 색을 더하거나 고치는 팔레트를 준다.
