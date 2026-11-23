@@ -1331,6 +1331,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
   - Home 히어로 부채꼴 잘림 1(기준값).
   - 숨긴 ov-grid 의 Card · Code 카드에 낀 어긋난 사본 2 — 11-19 항목에 적어 둔 것이 이번 덤프에서 실제로 나왔다(사람이 넣은 프레임이라 손대지 않음).
   - Card 제목 굵기 30 — 데스크톱에서 'SemiBold' 스타일 넷(Body 1/Normal · Label 1/Normal · Caption 1 · Caption 2 SemiBold)의 서체가 **Pretendard Bold** 로 되돌려졌다. `font-revert.md` 의 목록은 Pretendard SemiBold 다. audit 은 Card 제목에서만 굵기를 대조해 30건으로 드러났고, 같은 스타일을 쓰는 다른 글자도 700 이다. 에이전트 환경에는 Pretendard 가 없어 사람이 데스크톱에서 고친다.
+- **같은 날 사람이 SemiBold 스타일을 고쳤다** — 새 텍스트 스타일 28개가 모두 이름의 굵기와 같은 Pretendard(SemiBold 다섯 = Pretendard SemiBold)이고 Card 제목 30개도 Pretendard SemiBold 다(플러그인으로 확인). 전체 probe(`dump-c2`, 길이 · 해시 대조)를 다시 떠 기준 덤프로 바꿨고 **audit 은 3건**이다 — Home 잘림 1 · 숨긴 ov-grid 사본 2. Card 제목 30건은 없어졌다.
 - **audit · probe 도구:** 툴팁 행을 키 · 값 · 이름으로 읽고 대조한다(값 굵기 600 · 이름 72% 400 · 키는 짧은 선), crosshair 를 읽어 색 · 굵기를 대조한다(격자 목록에서는 뺌), 막대 모서리는 값 쪽 끝만(누적은 마지막 조각만), 네 귀를 따로 적은 `border-radius` 는 가장 큰 귀로 읽는다.
 - **덤프 뜨는 법**은 묶음 4 와 같다(줄인 probe 를 PNG tEXt 로 올림 → 조각을 `jsds.probe` 에 → 하위 에이전트 둘이 읽어 이어 붙이고 길이 · 해시 대조).
 - **그리지 않은 것:** 분석 패턴의 불러오는 중 · 빈 결과 예제(사이트에는 있음 — audit 은 예제 수를 대조하지 않는다).
