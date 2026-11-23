@@ -117,12 +117,15 @@
     });
   }
   function font(t, weight) { return { family: t.font.family, size: t.font.size, weight: weight || 400 }; }
-  /* 애니메이션 중에 들어온 크기 변경은 Chart.js 가 '다음 그리기' 로 미뤄 둔다(_resizeBeforeDraw — 4.6.1 고정). 그런데 애니메이션은 그리기 없이 끝나는
+  /* 애니메이션 중에 들어온 크기 변경은 Chart.js 가 '다음 그리기' 로 미뤄 둔다. 그런데 애니메이션은 그리기 없이 끝나는
      프레임이 있어서(마지막 항목을 치우는 틱), 그 틈에 들어온 변경은 영영 적용되지 않았다 — 부하가 걸린 채 창을 1440 → 390 으로 줄이면
-     대시보드 '일별 탐지' 캔버스가 445 로 남았다(hover 애니메이션 도중, 2026-11-20 측정). 애니메이션이 끝날 때 미뤄 둔 변경을 적용한다 */
+     대시보드 '일별 탐지' 캔버스가 445 로 남았다(hover 애니메이션 도중, 2026-11-20 측정). 애니메이션이 끝날 때 공개 API resize() 로
+     틀 크기를 다시 잰다 — onComplete 때는 애니메이션이 이미 끝난 것으로 쳐서 미루지 않고 바로 적용하고, 크기가 같으면 아무것도 하지 않는다.
+     2026-11-23 — 종전엔 미뤄 둔 값을 내부 이름 _resizeBeforeDraw 로 읽어 Chart.js 버전을 올리면 깨질 수 있었다.
+     틀이 숨어 0 × 0 이면 Chart.js 의 ResizeObserver 처럼 건너뛴다(숨은 탭 · 표로 보기 · 닫힌 패널의 차트를 0 으로 만들지 않게) */
   function flushResize(ctx) {
-    var c = ctx && ctx.chart, p = c && c._resizeBeforeDraw;
-    if (p && c.canvas) { c._resizeBeforeDraw = null; c.resize(p.width, p.height); }
+    var c = ctx && ctx.chart, box = c && c.canvas && c.canvas.parentNode;
+    if (box && (box.clientWidth || box.clientHeight)) c.resize();
   }
   /* ---------- 숫자 ----------
      값 축 눈금은 ko-KR 천 단위, 축이 1만에 닿으면 축 전체를 만 단위(1만 · 2.5만)로 — 한 축에 한 형식(dataviz 'Y-axis ticks'). 툴팁 값도 ko-KR */

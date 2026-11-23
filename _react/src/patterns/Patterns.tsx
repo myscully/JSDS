@@ -69,7 +69,7 @@ export const PageHead = forwardRef<HTMLDivElement, PageHeadProps>(function PageH
 });
 
 export interface FormProps extends FormHTMLAttributes<HTMLFormElement> {
-  /** 입력 검증을 켠다 — 포커스가 떠날 때 필드 단위, 제출하면 막고 첫 오류로 이동, 오류 3개 이상이면 위에 요약. 고치면 바로 지운다 */
+  /** 입력 검증을 켠다 — 포커스가 떠날 때 필드 단위, 제출하면 막고 첫 오류로 이동. 오류는 각 필드 아래에만 보이고 폼 위 요약은 없다. 고치면 바로 지운다 */
   validate?: boolean;
   /** 기본 검증 문구 덮어쓰기 */
   messages?: ValidationMessages;
