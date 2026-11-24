@@ -66,13 +66,13 @@ describe("글자 · 검사 (format)", () => {
     expect(r.message).toContain("2026. 09. 07 14:30");
     const t = check("2026. 09. 07 25:00");
     expect(t.validity).toBe("invalid");
-    expect(t.message).toBe("시각이 잘못됐습니다. 2026. 09. 07 14:30 처럼 24시간제로 입력하세요.");
+    expect(t.message).toBe("시각이 24시간제 형식이 아닙니다. 2026. 09. 07 14:30 처럼 입력하세요.");
     expect(check("2026. 02. 30 12:00").message?.startsWith("날짜가 달력에 없습니다")).toBe(true);
   });
   it("기간의 없는 시각은 틀린 쪽 이름으로", () => {
-    expect(check("2026. 09. 07 09:00 ~ 2026. 09. 08 25:00", true).message?.startsWith("종료 시각이 잘못됐습니다")).toBe(true);
-    expect(check("2026. 09. 07 25:00 ~ 2026. 09. 08 09:00", true).message?.startsWith("시작 시각이 잘못됐습니다")).toBe(true);
-    expect(check("2026. 09. 07 25:00 ~ 2026. 09. 08 25:00", true).message?.startsWith("시각이 잘못됐습니다")).toBe(true);
+    expect(check("2026. 09. 07 09:00 ~ 2026. 09. 08 25:00", true).message?.startsWith("종료 시각이 24시간제 형식이 아닙니다")).toBe(true);
+    expect(check("2026. 09. 07 25:00 ~ 2026. 09. 08 09:00", true).message?.startsWith("시작 시각이 24시간제 형식이 아닙니다")).toBe(true);
+    expect(check("2026. 09. 07 25:00 ~ 2026. 09. 08 25:00", true).message?.startsWith("시각이 24시간제 형식이 아닙니다")).toBe(true);
   });
   it("같은 날이면 순서 문구가 시각, 다른 날이면 날짜", () => {
     expect(check("2026. 09. 07 18:00 ~ 2026. 09. 07 09:00", true)).toMatchObject({ validity: "order", message: LABELS.dateTimeOrderError });
@@ -220,7 +220,7 @@ describe("DatePicker time", () => {
     fireEvent.change(clocks()[0], { target: { value: "2500" } });
     await userEvent.click(apply());
     expect(field().value).toBe("2026. 09. 07 25:00");
-    expect(help().startsWith("시각이 잘못됐습니다")).toBe(true);
+    expect(help().startsWith("시각이 24시간제 형식이 아닙니다")).toBe(true);
     expect(fn.mock.calls[fn.mock.calls.length - 1][1].validity).toBe("invalid");
   });
   it("footer 가 없어도 적용 버튼은 있고 날짜를 눌러도 닫히지 않는다", async () => {

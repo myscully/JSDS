@@ -63,7 +63,7 @@ export const TableFoot = forwardRef<HTMLTableSectionElement, HTMLAttributes<HTML
 export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   selected?: boolean;
   disabled?: boolean;
-  /** 모노스페이스 로그 행 */
+  /** 로그 행 — 칸을 한 줄로(줄바꿈 없음) 두고 짧은 열은 글자 폭만. 글자 크기는 다른 행과 같다 */
   log?: boolean;
   /** 합계 행 (TableFoot 안) */
   total?: boolean;

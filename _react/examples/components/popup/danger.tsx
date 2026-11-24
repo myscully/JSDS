@@ -10,7 +10,6 @@ export default function Example() {
         <TextField
           id="confirm"
           label={<>확인을 위해 <b>삭제</b>를 입력하세요</>}
-          placeholder="삭제"
           required
           requiredMark={false}
           pattern="\s*삭제\s*"

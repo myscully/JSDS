@@ -22,7 +22,7 @@ module.exports = async function dataviz({ page, ok, go }) {
       const tall = els.reduce((a, e) => (e.base - e.y > a.base - a.y ? e : a), els[0]);
       const L = tall.x - tall.width / 2, R = tall.x + tall.width / 2;
       const single = { widths: els.map((e) => +e.width.toFixed(2)), radius: o.borderRadius, skipped: o.borderSkipped, inflate: o.inflateAmount,
-        /* 값 끝 모서리는 둥글어 비고(알파 낮음), 바닥 모서리는 각져 차 있다 */
+        /* 네 모서리 모두 각져 차 있다(2026-11-24 — 11-20 의 값 끝 4px 를 지움) */
         topCorner: alphaAt(one, L + 0.6, tall.y + 0.6), baseCorner: alphaAt(one, L + 0.6, tall.base - 0.8), mid: alphaAt(one, tall.x, (tall.y + tall.base) / 2), right: R };
       /* 묶음 막대(주간 비교 — 2계열): 한 칸 안 두 막대 사이 = 2px, 그 틈의 픽셀은 비었다(카드 면이 보임) */
       const grp = chartOf("#ex-data-visual-bars canvas[data-chart]");
@@ -32,10 +32,10 @@ module.exports = async function dataviz({ page, ok, go }) {
       const group = { gaps, widths: a.concat(b).map((e) => +e.width.toFixed(2)), gapAlpha: alphaAt(grp, gx, (lo + a[j0].base) / 2), barAlpha: alphaAt(grp, a[j0].x, (lo + a[j0].base) / 2) };
       return { single, group };
     });
-    /* dataviz 'Bar / column' — 바닥에서 자라고 값 끝만 둥글다. 두께는 칸을 채우지 않고 24 에서 멈춘다 */
-    ok("bars: value end rounded 4 · base square (borderSkipped start) · no inflation · ≤ 24 thick (single series)",
-      r.single.radius === 4 && r.single.skipped === "start" && r.single.inflate === 0 && r.single.widths.every((w) => w <= 24.01), JSON.stringify(r.single));
-    ok("bars: in pixels the top corner is empty and the base corner is filled", r.single.topCorner < 140 && r.single.baseCorner > 200 && r.single.mid > 240, JSON.stringify(r.single));
+    /* 바닥에서 자라고 모서리는 모두 각지다(사람의 결정 2026-11-24). 두께는 칸을 채우지 않고 24 에서 멈춘다 */
+    ok("bars: square corners (radius 0) · base square (borderSkipped start) · no inflation · ≤ 24 thick (single series)",
+      r.single.radius === 0 && r.single.skipped === "start" && r.single.inflate === 0 && r.single.widths.every((w) => w <= 24.01), JSON.stringify(r.single));
+    ok("bars: in pixels both the value-end corner and the base corner are filled (square)", r.single.topCorner > 200 && r.single.baseCorner > 200 && r.single.mid > 240, JSON.stringify(r.single));
     /* dataviz 'Surface gap' — 맞닿은 막대도 누적 조각과 같은 2px 면 색 틈으로 갈린다 */
     ok("bars: grouped bars in one slot are 2px apart, ≤ 24 thick, and the gap shows the surface", r.group.gaps.every((g) => g >= 1.5 && g <= 2.5) && r.group.widths.every((w) => w <= 24.01) && r.group.gapAlpha < 30 && r.group.barAlpha > 240, JSON.stringify(r.group));
   });
@@ -69,14 +69,18 @@ module.exports = async function dataviz({ page, ok, go }) {
     const line = await page.evaluate((sel) => {
       const ch = document.querySelector(sel).__dsChart.chart, d = ch.data.datasets[0];
       const a = (c) => { const m = /rgba?\(([^)]+)\)/.exec(c || ""); return m ? +(m[1].split(",")[3] || 1) : null; };
-      const area = [...document.querySelectorAll("#ex-data-visual-timeseries canvas[data-chart]")].flatMap((c) => c.__dsChart.chart.data.datasets.map((x) => a(x.backgroundColor)));
-      return { cap: d.borderCapStyle, join: d.borderJoinStyle, ring: d.pointHoverBorderWidth, width: d.borderWidth, fill: a(d.backgroundColor), area,
+      const area = [...document.querySelectorAll("#ex-data-visual-timeseries canvas[data-chart]")].flatMap((c) => { const t = c.__dsChart.chart; return t.data.datasets.map((x, i) => a(t.getDatasetMeta(i).dataset.options.backgroundColor)); });
+      const meta = ch.getDatasetMeta(0), el = meta.dataset, ca = ch.chartArea, k = ch.canvas.width / ch.canvas.clientWidth, cx = ch.canvas.getContext("2d");
+      const pk = meta.data.reduce((p, e) => (e.y < p.y ? e : p), meta.data[0]), al = (y) => cx.getImageData(Math.round(pk.x * k), Math.round(y * k), 1, 1).data[3];
+      const grad = { kind: el.options.backgroundColor && el.options.backgroundColor.constructor && el.options.backgroundColor.constructor.name, top: al(pk.y + 8), bottom: al(ca.bottom - 3) };
+      return { cap: d.borderCapStyle, join: d.borderJoinStyle, ring: d.pointHoverBorderWidth, width: d.borderWidth, grad, area,
         ticks: ch.scales.y.ticks.map((t) => [t.label, new Intl.NumberFormat("ko-KR").format(t.value)]), tip: { weight: ch.options.plugins.tooltip.bodyFont.weight, style: ch.options.plugins.tooltip.pointStyle } };
     }, sel);
     /* dataviz 'Line' 2px · 둥근 이음 / 'Surface ring' hover 점에 2px 면 색 링 */
     ok("lines: 2px with round cap and join, hover point carries a 2px surface ring", line.cap === "round" && line.join === "round" && line.ring === 2 && line.width === 2, JSON.stringify(line));
-    /* dataviz 'Area fill' — 계열 색 약 10% 의 옅은 칠(그라데이션이 아님) */
-    ok("area: single and stacked areas are the series colour at 10% (a flat wash)", line.fill === 0.1 && line.area.length >= 2 && line.area.every((x) => x === 0.1), JSON.stringify({ fill: line.fill, area: line.area }));
+    /* 영역 칠(사람의 결정 2026-11-24) — 계열 하나인 선은 세로 그라데이션(위 32% → 바닥 6%), 여러 계열의 누적 영역은 계열 색 10% 단색 그대로 */
+    ok("area: the single-series line fills with a vertical gradient (denser under the peak than at the baseline), stacked areas stay a flat 10% wash",
+      line.grad.kind === "CanvasGradient" && line.grad.top > 60 && line.grad.bottom > 0 && line.grad.bottom < 30 && line.grad.top > line.grad.bottom * 3 && line.area.length >= 2 && line.area.every((x) => x === 0.1), JSON.stringify({ grad: line.grad, area: line.area }));
     ok("axis ticks: value ticks are the ko-KR format of their value", line.ticks.length >= 3 && line.ticks.every((t) => t[0] === t[1]), JSON.stringify(line.ticks));
     const fmt = await page.evaluate(() => ({ small: window.DSChart.tickFormat.call({ max: 2500, min: 0 }, 1500), big: window.DSChart.tickFormat.call({ max: 25000, min: 0 }, 20000), from: window.DSChart.COMPACT_FROM }));
     /* 한 축에 한 형식 — 축이 1만에 닿으면 축 전체를 만 단위로 */
@@ -141,9 +145,9 @@ module.exports = async function dataviz({ page, ok, go }) {
         ends: { bar: rad(".chart .bar i"), progress: rad(".progress-list .progress i"), spark: rad(".sparkline i") } };
     });
     const light = await read();
-    /* dataviz 'Bar / column' 은 정적 막대에도 — 값 끝만 4px */
-    ok("static bars: CSS bar, progress fill and sparkline bars round only the value end by 4px",
-      light.ends.bar === "0px 4px 4px 0px" && light.ends.progress === "0px 4px 4px 0px" && light.ends.spark === "4px 4px 0px 0px", JSON.stringify(light.ends));
+    /* 정적 막대도 각지게(사람의 결정 2026-11-24 — 탐색형 막대와 같게) */
+    ok("static bars: CSS bar, progress fill and sparkline bars have square ends",
+      light.ends.bar === "0px" && light.ends.progress === "0px" && light.ends.spark === "0px", JSON.stringify(light.ends));
     /* dataviz 'Meter' — 비운 트랙은 같은 램프의 옅은 단계(회색이 아님), 채움과 3:1 이상, 면과는 구분됨 */
     const trackOk = (t) => t.prog === t.track && t.gauge === t.track && t.progFill === t.fill && t.ratio >= 3 && t.bgRatio >= 1.1;
     ok("track: progress and gauge tracks are --chart-mono-track, fill / track ≥ 3:1 (light)", trackOk(light), JSON.stringify(light));
@@ -183,9 +187,14 @@ module.exports = async function dataviz({ page, ok, go }) {
     await go("patterns/dashboard.html"); await wait(700);
     const d = await page.evaluate(() => {
       const ex = document.querySelector("#ex-dashboard-full");
-      return { period: ex.querySelectorAll(".select-btn, .datepicker, .toolbar").length, inAction: ex.querySelectorAll(".chart-action :is(.select, .dropdown, .select-btn, .datepicker)").length };
+      const sb = ex.querySelector(".page-head .actions .select-btn"), head = ex.querySelector(".page-head"), act = ex.querySelector(".page-head .actions");
+      return { period: ex.querySelectorAll(".select-btn, .datepicker, .toolbar").length, inAction: ex.querySelectorAll(".chart-action :is(.select, .dropdown, .select-btn, .datepicker)").length,
+        head: !!sb, role: sb && sb.getAttribute("role"), name: sb && sb.getAttribute("aria-label"), opts: sb ? [...sb.querySelectorAll("button")].map((b) => b.textContent.trim()) : [],
+        on: sb ? [...sb.querySelectorAll("button")].filter((b) => b.getAttribute("aria-checked") === "true").map((b) => b.textContent.trim()) : [],
+        right: act && head ? Math.round(head.getBoundingClientRect().right - act.getBoundingClientRect().right) : null, inGroup: !!(sb && sb.closest(".page-head .actions")) };
     });
-    /* page-patterns 'Dashboard' — 훑어보기 화면은 기간을 바꾸지 않는다(바꿔 보려면 분석 화면) */
-    ok("dashboard: glance-only — no period control (Select Button · Date Picker · filter row) and nothing period-like in card actions", d.period === 0 && d.inAction === 0, JSON.stringify(d));
+    /* 대시보드의 기간(사람의 결정 2026-11-24 — 11-20 의 '훑어보기만' 을 바꿈) — 머리 오른쪽 Select Button 하나가 화면 전체 기간. 다른 필터 · 카드 안 기간은 없다 */
+    ok("dashboard: one period Select Button (24시간 · 7일 · 30일, 24시간 on) in the page header actions at its right edge — no other period control and nothing period-like in card actions",
+      d.head && d.period === 1 && d.inAction === 0 && d.role === "radiogroup" && d.name === "기간" && d.opts.join() === "24시간,7일,30일" && d.on.join() === "24시간" && d.inGroup && d.right !== null && d.right <= 1, JSON.stringify(d));
   });
 };

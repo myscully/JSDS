@@ -122,7 +122,7 @@ module.exports = async function timepicker({ page, ok, go }) {
     await inp.fill("9"); await inp.blur(); await wait(50); const i1 = await state("default");
     await inp.fill("25:10"); await inp.blur(); await wait(50); const i2 = await state("default");
     ok("leaving an incomplete or nonexistent time explains it (Date Picker's time messages)",
-      i1.validity === "incomplete" && i1.help === "시각이 덜 입력됐습니다. 14:30 처럼 끝까지 입력하세요." && i2.validity === "invalid" && i2.help === "시각이 잘못됐습니다. 14:30 처럼 24시간제로 입력하세요." && i2.value === "25:10", JSON.stringify({ i1, i2 }));
+      i1.validity === "incomplete" && i1.help === "시각이 덜 입력됐습니다. 14:30 처럼 끝까지 입력하세요." && i2.validity === "invalid" && i2.help === "시각이 24시간제 형식이 아닙니다. 14:30 처럼 입력하세요." && i2.value === "25:10", JSON.stringify({ i1, i2 }));
     await inp.fill("02:00"); await inp.blur(); await wait(50);
     ok("a valid value restores the help text", (await state("default")).help === "매일 이 시각에 백업합니다.");
   });
@@ -135,7 +135,7 @@ module.exports = async function timepicker({ page, ok, go }) {
     await page.keyboard.press("Escape");
     const pinp = page.locator(`${host("form")} .affix input`); await pinp.fill("18"); await pinp.blur(); await wait(50); const p3 = await state("form");
     ok("in a form, an empty required time blocks saving with the common message and focus, picking clears it, an incomplete time is a form error",
-      p1.error && p1.help === "필수 항목입니다. 값을 입력하세요." && p1.focus === "input" && p2.value === "18:00" && !p2.error && p3.error && p3.help.startsWith("시각이 덜 입력됐습니다"), JSON.stringify({ p1, p2, p3 }));
+      p1.error && p1.help === "값이 비어 있습니다. 값을 입력하세요." && p1.focus === "input" && p2.value === "18:00" && !p2.error && p3.error && p3.help.startsWith("시각이 덜 입력됐습니다"), JSON.stringify({ p1, p2, p3 }));
   });
   await part("13 · 초 — 열 셋, 고른 칸 셋", async () => {
 

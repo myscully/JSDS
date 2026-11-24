@@ -4,7 +4,7 @@ import { useControllable } from "../../utils/useControllable";
 import { mergeRefs } from "../../utils/hooks";
 import { Button, ButtonOffContext } from "../button/Button";
 import { Checkbox } from "../checkbox/Checkbox";
-import { Skeleton } from "../loading/Loading";
+import { Skeleton, useLoadingDelay } from "../loading/Loading";
 import { Icon } from "../../icons/Icon";
 import { Table, TableBody, TableCell, TableFoot, TableHead, TableHeader, TableRow, type TableDensity, type TableRowStyle } from "../table/Table";
 import { LABELS } from "../../labels";
@@ -72,10 +72,12 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   expandLabel?: (row: T) => string;
   /** rows 가 비었을 때 */
   empty?: ReactNode;
-  /** 불러오는 중이면 Skeleton 행, 실패면 오류 행으로 rows 를 대신한다 */
+  /** 불러오는 중이면 Skeleton 행, 실패면 오류 행으로 rows 를 대신한다. 이미 그린 행이 있으면(다시 불러오기) 행을 지우지 않고 흐리게 둔다 — 틀 aria-busy */
   status?: "loading" | "error";
-  /** 실제 작업으로. 예) 이벤트 불러오는 중 */
+  /** 실제 작업으로. 기본은 caption 이 있으면 '{caption} 불러오는 중', 없으면 '불러오는 중' */
   statusLabel?: string;
+  /** 불러오는 표시를 늦게 — true 면 1초, 숫자면 그 ms. 한 번 보이면 0.5초는 유지(useLoadingDelay). 빨리 끝나는 조회에서 깜빡임을 없앤다 */
+  delay?: boolean | number;
   loadingRows?: number;
   /** 원인과 다음 행동 */
   errorText?: ReactNode;
@@ -120,7 +122,7 @@ function defaultSortValue<T>(row: T, key: string): string | number {
 }
 
 function DataTableInner<T>(
-  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel = LABELS.loading, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, stickyColumn, summaryRow, maxHeight, caption, compact, density, zebra, rowStyle, hover, nowrap, className, wrapStyle, ...rest }: DataTableProps<T>,
+  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel, delay, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, stickyColumn, summaryRow, maxHeight, caption, compact, density, zebra, rowStyle, hover, nowrap, className, wrapStyle, ...rest }: DataTableProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [curSort, setSort] = useControllable<SortState | null>({ value: sort, defaultValue: defaultSort, onChange: onSortChange });
@@ -195,6 +197,11 @@ function DataTableInner<T>(
     : isAll ? <><span>{text.all(totalCount)}</span><Button variant="text" size="sm" onClick={clearAll}>{text.clear}</Button></>
     : allChecked && totalCount > allKeys.length ? <><span>{text.page(allKeys.length)}</span><Button variant="text" size="sm" onClick={() => setAll(true)}>{text.selectAll(totalCount)}</Button></>
     : null;
+  const showLoad = useLoadingDelay(status === "loading", { delay: delay === undefined || delay === false ? 0 : delay === true ? undefined : delay, minDuration: delay ? undefined : 0 });
+  const loading = delay ? showLoad : status === "loading";
+  /* 다시 불러오기 — 그린 행이 있으면 Skeleton 행 대신 지난 행을 흐리게(차트 카드와 같은 방식) */
+  const stale = status === "loading" && rows.length > 0;
+  const loadLabel = statusLabel ?? (caption ? `${caption} ${LABELS.loading}` : LABELS.loading);
   const colCount = columns.length + (expOn ? 1 : 0) + (selectable ? 1 : 0) + (actions ? 1 : 0);
   return (
     <div
@@ -202,11 +209,12 @@ function DataTableInner<T>(
       className={cx("tbl-wrap", stickyHeader && "sticky", stickyColumn && "sticky-col", className)}
       style={maxHeight !== undefined ? { ...wrapStyle, maxHeight } : wrapStyle}
       {...(stickyHeader || stickyColumn ? { tabIndex: 0, role: "region", "aria-label": caption } : null)}
+      aria-busy={(stale && loading) || undefined}
       {...rest}
     >
       {actionBar && actionBar(new Set(sel), { allMatching: !!isAll, count: isAll && totalCount !== undefined ? totalCount : sel.size })}
       {selectable && totalCount !== undefined && <div className="select-notice" aria-live="polite">{noticeBody}</div>}
-      {status === "loading" && <span className="sr-only" role="status">{statusLabel}</span>}
+      {loading && <span className="sr-only" role="status">{loadLabel}</span>}
       <Table compact={compact} density={density} zebra={zebra} rowStyle={rowStyle} hover={hover} nowrap={nowrap} wrap={false} aria-busy={status === "loading" || undefined}>
         {caption && <caption className="sr-only">{caption}</caption>}
         <TableHead>
@@ -235,7 +243,8 @@ function DataTableInner<T>(
           </TableRow>
         </TableHead>
         <TableBody onFocusCapture={noteRow}>
-          {status === "loading" ? (
+          {status === "loading" && !stale ? (
+            !loading ? null :
             Array.from({ length: loadingRows }, (_, i) => (
               <TableRow key={i}>
                 {Array.from({ length: colCount }, (_, j) => <TableCell key={j}><Skeleton /></TableCell>)}
@@ -249,7 +258,7 @@ function DataTableInner<T>(
             </TableRow>
           ) : sortedRows.length === 0 ? (
             <TableRow>
-              <TableCell empty colSpan={colCount}>{empty ?? "데이터가 없습니다."}</TableCell>
+              <TableCell empty colSpan={colCount}>{empty ?? LABELS.tableEmpty}</TableCell>
             </TableRow>
           ) : (
             sortedRows.map((row, i) => {

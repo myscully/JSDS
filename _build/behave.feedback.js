@@ -146,7 +146,8 @@ module.exports = async function feedback({ page, ok, go }) {
     await page.keyboard.type("a"); await clickDim();
     ok("a popup with input in progress stays on backdrop click", await isOpen());
     await page.keyboard.press("Escape"); await wait(30);
-    ok("Esc still closes it", !(await isOpen()));
+    /* 2026-11-23 — Esc 는 바로 닫지 않고 그 안에서 버릴지 묻는다(자세한 단정은 behave.ux) */
+    ok("Esc asks to discard first, and 버리기 closes it", (await isOpen()) && await page.evaluate(() => { const b = document.querySelector('.popup-backdrop[data-ds-popup] .discard-confirm [data-discard="drop"]'); if (!b) return false; b.click(); return !document.querySelector(".popup-backdrop[data-ds-popup]"); }));
     await open(3); await clickDim();
     ok("dirty state resets when the popup reopens", !(await isOpen()));
     await open(3);

@@ -901,3 +901,91 @@ Steps 를 다시 짰습니다.
 - **다시 불러오는 동안** `ChartCard state="loading"` 이 이미 그린 차트 위에서는 지난 그림을 흐리게(opacity .5) 둡니다.
 - **진행 막대 · 게이지 트랙 = `--chart-mono-track`**(새 토큰 — 라이트 blue-90 · 다크 blue-20). 회색 `--surface-neutral-strong` 이던 트랙이 채움과 같은 파랑의 옅은 단계가 됩니다. Loading 의 진행 막대(`Progress`)는 그대로입니다.
 - **대시보드 패턴에서 기간 Select Button 을 뺐습니다.** 대시보드는 훑어보기만 하고, 기간 · 필터를 바꿔 보는 화면은 새 패턴 **분석 · 리포트**(`analytics`)입니다 — 필터 한 줄(기간 Date Picker 맨 앞)이 모든 차트 위, 카드 밖에 있습니다.
+
+## 오버레이 입력 보호 (2026-11-23)
+
+- **`Popup` · 모달 `SidePanel` 은 입력한 뒤 닫으려 하면 안에서 버릴지 묻습니다.** 안의 입력 · 변경 · 메뉴 항목 · 달력 칸 누름이 있었으면 Esc · 닫기(X) · `data-popup-close` / `data-panel-close` 를 단 버튼이 `onClose` 를 바로 부르지 않고, 버튼 줄(`.popup-actions` · `.side-panel-footer`) 바로 위에 위험 Notice 줄(`role=alert`)을 띄웁니다. 버튼은 '계속 편집'(포커스) · '버리기' 이고 '버리기' 를 눌러야 `onClose` 가 불립니다. 다시 Esc 를 누르면 확인만 닫고 입력칸으로 돌아갑니다.
+- **묻지 않는 경우:** 위험 확인(`danger`) · 처리 중(`busy`), `.primary` 버튼에 단 닫기(저장 뒤 닫기), 제품이 `open={false}` 로 직접 닫을 때, 비모달 `SidePanel`. 끄려면 새 prop **`confirmDiscard={false}`**.
+- **모달 `SidePanel` 의 배경 누름**도 Popup 처럼 입력하는 중에는 닫지 않습니다(전에는 늘 닫았습니다).
+- 문구는 `labels.discardTitle` · `discardBody` · `discardKeep` · `discardDrop`(사이트와 같음).
+- 사이트(ds.js)는 같은 동작이고 `data-confirm-discard="false"` 로 끕니다. `DS.popup.close()` · `DS.panel.close()` 를 코드에서 부르면 묻지 않습니다.
+
+## 폼 초안 저장 (2026-11-23)
+
+- **새 훅 `useFormDraft(key, { exclude?, labels?, enabled? })`** — 길게 입력하는 폼에 켜는 옵션입니다. `<Form ref={draft.ref}>{draft.notice} …</Form>` 처럼 폼에 `ref` 를 달고 `notice` 를 맨 앞에 둡니다.
+  - 입력하면 0.5초 뒤 localStorage `jsds-draft:키` 에 남깁니다. 다시 열면 처음 값과 다른 칸만 되살리고, 폼 맨 위에 '저장하지 않은 입력을 되살렸습니다.' + '버리기'(처음 값으로 되돌림)를 보입니다.
+  - 제출이 통과하면(제출 뒤 폼에 `aria-invalid` 가 없으면) 지웁니다. 검증이 막은 제출은 남깁니다. 저장에 실패하는 경우처럼 직접 지우려면 `draft.clear()` 를 부릅니다.
+  - 남기지 않는 칸: 비밀번호 · 파일 · 숨은 값 · 읽기 전용 · 일회용 코드 · 복사 필드 · 인증 코드 칸 · 검색창 · Combobox 검색 글자 · `data-draft-skip` 안 · `exclude` 에 적은 name/id · name 도 id 도 없는 칸.
+  - 네이티브 입력(글자 · 숫자 · 체크박스 · 라디오 · select · textarea)만 다룹니다. `Select` · `Combobox` 의 고른 값은 제품이 저장합니다.
+- 문구는 `labels.draftRestored` · `draftDiscard`(사이트와 같음). 사이트(ds.js)는 `form[data-draft="키"]` 로 같은 동작입니다.
+
+## 아이콘 전용 버튼 Tooltip · 누르는 영역 (2026-11-23)
+
+- **새 prop `Button tooltip`**(`true | "top" | "bottom" | "left" | "right"`) — 아이콘 전용 버튼을 `aria-label` 과 같은 글의 `Tooltip` 으로 감쌉니다. 끈 버튼 · `aria-label` 이 없는 버튼은 감싸지 않습니다(이름이 없으면 개발 모드에서 한 번 경고). 화면 · 표 · 카드 · 목록의 아이콘 전용 버튼에 켭니다. 필드 · 칩 · 파일 줄 · 대화상자에 붙은 닫기 · 복사 · 보기 · 지우기 버튼은 두지 않습니다.
+- 감싸면 버튼의 부모가 `.tooltip-wrap` 이 됩니다. `td.actions > .btn` 처럼 버튼을 직접 자식으로 찾던 제품 CSS · 테스트는 `.tooltip-wrap > .btn` 도 찾게 고칩니다(시스템의 `td.actions` 규칙은 둘 다 받습니다).
+- **누르는 영역 24 이상** — 칩 · 검색 · Combobox 지우기, Notice · Toast · Banner 닫기, 표 정렬 버튼, 표 행 · 머리글 체크박스에 보이지 않는 `::after` 칸을 더했습니다. 글리프 크기와 배치는 그대로입니다. compact Pagination 의 이전 · 다음 아이콘 버튼은 32 × 32 정사각입니다.
+
+
+## DataTable 다시 불러오기 · 지연 (2026-11-23)
+
+- **`status="loading"` 에 `rows` 가 있으면 행을 Skeleton 으로 바꾸지 않습니다.** 지난 행을 그대로 두고 틀(`.tbl-wrap`)에 `aria-busy="true"` 를 달아 흐리게 합니다(차트 카드의 다시 불러오기와 같음). 처음 불러올 때처럼 Skeleton 행이 필요하면 `rows={[]}` 를 넘깁니다.
+- **새 prop `delay`**(`true` = 1초 · 숫자 = ms) — 그 시간 안에 끝나면 Skeleton · 흐림 · 알림이 보이지 않습니다. 한 번 보이면 0.5초는 유지합니다(`useLoadingDelay`).
+- `statusLabel` 을 주지 않으면 `caption` 이 있을 때 '{caption} 불러오는 중' 으로 알립니다(전에는 늘 '불러오는 중').
+- rows 가 빈 기본 문구는 '표시할 항목이 없습니다.'(`LABELS.tableEmpty`, 전에는 '데이터가 없습니다.').
+- 사이트는 제품이 `.tbl-wrap[aria-busy="true"]` 를 달고 뗍니다.
+
+## 기본 문구 (2026-11-23)
+
+- **필수 문구는 상태로** — `required` '값이 비어 있습니다. 값을 입력하세요.' · `choose` '고른 항목이 없습니다. 항목을 선택하세요.' · `fileRequired` '고른 파일이 없습니다. 파일을 선택하세요.'(전에는 셋 다 '필수 항목입니다. …'). 시각 오류 `invalidTime` · `dateTimeInvalidError` 는 '{subject} 24시간제 형식이 아닙니다. {example} 처럼 입력하세요.' 입니다. 화면의 오류 문구를 단정하던 제품 테스트는 새 문구로 고칩니다. `messages` 로 넘긴 문구는 그대로입니다.
+- **`Stepper` 의 완료 버튼**이 기본 문구 '완료' 이면 개발 모드에서 한 번 경고합니다 — `labels.finish` 에 결과를 말하는 이름(예: 정책 만들기)을 줍니다.
+
+## Combobox 태그 넘침 · 표 칸 글자 (2026-11-23)
+
+- **여러 개 Combobox 의 기본이 가로 스크롤로 바뀌었습니다.** 태그가 넘쳐도 필드 높이(32 · 40 · 48)는 그대로이고 태그 줄이 가로로 스크롤합니다. 입력칸은 늘 줄 끝에 보이고 세로 휠도 넘칠 때만 가로로 옮깁니다. 전처럼 줄을 바꿔 필드가 늘어나게 하려면 `overflow="wrap"`(사이트 `data-overflow="wrap"`).
+- 여러 개면 태그와 입력이 `.control` 안의 `.control-track` 에 들어갑니다. `.control > .chip` 처럼 바로 아래를 찾던 선택자는 `.control .chip` 으로 바꿉니다. 사이트 ds.js 는 옛 마크업(`.control-track` 없음)을 받으면 만들어 넣습니다.
+- **여러 개 목록의 고른 표시가 오른쪽 체크에서 앞 체크 상자(`span.menu-mark.check`)로 바뀌었습니다.** 고른 항목은 글자 600 이고 brand 면은 쓰지 않습니다.
+- **표 칸 글자는 밀도와 무관하게 14/22** — `TableRow log`(사이트 `tr.log-row`)의 12px 를 지웠습니다. compact 를 떼면 로그 행 글자가 12 로 작아지던 것이 고쳐졌습니다.
+
+## 메뉴 체크 · 라디오 항목 · Select 여러 개 (2026-11-23)
+
+새 기능이라 깨지는 것은 없습니다. 바뀐 동작은 둘입니다(맨 아래).
+
+- **Dropdown 항목 넷:**
+  - `MenuCheckboxItem checked · defaultChecked · onCheckedChange` — `li[role=menuitemcheckbox][aria-checked]` + 앞 `span.menu-mark.check`.
+  - `MenuRadioGroup label · name · value · defaultValue · onValueChange` + `MenuRadioItem value` — 라디오는 이름 있는 묶음(`role=group`) 안에만 둡니다. 표시는 `span.menu-mark.round` 입니다.
+  - `MenuGroup label` — 제목 + 묶음이 `li.menu-group > span.menu-label + ul[role=group]` 입니다.
+  - 항목의 `description` — 설명 줄 `span.menu-text > .menu-name + .menu-desc` 입니다.
+  - 켜고 끄는 동안 메뉴는 열린 채이고 포커스도 그 항목에 남습니다. 실행 항목(`MenuItem`)은 전처럼 닫습니다.
+- **초기화 · 적용 영역** `Menu actions={<MenuActionArea onApply onReset />}` — 팝오버 틀이 `div.menu[data-actions] > ul.menu-items + div.menu-actions.btn-group` 입니다. 고르는 동안의 값(초안)은 제품이 들고 있습니다. 적용하면 `onApply` 뒤에 닫히고 트리거로 돌아갑니다. 적용 없이 닫히면(Esc · 바깥 · Tab) `Dropdown onDiscard` 를 부르니, 거기서 초안을 되돌립니다. 사이트는 `ds:menu-change {name, value, checked, values, groups, trigger}` 입니다.
+- **`Select multiple`**:
+  - `value · defaultValue: T[]` · `onChange(values)` · `allSelectedLabel`(모두 고르면 그 글) · `overflow="ellipsis" | "wrap"` · `actions`(켜면 `onChange` 는 적용할 때만).
+  - 옵션은 앞 체크 상자 + `aria-selected` 이고, 단일 Select 의 `.on` 면은 쓰지 않습니다.
+  - 폼 값은 값마다 숨은 input 하나이고, `required` 는 단일과 같은 검증입니다.
+  - 지우기 버튼이 있는 칩으로 보여야 하면 Combobox 를 씁니다.
+  - 사이트는 `.dropdown[data-multiple]` · `data-all-label` · `ds:select {values, trigger}` 입니다.
+- **바뀐 동작:**
+  - 메뉴의 글자로 찾기(typeahead)는 이름(`.menu-name`)만 봅니다. 설명 줄의 첫 글자로는 찾지 않습니다.
+  - 사이트 ds.js 는 `.menu-mark` 를 앞 표시로 그립니다. 제품 CSS 에 같은 이름의 클래스가 있으면 충돌하니 이름을 바꿉니다.
+
+## 추가 수정 — 차트 · Tab · Avatar 중립 (2026-11-24)
+
+**Avatar 의 이름으로 정하는 6색을 없앴습니다**(2026-11-16 절을 되돌림).
+- 모든 아바타가 같은 중립 면 `--surface-neutral-secondary` + 글자 `--foreground-neutral-secondary` 입니다. 묶음 안에서는 이 면을 놓인 자리 면(`--avatar-ring`) 위에 겹쳐 그려 겹쳐도 불투명합니다.
+- 지운 것: 토큰 `--avatar-1~6-surface · -text` 12개, `.avatar[data-tone]` 규칙, 패키지 export `avatarTone` · 타입 `AvatarTone`, 사이트 `DS.avatarTone` 과 ds.js 가 처음 그릴 때 `data-tone` 을 달던 일.
+- `Avatar tone` 은 `@deprecated` — 주면 개발 모드에서 한 번 경고하고 무시합니다. `Avatar name` 도 `@deprecated` 이고 그려지지 않습니다. 혼자 있는 아바타의 이름은 `role="img"` + `aria-label` 로 줍니다.
+- 제품 CSS · 마크업에서 `--avatar-N-*` · `data-tone` · `data-name` 을 쓰고 있었다면 지우세요. 1.0 에서 `tone` · `name` 은 타입에서도 지웁니다.
+
+**차트**
+- **막대 `gradient` 옵션이 돌아왔습니다**(2026-11-20 의 삭제를 되돌림) — 막대마다 값 끝(계열 색)에서 기준선(같은 색 55%)까지 칠합니다. 누적 막대에서는 한 번 경고하고 단색입니다. `highlight` 와 함께 주면 강조 막대가 먼저입니다. `BarSpec.gradient` 의 `@deprecated` 를 뗐습니다.
+- **계열 하나인 선 차트의 아래 영역 = 세로 그라데이션**(위 32% → 바닥 6%, 계열의 가장 높은 점에서 그림 영역 바닥까지). 여러 계열의 누적 영역은 10% 단색 그대로입니다.
+- **막대는 네 모서리 모두 각집니다**(2026-11-20 의 값 끝 4px 를 지움 — `BAR_END` 0). 정적 `.chart .bar i` · `.progress-list .progress i` · `.sparkline i` 의 채움도 각집니다. 두께 최대 24 · 2px 틈은 그대로입니다.
+- 새 export `barFill`(ds-chart) · 상수 `AREA_TOP` · `AREA_BOTTOM` · `BAR_FADE`.
+- **차트 카드 머리**의 제목 · 부제 · 동작이 세로 가운데로 맞습니다(전에는 기준선 — 부제가 8px 떠 보였다). `.chart-figure` 안 증감 배지도 값의 세로 가운데입니다.
+- **대시보드 패턴 머리에 기간 Select Button(24시간 · 7일 · 30일)이 다시 있습니다**(2026-11-20 의 '훑어보기만' 을 바꿈). 화면 전체의 기간 하나만 고르고, 다른 필터는 분석 · 리포트 패턴입니다.
+
+**보이는 모양이 바뀐 것**
+- **Tab 글자** 기본 · pill 15/22(Body 2/Normal), `sm` 13/18(Label 2). 높이(44 · 34 · 38)는 그대로이고 위아래 여백이 1px 씩 늘었습니다.
+- **Tree** 고른 항목의 숫자(`.tree-meta`)가 600 · `--foreground-brand-primary` 입니다.
+- **Pagination compact** 의 이전 · 다음 아이콘이 버튼 가운데에 놓입니다(전에는 왼쪽으로 7px 붙었다).
+- **Card Radio** 고른 카드의 제목이 600 입니다(설명은 그대로).
+- **Page Header** 는 767px 이하에서 동작이 제목 아래 왼쪽으로 내려갑니다(넓은 화면은 그대로 오른쪽 — 좁은 화면에서 제목이 낱말 가운데서 끊겼다).

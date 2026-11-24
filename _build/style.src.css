@@ -77,8 +77,6 @@
      dataviz 검증기(ordinal 모드): 라이트 blue-40 · 50 · 60 · 70 / #F7F7F8 — 한 색상(3°) · 명도 단조 · 이웃 ΔL ≥ 0.06 · 옅은 끝 2.33:1(≥ 2) PASS,
      다크 blue-80 · 70 · 60 · 45 / #212225 — 같은 검사 PASS(옅은 끝 2.88). 둘째 · 넷째 계열 순서 규칙은 ds-chart.js MONO_STEPS(2계열 = 1 · 4 단계) */
   --chart-mono-1:var(--blue-40);--chart-mono-2:var(--blue-50);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-70);--chart-mono-track:var(--blue-90);
-  /* 아바타 6색(사람의 결정 2026-11-16 — 이름으로 정함, 상태색 빨강 · 주황 · 초록을 피함). 라이트 90 면 + 30 글자(라임만 20 — 30 은 4.43), 다크 20 면 + 80 글자. 이니셜 대비는 contrast.pairs 가 잰다 */
-  --avatar-1-surface:var(--blue-90);--avatar-1-text:var(--blue-30);--avatar-2-surface:var(--cyan-90);--avatar-2-text:var(--cyan-30);--avatar-3-surface:var(--lime-90);--avatar-3-text:var(--lime-20);--avatar-4-surface:var(--violet-90);--avatar-4-text:var(--violet-30);--avatar-5-surface:var(--purple-90);--avatar-5-text:var(--purple-30);--avatar-6-surface:var(--pink-90);--avatar-6-text:var(--pink-30);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   /* 기준 트리 밖 — 셋뿐이고, 왜 밖인지가 각각 적혀 있다 */
   /* 지란지교시큐리티 회사 마크. 이 시스템의 brand 는 제품 색이라 회사 정체성 표기가 들어갈 자리가 없다 */
@@ -158,7 +156,6 @@
      색각 분리 worst 8.2(violet↔light-blue, deutan) PASS · 정상 시각 16.1 PASS · 3:1 전부 PASS(2026-11-03) */
   --chart-series-1:var(--blue-60);--chart-series-2:var(--orange-40);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-60);--chart-series-5:var(--lime-40);--chart-series-6:var(--pink-46);--chart-series-1-subtle:var(--blue-30);--chart-series-1-strong:var(--blue-80);
   --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);--chart-mono-track:var(--blue-20);
-  --avatar-1-surface:var(--blue-20);--avatar-1-text:var(--blue-80);--avatar-2-surface:var(--cyan-20);--avatar-2-text:var(--cyan-80);--avatar-3-surface:var(--lime-20);--avatar-3-text:var(--lime-80);--avatar-4-surface:var(--violet-20);--avatar-4-text:var(--violet-80);--avatar-5-surface:var(--purple-20);--avatar-5-text:var(--purple-80);--avatar-6-surface:var(--pink-20);--avatar-6-text:var(--pink-80);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   --company-mark-subtle:#3A2410;
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
@@ -201,7 +198,6 @@
      색각 분리 worst 8.2(violet↔light-blue, deutan) PASS · 정상 시각 16.1 PASS · 3:1 전부 PASS(2026-11-03) */
   --chart-series-1:var(--blue-60);--chart-series-2:var(--orange-40);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-60);--chart-series-5:var(--lime-40);--chart-series-6:var(--pink-46);--chart-series-1-subtle:var(--blue-30);--chart-series-1-strong:var(--blue-80);
   --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);--chart-mono-track:var(--blue-20);
-  --avatar-1-surface:var(--blue-20);--avatar-1-text:var(--blue-80);--avatar-2-surface:var(--cyan-20);--avatar-2-text:var(--cyan-80);--avatar-3-surface:var(--lime-20);--avatar-3-text:var(--lime-80);--avatar-4-surface:var(--violet-20);--avatar-4-text:var(--violet-80);--avatar-5-surface:var(--purple-20);--avatar-5-text:var(--purple-80);--avatar-6-surface:var(--pink-20);--avatar-6-text:var(--pink-80);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   --company-mark-subtle:#3A2410;
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
@@ -399,7 +395,7 @@ ul:where(:not(.example-preview *)),ol:where(:not(.example-preview *)){padding-le
 .fnd-hero>div{width:7.5rem;height:7.5rem;border-radius:var(--radius-xl);display:grid;place-items:center;font-weight:800;color:var(--foreground-neutral-primary)}
 .base-list{border-top:1px solid var(--line-neutral-secondary);margin:var(--space-4) 0 var(--space-10)}
 .base-list a{display:grid;grid-template-columns:10rem 1fr auto;gap:var(--space-6);align-items:center;padding:1.375rem 0;border-bottom:1px solid var(--line-neutral-secondary);text-decoration:none;color:inherit}
-.base-list a b{font-size:var(--font-size-16);display:flex;align-items:center;gap:0.5rem}   /* 배지 간격 — h1 · .nav a 와 같은 방식 */.base-list a span{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary)}.base-list a svg{color:var(--foreground-neutral-tertiary)}
+.base-list a b{font-size:var(--font-size-16);display:flex;align-items:center;gap:0.5rem}   /* 배지 간격 — h1 · .nav a 와 같은 방식 */.base-list a>span{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary)}.base-list a>svg{color:var(--foreground-neutral-tertiary)}
 .base-list a:hover b{color:var(--foreground-brand-primary)}
 /* Templates(2026-11-18) — 개요 그림(토큰으로 그린 화면 조각 다섯)과 문서 페이지의 미리보기 틀.
    미리보기는 실제 화면 iframe(width · height 속성 1440×900 — 루트 글자 단계와 무관하게 화면이 1440 폭으로 그려지게 rem 이 아니라 속성)을 틀 폭에 맞게 줄인다.
@@ -717,7 +713,7 @@ table{width:100%;border-collapse:collapse;font-size:var(--font-size-14);margin:v
 th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-12);height:2.75rem;padding:0 var(--space-4);border-bottom:1px solid var(--line-neutral-secondary);white-space:nowrap;background:var(--background-neutral-secondary)}
 td{height:var(--row-h);padding:0.75rem var(--space-4);border-bottom:1px solid var(--line-neutral-secondary);vertical-align:middle}
 table:not(.tbl) tbody tr:last-child td{border-bottom:0}   /* 문서 표(.tablewrap 테두리 안)만 — 컴포넌트 표(.tbl)는 마지막 행 선이 아래 경계다(2026-11-11) */
-td code{background:var(--surface-neutral-strong);padding:1px 0.375rem;border-radius:0.25rem;font-size:var(--font-size-12)}
+table:not(.tbl) td code{background:var(--surface-neutral-strong);padding:1px 0.375rem;border-radius:0.25rem;font-size:var(--font-size-12)}
 table.props{table-layout:fixed;width:100%}   /* 열 폭 고정 — 종전에는 설명이 폭을 다 가져가 이름 · 값 · 기본값이 여러 줄로 꺾였다(사람의 결정 2026-10-29) */
 table.props th:nth-child(1){width:20%}
 table.props th:nth-child(2){width:25%}
@@ -748,6 +744,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .example-preview.stack{flex-direction:column;align-items:stretch;}
 .example-preview.stack.center{align-items:center}
 .example-preview.tall{min-height:21.25rem;align-items:flex-start}
+.example-preview.taller{min-height:31.25rem;align-items:flex-start}   /* 열린 메뉴가 길어(그룹 · 적용 영역) 340 을 넘는 예제 — 미리보기 안에서 스크롤되지 않게(2026-11-23) */
 .example-bar{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.375rem 0.625rem;border-top:1px solid var(--line-neutral-secondary);background:var(--surface-elevated-primary)}
 .code-tabs{display:flex;gap:2px;background:var(--surface-neutral-strong);border-radius:0.5rem;padding:2px}
 .code-tabs button{font:inherit;font-size:var(--font-size-12);font-weight:600;padding:0.3125rem 0.75rem;border:0;border-radius:var(--radius-md);background:transparent;color:var(--foreground-neutral-secondary);cursor:pointer}
@@ -1014,12 +1011,16 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .field.sm .combobox .control input{height:1.75rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .field.lg .combobox .control{min-height:3rem;padding-top:0.375rem;padding-bottom:0.375rem}
 .field.lg .combobox .control input{height:2.125rem;font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
+.combobox .control-track{display:flex;flex-wrap:wrap;align-items:center;gap:0.25rem;flex:1 1 auto;min-width:0}   /* 여러 개 — 칩과 입력칸의 줄. 셰브론 자리(.control 오른쪽 패딩) 안쪽에서 잘린다 */
+.combobox[data-multiple]:not([data-overflow="wrap"]) .control-track{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;scroll-padding-inline:0.75rem}   /* 칩이 넘치면 폭은 그대로 두고 가로로 스크롤 — 기본(사람의 결정 2026-11-23, Montage overflow=false). data-overflow="wrap" 이면 줄을 바꿔 필드가 늘어난다. scroll-padding — 포커스 · 보이게 하기로 옮긴 칩 지우기가 줄 끝에 붙지 않아 넓힌 누르는 영역(24)이 잘리지 않게 */
+.combobox[data-multiple]:not([data-overflow="wrap"]) .control-track::-webkit-scrollbar{display:none}
+.combobox[data-multiple]:not([data-overflow="wrap"]) .control-track > .chip{flex:none}
 .combobox .menu{position:absolute;top:calc(100% + 0.25rem);left:0;display:none;z-index:var(--z-menu);min-width:100%}
 .combobox.open .menu{display:block}
 .combobox.up .menu{top:auto;bottom:calc(100% + 0.25rem)}
 .combobox .menu-item.active{background:var(--surface-neutral-tertiary)}   /* 활성 = 면만, 테두리 없음(사람의 결정 2026-11-13) */
 .combobox .menu-item.on.active{background:var(--surface-brand-subtle)}
-.combobox[data-multiple] .menu-item.on::after{content:"";margin-left:auto;width:1rem;height:1rem;flex:none;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12l5 5l10 -10%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12l5 5l10 -10%22/%3E%3C/svg%3E") center/contain no-repeat}
+.combobox .menu-item.on.active:has(> .menu-mark){background:var(--surface-neutral-tertiary)}   /* 여러 개는 앞 체크가 고른 것을 나른다 — 면은 활성 표시만 */
 .field .affix:has(input:disabled){background:var(--surface-disable-primary);cursor:not-allowed}
 .field .affix:has(input:read-only:not(:disabled)){background:var(--background-neutral-secondary)}
 .field .affix > .field-icon{display:grid;flex:none}   /* 칸 안 앞 아이콘 18(2026-11-18) — 라벨을 대신하지 않는다. 색 tertiary 는 아래 .field .affix span 이 준다(음성 시험에서 겹친 선언이라 지움) */
@@ -1036,6 +1037,8 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .searchbar:has(input:focus){border-color:var(--line-field-focus);box-shadow:0 0 0 4px var(--line-field-focus-halo);outline:none}   /* 입력칸에 포커스가 있을 때만 — :focus-within 이라 지우기 버튼에 포커스가 가면 검색창 링과 버튼 외곽선이 함께 나왔다(사람의 결정 2026-10-26) */
 .searchbar .clear{border:0;padding:0;background:var(--surface-neutral-strong);color:var(--foreground-neutral-secondary);width:1.25rem;height:1.25rem;border-radius:50%;font:inherit;font-size:var(--font-size-12);line-height:0;cursor:pointer;display:grid;place-items:center;flex:none}
 .searchbar .clear svg{display:block;width:0.75rem;height:0.75rem}
+.searchbar .clear{position:relative}
+.searchbar .clear::after{content:"";position:absolute;top:50%;left:50%;width:max(100%,1.5rem);height:max(100%,1.5rem);transform:translate(-50%,-50%)}   /* 누르는 영역 24 이상 — 글리프는 그대로 두고 보이지 않는 칸만 넓힌다(2026-11-23, Breadcrumb 더 보기와 같은 방식) */
 .searchbar kbd{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-sm);padding:1px 0.3125rem;background:var(--background-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .searchbar input::-webkit-search-cancel-button,.searchbar input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}   /* 브라우저 기본 ×가 .clear 와 나란히 두 개 떴다 */
 .searchbar.lg{height:3rem}
@@ -1164,6 +1167,7 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .tree-item[aria-checked="mixed"]>.tree-row>.tree-check::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3C/svg%3E")}
 .tree-item[aria-disabled="true"]>.tree-row{color:var(--foreground-disable-primary);cursor:not-allowed}
 .tree-item[aria-disabled="true"]>.tree-row>svg{color:var(--foreground-disable-primary)}
+.tree-item[aria-selected="true"]>.tree-row>.tree-meta{font-weight:600;color:var(--foreground-brand-primary)}   /* 고른 항목의 숫자도 고른 이름과 같은 brand · 600(2026-11-24) */
 .tree-item[aria-disabled="true"]>.tree-row>.tree-meta{color:var(--foreground-neutral-tertiary)}   /* 끈 이유는 읽혀야 한다 — Card 의 끈 이유 문구와 같은 tertiary(2026-11-03 결정) */
 .tree-item[aria-disabled="true"]>.tree-row>.tree-check{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary)}
 .tree-item[aria-disabled="true"]:where([aria-checked="true"],[aria-checked="mixed"])>.tree-row>.tree-check::after{background:var(--foreground-disable-primary)}
@@ -1287,6 +1291,7 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
 .radio-group.row{flex-direction:row;flex-wrap:wrap;gap:0.75rem 1.5rem}   /* 자리에 안 들어가면 줄바꿈(2026-11-13 — 390 에서 카드 둘이 220 최소 폭으로 넘쳐 잘렸다). 줄 사이는 세로 묶음과 같은 12 */
 .radio.card{line-height:1.25rem;padding:0.875rem 1rem;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-md);background:var(--surface-elevated-primary);flex:1 1 13.75rem;min-width:13.75rem;flex-direction:row;gap:0.5rem;box-shadow:none;position:static}   /* 220 을 기준 폭으로 늘어나 줄을 채우고, 둘이 안 들어가면 한 장씩 줄바꿈. 최소 220 은 내용 폭으로 줄어든 묶음(Radio 예제)이 줄바꿈하지 않게 지킨다 — min(220, 100%) 는 내용 폭 계산에 들어가지 않아 1440 에서도 줄바꿈했다(실측) */   /* 뒤의 .card 규칙이 column·그림자를 흘려보내므로 되돌린다 */
 .radio.card:has(input:checked){border-color:var(--surface-brand-primary);background:var(--surface-brand-subtle)}
+.radio.card:has(input:checked)>span{font-weight:600}   /* 고른 카드의 제목만 600 — 설명(small)은 .radio small 의 400 그대로(2026-11-24) */
 
 /* Switch */
 .switch{display:inline-flex;align-items:center;gap:0.625rem;font-size:var(--font-size-14);cursor:pointer;line-height:1.375rem;letter-spacing:0.0145em}
@@ -1322,6 +1327,8 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
 .chip .x{flex:none;padding:0;border:0;cursor:pointer;display:inline-grid;place-items:center;width:1rem;height:1rem;border-radius:50%;background:transparent;color:var(--foreground-neutral-secondary);font-size:var(--font-size-11);line-height:1;margin-right:-0.25rem;transition:color var(--motion-fast)}   /* 면 없이 x 만(사람의 결정 2026-11-11 — Input Chip · 필터 칩 행 · Combobox 다중 선택 항목). 반경은 포커스 외곽선 모양 */
 .chip .x:hover{color:var(--foreground-neutral-primary)}
 .chip .x svg{width:0.625rem;height:0.625rem}
+.chip .x{position:relative}
+.chip .x::after{content:"";position:absolute;top:50%;left:50%;width:max(100%,1.5rem);height:max(100%,1.5rem);transform:translate(-50%,-50%)}   /* 누르는 영역 24 이상 — 글리프는 그대로 두고 보이지 않는 칸만 넓힌다(2026-11-23, Breadcrumb 더 보기와 같은 방식) */
 .chip.sm{height:1.625rem;padding:0 0.625rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .chip[disabled],.chip[aria-disabled="true"]{background:var(--surface-disable-primary);border-color:transparent;color:var(--foreground-disable-primary);cursor:not-allowed}   /* pointer-events:none 을 두지 않는다 — 클릭이 칩을 지나 뒤의 행 · 카드로 떨어지고 not-allowed 커서도 보이지 않았다(2026-11-12). button 은 disabled 가, span 은 ds.js 캡처가 막는다. 입력값 칩은 span 이라 disabled 속성을 못 가진다 — aria-disabled 로 (.btn 과 같게) */
 .chip[disabled] .x,.chip[aria-disabled="true"] .x{background:transparent;color:var(--foreground-disable-primary)}   /* 지울 수 없는 칩의 x 가 회색 원 + 진한 x 로 활성처럼 보였다(사람의 결정 2026-10-27) */
@@ -1412,10 +1419,46 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .menu-state .btn{margin-left:auto;flex:none}
 .menu-sep{height:1px;background:var(--line-neutral-secondary);margin:0.375rem 0;line-height:1.6}
 .menu-label{padding:0.375rem 0.625rem 2px;font-size:var(--font-size-12);letter-spacing:.06em;text-transform:uppercase;color:var(--foreground-neutral-tertiary);font-weight:600;line-height:max(1rem,16px)}
+/* 메뉴 항목 앞 표시 — 체크(여러 개 · 켜고 끄기) · 라디오(하나 고르기). Checkbox · Radio 와 같은 토큰(2026-11-23). 고른 항목은 brand 면 대신 글자 굵기 600 */
+.menu-mark{position:relative;flex:none;display:grid;place-items:center;width:1rem;height:1rem;border-radius:var(--radius-sm);box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);background:var(--surface-elevated-primary);transition:background var(--motion-fast)}
+.menu-mark.round{border-radius:50%}
+.menu-item:is([aria-checked="true"],[aria-selected="true"]) > .menu-mark.check::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat}
+.menu-item:is([aria-checked="true"],[aria-selected="true"]) > .menu-mark{background:var(--surface-brand-primary);box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary)}
+.menu-item:is([aria-checked="true"],[aria-selected="true"]) > .menu-mark.round::after{content:"";width:0.5rem;height:0.5rem;border-radius:50%;background:var(--brand-label)}
+.menu-item[aria-disabled="true"] > .menu-mark{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary)}
+.menu-item[aria-disabled="true"] > .menu-mark:is(.check,.round)::after{background:var(--foreground-disable-primary)}
+.menu-item:has(> .menu-mark):is([aria-checked="true"],[aria-selected="true"]){font-weight:600}
+.menu-item.on:has(> .menu-mark){background:transparent;color:var(--foreground-neutral-primary)}
+.menu-item.on[aria-disabled="true"]:has(> .menu-mark){color:var(--foreground-disable-primary)}
+.menu-item:has(> .menu-mark):where(:not([aria-disabled="true"])):hover{background:var(--surface-neutral-tertiary)}
+.menu-item:has(> .menu-mark):where(:not([aria-disabled="true"])):active{background:var(--surface-neutral-strong)}
+/* 항목 설명 줄 · 그룹 · 아래 초기화와 적용 영역(사람의 결정 2026-11-23 — Montage Menu 참고) */
+.menu-text{display:flex;flex-direction:column;flex:1;min-width:0;white-space:normal}
+.menu-desc{font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em;color:var(--foreground-neutral-tertiary);font-weight:400;word-break:keep-all}   /* 켜진 항목의 600 을 물려받지 않는다 — 설명은 이름만 굵어진다 */
+.menu-item[aria-disabled="true"] .menu-desc{color:var(--foreground-disable-primary)}
+.menu-item:has(.menu-desc){align-items:flex-start}
+.menu-item:has(.menu-desc) > :is(.menu-mark,svg){margin-top:0.1875rem}   /* 표시 · 아이콘을 이름 줄(22)의 가운데에 */
+.menu:has(.menu-desc){max-width:20rem}
+.menu-group{list-style:none}
+.menu-group > .menu-label{display:block}
+.menu-group > ul{list-style:none;margin:0;padding:0}
+.menu[data-actions]{flex-direction:column;padding:0;max-height:none;overflow:hidden}   /* 틀은 스크롤하지 않고 목록만 — 적용 버튼이 늘 보인다 */
+.dropdown.open .menu[data-actions]{display:flex}
+.dropdown .menu[data-actions]{min-width:max(100%,12.5rem)}   /* 트리거가 좁아도 초기화 · 적용이 한 줄에 — 동작 메뉴의 '폭은 글자에 맞춤'(min-width:100%)을 이 메뉴만 이긴다 */
+.menu-items{list-style:none;margin:0;padding:0.375rem;max-height:min(20rem,60vh);overflow-y:auto;overscroll-behavior:contain}
+.menu-actions{display:flex;flex-wrap:nowrap;justify-content:space-between;align-items:center;padding:0.5rem 0.625rem;border-top:1px solid var(--line-neutral-secondary)}
+/* Select 여러 개 — 트리거 글은 고른 이름을 쉼표로 이어 한 줄(넘치면 말줄임), data-overflow="wrap" 이면 줄바꿈하고 트리거가 늘어난다 */
+.dropdown .trigger .trigger-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.dropdown[data-multiple] .trigger{max-width:min(20rem,100%)}
+.field .dropdown[data-multiple] .trigger{max-width:100%}
+.dropdown[data-multiple][data-overflow="wrap"] .trigger{height:auto;min-height:2.5rem;padding-top:0.5rem;padding-bottom:0.5rem}
+.dropdown.sm[data-multiple][data-overflow="wrap"] .trigger,.field.sm .dropdown[data-multiple][data-overflow="wrap"] .trigger{min-height:2rem;padding-top:0.4375rem;padding-bottom:0.4375rem}
+.dropdown.lg[data-multiple][data-overflow="wrap"] .trigger,.field.lg .dropdown[data-multiple][data-overflow="wrap"] .trigger{min-height:3rem;padding-top:0.6875rem;padding-bottom:0.6875rem}
+.dropdown[data-multiple][data-overflow="wrap"] .trigger .trigger-text{white-space:normal;word-break:keep-all}
 
 /* Tab */
 .tabs{display:flex;gap:1.5rem;box-shadow:inset 0 -1px 0 var(--line-neutral-secondary);width:100%;line-height:1.6;overflow:auto hidden;scrollbar-width:thin}   /* 넘치면 탭 줄만 옆으로(사람의 결정 2026-11-10). 스크롤 영역은 테두리 밖을 자르므로 아랫줄을 안쪽 그림자로 — 활성 탭의 2px 밑줄이 그 위에 놓인다 */
-.tabs .tab{display:inline-flex;align-items:center;gap:0.25rem;padding:0.5625rem 2px;border:0;border-bottom:2px solid transparent;background:transparent;font:inherit;font-size:var(--font-size-16);font-weight:500;color:var(--foreground-neutral-tertiary);cursor:pointer;white-space:nowrap;transition:color var(--motion-fast);line-height:1.5rem;letter-spacing:0.0057em}   /* 글자 = Body 1/Normal 16/24(사람의 결정 2026-11-13), 높이 44 그대로 */
+.tabs .tab{display:inline-flex;align-items:center;gap:0.25rem;padding:0.625rem 2px;border:0;border-bottom:2px solid transparent;background:transparent;font:inherit;font-size:var(--font-size-15);font-weight:500;color:var(--foreground-neutral-tertiary);cursor:pointer;white-space:nowrap;transition:color var(--motion-fast);line-height:1.375rem;letter-spacing:0.0096em}   /* 글자 = Body 2/Normal 15/22(사람의 결정 2026-11-24 — 11-13 의 16/24 를 바꿈), 높이 44 그대로(위아래 10) */
 .tabs .tab:focus-visible{outline-offset:-2px}   /* 스크롤 영역이 바깥 외곽선을 자른다 */
 .tabs .tab:hover{color:var(--foreground-neutral-primary)}
 .tabs .tab.on{color:var(--foreground-neutral-primary);font-weight:700;border-bottom-color:var(--foreground-neutral-primary)}
@@ -1424,9 +1467,9 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tabs .tab.on .count{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
 .tabs.accent .tab.on{color:var(--foreground-brand-primary);border-bottom-color:var(--foreground-brand-primary)}
 .tabs.pill{display:inline-flex;gap:0.25rem;box-shadow:none;background:var(--surface-neutral-secondary);padding:0.1875rem;border-radius:var(--radius-md);width:auto;max-width:100%}
-.tabs.pill .tab{padding:0.3125rem 0.875rem;border:0;border-radius:var(--radius-md);margin:0;font-size:var(--font-size-16);line-height:1.5rem;letter-spacing:0.0057em}
+.tabs.pill .tab{padding:0.375rem 0.875rem;border:0;border-radius:var(--radius-md);margin:0;font-size:var(--font-size-15);line-height:1.375rem;letter-spacing:0.0096em}   /* 15/22, 높이 34 그대로 */
 .tabs.pill .tab.on{background:var(--surface-elevated-primary);box-shadow:var(--shadow-1);font-weight:600}
-.tabs.sm .tab{font-size:var(--font-size-14);padding:0.5rem 0.75rem;line-height:1.25rem;letter-spacing:0.0145em}   /* = Label 1/Normal 14/20, 높이 38(사람의 결정 2026-11-13) */
+.tabs.sm .tab{font-size:var(--font-size-13);padding:0.5625rem 0.75rem;line-height:1.125rem;letter-spacing:0.0194em}   /* = Label 2 13/18(사람의 결정 2026-11-24 — 11-13 의 14/20 을 바꿈), 높이 38 그대로(위아래 9) */
 .tab-panel{padding:1.25rem 0;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.375rem;letter-spacing:0.0145em}
 
 /* Breadcrumb */
@@ -1454,8 +1497,10 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .pagination button.on{background:var(--surface-brand-primary);color:var(--brand-label);font-weight:600}
 .pagination button[disabled]{color:var(--foreground-disable-primary);cursor:not-allowed}   /* pointer-events:none 을 두지 않는다(2026-11-12) — not-allowed 커서가 보이지 않았다. 클릭은 disabled 가 막는다 */
 .pagination button svg{width:1rem;height:1rem;display:block}
+.pagination button:has(> svg){display:inline-flex;align-items:center;justify-content:center}   /* 아이콘이 든 버튼은 svg 를 가운데에 — block svg 는 왼쪽에 붙었다(2026-11-24) */
 .pagination .gap{min-width:2.25rem;text-align:center;color:var(--foreground-disable-primary)}
 .pagination.compact button{min-width:2rem;height:2rem;border-radius:var(--radius-sm);font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
+.pagination.compact button[aria-label]:has(> svg){padding:0;width:2rem;display:inline-flex;align-items:center;justify-content:center}   /* 이전 · 다음은 32 정사각형 — 좌우 여백 8 이 34 × 32 로 만들었다(2026-11-23). 커서형은 글자가 있어 aria-label 이 없다 */
 .pagination.cursor button{display:inline-flex;align-items:center;justify-content:center;gap:0.25rem}
 .pagination.cursor .range{padding:0 0.5rem;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);font-variant-numeric:tabular-nums;line-height:1.375rem;letter-spacing:0.0145em}
 /* 기본 = outline(사람의 요청 2026-11-16) — 회색 선 + 흰 면, 고른 칸은 brand 선 + brand 글자. 면 없는 모양은 .ghost(옛 기본).
@@ -1511,21 +1556,14 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .skip-link{position:absolute;top:0.5rem;left:0.5rem;z-index:var(--z-skip);padding:0.5rem 0.75rem;border-radius:var(--radius-md);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-14);font-weight:600;line-height:1.375rem;text-decoration:none;transform:translateY(calc(-100% - 1rem));letter-spacing:0.0145em}   /* 키보드의 첫 칸. 포커스가 오기 전에는 화면 밖 */
 .skip-link:focus,.skip-link.show{transform:none}
 .skip-link:focus-visible{outline-color:currentColor}
-.avatar{width:2rem;height:2rem;border-radius:50%;background:var(--surface-brand-subtle);color:var(--foreground-brand-primary);display:inline-grid;place-items:center;font-size:var(--font-size-12);font-weight:700;flex:none;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.avatar{width:2rem;height:2rem;border-radius:50%;background:var(--surface-neutral-secondary);color:var(--foreground-neutral-secondary);display:inline-grid;place-items:center;font-size:var(--font-size-12);font-weight:700;flex:none;line-height:max(1rem,16px);letter-spacing:0.0252em}
 .avatar.sm{width:1.5rem;height:1.5rem;font-size:var(--font-size-11);line-height:max(0.875rem,14px);letter-spacing:0.0311em}
-/* 색 — 이름으로 정하는 6색(사람의 결정 2026-11-16). data-tone 은 ds.js · React 가 이름(aria-label → data-name → 글자)에서 계산해 단다. 없으면 brand.
-   --avatar-face 는 그룹의 링 합성(반투명 brand 면을 놓인 면 위에 겹치던 것)이 tone 면을 따라가게 하는 자리 */
-.avatar[data-tone="1"]{--avatar-face:var(--avatar-1-surface);background:var(--avatar-1-surface);color:var(--avatar-1-text)}
-.avatar[data-tone="2"]{--avatar-face:var(--avatar-2-surface);background:var(--avatar-2-surface);color:var(--avatar-2-text)}
-.avatar[data-tone="3"]{--avatar-face:var(--avatar-3-surface);background:var(--avatar-3-surface);color:var(--avatar-3-text)}
-.avatar[data-tone="4"]{--avatar-face:var(--avatar-4-surface);background:var(--avatar-4-surface);color:var(--avatar-4-text)}
-.avatar[data-tone="5"]{--avatar-face:var(--avatar-5-surface);background:var(--avatar-5-surface);color:var(--avatar-5-text)}
-.avatar[data-tone="6"]{--avatar-face:var(--avatar-6-surface);background:var(--avatar-6-surface);color:var(--avatar-6-text)}
+/* 색 — 모든 아바타가 같은 중립 면 · 글자(사람의 결정 2026-11-24 — 11-16 의 이름으로 정하는 6색을 없앰) */
 /* Avatar Group(사람의 결정 2026-11-13 — 이니셜만, 넘친 수는 '외 N명'). 겹침 -8(sm -6) · 경계 링 2px = 놓인 자리의 면(--avatar-ring).
-   Avatar 면(brand subtle)은 반투명이라 겹친 자리에 앞 아바타가 비친다 — 그룹 안에서는 링 색 위에 겹쳐 칠해 불투명하게 한다. 5개까지(verify), 넘치면 '외 N명' */
+   Avatar 면(surface/neutral/secondary)은 반투명이라 겹친 자리에 앞 아바타가 비친다 — 그룹 안에서는 링 색 위에 겹쳐 칠해 불투명하게 한다. 5개까지(verify), 넘치면 '외 N명' */
 .avatar-group{--avatar-ring:var(--background-neutral-primary);display:inline-flex;align-items:center;flex:none;vertical-align:middle}
 .card .avatar-group,.side-panel .avatar-group,.popup .avatar-group{--avatar-ring:var(--surface-elevated-primary)}
-.avatar-group > .avatar{background:linear-gradient(var(--avatar-face,var(--surface-brand-subtle)),var(--avatar-face,var(--surface-brand-subtle))) var(--avatar-ring);box-shadow:0 0 0 2px var(--avatar-ring)}
+.avatar-group > .avatar{background:linear-gradient(var(--surface-neutral-secondary),var(--surface-neutral-secondary)) var(--avatar-ring);box-shadow:0 0 0 2px var(--avatar-ring)}
 .avatar-group > .avatar + .avatar{margin-left:-0.5rem}
 .avatar-group > .avatar.sm + .avatar.sm{margin-left:-0.375rem}
 .avatar-group-more{margin-left:0.5rem;font-size:var(--font-size-14);font-weight:500;line-height:1.25rem;letter-spacing:0.0145em;color:var(--foreground-neutral-secondary);white-space:nowrap}
@@ -1646,6 +1684,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .side-panel-title{flex:1;min-width:0;margin:0;font-size:var(--font-size-16);font-weight:600;line-height:1.5rem;letter-spacing:0.0057em}
 .side-panel-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1.25rem}
 .side-panel-footer{flex:none;display:flex;justify-content:flex-end;gap:0.5rem;padding:0.75rem 1.25rem;border-top:1px solid var(--line-neutral-secondary)}
+.side-panel>.discard-confirm{flex:none;width:auto;margin:0 1.25rem 0.75rem}   /* 편집한 패널을 닫으려 할 때의 확인 줄 — 바닥글 바로 위(2026-11-23) */
+.popup>.discard-confirm{flex:none}
 
 /* Tooltip */
 .tooltip-wrap{position:relative;display:inline-flex;line-height:inherit}   /* 둘레 줄 높이를 따른다(2026-11-12 — 1.6 이면 칸 · 칩 · Breadcrumb 의 잘린 글자가 텍스트 스타일 밖 22.4 · 19.2 가 됐다) */
@@ -1672,6 +1712,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .notice .close{margin-left:auto;flex:none;border:0;background:transparent;color:var(--foreground-neutral-tertiary);font:inherit;line-height:1;cursor:pointer;padding:2px;display:grid;place-items:center}
 .notice .close svg{width:0.875rem;height:0.875rem}
 .notice .close:hover{color:var(--foreground-neutral-primary)}
+.notice .close{position:relative}
+.notice .close::after{content:"";position:absolute;top:50%;left:50%;width:max(100%,1.5rem);height:max(100%,1.5rem);transform:translate(-50%,-50%)}   /* 누르는 영역 24 이상 — 글리프는 그대로 두고 보이지 않는 칸만 넓힌다(2026-11-23, Breadcrumb 더 보기와 같은 방식) */
 .notice .actions{display:flex;gap:0.5rem;margin-top:0.5rem}
 .notice ul{margin:0.25rem 0 0;padding-left:1.2em;max-width:none}   /* 유의사항(패턴) — 글머리 목록 */
 .notice li + li{margin-top:0.25rem}
@@ -1692,6 +1734,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .toast .action:hover{text-decoration:underline}
 .toast .close,.banner .close{flex:none;margin-left:auto;border:0;background:transparent;color:inherit;font:inherit;line-height:1;cursor:pointer;padding:2px;display:grid;place-items:center;border-radius:var(--radius-sm)}
 .toast .close svg,.banner .close svg{width:0.875rem;height:0.875rem}
+.toast .close,.banner .close{position:relative}
+.toast .close::after,.banner .close::after{content:"";position:absolute;top:50%;left:50%;width:max(100%,1.5rem);height:max(100%,1.5rem);transform:translate(-50%,-50%)}   /* 누르는 영역 24 이상 — 글리프는 그대로 두고 보이지 않는 칸만 넓힌다(2026-11-23, Breadcrumb 더 보기와 같은 방식) */
 .toast .action~.close,.banner .btn~.close{margin-left:0}
 .toast button:focus-visible,.banner .close:focus-visible{outline-color:currentColor}   /* 기본 외곽선(brand)은 어두운 Toast · 제품 색 Banner 면에서 보이지 않는다 */
 .toast-stack{display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;max-width:100%;line-height:1.6}   /* max-width — 묶음이 Toast 폭(22.5rem)을 그대로 가져 390 에서 자리를 넘었다(368/351, 2026-11-15). 묶음이 자리에 들면 Toast 의 max-width:100% 가 걸린다 */
@@ -1827,10 +1871,13 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* 바깥 테두리 · radius 없음(사람의 결정 2026-11-11) — 위 경계는 회색 헤더 면, 아래 경계는 마지막 행 아래 선. 표는 놓인 자리(페이지 · 카드)의 면을 쓴다.
    밀도 세 단계 — 행 48 · .compact 40 · .relaxed 56, 헤더 44 · 40 · 48.
    행 상태의 면은 --tbl-tint 로 칠한다 — 고정 열(.sticky-col)이 불투명 면 위에 같은 색을 겹쳐 칠하려고. 숫자는 표 전체가 고정폭이다 */
-.tbl-wrap{position:relative;overflow-x:auto;width:100%;line-height:1.6}   /* relative — 머리글 안 숨긴 글자(.sr-only 절대 위치)가 스크롤 틀 밖 조상을 기준으로 놓여 좁은 화면에서 틀 바깥을 넓혔다(권한 · 역할 390 에서 467/351, 2026-11-15) */
+.tbl-wrap{position:relative;overflow-x:auto;width:100%}   /* relative — 머리글 안 숨긴 글자(.sr-only 절대 위치)가 스크롤 틀 밖 조상을 기준으로 놓여 좁은 화면에서 틀 바깥을 넓혔다(권한 · 역할 390 에서 467/351, 2026-11-15) */
+/* 다시 불러오기(2026-11-23, 차트 카드와 같은 방식) — 이미 그린 행이 있으면 Skeleton 행으로 바꾸지 않고 지난 행을 흐리게 둔다. 높이 · 열 폭이 그대로라 화면이 흔들리지 않는다 */
+.tbl-wrap > .tbl > tbody{transition:opacity var(--motion-base)}
+.tbl-wrap[aria-busy="true"] > .tbl > tbody{opacity:.5}
 .tbl{width:100%;border-collapse:collapse;font-size:var(--font-size-14);margin:0;line-height:1.375rem;font-variant-numeric:tabular-nums;letter-spacing:0.0145em}
 .tbl th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-13);height:2.75rem;padding:0 1rem;border-bottom:1px solid var(--line-neutral-secondary);white-space:nowrap;background:var(--background-neutral-secondary);line-height:1.125rem;letter-spacing:0.0194em}   /* 머리글 = Label 2 13/18(사람의 결정 2026-11-12 — 12 였다). 속성 표(.kv) 머리글도 13 */
-.tbl td{height:3rem;padding:0.75rem 1rem;border-bottom:1px solid var(--line-neutral-secondary);vertical-align:middle;background:var(--tbl-tint,transparent)}
+.tbl td{height:3rem;padding:0.75rem 1rem;border-bottom:1px solid var(--line-neutral-secondary);vertical-align:middle;background:var(--tbl-tint,transparent);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}   /* 칸 글자 = Label 1/Reading Regular 14/22 를 칸에 직접(2026-11-23) — 물려받게 두면 행에 걸린 글자(옛 .log-row 12px)가 기본 · relaxed 칸으로 내려왔고 compact 만 다시 적어 가려 왔다 */
 .tbl.hover tbody tr:where(:not(.row-detail,.disabled)):hover td{--tbl-tint:var(--surface-neutral-tertiary)}   /* 행 hover = 메뉴 · List 와 같은 tertiary(사람의 결정 2026-11-12). .hover 일 때만 — 행을 고르거나 행 동작이 있는 표(사람의 결정 2026-11-13, List .hover 와 같은 방식) */
 .tbl.hover tbody tr:where(:not(.row-detail)):active td{--tbl-tint:var(--surface-neutral-strong)}
 .tbl tr.on td{--tbl-tint:var(--surface-brand-subtle)}
@@ -1844,7 +1891,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl tr.disabled .link{color:var(--foreground-disable-primary);cursor:not-allowed}
 .tbl tr.disabled .indicator::before{background:var(--foreground-disable-primary)}
 .tbl tr.disabled .indicator::after{display:none}   /* 비활성 행은 아이콘 없는 회색 원 — 흰 아이콘이 옅은 비활성 면에서 라이트는 사라지고 다크는 도드라져 둘이 달랐다 */
-.tbl.compact td{height:2.5rem;padding:0.5rem 1rem;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
+.tbl.compact td{height:2.5rem;padding:0.5rem 1rem}
 .tbl.compact th{height:2.5rem}
 .tbl.relaxed td{height:3.5rem;padding:1rem}
 .tbl.relaxed th{height:3rem}
@@ -1853,6 +1900,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl th.sortable::after{content:"";display:inline-block;width:0.875rem;height:0.875rem;margin-left:0.375rem;vertical-align:-0.1875rem;opacity:.45;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M3 9l4 -4l4 4m-4 -4v14%22 /%3E%3Cpath d=%22M21 15l-4 4l-4 -4m4 4v-14%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M3 9l4 -4l4 4m-4 -4v14%22 /%3E%3Cpath d=%22M21 15l-4 4l-4 -4m4 4v-14%22 /%3E%3C/svg%3E") center/contain no-repeat}
 /* 정렬은 버튼 — th 에 클릭만 달려 있어 키보드로 닿지 않았다(2026-11-10). 누를 자리는 th 전체(화살표 포함)이고 버튼은 포커스와 이름을 맡는다 */
 .tbl th.sortable .sort{appearance:none;border:0;background:transparent;padding:0;margin:0;font:inherit;letter-spacing:inherit;color:inherit;cursor:pointer;border-radius:var(--radius-xs)}
+.tbl th.sortable .sort{position:relative}
+.tbl th.sortable .sort::after{content:"";position:absolute;top:50%;left:50%;width:max(100%,1.5rem);height:max(100%,1.5rem);transform:translate(-50%,-50%)}   /* 누르는 영역 24 이상 — 글리프는 그대로 두고 보이지 않는 칸만 넓힌다(2026-11-23, Breadcrumb 더 보기와 같은 방식) */
 .tbl th.sortable:hover{color:var(--foreground-neutral-primary)}
 .tbl th.sorted{color:var(--foreground-neutral-primary)}   /* 정렬된 열은 진한 중립 글자 + 진한 화살표 — brand 를 쓰지 않는다(사람의 결정 2026-11-12) */
 .tbl th.sorted::after{opacity:1;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 11l-6 -6%22 /%3E%3Cpath d=%22M6 11l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M12 5l0 14%22 /%3E%3Cpath d=%22M18 11l-6 -6%22 /%3E%3Cpath d=%22M6 11l6 -6%22 /%3E%3C/svg%3E") center/contain no-repeat}
@@ -1861,11 +1910,14 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl td svg{vertical-align:middle}
 .tbl .check{width:2.75rem;padding-right:0}
 .tbl .check .checkbox{vertical-align:middle}
+.tbl .check .checkbox{position:relative}
+.tbl .check .checkbox input{position:relative;z-index:1}   /* 입력이 넓힌 칸 위에 — 눌린 대상이 입력 자신이다 */
+.tbl .check .checkbox::after{content:"";position:absolute;top:calc(50% + 1px);left:50%;width:max(100%,1.5rem);height:max(100%,1.5rem);transform:translate(-50%,-50%)}   /* 행 · 머리글 체크박스 — 라벨의 가상 요소라 눌러도 체크된다(2026-11-23). +1px 은 입력의 margin-top 2px 의 절반 — 라벨이 아니라 상자 가운데에 */
 .tbl .actions{text-align:right;white-space:nowrap}
 /* 행 동작 아이콘 버튼이 있는 칸은 위아래 패딩을 줄여 행 높이를 지킨다(사람의 결정 2026-11-12) — 버튼 + 패딩 × 2 + 아래 선 1 이 행 높이(border-box)를 넘어 기본 48 은 57, relaxed 56 은 65 였다 */
-.tbl td.actions:has(> .btn.icon-only.sm, > .dropdown > .btn.icon-only.sm){padding-top:0.4375rem;padding-bottom:0.4375rem}   /* 기본 — 32 + 7 · 7 + 1 = 47 ≤ 48. relaxed 도 이 값을 받아 56 안에 가운데로 든다 */
+.tbl td.actions:has(> .btn.icon-only.sm, > .dropdown > .btn.icon-only.sm, > .tooltip-wrap > .btn.icon-only.sm, > .dropdown > .tooltip-wrap > .btn.icon-only.sm){padding-top:0.4375rem;padding-bottom:0.4375rem}   /* 기본 — 32 + 7 · 7 + 1 = 47 ≤ 48. relaxed 도 이 값을 받아 56 안에 가운데로 든다 */
 .tbl.compact td.actions .btn.icon-only.sm{width:1.75rem;height:1.75rem}   /* compact 행의 아이콘 동작 28(사람의 결정 2026-11-12) — 32 + 칸 패딩 8 · 8 로 행이 40 이 아니라 48 이 됐다. 아이콘 16 · 반경 4 는 그대로 */
-.tbl.compact td.actions:has(> .btn.icon-only.sm, > .dropdown > .btn.icon-only.sm){padding-top:0.3125rem;padding-bottom:0.3125rem}   /* 28 + 8 · 8 + 아래 선 1 = 45 라 그 칸만 5 · 5 — 행 40(border-box) 안에 들고 버튼은 가운데 */
+.tbl.compact td.actions:has(> .btn.icon-only.sm, > .dropdown > .btn.icon-only.sm, > .tooltip-wrap > .btn.icon-only.sm, > .dropdown > .tooltip-wrap > .btn.icon-only.sm){padding-top:0.3125rem;padding-bottom:0.3125rem}   /* 28 + 8 · 8 + 아래 선 1 = 45 라 그 칸만 5 · 5 — 행 40(border-box) 안에 들고 버튼은 가운데 */
 /* 행 펼침(사람의 결정 2026-11-11) — 맨 앞 칸의 셰브론 버튼(aria-expanded · aria-controls)이 바로 뒤의 tr.row-detail 을 연다. 여러 개를 함께 펼친다.
    상세는 첫 데이터 열에 맞춰 들여 쓰고 회색 면으로 행과 가른다. 긴 원본 로그는 Code(.wrap)가 줄바꿈한다 — contain 은 재 보니 소용없어 두지 않았다 */
 /* 셰브론 칸 = 왼쪽 16 + 버튼 24. td 로 적어 .tbl.compact td 의 padding 을 이긴다 — 상세 글자가 그 뒤 첫 칸 글자와 같은 선(56)에서 시작한다 */
@@ -1876,7 +1928,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl .expand-btn:hover{background:var(--surface-neutral-strong)}
 .tbl .expand-btn svg{transition:transform var(--motion-fast)}
 .tbl .expand-btn[aria-expanded="true"] svg{transform:rotate(90deg)}
-.tbl tr.row-detail > td{height:auto;padding:1rem 1rem 1.25rem 3.5rem;background:var(--background-neutral-secondary);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
+.tbl tr.row-detail > td{height:auto;padding:1rem 1rem 1.25rem 3.5rem;background:var(--background-neutral-secondary)}
 .tbl.compact tr.row-detail > td{height:auto;padding:0.75rem 1rem 1rem 3.5rem}
 .tbl.relaxed tr.row-detail > td{height:auto;padding:1.25rem 1rem 1.5rem 3.5rem}
 .tbl .row-detail-body{display:flex;flex-direction:column;gap:0.75rem}
@@ -1888,7 +1940,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl.kv td{height:auto}
 .tbl.kv tr:first-child > *{border-top:1px solid var(--line-neutral-secondary)}   /* 속성 표는 thead 가 없어 값 칸의 위가 열려 있었다(사람의 결정 2026-11-12) */
 .side-panel .tbl.kv th{width:7.5rem;border-right:0}   /* 패널 폭 400 에서 머리글 200 은 반을 차지한다 — Side Panel 의 속성 표(2026-11-12 compact 표에서 kv 로) */
-.tbl td.empty{display:table-cell;text-align:center;color:var(--foreground-neutral-tertiary);height:auto;padding:1.5rem 1rem;font-size:var(--font-size-14);border:none;border-radius:0;background:transparent;line-height:1.375rem;letter-spacing:0.0145em}
+.tbl td.empty{display:table-cell;text-align:center;color:var(--foreground-neutral-tertiary);height:auto;padding:1.5rem 1rem;border:none;border-radius:0;background:transparent}
 .tbl td.truncate{max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}   /* 남는 폭을 차지하고 그 안에서 자른다. 전체 값은 잘린 칸에만 붙는 Tooltip(ds.js · React — title 은 쓰지 않는다)과 상세에서 */
 .tbl td.truncate>.tooltip-wrap{display:flex;max-width:100%}
 .tbl td.truncate .cell-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1897,7 +1949,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl.plain td{border-bottom:0}
 /* 하위 텍스트 — 주 값 아래 보조 글(예: 이름 아래 이메일). 열을 늘리지 않고 맥락을 준다. 두 줄이라 .relaxed 를 권한다 */
 .tbl .cell-sub{display:block;font-size:var(--font-size-12);line-height:max(1rem,16px);color:var(--foreground-neutral-secondary);letter-spacing:0.0252em}
-.tbl td:has(> .cell-sub){padding-top:0.5rem;padding-bottom:0.5rem}   /* 두 줄(22.4 + 16) + 위아래 8 = 54.4 — relaxed 56 행에 든다 */
+.tbl td:has(> .cell-sub){padding-top:0.5rem;padding-bottom:0.5rem}   /* 두 줄(22 + 16) + 위아래 8 = 54 — relaxed 56 행에 든다 */
 .tbl tr.disabled .cell-sub{color:var(--foreground-disable-primary)}
 /* 합계 행 — tfoot 의 합계 · 평균. 회색 면 + 굵은 글자 + 위 선 한 단계 진하게(collapse 표는 위 칸의 아래 선이 이겨 그 선을 바꾼다) */
 .tbl tfoot tr.total td{font-weight:600;--tbl-tint:var(--background-neutral-secondary)}
@@ -1908,6 +1960,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl-wrap.sticky-col .tbl{width:max-content;min-width:100%}   /* 넓은 표가 영역 안에서 가로로 스크롤한다 — 칸을 줄바꿈해 폭에 맞추지 않는다 */
 .tbl-wrap.sticky-col .tbl :is(th,td){white-space:nowrap}
 .tbl.nowrap :is(th,td){white-space:nowrap}   /* 칸을 한 줄로 — 좁으면 .tbl-wrap 이 가로로 스크롤한다. 짧은 값만 있는 요약 표(대시보드 최근 이벤트) — 390 에서 '차 / 단' · 'PC- / 2041' 로 끊겼다(사람의 결정 2026-11-15) */
+.tbl.nowrap td.empty{white-space:normal}   /* 빈 상태 문구는 줄바꿈 — 한 줄로 두면 문구가 표를 넓혀 390 에서 가로 스크롤 뒤로 잘렸다(2026-11-23) */
 .card .tbl-wrap:is(.sticky-col,.sticky),.side-panel .tbl-wrap:is(.sticky-col,.sticky),.popup .tbl-wrap:is(.sticky-col,.sticky){--tbl-surface:var(--surface-elevated-primary)}
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :where(:first-child:not(.empty),.expand:first-child + *,.check:first-child + *,.expand:first-child + .check + *){position:sticky;left:0;z-index:1}   /* :where — 아래 칸별 left 가 이기게(:is 는 가장 센 인자의 명시도를 모두에게 준다) */
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(.expand:first-child + *){left:2.5rem}
@@ -2012,7 +2065,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* 막대는 값 쪽 끝만 4px 둥글게 · 바닥(시작)은 각지게(dataviz — 사람의 결정 2026-11-20, 11-05 의 '각지게' 를 바꿈 · 탐색형 막대와 같다).
    트랙은 각진 채로 둔다. 채움 기본은 한 톤의 가장 진한 단계(2026-11-15 — 제품 색이던 것) */
 .chart .bar{height:0.75rem;border-radius:0;background:var(--surface-neutral-strong);overflow:hidden}
-.chart .bar i{display:block;height:100%;background:var(--chart-mono-1);border-radius:0 0.25rem 0.25rem 0}
+.chart .bar i{display:block;height:100%;background:var(--chart-mono-1)}   /* 막대는 각짐(2026-11-24 — 11-20 의 값 끝 4 를 지움) */
 .chart .bar.critical i{background:var(--foreground-negative-strong)}
 .chart .bar.high i{background:var(--foreground-cautionary-primary)}
 .chart .bar.medium i{background:var(--foreground-accent-light-blue)}
@@ -2028,18 +2081,18 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* 트랙 = 채움과 같은 파랑의 옅은 단계(dataviz meter — 사람의 요청 2026-11-20, 회색 surface-neutral-strong 이던 것). 채움 / 트랙 3:1 은 contrast 가 잰다.
    Loading 의 작업 진행 막대(progressbar)는 상태 표시라 회색 그대로 */
 .progress-list .progress{border-radius:0;background:var(--chart-mono-track)}
-.progress-list .progress i{background:var(--chart-mono-1);border-radius:0 0.25rem 0.25rem 0}
+.progress-list .progress i{background:var(--chart-mono-1);border-radius:0}
 .progress-list .progress-row .row{font-variant-numeric:tabular-nums}
 /* 차트 카드 — 머리(제목 · 보조 글자 · 동작) 높이 32 고정, 선택 figure(큰 값 · 증감), 본문은 높이 단계(sm 160 · 기본 240 · lg 320).
    같은 줄의 카드는 머리 아래 끝 · 본문 위 끝이 같다(behave.chart) — 동작(Select sm · 텍스트 버튼 32)이 없는 카드도 머리가 32 라 줄이 어긋나지 않는다 */
 .chart-card{background:var(--surface-elevated-primary);border-radius:var(--radius-lg);border:1px solid var(--line-neutral-secondary);padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;width:100%;min-width:0;line-height:1.6}
-.chart-head{display:flex;align-items:baseline;gap:0.5rem;height:2rem;min-width:0}
-.chart-head>.chart-title{align-self:center}.chart-head>.chart-action{align-self:center}   /* 부제는 제목과 같은 기준선, 제목과 동작은 머리 가운데(2026-11-20 — 부제가 1px 어긋났다) */
+.chart-head{display:flex;align-items:center;gap:0.5rem;height:2rem;min-width:0}   /* 제목 · 부제 · 동작은 머리 세로 가운데(2026-11-24 — 부제를 제목 기준선에 맞추니 가운데보다 8px 위였다) */
 .chart-card .chart-title{font-size:var(--font-size-16);font-weight:600;margin:0;display:flex;justify-content:space-between;align-items:center;line-height:1.5rem;letter-spacing:0.0057em;min-width:0}
 .chart-head .chart-title{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chart-sub{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em;white-space:nowrap}
 .chart-action{margin-left:auto;display:flex;align-items:center;gap:0.5rem;flex:none}
 .chart-figure{display:flex;align-items:center;flex-wrap:wrap;gap:0.25rem 0.75rem;margin-top:-0.5rem}
+.chart-figure>.delta{align-self:center}   /* 증감은 값 · 노트와 같은 세로 가운데 — .delta 의 align-self:flex-start 가 위로 붙였다(2026-11-24) */
 .chart-figure .value{font-size:var(--font-size-32);font-weight:700;letter-spacing:-0.0253em;line-height:2.75rem;white-space:nowrap;color:var(--foreground-neutral-primary)}
 .chart-figure .value small{font-size:var(--font-size-16);line-height:1.5rem;font-weight:500;letter-spacing:0.0057em;color:var(--foreground-neutral-tertiary);margin-left:2px}
 .chart-card.flat{border-color:transparent}   /* variant flat — .card.flat 과 같은 결정 · 같은 조건(회색 바탕 전용) */
@@ -2111,7 +2164,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .chart-legend i.series-6{background:var(--chart-series-6)}
 .chart-legend b{color:var(--foreground-neutral-primary);}
 .sparkline{display:flex;align-items:flex-end;gap:0.1875rem;height:2rem;line-height:1.6}
-.sparkline i{display:block;width:0.375rem;background:var(--chart-mono-4);border-radius:0.25rem 0.25rem 0 0}   /* 일반 막대는 옅은 단계, .hi 는 진한 단계(같은 파랑 — 2026-11-15 제품 색이던 것) */
+.sparkline i{display:block;width:0.375rem;background:var(--chart-mono-4)}   /* 일반 막대는 옅은 단계, .hi 는 진한 단계(같은 파랑 — 2026-11-15 제품 색이던 것) */
 .sparkline i.hi{background:var(--chart-mono-1)}
 
 /* Patterns: layout helpers */
@@ -2121,6 +2174,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .page-head .title{font-size:var(--font-size-28);font-weight:700;margin:0;letter-spacing:-0.0236em;line-height:2.375rem;word-break:keep-all}   /* = Title 2 28/38(사람의 결정 2026-11-13 — 11-12 의 Title 1 32 에서 내림). 문서 사이트 h1 은 Display 3 그대로 */
 .page-head .sub{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0.25rem 0 0;line-height:1.375rem;letter-spacing:0.0145em;word-break:keep-all}   /* 제목과 같이 띄어쓰기에서 끊는다 — 390 에서 '자동 갱 / 신' 으로 끊겼다(사람의 결정 2026-11-15) */
 .page-head .actions{display:flex;align-items:center;gap:0.5rem;flex:none}   /* 높이가 다른 동작이 늘어나지 않게 — Select Button(38)이 40 으로 늘어나 안쪽 버튼이 위로 쏠렸다(2026-11-12) */
+@media (max-width:767px){.page-head{grid-template-columns:minmax(0,1fr)}.page-head .actions{justify-self:start;flex-wrap:wrap}}   /* 좁은 화면은 동작을 제목 아래로 — 대시보드 기간 버튼이 들어가며 390 에서 제목이 '대시보 / 드' 로 끊겼다(2026-11-24) */
 .stack{display:flex;flex-direction:column;gap:1rem;width:100%;line-height:1.6}
 .row-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;width:100%;line-height:1.6}
 .row-3{display:grid;grid-template-columns:2fr 1fr;gap:1rem;width:100%;line-height:1.6}
@@ -2131,6 +2185,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .toolbar .spacer{flex:1}
 .toolbar > .searchbar{flex:1 1 0;min-width:12.5rem}   /* 옆 컨트롤은 제 폭, 검색칸이 남는 폭을 갖고 넘치면 200 까지 줄어 한 줄을 지킨다 — 그래도 넘칠 때만 줄을 바꾼다(사람의 요청 2026-11-16) */
 .toolbar > .combobox{flex:none;min-width:12.5rem}   /* 툴바 안 필터 Combobox 는 제 폭 · 최소 200(밖은 260) — 검색 · 필터 · 기간이 한 줄에 들게 */
+.toolbar > .combobox[data-multiple]:not([data-overflow="wrap"]){max-width:20rem}   /* 가로 스크롤 Combobox 는 최대 320 — 넘는 태그는 칸 안에서 스크롤(2026-11-23) */
 .toolbar > .combobox .control input{width:0}   /* 입력칸 글자 폭이 Combobox 폭을 밀지 않게 — 폭 = 고른 태그 + 입력 최소 72 */
 .toolbar.sub{font-size:var(--font-size-13);color:var(--foreground-neutral-secondary);line-height:1.125rem;letter-spacing:0.0194em}   /* 결과 줄 — 결과 수 · 적용 조건 · 동작 */
 .toolbar.sub b{color:var(--foreground-neutral-primary)}
@@ -2270,7 +2325,6 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .auth-timer b{font-variant-numeric:tabular-nums}
 .danger-list{margin:0.5rem 0 0;padding-left:1.2em}   /* 위험 작업의 영향 범위 — 목록 일부 */
 .log-table{max-height:30rem}
-.log-row{font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em}
 .log-row td{white-space:nowrap}   /* 로그 한 건 = 한 줄(2026-11-12) — 시간 · 단말 · IP 가 'PC-' / '2041' 처럼 끊겨 행이 62 가 됐다 */
 .log-row:has(> td.truncate) > td:not(.truncate){width:1%}   /* 짧은 열은 글자 폭만 — 남는 폭은 메시지 열(td.truncate)이 갖고, 잘리면 Tooltip 으로 전체를 보인다 */
 /* ---------- /Live component samples ---------- */

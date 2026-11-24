@@ -4,7 +4,7 @@ import { TextField } from "@jiran/ds-react";
 export default function Example() {
   return (
     <>
-      <TextField id="ic-id" label="아이디" icon="user" autoComplete="username" placeholder="아이디 입력" />
+      <TextField id="ic-id" label="이메일" type="email" icon="user" autoComplete="username" placeholder="admin@example.com" />
       <TextField id="ic-mail" label="알림 받을 이메일" icon="mail" type="email" autoComplete="email" placeholder="name@example.com" />
     </>
   );

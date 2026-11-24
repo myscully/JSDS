@@ -31,14 +31,14 @@ const TEMPLATES = {
       ["언제 쓰는가", "여러 지표를 한눈에 훑고, 이상한 곳을 눌러 자세한 목록으로 들어가게 할 때 씁니다."],
       ["비슷한 템플릿", "한 종류의 기록을 찾고 고르는 일이 주된 일이면 리스트입니다."],
     ],
-    uses: ["avatar", "button", "card", "data-visual", "divider", "dropdown", "indicator", "link", "navigation", "notification-center", "page-header", "search", "table", "tooltip", "top-navigation"],
+    uses: ["avatar", "button", "card", "data-visual", "divider", "dropdown", "indicator", "link", "navigation", "notification-center", "page-header", "search", "select-button", "table", "tooltip", "top-navigation"],
     patterns: ["dashboard"],
     principles: [
       ["틀", "위에 상단 바, 왼쪽에 사이드 내비, 오른쪽에 본문을 두고 본문만 스크롤합니다."],
       ["순서", "요약 숫자, 추이와 분포, 비교와 목표, 최근 이벤트 순으로 위에서 아래로 갑니다."],
       ["카드 높이", "같은 줄의 카드는 머리와 본문 높이를 맞춥니다."],
       ["이동", "카드의 전체 보기와 표의 링크는 해당 목록 화면으로 갑니다."],
-      ["필터 없음", "기간이나 필터를 두지 않습니다. 기간을 바꿔 들여다보는 일은 분석 화면이 맡습니다."],
+      ["기간", "머리 오른쪽 Select Button 하나로 화면 전체의 기간을 고릅니다. 다른 조건으로 좁혀 들여다보는 일은 분석 화면이 맡습니다."],
     ],
   },
   analytics: {
@@ -46,7 +46,7 @@ const TEMPLATES = {
     line: "필터 한 줄, KPI 넷, 심각도별 추이, 유형 · 경로 차트, 상세 표. 분석 · 리포트 패턴을 그대로 담았습니다.",
     choose: [
       ["언제 쓰는가", "지난 기간과 견주거나 조건으로 좁혀 원인을 찾고, 그 결과를 보고서로 내보내야 할 때 씁니다."],
-      ["비슷한 템플릿", "필터 없이 지금 상태만 훑는 첫 화면은 대시보드입니다."],
+      ["비슷한 템플릿", "기간만 골라 전체를 훑는 첫 화면은 대시보드입니다."],
     ],
     uses: ["avatar", "button", "card", "combobox", "data-visual", "date-picker", "divider", "dropdown", "indicator", "navigation", "notification-center", "page-header", "search", "table", "tooltip", "top-navigation"],
     patterns: ["analytics"],
@@ -117,7 +117,7 @@ const TEMPLATES = {
     uses: ["avatar", "breadcrumb", "button", "data-table", "divider", "dropdown", "indicator", "link", "navigation", "notification-center", "page-header", "pagination", "search", "select", "tab", "tooltip", "top-navigation"],
     patterns: ["search"],
     principles: [
-      ["탭", "탭 이름 옆에 건수를 두고, 탭을 옮겨도 각 탭의 검색어와 필터는 남습니다."],
+      ["탭", "탭에는 이름만 두고 건수는 목록 아래 건수 줄이 보여 줍니다. 탭을 옮겨도 각 탭의 검색어와 필터는 남습니다."],
       ["탭마다", "탭 아래 툴바와 표, 페이지 이동을 탭마다 따로 둡니다."],
       ["주 동작", "화면의 주 동작은 머리글 오른쪽에 하나만 둡니다."],
     ],

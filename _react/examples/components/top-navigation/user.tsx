@@ -17,7 +17,7 @@ export default function Example() {
         <Divider orientation="vertical" />
         <Dropdown kind="menu" align="end" keepMounted>
           <DropdownTrigger asChild>
-            <button type="button" className="topbar-user" aria-label="사용자 메뉴"><Avatar initials="JH" name="정희" /></button>
+            <button type="button" className="topbar-user" aria-label="사용자 메뉴"><Avatar initials="JH" /></button>
           </DropdownTrigger>
           <Menu>
             <MenuItem onSelect={() => {}}>내 정보</MenuItem>

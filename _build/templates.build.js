@@ -77,11 +77,11 @@ const topBar = () => `<header class="topbar tpl-top">
       <span class="tooltip-wrap"><button type="button" class="btn md assistive icon-only" aria-label="설정">${I("settings")}</button><span class="tooltip bottom" role="tooltip">설정</span></span>
       <span class="tooltip-wrap"><button type="button" class="btn md assistive icon-only" data-theme-toggle aria-pressed="false" aria-label="다크 모드"><span class="i-light">${I("sun-high")}</span><span class="i-dark">${I("moon")}</span></button><span class="tooltip bottom" role="tooltip">다크 모드</span></span></div>
       <span class="divider vertical" role="separator" aria-orientation="vertical"></span>
-      <div class="dropdown"><button type="button" class="topbar-user" aria-label="사용자 메뉴" aria-haspopup="menu" aria-expanded="false"><span class="avatar" data-name="김보안">김</span></button><ul class="menu" role="menu"><li class="menu-item" role="menuitem">내 정보</li><li class="menu-item" role="menuitem">비밀번호 변경</li><li class="menu-sep" role="separator"></li><li role="none"><a class="menu-item" role="menuitem" href="login.html">로그아웃</a></li></ul></div>
+      <div class="dropdown"><button type="button" class="topbar-user" aria-label="사용자 메뉴" aria-haspopup="menu" aria-expanded="false"><span class="avatar">김</span></button><ul class="menu" role="menu"><li class="menu-item" role="menuitem">내 정보</li><li class="menu-item" role="menuitem">비밀번호 변경</li><li class="menu-sep" role="separator"></li><li role="none"><a class="menu-item" role="menuitem" href="login.html">로그아웃</a></li></ul></div>
     </div>
   </header>`;
 
-const doc = ({ id, title, body, chart, date, bodyClass = "tpl" }) => LIB.withAvatarTone(`<!doctype html>
+const doc = ({ id, title, body, chart, date, bodyClass = "tpl" }) => (`<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
@@ -175,7 +175,7 @@ const rowMenu = (name) => `<div class="dropdown"><button type="button" class="bt
 const list = () => {
   const selected = EVENTS.filter((r) => r[8]).length;
   const content = `        <div class="stack">
-        ${pageHead(["탐지", "보안 이벤트"], "보안 이벤트", "최근 7일 · 마지막 갱신 09:41", btn("md outline assistive", "내보내기", "", "download"))}
+        ${pageHead(["탐지", "보안 이벤트"], "보안 이벤트", "최근 7일 · 마지막 갱신 09:41", btn("md outline assistive", "CSV 내보내기", "", "download"))}
           <div class="toolbar">
             ${search("ev-q", "이벤트, 단말, IP 검색", "이벤트 검색")}
             ${H.pCombo({ id: "ev-sev", label: "심각도", items: ["Critical", "High", "Medium", "Low", "Info"], selected: ["Critical", "High"], multiple: true, placeholder: "심각도" })}
@@ -280,7 +280,7 @@ const tabsList = () => {
   const content = `        <div class="stack">
         ${pageHead(["자산", "에이전트"], "에이전트", "전체 1,284대 · 마지막 동기화 09:41", btn("md outline assistive", "설치 명령 보기") + btn("md solid primary", "에이전트 등록", "", "plus"))}
           <div class="tabs" role="tablist" aria-label="에이전트 상태">
-            ${TABS.map((t, i) => `<button type="button" class="tab${i ? "" : " on"}" role="tab" aria-selected="${!i}" id="ag-tab-${t.id}" aria-controls="ag-panel-${t.id}"${i ? ' tabindex="-1"' : ""}>${t.label}<span class="count">${t.count}</span></button>`).join("\n            ")}
+            ${TABS.map((t, i) => `<button type="button" class="tab${i ? "" : " on"}" role="tab" aria-selected="${!i}" id="ag-tab-${t.id}" aria-controls="ag-panel-${t.id}"${i ? ' tabindex="-1"' : ""}>${t.label}</button>`).join("\n            ")}
           </div>
           ${TABS.map(panel).join("\n          ")}
         </div>`;
@@ -318,7 +318,7 @@ const orgInfo = (() => {
   walk(ORG, []);
   return out;
 })();
-const memberRows = (d) => d.members.map((m) => `<tr><td><span class="tpl-person"><span class="avatar sm" data-name="${m.name}" aria-hidden="true">${m.name[0]}</span>${m.name}</span></td><td>${m.title}</td><td>${m.email}</td><td><span class="tag sm${m.role[1] ? " " + m.role[1] : ""}">${m.role[0]}</span></td><td><span class="indicator${m.on ? " ok" : ""}">${m.on ? "재직" : "휴직"}</span></td></tr>`).join("\n                  ");
+const memberRows = (d) => d.members.map((m) => `<tr><td><span class="tpl-person"><span class="avatar sm" aria-hidden="true">${m.name[0]}</span>${m.name}</span></td><td>${m.title}</td><td>${m.email}</td><td><span class="tag sm${m.role[1] ? " " + m.role[1] : ""}">${m.role[0]}</span></td><td><span class="indicator${m.on ? " ok" : ""}">${m.on ? "재직" : "휴직"}</span></td></tr>`).join("\n                  ");
 const org = () => {
   const d = orgInfo["sec-mon"];
   const parents = [["hq", "본사"], ["sec", "보안팀"], ["dev", "개발팀"], ["busan", "부산 지사"], ["daejeon", "대전 지사"]];

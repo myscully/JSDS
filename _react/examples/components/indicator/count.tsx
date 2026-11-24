@@ -9,10 +9,10 @@ export default function Example() {
       <Count value={128} tone="neutral" max={999} />
       <ButtonGroup>
         <WithCount count={<Count value={5} />}>
-          <Button variant="outline" color="assistive" iconOnly aria-label="알림 5건"><Icon name="bell" /></Button>
+          <Button variant="outline" color="assistive" iconOnly tooltip aria-label="알림 5건"><Icon name="bell" /></Button>
         </WithCount>
         <WithCount count={<Count dot />}>
-          <Button variant="outline" color="assistive" iconOnly aria-label="새 알림"><Icon name="bell" /></Button>
+          <Button variant="outline" color="assistive" iconOnly tooltip aria-label="새 알림"><Icon name="bell" /></Button>
         </WithCount>
       </ButtonGroup>
     </>

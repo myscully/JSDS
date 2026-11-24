@@ -196,15 +196,41 @@
     var meta = chart.$ds || {}; if (meta.kind !== "donut") return;
     chart.options.plugins.legend.position = legendPosition(meta.legend, size.width, size.height);
   }
-  /* 영역 = 계열 색 10% 단색(dataviz 'a wash' — 사람의 결정 2026-11-20, 11-13 의 세로 그라데이션 32 → 6% 를 바꿈). 누적 · 단일 모두.
-     데이터 마크에 그라데이션을 쓰지 않는다(design-elevation). 범례 · 툴팁 키는 단색(_dsColor)이라 이 칠을 쓰지 않는다 */
-  var AREA_ALPHA = 0.1;
-  function areaFill(c) { return alpha(c, AREA_ALPHA); }
+  /* 영역 — 계열이 하나인 선(spark 포함)은 세로 그라데이션, 여러 계열의 누적 영역은 계열 색 10% 단색(사람의 결정 2026-11-24 — 11-20 의 '모두 10% 단색' 을 바꿈).
+     그라데이션은 그 계열의 가장 높은 값에서 차트 바닥까지 위 32% → 아래 6%(11-13 의 값). 크기 · 값이 같으면 만든 것을 다시 쓴다.
+     배치 전(chartArea 없음)에는 단색 10%. 범례 · 툴팁 키는 단색(_dsColor)이라 이 칠을 쓰지 않는다 */
+  var AREA_ALPHA = 0.1, AREA_TOP = 0.32, AREA_BOTTOM = 0.06;
+  function areaFill(c) {
+    var cache = {};
+    return function (ctx) {
+      var chart = ctx && ctx.chart, a = chart && chart.chartArea, y = chart && chart.scales && chart.scales.y, i = ctx && ctx.datasetIndex;
+      if (!a || !y || i == null || (y.options && y.options.stacked)) return alpha(c, AREA_ALPHA);
+      var top = -Infinity;
+      (chart.data.datasets[i].data || []).forEach(function (d) { d = +d; if (isFinite(d) && d > top) top = d; });
+      var py = isFinite(top) ? Math.max(a.top, Math.min(a.bottom - 1, y.getPixelForValue(top))) : a.top, key = py + "|" + a.bottom;
+      if (cache.key !== key) { var g = chart.ctx.createLinearGradient(0, py, 0, a.bottom); g.addColorStop(0, alpha(c, AREA_TOP)); g.addColorStop(1, alpha(c, AREA_BOTTOM)); cache = { key: key, g: g }; }
+      return cache.g;
+    };
+  }
+  /* 막대 그라데이션(옵션 gradient:true — 사람의 결정 2026-11-24 에 되살림, 기본은 단색) — 막대마다 값 끝(진한 색)에서 기준선(같은 색 55%)까지.
+     진한 끝이 그래픽 3:1 을 지킨다. 가로 막대는 왼쪽(기준선) → 오른쪽(값 끝). 위치 · 크기가 같으면 만든 것을 다시 쓴다 */
+  var BAR_FADE = 0.55;
+  function barFill(c, horizontal) {
+    var cache = {};
+    return function (ctx) {
+      var chart = ctx.chart, v = ctx.raw;
+      var axis = chart.scales && chart.scales[horizontal ? "x" : "y"];
+      if (!axis || !chart.chartArea || !isFinite(+v)) return c;
+      var end = axis.getPixelForValue(+v), base = axis.getPixelForValue(0), key = end + "|" + base;
+      if (!cache[key]) { var g = horizontal ? chart.ctx.createLinearGradient(base, 0, end, 0) : chart.ctx.createLinearGradient(0, base, 0, end); g.addColorStop(0, alpha(c, BAR_FADE)); g.addColorStop(1, c); cache[key] = g; }
+      return cache[key];
+    };
+  }
 
-  /* ---------- 막대 모양(dataviz — 사람의 결정 2026-11-20, 11-05 '각지게' · 11-06 '틈 없이' 를 바꿈) ----------
-     두께 최대 24 · 값 쪽 끝만 4px 둥글게(바닥은 각짐) · 누적 조각 사이와 맞닿은 묶음 막대 사이 2px 면 색 틈. 테두리로 가르지 않는다 —
+  /* ---------- 막대 모양(dataviz — 사람의 결정 2026-11-20 · 11-24) ----------
+     두께 최대 24 · 네 모서리 모두 각짐(BAR_END 0 — 2026-11-24 에 11-20 의 값 끝 4px 를 지움) · 누적 조각 사이와 맞닿은 묶음 막대 사이 2px 면 색 틈. 테두리로 가르지 않는다 —
      틈은 투명 border 로 채움을 깎아 만든다(Chart.js 는 바깥 사각형을 borderColor 로, 안쪽을 backgroundColor 로 칠한다 — 투명이면 뒤의 카드 면이 보인다) */
-  var BAR_MAX = 24, BAR_END = 4, BAR_GAP = 2;
+  var BAR_MAX = 24, BAR_END = 0, BAR_GAP = 2;
   /* 그 칸에서 0 이 아닌 값을 가진 마지막(보이는) 막대 계열 = 쌓은 막대의 값 끝 */
   function stackTop(ctx) {
     var ch = ctx.chart, ds = ch.data.datasets, j = ctx.dataIndex, top = -1;
@@ -214,9 +240,7 @@
     }
     return top;
   }
-  function endCorners(horizontal, r) { return horizontal ? { topLeft: 0, bottomLeft: 0, topRight: r, bottomRight: r } : { topLeft: r, topRight: r, bottomLeft: 0, bottomRight: 0 }; }
-  /* 누적: 값 끝 조각만 둥글게, 나머지 조각은 값 쪽(위 · 오른쪽)에 투명 2px — 다음 조각과의 틈 */
-  function stackRadius(horizontal) { return function (ctx) { return ctx.datasetIndex === stackTop(ctx) ? endCorners(horizontal, BAR_END) : 0; }; }
+  /* 누적: 값 끝 조각 말고는 값 쪽(위 · 오른쪽)에 투명 2px — 다음 조각과의 틈 */
   function stackBorder(horizontal) { return function (ctx) { return ctx.datasetIndex === stackTop(ctx) ? 0 : horizontal ? { right: BAR_GAP } : { top: BAR_GAP }; }; }
   /* 묶음(누적 아닌 여러 계열): 한 칸 안의 막대 사이가 2px 이 되게 칸 비율을 정한다. 막대가 24 에 닿으면 칸을 좁혀 묶음이 벌어지지 않게 한다.
      Chart.js 는 칸 폭 × categoryPercentage ÷ 계열 수 = 한 막대 자리, 그 × barPercentage = 막대(최대 24) */
@@ -292,7 +316,7 @@
         var hi = meta.highlight;
         if (hi != null && n === 1 && !(ds.tone && t.tone[ds.tone])) {
           ds.backgroundColor = (ds.data || []).map(function (_, j) { return j === hi ? t.mono[0] : t.mono[MONO_MAX - 1]; });
-        } else ds.backgroundColor = c;
+        } else ds.backgroundColor = meta.gradient ? barFill(c, !!meta.horizontal) : c;
         ds.borderColor = "transparent";   // 막대는 stroke 없음 — 투명 border 는 틈(누적)에만 쓰인다
       }
     });
@@ -307,7 +331,7 @@
   function warn(msg) { if (root.console) root.console.warn("[ds-chart] " + msg); }
   var presets = {
     /* 시계열 — 선, stacked 면 누적 영역(심각도 누적 추이 같은). 점은 hover 때만 지름 8 + 면 색 링 2, 선 끝 · 꺾임은 둥글게.
-       계열이 하나면 선 아래를 계열 색 10% 로 칠한다(사람의 결정 2026-11-15 · 11-20) — area:false 로 끈다. 여러 계열의 겹친 영역은 서로 가려 칠하지 않는다 */
+       계열이 하나면 선 아래를 세로 그라데이션으로 칠한다(사람의 결정 2026-11-15 · 11-24) — area:false 로 끈다. 여러 계열의 겹친 영역은 서로 가려 칠하지 않는다 */
     timeseries: function (spec) {
       var stacked = !!spec.stacked, list = seriesOf(spec), area = !stacked && list.length === 1 && spec.area !== false;
       return { type: "line", _ds: { kind: "timeseries", color: spec.color },
@@ -316,17 +340,17 @@
         }) },
         options: { scales: { x: { stacked: stacked }, y: { stacked: stacked } } } };
     },
-    /* 막대 — horizontal 로 가로, stacked 로 누적. 최대 24 · 값 끝 4px · 누적과 묶음 사이 2px 면 색 틈(위 '막대 모양').
-       highlight: n(0부터) — 한 계열에서 그 막대만 진하게. gradient 옵션은 없어졌다(사람의 결정 2026-11-20 — 데이터 마크에 그라데이션을 쓰지 않음) */
+    /* 막대 — horizontal 로 가로, stacked 로 누적. 최대 24 · 각짐 · 누적과 묶음 사이 2px 면 색 틈(위 '막대 모양').
+       highlight: n(0부터) — 한 계열에서 그 막대만 진하게(강조가 그라데이션보다 먼저). gradient: true — 막대마다 값 끝 → 기준선 그라데이션, 누적에는 쓰지 않는다(조각끼리 갈리지 않음) */
     bar: function (spec) {
-      var stacked = !!spec.stacked, list = seriesOf(spec), hz = !!spec.horizontal, group = !stacked && list.length > 1 ? groupSlot(hz, list.length) : null;
-      if (spec.gradient) warn("gradient 옵션은 없어졌습니다 — 단색으로 그립니다. 한 막대를 가리키려면 highlight 를 씁니다");
+      var stacked = !!spec.stacked, list = seriesOf(spec), hz = !!spec.horizontal, group = !stacked && list.length > 1 ? groupSlot(hz, list.length) : null, gradient = !!spec.gradient;
+      if (gradient && stacked) { warn("누적 막대에는 gradient 를 쓰지 않습니다 — 단색으로 그립니다"); gradient = false; }
       if (spec.highlight != null && list.length !== 1) warn("highlight 는 계열이 하나인 막대에만 씁니다");
-      return { type: "bar", _ds: { kind: "bar", color: spec.color, highlight: spec.highlight, horizontal: hz },
+      return { type: "bar", _ds: { kind: "bar", color: spec.color, highlight: spec.highlight, gradient: gradient, horizontal: hz },
         data: { labels: spec.labels, datasets: list.map(function (s) {
-          /* 바닥 쪽 모서리는 각지게(borderSkipped 'start' 가 그 모서리의 반경을 0 으로) · inflateAmount 0 — 기본(auto)은 막대를 0.33px 부풀려 2px 틈을 메운다 */
+          /* inflateAmount 0 — 기본(auto)은 막대를 0.33px 부풀려 2px 틈을 메운다 */
           var o = { borderWidth: 0, borderRadius: BAR_END, borderSkipped: "start", maxBarThickness: BAR_MAX, inflateAmount: 0 };
-          if (stacked) { o.borderRadius = stackRadius(hz); o.borderWidth = stackBorder(hz); }
+          if (stacked) o.borderWidth = stackBorder(hz);
           if (group) { o.categoryPercentage = group.cat; o.barPercentage = group.bar; }
           return deepAssign(s, o);
         }) },
@@ -477,8 +501,8 @@
     btn.textContent = show ? L.chart : L.table;
   }
 
-  var DSChart = { tableData: tableData, TABLE_LABELS: TABLE_LABELS, theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, legendPosition: legendPosition, palette: palette, areaFill: areaFill,
-    tickFormat: tickFormat, tipLabel: tipLabel, BAR_MAX: BAR_MAX, BAR_END: BAR_END, BAR_GAP: BAR_GAP, AREA_ALPHA: AREA_ALPHA, COMPACT_FROM: COMPACT_FROM,
+  var DSChart = { tableData: tableData, TABLE_LABELS: TABLE_LABELS, theme: theme, presets: presets, mount: mount, auto: auto, paint: paint, resolve: resolve, legendPosition: legendPosition, palette: palette, areaFill: areaFill, barFill: barFill,
+    tickFormat: tickFormat, tipLabel: tipLabel, BAR_MAX: BAR_MAX, BAR_END: BAR_END, BAR_GAP: BAR_GAP, AREA_ALPHA: AREA_ALPHA, AREA_TOP: AREA_TOP, AREA_BOTTOM: AREA_BOTTOM, BAR_FADE: BAR_FADE, COMPACT_FROM: COMPACT_FROM,
     SERIES_MAX: SERIES_MAX, MONO_MAX: MONO_MAX, MONO_STEPS: MONO_STEPS, CENTER_FONT: CENTER_FONT, GAUGE_FONT: GAUGE_FONT, TOKENS: TOKENS, TONES: TONES };
   if (typeof module !== "undefined" && module.exports) module.exports = DSChart;
   root.DSChart = DSChart;

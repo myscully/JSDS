@@ -16,7 +16,7 @@ export interface TimeChangeInfo { text: string; validity: TimeValidity }
 /** 오류 문구 — Date Picker 의 시각 문구와 같은 키 · 같은 기본값(자리표시 {subject} {example} {min} {max}) */
 export const TIME_MESSAGES = {
   incomplete: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.",
-  invalidTime: "{subject} 잘못됐습니다. {example} 처럼 24시간제로 입력하세요.",
+  invalidTime: "{subject} 24시간제 형식이 아닙니다. {example} 처럼 입력하세요.",
   min: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.",
   max: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.",
   timeSubject: "시각이",

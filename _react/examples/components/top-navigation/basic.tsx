@@ -21,7 +21,7 @@ export default function Example() {
           <TopBarThemeToggle theme={theme} onThemeChange={setTheme} />
         </ButtonGroup>
         <Divider orientation="vertical" />
-        <Avatar initials="JH" name="정희" role="img" aria-label="정희 · 관리자" />
+        <Avatar initials="JH" role="img" aria-label="정희 · 관리자" />
       </TopBarRight>
     </TopBar>
   );

@@ -2,9 +2,9 @@
 import { createContext, useRef, useState, type FocusEvent, type FormEvent } from "react";
 
 export const VALIDATION_MESSAGES = {
-  required: "필수 항목입니다. 값을 입력하세요.",
-  choose: "필수 항목입니다. 항목을 선택하세요.",
-  fileRequired: "필수 항목입니다. 파일을 선택하세요.",
+  required: "값이 비어 있습니다. 값을 입력하세요.",
+  choose: "고른 항목이 없습니다. 항목을 선택하세요.",
+  fileRequired: "고른 파일이 없습니다. 파일을 선택하세요.",
   fileBusy: "파일을 전송하고 있습니다. 끝난 뒤 다시 저장하세요.",
   fileFailed: "올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.",
   fileType: "올릴 수 없는 형식입니다. {types} 파일을 고르세요.",
@@ -14,7 +14,7 @@ export const VALIDATION_MESSAGES = {
   fileCount: "파일이 너무 많습니다. {max}개까지 올릴 수 있습니다.",
   fileSend: "전송하지 못했습니다. 다시 시도하세요.",
   fileAdded: "파일 {ok}개를 추가했습니다.",
-  fileRejected: "{bad}개는 올릴 수 없습니다.",
+  fileRejected: "{bad}개는 올릴 수 없습니다. 파일 목록에서 이유를 확인하세요.",
   fileRemoved: "{name} 파일을 지웠습니다.",
   number: "숫자가 아닙니다. 숫자를 입력하세요.",
   email: "이메일 형식이 아닙니다. 예: admin@example.com",

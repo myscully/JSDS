@@ -12,7 +12,7 @@ export default function Example() {
         <CardMeta items={[{ label: "에이전트", value: "6.2.1" }, { label: "그룹", value: "개발팀" }, { label: "IP", value: "10.20.4.41" }, { label: "마지막 접속", value: "2026. 11. 02 09:41" }]} />
         <CardFoot>
           <ButtonGroup>
-            <Button variant="outline" color="assistive" size="sm">로그</Button>
+            <Button variant="outline" color="assistive" size="sm">로그 보기</Button>
             <Button size="sm">원격 점검</Button>
           </ButtonGroup>
         </CardFoot>
@@ -25,7 +25,7 @@ export default function Example() {
         <CardMeta items={[{ label: "에이전트", value: "6.1.8 · 업데이트 필요" }, { label: "그룹", value: "서버" }, { label: "IP", value: "10.20.1.12" }, { label: "마지막 접속", value: "2026. 11. 01 22:05" }]} />
         <CardFoot>
           <ButtonGroup>
-            <Button variant="outline" color="assistive" size="sm">로그</Button>
+            <Button variant="outline" color="assistive" size="sm">로그 보기</Button>
             <Button size="sm">업데이트</Button>
           </ButtonGroup>
         </CardFoot>

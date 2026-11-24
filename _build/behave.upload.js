@@ -80,7 +80,7 @@ module.exports = async function upload({ page, ok, go }) {
     ok("file upload: a wrong type stays as an error row and is not sent", (await rej.getAttribute("class")).includes("error") && (await log(d)).length === 0);
     ok("file upload: the wrong-type message names the types", (await rej.locator(".msg").textContent()) === "올릴 수 없는 형식입니다. .pem, .crt 파일을 고르세요.");
     ok("file upload: a rejected row has remove but no retry", (await rej.locator(".retry").count()) === 0 && (await rej.locator(".remove").count()) === 1);
-    ok("file upload: rejection is announced", (await d.locator(".upload-status").textContent()) === "1개는 올릴 수 없습니다.");
+    ok("file upload: rejection is announced", (await d.locator(".upload-status").textContent()) === "1개는 올릴 수 없습니다. 파일 목록에서 이유를 확인하세요.");
     ok("file upload: the error text uses negative-strong", (await rej.locator(".msg").evaluate((e) => getComputedStyle(e).color)) === (await color("--foreground-negative-strong")));
     await clear(d);
     await rej.locator(".remove").click(); await wait(20);
@@ -103,7 +103,7 @@ module.exports = async function upload({ page, ok, go }) {
     await input(m).setInputFiles([file("bad.exe"), file("one.csv"), file("two.txt")]);
     await wait(30);
     ok("file upload: passing files are taken and rejected ones go last", (await names(m)).join() === "one.csv,two.txt,bad.exe" && JSON.stringify(await log(m)) === '[["ds:upload",["one.csv","two.txt"]]]', (await names(m)).join());
-    ok("file upload: mixed results are announced together", (await m.locator(".upload-status").textContent()) === "파일 2개를 추가했습니다. 1개는 올릴 수 없습니다.");
+    ok("file upload: mixed results are announced together", (await m.locator(".upload-status").textContent()) === "파일 2개를 추가했습니다. 1개는 올릴 수 없습니다. 파일 목록에서 이유를 확인하세요.");
     await page.waitForSelector("#ex-file-upload-multiple .upload-item:nth-child(1) .retry", { timeout: 2500 });
     const first = m.locator(".upload-item").first();
     ok("file upload: a failed send has retry and remove named by the file", (await first.locator(".retry").getAttribute("aria-label")) === "one.csv 다시 시도" && (await first.locator(".remove").getAttribute("aria-label")) === "one.csv 지우기");
@@ -198,7 +198,7 @@ module.exports = async function upload({ page, ok, go }) {
     const orig = await help.textContent();
     await page.evaluate(() => { window._submits = 0; document.addEventListener("submit", (e) => { e.preventDefault(); window._submits++; }); });
     await save.click(); await wait(30);
-    ok("file upload form: submitting empty blocks and says so", (await help.textContent()) === "필수 항목입니다. 파일을 선택하세요." && (await field.evaluate((f) => f.classList.contains("error"))) && (await page.evaluate(() => window._submits)) === 0);
+    ok("file upload form: submitting empty blocks and says so", (await help.textContent()) === "고른 파일이 없습니다. 파일을 선택하세요." && (await field.evaluate((f) => f.classList.contains("error"))) && (await page.evaluate(() => window._submits)) === 0);
     ok("file upload form: the first error focuses the pick button", (await page.evaluate(() => document.activeElement.classList.contains("upload-pick"))));
     ok("file upload form: the button is marked invalid", (await fu.locator(".upload-pick").getAttribute("aria-invalid")) === "true");
     await wait(200);   // border-color 전환이 끝난 뒤
@@ -224,7 +224,7 @@ module.exports = async function upload({ page, ok, go }) {
     await save.click(); await wait(30);
     ok("file upload form: a failed file blocks the submit", (await help.textContent()) === "올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요." && (await page.evaluate(() => window._submits)) === 1);
     await fu.locator(".upload-item .remove").click(); await wait(30);
-    ok("file upload form: removing the last required file warns at once", (await help.textContent()) === "필수 항목입니다. 파일을 선택하세요.");
+    ok("file upload form: removing the last required file warns at once", (await help.textContent()) === "고른 파일이 없습니다. 파일을 선택하세요.");
     await input(fu).setInputFiles(file("bad.txt"));
     await wait(30);
     await save.click(); await wait(30);
@@ -240,7 +240,7 @@ module.exports = async function upload({ page, ok, go }) {
     await fresh.evaluate((h) => h.removeAttribute("data-demo"));
     await input(fresh).setInputFiles(file("ok.pem")); await wait(20);
     await fresh.locator(".upload-item .remove").click(); await wait(20);
-    ok("file upload form: removing the last file warns even before a submit", (await fHelp.textContent()) === "필수 항목입니다. 파일을 선택하세요.");
+    ok("file upload form: removing the last file warns even before a submit", (await fHelp.textContent()) === "고른 파일이 없습니다. 파일을 선택하세요.");
   });
   await part("15 · 진행률 API · 다른 파일이 전송 중일 때의 오류 표시", async () => {
     /* 진행률 API · 다른 파일이 전송 중일 때의 오류 표시 */

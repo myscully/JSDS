@@ -60,7 +60,7 @@ const pairs = [
   ["--foreground-brand-primary", ["--surface-brand-subtle", "--surface-brand-subtle-strong"], 4.5, "옅은 제품 면 위 글자 — text · outline primary · 면 없는 아이콘 전용 primary 버튼의 hover·pressed, Date Picker 오늘 원 · 기간 띠 안의 오늘(2026-11-09 · 원 위는 2026-11-11 부터 — 사람의 결정), Steps 현재 원의 숫자(2026-11-13)", REF("기준 토큰 값 — brand 와 그 틴트 조합이 4.2 언저리다")],
   /* Assistive 버튼 라벨 — solid 면(tertiary 단계), 그리고 solid · outline · 면 없는 아이콘 전용이 hover 에 올라앉는 secondary 단계(2026-10-28 정의 때 셌더니 선언이 없었다) */
   ["--foreground-neutral-primary", ["--surface-neutral-tertiary", "--surface-neutral-secondary"], 4.5, "Assistive 버튼 라벨 — rest · hover 면 · 중립 Tag 라벨(tertiary 면, 2026-11-13)"],
-  ["--foreground-neutral-secondary", ["--surface-neutral-secondary"], 4.5, "Info Tag 글자 — 중립 Tag 보다 한 단계 진한 secondary 면(사람의 결정 2026-11-13)"],
+  ["--foreground-neutral-secondary", ["--surface-neutral-secondary"], 4.5, "Info Tag 글자 — 중립 Tag 보다 한 단계 진한 secondary 면(사람의 결정 2026-11-13) · Avatar 이니셜 / 면(사람의 결정 2026-11-24 — 6색을 없앰)"],
   /* Accordion 헤더 Hover(2026-10-29) — 제목은 위 쌍(neutral-primary on surface-neutral-secondary), 보조 정보 · 셰브론은 여기 */
   ["--foreground-neutral-tertiary", ["--surface-neutral-secondary"], 4.5, "회색 면(surface-neutral-secondary) 위 보조 글 — Accordion 헤더 hover 의 보조 정보 · pill 탭의 고르지 않은 라벨", REF("기준 토큰 값 — 이 면 위 라이트 3.36 ~ 3.45 · 다크 3.05 ~ 3.45(2026-11-20 실측)")],
   ["--foreground-neutral-tertiary", ["--surface-disable-primary"], 4.5, "Disabled 선택 카드의 이유 문구", REF("기준 토큰 tertiary — disable 면 위 라이트 3.53 · 다크 3.28. 제목 · 아이콘은 disable(1.4.3 면제)이고 이유만 읽히게 둔 사람의 결정(2026-11-03)")],
@@ -120,13 +120,6 @@ const pairs = [
   ["--chart-mono-3", SURFACES, 3, "차트 한 톤 3단계"],
   ["--chart-mono-4", SURFACES, 3, "차트 한 톤 4단계(가장 옅음) — 비교 기간 · 강조 밖 막대 · 정적 스파크라인", { advisory: true, why: "사람의 결정(2026-11-15 한 톤) — 라이트 blue-70 2.49 · 회색 2.33, 다크 blue-45 카드 2.88. 명도로 계열을 가르는 옅은 끝이라 3:1 아래이고(검증기 바닥 2:1 은 넘음), 값은 범례 · 툴팁 · 표로 보기가 나른다" }],
   /* 게이지 · 진행 막대 · 정적 막대 — 채움이 트랙(--surface-neutral-strong) 위에서 보여야 한다 */
-  /* 아바타 이니셜 / tone 면(사람의 결정 2026-11-16 — 이름으로 정하는 6색) */
-  ["--avatar-1-text", ["--avatar-1-surface"], 4.5, "아바타 tone 1 이니셜"],
-  ["--avatar-2-text", ["--avatar-2-surface"], 4.5, "아바타 tone 2 이니셜"],
-  ["--avatar-3-text", ["--avatar-3-surface"], 4.5, "아바타 tone 3 이니셜"],
-  ["--avatar-4-text", ["--avatar-4-surface"], 4.5, "아바타 tone 4 이니셜"],
-  ["--avatar-5-text", ["--avatar-5-surface"], 4.5, "아바타 tone 5 이니셜"],
-  ["--avatar-6-text", ["--avatar-6-surface"], 4.5, "아바타 tone 6 이니셜"],
   ["--chart-mono-1", ["--surface-neutral-strong"], 3, "정적 막대의 채움 / 트랙"],
   ["--chart-mono-1", ["--chart-mono-track"], 3, "진행 막대 · 게이지의 채움 / 같은 파랑 트랙(2026-11-20)"],
   ["--chart-series-1-subtle", SURFACES, 3, "차트 비교 기간 막대(계열 1 옅은 톤)", { advisory: true, why: "사람의 결정(2026-11-05) — 비교 기간은 같은 색상의 옅은 톤으로 나누는 관례를 따른다. 계열 1 과의 대비 2.74 로 둘이 갈리고, 값은 툴팁 · 범례로 읽는다" }],

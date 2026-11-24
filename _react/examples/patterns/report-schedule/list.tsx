@@ -1,4 +1,5 @@
-import { Avatar, AvatarGroup, Button, Icon, Indicator, Link, Spacer, Stack, Switch, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Toolbar } from "@jiran/ds-react";
+import { useState } from "react";
+import { Avatar, AvatarGroup, Button, Icon, Indicator, Link, PageHead, Pagination, PaginationBar, Stack, Switch, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
 
 type Report = { id: string; name: string; cycle: string; next?: string; to: string[]; shown?: number; failed?: boolean; on: boolean };
 /* 받는 사람이 다섯을 넘지 않아도 칸이 좁으면 앞의 둘만 보이고 나머지는 '외 N명' 으로 적는다(max) */
@@ -10,16 +11,14 @@ const REPORTS: Report[] = [
 
 /* 예약 목록 — 주기 · 다음 발송 · 받는 사람 · 마지막 발송 결과. 잠시 멈출 때는 지우지 않고 사용을 끈다 */
 export default function Example() {
+  const [page, setPage] = useState(1);
   return (
     <Stack>
-      <Toolbar>
-        <Spacer />
-        <Button iconLeft={<Icon name="plus" />}>보고서 만들기</Button>
-      </Toolbar>
+      <PageHead as="h2" title="예약 보고서" actions={<Button iconLeft={<Icon name="plus" />}>보고서 만들기</Button>} />
       <Table nowrap>
         <TableHead>
           <TableRow>
-            <TableHeader>보고서</TableHeader><TableHeader>주기</TableHeader><TableHeader>다음 발송</TableHeader><TableHeader>받는 사람</TableHeader><TableHeader>마지막 발송</TableHeader><TableHeader>사용</TableHeader>
+            <TableHeader>보고서</TableHeader><TableHeader>주기</TableHeader><TableHeader sortable sorted="asc">다음 발송</TableHeader><TableHeader>받는 사람</TableHeader><TableHeader>마지막 발송</TableHeader><TableHeader>사용</TableHeader>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -39,6 +38,9 @@ export default function Example() {
           ))}
         </TableBody>
       </Table>
+      <PaginationBar summary={<>총 <b>56</b>건 · 1–20</>}>
+        <Pagination compact page={page} total={3} onChange={setPage} />
+      </PaginationBar>
     </Stack>
   );
 }

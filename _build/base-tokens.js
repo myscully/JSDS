@@ -223,20 +223,6 @@ const ADDITIONS = {
   "chart-axis-text": "축 눈금 · 범례 글자 — foreground/neutral/tertiary 를 참조",
   "chart-tooltip-surface": "툴팁 면 — surface/neutral/inverse 를 참조(Toast 와 같은 반전 면)",
   "chart-tooltip-text": "툴팁 글자 — foreground/neutral/inverse 를 참조",
-  /* 아바타 6색(사람의 결정 2026-11-16) — 기준에는 사람을 가르는 색이 없어 brand 틴트 하나였고, 그룹으로 겹치면 구분되지 않았다.
-     이름에서 정하는 tone 1~6(ds.js · React avatarTone). 상태색(빨강 · 주황 · 초록)은 피했다 — 사람 색이 상태로 읽히지 않게 */
-  "avatar-1-surface": "아바타 tone 1(파랑) 면 — 라이트 blue-90 · 다크 blue-20",
-  "avatar-1-text": "아바타 tone 1(파랑) 이니셜 — 라이트 blue-30 · 다크 blue-80",
-  "avatar-2-surface": "아바타 tone 2(시안) 면 — 라이트 cyan-90 · 다크 cyan-20",
-  "avatar-2-text": "아바타 tone 2(시안) 이니셜 — 라이트 cyan-30 · 다크 cyan-80",
-  "avatar-3-surface": "아바타 tone 3(라임) 면 — 라이트 lime-90 · 다크 lime-20",
-  "avatar-3-text": "아바타 tone 3(라임) 이니셜 — 라이트 lime-20(30 은 4.43) · 다크 lime-80",
-  "avatar-4-surface": "아바타 tone 4(바이올렛) 면 — 라이트 violet-90 · 다크 violet-20",
-  "avatar-4-text": "아바타 tone 4(바이올렛) 이니셜 — 라이트 violet-30 · 다크 violet-80",
-  "avatar-5-surface": "아바타 tone 5(퍼플) 면 — 라이트 purple-90 · 다크 purple-20",
-  "avatar-5-text": "아바타 tone 5(퍼플) 이니셜 — 라이트 purple-30 · 다크 purple-80",
-  "avatar-6-surface": "아바타 tone 6(핑크) 면 — 라이트 pink-90 · 다크 pink-20",
-  "avatar-6-text": "아바타 tone 6(핑크) 이니셜 — 라이트 pink-30 · 다크 pink-80",
 };
 
 /* style.css 와 대조한다. 반환은 어긋난 자리의 설명 목록 */

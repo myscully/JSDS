@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Checkbox, Combobox, Field, Form, FormActions, FormLegend, FormRow, FormSection, Notice, NumberInput, Select, TextField } from "@jiran/ds-react";
+import { useFormDraft, Button, ButtonGroup, Checkbox, Combobox, Field, Form, FormActions, FormLegend, FormRow, FormSection, Notice, NumberInput, Select, TextField } from "@jiran/ds-react";
 
 const SEVS = ["Critical", "High", "Medium", "Low", "Info"].map((label) => ({ value: label, label }));
 const TARGETS = [{ value: "all", label: "전체 단말" }, { value: "server", label: "서버 그룹" }, { value: "sales", label: "영업팀 PC" }];
@@ -7,8 +7,10 @@ const PEOPLE = ["보안팀", "운영팀", "김민준", "이서연"].map((label) 
 
 /* 조건은 모두 맞아야 하고 동작은 하나 이상. 저장 버튼 위에 규칙을 한 문장으로 */
 export default function Example() {
+  const draft = useFormDraft("alert-rule-new");
   return (
-    <Form validate onSubmit={(e) => e.preventDefault()}>
+    <Form ref={draft.ref} validate onSubmit={(e) => e.preventDefault()}>
+      {draft.notice}
       <FormLegend />
       <TextField id="ar-name" label="규칙 이름" required defaultValue="랜섬웨어 연속 탐지" />
       <FormSection>조건</FormSection>

@@ -1,4 +1,4 @@
-import { Button, CopyField, Icon, Indicator, Spacer, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Toolbar } from "@jiran/ds-react";
+import { Button, CopyField, Icon, Indicator, PageHead, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
 
 /* 목록에는 알아볼 수 있는 앞자리만 — 비밀값 전체는 두지 않는다. 만료 7일 안은 위험 점, 30일 안은 경고 점, 그보다 멀면 날짜만 */
 const KEYS = [
@@ -10,14 +10,11 @@ const KEYS = [
 export default function Example() {
   return (
     <Stack>
-      <Toolbar>
-        <Spacer />
-        <Button iconLeft={<Icon name="plus" />}>API 키 만들기</Button>
-      </Toolbar>
+      <PageHead as="h2" title="API 키" actions={<Button iconLeft={<Icon name="plus" />}>API 키 만들기</Button>} />
       <Table hover nowrap>
         <TableHead>
           <TableRow>
-            <TableHeader>이름</TableHeader><TableHeader>키 ID</TableHeader><TableHeader>앞자리</TableHeader><TableHeader>만료</TableHeader><TableHeader>마지막 사용</TableHeader>
+            <TableHeader>이름</TableHeader><TableHeader>키 ID</TableHeader><TableHeader>앞자리</TableHeader><TableHeader sortable sorted="asc">만료</TableHeader><TableHeader>마지막 사용</TableHeader>
             <TableHeader actions><span className="sr-only">동작</span></TableHeader>
           </TableRow>
         </TableHead>

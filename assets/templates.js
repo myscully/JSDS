@@ -35,7 +35,7 @@
       if (!tree || tree.getAttribute("aria-label") !== "조직도") return;
       const d = D[e.detail && e.detail.value]; if (!d) return;
       for (const k of ["name", "path", "lead", "count", "code", "scope"]) $$(`[data-org="${k}"]`).forEach((x) => { x.textContent = d[k]; });
-      const tb = $('[data-org="members"]'); if (tb) { tb.innerHTML = d.rows; $$(".avatar[data-name]", tb).forEach((a) => { a.dataset.tone = String(window.DS.avatarTone(a.dataset.name)); }); }
+      const tb = $('[data-org="members"]'); if (tb) { tb.innerHTML = d.rows; }
       const rn = $("#org-rename-name"); if (rn) rn.value = d.name;
     });
   }

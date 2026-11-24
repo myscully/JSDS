@@ -41,7 +41,7 @@ export default function Example() {
         </ChipGroup>
         <Button variant="text" color="assistive" size="sm" onClick={() => { setConds([]); setSev([]); }}>필터 초기화</Button>
         <Spacer />
-        <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>내보내기</Button>
+        <Button variant="outline" color="assistive" size="sm" iconLeft={<Icon name="download" />}>CSV 내보내기</Button>
       </Toolbar>
       <DataTable hover nowrap columns={COLUMNS} rows={ROWS} rowKey={(r) => r.id} defaultSort={{ key: "time", dir: "desc" }} />
       <PaginationBar summary={<>총 <b>128</b>건 · 1–50</>}>

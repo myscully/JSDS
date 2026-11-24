@@ -64,12 +64,12 @@ module.exports = async function chart({ page, ok, go }) {
     const hi = await page.evaluate(() => { const ch = document.querySelector("#ex-data-visual-bar-emphasis canvas[data-chart]").__dsChart.chart, T = window.DSChart.theme(document.documentElement);
       return { bg: ch.data.datasets[0].backgroundColor, m1: T.mono[0], m4: T.mono[3] }; });
     ok("bar highlight: only bar 4 (Friday) takes mono-1, the rest mono-4", Array.isArray(hi.bg) && hi.bg.length === 7 && hi.bg.every((c, i) => c === (i === 4 ? hi.m1 : hi.m4)), JSON.stringify(hi));
-    /* 그라데이션 옵션은 2026-11-20 에 없앴다(사람의 결정) — 둘째 카드(월별)도 단색 강조: 이번 달 막대가 위 · 아래 끝까지 불투명 mono-1 */
+    /* 그라데이션 옵션(2026-11-24 에 되살림 — 사람의 결정) — 둘째 카드(월별)는 gradient: 이번 달 막대가 값 끝은 불투명 mono-1, 기준선 쪽은 같은 색 55% */
     const sel = "#ex-data-visual-bar-emphasis .chart-card:nth-child(2) canvas[data-chart]";
     const geo = await page.evaluate((sel) => { const ch = document.querySelector(sel).__dsChart.chart, b = ch.getDatasetMeta(0).data[5]; return { x: b.x, top: b.y, base: b.base, m1: window.DSChart.theme(document.documentElement).mono[0], spec: JSON.parse(document.querySelector(sel).dataset.spec) }; }, sel);
     const [top, bottom] = await px(sel, [[geo.x, geo.top + 6], [geo.x, geo.base - 3]]);
     const m1 = rgbOf(geo.m1);
-    ok("bar emphasis is a solid colour — the highlighted bar is opaque mono-1 at the value end and at the baseline, and the spec has no gradient", near(top.slice(0, 3), m1) && top[3] > 240 && near(bottom.slice(0, 3), m1) && bottom[3] > 240 && !("gradient" in geo.spec), JSON.stringify({ top, bottom, m1, spec: Object.keys(geo.spec) }));
+    ok("bar gradient: the month card (spec gradient:true) paints mono-1 opaque at the value end and the same hue at about 55% at the baseline", near(top.slice(0, 3), m1) && top[3] > 240 && near(bottom.slice(0, 3), m1) && bottom[3] > 120 && bottom[3] < 165 && geo.spec.gradient === true, JSON.stringify({ top, bottom, m1, spec: Object.keys(geo.spec) }));
     /* 다크로 바꾸면 다크 mono-1 로 다시 칠한다 */
     await theme("dark");
     const geoD = await page.evaluate((sel) => { const ch = document.querySelector(sel).__dsChart.chart, b = ch.getDatasetMeta(0).data[5]; return { x: b.x, top: b.y, base: b.base, m1: window.DSChart.theme(document.documentElement).mono[0] }; }, sel);

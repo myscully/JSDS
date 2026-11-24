@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState, type ChangeEvent, type CSSProperties, type FocusEvent, type KeyboardEvent, type MouseEvent } from "react";
+import { useContext, useEffect, useLayoutEffect, useRef, useState, type ChangeEvent, type CSSProperties, type FocusEvent, type KeyboardEvent, type MouseEvent } from "react";
 import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { useEscape } from "../../utils/hooks";
@@ -31,6 +31,8 @@ interface ComboboxBase<T extends string> {
   filter?: boolean;
   /** 입력이 멈추고 300ms 뒤 */
   onQueryChange?: (query: string) => void;
+  /** 여러 개 — 태그가 넘칠 때. scroll(기본)은 필드 높이를 지키고 태그 줄이 가로로 스크롤, wrap 은 줄을 바꿔 필드가 늘어난다 */
+  overflow?: "scroll" | "wrap";
 }
 export type ComboboxProps<T extends string = string> = ComboboxBase<T> &
   ({ multiple?: false; value?: T | null; defaultValue?: T | null; onChange?: (value: T | null) => void } | { multiple: true; value?: T[]; defaultValue?: T[]; onChange?: (value: T[]) => void });
@@ -40,7 +42,7 @@ const textOf = (o: SelectOption<string>) => (typeof o.label === "string" ? o.lab
 
 /** 입력해서 찾아 고르기 · 여러 개 고르기. 포커스는 입력에 두고 aria-activedescendant 로 옮긴다. 목록에 있는 값만 고른다 */
 export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
-  const { options, placeholder, label, name, required, disabled, id, className, style, defaultOpen = false, status, statusText, onRetry, filter = true, onQueryChange, multiple } = props;
+  const { options, placeholder, label, name, required, disabled, id, className, style, defaultOpen = false, status, statusText, onRetry, filter = true, onQueryChange, multiple, overflow = "scroll" } = props;
   const field = useContext(FieldContext);
   const form = useContext(FormValidationContext);
   const autoId = useId(undefined, "cb");
@@ -60,6 +62,7 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
   const [leaves, setLeaves] = useState(0);
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
+  const track = useRef<HTMLDivElement>(null);
   const touched = useRef(false);
   const timer = useRef<number | undefined>(undefined);
   const known = useRef(new Map<string, string>());
@@ -87,6 +90,15 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
   useEscape(close, open);
   const { up, floating, vars } = useMenuPlacement(root, ".control", open, close);
   useEffect(() => () => window.clearTimeout(timer.current), []);
+  const scrolls = !!multiple && overflow !== "wrap";
+  /* 가로 스크롤 — 태그가 바뀌면 입력칸이 보이게 줄 끝으로. 세로 휠은 넘칠 때만 가로로(사이트 ds.js 와 같음) */
+  useLayoutEffect(() => { const t = track.current; if (t && scrolls) t.scrollLeft = t.scrollWidth; }, [selected.length, scrolls]);
+  useEffect(() => {
+    const t = track.current; if (!t || !scrolls) return;
+    const wheel = (e: WheelEvent) => { if (t.scrollWidth > t.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); t.scrollLeft += e.deltaY; } };
+    t.addEventListener("wheel", wheel, { passive: false });
+    return () => t.removeEventListener("wheel", wheel);
+  }, [scrolls]);
   useEffect(() => {
     if (active !== null) document.getElementById(`${listId}-${active}`)?.scrollIntoView?.({ block: "nearest" });
   }, [active, listId]);
@@ -179,36 +191,44 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
     else openMenu();
   };
 
+  const fieldInput = (
+    <input
+      ref={input}
+      type="text"
+      id={inputId}
+      role="combobox"
+      aria-autocomplete="list"
+      aria-expanded={open}
+      aria-controls={listId}
+      aria-activedescendant={open && active !== null ? `${listId}-${active}` : undefined}
+      aria-label={field?.labelId ? undefined : label}
+      aria-labelledby={field?.labelId}
+      aria-describedby={field?.helpId}
+      aria-invalid={field?.error || undefined}
+      autoComplete="off"
+      placeholder={placeholder}
+      disabled={disabled}
+      value={shown}
+      onChange={onInput}
+      onKeyDown={onKeyDown}
+      data-ds-field={form ? "" : undefined}
+      data-ds-choice={form ? "" : undefined}
+      data-ds-required={required ? "" : undefined}
+      data-ds-empty={selected.length ? undefined : ""}
+    />
+  );
+
   return (
-    <div ref={root} className={cx("combobox", open && "open", up && "up", floating && "float", disabled && "disabled", className)} style={{ ...vars, ...style }} data-multiple={multiple ? "" : undefined} onBlur={onBlur}>
+    <div ref={root} className={cx("combobox", open && "open", up && "up", floating && "float", disabled && "disabled", className)} style={{ ...vars, ...style }} data-multiple={multiple ? "" : undefined} data-overflow={multiple && overflow === "wrap" ? "wrap" : undefined} onBlur={onBlur}>
       <div className="control" onClick={onControlClick} onMouseDown={(e) => { if (e.target !== input.current) e.preventDefault(); }}>
-        {multiple && selected.map((v) => (
-          <Chip key={v} size="sm" removeLabel="제거" onRemove={() => { if (!disabled) remove(v); }}>{labelOf(v)}</Chip>
-        ))}
-        <input
-          ref={input}
-          type="text"
-          id={inputId}
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={open}
-          aria-controls={listId}
-          aria-activedescendant={open && active !== null ? `${listId}-${active}` : undefined}
-          aria-label={field?.labelId ? undefined : label}
-          aria-labelledby={field?.labelId}
-          aria-describedby={field?.helpId}
-          aria-invalid={field?.error || undefined}
-          autoComplete="off"
-          placeholder={placeholder}
-          disabled={disabled}
-          value={shown}
-          onChange={onInput}
-          onKeyDown={onKeyDown}
-          data-ds-field={form ? "" : undefined}
-          data-ds-choice={form ? "" : undefined}
-          data-ds-required={required ? "" : undefined}
-          data-ds-empty={selected.length ? undefined : ""}
-        />
+        {multiple ? (
+          <div className="control-track" ref={track}>
+            {selected.map((v) => (
+              <Chip key={v} size="sm" removeLabel="제거" onRemove={() => { if (!disabled) remove(v); }}>{labelOf(v)}</Chip>
+            ))}
+            {fieldInput}
+          </div>
+        ) : fieldInput}
       </div>
       <ul className="menu" role="listbox" id={listId} tabIndex={-1} aria-label={label} aria-multiselectable={multiple || undefined} onMouseDown={(e) => e.preventDefault()}>
         {state ? (
@@ -228,6 +248,7 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
                 hidden={!visible.includes(o) || undefined}
                 onClick={() => { if (!o.disabled) pick(o); }}
               >
+                {multiple && <span className="menu-mark check" aria-hidden="true" />}
                 {o.label}
               </li>
             );

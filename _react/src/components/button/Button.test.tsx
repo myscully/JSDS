@@ -126,4 +126,23 @@ describe("Button", () => {
     expect(container.children[0].className).toBe("btn-group end");
     expect(container.children[1].className).toBe("btn-group vertical");
   });
+
+  it("tooltip 은 접근 이름을 문구로 하는 Tooltip 으로 감싸고, 끈 버튼 · 이름 없는 버튼은 감싸지 않는다", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { container } = render(<>
+      <Button iconOnly tooltip aria-label="새로 고침">r</Button>
+      <Button iconOnly tooltip="bottom" aria-label="설정">s</Button>
+      <Button iconOnly tooltip disabled aria-label="삭제">d</Button>
+      <Button iconOnly tooltip aria-labelledby="x">n</Button>
+    </>);
+    const [a, b, c, d] = Array.from(container.children) as HTMLElement[];
+    expect(a.className).toBe("tooltip-wrap");
+    expect(a.querySelector("button")!.getAttribute("aria-describedby")).toBeNull();   // 이름과 같으니 되풀이해 잇지 않는다
+    expect(a.querySelector(".tooltip")!.textContent).toBe("새로 고침");
+    expect(b.querySelector(".tooltip")!.className).toBe("tooltip bottom");
+    expect(c.tagName).toBe("BUTTON");
+    expect(d.tagName).toBe("BUTTON");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("tooltip"));
+    warn.mockRestore();
+  });
 });

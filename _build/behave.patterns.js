@@ -52,7 +52,7 @@ module.exports = async function patterns({ page, ok, go }) {
       s0 === 1 && s1 === 2 && s2 === 3 && btns.next && !btns.finish && ev.includes("ds:step-finish"), JSON.stringify({ s0, s1, s2, btns, ev }));
   });
 
-  await part("4 · 검색 — 결과 줄의 조건 Chip 을 지우면 사라지고 ds:chip-remove · 빈 결과는 표 대신 Empty State", async () => {
+  await part("4 · 검색 — 결과 줄의 조건 Chip 을 지우면 사라지고 ds:chip-remove · 빈 결과는 표 틀 안 Empty State(2026-11-23)", async () => {
     await go("patterns/search.html");
     await listen(["ds:chip-remove"]);
     const sel = ex("search", "toolbar");
@@ -60,8 +60,8 @@ module.exports = async function patterns({ page, ok, go }) {
     await page.locator(`${sel} .toolbar.sub .chip .x`).first().click(); await wait(150);
     const n1 = await page.locator(`${sel} .toolbar.sub .chip`).count(), ev = (await events()).map((e) => e[0]);
     const empty = await page.evaluate((s) => { const p = document.querySelector(s); return { empty: !!p.querySelector(".empty"), table: !!p.querySelector("table"), reset: [...p.querySelectorAll(".empty .btn")].map((b) => b.textContent.trim()) }; }, ex("search", "empty"));
-    ok("search: removing a condition chip drops it and fires ds:chip-remove; the empty result shows an Empty State with 필터 초기화 instead of a table",
-      n0 === 2 && n1 === 1 && ev.includes("ds:chip-remove") && empty.empty && !empty.table && empty.reset.join() === "필터 초기화", JSON.stringify({ n0, n1, ev, empty }));
+    ok("search: removing a condition chip drops it and fires ds:chip-remove; the empty result keeps the table frame with an Empty State and 필터 초기화 in its body",
+      n0 === 2 && n1 === 1 && ev.includes("ds:chip-remove") && empty.empty && empty.table && empty.reset.join() === "필터 초기화", JSON.stringify({ n0, n1, ev, empty }));
   });
 
   await part("5 · 로그 뷰어 — 행 펼침 · 한 줄 행 · 고정 헤더 영역 · 새 로그 안내", async () => {
@@ -142,7 +142,7 @@ module.exports = async function patterns({ page, ok, go }) {
 
   await part("9 · 오류 화면 — 화면마다 다음 행동 하나", async () => {
     await go("patterns/error-pages.html");
-    const r = await page.evaluate(() => [...document.querySelectorAll("#ex-error-pages-pages .empty, #ex-error-pages-inline .empty")].map((e) => e.querySelectorAll(".btn, a.link").length));
+    const r = await page.evaluate(() => [...document.querySelectorAll("#ex-error-pages-pages .empty, #ex-error-pages-inline .empty")].map((e) => e.querySelectorAll(".btn:not(.copy), a.link").length));   /* 오류 정보 복사는 정보라 세지 않는다(2026-11-23) */
     ok("error pages: each of the six states offers exactly one next action", r.length === 6 && r.every((n) => n === 1), JSON.stringify(r));
   });
 

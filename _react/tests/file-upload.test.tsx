@@ -64,7 +64,7 @@ describe("FileUpload", () => {
     choose(container, mk("empty.pem", 0));
     expect(msg()).toBe("빈 파일입니다. 내용이 있는 파일을 고르세요.");
     expect(onAdd).not.toHaveBeenCalled();
-    expect(container.querySelector(".upload-status")?.textContent).toBe("1개는 올릴 수 없습니다.");
+    expect(container.querySelector(".upload-status")?.textContent).toBe("1개는 올릴 수 없습니다. 파일 목록에서 이유를 확인하세요.");
   });
 
   it("accepts mime wildcards and exact types", () => {
@@ -79,7 +79,7 @@ describe("FileUpload", () => {
     const { container } = render(<Host multiple accept=".csv" />);
     choose(container, mk("bad.exe"), mk("one.csv"));
     expect(rowNames(container)).toEqual(["one.csv", "bad.exe"]);
-    expect(container.querySelector(".upload-status")?.textContent).toBe("파일 1개를 추가했습니다. 1개는 올릴 수 없습니다.");
+    expect(container.querySelector(".upload-status")?.textContent).toBe("파일 1개를 추가했습니다. 1개는 올릴 수 없습니다. 파일 목록에서 이유를 확인하세요.");
   });
 
   it("rejects duplicates and files over the count", () => {
@@ -224,7 +224,7 @@ describe("FileUpload", () => {
     it("blocks an empty submit, focuses the button and clears when a file comes", () => {
       const { container, help, save, onSubmit } = setup();
       save();
-      expect(help()).toBe("필수 항목입니다. 파일을 선택하세요.");
+      expect(help()).toBe("고른 파일이 없습니다. 파일을 선택하세요.");
       expect(onSubmit).not.toHaveBeenCalled();
       expect(document.activeElement).toBe(container.querySelector(".upload-pick"));
       act(() => choose(container, mk("a.pem")));
@@ -253,7 +253,7 @@ describe("FileUpload", () => {
       expect(help()).toBe("올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.");
       expect(onSubmit).not.toHaveBeenCalled();
       fireEvent.click(screen.getByRole("button", { name: "a.pem 지우기" }));
-      expect(help()).toBe("필수 항목입니다. 파일을 선택하세요.");
+      expect(help()).toBe("고른 파일이 없습니다. 파일을 선택하세요.");
       act(() => choose(container, mk("x.txt")));
       save();
       expect(help()).toBe("올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.");
@@ -263,7 +263,7 @@ describe("FileUpload", () => {
       const { help } = setup([{ id: "1", name: "a.pem", size: 3, status: "done" }]);
       expect(help()).toBe("PEM");
       fireEvent.click(screen.getByRole("button", { name: "a.pem 지우기" }));
-      expect(help()).toBe("필수 항목입니다. 파일을 선택하세요.");
+      expect(help()).toBe("고른 파일이 없습니다. 파일을 선택하세요.");
     });
 
     it("stays quiet about a failed send until a submit is tried", () => {

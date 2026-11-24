@@ -26,7 +26,7 @@ export default function Example() {
               <Button>원격 점검</Button>
             <Dropdown kind="menu" align="end" keepMounted>
               <DropdownTrigger asChild>
-                <Button variant="outline" color="assistive" iconOnly aria-label="PC-2041 동작 더 보기"><Icon name="dots" /></Button>
+                <Button variant="outline" color="assistive" iconOnly tooltip="left" aria-label="PC-2041 동작 더 보기"><Icon name="dots" /></Button>
               </DropdownTrigger>
               <Menu>
                 <MenuItem icon="refresh" onSelect={() => {}}>에이전트 재설치</MenuItem>

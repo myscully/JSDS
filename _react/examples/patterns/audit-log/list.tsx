@@ -1,4 +1,5 @@
-import { DataTable, DateRangePicker, Indicator, Link, SearchBar, Stack, Toolbar, type DataTableColumn } from "@jiran/ds-react";
+import { useState } from "react";
+import { DataTable, DateRangePicker, Indicator, Link, Pagination, PaginationBar, SearchBar, Stack, Toolbar, type DataTableColumn } from "@jiran/ds-react";
 
 type Entry = { id: string; time: string; user: string; action: string; target: string; href?: string; ok: boolean; meta: [string, string][] };
 const ROWS: Entry[] = [
@@ -7,7 +8,7 @@ const ROWS: Entry[] = [
   { id: "3", time: "09:58", user: "박지훈", action: "내보내기", target: "로그 7일", ok: true, meta: [["접속 IP", "10.0.0.31"], ["형식", "CSV · 48,213줄"]] },
 ];
 const COLUMNS: DataTableColumn<Entry>[] = [
-  { key: "time", header: "시간", render: (r) => `11. 15 ${r.time}` },
+  { key: "time", header: "시간", sortable: true, render: (r) => `11. 15 ${r.time}` },
   { key: "user", header: "사용자" },
   { key: "action", header: "동작" },
   { key: "target", header: "대상", render: (r) => (r.href ? <Link href={r.href}>{r.target}</Link> : r.target) },
@@ -21,6 +22,7 @@ const PRESETS = [{ label: "최근 7일", range: (): [Date, Date] => [daysAgo(6),
 
 /* 감사 기록은 고칠 수 없다 — 편집 · 삭제 동작이 없다. 행을 펼쳐 접속 IP · 사유 · 바뀐 항목(변경 전 → 변경 후)을 본다 */
 export default function Example() {
+  const [page, setPage] = useState(1);
   return (
     <Stack>
       <Toolbar>
@@ -33,6 +35,7 @@ export default function Example() {
         columns={COLUMNS}
         rows={ROWS}
         rowKey={(r) => r.id}
+        defaultSort={{ key: "time", dir: "desc" }}
         defaultExpanded={new Set(["1"])}
         expandLabel={(r) => `${r.time} 기록 상세`}
         renderExpanded={(r) => (
@@ -41,6 +44,9 @@ export default function Example() {
           </dl>
         )}
       />
+      <PaginationBar summary={<>총 <b>142</b>건 · 1–50</>}>
+        <Pagination compact page={page} total={3} onChange={setPage} />
+      </PaginationBar>
     </Stack>
   );
 }

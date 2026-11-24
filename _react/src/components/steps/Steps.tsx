@@ -139,6 +139,8 @@ const quiet = (panel: HTMLElement | null) =>
 export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
   { steps, current, defaultCurrent = 0, onStepChange, onFinish, async: isAsync, layout = "horizontal", nonLinear, actions = true, labels, "aria-label": ariaLabel = "진행 단계", className, ...rest }, ref) {
   useCountWarning(steps.length);
+  /* 완료 버튼은 결과를 말하는 이름으로(2026-11-23 — Writing › Buttons) */
+  useEffect(() => { if (actions && !labels?.finish) warnOnce("stepper-finish", "[ds-react] Stepper 완료 버튼이 기본 문구 '완료' 입니다. labels.finish 에 결과를 말하는 이름(예: 정책 만들기)을 주세요."); }, [actions, labels?.finish]);
   const [inner, setInner] = useState(defaultCurrent);
   const cur = current ?? inner, last = steps.length - 1;
   const [done, setDone] = useState(() => new Set(Array.from({ length: current ?? defaultCurrent }, (_, i) => i)));

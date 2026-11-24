@@ -122,7 +122,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       await page.locator("#sel-f2").click(); await page.waitForTimeout(40); await page.keyboard.press("Escape"); await page.waitForTimeout(40);
       ok("select: optional field stays quiet when closed empty", !(await f2.evaluate((e) => e.classList.contains("error"))));
       await page.locator(`${F} button[type=submit]`).click(); await page.waitForTimeout(80);
-      ok("select: submit is blocked with the choose message", await f1.evaluate((e) => e.classList.contains("error") && e.querySelector(".help").textContent === "필수 항목입니다. 항목을 선택하세요." && e.querySelector(".trigger").getAttribute("aria-invalid") === "true"));
+      ok("select: submit is blocked with the choose message", await f1.evaluate((e) => e.classList.contains("error") && e.querySelector(".help").textContent === "고른 항목이 없습니다. 항목을 선택하세요." && e.querySelector(".trigger").getAttribute("aria-invalid") === "true"));
       ok("select: submit moves focus to the first error", await page.evaluate(() => document.activeElement.id === "sel-f1"));
       await t1.click(); await page.waitForTimeout(40);
       ok("select: open errored field keeps the red ring", (await t1.evaluate((e) => getComputedStyle(e).boxShadow)).includes("4px"));
@@ -175,9 +175,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const M = page.locator(`${ex("combobox", "multiple")} .combobox`), MI = page.locator("#cb-m"), chips = () => M.evaluate((e) => [...e.querySelectorAll(".chip")].map((c) => c.textContent.trim()));
       await MI.click(); await page.waitForTimeout(30);
       await M.locator(".menu-item").nth(1).click(); await page.waitForTimeout(30);
-      ok("combobox multi: picked item becomes a tag in option order", JSON.stringify(await chips()) === '["영업팀","개발팀","보안팀"]', JSON.stringify(await chips()));
+      ok("combobox multi: picked item becomes a tag in option order (example has five tags so it overflows — 2026-11-23)", JSON.stringify(await chips()) === '["영업팀","개발팀","인프라팀","보안팀","디자인팀","고객지원팀"]', JSON.stringify(await chips()));
       ok("combobox multi: list stays open and focus stays in the input", await M.evaluate((e) => e.classList.contains("open") && document.activeElement === e.querySelector("input[role=combobox]")));
-      ok("combobox multi: ds:select carries an array", JSON.stringify(await page.evaluate(() => window.__cb.at(-1))) === '["영업팀","개발팀","보안팀"]');
+      ok("combobox multi: ds:select carries an array", JSON.stringify(await page.evaluate(() => window.__cb.at(-1))) === '["영업팀","개발팀","인프라팀","보안팀","디자인팀","고객지원팀"]');
       await page.keyboard.type("재"); await page.waitForTimeout(30); await page.keyboard.press("Enter"); await page.waitForTimeout(30);
       ok("combobox multi: Enter adds and clears the query", (await chips()).includes("재무팀") && (await MI.inputValue()) === "");
       ok("combobox multi: selection is announced", (await st(M)) === "재무팀 선택됨", await st(M));
@@ -206,7 +206,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       await page.locator("#cb-f1").focus(); await page.keyboard.press("Tab"); await page.waitForTimeout(30);
       ok("combobox: tabbing through without opening is quiet", !(await f1.evaluate((e) => e.classList.contains("error"))));
       await page.locator(`${F} button[type=submit]`).click(); await page.waitForTimeout(60);
-      ok("combobox: submit is blocked on both fields", await page.locator(`${F} .field.error`).count() === 2 && (await f1.locator(".help").textContent()) === "필수 항목입니다. 항목을 선택하세요.");
+      ok("combobox: submit is blocked on both fields", await page.locator(`${F} .field.error`).count() === 2 && (await f1.locator(".help").textContent()) === "고른 항목이 없습니다. 항목을 선택하세요.");
       ok("combobox: submit moves focus to the first input", await page.evaluate(() => document.activeElement.id === "cb-f1"));
       ok("combobox: error field keeps the red ring", (await f1.locator(".control").evaluate((e) => getComputedStyle(e).boxShadow)).includes("4px"));
       ok("combobox: the input inside an error field draws no ring of its own", (await page.locator("#cb-f1").evaluate((e) => document.activeElement === e && getComputedStyle(e).boxShadow)) === "none");
@@ -1188,7 +1188,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       await S.evaluate((b) => { window.__v = null; b.form.addEventListener("ds:validate", (e) => { window.__v = e.detail; }); });
       await S.click(); await page.waitForTimeout(40); s = await st();
       const v = await page.evaluate(() => window.__v), optInvalid = await I.evaluateAll((k) => k.filter((x) => x.hasAttribute("aria-invalid") || x.hasAttribute("aria-describedby")).length);
-      ok(`${pg}: submit flags the empty group, links the message and focuses the first option`, optInvalid === 0 && s.err && s.help === "필수 항목입니다. 항목을 선택하세요." && s.inv === "true" && s.linked && s.focus && v.valid === false && v.errors[0].label === (pg === "checkbox" ? "알림 채널" : "격리 해제 권한"), JSON.stringify({ s, v, optInvalid }));
+      ok(`${pg}: submit flags the empty group, links the message and focuses the first option`, optInvalid === 0 && s.err && s.help === "고른 항목이 없습니다. 항목을 선택하세요." && s.inv === "true" && s.linked && s.focus && v.valid === false && v.errors[0].label === (pg === "checkbox" ? "알림 채널" : "격리 해제 권한"), JSON.stringify({ s, v, optInvalid }));
       const ring = await I.evaluateAll((k) => { const d = document.createElement("div"); d.style.color = "var(--foreground-negative-primary)"; document.body.append(d); const want = getComputedStyle(d).color; d.remove(); return { want, shadow: getComputedStyle(k[1]).boxShadow }; });
       ok(`${pg}: an empty option in an error group gets the error line`, ring.shadow.includes(ring.want), JSON.stringify(ring));
       await I.nth(1).check(); await page.waitForTimeout(30); s = await st();
@@ -1497,7 +1497,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     const vBlocked = await page.evaluate(() => { const f = document.querySelector("#ex-input-form-validate form"), box = f.querySelectorAll(":scope > .notice, [data-form-summary], .form-summary").length; return { reached: window.__reached, focus: document.activeElement.id, box, first: f.firstElementChild.className, errs: f.querySelectorAll(".field.error").length, ev: window.__ev[window.__ev.length - 1] }; });
     ok("validate: submit is blocked before product handlers, focus on first error", vBlocked.reached === 0 && vBlocked.focus === "v1" && vBlocked.errs === 3, JSON.stringify(vBlocked));
     ok("validate: three errors draw no summary above the form — the legend stays first (2026-11-16)", vBlocked.box === 0 && vBlocked.first === "form-legend", JSON.stringify(vBlocked));
-    ok("validate: ds:validate reports the errors", vBlocked.ev && vBlocked.ev.valid === false && vBlocked.ev.errors.length === 3 && vBlocked.ev.errors[0].message === "필수 항목입니다. 값을 입력하세요.", JSON.stringify(vBlocked.ev));
+    ok("validate: ds:validate reports the errors", vBlocked.ev && vBlocked.ev.valid === false && vBlocked.ev.errors.length === 3 && vBlocked.ev.errors[0].message === "값이 비어 있습니다. 값을 입력하세요.", JSON.stringify(vBlocked.ev));
     await vin("v1").fill("외부 USB 차단");
     ok("validate: fixing one field clears only that field's error and still no summary", (await vf.locator(".field.error").count()) === 2 && (await vf.locator(":scope > .notice, [data-form-summary]").count()) === 0);
     await vin("v3").fill("500"); await page.keyboard.press("Tab");
@@ -1746,7 +1746,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       return [...document.querySelectorAll('canvas:is([data-chart="timeseries"],[data-chart="bar"],[data-chart="donut"],[data-chart="mixed"])')].map((c) => {
         const h = c.__dsChart, ch = h && h.chart, kind = c.dataset.chart, ds = ch ? ch.data.datasets : [], r = c.getBoundingClientRect();
         if (!ch) return { kind, mounted: false };
-        const special = false, hl = ch.$ds.highlight;   // 막대 그라데이션은 2026-11-20 에 없앴다 — 모든 칠을 토큰과 대조한다
+        const special = !!ch.$ds.gradient, hl = ch.$ds.highlight;   // 그라데이션 막대(2026-11-24 되살림)는 칠이 CanvasGradient 라 behave.chart 가 픽셀로 잰다 — 나머지 칠은 토큰과 대조한다
         const pal = kind === "donut" ? DSChart.palette(T, ch.$ds.color, ds[0]._dsTones) : DSChart.palette(T, ch.$ds.color, ds.map((d) => d.tone));
         const card = c.closest(".chart-card"), size = card && card.classList.contains("sm") ? "sm" : card && card.classList.contains("lg") ? "lg" : "md";
         return { kind, mounted: true, size, label: c.getAttribute("aria-label"), h: Math.round(r.height), w: Math.round(r.width), n: ds.length, legend: ch.options.plugins.legend.display,
@@ -1756,7 +1756,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
           grid: kind === "donut" ? null : ch.options.scales[ch.options.indexAxis === "y" ? "x" : "y"].grid.color,   // 격자는 값 축에만(2026-11-20 — 가로 막대는 x)
           gridTok: tok(DSChart.TOKENS.grid), axis: ch.options.plugins.legend.labels.color, axisTok: tok(DSChart.TOKENS.axis),
           line: ds[0].borderWidth, pr: ds[0].pointHoverRadius, radius: typeof ds[0].borderRadius === "function" ? "fn" : ds[0].borderRadius,
-          /* 막대는 값 쪽 끝만 4 둥글고 바닥 각짐 · stroke 없음(2026-11-20 dataviz — 11-05 각지게 · 11-06 틈 없이를 바꿈). 누적은 반경 · 틈이 조각마다라 함수("fn"), 픽셀은 아래 틈 단정 · behave.dataviz 가 잰다 */
+          /* 막대는 네 모서리 각짐 · stroke 없음(2026-11-24 — 11-20 의 값 끝 4 를 지움). 누적은 틈이 조각마다라 borderWidth 가 함수("fn"), 픽셀은 behave.dataviz 가 잰다 */
           bars: ds.filter((d) => d.type === "bar" || (kind === "bar" && !d.type)).map((d) => [typeof d.borderRadius === "function" ? "fn" : d.borderRadius, typeof d.borderWidth === "function" ? "fn" : d.borderWidth, d.borderColor, d.borderSkipped, d.maxBarThickness, !!ch.options.scales[ch.options.indexAxis === "y" ? "x" : "y"]?.stacked]),
           point: [ch.options.plugins.legend.labels.pointStyle, ch.options.plugins.tooltip.pointStyle] };
       });
@@ -1769,8 +1769,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
     /* 범주 축은 라벨을 건너뛰지 않는다 — paint 가 기본 옵션으로 프리셋 옵션을 덮어 5개 중 3개만 보였다(Figma 대조에서 발견, 2026-11-04) */
     const barTicks = await page.evaluate(() => [...document.querySelectorAll('canvas[data-chart="bar"]')].map((c) => { const ch = c.__dsChart.chart, ax = ch.options.indexAxis === "y" ? "y" : "x"; return { labels: ch.data.labels.length, ticks: ch.scales[ax].ticks.length, autoSkip: ch.options.scales[ax].ticks.autoSkip }; }));
     ok("bar charts show every category label", barTicks.length >= 2 && barTicks.every((b) => b.ticks === b.labels && b.autoSkip === false), JSON.stringify(barTicks));
-    ok("chart legend only with 2+ series, mixed keeps one y axis, line 2 · hover point 8 · bar end radius 4", ch1.every((c) => c.legend === (c.kind === "donut" ? true : c.n > 1)) && ch1.filter((c) => c.kind !== "donut").every((c) => c.yAxes === 1) && ch1.filter((c) => c.kind === "timeseries").every((c) => c.line === 2 && c.pr === 4) && ch1.filter((c) => c.kind === "bar").every((c) => c.radius === 4 || c.radius === "fn"), JSON.stringify(ch1.map((c) => [c.kind, c.n, c.legend, c.yAxes, c.line, c.pr, c.radius])));
-    ok("chart bars: value end 4 · square base (borderSkipped start) · at most 24 thick · no stroke colour — stacked bars carve the 2px gap with a per-segment transparent border (bar · mixed)", ch1.filter((c) => c.bars.length).length >= 3 && ch1.every((c) => c.bars.every(([r, w, col, sk, max, st]) => (st ? r === "fn" && w === "fn" : r === 4 && w === 0) && col === "transparent" && sk === "start" && max === 24)), JSON.stringify(ch1.map((c) => [c.kind, c.bars])));
+    ok("chart legend only with 2+ series, mixed keeps one y axis, line 2 · hover point 8 · square bars (radius 0)", ch1.every((c) => c.legend === (c.kind === "donut" ? true : c.n > 1)) && ch1.filter((c) => c.kind !== "donut").every((c) => c.yAxes === 1) && ch1.filter((c) => c.kind === "timeseries").every((c) => c.line === 2 && c.pr === 4) && ch1.filter((c) => c.kind === "bar").every((c) => c.radius === 0), JSON.stringify(ch1.map((c) => [c.kind, c.n, c.legend, c.yAxes, c.line, c.pr, c.radius])));
+    ok("chart bars: all four corners square (2026-11-24) · borderSkipped start · at most 24 thick · no stroke colour — stacked bars carve the 2px gap with a per-segment transparent border (bar · mixed)", ch1.filter((c) => c.bars.length).length >= 3 && ch1.every((c) => c.bars.every(([r, w, col, sk, max, st]) => (r === 0 && (st ? w === "fn" : w === 0)) && col === "transparent" && sk === "start" && max === 24)), JSON.stringify(ch1.map((c) => [c.kind, c.bars])));
     ok("chart legends use circle markers and tooltips a line key (2026-11-20 dataviz — 범례는 원 그대로, 툴팁은 짧은 선)", ch1.every((c) => c.point[0] === "circle" && c.point[1] === "line"), JSON.stringify(ch1.map((c) => [c.kind, c.point])));
     /* 비교 기간 = 한 톤의 진한 · 옅은 끝(2026-11-15 — 11-05 의 series-1 · subtle 을 바꿈), 막대 위 선은 진한 톤 series-1-strong(사람의 결정 2026-11-05) */
     const tones = await page.evaluate(() => { const tok = (n) => DSChart.resolve(document.body, n); const weeks = document.querySelector('#ex-data-visual-bars canvas[data-chart="bar"]').__dsChart.chart.data.datasets, mixed = document.querySelector('canvas[data-chart="mixed"]').__dsChart.chart.data.datasets;
@@ -1830,8 +1830,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       const br = (sel) => [...new Set([...document.querySelectorAll(sel)].map((e) => getComputedStyle(e).borderRadius))];
       return { bars: { track: br(".example-preview .chart .bar"), fill: br(".example-preview .chart .bar i"), spark: br(".example-preview .sparkline i") }, legend: rad(".example-preview .chart-legend i"), ring, cuts, want, kpis: document.querySelectorAll("#ex-data-visual-kpi .kpi").length };
     });
-    /* 2026-11-20 dataviz — 채움은 값 쪽 끝만 4 둥글고 바닥 각짐(가로 막대 = 오른쪽, 스파크라인 = 위), 트랙은 각진 그대로(11-05 의 '모두 각지게' 를 바꿈) */
-    ok("static bar fills and sparklines round only the value end (4) and tracks stay square", JSON.stringify(statics.bars) === JSON.stringify({ track: ["0px"], fill: ["0px 4px 4px 0px"], spark: ["4px 4px 0px 0px"] }), JSON.stringify(statics.bars));
+    /* 2026-11-24 — 채움 · 스파크라인 · 트랙 모두 각짐(11-20 의 값 끝 4 를 지움, 사람의 요청) */
+    ok("static bar fills, sparklines and tracks are all square (2026-11-24)", JSON.stringify(statics.bars) === JSON.stringify({ track: ["0px"], fill: ["0px"], spark: ["0px"] }), JSON.stringify(statics.bars));
     ok("static legend markers are circles", statics.legend.length === 1 && statics.legend[0] === "50%", JSON.stringify(statics.legend));
     ok("static donut boundaries are 2px straight separators spanning the ring at each slice edge", statics.cuts.length === 5 && statics.cuts.every((c, i) => c.w === "2px" && parseFloat(c.h) === statics.ring && Math.abs(c.deg - statics.want[i]) <= 0.2), JSON.stringify(statics));
     ok("KPI example shows three cards", statics.kpis === 3, String(statics.kpis));
@@ -2145,15 +2145,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         afterEx: !!(rules && ex) && !!(ex.compareDocumentPosition(rules) & 4) && !document.querySelector("#rules ~ .example, #rules ~ * .example"), toSpec: !!rules && n === spec, seq: seq.join(","),
         divKv: document.querySelectorAll("div.kv").length };
     });
-    const chB = await chooseOf();   // Button Rules 2 → 3행: '삭제는 중립'(2026-11-14) → 4행: '버튼 묶음'(2026-11-18)
+    const chB = await chooseOf();   // Button Rules 2 → 3행: '삭제는 중립'(2026-11-14) → 4행: '버튼 묶음'(2026-11-18) → 5행: '아이콘 전용'(2026-11-23)
     ok("choose list (dl.kv, 3 rows max) sits right under the lead above the first example; Rules follows the examples and leads straight into Spec",
-      chB.kv === "DL.kv" && chB.keys === "언제 쓰는가|Placement" && chB.above && chB.afterEx && chB.toSpec && chB.seq === "DL.kv4" && !chB.divKv, JSON.stringify(chB));
+      chB.kv === "DL.kv" && chB.keys === "언제 쓰는가|Placement" && chB.above && chB.afterEx && chB.toSpec && chB.seq === "DL.kv5" && !chB.divKv, JSON.stringify(chB));
   });
   await part("part 69 · components/data-table.html", async () => {
     await go("components/data-table.html");
     const chT = await chooseOf();
-    ok("Data Table rules are grouped under five h3 headings, each followed by its own dl.kv (20 rows in all)",
-      chT.keys === "언제 쓰는가|Placement" && chT.above && chT.afterEx && chT.toSpec && chT.seq === "H3,DL.kv3,H3,DL.kv3,H3,DL.kv6,H3,DL.kv7,H3,DL.kv2", JSON.stringify(chT));
+    ok("Data Table rules are grouped under five h3 headings, each followed by its own dl.kv (22 rows in all — 상태 묶음에 '다시 불러오기', 2026-11-23)",
+      chT.keys === "언제 쓰는가|Placement" && chT.above && chT.afterEx && chT.toSpec && chT.seq === "H3,DL.kv3,H3,DL.kv3,H3,DL.kv6,H3,DL.kv7,H3,DL.kv3", JSON.stringify(chT));
   });
   await part("part 70 · patterns/input-form.html", async () => {
 
@@ -2331,9 +2331,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
         checker: pane.querySelectorAll(".sem-row.checker").length,
         titles: [...pane.querySelectorAll("h2")].slice(0, 3).map((h) => h.textContent) };
     });
-    /* 27 → 28: 트리 밖 Chart 절(탐색형 차트 토큰, 2026-11-03). 28 → 29: 트리 밖 Avatar 절(아바타 6색, 2026-11-16) */
-    ok("semantic tab is 29 sections, each a heading + one paragraph + a swatch row",
-      semPage.sections === 29 && semPage.paras === 29, JSON.stringify(semPage).slice(0, 220));
+    /* 27 → 28: 트리 밖 Chart 절(탐색형 차트 토큰, 2026-11-03). 28 → 29: 트리 밖 Avatar 절(아바타 6색, 2026-11-16). 29 → 28: 그 절을 지움(6색을 없앰, 2026-11-24) */
+    ok("semantic tab is 28 sections, each a heading + one paragraph + a swatch row",
+      semPage.sections === 28 && semPage.paras === 28, JSON.stringify(semPage).slice(0, 220));
     ok("no swatch is blank", semPage.blank.length === 0, semPage.blank.join(" ") || "없음");
     /* 알파가 든 절만 체커 바탕 — 솔리드 절에 체커가 깔리면 반투명으로 오독된다 */
     ok("only the alpha sections are checkered", semPage.checker === 15, String(semPage.checker));   // 14 → 15: Line - Field Focus 의 후광이 반투명(2026-11-14)
@@ -2592,6 +2592,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 93f · behave.p2.js", async () => {
     await require("./behave.p2.js")({ page, ok, go });   // 디자인 검토 P2 · P3 — 셸 · 접근 이름 · 제목 단계 · 시각 값 · 모션 · Steps 처리 중 · 상태 예제(2026-11-20)
+  });
+  await part("part 93g · behave.ux.js", async () => {
+    await require("./behave.ux.js")({ page, ok, go });   // VectorLab UI/UX 대조 — 오버레이 입력 보호 · 초안 · 누르는 영역 · 문구 · 패턴(2026-11-23)
+  });
+  await part("part 93h · behave.menu.js", async () => {
+    await require("./behave.menu.js")({ page, ok, go });   // 메뉴 체크 · 라디오 · 적용 영역 · Select 여러 개 · Combobox 넘침 · 표 글자(2026-11-23)
+  });
+  await part("part 93i · behave.fix24.js", async () => {
+    await require("./behave.fix24.js")({ page, ok, go });   // 추가 수정 열하나 — 차트 머리 · 증감 가운데 · Pagination 아이콘 · Card Radio · Tree 숫자 · N 배지 · 탭 건수(2026-11-24)
   });
   await part("part 93 · behave.shell.js", async () => {
     await require("./behave.shell.js")({ page, ok, go });   // 템플릿 검토 수정 일곱 — 상단 바 · 접기 · 테마 · 알림 점 · flush 표 · 로그인 · 버튼 묶음 · 대시보드(2026-11-18)

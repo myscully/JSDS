@@ -7,7 +7,7 @@ import { skeleton, skeletonOfHtml } from "./skeleton";
 
 const require = createRequire(import.meta.url);
 (globalThis as unknown as { I: unknown }).I = require("../../_build/icons.js").I;
-const LIB = require("../../_build/lib.js") as { dedent: (s: string) => string; withAvatarTone: (s: string) => string };
+const LIB = require("../../_build/lib.js") as { dedent: (s: string) => string };
 const COMPONENTS = require("../../_build/components.data.js") as Record<string, { examples: { id: string; html: string }[] }>;
 const PATTERNS = require("../../_build/patterns.data.js") as Record<string, { examples: { id: string; html: string }[] }>;
 
@@ -19,7 +19,7 @@ const siteHtml = (key: string): string | undefined => {
   const [sec, page, id] = key.split("/");
   const data = sec === "components" ? COMPONENTS : PATTERNS;
   const ex = data[page]?.examples.find((e) => e.id === id);
-  return ex ? LIB.withAvatarTone(LIB.dedent(ex.html)) : undefined;   // 빌드처럼 아바타 data-tone 을 이름에서 미리 적는다(2026-11-16)
+  return ex ? LIB.dedent(ex.html) : undefined;
 };
 
 describe("site ↔ react 구조 일치", () => {

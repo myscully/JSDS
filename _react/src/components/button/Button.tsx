@@ -1,6 +1,7 @@
 import { createContext, forwardRef, useContext, type KeyboardEvent, type MouseEvent, type PointerEvent, type ComponentPropsWithoutRef, type ElementType, type HTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import type { Size } from "../../types";
+import { Tooltip } from "../tooltip/Tooltip";
 
 /** 형태 — solid · outline. text 는 정의 밖 변형(색은 primary · assistive) */
 export type ButtonVariant = "solid" | "outline" | "text";
@@ -16,6 +17,8 @@ export interface ButtonProps extends Omit<ComponentPropsWithoutRef<"button">, "t
   size?: Size;
   /** 아이콘 전용 정사각 버튼. aria-label 필수 */
   iconOnly?: boolean;
+  /** 접근 이름(aria-label)을 문구로 하는 Tooltip 으로 감싼다 — 화면 · 표 · 카드의 아이콘 전용 버튼은 켠다(2026-11-23). 위치를 주면 그쪽(기본 top). 끈 버튼에는 달지 않는다 */
+  tooltip?: boolean | "top" | "bottom" | "left" | "right";
   /** 전체 폭 */
   block?: boolean;
   /** 스피너 표시. disabled 와 달리 포커스는 남고 onClick · onMouseDown · onPointerDown · onKeyDown 을 부르지 않는다 */
@@ -42,7 +45,7 @@ export const ButtonOffContext = createContext(false);
 const NAV = ["Tab", "Escape", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown"];
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant, color = "primary", size = "md", iconOnly, block, loading, iconLeft, iconRight, className, children, as, type, disabled,
+  { variant, color = "primary", size = "md", iconOnly, tooltip, block, loading, iconLeft, iconRight, className, children, as, type, disabled,
     onClick, onClickCapture, onMouseDown, onMouseDownCapture, onPointerDown, onPointerDownCapture, onKeyDown, onKeyDownCapture, ...props },
   ref,
 ) {
@@ -86,13 +89,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         }
       : onKeyDown,
   };
-  return (
+  const el = (
     <Comp ref={ref} className={cls} aria-busy={loading || undefined} {...extra} {...rest} {...guard}>
       {iconLeft}
       {children}
       {iconRight}
     </Comp>
   );
+  const name = rest["aria-label"];
+  if (!tooltip || disabled) return el;
+  if (typeof name !== "string") {
+    if (process.env.NODE_ENV !== "production") console.warn("[ds-react] Button tooltip 은 aria-label 을 문구로 씁니다 — aria-label 이 없습니다.");
+    return el;
+  }
+  return <Tooltip content={name} position={tooltip === true ? "top" : tooltip}>{el}</Tooltip>;
 });
 
 export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {

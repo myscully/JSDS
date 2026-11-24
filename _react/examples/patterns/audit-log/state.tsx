@@ -18,7 +18,7 @@ export default function Example() {
       </Card>
       <Card flush>
         <CardHead><CardTitle>빈 결과</CardTitle></CardHead>
-        <DataTable columns={COLUMNS} rows={[] as Row[]} rowKey={(r) => r.id} empty={<div className="empty">조건에 맞는 기록이 없습니다. 기간을 넓히거나 검색어를 바꾸세요. <Button size="sm" variant="outline" color="assistive">검색 지우기</Button></div>} />
+        <DataTable columns={COLUMNS} rows={[] as Row[]} rowKey={(r) => r.id} empty={<div className="empty">조건에 맞는 기록이 없습니다. 기간을 넓히거나 검색어를 바꾸세요. <Button size="sm" variant="outline" color="assistive">필터 초기화</Button></div>} />
       </Card>
       <Card flush>
         <CardHead><CardTitle>불러오기 실패</CardTitle></CardHead>

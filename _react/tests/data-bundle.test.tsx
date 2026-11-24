@@ -128,7 +128,7 @@ describe("DataTable", () => {
     expect(document.activeElement).toBe(screen.getByLabelText("밖"));
   });
   it("불러오는 중은 Skeleton 행 · aria-busy · 작업 이름", () => {
-    render(T({ status: "loading", statusLabel: "이벤트 불러오는 중", loadingRows: 2 }));
+    render(T({ rows: [], status: "loading", statusLabel: "이벤트 불러오는 중", loadingRows: 2 }));   // 처음 불러오기 — 행이 있으면 지난 행을 흐리게 둔다(아래 2026-11-23)
     expect(document.querySelectorAll("tbody tr").length).toBe(2);
     expect(document.querySelectorAll("tbody .skeleton").length).toBe(4);
     expect(document.querySelector("table")!.getAttribute("aria-busy")).toBe("true");
@@ -261,5 +261,48 @@ describe("List", () => {
     render(<List><ListItem primary="가" onClick={on} /></List>);
     fireEvent.keyDown(screen.getByRole("listitem"), { key: "Enter" });
     expect(on).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("DataTable 기본 빈 문구(2026-11-23)", () => {
+  it("rows 가 비고 empty 가 없으면 LABELS.tableEmpty, empty 를 주면 그것", () => {
+    const { container, rerender } = render(T({ rows: [] }));
+    expect(container.querySelector("tbody")!.textContent).toContain("표시할 항목이 없습니다.");
+    rerender(T({ rows: [], empty: "조건에 맞는 정책이 없습니다." }));
+    expect(container.querySelector("tbody")!.textContent).toContain("조건에 맞는 정책이 없습니다.");
+    expect(container.querySelector("tbody")!.textContent).not.toContain("표시할 항목이 없습니다.");
+  });
+});
+
+describe("DataTable 다시 불러오기 · 지연(2026-11-23)", () => {
+  it("행이 있으면 Skeleton 행 대신 지난 행을 두고 틀에 aria-busy, 이름은 '{caption} 불러오는 중'", () => {
+    const { container } = render(T({ status: "loading", caption: "정책 목록" }));
+    const wrap = container.querySelector(".tbl-wrap")!;
+    expect(wrap.getAttribute("aria-busy")).toBe("true");
+    expect(container.querySelectorAll("tbody .skeleton").length).toBe(0);
+    expect(container.querySelectorAll("tbody tr").length).toBe(ROWS.length);
+    expect(container.querySelector('[role="status"]')!.textContent).toBe("정책 목록 불러오는 중");
+  });
+  it("행이 없으면 Skeleton 행 — 틀은 aria-busy 가 아님(흐릴 지난 행이 없다)", () => {
+    const { container } = render(T({ rows: [], status: "loading" }));
+    expect(container.querySelector(".tbl-wrap")!.hasAttribute("aria-busy")).toBe(false);
+    expect(container.querySelectorAll("tbody .skeleton").length).toBeGreaterThan(0);
+    expect(container.querySelector('[role="status"]')!.textContent).toBe("불러오는 중");
+  });
+  it("delay 를 주면 그 시간 뒤에야 Skeleton · 알림이 보이고, 그 전에 끝나면 끝까지 보이지 않음", () => {
+    vi.useFakeTimers();
+    const { container } = render(T({ rows: [], status: "loading", delay: 400 }));
+    expect(container.querySelectorAll("tbody .skeleton").length).toBe(0);
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    act(() => { vi.advanceTimersByTime(450); });
+    expect(container.querySelectorAll("tbody .skeleton").length).toBeGreaterThan(0);
+    cleanup();
+    const r2 = render(T({ rows: [], status: "loading", delay: 400 }));
+    act(() => { vi.advanceTimersByTime(200); });
+    r2.rerender(T({ rows: [] }));
+    act(() => { vi.advanceTimersByTime(500); });
+    expect(r2.container.querySelectorAll("tbody .skeleton").length).toBe(0);
+    expect(r2.container.querySelector("tbody")!.textContent).toContain("표시할 항목이 없습니다.");
+    vi.useRealTimers();
   });
 });

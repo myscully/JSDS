@@ -32,7 +32,8 @@ const pSel = (o) => {
 const pCombo = (o) => {
   const sel = o.selected || [], chips = o.multiple ? sel.map((l) => `<span class="chip sm" data-value="${l}"><span class="lbl">${l}</span><button type="button" class="x" aria-label="${l} 제거">${I("x",10)}</button></span>`).join("") : "";
   const value = !o.multiple && sel[0] ? ` value="${sel[0]}"` : "";
-  const cb = `<div class="combobox"${o.multiple ? " data-multiple" : ""}${o.name ? ` data-name="${o.name}"` : ""}${o.req ? " data-required" : ""}><div class="control">${chips}<input type="text" id="${o.id}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${o.id}-list" autocomplete="off" placeholder="${o.placeholder}"${value}${o.field ? "" : ` aria-label="${o.label}"`}></div><ul class="menu" role="listbox" id="${o.id}-list" aria-label="${o.label}"${o.multiple ? ' aria-multiselectable="true"' : ""}>${o.items.map((l) => `<li class="menu-item${sel.includes(l) ? " on" : ""}" role="option" data-value="${l}" aria-selected="${sel.includes(l)}">${l}</li>`).join("")}</ul><span class="sr-only" role="status"></span>${o.name && !o.multiple ? `<input type="hidden" name="${o.name}" value="${sel[0] || ""}">` : ""}</div>`;
+  const inp = `<input type="text" id="${o.id}" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="${o.id}-list" autocomplete="off" placeholder="${o.placeholder}"${value}${o.field ? "" : ` aria-label="${o.label}"`}>`;
+  const cb = `<div class="combobox"${o.multiple ? " data-multiple" : ""}${o.overflow ? ` data-overflow="${o.overflow}"` : ""}${o.name ? ` data-name="${o.name}"` : ""}${o.req ? " data-required" : ""}><div class="control">${o.multiple ? `<div class="control-track">${chips}${inp}</div>` : inp}</div><ul class="menu" role="listbox" id="${o.id}-list" aria-label="${o.label}"${o.multiple ? ' aria-multiselectable="true"' : ""}>${o.items.map((l) => `<li class="menu-item${sel.includes(l) ? " on" : ""}" role="option" data-value="${l}" aria-selected="${sel.includes(l)}">${o.multiple ? '<span class="menu-mark check" aria-hidden="true"></span>' : ""}${l}</li>`).join("")}</ul><span class="sr-only" role="status"></span>${o.name && !o.multiple ? `<input type="hidden" name="${o.name}" value="${sel[0] || ""}">` : ""}</div>`;
   return o.field ? `<div class="field"><label for="${o.id}">${o.label}${o.req ? " <em>*</em>" : ""}</label>${cb}${o.help !== undefined ? `<span class="help"${o.live ? ' aria-live="polite"' : ""}>${o.help}</span>` : ""}</div>` : cb;
 };
 /* Time Picker · Date Picker — components.data.js 의 tpField · dpField 와 같은 마크업. pTime live = 검증 폼의 도움말 칸에 aria-live */
@@ -129,13 +130,13 @@ const POLICY_TARGETS = [
 const PATTERNS = {
   /* ------------------------------------------------ Common UI */
   "input-form": {
-    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["form", "text-field", "number-input", "select", "combobox", "date-picker", "time-picker", "file-upload", "checkbox", "radio-button", "button"], css: [], borrows: [".t-label-1-normal", ".t-semibold", ".chip", ".sr-only"],
+    status: "ready", react: ["Form","FormLegend","FormSection","FormRow","FormActions"], uses: ["form", "text-field", "number-input", "select", "combobox", "date-picker", "time-picker", "file-upload", "checkbox", "radio-button", "button"], css: [], borrows: [".menu-mark", ".t-label-1-normal", ".t-semibold", ".chip", ".sr-only"],
     desc: "정책이나 사용자, 설정을 입력하는 폼의 기본 구조입니다. 라벨은 필드 위에 두고, 필수 항목에는 별표를 붙입니다. 오류는 필드 아래에 적고, 저장 버튼은 오른쪽 아래에 둡니다.",
     choose: [["언제 쓰는가", "정책이나 사용자, 연동처럼 여러 값을 한 번에 입력하고 저장하는 화면에 씁니다."], ["비슷한 패턴", "값을 하나씩 바로 바꾸는 화면은 <a href=\"#/patterns/policy-settings\">정책 설정</a>을, 순서대로 나눠 받는 처음 설정은 <a href=\"#/patterns/onboarding\">온보딩</a>을 씁니다."]],
     principles: [["구성", "한 열이 기본입니다. 시작과 종료처럼 서로 관련된 짧은 필드만 두 열로 나란히 둡니다. 필드가 많으면 섹션 제목으로 묶습니다."], ["입력 컨트롤", "날짜는 Date Picker, 시각은 Time Picker, 숫자는 Number Input 으로 받습니다. 정해진 목록에서 하나를 고르면 Select, 여럿을 고르거나 목록이 길면 Combobox, 파일은 File Upload 를 씁니다."], ["검증", "폼 검증을 켜면 포커스가 떠날 때 그 필드를 검사합니다. 제출하면 첫 오류로 옮기고, 오류를 폼 위에 모아 요약하지 않습니다. 서버가 돌려준 오류도 그 필드 아래에 적습니다. 고치면 문구를 바로 지웁니다."], ["필수", "필수 항목이 있으면 폼 위에 필수 항목 안내를 둡니다."], ["액션", "버튼은 취소, 저장 순서로 두고 주 버튼은 저장 하나입니다. 삭제처럼 되돌리기 어려운 동작은 왼쪽 끝에 따로 둡니다."]],
     examples: [
-      { id: "basic", title: "기본 폼", desc: "섹션 제목으로 필드 묶음을 나누고, 맨 아래에 버튼 줄을 둡니다. 날짜와 시각, 여러 부서, 첨부 파일처럼 값의 종류마다 맞는 컨트롤을 씁니다.", html: `
-        <form class="form">
+      { id: "basic", title: "기본 폼", desc: "섹션 제목으로 필드 묶음을 나누고, 맨 아래에 버튼 줄을 둡니다. 날짜와 시각, 여러 부서, 첨부 파일처럼 값의 종류마다 맞는 컨트롤을 씁니다. 초안 저장을 켜 두어, 입력하다 페이지를 다시 열면 되살립니다.", html: `
+        <form class="form" data-draft="policy-new">
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="form-section">기본 정보</div>
           <div class="field"><label for="pname">정책 이름 <em>*</em></label><input id="pname" placeholder="예: 외부 USB 차단" required><span class="help">2~40자</span></div>
@@ -228,16 +229,16 @@ const PATTERNS = {
   },
 
   "error-pages": {
-    status: "new", react: ["Empty","Card"], uses: ["empty-state", "card", "button", "link"], css: [".row-2"],
+    status: "new", react: ["Empty","Card","CopyField"], uses: ["empty-state", "card", "button", "link", "copy-field"], css: [".row-2"],
     desc: "권한이 없거나 페이지가 없을 때, 서버 오류나 점검 중일 때 보여 주는 화면입니다. 무엇이 일어났는지 한 줄로 알리고 다음에 할 일 하나를 둡니다.",
     choose: [["언제 쓰는가", "화면 전체나 카드 하나를 보여 줄 수 없을 때 그 자리를 대신합니다. 권한 없음, 없는 주소, 서버 오류, 점검 중의 네 가지입니다."], ["비슷한 패턴", "검색 결과가 없는 것은 오류가 아니므로 <a href=\"#/patterns/search\">검색</a>의 빈 결과를 씁니다. 처음이라 데이터가 없는 화면은 <a href=\"#/components/empty-state\">Empty State</a> 를 씁니다."]],
-    principles: [["문구", "무엇이 일어났는지와 고치는 법을 한 줄씩 씁니다. 오류 번호는 지원 문의에 필요할 때만 문구 끝에 둡니다."], ["동작", "다음에 할 일 하나만 버튼으로 둡니다. 권한 없음은 권한 요청, 없는 주소는 대시보드로 이동, 서버 오류는 다시 시도입니다."], ["권한 없음", "권한이 없다는 사실은 알리되 무엇이 있는지는 보이지 않습니다. 메뉴에서 그 화면을 숨기는 것이 먼저이고, 주소로 직접 들어온 경우에만 이 화면을 봅니다."], ["카드 안", "화면의 일부만 볼 수 없으면 그 카드 안에만 작게 둡니다. 나머지 카드는 그대로 씁니다."], ["점검", "점검 시간은 시작과 끝을 날짜와 함께 적습니다. 점검 중에는 다시 시도 버튼을 두지 않습니다."]],
+    principles: [["문구", "무엇이 일어났는지와 고치는 법을 한 줄씩 씁니다. 지원 문의에 오류 번호가 필요하면 번호와 시각을 복사할 수 있게 문구 아래에 둡니다. 복사는 다음 행동이 아니라 정보입니다."], ["동작", "다음에 할 일 하나만 버튼으로 둡니다. 권한 없음은 권한 요청, 없는 주소는 대시보드로 이동, 서버 오류는 다시 시도입니다."], ["권한 없음", "권한이 없다는 사실은 알리되 무엇이 있는지는 보이지 않습니다. 메뉴에서 그 화면을 숨기는 것이 먼저이고, 주소로 직접 들어온 경우에만 이 화면을 봅니다."], ["카드 안", "화면의 일부만 볼 수 없으면 그 카드 안에만 작게 둡니다. 나머지 카드는 그대로 씁니다."], ["점검", "점검 시간은 시작과 끝을 날짜와 함께 적습니다. 점검 중에는 다시 시도 버튼을 두지 않습니다."]],
     examples: [
       { id: "pages", title: "화면 전체", desc: "권한 없음, 없는 주소, 서버 오류, 점검 중의 네 화면입니다. 아이콘과 제목, 설명, 동작 하나로 같은 틀을 씁니다.", html: `
         <div class="row-2">
           <div class="empty"><span class="ico">${I("lock",24)}</span><b>이 화면을 볼 권한이 없습니다</b><span>관리자에게 정책 편집 권한을 요청하세요.</span><button type="button" class="btn md outline assistive">권한 요청</button></div>
           <div class="empty"><span class="ico">${I("file-search",24)}</span><b>페이지를 찾을 수 없습니다</b><span>주소가 바뀌었거나 삭제된 페이지입니다.</span><a href="#" class="btn md outline assistive">대시보드로 이동</a></div>
-          <div class="empty error"><span class="ico">${I("alert-triangle",24)}</span><b>일시적인 오류가 발생했습니다</b><span>잠시 후 다시 시도하세요. 계속되면 오류 번호 E-5021 을 알려 주세요.</span><button type="button" class="btn md outline assistive">${I("refresh")}다시 시도</button></div>
+          <div class="empty error"><span class="ico">${I("alert-triangle",24)}</span><b>이 화면을 불러오지 못했습니다</b><span>잠시 후 다시 시도하세요. 계속되면 아래 오류 정보를 복사해 관리자에게 보내세요.</span>${pCopyInline("오류 정보", "E-5021 · 11. 23 14:30")}<button type="button" class="btn md outline assistive">${I("refresh")}다시 시도</button></div>
           <div class="empty"><span class="ico">${I("tool",24)}</span><b>시스템 점검 중입니다</b><span>11월 16일 02:00 부터 04:00 까지 점검합니다. 점검이 끝나면 다시 접속하세요.</span><a href="#" class="link standalone">점검 공지 보기</a></div>
         </div>`, layout: "stack" },
       { id: "inline", title: "카드 안", desc: "화면의 일부만 볼 수 없을 때는 그 카드 안에만 작은 Empty State 를 둡니다.", html: `
@@ -269,7 +270,7 @@ const PATTERNS = {
       { id: "type-name", title: "이름 입력 확인", desc: "지우면 넓게 영향을 주는 것은 이름을 입력하게 합니다. 삭제 버튼은 늘 켜 두고, 누르면 입력을 검사합니다. 이름이 다르면 막고 입력칸 아래에 고치는 법을 적습니다.", html: `
         <div class="popup danger" role="alertdialog" aria-modal="true" aria-labelledby="dc3-t" aria-describedby="dc3-b">
           <h3 class="popup-title" id="dc3-t">'SIEM 연동'을 삭제할까요?</h3>${pClose("popup-close", "data-popup-close")}
-          <p class="popup-body" id="dc3-b">연동을 지우면 이벤트 전송이 바로 멈추고, 이 연동을 쓰는 보고서 3개가 비게 됩니다. 복구할 수 없습니다.</p>
+          <p class="popup-body" id="dc3-b">연동을 삭제하면 이벤트 전송이 바로 멈추고, 이 연동을 쓰는 보고서 3개가 비게 됩니다. 복구할 수 없습니다.</p>
           <form class="popup-form" id="dc3-form" data-validate novalidate><div class="field"><label for="dc3-name">확인을 위해 <b>SIEM 연동</b>을 입력하세요</label><input id="dc3-name" required pattern="\\s*SIEM 연동\\s*" autocomplete="off" data-messages='{"required":"연동 이름을 입력하세요.","pattern":"연동 이름이 다릅니다. SIEM 연동을 그대로 입력하세요."}'><span class="help" aria-live="polite">이름이 같아야 삭제됩니다.</span></div></form>
           <div class="popup-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="submit" form="dc3-form" class="btn md solid negative">삭제</button></div></div>
         </div>` },
@@ -390,7 +391,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   },
 
   "search": {
-    status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "combobox", "date-picker", "chip", "data-table", "tag", "indicator", "pagination", "empty-state", "button", "link"], borrows: [".field"], css: [".toolbar", ".stack"],
+    status: "ready", react: ["Toolbar","Spacer","Stack"], uses: ["search", "combobox", "date-picker", "chip", "data-table", "tag", "indicator", "pagination", "empty-state", "button", "link"], borrows: [".menu-mark", ".field"], css: [".toolbar", ".stack"],
     desc: "검색과 필터로 결과 목록을 조회하는 화면입니다. 조건은 늘 보이게 두고, 결과 수와 적용 중인 조건을 함께 보여 줍니다.",
     choose: [["언제 쓰는가", "이벤트나 단말, 정책처럼 많은 항목에서 조건으로 좁혀 찾는 목록 화면에 씁니다."], ["비슷한 패턴", "초 단위로 쌓이는 로그를 훑는 화면은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>를 씁니다."]],
     principles: [["툴바", "검색칸 옆에 필터와 기간을 두고 되도록 한 줄에 놓습니다. 옆 컨트롤은 제 폭을 지키고 검색칸이 남는 폭을 가집니다. 자리가 모자라면 검색칸이 최소 폭까지 줄고, 그래도 넘칠 때만 줄을 바꿉니다. 한 줄에 놓인 컨트롤은 같은 높이로 맞추고, 동작 버튼은 결과 줄 오른쪽 끝에 둡니다."], ["필터", "여러 값을 고르는 필터는 Combobox 로 받습니다. 대시보드처럼 다른 화면에서 넘어온 조건은 결과 줄에 Chip 으로 보여 주고, 하나씩 지울 수 있게 합니다."], ["결과 줄", "결과 수를 툴바 아래 첫머리에 적습니다. 조건을 하나라도 바꿨으면 필터 초기화를 둡니다."], ["빈 결과", "결과가 없으면 표 대신 <a href=\"#/components/empty-state\">Empty State</a> 를 두고, 무엇을 바꾸면 되는지와 필터 초기화를 함께 보여 줍니다."], ["갱신", "글자를 칠 때마다 조회하면 입력을 잠시 기다렸다가 조회합니다. 결과 수가 바뀌면 화면 읽기 프로그램에도 알립니다."]],
@@ -407,7 +408,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             <div class="chip-group"><span class="chip sm"><span class="lbl">대상: PC-2041</span><button type="button" class="x" aria-label="대상: PC-2041 제거">${I("x",10)}</button></span><span class="chip sm"><span class="lbl">정책: 랜섬웨어 행위 차단</span><button type="button" class="x" aria-label="정책: 랜섬웨어 행위 차단 제거">${I("x",10)}</button></span></div>
             <button type="button" class="btn sm text assistive">필터 초기화</button>
             <span class="spacer"></span>
-            <button type="button" class="btn sm outline assistive">${I("download")}내보내기</button>
+            <button type="button" class="btn sm outline assistive">${I("download")}CSV 내보내기</button>
           </div>
           <div class="tbl-wrap">
             <table class="tbl hover nowrap">
@@ -421,13 +422,20 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           </div>
           <div class="pagination-bar"><span>총 <b>128</b>건 · 1–50</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
         </div>`, layout: "stack" },
-      { id: "empty", title: "빈 결과", desc: "결과가 없으면 표 대신 Empty State 를 둡니다. 무엇을 바꾸면 되는지 적고 필터 초기화를 함께 둡니다.", html: `
+      { id: "empty", title: "빈 결과", desc: "결과가 없어도 툴바와 표 틀은 그대로 두고 표 본문에 이유와 필터 초기화를 둡니다. 조건을 바로 고칠 수 있고 화면이 흔들리지 않습니다.", html: `
         <div class="stack">
           <div class="toolbar">
-            <div class="searchbar" role="search">${I("search")}<input type="search" value="랜섬웨어 2025" placeholder="이벤트, 단말, IP 검색" aria-label="이벤트 검색 결과 없음 예시"></div>
+            <div class="searchbar" role="search">${I("search")}<input type="search" value="랜섬웨어 2025" placeholder="이벤트, 단말, IP 검색" aria-label="이벤트 검색"></div>
+            ${pCombo({ id: "sr-sev0", label: "심각도", items: SEVS, selected: ["Critical"], multiple: true, placeholder: "심각도" })}
+            ${pDate({ id: "sr-range0", aria: "조회 기간", range: true, value: "2026. 10. 21 ~ 2026. 10. 27", attrs: 'data-max="today" data-presets="7 30" data-default-preset="7"' })}
           </div>
           <div class="toolbar sub"><span>결과 <b>0</b>건</span></div>
-          <div class="empty"><span class="ico">${I("search",24)}</span><b>'랜섬웨어 2025' 에 대한 결과가 없습니다</b><span>검색어를 줄이거나 기간을 최근 30일로 넓혀 보세요.</span><button type="button" class="btn md outline assistive">필터 초기화</button></div>
+          <div class="tbl-wrap">
+            <table class="tbl nowrap">
+              <thead><tr><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>심각도</th><th>이벤트</th><th>대상</th><th>상태</th></tr></thead>
+              <tbody><tr><td colspan="5" class="empty"><div class="empty">'랜섬웨어 2025' 에 대한 결과가 없습니다. 검색어를 줄이거나 기간을 최근 30일로 넓혀 보세요. <button type="button" class="btn sm outline assistive">필터 초기화</button></div></td></tr></tbody>
+            </table>
+          </div>
         </div>`, layout: "stack" },
     ],
   },
@@ -469,7 +477,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         <form class="form auth" data-validate novalidate>
           <p class="auth-logo" role="img" aria-label="Security Console"><i>${I("shield-check",48,{style:"filled"})}</i><span aria-hidden="true">Security Console</span></p>
           <h2 class="sr-only">관리 콘솔 로그인</h2>
-          <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20,{style:"filled"})}</span><div><b>이메일 또는 비밀번호가 맞지 않습니다</b>5번 틀리면 10분 동안 로그인할 수 없습니다. 남은 횟수는 3번입니다.</div></div>
+          <div class="notice danger" role="alert"><span class="ico">${I("alert-circle",20,{style:"filled"})}</span><div><b>이메일 또는 비밀번호가 맞지 않습니다</b>5번 틀리면 10분 동안 로그인할 수 없습니다. 남은 횟수는 3번입니다. 비밀번호가 기억나지 않으면 비밀번호 찾기를 누르세요.</div></div>
           <div class="field"><label for="si-email" class="sr-only">이메일</label><div class="affix"><span class="field-icon" aria-hidden="true">${I("user",18)}</span><input id="si-email" type="email" value="admin@jiran.com" placeholder="이메일" autocomplete="username" required data-messages='{"required":"이메일을 입력하세요."}'></div><span class="help" aria-live="polite"></span></div>
           <div class="field"><label for="si-pw" class="sr-only">비밀번호</label><div class="affix"><span class="field-icon" aria-hidden="true">${I("lock",18)}</span><input id="si-pw" type="password" placeholder="비밀번호" autocomplete="current-password" required data-messages='{"required":"비밀번호를 입력하세요."}'><button type="button" class="reveal" aria-label="비밀번호 표시" aria-pressed="false"><span class="i-show">${I("eye",18)}</span><span class="i-hide">${I("eye-off",18)}</span></button></div><span class="help" aria-live="polite"></span></div>
           <div class="auth-row"><label class="checkbox"><input type="checkbox" checked><span>이메일 저장</span></label><a href="#" class="link standalone">비밀번호 찾기</a></div>
@@ -492,7 +500,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
       { id: "session", title: "세션 만료 안내", desc: "끝나기 2분 전에 대화상자로 알리고 남은 시간을 보여 줍니다. 연장하면 서버가 세션을 늘리고, 시간이 다 되면 로그인 화면으로 보냅니다.", html: `
         <div class="popup" role="dialog" aria-modal="true" aria-labelledby="ss-t" aria-describedby="ss-b">
           <h3 class="popup-title" id="ss-t">로그인을 연장할까요?</h3>${pClose("popup-close", "data-popup-close")}
-          <div class="popup-body" id="ss-b"><p>오래 쓰지 않아 곧 자동으로 로그아웃됩니다. 저장하지 않은 입력은 사라집니다.</p><p class="auth-timer" role="timer">남은 시간 <b>01:58</b></p></div>
+          <div class="popup-body" id="ss-b"><p>오래 쓰지 않아 곧 자동으로 로그아웃됩니다. 입력하던 내용은 다시 로그인하면 되살립니다.</p><p class="auth-timer" role="timer">남은 시간 <b>01:58</b></p></div>
           <div class="popup-actions"><div class="btn-group"><button type="button" class="btn md outline assistive">로그아웃</button><button type="button" class="btn md solid primary" data-popup-close>연장</button></div></div>
         </div>` },
     ],
@@ -500,7 +508,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
 
   /* ------------------------------------------------ Security Console */
   "report-schedule": {
-    status: "new", react: ["Form", "TextField", "Select", "Combobox", "TimePicker", "Table", "DataTable", "Card"], uses: ["form", "text-field", "select", "radio-button", "combobox", "time-picker", "notification", "button", "table", "link", "avatar", "indicator", "switch", "data-table", "card", "loading", "empty-state"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold", ".chip"], css: [".stack", ".toolbar"],
+    status: "new", react: ["Form", "TextField", "Select", "Combobox", "TimePicker", "Table", "DataTable", "Card"], uses: ["page-header", "pagination", "form", "text-field", "select", "radio-button", "combobox", "time-picker", "notification", "button", "table", "link", "avatar", "indicator", "switch", "data-table", "card", "loading", "empty-state"], borrows: [".menu-mark", ".sr-only", ".t-label-1-normal", ".t-semibold", ".chip"], css: [".stack", ".toolbar"],
     desc: "보고서의 내용과 받는 사람, 보내는 때를 정해 정기적으로 보내는 화면입니다. 저장하기 전에 다음 발송이 언제 누구에게 가는지 한 문장으로 보여 줍니다.",
     choose: [["언제 쓰는가", "주간 보안 요약처럼 같은 보고서를 정해진 때마다 여러 사람에게 보내야 할 때 씁니다."], ["비슷한 패턴", "한 번만 파일로 받는 것은 <a href=\"#/patterns/import-export\">가져오기 · 내보내기</a>를, 이벤트가 생길 때 바로 알리는 것은 <a href=\"#/patterns/alert-rules\">알림 규칙</a>을 씁니다."]],
     principles: [["기간", "정기 보고서의 기간은 날짜가 아니라 '지난 7일' 처럼 보내는 때를 기준으로 고릅니다."], ["받는 사람", "사람과 부서를 Combobox 로 함께 받습니다. 부서를 고르면 그 부서에 새로 온 사람도 받습니다."], ["보내는 때", "반복 주기와 시각을 한 줄에 둡니다. 시각은 콘솔에 정한 시간대를 따르고, 그 시간대를 도움말에 적습니다."], ["요약 문장", "저장 버튼 위에 다음 발송이 언제 누구에게 어떤 형식으로 가는지 한 문장으로 보여 줍니다. 값을 바꾸면 바로 고칩니다."], ["미리보기와 지금 보내기", "미리보기는 지금 데이터로 보고서를 만들어 보여 주기만 합니다. 지금 보내기는 예약과 별개로 한 번 보냅니다."], ["목록", "예약 목록에는 주기와 다음 발송, 마지막 발송 결과를 둡니다. 잠시 멈출 때는 지우지 않고 사용을 끕니다."], ["실패", "발송에 실패하면 목록에 실패를 표시하고 만든 사람에게 알립니다. 다음 주기에는 다시 보냅니다."]],
@@ -524,26 +532,27 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
         </form>` },
       { id: "list", title: "예약 목록", desc: "주기와 다음 발송, 받는 사람, 마지막 발송 결과를 보여 줍니다. 잠시 멈출 때는 사용을 끕니다.", html: `
         <div class="stack">
-          <div class="toolbar"><span class="spacer"></span><button type="button" class="btn md solid primary">${I("plus")}보고서 만들기</button></div>
-          <div class="tbl-wrap"><table class="tbl nowrap"><thead><tr><th>보고서</th><th>주기</th><th>다음 발송</th><th>받는 사람</th><th>마지막 발송</th><th>사용</th></tr></thead><tbody>
+          <div class="page-head"><div><h2 class="title">예약 보고서</h2></div><div class="actions"><button type="button" class="btn md solid primary">${I("plus")}보고서 만들기</button></div></div>
+          <div class="tbl-wrap"><table class="tbl nowrap"><thead><tr><th>보고서</th><th>주기</th><th class="sortable sorted" aria-sort="ascending"><button type="button" class="sort">다음 발송</button></th><th>받는 사람</th><th>마지막 발송</th><th>사용</th></tr></thead><tbody>
             <tr><td><a href="#" class="link">주간 보안 요약</a></td><td>매주 월요일 09:00</td><td>11. 16 09:00</td><td>${pAvatars("주간 보안 요약 받는 사람", ["김민준", "이서연"], 3, true)}</td><td><span class="indicator ok">보냄</span></td><td><label class="switch"><input type="checkbox" role="switch" checked aria-label="주간 보안 요약 사용"></label></td></tr>
             <tr><td><a href="#" class="link">에이전트 상태</a></td><td>매월 1일 08:00</td><td>12. 01 08:00</td><td>${pAvatars("에이전트 상태 받는 사람", ["박지훈"], 0, true)}</td><td><span class="indicator danger">실패</span></td><td><label class="switch"><input type="checkbox" role="switch" checked aria-label="에이전트 상태 사용"></label></td></tr>
             <tr><td><a href="#" class="link">위협 상세</a></td><td>매일 02:00</td><td>—<span class="sr-only">없음</span></td><td>${pAvatars("위협 상세 받는 사람", ["최유진", "정다은"], 0, true)}</td><td><span class="indicator ok">보냄</span></td><td><label class="switch"><input type="checkbox" role="switch" aria-label="위협 상세 사용"></label></td></tr>
           </tbody></table></div>
+          <div class="pagination-bar"><span>총 <b>56</b>건 · 1–20</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
         </div>`, layout: "stack" },
       { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "예약 목록을 불러오는 동안과 예약한 보고서가 없을 때, 불러오지 못했을 때의 화면입니다. 첫 사용에는 예약하는 동작을 둡니다.", html: pStates({"cols": ["보고서", "주기", "다음 발송"], "loading": "예약 보고서 불러오는 중", "emptyTitle": "첫 사용", "empty": "아직 예약한 보고서가 없습니다.", "error": "예약 목록을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["보고서 예약", true]}), layout: "stack" },
     ],
   },
 
   "dashboard": {
-    status: "ready", react: ["PageHead","Stack","Row3","Row2"], uses: ["page-header", "button", "data-visual", "card", "table", "indicator", "link"], css: [".stack", ".row-2", ".row-3"], borrows: [".sr-only", ".progress-row", ".progress"],
+    status: "ready", react: ["PageHead","Stack","Row3","Row2"], uses: ["button", "card", "data-visual", "indicator", "link", "page-header", "select-button", "table", "tooltip"], css: [".stack", ".row-2", ".row-3"], borrows: [".sr-only", ".progress-row", ".progress"],
     desc: "보안 관리자가 처음 보는 화면입니다. 위에 KPI 4개를 두고, 그 아래에 일별 탐지 · 분포 차트, 비교 · 목표 대비 차트, 최근 이벤트 표를 차례로 둡니다. 위험이 한눈에 들어오고 상세로 바로 내려갈 수 있어야 합니다.",
-    choose: [["언제 쓰는가", "로그인한 관리자가 지금 위험이 얼마나 있는지 훑고, 손볼 곳으로 바로 내려가야 하는 첫 화면에 씁니다."], ["비슷한 패턴", "기간을 바꾸거나 조건으로 좁혀 들여다보는 화면은 <a href=\"#/patterns/analytics\">분석 · 리포트</a>입니다. 연동과 서버가 살아 있는지는 <a href=\"#/patterns/system-status\">시스템 상태</a>에서, 로그 한 건 한 건은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>에서 봅니다."]],
-    principles: [["위계", "KPI 로 무슨 일이 있는지, 차트로 어디서 얼마나 일어났는지, 표로 무엇을 할지를 차례로 보여 줍니다. KPI 카드는 숫자와 증감만 두고 스파크라인은 넣지 않습니다. 흐름은 아래 차트가 보여 줍니다."], ["필터 없음", "대시보드에는 기간이나 필터를 두지 않습니다. 늘 지금을 기준으로 훑어보는 화면입니다. 기간을 바꾸거나 조건으로 좁혀 보려면 <a href=\"#/patterns/analytics\">분석 · 리포트</a> 화면으로 갑니다. KPI 는 한 화면에 다섯 개를 넘기지 않습니다."], ["밀도", "카드 사이 간격은 16px, 카드 안 여백은 24px 입니다. KPI 카드만 좌우 여백이 20px 입니다. 스크롤하지 않아도 첫 화면에 KPI 와 차트가 들어오게 합니다."], ["한 세트", "차트는 한 톤으로 그리고, 심각도처럼 등급이 있을 때만 등급 색을 씁니다. 같은 줄 카드는 머리와 본문 높이를 맞춥니다."], ["내려가기", "표의 이벤트 이름은 그 이벤트의 상세로 가는 링크입니다. 카드의 전체 보기는 같은 조건이 걸린 목록 화면으로 갑니다."], ["증감", "증감 배지의 색은 방향이 아니라 좋고 나쁨을 따릅니다. 비교 기준을 배지 옆에 함께 적습니다."]],
+    choose: [["언제 쓰는가", "로그인한 관리자가 지금 위험이 얼마나 있는지 훑고, 손볼 곳으로 바로 내려가야 하는 첫 화면에 씁니다."], ["비슷한 패턴", "심각도 같은 조건으로 좁혀 들여다보는 화면은 <a href=\"#/patterns/analytics\">분석 · 리포트</a>입니다. 연동과 서버가 살아 있는지는 <a href=\"#/patterns/system-status\">시스템 상태</a>에서, 로그 한 건 한 건은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>에서 봅니다."]],
+    principles: [["위계", "KPI 로 무슨 일이 있는지, 차트로 어디서 얼마나 일어났는지, 표로 무엇을 할지를 차례로 보여 줍니다. KPI 카드는 숫자와 증감만 두고 스파크라인은 넣지 않습니다. 흐름은 아래 차트가 보여 줍니다."], ["기간", "머리 오른쪽에 기간을 고르는 Select Button 하나를 둡니다. 24시간 · 7일 · 30일 가운데 하나를 고르면 KPI 와 차트, 표가 모두 그 기간으로 바뀝니다. 다른 조건으로 좁혀 보려면 <a href=\"#/patterns/analytics\">분석 · 리포트</a> 화면으로 갑니다. KPI 는 한 화면에 다섯 개를 넘기지 않습니다."], ["밀도", "카드 사이 간격은 16px, 카드 안 여백은 24px 입니다. KPI 카드만 좌우 여백이 20px 입니다. 스크롤하지 않아도 첫 화면에 KPI 와 차트가 들어오게 합니다."], ["한 세트", "차트는 한 톤으로 그리고, 심각도처럼 등급이 있을 때만 등급 색을 씁니다. 같은 줄 카드는 머리와 본문 높이를 맞춥니다."], ["내려가기", "표의 이벤트 이름은 그 이벤트의 상세로 가는 링크입니다. 카드의 전체 보기는 같은 조건이 걸린 목록 화면으로 갑니다."], ["증감", "증감 배지의 색은 방향이 아니라 좋고 나쁨을 따릅니다. 비교 기준을 배지 옆에 함께 적습니다."]],
     examples: [
       { id: "full", title: "대시보드", html: `
         <div class="stack">
-          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button></div></div>
+          <div class="page-head"><div><h2 class="title">대시보드</h2><p class="sub">최근 갱신 09:41 · 자동 갱신 1분</p></div><div class="actions"><div class="btn-group"><div class="select-btn" role="radiogroup" aria-label="기간"><button type="button" class="on" role="radio" aria-checked="true">24시간</button><button type="button" role="radio" aria-checked="false">7일</button><button type="button" role="radio" aria-checked="false">30일</button></div><span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침">${I("refresh")}</button><span class="tooltip left" role="tooltip">새로 고침</span></span></div></div></div>
           <div class="kpi-grid">
             <div class="kpi critical"><span class="label">Critical 이벤트</span><span class="value">1,284</span><div class="kpi-foot">${pDelta("up", "bad", "12%")}<span class="delta-note">전일 대비</span></div></div>
             <div class="kpi"><span class="label">차단률</span><span class="value">99.2<small>%</small></span><div class="kpi-foot">${pDelta("up", "good", "0.3%p")}<span class="delta-note">전일 대비</span></div></div>
@@ -571,9 +580,9 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   },
 
   "analytics": {
-    status: "new", react: ["PageHead","Stack","Toolbar","Row2"], uses: ["page-header", "button", "date-picker", "combobox", "chip", "data-visual", "card", "table", "empty-state"], css: [".stack", ".row-2", ".toolbar"], borrows: [".field", ".menu", ".menu-item", ".sr-only"],
-    desc: "기간과 조건을 바꿔 가며 탐지를 들여다보는 화면입니다. 맨 위 필터 한 줄이 아래 KPI 와 차트, 표 전체에 같이 걸려서 숫자가 서로 맞습니다. 대시보드가 지금을 훑는 화면이라면, 이 화면은 원인을 찾고 보고서로 내보내는 화면입니다.",
-    choose: [["언제 쓰는가", "지난 기간과 견주거나 특정 심각도만 골라 추이를 보고, 그 결과를 내보내야 할 때 씁니다."], ["비슷한 패턴", "필터 없이 지금 상태만 훑는 첫 화면은 <a href=\"#/patterns/dashboard\">대시보드</a>입니다. 로그 한 건 한 건을 찾는 일은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>가 맡습니다."]],
+    status: "new", react: ["PageHead","Stack","Toolbar","Row2"], uses: ["page-header", "button", "date-picker", "combobox", "chip", "data-visual", "card", "table", "empty-state"], css: [".stack", ".row-2", ".toolbar"], borrows: [".menu-mark", ".field", ".menu", ".menu-item", ".sr-only"],
+    desc: "기간과 조건을 바꿔 가며 탐지를 들여다보는 화면입니다. 맨 위 필터 한 줄이 아래 KPI 와 차트, 표 전체에 같이 걸려서 숫자가 서로 맞습니다. 대시보드가 기간 하나로 전체를 훑는 화면이라면, 이 화면은 원인을 찾고 보고서로 내보내는 화면입니다.",
+    choose: [["언제 쓰는가", "지난 기간과 견주거나 특정 심각도만 골라 추이를 보고, 그 결과를 내보내야 할 때 씁니다."], ["비슷한 패턴", "기간만 골라 전체를 훑는 첫 화면은 <a href=\"#/patterns/dashboard\">대시보드</a>입니다. 로그 한 건 한 건을 찾는 일은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>가 맡습니다."]],
     principles: [["필터 한 줄", "필터는 모든 카드 위에 한 줄로 두고 카드 안에는 두지 않습니다. 카드마다 다른 기간을 두면 숫자가 서로 맞지 않습니다."], ["기간이 먼저", "기간을 필터 줄 맨 앞에 둡니다. 최근 7일 · 30일 · 90일 프리셋을 먼저 보이고, 직접 고르는 기간은 달력으로 엽니다."], ["같은 조각", "조건을 바꾸면 KPI 와 모든 차트, 표가 같은 기간과 조건으로 다시 그려집니다. 합계가 어디서나 같아야 합니다."], ["순서", "KPI, 주 차트, 보조 차트 둘, 상세 표 순서로 위에서 아래로 갑니다. 주 차트는 넓게 한 줄을 다 씁니다."], ["다시 불러오기", "조건을 바꾼 뒤 새 결과가 올 때까지 지난 차트를 흐리게 둡니다. Skeleton 으로 바꾸지 않아 화면이 흔들리지 않습니다."], ["빈 결과", "조건에 맞는 탐지가 없으면 무엇이 걸렸는지 칩으로 보이고, 필터를 지우는 버튼을 둡니다."], ["내보내기", "지금 걸린 조건 그대로 내보냅니다. 내보내기는 이 화면의 머리 오른쪽에 하나만 둡니다."]],
     examples: [
       { id: "default", title: "분석 · 리포트", desc: "필터 줄, KPI 넷, 심각도별 일별 탐지 추이, 유형별 탐지와 탐지 경로, 유형별 상세 표입니다. 추이와 유형, 경로, 표의 합계가 모두 같습니다.", html: `
@@ -635,7 +644,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   },
 
   "policy-settings": {
-    status: "ready", react: ["SettingsSection","Setting","PageHead","Breadcrumb"], uses: ["page-header", "breadcrumb", "notification", "switch", "slider", "select", "number-input", "time-picker", "combobox", "copy-field", "tag", "side-panel", "tree", "button"], borrows: [".chip", ".sr-only", ".field", ".tooltip-wrap", ".tooltip"], css: [".settings-section", ".setting", ".stack"],
+    status: "ready", react: ["SettingsSection","Setting","PageHead","Breadcrumb"], uses: ["page-header", "breadcrumb", "notification", "switch", "slider", "select", "number-input", "time-picker", "combobox", "copy-field", "tag", "side-panel", "tree", "button"], borrows: [".menu-mark", ".chip", ".sr-only", ".field", ".tooltip-wrap", ".tooltip"], css: [".settings-section", ".setting", ".stack"],
     desc: "정책과 시스템을 설정하는 화면입니다. 섹션마다 카드를 두고, 왼쪽에 라벨과 설명, 오른쪽에 컨트롤이 있는 행을 쌓습니다. 바로 적용되는 Switch 와 배포해야 적용되는 입력을 구분합니다.",
     choose: [["언제 쓰는가", "정책 하나의 동작이나 시스템 설정처럼, 언제든 돌아와 값을 바꾸는 설정 화면에 씁니다."], ["비슷한 패턴", "처음 한 번 순서대로 정하는 설정은 <a href=\"#/patterns/onboarding\">온보딩</a>으로, 새 항목을 만드는 입력은 <a href=\"#/patterns/input-form\">입력 폼</a>으로 받습니다."]],
     principles: [["행 구성", "왼쪽에 이름과 한 줄 설명, 오른쪽에 컨트롤 하나를 둡니다. 설명에는 바꾸면 무엇이 달라지는지를 씁니다."], ["바로 적용과 배포", "Switch 는 누르면 바로 서버에 반영합니다. 그 섹션 머리에 바로 적용된다고 적습니다. 나머지 입력은 모아 두었다가 배포를 눌러야 에이전트에 갑니다."], ["배포 전 변경", "배포하지 않은 변경이 있으면 맨 위 경고 알림에 건수를 적습니다. 화면을 떠나려 하면 버릴지 묻습니다."], ["컨트롤 고르기", "켜고 끄기는 Switch, 정도는 Slider, 정확한 수는 Number Input, 시각은 Time Picker, 여럿 고르기는 Combobox 로 받습니다."], ["적용 대상", "부서처럼 계층이 있는 대상은 지금 고른 것을 Tag 로 보여 주고, 바꿀 때는 Side Panel 의 체크박스 Tree 에서 고릅니다."], ["연결 정보", "에이전트 등록 키처럼 복사해 쓰는 값은 Copy Field 로 보여 줍니다."]],
@@ -715,7 +724,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   },
 
   "detail": {
-    status: "new", react: ["PageHead","Tabs","Card","Table"], uses: ["page-header", "breadcrumb", "button", "dropdown", "tab", "card", "table", "copy-field", "indicator", "tag", "link", "list", "loading", "empty-state"], css: [".stack", ".row-2"],
+    status: "new", react: ["PageHead","Tabs","Card","Table"], uses: ["page-header", "breadcrumb", "button", "dropdown", "tab", "card", "table", "copy-field", "indicator", "tag", "link", "list", "loading", "empty-state", "tooltip"], css: [".stack", ".row-2"],
     desc: "자산이나 정책, 사용자처럼 한 대상의 모든 것을 보여 주는 화면입니다. 위에는 이름과 그 대상에 할 동작을, 아래에는 탭으로 나눈 정보를 둡니다.",
     choose: [["언제 쓰는가", "목록에서 한 항목을 눌러 들어가, 그 대상의 상태와 이력을 보고 동작을 실행하는 화면에 씁니다."], ["비슷한 패턴", "목록을 떠나지 않고 잠깐 보는 상세는 <a href=\"#/components/side-panel\">Side Panel</a> 이나 표의 행 펼침으로 보여 줍니다."]],
     principles: [["머리", "Page Header 에 위치와 이름, 상태 한 줄을 둡니다. 동작은 세 개까지이고 가장 많이 하는 동작 하나만 주 버튼입니다."], ["위험 동작", "격리나 삭제처럼 되돌리기 어려운 동작은 ⋯ 메뉴 맨 아래 구분선 뒤에 둡니다. 누르면 <a href=\"#/patterns/danger-confirm\">위험 작업 확인</a>으로 묻습니다."], ["탭", "개요 · 활동 · 설정처럼 성격이 다른 정보를 탭으로 나눕니다. 첫 탭인 개요에는 가장 자주 보는 정보만 둡니다."], ["키-값", "카드 안 속성은 키-값 목록으로 보여 줍니다. IP 처럼 복사해 쓰는 값에는 복사 버튼을 붙입니다."], ["관련 항목", "관련 이벤트나 로그는 최근 몇 건만 보여 주고, 같은 조건의 목록 화면으로 가는 링크를 둡니다."], ["상태", "불러오는 동안은 내용 자리에 Skeleton 을 두고, 없는 대상이면 Empty State 로 알리며 목록으로 돌아갈 길을 줍니다."]],
@@ -725,7 +734,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           <div class="page-head">
             ${pBreadcrumb(["자산", "PC-2041"])}
             <div><h2 class="title">PC-2041</h2><p class="sub">김민준 · 개발팀 · Windows 11</p></div>
-            <div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">검사 실행</button><button type="button" class="btn md solid primary">원격 점검</button><div class="dropdown"><button type="button" class="btn md outline assistive icon-only" aria-label="PC-2041 동작 더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button><ul class="menu" role="menu"><li class="menu-item" role="menuitem">${I("refresh")}에이전트 재설치</li><li class="menu-item" role="menuitem">${I("download")}정보 내보내기</li><li class="menu-item" role="menuitem">${I("lock")}네트워크 격리</li><li class="menu-sep" role="separator"></li><li class="menu-item danger" role="menuitem">${I("trash")}자산 삭제</li></ul></div></div></div>
+            <div class="actions"><div class="btn-group"><button type="button" class="btn md outline assistive">검사 실행</button><button type="button" class="btn md solid primary">원격 점검</button><div class="dropdown"><span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="PC-2041 동작 더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button><span class="tooltip left" role="tooltip">PC-2041 동작 더 보기</span></span><ul class="menu" role="menu"><li class="menu-item" role="menuitem">${I("refresh")}에이전트 재설치</li><li class="menu-item" role="menuitem">${I("download")}정보 내보내기</li><li class="menu-item" role="menuitem">${I("lock")}네트워크 격리</li><li class="menu-sep" role="separator"></li><li class="menu-item danger" role="menuitem">${I("trash")}자산 삭제</li></ul></div></div></div>
           </div>
           <div class="tabs" role="tablist" aria-label="자산 정보"><button type="button" class="tab on" role="tab" aria-selected="true" id="ad-tab-a" aria-controls="ad-panel-a">개요</button><button type="button" class="tab" role="tab" aria-selected="false" id="ad-tab-b" aria-controls="ad-panel-b">활동</button><button type="button" class="tab" role="tab" aria-selected="false" id="ad-tab-c" aria-controls="ad-panel-c">설정</button></div>
           <div class="tab-panel" role="tabpanel" id="ad-panel-a" aria-labelledby="ad-tab-a">
@@ -759,17 +768,17 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   },
 
   "roles": {
-    status: "new", react: ["DataTable", "AvatarGroup", "SidePanel", "Tree", "Card"], uses: ["button", "data-table", "avatar", "tag", "side-panel", "notification", "tree", "card", "loading", "empty-state"], borrows: [".sr-only"], css: [".toolbar", ".stack"],
+    status: "new", react: ["DataTable", "AvatarGroup", "SidePanel", "Tree", "Card"], uses: ["page-header", "button", "data-table", "avatar", "tag", "side-panel", "notification", "tree", "card", "loading", "empty-state"], borrows: [".sr-only"], css: [".toolbar", ".stack"],
     desc: "관리자 역할과 그 역할이 할 수 있는 일을 정하는 화면입니다. 역할 목록에서 하나를 골라 Side Panel 에서 권한을 고칩니다.",
     choose: [["언제 쓰는가", "콘솔을 쓰는 사람에게 역할을 주고, 역할마다 보기 · 처리 · 배포 같은 권한을 정할 때 씁니다."], ["비슷한 패턴", "정책이 적용될 부서나 단말을 고르는 일은 <a href=\"#/patterns/policy-settings\">정책 설정</a>의 적용 대상에서 합니다."]],
     principles: [["목록", "역할마다 이름과 설명, 그 역할을 가진 사람, 기본 · 사용자 정의 구분을 한 줄에 둡니다. 사람은 Avatar Group 으로 다섯까지 보여 주고 나머지는 수로 적습니다."], ["기본 역할", "시스템이 만든 기본 역할은 이름을 바꾸거나 지울 수 없습니다. 권한을 바꾸려면 복제해서 사용자 정의 역할로 만듭니다."], ["권한 트리", "권한은 화면별로 묶은 체크박스 Tree 로 고릅니다. 묶음을 켜면 그 안의 권한이 함께 켜지고, 일부만 켜지면 묶음은 일부 선택으로 보입니다."], ["변경 요약", "저장하기 전에 무엇이 늘고 줄었는지 Side Panel 위에 요약합니다. 영향을 받는 사람 수를 함께 적습니다."], ["저장", "저장해야 반영되고, 취소하면 열기 전 상태로 돌아갑니다. 바뀐 권한은 그 사람이 다음에 화면을 열 때부터 적용됩니다."], ["감사", "역할을 바꾼 기록은 감사 로그에 남습니다. 누가 언제 무엇을 바꿨는지는 제품 서버가 기록합니다."]],
     examples: [
       { id: "list", title: "역할 목록", html: `
         <div class="stack">
-          <div class="toolbar"><span class="spacer"></span><button type="button" class="btn md solid primary">${I("plus")}역할 만들기</button></div>
+          <div class="page-head"><div><h2 class="title">역할</h2></div><div class="actions"><button type="button" class="btn md solid primary">${I("plus")}역할 만들기</button></div></div>
           <div class="tbl-wrap">
             <table class="tbl hover">
-              <thead><tr><th>역할</th><th>설명</th><th>사용자</th><th>구분</th><th class="actions"><span class="sr-only">동작</span></th></tr></thead>
+              <thead><tr><th class="sortable sorted" aria-sort="ascending"><button type="button" class="sort">역할</button></th><th>설명</th><th>사용자</th><th>구분</th><th class="actions"><span class="sr-only">동작</span></th></tr></thead>
               <tbody>
                 <tr><td>보안 관리자</td><td>모든 화면을 보고 정책을 배포합니다</td><td>${pAvatars("보안 관리자 사용자", ["김민준", "이서연", "박지훈"], 0, true)}</td><td><span class="tag sm">기본</span></td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="보안 관리자 권한 편집" data-panel-open="#role-edit">권한 편집</button></td></tr>
                 <tr><td>운영자</td><td>이벤트를 처리하고 정책을 봅니다</td><td>${pAvatars("운영자 사용자", ["최유진", "정다은", "한지우", "오세훈", "윤하늘"], 7, true)}</td><td><span class="tag sm">기본</span></td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="운영자 권한 편집" data-panel-open="#role-edit">권한 편집</button></td></tr>
@@ -792,17 +801,17 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
   },
 
   "secrets": {
-    status: "new", react: ["DataTable", "CopyField", "Popup", "Card"], uses: ["button", "data-table", "copy-field", "indicator", "popup", "form", "text-field", "date-picker", "radio-button", "notification", "card", "loading", "empty-state"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold"], css: [".toolbar", ".stack"],
+    status: "new", react: ["DataTable", "CopyField", "Popup", "Card"], uses: ["page-header", "button", "data-table", "copy-field", "indicator", "popup", "form", "text-field", "date-picker", "radio-button", "notification", "card", "loading", "empty-state"], borrows: [".sr-only", ".t-label-1-normal", ".t-semibold"], css: [".toolbar", ".stack"],
     desc: "외부 연동에 쓰는 API 키와 비밀값을 만들고 재발급하는 화면입니다. 비밀값은 만든 순간 한 번만 보여 주고, 목록에는 알아볼 수 있는 앞자리만 둡니다.",
     choose: [["언제 쓰는가", "SIEM 이나 티켓 시스템처럼 콘솔과 연결되는 외부 서비스에 줄 키를 만들고, 만료를 관리할 때 씁니다."], ["비슷한 패턴", "에이전트 등록처럼 가려서 다시 볼 수 있는 값은 <a href=\"#/components/copy-field\">Copy Field</a> 하나로 충분합니다."]],
     principles: [["한 번만 보임", "비밀값은 만든 직후 대화상자에서 한 번만 보여 줍니다. 다시 볼 수 없다는 경고를 함께 두고, 닫으면 서버에 남지 않습니다."], ["목록", "목록에는 키 이름과 키 ID, 알아볼 수 있는 앞자리, 만료일, 마지막 사용을 둡니다. 비밀값 전체는 목록에 두지 않습니다."], ["만료", "만료가 30일 안이면 남은 날을 경고 점으로, 7일 안이면 위험 점으로 보여 줍니다. 그보다 멀면 날짜만 적습니다. 만료가 없는 키는 만들 수 없게 기본값을 정해 둡니다."], ["재발급", "재발급하면 옛 키가 바로 멈춥니다. 그래서 alertdialog 로 묻고, 무엇이 끊기는지 적습니다."], ["범위", "키마다 할 수 있는 일을 정합니다. 읽기 전용을 기본으로 고르고, 쓰기는 필요한 연동에만 줍니다."], ["복사", "복사해도 값은 알림이나 로그에 남기지 않습니다. 복사했다는 사실만 버튼 자리에서 알립니다."]],
     examples: [
       { id: "keys", title: "키 목록", html: `
         <div class="stack">
-          <div class="toolbar"><span class="spacer"></span><button type="button" class="btn md solid primary" data-popup-open="#sec-create">${I("plus")}API 키 만들기</button></div>
+          <div class="page-head"><div><h2 class="title">API 키</h2></div><div class="actions"><button type="button" class="btn md solid primary" data-popup-open="#sec-create">${I("plus")}API 키 만들기</button></div></div>
           <div class="tbl-wrap">
             <table class="tbl hover nowrap">
-              <thead><tr><th>이름</th><th>키 ID</th><th>앞자리</th><th>만료</th><th>마지막 사용</th><th class="actions"><span class="sr-only">동작</span></th></tr></thead>
+              <thead><tr><th>이름</th><th>키 ID</th><th>앞자리</th><th class="sortable sorted" aria-sort="ascending"><button type="button" class="sort">만료</button></th><th>마지막 사용</th><th class="actions"><span class="sr-only">동작</span></th></tr></thead>
               <tbody>
                 <tr><td>SIEM 연동</td><td>${pCopyInline("SIEM 연동 키 ID", "key_01HF8Q")}</td><td>jsk_live_8c2e</td><td><span class="indicator danger">7일 남음</span></td><td>09:41</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="SIEM 연동 키 재발급" data-popup-open="#sec-reissue">재발급</button></td></tr>
                 <tr><td>티켓 시스템</td><td>${pCopyInline("티켓 시스템 키 ID", "key_01HD2K")}</td><td>jsk_live_41f7</td><td><span class="indicator warn">24일 남음</span></td><td>어제</td><td class="actions"><button type="button" class="btn sm outline assistive" aria-label="티켓 시스템 키 재발급" data-popup-open="#sec-reissue">재발급</button></td></tr>
@@ -816,7 +825,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           <h3 class="popup-title" id="sec-create-t">API 키 만들기</h3>${pClose("popup-close", "data-popup-close")}
           <form class="form popup-body" id="sec-create-form" data-validate novalidate>
             <p class="form-legend"><em>*</em> 필수 항목</p>
-            <div class="field"><label for="sec-name">키 이름 <em>*</em></label><input id="sec-name" required placeholder="연동할 서비스 이름"><span class="help" aria-live="polite">목록에서 알아볼 이름입니다.</span></div>
+            <div class="field"><label for="sec-name">키 이름 <em>*</em></label><input id="sec-name" required placeholder="예: SIEM 연동"><span class="help" aria-live="polite">목록에서 알아볼 이름입니다.</span></div>
             ${pDate({ id: "sec-exp", label: "만료일", value: "2027. 02. 15", help: "최대 1년까지 정할 수 있습니다." })}
             <div class="field"><fieldset class="radio-group"><legend class="t-label-1-normal t-semibold">범위</legend><label class="radio"><input type="radio" name="sec-scope" checked><span>읽기 전용</span></label><label class="radio"><input type="radio" name="sec-scope"><span>읽기와 쓰기</span></label></fieldset><span class="help" aria-live="polite"></span></div>
           </form>
@@ -877,12 +886,12 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             </div>
           </div>
         </div>`, layout: "stack" },
-      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "사고 목록을 불러오는 동안과 조건에 맞는 사고가 없을 때, 불러오지 못했을 때의 화면입니다.", html: pStates({"cols": ["시간", "심각도", "사고", "담당자"], "loading": "사고 목록 불러오는 중", "emptyTitle": "빈 결과", "empty": "조건에 맞는 사고가 없습니다. 필터를 바꾸거나 지우세요.", "error": "사고 목록을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["필터 지우기", false]}), layout: "stack" },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "사고 목록을 불러오는 동안과 조건에 맞는 사고가 없을 때, 불러오지 못했을 때의 화면입니다.", html: pStates({"cols": ["시간", "심각도", "사고", "담당자"], "loading": "사고 목록 불러오는 중", "emptyTitle": "빈 결과", "empty": "조건에 맞는 사고가 없습니다. 필터를 바꾸거나 지우세요.", "error": "사고 목록을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["필터 초기화", false]}), layout: "stack" },
     ],
   },
 
   "audit-log": {
-    status: "new", react: ["DataTable", "Table", "Card"], uses: ["search", "date-picker", "data-table", "table", "indicator", "card", "tag", "link", "button", "loading", "empty-state"], borrows: [".sr-only", ".field"], css: [".stack", ".toolbar"],
+    status: "new", react: ["DataTable", "Table", "Card"], uses: ["pagination", "search", "date-picker", "data-table", "table", "indicator", "card", "tag", "link", "button", "loading", "empty-state"], borrows: [".sr-only", ".field"], css: [".stack", ".toolbar"],
     desc: "누가 언제 무엇을 바꿨는지 남기고 찾아보는 화면입니다. 기록은 고칠 수 없고, 바꾼 내용은 변경 전과 변경 후를 나란히 보여 줍니다.",
     choose: [["언제 쓰는가", "정책 변경이나 로그인, 내보내기처럼 관리자가 한 일을 감사하거나, 설정이 언제 왜 바뀌었는지 찾을 때 씁니다."], ["비슷한 패턴", "단말과 보안 이벤트의 기록은 <a href=\"#/patterns/log-viewer\">로그 뷰어</a>를, 사고 하나의 처리 기록은 <a href=\"#/patterns/incident\">사고 처리</a>를 씁니다."]],
     principles: [["남기는 것", "누가, 언제, 어디서, 무엇을 했는지와 결과를 남깁니다. 실패한 시도도 남깁니다."], ["고칠 수 없음", "감사 기록은 고치거나 지울 수 없습니다. 화면에 편집이나 삭제 동작을 두지 않습니다."], ["찾기", "검색칸과 기간을 툴바에 둡니다. 기간의 처음 값은 최근 7일입니다."], ["자세히 보기", "행을 펼쳐 접속 IP와 사유, 바뀐 항목을 보여 줍니다. 바뀐 항목은 변경 전에서 변경 후로 읽히게 적습니다."], ["변경 이력", "설정 하나의 이력은 버전마다 바꾼 사람과 시각, 요약을 표로 보여 주고, 두 버전을 나란히 비교합니다."], ["되돌리기", "지난 버전으로 되돌리는 일도 새 버전을 하나 만듭니다. 이력을 지우지 않고, 누르면 <a href=\"#/patterns/danger-confirm\">위험 작업 확인</a>을 거칩니다."], ["보관", "보관 기간과 내보내기 방법은 화면 아래에 적습니다. 내보낸 일도 감사 기록에 남습니다."]],
@@ -894,7 +903,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             ${pDate({ id: "au-range", aria: "조회 기간", range: true, value: "2026. 11. 09 ~ 2026. 11. 15", attrs: 'data-max="today" data-presets="7 30" data-default-preset="7"' })}
           </div>
           <div class="tbl-wrap"><table class="tbl compact nowrap">
-            <thead><tr><th class="expand"><span class="sr-only">상세</span></th><th>시간</th><th>사용자</th><th>동작</th><th>대상</th><th>결과</th></tr></thead>
+            <thead><tr><th class="expand"><span class="sr-only">상세</span></th><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>사용자</th><th>동작</th><th>대상</th><th>결과</th></tr></thead>
             <tbody>
               <tr><td class="expand"><button type="button" class="expand-btn" aria-expanded="true" aria-controls="au0-d" aria-label="10:12 기록 상세">${I("chevron-right",16)}</button></td><td>11. 15 10:12</td><td>이서연</td><td>정책 변경</td><td><a href="#" class="link">표준 보호</a></td><td><span class="indicator ok">성공</span></td></tr>
               <tr class="row-detail" id="au0-d"><td colspan="6"><div class="row-detail-body"><dl class="detail-meta"><dt>접속 IP</dt><dd>10.0.0.12</dd><dt>사유</dt><dd>PC-2041 USB 예외 요청</dd><dt>USB 저장장치 차단</dt><dd>켬 → 끔</dd><dt>예외 단말</dt><dd>2대 → 3대</dd></dl></div></td></tr>
@@ -904,6 +913,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
               <tr class="row-detail" id="au2-d" hidden><td colspan="6"><div class="row-detail-body"><dl class="detail-meta"><dt>접속 IP</dt><dd>10.0.0.31</dd><dt>형식</dt><dd>CSV · 48,213줄</dd></dl></div></td></tr>
             </tbody>
           </table></div>
+          <div class="pagination-bar"><span>총 <b>142</b>건 · 1–50</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
         </div>`, layout: "stack" },
       { id: "history", title: "변경 이력과 비교", desc: "설정 하나의 버전을 표로 보여 주고, 두 버전을 나란히 비교합니다. 되돌리기도 새 버전을 만듭니다.", html: `
         <div class="stack">
@@ -923,18 +933,18 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             </tbody></table></div>
           </div>
         </div>`, layout: "stack" },
-      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "기록을 불러오는 동안은 같은 크기의 Skeleton 행을, 조건에 맞는 기록이 없으면 조건을 바꾸는 길을, 불러오지 못하면 원인과 다시 시도를 둡니다.", html: pStates({"cols": ["시간", "사용자", "동작", "대상"], "loading": "감사 로그 불러오는 중", "emptyTitle": "빈 결과", "empty": "조건에 맞는 기록이 없습니다. 기간을 넓히거나 검색어를 바꾸세요.", "error": "감사 로그를 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["검색 지우기", false]}), layout: "stack" },
+      { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "기록을 불러오는 동안은 같은 크기의 Skeleton 행을, 조건에 맞는 기록이 없으면 조건을 바꾸는 길을, 불러오지 못하면 원인과 다시 시도를 둡니다.", html: pStates({"cols": ["시간", "사용자", "동작", "대상"], "loading": "감사 로그 불러오는 중", "emptyTitle": "빈 결과", "empty": "조건에 맞는 기록이 없습니다. 기간을 넓히거나 검색어를 바꾸세요.", "error": "감사 로그를 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["필터 초기화", false]}), layout: "stack" },
     ],
   },
 
   "alert-rules": {
-    status: "new", react: ["Form", "Combobox", "NumberInput", "Checkbox", "DataTable", "Card"], uses: ["form", "text-field", "combobox", "select", "number-input", "checkbox", "notification", "button", "data-table", "card", "loading", "empty-state"], borrows: [".sr-only", ".chip"], css: [".btn-group", ".stack"],
+    status: "new", react: ["Form", "Combobox", "NumberInput", "Checkbox", "DataTable", "Card"], uses: ["form", "text-field", "combobox", "select", "number-input", "checkbox", "notification", "button", "data-table", "card", "loading", "empty-state"], borrows: [".menu-mark", ".sr-only", ".chip"], css: [".btn-group", ".stack"],
     desc: "어떤 이벤트가 생기면 누구에게 어떻게 알릴지 정하는 화면입니다. 조건과 동작을 나눠 받고, 저장하기 전에 규칙을 한 문장으로 보여 줍니다.",
     choose: [["언제 쓰는가", "Critical 이벤트가 짧은 시간에 몰리는 것처럼 사람이 바로 알아야 하는 조건을 정해 메일이나 웹훅으로 알릴 때 씁니다."], ["비슷한 패턴", "정해진 때마다 요약을 보내는 것은 <a href=\"#/patterns/report-schedule\">보고서 · 예약 발송</a>을, 탐지와 차단 동작 자체를 정하는 것은 <a href=\"#/patterns/policy-settings\">정책 설정</a>을 씁니다."]],
     principles: [["조건과 동작", "조건과 동작을 섹션으로 나눕니다. 조건은 모두 맞아야 하고, 동작은 하나 이상 고릅니다."], ["조건", "심각도와 대상, 횟수와 시간 창을 받습니다. 횟수와 시간 창은 '10분 안에 5건 이상' 처럼 한 줄로 읽히게 둡니다."], ["동작", "메일은 받는 사람을, 웹훅은 주소를 받습니다. 웹훅은 저장하기 전에 테스트 전송으로 확인할 수 있게 합니다."], ["요약 문장", "저장 버튼 위에 규칙을 한 문장으로 보여 주고, 값을 바꾸면 바로 고칩니다."], ["알림 묶기", "같은 규칙의 알림은 시간 창 안에서 한 번만 보냅니다. 같은 이벤트로 알림이 쏟아지지 않게 합니다."], ["검증", "필수 값과 웹훅 주소 형식은 입력 검증으로 확인합니다. 저장을 누르면 첫 오류로 이동합니다."]],
     examples: [
       { id: "builder", title: "알림 규칙 만들기", html: `
-        <form class="form" data-validate novalidate>
+        <form class="form" data-validate data-draft="alert-rule-new" novalidate>
           <p class="form-legend"><em>*</em> 필수 항목</p>
           <div class="field"><label for="ar-name">규칙 이름 <em>*</em></label><input id="ar-name" value="랜섬웨어 연속 탐지" required><span class="help" aria-live="polite"></span></div>
           <div class="form-section">조건</div>

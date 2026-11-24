@@ -4,6 +4,7 @@ import { useId } from "../../utils/useId";
 import { mergeRefs, useEscape, useFocusTrap } from "../../utils/hooks";
 import { Portal } from "../../utils/Portal";
 import { ghostOut } from "../../utils/ghost";
+import { useDiscardGuard } from "../../utils/discard";
 import { Button } from "../button/Button";
 import { Icon } from "../../icons/Icon";
 import { LABELS } from "../../labels";
@@ -40,6 +41,8 @@ export const SidePanelSurface = forwardRef<HTMLElement, SidePanelSurfaceProps>(f
 
 export interface SidePanelProps extends SidePanelSurfaceProps {
   open: boolean;
+  /** 모달 패널에서 입력을 시작한 뒤 Esc · X · 취소(data-panel-close)로 닫으려 하면 '변경 사항을 버릴까요?' 를 안에 띄운다 (기본 true). 배경 클릭은 입력 중이면 닫지 않는다 */
+  confirmDiscard?: boolean;
   /** Portal 컨테이너 (기본 document.body) */
   container?: Element | null;
 }
@@ -50,19 +53,24 @@ export interface SidePanelProps extends SidePanelSurfaceProps {
  */
 export const SidePanel = forwardRef<HTMLElement, SidePanelProps>(function SidePanel({ open, container, ...layer }, ref) {
   const inner = useRef<HTMLElement>(null);
+  const guard = useRef<(() => void) | null>(null);   // 안쪽 Layer 가 입력 보호를 거친 닫기를 넣는다
   /* Esc 는 여기서 — 안에 처음부터 열려 있는 Select 보다 먼저 스택에 올라야 Select 가 먼저 받는다 */
-  useEscape(() => { if (layer.modal || inner.current?.contains(document.activeElement)) layer.onClose(); }, open);
+  useEscape(() => { if (layer.modal || inner.current?.contains(document.activeElement)) (guard.current ?? layer.onClose)(); }, open);
   if (!open) return null;
   return (
     <Portal container={container}>
-      <SidePanelLayer ref={mergeRefs(inner, ref)} {...layer} />
+      <SidePanelLayer ref={mergeRefs(inner, ref)} guard={guard} {...layer} />
     </Portal>
   );
 });
 
 /* 훅은 Portal 안에서 돈다 — Portal 은 한 박자 늦게 그려서, 밖에서 돌면 포커스를 옮길 때 표면이 아직 없다 */
-const SidePanelLayer = forwardRef<HTMLElement, Omit<SidePanelProps, "open" | "container">>(function SidePanelLayer({ onClose, modal, children, ...surface }, ref) {
+const SidePanelLayer = forwardRef<HTMLElement, Omit<SidePanelProps, "open" | "container"> & { guard: { current: (() => void) | null } }>(function SidePanelLayer({ onClose, modal, confirmDiscard = true, guard, children, ...surface }, ref) {
   const inner = useRef<HTMLElement>(null);
+  /* 입력 보호는 모달만 — 비모달은 뒤 페이지와 함께 쓰는 자리라 닫아도 입력이 화면에 남는 경우가 많다(사이트와 같음) */
+  const g = useDiscardGuard(inner, onClose, !!modal && confirmDiscard);
+  guard.current = g.request;
+  useEffect(() => () => { guard.current = null; }, [guard]);
   useFocusTrap(inner, !!modal, inner);
   useEffect(() => {
     if (modal) {
@@ -80,10 +88,21 @@ const SidePanelLayer = forwardRef<HTMLElement, Omit<SidePanelProps, "open" | "co
   useLayoutEffect(() => { const d = dim.current, p = inner.current; return () => ghostOut([d, p]); }, []);   // 나갈 때 흐려지는 사본(사이트와 같음)
   return (
     <>
-      {modal && <div ref={dim} className="side-panel-dim" onMouseDown={onClose} />}
-      <SidePanelSurface ref={mergeRefs(inner, ref)} fixed modal={modal} onClose={onClose} tabIndex={-1} {...surface}>
+      {modal && <div ref={dim} className="side-panel-dim" onMouseDown={() => { if (!g.dirty.current) onClose(); }} />}
+      <SidePanelSurface
+        ref={mergeRefs(inner, ref)} fixed modal={modal} onClose={g.request} tabIndex={-1}
+        onInputCapture={g.mark} onChangeCapture={g.mark}
+        onClickCapture={(e) => {
+          const t = e.target as Element;
+          if (t.closest(".menu-item, [role=gridcell]")) g.mark();
+          const cl = t.closest("[data-panel-close]");   // 주 버튼에 단 닫기는 저장 뒤 닫기라 묻지 않는다
+          if (cl && !cl.matches(".primary") && g.asks()) { e.preventDefault(); e.stopPropagation(); g.request(); }
+        }}
+        {...surface}
+      >
         {children}
       </SidePanelSurface>
+      {g.portal}
     </>
   );
 });

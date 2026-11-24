@@ -57,6 +57,8 @@ describe("사이트 · React 문구가 같다", () => {
   it("Copy Field 문구", () => expect(same(grab(SRC, "COPY_LABEL"), COPY_LABELS)).toEqual([]));
   it("File Upload 문구", () => expect(same(grab(SRC, "UP_LABEL"), grab(FU, "DEFAULT_LABELS") as Record<string, string>)).toEqual([]));
   it("Tree 문구", () => expect(same(grab(SRC, "TREE_LABEL"), TREE_LABELS)).toEqual([]));
+  it("오버레이 입력 보호 문구", () => expect(same(grab(SRC, "DISCARD_LABEL"), LABELS, { title: "discardTitle", body: "discardBody", keep: "discardKeep", drop: "discardDrop" })).toEqual([]));
+  it("폼 초안 문구", () => expect(same(grab(SRC, "DRAFT_LABEL"), LABELS, { restored: "draftRestored", discard: "draftDiscard" })).toEqual([]));
   it("Notification Center 문구", () => expect(same(grab(SRC, "NF_LABEL"), NOTIFY_LABELS)).toEqual([]));
   it("사이드 내비 접기 문구", () => expect(same(grab(SRC, "NAV_LABEL"), LABELS, { collapse: "navCollapse", expand: "navExpand" })).toEqual([]));   // 2026-11-18
 });

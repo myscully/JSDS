@@ -143,7 +143,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
 /* 문구 — 예제 미리보기의 버튼 · 링크 글자와 자리 표시 글. 규칙과 예외는 foundations/writing(Writing 페이지)과 같다.
    taste-skill 2.5.0(MIT) references/copy.md 를 한국어 콘솔에 맞게 옮겼다(2026-11-05) */
 {
-  const BANNED_LABELS = ["자세히", "자세히 보기", "여기", "이곳", "클릭", "바로가기", "더 보기", "더보기", "Learn more", "Read more", "Click here", "More"];
+  const BANNED_LABELS = ["자세히", "자세히 보기", "여기", "이곳", "클릭", "바로가기", "더 보기", "더보기", "Learn more", "Read more", "Click here", "More", "예", "아니요", "제출", "진행", "계속"];
   const PLACEHOLDER = /lorem|ipsum|\bTODO\b|\[\s*\]|샘플/i;
   const HAEYO = /[가-힣]*(?:해요|했어요|있어요|없어요|돼요|됐어요|예요|이에요|네요)(?=[\s.!?,]|$)/;
   const text = (h) => h.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
@@ -155,8 +155,30 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         const t = text(m[3]); if (BANNED_LABELS.includes(t)) fails.push(`${f}: 모호한 ${m[1]} 라벨 "${t}" — 열리는 것 · 일어날 동작으로(Writing › Vague labels)`);
         const al = (/aria-label="([^"]*)"/.exec(m[2]) || [])[1];
         if (al && BANNED_LABELS.includes(al) && !(al === "더 보기" && /icon-only/.test(m[2]))) fails.push(`${f}: 모호한 접근 이름 "${al}" — "더 보기" 는 ⋯ 아이콘 버튼(액션 메뉴)만 허용`);
+        if (al && /예시/.test(al)) fails.push(`${f}: 접근 이름에 문서용 말 "예시" — "${al}"(Writing › Vague labels)`);
+      }
+      /* '확인' 은 정보만 알리고 닫는 대화상자의 단독 버튼으로만(2026-11-23 — Writing › Buttons) */
+      { const acts = [...pv.matchAll(/<div class="popup-actions[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>/g)];
+        for (const m of pv.matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)) {
+          if (text(m[1]) !== "확인") continue;
+          const box = acts.find((a) => m.index > a.index && m.index < a.index + a[0].length);
+          if (!box || (box[1].match(/<button\b/g) || []).length !== 1) fails.push(`${f}: 버튼 "확인" — 일어날 동작으로. 정보만 알리는 대화상자의 단독 버튼만 허용(Writing › Buttons)`);
+        } }
+      /* 아이콘 전용 버튼은 Tooltip 안에(2026-11-23 — 글자 없는 버튼은 마우스로 이름을 볼 길이 없다). 뺀 것: 끈 버튼(Tooltip 금지),
+         닫기 X · 복사 · 파일 줄의 지우기 · 다시 시도(오버레이 · 필드 · 파일 줄에 붙어 자리가 뜻을 알린다 — 달력 · 시계 버튼 · 칩 지우기와 같은 이유) */
+      for (const b of pv.matchAll(/<button\b[^>]*class="btn [^"]*\bicon-only\b[^"]*"[^>]*>/g)) {
+        if (/\sdisabled[\s>=]/.test(b[0]) || /class="[^"]*\b(?:popup-close|side-panel-close|copy|remove|retry)\b/.test(b[0])) continue;
+        if (!/<span class="tooltip-wrap(?: show)?">$/.test(pv.slice(Math.max(0, b.index - 40), b.index))) fails.push(`${f}: 아이콘 전용 버튼 "${(/aria-label="([^"]*)"/.exec(b[0]) || [])[1] || "?"}" 에 Tooltip 없음(Button › 아이콘 전용)`);
       }
       const ph = PLACEHOLDER.exec(text(pv)); if (ph) fails.push(`${f}: 예제에 자리 표시 글 "${ph[0]}"(Writing › Placeholders)`);
+      /* Empty State — 첫 사용('아직 … 없습니다') · 검색 결과 없음('결과가 없습니다')은 동작을 하나 이상(2026-11-23 — Empty State › 구성) */
+      for (const m of pv.matchAll(/<div class="empty(?![^"]*\berror\b)[^"]*"[^>]*>/g)) {
+        let i = m.index + m[0].length, depth = 1;
+        const re = /<(\/?)div\b[^>]*>/g; re.lastIndex = i;
+        for (let t; depth && (t = re.exec(pv)); ) { depth += t[1] ? -1 : 1; i = re.lastIndex; }
+        const block = pv.slice(m.index, i), title = text((/<b>([\s\S]*?)<\/b>/.exec(block) || [])[1] || "");
+        if (/결과가 없습니다|^아직 /.test(title) && !/<(?:button|a)\b/.test(block)) fails.push(`${f}: 빈 화면 "${title}" 에 동작이 없다 — 첫 사용 · 검색 결과 없음은 동작을 하나 이상(Empty State › 구성)`);
+      }
       /* 종결 · 마침표(Writing › Sentence endings, 2026-11-09). 안내 목록 li 는 완전한 문장이라 뺀다 — notes 패턴 8줄 */
       const ending = HAEYO.exec(text(pv)); if (ending) fails.push(`${f}: 해요체 "${ending[0]}" — 합니다체로(Writing › Sentence endings)`);
       for (const m of pv.matchAll(/<(button|a|label|th)\b[^>]*>([\s\S]*?)<\/\1>/g)) { const t = text(m[2].replace(/<svg[\s\S]*?<\/svg>/g, "")); if (/[가-힣]\.$/.test(t)) fails.push(`${f}: ${m[1]} 글자에 마침표 "${t}"(Writing › Sentence endings)`); }
@@ -226,7 +248,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       for (const m of pv.matchAll(/<div class="tbl-wrap[^"]*\bsticky-col\b[^"]*"([^>]*)>/g)) if (!/tabindex="0"/.test(m[1]) || !/aria-label="/.test(m[1])) fails.push(`${f}: 첫 열 고정 영역은 tabindex=0 + 이름(Data Table › 첫 열 고정)`);
       for (const m of pv.matchAll(/<table class="(tbl\b[^"]*)"/g)) { const c = m[1].split(/\s+/);
         if (c.includes("plain") && (c.includes("zebra") || c.includes("grid"))) fails.push(`${f}: 표 .plain 은 .zebra · .grid 와 함께 쓰지 않는다(Table › 행 스타일) — "${m[1]}"`);
-        if (c.includes("compact") && c.includes("relaxed")) fails.push(`${f}: 표 밀도는 하나 — .compact · .relaxed 를 함께 쓰지 않는다`); }
+        if (c.includes("compact") && c.includes("relaxed")) fails.push(`${f}: 표 밀도는 하나 — .compact · .relaxed 를 함께 쓰지 않는다`);
+        if (c.includes("kv") && (c.includes("compact") || c.includes("relaxed"))) fails.push(`${f}: 속성 표(.kv)에는 밀도를 주지 않는다 — 머리글은 행 머리라 높이 규칙이 다르다(Table › 밀도) — "${m[1]}"`); }
       for (const m of pv.matchAll(/<ul class="list[^"]*"([^>]*)>([\s\S]*?)<\/ul>/g)) {
         sameNames(m[2], "List");
         if (!/role="option"/.test(m[2])) continue;
@@ -264,7 +287,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         const list = kind === "mixed" ? (spec.bars || []).concat(spec.lines || []) : spec.series || [], free = list.filter((s) => !s.tone).length;
         if (spec.color === "mono" && free > 4) bad(`한 톤은 tone 없는 계열 4개까지입니다(${free}개) — color 를 지우면 계열 색으로 그립니다`);
         if (spec.highlight != null && (kind !== "bar" || list.length !== 1 || !Number.isInteger(spec.highlight) || spec.highlight < 0 || spec.highlight >= (spec.labels || []).length)) bad("highlight 는 계열이 하나인 bar 의 막대 번호(0부터, 라벨 수 미만)입니다");
-        if ("gradient" in spec) bad("gradient 는 없앴습니다(2026-11-20 — 막대는 단색, 하나를 두드러지게 하려면 highlight)");
+        if (spec.gradient != null && (kind !== "bar" || typeof spec.gradient !== "boolean")) bad("gradient 는 bar 의 true | false 입니다");
+        if (spec.gradient && spec.stacked) bad("누적 막대에는 gradient 를 쓰지 않습니다 — 조각끼리 갈리지 않아 단색으로 그립니다(2026-11-24)");
         if (kind === "gauge" && !(+spec.value >= 0 && +spec.value <= (spec.max == null ? 100 : +spec.max))) bad("gauge 의 value 는 0 이상 max 이하입니다");
       }
       /* 필터는 페이지 위 한 줄(2026-11-20, dataviz 'One row, above the charts') — 차트 카드 머리의 동작 칸에 기간 · 필터 컨트롤을 두지 않는다 */
@@ -272,8 +296,13 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         const body = pv.slice(m.index); let depth = 0, n = body.length; for (const t of body.matchAll(/<(\/?)div\b/g)) { depth += t[1] ? -1 : 1; if (!depth) { n = t.index; break; } }
         if (/class="(?:select-btn|select|datepicker|combobox|searchbar)\b|class="[^"]*\b(?:datepicker|timepicker)\b/.test(body.slice(0, n))) fails.push(`${f}: 차트 카드 머리(.chart-action)에 기간 · 필터 컨트롤 금지 — 필터는 모든 카드 위 한 줄(Data Visual › 카드 머리)`);
       }
-      /* 대시보드는 훑어보는 화면이라 기간 · 필터가 없고(2026-11-20), 분석 · 리포트는 필터 줄이 카드 밖 · 첫 차트 카드보다 위 · 기간이 맨 앞 */
-      if (f === "patterns/dashboard.html" && /class="(?:select-btn|toolbar)\b|class="[^"]*\bdatepicker\b|aria-label="(?:조회 )?기간"/.test(pv)) fails.push(`${f}: 대시보드에는 기간 · 필터를 두지 않습니다 — 분석 · 리포트 패턴으로(Dashboard › 필터 없음)`);
+      /* 대시보드의 기간은 머리 동작의 Select Button 하나(사람의 결정 2026-11-24 — 11-20 의 '기간 없음' 을 바꿈). 다른 필터(툴바 · Date Picker)는 분석 · 리포트 패턴으로.
+         분석 · 리포트는 필터 줄이 카드 밖 · 첫 차트 카드보다 위 · 기간이 맨 앞 */
+      if (f === "patterns/dashboard.html") {
+        if (/class="toolbar\b|class="[^"]*\b(?:datepicker|combobox)\b/.test(pv)) fails.push(`${f}: 대시보드에는 기간 Select Button 말고 필터를 두지 않습니다 — 분석 · 리포트 패턴으로(Dashboard › 기간)`);
+        const ph = pv.indexOf('class="page-head"'), act = ph < 0 ? -1 : pv.indexOf('class="actions"', ph), per = pv.indexOf('role="radiogroup" aria-label="기간"'), kpi = pv.indexOf('class="kpi');
+        if (ph < 0 || act < 0 || per < act || (kpi >= 0 && per > kpi)) fails.push(`${f}: 대시보드 머리의 동작(.page-head .actions)에 기간 Select Button(role=radiogroup · aria-label=기간)이 있어야 합니다(Dashboard › 기간)`);
+      }
       if (f === "patterns/analytics.html" && /class="chart-card\b/.test(pv)) {
         const tb = pv.indexOf('<div class="toolbar">'), card = pv.search(/class="chart-card\b/);
         if (tb < 0 || tb > card) fails.push(`${f}: 필터 줄(.toolbar)은 첫 차트 카드보다 위에 둡니다(분석 · 리포트 › 필터 한 줄)`);
@@ -479,14 +508,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (/target="_blank"/.test(m[2]) && (!/rel="[^"]*noopener/.test(m[2]) || !/<svg/.test(m[3]) || !/class="sr-only"/.test(m[3]))) fails.push(`${f}: 새 창 링크는 rel · 아이콘 · 숨긴 문구(Link › 새 창)`);
       }
       for (const m of pv.matchAll(/<span class="avatar(?: sm)?"[^>]*>([^<]*)<\/span>/g)) if ([...m[1].trim()].length < 1 || [...m[1].trim()].length > 2) fails.push(`${f}: Avatar 이니셜은 1~2자 "${m[1]}"`);
-      /* Avatar 색(2026-11-16) — 예제의 아바타마다 data-tone 1~6, 값은 이름(data-name → aria-label → 글자)에서 정한 것과 같다.
-         식은 ds.src.js · render.js · React avatarTone 과 같다(React 테스트가 셋을 대조) */
-      const avTone = (n) => { let h = 0; for (const ch of String(n || "").trim()) h = (Math.imul(h, 31) + ch.codePointAt(0)) >>> 0; return h % 6 + 1; };
-      for (const m of pv.matchAll(/<span class="avatar(?: sm)?"([^>]*)>([^<]*)<\/span>/g)) {
-        const tone = (/\sdata-tone="([^"]*)"/.exec(m[1]) || [])[1], name = (/data-name="([^"]*)"/.exec(m[1]) || /aria-label="([^"]*)"/.exec(m[1]) || [])[1] || m[2];
-        if (!/^[1-6]$/.test(tone || "")) fails.push(`${f}: Avatar 에 data-tone 1~6 이 없다 "${m[2]}"(Avatar › 색)`);
-        else if (+tone !== avTone(name)) fails.push(`${f}: Avatar data-tone ${tone} ≠ 이름 "${name}" 의 tone ${avTone(name)}(Avatar › 색)`);
-      }
+      /* Avatar 색(2026-11-24) — 모든 아바타가 같은 중립 면 · 글자다. 11-16 의 이름으로 정하는 6색(data-tone)은 없앴다 */
+      if (/<span class="avatar[^"]*"[^>]*\sdata-tone=/.test(pv)) fails.push(`${f}: Avatar 의 data-tone 은 없앴다 — 모든 아바타가 중립 면(Avatar › 색)`);
       /* Avatar Group(2026-11-13) — role=group + 이름, 아바타 5개까지 · 아바타마다 role=img + 이름, '외 N명' 은 맨 뒤(버튼이면 이름에 그 글자) */
       const groups = [...pv.matchAll(/<span class="avatar-group"([^>]*)>((?:\s|<span class="avatar(?:-group-more| sm)?"[^>]*>[^<]*<\/span>|<button\b[^>]*>[^<]*<\/button>)*)<\/span>/g)];
       if (groups.length !== (pv.match(/<span class="avatar-group"/g) || []).length) fails.push(`${f}: .avatar-group 의 자식은 .avatar 와 맨 뒤 '외 N명' 뿐이다`);
@@ -560,7 +583,8 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
           const region = vertical ? m[2] : rest.slice(0, stop < 0 ? undefined : stop), panels = [...region.matchAll(/<div class="step-panel"([^>]*)>/g)].map((x) => x[1]);
           if (panels.length !== lis.length) fails.push(`${f}: Steps 마법사의 .step-panel ${panels.length}개 ≠ 단계 ${lis.length}개${vertical ? " — 세로는 각 li 안에 패널" : ""}`);
           else if (panels.filter((x) => !/\bhidden\b/.test(x)).length !== 1 || /\bhidden\b/.test(panels[onAt] || "hidden")) fails.push(`${f}: Steps 마법사는 현재(.on) 단계의 패널 하나만 보인다(hidden)`);
-          if (!/data-step="next"/.test(region)) fails.push(`${f}: Steps 마법사에 data-step="next" 버튼이 없다`);  // 완료는 선택 — 마지막 단계가 완료 화면이면(온보딩) finish 가 없다
+          if (!/data-step="next"/.test(region)) fails.push(`${f}: Steps 마법사에 data-step="next" 버튼이 없다`);
+          for (const fin of region.matchAll(/data-step="finish"[^>]*>([\s\S]*?)<\/button>/g)) if (text(fin[1]) === "완료") fails.push(`${f}: Steps 완료 버튼이 '완료' — 결과를 말하는 이름으로(Writing › Buttons)`);  // 완료는 선택 — 마지막 단계가 완료 화면이면(온보딩) finish 가 없다
         }
       }
       if (/<(?:ul class="(?:menu|list)|table)[^>]*>(?:(?!<\/(?:ul|table)>)[\s\S])*?<hr class="divider/.test(pv)) fails.push(`${f}: 구분선이 이미 있는 컴포넌트 안에 Divider(Divider › 중복 금지)`);
@@ -570,15 +594,45 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         const id = (/\sid="([^"]+)"/.exec(m[0]) || [])[1], wrapped = pv.lastIndexOf("<label", m.index) > pv.lastIndexOf("</label>", m.index);
         if (!wrapped && !(id && pv.includes(`for="${id}"`))) fails.push(`${f}: 접근 이름 없는 입력 ${m[0].slice(0, 80)}(Text Field › 라벨)`);
       }
+      /* placeholder 는 형식 예시만(2026-11-23 — UI/UX 검토) — '…입력' · '…입력하세요' 같은 지시문, 라벨을 되풀이한 글은 막는다 */
+      for (const m of pv.matchAll(/<(?:input|textarea)\b[^>]*\splaceholder="([^"]*)"[^>]*>/g)) {
+        const ph = m[1].trim(), id = (/\sid="([^"]+)"/.exec(m[0]) || [])[1];
+        if (/입력(?:하세요|해 ?주세요)?\.?$/.test(ph)) fails.push(`${f}: placeholder 가 지시문 "${ph}" — 형식 예시만 둔다(Text Field › 라벨)`);
+        const lab = id && new RegExp(`<label[^>]*for="${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]*>([\\s\\S]*?)<\\/label>`).exec(pv);
+        const labText = lab ? lab[1].replace(/<[^>]+>/g, "").replace(/\*/g, "").trim() : "";
+        if (labText && ph && labText === ph && !/class="sr-only"/.test(lab[0])) fails.push(`${f}: placeholder 가 라벨 "${ph}" 을 되풀이(Text Field › 라벨)`);
+      }
       /* 폼의 Select 는 라벨을 트리거 이름에 잇는다 — 안 그러면 '전체' 처럼 값만 읽힌다(Select › 폼 안에서) */
       for (const m of pv.matchAll(/<div class="field[^"]*"[^>]*>\s*<label[^>]*>[\s\S]*?<\/label>\s*<div class="dropdown[^"]*"[^>]*>\s*(<button\b[^>]*>)/g)) if (!/aria-labelledby="/.test(m[1])) fails.push(`${f}: 폼의 Select 트리거에 aria-labelledby 가 없다 ${m[1].slice(0, 80)}(Select › 폼 안에서)`);
-      /* 동작 메뉴(Dropdown 원칙) — 3~15개 · 선택 표시 없음 · 위험 항목은 맨 아래 구분선 뒤 */
-      for (const m of pv.matchAll(/<ul class="menu"[^>]*role="menu"[^>]*>([\s\S]*?)<\/ul>/g)) {
-        const items = [...m[1].matchAll(/<(?:li|a) class="menu-item([^"]*)"[^>]*role="menuitem"/g)].map((x) => x[1]);
-        if (items.length < 3 || items.length > 15) fails.push(`${f}: 동작 메뉴 항목 ${items.length}개 — 3~15개(Dropdown › 언제 쓰는가)`);
-        if (items.some((c) => /\bon\b/.test(c))) fails.push(`${f}: 동작 메뉴에 선택 표시 .on(Dropdown › 선택 표시)`);
-        const d = items.findIndex((c) => /\bdanger\b/.test(c));
-        if (d >= 0 && (d !== items.length - 1 || !/<li class="menu-sep"[^>]*><\/li>\s*<li class="menu-item danger"/.test(m[1]))) fails.push(`${f}: 위험 항목은 맨 아래 구분선 뒤(Dropdown › 위험 항목)`);
+      /* 동작 메뉴(Dropdown 원칙) — 실행 · 체크 · 라디오 항목 합쳐 3~15개 · 선택 표시 .on 없음 · 위험 항목은 맨 아래 구분선 뒤.
+         그룹(.menu-group > ul[role=group])이 목록 안에 목록을 두므로 짝이 맞는 </ul> 까지 읽는다(2026-11-23) */
+      const ulBody = (src, from) => { const re = /<(\/?)ul\b[^>]*>/g; re.lastIndex = from; let depth = 0, x; while ((x = re.exec(src))) { depth += x[1] ? -1 : 1; if (!depth) return src.slice(from, x.index + x[0].length); } return src.slice(from); };
+      for (const m of pv.matchAll(/<ul class="menu(?:-items)?"[^>]*role="menu"[^>]*>/g)) {
+        const body = ulBody(pv, m.index);
+        const items = [...body.matchAll(/<(?:li|a) class="menu-item([^"]*)"[^>]*role="(menuitem(?:checkbox|radio)?)"[^>]*>/g)].map((x) => ({ c: x[1], r: x[2], t: x[0] }));
+        if (items.length < 3 || items.length > 15) fails.push(`${f}: 메뉴 항목 ${items.length}개 — 실행 · 체크 · 라디오 합쳐 3~15개(Dropdown › 항목 수)`);
+        if (items.some((x) => /\bon\b/.test(x.c))) fails.push(`${f}: 메뉴에 선택 표시 .on — 켜짐은 aria-checked(Dropdown › 체크 · 라디오 항목)`);
+        const d = items.findIndex((x) => /\bdanger\b/.test(x.c));
+        if (d >= 0 && (d !== items.length - 1 || !/<li class="menu-sep"[^>]*><\/li>\s*<li class="menu-item danger"/.test(body))) fails.push(`${f}: 위험 항목은 맨 아래 구분선 뒤(Dropdown › 위험 항목)`);
+        for (const x of items.filter((x) => x.r !== "menuitem")) if (!/aria-checked="(?:true|false)"/.test(x.t)) fails.push(`${f}: ${x.r} 에 aria-checked 가 없다(Dropdown › 체크 · 라디오 항목)`);
+        const marks = [...body.matchAll(/role="(menuitem(?:checkbox|radio))"[^>]*>\s*(<span class="menu-mark (check|round)" aria-hidden="true"><\/span>)?/g)];
+        for (const x of marks) if (!x[2] || (x[1] === "menuitemcheckbox") !== (x[3] === "check")) fails.push(`${f}: ${x[1]} 맨 앞에 span.menu-mark.${x[1] === "menuitemcheckbox" ? "check" : "round"}[aria-hidden] 가 없다(Dropdown › 체크 · 라디오 항목)`);
+        /* 라디오는 이름 있는 그룹 안에만 — 그룹 ul 마다 안의 라디오를 빼고 남은 라디오가 있으면 실패 */
+        let rest = body;
+        for (const g of body.matchAll(/<ul role="group"([^>]*)>([\s\S]*?)<\/ul>/g)) { if (/menuitemradio/.test(g[2]) && !/aria-label(?:ledby)?="/.test(g[1])) fails.push(`${f}: 라디오 묶음 그룹에 이름이 없다(Dropdown › 그룹)`); rest = rest.replace(g[0], ""); }
+        if (/role="menuitemradio"/.test(rest)) fails.push(`${f}: 라디오 항목이 role=group 밖에 있다(Dropdown › 그룹)`);
+      }
+      /* 적용 영역 — 목록 + 초기화 · 적용, 적용 버튼 필수, 실행 항목과 섞지 않음 */
+      for (const m of pv.matchAll(/<div class="menu" data-actions[^>]*>/g)) {
+        const tail = pv.slice(m.index, m.index + 12000);
+        const list = /<ul class="menu-items"[^>]*role="(menu|listbox)"/.exec(tail);
+        if (!list) { fails.push(`${f}: .menu[data-actions] 안에 ul.menu-items[role=menu|listbox] 가 없다(Dropdown › 적용 영역)`); continue; }
+        const body = ulBody(tail, list.index);
+        const after = tail.slice(list.index + body.length);
+        const acts = /^\s*<div class="menu-actions btn-group">([\s\S]*?)<\/div>/.exec(after);
+        if (!acts) fails.push(`${f}: 목록 바로 뒤에 div.menu-actions.btn-group 이 없다(Dropdown › 적용 영역)`);
+        else if (!/data-menu-action="apply"[^>]*>적용</.test(acts[1])) fails.push(`${f}: 적용 영역에 '적용' 버튼(data-menu-action=apply)이 없다(Dropdown › 적용 영역)`);
+        if (/role="menuitem"/.test(body)) fails.push(`${f}: 적용 영역이 있는 메뉴에 실행 항목(menuitem)이 섞였다(Dropdown › 적용 영역)`);
       }
       /* Select Button — 항상 하나, radiogroup(2026-11-10). 토글 묶음(aria-pressed)으로 돌아가면 막는다 */
       for (const m of pv.matchAll(/<div class="select-btn[^"]*"([^>]*)>([\s\S]*?)<\/div>/g)) {

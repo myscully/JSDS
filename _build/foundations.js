@@ -91,7 +91,7 @@ ${tbl(["이름", "값", "흰 글자 대비", "설명", "적용"], rows, "product
 ${tbl(["쓰는 자리", "끝맺음", "예"], [
   ["상태 · 결과 설명", "~합니다", "삭제한 정책은 복구할 수 없습니다."],
   ["사용자에게 하는 안내", "~하세요", "네트워크 상태를 확인하세요."],
-  ["확인 대화상자 · 빈 화면의 제목", "~할까요?", "정책 12개를 삭제할까요?"],
+  ["확인 대화상자의 제목", "~할까요?", "정책 12개를 삭제할까요?"],
   ["버튼 · 링크 · 라벨 · 표 머리글", "마침표 없음", "정책 저장"],
   ["안내 목록", "완전한 문장이면 마침표", "격리 파일은 30일 보관됩니다."],
 ])}
@@ -106,6 +106,7 @@ ${tbl(["쓰지 않음", "대신", "예외"], [
   ["여기 · 클릭 · 이곳", "링크 글자 자체를 대상으로 — <a href=\"#/foundations/colors\">Colors</a> 에서 확인", ""],
   ["바로가기(단독)", "가는 곳 — 로그 보기 · 에이전트 목록", ""],
   ["더 보기", "펼쳐지는 것 — 이벤트 20건 더 보기", "⋯ 아이콘만 있는 Dropdown 동작 메뉴 버튼의 숨긴 이름으로는 허용"],
+  ["확인 · 예 · 아니요 · 제출 · 진행 · 계속", "일어날 동작 — 정책 배포 · 삭제 · 다음", "'확인' 은 정보만 알리고 닫는 대화상자의 단독 버튼으로는 허용"],
   ["전체 보기", "", "Card 머리에서 같은 목록 화면으로 가는 링크로는 허용"],
 ])}
 ${dd(`<div class="banner" role="status" style="flex:1;min-width:0;flex-wrap:wrap">${I("info-circle",18,{style:"filled"})}9월 10일 02:00~04:00 정기 점검이 예정되어 있습니다.<button type="button" class="btn sm outline assistive">점검 안내 보기</button></div>`,
@@ -120,7 +121,7 @@ ${tbl(["상황", "문구", "행동"], [
   ["에이전트 미응답", "10분 이상 체크인이 없습니다. 네트워크 상태를 확인하세요.", "—"],
   ["되돌릴 수 없는 삭제", "삭제한 정책은 복구할 수 없습니다. 해당 정책이 적용된 에이전트는 기본 정책으로 돌아갑니다.", "취소 · 삭제"],
   ["검색 결과 없음", "'랜섬웨어 2025' 에 대한 결과가 없습니다", "필터 초기화"],
-  ["처음 쓰는 화면", "아직 정책이 없습니다", "정책 추가"],
+  ["처음 쓰는 화면", "아직 정책이 없습니다", "정책 만들기"],
 ])}
 <h2 id="placeholders">Placeholders</h2><p>lorem ipsum · TODO · 빈 대괄호 · '샘플' · '예시' 같은 표시를 화면에 남기지 않습니다. 실제 문구를 쓰거나 그 요소를 뺍니다.</p>
 <h2 id="terms">One fact, one wording</h2><p>같은 사실은 화면 전체에서 한 표현으로 씁니다. 같은 동작을 '차단' 과 '블록' 으로 섞지 않습니다. 상태 이름은 <a href="#/patterns/severity">Severity</a> 패턴의 용어를 따릅니다.</p>
@@ -251,7 +252,6 @@ ${sem("ef-dimmer", "Effect - Dimmer", "모달과 같이 층위가 생길 때 배
 ${sem("ef-transparent", "Effect - Transparent", "Chrome 효과를 적용할 때 사용하는 투명도가 포함 된 배경 색상입니다.", [["Primary", "--effect-transparent-primary"], ["Secondary", "--effect-transparent-secondary"]], { alpha: true })}
 ${sem("static", "Static", "Light, Dark 테마에 상관없이 고정된 고유 색으로 테마가 변경되더라도 색상을 유지하여 해당 요소에 대비를 줄 때 사용합니다.", [["White", "--static-white"], ["Black", "--static-black"]])}
 ${sem("chart", "Chart", "탐색형 차트와 정적 요약의 계열 · 격자 · 축 · 툴팁 색입니다. <b>기본은 한 톤</b>입니다. Mono 1~4 는 진한 쪽부터 옅은 쪽으로 가는 고정 파랑 명도 단계이고, 계열 수에 맞춰 단계를 골라 씁니다. Mono Track 은 진행 막대와 게이지의 비어 있는 자리에 쓰는 같은 파랑의 옅은 단계입니다. 순서 없는 범주가 5개 이상이면 계열 1~6 을 씁니다. 계열 1~6 은 <b>순서가 고정</b>이고 제품 색과 무관하며, 라이트와 다크 각각에서 색각 이상으로도 갈리도록 고른 단계입니다. 상태색과 같은 단계는 피했습니다. 심각도 5단계는 Foreground 의 Negative Strong · Cautionary · Accent Light Blue · Accent Lime · Inactive 를 그대로 씁니다. 차트 토큰은 토큰 트리 밖에 두며, 쓰는 법은 <a href=\"#/components/data-visual\">Data Visual</a> 에 있습니다.", [["Mono 1", "--chart-mono-1"], ["Mono 2", "--chart-mono-2"], ["Mono 3", "--chart-mono-3"], ["Mono 4", "--chart-mono-4"], ["Mono Track", "--chart-mono-track"], ["Series 1", "--chart-series-1"], ["Series 2", "--chart-series-2"], ["Series 3", "--chart-series-3"], ["Series 4", "--chart-series-4"], ["Series 5", "--chart-series-5"], ["Series 6", "--chart-series-6"], ["Series 1 subtle", "--chart-series-1-subtle"], ["Series 1 strong", "--chart-series-1-strong"], ["Grid", "--chart-grid-primary"], ["Axis text", "--chart-axis-text"], ["Tooltip surface", "--chart-tooltip-surface"], ["Tooltip text", "--chart-tooltip-text"]])}
-${sem("avatar", "Avatar", "아바타 이니셜의 면과 글자 색입니다. 사람의 이름으로 여섯 색 중 하나가 정해져, 같은 사람은 어느 화면에서나 같은 색입니다. 색은 사람을 가르는 데만 쓰고 뜻이 없습니다. 상태로 읽히지 않도록 빨강 · 주황 · 초록은 쓰지 않습니다. 토큰 트리 밖에 두며, 쓰는 법은 <a href=\"#/components/avatar\">Avatar</a> 에 있습니다.", [["1 파랑 면", "--avatar-1-surface"], ["1 파랑 글자", "--avatar-1-text"], ["2 시안 면", "--avatar-2-surface"], ["2 시안 글자", "--avatar-2-text"], ["3 라임 면", "--avatar-3-surface"], ["3 라임 글자", "--avatar-3-text"], ["4 바이올렛 면", "--avatar-4-surface"], ["4 바이올렛 글자", "--avatar-4-text"], ["5 퍼플 면", "--avatar-5-surface"], ["5 퍼플 글자", "--avatar-5-text"], ["6 핑크 면", "--avatar-6-surface"], ["6 핑크 글자", "--avatar-6-text"]])}
 ${sem("company", "Brand Mark", "지란지교시큐리티 브랜드 색입니다. 기준 토큰의 Brand 는 제품 색이라 회사 정체성을 표기할 자리가 없어, 토큰 트리 밖에 따로 둡니다. 로고·헤더 마크에만 쓰고 제품 UI 의 Brand 로 쓰지 않습니다.", [["Mark", "--company-mark"], ["Subtle", "--company-mark-subtle"]])}
 ${productColor()}
 <h2 id="roles">브랜드 역할 맵</h2><p>색은 네 축으로만 씁니다. <b>Product Brand</b> 는 행동과 선택, <b>Status</b> 는 처리 결과, <b>Severity</b> 는 보안 위협 등급, <b>Brand Mark</b> 는 회사 정체성 표기입니다. 한 요소에 두 축을 겹치지 않고, 어느 축이든 색만으로 의미를 전달하지 않습니다.</p>

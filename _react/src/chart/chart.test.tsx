@@ -25,15 +25,16 @@ describe("presets", () => {
     expect((c.options as { scales: { y: { stacked: boolean } } }).scales.y.stacked).toBe(true);
     expect(presets.timeseries({ labels: ["a"], series }).data.datasets.every((d) => d.fill === false)).toBe(true);
   });
-  it("bar 는 값 쪽 끝만 4 둥글고 바닥 각짐 · 두께 24 이하 · stroke 없음 — 누적은 맨 위 조각만 둥글고 아래 조각 사이 2px 틈(dataviz), horizontal 은 indexAxis y", () => {
+  it("bar 는 네 모서리 각짐(2026-11-24) · 두께 24 이하 · stroke 없음 — 누적은 아래 조각 사이 2px 틈(dataviz), horizontal 은 indexAxis y", () => {
     const g = presets.bar({ labels: ["a"], series });
-    expect(g.type).toBe("bar"); expect(g.data.datasets.map((d) => [d.borderRadius, d.borderWidth, d.borderSkipped, d.maxBarThickness, d.inflateAmount])).toEqual([[4, 0, "start", 24, 0], [4, 0, "start", 24, 0]]); expect((g.options as { indexAxis: string }).indexAxis).toBe("x");
+    expect(g.type).toBe("bar"); expect(g.data.datasets.map((d) => [d.borderRadius, d.borderWidth, d.borderSkipped, d.maxBarThickness, d.inflateAmount])).toEqual([[0, 0, "start", 24, 0], [0, 0, "start", 24, 0]]); expect((g.options as { indexAxis: string }).indexAxis).toBe("x");
     const st = presets.bar({ labels: ["a"], series, stacked: true, horizontal: true });
     expect((st.options as { indexAxis: string }).indexAxis).toBe("y");
     const ctx = (datasetIndex: number) => ({ datasetIndex, dataIndex: 0, chart: { config: { type: "bar" }, data: { datasets: st.data.datasets } } });
-    const r = st.data.datasets[0].borderRadius as unknown as (c: object) => unknown, w = st.data.datasets[0].borderWidth as unknown as (c: object) => unknown;
-    expect(typeof r).toBe("function"); expect(r(ctx(0))).toBe(0); expect(w(ctx(0))).toEqual({ right: 2 });   // 아래 조각 — 각지고 끝 쪽 2px 틈
-    expect(w(ctx(1))).toBe(0); expect(r(ctx(1))).not.toBe(0);   // 맨 위 조각 — 틈 없이 끝만 둥글게
+    const w = st.data.datasets[0].borderWidth as unknown as (c: object) => unknown;
+    expect(st.data.datasets.every((d) => d.borderRadius === 0)).toBe(true);   // 누적도 네 모서리 각짐
+    expect(w(ctx(0))).toEqual({ right: 2 });   // 아래 조각 — 끝 쪽 2px 틈
+    expect(w(ctx(1))).toBe(0);   // 맨 위 조각 — 틈 없음
     expect(st.data.datasets.every((d) => d.inflateAmount === 0 && d.maxBarThickness === 24)).toBe(true);
   });
   it("donut 은 doughnut, 구멍 67%, 조각 톤과 center 를 메타에", () => {
@@ -46,7 +47,7 @@ describe("presets", () => {
     const m = presets.mixed({ labels: ["a"], bars: [{ label: "탐지", data: [1] }], lines: [{ label: "차단", data: [1] }] });
     expect(m.type).toBe("bar"); expect(m.data.datasets.map((d) => d.type)).toEqual(["bar", "line"]);
     expect(m.data.datasets.map((d) => d.order)).toEqual([2, 0]);
-    expect([m.data.datasets[0].borderWidth, m.data.datasets[0].borderRadius, m.data.datasets[0].borderSkipped]).toEqual([0, 4, "start"]);   // 막대 stroke 없음 · 값 쪽 끝만 둥글게
+    expect([m.data.datasets[0].borderWidth, m.data.datasets[0].borderRadius, m.data.datasets[0].borderSkipped]).toEqual([0, 0, "start"]);   // 막대 stroke 없음 · 각짐(2026-11-24)
     expect(Object.keys((m.options as { scales?: Record<string, unknown> }).scales ?? {}).filter((k) => k.startsWith("y"))).toHaveLength(0);   // y2 를 만들지 않는다
   });
 });

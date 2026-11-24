@@ -115,4 +115,11 @@ describe("Empty · Avatar", () => {
     expect(a.className).toBe("avatar");
     expect(b.className).toBe("avatar sm");
   });
+  it("Avatar tone 은 없앴다(2026-11-24) — 개발 모드에서 한 번 경고하고 data-tone 을 그리지 않는다", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const { container } = render(<><Avatar initials="JH" tone={3} name="정희" /><Avatar initials="K" tone={1} /></>);
+    expect([...container.querySelectorAll(".avatar")].every((a) => !a.hasAttribute("data-tone") && !a.hasAttribute("data-name"))).toBe(true);
+    expect(warn.mock.calls.filter((c) => String(c[0]).includes("tone")).length).toBe(1);
+    warn.mockRestore();
+  });
 });

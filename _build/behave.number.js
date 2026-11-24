@@ -132,7 +132,7 @@ module.exports = async function number({ page, ok, go }) {
     await fp.i.focus(); await blur();
     ok("number input form: passing an untouched field is quiet", !(await ff.evaluate((f) => f.classList.contains("error"))));
     await save.click(); await wait(30);
-    ok("number input form: an empty required value blocks and focuses", (await fp.help.textContent()) === "필수 항목입니다. 값을 입력하세요." && (await page.evaluate(() => window._s)) === 0 && (await fp.i.evaluate((x) => document.activeElement === x)));
+    ok("number input form: an empty required value blocks and focuses", (await fp.help.textContent()) === "값이 비어 있습니다. 값을 입력하세요." && (await page.evaluate(() => window._s)) === 0 && (await fp.i.evaluate((x) => document.activeElement === x)));
     await fp.i.fill("501"); await save.click(); await wait(30);
     ok("number input form: an out-of-range value blocks with the range message", (await fp.help.textContent()) === "값이 너무 큽니다. 500 이하 입력하세요." && (await page.evaluate(() => window._s)) === 0 && (await fp.i.inputValue()) === "501");
     await fp.down.click(); await wait(30);

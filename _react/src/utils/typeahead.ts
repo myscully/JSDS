@@ -17,7 +17,7 @@ export function typeahead(state: TypeaheadState, key: string, items: HTMLElement
   const i = items.indexOf(active as HTMLElement);
   const from = repeat ? i + 1 : Math.max(i, 0);
   return [...items.slice(from), ...items.slice(0, from)].find((x) => {
-    const label = (x.textContent ?? "").trim().toLowerCase();
+    const label = ((x.querySelector(".menu-name") ?? x).textContent ?? "").trim().toLowerCase();   // 설명 줄(.menu-desc)은 보지 않는다(2026-11-23)
     return label.startsWith(q) || cho(label).startsWith(q);
   });
 }

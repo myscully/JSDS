@@ -50,7 +50,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 105 · verify 0/0 · contrast 3906쌍 실패 0 · advisory 1149 · behave 1651/1651 · react 903+6 · tsc 0
+pages 105 · verify 0/0 · contrast 3822쌍 실패 0 · advisory 1149 · behave 1726/1726 · react 939+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1148,6 +1148,97 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
   behave.chart 의 단정을 내부 값을 넣는 대신 틀 폭을 줄이고(ResizeObserver 가 돌기 전) 콜백을 불러 차트가 새 틀 폭이 되는지, 숨긴 틀에서는 그대로인지 재게 다시 썼다(단정 수 그대로).
   음성 시험: `flushResize` 를 빈 함수로 하면 그 단정이 실패, 숨은 틀 검사를 빼면 실패.
 
+2026-11-23 VectorLab UI/UX Skills 대조 — 입력 보호 · 누르는 영역 · 문구 · 패턴 보강(사람의 요청 · 결정 넷) — behave 1651 → 1685(`behave.ux.js` 34) · react 903+6 → 923+6. contrast · advisory · verify · pages 수는 그대로(새 색 쌍 없음).
+- **근거:** 공개 저장소(github.com/vectorlabau/skills, 16 스킬)의 스킬 파일 52개를 읽어 인터랙션 · 피드백과 문구 · 시각과 모션 셋으로 대조했다(플러그인은 설치하지 않음). 어긋남은 약 45건(겹침을 합침)이다. 사람의 결정과 부딪히는 규칙(버튼 40 · 12px 글자 · 폼 위 요약 없음 · Negative 는 alertdialog 안만 · 로그인 숨긴 라벨 · 줄인 모션에서 Spinner 돎)은 뒤집지 않았다.
+- **사람의 결정:** 범위 = 입력 보호 · 누르는 영역 + 문구 정리 + 패턴 보강. 시각 · 모션과 구조 일은 목록으로만 남긴다(아래 '하지 않은 것'). 필수 문구는 상태로 쓴다. 폼 초안 저장은 옵션이다.
+- **오버레이 입력 보호** — 모달 Side Panel 의 배경 누름이 Popup 과 같은 판정이 됐다. 입력하는 중이거나 처리 중이면 닫지 않는다(전에는 늘 닫았다).
+  편집한 Popup · 모달 Side Panel 을 Esc · X · 취소로 닫으면 버튼 줄 바로 위에 위험 Notice 줄(`role=alert`)을 띄운다. 문구는 '변경 사항을 버릴까요?' · '입력한 내용은 저장되지 않습니다.' 이고 버튼은 '계속 편집'(포커스) · '버리기' 다. 모달 위에 모달을 겹치지 않으려고 Notice 줄로 했다(사람이 정하지 않은 기본값).
+  묻지 않는 경우: 위험 확인 · 처리 중, `.primary` 에 단 닫기(저장 뒤 닫기), 코드로 닫기(`DS.popup.close()` · `open={false}`), 비모달 패널. 끄는 법은 사이트 `data-confirm-discard="false"` · React `confirmDiscard={false}` 다.
+  **오버레이 안 검색창에 친 것은 입력으로 세지 않는다** — 거르는 것이지 입력이 아니다(사람이 정하지 않은 기본값, 초안과 같은 규칙). 첫 게이트에서 단정이 잡았다.
+- **폼 초안(옵션)** — 사이트 `form[data-draft="키"]` · React `useFormDraft(key, {exclude, labels, enabled})`. 입력하고 0.5초 뒤 localStorage `jsds-draft:키` 에 남긴다(모든 접근은 try/catch).
+  다시 열면 처음 값과 다른 칸만 되살리고, 폼 맨 위에 '저장하지 않은 입력을 되살렸습니다.' + '버리기' 를 보인다. 통과한 제출이면 지우고, 검증이 막은 제출이면 남긴다.
+  남기지 않는 칸: 비밀번호 · 파일 · 숨은 값 · 읽기 전용 · 일회용 코드 · 복사 필드 · 인증 코드 칸 · 검색창 · `data-draft-skip` 안.
+  켠 예제는 입력 폼(`policy-new`) · 알림 규칙(`alert-rule-new`) 패턴이다. 계획에 적은 정책 설정 패턴에는 켜지 않았다. 세션 만료 패턴의 '입력이 사라짐' 문구를 '초안이 남는 폼이면 다시 로그인한 뒤 되살아남' 쪽으로 고쳤다.
+- **누르는 영역 24 이상** — 아래 대상에 보이지 않는 `::after` 칸을 더했다. Breadcrumb 더 보기와 같은 방식이고, 글리프 크기 · 배치는 그대로다.
+  - 대상: 칩 · 검색 · Combobox 지우기, Notice · Toast · Banner 닫기, 표 정렬 버튼, 표 행 · 머리글 체크박스.
+  - **체크박스는 입력을 그 칸 위로**(`position:relative;z-index:1`). 넓힌 칸이 입력을 덮어 Playwright 클릭이 시간 초과로 멈췄다(첫 게이트).
+  - 이웃 대상을 덮지 않는지는 모든 예제에서 쟀다.
+  - compact Pagination 의 이전 · 다음은 34 × 32 → 32 × 32 다.
+- **아이콘 전용 버튼 Tooltip** — 화면 · 표 · 카드 · 목록의 아이콘 전용 버튼을 접근 이름과 같은 글의 Tooltip 으로 감쌌다. 사이트는 `.tooltip-wrap`, React 는 새 prop `Button tooltip`(true | 방향)이다.
+  빼는 것(사람이 정하지 않은 기본값): 끈 버튼, 닫기 X, 필드 · 칩 안 버튼(달력 · 시계 · 비밀번호 보기 · 지우기), 복사 · 파일 지우기 · 다시 시도.
+  Tooltip 에는 aria-hidden 을 달지 않았다(기존 Tooltip 그대로 — 글이 이름과 같아 `aria-describedby` 로 잇지 않음). 미리보기 오른쪽 끝의 둘(대시보드 새로 고침 · 상세의 더 보기)은 넘침을 막으려 왼쪽으로 연다(1440 · 1024 · 768 에서 13px, 390 에서 32px 넘쳤다).
+- **문구**
+  - 필수 문구는 상태로(사람의 결정) — '값이 비어 있습니다. 값을 입력하세요.' · '고른 항목이 없습니다. 항목을 선택하세요.' · '고른 파일이 없습니다. 파일을 선택하세요.'
+  - 시각 오류는 '{subject} 24시간제 형식이 아닙니다. 14:30 처럼 입력하세요.' 다.
+  - React DataTable 의 빈 문구 '데이터가 없습니다.' → `LABELS.tableEmpty` '표시할 항목이 없습니다.'.
+  - 같은 동작은 한 말 — '필터 초기화' · '정책 만들기' · 'CSV 내보내기'. 액션 바 · 메뉴의 '내보내기' 는 대상이 분명해 그대로 뒀다.
+  - 동사 + 대상 — '로그 보기' · '라이선스 상세' · '라이선스 갱신' · '알림 채널 연결'.
+  - 오류는 무엇 + 고치는 법 — 오류 Toast 예제, 오류 화면 제목 '이 화면을 불러오지 못했습니다' + '오류 정보 복사', 로그인 실패 · 에이전트 끊김 Notice 의 다음 행동.
+  - placeholder 는 형식 예시만이다('예: 외부 USB 차단' · 'admin@example.com' · '예: SIEM 연동'). 형식 예시가 아닌 placeholder 와 제품이 넣은 사용자 문구는 남겼다.
+  - 차트 '표시할 데이터 없음' → '탐지 이벤트 없음'.
+  - Steps 기본 '완료' 버튼은 React 개발 모드에서 한 번 경고한다.
+  - Rules 를 더하거나 고쳤다: Button '아이콘 전용', Popup · Side Panel '닫기', Loading '오래 걸리는 작업'(10초 넘으면 진행 표시 + 취소), Data Table '다시 불러오기' · '상태', Empty State '첫 사용' · '정상 0건' · '권한 없음' · '구성', Form '초안', 오류 화면 '문구'.
+  - Writing '빈 화면 제목' 행을 고쳤다.
+- **패턴 보강**
+  - 검색 빈 결과는 툴바 · 표 틀을 그대로 두고 표 본문에 빈 상태 + '필터 초기화' 를 둔다.
+  - 역할 · 비밀값 · 보고서 예약 · 감사 로그 목록은 만들기 버튼을 Page Header 로 옮기고 기본 정렬 열(`aria-sort`)을 둔다. Pagination 은 보고서 예약 · 감사 로그만 붙였다 — 역할 · 비밀값은 3행이라 붙이지 않았다.
+  - **DataTable 다시 불러오기** — React `status="loading"` 에 rows 가 있으면 Skeleton 대신 지난 행을 두고 틀에 `aria-busy` 를 단다. 몸통만 opacity .5 이고 머리글 · 높이는 그대로다.
+    처음 불러오기는 `rows={[]}` 로 Skeleton 이다. 새 prop `delay` 는 `useLoadingDelay` 를 다시 쓴다(11-11 결정대로 옵션). 알림 이름은 caption 이 있으면 '{caption} 불러오는 중'(MIGRATION — 동작 변화).
+    사이트는 제품이 `.tbl-wrap[aria-busy="true"]` 를 달고 뗀다(ds.js 동작 없음).
+  - **빈 상태 문구는 한 줄 표 안에서도 줄바꿈**(`.tbl.nowrap td.empty{white-space:normal}`) — 390 캡처에서 발견했다. 검색 빈 결과의 한 줄 문구가 표를 573px 로 넓혀 가로 스크롤 뒤로 잘렸다.
+- **verify 더함:** placeholder 지시문('…입력하세요')과 라벨 되풀이, `BANNED_LABELS` 에 예 · 아니요 · 제출 · 진행 · 계속, '확인' 은 정보 대화상자의 단독 버튼으로만(이 허용을 쓰는 예제는 지금 없다), 접근 이름의 '예시', 아이콘 전용 버튼의 Tooltip, 첫 사용 · 검색 결과 없음 Empty State 의 동작, Steps 완료 라벨 '완료'.
+- **behave.ux 34**(다섯 부분): Side Panel 배경 · Esc · 취소 · 버리기 · 끔, Popup Esc · X · 취소 · 위험 확인 · 코드 닫기, 초안 저장 · 되살림 · 버리기 · 제출 · 막힌 제출 · 제외 칸 · 라디오, 누르는 영역 · 이웃 겹침 · Pagination · Tooltip, 검색 빈 결과 · 목록 Page Header · 정렬 · Pagination · 흐림 · 좁은 화면 빈 상태.
+  **기존 단정 고침:** Button Rules 4 → 5행 · Data Table Rules 묶음 수(상태 묶음에 한 줄), 검색 빈 결과는 표 틀 안(behave.patterns), 필수 문구 단정들(사이트 · React).
+  초안 단정의 0.5초 저장 타이머가 부하에서 늦게 불려 4회에 1회 실패했다 — 저장값이 생길 때까지 기다리게 고쳤다.
+- **react +20:** `discard-guard` 7(팝업 안 검색창 1 포함) · `form-draft` 6 · `data-bundle` 4(tableEmpty · 지난 행 · 처음 Skeleton · delay) · `labels-parity` 2(버림 · 초안 문구) · `Button` 1(tooltip). `feedback` 1건은 같은 수로 다시 썼다.
+- **음성 시험(모두 잡힘):**
+  - verify 7 — placeholder 지시문 · '계속' · 접근 이름 '예시' · 단독 아닌 '확인' · Tooltip 없는 아이콘 버튼 · 동작 없는 빈 화면 · Steps '완료'.
+  - React — stale 끔 · delay 무시 · caption 이름 · 검색창을 입력으로 셈 · tableEmpty 글자. tableEmpty 는 사이트에 없는 문구라 labels-parity 가 아니라 data-bundle 이 잡는다.
+  - 사이트 5 — 흐림 규칙 지움 · 빈 결과 colspan 틀림 · 체크박스 입력 위로 지움 · 오버레이 검색창 제외 지움 · 빈 상태 줄바꿈 지움.
+  - 캡처: 1440 라이트 · 다크 · 390 에서 Side Panel · Popup 버림 확인 · Tooltip · 검색 빈 결과 · 목록 Page Header · 흐린 표를 보았다(콘솔 오류 0).
+- **하지 않은 것(후속 후보 — 사람의 결정 '목록으로만'):**
+  - 시각 · 모션 — Popup 1px 테두리, 라이트 그림자 한 겹 · 합 .08 이하, 알림 센터 그림자 단계, 다크 윗변 하이라이트, 소비자 0 그림자 토큰 4, 들어옴 ease-out · 나감 ease-in 이징 토큰, transition 속성 허용 목록, 줄인 모션 변경 구독, 문서 셸 N 배지 9px/800.
+  - 구조 — 컴포넌트 간격 약 500곳 `--space-*` 화, 격자 밖 값, 브레이크포인트 단일 출처, 템플릿 화면 375 넘침 결정 기록, 2560 셸 머리, ⌘K · ? 도움말 · 표 행 방향키 · Kbd, 선택 기억 helper, 긴 폼 sticky 버튼.
+  - 조직도 인라인 편집은 '1.0 뒤 다시 묻기'(메모리)라 그대로다.
+- Figma 미반영 12건 — Rules 행(Button 아이콘 전용 · Popup 닫기 · Side Panel 닫기 · Loading 오래 걸리는 작업 · Data Table 다시 불러오기와 상태 · Empty State 넷 · Form 초안 · 오류 화면 문구). 누르는 영역 · Tooltip · 버림 확인 · 초안 Notice 는 audit 대조 밖이라 수에 없다.
+
+2026-11-23 메뉴 체크 · 라디오 · 적용 영역 · Select 여러 개 · Combobox 칩 넘침 · 표 칸 글자(사람의 요청 셋 · 결정 넷) — behave 1685 → 1719(`behave.menu.js` 33 · `behave.table.js` 1, 기존 단정 고침 2) · react 923+6 → 940+6(`tests/menu-choice.test.tsx` 9 · 예제 334 → 342 에 따른 구조 비교 8). contrast · advisory · verify · pages 수는 그대로(새 색 쌍 없음 — 체크 표시는 Checkbox 와 같은 제품 면 / brand-label 쌍, 설명 줄은 tertiary).
+- **참고:** Montage Menu(항목 variant normal · radio · checkbox, 그룹 제목, 항목 설명, 아래 초기화 · 적용)와 Select(SelectMultiple · overflow · allSelectedLabel · 적용 영역). 이름 · 모양은 이 시스템의 토큰과 마크업으로 썼다.
+- **사람의 결정:** Select 에 여러 개 선택을 넣는다(2026-11-09 의 'Select 는 단일, 여러 개는 Combobox' 를 바꿈), Dropdown 에 넷 모두(체크 항목 · 라디오 항목 · 그룹 제목과 설명 줄 · 아래 초기화와 적용 영역), Combobox 칩 넘침은 **가로 스크롤이 기본**이고 줄바꿈은 옵션(11-09 원칙 '여러 개' 와 지금 동작을 바꿈), 로그 행 글자는 14(다른 표와 같게).
+- **메뉴 항목(Dropdown · Select 공통)** — 앞 표시 `span.menu-mark.check` · `.round`(16, aria-hidden — 켜짐은 `--surface-brand-primary` 면 + `--brand-label` 체크 · 점), 켜진 항목은 글자 600 이고 면 · brand 글자를 쓰지 않는다(`.on` 과 갈림 — 사람이 정하지 않은 기본값). 설명 줄 `span.menu-text > .menu-name + .menu-desc`(12/16 tertiary · 있으면 메뉴 최대 320), 그룹 `li[role=none].menu-group > .menu-label#id + ul[role=group][aria-labelledby]`.
+- **Dropdown** — `li.menu-item[role=menuitemcheckbox|menuitemradio][aria-checked]`, 라디오는 이름 있는 `ul[role=group][data-name]` 안에만. 누르거나 Enter · Space 면 뒤집고 **메뉴는 열린 채 · 포커스는 그 항목**(실행 항목은 지금처럼 닫음), `ds:menu-change {name, value, checked, values, groups, trigger}`. 글자로 찾기는 `.menu-name` 만 본다.
+  **적용 영역** `div.menu[data-actions] > ul.menu-items[role=menu|listbox] + div.menu-actions.btn-group`(텍스트 '초기화' · sm solid '적용') — 고르는 것은 초안이고, 적용하면 이벤트를 한 번 내고 닫고 트리거로, 적용 없이 닫히면(Esc · 바깥 · 트리거 · Tab) 열 때로 되돌린다. 초기화는 체크를 모두 끄고 라디오는 `data-default`(없으면 첫 항목)로 — 적용 전까지 초안. Tab 은 항목 → 초기화 → 적용 → 닫힘.
+  React `MenuCheckboxItem` · `MenuRadioGroup` + `MenuRadioItem` · `MenuGroup` · `MenuItem description` · `MenuActionArea onApply onReset` · `Dropdown onDiscard`.
+- **Select 여러 개** — `.dropdown[data-multiple]` + `ul.menu[role=listbox][aria-multiselectable=true]`, 옵션 앞 체크 · `aria-selected`(`.on` 없음), 고르는 동안 목록은 열린 채. 트리거 글은 고른 이름을 쉼표로 이어 한 줄(넘치면 말줄임) · 모두 고르면 `data-all-label` · `data-overflow="wrap"` 이면 줄바꿈하고 트리거가 늘어남. 폼 값은 값마다 숨은 input(`data-name`), `ds:select {values, trigger}`, 필수는 단일과 같은 검증(문구 `choose`). 적용 영역은 Dropdown 과 같은 초안 규칙. '전체' · '선택 안 함' 옵션은 여러 개에 두지 않는다(초기화가 대신). React `Select multiple value={string[]} allSelectedLabel overflow actions`(actions 를 켜면 onChange 는 적용 때만). 단일 Select 의 모양은 그대로다.
+- **Combobox 칩 넘침** — 여러 개는 기본 가로 스크롤: `.control-track` 이 한 줄 · 높이 32 · 40 · 48 고정 · 스크롤바 숨김, 칩을 더하거나 입력칸 · 칩 지우기에 포커스가 오면 그 자리로 스크롤, 넘칠 때만 세로 휠을 가로로. `data-overflow="wrap"` · React `overflow="wrap"` 이면 예전처럼 줄바꿈(MIGRATION). 툴바 안 가로 스크롤 Combobox 는 최대 320. 여러 개의 고른 표시는 오른쪽 체크에서 앞 `.menu-mark.check` 로(Select 여러 개와 같게 — 사람이 정하지 않은 기본값).
+- **표 칸 글자** — 원인: `.log-row{font-size:12px}` 가 행에 걸리고 `.tbl td` 는 글자를 정하지 않아, `.tbl.compact td` 만 14 를 다시 적어 가려 왔다(compact 를 떼면 로그 표 넷이 12 가 됨). `.tbl td` 가 14 / 1.375rem / .0145em 을 직접 정하고 compact 의 되풀이 · `.log-row` 글자 선언을 지웠다. `.tbl-wrap{line-height:1.6}`(표 안에는 효과 없음)과 사이트 셸 `td code` 가 컴포넌트 표에 걸리던 것(`table:not(.tbl) td code` 로 좁힘)도 정리했다. Spec 의 칸 글은 'Label 1/Reading Regular 14(밀도 · 로그 행과 무관)'. verify 가 `.kv` 와 밀도 클래스를 함께 쓰지 못하게 한다.
+- **고르기 표 · Rules** — Dropdown 언제 쓰는가에 '켜고 끄는 보기 설정', Rules 를 세 묶음(항목 · 선택 항목 · 자리와 키보드)으로 — '선택 표시: 쓰지 않습니다' 를 '체크 · 라디오 항목' 으로 바꾸고 그룹 · 설명 · 적용 영역 · 항목 수(체크 · 라디오도 3~15 에 셈)를 더함. Select 언제 쓰는가 '6개 이상에서 하나, 또는 찾지 않고 여러 개', Rules 세 묶음(목록 · 동작 · 여러 개). Combobox 언제 쓰는가 '약 15개 이상 · 칩으로 보고 지울 때', Rules '여러 개' 를 고치고 '태그가 넘칠 때' 를 더함.
+- **예제(사이트 · React):** Dropdown Checkbox · Radio · Groups · Actions, Select Multiple · Multiple Apply · All Selected, Combobox Multiple Wrap(Multiple 은 태그 다섯으로 넘치게). Data Table 열 표시 설정에는 쓰지 않았다(1.0 뒤 다시 묻기).
+- **verify 더함:** 메뉴 항목 수 = menuitem · checkbox · radio 합 3~15, 그룹(`ul[role=group]`) 안 목록까지 짝 맞춰 읽음, 체크 · 라디오의 aria-checked · 맨 앞 `.menu-mark`(종류가 role 과 맞음), 라디오는 이름 있는 그룹 안, 적용 영역의 구조 · '적용' 버튼 · 실행 항목과 섞지 않음, `.kv` + 밀도 금지.
+- **behave.menu 33**(여섯 부분) — Dropdown 체크 · 라디오(열린 채 · 포커스 · 이벤트 · Space · 켜진 모양 · 라디오 하나 · 그룹과 설명 · 글자로 찾기), 적용 영역(구조 · 한 줄 양끝 · 초안 · 트리거와 Esc 로 되돌림 · 초기화 · 적용 · Tab 순서), Select 여러 개(모양 · 값 · Space · placeholder · 600 · 적용 영역 · 전체 라벨 · 필수 검증), Combobox(스크롤 높이 고정 · 입력칸 보임 · wrap · 휠 · 태그 더해도 입력칸 보임 · 크기 셋), 처음부터 열린 메뉴는 미리보기 안. behave.table +1 — 컴포넌트 · 패턴 · 템플릿의 모든 표 칸이 세 밀도에서 14/22(로그 행 포함, 표와 행에 12px 를 걸어도). **기존 단정 고침 2:** Combobox 여러 개 예제의 태그 기대값(셋 → 여섯 — 넘치게 늘림, behave.js 두 곳).
+- **측정 · 캡처에서 드러나 고친 것:** 가로 스크롤 트랙이 끝 칩 지우기의 넓힌 누르는 영역(24)을 잘라 behave.ux 가 잡았다(`scroll-padding-inline:0.75rem`). Dropdown 적용 영역이 트리거 폭(118)에서 초기화 · 적용을 두 줄로 쌓았다(캡처) — `.dropdown .menu[data-actions]{min-width:max(100%,12.5rem)}` · `.menu-actions{flex-wrap:nowrap}`. 첫 전체 게이트는 그 CSS 를 빌드하기 전에 돌아 1716/1719 였다.
+- 음성 시험(모두 behave.menu 가 잡음): ds.js 6(토글 이벤트 지움 · 되돌림 없음 · 휠 처리기 지움 · 전체 라벨 지움 · 여러 개 빈 값 검증 지움 · 포커스 유지 지움), CSS 4(켜진 굵기 500 · 적용 영역 nowrap 지움 · 표 칸 글자 지움 · 적용 영역 최소 폭 지움). 표 글자 단정은 처음에 못 잡아(세 밀도 모두 상속으로 14 가 나옴) 표와 행에 12px 를 걸고 재게 고쳐 잡았다. React 는 새 테스트를 하나씩 되돌려 실패를 확인했다.
+- **하지 않은 것:** 단일 Select 의 그룹 라벨을 `.menu-group` 마크업으로 옮기는 일(그룹을 쓰는 Select 예제가 없음 — 옛 `li.menu-label` 그대로), 하위 메뉴 · 메뉴 안 검색 · 앞뒤 콘텐츠 갈래, Figma 세트 그리기.
+- Figma 미반영 12 → 58건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — 이번 몫 46: Dropdown · Select Rules 를 묶음으로 다시 짠 행(저장소에만 · Figma 에만 각각), 고르기 표 셋(Dropdown · Select · Combobox), Combobox Rules 2 · Spec Tag · Mark, Dropdown Spec Size, Data Table · Table Spec Label. 메뉴 체크 · 라디오 · 적용 영역 · Select 여러 개 · Combobox 가로 스크롤은 Figma 에 그리지 않았다(audit 대조 밖).
+
+2026-11-24 추가 수정 열하나 — 차트 · Tab · 대시보드 기간 · Tree · Pagination · Card Radio · Avatar · N 배지(사람의 요청 · 결정 넷) — contrast 3906 → 3822 · behave 1719 → 1726(`behave.fix24.js` 7) · react 940+6 → 939+6. advisory · verify · pages 수는 그대로.
+- **사람의 결정:** 그라데이션 둘 다 되살림(계열 하나인 선 영역 · 막대 `gradient` 옵션), 대시보드 기간 = Select Button '24시간 · 7일 · 30일'(11-20 의 '훑어보기만' 을 바꿈), Avatar 6색 체계를 통째로 지움(11-16 을 바꿈), 탭 건수는 탭 목록 템플릿에서만 뺌(알림 센터 안 읽음 탭 · Tab 'With Count' 예제는 남김).
+- **차트 머리 · 증감 세로 가운데** — `.chart-head{align-items:center}`(부제를 제목 기준선에 맞추니 8px 위였다), `.chart-figure>.delta{align-self:center}`(`.delta` 의 `align-self:flex-start` 가 값보다 13px 위로 붙였다).
+- **그라데이션 되살림(ds-chart — 사이트 · React 같은 파일)** — 계열 하나인 선의 아래 영역 = 가장 높은 점에서 바닥까지 32% → 6%(11-13 의 값 · `AREA_TOP` · `AREA_BOTTOM`), 여러 계열 누적 영역은 10% 단색 그대로, 배치 전에는 단색 10%. 막대 `gradient:true` = 값 끝 불투명 → 기준선 55%(`barFill` · `BAR_FADE`), 누적이면 경고하고 단색(verify 가 예제의 누적 + gradient 를 막음 — 11-20 의 'gradient 금지' 를 바꿈). React `BarSpec.gradient` 의 `@deprecated` 를 뗐다. `bar-emphasis` 예제에 Gradient 막대(사이트 · React), Data Visual Rules '막대' · '영역 · 그라데이션'.
+- **막대 모서리 4 → 0** — `BAR_END 0` 으로 bar · mixed · 누적 모두 네 모서리 각짐(두께 24 · 2px 틈은 그대로), 정적 `.chart .bar i` · `.progress-list .progress i` · `.sparkline i` 도 각짐.
+- **Tab 글자 15 · sm 13** — 기본 · pill = Body 2/Normal 15/22(0.0096em), sm = Label 2 13/18(0.0194em). 높이는 그대로(44 · pill 34 · sm 38 — 위아래 여백을 맞춤). 탭 목록 템플릿의 탭 건수를 지우고 Tab Rules '건수'(기본은 없음 · 그 수로 탭을 고를 때만) 행을 더했다.
+- **대시보드 기간** — 머리 `.actions` 의 `.btn-group` 안 Select Button(radiogroup '기간', 24시간 on) + 기존 새로 고침(사이트 · React · 템플릿). Rules '필터 없음' → '기간'(다른 필터는 분석 · 리포트), 고르기 표의 '비슷한 패턴' 두 곳. verify 의 '대시보드에 기간 금지' 를 '머리의 Select Button 하나' 로.
+- **Tree 고른 항목의 숫자** `.tree-meta` = 600 · `--foreground-brand-primary`(조직도 템플릿 · 권한 패턴이 따라감, 기존 brand 글자 / brand subtle 쌍).
+- **Pagination 아이콘 가운데** — `.pagination button:has(> svg){display:inline-flex;…center}`(block svg 가 왼쪽에 붙었다 — compact 7px · 기본 1px).
+- **Card Radio 고른 제목 600** — `.radio.card:has(input:checked)>span{font-weight:600}`, 설명 small 은 400.
+- **Avatar = 중립** — 면 `--surface-neutral-secondary` · 글자 `--foreground-neutral-secondary`(그룹 안은 링 면 위에 합성). 지운 것: 토큰 12(`--avatar-N-surface · -text` — 트리 밖 32 → 20 · 전체 122 → 110), `.avatar[data-tone]` 규칙, ds.js `DS.avatarTone`, `lib.js withAvatarTone`, React `avatarTone` · `AvatarTone` · `tests/avatar-tone.test.tsx` · 구조 비교의 `data-tone`, LOCAL_VARS `--avatar-face`. React `Avatar tone` 은 개발 모드에서 한 번 경고하고 무시, `name` 은 그리지 않는다(MIGRATION). verify 가 예제의 `data-tone` 을 막는다. Avatar Rules '색' · Spec · Props.
+- **N 배지** — `.base-list a span` 이 11-20 A10 에서 배지에 넣은 `<span aria-hidden>N</span>` 까지 잡아 14px secondary 로 그렸다 → `.base-list a>span`(Foundations · Templates 개요 · Guide).
+- **좁은 화면 Page Header(캡처에서 발견)** — 기간 버튼이 들어가자 390 에서 제목이 '대시보 / 드' 로 낱말 가운데서 끊겼다. 767 이하에서는 `.page-head` 를 한 칸으로 해 동작이 제목 아래 왼쪽으로 내려간다(넓은 화면은 그대로 오른쪽). 모든 Page Header 예제가 따라간다.
+- **수의 근거:** contrast −84 = 아바타 이니셜 / 면 6쌍 × 맥락 14(새 쌍은 기존 'secondary / secondary 면' 쌍이 잼 — 설명만 더함). behave +7 = `behave.fix24` 7(머리 · 증감 가운데 · Pagination svg 가운데 · Card Radio · Tree 숫자 · N 배지 · 탭 건수 · 좁은 화면 Page Header). 기존 단정을 다시 씀: behave.dataviz(막대 각짐 · 영역 그라데이션 · 누적 10% · 정적 각짐 · 대시보드 기간), behave.chart(강조 예제의 그라데이션 픽셀), behave.revise(Avatar 중립 라이트 · 다크 · Tab 15/13), behave.js part 41(막대 반경 0 · 그라데이션 막대는 픽셀 단정으로 · 정적 각짐). react −1 = avatar-tone 2 지움 + Avatar tone 경고 1, 차트 테스트(반경 0 · gradient 메타 · 누적 + gradient 경고)는 같은 수로 고침.
+- **음성 시험:** 사이트 12건(머리 baseline · 증감 flex-start · Pagination 규칙 · Card Radio · Tree · N 배지 선택자 · Avatar 면 · Tab 14 · BAR_END 4 · 영역 단색 · 막대 그라데이션 끔 · 좁은 Page Header 규칙) · React 2건(Avatar 경고 끔 · gradient 메타 끔) 모두 실패로 잡혔다.
+- **audit 도구:** 정적 막대에 border-radius 선언이 없으면 모서리 0 으로 읽는다(선언을 지워 '읽지 못함' 이 났다), 막대 모서리 메시지 문구.
+- Figma 미반영 58 → 95건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — 이번 몫 37: Chart 세트의 Bar · Mixed 막대 모서리 4 ≠ 0(24 — 정적 KPI 스파크 포함), Figma 에만 남은 아바타 변수 12개(1), Rules · 고르기 표(Avatar 색 · Data Visual 막대 · 영역 · Tab 건수 · 대시보드 기간 · 비슷한 패턴 둘), Spec(Tab · Avatar · Data Visual). Tab 글자 · Tree 숫자 · Card Radio · 머리 · 증감 가운데 · Pagination · 대시보드 기간 버튼은 audit 대조 밖이라 수에 없다. 같은 날 Figma 에 반영해 0건이다(Figma 절 '2026-11-24').
+
 `advisory 1149` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.
 
@@ -1155,7 +1246,7 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 
 - **Atomic** `--{램프}-{단계}` — 램프 13개, **숫자가 클수록 밝습니다**. 컴포넌트에서 직접 쓰지 않습니다.
 - **Semantic** `--{그룹}-{하위}-{이름}` — `foreground` · `background` · `surface` · `line` · `effect` · `static`
-  여섯 그룹 **90개**(기준 75 + 더한 15) + 트리 밖 32개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 17 · 아바타 `--avatar-1~6-surface · -text` 12 — 2026-11-16, 차트 트랙 2026-11-20) = **122**.
+  여섯 그룹 **90개**(기준 75 + 더한 15) + 트리 밖 20개(`--brand-label` · `--company-mark` · `--company-mark-subtle` · 차트 `--chart-*` 17 — 차트 트랙 2026-11-20. 아바타 12 는 2026-11-24 에 지움) = **110**.
   더한 것 중 6개는 Tag 글자용 `--foreground-{negative|cautionary|accent-light-blue|accent-lime|accent-cyan|positive}-heavy`(2026-11-11),
   5개는 입력 링 `--line-field-focus` · `-halo` 와 AI 면 `--surface-brand-gradient` · `-strong` · `-heavy`(2026-11-14).
 - **차트 토큰** `--chart-mono-1~4`(한 톤 — 기본, 제품과 무관한 고정 파랑 명도 단계, 2026-11-15) · `--chart-mono-track`(진행 막대 · 게이지 트랙 — 같은 파랑 옅은 단계, 2026-11-20) · `--chart-series-1~6`(범주색 — tone 없는 계열 5개부터 · 순서 고정 · 제품색과 무관) · `--chart-series-1-subtle`(비교 기간 막대) · `--chart-series-1-strong`(막대 위 선) · `--chart-grid-primary` · `--chart-axis-text` · `--chart-tooltip-surface` · `--chart-tooltip-text` 는
@@ -1342,6 +1433,14 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **audit · probe 도구:** 툴팁 행을 키 · 값 · 이름으로 읽고 대조한다(값 굵기 600 · 이름 72% 400 · 키는 짧은 선), crosshair 를 읽어 색 · 굵기를 대조한다(격자 목록에서는 뺌), 막대 모서리는 값 쪽 끝만(누적은 마지막 조각만), 네 귀를 따로 적은 `border-radius` 는 가장 큰 귀로 읽는다.
 - **덤프 뜨는 법**은 묶음 4 와 같다(줄인 probe 를 PNG tEXt 로 올림 → 조각을 `jsds.probe` 에 → 하위 에이전트 둘이 읽어 이어 붙이고 길이 · 해시 대조).
 - **그리지 않은 것:** 분석 패턴의 불러오는 중 · 빈 결과 예제(사이트에는 있음 — audit 은 예제 수를 대조하지 않는다).
+
+**2026-11-24 Figma 미반영 95건 반영(사람의 요청 '피그마에도 미반영 95건 반영해줘' — 11-23 메뉴 · Combobox · 표 글자와 11-24 추가 수정 열하나의 몫).** 95건은 모두 없어졌다. 다시 잰 전체 probe(`dump-c3`, 15조각 · 길이 · 해시 대조)로 **audit 은 3건**이다 — Home 잘림 1 · 숨긴 ov-grid 사본 2(기준값).
+- **막대 각짐** — Chart 세트(992:4826) · Chart Card(330:2424) · KPI(330:2345)와 대시보드 · 분석 패턴의 막대 · 스파크라인 · 진행 막대 트랙 사각형 95개의 모서리를 0 으로.
+- **Avatar 중립** — Avatar 세트의 면을 `surface/neutral/secondary` · 글자를 `foreground/neutral/secondary` 로 다시 묶고 변수 `avatar/1~6/surface · text` 12개를 지웠다. **Tone=1 ~ 6 변형은 남겼다**(이제 모두 같은 색 — 지우면 인스턴스가 끊김, audit 대조 밖). 일괄 정리 때 변형을 하나로 합칠지 묻는다.
+- **글** — 컴포넌트 카드 14개(Button · Dropdown · Select · Combobox · Tab · Popup · Side Panel · Loading · Data Table · Table · Data Visual · Empty State · Form · Avatar)의 고르기 표 · Rules(묶음 다시 짬) · Spec, 패턴 카드 셋(오류 · 권한 없음 · 대시보드 · 분석 · 리포트)의 고르기 표 · Rules 를 저장소 글로. 기대 글은 PNG tEXt 로 올려 `jsds/expect` 에 두었다가 끝에 지웠다.
+- **측정에서 드러나 고친 것:** 새 행을 숨긴 복제 원본에서 복제해 31행이 숨은 채였다(스크린샷에서 발견 — probe 는 숨은 행도 읽어 audit 으로는 안 보인다). 보이게 하고 늘어난 카드에 맞춰 Components 섹션 13개를 늘리고 간격 200 을 다시 맞췄다(넘침 0).
+- **audit 대조 밖이라 그리지 않은 것:** Tab 글자 15 · 13, 대시보드 기간 Select Button, Tree 고른 숫자, Card Radio 고른 제목, 차트 머리 · 증감 가운데, Pagination 아이콘 가운데, 막대 그라데이션 예제, 메뉴 체크 · 라디오 · 적용 영역 · Select 여러 개 · Combobox 가로 스크롤(11-23).
+- **덤프 뜨는 법 보탬:** 하위 에이전트의 기록에서 use_figma 결과는 JSON 문자열이 아니라 날 글자다(이어 붙이는 스크립트가 둘 다 받게).
 
 - `use_figma` 를 부르기 **전에 `/figma-use` 스킬을 반드시 불러옵니다.**
 - 텍스트를 만들거나 고칠 때는 `_figma/font.js` 의 `makeFont()` 만 씁니다.

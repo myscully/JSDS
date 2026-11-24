@@ -72,17 +72,12 @@
       if (ol.offsetParent !== null && ol.scrollWidth > ol.clientWidth + 1) ol.classList.add("stacked");
     });
   }
-  /* Avatar 색 — 이름으로 정하는 6색(사람의 결정 2026-11-16). 이름은 data-name → aria-label → 글자 순. 같은 이름은 어디서나 같은 tone 이다.
-     React avatarTone(_react/src/components/avatar/tone.ts)과 같은 식이고 테스트가 대조한다. 빌드도 같은 식으로 예제에 미리 적는다(render.js) */
-  function avatarTone(name) { var h = 0, s = String(name || "").trim(); for (var i = 0; i < s.length; i++) { var c = s.codePointAt(i); if (c > 0xffff) i++; h = (Math.imul(h, 31) + c) >>> 0; } return h % 6 + 1; }
-  function avTone(el) { if (!el.hasAttribute("data-tone")) el.setAttribute("data-tone", String(avatarTone(el.getAttribute("data-name") || el.getAttribute("aria-label") || el.textContent))); }
   var fitTimer = 0;
   window.addEventListener("resize", function () { fitSteps(); clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitCells(); }, 150); });
   function init(root) {
     fitSteps(root);
     doc.fonts.ready.then(function () { fitCrumbs(root); fitCells(root); fitChips(root); fitSteps(root); });
     $$(".number-field input", root || doc).forEach(numSync);
-    $$(".avatar", root || doc).forEach(avTone);
     dsLive();   // 알림 영역은 미리 — 복사하는 순간 새로 넣으면 대개 읽히지 않는다
     root = root || doc;
     $$("input.mixed", root).forEach(function (i) { i.indeterminate = true; });
@@ -98,6 +93,7 @@
     $$(".terms", root).forEach(syncTerms);
     $$(".searchbar .clear", root).forEach(function (c) { var i = $("input", closest(c, ".searchbar")); if (i) c.hidden = !i.value; });
     $$(".combobox", root).forEach(cbInit);
+    $$("form[data-draft]", root).forEach(draftRestore);
     $$(".dropdown .trigger .placeholder", root).forEach(function (p) { closest(p, ".trigger").dataset.placeholder = p.textContent; });
     $$(".searchbar kbd", root).forEach(function (k) { var i = $("input", closest(k, ".searchbar")); if (i) k.hidden = !!i.value; });
     $$(".toast-stack.fixed .toast[data-duration]", root).forEach(scheduleToast);
@@ -173,8 +169,8 @@
   function setOpen(dd, open) {
     dd.classList.toggle("open", open);
     var t = $("[aria-haspopup]", dd); if (t) t.setAttribute("aria-expanded", String(open));
-    if (open) { dd.dataset.dsOpened = "1"; placeMenu(dd); var items = itemsOf(dd); var sel = items.filter(function (i) { return i.classList.contains("on"); })[0]; var f = sel || items[0] || $(".menu-state button", dd); if (f) f.focus(); }
-    else { delete dd.dataset.dsOpened; dd.classList.remove("up", "float"); vTouch(dd); }
+    if (open) { dd.dataset.dsOpened = "1"; placeMenu(dd); var items = itemsOf(dd); mcSnap(dd); var sel = items.filter(function (i) { return i.classList.contains("on") || (i.getAttribute("role") === "option" && i.getAttribute("aria-selected") === "true"); })[0]; var f = sel || items[0] || $(".menu-state button", dd); if (f) f.focus(); }
+    else { delete dd.dataset.dsOpened; dd.classList.remove("up", "float"); mcRestore(dd); vTouch(dd); }
   }
   /* 글자로 항목 찾기 — 0.5초 안의 글자를 이어 붙이고, 같은 글자를 반복하면 다음 항목으로. 'ㅂ' 은 초성으로 '보안팀' 에 맞는다 */
   var CHO = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
@@ -182,9 +178,57 @@
   function typeahead(dd, key) {
     var ta = dd._dsType || (dd._dsType = { s: "", t: 0 }), now = Date.now(); if (now - ta.t > 500) ta.s = ""; ta.t = now; ta.s += key.toLowerCase();
     var rep = ta.s.split("").every(function (c) { return c === ta.s[0]; }), q = rep ? ta.s[0] : ta.s, items = itemsOf(dd), i = items.indexOf(doc.activeElement), from = rep ? i + 1 : Math.max(i, 0);
-    return items.slice(from).concat(items.slice(0, from)).filter(function (x) { var l = x.textContent.trim().toLowerCase(); return l.indexOf(q) === 0 || cho(l).indexOf(q) === 0; })[0];
+    return items.slice(from).concat(items.slice(0, from)).filter(function (x) { var l = ($(".menu-name", x) || x).textContent.trim().toLowerCase(); return l.indexOf(q) === 0 || cho(l).indexOf(q) === 0; })[0];
   }
   function itemsOf(dd) { return $$(".menu-item:not([aria-disabled=true])", dd).map(function (i) { if (!i.hasAttribute("tabindex")) i.tabIndex = -1; return i; }); }
+
+  /* 메뉴의 체크 · 라디오 항목과 Select 여러 개(사람의 결정 2026-11-23 — Montage Menu · Select 참고).
+     켜고 끄는 동안 메뉴는 열린 채이고 포커스도 그 항목에 남는다. 실행 항목(menuitem)과 단일 Select 는 지금처럼 닫는다.
+     아래 초기화 · 적용 영역(.menu[data-actions])이 있으면 고르는 것은 초안 — 적용해야 이벤트가 나고, 적용 없이 닫히면(Esc · 바깥 · Tab) 열 때로 되돌린다 */
+  function mcAttr(i) { return i.getAttribute("role") === "option" ? "aria-selected" : "aria-checked"; }
+  function mcOn(i) { return i.getAttribute(mcAttr(i)) === "true"; }
+  function mcSet(i, on) { i.setAttribute(mcAttr(i), String(on)); }
+  function mcToggles(i) { var r = i.getAttribute("role"); return r === "menuitemcheckbox" || r === "menuitemradio" || (r === "option" && !!closest(i, '.dropdown [aria-multiselectable="true"]')); }
+  function mcItems(dd) { return $$('.menu-item[role=menuitemcheckbox], .menu-item[role=menuitemradio], [aria-multiselectable="true"] .menu-item[role=option]', dd); }
+  function mcVal(i) { return i.dataset.value != null ? i.dataset.value : ($(".menu-name", i) || i).textContent.trim(); }
+  function mcName(i) { var g = closest(i, "[role=group][data-name]"), dd = closest(i, ".dropdown"); return g ? g.dataset.name : (dd && dd.getAttribute("data-name")) || ""; }
+  function mcValues(dd) { return mcItems(dd).filter(mcOn).map(mcVal); }
+  function mcGroups(dd) { var g = {}; mcItems(dd).forEach(function (i) { var n = mcName(i); g[n] = g[n] || []; if (mcOn(i)) g[n].push(mcVal(i)); }); return g; }
+  function mcDraft(dd) { return !!$(".menu[data-actions]", dd); }
+  function mcFire(dd, item, trigger) {
+    if (dd.hasAttribute("data-multiple")) { fire(dd, "ds:select", { values: mcValues(dd), trigger: trigger }); return; }
+    fire(dd, "ds:menu-change", { name: item ? mcName(item) : null, value: item ? mcVal(item) : null, checked: item ? mcOn(item) : null, values: mcValues(dd), groups: mcGroups(dd), trigger: trigger });
+  }
+  function mcToggle(item) {
+    var dd = closest(item, ".dropdown");
+    if (dd && mcDraft(dd) && !dd._dsSnap) mcSnap(dd);   // 처음부터 열린 메뉴(문서 예제)도 적용 없이 닫으면 되돌아가게
+    if (item.getAttribute("role") === "menuitemradio") $$("[role=menuitemradio]", closest(item, "[role=group]") || closest(item, ".menu")).forEach(function (r) { mcSet(r, r === item); });
+    else mcSet(item, !mcOn(item));
+    if (!item.hasAttribute("tabindex")) item.tabIndex = -1;   // 처음부터 열린 메뉴는 itemsOf 를 거치지 않아 아직 포커스를 받지 못한다
+    item.focus();
+    if (!dd) return;
+    if (dd.hasAttribute("data-multiple")) { selMulti(dd); var mt = $(".trigger", dd); if (mt && mt.getAttribute("aria-invalid") === "true") vTouch(dd); }   // 오류가 떠 있으면 고르는 순간 지운다
+    if (!mcDraft(dd)) mcFire(dd, item, "toggle");
+  }
+  function mcSnap(dd) { dd._dsSnap = mcDraft(dd) ? mcItems(dd).map(function (i) { return [i, mcOn(i)]; }) : null; }
+  function mcRestore(dd) { var sn = dd._dsSnap; dd._dsSnap = null; if (!sn) return; sn.forEach(function (p) { mcSet(p[0], p[1]); }); if (dd.hasAttribute("data-multiple")) selMulti(dd); }
+  /* 초기화 — 체크는 모두 끄고 라디오는 data-default(없으면 첫 항목)로. 적용 전까지는 초안이다. 끈 항목은 그대로 */
+  function mcReset(dd) {
+    if (mcDraft(dd) && !dd._dsSnap) mcSnap(dd);
+    mcItems(dd).forEach(function (i) { if (i.getAttribute("aria-disabled") !== "true" && i.getAttribute("role") !== "menuitemradio") mcSet(i, false); });
+    $$("[role=group]", dd).forEach(function (g) { var rs = $$("[role=menuitemradio]", g); if (!rs.length) return; var d = rs.filter(function (r) { return r.hasAttribute("data-default"); })[0] || rs[0]; rs.forEach(function (r) { mcSet(r, r === d); }); });
+    if (dd.hasAttribute("data-multiple")) selMulti(dd);
+  }
+  function mcApply(dd) { dd._dsSnap = null; mcFire(dd, null, "apply"); setOpen(dd, false); var tr = $("[aria-haspopup]", dd); if (tr) tr.focus(); }
+  /* Select 여러 개 — 트리거 글은 고른 이름을 쉼표로(넘치면 말줄임, data-overflow="wrap" 이면 줄바꿈), 모두 고르면 data-all-label. 폼 값은 값마다 숨은 input 하나 */
+  function selMulti(dd) {
+    var t = $(".trigger", dd), on = $$('.menu-item[role=option][aria-selected="true"]', dd), all = $$('.menu-item[role=option]:not([aria-disabled="true"])', dd);
+    if (t) { t.textContent = ""; var sp = doc.createElement("span");
+      if (!on.length) { sp.className = "placeholder"; sp.textContent = t.dataset.placeholder || ""; }
+      else { sp.className = "trigger-text"; sp.textContent = dd.dataset.allLabel && all.length && all.every(mcOn) ? dd.dataset.allLabel : on.map(function (i) { return ($(".menu-name", i) || i).textContent.trim(); }).join(", "); }
+      t.appendChild(sp); }
+    var nm = dd.getAttribute("data-name"); if (nm) { $$(":scope > input[type=hidden]", dd).forEach(function (h) { dd.removeChild(h); }); on.forEach(function (i) { var h = doc.createElement("input"); h.type = "hidden"; h.name = nm; h.value = mcVal(i); dd.appendChild(h); }); }
+  }
   function selectItem(item) {
     var dd = closest(item, ".dropdown"), menu = closest(item, ".menu");
     if (menu && menu.getAttribute("role") === "listbox") {
@@ -292,7 +336,7 @@
   /* 오류 문구 — Writing 규칙(무엇이 일어났는지 + 어떻게 하면 되는지), 범위는 '부터 · 까지'(그 날짜를 포함). 사람의 결정(2026-11-09).
      자리표시 {subject} {example} {min} {max} — 어순이 다른 언어도 쓸 수 있게. 다른 언어 기본값은 두지 않고 data-messages 로 넣는다.
      {subject} 는 기간에서 한쪽만 틀렸으면 그 쪽(startSubject · endSubject), 아니면 subject. 자리표시가 없는 문자열은 옛 조합(앞말 + 예시 · 날짜 + 꼬리말) */
-  var MSG = { incomplete: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.", invalid: "{subject} 달력에 없습니다. 달력에서 고르거나 {example} 처럼 입력하세요.", min: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.", max: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.", order: "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.", subject: "날짜가", startSubject: "시작일이", endSubject: "종료일이", long: "기간이 {days}일을 넘습니다. {days}일 이내로 고르세요.", invalidTime: "{subject} 잘못됐습니다. {example} 처럼 24시간제로 입력하세요.", orderTime: "종료 시각이 시작 시각보다 빠릅니다. 시작과 같거나 늦은 시각으로 바꾸세요.", timeSubject: "시각이", startTimeSubject: "시작 시각이", endTimeSubject: "종료 시각이" };
+  var MSG = { incomplete: "{subject} 덜 입력됐습니다. {example} 처럼 끝까지 입력하세요.", invalid: "{subject} 달력에 없습니다. 달력에서 고르거나 {example} 처럼 입력하세요.", min: "{subject} 범위를 벗어났습니다. {min} 부터 입력할 수 있습니다.", max: "{subject} 범위를 벗어났습니다. {max} 까지 입력할 수 있습니다.", order: "종료일이 시작일보다 빠릅니다. 시작일과 같거나 늦은 날짜로 바꾸세요.", subject: "날짜가", startSubject: "시작일이", endSubject: "종료일이", long: "기간이 {days}일을 넘습니다. {days}일 이내로 고르세요.", invalidTime: "{subject} 24시간제 형식이 아닙니다. {example} 처럼 입력하세요.", orderTime: "종료 시각이 시작 시각보다 빠릅니다. 시작과 같거나 늦은 시각으로 바꾸세요.", timeSubject: "시각이", startTimeSubject: "시작 시각이", endTimeSubject: "종료 시각이" };
   function dpMessages(host) {
     var raw = host.getAttribute("data-messages"), o = {}, out = {}, k;
     if (raw) try { o = JSON.parse(raw) || {}; } catch (e) { if (!labelWarned[raw]) { labelWarned[raw] = 1; if (window.console) console.warn("[ds.js] data-messages 가 JSON 이 아닙니다 — 기본 문구를 씁니다: " + raw); } }
@@ -1005,7 +1049,7 @@
     open: function (sel) {
       var el = typeof sel === "string" ? $(sel) : sel; if (!el) return;
       if ($(".popup-backdrop[data-ds-popup]")) { console.warn("[DS.popup] 모달 위에 모달을 띄우지 않습니다 — 열려 있는 팝업을 먼저 닫으세요."); return; }
-      popup._prev = doc.activeElement; delete el.dataset.dsDirty;
+      popup._prev = doc.activeElement; delete el.dataset.dsDirty; discardClear(el);
       var bd = doc.createElement("div"); bd.className = "popup-backdrop"; bd.dataset.dsPopup = "1";
       el.dataset.dsHome = "1"; var ph = doc.createComment("popup"); el.parentNode.insertBefore(ph, el); el._dsPlaceholder = ph;
       bd.appendChild(el); doc.body.appendChild(bd); doc.body.style.overflow = "hidden";
@@ -1027,9 +1071,37 @@
     },
   };
 
-  function popupKeeps(bd) { var el = $(".popup", bd); return !el || el.matches(".danger, [aria-busy='true']") || el.dataset.dsDirty === "1"; }
-  ["input", "change"].forEach(function (ev) { doc.addEventListener(ev, function (e) { var p = closest(e.target, ".popup-backdrop[data-ds-popup] .popup"); if (p) p.dataset.dsDirty = "1"; }, true); });
-  doc.addEventListener("click", function (e) { var it = closest(e.target, ".popup-backdrop[data-ds-popup] .menu-item, .popup-backdrop[data-ds-popup] [role=gridcell]"); if (it) closest(it, ".popup").dataset.dsDirty = "1"; }, true);   // Select · Date Picker 는 input 이벤트를 내지 않는다
+  /* ---------- 오버레이 입력 보호 — Popup · 모달 Side Panel 공통(2026-11-23) ----------
+     입력을 시작하면(data-ds-dirty) 배경을 눌러도 닫지 않고, Esc · X · 취소로 닫으려 하면 그 안에 '변경 사항을 버릴까요?' 를 띄운다.
+     새 모달을 겹치지 않는다(모달 위 모달 금지) — 오버레이 안 위험 Notice 한 줄. 위험 확인(alertdialog) · 처리 중은 대상이 아니고,
+     data-confirm-discard="false" 로 끈다. DS.popup.close() · DS.panel.close() 를 코드에서 부르면 묻지 않는다(저장 뒤 닫기) */
+  var DIRTY_HOST = ".popup-backdrop[data-ds-popup] .popup, .side-panel.fixed[data-modal]:not([hidden])";
+  var DISCARD_LABEL = { title: "변경 사항을 버릴까요?", body: "입력한 내용은 저장되지 않습니다.", keep: "계속 편집", drop: "버리기" };
+  var ALERT_FILLED = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none" aria-hidden="true"><path d="M12 2c5.523 0 10 4.477 10 10a10 10 0 0 1 -19.995 .324l-.005 -.324l.004 -.28c.148 -5.393 4.566 -9.72 9.996 -9.72zm.01 13l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007zm-.01 -8a1 1 0 0 0 -.993 .883l-.007 .117v4l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-4l-.007 -.117a1 1 0 0 0 -.993 -.883z"/></svg>';
+  function overlayKeeps(box) { return !box || box.matches(".danger, [aria-busy='true']") || box.dataset.dsDirty === "1"; }
+  function popupKeeps(bd) { return overlayKeeps($(".popup", bd)); }
+  function discardAsks(box) { return !!box && box.dataset.dsDirty === "1" && !box.matches(".danger, [aria-busy='true']") && box.getAttribute("data-confirm-discard") !== "false"; }
+  function discardClear(box) { var n = box && $(":scope > .discard-confirm", box); if (n) n.remove(); }
+  /** 닫으려는 순간 — 물어야 하면 확인 줄을 띄우고 true. 이미 떠 있으면 '계속 편집' 과 같다(두 번째 Esc) */
+  function discardAsk(box) {
+    if (!discardAsks(box)) return false;
+    var cur = $(":scope > .discard-confirm", box); if (cur) { discardKeep(box); return true; }
+    box._dsDiscardFrom = box.contains(doc.activeElement) ? doc.activeElement : null;
+    var n = doc.createElement("div"); n.className = "notice danger discard-confirm"; n.setAttribute("role", "alert");
+    n.innerHTML = '<span class="ico">' + ALERT_FILLED + '</span><div><b></b><span class="discard-body"></span><div class="actions"><div class="btn-group"><button type="button" class="btn sm outline assistive" data-discard="keep"></button><button type="button" class="btn sm outline assistive" data-discard="drop"></button></div></div></div>';
+    $("b", n).textContent = DISCARD_LABEL.title; $(".discard-body", n).textContent = DISCARD_LABEL.body;
+    $('[data-discard="keep"]', n).textContent = DISCARD_LABEL.keep; $('[data-discard="drop"]', n).textContent = DISCARD_LABEL.drop;
+    var at = $(":scope > .popup-actions, :scope > .side-panel-footer", box); box.insertBefore(n, at || null);   // 버튼 줄 바로 위 — 화면 순서와 Tab 순서가 같다
+    $('[data-discard="keep"]', n).focus();
+    return true;
+  }
+  function discardKeep(box) {
+    discardClear(box); var f = box._dsDiscardFrom; box._dsDiscardFrom = null;
+    if (f && box.contains(f) && f.getClientRects().length) f.focus(); else { var fs = focusablesIn(box); (fs.filter(function (x) { return !x.matches(".popup-close, .side-panel-close"); })[0] || fs[0] || box).focus(); }
+  }
+  function discardDrop(box) { discardClear(box); delete box.dataset.dsDirty; if (box.classList.contains("popup")) popup.close(); else panel.close(box); }
+  ["input", "change"].forEach(function (ev) { doc.addEventListener(ev, function (e) { var p = closest(e.target, DIRTY_HOST); if (p && !closest(e.target, ".searchbar")) p.dataset.dsDirty = "1"; }, true);   /* 오버레이 안 검색창은 거르는 것이지 입력이 아니다 — 초안과 같은 규칙 */ });
+  doc.addEventListener("click", function (e) { var it = closest(e.target, ".menu-item, [role=gridcell]"), p = it && closest(it, DIRTY_HOST); if (p) p.dataset.dsDirty = "1"; }, true);   // Select · Date Picker 는 input 이벤트를 내지 않는다
 
   /* ---------- Side Panel(사람의 결정 — 비모달 기본, 모달 옵션) ----------
      DS.panel.open("#id") / DS.panel.close(). 비모달은 뒤 페이지를 그대로 쓸 수 있다 — 가두지 않고 스크롤도 잠그지 않으며, 패널 안에 포커스가 있을 때만 Esc 로 닫는다.
@@ -1039,7 +1111,7 @@
       var el = typeof sel === "string" ? $(sel) : sel; if (!el) return;
       var cur = $(".side-panel.fixed:not([hidden])"), from = doc.activeElement;
       if (cur && cur !== el) { from = cur._dsPrev || from; panel.close(cur, true); }
-      el._dsPrev = from;
+      el._dsPrev = from; delete el.dataset.dsDirty; discardClear(el);
       if (cur !== el) el._dsWasHidden = el.hidden;   // 닫을 때 되돌린다 — 문서 예제처럼 처음부터 보이던 패널은 닫아도 제자리에 다시 보인다
       if (cur !== el) { var ph = doc.createComment("side-panel"); el.parentNode.insertBefore(ph, el); el._dsPlaceholder = ph; doc.body.appendChild(el); }
       el.hidden = false; el.classList.add("fixed");
@@ -1115,14 +1187,17 @@
   }
   /* 고른 값을 칩 · 숨은 input 으로 옮긴다 — 칩은 옵션 순서 */
   function cbSync(h) {
-    var on = cbOn(h), name = h.getAttribute("data-name"), multi = cbMulti(h), inp = cbInput(h), ctrl = $(".control", h);
+    var on = cbOn(h), name = h.getAttribute("data-name"), multi = cbMulti(h), inp = cbInput(h), ctrl = $(".control", h), row = inp.parentNode;
     if (multi) {
       $$(".chip", ctrl).forEach(function (c) { c.remove(); });
-      on.forEach(function (i) { var c = doc.createElement("span"), l = doc.createElement("span"), x = doc.createElement("button"); c.className = "chip sm"; c.dataset.value = cbValue(i); l.className = "lbl"; l.textContent = cbLabel(i); x.type = "button"; x.className = "x"; x.setAttribute("aria-label", cbLabel(i) + " 제거"); x.innerHTML = X_ICON; c.appendChild(l); c.appendChild(x); ctrl.insertBefore(c, inp); });
-      fitChips(ctrl);
+      on.forEach(function (i) { var c = doc.createElement("span"), l = doc.createElement("span"), x = doc.createElement("button"); c.className = "chip sm"; c.dataset.value = cbValue(i); l.className = "lbl"; l.textContent = cbLabel(i); x.type = "button"; x.className = "x"; x.setAttribute("aria-label", cbLabel(i) + " 제거"); x.innerHTML = X_ICON; c.appendChild(l); c.appendChild(x); row.insertBefore(c, inp); });
+      fitChips(ctrl); cbEnd(h);
     }
     if (name) { $$("input[type=hidden]", h).forEach(function (x) { x.remove(); }); (multi ? on.map(cbValue) : [on[0] ? cbValue(on[0]) : ""]).forEach(function (v) { var x = doc.createElement("input"); x.type = "hidden"; x.name = name; x.value = v; h.appendChild(x); }); }
   }
+  /* 가로 스크롤(기본) — 입력칸이 늘 끝에 보이게 */
+  function cbScrolls(h) { return cbMulti(h) && h.getAttribute("data-overflow") !== "wrap"; }
+  function cbEnd(h) { var row = $(".control-track", h); if (row && cbScrolls(h)) row.scrollLeft = row.scrollWidth; }
   function cbFire(h) { var on = cbOn(h); fire(h, "ds:select", { value: cbMulti(h) ? on.map(cbValue) : on[0] ? cbValue(on[0]) : "" }); }
   function cbCheck(h) { var inp = cbInput(h), form = closest(inp, "form[data-validate]"); if (form && h._dsTouched && closest(inp, ".field")) { vShow(inp, vMessage(inp)); } }
   function cbOpen(h, open) {
@@ -1166,6 +1241,13 @@
     menu.tabIndex = -1;   // 스크롤되는 목록은 Chromium 에서 Tab 칸이 된다 — Tab 이 목록에 멈춰 떠남이 일어나지 않았다
     cbItems(h).forEach(function (i, n) { if (!i.id) i.id = menu.id + "-" + n; });
     if (!$(":scope > [role=status]", h)) { var s = doc.createElement("span"); s.className = "sr-only"; s.setAttribute("role", "status"); h.insertBefore(s, menu.nextSibling); }
+    if (cbMulti(h)) {
+      /* 2026-11-23 앞 마크업(.control 바로 아래 칩 · 입력)과 앞 체크 없는 옵션도 받는다 */
+      if (!$(".control-track", h)) { var ctl = $(".control", h), tr = doc.createElement("div"); tr.className = "control-track"; while (ctl.firstChild) tr.appendChild(ctl.firstChild); ctl.appendChild(tr); }
+      cbItems(h).forEach(function (i) { if (!$(":scope > .menu-mark", i)) { var m = doc.createElement("span"); m.className = "menu-mark check"; m.setAttribute("aria-hidden", "true"); i.insertBefore(m, i.firstChild); } });
+      /* 세로 휠은 넘칠 때만 가로로 — 넘치지 않으면 페이지가 그대로 스크롤된다 */
+      $(".control-track", h).addEventListener("wheel", function (ev) { var r = ev.currentTarget; if (!cbScrolls(h) || r.scrollWidth <= r.clientWidth || Math.abs(ev.deltaY) <= Math.abs(ev.deltaX)) return; ev.preventDefault(); r.scrollLeft += ev.deltaY; }, { passive: false });
+    }
     if (cbMulti(h) || h.getAttribute("data-name")) cbSync(h);
   }
 
@@ -1174,10 +1256,10 @@
      포커스가 떠날 때 필드 단위 — 건드리지 않은 빈 필드는 탭으로 지나가도 오류를 내지 않는다. 오류가 있는 필드는 입력할 때마다 다시 재 바로 지운다.
      제출하면 전부 재고, 막으면 첫 오류로 포커스 · 스크롤(폼 위 요약은 없다 — 사람의 결정 2026-11-16). Date Picker 는 스스로 재므로 .error 만 센다.
      Checkbox · Radio 그룹은 .field 안 fieldset 의 data-required — 하나 이상 고른다. 문구는 React validation.ts 와 같아야 한다 */
-  var V_MSG = { fileRequired: "필수 항목입니다. 파일을 선택하세요.", fileBusy: "파일을 전송하고 있습니다. 끝난 뒤 다시 저장하세요.", fileFailed: "올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.", fileType: "올릴 수 없는 형식입니다. {types} 파일을 고르세요.", fileSize: "파일이 너무 큽니다. {max} 이하 파일을 고르세요.", fileEmpty: "빈 파일입니다. 내용이 있는 파일을 고르세요.", fileDuplicate: "이미 추가한 파일입니다. 다른 파일을 고르세요.", fileCount: "파일이 너무 많습니다. {max}개까지 올릴 수 있습니다.", fileSend: "전송하지 못했습니다. 다시 시도하세요.", fileAdded: "파일 {ok}개를 추가했습니다.", fileRejected: "{bad}개는 올릴 수 없습니다.", fileRemoved: "{name} 파일을 지웠습니다.", required: "필수 항목입니다. 값을 입력하세요.", choose: "필수 항목입니다. 항목을 선택하세요.", number: "숫자가 아닙니다. 숫자를 입력하세요.", email: "이메일 형식이 아닙니다. 예: admin@example.com", url: "URL 형식이 아닙니다. 예: https://example.com", pattern: "형식이 맞지 않습니다. 도움말을 확인하세요.", min: "값이 너무 작습니다. {min} 이상 입력하세요.", max: "값이 너무 큽니다. {max} 이하 입력하세요.", minlength: "글자 수가 모자랍니다. {minlength}자 이상 입력하세요.", step: "입력할 수 없는 값입니다. {step} 단위로 입력하세요.", length: "글자 수가 {over}자 넘었습니다. {limit}자 이하로 줄이세요.", code: "코드가 덜 입력됐습니다. {length}자리를 모두 입력하세요." };
+  var V_MSG = { fileRequired: "고른 파일이 없습니다. 파일을 선택하세요.", fileBusy: "파일을 전송하고 있습니다. 끝난 뒤 다시 저장하세요.", fileFailed: "올리지 못한 파일이 있습니다. 지우거나 다시 시도하세요.", fileType: "올릴 수 없는 형식입니다. {types} 파일을 고르세요.", fileSize: "파일이 너무 큽니다. {max} 이하 파일을 고르세요.", fileEmpty: "빈 파일입니다. 내용이 있는 파일을 고르세요.", fileDuplicate: "이미 추가한 파일입니다. 다른 파일을 고르세요.", fileCount: "파일이 너무 많습니다. {max}개까지 올릴 수 있습니다.", fileSend: "전송하지 못했습니다. 다시 시도하세요.", fileAdded: "파일 {ok}개를 추가했습니다.", fileRejected: "{bad}개는 올릴 수 없습니다. 파일 목록에서 이유를 확인하세요.", fileRemoved: "{name} 파일을 지웠습니다.", required: "값이 비어 있습니다. 값을 입력하세요.", choose: "고른 항목이 없습니다. 항목을 선택하세요.", number: "숫자가 아닙니다. 숫자를 입력하세요.", email: "이메일 형식이 아닙니다. 예: admin@example.com", url: "URL 형식이 아닙니다. 예: https://example.com", pattern: "형식이 맞지 않습니다. 도움말을 확인하세요.", min: "값이 너무 작습니다. {min} 이상 입력하세요.", max: "값이 너무 큽니다. {max} 이하 입력하세요.", minlength: "글자 수가 모자랍니다. {minlength}자 이상 입력하세요.", step: "입력할 수 없는 값입니다. {step} 단위로 입력하세요.", length: "글자 수가 {over}자 넘었습니다. {limit}자 이하로 줄이세요.", code: "코드가 덜 입력됐습니다. {length}자리를 모두 입력하세요." };
   function vIsField(t) { return !!(t && t.matches && t.matches(".field input, .field textarea") && !closest(t, ".datepicker, .code-inputs") && ["checkbox", "radio", "hidden", "file"].indexOf(t.type) < 0); }   // 인증 코드 칸은 묶음(.code-inputs) 하나로 잰다
   function vChoice(el) { return closest(el, ".dropdown[data-required], .combobox[data-required], .checkbox-group[data-required], .radio-group[data-required], .upload"); }
-  function vEmpty(host) { if (host.matches(".combobox")) return !cbOn(host).length; if (host.matches(".checkbox-group, .radio-group")) return !$("input:checked", host); var on = $(".menu-item.on", host); return !on || on.dataset.value === ""; }
+  function vEmpty(host) { if (host.matches(".combobox")) return !cbOn(host).length; if (host.matches(".checkbox-group, .radio-group")) return !$("input:checked", host); if (host.hasAttribute("data-multiple")) return !$('.menu-item[aria-selected="true"]', host); var on = $(".menu-item.on", host); return !on || on.dataset.value === ""; }
   function vFields(form) { return $$(".field input, .field textarea, .field .dropdown[data-required] .trigger, .field .checkbox-group[data-required], .field .radio-group[data-required], .field .upload .upload-pick, .field .code-inputs", form).filter(function (i) { if (i.matches(".code-inputs")) return codeCells(i).some(function (c) { return !c.disabled; }); return !i.disabled && i.type !== "checkbox" && i.type !== "radio" && i.type !== "file" && ((vIsField(i) && i.willValidate) || vChoice(i)); }); }
   function vMsgs(inp) {
     var out = {}, k; for (k in V_MSG) out[k] = V_MSG[k];
@@ -1388,7 +1470,8 @@
     if ((el = closest(t, ".combobox .x"))) { var cbh = closest(el, ".combobox"); if (!cbInput(cbh).disabled) cbRemove(cbh, closest(el, ".chip")); return; }
     if ((el = closest(t, ".combobox .menu-item"))) { if (el.getAttribute("aria-disabled") !== "true") cbPick(closest(el, ".combobox"), el); return; }
     if ((el = closest(t, ".combobox .control"))) { var cbc = closest(el, ".combobox"), cbi = cbInput(cbc); if (!cbi.disabled) { cbi.focus(); cbOpen(cbc, t === cbi || !cbc.classList.contains("open")); } return; }
-    if ((el = closest(t, ".menu-item"))) { if (el.getAttribute("aria-disabled") === "true") return; selectItem(el); return; }
+    if ((el = closest(t, ".dropdown .menu-actions [data-menu-action]")) && !el.disabled) { var mad = closest(el, ".dropdown"); if (el.dataset.menuAction === "apply") mcApply(mad); else mcReset(mad); return; }
+    if ((el = closest(t, ".menu-item"))) { if (el.getAttribute("aria-disabled") === "true") return; if (mcToggles(el)) mcToggle(el); else selectItem(el); return; }
 
     // Tabs
     if ((el = closest(t, ".tabs .tab")) && !el.disabled) { tabPick(el); return; }
@@ -1437,11 +1520,12 @@
     if ((el = closest(t, ".banner .close"))) { var bnr = closest(el, ".banner"); if (e.detail === 0) focusPast(bnr); fire(bnr, "ds:banner-close"); dismiss(bnr); return; }
     if ((el = closest(t, ".toast .action, .toast .close"))) { closeToast(closest(el, ".toast"), e.detail === 0); return; }
     // Popup — 입력 중 · 위험 확인 · 처리 중에는 배경을 눌러도 닫지 않는다(Interaction › Overlays)
+    if ((el = closest(t, ".discard-confirm [data-discard]"))) { var dbx = closest(el, ".popup, .side-panel"); if (el.getAttribute("data-discard") === "drop") discardDrop(dbx); else discardKeep(dbx); return; }
     if (t.classList.contains("popup-backdrop")) { if (!popupKeeps(t)) popup.close(); return; }
-    if ((el = closest(t, ".popup [data-popup-close]"))) { popup.close(); return; }
-    // Side Panel
-    if (t.classList.contains("side-panel-dim")) { panel.close(); return; }
-    if ((el = closest(t, ".side-panel [data-panel-close]"))) { panel.close(closest(el, ".side-panel")); return; }
+    if ((el = closest(t, ".popup [data-popup-close]"))) { if (el.matches(".primary") || !discardAsk(closest(el, ".popup"))) popup.close(); return; }   // 주 버튼에 단 닫기는 저장 뒤 닫기라 묻지 않는다
+    // Side Panel — 모달의 배경도 Popup 과 같은 판정(입력 중 · 처리 중이면 닫지 않음)
+    if (t.classList.contains("side-panel-dim")) { var dpn = $(".side-panel.fixed[data-modal]:not([hidden])"); if (!dpn || !overlayKeeps(dpn)) panel.close(dpn || undefined); return; }
+    if ((el = closest(t, ".side-panel [data-panel-close]"))) { var cpn = closest(el, ".side-panel"); if (el.matches(".primary") || !discardAsk(cpn)) panel.close(cpn); return; }
     if ((el = closest(t, "[data-panel-open]"))) { panel.open(el.getAttribute("data-panel-open")); return; }
     if ((el = closest(t, "[data-popup-open]"))) { popup.open(el.getAttribute("data-popup-open")); return; }
   });
@@ -1511,10 +1595,14 @@
       var ddo = $$(".dropdown.open[data-ds-opened]"); if (ddo.length) { ddo.forEach(function (d) { setOpen(d, false); var tr = $("[aria-haspopup]", d); tr && tr.focus(); }); return; }   // 가장 안쪽 것 하나만 — 대화상자는 다음 Esc 에
       var tips = $$(".tooltip-wrap:not(.show):not(.quiet)").filter(function (w) { var tip = $(".tooltip", w); return tip && (w.matches(":hover") || w.contains(doc.activeElement)) && Number(getComputedStyle(tip).opacity) > 0; });
       if (tips.length) { tips.forEach(function (w) { w.classList.add("quiet"); }); return; }   // 보이는 툴팁이 가장 안쪽이다 — 대화상자는 다음 Esc 에
-      var pop = $(".popup-backdrop[data-ds-popup]"); if (pop) { if ($(".popup", pop).getAttribute("aria-busy") !== "true") popup.close(); return; }
-      var pn = $(".side-panel.fixed:not([hidden])"); if (pn && (pn.hasAttribute("data-modal") || pn.contains(doc.activeElement))) panel.close(pn); return; }
+      var pop = $(".popup-backdrop[data-ds-popup]"); if (pop) { var ppe = $(".popup", pop); if (ppe.getAttribute("aria-busy") !== "true" && !discardAsk(ppe)) popup.close(); return; }
+      var pn = $(".side-panel.fixed:not([hidden])"); if (pn && (pn.hasAttribute("data-modal") || pn.contains(doc.activeElement)) && !discardAsk(pn)) panel.close(pn); return; }
     var ctr = closest(e.target, ".dropdown:not(.open) [aria-haspopup]");
     if (ctr && !ctr.disabled && (e.key === "ArrowDown" || e.key === "ArrowUp")) { e.preventDefault(); setOpen(closest(ctr, ".dropdown"), true); return; }
+    if (dd && e.key === "Tab") { var acts = $$(".menu-actions button:not([disabled])", dd), mae = doc.activeElement, mai = acts.indexOf(mae);
+      if (acts.length && !e.shiftKey && (mai < 0 ? !!closest(mae, ".menu-items") : mai < acts.length - 1)) return;   // 적용 영역 — 항목 → 초기화 → 적용은 브라우저 기본 이동(항목은 tabindex -1)
+      if (acts.length && e.shiftKey && mai > 0) return;
+      if (acts.length && e.shiftKey && mai === 0) { e.preventDefault(); var mfi = itemsOf(dd); (mfi.filter(mcOn)[0] || mfi[0] || mae).focus(); return; } }
     if (dd && e.key === "Tab") { var dtr = $("[aria-haspopup]", dd); if (dtr) dtr.focus(); setOpen(dd, false); dd = null; }   // 트리거에서 다음 칸으로 — 목록이 열린 채 포커스만 나가던 것
     var pbd = e.key === "Tab" && $(".popup-backdrop[data-ds-popup]"), pel = e.key === "Tab" && (pbd ? $(".popup", pbd) : $(".side-panel.fixed[data-modal]:not([hidden])"));
     if (pel) { var fl = focusablesIn(pel), cur = doc.activeElement;
@@ -1526,7 +1614,7 @@
       var items = itemsOf(dd), i = items.indexOf(doc.activeElement); if (!items.length) return;
       var n = e.key === "ArrowDown" ? (i + 1) % items.length : e.key === "ArrowUp" ? (i - 1 + items.length) % items.length : e.key === "Home" ? 0 : e.key === "End" ? items.length - 1 : -1;
       if (n >= 0) { e.preventDefault(); items[n].focus(); }
-      else if (i >= 0) { e.preventDefault(); selectItem(items[i]); }
+      else if (i >= 0) { e.preventDefault(); if (mcToggles(items[i])) mcToggle(items[i]); else selectItem(items[i]); }
       return;
     }
     // Tabs 방향키
@@ -1551,6 +1639,81 @@
   /* 입력형 Date Picker — 포커스가 필드 밖(달력 · 달력 버튼은 안)으로 나가면 친 글자를 검사한다 */
   /* 입력 검증 — 캡처라 폼 · 버튼에 달린 제품 핸들러보다 먼저 막는다 */
   doc.addEventListener("submit", function (e) { if (e.target.matches && e.target.matches("form[data-validate]") && !vRun(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+  /* 폼 초안(2026-11-23 — VectorLab UI/UX 대조, 사람의 결정 '옵션으로') — form[data-draft="키"] 는 입력을 이 브라우저(localStorage jsds-draft:키)에 0.5초 뒤 남긴다.
+     다시 열면 기본값과 다른 칸만 되살리고 폼 맨 위에 알린다('버리기' 는 기본값으로 되돌림). 제출이 통과하면(그 틱에 aria-invalid 가 없으면) 지운다.
+     남기지 않는 칸: 비밀번호 · 파일 · 숨은 값 · 읽기 전용 · 일회용 코드 · 복사 필드 · 인증 코드 칸 · Combobox 검색 글자 · 검색창 · data-draft-skip 안 · 이름도 id 도 없는 칸.
+     네이티브 입력(글자 · 숫자 · 체크박스 · 라디오 · select · textarea)만 다룬다 — Select · Combobox 의 고른 값은 제품이 저장한다. 저장이 막힌 브라우저는 그냥 지나간다 */
+  var DRAFT_LABEL = { restored: "저장하지 않은 입력을 되살렸습니다.", discard: "버리기" };
+  var DRAFT_SKIP_TYPE = ["password", "file", "hidden", "submit", "button", "reset", "image"];
+  var INFO_FILLED = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none" aria-hidden="true"><path d="M12 2c5.523 0 10 4.477 10 10a10 10 0 0 1 -19.995 .324l-.005 -.324l.004 -.28c.148 -5.393 4.566 -9.72 9.996 -9.72zm0 9h-1l-.117 .007a1 1 0 0 0 0 1.986l.117 .007v3l.007 .117a1 1 0 0 0 .876 .876l.117 .007h1l.117 -.007a1 1 0 0 0 .876 -.876l.007 -.117l-.007 -.117a1 1 0 0 0 -.764 -.857l-.112 -.02l-.117 -.006v-3l-.007 -.117a1 1 0 0 0 -.876 -.876l-.117 -.007zm.01 -3l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z"/></svg>';
+  function draftKey(f) { return "jsds-draft:" + f.getAttribute("data-draft"); }
+  function draftFields(f) {
+    return $$("input, textarea, select", f).filter(function (el) {
+      return !!(el.name || el.id) && DRAFT_SKIP_TYPE.indexOf((el.type || "").toLowerCase()) < 0 && !el.readOnly && el.getAttribute("autocomplete") !== "one-time-code" && el.getAttribute("role") !== "combobox" && !el.closest(".copy-field, .code-inputs, .searchbar, [data-draft-skip]");
+    });
+  }
+  function draftRadioIdx(f, el) { return $$("input[type=radio]", f).filter(function (r) { return r.name === el.name; }).indexOf(el); }
+  function draftSave(f) {
+    var data = {};
+    draftFields(f).forEach(function (el) {
+      if (el.type === "radio") { if (el.checked && el.name) data["radio:" + el.name] = draftRadioIdx(f, el); return; }
+      data[el.name || el.id] = el.type === "checkbox" ? el.checked : el.value;
+    });
+    try { localStorage.setItem(draftKey(f), JSON.stringify({ v: 1, f: data })); } catch (e) {}
+  }
+  function draftNotice(f) {
+    var old = $(":scope > .draft-notice", f); if (old) return old;
+    var n = doc.createElement("div"); n.className = "notice info draft-notice"; n.setAttribute("role", "status");
+    n.innerHTML = '<span class="ico">' + INFO_FILLED + '</span><div><span></span><div class="actions"><button type="button" class="btn sm outline assistive" data-draft-discard></button></div></div>';
+    $("div > span", n).textContent = DRAFT_LABEL.restored; $("[data-draft-discard]", n).textContent = DRAFT_LABEL.discard;
+    f.insertBefore(n, f.firstChild); return n;
+  }
+  function draftPut(el, v, isDefault) {   // 값을 넣고 다른 동작(카운터 · 슬라이더 · 검증)이 따라오게 input · change 를 낸다
+    var t = el.type;
+    if (t === "checkbox" || t === "radio") { var c = isDefault ? el.defaultChecked : !!v; if (el.checked === c) return false; el.checked = c; }
+    else {
+      var dv = el.tagName === "SELECT" ? (($$("option", el).filter(function (o) { return o.defaultSelected; })[0] || el.options[0] || {}).value || "") : el.defaultValue;
+      var sv = isDefault ? dv : String(v); if (el.value === sv) return false; el.value = sv;
+    }
+    el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); return true;
+  }
+  function draftRestore(f) {
+    if (f._dsDraft) return; f._dsDraft = true;
+    var d = null; try { d = JSON.parse(localStorage.getItem(draftKey(f)) || "null"); } catch (e) {}
+    if (!d || !d.f) return;
+    var n = 0;
+    f._dsDraftQuiet = true;
+    draftFields(f).forEach(function (el) {
+      if (el.type === "radio") { var rk = "radio:" + el.name; if (el.name && rk in d.f && d.f[rk] === draftRadioIdx(f, el) && draftPut(el, true)) n++; return; }
+      var k = el.name || el.id; if (k in d.f && draftPut(el, d.f[k])) n++;
+    });
+    f._dsDraftQuiet = false;
+    if (n) draftNotice(f); else draftClear(f);
+  }
+  function draftClear(f) {
+    clearTimeout(f._dsDraftT);
+    try { localStorage.removeItem(draftKey(f)); } catch (e) {}
+    var n = $(":scope > .draft-notice", f); if (n) n.parentNode.removeChild(n);
+  }
+  function draftDiscard(f) {
+    var fields = draftFields(f);
+    f._dsDraftQuiet = true;
+    fields.forEach(function (el) { draftPut(el, null, true); });
+    f._dsDraftQuiet = false;
+    draftClear(f);
+    var first = fields.filter(function (el) { return el.offsetParent; })[0]; if (first) first.focus();
+  }
+  function draftQueue(e) {
+    var f = e.target && e.target.closest && e.target.closest("form[data-draft]"); if (!f || f._dsDraftQuiet) return;
+    clearTimeout(f._dsDraftT); f._dsDraftT = setTimeout(function () { draftSave(f); }, 500);
+  }
+  doc.addEventListener("input", draftQueue, true); doc.addEventListener("change", draftQueue, true);
+  doc.addEventListener("submit", function (e) {   // 캡처 — 검증이 막아도(stopPropagation) 같은 document 의 이 처리기는 돈다. 검증 결과(aria-invalid)를 보고 지운다. 막힌 제출은 기다리던 저장을 그대로 둔다(방금 친 값까지 남게)
+    var f = e.target; if (!f.matches || !f.matches("form[data-draft]")) return;
+    if (!$('[aria-invalid="true"]', f)) draftClear(f);
+  }, true);
+  doc.addEventListener("click", function (e) { var b = e.target.closest && e.target.closest(".draft-notice [data-draft-discard]"), f = b && closest(b, "form[data-draft]"); if (f) draftDiscard(f); });
   /* Steps 마법사 — 패널 안 폼의 Enter 제출은 '다음'(마지막이면 '완료'). 검증은 위 캡처가 이미 했고 막히면 여기까지 오지 않는다 */
   doc.addEventListener("submit", function (e) { var f = e.target, p = f && f.closest && f.closest(".stepper .step-panel"), sp = p && closest(p, ".stepper"); if (!sp) return; e.preventDefault();   /* 막힌 제출은 위 캡처가 멈춘다. defaultPrevented 는 보지 않는다 — 제출 기본 동작을 막는 제품 · 문서 미리보기 처리기가 먼저 돌아도 단계는 넘어가야 한다 */ if (spPanels(sp).indexOf(p) === spCur(sp)) spNext(sp, true); });
   doc.addEventListener("focusout", function (e) { var cb = closest(e.target, ".combobox"); if (cb && !cb.contains(e.relatedTarget)) cbLeave(cb); });
@@ -2270,5 +2433,5 @@
 
   /* 맨 끝에서 부른다 — 뒤에 선언한 문구 상수(NF_LABEL 등)가 init 때 아직 undefined 이지 않게 */
   if (doc.readyState === "loading") doc.addEventListener("DOMContentLoaded", function () { init(); }); else init();
-  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, avatarTone: avatarTone, notify: { add: nfApiAdd, sync: function (el) { var h = closest(el, ".notify") || el; nfFilter(h); return nfSync(h); } }, version: "0.9" };
+  window.DS = { init: init, toast: toast, popup: popup, panel: panel, table: { removeRow: removeRow }, upload: upload, validate: vRun, stepper: { go: function (el, i) { var sp = closest(el, ".stepper") || el; return spGo(sp, i, "api"); } }, loading: { start: loadStart, stop: loadStop, DELAY: LOAD.delay, MIN: LOAD.min }, notify: { add: nfApiAdd, sync: function (el) { var h = closest(el, ".notify") || el; nfFilter(h); return nfSync(h); } }, version: "0.9" };
 })();

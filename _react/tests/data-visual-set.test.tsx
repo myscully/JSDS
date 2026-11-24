@@ -34,16 +34,18 @@ describe("프리셋 — 영역 · 강조 · 게이지 · 스파크", () => {
     expect(presets.timeseries({ labels: ["a", "b", "c"], series: one }).data.datasets[0]!.fill).toBe("origin");
     expect(presets.timeseries({ labels: ["a", "b", "c"], series: one, area: false }).data.datasets[0]!.fill).toBe(false);
   });
-  it("bar 의 highlight 는 메타로, 없어진 gradient 는 경고하고 단색(메타에 남지 않음)", () => {
+  it("bar 의 highlight · gradient 는 메타로(2026-11-24 gradient 되살림), 누적 + gradient 는 경고하고 단색", () => {
     expect(presets.bar({ labels: ["a", "b", "c"], series: one, highlight: 1 })._ds).toMatchObject({ highlight: 1 });
+    expect(presets.bar({ labels: ["a"], series: one, gradient: true })._ds).toMatchObject({ gradient: true });
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const g = presets.bar({ labels: ["a"], series: one, gradient: true } as never);
-    expect(g._ds).not.toHaveProperty("gradient");
+    const g = presets.bar({ labels: ["a"], series: [...one, { label: "b", data: [2] }], stacked: true, gradient: true });
+    expect(g._ds).toMatchObject({ gradient: false });
     expect(warn).toHaveBeenCalled(); warn.mockRestore();
   });
-  it("bar 마크 — 두께 최대 24 · 값 끝 4 · 바닥 각짐 · 틈을 메우지 않음(dataviz 2026-11-20)", () => {
+  it("bar 마크 — 두께 최대 24 · 네 모서리 각짐(2026-11-24) · 틈을 메우지 않음", () => {
     const d = presets.bar({ labels: ["a", "b"], series: one }).data.datasets[0] as Record<string, unknown>;
     expect(d).toMatchObject({ maxBarThickness: 24, borderSkipped: "start", inflateAmount: 0 });
+    expect(d.borderRadius ?? 0).toBe(0);
   });
   it("gauge 는 반원 doughnut(회전 -90 · 180° · 구멍 78%), data = [값, 남은 값], max 를 넘으면 멈추고 경고", () => {
     const g = presets.gauge({ value: 842, max: 1284, label: "66%", caption: "패치 적용" });

@@ -190,13 +190,15 @@ describe("Popup", () => {
     fireEvent.mouseDown(dim());
     expect(onClose).toHaveBeenCalledTimes(1);
   });
-  it("입력을 시작하면 배경으로 닫히지 않는다 · Esc 는 닫힌다", () => {
+  it("입력을 시작하면 배경으로 닫히지 않는다 · Esc 는 버릴지 묻고 '버리기' 로 닫힌다(2026-11-23)", () => {
     const onClose = vi.fn();
     render(<P onClose={onClose}><input aria-label="값" /></P>);
     fireEvent.input(screen.getByLabelText("값"), { target: { value: "a" } });
     fireEvent.mouseDown(dim());
     expect(onClose).not.toHaveBeenCalled();
-    fireEvent.keyDown(document, { key: "Escape" });
+    act(() => { fireEvent.keyDown(document, { key: "Escape" }); });
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "버리기" }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
   it("목록에서 고른 것도 입력이다", () => {

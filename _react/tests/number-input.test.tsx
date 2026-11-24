@@ -185,7 +185,7 @@ describe("NumberInput", () => {
       const { help, save, onSubmit } = setup();
       const { input } = parts();
       save();
-      expect(help()).toBe("필수 항목입니다. 값을 입력하세요.");
+      expect(help()).toBe("값이 비어 있습니다. 값을 입력하세요.");
       expect(document.activeElement).toBe(input);
       fireEvent.input(input, { target: { value: "11" } });
       save();

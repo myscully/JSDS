@@ -12,7 +12,7 @@ describe("checkTime", () => {
   it("classifies empty · incomplete · invalid · min · max · valid with Date Picker's time messages", () => {
     expect(checkTime("").validity).toBe("empty");
     expect(checkTime("09:3")).toMatchObject({ validity: "incomplete", value: null, message: "시각이 덜 입력됐습니다. 14:30 처럼 끝까지 입력하세요." });
-    expect(checkTime("25:10")).toMatchObject({ validity: "invalid", value: null, message: "시각이 잘못됐습니다. 14:30 처럼 24시간제로 입력하세요." });
+    expect(checkTime("25:10")).toMatchObject({ validity: "invalid", value: null, message: "시각이 24시간제 형식이 아닙니다. 14:30 처럼 입력하세요." });
     expect(checkTime("05:00", { min: "06:00" })).toMatchObject({ validity: "min", value: "05:00", message: "시각이 범위를 벗어났습니다. 06:00 부터 입력할 수 있습니다." });
     expect(checkTime("13:00", { max: "12:00" })).toMatchObject({ validity: "max", value: "13:00" });
     expect(checkTime("14:30:05", { seconds: true })).toMatchObject({ validity: "valid", value: "14:30:05" });
@@ -105,7 +105,7 @@ describe("TimePicker", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByText("필수 항목입니다. 값을 입력하세요.")).toBeTruthy();
+    expect(screen.getByText("값이 비어 있습니다. 값을 입력하세요.")).toBeTruthy();
     fireEvent.change(input(), { target: { value: "18" } });
     fireEvent.blur(input());
     expect(screen.getByText("시각이 덜 입력됐습니다. 14:30 처럼 끝까지 입력하세요.")).toBeTruthy();
@@ -125,7 +125,7 @@ describe("TimePicker", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
     expect(onSubmit).not.toHaveBeenCalled();
-    expect(screen.getByText("시각이 잘못됐습니다. 14:30 처럼 24시간제로 입력하세요.")).toBeTruthy();
+    expect(screen.getByText("시각이 24시간제 형식이 아닙니다. 14:30 처럼 입력하세요.")).toBeTruthy();
   });
 
   it("seconds adds a third column and follows a controlled value", () => {

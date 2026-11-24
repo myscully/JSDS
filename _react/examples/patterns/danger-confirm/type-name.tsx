@@ -8,7 +8,7 @@ export default function Example() {
   return (
     <PopupSurface danger onClose={close}>
       <PopupTitle>'{NAME}'을 삭제할까요?</PopupTitle>
-      <PopupBody>연동을 지우면 이벤트 전송이 바로 멈추고, 이 연동을 쓰는 보고서 3개가 비게 됩니다. 복구할 수 없습니다.</PopupBody>
+      <PopupBody>연동을 삭제하면 이벤트 전송이 바로 멈추고, 이 연동을 쓰는 보고서 3개가 비게 됩니다. 복구할 수 없습니다.</PopupBody>
       <Form bare validate className="popup-form" id="dc3-form" onSubmit={(e) => { e.preventDefault(); /* 삭제 실행 */ }}>
         <TextField
           id="dc3-name"

@@ -17,7 +17,7 @@ export type ColorMode = "mono" | "categorical";
 export interface Series { label: string; data: number[]; tone?: Tone; /** 색 자리 고정(mono 1~4 · categorical 1~6) — 필터로 계열 수가 바뀌어도 남은 계열의 색이 그대로 */ slot?: number }
 export interface DonutSlice { label: string; value: number; tone?: Tone }
 export interface TimeseriesSpec { labels: string[]; series: Series[]; /** 누적 영역(심각도 누적 추이) */ stacked?: boolean; /** 계열이 하나일 때 선 아래 옅은 칠(기본 true) */ area?: boolean; color?: ColorMode }
-export interface BarSpec { labels: string[]; series: Series[]; stacked?: boolean; horizontal?: boolean; /** 이 막대(0부터)만 진하게 — 계열이 하나일 때 */ highlight?: number; /** @deprecated 2026-11-20 에 없어졌다 — 경고하고 단색으로 그린다. 한 막대를 가리키려면 highlight */ gradient?: boolean; color?: ColorMode }
+export interface BarSpec { labels: string[]; series: Series[]; stacked?: boolean; horizontal?: boolean; /** 이 막대(0부터)만 진하게 — 계열이 하나일 때 */ highlight?: number; /** 막대 면을 값 끝(불투명) → 바닥(55%) 그라데이션으로 — 강조용 옵션. 누적 막대에서는 경고하고 단색 */ gradient?: boolean; color?: ColorMode }
 export interface DonutSpec { series: DonutSlice[]; /** 구멍 가운데 글자(합계 등) */ center?: string | number; /** right 는 자리가 좁고 세로로 길면(폭 < 높이 × 1.5) 아래로 내려간다 */ legend?: "bottom" | "right"; color?: ColorMode }
 export interface MixedSpec { labels: string[]; bars: Series[]; lines: Series[]; color?: ColorMode }
 /** 반원 게이지 — 목표 대비 하나. 범례 · 툴팁 없음, 값은 가운데 글자와 aria-label 이 나른다 */
@@ -58,10 +58,12 @@ export interface DSChartApi {
   MONO_STEPS: Record<number, number[]>;
   /** tone 없는 계열에 줄 색 — tone 을 준 자리는 그 톤 */
   palette(theme: DsTheme, mode: ColorMode | undefined, tones: Array<Tone | undefined>): string[];
-  /** 영역 칠 — 선 색에서 바닥으로 옅어지는 그라데이션(scriptable) */
-  areaFill(color: string): string;
+  /** 영역 칠 — 계열 하나면 가장 높은 점(32%)에서 바닥(6%)으로 옅어지는 세로 그라데이션, 누적이면 10% 단색(scriptable) */
+  areaFill(color: string): string | ((ctx: unknown) => string | CanvasGradient);
+  /** 막대 칠 — 값 끝 불투명 → 바닥 55%(scriptable) */
+  barFill(color: string, horizontal?: boolean): string | ((ctx: unknown) => string | CanvasGradient);
   tickFormat(this: { max: number; min: number }, value: number | string): string;
-  BAR_MAX: number; BAR_END: number; BAR_GAP: number; AREA_ALPHA: number; COMPACT_FROM: number;
+  BAR_MAX: number; BAR_END: number; BAR_GAP: number; BAR_FADE: number; AREA_ALPHA: number; AREA_TOP: number; AREA_BOTTOM: number; COMPACT_FROM: number;
   CENTER_FONT: { weight: number; size: number };
   GAUGE_FONT: { weight: number; size: number; caption: number };
   TOKENS: { series: string[]; mono: string[]; sub: string; track: string; grid: string; axis: string; tipBg: string; tipFg: string; surface: string; text: string };

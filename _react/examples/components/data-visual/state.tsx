@@ -5,7 +5,7 @@ export default function Example() {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(15rem,1fr))", gap: 16, width: "100%", maxWidth: 960 }}>
       <ChartCard title="일별 탐지" sub="최근 14일" state="loading" />
-      <ChartCard title="일별 탐지" sub="최근 14일" state="empty" stateText="최근 14일 동안 탐지된 이벤트가 없습니다." />
+      <ChartCard title="일별 탐지" sub="최근 14일" state="empty" stateTitle="탐지 이벤트 없음" stateText="최근 14일 동안 탐지된 이벤트가 없습니다." />
       <ChartCard title="일별 탐지" sub="최근 14일" state="error" onRetry={() => {}} />
     </div>
   );

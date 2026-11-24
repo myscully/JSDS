@@ -55,7 +55,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   });
   await step("a missing clock names the time", async () => {
     const r = await typeInto(single(), "202609072500");
-    ok("a missing clock names the time", r.val === "invalid" && r.msg.startsWith("시각이 잘못됐습니다") && r.msg.includes("24시간제") && !r.v, JSON.stringify(r));
+    ok("a missing clock names the time", r.val === "invalid" && r.msg.startsWith("시각이 24시간제 형식이 아닙니다") && r.msg.includes("24시간제") && !r.v, JSON.stringify(r));
     const d = await typeInto(single(), "202602301200");
     ok("a missing date still names the date", d.val === "invalid" && d.msg.startsWith("날짜가 달력에 없습니다"), d.msg);
   });
@@ -70,11 +70,11 @@ module.exports = async ({ b, ok, SITE, path }) => {
   });
   await step("range names the wrong clock side", async () => {
     const r = await typeInto(range(), "202609070900202609082500");
-    ok("range names the wrong clock side", r.val === "invalid" && r.msg.startsWith("종료 시각이 잘못됐습니다"), r.msg);
+    ok("range names the wrong clock side", r.val === "invalid" && r.msg.startsWith("종료 시각이 24시간제 형식이 아닙니다"), r.msg);
     const s = await typeInto(range(), "202609072500202609080900");
-    ok("range names the wrong start clock", s.msg.startsWith("시작 시각이 잘못됐습니다"), s.msg);
+    ok("range names the wrong start clock", s.msg.startsWith("시작 시각이 24시간제 형식이 아닙니다"), s.msg);
     const b = await typeInto(range(), "202609072500202609082500");
-    ok("both clocks wrong says time", b.msg.startsWith("시각이 잘못됐습니다"), b.msg);
+    ok("both clocks wrong says time", b.msg.startsWith("시각이 24시간제 형식이 아닙니다"), b.msg);
   });
   await step("same-day order compares the clock", async () => {
     const r = await typeInto(range(), "202609071800202609070900");
@@ -237,7 +237,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
     await fresh(); const dp = single(); await openCal(dp);
     const i = dp.locator(".cal-time input"); await i.fill(""); await i.pressSequentially("2500"); await applyBtn(dp).click();
     const r = await state(dp);
-    ok("a bad panel time reports on the field", r.val === "invalid" && r.msg.startsWith("시각이 잘못됐습니다") && r.t === "2026. 09. 07 25:00" && !r.open, JSON.stringify(r));
+    ok("a bad panel time reports on the field", r.val === "invalid" && r.msg.startsWith("시각이 24시간제 형식이 아닙니다") && r.t === "2026. 09. 07 25:00" && !r.open, JSON.stringify(r));
     await openCal(dp); const v = await clockVals(dp);
     ok("reopening after a bad value falls back to the default", v.join() === "00:00", v.join());
     await page.keyboard.press("Escape");

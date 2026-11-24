@@ -1,25 +1,22 @@
 import { Children, forwardRef, isValidElement, cloneElement, type HTMLAttributes, type ReactElement, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { Button } from "../button/Button";
-import { avatarTone, type AvatarTone } from "./tone";
-export { avatarTone, type AvatarTone } from "./tone";
 
 export interface AvatarProps extends HTMLAttributes<HTMLSpanElement> {
   /** 이니셜 1~2자 */
   initials?: string;
   size?: "md" | "sm";
-  /** 색을 정하는 이름(사람의 결정 2026-11-16) — 없으면 aria-label, 그것도 없으면 이니셜. 같은 사람이 어디서나 같은 색이 되려면 이름을 준다 */
+  /** @deprecated 2026-11-24 — 색을 정하던 이름. 모든 아바타가 같은 중립 색이 되어 쓰지 않는다(그려지지 않음). 이름은 role="img" + aria-label 로 */
   name?: string;
-  /** 색을 직접 고름(1 파랑 · 2 시안 · 3 라임 · 4 바이올렛 · 5 퍼플 · 6 핑크) — 주면 이름으로 정하지 않는다 */
-  tone?: AvatarTone;
+  /** @deprecated 2026-11-24 — 이름으로 정하던 6색을 없앴다. 주면 개발 모드에서 한 번 경고하고 무시한다 */
+  tone?: 1 | 2 | 3 | 4 | 5 | 6;
 }
-/** 이니셜 아바타 32 (sm 24). 색은 이름으로 정하는 6색 */
-export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(function Avatar({ initials, size = "md", name, tone, className, children, ...rest }, ref) {
-  const label = (rest as { "aria-label"?: string })["aria-label"];
-  const text = typeof children === "string" ? children : initials;
-  const t = tone ?? avatarTone(name || label || text);
+let warnedTone = false;
+/** 이니셜 아바타 32 (sm 24). 면 surface/neutral/secondary · 글자 foreground/neutral/secondary — 모든 아바타가 같은 색(사람의 결정 2026-11-24) */
+export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(function Avatar({ initials, size = "md", name: _name, tone, className, children, ...rest }, ref) {
+  if (process.env.NODE_ENV !== "production" && tone != null && !warnedTone) { warnedTone = true; console.warn("[ds-react] Avatar tone 은 없앴습니다(2026-11-24) — 모든 아바타가 같은 중립 색입니다. prop 을 지우세요."); }
   return (
-    <span ref={ref} className={cx("avatar", size === "sm" && "sm", className)} data-tone={t} data-name={name} {...rest}>
+    <span ref={ref} className={cx("avatar", size === "sm" && "sm", className)} {...rest}>
       {children ?? initials}
     </span>
   );

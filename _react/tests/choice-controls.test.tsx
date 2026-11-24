@@ -139,7 +139,7 @@ describe("필수 그룹 — <Form validate>", () => {
     expect(help.textContent).toBe("하나 이상 선택합니다.");
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
     expect(field().classList.contains("error")).toBe(true);
-    expect(help.textContent).toBe("필수 항목입니다. 항목을 선택하세요.");
+    expect(help.textContent).toBe("고른 항목이 없습니다. 항목을 선택하세요.");
     expect(field().querySelector("fieldset")!.getAttribute("aria-invalid")).toBe("true");
     expect(document.activeElement).toBe(screen.getAllByRole("checkbox")[0]);
     fireEvent.click(screen.getAllByRole("checkbox")[1]);

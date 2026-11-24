@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, ButtonGroup, Checkbox, Combobox, DatePicker, Field, FileUpload, Form, FormActions, FormLegend, FormRow, FormSection, NumberInput, Radio, RadioGroup, Select, TextArea, TextField, TimePicker, type UploadItem } from "@jiran/ds-react";
+import { useFormDraft, Button, ButtonGroup, Checkbox, Combobox, DatePicker, Field, FileUpload, Form, FormActions, FormLegend, FormRow, FormSection, NumberInput, Radio, RadioGroup, Select, TextArea, TextField, TimePicker, type UploadItem } from "@jiran/ds-react";
 
 const GROUPS = [{ value: "all", label: "전체" }, { value: "sales", label: "영업팀" }, { value: "dev", label: "개발팀" }, { value: "sec", label: "보안팀" }];
 const DEPTS = ["영업팀", "개발팀", "인프라팀", "보안팀", "기획팀", "재무팀"].map((label) => ({ value: label, label }));
@@ -8,8 +8,10 @@ const MB = 1024 * 1024;
 /* 값의 종류마다 맞는 컨트롤 — 날짜 · 시각 · 여러 부서 · 첨부 파일 */
 export default function Example() {
   const [files, setFiles] = useState<UploadItem[]>([]);
+  const draft = useFormDraft("policy-new");
   return (
-    <Form onSubmit={(e) => e.preventDefault()}>
+    <Form ref={draft.ref} onSubmit={(e) => e.preventDefault()}>
+      {draft.notice}
       <FormLegend />
       <FormSection>기본 정보</FormSection>
       <TextField id="pname" label="정책 이름" required placeholder="예: 외부 USB 차단" help="2~40자" />

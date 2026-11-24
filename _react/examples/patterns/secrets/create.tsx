@@ -7,7 +7,7 @@ export default function Example() {
       <PopupTitle>API 키 만들기</PopupTitle>
       <Form id="sec-create-form" className="popup-body" validate onSubmit={(e) => e.preventDefault()}>
         <FormLegend />
-        <TextField id="sec-name" label="키 이름" required placeholder="연동할 서비스 이름" help="목록에서 알아볼 이름입니다." />
+        <TextField id="sec-name" label="키 이름" required placeholder="예: SIEM 연동" help="목록에서 알아볼 이름입니다." />
         <DatePicker label="만료일" defaultValue={new Date(2027, 1, 15)} help="최대 1년까지 정할 수 있습니다." />
         <RadioGroup legend="범위" name="sec-scope" defaultValue="read">
           <Radio value="read">읽기 전용</Radio>

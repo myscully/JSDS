@@ -21,8 +21,8 @@ module.exports = async function revise({ page, ok, go }) {
         pill: f(pill.querySelector(".tab")), pillTab: Math.round(pill.querySelector(".tab").getBoundingClientRect().height * 10) / 10 };
       sm.remove(); return r;
     });
-    ok("tab text is Body 1/Normal 16/24 at height 44, sm is Label 1/Normal 14/20 at 38, pill tabs are 16/24 at 34 (2026-11-13)",
-      tab.base === "16/24/0.0057" && tab.baseH === 44 && tab.sm === "14/20/0.0145" && tab.smH === 38 && tab.pill === "16/24/0.0057" && tab.pillTab === 34, JSON.stringify(tab));
+    ok("tab text is Body 2/Normal 15/22 at height 44, sm is Label 2 13/18 at 38, pill tabs are 15/22 at 34 (2026-11-24 — 11-13 의 16 · 14 를 바꿈, 높이는 그대로)",
+      tab.base === "15/22/0.0096" && tab.baseH === 44 && tab.sm === "13/18/0.0194" && tab.smH === 38 && tab.pill === "15/22/0.0096" && tab.pillTab === 34, JSON.stringify(tab));
   });
   await part("2 · components/top-navigation.html", async () => {
 
@@ -204,23 +204,26 @@ module.exports = async function revise({ page, ok, go }) {
         r.md.every((x) => x === -8) && r.sm.every((x) => x === -6) && r.ring.includes(elev) && r.ring.includes("2px") && r.img && r.base === elev && r.role === "group" && r.name === "담당자" &&
         r.count === 5 && r.text.last && r.text.gap === 8 && r.text.fs === "14px" && r.text.tag === "SPAN" && r.btn.last && r.btn.gap === 4 && r.btn.tag === "BUTTON" && /외 3명/.test(r.btnName), JSON.stringify({ r, elev }));
     }
-    /* Avatar 색(2026-11-16) — 이름으로 정한 tone 의 면 · 글자 토큰, 겹친 묶음의 셋이 서로 다른 면, 이니셜 4.5 이상, ds.js 가 새 아바타에도 이름으로 tone 을 단다 · 라이트 · 다크 */
+    /* Avatar 색(2026-11-24 — 11-16 의 이름으로 정하는 6색을 없앰) — 페이지의 모든 아바타가 면 surface/neutral/secondary(묶음 안은 링 면 위에 합성한 같은 색)
+       · 글자 foreground/neutral/secondary, data-tone 없음, 이니셜 4.5 이상, ds.js 가 새 아바타에 data-tone 을 달지 않음 · 라이트 · 다크 */
     for (const t of [null, "dark"]) {
       await theme(t); await wait(300);
       const r = await page.evaluate(() => {
-        const rgb = (s) => s.match(/[\d.]+/g).slice(0, 3).map(Number), lum = (c) => { const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+        const rgb = (s) => { const v = s.match(/[\d.]+/g).map(Number); return /^color\(srgb/.test(s) ? [v[0] * 255, v[1] * 255, v[2] * 255, v[3]] : v; }, lum = (c) => { const [r, g, b] = c.slice(0, 3).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+        const over = (fg, bg) => { const f = rgb(fg), b = rgb(bg), a = f[3] == null ? 1 : f[3]; return `rgb(${[0, 1, 2].map((k) => Math.round(f[k] * a + b[k] * (1 - a))).join(", ")})`; };
         const ratio = (a, b) => { const [x, y] = [lum(rgb(a)), lum(rgb(b))].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
         const tk = (v, p) => { const e = document.createElement("i"); e.style[p] = `var(${v})`; document.body.append(e); const c = getComputedStyle(e)[p]; e.remove(); return c; };
-        const avs = [...document.querySelectorAll("#ex-avatar-group .avatar-group")[0].querySelectorAll(".avatar")];
-        const rows = avs.map((a) => { const n = a.dataset.tone, c = getComputedStyle(a), face = (c.backgroundImage.match(/rgba?\([^)]*\)/) || [c.backgroundImage])[0];
-          return { n, tone: DS.avatarTone(a.getAttribute("aria-label")), face, faceTok: tk(`--avatar-${n}-surface`, "color"), text: c.color, textTok: tk(`--avatar-${n}-text`, "color"), cr: Math.round(ratio(c.color, face) * 100) / 100 }; });
-        const solo = document.querySelector("#ex-avatar-name .avatar"), sc = getComputedStyle(solo);
+        const face = tk("--surface-neutral-secondary", "color"), text = tk("--foreground-neutral-secondary", "color");
+        const rows = [...document.querySelectorAll(".example-preview .avatar")].map((a) => { const c = getComputedStyle(a), inG = !!a.closest(".avatar-group");
+          const f = inG ? (c.backgroundImage.match(/color\(srgb[^)]*\)|rgba?\([^)]*\)/) || [""])[0] : c.backgroundColor, ring = getComputedStyle(a.closest(".avatar-group") || a.parentElement).getPropertyValue("--avatar-ring");
+          const under = inG ? c.backgroundColor : getComputedStyle(a.closest(".example-preview")).backgroundColor;
+          return { f, c: c.color, tone: a.hasAttribute("data-tone"), cr: Math.round(ratio(c.color, over(over(f, under), "rgb(255, 255, 255)")) * 100) / 100 }; });
         const d = document.createElement("div"); d.innerHTML = '<span class="avatar" role="img" aria-label="박지호">박</span>'; document.body.append(d); DS.init(d);
-        const fresh = d.firstChild.dataset.tone; d.remove();
-        return { rows, distinct: new Set(rows.map((x) => x.face)).size, solo: { n: solo.dataset.tone, bg: sc.backgroundColor, tok: tk(`--avatar-${solo.dataset.tone}-surface`, "color") }, fresh, freshWant: DS.avatarTone("박지호") };
+        const fresh = d.firstChild.hasAttribute("data-tone"); d.remove();
+        return { n: rows.length, bad: rows.filter((x) => x.f !== face || x.c !== text || x.tone || x.cr < 4.5), face, text, fresh, api: typeof DS.avatarTone };
       });
-      ok(`avatar ${t || "light"}: tone from the name, face · initials = --avatar-N tokens, three people in a group get three faces, initials ≥ 4.5, DS.init tones a new avatar (2026-11-16)`,
-        r.rows.every((x) => +x.n === x.tone && x.face === x.faceTok && x.text === x.textTok && x.cr >= 4.5) && r.distinct === 3 && r.solo.bg === r.solo.tok && r.fresh === String(r.freshWant), JSON.stringify(r));
+      ok(`avatar ${t || "light"}: every avatar face = surface/neutral/secondary · initials = foreground/neutral/secondary, no data-tone, initials ≥ 4.5, DS.init adds no tone (2026-11-24)`,
+        r.n >= 8 && !r.bad.length && !r.fresh && r.api === "undefined", JSON.stringify(r));
     }
     await theme(null);
   });

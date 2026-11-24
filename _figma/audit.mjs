@@ -976,8 +976,9 @@ function chartExpect() {
           Delta=None = class 없는 .kpi .delta(화살표 없음 · 그 color) — 예제에 class 없는 증감이 있으면 KPI 세트 Delta 속성에 None 이 있어야 한다 */
 function staticChartExpect() {
   try {
-    /* 2026-11-23 — 네 귀를 따로 적은 값(값 쪽 끝만 둥근 막대 "0 .25rem .25rem 0")은 가장 큰 귀로 읽는다(probe maxR 과 같은 식). 종전엔 첫 귀만 읽어 0 이 됐다 */
-    const rad = (sel) => { const v = cssRule(sel)["border-radius"]; if (v == null) throw new Error(sel + " 에 border-radius 가 없습니다"); return /%$/.test(v) ? v : Math.max(...String(v).trim().split(/\s+/).map(px)); };
+    /* 2026-11-24 — border-radius 선언이 없으면 모서리 0 으로 읽는다(정적 막대를 각지게 하며 선언을 지움).
+       2026-11-23 — 네 귀를 따로 적은 값(값 쪽 끝만 둥근 막대 "0 .25rem .25rem 0")은 가장 큰 귀로 읽는다(probe maxR 과 같은 식). 종전엔 첫 귀만 읽어 0 이 됐다 */
+    const rad = (sel) => { const v = cssRule(sel)["border-radius"]; if (v == null) return 0; return /%$/.test(v) ? v : Math.max(...String(v).trim().split(/\s+/).map(px)); };
     const leg = cssRule(".chart-legend i"), dn = cssRule(".donut"), di = cssRule(".donut i");
     const legend = { d: px(leg.width), h: px(leg.height), round: leg["border-radius"] === "50%" };
     if (legend.d !== legend.h) throw new Error(`.chart-legend i ${leg.width} × ${leg.height} 가 정사각이 아닙니다`);
@@ -2440,7 +2441,7 @@ function diffChart(c, w, variables, bad, notes) {
       per.forEach((n, s) => { for (let j = 0; j < n && k < bars.length; j++, k++) { const b = bars[k]; if (b.fill !== T(barColors[s])) bad.push(`${at} 막대 ${b.name} 색 ${b.fill} ≠ ${barColors[s]} — 계열 ${s + 1}`); { /* 2026-11-20 — 값 쪽 끝만 BAR_END, 바닥은 각짐(borderSkipped "start"). 누적이면 그 칸의 마지막 조각만 둥글다. r = [TL, TR, BR, BL] */
             const end = wv.horizontal ? [0, w.barRadius, w.barRadius, 0] : [w.barRadius, w.barRadius, 0, 0], flat = [0, 0, 0, 0];
             const want = wv.stacked && s < per.length - 1 ? flat : end;
-            if (b.r.some((r, q) => r !== want[q])) bad.push(`${at} 막대 ${b.name} 모서리 ${JSON.stringify(b.r)} ≠ ${JSON.stringify(want)} — 값 쪽 끝만 ${w.barRadius}, 바닥 각짐(ds-chart BAR_END · borderSkipped "start")`); } if (b.st !== undefined && b.st !== w.barStroke) bad.push(`${at} 막대 ${b.name} 보이는 테두리 ${b.st}개 ≠ ${w.barStroke} — figma.chart.barStroke(막대는 stroke 없음)`); if (b.w > w.barMax + 0.01) bad.push(`${at} 막대 ${b.name} 두께 ${b.w} > ${w.barMax} — figma.chart.barMax`); } });
+            if (b.r.some((r, q) => r !== want[q])) bad.push(`${at} 막대 ${b.name} 모서리 ${JSON.stringify(b.r)} ≠ ${JSON.stringify(want)} — 모서리 ${w.barRadius}(ds-chart BAR_END · borderSkipped "start")`); } if (b.st !== undefined && b.st !== w.barStroke) bad.push(`${at} 막대 ${b.name} 보이는 테두리 ${b.st}개 ≠ ${w.barStroke} — figma.chart.barStroke(막대는 stroke 없음)`); if (b.w > w.barMax + 0.01) bad.push(`${at} 막대 ${b.name} 두께 ${b.w} > ${w.barMax} — figma.chart.barMax`); } });
       if (bars.length && bars[0].st === undefined) notes.push(`${at} 막대 테두리 조사가 없습니다 — k35 전 probe.js 로 만든 덤프입니다`);
       /* 누적 막대 — 같은 라벨의 이웃 세그먼트 사이 틈 = stackGap(투명 — 그 자리에 칠한 노드가 없어야 한다). Figma 의 Bar 변형이 비누적(weeks)이면 대상이 없다 */
       if (wv.stacked && bars.length && bars[0].x !== undefined) {

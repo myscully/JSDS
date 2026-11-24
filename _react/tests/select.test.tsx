@@ -86,7 +86,7 @@ describe("Select", () => {
     await tick();
     fireEvent.click(trig(container));
     await tick();
-    expect(field.querySelector(".help")!.textContent).toBe("필수 항목입니다. 항목을 선택하세요.");
+    expect(field.querySelector(".help")!.textContent).toBe("고른 항목이 없습니다. 항목을 선택하세요.");
     expect(trig(container).getAttribute("aria-invalid")).toBe("true");
     fireEvent.submit(container.querySelector("form")!);
     await tick();

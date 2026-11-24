@@ -20,7 +20,7 @@ export { TagGroup, type TagGroupProps } from "./components/tag/Tag";
 export { Indicator, Count, WithCount, type IndicatorProps, type CountProps, type WithCountProps } from "./components/indicator/Indicator";
 export { Steps, Stepper, StepButton, type StepsProps, type StepsLayout, type StepperProps, type StepperStep, type StepButtonProps, type StepTrigger } from "./components/steps/Steps";
 export { Divider, type DividerProps } from "./components/divider/Divider";
-export { Avatar, AvatarGroup, avatarTone, type AvatarProps, type AvatarGroupProps, type AvatarTone } from "./components/avatar/Avatar";
+export { Avatar, AvatarGroup, type AvatarProps, type AvatarGroupProps } from "./components/avatar/Avatar";
 
 // B. form controls
 export { Field, TextField, TextArea, type FieldProps, type FieldOwnProps, type TextFieldProps, type TextAreaProps } from "./components/text-field/TextField";
@@ -51,7 +51,7 @@ export { TopBar, TopBarLogo, TopBarNav, TopBarNavItem, TopBarRight, TopBarStart,
 // D. overlays & behavior
 export { Combobox, type ComboboxProps } from "./components/combobox/Combobox";
 export { SidePanel, SidePanelSurface, type SidePanelProps, type SidePanelSurfaceProps } from "./components/side-panel/SidePanel";
-export { Dropdown, DropdownTrigger, Menu, MenuItem, MenuSep, MenuLabel, MenuState, Select, type DropdownProps, type DropdownTriggerProps, type MenuProps, type MenuItemProps, type SelectProps, type SelectOption } from "./components/dropdown/Dropdown";
+export { Dropdown, DropdownTrigger, Menu, MenuItem, MenuSep, MenuLabel, MenuState, MenuActionArea, MenuCheckboxItem, MenuGroup, MenuRadioGroup, MenuRadioItem, Select, type DropdownProps, type DropdownTriggerProps, type MenuProps, type MenuItemProps, type MenuActionAreaProps, type MenuCheckboxItemProps, type MenuGroupProps, type MenuRadioGroupProps, type MenuRadioItemProps, type SelectProps, type SelectMultipleProps, type SelectOption } from "./components/dropdown/Dropdown";
 export { Tooltip, type TooltipProps } from "./components/tooltip/Tooltip";
 export { Popup, PopupSurface, PopupTitle, PopupBody, PopupActions, PopupForm, type PopupProps, type PopupSurfaceProps } from "./components/popup/Popup";
 export { Notice, Toast, ToastStack, Banner, ToastProvider, useToast, type NoticeProps, type ToastProps, type ToastStackProps, type BannerProps, type ToastProviderProps, type ToastOptions } from "./components/notification/Notification";
@@ -67,6 +67,7 @@ export { List, ListItem, type ListProps, type ListItemProps } from "./components
 export { Tile, TileGrid, type TileProps } from "./components/item-tile/Tile";
 export { Table, TableHead, TableBody, TableFoot, TableRow, TableHeader, TableCell, type TableProps, type TableDensity, type TableRowStyle, type TableRowProps, type TableHeaderProps, type TableCellProps } from "./components/table/Table";
 export { DataTable, ActionBar, type DataTableProps, type DataTableColumn, type SortState, type ActionBarProps } from "./components/data-table/DataTable";
+export { useFormDraft, type FormDraftOptions, type DraftLabels } from "./utils/draft";
 export { Spinner, Skeleton, SkeletonRow, Progress, useLoadingDelay, LOADING_DELAY, LOADING_MIN, type SpinnerProps, type SkeletonProps, type SkeletonRowProps, type ProgressProps } from "./components/loading/Loading";
 
 // F. data visual

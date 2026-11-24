@@ -117,4 +117,23 @@ module.exports = async function tableOpt({ page, ok, go }) {
       ok("a selection table drawn with nothing picked starts with its bar buttons off", fresh === "true", String(fresh));
     }
   });
+
+  /* ── 칸 글자는 밀도 · 행과 무관하게 14/22(2026-11-23) — 로그 행의 12px 를 compact 만 덮어 기본 · relaxed 로 바꾸면 작아졌다 ── */
+  await part("칸 글자 14/22 — 세 밀도 · 로그 행 · 템플릿", async () => {
+    const fs = require("fs"), path = require("path"), ROOT = path.resolve(__dirname, "..");
+    const probe = () => { const out = { t: 0, c: 0, log: 0, bad: [] };
+      for (const t of document.querySelectorAll("table.tbl")) { out.t++; const orig = t.className;
+        for (const d of ["", "compact", "relaxed"]) { t.classList.remove("compact", "relaxed"); if (d) t.classList.add(d);
+          for (const td of t.querySelectorAll("tbody td:not(.empty)")) { if (td.closest(".row-detail")) continue; const cs = getComputedStyle(td); out.c++; if (td.closest("tr.log-row")) out.log++;
+            if (cs.fontSize !== "14px" || cs.lineHeight !== "22px") out.bad.push(((t.closest("[id]") || {}).id || "") + " " + (d || "default") + " " + cs.fontSize + "/" + cs.lineHeight + " " + td.textContent.trim().slice(0, 16)); } }
+        t.className = orig; } return out; };
+    const pages = []; for (const d of ["components", "patterns"]) for (const f of fs.readdirSync(path.join(ROOT, d))) if (f.endsWith(".html") && f !== "overview.html") pages.push(d + "/" + f);
+    let t = 0, c = 0, log = 0; const bad = [];
+    for (const f of pages) { await go(f); const r = await page.evaluate(probe); t += r.t; c += r.c; log += r.log; for (const x of r.bad) bad.push(f + ": " + x); }
+    const ctx = await page.context().browser().newContext({ viewport: { width: 1440, height: 900 } }); const p = await ctx.newPage(); let tt = 0;
+    try { for (const f of fs.readdirSync(path.join(ROOT, "templates", "screen")).filter((x) => x.endsWith(".html"))) { await p.goto("file://" + path.join(ROOT, "templates", "screen", f)); await p.waitForTimeout(120);
+      const r = await p.evaluate(probe); tt += r.t; c += r.c; for (const x of r.bad) bad.push("templates/" + f + ": " + x); } } finally { await ctx.close(); }
+    ok("every table cell is 14/22 in default, compact and relaxed — log rows and template screens included", t > 50 && tt > 2 && log > 20 && bad.length === 0,
+      JSON.stringify({ tables: t, templateTables: tt, cells: c, logCells: log, bad: bad.slice(0, 8) }));
+  });
 };

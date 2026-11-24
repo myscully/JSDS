@@ -12,7 +12,7 @@ export default function Example() {
       <Notice tone="warning" title="라이선스가 3일 후 만료됩니다" actions={<Button size="sm">갱신 요청</Button>} style={{ maxWidth: 600 }}>
         만료 시 신규 이벤트 수집이 중단됩니다.
       </Notice>
-      <Notice tone="danger" title="에이전트 37대 연결 끊김" style={{ maxWidth: 600 }}>
+      <Notice tone="danger" title="에이전트 37대 연결 끊김" actions={<Button variant="outline" color="assistive" size="sm">연결 끊긴 에이전트 보기</Button>} style={{ maxWidth: 600 }}>
         10분 이상 체크인이 없습니다. 네트워크 상태를 확인하세요.
       </Notice>
     </>

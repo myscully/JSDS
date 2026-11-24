@@ -1,5 +1,5 @@
 import { Chart } from "chart.js/auto";
-import { Button, Card, CardHead, CardTitle, ChartCard, Icon, Indicator, Kpi, KpiGrid, Link, PageHead, ProgressList, Row2, Row3, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
+import { Button, ButtonGroup, Card, CardHead, CardTitle, ChartCard, Icon, Indicator, Kpi, KpiGrid, Link, PageHead, ProgressList, Row2, Row3, SelectButton, Stack, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@jiran/ds-react";
 
 import { ChartCanvas, presets } from "@jiran/ds-react/chart";
 
@@ -40,7 +40,7 @@ export default function Example() {
       <PageHead as="h2"
         title="대시보드"
         sub="최근 갱신 09:41 · 자동 갱신 1분"
-        actions={<Button variant="outline" color="assistive" iconOnly aria-label="새로 고침"><Icon name="refresh" /></Button>}
+        actions={<ButtonGroup><SelectButton label="기간" defaultValue="24h" options={[{ value: "24h", label: "24시간" }, { value: "7d", label: "7일" }, { value: "30d", label: "30일" }]} /><Button variant="outline" color="assistive" iconOnly tooltip="left" aria-label="새로 고침"><Icon name="refresh" /></Button></ButtonGroup>}
       />
       <KpiGrid>
         <Kpi tone="critical" label="Critical 이벤트" value="1,284" delta="12%" deltaDir="up" deltaTone="bad" note="전일 대비" />

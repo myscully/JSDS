@@ -10,8 +10,8 @@ export default function Example() {
       <CardDesc>1,000석 중 842석 사용 중. 2026. 12. 31 만료.</CardDesc>
       <CardFoot>
         <ButtonGroup>
-          <Button variant="outline" color="assistive" size="sm">상세</Button>
-          <Button size="sm">갱신</Button>
+          <Button variant="outline" color="assistive" size="sm">라이선스 상세</Button>
+          <Button size="sm">라이선스 갱신</Button>
         </ButtonGroup>
       </CardFoot>
     </Card>

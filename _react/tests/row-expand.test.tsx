@@ -108,7 +108,7 @@ describe("DataTable 행 펼침", () => {
     expect(click).not.toHaveBeenCalled(); expect(btn("가").getAttribute("aria-expanded")).toBe("true");
   });
   it("불러오는 중 · 오류 · 빈 행의 칸 수에 셰브론 칸이 든다", () => {
-    const { rerender } = render(T({ status: "loading", loadingRows: 1 }));
+    const { rerender } = render(T({ rows: [], status: "loading", loadingRows: 1 }));
     expect(document.querySelectorAll("tbody tr td").length).toBe(3);
     rerender(T({ status: "error" }));
     expect((document.querySelector("tbody td") as HTMLTableCellElement).colSpan).toBe(3);

@@ -232,17 +232,9 @@
   /* 런타임 · 지역 CSS 변수 — 루트에 선언하지 않고 ds.js · React · 마크업 · 컴포넌트 규칙이 그 자리에서 넣는다. verify 와 패키지 sync-css 가 이 목록 하나를 쓴다.
      --checker-bg · --cols* · --p: 문서 셸 · 격자 · 진행 막대 비율. --dp-top · --dp-left · --tp-top · --tp-left: Date Picker 달력 · Time Picker 열 목록 자리(열 때 잼).
      --a: 정적 도넛 경계 구분선 각도. --d1~--d5: 정적 도넛 조각의 누적 비율. --float-*: 스크롤 영역 안에서 화면 기준으로 띄운 메뉴 · Tooltip 의 자리 · 폭.
-     --ds-delay: Loading 지연 시간. --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면. --avatar-ring: Avatar Group 링(놓인 면). --avatar-face: 그 아바타의 tone 면(링 합성이 따라감). --nf-dx: 알림 패널을 화면 안으로 미는 거리 */
-  const LOCAL_VARS = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--avatar-face", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5", "--hm-sy", "--hm-k", "--hm-kr", "--hm-rot", "--hm-fx", "--hm-fy", "--hm-d", "--hm-i", "--tpl-s"];   // --hm-* — 메인 히어로 도형의 자리 · 움직임, --tpl-s — Templates 미리보기 축소 비율(2026-11-18)
+     --ds-delay: Loading 지연 시간. --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면. --avatar-ring: Avatar Group 링(놓인 면). --nf-dx: 알림 패널을 화면 안으로 미는 거리 */
+  const LOCAL_VARS = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5", "--hm-sy", "--hm-k", "--hm-kr", "--hm-rot", "--hm-fx", "--hm-fy", "--hm-d", "--hm-i", "--tpl-s"];   // --hm-* — 메인 히어로 도형의 자리 · 움직임, --tpl-s — Templates 미리보기 축소 비율(2026-11-18)
 
-  /* Avatar 색 — 이름으로 정하는 tone 1~6 을 예제에 미리 적는다(사람의 결정 2026-11-16). 정적 HTML · 복사한 HTML 이 ds.js 가 켠 뒤와 같은 모양이게(11-10 결정).
-     식은 ds.src.js avatarTone · React avatarTone 과 같다(verify · React 테스트가 대조). 빌드(render.js)와 React 구조 비교 테스트가 함께 쓴다 */
-  const avatarTone = (name) => { let h = 0; for (const ch of String(name || "").trim()) h = (Math.imul(h, 31) + ch.codePointAt(0)) >>> 0; return h % 6 + 1; };
-  const withAvatarTone = (html) => html.replace(/<span class="avatar(?: sm)?"([^>]*)>([^<]*)<\/span>/g, (m, attrs, txt) => {
-    if (/\sdata-tone=/.test(attrs)) return m;
-    const name = (/data-name="([^"]*)"/.exec(attrs) || /aria-label="([^"]*)"/.exec(attrs) || [])[1] || txt;
-    return m.replace(/^<span class="avatar(?: sm)?"/, (o) => `${o} data-tone="${avatarTone(name)}"`);
-  });
   /* UI Dictionary(2026-11-19) — 한 페이지에 예제 백여 개를 함께 그리므로 미리보기마다 id 와 그 참조(for · aria-* · href="#…" · data-*), 라디오 묶음 name 에 접두어를 붙인다.
      id 를 가리키는 값만 바꾸고 aria-label 같은 글자는 건드리지 않는다. 빌드(render.js 카드)와 상세 패널의 큰 미리보기(app.js — build.js 가 이 함수를 옮겨 적음)가 같은 함수를 쓴다 */
   function udPrefix(html, p) {
@@ -250,8 +242,8 @@
     return html.replace(/(\s)(id|for|form|list|name|href|aria-(?:labelledby|describedby|controls|owns|activedescendant|details|errormessage|flowto)|data-[a-z-]+)="([^"]*)"/g, function (m, sp, a, v) {
       if (a === "name") return sp + a + '="' + p + v + '"';
       return sp + a + '="' + v.split(" ").map(function (t) { return ids[t] ? p + t : (t.charAt(0) === "#" && ids[t.slice(1)]) ? "#" + p + t.slice(1) : t; }).join(" ") + '"';
-    }).replace(/\sdata-hotkey(?:="[^"]*")?/g, "").replace(/\sautofocus(?:="[^"]*")?/g, "");
+    }).replace(/\sdata-hotkey(?:="[^"]*")?/g, "").replace(/\sautofocus(?:="[^"]*")?/g, "").replace(/\sdata-draft="[^"]*"/g, "");
   }
-  const api = { LOCAL_VARS, udPrefix, avatarTone, withAvatarTone, esc, dedent, toPx, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
+  const api = { LOCAL_VARS, udPrefix, esc, dedent, toPx, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;
 })(typeof window !== "undefined" ? window : globalThis);

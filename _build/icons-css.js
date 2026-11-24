@@ -22,6 +22,7 @@ const RULES = [
   [".switch.sm input::after", "width:1rem;height:1rem"],
   [".switch.sm input:checked::after", "transform:translateX(1rem)"],
   [".checkbox input:indeterminate::after,.checkbox input.mixed::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("minus", "outline", { strokeWidth: 3.5 })}`],
+  [".menu-item:is([aria-checked=\"true\"],[aria-selected=\"true\"]) > .menu-mark.check::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })}`, ".menu-mark.radio"],   // 메뉴 체크 항목 · 여러 개 옵션 — Checkbox 와 같은 체크(2026-11-23)
   [".chip[aria-pressed]::before", `content:"";width:0.875rem;height:0.875rem;flex:none;background:var(--foreground-disable-primary);${mask("check", "outline", { strokeWidth: 2.5 })}`],   // 체크 선 2.5 — 기본 2 에서 한 단계(사람의 요청 2026-11-16)
   [".dropdown .trigger::after", `content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast)`],
   [".dropdown.open .trigger::after", "transform:rotate(180deg)"],
