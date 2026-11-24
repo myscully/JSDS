@@ -40,7 +40,7 @@ module.exports = async function promote({ page, ok, go }) {
     /* ── Avatar ── */
     await go("components/avatar.html");
     const av = await page.evaluate(() => [...document.querySelectorAll("#ex-avatar-sizes .avatar")].map((a) => { const r = a.getBoundingClientRect(), c = getComputedStyle(a); return [r.width, r.height, c.fontSize, c.borderTopLeftRadius]; }));
-    ok("avatar is 32 with 12 text and sm 24 with 11 text, both round", JSON.stringify(av) === JSON.stringify([[32, 32, "12px", "50%"], [24, 24, "11px", "50%"]]), JSON.stringify(av));
+    ok("avatar lg is 64 with 20 text, md 32 with 12 text and sm 24 with 11 text, all round (lg 2026-11-24)", JSON.stringify(av) === JSON.stringify([[64, 64, "20px", "50%"], [32, 32, "12px", "50%"], [24, 24, "11px", "50%"]]), JSON.stringify(av));
   });
   await part("4 · Empty State", async () => {
 

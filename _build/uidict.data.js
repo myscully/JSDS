@@ -120,6 +120,7 @@ const UIDICT = {
     { src: "templates/wizard", cat: "화면 전체", name: "위저드 화면", en: "Wizard Template", aka: ["마법사","단계별 화면"], kw: "단계 다음 이전 배포" },
     { src: "templates/tabs-list", cat: "화면 전체", name: "탭이 있는 리스트", en: "Tabs List Template", aka: ["탭 목록 화면"], kw: "탭 표 건수" },
     { src: "templates/org", cat: "화면 전체", name: "조직도", en: "Organization Template", aka: ["조직 관리","부서 트리 화면"], kw: "부서 트리 구성원 표" },
+    { src: "templates/settings", cat: "화면 전체", name: "설정", en: "Settings Template", aka: ["내 정보 화면","프로필 설정","계정 설정"], kw: "프로필 개인 정보 편집 계정 삭제" },
   ],
 };
 if (typeof module !== "undefined" && module.exports) module.exports = UIDICT;

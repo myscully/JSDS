@@ -1503,7 +1503,7 @@ const COMPONENTS = {
 
   /* ------------------------------------------------ Navigation */
   "navigation": {
-    status: "ready", react: ["SideNav","SideNavGroup","SideNavItem"], css: [".sidenav", ".count", ".skip-link", ".tooltip-wrap", ".tooltip"],
+    status: "ready", react: ["SideNav","SideNavGroup","SideNavItem"], css: [".sidenav", ".count", ".skip-link", ".tooltip-wrap", ".tooltip"], borrows: [".divider"],
     desc: "콘솔 좌측의 1차 내비게이션입니다. 그룹 라벨로 메뉴를 묶고 현재 위치를 강조합니다. 폭은 240px 이고, 접으면 64px 입니다.",
     choose: [
       ["언제 쓰는가", "메뉴가 여러 그룹으로 나뉜 콘솔에서 1차 이동을 맡습니다. 상단 1차 메뉴와 함께 두지 않습니다."],
@@ -1514,6 +1514,7 @@ const COMPONENTS = {
       ["이름", "메뉴 이름과 페이지 제목, Breadcrumb 이름을 같게 씁니다."],
       ["권한", "권한 없는 메뉴는 숨깁니다. 비활성으로 두지 않습니다."],
       ["접힘", "Top Navigation 왼쪽 영역의 접기 버튼으로 접고 폅니다. 접으면 아이콘만 남고 이름은 Tooltip 으로 보입니다. 마우스와 키보드 모두 볼 수 있습니다. 접은 상태는 사용자별로 기억하고, 그 저장은 제품이 맡습니다."],
+      ["위험 항목", "계정 삭제처럼 되돌릴 수 없는 일로 가는 항목은 메뉴 맨 아래에 구분선을 두고 빨간 글자로 하나만 둡니다. 누르면 바로 실행하지 않고 위험 확인 대화상자를 엽니다. 화면으로 가는 항목이 아니므로 눌러도 현재 메뉴 표시는 그대로입니다."],
       ["좁은 화면", "화면 폭이 1280px 아래로 줄면 접기 버튼이 있는 사이드 내비가 접히고, 다시 넓히면 펼쳐집니다. 그 사이 사용자가 바꾼 상태는 다음에 폭이 경계를 넘을 때까지 그대로 둡니다."],
       ["본문 바로가기", "페이지의 첫 포커스에 둡니다. 포커스가 오면 나타납니다."],
     ],
@@ -1540,11 +1541,20 @@ const COMPONENTS = {
           <span class="tooltip-wrap"><a href="#" aria-label="에이전트">${I("server")}<span>에이전트</span></a><span class="tooltip right" role="tooltip">에이전트</span></span>
           <span class="tooltip-wrap"><a href="#" aria-label="설정">${I("settings")}<span>설정</span></a><span class="tooltip right" role="tooltip">설정</span></span>
         </nav>`, layout: "left" },
+      { id: "danger", group: "variant", title: "Danger Item", desc: "설정 메뉴처럼 아이콘 없이 쓸 수 있습니다. 계정 삭제 같은 위험 항목은 맨 아래 구분선 뒤에 빨간 글자로 하나만 두고, 누르면 위험 확인 대화상자를 엽니다.", html: `
+        <nav class="sidenav" aria-label="설정 메뉴" style="border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg)">
+          <a href="#" class="on" aria-current="page"><span>내 정보</span></a>
+          <a href="#"><span>비밀번호와 보안</span></a>
+          <a href="#"><span>알림</span></a>
+          <a href="#"><span>팀 구성원</span></a>
+          <hr class="divider">
+          <a href="#" class="danger"><span>계정 삭제</span></a>
+        </nav>`, layout: "left" },
       { id: "skip", group: "variant", title: "Skip Link", desc: "페이지의 첫 포커스에 둡니다. 화면 밖에 있다가 Tab 을 누르면 나타납니다. 이 예제는 보이는 상태로 고정했습니다.", html: `
         <div style="position:relative;width:100%;max-width:480px;height:64px;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg)"><a href="#" class="skip-link show">본문 바로가기</a></div>` },
     ],
-    props: [[".skip-link", "a", "—", "본문 바로가기. .show 는 문서용 고정 표시"], [".tooltip-wrap > a", "wrapper", "—", "접힌 레일의 항목. a 에 aria-label, 옆에 .tooltip.right"], [".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(brand subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기). 선택(.on)되면 brand 글자"], ["a.has-on", "parent", "—", "하위 항목이 현재 메뉴인 부모. 펼친 레일에서는 그대로, 접힌 레일에서는 하위 항목이 숨으니 선택 모양이 된다. 접힌 레일에서는 aria-current=\"true\" 도 함께(React hasActiveChild 는 자동)"], [".collapsed", "boolean", "false", "폭 64, 아이콘만. 접기 버튼이 가리키는 내비는 ds.js 가 화면 폭 1280 경계를 넘을 때 붙이고 뗍니다(React <code>useSideNavCollapse</code>)"], ["[data-auto-collapse=\"false\"]", "attr", "—", "화면 폭으로 접지 않음(React <code>useSideNavCollapse({ auto: false })</code>)"], [".count", "element", "—", "미확인 건수"]],
-    spec: [["Size", "폭 240 (접힘 64) · 안쪽 여백 20 (접힘 위아래 20 · 좌우 10) · 항목 높이 38 (padding 8 · Label 1/Reading 14/22)"], ["Container", "surface/elevated/primary · 우측 1px line/neutral/secondary"], ["Label", "항목 14 Medium · 선택 14 Bold · 그룹 12 SemiBold uppercase"], ["Icon", "18 · foreground/neutral/secondary · 선택 foreground/brand/primary"]],
+    props: [[".skip-link", "a", "—", "본문 바로가기. .show 는 문서용 고정 표시"], [".tooltip-wrap > a", "wrapper", "—", "접힌 레일의 항목. a 에 aria-label, 옆에 .tooltip.right"], [".sidenav", "nav", "—", "폭 240, 세로 링크 목록"], [".group", "div", "—", "그룹 라벨(uppercase caption)"], ["a.on", "current", "—", "현재 메뉴(brand subtle)"], ["a.sub", "child", "—", "하위 항목(들여쓰기). 선택(.on)되면 brand 글자"], ["a.danger", "danger", "—", "위험 항목 — foreground/negative/strong 글자. 맨 아래 하나, 앞에 .divider. 누르면 위험 확인(alertdialog)을 연다. 눌러도 현재 메뉴(.on · aria-current)가 옮겨 가지 않는다. React <code>SideNavItem danger</code>"], ["a.has-on", "parent", "—", "하위 항목이 현재 메뉴인 부모. 펼친 레일에서는 그대로, 접힌 레일에서는 하위 항목이 숨으니 선택 모양이 된다. 접힌 레일에서는 aria-current=\"true\" 도 함께(React hasActiveChild 는 자동)"], [".collapsed", "boolean", "false", "폭 64, 아이콘만. 접기 버튼이 가리키는 내비는 ds.js 가 화면 폭 1280 경계를 넘을 때 붙이고 뗍니다(React <code>useSideNavCollapse</code>)"], ["[data-auto-collapse=\"false\"]", "attr", "—", "화면 폭으로 접지 않음(React <code>useSideNavCollapse({ auto: false })</code>)"], [".count", "element", "—", "미확인 건수"]],
+    spec: [["Size", "폭 240 (접힘 64) · 안쪽 여백 20 (접힘 위아래 20 · 좌우 10) · 항목 높이 38 (padding 8 · Label 1/Reading 14/22)"], ["Container", "surface/elevated/primary · 우측 1px line/neutral/secondary"], ["Label", "항목 14 Medium · 선택 14 Bold · 그룹 12 SemiBold uppercase · 위험 항목 foreground/negative/strong"], ["Icon", "18 · foreground/neutral/secondary · 선택 foreground/brand/primary"]],
     figma: { frame: "Navigation", radius: "radius/md", sizes: { expanded: { w: 240 }, collapsed: { w: 64 }, item: { h: 38 } }, variants: { default: { icon: "--foreground-neutral-secondary" }, collapsed: { hasOn: { bg: "--surface-brand-subtle", icon: "--foreground-brand-primary" } }, selected: { bg: "--surface-brand-subtle", fg: "--foreground-brand-primary" }, sub: { fg: "--foreground-neutral-secondary", selected: { fg: "--foreground-brand-primary" } } }, states: ["default", "hover", "active", "sub selected"] },
   },
 
@@ -1720,6 +1730,17 @@ const COMPONENTS = {
             <div class="card-foot"><div class="btn-group"><button type="button" class="btn sm outline assistive">로그 보기</button><button type="button" class="btn sm solid primary">업데이트</button></div></div>
           </div>
         </div>` },
+      { id: "columns", group: "variant", title: "Columns", desc: "설정 화면의 개인 정보처럼 항목이 많고 값이 긴 키-값은 두 칸으로 나눠 라벨을 위에, 값을 아래에 둡니다. 긴 값은 두 칸을 다 씁니다. 좁은 화면에서는 한 칸으로 쌓입니다.", html: `
+        <div class="card" style="width:min(560px,100%)">
+          <div class="card-head"><h3 class="title">개인 정보</h3><button type="button" class="btn sm outline assistive" aria-label="개인 정보 편집">${I("edit",16)}편집</button></div>
+          <dl class="card-meta columns">
+            <div><dt>이름</dt><dd>김민준</dd></div>
+            <div><dt>직함</dt><dd>보안 관리자</dd></div>
+            <div><dt>이메일</dt><dd>minjun.kim@example.com</dd></div>
+            <div><dt>휴대전화</dt><dd>010-1234-5678</dd></div>
+            <div class="wide"><dt>소개</dt><dd>엔드포인트 보안 정책과 에이전트 배포를 맡고 있습니다.</dd></div>
+          </dl>
+        </div>` },
       { id: "list", group: "variant", title: "List", desc: "최근 이벤트나 위협 Top 5 처럼 표 · 목록을 카드 폭까지 채울 때는 여백 없는 카드를 씁니다. 카드의 안쪽 여백과 간격이 0 이고, 헤더에만 위아래 16px · 좌우 24px 여백을 둡니다. 헤더 오른쪽에는 '전체 보기' 텍스트 버튼을 둡니다. 표는 바깥 테두리가 없으므로 그대로 넣습니다. List 는 자체 테두리가 있어 넣으면 테두리가 두 겹이 됩니다.", html: `
         <div class="card flush" style="width:400px">
           <div class="card-head"><h3 class="title">최근 이벤트</h3><button type="button" class="btn sm text assistive">전체 보기</button></div>
@@ -1779,6 +1800,7 @@ const COMPONENTS = {
       ["CardHead · CardTitle / .card-head · .title", "element", "—", "제목 + 오른쪽 요소 하나(상태 Tag · Select Button · '전체 보기' 텍스트 assistive 버튼 중 하나). <code>CardTitle</code> 기본 h3"],
       ["CardDesc / .desc", "element", "—", "Label 1/Reading 14 secondary"],
       ["CardMeta / dl.card-meta", "element", "—", "상태 카드의 키-값 행 — dt secondary · dd primary · 14/22, 키 열은 가장 긴 키에 맞춤. React <code>items={[{ label, value }]}</code> 또는 dt · dd 자식"],
+      ["columns / dl.card-meta.columns", "boolean", "false", "두 칸 키-값 — 항목마다 <code>div</code>(dt + dd), 라벨 Label 2 13/18 secondary 위 · 값 Body 1/Normal 16/24 primary 아래, 칸 사이 24 · 줄 사이 20. <code>.wide</code> 는 두 칸을 씀. 767 이하 한 칸. React <code>CardMeta columns</code> · items 의 <code>wide</code>"],
       ["CardFoot / .card-foot", "element", "—", "액션 오른쪽 정렬 · 버튼이 둘 이상이면 안에 .btn-group(간격은 버튼 크기 — sm 6) · 강조 버튼은 하나"],
       ["variant / .flat", "\"outline\" | \"flat\"", "\"outline\"", "outline 1px line/neutral/secondary 보더 / flat 보더 색 없음(두께 1px 는 남아 크기 같음) — 주변에 배경색 <code>background/neutral/secondary</code> 이 있을 때만. 흰 바탕 위 금지 · 그림자 없음. KPI · Chart Card 도 같은 옵션"],
       ["flush / .flush", "boolean", "false", "padding · gap 0 — 테두리 없는 표 · 목록을 카드 폭까지. 헤더만 자체 여백(md 16 · 24 / sm 12 · 16). 안의 Table 은 테두리가 없어 그대로(가로 스크롤이 필요 없으면 <code>wrap={false}</code>) · List 는 자체 테두리가 있어 두 겹 · 바닥에 붙은 표는 마지막 행 선 없음(카드 테두리가 경계)"],
@@ -1790,7 +1812,7 @@ const COMPONENTS = {
       ["compact / .compact", "boolean", "false", "<b>호환용</b> — sm 의 옛 이름. React 는 개발 모드에서 경고합니다"],
       ["bordered / .bordered", "boolean", "false", "<b>호환용 — 효과 없음.</b> 기본 카드가 이미 1px 보더입니다"],
     ],
-    spec: [["Size", "md padding 24 · gap 12 · sm padding 16 · gap 8 · flush 0 · 최소 폭 260"], ["Container", "radius/lg 8 · 1px line/neutral/secondary · flush 카드 바닥에 붙은 표는 마지막 행 선 없음(카드 테두리가 경계) · surface/elevated/primary · flat 은 보더 색 없음(background/neutral/secondary 위 전용) · 선택 2px brand 링 · Disabled surface/disable"], ["Label", "제목 md Body 1/Normal 16/24 SemiBold · sm Label 1/Normal 14/20 SemiBold · 설명 Label 1/Reading 14 secondary · 키 secondary · 값 primary"], ["Motion", "선택 · 이동 카드 hover --motion-fast 로 그림자 없음 → shadow/2"]],
+    spec: [["Size", "md padding 24 · gap 12 · sm padding 16 · gap 8 · flush 0 · 최소 폭 260"], ["Container", "radius/lg 8 · 1px line/neutral/secondary · flush 카드 바닥에 붙은 표는 마지막 행 선 없음(카드 테두리가 경계) · surface/elevated/primary · flat 은 보더 색 없음(background/neutral/secondary 위 전용) · 선택 2px brand 링 · Disabled surface/disable"], ["Label", "제목 md Body 1/Normal 16/24 SemiBold · sm Label 1/Normal 14/20 SemiBold · 설명 Label 1/Reading 14 secondary · 키 secondary · 값 primary · 두 칸 키-값은 라벨 Label 2 13/18 · 값 Body 1/Normal 16/24"], ["Motion", "선택 · 이동 카드 hover --motion-fast 로 그림자 없음 → shadow/2"]],
     figma: { frame: "Card", radius: "radius/lg", sizes: { md: { pad: 24 }, sm: { pad: 16 }, flush: { pad: 0 } }, variants: { default: { bg: "--surface-elevated-primary", stroke: "--line-neutral-secondary" }, status: {}, list: {}, selection: {}, empty: {}, error: {} }, variant: { outline: { stroke: "--line-neutral-secondary" }, flat: { stroke: "transparent", canvas: "--background-neutral-secondary" } }, states: ["default", "hover", "selected", "focused", "disabled", "loading"] },
   },
 
@@ -2980,6 +3002,7 @@ const COMPONENTS = {
     ],
     principles: [
       ["글자", "이니셜 1~2자로 씁니다."],
+      ["크기", "목록 · 표 · 상단 바에는 기본이나 작은 크기를 씁니다. 큰 크기는 프로필처럼 한 사람을 보이는 자리에만 쓰고, Avatar Group 에는 쓰지 않습니다."],
       ["색", "모든 아바타는 같은 중립 회색 면과 글자를 씁니다. 사람은 이니셜과 이름으로 가르고, 상태나 역할을 아바타 색으로 알리지 않습니다."],
       ["이름", "옆에 이름이 보이면 아바타는 스크린 리더에서 숨깁니다. 혼자 있으면 이미지로 읽히게 하고 이름을 줍니다."],
       ["누를 때", "그 자체로는 버튼이 아닙니다. 사용자 메뉴는 <a href=\"#/components/top-navigation\">Top Navigation</a> 의 사용자 메뉴를 씁니다."],
@@ -2987,8 +3010,8 @@ const COMPONENTS = {
       ["Group 개수", "아바타는 5개까지 보이고 나머지는 뒤에 '외 N명' 으로 적습니다. 전체 목록을 열어야 하면 '외 N명' 을 글자 버튼으로 두고, 목록은 제품이 그립니다."],
     ],
     examples: [
-      { id: "sizes", group: "size", title: "Size", desc: "기본 32px 과 작은 크기 24px 두 가지입니다.", html: `
-        <div style="display:flex;gap:12px;align-items:center"><span class="avatar" role="img" aria-label="김민준">김</span><span class="avatar sm" role="img" aria-label="김민준">김</span></div>` },
+      { id: "sizes", group: "size", title: "Size", desc: "기본 32px, 작은 크기 24px, 큰 크기 64px 세 가지입니다. 큰 크기는 설정 화면의 프로필처럼 한 사람을 크게 보일 때만 씁니다.", html: `
+        <div style="display:flex;gap:12px;align-items:center"><span class="avatar lg" role="img" aria-label="김민준">김</span><span class="avatar" role="img" aria-label="김민준">김</span><span class="avatar sm" role="img" aria-label="김민준">김</span></div>` },
       { id: "name", group: "default", title: "With Name", desc: "이름이 옆에 있으면 아바타는 스크린 리더에서 숨깁니다.", html: `
         <div style="display:flex;gap:8px;align-items:center"><span class="avatar" aria-hidden="true">이</span><span class="t-label-1-reading t-regular">이서연</span></div>` },
       { id: "group", group: "variant", title: "Group", desc: "여러 사람을 겹쳐 놓습니다. 겹침은 8px 이고 작은 크기에서는 6px 입니다. 아바타마다 놓인 자리의 면 색으로 2px 링을 둘러 겹쳐도 경계가 보입니다.", html: `
@@ -3001,8 +3024,8 @@ const COMPONENTS = {
       { id: "group-button", group: "variant", title: "Group With List", desc: "전체 목록을 열어야 하면 '외 N명' 을 글자 버튼으로 둡니다. 목록은 제품이 그립니다.", html: `
         <span class="avatar-group" role="group" aria-label="담당자"><span class="avatar" role="img" aria-label="김민준">김</span><span class="avatar" role="img" aria-label="이서연">이</span><span class="avatar" role="img" aria-label="박지호">박</span><span class="avatar" role="img" aria-label="최유나">최</span><span class="avatar" role="img" aria-label="정하준">정</span><button type="button" class="btn sm text assistive avatar-group-more" aria-label="담당자 외 3명 보기">외 3명</button></span>` },
     ],
-    props: [[".avatar", "span", "—", "32. React <code>initials</code>"], ["role=\"img\" + aria-label", "string", "—", "혼자 있는 아바타의 이름. 옆에 이름이 보이면 대신 aria-hidden=\"true\""], [".sm", "boolean", "false", "24. React <code>size=\"sm\"</code>"], [".avatar-group", "span", "—", "role=group + aria-label. 아바타 5개까지. React <code>AvatarGroup label</code> · <code>max</code>(기본 5) · <code>size</code>"], [".avatar-group-more", "span | button", "—", "'외 N명'. 목록을 열면 <code>.btn.sm.text.assistive</code> 버튼. React <code>AvatarGroup onMore</code> 를 주면 버튼"]],
-    spec: [["Size", "32 · sm 24"], ["Container", "surface/neutral/secondary · radius/full"], ["Label", "12 Bold · sm 11 Bold · foreground/neutral/secondary"], ["Group", "겹침 8 · sm 6 · 링 2px 놓인 자리의 면(바탕 background/neutral/primary, 카드 · 패널 · 팝업 안 surface/elevated/primary) · 5개까지"], ["More", "'외 N명' Label 1/Normal 14/20 Medium · foreground/neutral/secondary · 앞 간격 8(버튼이면 4)"]],
+    props: [[".avatar", "span", "—", "32. React <code>initials</code>"], ["role=\"img\" + aria-label", "string", "—", "혼자 있는 아바타의 이름. 옆에 이름이 보이면 대신 aria-hidden=\"true\""], [".sm", "boolean", "false", "24. React <code>size=\"sm\"</code>"], [".lg", "boolean", "false", "64 · 글자 Heading 2 20/28 Bold. 프로필 머리에만, Avatar Group 에는 쓰지 않는다. React <code>size=\"lg\"</code>"], [".avatar-group", "span", "—", "role=group + aria-label. 아바타 5개까지. React <code>AvatarGroup label</code> · <code>max</code>(기본 5) · <code>size</code>"], [".avatar-group-more", "span | button", "—", "'외 N명'. 목록을 열면 <code>.btn.sm.text.assistive</code> 버튼. React <code>AvatarGroup onMore</code> 를 주면 버튼"]],
+    spec: [["Size", "32 · sm 24 · lg 64"], ["Container", "surface/neutral/secondary · radius/full"], ["Label", "12 Bold · sm 11 Bold · lg Heading 2 20/28 Bold · foreground/neutral/secondary"], ["Group", "겹침 8 · sm 6 · 링 2px 놓인 자리의 면(바탕 background/neutral/primary, 카드 · 패널 · 팝업 안 surface/elevated/primary) · 5개까지"], ["More", "'외 N명' Label 1/Normal 14/20 Medium · foreground/neutral/secondary · 앞 간격 8(버튼이면 4)"]],
   },
 
   /* ------------------------------------------------ Link (2026-11-10) */

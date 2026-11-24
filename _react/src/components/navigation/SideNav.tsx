@@ -49,16 +49,18 @@ export interface SideNavItemProps extends AnchorHTMLAttributes<HTMLAnchorElement
   hasActiveChild?: boolean;
   /** 링크 요소 (react-router Link 등) */
   as?: ElementType;
+  /** 위험 항목(.danger — 계정 삭제 등). 맨 아래 하나, 앞에 구분선, 누르면 위험 확인을 연다(2026-11-24) */
+  danger?: boolean;
   children?: ReactNode;
 }
-export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem({ icon, active, count, countTone, sub, hasActiveChild, as, className, children, title, ...rest }, ref) {
+export const SideNavItem = forwardRef<HTMLAnchorElement, SideNavItemProps>(function SideNavItem({ icon, active, count, countTone, sub, hasActiveChild, danger, as, className, children, title, ...rest }, ref) {
   const { collapsed, collapsible } = useContext(Ctx);
   const Link: ElementType = as ?? "a";
   /* 접힌 레일은 이름이 안 보인다 — title 은 키보드로 볼 수 없어 Tooltip 으로 */
   const railName = (collapsed || collapsible) && !sub && typeof children === "string" ? children : undefined;
   const current = active ? "page" : collapsed && hasActiveChild ? "true" : undefined;
   const link = (
-    <Link ref={ref} className={cx(active && "on", hasActiveChild && "has-on", sub && "sub", className) || undefined} aria-current={current} aria-label={railName} title={title} {...rest}>
+    <Link ref={ref} className={cx(active && "on", hasActiveChild && "has-on", sub && "sub", danger && "danger", className) || undefined} aria-current={current} aria-label={railName} title={title} {...rest}>
       {icon && <Icon name={icon} />}
       {sub ? children : <span>{children}</span>}
       {count !== undefined && <span className={cx("count", countTone)}>{count}</span>}

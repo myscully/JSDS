@@ -43,7 +43,7 @@ const NAV = [
   { group: "관리" },
   { id: "settings", icon: "settings", label: "설정" },
 ];
-const PAGES = ["dashboard", "analytics", "list", "policy", "wizard", "tabs-list", "org"];
+const PAGES = ["dashboard", "analytics", "list", "policy", "wizard", "tabs-list", "org", "settings"];
 const href = (id) => (PAGES.includes(id) ? `${id}.html` : "#");
 const cur = (id, page) => (id === page ? ' class="on" aria-current="page"' : "");
 
@@ -77,7 +77,7 @@ const topBar = () => `<header class="topbar tpl-top">
       <span class="tooltip-wrap"><button type="button" class="btn md assistive icon-only" aria-label="설정">${I("settings")}</button><span class="tooltip bottom" role="tooltip">설정</span></span>
       <span class="tooltip-wrap"><button type="button" class="btn md assistive icon-only" data-theme-toggle aria-pressed="false" aria-label="다크 모드"><span class="i-light">${I("sun-high")}</span><span class="i-dark">${I("moon")}</span></button><span class="tooltip bottom" role="tooltip">다크 모드</span></span></div>
       <span class="divider vertical" role="separator" aria-orientation="vertical"></span>
-      <div class="dropdown"><button type="button" class="topbar-user" aria-label="사용자 메뉴" aria-haspopup="menu" aria-expanded="false"><span class="avatar">김</span></button><ul class="menu" role="menu"><li class="menu-item" role="menuitem">내 정보</li><li class="menu-item" role="menuitem">비밀번호 변경</li><li class="menu-sep" role="separator"></li><li role="none"><a class="menu-item" role="menuitem" href="login.html">로그아웃</a></li></ul></div>
+      <div class="dropdown"><button type="button" class="topbar-user" aria-label="사용자 메뉴" aria-haspopup="menu" aria-expanded="false"><span class="avatar">김</span></button><ul class="menu" role="menu"><li role="none"><a class="menu-item" role="menuitem" href="settings.html">내 정보</a></li><li class="menu-item" role="menuitem">비밀번호 변경</li><li class="menu-sep" role="separator"></li><li role="none"><a class="menu-item" role="menuitem" href="login.html">로그아웃</a></li></ul></div>
     </div>
   </header>`;
 
@@ -279,7 +279,7 @@ const tabsList = () => {
           </div>`;
   const content = `        <div class="stack">
         ${pageHead(["자산", "에이전트"], "에이전트", "전체 1,284대 · 마지막 동기화 09:41", btn("md outline assistive", "설치 명령 보기") + btn("md solid primary", "에이전트 등록", "", "plus"))}
-          <div class="tabs" role="tablist" aria-label="에이전트 상태">
+          <div class="tabs accent" role="tablist" aria-label="에이전트 상태">
             ${TABS.map((t, i) => `<button type="button" class="tab${i ? "" : " on"}" role="tab" aria-selected="${!i}" id="ag-tab-${t.id}" aria-controls="ag-panel-${t.id}"${i ? ' tabindex="-1"' : ""}>${t.label}</button>`).join("\n            ")}
           </div>
           ${TABS.map(panel).join("\n          ")}
@@ -381,8 +381,60 @@ const org = () => {
   return doc({ id: "org", title: "조직도", body: shell("org", content, dialogs) });
 };
 
+/* 설정 › 내 정보(2026-11-24) — 왼쪽 설정 메뉴(Navigation, 아이콘 없음 · 맨 아래 구분선 뒤 위험 항목), 오른쪽 카드 셋.
+   카드마다 편집은 모달 Side Panel 의 검증 폼, 계정 삭제는 이메일을 입력받는 위험 확인(사람의 결정) */
+const ME = { name: "김민준", title: "보안 관리자", email: "minjun.kim@example.com", phone: "010-2345-6789", bio: "엔드포인트 보안 정책과 탐지 규칙을 관리합니다. 야간 장애 대응 순번을 맡고 있습니다.", org: "본사", dept: "보안팀 · 보안관제파트", country: "대한민국", city: "서울" };
+const settings = () => {
+  const menu = ["내 정보", "비밀번호와 보안", "알림", "팀", "팀 구성원", "라이선스", "데이터 내보내기"];
+  const edit = (what, id) => btn("sm outline assistive", "편집", `aria-label="${what} 편집" data-panel-open="#${id}"`, "edit");
+  const meta = (rows) => `<dl class="card-meta columns">${rows.map(([k, v, w]) => `<div${w ? ' class="wide"' : ""}><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
+  const content = `        <div class="stack">
+        ${pageHead(["설정"], "내 정보", "", "")}
+          <div class="tpl-settings">
+            <nav class="sidenav tpl-subnav" aria-label="설정 메뉴">
+              ${menu.map((m, i) => `<a href="#"${i ? "" : ' class="on" aria-current="page"'}><span>${m}</span></a>`).join("\n              ")}
+              <hr class="divider">
+              <a href="#" class="danger" data-popup-open="#set-delete"><span>계정 삭제</span></a>
+            </nav>
+            <div class="stack">
+              <div class="card tpl-profile">
+                <span class="avatar lg" aria-hidden="true">${ME.name[0]}</span>
+                <div><h2 class="t-heading-2">${ME.name}</h2><p class="t-label-1-reading">${ME.title}</p><p class="t-label-1-reading">${ME.city}, ${ME.country}</p></div>
+                ${edit("프로필", "set-profile")}
+              </div>
+              <div class="card">
+                <div class="card-head"><h3 class="title">개인 정보</h3>${edit("개인 정보", "set-info")}</div>
+                ${meta([["이름", ME.name], ["직함", ME.title], ["이메일", ME.email], ["휴대전화", ME.phone], ["소개", ME.bio, 1]])}
+              </div>
+              <div class="card">
+                <div class="card-head"><h3 class="title">소속과 지역</h3>${edit("소속과 지역", "set-place")}</div>
+                ${meta([["조직", ME.org], ["부서", ME.dept], ["국가", ME.country], ["도시", ME.city]])}
+              </div>
+            </div>
+          </div>
+        </div>`;
+  const field = (id, label, value, o = {}) => `<div class="field"><label for="${id}">${label}${o.req ? " <em>*</em>" : ""}</label>${o.area ? `<textarea id="${id}" rows="4" data-maxlength="200">${value}</textarea>` : `<input id="${id}"${o.type ? ` type="${o.type}"` : ""} value="${value}"${o.req ? " required" : ""}${o.ac ? ` autocomplete="${o.ac}"` : ""}>`}<span class="help" aria-live="polite">${o.help || ""}</span></div>`;
+  const panel = (id, title, done, fields) => `<section class="side-panel" id="${id}" role="dialog" aria-modal="true" aria-labelledby="${id}-t" data-modal hidden>
+  <div class="side-panel-header"><h3 class="side-panel-title" id="${id}-t">${title}</h3>${H.pClose("side-panel-close", "data-panel-close")}</div>
+  <div class="side-panel-body"><form class="tpl-panel-form" id="${id}-form" data-validate novalidate data-done="${done}">${fields}</form></div>
+  <div class="side-panel-footer"><div class="btn-group"><button type="button" class="btn md outline assistive" data-panel-close>취소</button><button type="submit" form="${id}-form" class="btn md solid primary">저장</button></div></div>
+</section>`;
+  const dialogs = [
+    panel("set-profile", "프로필 편집", "프로필을 저장했습니다.", field("set-p-name", "이름", ME.name, { req: 1, ac: "name" }) + field("set-p-title", "직함", ME.title, { ac: "organization-title" })),
+    panel("set-info", "개인 정보 편집", "개인 정보를 저장했습니다.", field("set-i-email", "이메일", ME.email, { req: 1, type: "email", ac: "email", help: "로그인과 알림에 씁니다." }) + field("set-i-phone", "휴대전화", ME.phone, { type: "tel", ac: "tel" }) + field("set-i-bio", "소개", ME.bio, { area: 1, help: "200자까지" })),
+    panel("set-place", "소속과 지역 편집", "소속과 지역을 저장했습니다.", field("set-l-dept", "부서", ME.dept) + field("set-l-country", "국가", ME.country, { ac: "country-name" }) + field("set-l-city", "도시", ME.city, { ac: "address-level2" })),
+    `<div class="popup danger" id="set-delete" role="alertdialog" aria-modal="true" aria-labelledby="set-delete-t" aria-describedby="set-delete-b">
+  <h3 class="popup-title" id="set-delete-t">계정을 삭제할까요?</h3>${H.pClose("popup-close", "data-popup-close")}
+  <p class="popup-body" id="set-delete-b">계정과 개인 설정, 알림 구독이 모두 삭제됩니다. 맡고 있던 정책과 보고서는 조직 관리자에게 넘어갑니다. 삭제한 계정은 되돌릴 수 없습니다.</p>
+  <form class="popup-form" id="set-delete-form" data-validate novalidate data-done="계정 삭제를 요청했습니다."><div class="field"><label for="set-delete-email">확인을 위해 <b>${ME.email}</b>을 입력하세요</label><input id="set-delete-email" type="email" required pattern="\\s*${ME.email.replace(/\./g, "\\.")}\\s*" autocomplete="off" data-messages='{"required":"확인할 이메일을 입력하세요.","pattern":"이메일이 계정 이메일과 다릅니다. 위에 적힌 이메일을 그대로 입력하세요."}'><span class="help" aria-live="polite">이메일이 같아야 삭제됩니다.</span></div></form>
+  <div class="popup-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-popup-close>취소</button><button type="submit" form="set-delete-form" class="btn md solid negative">계정 삭제</button></div></div>
+</div>`,
+  ].join("\n");
+  return doc({ id: "settings", title: "설정", body: shell("settings", content, dialogs) });
+};
 
-const SCREENS = { login, dashboard, analytics, list, policy, wizard, "tabs-list": tabsList, org };
+
+const SCREENS = { login, dashboard, analytics, list, policy, wizard, "tabs-list": tabsList, org, settings };
 return Object.fromEntries(Object.entries(SCREENS).map(([name, fn]) => [name, fn()]));
 }
 
@@ -394,4 +446,4 @@ function build(OUT, html = screens()) {
   return Object.keys(html);
 }
 
-module.exports = { build, screens, SCREEN_KEYS: ["login", "dashboard", "analytics", "list", "policy", "wizard", "tabs-list", "org"] };
+module.exports = { build, screens, SCREEN_KEYS: ["login", "dashboard", "analytics", "list", "policy", "wizard", "tabs-list", "org", "settings"] };

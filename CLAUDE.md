@@ -16,7 +16,7 @@
 | `assets/` `home/` `foundations/` `components/` `patterns/` `templates/` `resources/` `index.html` | **전부 생성물.** 직접 고치지 말고 `_build/` 를 고친 뒤 빌드하세요. `assets/vendor/chart.umd.js` · `assets/ds-chart.js` · `assets/templates.css` · `assets/templates.js` · `templates/screen/*.html` 도 생성물 |
 | `_build/font-jp.src.css` · `_build/fonts-jp/` | **원본.** 일본어 한자용 Pretendard JP Variable v1.3.9(OFL) — 조각 woff2 119개 · `OFL.txt` 와 그 `@font-face`(unicode-range). 내려받은 원본 CSS 에서 만들었고 손으로 고치지 않습니다. `build.js` 가 `assets/font-jp.css` · `assets/fonts/jp/`(생성물)로, `sync-css.mjs` 가 패키지 `dist/font-jp.css`(선택 import)로 복사 |
 | `_concepts/` | **원본 · 시안.** 메인 화면 비주얼 시안(도형 타이포 A1 · A2 · A3, 정한 카피의 B1 Simple · B2 Visual · B3 Signal, 가운데 정렬 B4 Balance + 고르는 `index.html`). **B4 는 2026-11-18 사이트 메인 화면이 됐다**(`_build/render.js` `homePage` · `style.src.css` Home 블록 — 시안 파일은 기록으로 남김). B 의 띠 · 미리보기 이미지 `img/*.png` 는 `capture.mjs` 가 패턴 예제를 찍은 것(패턴이 바뀌면 다시 돌림). `../assets/style.css` 의 토큰 · Pretendard 와 `../assets/app.js` 의 제품 색 · `SEARCH_INDEX` 를 불러 쓰고, 루트의 `_` 폴더라 빌드 · verify · 게이트 밖이다(반복 애니메이션도 씀). 사이트로 옮길 때 게이트 규칙에 맞게 다듬는다 |
-| `_build/templates.data.js` · `templates.build.js` · `templates.src.css` · `templates.src.js` | **원본.** Templates 메뉴(2026-11-18 — 옛 `_templates/` 를 옮기고 지움). `templates.data.js` 는 문서 페이지의 글(정의 · 고르기 표 · 쓴 컴포넌트 · 패턴 · Rules · 개요 한 줄), `templates.build.js` 는 `_build/*.data.js` 의 예제 문자열 · 헬퍼를 읽어 화면 일곱 `templates/screen/<key>.html` 을 쓰는 생성기(`build.js` 가 부름 — route 가 아니라 pages 수에 들지 않음), `templates.src.css` → `assets/templates.css` 는 앱 틀 배치만(패키지 CSS 에 섞이지 않게 style.css 와 따로), `templates.src.js` → `assets/templates.js` 는 둘러보기용 흉내 동작이다 |
+| `_build/templates.data.js` · `templates.build.js` · `templates.src.css` · `templates.src.js` | **원본.** Templates 메뉴(2026-11-18 — 옛 `_templates/` 를 옮기고 지움). `templates.data.js` 는 문서 페이지의 글(정의 · 고르기 표 · 쓴 컴포넌트 · 패턴 · Rules · 개요 한 줄), `templates.build.js` 는 `_build/*.data.js` 의 예제 문자열 · 헬퍼를 읽어 화면 아홉 `templates/screen/<key>.html` 을 쓰는 생성기(`build.js` 가 부름 — route 가 아니라 pages 수에 들지 않음), `templates.src.css` → `assets/templates.css` 는 앱 틀 배치만(패키지 CSS 에 섞이지 않게 style.css 와 따로), `templates.src.js` → `assets/templates.js` 는 둘러보기용 흉내 동작이다 |
 | `_build/guide.data.js` | **원본.** Home › Guide(2026-11-20)의 글 — 트랙 다섯(공통 · 디자이너 · 기획자 · 개발자 · 함께 만들기)의 단계(제목 · 무엇 · 왜 · 해보기 · 관련 문서 · 개발자 code key · 함께 만들기 lead 역할). 렌더는 `render.js` `guideTrackPage` · `guideOverviewPage`, 개발자 코드는 `GUIDE_CODE`, 진행 저장은 `app.src.js`(jsds-guide). `verify.js` 가 순서 · 단계 수 · 링크 대상 · 문구를, `behave.guide.js` 가 동작을 본다 |
 | `_build/uidict.data.js` | **원본.** Resources › UI Dictionary(2026-11-19)의 항목 — 분류 10 · 추천 검색어 · 항목(`src` = 예제 · 화면 주소, 이름 · 영문 · 대표 클래스 · React 이름 · 다른 이름 `aka` · 생김새 검색어 `kw`). 미리보기 · 코드 · 비슷한 것 · 문서 링크는 `render.js` `uiDictPage` 가 예제 데이터에서 만든다. `verify.js` 가 src · 클래스 · React · 범위를, `behave.uidict.js` 가 동작을 본다 |
 | `_build/thumbs/components/*.svg` · `_build/thumbs/patterns/*.svg` · `_build/thumbs.js` | **원본.** Overview 카드 썸네일 — 컴포넌트 46개(2026-11-19, Figma `Thumbnail / <이름>`) · 패턴 22개(2026-11-20, Figma Patterns › Overview 의 `ov-grid` 카드)를 SVG 로 내보낸 것(손으로 고치지 않음)과, 그 색을 토큰으로 바꿔 빌드에 넣는 변환기(표에 없는 색이면 빌드가 멈춤 · 명도 마스크 안은 흰색 그대로). Figma 썸네일이 바뀌면 다시 내보낸다 |
@@ -50,7 +50,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 105 · verify 0/0 · contrast 3822쌍 실패 0 · advisory 1149 · behave 1726/1726 · react 939+6 · tsc 0
+pages 106 · verify 0/0 · contrast 3822쌍 실패 0 · advisory 1149 · behave 1731/1731 · react 945+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1238,6 +1238,21 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **음성 시험:** 사이트 12건(머리 baseline · 증감 flex-start · Pagination 규칙 · Card Radio · Tree · N 배지 선택자 · Avatar 면 · Tab 14 · BAR_END 4 · 영역 단색 · 막대 그라데이션 끔 · 좁은 Page Header 규칙) · React 2건(Avatar 경고 끔 · gradient 메타 끔) 모두 실패로 잡혔다.
 - **audit 도구:** 정적 막대에 border-radius 선언이 없으면 모서리 0 으로 읽는다(선언을 지워 '읽지 못함' 이 났다), 막대 모서리 메시지 문구.
 - Figma 미반영 58 → 95건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — 이번 몫 37: Chart 세트의 Bar · Mixed 막대 모서리 4 ≠ 0(24 — 정적 KPI 스파크 포함), Figma 에만 남은 아바타 변수 12개(1), Rules · 고르기 표(Avatar 색 · Data Visual 막대 · 영역 · Tab 건수 · 대시보드 기간 · 비슷한 패턴 둘), Spec(Tab · Avatar · Data Visual). Tab 글자 · Tree 숫자 · Card Radio · 머리 · 증감 가운데 · Pagination · 대시보드 기간 버튼은 audit 대조 밖이라 수에 없다. 같은 날 Figma 에 반영해 0건이다(Figma 절 '2026-11-24').
+
+2026-11-24 설정 템플릿 · 에이전트 탭 accent(사람의 요청 둘 · 결정 넷) — pages 105 → 106 · behave 1726 → 1731(`behave.templates.js` 5) · react 939+6 → 945+6(`tests/settings-parts.test.tsx` 4 · 예제 342 → 344 에 따른 구조 비교 2). contrast · advisory · verify 수는 그대로(새 색 쌍 없음 — 위험 항목 글자는 메뉴 위험 항목과 같은 negative-strong 쌍, 아바타 lg 는 기존 중립 쌍).
+- **새 템플릿 '설정'**(`settings` — 템플릿 여덟 → 아홉, 첨부 이미지 'My Profile' 을 참고). 왼쪽 설정 메뉴 `nav.sidenav.tpl-subnav`(아이콘 없음 · 접기 버튼이 가리키지 않아 폭으로 접히지 않음 — 사람의 결정) + 오른쪽 Page Header '내 정보' 와 카드 셋(프로필 · 개인 정보 · 소속과 지역). 이번에는 '내 정보' 화면만 만들고 다른 메뉴는 `href="#"` 다.
+  카드마다 '편집'(outline assistive · 이름에 대상) → **모달 Side Panel**(사람의 결정)의 검증 폼, 저장하면 패널을 닫고 Toast(흉내 — `templates.src.js` 에 Side Panel 제출 분기). 콘솔 사이드 내비의 '설정' 과 사용자 메뉴 '내 정보' 가 이 화면으로 간다. 이미지의 Address 는 콘솔 맥락의 '소속과 지역' 으로, 옅은 파랑 면 버튼은 시스템에 없는 모양이라 쓰지 않았다.
+- **계정 삭제 = 메뉴 맨 아래 구분선 뒤 빨간 글자 → 위험 확인 alertdialog**(사람의 결정) — 계정 이메일을 입력해야 삭제(앞뒤 공백 무시, '위험 작업 확인' 패턴의 이름 입력 방식), 확정하면 Toast 만(이동 없음).
+- **컴포넌트에 더한 것 셋**
+  - **Avatar lg 64**(사람의 결정) — `.avatar.lg` · Heading 2 20/28 Bold, React `Avatar size="lg"`. Avatar Group 에는 쓰지 않는다 — verify 의 묶음 자식 규칙이 이미 `avatar` · `avatar sm` 만 받아(메시지에 'lg 는 묶음에 쓰지 않는다' 를 더함), React `AvatarGroup` 은 lg 를 경고하고 묶음 크기로 그린다. Avatar Sizes 예제 맨 앞에 lg.
+  - **Navigation 위험 항목** `.sidenav a.danger`(글자 · 아이콘 negative-strong, hover 면은 그대로 회색) · 앞 구분선 `.sidenav > .divider`(위아래 8). 눌러도 현재 메뉴(.on · aria-current)가 옮겨 가지 않는다 — ds.js 의 현재 항목 처리기가 `.sidenav a:not(.danger)` 만 받는다. React `SideNavItem danger`, Navigation Rules '위험 항목' 행 · Props · 예제 Danger(사이트 · React). **verify 더함:** 사이드 내비의 위험 항목은 하나 · 마지막 항목 · 바로 앞 `<hr class="divider">`(컴포넌트 예제와 템플릿 화면 모두).
+  - **Card 두 칸 키-값** `.card-meta.columns`(라벨 Label 2 위 · 값 Body 1/Normal 아래, `.wide` 는 두 칸, 767 이하 한 칸). React `CardMeta columns` · 항목 `wide`, 예제 Columns(사이트 · React). 옛 `card-meta`(옆으로 나란한 키-값)는 그대로다.
+- **에이전트 탭 = `.tabs.accent`**(사람의 요청) — 탭이 있는 리스트 템플릿, 고른 탭의 글자 · 밑줄이 제품 색.
+- **behave +5:** templates part 9(설정 화면 — 현재 표시 둘 · 위험 항목은 현재가 아님 · h1 하나 · 패널 모달과 포커스 · 틀린 이메일이 제출을 막음 · 저장하면 닫고 Toast 와 포커스 복귀 · 위험 항목이 alertdialog 를 열고 현재 표시 그대로 · 틀린 이메일 막힘 · 공백 섞인 이메일로 닫고 Toast · 1024 · 1440 넘침 없음), part 10 넷(Avatar lg 크기 · 글자 · 묶음에 없음, Navigation 위험 항목 색 · 마지막 · 구분선 뒤 · 눌러도 현재 그대로, card-meta columns 1440 두 칸 · wide · 390 한 칸, 에이전트 탭 accent · 고른 탭 글자 = brand). **기존 단정 고침 1:** Avatar 크기 예제의 기대값에 lg 64 · 20px 를 더함(behave.promote — 첫 게이트에서 걸림).
+- **react +6:** `settings-parts.test` 4(Avatar lg 클래스 · 묶음 안 lg 경고와 sm 로 그림 · SideNavItem danger 는 aria-current 없음 · CardMeta columns 와 wide) + 구조 비교 2. `examples-coverage` 의 예제 수 342 → 344(첫 게이트에서 걸림).
+- 음성 시험: verify 2(위험 항목이 마지막이 아님 · 구분선 없음) · React 4 · behave 6(ds.js `:not(.danger)` 지움 · avatar lg CSS · danger 색 · columns 390 · accent 클래스 · 패널 제출 분기) 모두 실패로 잡혔다. 설정 화면은 1440 라이트 · 다크 · 1024 캡처로 보았다(콘솔 오류 0). 390 은 템플릿 화면 최소 폭 1024 라 넘친다(다른 화면과 같음).
+- **하지 않은 것:** 설정의 다른 메뉴 화면, 사진 아바타, 저장 · 삭제 실제 동작(흉내만), Figma 에 설정 화면.
+- Figma 미반영 6건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — Spec Navigation · Label, Spec Card · Label, Spec Avatar · Size, Spec Avatar · Label, Rules navigation · 위험 항목, Rules avatar · 크기.
 
 `advisory 1149` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

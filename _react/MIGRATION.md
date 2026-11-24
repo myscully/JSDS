@@ -989,3 +989,11 @@ Steps 를 다시 짰습니다.
 - **Pagination compact** 의 이전 · 다음 아이콘이 버튼 가운데에 놓입니다(전에는 왼쪽으로 7px 붙었다).
 - **Card Radio** 고른 카드의 제목이 600 입니다(설명은 그대로).
 - **Page Header** 는 767px 이하에서 동작이 제목 아래 왼쪽으로 내려갑니다(넓은 화면은 그대로 오른쪽 — 좁은 화면에서 제목이 낱말 가운데서 끊겼다).
+
+## 설정 화면 — Avatar lg · 사이드 내비 위험 항목 · 두 칸 키-값 (2026-11-24)
+
+새로 더한 것만 있고 바뀐 기본값은 없습니다.
+- **`Avatar size="lg"`** — 64 · 이니셜 20/28 Bold(`.avatar.lg`). 프로필 머리처럼 한 사람을 크게 보일 때 씁니다. `AvatarGroup` 안에서는 쓰지 않습니다 — 주면 개발 모드에서 한 번 경고하고 묶음 크기(없으면 md)로 그립니다.
+- **`SideNavItem danger`** — 계정 삭제 같은 위험 항목(`a.danger`, `--foreground-negative-strong` 글자). 사이드 내비의 마지막 항목 하나이고 바로 앞에 `<Divider />`(사이트 `<hr class="divider">`)를 둡니다. 누르면 위험 확인 Popup(`danger`)을 열고, 현재 메뉴(`active`)로 만들지 않습니다.
+  - 사이트 ds.js 는 `.sidenav a.danger` 를 눌러도 `.on` · `aria-current` 를 옮기지 않습니다(위험 확인을 여는 항목이지 화면이 아니므로). 제품이 사이드 내비 클릭에 현재 메뉴를 직접 다는 코드가 있으면 같은 예외를 둡니다.
+- **`CardMeta columns`** — 라벨 위 · 값 아래의 두 칸 키-값(`dl.card-meta.columns > div > dt + dd`), 767px 이하 한 칸. `items` 의 `wide: true` 는 두 칸을 다 씁니다(소개처럼 긴 값). `columns` 없이 쓰는 기존 `CardMeta` 는 그대로입니다.

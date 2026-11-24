@@ -5,7 +5,8 @@ import { Button } from "../button/Button";
 export interface AvatarProps extends HTMLAttributes<HTMLSpanElement> {
   /** 이니셜 1~2자 */
   initials?: string;
-  size?: "md" | "sm";
+  /** md 32 · sm 24 · lg 64(프로필 머리 — Avatar Group 에는 쓰지 않음, 2026-11-24) */
+  size?: "md" | "sm" | "lg";
   /** @deprecated 2026-11-24 — 색을 정하던 이름. 모든 아바타가 같은 중립 색이 되어 쓰지 않는다(그려지지 않음). 이름은 role="img" + aria-label 로 */
   name?: string;
   /** @deprecated 2026-11-24 — 이름으로 정하던 6색을 없앴다. 주면 개발 모드에서 한 번 경고하고 무시한다 */
@@ -16,7 +17,7 @@ let warnedTone = false;
 export const Avatar = forwardRef<HTMLSpanElement, AvatarProps>(function Avatar({ initials, size = "md", name: _name, tone, className, children, ...rest }, ref) {
   if (process.env.NODE_ENV !== "production" && tone != null && !warnedTone) { warnedTone = true; console.warn("[ds-react] Avatar tone 은 없앴습니다(2026-11-24) — 모든 아바타가 같은 중립 색입니다. prop 을 지우세요."); }
   return (
-    <span ref={ref} className={cx("avatar", size === "sm" && "sm", className)} {...rest}>
+    <span ref={ref} className={cx("avatar", size !== "md" && size, className)} {...rest}>
       {children ?? initials}
     </span>
   );
@@ -42,7 +43,8 @@ export const AvatarGroup = forwardRef<HTMLSpanElement, AvatarGroupProps>(functio
   const items = Children.toArray(children).filter(isValidElement) as ReactElement<AvatarProps>[];
   const cap = Math.max(1, Math.min(max, 5));
   if (process.env.NODE_ENV !== "production" && max > 5) console.warn("[ds-react] AvatarGroup max 는 5 까지입니다 — 나머지는 '외 N명' 으로 적습니다.");
-  const shown = items.slice(0, cap).map((el) => (size && !el.props.size ? cloneElement(el, { size }) : el));
+  if (process.env.NODE_ENV !== "production" && items.some((el) => el.props.size === "lg")) console.warn("[ds-react] AvatarGroup 안에서는 Avatar size=\"lg\" 를 쓰지 않습니다 — md 나 sm 으로 그립니다.");
+  const shown = items.slice(0, cap).map((el) => (el.props.size === "lg" ? cloneElement(el, { size: size ?? "md" }) : size && !el.props.size ? cloneElement(el, { size }) : el));
   const rest_ = items.length - shown.length;
   return (
     <span ref={ref} role="group" aria-label={label} className={cx("avatar-group", className)} {...rest}>

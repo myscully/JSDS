@@ -68,16 +68,24 @@ export const CardDesc = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
 export interface CardMetaItem {
   label: ReactNode;
   value: ReactNode;
+  /** columns 일 때 두 칸을 다 씀(.wide) — 소개처럼 긴 값 */
+  wide?: boolean;
 }
 export interface CardMetaProps extends HTMLAttributes<HTMLDListElement> {
-  /** 키-값 행. 없으면 children(dt · dd)을 그대로 */
+  /** 키-값 행. 없으면 children(dt · dd — columns 면 div 로 감싼 dt · dd)을 그대로 */
   items?: CardMetaItem[];
+  /** 두 칸 키-값(.columns) — 라벨 위 · 값 아래, 767 이하 한 칸(2026-11-24) */
+  columns?: boolean;
 }
 /** 상태 카드의 키-값 행(dl.card-meta) — 키 secondary · 값 primary */
-export const CardMeta = forwardRef<HTMLDListElement, CardMetaProps>(function CardMeta({ items, className, children, ...rest }, ref) {
+export const CardMeta = forwardRef<HTMLDListElement, CardMetaProps>(function CardMeta({ items, columns, className, children, ...rest }, ref) {
   return (
-    <dl ref={ref} className={cx("card-meta", className)} {...rest}>
-      {items ? items.map((it, i) => <Fragment key={i}><dt>{it.label}</dt><dd>{it.value}</dd></Fragment>) : children}
+    <dl ref={ref} className={cx("card-meta", columns && "columns", className)} {...rest}>
+      {items
+        ? items.map((it, i) => columns
+          ? <div key={i} className={it.wide ? "wide" : undefined}><dt>{it.label}</dt><dd>{it.value}</dd></div>
+          : <Fragment key={i}><dt>{it.label}</dt><dd>{it.value}</dd></Fragment>)
+        : children}
     </dl>
   );
 });

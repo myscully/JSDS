@@ -512,7 +512,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
       if (/<span class="avatar[^"]*"[^>]*\sdata-tone=/.test(pv)) fails.push(`${f}: Avatar 의 data-tone 은 없앴다 — 모든 아바타가 중립 면(Avatar › 색)`);
       /* Avatar Group(2026-11-13) — role=group + 이름, 아바타 5개까지 · 아바타마다 role=img + 이름, '외 N명' 은 맨 뒤(버튼이면 이름에 그 글자) */
       const groups = [...pv.matchAll(/<span class="avatar-group"([^>]*)>((?:\s|<span class="avatar(?:-group-more| sm)?"[^>]*>[^<]*<\/span>|<button\b[^>]*>[^<]*<\/button>)*)<\/span>/g)];
-      if (groups.length !== (pv.match(/<span class="avatar-group"/g) || []).length) fails.push(`${f}: .avatar-group 의 자식은 .avatar 와 맨 뒤 '외 N명' 뿐이다`);
+      if (groups.length !== (pv.match(/<span class="avatar-group"/g) || []).length) fails.push(`${f}: .avatar-group 의 자식은 .avatar(sm) 와 맨 뒤 '외 N명' 뿐이다 — lg 는 묶음에 쓰지 않는다`);
       for (const m of groups) {
         const [, attrs, inner] = m, avs = [...inner.matchAll(/<span class="avatar(?: sm)?"([^>]*)>/g)], more = inner.match(/<(span|button)\b[^>]*class="[^"]*\bavatar-group-more\b[^"]*"[^>]*>([^<]*)<\/\1>/);
         if (!/\brole="group"/.test(attrs) || !/\baria-label="[^"]+"/.test(attrs)) fails.push(`${f}: .avatar-group 은 role="group" 과 aria-label(무엇의 사람들인지)`);
@@ -546,6 +546,7 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         for (const t of m[2].matchAll(/<button\b[^>]*>([\s\S]*?)<\/button>/g)) { const w = t[1].replace(/<span class="count">[\s\S]*?<\/span>/, "").replace(/<[^>]+>/g, " ").trim().split(/\s+/); if (w.length > 2) fails.push(`${f}: 탭 라벨은 1~2단어 "${w.join(" ")}"(Tab › 라벨)`); }
       }
       for (const m of pv.matchAll(/<nav class="sidenav collapsed"[^>]*>([\s\S]*?)<\/nav>/g)) { if (/<a\b[^>]*\stitle=/.test(m[1])) fails.push(`${f}: 접힌 내비의 이름을 title 로(Navigation › 접힘)`); if ([...m[1].matchAll(/<a\b/g)].length !== [...m[1].matchAll(/<span class="tooltip-wrap"><a\b[^>]*aria-label="/g)].length) fails.push(`${f}: 접힌 내비 항목은 Tooltip + aria-label(Navigation › 접힘)`); }
+      sidenavDanger(f, pv);
       if (/class="topbar"[\s\S]*?<nav\b/.test(pv) && /class="sidenav/.test(pv) && /<header class="topbar"[\s\S]*?<nav aria-label/.test(pv)) fails.push(`${f}: 상단 메뉴와 Navigation 을 함께(Top Navigation › 1차 메뉴)`);
       for (const m of pv.matchAll(/<div class="right">([\s\S]*?)<\/header>/g)) {
         for (const b of m[1].matchAll(/<button\b[^>]*class="btn[^"]*icon-only[^"]*"[^>]*>/g)) { if (!/aria-label="/.test(b[0])) fails.push(`${f}: 상단 아이콘 버튼 이름 없음(Top Navigation › 아이콘 버튼)`); if (!m[1].slice(0, b.index).endsWith('<span class="tooltip-wrap">')) fails.push(`${f}: 상단 아이콘 버튼에 Tooltip 없음(Top Navigation › 아이콘 버튼)`); }
@@ -765,7 +766,19 @@ for (const [k, c] of Object.entries(PATTERNS)) {
   for (const u of c.uses || []) if (!USES_MARK[u] && !COMPONENTS[u]) fails.push(`patterns/${k}: uses 의 ${u} 는 없는 컴포넌트다`);
 }
 
-/* Templates(2026-11-18) — 콘솔 화면 일곱. 문서 페이지 templates/<key>.html(정의 · 고르기 표 · 미리보기 · Composition · Rules)과
+/* Navigation 위험 항목(2026-11-24) — a.danger 는 사이드 내비에 하나, 마지막 항목이고 바로 앞에 구분선(.divider) */
+function sidenavDanger(f, html) {
+  for (const m of html.matchAll(/<nav class="sidenav[^"]*"[^>]*>([\s\S]*?)<\/nav>/g)) {
+    const ds = [...m[1].matchAll(/<a\b[^>]*class="[^"]*\bdanger\b[^"]*"/g)];
+    if (!ds.length) continue;
+    if (ds.length > 1) fails.push(`${f}: 사이드 내비의 위험 항목은 하나(Navigation › 위험 항목)`);
+    const last = [...m[1].matchAll(/<a\b[^>]*>/g)].pop();
+    if (!/\bdanger\b/.test(last[0])) fails.push(`${f}: 위험 항목은 사이드 내비의 마지막 항목(Navigation › 위험 항목)`);
+    if (!/<hr class="divider"[^>]*>\s*$/.test(m[1].slice(0, ds[ds.length - 1].index))) fails.push(`${f}: 위험 항목 바로 앞에 구분선 <hr class="divider">(Navigation › 위험 항목)`);
+  }
+}
+
+/* Templates(2026-11-18) — 콘솔 화면 아홉. 문서 페이지 templates/<key>.html(정의 · 고르기 표 · 미리보기 · Composition · Rules)과
    실제 화면 templates/screen/<key>.html(templates.build.js 생성). 미리보기 iframe 이 가리키는 화면이 있어야 하고, 새 창 링크는 Link 규칙(rel · 숨긴 '(새 창)')을 따른다.
    uses 는 화면 HTML 이 실제로 쓰는 컴포넌트와 같아야 한다 — 패턴의 USES_MARK 에 앱 틀 컴포넌트 넷을 더해 잰다 */
 {
@@ -800,6 +813,7 @@ for (const [k, c] of Object.entries(PATTERNS)) {
     else { if (!/rel="noopener noreferrer"/.test(nw[0])) fails.push(`${f}: 새 창 링크에 rel="noopener noreferrer" 가 없다`); if (!/<span class="sr-only"> \(새 창\)<\/span>/.test(nw[0])) fails.push(`${f}: 새 창 링크에 숨긴 '(새 창)' 이 없다`); if (!nw[0].includes(`screen/${k}.html`)) fails.push(`${f}: 새 창 링크가 이 화면이 아니다`); }
     if (!fs.existsSync(path.join(OUT, sf))) { fails.push(`${sf}: 화면이 없다`); continue; }
     const s = read(sf);
+    sidenavDanger(sf, s);
     if (/tpl-review|tpl-hub/.test(s)) fails.push(`${sf}: 검토 도구(.tpl-review)가 남아 있다 — 사이트 화면에는 두지 않는다`);
     if (!/<title>[^<]+<\/title>/.test(s)) fails.push(`${sf}: <title> 이 없다`);
     /* 코드 보기(2026-11-19) — 보이는 HTML 은 화면 파일 그대로, CSS 는 assets/templates.css 그대로. 복사 버튼은 HTML 칸부터 */
