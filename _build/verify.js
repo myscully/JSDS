@@ -47,6 +47,9 @@ for (const sec of ["components", "patterns"]) {
 const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.name.startsWith("_") || e.name.startsWith(".") || e.name === "node_modules" ? [] : e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
 for (const f of walk(OUT).filter(f => f.endsWith(".html"))) { const n = count(fs.readFileSync(f, "utf8"), /class="ph"/g); if (n) { phTotal += n; phPages.push(path.relative(OUT, f)); } }
 if (phPages.length) warns.push(`플레이스홀더 남은 페이지: ${phPages.join(", ")}`);
+/* 운영 팀 이름 = '기획실 디자인팀'(2026-11-25 — 옛 '기획팀 디자인파트'). 원본 · 생성 페이지 · 자산에 옛 이름이 남으면 막는다 */
+for (const f of [...walk(OUT).filter((x) => /\.(html|js|css)$/.test(x)), ...fs.readdirSync(__dirname).filter((x) => /\.(js|css)$/.test(x) && x !== "verify.js").map((x) => path.join(__dirname, x))])
+  if (fs.readFileSync(f, "utf8").includes("디자인파트")) fails.push(`${path.relative(OUT, f)}: 옛 팀 이름 '디자인파트' — '기획실 디자인팀'(2026-11-25)`);
 for (const n of ICONS_MOD.ICON_NAMES) if (!fs.existsSync(path.join(OUT, "assets/icons/outline", n + ".svg"))) fails.push(`assets/icons/outline/${n}.svg 없음`);
 if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.js 없음");
 /* 다크 토큰은 @media (prefers-color-scheme:dark) 와 :root[data-theme="dark"] 에 **같은 내용이 두 번** 들어간다.
@@ -634,6 +637,19 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
         if (!acts) fails.push(`${f}: 목록 바로 뒤에 div.menu-actions.btn-group 이 없다(Dropdown › 적용 영역)`);
         else if (!/data-menu-action="apply"[^>]*>적용</.test(acts[1])) fails.push(`${f}: 적용 영역에 '적용' 버튼(data-menu-action=apply)이 없다(Dropdown › 적용 영역)`);
         if (/role="menuitem"/.test(body)) fails.push(`${f}: 적용 영역이 있는 메뉴에 실행 항목(menuitem)이 섞였다(Dropdown › 적용 영역)`);
+      }
+      /* Combobox '전체' 옵션(2026-11-25) — 여러 개 목록(aria-multiselectable) 맨 위 하나뿐 · role=option · aria-selected = 모든 항목이 골라졌는지 */
+      for (const m of pv.matchAll(/<ul class="menu"[^>]*role="listbox"[^>]*>/g)) {
+        const body = ulBody(pv, m.index);
+        const alls = [...body.matchAll(/<li class="menu-item([^"]*)"([^>]*)\bdata-all\b([^>]*)>/g)];
+        if (!alls.length) continue;
+        if (!/aria-multiselectable="true"/.test(m[0])) fails.push(`${f}: '전체' 옵션(data-all)은 여러 개 Combobox 에만(Combobox › 전체)`);
+        if (alls.length > 1) fails.push(`${f}: '전체' 옵션이 ${alls.length}개 — 하나만(Combobox › 전체)`);
+        const first = /<li\b[^>]*>/.exec(body.slice(m[0].length));
+        if (!first || !/\bdata-all\b/.test(first[0])) fails.push(`${f}: '전체' 옵션은 목록 맨 위(Combobox › 전체)`);
+        const a = alls[0][0], others = [...body.matchAll(/<li class="menu-item([^"]*)"(?![^>]*\bdata-all\b)[^>]*role="option"[^>]*>/g)].filter((x) => !/aria-disabled="true"/.test(x[0]));
+        const allOn = others.length > 0 && others.every((x) => /\bon\b/.test(x[1]));
+        if (!/role="option"/.test(a) || a.includes(`aria-selected="${!allOn}"`) || !/aria-selected="(true|false)"/.test(a)) fails.push(`${f}: '전체' 옵션은 role=option · aria-selected="${allOn}"(모든 항목이 골라졌는지 — Combobox › 전체)`);
       }
       /* Select Button — 항상 하나, radiogroup(2026-11-10). 토글 묶음(aria-pressed)으로 돌아가면 막는다 */
       for (const m of pv.matchAll(/<div class="select-btn[^"]*"([^>]*)>([\s\S]*?)<\/div>/g)) {

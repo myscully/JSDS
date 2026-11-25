@@ -76,7 +76,7 @@
   /* 한 톤(사람의 결정 2026-11-15 — 심각도 · 범주 구분이 필요 없는 차트의 기본, 제품 색과 무관한 고정 파랑) — 계열 순서대로 진한 → 옅은 명도 4단계.
      dataviz 검증기(ordinal 모드): 라이트 blue-40 · 50 · 60 · 70 / #F7F7F8 — 한 색상(3°) · 명도 단조 · 이웃 ΔL ≥ 0.06 · 옅은 끝 2.33:1(≥ 2) PASS,
      다크 blue-80 · 70 · 60 · 45 / #212225 — 같은 검사 PASS(옅은 끝 2.88). 둘째 · 넷째 계열 순서 규칙은 ds-chart.js MONO_STEPS(2계열 = 1 · 4 단계) */
-  --chart-mono-1:var(--blue-40);--chart-mono-2:var(--blue-50);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-70);--chart-mono-track:var(--blue-90);
+  --chart-mono-1:var(--blue-40);--chart-mono-2:var(--blue-50);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-70);--chart-mono-track:var(--surface-neutral-strong);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   /* 기준 트리 밖 — 셋뿐이고, 왜 밖인지가 각각 적혀 있다 */
   /* 지란지교시큐리티 회사 마크. 이 시스템의 brand 는 제품 색이라 회사 정체성 표기가 들어갈 자리가 없다 */
@@ -155,7 +155,7 @@
   /* Chart(트리 밖) 다크 — 같은 여섯 색상을 어두운 면에 맞는 단계로. 검증기 다크, 바탕 #212225 · #1B1C1E: 명도 띠 PASS · 채도 PASS ·
      색각 분리 worst 8.2(violet↔light-blue, deutan) PASS · 정상 시각 16.1 PASS · 3:1 전부 PASS(2026-11-03) */
   --chart-series-1:var(--blue-60);--chart-series-2:var(--orange-40);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-60);--chart-series-5:var(--lime-40);--chart-series-6:var(--pink-46);--chart-series-1-subtle:var(--blue-30);--chart-series-1-strong:var(--blue-80);
-  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);--chart-mono-track:var(--blue-20);
+  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);--chart-mono-track:var(--surface-neutral-strong);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   --company-mark-subtle:#3A2410;
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
@@ -197,7 +197,7 @@
   /* Chart(트리 밖) 다크 — 같은 여섯 색상을 어두운 면에 맞는 단계로. 검증기 다크, 바탕 #212225 · #1B1C1E: 명도 띠 PASS · 채도 PASS ·
      색각 분리 worst 8.2(violet↔light-blue, deutan) PASS · 정상 시각 16.1 PASS · 3:1 전부 PASS(2026-11-03) */
   --chart-series-1:var(--blue-60);--chart-series-2:var(--orange-40);--chart-series-3:var(--light-blue-40);--chart-series-4:var(--violet-60);--chart-series-5:var(--lime-40);--chart-series-6:var(--pink-46);--chart-series-1-subtle:var(--blue-30);--chart-series-1-strong:var(--blue-80);
-  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);--chart-mono-track:var(--blue-20);
+  --chart-mono-1:var(--blue-80);--chart-mono-2:var(--blue-70);--chart-mono-3:var(--blue-60);--chart-mono-4:var(--blue-45);--chart-mono-track:var(--surface-neutral-strong);
   --chart-grid-primary:var(--line-neutral-tertiary);--chart-axis-text:var(--foreground-neutral-tertiary);--chart-tooltip-surface:var(--surface-neutral-inverse);--chart-tooltip-text:var(--foreground-neutral-inverse);
   --company-mark-subtle:#3A2410;
   --shadow-xs:0 1px 2px 0 rgba(0,0,0,.35);--shadow-sm:0 1px 3px 0 rgba(0,0,0,.4);--shadow-md:0 4px 12px 0 rgba(0,0,0,.5);--shadow-lg:0 8px 24px 0 rgba(0,0,0,.55);--shadow-xl:0 12px 32px 0 rgba(0,0,0,.6);--shadow-spread-sm:0 0 8px 0 rgba(0,0,0,.5);--shadow-spread-md:0 0 24px 0 rgba(0,0,0,.6);
@@ -1343,7 +1343,7 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
    pending 은 심각도가 아니라 상태 톤이다('검토 대기' — 옛 Medium 의 청록을 물려받는다. 심각도와 상태가 한 클래스를 나눠 쓰지 않게 갈랐다)
    solid 는 솔리드 상태 면이 없어 같은 틴트 + 테두리로 한 단계 강조하도록 다시 디자인했다.
    색만으로 의미를 전달하지 않는다(1.4.1)는 라벨 병기가 담당하고 verify 가 그것을 검사한다 */
-.tag{display:inline-flex;align-items:center;gap:0.375rem;font-size:var(--font-size-12);font-weight:600;padding:0.1875rem 0.625rem;border-radius:var(--radius-full);line-height:max(1rem,16px);background:var(--surface-neutral-tertiary);color:var(--foreground-neutral-primary);flex:none;width:max-content;max-width:10rem;word-break:keep-all;letter-spacing:0.0252em}   /* 160 을 넘는 라벨만 줄바꿈 — 포커스를 받지 않아 잘라 내면 읽을 길이 없다 */
+.tag{display:inline-flex;align-items:center;gap:0.375rem;font-size:var(--font-size-12);font-weight:600;padding:0.25rem 0.375rem;border-radius:var(--radius-md);line-height:max(1rem,16px);background:var(--surface-neutral-tertiary);color:var(--foreground-neutral-primary);flex:none;width:max-content;max-width:10rem;word-break:keep-all;letter-spacing:0.0252em}   /* 160 을 넘는 라벨만 줄바꿈 — 포커스를 받지 않아 잘라 내면 읽을 길이 없다. 모서리 radius-md · 여백 4/6 — Chip(알약)과 모양을 가름(사람의 요청 2026-11-25) */
 .tag-group{display:inline-flex;flex-wrap:wrap;align-items:center;gap:0.25rem;max-width:100%;line-height:1.6}
 td .tag-group{flex-wrap:nowrap}
 .tag-more{border:0;font-family:inherit}
@@ -1364,8 +1364,8 @@ td .tag-group{flex-wrap:nowrap}
 .tag.ok::before{background:var(--foreground-positive-primary)}
 .tag.accent{background:var(--surface-brand-subtle);color:var(--foreground-brand-primary)}
 .tag.accent::before{background:var(--foreground-brand-primary)}
-.tag.sm{font-size:var(--font-size-11);padding:2px 0.5rem;line-height:max(0.875rem,14px);letter-spacing:0.0311em}   /* Caption 2 11/14 + 위아래 2 — 높이 18 그대로(사람의 결정 2026-11-14, 12/16 + 1 이었다) */
-.tag.lg{font-size:var(--font-size-12);padding:0.3125rem 0.75rem;line-height:max(1rem,16px);letter-spacing:0.0252em}
+.tag.sm{font-size:var(--font-size-11);padding:0.125rem 0.25rem;border-radius:var(--radius-sm);line-height:max(0.875rem,14px);letter-spacing:0.0311em}   /* Caption 2 11/14 + 위아래 2 · 좌우 4 · radius-sm — 높이 18 그대로(사람의 요청 2026-11-25) */
+.tag.lg{font-size:var(--font-size-13);padding:0.375rem 0.5rem;line-height:1.125rem;letter-spacing:0.0194em}   /* Label 2 13/18 + 6/8 — 높이 30(사람의 요청 2026-11-25, 12/16 · 26 이었다) */
 .tag.outline{background:transparent;box-shadow:inset 0 0 0 1px var(--line-neutral-primary)}
 /* outline 테두리 = 그 톤의 선 토큰(사람의 결정 2026-11-13). 중립 · info 는 위의 중립 선 그대로 */
 .tag.outline.critical{box-shadow:inset 0 0 0 1px var(--line-negative-primary)}
@@ -1736,7 +1736,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .notice.warning .ico{color:var(--foreground-cautionary-primary)}
 .notice.danger{background:var(--surface-negative-primary)}
 .notice.danger .ico{color:var(--foreground-negative-primary)}
-.toast{display:inline-flex;align-items:center;gap:0.75rem;width:22.5rem;max-width:100%;padding:0.75rem 1rem;border-radius:var(--radius-lg);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-14);box-shadow:var(--shadow-3);line-height:1.375rem;letter-spacing:0.0145em}
+.toast{display:inline-flex;align-items:center;gap:0.75rem;width:22.5rem;max-width:100%;padding:0.75rem 1rem;border-radius:var(--radius-lg);background:var(--surface-neutral-inverse);color:var(--foreground-neutral-inverse);font-size:var(--font-size-14);font-weight:500;box-shadow:var(--shadow-3);line-height:1.375rem;letter-spacing:0.0145em}
 /* 반전 표면(--surface-neutral-inverse) 위라 -text 를 쓰면 더 나빠진다 — 기준 단계를 그대로 쓴다(라이트 4.74 · 다크 2.37) */
 .toast .ico{flex:none;width:1.25rem;height:1.25rem;display:grid;place-items:center;color:var(--foreground-positive-primary)}
 .toast .ico svg{width:1.25rem;height:1.25rem}
@@ -1887,7 +1887,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl-wrap > .tbl > tbody{transition:opacity var(--motion-base)}
 .tbl-wrap[aria-busy="true"] > .tbl > tbody{opacity:.5}
 .tbl{width:100%;border-collapse:collapse;font-size:var(--font-size-14);margin:0;line-height:1.375rem;font-variant-numeric:tabular-nums;letter-spacing:0.0145em}
-.tbl th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-13);height:2.75rem;padding:0 1rem;border-bottom:1px solid var(--line-neutral-secondary);white-space:nowrap;background:var(--background-neutral-secondary);line-height:1.125rem;letter-spacing:0.0194em}   /* 머리글 = Label 2 13/18(사람의 결정 2026-11-12 — 12 였다). 속성 표(.kv) 머리글도 13 */
+.tbl th{text-align:left;font-weight:600;color:var(--foreground-neutral-tertiary);font-size:var(--font-size-13);height:2.75rem;padding:0 1rem;border-bottom:1px solid var(--line-neutral-secondary);white-space:nowrap;background:transparent;line-height:1.125rem;letter-spacing:0.0194em}   /* 머리글 = Label 2 13/18(사람의 결정 2026-11-12 — 12 였다). 속성 표(.kv) 머리글도 13. 머리글 면 없음 — 아래 선만(사람의 요청 2026-11-25, 회색 면이었다. transparent 는 문서 셸의 th 면을 이기려고) */
 .tbl td{height:3rem;padding:0.75rem 1rem;border-bottom:1px solid var(--line-neutral-secondary);vertical-align:middle;background:var(--tbl-tint,transparent);font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}   /* 칸 글자 = Label 1/Reading Regular 14/22 를 칸에 직접(2026-11-23) — 물려받게 두면 행에 걸린 글자(옛 .log-row 12px)가 기본 · relaxed 칸으로 내려왔고 compact 만 다시 적어 가려 왔다 */
 .tbl.hover tbody tr:where(:not(.row-detail,.disabled)):hover td{--tbl-tint:var(--surface-neutral-tertiary)}   /* 행 hover = 메뉴 · List 와 같은 tertiary(사람의 결정 2026-11-12). .hover 일 때만 — 행을 고르거나 행 동작이 있는 표(사람의 결정 2026-11-13, List .hover 와 같은 방식) */
 .tbl.hover tbody tr:where(:not(.row-detail)):active td{--tbl-tint:var(--surface-neutral-strong)}
@@ -1947,10 +1947,10 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl .detail-meta dt{color:var(--foreground-neutral-secondary)}
 .tbl .detail-meta dd{margin:0;overflow-wrap:anywhere}
 .tbl .row-detail .spinner-wrap{flex-direction:row;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em}
-.tbl.kv th{width:12.5rem;height:auto;padding:0.75rem 1rem;font-size:var(--font-size-13);color:var(--foreground-neutral-secondary);font-weight:500;border-right:1px solid var(--line-neutral-secondary);white-space:normal;vertical-align:top;line-height:1.125rem;letter-spacing:0.0194em}   /* 머리글 13 = 표 머리글과 같다(사람의 결정 2026-11-12 — 14 였다) */
+.tbl.kv th{width:12.5rem;height:auto;padding:0.75rem 1rem;font-size:var(--font-size-13);color:var(--foreground-neutral-secondary);font-weight:500;white-space:normal;vertical-align:top;line-height:1.125rem;letter-spacing:0.0194em}   /* 머리글 13 = 표 머리글과 같다(사람의 결정 2026-11-12 — 14 였다) */
 .tbl.kv td{height:auto}
 .tbl.kv tr:first-child > *{border-top:1px solid var(--line-neutral-secondary)}   /* 속성 표는 thead 가 없어 값 칸의 위가 열려 있었다(사람의 결정 2026-11-12) */
-.side-panel .tbl.kv th{width:7.5rem;border-right:0}   /* 패널 폭 400 에서 머리글 200 은 반을 차지한다 — Side Panel 의 속성 표(2026-11-12 compact 표에서 kv 로) */
+.side-panel .tbl.kv th{width:7.5rem}   /* 패널 폭 400 에서 머리글 200 은 반을 차지한다 — Side Panel 의 속성 표(2026-11-12 compact 표에서 kv 로) */
 .tbl td.empty{display:table-cell;text-align:center;color:var(--foreground-neutral-tertiary);height:auto;padding:1.5rem 1rem;border:none;border-radius:0;background:transparent}
 .tbl td.truncate{max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}   /* 남는 폭을 차지하고 그 안에서 자른다. 전체 값은 잘린 칸에만 붙는 Tooltip(ds.js · React — title 은 쓰지 않는다)과 상세에서 */
 .tbl td.truncate>.tooltip-wrap{display:flex;max-width:100%}
@@ -1977,14 +1977,15 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(.expand:first-child + *){left:2.5rem}
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(.check:first-child + *){left:2.75rem}
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(.expand:first-child + .check + *){left:5.25rem}
-.tbl-wrap.sticky-col .tbl tr:not(.row-detail) > td:is(:first-child:not(.empty),.expand:first-child + *,.check:first-child + *,.expand:first-child + .check + *){background:linear-gradient(var(--tbl-tint,transparent),var(--tbl-tint,transparent)) var(--tbl-surface)}
+.tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(td,th):is(:first-child:not(.empty),.expand:first-child + *,.check:first-child + *,.expand:first-child + .check + *){background:linear-gradient(var(--tbl-tint,transparent),var(--tbl-tint,transparent)) var(--tbl-surface)}
 .tbl-wrap.sticky-col .tbl tr:not(.row-detail) > :is(:first-child:not(.check,.expand,.empty),.expand:first-child + :not(.check),.check:first-child + *,.expand:first-child + .check + *){box-shadow:inset -1px 0 0 var(--line-neutral-secondary)}
 .tbl-wrap.sticky.sticky-col .tbl th:is(:first-child,.expand:first-child + *,.check:first-child + *,.expand:first-child + .check + *){z-index:2}
 .tbl-wrap.sticky.sticky-col .tbl th:is(:first-child:not(.check,.expand),.expand:first-child + :not(.check),.check:first-child + *,.expand:first-child + .check + *){box-shadow:inset -1px 0 0 var(--line-neutral-secondary),inset 0 -1px 0 var(--line-neutral-secondary)}   /* 고정 헤더의 아래 선(그림자)과 고정 열의 오른쪽 선을 함께 */
 /* 고정 헤더 — 표 영역 안에서 세로로 스크롤한다. collapse 표의 th 보더는 스크롤하면 사라져 아래 선을 그림자로 그린다.
    스크롤 영역이라 키보드로 닿도록 tabindex=0 + 이름(verify). 선택 막대가 있으면 그 아래(10+32+10+1)에 붙는다 */
 .tbl-wrap.sticky{scroll-padding-top:2.75rem}
-.tbl-wrap.sticky .tbl th{position:sticky;top:0;z-index:1;box-shadow:inset 0 -1px 0 var(--line-neutral-secondary)}
+.tbl-wrap.sticky{--tbl-surface:var(--background-neutral-primary)}
+.tbl-wrap.sticky .tbl th{position:sticky;top:0;z-index:1;box-shadow:inset 0 -1px 0 var(--line-neutral-secondary);background:var(--tbl-surface)}   /* 머리글 면이 없어져 붙어 있는 동안 아래로 지나가는 행이 비치지 않게 놓인 자리의 면(2026-11-25) */
 .tbl-wrap.sticky > .action-bar{position:sticky;top:0;left:0;z-index:2;background:var(--tbl-surface,var(--background-neutral-primary))}   /* 붙어 있는 동안 아래로 지나가는 행이 비치지 않게 — 놓인 자리의 면 */
 .tbl-wrap.sticky:has(> .action-bar:not([hidden])) .tbl th{top:3.3125rem}
 .tbl-wrap.sticky:has(> .action-bar:not([hidden])){scroll-padding-top:6.0625rem}

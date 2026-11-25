@@ -212,7 +212,7 @@ const wizard = () => {
   const legend = '<p class="form-legend"><em>*</em> 필수 항목</p>';
   const radio = (name, legend, opts, { cls = "", req = false } = {}) => `<div class="field"><fieldset class="radio-group${cls ? " " + cls : ""}"${req ? " data-required" : ""}><legend class="t-label-1-normal t-semibold">${legend}${req ? " <em>*</em>" : ""}</legend>${opts.map(([label, small, on]) => `<label class="radio${small ? " card" : ""}"><input type="radio" name="${name}"${on ? " checked" : ""}><span>${label}${small ? `<small>${small}</small>` : ""}</span></label>`).join("")}</fieldset><span class="help" aria-live="polite"></span></div>`;
   const step1 = `<form class="form" data-validate novalidate>${legend}
-              ${H.pCombo({ id: "wz-groups", label: "배포 대상 그룹", items: ["전체", "보안팀", "개발팀", "영업팀", "경영지원팀", "부산 지사", "대전 지사"], multiple: true, placeholder: "그룹 검색", field: true, req: true, name: "groups", help: "", live: true })}
+              ${H.pCombo({ id: "wz-groups", label: "배포 대상 그룹", items: ["보안팀", "개발팀", "영업팀", "경영지원팀", "부산 지사", "대전 지사"], all: "전체", multiple: true, placeholder: "그룹 검색", field: true, req: true, name: "groups", help: "", live: true })}
               ${radio("wz-scope", "배포 범위", [["모든 단말", "", true], ["지금 온라인인 단말만", ""]])}
             </form>`;
   const step2 = `<form class="form" data-validate novalidate>${legend}

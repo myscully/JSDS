@@ -26,7 +26,7 @@
     mono: ["--chart-mono-1", "--chart-mono-2", "--chart-mono-3", "--chart-mono-4"],
     grid: "--chart-grid-primary", axis: "--chart-axis-text", tipBg: "--chart-tooltip-surface", tipFg: "--chart-tooltip-text",
     surface: "--surface-elevated-primary", text: "--foreground-neutral-primary", sub: "--foreground-neutral-tertiary",
-    /* meter 트랙 = 채움과 같은 파랑의 옅은 단계(사람의 요청 2026-11-20 — dataviz meter 규칙, 종전 회색 --surface-neutral-strong). 게이지의 남은 호 · 진행 막대 목록의 트랙 */
+    /* meter 트랙 = 회색 --surface-neutral-strong(사람의 요청 2026-11-25 — 11-20 의 옅은 파랑을 되돌림, 토큰 이름은 그대로). 게이지의 남은 호 · 진행 막대 목록의 트랙 */
     track: "--chart-mono-track",
     /* crosshair — 격자(--line-neutral-tertiary)보다 한 단계 진한 선. 격자와 구별되고 데이터보다는 조용하다 */
     cross: "--line-neutral-primary",

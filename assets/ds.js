@@ -1165,7 +1165,12 @@
      옵션이 많거나 여러 개 고를 때. 포커스는 입력에 두고 aria-activedescendant 로 옮긴다. 값을 새로 만들지 않는다 — 목록에 있는 것만 고른다 */
   var X_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>';
   function cbInput(h) { return $("input[role=combobox]", h); }
-  function cbItems(h) { return $$(".menu-item", h); }
+  function cbItems(h) { return $$(".menu-item:not([data-all])", h); }
+  /* '전체' 옵션(2026-11-25 — 여러 개에만, 목록 맨 위 li.menu-item[data-all]). 고르면 끄지 않은 모든 옵션을 고르고, 모두 골라진 채 다시 고르면 모두 푼다. 값 · 칩에는 들지 않는다 */
+  function cbAll(h) { return cbMulti(h) ? $(".menu-item[data-all]", h) : null; }
+  function cbEnabled(h) { return cbItems(h).filter(function (i) { return i.getAttribute("aria-disabled") !== "true"; }); }
+  function cbAllSync(h) { var a = cbAll(h); if (!a) return; var en = cbEnabled(h), on = !!en.length && en.every(function (i) { return i.classList.contains("on"); }); a.classList.toggle("on", on); a.setAttribute("aria-selected", String(on)); }
+  function cbNav(h) { var a = cbAll(h); return (a && !a.hidden ? [a] : []).concat(cbVisible(h)); }
   function cbLabel(i) { return i.textContent.trim(); }
   function cbValue(i) { return i.dataset.value != null ? i.dataset.value : cbLabel(i); }
   function cbOn(h) { return cbItems(h).filter(function (i) { return i.classList.contains("on"); }); }
@@ -1179,6 +1184,7 @@
   function cbFilter(h) {
     var inp = cbInput(h), remote = h.getAttribute("data-filter") === "none", q = remote || !h._dsTyped ? "" : inp.value.trim().toLowerCase(), menu = $(".menu", h);
     if (!remote) cbItems(h).forEach(function (i) { i.hidden = !!q && cbLabel(i).toLowerCase().indexOf(q) < 0; });
+    var all = cbAll(h); if (all) all.hidden = !!(h._dsTyped && inp.value.trim());   // 검색어를 치는 동안은 숨김
     var vis = cbVisible(h), shown = cbItems(h).filter(function (i) { return !i.hidden; }).length, auto = $(".menu-state[data-auto]", menu), none = !!q && !shown && !$(".menu-state:not([data-auto])", menu);   // 비활성 항목만 맞아도 '없음'은 아니다 — 후보만 비운다
     if (none && !auto) { auto = doc.createElement("li"); auto.className = "menu-state"; auto.setAttribute("role", "presentation"); auto.setAttribute("data-auto", ""); auto.textContent = "일치하는 항목이 없습니다. 다른 검색어를 입력하세요."; menu.appendChild(auto); }
     if (!none && auto) auto.remove();
@@ -1191,7 +1197,7 @@
     if (multi) {
       $$(".chip", ctrl).forEach(function (c) { c.remove(); });
       on.forEach(function (i) { var c = doc.createElement("span"), l = doc.createElement("span"), x = doc.createElement("button"); c.className = "chip sm"; c.dataset.value = cbValue(i); l.className = "lbl"; l.textContent = cbLabel(i); x.type = "button"; x.className = "x"; x.setAttribute("aria-label", cbLabel(i) + " 제거"); x.innerHTML = X_ICON; c.appendChild(l); c.appendChild(x); row.insertBefore(c, inp); });
-      fitChips(ctrl); cbEnd(h);
+      fitChips(ctrl); cbEnd(h); cbAllSync(h);
     }
     if (name) { $$("input[type=hidden]", h).forEach(function (x) { x.remove(); }); (multi ? on.map(cbValue) : [on[0] ? cbValue(on[0]) : ""]).forEach(function (v) { var x = doc.createElement("input"); x.type = "hidden"; x.name = name; x.value = v; h.appendChild(x); }); }
   }
@@ -1208,7 +1214,10 @@
   function cbToggle(h, item, on) { item.classList.toggle("on", on); item.setAttribute("aria-selected", String(on)); }
   function cbPick(h, item) {
     var inp = cbInput(h), label = cbLabel(item);
-    if (cbMulti(h)) { var on = !item.classList.contains("on"); cbToggle(h, item, on); inp.value = ""; h._dsTyped = false; cbSync(h); cbFilter(h); cbActive(h, item); cbLive(h, label + (on ? " 선택됨" : " 선택 해제됨")); inp.focus(); }
+    if (item.hasAttribute("data-all")) {
+      var en = cbEnabled(h), was = item.classList.contains("on"); en.forEach(function (i) { cbToggle(h, i, !was); });
+      inp.value = ""; h._dsTyped = false; cbSync(h); cbFilter(h); cbActive(h, item); cbLive(h, label + (was ? " 선택 해제됨" : " 선택됨, " + en.length + "개")); inp.focus();
+    } else if (cbMulti(h)) { var on = !item.classList.contains("on"); cbToggle(h, item, on); inp.value = ""; h._dsTyped = false; cbSync(h); cbFilter(h); cbActive(h, item); cbLive(h, label + (on ? " 선택됨" : " 선택 해제됨")); inp.focus(); }
     else { cbItems(h).forEach(function (i) { cbToggle(h, i, i === item); }); inp.value = label; h._dsTyped = false; cbSync(h); cbOpen(h, false); cbLive(h, label + " 선택됨"); inp.focus(); }
     cbFire(h); cbCheck(h);
   }
@@ -1228,7 +1237,7 @@
     var inp = cbInput(h), open = h.classList.contains("open"), k = e.key;
     if (k === "ArrowDown" || k === "ArrowUp") {
       e.preventDefault(); if (!open) { cbOpen(h, true); return true; }
-      var vis = cbVisible(h), i = vis.indexOf($(".menu-item.active", h)), n = k === "ArrowDown" ? (i + 1) % vis.length : i <= 0 ? vis.length - 1 : i - 1; if (vis.length) cbActive(h, vis[n]); return true;
+      var vis = cbNav(h), i = vis.indexOf($(".menu-item.active", h)), n = k === "ArrowDown" ? (i + 1) % vis.length : i <= 0 ? vis.length - 1 : i - 1; if (vis.length) cbActive(h, vis[n]); return true;
     }
     if (k === "Enter" && open) { e.preventDefault(); var a = $(".menu-item.active", h); if (a) cbPick(h, a); return true; }
     if (k === "Escape" && open) { e.preventDefault(); cbOpen(h, false); return true; }
@@ -1239,12 +1248,12 @@
     var inp = cbInput(h), menu = $(".menu", h); if (!inp || !menu || h._dsInit) return; h._dsInit = true;
     if (!menu.id) menu.id = "cb" + Math.random().toString(36).slice(2, 8); inp.setAttribute("aria-controls", menu.id);
     menu.tabIndex = -1;   // 스크롤되는 목록은 Chromium 에서 Tab 칸이 된다 — Tab 이 목록에 멈춰 떠남이 일어나지 않았다
-    cbItems(h).forEach(function (i, n) { if (!i.id) i.id = menu.id + "-" + n; });
+    $$(".menu-item", h).forEach(function (i, n) { if (!i.id) i.id = menu.id + "-" + n; });
     if (!$(":scope > [role=status]", h)) { var s = doc.createElement("span"); s.className = "sr-only"; s.setAttribute("role", "status"); h.insertBefore(s, menu.nextSibling); }
     if (cbMulti(h)) {
       /* 2026-11-23 앞 마크업(.control 바로 아래 칩 · 입력)과 앞 체크 없는 옵션도 받는다 */
       if (!$(".control-track", h)) { var ctl = $(".control", h), tr = doc.createElement("div"); tr.className = "control-track"; while (ctl.firstChild) tr.appendChild(ctl.firstChild); ctl.appendChild(tr); }
-      cbItems(h).forEach(function (i) { if (!$(":scope > .menu-mark", i)) { var m = doc.createElement("span"); m.className = "menu-mark check"; m.setAttribute("aria-hidden", "true"); i.insertBefore(m, i.firstChild); } });
+      $$(".menu-item", h).forEach(function (i) { if (!$(":scope > .menu-mark", i)) { var m = doc.createElement("span"); m.className = "menu-mark check"; m.setAttribute("aria-hidden", "true"); i.insertBefore(m, i.firstChild); } });
       /* 세로 휠은 넘칠 때만 가로로 — 넘치지 않으면 페이지가 그대로 스크롤된다 */
       $(".control-track", h).addEventListener("wheel", function (ev) { var r = ev.currentTarget; if (!cbScrolls(h) || r.scrollWidth <= r.clientWidth || Math.abs(ev.deltaY) <= Math.abs(ev.deltaX)) return; ev.preventDefault(); r.scrollLeft += ev.deltaY; }, { passive: false });
     }

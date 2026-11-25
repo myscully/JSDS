@@ -52,12 +52,12 @@ module.exports = async function revise({ page, ok, go }) {
     await go("components/navigation.html");
     const nv = await page.evaluate(() => { const a = [...document.querySelectorAll(".example-preview .sidenav a")]; return { on: a.filter((x) => x.classList.contains("on")).map((x) => getComputedStyle(x).fontWeight + (x.classList.contains("sub") ? "s" : "")), off: [...new Set(a.filter((x) => !x.classList.contains("on")).map((x) => getComputedStyle(x).fontWeight))] }; });
     ok("navigation: the selected item (and a selected sub item) is weight 700, the rest 500 (2026-11-16)", nv.on.length > 0 && nv.on.every((w) => /^700/.test(w)) && JSON.stringify(nv.off) === '["500"]', JSON.stringify(nv));
-    /* 사이드 패널 안 속성 표 머리글은 오른쪽 선 없음, 다른 자리의 속성 표는 그대로 */
+    /* 속성 표 머리글은 어디서나 오른쪽 선 없음(2026-11-16 사이드 패널 → 2026-11-25 모든 속성 표) */
     await go("components/side-panel.html");
     const sp = await page.evaluate(() => [...document.querySelectorAll(".side-panel .tbl.kv th")].map((th) => getComputedStyle(th).borderRightWidth));
     await go("components/table.html");
     const kv = await page.evaluate(() => [...document.querySelectorAll(".example-preview .tbl.kv th")].filter((th) => !th.closest(".side-panel")).map((th) => getComputedStyle(th).borderRightWidth));
-    ok("a key-value table inside a side panel has no header right border; elsewhere it keeps 1px (2026-11-16)", sp.length > 0 && sp.every((w) => w === "0px") && kv.length > 0 && kv.every((w) => w === "1px"), JSON.stringify({ sp, kv }));
+    ok("key-value tables have no header right border, inside a side panel and elsewhere (2026-11-25)", sp.length > 0 && sp.every((w) => w === "0px") && kv.length > 0 && kv.every((w) => w === "0px"), JSON.stringify({ sp, kv }));
     /* Time Picker — 단독은 최소 160, 폼 안에서는 칸 폭을 채운다(설정 행은 160 고정 그대로) */
     await go("components/time-picker.html");
     const tp = await page.evaluate(() => { const w = (e) => Math.round(e.getBoundingClientRect().width); const solo = [...document.querySelectorAll("#ex-time-picker-default .field.timepicker, #ex-time-picker-size .field.timepicker")].map(w);
@@ -66,10 +66,10 @@ module.exports = async function revise({ page, ok, go }) {
   });
   await part("3 · components/tag.html", async () => {
 
-    /* Tag sm = Caption 2 11/14 · 위아래 2 · 좌우 8 — 높이는 18 그대로(2026-11-14 사람의 결정, 12/16 + 1 이었다) */
+    /* Tag sm = Caption 2 11/14 · 위아래 2 · 좌우 4(2026-11-25) — 높이는 18 그대로 */
     await go("components/tag.html");
     const tsm = await page.evaluate(() => [...document.querySelectorAll("#ex-tag-size .example-preview .tag.sm, #ex-tag-size .tag.sm")].map((e) => { const c = getComputedStyle(e); return [parseFloat(c.fontSize), parseFloat(c.lineHeight), c.paddingTop, c.paddingLeft, Math.round(e.getBoundingClientRect().height * 10) / 10].join("/"); }));
-    ok("tag sm is Caption 2 11/14 with padding 2/8 at height 18 (2026-11-14)", tsm.length > 0 && tsm.every((v) => v === "11/14/2px/8px/18"), JSON.stringify(tsm));
+    ok("tag sm is Caption 2 11/14 with padding 2/4 at height 18 (2026-11-14 · padding 2026-11-25)", tsm.length > 0 && tsm.every((v) => v === "11/14/2px/4px/18"), JSON.stringify(tsm));
   });
   await part("4 · components/indicator.html", async () => {
 

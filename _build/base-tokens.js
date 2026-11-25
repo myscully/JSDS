@@ -210,7 +210,7 @@ const ADDITIONS = {
   "chart-mono-2": "한 톤 2단계(라이트 blue-50 · 다크 blue-70) — 계열 셋 · 넷일 때",
   "chart-mono-3": "한 톤 3단계(blue-60) — 계열 넷일 때",
   "chart-mono-4": "한 톤 4단계(가장 옅음) — 두 계열의 둘째 · 강조 밖 막대 · 정적 스파크라인(라이트 blue-70 · 다크 blue-45, 3:1 미만은 contrast.pairs 예외)",
-  "chart-mono-track": "한 톤 meter 트랙 — 진행 막대 목록 · 게이지의 남은 호(라이트 blue-90 · 다크 blue-20, 사람의 요청 2026-11-20 — 채움과 같은 파랑의 옅은 단계 · 회색 surface-neutral-strong 이던 것)",
+  "chart-mono-track": "한 톤 meter 트랙 — 진행 막대 목록 · 게이지의 남은 호. 값은 surface-neutral-strong(사람의 요청 2026-11-25 — 2026-11-20 의 같은 파랑 옅은 단계 blue-90 · 20 을 회색으로 되돌림). ds-chart 가 이 이름으로 읽어 토큰은 남김",
   "chart-series-1": "탐색형 차트 계열 1(blue) — 순서 고정, 7번째부터는 '기타'로 묶는다",
   "chart-series-2": "탐색형 차트 계열 2(orange-39/40 — cautionary 의 orange-50/60 과 다른 단계)",
   "chart-series-3": "탐색형 차트 계열 3(light-blue-40 — Medium 의 cyan 과 다른 색상)",

@@ -997,3 +997,19 @@ Steps 를 다시 짰습니다.
 - **`SideNavItem danger`** — 계정 삭제 같은 위험 항목(`a.danger`, `--foreground-negative-strong` 글자). 사이드 내비의 마지막 항목 하나이고 바로 앞에 `<Divider />`(사이트 `<hr class="divider">`)를 둡니다. 누르면 위험 확인 Popup(`danger`)을 열고, 현재 메뉴(`active`)로 만들지 않습니다.
   - 사이트 ds.js 는 `.sidenav a.danger` 를 눌러도 `.on` · `aria-current` 를 옮기지 않습니다(위험 확인을 여는 항목이지 화면이 아니므로). 제품이 사이드 내비 클릭에 현재 메뉴를 직접 다는 코드가 있으면 같은 예외를 둡니다.
 - **`CardMeta columns`** — 라벨 위 · 값 아래의 두 칸 키-값(`dl.card-meta.columns > div > dt + dd`), 767px 이하 한 칸. `items` 의 `wide: true` 는 두 칸을 다 씁니다(소개처럼 긴 값). `columns` 없이 쓰는 기존 `CardMeta` 는 그대로입니다.
+
+## 추가 수정 — 표 머리글 · Tag 모양 · Combobox 전체 (2026-11-25)
+
+**새로 더한 것**
+- **`Combobox multiple allLabel="전체"`** — 목록 맨 위에 '전체' 옵션(`li.menu-item[data-all]`)을 그립니다. 고르면 끄지 않은 모든 항목이 선택되고 항목마다 태그가 생깁니다. 모두 골라진 채 다시 고르면 모두 풉니다. 항목 하나를 풀면 '전체' 체크도 꺼집니다.
+  - '전체' 는 값이 아닙니다 — `onChange` · 숨은 input · 사이트 `ds:select` 의 values 에 들지 않습니다. 검색어를 치는 동안은 숨습니다.
+  - 하나 고르기(`multiple` 없음)에서 주면 개발 모드에서 한 번 경고하고 그리지 않습니다.
+  - 전에 옵션 목록에 '전체' 라는 항목을 직접 넣었다면 지우고 `allLabel` 로 바꾸세요 — 그 항목은 고르면 '전체' 라는 칩 하나만 생겼습니다.
+
+**보이는 모양이 바뀐 것**
+- **표 머리글(`.tbl th`)의 면을 지웠습니다**(투명, 아래 선은 그대로). 고정 헤더 · 고정 열의 머리글만 놓인 자리 면(`--tbl-surface`)을 칠해 지나가는 행이 비치지 않습니다.
+- **속성 표(`.tbl.kv`)의 머리글 오른쪽 선을 지웠습니다**(모든 자리).
+- **Tag 모양** — 기본 반경 `--radius-md` · 여백 4/6 · 높이 22 → 24, `sm` 반경 `--radius-sm` · 여백 2/4(높이 18 그대로), `lg` 반경 `--radius-md` · 여백 6/8 · 글자 13/18 · 높이 26 → 30. Chip(알약 모양)과 갈리게 했습니다.
+- **진행 막대 · 게이지 트랙** `--chart-mono-track` 의 값이 `--surface-neutral-strong`(회색)입니다(2026-11-20 의 옅은 파랑을 바꿈).
+- **Toast 글자 500.**
+- 표 행 hover 는 원래 옵션(`Table hover` · `.tbl.hover`)이었고 기본값은 바뀌지 않았습니다. Table 페이지에 Hover 예제를 더했습니다.

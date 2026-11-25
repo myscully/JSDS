@@ -24,7 +24,7 @@ function buildNav(filter = "") {
   const f = filter.trim().toLowerCase(); let h = "";
   if (f) { for (const sec of Object.keys(SITE)) { const it = sectionItems(sec, f); if (it) h += `<div class="sec-label">${SITE[sec].title}</div>${it}`; } if (!h) h = `<p style="padding:0 12px;color:var(--foreground-neutral-tertiary);font-size:12px">검색 결과가 없습니다.</p>`; }
   else { h = sectionItems(currentSection(), ""); } /* 섹션 타이틀(h4)은 상단 메뉴와 중복이라 두지 않는다 */
-  $("#nav").innerHTML = h; $("#foot").textContent = VERSION + " · 지란지교시큐리티 기획팀 디자인파트"; markActive();
+  $("#nav").innerHTML = h; $("#foot").textContent = VERSION + " · 지란지교시큐리티 기획실 디자인팀"; markActive();
 }
 function markActive() { const cur = location.hash || "#/home/overview"; document.querySelectorAll("#nav a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === cur)); }
 
@@ -523,7 +523,7 @@ ${docTabs([["designer", "디자이너"], ["react", "React 개발자"], ["html", 
 <h2 id="how">어떻게 쓰나</h2><dl class="kv"><dt>디자이너</dt><dd>Figma 라이브러리의 컴포넌트를 쓰고, 이 가이드의 예제·Props 로 변형과 상태를 확인합니다</dd><dt>개발자</dt><dd>React 제품은 <a href="#/resources/react">React 패키지</a>를 설치하고 각 페이지의 React 탭 코드를 그대로 씁니다. 그 밖의 제품은 HTML+CSS 탭 코드에 공통 스타일 파일과 동작 스크립트를 함께 씁니다</dd><dt>제품 적용</dt><dd>제품 색 팔레트 일곱(기본 · 제품1 · 제품2 · 제품3 · 브랜드 · 중립 · AI) 중 하나를 고르면 제품 색을 쓰는 자리가 모두 따라옵니다. 고르지 않으면 파랑입니다</dd></dl>
 <p>역할별 단계 안내는 <a href="#/home/getting-started">Getting started</a>를 참고하세요.</p>
 <h2 id="scope">범위</h2><dl class="kv"><dt>제공하는 것</dt><dd>중립 램프, 타이포그래피, 간격 · 반경 · 엘리베이션, 아이콘 규칙, 코드가 함께 있는 데스크톱 컴포넌트 ${allPages("components").filter((p) => p.key !== "overview").length}개, 패턴 ${allPages("patterns").filter((p) => p.key !== "overview").length}개, 토큰</dd><dt>제품이 정하는 것</dt><dd>팔레트 중 어느 제품 색을 쓸지. 헤더의 제품 색 메뉴로 팔레트마다 적용된 모습을 미리 볼 수 있습니다</dd><dt>브랜드 컬러</dt><dd>회사 색 #FF7F00 은 팔레트의 주황으로 쓸 수 있습니다. 그 위 흰 글자 대비가 기준에 못 미쳐 예외로 선언되어 있습니다. 이 시스템은 관리자 웹 제품 기준이며, 브랜드 디자인 시스템은 별도로 제작합니다</dd><dt>플랫폼</dt><dd>관리 콘솔인 데스크톱 웹 우선</dd></dl>
-<h2 id="team">운영</h2><p>기획팀 디자인파트가 운영하며, Figma 라이브러리와 이 가이드를 함께 갱신합니다. 제안·기여 절차는 <a href="#/resources/contribution">Contribution</a>을 참고하세요.</p>`,
+<h2 id="team">운영</h2><p>기획실 디자인팀이 운영하며, Figma 라이브러리와 이 가이드를 함께 갱신합니다. 제안·기여 절차는 <a href="#/resources/contribution">Contribution</a>을 참고하세요.</p>`,
   "home/principles": () => `<h1>UX Principles</h1><p class="lead">보안 관리자는 하루 종일 콘솔을 봅니다. 화려함보다 정확함, 밀도, 예측 가능성이 우선입니다.</p>
 ${PRINCIPLES.map(([id, t, b], i) => `<h2 id="${id}">${i + 1}. ${t}</h2><p>${b}</p>`).join("\n")}`,
 
@@ -601,7 +601,7 @@ ${codeBlock("tok-json", `{\n  "color": {\n    "atomic": { "blue": { "50": { "val
 <h2 id="screens">Screens</h2>
 <div class="base-list">${allPages("templates").filter((p) => p.key !== "overview").map((p) => `<a href="#/templates/${p.key}"><b>${p.title}${nb("templates", p.key)}</b><span>${TEMPLATES[p.key].line}</span>${I("chevron-right", 18)}</a>`).join("")}</div>
 <p>화면에 쓴 컴포넌트와 패턴은 각 화면 페이지의 Composition 에 있습니다. 화면 하나를 크게 보려면 그 페이지에서 새 창으로 엽니다.</p>`,
-  "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><p>이 문서는 아직 작업 중입니다. 아래 절차는 큰 흐름이며, 각 단계의 서식과 기준이 확정되면 이 페이지를 갱신합니다.</p><ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인파트 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
+  "resources/contribution": () => `<h1>Contribution</h1><p class="lead">새 컴포넌트를 제안·검토·배포하는 절차입니다.</p><p>이 문서는 아직 작업 중입니다. 아래 절차는 큰 흐름이며, 각 단계의 서식과 기준이 확정되면 이 페이지를 갱신합니다.</p><ol><li><b>제안</b>: 필요 배경, 기존 컴포넌트로 안 되는 이유, 사용 화면 캡처</li><li><b>디자인 리뷰</b>: 디자인팀 검토(토큰 준수, 변형·상태 완비, 접근성)</li><li><b>구현 리뷰</b>: 개발팀 검토(Props 명세, 반응형, 키보드)</li><li><b>배포</b>: <code>_build/components.data.js</code> 에 예제·Props 추가 → <code>style.src.css</code> 의 Live component samples 블록에 CSS 추가 → 재빌드 → Figma 섹션 갱신 → Changelog 기록</li></ol>`,
 };
 
 Object.assign(PAGES, window.FOUNDATION_PAGES({ codeBlock, tokenSection, sw, nb, STYLE, VERSION, PRODUCTS, ICONS, I, LIB, dedent, tbl }));

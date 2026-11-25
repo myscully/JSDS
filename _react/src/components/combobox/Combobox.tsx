@@ -33,16 +33,22 @@ interface ComboboxBase<T extends string> {
   onQueryChange?: (query: string) => void;
   /** 여러 개 — 태그가 넘칠 때. scroll(기본)은 필드 높이를 지키고 태그 줄이 가로로 스크롤, wrap 은 줄을 바꿔 필드가 늘어난다 */
   overflow?: "scroll" | "wrap";
+  /** 여러 개 — 목록 맨 위의 '전체' 옵션 라벨. 고르면 끄지 않은 모든 옵션이 선택되고(항목마다 칩), 모두 선택된 채 다시 고르면 모두 해제한다. 값에는 들지 않고 검색어를 치는 동안은 숨는다 */
+  allLabel?: string;
 }
 export type ComboboxProps<T extends string = string> = ComboboxBase<T> &
   ({ multiple?: false; value?: T | null; defaultValue?: T | null; onChange?: (value: T | null) => void } | { multiple: true; value?: T[]; defaultValue?: T[]; onChange?: (value: T[]) => void });
 
 const NO_MATCH = "일치하는 항목이 없습니다.";
+/** '전체' 옵션의 활성 키 — 옵션 값과 겹치지 않게 */
+const ALL = "\u0000all";
+let warnedAll = false;
 const textOf = (o: SelectOption<string>) => (typeof o.label === "string" ? o.label : o.value);
 
 /** 입력해서 찾아 고르기 · 여러 개 고르기. 포커스는 입력에 두고 aria-activedescendant 로 옮긴다. 목록에 있는 값만 고른다 */
 export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
-  const { options, placeholder, label, name, required, disabled, id, className, style, defaultOpen = false, status, statusText, onRetry, filter = true, onQueryChange, multiple, overflow = "scroll" } = props;
+  const { options, placeholder, label, name, required, disabled, id, className, style, defaultOpen = false, status, statusText, onRetry, filter = true, onQueryChange, multiple, overflow = "scroll", allLabel } = props;
+  if (process.env.NODE_ENV !== "production" && allLabel && !multiple && !warnedAll) { warnedAll = true; console.warn("[ds-react] Combobox allLabel 은 multiple 에서만 씁니다 — 하나만 고르는 목록에는 '전체' 옵션을 두지 않습니다."); }
   const field = useContext(FieldContext);
   const form = useContext(FormValidationContext);
   const autoId = useId(undefined, "cb");
@@ -57,7 +63,7 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
   const [open, setOpen] = useState(defaultOpen);
   const [typed, setTyped] = useState(false);
   const [text, setText] = useState("");
-  const [active, setActive] = useState<T | null>(null);
+  const [active, setActive] = useState<string | null>(null);
   const [live, setLive] = useState("");
   const [leaves, setLeaves] = useState(0);
   const root = useRef<HTMLDivElement>(null);
@@ -76,6 +82,10 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
   const usable = (list: SelectOption<T>[]) => list.filter((o) => !o.disabled);
   const state = status ?? (options.length ? undefined : ("empty" as const));
   const noMatch = !state && !!query && !visible.length;
+  const showAll = !!multiple && !!allLabel && !state && !(typed && text.trim());
+  const enabledValues = usable(options).map((o) => o.value);
+  const allOn = enabledValues.length > 0 && enabledValues.every((v) => selected.includes(v));
+  const idOf = (k: string) => (k === ALL ? `${listId}--all` : `${listId}-${k}`);
 
   const openMenu = () => {
     if (disabled || open) return;
@@ -100,7 +110,7 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
     return () => t.removeEventListener("wheel", wheel);
   }, [scrolls]);
   useEffect(() => {
-    if (active !== null) document.getElementById(`${listId}-${active}`)?.scrollIntoView?.({ block: "nearest" });
+    if (active !== null) document.getElementById(active === ALL ? `${listId}--all` : `${listId}-${active}`)?.scrollIntoView?.({ block: "nearest" });
   }, [active, listId]);
   /* 검증 — 값이 바뀌었거나 떠날 때. 열어 보지 않은 필드는 조용하다 */
   const seen = useRef({ selected, leaves });
@@ -127,6 +137,15 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
       close();
       setLive(`${text2} 선택됨`);
     }
+    setTyped(false);
+    setText("");
+    input.current?.focus();
+  };
+  /* '전체' — 모두 선택돼 있으면 끄지 않은 옵션을 모두 해제, 아니면 모두 선택(끈 옵션은 그대로) */
+  const pickAll = () => {
+    setSelected(allOn ? selected.filter((v) => !enabledValues.includes(v)) : ordered([...selected, ...enabledValues.filter((v) => !selected.includes(v))]));
+    setActive(ALL);
+    setLive(`${allLabel} ${allOn ? "선택 해제됨" : `선택됨, ${enabledValues.length}개`}`);
     setTyped(false);
     setText("");
     input.current?.focus();
@@ -160,12 +179,13 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
       if (!open) { openMenu(); return; }
-      const list = usable(visible);
+      const list: string[] = [...(showAll ? [ALL] : []), ...usable(visible).map((o) => o.value)];
       if (!list.length) return;
-      const i = list.findIndex((o) => o.value === active);
-      setActive(list[e.key === "ArrowDown" ? (i + 1) % list.length : i <= 0 ? list.length - 1 : i - 1].value);
+      const i = list.indexOf(active ?? "");
+      setActive(list[e.key === "ArrowDown" ? (i + 1) % list.length : i <= 0 ? list.length - 1 : i - 1]);
     } else if (e.key === "Enter" && open) {
       e.preventDefault();   // 목록이 열려 있으면 폼을 제출하지 않는다
+      if (active === ALL && showAll) { pickAll(); return; }
       const o = options.find((x) => x.value === active);
       if (o) pick(o);
     } else if (e.key === "Backspace" && multiple && !shown && selected.length) {
@@ -200,7 +220,7 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
       aria-autocomplete="list"
       aria-expanded={open}
       aria-controls={listId}
-      aria-activedescendant={open && active !== null ? `${listId}-${active}` : undefined}
+      aria-activedescendant={open && active !== null ? idOf(active) : undefined}
       aria-label={field?.labelId ? undefined : label}
       aria-labelledby={field?.labelId}
       aria-describedby={field?.helpId}
@@ -234,7 +254,14 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
         {state ? (
           <MenuState status={state} text={statusText} onRetry={onRetry} />
         ) : (
-          options.map((o) => {
+          <>
+          {showAll && (
+            <li id={idOf(ALL)} className={cx("menu-item", allOn && "on", active === ALL && "active")} role="option" data-all="" aria-selected={allOn} onClick={pickAll}>
+              <span className="menu-mark check" aria-hidden="true" />
+              {allLabel}
+            </li>
+          )}
+          {options.map((o) => {
             const on = selected.includes(o.value);
             return (
               <li
@@ -252,7 +279,8 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>) {
                 {o.label}
               </li>
             );
-          })
+          })}
+          </>
         )}
         {noMatch && <MenuState status="empty" text={`${NO_MATCH} 다른 검색어를 입력하세요.`} />}
       </ul>

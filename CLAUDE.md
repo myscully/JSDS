@@ -50,7 +50,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 106 · verify 0/0 · contrast 3822쌍 실패 0 · advisory 1149 · behave 1731/1731 · react 945+6 · tsc 0
+pages 106 · verify 0/0 · contrast 3808쌍 실패 0 · advisory 1149 · behave 1739/1739 · react 951+6 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1253,6 +1253,22 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 음성 시험: verify 2(위험 항목이 마지막이 아님 · 구분선 없음) · React 4 · behave 6(ds.js `:not(.danger)` 지움 · avatar lg CSS · danger 색 · columns 390 · accent 클래스 · 패널 제출 분기) 모두 실패로 잡혔다. 설정 화면은 1440 라이트 · 다크 · 1024 캡처로 보았다(콘솔 오류 0). 390 은 템플릿 화면 최소 폭 1024 라 넘친다(다른 화면과 같음).
 - **하지 않은 것:** 설정의 다른 메뉴 화면, 사진 아바타, 저장 · 삭제 실제 동작(흉내만), Figma 에 설정 화면.
 - Figma 미반영 6건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — Spec Navigation · Label, Spec Card · Label, Spec Avatar · Size, Spec Avatar · Label, Rules navigation · 위험 항목, Rules avatar · 크기.
+
+2026-11-25 추가 수정 일곱 — 진행 막대 트랙 · 표 hover · Tag 모양 · Combobox 전체 · 표 머리글 · Toast · 운영 팀 이름(사람의 요청 · 결정 셋) — contrast 3822 → 3808 · behave 1731 → 1739(`behave.fix25.js` 7 · `behave.nav.js` 1) · react 945+6 → 951+6(`tests/combobox-all.test.tsx` 4 · 예제 344 → 346 에 따른 구조 비교 2). advisory · verify · pages 수는 그대로.
+- **사람의 결정:** 게이지 남은 호도 함께 회색, Combobox '전체' 는 항목마다 칩, 속성 표의 오른쪽 선은 모든 `.tbl.kv` 에서 지움.
+- **진행 막대 · 게이지 트랙 = 회색** — `--chart-mono-track` 의 값을 라이트 · 다크 모두 `var(--surface-neutral-strong)` 으로(11-20 의 같은 파랑 옅은 단계 blue-90 · 20 을 되돌림). 토큰 이름 · 소비자(`.progress-list .progress` · ds-chart `track`)는 그대로라 토큰 수 110 그대로다. **contrast −14** = 따로 재던 '채움 mono-1 / mono-track' 쌍이 '채움 / surface-neutral-strong' 쌍과 같은 값이 되어 지움(× 맥락 14). 채움 / 트랙(카드 위 합성) 라이트 5.00 · 다크 6.15.
+- **표 hover 는 옵션** — `.tbl.hover`(이미 있던 클래스 · React `hover`)를 Table · Data Table Props 에 적고 Table 페이지에 Hover 예제(사이트 · React), Rules '행 hover'(기본은 없음 · 행이 상세로 이어질 때만). 복사용 CSS 에 `.link` 를 더함(verify 가 잡음).
+- **Tag = Chip 과 다른 모서리** — 기본 `--radius-md` · 4/6(높이 22 → 24), sm `--radius-sm` · 2/4(18 그대로), lg `--radius-md` · 6/8 · Label 2 13/18 · 자간 0.0194em(26 → 30). `.tag-more`(+N)도 따라간다. lg 의 행간 · 자간은 사람이 정하지 않은 기본값(텍스트 스타일 표 안). Spec Size · Container · Label · Props.
+- **Combobox '전체' 옵션** — 여러 개 Combobox 목록 맨 위 `li.menu-item[data-all][role=option]`(사이트 `cbBox all` · `pCombo all`), React `Combobox multiple allLabel="전체"`. 고르면 끄지 않은 모든 항목이 선택되고 항목마다 칩, 모두 골라진 채 다시 고르면 모두 풂, 항목 하나를 풀면 체크가 꺼지고 다 고르면 다시 켜짐. 값 · 숨은 input · `ds:select` · `onChange` 에는 들지 않고, 알림 문구는 '전체 선택됨, n개'. 검색어를 치는 동안 숨는다(사람이 정하지 않은 기본값). React 는 `multiple` 없이 주면 개발 모드에서 한 번 경고하고 그리지 않음. 위저드 템플릿 '배포 대상 그룹' 의 보통 항목 '전체' 를 이 옵션으로 바꿨다. 예제 All Option(사이트 · React), Rules '전체', Props, MIGRATION. **verify 더함:** `data-all` 은 `aria-multiselectable` 목록 안에만 · 하나 · 맨 위 · role=option · aria-selected = 모두 골라졌는지.
+- **표 머리글 면 없음** — `.tbl th` 의 회색 면을 지움(아래 선 그대로). 고정 헤더 · 고정 열의 머리글만 아래로 지나가는 행이 비치지 않게 놓인 자리의 면 `--tbl-surface` 를 칠한다(`.tbl-wrap.sticky` 에 기본 `--background-neutral-primary`, 카드 · 패널 · 팝업 안은 기존 규칙대로 elevated). **속성 표(`.tbl.kv`)의 머리글 오른쪽 선을 모두 지움**(사이드 패널 전용 `border-right:0` 은 쓸모없어져 지움). Table · Data Table Spec Container · Props · Rules '경계'.
+- **Toast 글자 500**(동작 버튼은 600 그대로).
+- **운영 팀 이름 = '기획실 디자인팀'** — `render.js` About › 운영 문장과 Contribution 의 '디자인 리뷰' 줄. **verify 더함:** 원본(`_build/*.js|css`, verify.js 제외)과 생성 html · js · css 에 '디자인파트' 금지. 예제 데이터의 부서 '기획팀'(조직도 등)은 다른 뜻이라 그대로다.
+- **behave.fix25 7** — 8 페이지 149 개 비고정 머리글이 투명 · 고정 헤더 th = `--tbl-surface` 이고 스크롤해도 위 · 고정 열 머리글 불투명, Table 기본은 hover 면 없음 · Hover 예제는 tertiary, Toast 500 · 버튼 600, Combobox 전체 둘(고르기 · 칩 · 이벤트 값 · 알림 / 칩 지우면 꺼짐 · 다시 고르면 모두 풂 · 검색 중 숨김), 위저드 '전체' 옵션, About 팀 이름. behave.nav +1 = Tag 세 크기의 반경 · 여백 · 글자. **기존 단정 고침:** Tag 높이 18 · 22 · 26 → 18 · 24 · 30 · 좁은 자리 Tag 22 → 24 · sm 여백 2/8 → 2/4(behave.nav), 속성 표 오른쪽 선 '패널 밖은 1px' → 모두 0(behave.revise), 트랙 = 파랑 옅은 단계 → surface-neutral-strong · 게이지는 합성한 색끼리 비교(behave.dataviz — `rgba()` 와 `color(srgb …)` 표기가 달라 글자 비교가 첫 게이트에서 실패).
+- **측정에서 드러나 고친 것:** 처음 전체 게이트에서 verify 의 '디자인파트' 검사가 behave.fix25.js 의 검사 문자열 자체를 잡았다(문자열을 나눠 씀). 고정 헤더 단정은 이 사이트의 부드러운 스크롤 때문에 틀을 즉시 스크롤로 보인 뒤 잰다.
+- 음성 시험: verify 3건(`aria-selected` 틀림 · 여러 개 아닌 목록의 `data-all` · '디자인파트' 되살림 — 첫 회는 생성 마크업이 `data-all=""` 라 변형이 적용되지 않아 다시 함) · behave 7건(고정 th 면 지움 · th 회색 되살림 · Toast 500 지움 · hover 기본으로 · 전체 분기 끔(4/7) · 검색 중 숨김 끔 · 위저드 보통 항목) · React 4건 모두 잡혔다.
+- 캡처: 1440 라이트 · 다크 · 390 에서 Tag 세 크기 · Table · 고정 헤더 스크롤 · 사이드 패널 속성 표 · 대시보드 부서별 패치 · 게이지 · Toast · Combobox 전체를 보았다. 전체 예제의 열린 목록이 미리보기 아래로 넘쳐 뜨는 것은 기존 Multiple 예제와 같은 배치다.
+- **고치지 않은 것:** 문서 셸의 문서 표 머리글(`table:not(.tbl) th`)은 회색 그대로(컴포넌트 표가 아님 — 요청 밖). `_figma/font-revert-nodes.tsv` 의 '기획팀 디자인파트'(Figma Home 바닥글 글자 — Figma 몫). `render.js` 의 `#foot` 줄은 생성 페이지에 그 요소가 없어 쓰이지 않는다.
+- Figma 미반영 6 → 18건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — 이번 몫 12: 변수 `chart/mono/track` 값(Figma 는 blue-90 · 20), Tag 세트 높이 2(Medium 22 · Large 26), Spec Tag Size · Container · Label, Spec Data Table · Table Container, Spec Data Visual Color, Rules combobox · 전체 · table · 행 hover · 경계. Toast 굵기 · 머리글 면 · 속성 표 선 · Combobox 전체 옵션은 audit 대조 밖이라 수에 없다.
 
 `advisory 1149` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

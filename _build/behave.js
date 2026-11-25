@@ -2602,6 +2602,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 93i · behave.fix24.js", async () => {
     await require("./behave.fix24.js")({ page, ok, go });   // 추가 수정 열하나 — 차트 머리 · 증감 가운데 · Pagination 아이콘 · Card Radio · Tree 숫자 · N 배지 · 탭 건수(2026-11-24)
   });
+  await part("part 93j · behave.fix25.js", async () => {
+    await require("./behave.fix25.js")({ page, ok, go });   // 추가 수정 일곱 — 표 머리글 면 · hover 옵션 · Toast 500 · Combobox 전체 · 팀 이름(2026-11-25)
+  });
   await part("part 93 · behave.shell.js", async () => {
     await require("./behave.shell.js")({ page, ok, go });   // 템플릿 검토 수정 일곱 — 상단 바 · 접기 · 테마 · 알림 점 · flush 표 · 로그인 · 버튼 묶음 · 대시보드(2026-11-18)
   });

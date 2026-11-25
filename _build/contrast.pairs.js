@@ -120,8 +120,7 @@ const pairs = [
   ["--chart-mono-3", SURFACES, 3, "차트 한 톤 3단계"],
   ["--chart-mono-4", SURFACES, 3, "차트 한 톤 4단계(가장 옅음) — 비교 기간 · 강조 밖 막대 · 정적 스파크라인", { advisory: true, why: "사람의 결정(2026-11-15 한 톤) — 라이트 blue-70 2.49 · 회색 2.33, 다크 blue-45 카드 2.88. 명도로 계열을 가르는 옅은 끝이라 3:1 아래이고(검증기 바닥 2:1 은 넘음), 값은 범례 · 툴팁 · 표로 보기가 나른다" }],
   /* 게이지 · 진행 막대 · 정적 막대 — 채움이 트랙(--surface-neutral-strong) 위에서 보여야 한다 */
-  ["--chart-mono-1", ["--surface-neutral-strong"], 3, "정적 막대의 채움 / 트랙"],
-  ["--chart-mono-1", ["--chart-mono-track"], 3, "진행 막대 · 게이지의 채움 / 같은 파랑 트랙(2026-11-20)"],
+  ["--chart-mono-1", ["--surface-neutral-strong"], 3, "정적 막대 · 진행 막대 · 게이지의 채움 / 트랙(--chart-mono-track = surface-neutral-strong, 2026-11-25 — 같은 값이라 따로 재던 쌍을 지움)"],
   ["--chart-series-1-subtle", SURFACES, 3, "차트 비교 기간 막대(계열 1 옅은 톤)", { advisory: true, why: "사람의 결정(2026-11-05) — 비교 기간은 같은 색상의 옅은 톤으로 나누는 관례를 따른다. 계열 1 과의 대비 2.74 로 둘이 갈리고, 값은 툴팁 · 범례로 읽는다" }],
   ["--chart-series-1-strong", SURFACES, 3, "차트 막대 위 선(계열 1 진한 톤)"],
   ["--chart-axis-text", SURFACES, 4.5, "차트 축 · 범례 글자", REF("foreground/neutral/tertiary 를 참조 — 기준 토큰 값(61% 알파)이라 글자 쌍과 같은 예외")],

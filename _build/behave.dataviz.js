@@ -3,7 +3,7 @@
    - 격자는 값 축에만(가로 막대면 x) · 선은 둥근 끝 · hover 점 링 2 · 영역은 계열 색 10% 단색
    - 툴팁: 선 · 영역 차트에 세로 crosshair, 값이 먼저 굵게 · 계열 키는 짧은 선 · 숫자는 ko-KR(축이 1만에 닿으면 만 단위)
    - 색은 계열을 따름(slot) · 스파크 끝 점 · 다시 불러오는 동안 지난 그림을 흐리게(레이아웃 그대로)
-   - 정적 막대 끝 4 · 진행 막대 · 게이지 트랙 = 같은 파랑의 옅은 단계(--chart-mono-track)
+   - 정적 막대 각짐 · 진행 막대 · 게이지 트랙 = --chart-mono-track(값은 회색 --surface-neutral-strong — 2026-11-25)
    - 대시보드는 훑어보기만(기간 컨트롤 없음), 분석 패턴은 필터 한 줄이 카드 밖 · 차트 위 */
 module.exports = async function dataviz({ page, ok, go }) {
   const wait = (ms) => page.waitForTimeout(ms);
@@ -130,30 +130,33 @@ module.exports = async function dataviz({ page, ok, go }) {
       r.pts.length > 3 && r.pts.slice(0, -1).every((x) => x === 0) && r.pts[r.pts.length - 1] === 3 && r.ring === 2 && r.ringColor === r.surface && r.color === r.line, JSON.stringify(r));
   });
 
-  await part("5 · 정적 막대 끝 · 트랙 = 같은 파랑의 옅은 단계(라이트 · 다크)", async () => {
+  await part("5 · 정적 막대 끝 · 트랙 = 회색 surface-neutral-strong(라이트 · 다크)", async () => {
     const read = () => page.evaluate(() => {
       const rgb = (c) => { const p = document.createElement("i"); p.style.color = c; document.body.appendChild(p); const v = getComputedStyle(p).color; p.remove(); return v; };
       const lum = (c) => { const [r, g, b] = c.match(/[\d.]+/g).slice(0, 3).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
       const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
-      const track = rgb("var(--chart-mono-track)"), fill = rgb("var(--chart-mono-1)");
+      const track = rgb("var(--chart-mono-track)"), fill = rgb("var(--chart-mono-1)"), gray = rgb("var(--surface-neutral-strong)"), surf = rgb("var(--surface-elevated-primary)");
+      /* 반투명 트랙은 카드 면 위에 합성해 잰다(같은 색의 두 알파를 그냥 비교하지 않는다) */
+      const over = (top, under) => { const c = document.createElement("canvas"); c.width = c.height = 1; const x = c.getContext("2d"); x.fillStyle = under; x.fillRect(0, 0, 1, 1); x.fillStyle = top; x.fillRect(0, 0, 1, 1); const d = x.getImageData(0, 0, 1, 1).data; return `rgb(${d[0]}, ${d[1]}, ${d[2]})`; };
+      const trackOnCard = over(track, surf);
       const rad = (sel) => { const e = document.querySelector(sel); return e ? getComputedStyle(e).borderRadius : null; };
       const prog = document.querySelector("#ex-data-visual-progress .progress-list .progress");
       const gauge = document.querySelector("#ex-data-visual-gauge canvas[data-chart]"), gch = gauge && gauge.__dsChart && gauge.__dsChart.chart;
-      return { track, fill, ratio: +ratio(fill, track).toFixed(2), bgRatio: +ratio(track, rgb("var(--surface-elevated-primary)")).toFixed(2),
+      return { track, gray, fill, trackOnCard, ratio: +ratio(over(fill, surf), trackOnCard).toFixed(2), bgRatio: +ratio(trackOnCard, over(surf, "#fff")).toFixed(2),
         prog: prog && getComputedStyle(prog).backgroundColor, progFill: prog && getComputedStyle(prog.querySelector("i")).backgroundColor,
-        gauge: gch && rgb(gch.data.datasets[0].backgroundColor[1]),
+        gauge: gch && rgb(gch.data.datasets[0].backgroundColor[1]), gaugeOnCard: gch && over(gch.data.datasets[0].backgroundColor[1], surf),
         ends: { bar: rad(".chart .bar i"), progress: rad(".progress-list .progress i"), spark: rad(".sparkline i") } };
     });
     const light = await read();
     /* 정적 막대도 각지게(사람의 결정 2026-11-24 — 탐색형 막대와 같게) */
     ok("static bars: CSS bar, progress fill and sparkline bars have square ends",
       light.ends.bar === "0px" && light.ends.progress === "0px" && light.ends.spark === "0px", JSON.stringify(light.ends));
-    /* dataviz 'Meter' — 비운 트랙은 같은 램프의 옅은 단계(회색이 아님), 채움과 3:1 이상, 면과는 구분됨 */
-    const trackOk = (t) => t.prog === t.track && t.gauge === t.track && t.progFill === t.fill && t.ratio >= 3 && t.bgRatio >= 1.1;
-    ok("track: progress and gauge tracks are --chart-mono-track, fill / track ≥ 3:1 (light)", trackOk(light), JSON.stringify(light));
+    /* 트랙 = 회색 --surface-neutral-strong(사람의 요청 2026-11-25), 카드 면 위에 합성해 채움과 3:1 이상 · 면과 구분됨 */
+    const trackOk = (t) => t.track === t.gray && t.prog === t.track && t.gaugeOnCard === t.trackOnCard && t.progFill === t.fill && t.ratio >= 3 && t.bgRatio >= 1.1;
+    ok("track: progress and gauge tracks are --chart-mono-track = --surface-neutral-strong, fill / track over the card ≥ 3:1 (light)", trackOk(light), JSON.stringify(light));
     await theme("dark");
     const dark = await read();
-    ok("track: the same holds in dark with the dark track step", trackOk(dark) && dark.track !== light.track, JSON.stringify(dark));
+    ok("track: the same holds in dark (dark --surface-neutral-strong)", trackOk(dark) && dark.track !== light.track, JSON.stringify(dark));
     await theme(null);
   });
 
