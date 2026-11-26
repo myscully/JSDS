@@ -1473,6 +1473,41 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - **audit 대조 밖이라 그리지 않은 것:** Tab 글자 15 · 13, 대시보드 기간 Select Button, Tree 고른 숫자, Card Radio 고른 제목, 차트 머리 · 증감 가운데, Pagination 아이콘 가운데, 막대 그라데이션 예제, 메뉴 체크 · 라디오 · 적용 영역 · Select 여러 개 · Combobox 가로 스크롤(11-23).
 - **덤프 뜨는 법 보탬:** 하위 에이전트의 기록에서 use_figma 결과는 JSON 문자열이 아니라 날 글자다(이어 붙이는 스크립트가 둘 다 받게).
 
+**2026-11-26 사이트 기준 동기화(사람의 요청 '현재까지 사이트를 기준으로 피그마 동기화' · 결정 셋: 미반영 18건 + 빠진 변형 · Templates 페이지는 이번엔 만들지 않음 · Avatar Tone 은 하나로 합침).** 다시 잰 전체 probe(`dump-c5`, 19조각 · 길이 513,574 · 해시 대조)로 **audit 은 3건**이다 — Home 잘림 1 · 숨긴 ov-grid 사본 2(기준값). 기준 덤프를 이것으로 바꿨다.
+- **미반영 18건(11-24 설정 템플릿 · 11-25 추가 수정 일곱의 몫)** — 변수 `chart/mono/track` 을 `surface/neutral/strong` 별칭으로(라이트 · 다크), Tag 세트 높이 18 · 24 · 30 · 크기별 여백과 모서리(Large 글자 새 스타일 Label 2 SemiBold), Spec 9행 · Rules 5행 글(Tag · Data Table · Table · Data Visual · Combobox · Navigation · Card · Avatar).
+- **빠진 변형(audit 대조 밖이던 사이트 모양):**
+  - Avatar — Tone=2~6 인스턴스 9개를 Tone 1 로 바꾸고 글자를 되살린 뒤 Tone 변형 10개를 지워 `Size` 하나로 합쳤다. Size=lg 64(1397:279, Heading 2 이니셜)를 더했다.
+  - Navigation Item `Type=Danger` 세 상태(1397:541 · 549 · 557, 글자 · 아이콘 `foreground/negative/strong`). audit 의 Navigation 기대값이 Danger 를 위험 색으로 대조한다(`audit.mjs` navItem).
+  - Menu Item `Checkbox` · `Radio` × 켬 · 끔 × 세 상태 12변형(켜진 표시 brand 면 + `brand/label` 체크 · 점), Dropdown 카드에 예제 틀 'Examples'(1407:5756 — 체크 · 라디오 · 그룹과 설명 · 적용 영역).
+  - Select `State=Multiple` · `Multiple Open`(1409:5817 · 5821), Combobox `State=Multiple Open` + 맨 위 '전체' 옵션(1410:5835).
+  - Card 두 칸 키-값은 세트 변형이 아니라 Card Body 의 예제 틀 'Columns'(1411:164) — 세트에 두면 audit cardExpect 가 '없는 변형' 으로 센다.
+  - 대시보드 패턴 머리에 기간 Select Button(1410:7046 — 24시간 · 7일 · 30일).
+  - Tab Item 글자 15 · 13(새 스타일 Body 2/Normal Medium · Bold, Label 2 Bold), Toast 메시지 500 · 동작 600, 표 머리글 면 없음 · 13/18 600 · KV 표 오른쪽 선 없음, Table · Data Table 바깥 테두리 없음 · 마지막 행 아래 선 · 행 48 · compact 40, 칸 링크 중립 500 · 액션 바 건수 중립 · 삭제 assistive, Tree 고른 숫자 600.
+- **새 변형의 속성 연결** — 복제한 변형이 속성 참조를 잃어 audit 이 4줄을 잡았다. Navigation Danger 의 Label · Count, Menu Item Checkbox/Radio 의 Label · Hint 를 `componentPropertyReferences` 로 다시 이었다(30곳). 인스턴스의 글자 override 는 남았다(21개 확인 · Dropdown 예제 스크린샷).
+- **측정에서 드러나 고친 것:** 늘어난 카드가 섹션 다섯(Card · Dropdown · Navigation · Combobox · Select)을 넘쳐 섹션을 카드 아래 + 70 으로 맞추고 전체 간격 200 을 다시 맞췄다. Card/Select 본문 폭 928 · Card/Tag 952 로 넓혔다. Card 세트에서 Status Medium 이 List Medium 과 8 겹쳐 아래 변형을 8 내렸다. Components 넘침 0(포커스 링 · 눈금 · 게이지 제외), 세트 겹침 0.
+- **그리지 않은 것과 이유:** 막대 그라데이션 예제(Chart 변형 대조가 깨짐), Card Radio 고른 제목 600(Figma 에 카드형 Radio 컴포넌트가 없음 — Radio Button 카드 안 정적 그림뿐), Templates 페이지(사람의 결정).
+- **Noto 로 만든 것:** 새 텍스트 스타일 5개와 Noto 로 배치한 뒤 Pretendard 스타일에 다시 묶은 글자 목록은 `_figma/font-revert.md` 끝 절 — 사람이 데스크톱에서 서체를 바꾸고 높이를 본다.
+- **덤프 뜨는 법 보탬:** 플러그인에 `TextEncoder` 가 없다 — 조각의 UTF-8 길이는 직접 센다. join 스크립트의 해시는 시작값 5381(플러그인 쪽 0 과 다름 — 같은 시작값으로 다시 재어 대조).
+
+**2026-11-26 Writing · Interaction 채움 · 분류별 열 배치(사람의 요청 'Writing 이 쓰다 말았다 · Components · Patterns 가 한 줄로 늘어서 보기 힘들다', 결정 넷).** 결정은 넷이다. 한 페이지 안에서 분류별 열로 배치하고, 컴포넌트는 사이트 메뉴 순서(알파벳 · 이름 있는 묶음 Selection Controls · Table)를 따르고, 패턴은 Common UI · Service Pattern · Security Console 로 나누고, Interaction 도 함께 채운다. 다시 잰 전체 probe(`dump-c6`, 19조각 · 길이 507,729 · 해시 대조)로 **audit 은 3건**이고 모두 기준값이다(Home 잘림 1 · 숨긴 ov-grid 사본 2). 기준 덤프를 `dump-c6` 으로 바꿨다.
+- **Foundations › Writing(1185:30)** — 소개 문장(1185:33)을 사이트의 두 문장으로 고쳤다. 카드 여덟을 더했다: Sentence endings · Buttons · Vague labels · Titles · Numbers · Errors and empty states · Placeholders · One fact, one wording. 카드 틀은 `Card/Motion` 과 같다. 표 · 목록 · Do/Don't 는 라이브러리 Button · Banner 인스턴스로 그렸고, 글은 `_build/foundations.js` 그대로다.
+- **Foundations › Interaction(1185:22)** — 소개 문단 둘과 카드 여덟을 더했다: Disabled · Input errors · Overlays · Choosing feedback · Destructive actions · Overflow · Loading · Choosing a selection control. 규칙 표의 '지금' 칸은 사이트 그대로다. 기존 `Card/Motion` 은 맨 끝에 그대로 두었다. 사이트의 링크 글자는 일반 글자로 썼다. Foundations 섹션 간격은 200 이다.
+- **Components(302:5) — 열 열**. 열마다 섹션을 위아래로 쌓았고, 열 안 간격은 200 이며 열의 위 끝은 모두 y 0 이다. 열의 x 는 앞 열에서 가장 넓은 섹션의 오른쪽 + 200 이다. 열은 다음과 같다:
+  - Accordion – Breadcrumb(맨 위 Overview)
+  - Button – Copy Field
+  - Data Visual – Divider
+  - Dropdown – Item Tile
+  - Link – Notification
+  - Notification Center – Popup
+  - Selection Controls
+  - Search – Tab
+  - Table
+  - Tag – Tree
+- **Patterns(302:6) — 다섯 열**: Overview · Common UI 7 · Service Pattern 5 · Security Console 11. Security Console 은 너무 길어 둘로 나눴고(대시보드 – 상세 화면 6 · 권한 · 역할 – 알림 규칙 5), 이름표는 첫 열 위에 하나만 두었다(사람이 정하지 않은 기본값).
+- **열 이름표** — 페이지 최상위 TEXT(Title 2)이고 열 위 120 에 둔다(1432:5851 – 5860 · 1432:6985 – 6988). 알파벳 범위로 쓴 이름표는 사람이 정하지 않은 기본값이다. probe 의 docFrames 는 TEXT 를 건너뛰고, 겹침 검사는 이름표도 본다.
+- **잰 것:** 두 페이지에서 섹션 · 이름표 겹침 0, 열 안 간격 어긋남 0, 열끼리 가로 겹침 0, 섹션 밖 넘침 0 이다. 축소 스크린샷도 확인했다. 노드는 옮기기만 했다(id · 컴포넌트 키 그대로 · 지운 것 없음).
+- **Noto 로 만든 것** — Writing 카드 글 110 · Interaction 142 · 이름표 14. 목록은 `_figma/font-revert.md` 끝 절에 있고, 사람이 데스크톱에서 Pretendard 로 되돌리며 높이 · 줄바꿈을 본다.
+
 - `use_figma` 를 부르기 **전에 `/figma-use` 스킬을 반드시 불러옵니다.**
 - 텍스트를 만들거나 고칠 때는 `_figma/font.js` 의 `makeFont()` 만 씁니다.
 - 조사는 `_figma/probe.js` 를 붙여 넣고, 결과를 `node _figma/audit.mjs diff <덤프>` 로 대조합니다.

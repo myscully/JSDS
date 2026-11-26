@@ -1339,7 +1339,8 @@ function componentsExpect() {
       hover: figTok(r(".sidenav a:hover").background), pressed: figTok(r(".sidenav a:active").background),
       selected: { fill: figTok(r(".sidenav a.on").background), label: figTok(r(".sidenav a.on").color), icon: figTok(r(".sidenav a.on svg").color) },
       base: { label: figTok(r(".sidenav a").color), icon: figTok(r(".sidenav a svg").color) },
-      sub: { label: figTok(r(".sidenav a.sub").color), selected: figTok(r(".sidenav a.sub.on").color) } }; })(),
+      sub: { label: figTok(r(".sidenav a.sub").color), selected: figTok(r(".sidenav a.sub.on").color) },
+      danger: { label: figTok(r(".sidenav a.danger").color), icon: figTok(r(".sidenav a.danger svg").color) } }; })(),   // 위험 항목(2026-11-24)
     sparkBars: { bar: figTok(cssRule(".sparkline i").background), hi: figTok(cssRule(".sparkline i.hi").background) },
     /* 컨테이너 — 사이트 예제와 순서 · 라벨 · 상태 · 아이콘. Steps 는 Indicator 의 steps 예제, Navigation 은 Default 예제 */
     stepsItems: stepsExample(),
@@ -1770,9 +1771,9 @@ function diffComponents(c, want, bad, notes) {
       if (v.label && !has$(v.label, lw)) bad.push(`${tag} 글자 ${v.label} ≠ ${lw} (${v.id})`);
       if (v.icon && !has$(v.icon, w.selected.icon)) bad.push(`${tag} 아이콘 ${v.icon} ≠ ${w.selected.icon} (${v.id})`);
     } else {
-      const lw = type === "Sub" ? w.sub.label : w.base.label;
+      const lw = type === "Sub" ? w.sub.label : type === "Danger" ? w.danger.label : w.base.label, iw = type === "Danger" ? w.danger.icon : w.base.icon;
       if (v.label && !has$(v.label, lw)) bad.push(`${tag} 글자 ${v.label} ≠ ${lw} (${v.id})`);
-      if (v.icon && !has$(v.icon, w.base.icon)) bad.push(`${tag} 아이콘 ${v.icon} ≠ ${w.base.icon} (${v.id})`);
+      if (v.icon && !has$(v.icon, iw)) bad.push(`${tag} 아이콘 ${v.icon} ≠ ${iw} (${v.id})`);
     }
     if (v.countInstance === false) bad.push(`${tag} 건수가 Count 인스턴스가 아닙니다 — 톤을 고를 수 없다 (${v.id})`);   // React countTone
   }

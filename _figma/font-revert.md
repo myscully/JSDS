@@ -344,3 +344,29 @@ Noto Sans KR 에는 SemiBold 가 없어 **SemiBold 조합은 Noto Bold 로 그�
 | Caption 2 SemiBold | Noto Sans KR Bold | Pretendard SemiBold | 11/14, +3.11% |
 
 현행 네 페이지에서 옛 스타일 19개를 쓰는 노드는 0이 됐다(2026-11-18). 아카이브 페이지는 세지 않았다.
+
+## 2026-11-26 새 텍스트 스타일 5개 — Noto 로 만듦, Pretendard 로 되돌릴 것(사이트 동기화)
+플러그인에 Pretendard 가 없어 새로 만든 스타일 다섯을 **Noto Sans KR** 로 만들었다. 크기 · 행간 · 자간은 저장소 값이다. SemiBold 는 Noto 에 없어 Bold 로 그렸다.
+사람이 데스크톱에서 스타일의 서체만 바꾸면 묶인 노드가 따라온다.
+
+| 스타일 | 지금 서체 | 되돌릴 서체 | 크기/행간 · 자간 | 쓰는 곳 |
+| --- | --- | --- | --- | --- |
+| Label 2 SemiBold | Noto Sans KR Bold | Pretendard SemiBold | 13/18, +1.94% | Tag Large 글자 |
+| Body 2/Normal Medium | Noto Sans KR Medium | Pretendard Medium | 15/22, +0.96% | Tab Item Medium 글자 |
+| Body 2/Normal SemiBold | Noto Sans KR Bold | Pretendard SemiBold | 15/22, +0.96% | (만들어 둠) |
+| Body 2/Normal Bold | Noto Sans KR Bold | Pretendard Bold | 15/22, +0.96% | Tab Item Medium 고른 탭 |
+| Label 2 Bold | Noto Sans KR Bold | Pretendard Bold | 13/18, +1.94% | Tab Item Small 고른 탭 |
+
+**Noto 로 써서 배치한 뒤 기존 Pretendard 스타일에 다시 묶은 글자** — 서체는 이미 Pretendard 이지만 글리프 없이 배치되어, 데스크톱에서 열 때 높이 · 줄바꿈을 한 번 본다:
+- Avatar lg 이니셜(1397:279 안), Navigation Danger 변형 글자(1397:541 · 1397:549 · 1397:557)
+- 표 머리글(Table · Data Table 변형), Data Table 칸 링크 · 액션 바 건수, Tree 고른 숫자(1262:5343)
+- Menu Item Checkbox · Radio 12변형의 글자, Dropdown 예제 틀(1407:5756) · 제목 'Examples'(1411:133)
+- Select Multiple · Multiple Open(1409:5817 · 1409:5821), Combobox Multiple Open(1410:5835)
+- Card Columns 예제(1411:164), 대시보드 머리의 기간 Select Button(1410:7046)
+- Spec · Rules 글 15곳(326:1294 · 326:1297 · 326:1300 · 332:3058 · 326:1810 · 328:2652 · 330:2261 · 996:4679 · 1245:4974 · 1245:4980 · 1396:5753 · 1396:5756 · 1396:5759 · 1396:5762 · 1292:5728)
+
+## 2026-11-26 Writing · Interaction 카드 · 열 이름표 — Noto 로 배치한 뒤 Pretendard 스타일에 다시 묶음
+글자를 Noto Sans KR 로 써서 배치한 뒤 원래 텍스트 스타일(Title 1 · Body 1/Reading · Headline 1 · Label 1/Reading Regular · Caption 1 · Label 1/Normal SemiBold)에 묶었다. 서체는 스타일을 따라 이미 Pretendard 이지만 글리프 없이 배치되어, 데스크톱에서 열 때 높이 · 줄바꿈을 한 번 본다. 버튼 · Text Field · Banner 인스턴스 안 글자도 같은 방식이다.
+- **Foundations › Writing**(1185:30) — 머리말 소개(1185:33)와 카드 여덟: Sentence endings 1425:188 · Buttons 1425:285 · Vague labels 1425:337 · Titles 1425:468 · Numbers 1425:491 · Errors and empty states 1425:519 · Placeholders 1425:616 · One fact, one wording 1425:639(글자 110 + 소개 1).
+- **Foundations › Interaction**(1185:22) — 머리말 소개 둘(1185:25 · 1429:215)과 카드 여덟: Disabled 1429:216 · Input errors 1429:342 · Overlays 1429:447 · Choosing feedback 1429:545 · Destructive actions 1429:650 · Overflow 1429:774 · Loading 1429:850 · Choosing a selection control 1429:933(글자 142). Card/Motion(311:50)은 손대지 않았다.
+- **열 이름표**(Title 2) — Components 1432:5851 ~ 1432:5860, Patterns 1432:6985 ~ 1432:6988.
