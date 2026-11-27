@@ -27,7 +27,7 @@ export default function Example() {
       </TopBar>
       <div style={{ display: "flex", minHeight: "15rem" }}>
         <SideNav id="tn-nav" collapsible collapsed={collapsed} style={{ minHeight: 0 }}>
-          <SideNavItem href="#" icon="layout-dashboard" active>대시보드</SideNavItem>
+          <SideNavItem href="#" icon="layout-board" active>대시보드</SideNavItem>
           <SideNavItem href="#" icon="list">이벤트</SideNavItem>
           <SideNavItem href="#" icon="shield">정책</SideNavItem>
           <SideNavItem href="#" icon="server">에이전트</SideNavItem>

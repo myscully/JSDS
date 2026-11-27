@@ -4,7 +4,7 @@ import { Button, CommandPalette, Icon, Kbd, ToastProvider, useToast, type Comman
 
 const GROUPS: CommandGroup[] = [
   { label: "이동", items: [
-    { icon: "layout-dashboard", label: "대시보드", keywords: "홈 요약 dashboard", value: "nav-dashboard" },
+    { icon: "layout-board", label: "대시보드", keywords: "홈 요약 dashboard", value: "nav-dashboard" },
     { icon: "list-details", label: "탐지 로그", keywords: "이벤트 log", value: "nav-logs" },
     { icon: "shield", label: "정책", keywords: "policy 규칙", value: "nav-policies" },
     { icon: "device-desktop", label: "에이전트", keywords: "agent 단말 PC", value: "nav-agents" },

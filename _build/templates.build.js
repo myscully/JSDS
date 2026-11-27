@@ -30,7 +30,7 @@ const ex = (src, key, id) => {
 
 /* ---------- 공통 ---------- */
 const NAV = [
-  { id: "dashboard", icon: "layout-dashboard", label: "대시보드" },
+  { id: "dashboard", icon: "layout-board", label: "대시보드" },
   { id: "analytics", icon: "chart-bar", label: "탐지 분석" },
   { group: "탐지" },
   { id: "list", icon: "alert-triangle", label: "보안 이벤트", count: 12 },

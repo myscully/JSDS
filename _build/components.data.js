@@ -54,7 +54,7 @@ const cb = (label, attrs = "", small = "") => `<label class="checkbox"><input ty
 /* 명령 팔레트 — ds.js(cmdkFilter) · React CommandPaletteSurface 와 같은 골격. groups = [[제목, [[아이콘, 이름, 찾는 말, 값, 키?]]]].
    value 를 주면 그 글로 거른 모습(ds.js 와 같은 식 — 초성 찾기는 빼고). 활성은 보이는 첫 항목 */
 const CMDK_GROUPS = [
-  ["이동", [["layout-dashboard", "대시보드", "홈 요약 dashboard", "nav-dashboard"], ["list-details", "탐지 로그", "이벤트 log", "nav-logs"], ["shield", "정책", "policy 규칙", "nav-policies"], ["device-desktop", "에이전트", "agent 단말 PC", "nav-agents"]]],
+  ["이동", [["layout-board", "대시보드", "홈 요약 dashboard", "nav-dashboard"], ["list-details", "탐지 로그", "이벤트 log", "nav-logs"], ["shield", "정책", "policy 규칙", "nav-policies"], ["device-desktop", "에이전트", "agent 단말 PC", "nav-agents"]]],
   ["작업", [["plus", "정책 만들기", "새 정책 추가 create", "policy-new"], ["file-export", "보고서 내보내기", "CSV 다운로드 report export", "report-export"], ["search", "검색창으로 이동", "search 찾기", "focus-search", "/"], ["help-circle", "단축키 보기", "help 도움말 keyboard", "show-shortcuts", "?"]]],
 ];
 const cmdkPal = (id, groups, o = {}) => {
@@ -1554,7 +1554,7 @@ const COMPONENTS = {
     examples: [
       { id: "basic", group: "default", title: "Default", desc: "그룹 라벨 아래에 링크를 둡니다. 아이콘은 18px 이고, 건수와 하위 항목을 함께 둘 수 있습니다.", html: `
         <nav class="sidenav" aria-label="주 메뉴" style="border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg)">
-          <a href="#" class="on" aria-current="page">${I("home")}<span>대시보드</span></a>
+          <a href="#" class="on" aria-current="page">${I("layout-board")}<span>대시보드</span></a>
           <a href="#">${I("list")}<span>이벤트</span><span class="count">12</span></a>
           <div class="group">보호</div>
           <a href="#">${I("shield")}<span>정책</span></a>
@@ -1568,7 +1568,7 @@ const COMPONENTS = {
         </nav>`, layout: "left" },
       { id: "collapsed", group: "variant", title: "Collapsed", desc: "사용자가 접었거나 화면 폭이 1280px 아래로 줄었을 때의 모양입니다. 아이콘만 남고, 이름은 마우스와 키보드 모두 Tooltip 으로 봅니다. 하위 항목과 아래쪽 영역은 숨습니다. 현재 메뉴가 하위 항목이면 부모 메뉴가 선택 모양을 이어받습니다.", html: `
         <nav class="sidenav collapsed" aria-label="주 메뉴" style="border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg)">
-          <span class="tooltip-wrap"><a href="#" class="on" aria-current="page" aria-label="대시보드">${I("home")}<span>대시보드</span></a><span class="tooltip right" role="tooltip">대시보드</span></span>
+          <span class="tooltip-wrap"><a href="#" class="on" aria-current="page" aria-label="대시보드">${I("layout-board")}<span>대시보드</span></a><span class="tooltip right" role="tooltip">대시보드</span></span>
           <span class="tooltip-wrap"><a href="#" aria-label="이벤트">${I("list")}<span>이벤트</span></a><span class="tooltip right" role="tooltip">이벤트</span></span>
           <span class="tooltip-wrap"><a href="#" aria-label="정책">${I("shield")}<span>정책</span></a><span class="tooltip right" role="tooltip">정책</span></span>
           <span class="tooltip-wrap"><a href="#" aria-label="에이전트">${I("server")}<span>에이전트</span></a><span class="tooltip right" role="tooltip">에이전트</span></span>
@@ -1631,7 +1631,7 @@ const COMPONENTS = {
           </header>
           <div style="display:flex;min-height:15rem">
             <nav class="sidenav" id="tn-nav" aria-label="주 메뉴" style="min-height:0">
-              <span class="tooltip-wrap"><a href="#" class="on" aria-current="page" aria-label="대시보드">${I("layout-dashboard")}<span>대시보드</span></a><span class="tooltip right" role="tooltip">대시보드</span></span>
+              <span class="tooltip-wrap"><a href="#" class="on" aria-current="page" aria-label="대시보드">${I("layout-board")}<span>대시보드</span></a><span class="tooltip right" role="tooltip">대시보드</span></span>
               <span class="tooltip-wrap"><a href="#" aria-label="이벤트">${I("list")}<span>이벤트</span></a><span class="tooltip right" role="tooltip">이벤트</span></span>
               <span class="tooltip-wrap"><a href="#" aria-label="정책">${I("shield")}<span>정책</span></a><span class="tooltip right" role="tooltip">정책</span></span>
               <span class="tooltip-wrap"><a href="#" aria-label="에이전트">${I("server")}<span>에이전트</span></a><span class="tooltip right" role="tooltip">에이전트</span></span>
