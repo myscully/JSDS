@@ -1,0 +1,101 @@
+/* demo.css — DocuONE 시안에만 필요한 것.
+   컴포넌트 모양은 ../../assets/style.css 가 맡고, 여기에는 컨셉의 3칸 배치와 폴더 그림만 둔다.
+   색 · 간격 · 반경 · 그림자 · 모션은 전부 시스템 토큰(라이트 · 다크가 함께 뒤집힌다). */
+
+body{margin:0;background:var(--background-neutral-primary);color:var(--foreground-neutral-primary);font-family:var(--font-sans)}
+
+/* ---------- 3칸 틀 — 사이드바 · 본문 · Info ---------- */
+.docu-app{display:flex;height:100vh;min-width:64rem;overflow:hidden}
+.docu-nav{flex:none;min-height:0;height:100%;overflow-y:auto;transition:width var(--motion-base)}
+.docu-main{flex:1;min-width:0;overflow:auto;padding:1.5rem 2rem 2.5rem;outline:none}
+.docu-info{flex:none;width:21.25rem;height:100%;overflow-y:auto;display:flex;flex-direction:column;padding:1.5rem 1.25rem;background:var(--surface-elevated-primary);border-left:1px solid var(--line-neutral-secondary);transition:width var(--motion-base)}
+
+/* ---------- 사이드바 ---------- */
+.docu-brand{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin:0 0 1rem 0.75rem}
+.docu-logo{display:flex;align-items:center;gap:0.375rem;padding:0;font-size:var(--font-size-20);line-height:1.75rem;font-weight:700;letter-spacing:-0.012em;color:var(--foreground-neutral-primary)}
+.docu-logo::after{content:"";width:0.375rem;height:0.375rem;border-radius:var(--radius-full);background:var(--surface-brand-primary)}
+.docu-brand .docu-logo:hover{background:none}
+.docu-nav-end{margin-top:auto;display:flex;flex-direction:column;gap:2px;padding-top:1rem}
+.docu-user{display:flex;align-items:center;gap:0.75rem;margin-top:0.75rem;padding:1rem 0.25rem 0 0.75rem;border-top:1px solid var(--line-neutral-secondary)}
+.docu-user .docu-user-name{flex:1;min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 접힌 레일 — 로고 · 이름은 숨기고 접기 버튼 · 아바타만 가운데에 */
+.docu-nav.collapsed .docu-brand{margin-left:0;justify-content:center}
+.docu-nav.collapsed .docu-logo,.docu-nav.collapsed .docu-user-name,.docu-nav.collapsed .docu-user .tooltip-wrap{display:none}
+.docu-nav.collapsed .docu-user{padding-left:0;padding-right:0;justify-content:center}
+
+/* ---------- 본문 ---------- */
+.docu-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}
+.docu-top-start{display:flex;align-items:center;gap:0.75rem;min-width:0}
+.docu-top-start .divider.vertical{height:1.25rem}
+.docu-main .page-head{margin-bottom:1.5rem}
+.docu-toolbar{justify-content:space-between;margin-bottom:1.5rem}
+.docu-toolbar>.searchbar{flex:0 1 23.75rem;min-width:0}
+/* 카드 수는 폭에 맞춘다 — 카드 최소 15rem(240), 남는 폭은 칸이 나눠 가짐. auto-fill 이라 걸러져 카드가 적어도 한 장이 줄 전체로 늘어나지 않는다 */
+.docu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(15rem,100%),1fr));gap:1.5rem}
+
+/* 폴더 카드 — 시스템 선택 카드(.card.clickable) 안에 그림 + 글 */
+.docu-card{min-width:0;gap:1rem}
+.docu-card-text{display:flex;flex-direction:column;gap:0.25rem}
+.docu-card .docu-size{margin-top:0.75rem;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em;color:var(--foreground-neutral-tertiary)}
+
+/* 폴더 그림 — 컨셉의 뒤판 · 탭 · 종이 · 앞판. 앞판은 원본처럼 세로 그라데이션 + 위쪽 광택, 색은 전부 토큰.
+   고른 폴더의 모양은 아래 '고른 카드' 블록에 — 카드 면이 제품 색이 되므로 앞판은 그보다 한 겹 깊은 제품 색이다. */
+.docu-folder{position:relative;display:block;height:9.375rem}
+.docu-folder .back{position:absolute;top:0.5rem;left:0;right:0;bottom:0;border-radius:var(--radius-xl);background:var(--surface-neutral-secondary)}
+.docu-folder .tab{position:absolute;top:-0.625rem;left:0.75rem;width:5.25rem;height:0.625rem;border-radius:var(--radius-lg) var(--radius-lg) 0 0;background:var(--surface-neutral-secondary)}
+.docu-folder .paper{position:absolute;top:1.25rem;left:1.5rem;right:1.5rem;height:5.75rem;padding:0.75rem 1rem;overflow:hidden;border-radius:var(--radius-md);background:var(--surface-elevated-primary);box-shadow:var(--shadow-sm);transition:transform var(--motion-base)}
+.docu-folder .paper-text{display:block;font-size:var(--font-size-12);line-height:max(1rem,16px);letter-spacing:0.0252em;color:var(--foreground-neutral-secondary);text-align:left}
+.docu-folder .front{position:absolute;left:0;right:0;bottom:0;height:5.5rem;overflow:hidden;border-radius:var(--radius-xl);
+  background:linear-gradient(180deg,transparent,var(--surface-neutral-secondary)) var(--surface-elevated-primary);
+  box-shadow:0 14px 26px -16px color-mix(in srgb,var(--static-black) 30%,transparent)}
+.docu-folder .front::before{content:"";position:absolute;top:0;left:0;right:0;height:2.625rem;border-radius:var(--radius-xl) var(--radius-xl) 2.5rem 2.5rem;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface-elevated-primary) 90%,transparent),transparent)}
+.docu-card:hover .docu-folder .paper{transform:translateY(-0.25rem)}   /* 종이가 살짝 올라옴 — 카드 자체는 뜨지 않음(시스템 규칙: hover 는 색 · 그림자로) */
+
+/* 고른 카드 — 원본처럼 카드 면 자체가 제품 색 그라데이션(165deg) + 제품 색 빛 그림자. 면은 연하게, 글자는 진한 중립(사람의 결정 2026-11-27).
+   원본의 옅은 파랑(#7EAEF3 → #5B97EF)과 같은 밝기대를, 제품 색을 카드 면에 섞어 만든다(위 --docu-on-top → 아래 --docu-on-bottom).
+   제품 색 · 다크 테마를 따른다 — 다크에서는 어두운 카드 면에 섞여 깊은 파랑이 되고, 글자 토큰이 밝은 색으로 뒤집힌다.
+   AI 제품도 같은 식(그라데이션 층 없이 violet 단색을 섞음 — 진한 그라데이션 위에는 진한 글자를 올릴 수 없다).
+   앞판은 같은 방식으로 카드보다 한 겹만 짙게. */
+.docu-card.card.on{--docu-on-top:18%;--docu-on-bottom:36%;border:0;padding:calc(var(--card-pad) + 1px);   /* 테두리 없음 — 빠진 1px 는 안쪽 여백에 더해 고르지 않은 카드와 크기 · 글자 자리가 같다 */
+  background:linear-gradient(165deg,
+    color-mix(in srgb,var(--surface-brand-primary) var(--docu-on-top),var(--surface-elevated-primary)),
+    color-mix(in srgb,var(--surface-brand-primary) var(--docu-on-bottom),var(--surface-elevated-primary)));
+  box-shadow:0 20px 40px -18px color-mix(in srgb,var(--surface-brand-primary) 45%,transparent)}
+.docu-card.card.clickable.on:not(:disabled,[aria-disabled="true"]):hover{box-shadow:0 24px 44px -16px color-mix(in srgb,var(--surface-brand-primary) 55%,transparent)}
+.docu-card.on .title{color:var(--foreground-neutral-primary)}
+.docu-card.on .desc,.docu-card.on .docu-size{color:var(--foreground-neutral-secondary)}   /* 이 면 위 5.34 ~ 6.22 — tertiary 는 2.6 대라 쓰지 않음 */
+.docu-card.on .docu-folder .back,.docu-card.on .docu-folder .tab{background:color-mix(in srgb,var(--surface-elevated-primary) 55%,transparent)}
+.docu-card.on .docu-folder .paper{box-shadow:0 6px 14px -4px color-mix(in srgb,var(--static-black) 22%,transparent)}
+.docu-card.on .docu-folder .front{   /* 앞판도 카드 면처럼 제품 색을 섞은 그라데이션 — 카드보다 한 겹만 짙게(42% → 66%) */
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--surface-brand-primary) 42%,var(--surface-elevated-primary)),
+    color-mix(in srgb,var(--surface-brand-primary) 66%,var(--surface-elevated-primary)));
+  box-shadow:0 14px 26px -16px color-mix(in srgb,var(--surface-brand-primary) 45%,transparent)}
+.docu-card.on .docu-folder .front::before{background:linear-gradient(180deg,color-mix(in srgb,var(--brand-label) 32%,transparent),transparent)}
+
+/* ---------- Info 패널 ---------- */
+.docu-info-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.docu-info-title{margin:0;font-size:var(--font-size-20);line-height:1.75rem;font-weight:700;letter-spacing:-0.012em}
+.docu-info-body{display:flex;flex-direction:column;gap:0.75rem;flex:1}
+.docu-stat{min-width:0;gap:0.25rem}
+.docu-stat .card-head{align-items:flex-start}
+.docu-stat-label{font-size:var(--font-size-13);line-height:1.125rem;letter-spacing:0.0194em;color:var(--foreground-neutral-secondary);font-weight:500}
+.docu-stat-value{font-size:var(--font-size-24);line-height:2rem;font-weight:700;letter-spacing:-0.023em;margin-bottom:0.5rem;font-variant-numeric:tabular-nums}
+.docu-sec{margin-top:1rem}
+.docu-sec-title{margin:0 0 0.75rem;font-size:var(--font-size-16);line-height:1.5rem;font-weight:600;letter-spacing:0.0057em}
+.docu-props th{width:8.75rem}
+.docu-tags{display:flex;flex-wrap:wrap;gap:0.5rem}
+.docu-links{margin-top:auto;border:0;border-radius:0;background:none}
+.docu-links li{border-bottom:0;padding-left:0.25rem;padding-right:0.25rem;border-radius:var(--radius-md)}
+.docu-links li svg{color:var(--foreground-neutral-secondary)}
+.docu-links li>div{flex:1}
+/* 접힌 패널 — 머리의 버튼만 */
+.docu-info.collapsed{width:4rem;padding-left:0.625rem;padding-right:0.625rem}
+.docu-info.collapsed .docu-info-body,.docu-info.collapsed .docu-info-title{display:none}
+.docu-info.collapsed .docu-info-head{justify-content:center}
+.docu-info-toggle svg{transition:transform var(--motion-base)}
+.docu-info.collapsed .docu-info-toggle svg{transform:rotate(180deg)}
+
+/* 검색 · Filter 결과가 없을 때 — 격자 자리에 빈 상태(가운데) */
+.docu-empty{margin:3rem auto 0;max-width:30rem}
