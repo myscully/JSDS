@@ -50,7 +50,7 @@ node _build/gates.mjs --quick  # 사이트만
 기준값 — 바뀌면 **왜 바뀌었는지 적습니다.**
 
 ```
-pages 106 · verify 0/0 · contrast 3808쌍 실패 0 · advisory 1149 · behave 1739/1739 · react 951+6 · tsc 0
+pages 108 · verify 0/0 · contrast 3808쌍 실패 0 · advisory 1149 · behave 1816/1816 · react 982+8 · tsc 0
 ```
 
 2026-10-28 Button 정의 개편으로 바뀐 것 — contrast +36(Assistive 버튼 라벨 쌍: 반투명 면 2 × 바탕 3 × 맥락 6),
@@ -1269,6 +1269,83 @@ contrast · advisory · verify 수는 그대로(verify 는 dayjs 동반 검사�
 - 캡처: 1440 라이트 · 다크 · 390 에서 Tag 세 크기 · Table · 고정 헤더 스크롤 · 사이드 패널 속성 표 · 대시보드 부서별 패치 · 게이지 · Toast · Combobox 전체를 보았다. 전체 예제의 열린 목록이 미리보기 아래로 넘쳐 뜨는 것은 기존 Multiple 예제와 같은 배치다.
 - **고치지 않은 것:** 문서 셸의 문서 표 머리글(`table:not(.tbl) th`)은 회색 그대로(컴포넌트 표가 아님 — 요청 밖). `_figma/font-revert-nodes.tsv` 의 '기획팀 디자인파트'(Figma Home 바닥글 글자 — Figma 몫). `render.js` 의 `#foot` 줄은 생성 페이지에 그 요소가 없어 쓰이지 않는다.
 - Figma 미반영 6 → 18건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — 이번 몫 12: 변수 `chart/mono/track` 값(Figma 는 blue-90 · 20), Tag 세트 높이 2(Medium 22 · Large 26), Spec Tag Size · Container · Label, Spec Data Table · Table Container, Spec Data Visual Color, Rules combobox · 전체 · table · 행 hover · 경계. Toast 굵기 · 머리글 면 · 속성 표 선 · Combobox 전체 옵션은 audit 대조 밖이라 수에 없다.
+
+2026-11-26 모션 · 인터랙션 보강 1 ~ 3단계 — 이징 토큰 · 팝오버 · 탭 밑줄 · 사이드 내비 폭 · 패널 흐림 · 체크 표시 · 새 항목 · 지운 항목(사람의 요청 '인터랙션 · 모션이 부족하다', 추천 12가지를 모두 고름 — 4 · 5단계는 따로) — behave 1739 → 1777(`behave.motion.js` 38) · react 951+6 → 959+6(`tests/motion.test.tsx` 8). contrast · advisory · verify · pages 수는 그대로(새 색 쌍 없음 — 새 항목 면은 기존 '글자 / brand subtle' 쌍).
+- **이징 토큰 셋**(`ADDITIONS` 가 아니라 모션 토큰 — 색 수 110 그대로) `--motion-enter` 200ms `cubic-bezier(.2,.8,.2,1)`(들어옴 · 감속) · `--motion-exit` 120ms `cubic-bezier(.4,0,1,1)`(나감 · 가속) · `--motion-flash` 1600ms ease-out(새 항목). 길이와 이징을 한 값으로 두어 verify 의 '속성 하나 + 토큰 하나' 규칙이 그대로다(정규식에 enter · exit · flash). Popup · 모달 Side Panel · Toast 들어옴은 base → enter, 닫힌 사본은 fast → exit.
+- **팝오버 들어옴** — 열린 메뉴 · Select · Combobox · 달력 · 시각 목록 · 알림 센터가 `ds-pop`(흐림에서 4px 내려옴), 위로 뒤집힌 것(`.up`)은 `ds-pop-up`(아래에서 올라옴). transform 이 아니라 `translate` 속성이다 — Tooltip · 알림 센터 자리 맞춤이 transform 을 쓴다. 닫힘은 바로다.
+- **탭 밑줄 하나가 미끄러짐** — `.tabs[data-ink]::after` 에 ds.js `inkSync` · React `tabInk.ts` 가 고른 탭의 `--tab-x` · `--tab-w`(pill 은 `--tab-y` · `--tab-h` 의 면)를 넣고 `left` · `width` 가 `--motion-base` 로 움직인다. 스크립트가 붙으면 탭 자신의 아래 선은 투명이고, 스크립트가 없으면 예전 밑줄이 그대로다. 처음 그릴 때 · 숨은 줄(닫힌 알림 패널 안)이 보일 때 · 창 크기가 바뀔 때는 전환 없이(`data-ink-ready` 를 한 프레임 뒤에, 폭이 0 이면 떼고 재지 않음). 가로 스크롤 줄 안에서도 맞는다.
+- **사이드 내비 폭** — 버튼 · 경계 넘기로 접고 펼 때 `width` · `padding` 이 `--motion-base` 로 움직이고 펼칠 때 이름이 흐림에서 나타난다(`.ds-nav-opening`). 폭으로 처음 접혀 그릴 때는 움직이지 않는다(`data-nav-ready` 를 그 뒤에). 펼치는 동안 늘어나는 폭 밖 글자는 `overflow-x:clip` 으로 자르고, 접힌 레일은 이름 Tooltip 이 밖으로 나가야 해서 자르지 않는다. React `SideNav` 도 같다.
+- **패널 바꿈 흐림** — 탭 · 단계 · 행 펼침 패널이 바뀔 때만 `.ds-swap`(`ds-fade var(--motion-fast)`, 움직임 · 높이 변화 없음). 처음 그릴 때는 없다. 사이트 `swap()` · React `swapIn` · `useSwapIn`.
+- **체크 표시** — Checkbox · Radio · 메뉴 체크 · 라디오 표시의 `::after` 를 늘 그려 두고 꺼지면 `scale(.5)` + opacity 0, 켜지면 1 로 transition 한다. transition 이라 처음부터 켜진 것은 움직이지 않는다. 복사 완료 · 실패 아이콘은 `ds-check` 로 커지며 나타나고, 2초 뒤 복사 아이콘으로는 바로 돌아간다.
+- **새 항목 하이라이트** — 로그 뷰어 패턴의 '맨 위로 이동해 보기' 가 새로 들어온 세 행을 흐리게 시연한다(문서 전용 `data-demo-flash`). `.ds-new` 가 `--surface-brand-subtle` 에서 `--motion-flash` 동안 한 번 흐려진다(표 행은 칸에 칠함 — 고정 열 · 줄무늬 칸의 면 위로). 사이트 `DS.flash(el | els)` · React `flash(nodes)`. 자동으로 쓰는 곳은 `DS.notify.add` · React 알림 센터의 새 항목이다. **줄인 모션이면 흐려지지 않는 면이 같은 시간 머물다 사라진다**(정보는 남김 — 줄인 모션 블록의 예외).
+- **지운 항목 사라짐** — 사이트 `dismiss()` 가 지운 요소에 `.ds-leaving` · inert · aria-hidden · 인라인 `ds-out var(--motion-exit)` 을 달고 animationend(보조 타이머 exit + 60ms)에 지운다. 대상: `DS.table.removeRow` · 입력값 칩과 Combobox 칩 지우기(`ghostOut` 사본) · Toast · Notice · Banner 닫기. 상태 · 포커스 · 이벤트는 누르는 순간 바뀌고, 남은 행은 움직이지 않는다(높이 접힘 없음). 줄인 모션이면 바로 지운다.
+  React: Toast · Notice · Banner 닫기와 Combobox 칩은 `ghostTake` → 상태 변경 → `ghostPut` 사본, DataTable 은 rows 키 비교로 사라진 행(1 ~ 10건이고 남는 행이 있을 때)의 `leaveInPlace` 사본을 다음 행 앞에 넣는다(id · for · name · aria 참조를 걷음, MIGRATION — tbody 에 잠깐 사본 행).
+- **기존 단정 고침(들어오는 움직임 도중에 재던 것 · 흐려지며 남은 행을 세던 것):** 표 행 수(behave.data · behave.expand)는 `tr:not(.ds-leaving)` 로 센다. Dropdown 띄움 위치 둘(behave.js), Date Picker 달력 열기(behave.dp `openCal`), 사이드 내비 접기 폭 · 경계 넘기(behave.shell) — 재기 전에 끝이 있는 애니메이션만 `finish()`(스피너처럼 끝이 없는 것은 finish 가 던진다 — 첫 게이트에서 Slider 덩어리가 멈춤). behave 안에서 새 페이지는 `page.context().browser().newContext()` 로 연다(기본 컨텍스트는 탭을 더할 수 없음).
+- **측정에서 드러나 고친 것:** 닫힌 알림 패널 안 탭 줄은 폭이 0 이라 밑줄이 0 에서 시작해, 패널을 열 때마다 왼쪽에서 미끄러져 들어왔다(사이트 · React 같은 가드). jsdom 은 크기가 0 이라 React 칩 사본 테스트는 `getBoundingClientRect` 를 흉내 낸다.
+- 음성 시험: 1 · 2단계 6건(탭 밑줄 전환 지움 · 팝오버 이동 지움 · 사이드 내비 첫 그림에도 전환 · 위로 뒤집힌 팝오버 방향 · 숨은 줄의 ink-ready 가드 지움 · 나감 이징을 ease 로), 3단계 사이트 7건(지운 행이 바로 사라짐 · swap 끔 · flash 끔 · 체크 transition 지움 · 줄인 모션 머묾 지움 · 숨은 줄 가드 지움 · 복사 체크 지움)과 React 5건(TabPanel useSwapIn · 칩 ghostPut · DataTable leaveInPlace · 알림 flash · 사본의 ds-leaving) 모두 실패로 잡혔다.
+- Figma 미반영 0건 — 모션은 audit 대조 밖이다.
+
+2026-11-26 모션 · 인터랙션 보강 4단계 — Kbd · 명령 팔레트 신규(위 계획의 넷째 묶음) — pages 106 → 108 · 컴포넌트 46 → 48 · behave 1777 → 1797(`behave.kbd.js` 20) · react 959+6 → 971+8(`tests/kbd-cmdk.test.tsx` 6 · 예제 구조 비교). contrast · advisory · verify 수는 그대로(새 색 쌍 없음 — Kbd 는 `--foreground-neutral-secondary` 글자 / `--background-neutral-secondary` 면, 톤 없는 Notice 와 같은 기존 쌍).
+- **Kbd** — `kbd.kbd`(20) · `.sm`(18, 메뉴 끝 `.menu-kbd`), 여러 키는 `.kbd-combo`. 수정 키 `kbd[data-kbd-mod]` 는 ds.js `kbdSync` 가 맥이면 ⌘ + 숨긴 'Command', 그 밖이면 Ctrl 로 바꾼다(React `Kbd keys={["Mod","K"]}`). Search 의 `/` 표시도 같은 모양이다. 메뉴 끝 단축키는 aria-hidden 이고 항목의 `aria-keyshortcuts` 가 알린다(verify).
+- **Command Palette** — `div.popup.cmdk[role=dialog]` 안에 검색칸(`role=combobox` · `aria-activedescendant`) + `.cmdk-list[role=listbox]` · `.cmdk-group[role=group]` · `.cmdk-item[role=option][data-value]` · 숨긴 결과 수 status. 부분 일치 · 초성, ↑↓ 돌기 · Home · End · Enter, 누르거나 Enter 면 닫고 `ds:command {value, label}` · 포커스 복귀, 열 때마다 빈 검색칸 · 맨 위. **⌘K · Ctrl+K** 로 화면의 `.cmdk[data-hotkey]` 하나를 열고 다시 누르면 닫는다 — 입력 중에도 열리고, 다른 대화상자 · 모달 패널이 열린 동안에는 무시한다(verify — 화면에 하나). React `CommandPalette`(`hotkey` 기본 true · `onCommand` · `onOpen` · `onClose`).
+- **`?` 단축키 도움말** — 그 화면의 `.popup[data-hotkey-help]` 를 연다(입력 중 · 다른 대화상자가 열린 동안 무시). 예제는 Kbd 표.
+- 따라온 것: 두 페이지(고르기 표 · Rules · Spec · Props · Usage), UI Dictionary 항목, `thumbs.js PENDING` 을 컴포넌트에도 쓰게 넓힘(Figma 썸네일이 아직 없어 기본 그림 — 이유를 적음), 버림 확인이 팔레트 검색칸 글자를 입력으로 세지 않음, MIGRATION · README.
+- **측정에서 드러나 고친 것:** 팝업 배경 grid 의 자동 열이 내용 폭만큼 늘어 긴 글의 팝업이 390 에서 화면 밖으로 나갔다 — `.popup-backdrop{grid-template-columns:minmax(0,1fr)}`. 개요 썸네일 단정이 PENDING 을 패턴 하나로 박아 두어 새 두 컴포넌트에서 실패했다(전체 게이트 1796/1797) — 단정이 `thumbs.js PENDING` 을 읽게 고쳤다.
+- 음성 시험: 사이트 4건(다른 대화상자 위에서 무시 · 초성 찾기 · 열 때 비움 · 맥 ⌘ 표시) · React 2건(초성 · 수정 키) 모두 실패로 잡혔다. 첫 회 '다른 대화상자 위에서 무시' 1건을 못 잡았다 — `DS.popup.open` 이 모달 위에 모달을 띄우지 않아 화면은 같고 콘솔 경고만 남는다. 단정에 '경고 없음' 을 더해 잡았다.
+- **사람이 정하지 않은 기본값:** Kbd 는 Command Palette 와 따로 페이지를 둠, 문서 사이트 헤더 검색에는 ⌘K 를 붙이지 않음(컴포넌트 예제로만), 팔레트에 닫기 X 없음(Esc · 다시 ⌘K), React `hotkey` 기본 true · `onOpen`.
+- Figma 미반영 4건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — Kbd · Command Palette 의 Spec 카드 없음 2 · 문서 카드 없음 2.
+
+2026-11-26 모션 · 인터랙션 보강 5단계 — 표 행 방향키 · 긴 폼 버튼 줄 고정(위 계획의 마지막 묶음) — behave 1797 → 1813(`behave.rownav.js` 16) · react 971+8 → 980+8(`tests/rownav-sticky.test.tsx` 7 · 예제 354 → 356 에 따른 구조 비교 2). contrast · advisory · verify · pages 수는 그대로(새 색 쌍 없음 — 행 포커스 링은 기존 brand 외곽선, 붙은 줄의 면은 놓인 자리의 면).
+- **표 행 방향키 = 옵션** `table.tbl[data-row-nav]` · React `Table` · `DataTable rowNavigation`. 행이 Tab 칸 하나(roving tabindex — 다른 행 안의 링크 · 버튼 · 입력은 `tabindex=-1`), ↑↓ · Home · End · PageUp/PageDown(10행)으로 옮기고 끝에서 멈춘다. 꺼진 행 · 상세 행 · 흐려지며 사라지는 행 · 빈 상태 행은 건너뛴다.
+  Enter 는 행 펼침 버튼이 있으면 그것을, 없으면 행의 첫 링크를 누른다. Space 는 행 체크박스를 켜고 끄며 페이지를 스크롤하지 않는다. 행에서 Tab 은 그 행 안의 조작으로, 칸 안 조작(입력 · 메뉴 · 체크박스)의 방향키는 가로채지 않는다. 행을 누르거나 행 안에 포커스가 오면 그 행이 Tab 칸이 된다. 포커스 링은 행 안쪽 1px brand.
+  켠 곳: Data Table 'Row Navigation'(새 예제 — 사이트 · React) · 'Row Actions' · 'Row Expand', 로그 뷰어 패턴. Data Table Rules '행 동작' 묶음에 '키보드' 행(6 → 7, 전체 22 → 23).
+  행 방향키 표에서 `DS.table.removeRow` · React DataTable 의 행 삭제는 포커스를 같은 자리의 고를 수 있는 행 **자체**로 옮긴다(없으면 앞 행 — 옵션이 없으면 지금처럼 행의 첫 조작).
+- **긴 폼 버튼 줄 고정 = 옵션** `.form-actions.sticky` · `.step-actions.sticky` · React `FormActions sticky`(이제 forwardRef · `FormActionsProps`) · `Stepper stickyActions`. 스크롤 영역 아래 끝에 `position:sticky`, 놓인 자리의 면을 칠하고(카드 · 폼 안은 그 면, 문서 미리보기는 elevated), 붙어 있는 동안 ds.js · React `useStuck` 이 `.stuck` 을 단다 — 마법사 버튼 줄만 그동안 위 선 `--line-neutral-secondary`, 폼 버튼 줄은 선 없음. 폼 끝에 닿으면 제자리. z-index 2.
+  켠 곳: Form 'Sticky Actions'(새 예제 — 미리보기를 최대 25rem 로 스크롤하는 레이아웃 `.example-preview.scroll`), 입력 폼 · 보고서 예약 · 알림 규칙 패턴, 위저드 템플릿. 계획에 적은 정책 설정 패턴에는 켜지 않았다(버튼 줄이 머리글에 있음).
+- **verify 더함:** `data-row-nav` 는 `table.tbl` 에만, 예제의 `<tr tabindex>` 금지(ds.js 가 단다).
+- **측정에서 드러나 고친 것:**
+  - Chrome 은 sticky 줄을 스크롤 영역의 **아래 패딩 위**에 붙인다 — 미리보기(아래 패딩 48)에서 줄이 끝까지 다 보여 `.stuck` 이 붙지 않았고, 줄 밑 48px 띠로 내용이 비쳤다. 관찰 영역에서 그 영역의 아래 패딩을 빼고(`rootMargin` — 사이트 · React 같은 식), 스크롤 미리보기는 아래 패딩 0 + 자식 아래 여백 3rem.
+  - React `Stepper` 에 `useStuck` import 가 빠져 있었다(새 테스트가 잡음).
+  - 꺼진 행의 체크박스가 사이트 마크업은 `disabled` 인데 React DataTable 은 `aria-disabled` 만 달았다(새 예제의 구조 비교가 잡음) — DataTable 이 꺼진 행의 체크박스를 `disabled` 로 그리고, `TableRow disabled` 는 이미 disabled 인 조작에 `aria-disabled` 를 덧달지 않는다(MIGRATION).
+  - 전체 게이트에서 흔들린 단정 셋 — 행 방향키의 Space 단정은 앞 포커스가 일으킨 부드러운 스크롤이 멈출 때까지 기다리고, 4단계의 체크 · 라디오 표시 단정 둘은 두 프레임 뒤에 재던 것을 막 시작한 `::after` 전환을 찾아 길이 절반에 멈춰 재게 고쳤다(부하에서 전환 시작 전 값을 읽었다 — 단독으로는 통과). Date Picker 시각 묶음(behave.dptime)의 페이지 다시 읽기도 그 묶음의 기본 기다림 2초를 받아 부하에서 한 번 시간 초과가 났다 — 그 `goto` 만 15초로(단정 수 그대로).
+- **기존 단정 고침 2:** Data Table Rules 묶음 수(행 동작 6 → 7), 행 펼침 삭제 뒤 포커스 = 펼침 버튼 → 다음 행 자체(그 예제에 행 방향키를 켰음).
+- 음성 시험: 사이트 6건(꺼진 행 건너뛰기 · keydown 처리기 · 행 포커스 링 · 패딩 빼기 · 스크롤 미리보기 패딩 · 라디오 점 전환) · React 4건(꺼진 행 건너뛰기 · Space · FormActions · Stepper 의 stuck) 모두 실패로 잡혔다. 패딩 빼기는 처음에 못 잡아(예제 미리보기의 아래 패딩을 0 으로 해 그 경로가 돌지 않음) 아래 패딩 있는 스크롤 영역을 만들어 재는 단정을 더했다.
+- Figma 미반영 4 → 6건(Home 잘림 · 숨긴 ov-grid 사본 2 제외) — 이번 몫 2: Rules data-table '행 동작 / 키보드' · form '긴 폼'(저장소에만 있는 행). 앞 단계의 Kbd · Command Palette Spec 카드 없음 2 · 문서 카드 없음 2 는 그대로다. 행 포커스 링 · 붙은 버튼 줄은 audit 대조 밖이다.
+
+
+2026-11-27 모션 다듬기 — transition 속성 허용 목록 · 탭 밑줄과 진행 막대 transform · 팝오버 기준점 확대 · 새 항목 알림(사람의 요청 '적용할 만한 모션 스킬 검토', 결정 넷) — behave 1813 → 1816(`behave.motion.js` 38 → 41) · react 980+8 → 982+8(`motion.test` 1 · `labels-parity` 1). contrast · advisory · pages 수는 그대로. verify 는 검사 한 묶음을 더했고 실패는 0 이다.
+- **근거:** 설치된 모션 스킬 여섯을 읽어 지금 코드와 대조했다. VectorLab `motion` · `transitions` · `reduced-motion`, design-skills `interaction-design`, figma `figma-use-motion` · `figma-implement-motion` 이다.
+  - 들어옴 감속 · 나감 가속 · 반복 장식 없음 · 줄인 모션 · 자리 유지는 이미 맞았다.
+  - 다른 점은 넷이었다: 레이아웃 속성 transition, 허용 목록 없음, 팝오버 기준점 없음, 하이라이트의 뜻이 모션에만 있음.
+  - 하지 않은 것: 목록 순차 등장 · 줄인 모션의 흐림 허용(11-10 사람의 결정) · 길이 숫자 맞춤(20ms 이하 차이에 소비자 수십 곳) · 내러티브 · 제스처. Figma 모션 스타일은 나중에 한다(사람의 결정).
+- **transition 속성 허용 목록(verify)** — 허용하는 속성은 transform · translate · scale · rotate · opacity · color · background(-color) · border-color · box-shadow · outline(-color) 이다.
+  - 그 밖은 `MOTION_LAYOUT` 에 선택자 · 속성 · 이유를 적은 것만 받는다(11 줄). Accordion `::details-content` height · content-visibility, 사이드 내비 width · padding, pill 탭 면 width, 문서 셸 다섯(Colors 막대 · 팔레트 칸 · 홈 배너 gap · 아이콘 둘)이다.
+  - 예외의 transition 이 없어지면 '예외에서 지운다' 로 실패한다.
+- **탭 밑줄 = translate + scale** — `::after` 는 폭 1px 이고 `--tab-s`(고른 탭 폭)만큼 늘어난다(`transform-origin:0 0`). pill 면은 scale 이면 모서리가 일그러져 translate + width 그대로다(예외 목록). ds.js `inkSync` · React `syncInk` 가 `--tab-s` 를 더 넣는다.
+- **진행 막대 채움 = translate** — `width:100%; translate:calc(var(--p,100%) - 100%) 0`, 트랙이 `overflow:hidden` 으로 자른다.
+  - 값은 `--p`(이미 LOCAL_VARS — Slider 와 같은 변수)로 넣는다. 사이트 예제 · 패턴 · ds.js 업로드 · React Loading · ProgressList 가 쓴다.
+  - 옛 인라인 `width:N%` 도 그대로 보인다(변수가 없으면 100%).
+- **팝오버 기준점 확대** — `ds-pop` · `ds-pop-up` 에 `scale .98` 을 더했다. 기준점은 트리거 쪽이다: 아래로 열리면 위, `.up` 이면 아래, 알림 센터는 오른쪽 위. Tooltip 은 그대로다.
+- **측정에서 드러나 고친 결함 — 커지는 조상 안의 탭 밑줄:** 알림 센터 패널이 scale .98 로 들어오는 동안 그 안 탭 줄의 밑줄을 재서, 밑줄이 2% 짧게(dw 0.94) 남았다. `getBoundingClientRect` 는 조상 transform 을 받는다. `inkSync` · `syncInk` 가 `k = 줄의 화면 폭 ÷ offsetWidth` 로 나눈다.
+- **게이트에서 드러나 고친 결함 — 확대 도중의 자리 측정:** 띄운 메뉴(`placeMenu` · React `useMenuPlacement`)와 알림 센터 맞춤(`nfFit` · React `fit`)이 열리는 순간 .98 로 줄어 있는 상자를 쟀다. 그래서 표 안 행 동작 메뉴의 오른쪽 끝이 트리거와 1.08px 어긋났고, 390 화면에서 처음부터 열린 알림 패널이 왼쪽 8px 여백을 못 지켰다(l 1).
+  - 새 도우미 `restRect(el)`(사이트 · React `utils/motion.ts`)는 돌고 있는 애니메이션을 끝 시점으로 옮겨 재고 `currentTime` 을 되돌린다.
+- **기존 단정 고침 셋(들어오는 확대 도중에 재던 것):**
+  - Date Picker 시각 묶음의 `openCal` 이 달력 애니메이션을 끝낸 뒤 잰다 — 기간 시각 칸 간격 11.944 · 시계 버튼 27 이 나왔다.
+  - '컴포넌트는 React 기본 글자에서도 같은 배치'(behave.js)가 끝이 있는 애니메이션을 끝낸 뒤 잰다 — 처음부터 열린 알림 패널 예제 둘이 다섯 번에 일곱 번 달랐고, 고친 뒤 0 이다.
+  - 메뉴 체크 표시 단정(behave.motion)이 두 프레임 대신 막 시작한 `::after` 전환을 절반에 멈춰 잰다 — 11-26 에 체크박스 · 라디오에 쓴 방법이다.
+- **새 항목 알림** — `DS.flash(el, {announce})` · React `flash(nodes, {announce})` 가 숨긴 `body > .ds-live`(role=status)에 '새 항목 n개' 를 한 번 알린다(`FLASH_SAY` — labels-parity 가 사이트와 대조).
+  - `announce:false` 면 조용하고, 문자열이면 그 문구를 쓴다(`{n}`).
+  - 알림 센터(`DS.notify.add` · React NotificationCenter)는 제목으로 따로 알려 false 를 넘긴다.
+- **behave.motion** — 탭 밑줄 단정을 계산값(left · width) 대신 박스(left + translate · width × scale)로 다시 썼고, transition 이 translate · scale 뿐인지 잰다.
+  - 새 부분 3b 진행 막대: 도중 프레임 · 폭 = 트랙 · translate 전환 · overflow hidden 을 잰다.
+  - 팝오버 단정에 scale .98 ~ 1 · 기준점(위로 열리면 아래 끝)을 더했다.
+  - 7 에 알림 단정 둘: 문구 · false · 바꾼 문구, 알림 센터는 '새 항목' 없이 제목만.
+  - **기존 단정 고침:** 진행 막대 값 읽기(behave.chart · behave.patterns · behave.upload · React data-visual-set)를 `--p` 로.
+- 음성 시험: 사이트 5건(생성 파일을 바꾸고 `cmp` 로 되돌림 확인) — 팝오버 scale 지움(behave.motion 2) · flash 알림 끔(1) · 밑줄의 배율 나눗셈 되돌림(숨은 줄 단정 1) · `placeMenu` 의 restRect 되돌림(끝 정렬 1.08px) · `nfFit` 의 restRect 되돌림(behave.notify 390 단정). React 2건 — flash 알림 끔(motion.test) · `FLASH_SAY` 글자 바꿈(labels-parity). 모두 실패로 잡혔다.
+  - React 의 restRect · 밑줄 나눗셈은 jsdom 에 배치 · 애니메이션이 없어 테스트로 잡지 못한다(사이트 단정이 같은 식을 잰다).
+- 캡처: 1440 라이트 · 다크 · 390 의 탭 · 진행 막대 · 진행 막대 목록, 탭을 옮기는 도중(밑줄이 두 탭 사이) · 메뉴가 들어오는 도중 프레임. 알림 센터 도중 프레임은 예제가 처음부터 열려 있어 벨을 누르면 닫혀 찍지 못했다(동작은 behave.motion 이 잼).
+- **audit 도구:** 대시보드 진행 막대 행을 `--p` 로도 읽는다(옛 `width:N%` 만 읽어 '정적 차트 기대값을 읽지 못함' 이 났다).
+- Figma 미반영 6건(Home 잘림 · 숨긴 ov-grid 사본 2 제외 — 5단계 그대로). 모션은 audit 대조 밖이다.
 
 `advisory 1149` 는 기준 토큰 값을 따르느라, 또는 사람이 결정한 표현(예: 진한 빨강 Count 배지의 다크 흰 숫자) 때문에
 우리 기준을 못 넘는 쌍입니다 — **실패가 아니라 선언된 예외**이고 `contrast.pairs.js` 에 이유가 적혀 있습니다.

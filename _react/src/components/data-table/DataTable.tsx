@@ -8,6 +8,8 @@ import { Skeleton, useLoadingDelay } from "../loading/Loading";
 import { Icon } from "../../icons/Icon";
 import { Table, TableBody, TableCell, TableFoot, TableHead, TableHeader, TableRow, type TableDensity, type TableRowStyle } from "../table/Table";
 import { LABELS } from "../../labels";
+import { leaveInPlace, swapIn } from "../../utils/motion";
+import { rowNavRows, rowNavSet } from "../../utils/rowNav";
 
 export interface DataTableColumn<T> {
   key: string;
@@ -104,6 +106,8 @@ export interface DataTableProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 
   hover?: boolean;
   /** 칸을 한 줄로(.tbl.nowrap) — 좁으면 표 틀이 가로로 스크롤(2026-11-15) */
   nowrap?: boolean;
+  /** 행 방향키(2026-11-26 — Table rowNavigation). 행을 지우면 포커스가 같은 자리의 행 자체로 간다 */
+  rowNavigation?: boolean;
   wrapStyle?: CSSProperties;
 }
 
@@ -122,7 +126,7 @@ function defaultSortValue<T>(row: T, key: string): string | number {
 }
 
 function DataTableInner<T>(
-  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel, delay, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, stickyColumn, summaryRow, maxHeight, caption, compact, density, zebra, rowStyle, hover, nowrap, className, wrapStyle, ...rest }: DataTableProps<T>,
+  { columns, rows, rowKey, sort, defaultSort = null, onSortChange, manualSort, selectable, selected, defaultSelected, onSelectedChange, rowLabel, actionBar, selectionScope, totalCount, allMatching, defaultAllMatching, onAllMatchingChange, selectNoticeText, rowProps, actions, renderExpanded, expandable, expanded, defaultExpanded, onExpandedChange, expandScope, expandLabel, empty, status, statusLabel, delay, loadingRows = 5, errorText = LABELS.tableError, onRetry, retryLabel = LABELS.retry, stickyHeader, stickyColumn, summaryRow, maxHeight, caption, compact, density, zebra, rowStyle, hover, nowrap, rowNavigation, className, wrapStyle, ...rest }: DataTableProps<T>,
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const [curSort, setSort] = useControllable<SortState | null>({ value: sort, defaultValue: defaultSort, onChange: onSortChange });
@@ -175,12 +179,18 @@ function DataTableInner<T>(
     lastRow.current = null;
     if (document.activeElement && document.activeElement !== document.body) return;
     const trs = mainRows();
+    const tbl = wrapEl.current?.querySelector("table");
+    if (rowNavigation && tbl) {   // 같은 자리의 고를 수 있는 행(없으면 앞) 자체로
+      const ok = rowNavRows(tbl), at = Math.min(last.index, trs.length - 1);
+      const tr = trs.slice(at).find((r) => ok.includes(r as HTMLTableRowElement)) ?? trs.slice(0, at).reverse().find((r) => ok.includes(r as HTMLTableRowElement));
+      if (tr) { rowNavSet(tbl, tr as HTMLTableRowElement); (tr as HTMLElement).focus(); return; }
+    }
     const target = (trs[Math.min(last.index, trs.length - 1)] as HTMLElement | undefined)?.querySelector<HTMLElement>(FOCUS_IN_ROW);
     if (target) target.focus();
     else if (wrapEl.current) { if (wrapEl.current.tabIndex < 0) wrapEl.current.tabIndex = -1; wrapEl.current.focus(); }
   });
   /* 펼친 상세 행은 행 순서에 세지 않는다 — 상세 안의 포커스는 그 위 행의 것 */
-  const mainRows = () => Array.from(wrapEl.current?.querySelector("table")?.tBodies[0]?.rows ?? []).filter((tr) => !tr.classList.contains("row-detail"));
+  const mainRows = () => Array.from(wrapEl.current?.querySelector("table")?.tBodies[0]?.rows ?? []).filter((tr) => !tr.classList.contains("row-detail") && !tr.classList.contains("ds-leaving"));
   const noteRow = (e: { target: EventTarget }) => {
     let tr = (e.target as Element).closest?.("tr") as HTMLTableRowElement | null;
     if (tr?.classList.contains("row-detail")) tr = tr.previousElementSibling as HTMLTableRowElement | null;
@@ -203,6 +213,33 @@ function DataTableInner<T>(
   const stale = status === "loading" && rows.length > 0;
   const loadLabel = statusLabel ?? (caption ? `${caption} ${LABELS.loading}` : LABELS.loading);
   const colCount = columns.length + (expOn ? 1 : 0) + (selectable ? 1 : 0) + (actions ? 1 : 0);
+  /* 지운 행이 그 자리에서 흐려짐(2026-11-26 — 사이트 DS.table.removeRow 와 같은 모습). 지난번에 그린 행 중 사라진 것의 사본을 남은 다음 행 앞에 두고
+     --motion-exit 뒤 지운다. 남은 행이 없으면(페이지 이동 · 새 목록) · 11개 이상이면 바로 바뀐다. 남은 행은 움직이지 않는다 */
+  const drawn = useRef<{ keys: string[]; trs: HTMLTableRowElement[] } | null>(null);
+  useLayoutEffect(() => {
+    const listing = !(status === "loading" && !stale) && status !== "error" && sortedRows.length > 0;
+    const trs = listing ? (mainRows() as HTMLTableRowElement[]) : [];
+    const prev = drawn.current;
+    drawn.current = listing && trs.length === orderKeys.length ? { keys: orderKeys, trs } : null;
+    if (!prev || !drawn.current) return;
+    const gone = prev.keys.filter((k) => !orderKeys.includes(k));
+    if (!gone.length || gone.length > 10 || gone.length === prev.keys.length) return;
+    const body = trs[0]?.parentElement;
+    for (const k of gone) {
+      const i = prev.keys.indexOf(k), src = prev.trs[i];
+      const next = prev.keys.slice(i + 1).find((x) => orderKeys.includes(x));
+      const before = next ? trs[orderKeys.indexOf(next)] : null;
+      if (src && body) leaveInPlace(src, (copy) => body.insertBefore(copy, before ?? null));
+    }
+  });
+  /* 펼친 상세가 흐림에서 나타남(2026-11-26) — 처음 그릴 때는 그대로 */
+  const expSeen = useRef<ReadonlySet<string> | null>(null);
+  useLayoutEffect(() => {
+    const before = expSeen.current; expSeen.current = exp;
+    if (!before || before === exp) return;
+    const trs = mainRows();
+    exp.forEach((k) => { if (!before.has(k)) { const tr = trs[orderKeys.indexOf(k)]; if (tr?.nextElementSibling?.classList.contains("row-detail")) swapIn(tr.nextElementSibling); } });
+  });
   return (
     <div
       ref={mergeRefs(ref, wrapEl)}
@@ -215,7 +252,7 @@ function DataTableInner<T>(
       {actionBar && actionBar(new Set(sel), { allMatching: !!isAll, count: isAll && totalCount !== undefined ? totalCount : sel.size })}
       {selectable && totalCount !== undefined && <div className="select-notice" aria-live="polite">{noticeBody}</div>}
       {loading && <span className="sr-only" role="status">{loadLabel}</span>}
-      <Table compact={compact} density={density} zebra={zebra} rowStyle={rowStyle} hover={hover} nowrap={nowrap} wrap={false} aria-busy={status === "loading" || undefined}>
+      <Table compact={compact} density={density} zebra={zebra} rowStyle={rowStyle} hover={hover} nowrap={nowrap} rowNavigation={rowNavigation} wrap={false} aria-busy={status === "loading" || undefined}>
         {caption && <caption className="sr-only">{caption}</caption>}
         <TableHead>
           <TableRow>
@@ -281,7 +318,7 @@ function DataTableInner<T>(
                   )}
                   {selectable && (
                     <TableCell check>
-                      <Checkbox checked={sel.has(k)} onChange={(on) => toggleOne(k, on)} aria-label={`${nameOf(row, k)} ${LABELS.select}`} />
+                      <Checkbox checked={sel.has(k)} disabled={rp.disabled} onChange={(on) => toggleOne(k, on)} aria-label={`${nameOf(row, k)} ${LABELS.select}`} />
                     </TableCell>
                   )}
                   {columns.map((c) => {

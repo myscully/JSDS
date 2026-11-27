@@ -7,6 +7,7 @@ export { useControllable } from "./utils/useControllable";
 export { useId } from "./utils/useId";
 export { Portal, type PortalProps } from "./utils/Portal";
 export { useOutsideClick, useEscape, useFocusTrap, mergeRefs } from "./utils/hooks";
+export { flash, type FlashOptions } from "./utils/motion";   // 새로 들어온 행 · 항목이 옅은 brand 면에서 한 번 흐려짐 — 사이트 DS.flash 와 같음(2026-11-26)
 export { accentScale, applyAccent, applyProductColor, PRODUCT_COLORS, isLightAccent, setTheme, getTheme, checkRootFontSize, ROOT_FONT_MIN, type AccentScale, type ProductColor, type ProductColorKey, type Theme } from "./theme";
 export { LABELS, type LabelKey } from "./labels";
 
@@ -75,4 +76,6 @@ export { Kpi, KpiGrid, ChartCard, BarChart, Donut, DonutRow, ChartLegend, Sparkl
 
 // patterns (thin wrappers)
 export { SettingsSection, Setting, type SettingsSectionProps, type SettingProps } from "./patterns/Settings";
-export { Stack, Row2, Row3, Toolbar, Spacer, PageHead, Form, FormLegend, type FormProps, ErrorSummary, type ErrorSummaryProps, FormSection, FormRow, FormActions, Empty, Notes, StatusList, StatusItem, SevBand, SevCell, Onboard, Terms, TermsAll, TermsItem, TermsMessage, type PageHeadProps, type EmptyProps, type NotesProps, type StatusItemProps, type SevBandProps, type SevCellProps, type TermsItemProps } from "./patterns/Patterns";
+export { Stack, Row2, Row3, Toolbar, Spacer, PageHead, Form, FormLegend, type FormProps, ErrorSummary, type ErrorSummaryProps, FormSection, FormRow, FormActions, type FormActionsProps, Empty, Notes, StatusList, StatusItem, SevBand, SevCell, Onboard, Terms, TermsAll, TermsItem, TermsMessage, type PageHeadProps, type EmptyProps, type NotesProps, type StatusItemProps, type SevBandProps, type SevCellProps, type TermsItemProps } from "./patterns/Patterns";
+export { Kbd, isMacPlatform, type KbdProps } from "./components/kbd/Kbd";   // 키 표시 — Mod 는 맥 ⌘ · 그 밖 Ctrl (2026-11-26)
+export { CommandPalette, CommandPaletteSurface, matchCommand, type CommandPaletteProps, type CommandPaletteSurfaceProps, type CommandGroup, type CommandItem } from "./components/command-palette/CommandPalette";   // 명령 팔레트 — Mod K (2026-11-26)

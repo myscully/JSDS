@@ -3,6 +3,8 @@ import { cx } from "../../utils/cx";
 import { useControllable } from "../../utils/useControllable";
 import { useId } from "../../utils/useId";
 import { mergeRefs } from "../../utils/hooks";
+import { useTabInk } from "../../utils/tabInk";
+import { useSwapIn } from "../../utils/motion";
 
 /* 탭 줄만 옮긴다 — scrollIntoView 는 페이지까지 움직인다. 사이트 ds.js 의 tabReveal 과 같은 규칙 */
 const EDGE = 16;
@@ -51,7 +53,9 @@ export interface TabListProps extends HTMLAttributes<HTMLDivElement> {
 }
 /** role=tablist. ←→ Home End 로 이동(선택 즉시 전환) */
 export const TabList = forwardRef<HTMLDivElement, TabListProps>(function TabList({ pill, sm, accent, label, className, onKeyDown, ...rest }, ref) {
-  const { set } = useTabs();
+  const { set, value } = useTabs();
+  const self = useRef<HTMLDivElement>(null);
+  useTabInk(self, value);   // 고른 탭으로 밑줄이 미끄러진다(2026-11-26 — 사이트 ds.js 와 같음)
   const keyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     onKeyDown?.(e);
     const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
@@ -69,7 +73,7 @@ export const TabList = forwardRef<HTMLDivElement, TabListProps>(function TabList
     const v = tabs[n].dataset.value;
     if (v !== undefined) set(v);
   };
-  return <div ref={ref} className={cx("tabs", { pill, sm, accent }, className)} role="tablist" aria-label={label} onKeyDown={keyDown} {...rest} />;
+  return <div ref={mergeRefs(ref, self)} className={cx("tabs", { pill, sm, accent }, className)} role="tablist" aria-label={label} onKeyDown={keyDown} {...rest} />;
 });
 
 export interface TabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "value"> {
@@ -114,6 +118,8 @@ export interface TabPanelProps extends HTMLAttributes<HTMLDivElement> {
 export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPanel({ value, keepMounted = true, className, ...rest }, ref) {
   const { value: cur, baseId } = useTabs();
   const on = cur === value;
+  const self = useRef<HTMLDivElement | null>(null);
+  useSwapIn(self, on);   // 고른 패널이 흐림에서 나타남(2026-11-26) — 처음 그릴 때는 그대로
   if (!on && !keepMounted) return null;
-  return <div ref={ref} role="tabpanel" id={`${baseId}-panel-${value}`} aria-labelledby={`${baseId}-tab-${value}`} hidden={!on} tabIndex={0} className={cx("tab-panel", className)} {...rest} />;
+  return <div ref={mergeRefs(ref, self)} role="tabpanel" id={`${baseId}-panel-${value}`} aria-labelledby={`${baseId}-tab-${value}`} hidden={!on} tabIndex={0} className={cx("tab-panel", className)} {...rest} />;
 });

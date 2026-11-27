@@ -1,6 +1,8 @@
 /* 패턴 페이지용 얇은 레이아웃 래퍼 — 사이트 style.css 의 패턴 클래스와 1:1 */
-import { forwardRef, type ButtonHTMLAttributes, type FormHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
+import { forwardRef, useRef, type ButtonHTMLAttributes, type FormHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { cx } from "../utils/cx";
+import { mergeRefs } from "../utils/hooks";
+import { useStuck } from "../utils/stuck";
 import { Icon } from "../icons/Icon";
 import { ICONS, type IconName } from "../icons/icons.data";
 import { Indicator } from "../components/indicator/Indicator";
@@ -35,8 +37,16 @@ export const Terms = simple("terms", "Terms");
 export const FormSection = simple("form-section", "FormSection");
 /** 폼 2열 */
 export const FormRow = simple("form-row", "FormRow");
+export interface FormActionsProps extends HTMLAttributes<HTMLDivElement> {
+  /** 긴 폼에서 스크롤 영역 아래 끝에 붙는다(.form-actions.sticky, 2026-11-26). 폼 끝에 닿으면 제자리로 */
+  sticky?: boolean;
+}
 /** 폼 하단 액션 (우측 정렬) */
-export const FormActions = simple("form-actions", "FormActions");
+export const FormActions = forwardRef<HTMLDivElement, FormActionsProps>(function FormActions({ sticky, className, ...rest }, ref) {
+  const self = useRef<HTMLDivElement>(null);
+  const stuck = useStuck(self, sticky);
+  return <div ref={mergeRefs(ref, self)} className={cx("form-actions", { sticky, stuck }, className)} {...rest} />;
+});
 
 /** 툴바 가운데 여백 */
 export const Spacer = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement>>(function Spacer({ className, ...rest }, ref) {

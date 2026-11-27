@@ -1013,3 +1013,47 @@ Steps 를 다시 짰습니다.
 - **진행 막대 · 게이지 트랙** `--chart-mono-track` 의 값이 `--surface-neutral-strong`(회색)입니다(2026-11-20 의 옅은 파랑을 바꿈).
 - **Toast 글자 500.**
 - 표 행 hover 는 원래 옵션(`Table hover` · `.tbl.hover`)이었고 기본값은 바뀌지 않았습니다. Table 페이지에 Hover 예제를 더했습니다.
+
+## 모션 — 팝오버 · 탭 밑줄 · 사이드 내비 · 패널 흐림 · 새 항목 · 지운 항목 (2026-11-26)
+
+**새로 더한 것**
+- **`flash(nodes)`**(`@jiran/ds-react`) — 새로 들어온 행 · 항목을 옅은 brand 면에서 한 번(1.6초) 흐리게 보입니다. 표 행이면 칸에 칠합니다. 사이트 `DS.flash` 와 같습니다. 알림 센터는 새 항목에 이미 씁니다. 줄인 모션이면 흐려지지 않는 면이 같은 시간 머뭅니다.
+- **모션 토큰 셋** — `--motion-enter`(200ms 감속 · 들어옴) · `--motion-exit`(120ms 가속 · 나감) · `--motion-flash`(1600ms). 길이와 이징이 한 값입니다(`transition: opacity var(--motion-enter)`).
+
+**보이는 모양 · DOM 이 바뀐 것**
+- **팝오버가 흐림에서 4px 내려옵니다**(메뉴 · Select · Combobox · 달력 · 시각 목록 · 알림 센터 — 위로 뒤집힌 것은 아래에서). `translate` 속성을 써서 제품이 넣은 `transform` 과 겹치지 않습니다. 닫힘은 바로입니다.
+- **탭 밑줄이 하나로 미끄러집니다** — 스크립트가 붙으면 탭 줄에 `data-ink` 가 달리고 탭 자신의 아래 선은 투명이 되며, 줄의 `::after` 가 고른 탭으로 움직입니다(`--tab-x` · `--tab-w`). 탭 아래 선을 직접 칠하던 제품 CSS 는 `.tabs:not([data-ink])` 로 좁히세요.
+- **사이드 내비 접기 · 펼치기의 폭이 움직입니다**(처음 그릴 때는 그대로).
+- **탭 · 단계 · 행 펼침 패널이 바뀔 때 흐림에서 나타납니다**(`.ds-swap` — 처음 그릴 때는 없음).
+- **지운 항목이 그 자리에서 흐려집니다** — Toast · Notice · Banner 닫기와 Combobox 칩은 같은 모양의 사본(`.ds-ghost` · `.ds-leaving`)이 잠깐 남습니다. **DataTable 은 rows 에서 사라진 행(1 ~ 10건)의 사본 행을 tbody 의 다음 행 앞에 120ms 넣습니다** — inert · aria-hidden 이고 id · for · name · aria 참조를 걷었습니다. 테스트 · 제품 코드가 tbody 의 행을 세면 `tr:not(.ds-leaving)` 으로 세세요. 상태 · 포커스 · 콜백은 누르는 순간 바뀝니다.
+- 줄인 모션이면 위 움직임은 모두 없고, 지운 항목은 바로 사라집니다.
+
+## Kbd · 명령 팔레트 (2026-11-26)
+
+**새로 더한 것**
+- **`Kbd`** — 키 하나(`<Kbd>Esc</Kbd>`) 또는 함께 누르는 키(`<Kbd keys={["Mod", "K"]} />`). `"Mod"` 는 맥에서 ⌘(숨긴 이름 'Command'), 그 밖에서 Ctrl 입니다. 메뉴 항목 끝은 `size="sm" menu`(aria-hidden — 단축키는 항목의 `aria-keyshortcuts` 로 알림). `isMacPlatform()` 도 내보냅니다.
+- **`CommandPalette`** — `open` · `onOpen` · `onClose` · `groups` · `onCommand(value, item)` · `hotkey`(기본 true — Mod K 로 열고 다시 누르면 닫음, 화면에 하나만 켬) · `placeholder` · `label` · `title` · `emptyText`. Popup 위에 그리고 닫기(X)가 없습니다. 실행하면 먼저 닫고 `onCommand` 를 부릅니다. 다른 대화상자가 열린 동안에는 단축키로 열지 않습니다. 표면만 쓰려면 `CommandPaletteSurface`, 걸러내기 규칙은 `matchCommand(item, query)`(사이트 ds.js 와 같음 — 띄어쓰기 · 대소문자 무시, 자음만이면 초성).
+
+**보이는 모양 · DOM 이 바뀐 것**
+- `SearchBar shortcut` 의 키 표시가 `<kbd className="kbd">` 가 되어 Kbd 모양(면 · 테두리 · 반경 4)으로 보입니다.
+- 팝업 · 패널 안 입력 보호(변경 사항을 버릴까요?)는 명령 팔레트의 검색칸 글자를 입력으로 세지 않습니다(검색창과 같음).
+
+## 표 행 방향키 · 긴 폼 버튼 줄 고정 (2026-11-26)
+
+**새로 더한 것(모두 옵션 — 켜지 않으면 지금과 같습니다)**
+- **`Table rowNavigation` · `DataTable rowNavigation`** — 행이 Tab 칸 하나가 됩니다(roving tabindex, `table[data-row-nav]`). ↑↓ · Home · End · PageUp/PageDown(10행)으로 옮기고 꺼진 행은 건너뜁니다. Enter 는 행 펼침 버튼이 있으면 펼치고 없으면 행의 첫 링크를 엽니다. Space 는 행 체크박스를 켜고 끕니다. 행에서 Tab 을 누르면 그 행 안의 조작으로 갑니다. 칸 안 입력 · 메뉴의 방향키는 가로채지 않습니다. 행 안 조작 중 Tab 칸이 아닌 행의 것은 `tabindex=-1` 이 됩니다.
+  - DataTable 은 행을 지우면 포커스가 같은 자리 행 자체로 갑니다(rowNavigation 일 때만 — 아닐 때는 지금처럼 행의 첫 조작).
+- **`FormActions sticky`** · **`Stepper stickyActions`** — 버튼 줄이 스크롤 영역 아래 끝에 붙습니다(`position:sticky`). 붙어 있는 동안 `.stuck` 이 달리고, 마법사 버튼 줄은 그동안 위 선을 보입니다. 폼 끝에 닿으면 제자리로 돌아갑니다. `FormActions` 는 이제 `forwardRef` 컴포넌트이고 `FormActionsProps` 를 내보냅니다.
+- **꺼진 행의 체크박스** — `DataTable` 은 꺼진 행(`rowProps` 의 `disabled`)의 행 체크박스를 `disabled` 로 그립니다(전에는 `aria-disabled` 만 — 사이트 마크업과 같게). `TableRow disabled` 는 이미 `disabled` 인 조작에 `aria-disabled` 를 덧달지 않습니다. 꺼진 행 체크박스를 `[aria-disabled]` 로 찾던 제품 코드는 `:disabled` 로 찾으세요.
+
+## 모션 다듬기 — 탭 밑줄 · 진행 막대 transform · 팝오버 기준점 · 새 항목 알림 (2026-11-27)
+
+**새로 더한 것**
+- **`flash(nodes, { announce })`** — 이제 숨긴 알림 영역(`body > .ds-live`, `role=status`)에 '새 항목 n개' 를 한 번 알립니다. 뜻이 모션으로만 전해지지 않게 하려는 것입니다. `announce: false` 면 알리지 않고(알림 센터처럼 따로 알리는 곳), 문자열이면 그 문구를 씁니다(`{n}` 자리). 사이트 `DS.flash(el, { announce })` 도 같습니다. 알림 센터는 제목으로만 알려 겹치지 않습니다. `FlashOptions` 타입을 내보냅니다.
+
+**보이는 모양 · DOM 이 바뀐 것(바깥 크기 · 위치는 같습니다)**
+- **탭 밑줄**은 `left` · `width` 대신 `translate` + `scale` 로 움직입니다 — 줄의 `::after` 는 폭 1px 이고 `--tab-s`(고른 탭 폭)만큼 가로로 늘어납니다. pill 면은 모서리가 일그러지지 않게 그대로 `width` 로 움직입니다. `--tab-x` · `--tab-w` 는 그대로 남고 `--tab-s` 가 더해졌습니다. 밑줄을 직접 덮어 칠하던 제품 CSS 가 `width` 를 정했다면 `scale` 이 그것을 늘리므로 지우세요.
+- **진행 막대 채움**(`.progress i` · Loading 진행 막대 · `ProgressList`)은 폭 100% 에서 `translate` 로 밀어 보입니다. 값은 CSS 변수 `--p`(예: `style="--p:62%"`)로 넣습니다. 옛 인라인 `width:62%` 도 그대로 보입니다(변수가 없으면 100% 로 계산). React 가 그리는 `<i>` 는 이제 `width` 대신 `--p` 를 답니다 — 테스트가 `style.width` 를 읽었다면 `style.getPropertyValue("--p")` 로 바꾸세요.
+- **팝오버**가 흐림 · 4px 이동에 더해 `scale .98 → 1` 로 트리거 쪽에서 커지며 나옵니다(기준점: 아래로 열리면 위, 위로 뒤집히면 아래, 알림 센터는 오른쪽 위).
+- **탭 밑줄 측정**은 조상의 화면 배율을 나눕니다 — 커지는 팝오버(알림 센터) 안 탭 줄에서 밑줄이 2% 짧게 잡히던 것을 고쳤습니다.
+- **띄운 메뉴 · 알림 센터 자리**는 들어오는 확대가 끝난 크기로 잽니다 — 열리는 순간 `.98` 로 줄어 있는 상자를 재서, 띄운 메뉴의 오른쪽 끝이 트리거와 약 1px 어긋나고 390 화면의 알림 센터가 왼쪽 8px 여백을 지키지 못했습니다. 바깥에서 할 일은 없습니다.

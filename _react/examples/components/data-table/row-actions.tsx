@@ -14,6 +14,7 @@ export default function Example() {
   return (
     <DataTable
       hover
+      rowNavigation
       columns={COLUMNS}
       rows={ROWS}
       rowKey={(r) => r.id}

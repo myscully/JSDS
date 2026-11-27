@@ -92,7 +92,7 @@ export const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function S
       <Icon name="search" />
       <input ref={mergeRefs(inner, ref)} type="search" value={cur} onChange={(e) => change(e.target.value)} onKeyDown={keyDown} aria-label={label} {...rest} />
       {status !== undefined && <span className="sr-only" role="status">{status}</span>}
-      {shortcut && !cur && <kbd>{shortcut}</kbd>}
+      {shortcut && !cur && <kbd className="kbd">{shortcut}</kbd>}
       {clearable && cur && (
         <button type="button" className="clear" aria-label={LABELS.clear} onClick={clear}>
           <Icon name="x" size={12} />

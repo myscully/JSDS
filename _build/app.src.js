@@ -340,6 +340,10 @@
   document.addEventListener("ds:upload-retry", e => { if (e.target.closest(".example-preview") && e.target.hasAttribute("data-demo")) uploadDemo(e.target, e.detail.id, true); });
   /* Switch 예제 — 서버 대신 0.9초 뒤 응답한다. data-demo-fail 은 실패를 보여 주는 문서 전용 표시 */
   document.addEventListener("ds:switch", e => { if (!e.target.closest(".example-preview")) return; setTimeout(() => e.target.closest("[data-demo-fail]") ? e.detail.reject("정책 서버에 연결하지 못했습니다. 잠시 후 다시 시도하세요.") : e.detail.resolve(), 900); });
+  /* 로그 뷰어 '새 로그' — 맨 위로 가면 새로 들어온 행이 한 번 흐려진다(DS.flash 시연). data-demo-flash 는 보일 행 수를 담은 문서 전용 표시 */
+  document.addEventListener("click", e => { const b = e.target.closest(".example-preview [data-demo-flash]"); if (!b || !window.DS || !window.DS.flash) return; const rows = [...b.closest(".example-preview").querySelectorAll("tbody tr.log-row")].slice(0, +b.dataset.demoFlash || 3); if (rows[0]) rows[0].scrollIntoView({ block: "nearest" }); window.DS.flash(rows); });
+  /* 명령 팔레트 예제 — 고르면 문서 예제라 실행 대신 Toast 로 알린다(data-demo 는 문서 전용 표시) */
+  document.addEventListener("ds:command", e => { const el = e.target.closest && e.target.closest(".example-preview .cmdk[data-demo]"); if (el && window.DS) window.DS.toast(`명령을 골랐습니다: ${e.detail.label}`); });
   /* Steps 마법사 완료 처리 중(data-async) — 서버 대신 0.9초 뒤 응답한다 */
   document.addEventListener("ds:step-finish", e => { if (!e.target.closest(".example-preview") || !e.detail.resolve) return; setTimeout(() => e.detail.resolve(), 900); });
   /* Tree 펼칠 때 불러오기 — 문서 예제의 응답을 흉내 낸다(조회는 제품 몫). data-demo-fail 항목은 실패 */

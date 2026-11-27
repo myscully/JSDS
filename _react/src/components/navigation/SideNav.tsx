@@ -1,9 +1,10 @@
-import { createContext, forwardRef, useContext, type AnchorHTMLAttributes, type ElementType, type HTMLAttributes, type ReactNode } from "react";
+import { createContext, forwardRef, useContext, useEffect, useLayoutEffect, useRef, type AnchorHTMLAttributes, type ElementType, type HTMLAttributes, type ReactNode } from "react";
 import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import type { IconName } from "../../icons/icons.data";
 import { LABELS } from "../../labels";
 import { Tooltip } from "../tooltip/Tooltip";
+import { mergeRefs } from "../../utils/hooks";
 
 const Ctx = createContext<{ collapsed: boolean; collapsible: boolean }>({ collapsed: false, collapsible: false });
 
@@ -19,9 +20,23 @@ export interface SideNavProps extends HTMLAttributes<HTMLElement> {
 }
 /** 콘솔 좌측 1차 내비게이션 (폭 240 / 접힘 64) */
 export const SideNav = forwardRef<HTMLElement, SideNavProps>(function SideNav({ collapsed = false, collapsible = false, label = LABELS.mainMenu, footer, className, children, ...rest }, ref) {
+  /* 접고 펼 때 폭이 움직인다(2026-11-26 — 사이트 ds.js 와 같음). 처음 그릴 때는 data-nav-ready 전이라 움직이지 않고, 펼칠 때 이름 글자가 흐림에서 나타난다 */
+  const self = useRef<HTMLElement>(null), first = useRef(true);
+  useEffect(() => {
+    const nav = self.current; if (!nav || typeof requestAnimationFrame !== "function") return;
+    let id = requestAnimationFrame(() => { id = requestAnimationFrame(() => nav.setAttribute("data-nav-ready", "")); });
+    return () => cancelAnimationFrame(id);
+  }, []);
+  useLayoutEffect(() => {
+    if (first.current) { first.current = false; return; }
+    const nav = self.current; if (!nav || collapsed || !nav.hasAttribute("data-nav-ready")) return;
+    nav.classList.remove("ds-nav-opening"); void nav.offsetWidth; nav.classList.add("ds-nav-opening");
+    const t = setTimeout(() => nav.classList.remove("ds-nav-opening"), 400);
+    return () => clearTimeout(t);
+  }, [collapsed]);
   return (
     <Ctx.Provider value={{ collapsed, collapsible }}>
-      <nav ref={ref} className={cx("sidenav", { collapsed }, className)} aria-label={label} {...rest}>
+      <nav ref={mergeRefs(ref, self)} className={cx("sidenav", { collapsed }, className)} aria-label={label} {...rest}>
         {children}
         {footer !== undefined && !collapsed && <div className="foot">{footer}</div>}
       </nav>

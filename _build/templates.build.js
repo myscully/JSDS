@@ -71,7 +71,7 @@ const notify = (() => {
 /* 상단 바(2026-11-18) — 왼쪽 영역 240(로고 + 접기) · 검색 40 · 알림(점) · 설정 · 라이트/다크 · 사용자. 컴포넌트 Top Navigation 'With Navigation' 과 같은 짜임 */
 const topBar = () => `<header class="topbar tpl-top">
     <div class="topbar-start"><a href="dashboard.html" class="logo"><i>${I("shield-check",24,{style:"filled"})}</i>Security Console</a><span class="tooltip-wrap"><button type="button" class="btn md assistive icon-only" data-sidenav-toggle aria-controls="tpl-nav" aria-expanded="true" aria-label="메뉴 접기">${I("layout-sidebar")}</button><span class="tooltip bottom" role="tooltip">메뉴 접기</span></span></div>
-    <div class="searchbar" role="search" data-hotkey>${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="전역 검색"><kbd>/</kbd></div>
+    <div class="searchbar" role="search" data-hotkey>${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="전역 검색"><kbd class="kbd">/</kbd></div>
     <div class="right">
       <div class="btn-group">${notify}
       <span class="tooltip-wrap"><button type="button" class="btn md assistive icon-only" aria-label="설정">${I("settings")}</button><span class="tooltip bottom" role="tooltip">설정</span></span>
@@ -235,7 +235,7 @@ const wizard = () => {
             ${H.stepPanel(false, step2)}
             ${H.stepPanel(false, step3)}
             ${H.stepPanel(false, step4)}
-            ${H.stepActs(true, false, "정책 배포")}
+            ${H.stepActs(true, false, "정책 배포", true)}
           </div>
         </div>`;
   return doc({ id: "wizard", title: "정책 배포", date: true, body: shell("wizard", content) });

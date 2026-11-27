@@ -163,7 +163,7 @@ module.exports = async function upload({ page, ok, go }) {
 
     s = box("states");
     await s.scrollIntoViewIfNeeded();
-    ok("file upload: the states example shows all five rows", (await s.locator(".upload-item").count()) === 5 && (await s.locator(".upload-item.uploading .progress i").evaluate((i) => i.style.width)) === "60%");
+    ok("file upload: the states example shows all five rows", (await s.locator(".upload-item").count()) === 5 && (await s.locator(".upload-item.uploading .progress i").evaluate((i) => i.style.getPropertyValue("--p"))) === "60%");
     ok("file upload: only the failed send has retry", (await s.locator(".retry").count()) === 1 && (await s.locator(".upload-item[data-rejected] .retry").count()) === 0);
     await s.evaluate((h) => { h.style.width = "320px"; h.querySelector(".upload-item .name").textContent = "a".repeat(200) + ".log"; });
     const wrap = await s.locator(".upload-item").first().evaluate((li) => ({ over: li.scrollWidth - li.clientWidth, sizeW: li.querySelector(".size").getBoundingClientRect().width, nameLines: li.querySelector(".name").getBoundingClientRect().height }));
@@ -251,7 +251,7 @@ module.exports = async function upload({ page, ok, go }) {
     const api = (fn, id, v) => fresh.evaluate((h, a) => window.DS.upload[a.fn](h, a.id, a.v), { fn, id, v });
     await api("progress", ids[0], 42); await wait(20);
     const barNow = fresh.locator(".upload-item").first().locator(".progress");
-    ok("file upload: progress() moves the bar", (await barNow.getAttribute("aria-valuenow")) === "42" && (await barNow.locator("i").evaluate((i) => i.style.width)) === "42%");
+    ok("file upload: progress() moves the bar", (await barNow.getAttribute("aria-valuenow")) === "42" && (await barNow.locator("i").evaluate((i) => i.style.getPropertyValue("--p"))) === "42%");
     await api("done", ids[1]); await wait(20);
     ok("file upload form: another file still sending does not turn the field red", !(await fField.evaluate((f) => f.classList.contains("error"))));
     await fSave.click(); await wait(20);

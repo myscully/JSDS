@@ -34,7 +34,7 @@ export default function Example() {
         <TimePicker id="rp-time" label="시각" defaultValue="09:00" help="서울 시간 기준" />
       </FormRow>
       <Notice title="다음 발송: 11월 16일 월요일 09:00">보안팀 외 1명에게 지난 7일의 보안 요약을 PDF 로 보냅니다.</Notice>
-      <FormActions>
+      <FormActions sticky>
         <ButtonGroup>
           <Button variant="outline" color="assistive">미리보기</Button>
           <Button variant="outline">지금 보내기</Button>

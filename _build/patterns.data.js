@@ -65,7 +65,7 @@ const LOG_ROWS = [
 /* 로그 뷰어 표 — 행 펼침(사람의 결정 2026-11-15, Side Panel 대신) + 고정 헤더. 첫 행만 펼쳐 둔다 */
 const logTable = (rows) => `
           <div class="tbl-wrap sticky log-table" tabindex="0" role="region" aria-label="로그 목록">
-            <table class="tbl compact hover" id="log-tbl">
+            <table class="tbl compact hover" id="log-tbl" data-row-nav>
               <thead><tr><th class="expand"><span class="sr-only">상세</span></th><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>심각도</th><th>소스 IP</th><th>단말</th><th>메시지</th></tr></thead>
               <tbody>
                 ${rows.map(([t, tone, lv, ip, host, msg, pol, proc], i) => `<tr class="log-row"><td class="expand"><button type="button" class="expand-btn" aria-expanded="${i === 0}" aria-controls="lv${i}-d" aria-label="${t} 로그 상세">${I("chevron-right",16)}</button></td><td>2026. 09. 07 ${t}</td><td><span class="tag ${tone} sm">${lv}</span></td><td>${ip}</td><td>${host}</td><td class="truncate">${msg}</td></tr><tr class="row-detail" id="lv${i}-d"${i === 0 ? "" : " hidden"}><td colspan="6"><div class="row-detail-body"><dl class="detail-meta"><dt>탐지 정책</dt><dd>${pol}</dd><dt>단말</dt><dd>${host} · ${ip}</dd><dt>프로세스</dt><dd>${proc}</dd></dl><div class="code-view wrap"><div class="head"><span class="title">${t} 원본 로그</span>${pCopy(t + " 원본 로그")}</div><pre tabindex="0" aria-label="${t} 원본 로그"><code>2026-09-07T${t} ${ip} ${lv} ${msg} host=${host} proc=${proc}</code></pre></div></div></td></tr>`).join("\n                ")}
@@ -79,7 +79,7 @@ const DAILY14 = {"labels":["10-21","10-22","10-23","10-24","10-25","10-26","10-2
 /* 2026-11-15 차트 카드 · 증감 · 스파크 · 진행 막대 — components.data.js 의 chartHead · delta · sparkCanvas · meter 와 같은 마크업(브라우저에서 두 파일이 한 전역을 나눠 써 이름을 달리한다) */
 const pChartHead = (title, sub = "", action = "") => `<div class="chart-head"><h3 class="chart-title">${title}</h3>${sub ? `<span class="chart-sub">${sub}</span>` : ""}${action ? `<div class="chart-action">${action}</div>` : ""}</div>`;
 const pDelta = (dir, tone, text) => `<span class="delta${tone ? " " + tone : ""}">${I(dir === "up" ? "arrow-up" : "arrow-down", 12)}<span class="sr-only">${dir === "up" ? "증가" : "감소"}</span>${text}</span>`;
-const pMeter = (id, label, value, max, unit = "") => { const pct = Math.round(value / max * 1000) / 10, fmt = (n) => n.toLocaleString("en-US"); return `<div class="progress-row"><div class="row"><span id="${id}">${label}</span><span><b>${fmt(value)}</b><span class="target">/ ${fmt(max)}${unit}</span></span></div><div class="progress" role="meter" aria-labelledby="${id}" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${value}" aria-valuetext="${fmt(value)}${unit} / ${fmt(max)}${unit}, ${Math.round(pct)}%"><i style="width:${pct}%"></i></div></div>`; };
+const pMeter = (id, label, value, max, unit = "") => { const pct = Math.round(value / max * 1000) / 10, fmt = (n) => n.toLocaleString("en-US"); return `<div class="progress-row"><div class="row"><span id="${id}">${label}</span><span><b>${fmt(value)}</b><span class="target">/ ${fmt(max)}${unit}</span></span></div><div class="progress" role="meter" aria-labelledby="${id}" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${value}" aria-valuetext="${fmt(value)}${unit} / ${fmt(max)}${unit}, ${Math.round(pct)}%"><i style="--p:${pct}%"></i></div></div>`; };
 const DASH = {
   /* 심각도 분포 — 탐색형 도넛(2026-11-18). components.data.js CHART_DATA.severity 와 같은 값 */
   severity: {"series":[{"label":"Critical","tone":"critical","value":190},{"label":"High","tone":"high","value":285},{"label":"Medium","tone":"medium","value":196},{"label":"Low","tone":"low","value":120},{"label":"Info","tone":"info","value":263}],"center":"1,054","legend":"right"},
@@ -158,7 +158,7 @@ const PATTERNS = {
           </fieldset>
           <div class="field"><label id="pfile-l">예외 목록</label><div class="upload compact" data-max-size="1MB"><div class="upload-zone"><button type="button" id="pfile-p" class="btn sm outline assistive upload-pick" aria-labelledby="pfile-l pfile-p">파일 선택</button><input type="file" hidden accept=".csv"></div><span class="sr-only upload-status" role="status"></span></div><span class="help">CSV, 1MB 이하</span></div>
           <label class="checkbox"><input type="checkbox" checked><span>저장 즉시 배포<small>에이전트가 다음 체크인에서 적용합니다</small></span></label>
-          <div class="form-actions"><div class="btn-group"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div></div>
+          <div class="form-actions sticky"><div class="btn-group"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div></div>
         </form>` },
       { id: "error", title: "오류 상태", desc: "제출한 뒤 오류가 난 모습입니다. 오류는 필드마다 그 아래에 적고, 폼 위에 모아 요약하지 않습니다.", html: `
         <form class="form" novalidate>
@@ -321,7 +321,7 @@ const PATTERNS = {
       { id: "running", title: "진행 중", desc: "끝난 수와 진행 막대, 성공과 실패, 남은 수를 함께 보여 줍니다. 취소는 아직 시작하지 않은 단말만 멈춥니다.", html: `
         <div class="card">
           <div class="card-head"><h3 class="title">정책 배포 · 표준 보호 v12</h3><span class="tag pending sm">진행 중</span></div>
-          <div class="progress-row"><div class="row"><span>1,284대 중 842대 끝남</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="정책 배포 진행률"><i style="width:66%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>1,284대 중 842대 끝남</span><span>66%</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="정책 배포 진행률"><i style="--p:66%"></i></div></div>
           <dl class="card-meta"><dt>성공</dt><dd>839대</dd><dt>실패</dt><dd>3대</dd><dt>남음</dt><dd>442대</dd></dl>
           <span class="sr-only" role="status">3대에 배포하지 못했습니다.</span>
           <p class="desc">이미 배포한 단말은 그대로 두고, 아직 시작하지 않은 단말만 멈춥니다.</p>
@@ -528,7 +528,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             ${pTime({ id: "rp-time", label: "시각", value: "09:00", help: "서울 시간 기준", live: true })}
           </div>
           ${pNotice("", "다음 발송: 11월 16일 월요일 09:00", "보안팀 외 1명에게 지난 7일의 보안 요약을 PDF 로 보냅니다.")}
-          <div class="form-actions"><div class="btn-group"><button type="button" class="btn md outline assistive">미리보기</button><button type="button" class="btn md outline primary">지금 보내기</button><button type="submit" class="btn md solid primary">예약 저장</button></div></div>
+          <div class="form-actions sticky"><div class="btn-group"><button type="button" class="btn md outline assistive">미리보기</button><button type="button" class="btn md outline primary">지금 보내기</button><button type="submit" class="btn md solid primary">예약 저장</button></div></div>
         </form>` },
       { id: "list", title: "예약 목록", desc: "주기와 다음 발송, 받는 사람, 마지막 발송 결과를 보여 줍니다. 잠시 멈출 때는 사용을 끕니다.", html: `
         <div class="stack">
@@ -634,7 +634,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
             <div class="select-btn outline sm" role="radiogroup" aria-label="갱신"><button type="button" role="radio" aria-checked="false">실시간</button><button type="button" class="on" role="radio" aria-checked="true">일시정지</button></div>
             <button type="button" class="btn sm outline assistive">${I("download")}CSV 내보내기</button>
           </div>
-          ${pNotice("info", "새 로그 24건", "일시정지한 동안 들어왔습니다.", `<div class="actions"><button type="button" class="btn sm outline assistive">맨 위로 이동해 보기</button></div>`)}
+          ${pNotice("info", "새 로그 24건", "일시정지한 동안 들어왔습니다.", `<div class="actions"><button type="button" class="btn sm outline assistive" data-demo-flash="3">맨 위로 이동해 보기</button></div>`)}
           ${logTable(LOG_ROWS)}
           <div class="pagination-bar"><span>총 <b>48,213</b>건 · 최신 100건 표시</span><nav class="pagination compact" aria-label="페이지"><button type="button" aria-label="이전" disabled>${I("chevron-left",16)}</button><button type="button" class="on" aria-current="page">1</button><button type="button">2</button><button type="button">3</button><span class="gap">…</span><button type="button">483</button><button type="button" aria-label="다음">${I("chevron-right",16)}</button></nav></div>
         </div>`, layout: "stack" },
@@ -961,7 +961,7 @@ sudo sh install.sh --key "$JS_AGENT_KEY"</code></pre></div>
           <div class="field"><label for="ar-hook">웹훅 주소</label><input id="ar-hook" type="url" value="https://hooks.example.com/js-alert" data-messages='{"url":"https:// 로 시작하는 주소를 입력하세요."}'><span class="help" aria-live="polite">테스트 전송으로 받는 쪽을 확인하세요.</span></div>
           <div class="btn-group"><button type="button" class="btn sm outline assistive">테스트 전송</button></div>
           ${pNotice("", "규칙 요약", "Critical · High 이벤트가 전체 단말에서 10분 안에 5건 이상 생기면 보안팀에 메일을 보내고 웹훅을 호출합니다.")}
-          <div class="form-actions"><div class="btn-group"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">저장</button></div></div>
+          <div class="form-actions sticky"><div class="btn-group"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">저장</button></div></div>
         </form>` },
       { id: "state", title: "불러오는 중 · 빈 결과 · 오류", desc: "규칙 목록을 불러오는 동안과 아직 만든 규칙이 없을 때, 불러오지 못했을 때의 화면입니다. 첫 사용에는 만드는 동작을 둡니다.", html: pStates({"cols": ["규칙", "조건", "알림"], "loading": "알림 규칙 불러오는 중", "emptyTitle": "첫 사용", "empty": "아직 만든 알림 규칙이 없습니다.", "error": "알림 규칙을 불러오지 못했습니다. 네트워크 연결을 확인하고 다시 시도하세요.", "emptyBtn": ["규칙 만들기", true]}), layout: "stack" },
     ],

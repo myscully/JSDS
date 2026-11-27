@@ -233,7 +233,7 @@
      --checker-bg · --cols* · --p: 문서 셸 · 격자 · 진행 막대 비율. --dp-top · --dp-left · --tp-top · --tp-left: Date Picker 달력 · Time Picker 열 목록 자리(열 때 잼).
      --a: 정적 도넛 경계 구분선 각도. --d1~--d5: 정적 도넛 조각의 누적 비율. --float-*: 스크롤 영역 안에서 화면 기준으로 띄운 메뉴 · Tooltip 의 자리 · 폭.
      --ds-delay: Loading 지연 시간. --tbl-tint · --tbl-surface: 표 행 상태 면 · 고정 열 밑면. --avatar-ring: Avatar Group 링(놓인 면). --nf-dx: 알림 패널을 화면 안으로 미는 거리 */
-  const LOCAL_VARS = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5", "--hm-sy", "--hm-k", "--hm-kr", "--hm-rot", "--hm-fx", "--hm-fy", "--hm-d", "--hm-i", "--tpl-s"];   // --hm-* — 메인 히어로 도형의 자리 · 움직임, --tpl-s — Templates 미리보기 축소 비율(2026-11-18)
+  const LOCAL_VARS = ["--checker-bg", "--cols", "--cols-sm", "--cols-xs", "--p", "--dp-top", "--dp-left", "--tp-top", "--tp-left", "--a", "--float-x", "--float-y", "--float-w", "--float-arrow", "--ds-delay", "--tbl-tint", "--tbl-surface", "--avatar-ring", "--nf-dx", "--d1", "--d2", "--d3", "--d4", "--d5", "--hm-sy", "--hm-k", "--hm-kr", "--hm-rot", "--hm-fx", "--hm-fy", "--hm-d", "--hm-i", "--tpl-s", "--tab-x", "--tab-w", "--tab-s", "--tab-y", "--tab-h"];   // --hm-* — 메인 히어로 도형의 자리 · 움직임, --tpl-s — Templates 미리보기 축소 비율(2026-11-18)
 
   /* UI Dictionary(2026-11-19) — 한 페이지에 예제 백여 개를 함께 그리므로 미리보기마다 id 와 그 참조(for · aria-* · href="#…" · data-*), 라디오 묶음 name 에 접두어를 붙인다.
      id 를 가리키는 값만 바꾸고 aria-label 같은 글자는 건드리지 않는다. 빌드(render.js 카드)와 상세 패널의 큰 미리보기(app.js — build.js 가 이 함수를 옮겨 적음)가 같은 함수를 쓴다 */
@@ -242,7 +242,7 @@
     return html.replace(/(\s)(id|for|form|list|name|href|aria-(?:labelledby|describedby|controls|owns|activedescendant|details|errormessage|flowto)|data-[a-z-]+)="([^"]*)"/g, function (m, sp, a, v) {
       if (a === "name") return sp + a + '="' + p + v + '"';
       return sp + a + '="' + v.split(" ").map(function (t) { return ids[t] ? p + t : (t.charAt(0) === "#" && ids[t.slice(1)]) ? "#" + p + t.slice(1) : t; }).join(" ") + '"';
-    }).replace(/\sdata-hotkey(?:="[^"]*")?/g, "").replace(/\sautofocus(?:="[^"]*")?/g, "").replace(/\sdata-draft="[^"]*"/g, "");
+    }).replace(/\sdata-hotkey(?:-help)?(?:="[^"]*")?(?=[\s>])/g, "").replace(/\sautofocus(?:="[^"]*")?/g, "").replace(/\sdata-draft="[^"]*"/g, "");
   }
   const api = { LOCAL_VARS, udPrefix, esc, dedent, toPx, hasDatePicker, splitSelectors, demoStateCss, siteCss, cssFor, cssPrefixes, exampleCssPrefixes, tokenBlock, parseVars, rootBlock, htmlToJsx, hl, allPages, SAMPLES_START, SAMPLES_END };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.LIB = api;

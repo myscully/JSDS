@@ -28,6 +28,8 @@ createRoot(document.getElementById("root")!).render(
 - 서체·배경: 앱 루트에 `.ds-root` 클래스를 붙이면 Pretendard · 본문 색 · 배경이 적용됩니다. 빼면 글자가 브라우저 기본 서체로 나옵니다.
 - 화면 폭 단계(선택): `import "@jiran/ds-react/scale.css"` 는 화면 폭에 따라 루트 글자 크기를 93.75 · 100 · 106.25 · 112.5% 로 바꿉니다. `html` 에 걸리므로 제품이 고릅니다.
 - 사이드 내비 접힘: `const [collapsed, setCollapsed] = useSideNavCollapse()` 를 `TopBarNavToggle` · `SideNav` 에 넘기면 화면 폭이 1280 아래로 줄 때 접히고 다시 넓히면 펼쳐집니다. 그 사이 사용자가 바꾼 상태는 남습니다.
+- 명령 팔레트: `<CommandPalette open onOpen onClose groups onCommand />` 하나를 앱 셸에 두면 Mod K(맥 ⌘K · 그 밖 Ctrl K)로 열고 닫습니다. 단축키 표시는 `<Kbd keys={["Mod", "K"]} />`.
+- 표 행 방향키: `<DataTable rowNavigation />`(또는 `Table`)이면 행이 Tab 칸 하나가 되고 ↑↓ · Home · End 로 옮깁니다. 긴 폼의 버튼 줄은 `<FormActions sticky>` · `<Stepper stickyActions>` 로 스크롤 영역 아래 끝에 붙습니다.
 - TypeScript 7 은 `import "….css"` 에 TS2882 를 냅니다. `src/vite-env.d.ts` 에 `/// <reference types="vite/client" />` 를 두면 통과합니다.
 - 일본어: Pretendard 에는 한자가 없습니다. 일본어를 쓰는 제품은 `import "@jiran/ds-react/font-jp.css"` 를 더합니다. Pretendard JP 의 조각 파일이고, 한자가 화면에 나올 때만 그 조각을 내려받습니다.
 - 브라우저: `color-mix()` 사용 — Chrome 111+ · Safari 16.2+ · Firefox 113+.

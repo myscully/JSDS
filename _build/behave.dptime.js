@@ -9,7 +9,8 @@ module.exports = async ({ b, ok, SITE, path }) => {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const step = async (name, fn) => { try { await fn(); } catch (e) { ok(name, false, "예외: " + String(e.message || e).split("\n")[0]); } };
-  const fresh = async () => { await page.goto("file://" + path.join(SITE, "components/date-picker.html")); await page.waitForTimeout(150); await page.evaluate(() => { document.documentElement.style.scrollBehavior = "auto"; window.__dsd = []; document.addEventListener("ds:date", (e) => { const d = e.detail, iso = (x) => (x instanceof Date ? (isNaN(x.getTime()) ? "NaN" : x.toISOString()) : x); window.__dsd.push({ ...d, date: d.date && !(d.date instanceof Date) ? { start: iso(d.date.start), end: iso(d.date.end) } : iso(d.date) }); }); }); };
+  const fresh = async () => { await page.goto("file://" + path.join(SITE, "components/date-picker.html"), { timeout: 15000 });   // 페이지 읽기는 부하에서 2초를 넘을 수 있다(2026-11-26 — 기본 2초는 단정의 기다림용)
+    await page.waitForTimeout(150); await page.evaluate(() => { document.documentElement.style.scrollBehavior = "auto"; window.__dsd = []; document.addEventListener("ds:date", (e) => { const d = e.detail, iso = (x) => (x instanceof Date ? (isNaN(x.getTime()) ? "NaN" : x.toISOString()) : x); window.__dsd.push({ ...d, date: d.date && !(d.date instanceof Date) ? { start: iso(d.date.start), end: iso(d.date.end) } : iso(d.date) }); }); }); };
   const dpOf = (id, n = 0) => page.locator(`#ex-date-picker-${id} .example-preview .datepicker`).nth(n);
   const single = () => dpOf("time"), sec = () => dpOf("time", 1), range = () => dpOf("time-range");
   const toTop = (loc) => loc.evaluate((e) => { e.scrollIntoView({ block: "start", behavior: "instant" }); window.scrollBy(0, -140); });
@@ -17,7 +18,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   const state = (dp) => dp.evaluate((e) => ({ v: e.dataset.value || null, s: e.dataset.start || null, e: e.dataset.end || null, t: e.querySelector(":scope > .affix input").value, val: e.dataset.validity || null, err: e.classList.contains("error"), msg: (e.querySelector(".help") || {}).textContent || "", open: e.classList.contains("open") }));
   const typeInto = async (dp, digits) => { const i = dp.locator(":scope > .affix input"); await i.fill(""); await i.pressSequentially(digits); await i.press("Enter"); return state(dp); };
   const clear = async (dp) => { const i = dp.locator(":scope > .affix input"); await i.fill(""); await i.press("Enter"); };
-  const openCal = async (dp) => { await toTop(dp); await dp.locator(".cal-btn").click(); };
+  const openCal = async (dp) => { await toTop(dp); await dp.locator(".cal-btn").click(); await dp.evaluate((e) => e.querySelectorAll(".calendar").forEach((c) => c.getAnimations().forEach((a) => { if (a.effect && isFinite(a.effect.getComputedTiming().endTime)) a.finish(); }))); };   // 들어오는 확대(ds-pop · scale .98) 도중에 재지 않게
   const last = async () => (await page.evaluate(() => window.__dsd)).pop() || {};
   const clockVals = (dp) => dp.locator(".cal-time input").evaluateAll((l) => l.map((i) => i.value));
   const applyBtn = (dp) => dp.locator('.calendar [data-cal="apply"]');

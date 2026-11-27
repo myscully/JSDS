@@ -1067,7 +1067,7 @@ function staticChartExpect() {
           const tb2 = /var TONES = \{([\s\S]*?)\};/.exec(read("_build/ds-chart.src.js")), TN = Object.fromEntries([...tb2[1].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/"?([a-z0-9-]+)"?\s*:\s*"(--[a-z0-9-]+)"/g)].map((m2) => [m2[1], m2[2]]));
           card.fills = (spec.series || []).map((s2) => (s2.tone && TN[s2.tone] ? figTok(`var(${TN[s2.tone]})`) : null)); }
         else if (/class="progress-list"/.test(h)) { card.kind = "progress";   // 진행 막대 목록 — 행마다 라벨 · 값 · 목표(단위) · 채움 %
-          card.rows = [...h.matchAll(/<div class="progress-row"><div class="row"><span id="[^"]*">([^<]*)<\/span><span><b>([^<]*)<\/b><span class="target">([^<]*)<\/span><\/span><\/div><div class="progress"[^>]*><i style="width:([\d.]+)%"><\/i>/g)]
+          card.rows = [...h.matchAll(/<div class="progress-row"><div class="row"><span id="[^"]*">([^<]*)<\/span><span><b>([^<]*)<\/b><span class="target">([^<]*)<\/span><\/span><\/div><div class="progress"[^>]*><i style="(?:width|--p):\s*([\d.]+)%"><\/i>/g)]
             .map((m) => ({ label: txt(m[1]), value: txt(m[2]), target: txt(m[3]), pct: +m[4] }));
           if (!card.rows.length) throw new Error(`대시보드 ${card.title} 의 진행 막대 행을 읽지 못했습니다`); }
         else card.kind = /class="donut"/.test(h) ? "donut" : /class="chart"/.test(h) ? "bars" : "other";

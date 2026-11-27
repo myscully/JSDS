@@ -3,7 +3,7 @@ import { cx } from "../../utils/cx";
 import { Icon } from "../../icons/Icon";
 import type { IconName } from "../../icons/icons.data";
 import { Portal } from "../../utils/Portal";
-import { ghostOut } from "../../utils/ghost";
+import { ghostOut, ghostPut, ghostTake } from "../../utils/ghost";
 import { focusPast, mergeRefs } from "../../utils/hooks";
 import { LABELS } from "../../labels";
 import type { FeedbackTone } from "../../types";
@@ -34,13 +34,20 @@ export const Notice = forwardRef<HTMLDivElement, NoticeProps>(function Notice({ 
         {actions !== undefined && <div className="actions">{actions}</div>}
       </div>
       {onClose && (
-        <button type="button" className="close" aria-label={closeLabel} onClick={onClose}>
+        <button type="button" className="close" aria-label={closeLabel} onClick={(e) => closeAway(e.currentTarget.closest(".notice"), onClose)}>
           <Icon name="x" size={14} />
         </button>
       )}
     </div>
   );
 });
+
+/* 닫은 Notice · Banner 는 제품이 지운다 — 지워졌으면 사본이 그 자리에서 흐려진다(2026-11-26, 사이트 ds.js dismiss 와 같은 모습) */
+function closeAway(el: Element | null, close: () => void) {
+  const snap = ghostTake([el]);
+  close();
+  requestAnimationFrame(() => { if (!el?.isConnected) ghostPut(snap); });
+}
 
 export interface ToastProps extends HTMLAttributes<HTMLDivElement> {
   tone?: "success" | "danger";
@@ -104,7 +111,7 @@ export const Banner = forwardRef<HTMLDivElement, BannerProps>(function Banner({ 
       {children}
       {action}
       {onClose && (
-        <button type="button" className="close" aria-label={closeLabel} onClick={(e) => { if (e.detail === 0) focusPast(e.currentTarget.closest<HTMLElement>(".banner")); onClose(); }}>
+        <button type="button" className="close" aria-label={closeLabel} onClick={(e) => { const b = e.currentTarget.closest<HTMLElement>(".banner"); if (e.detail === 0) focusPast(b); closeAway(b, onClose); }}>
           <Icon name="x" size={14} />
         </button>
       )}

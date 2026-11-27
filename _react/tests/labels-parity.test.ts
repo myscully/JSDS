@@ -9,6 +9,7 @@ import { TIME_LABELS } from "../src/components/time-picker/TimePicker";
 import { VALIDATION_MESSAGES } from "../src/components/text-field/validation";
 import { TREE_LABELS } from "../src/components/tree/Tree";
 import { NOTIFY_LABELS } from "../src/components/notification-center/NotificationCenter";
+import { FLASH_SAY } from "../src/utils/motion";
 
 const SRC = fs.readFileSync(path.resolve(__dirname, "../../_build/ds.src.js"), "utf8");
 const FU = fs.readFileSync(path.resolve(__dirname, "../src/components/file-upload/FileUpload.tsx"), "utf8");
@@ -60,5 +61,6 @@ describe("사이트 · React 문구가 같다", () => {
   it("오버레이 입력 보호 문구", () => expect(same(grab(SRC, "DISCARD_LABEL"), LABELS, { title: "discardTitle", body: "discardBody", keep: "discardKeep", drop: "discardDrop" })).toEqual([]));
   it("폼 초안 문구", () => expect(same(grab(SRC, "DRAFT_LABEL"), LABELS, { restored: "draftRestored", discard: "draftDiscard" })).toEqual([]));
   it("Notification Center 문구", () => expect(same(grab(SRC, "NF_LABEL"), NOTIFY_LABELS)).toEqual([]));
+  it("새 항목 알림 문구", () => expect(SRC.match(/FLASH_SAY = "([^"]+)"/)?.[1]).toBe(FLASH_SAY));   // 2026-11-27
   it("사이드 내비 접기 문구", () => expect(same(grab(SRC, "NAV_LABEL"), LABELS, { collapse: "navCollapse", expand: "navExpand" })).toEqual([]));   // 2026-11-18
 });

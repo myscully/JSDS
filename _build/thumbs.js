@@ -68,6 +68,7 @@ function load(sec = "components") {
 }
 /* Figma 에 아직 썸네일이 없는 페이지 — 이유와 함께. 카드는 기본 그림(.figma 클래스 없음)이고, verify 가 파일이 생기면 여기서 지우라고 알린다 */
 const PENDING = {
+  components: { kbd: "2026-11-26 새 컴포넌트 — Figma Overview 에 썸네일이 아직 없다(Figma 반영 때 내보냄)", "command-palette": "2026-11-26 새 컴포넌트 — Figma Overview 에 썸네일이 아직 없다(Figma 반영 때 내보냄)" },
   patterns: { analytics: "2026-11-20 새 패턴 — Figma Patterns › Overview 에 카드가 아직 없다(Figma 반영 때 내보냄)" },
 };
 module.exports = { load, COLORS, DIR, SECTIONS, PENDING, dirOf, stripMasks };

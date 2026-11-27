@@ -42,7 +42,7 @@ const delta = (dir, tone, text) => `<span class="delta${tone ? " " + tone : ""}"
 /* KPI 안 탐색형 스파크 — .kpi > .chart-canvas.spark > canvas(표로 보기 틀 없음) */
 const sparkCanvas = (spec, label) => `<div class="chart-canvas spark"><canvas data-chart="spark" data-spec='${JSON.stringify(spec)}' role="img" aria-label="${label}"></canvas></div>`;
 /* 진행 막대 목록의 한 줄 — 측정값이라 role=meter */
-const meter = (id, label, value, max, unit = "") => { const pct = Math.round(value / max * 1000) / 10, fmt = (n) => n.toLocaleString("en-US"); return `<div class="progress-row"><div class="row"><span id="${id}">${label}</span><span><b>${fmt(value)}</b><span class="target">/ ${fmt(max)}${unit}</span></span></div><div class="progress" role="meter" aria-labelledby="${id}" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${value}" aria-valuetext="${fmt(value)}${unit} / ${fmt(max)}${unit}, ${Math.round(pct)}%"><i style="width:${pct}%"></i></div></div>`; };
+const meter = (id, label, value, max, unit = "") => { const pct = Math.round(value / max * 1000) / 10, fmt = (n) => n.toLocaleString("en-US"); return `<div class="progress-row"><div class="row"><span id="${id}">${label}</span><span><b>${fmt(value)}</b><span class="target">/ ${fmt(max)}${unit}</span></span></div><div class="progress" role="meter" aria-labelledby="${id}" aria-valuemin="0" aria-valuemax="${max}" aria-valuenow="${value}" aria-valuetext="${fmt(value)}${unit} / ${fmt(max)}${unit}, ${Math.round(pct)}%"><i style="--p:${pct}%"></i></div></div>`; };
 
 /* 아이콘: icons.gen.js 의 I(name, size, {style}) — assets/icons 의 Tabler 아이콘을 빌드 시 인라인 */
 const popX = () => `<button type="button" class="btn sm text assistive icon-only popup-close" aria-label="닫기" data-popup-close>${I("x")}</button>`;
@@ -50,6 +50,36 @@ const spHead = (id, title) => `<div class="side-panel-header"><h3 class="side-pa
 const spFacts = (rows) => `<table class="tbl kv"><tbody>${rows.map(([k, v]) => `<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join("")}</tbody></table>`;
 const SP_EVENT = [["시각", "2026. 09. 07 14:22:05"], ["호스트", "DESKTOP-7F3K"], ["IP", "10.0.0.12"], ["정책", "외부 USB 차단"], ["처리", "차단"]];
 const cb = (label, attrs = "", small = "") => `<label class="checkbox"><input type="checkbox"${attrs ? " " + attrs : ""}><span>${label}${small ? `<small>${small}</small>` : ""}</span></label>`;
+
+/* 명령 팔레트 — ds.js(cmdkFilter) · React CommandPaletteSurface 와 같은 골격. groups = [[제목, [[아이콘, 이름, 찾는 말, 값, 키?]]]].
+   value 를 주면 그 글로 거른 모습(ds.js 와 같은 식 — 초성 찾기는 빼고). 활성은 보이는 첫 항목 */
+const CMDK_GROUPS = [
+  ["이동", [["layout-dashboard", "대시보드", "홈 요약 dashboard", "nav-dashboard"], ["list-details", "탐지 로그", "이벤트 log", "nav-logs"], ["shield", "정책", "policy 규칙", "nav-policies"], ["device-desktop", "에이전트", "agent 단말 PC", "nav-agents"]]],
+  ["작업", [["plus", "정책 만들기", "새 정책 추가 create", "policy-new"], ["file-export", "보고서 내보내기", "CSV 다운로드 report export", "report-export"], ["search", "검색창으로 이동", "search 찾기", "focus-search", "/"], ["help-circle", "단축키 보기", "help 도움말 keyboard", "show-shortcuts", "?"]]],
+];
+const cmdkPal = (id, groups, o = {}) => {
+  const norm = (x) => x.toLowerCase().replace(/\s+/g, ""), q = norm(o.value || "");
+  let n = 0, first = "";
+  const body = groups.map(([label, items], gi) => {
+    const rows = items.map(([icon, name, kw, value, key]) => {
+      const oid = `${id}-o${++n}`, hit = !q || norm(name + " " + kw).includes(q), on = hit && !first;
+      if (on) first = oid;
+      return `<div class="cmdk-item" id="${oid}" role="option" aria-selected="${on}" data-value="${value}" data-keywords="${kw}"${hit ? "" : " hidden"}>${I(icon)}<span class="cmdk-name">${name}</span>${key ? `<span class="kbd-combo menu-kbd" aria-hidden="true"><kbd class="kbd sm">${key}</kbd></span>` : ""}</div>`;
+    });
+    const any = items.some(([, name, kw]) => !q || norm(name + " " + kw).includes(q));
+    return `<div class="cmdk-group" role="group" aria-labelledby="${id}-g${gi}"${any ? "" : " hidden"}><div class="cmdk-label" id="${id}-g${gi}">${label}</div>${rows.join("")}</div>`;
+  }).join("");
+  return `<div class="popup cmdk" id="${id}" role="dialog" aria-modal="true" aria-labelledby="${id}-t"${o.hotkey === false ? "" : " data-hotkey"}${o.demo === false ? "" : " data-demo"} data-confirm-discard="false">
+          <h3 class="sr-only" id="${id}-t">명령 팔레트</h3>
+          <div class="cmdk-search">${I("search")}<input type="text" role="combobox" aria-expanded="true" aria-controls="${id}-list" aria-autocomplete="list"${first ? ` aria-activedescendant="${first}"` : ""} placeholder="화면 · 명령 검색" aria-label="명령 검색" autocomplete="off" spellcheck="false"${o.value ? ` value="${o.value}"` : ""}></div>
+          <div class="cmdk-list" id="${id}-list" role="listbox" aria-label="명령" tabindex="-1">${body}</div>
+          <p class="cmdk-empty"${first ? " hidden" : ""}>맞는 명령이 없습니다. 다른 낱말로 찾아보세요.</p>
+          <div class="cmdk-foot" aria-hidden="true"><span><kbd class="kbd sm">↑</kbd><kbd class="kbd sm">↓</kbd>이동</span><span><kbd class="kbd sm">Enter</kbd>실행</span><span><kbd class="kbd sm">Esc</kbd>닫기</span></div>
+          <span class="sr-only" role="status"></span>
+        </div>`;
+};
+/* Kbd 조합 — "Mod" 는 운영체제 수정 키(ds.js 가 맥이면 ⌘ 로 바꿈) */
+const kbdCombo = (keys, sm, hidden) => `<span class="kbd-combo${hidden ? " menu-kbd" : ""}"${hidden ? ' aria-hidden="true"' : ""}>${keys.map((k) => k === "Mod" ? `<kbd class="kbd${sm ? " sm" : ""}" data-kbd-mod>Ctrl</kbd>` : `<kbd class="kbd${sm ? " sm" : ""}">${k}</kbd>`).join("")}</span>`;
 
 /* 정적 달력 — ds.js 가 그리는 마크업과 같다(behave 가 대조한다). 정적 데모도 클릭 · 키보드 · 달 이동이 그대로 동작한다.
    React Calendar 도 같은 골격이다(site-consistency). 표기는 Intl(locale, 기본 ko-KR) — ds.js · React 와 같은 식.
@@ -233,7 +263,7 @@ const stepLi = (label, i, st, { btn = false, inner = "" } = {}) => {
 };
 const stepsOl = (cls, items) => `<ol class="steps${cls ? " " + cls : ""}" aria-label="진행 단계">${items.join("")}</ol>`;
 const stepPanel = (on, inner) => `<div class="step-panel" tabindex="-1"${on ? "" : " hidden"}>${inner}</div>`;
-const stepActs = (first, last, finish = "완료") => `<div class="step-actions"><div class="btn-group"><button type="button" class="btn md outline assistive" data-step="prev"${first ? " disabled" : ""}>이전</button><button type="button" class="btn md solid primary" data-step="next"${last ? " hidden" : ""}>다음</button><button type="button" class="btn md solid primary" data-step="finish"${last ? "" : " hidden"}>${finish}</button></div></div>`;
+const stepActs = (first, last, finish = "완료", sticky = false) => `<div class="step-actions${sticky ? " sticky" : ""}"><div class="btn-group"><button type="button" class="btn md outline assistive" data-step="prev"${first ? " disabled" : ""}>이전</button><button type="button" class="btn md solid primary" data-step="next"${last ? " hidden" : ""}>다음</button><button type="button" class="btn md solid primary" data-step="finish"${last ? "" : " hidden"}>${finish}</button></div></div>`;
 const stepForm = (id, label, help, value = "") => `<form class="form" data-validate novalidate><p class="form-legend"><em>*</em> 필수 항목</p><div class="field"><label for="${id}">${label} <em>*</em></label><input id="${id}"${value ? ` value="${value}"` : ""} required><span class="help" aria-live="polite">${help}</span></div></form>`;
 const stepNote = (t) => `<p class="t-body-2-reading">${t}</p>`;
 const COMPONENTS = {
@@ -453,7 +483,7 @@ const COMPONENTS = {
       { id: "basic", group: "default", title: "Default", desc: "아이콘과 입력칸으로 된 조회형입니다. Enter 를 누르면 검색을 실행했다는 이벤트를 냅니다.", html: `
         <div class="searchbar" role="search">${I("search")}<input type="search" placeholder="정책 이름 검색" aria-label="정책 검색"></div>` },
       { id: "extras", group: "variant", title: "Shortcut / Clear", desc: "전역 검색에는 단축키를 달고 그 키를 입력칸에 표시합니다. 값이 있을 때는 지우기 버튼을 보여 줍니다. 이 페이지에서는 / 를 누르면 이 입력으로 갑니다.", html: `
-        <div class="searchbar" role="search" data-hotkey>${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="검색"><kbd>/</kbd></div>
+        <div class="searchbar" role="search" data-hotkey>${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="검색"><kbd class="kbd">/</kbd></div>
         <div class="searchbar" role="search">${I("search")}<input type="search" value="랜섬웨어" aria-label="검색"><button type="button" class="clear" aria-label="지우기">${I("x",12)}</button></div>` },
       { id: "large", group: "size", title: "Large / Block", desc: "빈 화면이나 온보딩처럼 검색이 화면의 주된 행동일 때 큰 크기를 폭에 꽉 채워 씁니다.", html: `
         <div class="searchbar lg block" role="search" style="max-width:560px">${I("search")}<input type="search" placeholder="정책 이름, 대상 검색" aria-label="검색"></div>` },
@@ -484,7 +514,7 @@ const COMPONENTS = {
       ["data-hotkey", "boolean", "false", "/ 로 포커스. 화면에 하나. React 는 hotkey"],
       [".sr-only[role=status]", "element", "—", "결과 건수 — 제품이 글자를 넣습니다. React 는 status"],
       ["size", "sm | (md) | lg", "md", "높이 32 / 40 / 48 — 버튼 · 필드와 같다(상단 내비 검색은 32)"],
-      ["kbd", "element", "—", "단축키 표시(전역 검색). 값이 있으면 숨김. data-hotkey 와 같이 씁니다"],
+      ["kbd.kbd", "element", "—", "단축키 표시(전역 검색) — <a href=\"#/components/kbd\">Kbd</a>. 값이 있으면 숨김. data-hotkey 와 같이 씁니다"],
       [".clear", "button", "—", "값 지우기. 값이 있을 때만 렌더"],
     ],
     spec: [["Size", "높이 sm 32 · md 40 · lg 48 · 최소 폭 280 · 상단 내비 40(최소 폭 220)"], ["Container", "radius/md 6(sm 4) · line/neutral/primary · 포커스: 테두리 1px line/field/focus · 바깥 4px line/field/focus-halo(제품 색, 빨강 · 주황 제품은 중립)"], ["Label", "Label 1/Reading 14 · 플레이스홀더 foreground/neutral/tertiary"]],
@@ -1592,7 +1622,7 @@ const COMPONENTS = {
         <div style="width:100%;border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);overflow:hidden">
           <header class="topbar">
             ${tbStart("tn-nav")}
-            <div class="searchbar" role="search" data-hotkey>${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="전역 검색"><kbd>/</kbd></div>
+            <div class="searchbar" role="search" data-hotkey>${I("search")}<input type="search" placeholder="이벤트, 대상, IP 검색" aria-label="전역 검색"><kbd class="kbd">/</kbd></div>
             <div class="right">
               <div class="btn-group">${tbBell("알림")}${tbIcon("settings", "설정")}${tbTheme()}</div>
               <span class="divider vertical" role="separator" aria-orientation="vertical"></span>
@@ -2070,9 +2100,9 @@ const COMPONENTS = {
         <div style="width:100%;max-width:520px" aria-busy="true"><div class="skeleton-row" data-delay style="--ds-delay:300ms"><span class="skeleton circle"></span><div class="lines"><span class="skeleton title"></span><span class="skeleton text"></span></div></div></div>` },
       { id: "progress", group: "variant", title: "Progress", desc: "배포나 검사처럼 진행률을 아는 작업에 씁니다. 끝나면 성공 색, 실패하면 위험 색으로 칠합니다.", html: `
         <div style="width:100%;max-width:480px;display:flex;flex-direction:column;gap:20px">
-          <div class="progress-row"><div class="row"><span>정책 배포 중</span><span>842 / 1,284</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="정책 배포 중"><i style="width:66%"></i></div></div>
-          <div class="progress-row"><div class="row"><span>전체 검사 완료</span><span>100%</span></div><div class="progress success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="전체 검사 완료"><i style="width:100%"></i></div></div>
-          <div class="progress-row"><div class="row"><span>업데이트 실패</span><span>38%</span></div><div class="progress danger" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100" aria-label="업데이트 실패"><i style="width:38%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>정책 배포 중</span><span>842 / 1,284</span></div><div class="progress" role="progressbar" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100" aria-label="정책 배포 중"><i style="--p:66%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>전체 검사 완료</span><span>100%</span></div><div class="progress success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="전체 검사 완료"><i style="--p:100%"></i></div></div>
+          <div class="progress-row"><div class="row"><span>업데이트 실패</span><span>38%</span></div><div class="progress danger" role="progressbar" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100" aria-label="업데이트 실패"><i style="--p:38%"></i></div></div>
         </div>` },
     ],
     props: [[".spinner", "span", "—", "role=status · aria-label 은 실제 작업. sm | (md) | lg"], [".skeleton", "span", "—", ".title | .text(.short) | .circle | .rect. 컨테이너에 aria-busy"], [".progress", "div", "—", "role=progressbar aria-valuenow. i 의 width 가 진행률"], ["tone", ".success | .danger", "accent", "완료 / 실패"], [".sm", "boolean", "false", "높이 4"], ["data-delay", "attr", "—", ".spinner · .spinner-wrap · .skeleton · .skeleton-row 에. <code>--ds-delay</code>(기본 1s) 동안 자리를 지킨 채 보이지 않는다 — 줄인 모션에서도. React <code>delay</code>(true | ms)"], ["DS.loading.start(el, {delay, min}) · stop(el)", "function", "1000 · 500 ms", "보일지를 정한다 — delay 안에 stop 하면 끝내 안 보이고, 보였으면 min 을 채운 뒤 숨긴다(el.hidden). stop 은 숨긴 뒤 풀리는 Promise. 이 요소에는 data-delay 를 달지 않는다. React <code>useLoadingDelay(loading, {delay, minDuration})</code>"]],
@@ -2176,7 +2206,7 @@ const COMPONENTS = {
       { id: "indicator", group: "variant", title: "Indicator Only", desc: "마법사 틀 없이 단계 목록만 쓰면 표시만 합니다. 단계 이동은 제품이 맡고, 완료한 단계를 누르면 몇 번째 단계를 눌렀는지 알리는 이벤트만 냅니다.", html: `
         ${stepsOl("", [stepLi(STEP_L[0], 0, "done", { btn: true }), stepLi(STEP_L[1], 1, "done", { btn: true }), stepLi(STEP_L[2], 2, "on"), stepLi(STEP_L[3], 3, "")])}` },
     ],
-    props: [[".stepper", "container", "—", "마법사. .steps + 단계 수만큼의 .step-panel + .step-actions(이전 · 다음 · 완료를 .btn-group 으로)"], [".steps", "ol", "—", "진행 단계. aria-label 필수. .stepper 밖에서 혼자 쓰면 표시만 한다(이동은 제품)"], [".steps li", "li", "—", ".done 완료(제품 색 원 + 체크 + 숨긴 '(완료)'), .on 현재(제품 색 테두리 원 + aria-current=\"step\"). 라벨은 .label"], [".label-below · .vertical", "class", "—", "배치. 없으면 가로. 세로는 각 li 안에 그 단계의 .step-panel 과 버튼"], [".stacked", "class", "—", "가로 · 라벨 아래가 자리에 안 들어가면 ds.js · React 가 붙여 세로로 쌓는다(창 크기가 바뀌면 다시 잰다). 직접 적지 않는다 — 빌드가 막는다"], [".step-btn", "button", "—", "누를 수 있는 단계 — 순서대로면 .done 안에만, data-nonlinear 면 현재가 아닌 모든 단계. ds.js 가 단계를 옮길 때마다 다시 그린다"], [".step-panel", "div", "—", "단계 내용. 현재만 보이고(hidden) 입력값은 남는다. 안의 form[data-validate] 를 '다음' · '완료'가 검사한다"], ["data-step", "prev | next | finish", "—", "이전 · 다음 · 완료 버튼. 첫 단계에서 이전은 disabled, 마지막 단계에서는 다음 대신 완료. 완료 버튼의 글자는 결과를 말하는 동사로 바꿔 쓴다(정책 만들기 · 배포). React labels.finish"], ["data-nonlinear", "attribute", "—", "어느 단계든 눌러 옮긴다. React nonLinear"], ["data-async", "attribute", "—", "완료 처리 중. 완료를 내면 완료 버튼이 loading 이 되어 다시 눌리지 않고, 제품이 ds:step-finish 의 resolve() 나 reject(문구) 를 불러야 풀린다. reject 는 오류 Toast(문구가 없으면 기본 문구). React async"], ["ds:step", "event", "—", ".stepper 에서 {index, from, trigger} — trigger 는 next · prev · click · finish · api. .stepper 밖 .steps 는 완료 단계 누름만 {index, from, trigger: \"click\"}. React onStepChange · Steps onStepClick"], ["ds:step-finish", "event", "—", "'완료'가 검사를 통과하면 {index}. data-async 면 {index, resolve, reject}. React onFinish(async 면 Promise 를 돌려줌 — 던지면 오류 Toast)"], ["DS.stepper.go(el, index)", "function", "—", "제품이 단계를 옮긴다(검사 없음) — 서버 응답 뒤 등"]],
+    props: [[".stepper", "container", "—", "마법사. .steps + 단계 수만큼의 .step-panel + .step-actions(이전 · 다음 · 완료를 .btn-group 으로)"], [".steps", "ol", "—", "진행 단계. aria-label 필수. .stepper 밖에서 혼자 쓰면 표시만 한다(이동은 제품)"], [".steps li", "li", "—", ".done 완료(제품 색 원 + 체크 + 숨긴 '(완료)'), .on 현재(제품 색 테두리 원 + aria-current=\"step\"). 라벨은 .label"], [".label-below · .vertical", "class", "—", "배치. 없으면 가로. 세로는 각 li 안에 그 단계의 .step-panel 과 버튼"], [".stacked", "class", "—", "가로 · 라벨 아래가 자리에 안 들어가면 ds.js · React 가 붙여 세로로 쌓는다(창 크기가 바뀌면 다시 잰다). 직접 적지 않는다 — 빌드가 막는다"], [".step-btn", "button", "—", "누를 수 있는 단계 — 순서대로면 .done 안에만, data-nonlinear 면 현재가 아닌 모든 단계. ds.js 가 단계를 옮길 때마다 다시 그린다"], [".step-panel", "div", "—", "단계 내용. 현재만 보이고(hidden) 입력값은 남는다. 안의 form[data-validate] 를 '다음' · '완료'가 검사한다"], ["data-step", "prev | next | finish", "—", "이전 · 다음 · 완료 버튼. 첫 단계에서 이전은 disabled, 마지막 단계에서는 다음 대신 완료. 완료 버튼의 글자는 결과를 말하는 동사로 바꿔 쓴다(정책 만들기 · 배포). React labels.finish"], ["data-nonlinear", "attribute", "—", "어느 단계든 눌러 옮긴다. React nonLinear"], [".step-actions.sticky", "class", "—", "단계 내용이 긴 마법사에서 버튼 줄을 스크롤 영역 아래 끝에 붙인다. 붙어 있는 동안 ds.js · React 가 .stuck(위 선)을 단다. React stickyActions"], ["data-async", "attribute", "—", "완료 처리 중. 완료를 내면 완료 버튼이 loading 이 되어 다시 눌리지 않고, 제품이 ds:step-finish 의 resolve() 나 reject(문구) 를 불러야 풀린다. reject 는 오류 Toast(문구가 없으면 기본 문구). React async"], ["ds:step", "event", "—", ".stepper 에서 {index, from, trigger} — trigger 는 next · prev · click · finish · api. .stepper 밖 .steps 는 완료 단계 누름만 {index, from, trigger: \"click\"}. React onStepChange · Steps onStepClick"], ["ds:step-finish", "event", "—", "'완료'가 검사를 통과하면 {index}. data-async 면 {index, resolve, reject}. React onFinish(async 면 Promise 를 돌려줌 — 던지면 오류 Toast)"], ["DS.stepper.go(el, index)", "function", "—", "제품이 단계를 옮긴다(검사 없음) — 서버 응답 뒤 등"]],
     spec: [["Size", "원 32 · 체크 16 · 연결선 2(최소 16) · 간격 8 · 세로 단계 사이 24 · 마법사 안 폼 카드는 패널 폭을 채움(최대 폭 없음)"], ["Container", "원 radius/full · 완료 surface/brand/primary · 현재 surface/brand/primary 테두리 + surface/brand/subtle · 아직 line/neutral/primary 테두리 · 완료 뒤 연결선 surface/brand/primary"], ["Label", "Label 1/Normal 14 · 현재 SemiBold · 완료 secondary · 아직 tertiary"]],
   },
 
@@ -2249,6 +2279,7 @@ const COMPONENTS = {
         ["행 전체 클릭", "안쪽 버튼 · 링크 · 체크박스를 누르면 행을 누른 것으로 치지 않습니다. 키보드로 닿도록 같은 목적지의 링크를 첫 열에 둡니다."],
         ["행 버튼 이름", "행마다 달라야 합니다. '수정' 이 아니라 'USB 차단 정책 수정' 입니다."],
         ["행을 지운 뒤", "포커스를 다음 행으로 옮깁니다."],
+        ["키보드", "행을 오가며 훑는 표는 행 방향키를 켭니다. 행 자체가 Tab 칸 하나가 되고 위 · 아래 화살표로 행을 옮깁니다. Space 는 그 행을 고르고, Enter 는 상세를 펼치거나 행의 링크를 엽니다. 칸 안의 입력과 메뉴의 키는 가로채지 않고, 꺼진 행은 건너뜁니다."],
         ["행 펼침", "원본 로그나 탐지 근거 같은 한 행의 상세를 페이지를 옮기지 않고 봅니다. 맨 앞 칸의 셰브론 버튼으로 열고, 여러 행을 함께 펼칠 수 있습니다. 행을 누르는 동작은 상세 화면 이동에 남겨 두고 펼침에 쓰지 않습니다. 정렬하면 펼친 상세가 제 행을 따라갑니다. 페이지 · 필터 · 검색 · 기간이 바뀌면 모두 접습니다."],
         ["펼친 내용", "펼친 자리는 제품이 채웁니다. 키-값 목록과 원본 로그를 담은 <a href=\"#/components/code\">Code</a> 를 권합니다. 서버에서 불러오는 동안은 그 자리에 Spinner 를 두고, 실패하면 원인과 다시 시도를 둡니다."],
       ],
@@ -2358,11 +2389,21 @@ const COMPONENTS = {
         </div>` },
       { id: "row-actions", group: "variant", title: "Row Actions", desc: "동작이 3개 이상이면 ⋯ 로 묶습니다. 스크롤 영역 안에서도 메뉴는 잘리지 않습니다.", html: `
         <div class="tbl-wrap">
-          <table class="tbl hover">
+          <table class="tbl hover" data-row-nav>
             <thead><tr><th>정책</th><th>대상</th><th class="actions"></th></tr></thead>
             <tbody>${[["외부 USB 차단", "전체"], ["랜섬웨어 행위 차단", "영업팀"]].map(([n, t]) => `
               <tr><td>${n}</td><td>${t}</td><td class="actions"><div class="dropdown"><span class="tooltip-wrap"><button type="button" class="btn sm assistive icon-only" aria-label="${n} 더 보기" aria-haspopup="menu" aria-expanded="false">${I("dots")}</button><span class="tooltip" role="tooltip">${n} 더 보기</span></span><ul class="menu" role="menu" style="left:auto;right:0"><li class="menu-item" role="menuitem">${I("pencil")}편집</li><li class="menu-item" role="menuitem">${I("download")}내보내기</li><li class="menu-sep" role="separator"></li><li class="menu-item danger" role="menuitem">${I("trash")}삭제</li></ul></div></td></tr>`).join("")}
             </tbody>
+          </table>
+        </div>`, layout: "top" },
+      { id: "row-nav", group: "variant", title: "Row Navigation", desc: "행 자체가 Tab 칸 하나가 됩니다. 위 · 아래 화살표와 Home · End 로 행을 옮기고, Space 로 그 행을 고르고, Enter 로 그 행의 링크를 엽니다. 행 안의 체크박스와 링크는 Tab 으로 갑니다. 꺼진 행은 건너뜁니다.", html: `
+        <div class="tbl-wrap">
+          <table class="tbl hover" data-row-nav>
+            <caption class="sr-only">단말 목록</caption>
+            <thead><tr><th class="check"><label class="checkbox"><input type="checkbox" aria-label="전체 선택"></label></th><th>단말</th><th>그룹</th><th>마지막 접속</th></tr></thead>
+            <tbody>${[["PC-2041", "영업팀", "09:41"], ["PC-1187", "개발팀", "09:38"], ["PC-0932", "인프라팀", "08:12", 1], ["PC-0815", "경영지원팀", "09:40"], ["Server-03", "보안팀", "09:41"]].map(([n, g, t, off]) => off
+              ? `<tr class="disabled" aria-disabled="true"><td class="check"><label class="checkbox"><input type="checkbox" disabled aria-label="${n} 선택"></label></td><td><a href="#" class="link" tabindex="-1" aria-disabled="true">${n}</a></td><td>${g}</td><td>2026. 09. 07 ${t}</td></tr>`
+              : `<tr><td class="check"><label class="checkbox"><input type="checkbox" aria-label="${n} 선택"></label></td><td><a href="#" class="link">${n}</a></td><td>${g}</td><td>2026. 09. 07 ${t}</td></tr>`).join("")}</tbody>
           </table>
         </div>`, layout: "top" },
       { id: "loading", group: "state", title: "Loading", desc: "완성될 행과 같은 크기의 Skeleton 행을 둡니다. 표가 불러오는 중이라는 것을 스크린 리더에도 알립니다.", html: `
@@ -2398,7 +2439,7 @@ const COMPONENTS = {
         </div>` },
       { id: "expandable", group: "variant", title: "Row Expand", desc: "맨 앞 셰브론으로 한 행의 상세를 펼칩니다. 여러 행을 함께 펼칠 수 있고, 정렬하면 상세가 제 행을 따라갑니다. 서버에서 불러오는 동안은 그 자리에 Spinner 를 둡니다. 두 번째 행이 불러오는 중인 모습입니다.", html: `
         <div class="tbl-wrap">
-          <table class="tbl compact">
+          <table class="tbl compact" data-row-nav>
             <thead><tr><th class="expand"><span class="sr-only">상세</span></th><th class="sortable sorted desc" aria-sort="descending"><button type="button" class="sort">시간</button></th><th>레벨</th><th>소스</th><th>메시지</th></tr></thead>
             <tbody>${EXP_ROWS.map(([id, t, c, l, ip, m, st]) => `<tr class="log-row"><td class="expand">${expBtn(id, t, !!st)}</td><td>${t}</td><td><span class="tag ${c} sm">${l}</span></td><td>${ip}</td><td class="truncate">${m}</td></tr>${expDetail(id, t, ip, m, st)}`).join("")}</tbody>
           </table>
@@ -2412,7 +2453,7 @@ const COMPONENTS = {
           </table>
         </div>`, layout: "top" },
     ],
-    props: [[".tbl-wrap", "container", "—", "가로 스크롤 영역(테두리 · radius 없음 — 위는 머리글 아래 선, 아래는 마지막 행 선). 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 48. .compact 40 · .relaxed 56 · .zebra 줄무늬. React density · rowStyle"], [".hover", "boolean", "false", "행 hover · 눌림 면(surface/neutral/tertiary · strong). 행을 고르거나 행 동작이 있는 표에만 켭니다. React hover"], [".tbl-wrap.sticky-col", "container", "—", "첫 열 고정(맨 앞 체크박스 · 펼침 칸 포함). tabindex=0 + 이름. React stickyColumn"], [".cell-sub", "element", "—", "칸 안 주 값 아래 보조 글(12 secondary). React 열 정의 sub"], ["tfoot tr.total", "row", "—", "합계 · 평균 행. React summaryRow"], [".select-btn[data-density-for]", "attribute", "—", "표 id. 버튼 data-density(compact · default · relaxed)로 밀도를 바꾼다"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["table[data-sort=server]", "attribute", "—", "서버 정렬. 표시만 바꾸고 다시 정렬하지 않는다. 정렬하면 언제나 ds:sort {key, dir}"], [".tbl-wrap[data-total]", "attribute", "—", "전체 건수. .select-notice 에 전체 결과 선택을 안내하고 ds:select-all {all, total}"], [".tbl-wrap.sticky", "class", "—", "고정 헤더. max-height · tabindex=0 · 이름을 함께"], ["td.truncate", "class", "—", "말줄임. 잘린 칸에만 ds.js 가 전체 값 Tooltip 을 붙이고 칸이 Tab 칸이 됩니다(창 크기가 바뀌면 다시 잼 · 비활성 행 안은 Tab 칸 없음). title 은 쓰지 않는다 — 키보드로 볼 수 없다. React 는 TableCell truncate · 열 정의 truncate"], ["DS.table.removeRow(tr)", "function", "—", "행을 지우고 다음 행으로 포커스. 펼친 상세 행도 함께 지운다"], ["th.expand / td.expand > .expand-btn", "cell", "—", "행 펼침 — 맨 앞 칸. 머리글에는 숨긴 이름(.sr-only), 버튼은 aria-expanded · aria-controls(상세 행 id) · 행마다 다른 aria-label. React <code>renderExpanded</code>"], ["tr.row-detail[hidden] > td[colspan] > .row-detail-body", "row", "—", "바로 앞 행의 상세. colspan = 열 수. 글자는 셰브론 뒤 첫 칸의 글자와 같은 선(왼쪽 56)에서 시작합니다. 안에 .detail-meta(dl) · Code · 불러오는 중 .spinner-wrap. React 는 <code>renderExpanded(row, {expanded})</code> — 접힌 행도 그려 두므로 불러와야 하는 내용은 expanded 일 때만 돌려줍니다. 펼칠 내용이 없는 행은 <code>expandable</code> 로 빼면 셰브론 없이 빈 칸"], ["ds:row-expand", "event", "—", "행(tr)에서 {expanded}. 상세를 불러올 때 쓴다. React <code>expanded</code> · <code>defaultExpanded</code> · <code>onExpandedChange(set, {key, expanded})</code> — 지금 rows 에 없는 키는 지우고(페이지를 옮기면 접힘), <code>expandScope</code> 가 바뀌면 모두 접습니다(key null)"], ["[data-retry]", "attribute", "—", "오류 행의 다시 시도. ds:retry"], [".tbl-wrap[aria-busy=\"true\"]", "attribute", "—", "다시 불러오는 중 — 지난 행을 흐리게 둔다(행을 Skeleton 으로 바꾸지 않음). 제품이 달고 뗀다. React <code>status=\"loading\"</code> 에 rows 가 있으면 자동, 이름은 caption 이 있으면 '{caption} 불러오는 중'. 지연은 React <code>delay</code>(true = 1초 · ms)"], ["tr.on / .disabled", "row", "—", "선택 / 비활성. 비활성 행은 <code>aria-disabled=\"true\"</code>(<code>inert</code> 는 쓰지 않는다 — 클릭이 표로 떨어지고 행 글자가 보조기기에서 사라진다), 안의 링크 · 버튼은 <code>tabindex=\"-1\"</code> + <code>aria-disabled</code>. 비활성 행 안의 태그도 disable 토큰으로 칠해져 심각도 색이 활성처럼 남지 않습니다"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션(버튼 둘 이상은 .btn-group). 선택 표 위에 늘 있고(면 없음 · 고정 헤더 표에서는 스크롤해도 맨 위), 0개면 ds.js 가 버튼에 aria-disabled 를 답니다. React <code>ActionBar count={0}</code> 도 같습니다"]],
+    props: [[".tbl-wrap", "container", "—", "가로 스크롤 영역(테두리 · radius 없음 — 위는 머리글 아래 선, 아래는 마지막 행 선). 안에 .action-bar 와 table.tbl"], [".tbl", "table", "—", "기본 행 48. .compact 40 · .relaxed 56 · .zebra 줄무늬. React density · rowStyle"], [".hover", "boolean", "false", "행 hover · 눌림 면(surface/neutral/tertiary · strong). 행을 고르거나 행 동작이 있는 표에만 켭니다. React hover"], [".tbl-wrap.sticky-col", "container", "—", "첫 열 고정(맨 앞 체크박스 · 펼침 칸 포함). tabindex=0 + 이름. React stickyColumn"], [".cell-sub", "element", "—", "칸 안 주 값 아래 보조 글(12 secondary). React 열 정의 sub"], ["tfoot tr.total", "row", "—", "합계 · 평균 행. React summaryRow"], [".select-btn[data-density-for]", "attribute", "—", "표 id. 버튼 data-density(compact · default · relaxed)로 밀도를 바꾼다"], ["th.sortable / .sorted(.desc)", "header", "—", "정렬 가능 / 정렬 중. aria-sort"], ["table[data-sort=server]", "attribute", "—", "서버 정렬. 표시만 바꾸고 다시 정렬하지 않는다. 정렬하면 언제나 ds:sort {key, dir}"], [".tbl-wrap[data-total]", "attribute", "—", "전체 건수. .select-notice 에 전체 결과 선택을 안내하고 ds:select-all {all, total}"], [".tbl-wrap.sticky", "class", "—", "고정 헤더. max-height · tabindex=0 · 이름을 함께"], ["td.truncate", "class", "—", "말줄임. 잘린 칸에만 ds.js 가 전체 값 Tooltip 을 붙이고 칸이 Tab 칸이 됩니다(창 크기가 바뀌면 다시 잼 · 비활성 행 안은 Tab 칸 없음). title 은 쓰지 않는다 — 키보드로 볼 수 없다. React 는 TableCell truncate · 열 정의 truncate"], ["DS.table.removeRow(tr)", "function", "—", "행을 지우고 다음 행으로 포커스. 펼친 상세 행도 함께 지운다. 행 방향키 표는 그 행 자체로"], ["table.tbl[data-row-nav]", "attribute", "—", "행 방향키(옵션) — 행이 roving tabindex 로 Tab 칸 하나. ↑↓ · Home · End · PageUp/Down(10행), Enter = 펼침 버튼(없으면 행의 첫 링크), Space = 행 체크박스. 키는 행에 포커스가 있을 때만 받고, 비활성 · 상세 · 빈 상태 행은 건너뛴다. 지금 행 안의 조작 요소만 Tab 에 남는다(다른 행은 tabindex -1 — 원래 값은 data-ds-rn). 포커스 링은 행 안쪽 1px. React <code>rowNavigation</code>"], ["th.expand / td.expand > .expand-btn", "cell", "—", "행 펼침 — 맨 앞 칸. 머리글에는 숨긴 이름(.sr-only), 버튼은 aria-expanded · aria-controls(상세 행 id) · 행마다 다른 aria-label. React <code>renderExpanded</code>"], ["tr.row-detail[hidden] > td[colspan] > .row-detail-body", "row", "—", "바로 앞 행의 상세. colspan = 열 수. 글자는 셰브론 뒤 첫 칸의 글자와 같은 선(왼쪽 56)에서 시작합니다. 안에 .detail-meta(dl) · Code · 불러오는 중 .spinner-wrap. React 는 <code>renderExpanded(row, {expanded})</code> — 접힌 행도 그려 두므로 불러와야 하는 내용은 expanded 일 때만 돌려줍니다. 펼칠 내용이 없는 행은 <code>expandable</code> 로 빼면 셰브론 없이 빈 칸"], ["ds:row-expand", "event", "—", "행(tr)에서 {expanded}. 상세를 불러올 때 쓴다. React <code>expanded</code> · <code>defaultExpanded</code> · <code>onExpandedChange(set, {key, expanded})</code> — 지금 rows 에 없는 키는 지우고(페이지를 옮기면 접힘), <code>expandScope</code> 가 바뀌면 모두 접습니다(key null)"], ["[data-retry]", "attribute", "—", "오류 행의 다시 시도. ds:retry"], [".tbl-wrap[aria-busy=\"true\"]", "attribute", "—", "다시 불러오는 중 — 지난 행을 흐리게 둔다(행을 Skeleton 으로 바꾸지 않음). 제품이 달고 뗀다. React <code>status=\"loading\"</code> 에 rows 가 있으면 자동, 이름은 caption 이 있으면 '{caption} 불러오는 중'. 지연은 React <code>delay</code>(true = 1초 · ms)"], ["tr.on / .disabled", "row", "—", "선택 / 비활성. 비활성 행은 <code>aria-disabled=\"true\"</code>(<code>inert</code> 는 쓰지 않는다 — 클릭이 표로 떨어지고 행 글자가 보조기기에서 사라진다), 안의 링크 · 버튼은 <code>tabindex=\"-1\"</code> + <code>aria-disabled</code>. 비활성 행 안의 태그도 disable 토큰으로 칠해져 심각도 색이 활성처럼 남지 않습니다"], ["td.num / .check / .actions / .empty", "cell", "—", "숫자 우측 정렬 / 체크박스 열 / 행 액션 / 빈 상태"], [".action-bar", "div", "—", "선택 건수 + 일괄 액션(버튼 둘 이상은 .btn-group). 선택 표 위에 늘 있고(면 없음 · 고정 헤더 표에서는 스크롤해도 맨 위), 0개면 ds.js 가 버튼에 aria-disabled 를 답니다. React <code>ActionBar count={0}</code> 도 같습니다"]],
     spec: [["Size", "행 48 · compact 40 · relaxed 56 · 헤더 44 · 40 · 48 · 셀 좌우 16 · 액션 바 위아래 10 · 좌우 0 · 행 동작 아이콘 버튼 칸은 위아래 7(compact 는 버튼 28 · 5) — 버튼이 있어도 행 높이 그대로"], ["Container", "테두리 · radius 없음 · 머리글 면 없음(고정 헤더 · 고정 열은 놓인 자리의 면) · 머리글 아래 선 · 행 선 line/neutral/secondary 1px(마지막 행 포함 — flush 카드 바닥에 붙으면 카드 테두리가 대신) · 합계 행 위 선 line/neutral/primary · 셀 격자선 없음"], ["Label", "헤더 Label 2 13 SemiBold tertiary(정렬된 열 neutral/primary + 진한 화살표) · 셀 Label 1/Reading Regular 14(밀도 · 로그 행과 무관) · 칸 링크는 칸 글자색 Medium + hover 밑줄 · 하위 텍스트 12 secondary · 숫자 tabular(표 전체) · 오른쪽 정렬은 크기 숫자(.num) · 말줄임은 긴 메시지 열 하나"]],
     figma: { frame: "Data Table", radius: "none", sizes: { row: { h: 48 }, compact: { h: 40 }, relaxed: { h: 56 }, header: { h: 44 } }, variants: { default: {}, selectable: {}, compact: {} }, states: ["default", "hover", "selected", "sorted", "empty"] },
   },
@@ -2934,6 +2975,7 @@ const COMPONENTS = {
       ["서버 오류", "폼 위에 오류를 모아 요약하지 않습니다. 서버가 돌려준 오류도 그 필드 아래에 적고, 필드에 붙일 수 없는 오류는 Toast 로 알립니다."],
       ["동작", "동작 버튼 줄은 폼 맨 아래에 두고, 주 버튼은 오른쪽 끝에 둡니다. 삭제는 왼쪽에 떼어 둡니다."],
       ["초안", "길게 입력하는 폼은 초안 저장을 켭니다. 입력을 이 브라우저에 남겨 두었다가 다시 열면 되살리고 폼 맨 위에 알립니다. 저장에 성공하면 지웁니다. 비밀번호와 인증 코드는 남기지 않습니다."],
+      ["긴 폼", "화면보다 긴 폼은 동작 버튼 줄을 화면 아래 끝에 붙입니다. 스크롤하는 동안 저장 버튼이 늘 보이고, 폼 끝에 닿으면 제자리로 돌아갑니다."],
     ],
     examples: [
       { id: "default", group: "default", title: "Default", desc: "필수 항목 안내, 필드, 2열 줄, 동작 버튼을 차례로 둔 기본 폼입니다.", html: `
@@ -2966,8 +3008,21 @@ const COMPONENTS = {
           <div class="field error"><label for="fe-c">보관 기간</label><input id="fe-c" value="400" aria-invalid="true" aria-describedby="fe-ch"><span class="help" id="fe-ch">라이선스 한도를 넘었습니다. 365 이하로 입력하세요.</span></div>
           <div class="form-actions"><button type="submit" class="btn md solid primary">저장</button></div>
         </form>` },
+      { id: "sticky", group: "variant", title: "Sticky Actions", desc: "화면보다 긴 폼은 동작 버튼 줄이 스크롤 영역 아래 끝에 붙습니다. 미리보기 안을 스크롤하면 버튼 줄이 남고, 폼 끝에 닿으면 제자리로 돌아갑니다.", html: `
+        <form class="form">
+          <div class="form-section">기본 정보</div>
+          <div class="field"><label for="fk-name">정책 이름</label><input id="fk-name" value="외부 USB 차단"></div>
+          <div class="field"><label for="fk-desc">설명</label><textarea id="fk-desc">승인하지 않은 외부 저장 장치를 차단합니다.</textarea></div>
+          <div class="form-section">대상</div>
+          <div class="field"><label for="fk-group">적용 그룹</label><input id="fk-group" value="영업팀"></div>
+          <div class="field"><label for="fk-except">예외 단말</label><input id="fk-except" value="PC-0932"></div>
+          <div class="form-section">알림</div>
+          <div class="field"><label for="fk-mail">알림 이메일</label><input id="fk-mail" type="email" value="soc@example.com"></div>
+          <div class="field"><label for="fk-hook">웹훅 주소</label><input id="fk-hook" type="url" value="https://hooks.example.com/soc"></div>
+          <div class="form-actions sticky"><div class="btn-group"><button type="button" class="btn md outline assistive">취소</button><button type="submit" class="btn md solid primary">정책 저장</button></div></div>
+        </form>`, layout: "scroll" },
     ],
-    props: [["form.form", "form", "—", "카드 형태의 틀. 최대 폭 640"], ["data-validate", "attr", "—", "입력 검증을 켭니다. React <code>validate</code>"], ["data-draft=\"키\"", "attr", "—", "초안 저장 — 입력을 localStorage <code>jsds-draft:키</code> 에 0.5초 뒤 남기고, 다시 열면 되살려 맨 위에 Notice('버리기'). 제출이 통과하면 지움. 비밀번호 · 파일 · 일회용 코드 · 복사 필드 · <code>data-draft-skip</code> 안은 남기지 않음. 네이티브 입력만. React <code>useFormDraft(key)</code>"], [".form-legend", "p", "—", "필수 범례. React <code>FormLegend</code>"], [".form-section", "div", "—", "섹션 제목. React <code>FormSection</code>"], [".form-row", "div", "—", "2열. React <code>FormRow</code>"], [".form-actions", "div", "—", "하단 동작. 버튼은 .btn-group 안, .left 는 묶음 밖 왼쪽. React <code>FormActions</code>"], ["ds:validate", "event", "—", "제출을 검사한 뒤 form 에서 {valid, errors[{label, message}]}. React <code>onValidate</code>"]],
+    props: [["form.form", "form", "—", "카드 형태의 틀. 최대 폭 640"], ["data-validate", "attr", "—", "입력 검증을 켭니다. React <code>validate</code>"], ["data-draft=\"키\"", "attr", "—", "초안 저장 — 입력을 localStorage <code>jsds-draft:키</code> 에 0.5초 뒤 남기고, 다시 열면 되살려 맨 위에 Notice('버리기'). 제출이 통과하면 지움. 비밀번호 · 파일 · 일회용 코드 · 복사 필드 · <code>data-draft-skip</code> 안은 남기지 않음. 네이티브 입력만. React <code>useFormDraft(key)</code>"], [".form-legend", "p", "—", "필수 범례. React <code>FormLegend</code>"], [".form-section", "div", "—", "섹션 제목. React <code>FormSection</code>"], [".form-row", "div", "—", "2열. React <code>FormRow</code>"], [".form-actions", "div", "—", "하단 동작. 버튼은 .btn-group 안, .left 는 묶음 밖 왼쪽. React <code>FormActions</code>"], [".form-actions.sticky", "class", "—", "긴 폼 — 스크롤 영역 아래 끝에 붙고 폼 끝에 닿으면 제자리로(position:sticky). 놓인 자리의 면을 칠한다. 붙어 있는 동안 ds.js 가 .stuck 을 단다. React <code>FormActions sticky</code>"], ["ds:validate", "event", "—", "제출을 검사한 뒤 form 에서 {valid, errors[{label, message}]}. React <code>onValidate</code>"]],
     spec: [["Size", "최대 폭 640 · 패딩 24 · 필드 간격 20"], ["Container", "surface/elevated/primary · 1px · radius/lg"], ["Section", "16 SemiBold"], ["Actions", "위 패딩 16 · 위 테두리 1px · 버튼은 .btn-group(md 8) · .left 는 묶음 밖 왼쪽"]],
   },
 
@@ -3146,7 +3201,7 @@ const COMPONENTS = {
             </li>
             <li class="upload-item uploading" data-id="s2">
               <span class="ico">${I("file",20)}</span>
-              <div class="body"><div class="row"><span class="name">server-audit.log</span><span class="size">4.2 MB</span></div><div class="progress sm" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" aria-label="server-audit.log 전송"><i style="width:60%"></i></div></div>
+              <div class="body"><div class="row"><span class="name">server-audit.log</span><span class="size">4.2 MB</span></div><div class="progress sm" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="60" aria-label="server-audit.log 전송"><i style="--p:60%"></i></div></div>
               <button type="button" class="btn sm text assistive icon-only remove" aria-label="server-audit.log 지우기">${I("x",16)}</button>
             </li>
             <li class="upload-item done" data-id="s3">
@@ -3464,6 +3519,85 @@ sudo systemctl enable --now js-agent</code></pre>
     ],
     props: [[".notify", "class", "—", "벨 버튼과 패널을 감쌉니다. React <code>NotificationCenter</code>"], ["[aria-haspopup=dialog]", "button", "필수", "벨 아이콘 버튼 — <code>aria-expanded</code> · <code>aria-controls</code>, 접근 이름과 Tooltip 은 ds.js 가 안 읽은 수로 맞춥니다. 배지는 <code>.with-count > .count</code> — 기본은 점(<code>.dot</code>)"], ["data-count=\"number\"", ".notify", "점", "벨 배지를 숫자로. Caption 2 11, 99 초과 99+. React <code>count=\"number\"</code>"], [".notify-panel", "section", "—", "<code>role=dialog</code> · <code>aria-labelledby</code>(.notify-title). <code>hidden</code> 이면 닫힘"], [".notify-read-all", "button", "—", "모두 읽음 — 안 읽은 것이 없으면 <code>aria-disabled</code>"], [".tabs [data-filter]", "tab", "all · unread", "탭 두 개가 같은 <code>.tab-panel.notify-body[data-static]</code> 를 거릅니다"], [".notify-group", "section", "—", "날짜 묶음 — <code>aria-label</code> = <code>.notify-day</code> 글자"], [".notify-item", "li", "—", "<code>data-id</code>. 안 읽음이면 <code>.unread</code> + 링크 안 <code>.sr-only</code> ', 안 읽음'"], [".notify-link", "a | button", "—", "갈 화면이 있으면 <code>a[href]</code>, 없으면 <code>button</code>. 안에 다른 조작을 두지 않습니다"], [".notify-more", "container", "—", "이전 알림 보기 버튼. 실패 문구 <code>.msg</code> 는 ds.js 가 넣습니다. React <code>hasMore</code> · <code>onMore</code>"], ["data-labels", "attr", "—", "문구 JSON(trigger · triggerNone · unread · empty · emptyUnread · more · retry · moreFailed · loaded · readAll · fresh · freshMany · today). React <code>labels</code>"], ["DS.notify.add(el, items)", "function", "—", "맨 위에 넣고 수와 알림을 맞춥니다. items 는 <code>{id, title, sub, time, datetime, severity, href, unread, group}</code>. React 는 <code>items</code> 를 바꿉니다"], ["ds:notify-read", "event", "—", "<code>{ids, all}</code>. React <code>onRead(ids, {all})</code>"], ["ds:notify-more", "event", "—", "<code>{resolve(items, {done}), reject(message)}</code>. React <code>onMore()</code> 가 Promise"], ["ds:notify-open", "event", "—", "<code>{open}</code>. React <code>onOpenChange(open)</code>"]],
     spec: [["Size", "패널 폭 380(화면 폭 − 32 까지) · 높이 화면 − 96 과 560 중 작은 값 · 본문만 스크롤 · 항목 padding 12/20"], ["Container", "surface/elevated/primary · line/neutral/secondary · radius/lg · shadow-3 · 벨 아래 8 · 오른쪽 맞춤"], ["Label", "제목 Body 1/Normal 16/24 600 · 항목 Label 1/Normal 14/20(안 읽음 600) · 보조 · 시각 Caption 1 12/16 foreground/neutral/secondary · 날짜 묶음 Caption 1 600"], ["Unread", "앞 점 8 surface/brand/primary · 제목 600 — 읽으면 점 자리만 남음"], ["State", "항목 hover surface/neutral/tertiary · 누름 surface/neutral/strong · 포커스는 항목 안쪽 1px"], ["Count", "벨 배지 = Indicator Count · 99 넘으면 99+ · 0 이면 숨김 · 안 읽음 탭은 탭 건수 Count"]],
+  },
+  /* ------------------------------------------------ Kbd (2026-11-26) */
+  "kbd": {
+    status: "ready", react: ["Kbd"], css: [".kbd", ".kbd-combo", ".menu-kbd"], borrows: [".dropdown", ".menu", ".menu-item", ".btn", ".tooltip-wrap", ".tooltip", ".popup", ".popup-title", ".popup-close", ".tbl", ".kv", ".sr-only", ".searchbar", ".t-label-1-reading", ".t-regular"],
+    desc: "키보드 단축키를 키 모양으로 보입니다. 단축키가 실제로 동작하는 자리에만 둡니다.",
+    choose: [
+      ["언제 쓰는가", "검색창 · 메뉴 항목 · 버튼에 단축키가 있을 때 그 키를 보입니다. 명령어나 설정 값처럼 그대로 옮겨 적는 글은 <a href=\"#/components/code\">Code</a> 로 씁니다."],
+      ["비슷한 것", "상태나 분류를 붙이는 표시는 <a href=\"#/components/tag\">Tag</a> 입니다."],
+      ["Placement", "검색창 오른쪽 끝 · 메뉴 항목 오른쪽 끝 · Tooltip 라벨 뒤 · 단축키 도움말 표"],
+    ],
+    principles: [
+      ["동작하는 키만", "보이는 키는 그 화면에서 실제로 동작해야 합니다. 동작하지 않는 키를 보이면 사용자가 눌러 보고 실패합니다."],
+      ["운영체제", "수정 키는 맥에서 Command 기호로, 그 밖에서는 Ctrl 로 보입니다. 기호는 화면 낭독기가 읽지 못해 이름을 숨겨 둡니다."],
+      ["조합", "함께 누르는 키는 키 모양을 나란히 둡니다. 키 사이에 더하기 기호를 넣지 않습니다."],
+      ["입력 중", "글자 하나로 된 단축키는 입력칸에 글을 치는 동안 동작하지 않습니다. 수정 키를 함께 누르는 단축키만 입력 중에도 동작합니다."],
+      ["단축키 도움말", "단축키가 셋 이상인 화면은 물음표 키로 여는 도움말을 둡니다. 도움말은 그 화면의 단축키만 보입니다."],
+      ["글자", "키 이름은 키보드에 적힌 대로 씁니다. 한 글자 키는 대문자로 씁니다."],
+    ],
+    examples: [
+      { id: "default", group: "default", title: "Default", desc: "키 하나를 키 모양으로 보입니다.", html: `
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><kbd class="kbd">Esc</kbd><kbd class="kbd">Enter</kbd><kbd class="kbd">Tab</kbd><kbd class="kbd">/</kbd></div>` },
+      { id: "combo", group: "variant", title: "Combination", desc: "함께 누르는 키는 나란히 둡니다. 수정 키는 운영체제에 맞게 바뀝니다.", html: `
+        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">${kbdCombo(["Mod", "K"])}${kbdCombo(["Shift", "Tab"])}</div>` },
+      { id: "menu", group: "variant", title: "In Menu", desc: "메뉴 항목 끝에 그 항목의 단축키를 보입니다.", html: `
+        <div class="dropdown open">
+          <span class="tooltip-wrap"><button type="button" class="btn md outline assistive icon-only" aria-label="편집 메뉴" aria-haspopup="menu" aria-expanded="true">${I("dots")}</button><span class="tooltip" role="tooltip">편집 메뉴</span></span>
+          <ul class="menu" role="menu">
+            <li class="menu-item" role="menuitem" aria-keyshortcuts="Control+C Meta+C">${I("copy")}복사${kbdCombo(["Mod", "C"], true, true)}</li>
+            <li class="menu-item" role="menuitem" aria-keyshortcuts="Control+V Meta+V">${I("clipboard")}붙여넣기${kbdCombo(["Mod", "V"], true, true)}</li>
+            <li class="menu-item" role="menuitem" aria-keyshortcuts="Control+A Meta+A">${I("list")}모두 선택${kbdCombo(["Mod", "A"], true, true)}</li>
+            <li class="menu-item" role="menuitem" aria-keyshortcuts="F2">${I("pencil")}이름 바꾸기${kbdCombo(["F2"], true, true)}</li>
+          </ul>
+        </div>` },
+      { id: "tooltip", group: "variant", title: "In Tooltip", desc: "아이콘 버튼의 Tooltip 라벨 뒤에 단축키를 둡니다.", html: `
+        <span class="tooltip-wrap show"><button type="button" class="btn md outline assistive icon-only" aria-label="새로 고침" aria-keyshortcuts="R">${I("refresh")}</button><span class="tooltip" role="tooltip">새로 고침<kbd class="kbd sm" aria-hidden="true">R</kbd></span></span>` },
+      { id: "size", group: "size", title: "Size", desc: "메뉴 · 명령 팔레트처럼 글자가 작은 자리에는 Small 을 씁니다.", html: `
+        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">${kbdCombo(["Mod", "K"], true)}${kbdCombo(["Mod", "K"])}</div>` },
+      { id: "help", group: "variant", title: "Shortcut Help", desc: "물음표 키나 버튼으로 그 화면의 단축키 목록을 엽니다.", html: `
+        <button type="button" class="btn md outline assistive" data-popup-open="#kbd-help" aria-keyshortcuts="Shift+?">단축키 보기</button>
+        <div class="popup" id="kbd-help" role="dialog" aria-modal="true" aria-labelledby="kbd-help-t" data-hotkey-help>
+          <h3 class="popup-title" id="kbd-help-t">단축키</h3>${popX()}
+          <table class="tbl kv"><tbody>
+            <tr><th scope="row">명령 팔레트 열기</th><td>${kbdCombo(["Mod", "K"])}</td></tr>
+            <tr><th scope="row">검색창으로 이동</th><td>${kbdCombo(["/"])}</td></tr>
+            <tr><th scope="row">단축키 보기</th><td>${kbdCombo(["?"])}</td></tr>
+            <tr><th scope="row">닫기</th><td>${kbdCombo(["Esc"])}</td></tr>
+          </tbody></table>
+        </div>` },
+    ],
+    props: [["kbd.kbd", "element", "—", "키 하나. 글자는 키보드에 적힌 대로"], [".sm", "boolean", "false", "메뉴 · 명령 팔레트 · Tooltip 안. React <code>size=\"sm\"</code>"], ["[data-kbd-mod]", "attr", "—", "운영체제 수정 키 — ds.js 가 맥이면 ⌘ + 숨긴 'Command', 그 밖은 Ctrl. React <code>keys={[\"Mod\", \"K\"]}</code>"], [".kbd-combo", "element", "—", "함께 누르는 키 묶음(간격 2, 더하기 기호 없음)"], [".menu-kbd", "class", "—", "메뉴 · 팔레트 항목 끝 자리. <code>aria-hidden</code> — 단축키는 항목의 <code>aria-keyshortcuts</code> 로"], [".popup[data-hotkey-help]", "attr", "—", "<code>?</code> 키로 여는 단축키 도움말. 화면에 하나. 입력 중 · 다른 대화상자가 열린 동안은 무시"], ["DS.kbd.mac", "boolean", "—", "맥으로 판단했는지"], ["DS.kbd.sync(root, mac?)", "function", "—", "새로 그린 <code>[data-kbd-mod]</code> 를 다시 맞춤(처음 그릴 때는 DS.init 이 함)"]],
+    spec: [["Size", "높이 20 · 최소 폭 20 · 좌우 5 · sm 18 / 4"], ["Container", "background/neutral/secondary · 1px line/neutral/secondary · radius/sm"], ["Label", "Caption 1 12/16 Medium · sm Caption 2 11/14 · foreground/neutral/secondary · 숫자 tabular"], ["Combo", "키 사이 2"]],
+  },
+  /* ------------------------------------------------ Command Palette (2026-11-26) */
+  "command-palette": {
+    status: "ready", react: ["CommandPalette", "CommandPaletteSurface"], css: [".cmdk", ".cmdk-search", ".cmdk-list", ".cmdk-group", ".cmdk-label", ".cmdk-item", ".cmdk-name", ".cmdk-empty", ".cmdk-foot"], borrows: [".popup", ".popup-backdrop", ".kbd", ".kbd-combo", ".menu-kbd", ".btn", ".sr-only"],
+    desc: "화면 이동과 자주 쓰는 작업을 키보드로 찾아 바로 실행합니다. 어느 화면에서든 같은 단축키로 엽니다.",
+    choose: [
+      ["언제 쓰는가", "메뉴가 깊거나 자주 쓰는 작업이 여러 화면에 흩어져 있을 때 둡니다. 화면 안의 데이터를 찾는 일은 <a href=\"#/components/search\">Search</a> 로 합니다."],
+      ["비슷한 것", "폼 안에서 값을 골라 넣는 일은 <a href=\"#/components/combobox\">Combobox</a> 입니다."],
+      ["Placement", "화면 위쪽 가운데 · 여는 버튼 옆에 단축키를 함께 보임"],
+    ],
+    principles: [
+      ["열기", "맥은 Command K, 그 밖은 Ctrl K 로 엽니다. 입력칸에 글을 치는 중에도 열리고, 다시 누르면 닫힙니다. 다른 대화상자가 열린 동안에는 열지 않습니다."],
+      ["찾기", "이름과 다른 이름을 띄어쓰기 · 대소문자 없이 찾고, 자음만 치면 초성으로 찾습니다. 맞는 것이 없으면 다른 낱말을 권합니다."],
+      ["키보드", "포커스는 검색칸에 남고 위아래 화살표로 항목을 옮깁니다. Enter 로 실행하고 Esc 로 닫습니다."],
+      ["항목", "화면 이동과 작업을 묶어 보입니다. 항목 이름은 동사로 끝나는 동작이거나 화면 이름입니다. 단축키가 있으면 끝에 보입니다."],
+      ["실행", "실행하면 팔레트를 먼저 닫고, 포커스는 연 자리로 돌아갑니다. 되돌릴 수 없는 작업은 바로 실행하지 않고 확인 대화상자를 엽니다."],
+      ["범위", "지금 사용자가 할 수 있는 것만 보입니다. 권한이 없는 화면은 넣지 않습니다."],
+      ["알림", "결과 수는 화면 낭독기에 알립니다."],
+    ],
+    examples: [
+      { id: "default", group: "default", title: "Default", desc: "버튼이나 단축키로 엽니다. 글을 치면 걸러지고 Enter 로 실행합니다. 이 예제는 고른 명령을 알림으로 보입니다.", html: `
+        <button type="button" class="btn md outline assistive" data-popup-open="#cmdk-demo" aria-keyshortcuts="Control+K Meta+K">${I("search")}명령 찾기${kbdCombo(["Mod", "K"], true, true)}</button>
+        ${cmdkPal("cmdk-demo", CMDK_GROUPS)}` },
+      { id: "empty", group: "state", title: "Empty", desc: "맞는 명령이 없으면 다른 낱말을 권합니다.", html: `
+        ${cmdkPal("cmdk-empty", CMDK_GROUPS, { value: "백업", hotkey: false, demo: false })}` },
+    ],
+    props: [[".popup.cmdk", "element", "—", "<code>role=dialog</code> · <code>aria-modal</code> · <code>aria-labelledby</code>(숨긴 제목). 닫기(X) 없음 — Esc · 배경 · 단축키로 닫음"], ["[data-hotkey]", "attr", "—", "Mod K 로 여는 팔레트. 화면에 하나"], [".cmdk-search input", "element", "—", "<code>role=combobox</code> · <code>aria-controls</code> = 목록 · <code>aria-activedescendant</code>"], [".cmdk-group", "element", "—", "<code>role=group</code> · <code>aria-labelledby</code> = <code>.cmdk-label</code>"], [".cmdk-item", "element", "—", "<code>role=option</code> · <code>aria-selected</code> · <code>data-value</code> · 찾는 말 <code>data-keywords</code>"], [".cmdk-empty", "element", "—", "맞는 것이 없을 때 보임"], ["ds:command", "event", "—", "<code>{value, label}</code> — 팔레트를 닫은 뒤 팔레트 요소에서"], ["React", "props", "—", "<code>open</code> · <code>onOpen</code>(단축키로 열 때) · <code>onClose</code> · <code>groups</code> · <code>onCommand(value, item)</code> · <code>hotkey</code>(기본 true) · <code>placeholder</code>"]],
+    spec: [["Size", "폭 640 · 검색칸 56 · 목록 최대 360 · 항목 40"], ["Container", "surface/elevated/primary · radius/xl · shadow-3 · 화면 위에서 96"], ["Label", "검색칸 Body 1/Normal 16/24 · 항목 Label 1/Normal 14/20 Medium · 묶음 제목 Caption 1 tertiary"], ["Active", "surface/neutral/tertiary · radius/md"], ["Icon", "검색 20 · 항목 16 foreground/neutral/tertiary"]],
   },
 };
 

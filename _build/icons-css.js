@@ -15,14 +15,16 @@ const mask = (name, style, opt = {}) => { const u = `url("${dataUri(name, style,
 /* [셀렉터(정확히 일치), 새 선언부, (없으면 이 셀렉터 규칙 뒤에 삽입)]. 아이콘: check(굵게) · minus · circle(스위치 손잡이) · chevron-down · slash · arrows-sort · arrow-up · arrow-down
    라디오 점은 글리프가 아니라 단순 원이므로 마스크를 쓰지 않는다 — style.src.css 의 .radio input:checked::after 에 직접 둔다(마스크로 그리면 Safari 에서 0.4~0.75px 어긋남). */
 const RULES = [
-  [".checkbox input:checked::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })}`],
+  [".checkbox input::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })};opacity:0;transform:scale(.5);transition:opacity var(--motion-fast),transform var(--motion-fast)`, ".checkbox input"],   // 체크는 늘 그려 두고 켜질 때 커지며 나타난다(2026-11-26) — transition 이라 처음 그릴 때는 움직이지 않는다
+  [".checkbox input:checked::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })};opacity:1;transform:none`],
   [".radio input:checked", "box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary);background:var(--surface-brand-primary)"],   // 테두리는 안쪽 그림자(1.5px)로 그린다 — border-color 로 두면 선택된 Radio 의 brand 면 위에 기본 회색 띠가 남는다
   [".switch input::after", `content:"";position:absolute;top:2px;left:2px;width:1.25rem;height:1.25rem;background:var(--static-white);${mask("circle", "filled", { size: "120%" })};transition:transform var(--motion-fast)`],
   [".switch input:checked::after", "transform:translateX(1.25rem)"],   // 노브는 transform 으로 옮긴다(2026-11-20 — left 전환은 매 프레임 배치를 다시 잼)
   [".switch.sm input::after", "width:1rem;height:1rem"],
   [".switch.sm input:checked::after", "transform:translateX(1rem)"],
-  [".checkbox input:indeterminate::after,.checkbox input.mixed::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("minus", "outline", { strokeWidth: 3.5 })}`],
-  [".menu-item:is([aria-checked=\"true\"],[aria-selected=\"true\"]) > .menu-mark.check::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })}`, ".menu-mark.radio"],   // 메뉴 체크 항목 · 여러 개 옵션 — Checkbox 와 같은 체크(2026-11-23)
+  [".checkbox input:indeterminate::after,.checkbox input.mixed::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("minus", "outline", { strokeWidth: 3.5 })};opacity:1;transform:none`],
+  [".menu-mark.check::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })};opacity:0;transform:scale(.5);transition:opacity var(--motion-fast),transform var(--motion-fast)`, ".menu-mark.round"],   // 메뉴 체크도 Checkbox 와 같이 커지며 나타남(2026-11-26)
+  [".menu-item:is([aria-checked=\"true\"],[aria-selected=\"true\"]) > .menu-mark.check::after", `content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);${mask("check", "outline", { strokeWidth: 3.5 })};opacity:1;transform:none`, ".menu-mark.radio"],   // 메뉴 체크 항목 · 여러 개 옵션 — Checkbox 와 같은 체크(2026-11-23)
   [".chip[aria-pressed]::before", `content:"";width:0.875rem;height:0.875rem;flex:none;background:var(--foreground-disable-primary);${mask("check", "outline", { strokeWidth: 2.5 })}`],   // 체크 선 2.5 — 기본 2 에서 한 단계(사람의 요청 2026-11-16)
   [".dropdown .trigger::after", `content:"";width:1rem;height:1rem;flex:none;background:var(--foreground-neutral-secondary);${mask("chevron-down")};transition:transform var(--motion-fast)`],
   [".dropdown.open .trigger::after", "transform:rotate(180deg)"],

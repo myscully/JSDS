@@ -24,7 +24,7 @@ export function useDiscardGuard(box: RefObject<HTMLElement | null>, onClose: () 
   /** 입력이 시작됐다 — 오버레이 안 검색창은 거르는 것이지 입력이 아니라 빼다(사이트 ds.js 와 같음) */
   const mark = (e?: { target: EventTarget | null }) => {
     const t = e?.target as Element | null | undefined;
-    if (t && typeof t.closest === "function" && t.closest(".searchbar")) return;
+    if (t && typeof t.closest === "function" && t.closest(".searchbar, .cmdk-search")) return;
     dirty.current = true;
   };
   const keep = () => {

@@ -2,6 +2,7 @@ import { forwardRef, useLayoutEffect, useRef, useState, type CSSProperties, type
 import { cx } from "../../utils/cx";
 import { mergeRefs } from "../../utils/hooks";
 import { Tooltip } from "../tooltip/Tooltip";
+import { useRowNav } from "../../utils/rowNav";
 
 export type TableDensity = "compact" | "default" | "relaxed";
 export type TableRowStyle = "lines" | "zebra" | "grid" | "plain";
@@ -32,12 +33,16 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   maxHeight?: number | string;
   /** 스크롤 영역의 이름(aria-label) — 고정 헤더 · 첫 열 고정이면 영역이 Tab 칸(tabindex 0)이 되어 이름이 필요하다 */
   regionLabel?: string;
+  /** 행 방향키(table[data-row-nav], 2026-11-26) — 행이 Tab 칸 하나가 되고 ↑↓ · Home · End · PageUp/Down 으로 옮긴다. Enter 는 행 펼침(없으면 행의 첫 링크), Space 는 행 체크박스. 비활성 행은 건너뛴다 */
+  rowNavigation?: boolean;
 }
 let regionWarned = false;
 /** 단순 표. 정렬·선택이 필요하면 DataTable */
-export const Table = forwardRef<HTMLTableElement, TableProps>(function Table({ compact, density, zebra, rowStyle, kv, hover, nowrap, wrap = true, wrapClassName, wrapStyle, stickyHeader, stickyColumn, maxHeight, regionLabel, className, ...rest }, ref) {
+export const Table = forwardRef<HTMLTableElement, TableProps>(function Table({ compact, density, zebra, rowStyle, kv, hover, nowrap, wrap = true, wrapClassName, wrapStyle, stickyHeader, stickyColumn, maxHeight, regionLabel, rowNavigation, className, ...rest }, ref) {
+  const self = useRef<HTMLTableElement>(null);
+  useRowNav(self, rowNavigation);
   const d = density ?? (compact ? "compact" : "default"), r = rowStyle ?? (zebra ? "zebra" : "lines");
-  const table = <table ref={ref} className={cx("tbl", { compact: d === "compact", relaxed: d === "relaxed", zebra: r === "zebra", grid: r === "grid", plain: r === "plain", kv, hover, nowrap }, className)} {...rest} />;
+  const table = <table ref={mergeRefs(ref, self)} data-row-nav={rowNavigation ? "" : undefined} className={cx("tbl", { compact: d === "compact", relaxed: d === "relaxed", zebra: r === "zebra", grid: r === "grid", plain: r === "plain", kv, hover, nowrap }, className)} {...rest} />;
   const scroll = stickyHeader || stickyColumn;
   if (scroll && !regionLabel && process.env.NODE_ENV !== "production" && !regionWarned) { regionWarned = true; console.warn("[ds-react] Table stickyHeader · stickyColumn 은 스크롤 영역(Tab 칸)이라 regionLabel 이 필요합니다."); }
   return wrap ? (
@@ -69,7 +74,7 @@ export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   total?: boolean;
 }
 /* 비활성 행 안에서 Tab 이 멈추는 것 — 원래 tabindex 는 data-ds-off 에 적어 두었다가 행을 켜면 되돌린다 */
-const ROW_FOCUS = 'a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])';
+const ROW_FOCUS = 'a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])';   // 이미 disabled 인 조작은 그대로(사이트 마크업과 같게, 2026-11-26)
 export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function TableRow({ selected, disabled, log, total, className, onClickCapture, ...rest }, ref) {
   /* 비활성 행은 inert 대신 aria-disabled(2026-11-12) — inert 는 클릭을 표로 떨어뜨리고(제품의 표 · 카드 핸들러가 받음) 행의 글자를 보조기기에서 지웠다.
      안의 링크 · 버튼은 tabindex=-1 + aria-disabled 로 Tab 에서 빼고, 클릭은 캡처에서 삼킨다(사이트는 ds.js). 칸 내용이 바뀌어도 맞게 렌더마다 다시 잰다 */

@@ -99,6 +99,7 @@
   --shadow-1:var(--shadow-sm);--shadow-2:var(--shadow-md);--shadow-3:var(--shadow-xl);
   --z-menu:5;--z-tooltip:10;--z-float:30;--z-dim:90;--z-panel:91;--z-popup:100;--z-toast:110;--z-tooltip-float:120;--z-skip:130;   /* 쌓임 단계(2026-11-20) — 컴포넌트 층만. 한 컴포넌트 안의 1 · 2 · 3 · -1 은 그 안의 순서라 숫자 그대로 */
   --motion-fast:120ms ease-out;--motion-base:200ms ease-in-out;--motion-slow:320ms cubic-bezier(.2,.8,.2,1);
+  --motion-enter:200ms cubic-bezier(.2,.8,.2,1);--motion-exit:120ms cubic-bezier(.4,0,1,1);--motion-flash:1600ms ease-out;   /* 들어옴은 감속 · 나감은 가속 · 새 항목 하이라이트(2026-11-26) — 길이 + 이징을 한 값으로(transition 은 토큰 하나 규칙) */
   /* "Pretendard JP" 는 한자만 그린다(Pretendard 에 한자가 없음 — 2026-11-14). 선언은 font-jp.src.css(사이트 늘 · 패키지 선택 import), 선언이 없으면 건너뛴다 */
   --font-sans:"Pretendard","Pretendard JP",-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,"D2Coding",monospace;
@@ -220,7 +221,7 @@
 html{scroll-behavior:smooth}
 /* * 는 가상 요소를 고르지 않는다 — Accordion 의 ::details-content 높이 전환을 따로 꺼야 한다 */
 /* 가상 요소도 멈춘다 — 종전 *, ::details-content 만 잡아 로딩 스피너(.btn.loading::after) · Indicator 맥박 · 셰브론 · 스위치 손잡이가 계속 움직였다(2026-11-05 실측) */
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin .8s linear infinite!important}.spinner[data-delay]{animation:spin .8s linear infinite,ds-delay 0s var(--ds-delay,1s) both!important}.skeleton[data-delay],.spinner-wrap[data-delay],.skeleton-row[data-delay]{animation:ds-delay 0s var(--ds-delay,1s) both!important}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after,*::details-content{transition:none!important;animation:none!important}.spinner,.btn.loading::after,.switch input[aria-busy="true"]::before{animation:spin .8s linear infinite!important}.spinner[data-delay]{animation:spin .8s linear infinite,ds-delay 0s var(--ds-delay,1s) both!important}.skeleton[data-delay],.spinner-wrap[data-delay],.skeleton-row[data-delay]{animation:ds-delay 0s var(--ds-delay,1s) both!important}.ds-new:not(tr),tr.ds-new>td{background-color:var(--surface-brand-subtle)}}
 html{height:100%}
 /* ds:scale:start — 화면 폭 단계(사람의 결정 2026-11-11). rem 의 기준인 루트 글꼴 크기를 폭 구간마다 한 단계씩 바꿔 글자 · 간격 · 높이가 같은 비율로 따라간다.
    1280~1919 가 기준(16px — Figma 수치). % 로 적어 사용자가 브라우저 글꼴 크기를 바꾸면 그것도 따른다(px 로 적으면 덮어쓴다).
@@ -741,6 +742,8 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .example:has(.datepicker.open[data-ds-opened="1"],.timepicker.open[data-ds-opened="1"],.dropdown.open[data-ds-opened="1"],.combobox.open[data-ds-opened="1"]) .example-preview{overflow:visible;border-radius:var(--radius-lg) var(--radius-lg) 0 0;z-index:1}
 .example-preview.left{justify-content:flex-start}
 .example-preview.top{align-items:flex-start}
+.example-preview.scroll{max-height:25rem;align-items:flex-start;padding-bottom:0}   /* 긴 폼 시연 — 미리보기 안에서 스크롤해 고정 버튼 줄을 보인다. sticky 는 아래 안쪽 여백 위에 붙어 그 띠로 글이 비치므로 여백을 자식 바깥 여백으로 옮김 */
+.example-preview.scroll>*{margin-bottom:3rem}
 .example-preview.stack{flex-direction:column;align-items:stretch;}
 .example-preview.stack.center{align-items:center}
 .example-preview.tall{min-height:21.25rem;align-items:flex-start}
@@ -1039,7 +1042,13 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 .searchbar .clear svg{display:block;width:0.75rem;height:0.75rem}
 .searchbar .clear{position:relative}
 .searchbar .clear::after{content:"";position:absolute;top:50%;left:50%;width:max(100%,1.5rem);height:max(100%,1.5rem);transform:translate(-50%,-50%)}   /* 누르는 영역 24 이상 — 글리프는 그대로 두고 보이지 않는 칸만 넓힌다(2026-11-23, Breadcrumb 더 보기와 같은 방식) */
-.searchbar kbd{font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-sm);padding:1px 0.3125rem;background:var(--background-neutral-secondary);line-height:max(1rem,16px);letter-spacing:0.0252em}
+/* Kbd(2026-11-26) — 단축키를 키 모양으로. 검색창의 옛 맨 kbd 도 같은 모양(.searchbar kbd) */
+.kbd,.searchbar kbd{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;min-width:1.25rem;height:1.25rem;padding:0 0.3125rem;font-family:var(--font-sans);font-size:var(--font-size-12);line-height:max(1rem,16px);font-weight:500;letter-spacing:0.0252em;font-variant-numeric:tabular-nums;white-space:nowrap;vertical-align:middle;color:var(--foreground-neutral-secondary);background:var(--background-neutral-secondary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-sm);flex:none}
+.kbd.sm{min-width:1.125rem;height:1.125rem;padding:0 0.25rem;font-size:var(--font-size-11);line-height:max(0.875rem,14px);letter-spacing:0.0311em}
+.kbd-combo{display:inline-flex;align-items:center;gap:0.125rem;flex:none;vertical-align:middle}
+.menu-item .menu-kbd,.cmdk-item .menu-kbd{margin-left:auto;padding-left:1rem}
+.tooltip .kbd{color:inherit;background:transparent;border-color:currentColor;height:1rem;min-width:1rem;margin-left:0.375rem}
+.btn .kbd-combo{margin-left:0.25rem}
 .searchbar input::-webkit-search-cancel-button,.searchbar input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}   /* 브라우저 기본 ×가 .clear 와 나란히 두 개 떴다 */
 .searchbar.lg{height:3rem}
 .searchbar.lg input{font-size:var(--font-size-16);line-height:1.625rem;letter-spacing:0.0057em}
@@ -1262,10 +1271,11 @@ dl.kv dt{color:var(--foreground-neutral-tertiary);font-weight:500}dl.kv dd{margi
 /* Checkbox */
 .checkbox{display:inline-flex;align-items:flex-start;gap:0.5rem;font-size:var(--font-size-14);cursor:pointer;line-height:1.25rem;letter-spacing:0.0145em}
 .checkbox input{appearance:none;-webkit-appearance:none;flex:none;width:1rem;height:1rem;margin:2px 0 0;border:0;box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);border-radius:var(--radius-sm);background:var(--surface-elevated-primary);display:grid;place-items:center;cursor:inherit;transition:background var(--motion-fast),border-color var(--motion-fast)}
+.checkbox input::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.5);transition:opacity var(--motion-fast),transform var(--motion-fast)}
 .checkbox input:hover{box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary)}   /* 테두리를 안쪽 그림자로 그린다 — Chromium 은 border 1.5px 를 1px 로 내려 엔진마다 굵기가 달랐다(사람의 결정 2026-10-26: 1.5px 로 통일) */
 .checkbox input:checked,.checkbox input:indeterminate,.checkbox input.mixed{background:var(--surface-brand-primary);box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary)}
-.checkbox input:checked::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat}
-.checkbox input:indeterminate::after,.checkbox input.mixed::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3C/svg%3E") center/contain no-repeat}
+.checkbox input:checked::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;opacity:1;transform:none}
+.checkbox input:indeterminate::after,.checkbox input.mixed::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l14 0%22 /%3E%3C/svg%3E") center/contain no-repeat;opacity:1;transform:none}
 .checkbox input:disabled{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary);cursor:not-allowed}
 .checkbox input:checked:disabled::after,.checkbox input:indeterminate:disabled::after{background:var(--foreground-disable-primary)}
 .checkbox input:disabled+span{color:var(--foreground-disable-primary)}
@@ -1282,7 +1292,8 @@ fieldset.checkbox-group,fieldset.radio-group{border:0;padding:0;margin:0;min-wid
 .radio input{appearance:none;-webkit-appearance:none;flex:none;width:1rem;height:1rem;margin:2px 0 0;border:0;box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);border-radius:50%;background:var(--surface-elevated-primary);cursor:inherit;display:grid;place-items:center;transition:background var(--motion-fast),border-color var(--motion-fast)}
 .radio input:hover{box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary)}
 .radio input:checked{box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary);background:var(--surface-brand-primary)}   /* 테두리를 안쪽 그림자로 바꾸며 여기만 border-color 로 남아, 선택된 Radio 의 brand 면 위에 기본 회색 띠가 남았다 */
-.radio input:checked::after{content:"";width:0.5rem;height:0.5rem;border-radius:50%;background:var(--brand-label)}
+.radio input::after{content:"";width:0.5rem;height:0.5rem;border-radius:50%;background:var(--brand-label);opacity:0;transform:scale(.5);transition:opacity var(--motion-fast),transform var(--motion-fast)}   /* 점은 늘 그려 두고 켜질 때 커지며 나타난다(2026-11-26) */
+.radio input:checked::after{content:"";width:0.5rem;height:0.5rem;border-radius:50%;background:var(--brand-label);opacity:1;transform:none}
 .radio input:disabled{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary);cursor:not-allowed}
 .radio input:checked:disabled::after{background:var(--foreground-disable-primary)}
 .radio input:disabled+span{color:var(--foreground-disable-primary)}
@@ -1422,9 +1433,11 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 /* 메뉴 항목 앞 표시 — 체크(여러 개 · 켜고 끄기) · 라디오(하나 고르기). Checkbox · Radio 와 같은 토큰(2026-11-23). 고른 항목은 brand 면 대신 글자 굵기 600 */
 .menu-mark{position:relative;flex:none;display:grid;place-items:center;width:1rem;height:1rem;border-radius:var(--radius-sm);box-shadow:inset 0 0 0 1.5px var(--line-neutral-primary);background:var(--surface-elevated-primary);transition:background var(--motion-fast)}
 .menu-mark.round{border-radius:50%}
-.menu-item:is([aria-checked="true"],[aria-selected="true"]) > .menu-mark.check::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat}
+.menu-mark.check::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;opacity:0;transform:scale(.5);transition:opacity var(--motion-fast),transform var(--motion-fast)}
+.menu-item:is([aria-checked="true"],[aria-selected="true"]) > .menu-mark.check::after{content:"";width:0.75rem;height:0.75rem;background:var(--brand-label);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 %3E%3Cpath d=%22M5 12l5 5l10 -10%22 /%3E%3C/svg%3E") center/contain no-repeat;opacity:1;transform:none}
 .menu-item:is([aria-checked="true"],[aria-selected="true"]) > .menu-mark{background:var(--surface-brand-primary);box-shadow:inset 0 0 0 1.5px var(--surface-brand-primary)}
-.menu-item:is([aria-checked="true"],[aria-selected="true"]) > .menu-mark.round::after{content:"";width:0.5rem;height:0.5rem;border-radius:50%;background:var(--brand-label)}
+.menu-mark.round::after{content:"";width:0.5rem;height:0.5rem;border-radius:50%;background:var(--brand-label);opacity:0;transform:scale(.5);transition:opacity var(--motion-fast),transform var(--motion-fast)}
+.menu-item:is([aria-checked="true"],[aria-selected="true"]) > .menu-mark.round::after{content:"";width:0.5rem;height:0.5rem;border-radius:50%;background:var(--brand-label);opacity:1;transform:none}
 .menu-item[aria-disabled="true"] > .menu-mark{background:var(--surface-disable-primary);box-shadow:inset 0 0 0 1.5px var(--surface-disable-primary)}
 .menu-item[aria-disabled="true"] > .menu-mark:is(.check,.round)::after{background:var(--foreground-disable-primary)}
 .menu-item:has(> .menu-mark):is([aria-checked="true"],[aria-selected="true"]){font-weight:600}
@@ -1470,6 +1483,15 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .tabs.pill .tab{padding:0.375rem 0.875rem;border:0;border-radius:var(--radius-md);margin:0;font-size:var(--font-size-15);line-height:1.375rem;letter-spacing:0.0096em}   /* 15/22, 높이 34 그대로 */
 .tabs.pill .tab.on{background:var(--surface-elevated-primary);box-shadow:var(--shadow-1);font-weight:600}
 .tabs.sm .tab{font-size:var(--font-size-13);padding:0.5625rem 0.75rem;line-height:1.125rem;letter-spacing:0.0194em}   /* = Label 2 13/18(사람의 결정 2026-11-24 — 11-13 의 14/20 을 바꿈), 높이 38 그대로(위아래 9) */
+.tabs{position:relative}   /* 밑줄 하나(::after)의 자리 기준 — 스크롤하면 내용과 함께 움직인다 */
+.tabs[data-ink]::after{content:"";position:absolute;left:0;bottom:0;width:1px;height:2px;translate:var(--tab-x,0) 0;scale:var(--tab-s,0) 1;transform-origin:0 0;background:var(--foreground-neutral-primary);pointer-events:none}   /* 고른 탭으로 미끄러지는 밑줄(2026-11-26) — ds.js · React 가 --tab-x · --tab-s(폭 — 1px 선을 늘림) 를 넣고 data-ink 를 단다. 움직임은 translate · scale 만(2026-11-27 — 레이아웃을 다시 계산하지 않게). 스크립트가 없으면 탭 자신의 밑줄이 그대로 남는다 */
+.tabs[data-ink] .tab.on{border-bottom-color:transparent}
+.tabs.accent[data-ink]::after{background:var(--foreground-brand-primary)}
+.tabs.pill[data-ink]::after{top:0;bottom:auto;width:var(--tab-w,0);height:var(--tab-h,0);translate:var(--tab-x,0) var(--tab-y,0);scale:none;background:var(--surface-elevated-primary);box-shadow:var(--shadow-1);border-radius:var(--radius-md)}   /* pill 은 면이 미끄러진다 — 크기는 width 로(scale 이면 모서리 · 그림자가 일그러짐) */
+.tabs.pill[data-ink] .tab{position:relative;z-index:1}
+.tabs.pill[data-ink] .tab.on{background:transparent;box-shadow:none}
+.tabs[data-ink-ready]::after{transition:translate var(--motion-base),scale var(--motion-base)}
+.tabs.pill[data-ink-ready]::after{transition:translate var(--motion-base),width var(--motion-base)}   /* 처음 그릴 때 · 숨었다 보일 때는 전환 없이 — 한 프레임 뒤에 data-ink-ready 를 단다 */
 .tab-panel{padding:1.25rem 0;font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);line-height:1.375rem;letter-spacing:0.0145em}
 
 /* Breadcrumb */
@@ -1534,6 +1556,9 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .sidenav.collapsed a span,.sidenav.collapsed .group,.sidenav.collapsed a .count,.sidenav.collapsed a.sub,.sidenav.collapsed .foot{display:none}   /* 하위 항목은 아이콘이 없어 레일에서 글자만 남았다 — 항목째 숨긴다. .foot 은 64 폭에서 한 글자씩 세로로 쪼개졌다(React 는 접히면 그리지 않는다) */
 .sidenav.collapsed a.has-on{background:var(--surface-brand-subtle)}   /* 하위 항목이 현재 메뉴인 부모 — 레일에서는 하위 항목이 숨으니 부모가 선택 모양을 이어받는다. 펼친 레일에서는 모양이 그대로 */
 .sidenav.collapsed a.has-on svg{color:var(--foreground-brand-primary)}
+.sidenav:not(.collapsed){overflow-x:clip}   /* 펼치는 동안 늘어나는 폭 밖의 이름 글자를 자른다. 접힌 레일은 이름 Tooltip 이 밖으로 나가야 해서 자르지 않는다 */
+.sidenav[data-nav-ready]{transition:width var(--motion-base),padding var(--motion-base)}   /* 접고 펼 때 폭이 움직인다(2026-11-26) — 접기 아이콘 회전과 같은 시간. 처음 그릴 때(폭으로 처음 접힘 포함)는 data-nav-ready 전이라 움직이지 않는다 */
+.sidenav.ds-nav-opening a span,.sidenav.ds-nav-opening .group,.sidenav.ds-nav-opening a .count{animation:ds-fade var(--motion-base)}
 .sidenav .foot{margin-top:auto;padding:0.75rem;font-size:var(--font-size-12);color:var(--foreground-neutral-tertiary);line-height:max(1rem,16px);letter-spacing:0.0252em}
 
 /* Top Navigation */
@@ -1663,7 +1688,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16.25rem,1fr));gap:var(--card-gap);width:100%;line-height:1.6}
 
 /* Popup */
-.popup-backdrop{position:fixed;inset:0;padding:1.5rem;background:var(--effect-dimmer-primary);display:grid;place-items:center;z-index:var(--z-popup);line-height:1.6}
+.popup-backdrop{position:fixed;inset:0;padding:1.5rem;background:var(--effect-dimmer-primary);display:grid;grid-template-columns:minmax(0,1fr);place-items:center;z-index:var(--z-popup);line-height:1.6}
 .popup{position:relative;width:27.5rem;max-width:100%;background:var(--surface-elevated-primary);border-radius:var(--radius-xl);box-shadow:var(--shadow-3);padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;line-height:1.6;max-height:calc(100vh - 3rem)}   /* 길면 본문만 스크롤 — 제목 · 버튼은 그 자리 */
 .popup .popup-title{font-size:var(--font-size-18);font-weight:700;margin:0;padding-right:2.25rem;display:flex;align-items:center;gap:0.625rem;flex:none;line-height:1.625rem;letter-spacing:-0.002em}
 .popup .popup-body{font-size:var(--font-size-14);color:var(--foreground-neutral-secondary);margin:0;line-height:1.375rem;overflow-y:auto;min-height:0;letter-spacing:0.0145em}
@@ -1673,24 +1698,58 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .popup.danger .popup-title{color:var(--foreground-negative-strong)}
 .popup .popup-form{display:flex;flex-direction:column;gap:1rem;overflow-y:auto;min-height:0;margin:0 -0.25rem -0.25rem;padding:0.25rem}   /* 스크롤 영역이 입력 포커스 링(4px)을 자르지 않게 패딩을 두고 음수 여백으로 자리를 되돌린다 */
 
+/* Command Palette(2026-11-26) — Popup 위에 검색칸 + 목록. 화면 위쪽 가운데에 뜬다. 포커스는 검색칸에 남고 활성 항목은 aria-activedescendant */
+.popup.cmdk{width:40rem;padding:0;gap:0;overflow:hidden;max-height:calc(100vh - 7.5rem)}
+.popup-backdrop:has(>.popup.cmdk){place-items:start center;padding-top:6rem}
+.cmdk-search{display:flex;align-items:center;gap:0.625rem;height:3.5rem;padding:0 1.25rem;border-bottom:1px solid var(--line-neutral-secondary);flex:none}
+.cmdk-search svg{width:1.25rem;height:1.25rem;flex:none;color:var(--foreground-neutral-tertiary)}
+.cmdk-search input{flex:1;min-width:0;height:100%;border:0;padding:0;background:transparent;color:var(--foreground-neutral-primary);font:inherit;font-size:var(--font-size-16);line-height:1.5rem;font-weight:400;letter-spacing:0.0057em;outline:none}
+.cmdk-search:focus-within{border-bottom-color:var(--line-field-focus)}
+.cmdk-search input::placeholder{color:var(--foreground-neutral-tertiary)}
+.cmdk-list{overflow-y:auto;max-height:22.5rem;padding:0.5rem;flex:1 1 auto;min-height:0}
+.cmdk-group+.cmdk-group{margin-top:0.5rem}
+.cmdk-label{padding:0.5rem 0.75rem 0.25rem;font-size:var(--font-size-12);line-height:max(1rem,16px);font-weight:500;letter-spacing:0.0252em;color:var(--foreground-neutral-tertiary)}
+.cmdk-item{display:flex;align-items:center;gap:0.625rem;min-height:2.5rem;padding:0.5rem 0.75rem;border-radius:var(--radius-md);font-size:var(--font-size-14);line-height:1.25rem;font-weight:500;letter-spacing:0.0145em;color:var(--foreground-neutral-primary);cursor:pointer}
+.cmdk-item svg{width:1rem;height:1rem;flex:none;color:var(--foreground-neutral-tertiary)}
+.cmdk-item[aria-selected="true"]{background:var(--surface-neutral-tertiary)}
+.cmdk-name{flex:1;min-width:0}
+.cmdk-empty{margin:0;padding:2rem 1.25rem;text-align:center;font-size:var(--font-size-14);line-height:1.375rem;letter-spacing:0.0145em;color:var(--foreground-neutral-secondary)}
+.cmdk-foot{display:flex;gap:1rem;padding:0.625rem 1.25rem;border-top:1px solid var(--line-neutral-secondary);font-size:var(--font-size-12);line-height:max(1rem,16px);font-weight:500;letter-spacing:0.0252em;color:var(--foreground-neutral-secondary);flex:none}
+.cmdk-foot span{display:inline-flex;align-items:center;gap:0.375rem}
+
 /* Side Panel — 띄우지 않은 모습이 기본이고 .fixed 가 화면 오른쪽에 띄운다. 비모달이 기본(사람의 결정) */
 .side-panel{display:flex;flex-direction:column;width:25rem;max-width:100%;background:var(--surface-elevated-primary);border:1px solid var(--line-neutral-secondary);border-radius:var(--radius-lg);overflow:hidden;font-size:var(--font-size-14);line-height:1.375rem;outline:none;letter-spacing:0.0145em}
 .side-panel[hidden]{display:none}
 .side-panel.lg{width:35rem}
 .side-panel.fixed{position:fixed;top:0;right:0;bottom:0;max-width:100vw;border-width:0 0 0 1px;border-radius:0;box-shadow:var(--shadow-3);z-index:var(--z-panel)}
 .side-panel-dim{position:fixed;inset:0;background:var(--effect-dimmer-primary);z-index:var(--z-dim)}
-/* 오버레이 들어옴 · 나감(2026-11-20) — 들어올 때 --motion-base 로 흐림에서 나타나며 8px 움직이고, 나갈 때는 ds.js · React 의 ghostOut 사본이 --motion-fast 로 흐려진다.
+/* 오버레이 들어옴 · 나감(2026-11-20) — 들어올 때 --motion-enter(2026-11-26, 전에는 base)로 흐림에서 나타나며 8px 움직이고, 나갈 때는 ds.js · React 의 ghostOut 사본이 --motion-exit 로 흐려진다.
    줄인 모션이면 전역 규칙이 animation 을 지워 바로 나타나고, 사본은 만들지 않는다 */
-.popup-backdrop,.side-panel-dim{animation:ds-fade var(--motion-base)}
-.popup-backdrop>.popup{animation:ds-rise var(--motion-base)}
-.side-panel.fixed{animation:ds-slide var(--motion-base)}
-.toast-stack>.toast{animation:ds-rise var(--motion-base)}
+.popup-backdrop,.side-panel-dim{animation:ds-fade var(--motion-enter)}
+.popup-backdrop>.popup{animation:ds-rise var(--motion-enter)}
+.side-panel.fixed{animation:ds-slide var(--motion-enter)}
+.toast-stack>.toast{animation:ds-rise var(--motion-enter)}
 @keyframes ds-fade{from{opacity:0}}
 @keyframes ds-rise{from{opacity:0;transform:translateY(0.5rem)}}
 @keyframes ds-slide{from{opacity:0;transform:translateX(0.5rem)}}
-.ds-ghost{position:fixed;inset:0;z-index:var(--z-popup);pointer-events:none;animation:ds-out var(--motion-fast);animation-fill-mode:forwards}
+.ds-ghost{position:fixed;inset:0;z-index:var(--z-popup);pointer-events:none;animation:ds-out var(--motion-exit);animation-fill-mode:forwards}
 .ds-ghost *{animation:none!important;transition:none!important}
 @keyframes ds-out{to{opacity:0}}
+/* 팝오버 들어옴(2026-11-26) — 메뉴 · Select · Combobox · 달력 · 시각 목록 · 알림 센터가 흐림에서 4px 내려오며 나타난다. 위로 뒤집힌 것은 아래에서 올라온다.
+   transform 이 아니라 translate 속성 — Tooltip · 알림 센터 자리 맞춤이 transform 을 쓴다. 닫힘은 바로(눈이 다음 할 일로 간다) */
+.dropdown.open .menu,.combobox.open .menu,.datepicker.open .calendar,.timepicker.open .time-panel,.notify-panel:not([hidden]){animation:ds-pop var(--motion-enter)}
+.dropdown.open.up .menu,.combobox.open.up .menu,.datepicker.open.up .calendar,.timepicker.open.up .time-panel{animation-name:ds-pop-up}
+/* 트리거 쪽에서 살짝 커지며 나온다(2026-11-27 — scale .98 → 1, 기준점은 트리거가 있는 변). 아래로 열리면 위 변, .up 이면 아래 변, 벨 아래 알림 센터는 오른쪽 위 */
+.dropdown.open .menu,.combobox.open .menu,.datepicker.open .calendar,.timepicker.open .time-panel{transform-origin:top}
+.dropdown.open.up .menu,.combobox.open.up .menu,.datepicker.open.up .calendar,.timepicker.open.up .time-panel{transform-origin:bottom}
+.notify-panel{transform-origin:top right}
+@keyframes ds-pop{from{opacity:0;translate:0 -0.25rem;scale:.98}}
+@keyframes ds-pop-up{from{opacity:0;translate:0 0.25rem;scale:.98}}
+@keyframes ds-check{from{opacity:0;transform:scale(.5)}}   /* 복사 완료 · 실패 아이콘이 커지며 나타남(2026-11-26) */
+@keyframes ds-flash{from{background-color:var(--surface-brand-subtle)}}   /* 새 항목이 brand subtle 면에서 한 번 흐려짐(2026-11-26) */
+.ds-new:not(tr),tr.ds-new>td{animation:ds-flash var(--motion-flash)}   /* 사이트 DS.flash · React useFlash 가 달고 뗀다. 표 행은 칸에 칠한다(고정 열 · 줄무늬 칸의 면 위로) */
+.ds-swap{animation:ds-fade var(--motion-fast)}   /* 탭 · 단계 패널 · 행 펼침을 바꿀 때만 — ds.js swap · React 가 달고 animationend 에 뗀다(2026-11-26) */
+.ds-leaving{pointer-events:none}   /* 지워지며 흐려지는 요소 — ds.js dismiss 가 inert · aria-hidden 과 함께 달고, 애니메이션은 인라인(컴포넌트의 들어옴보다 앞서게) */
 .side-panel-header{flex:none;display:flex;align-items:center;gap:0.5rem;min-height:3.5rem;padding:0.75rem 0.75rem 0.75rem 1.25rem;border-bottom:1px solid var(--line-neutral-secondary)}
 .side-panel-title{flex:1;min-width:0;margin:0;font-size:var(--font-size-16);font-weight:600;line-height:1.5rem;letter-spacing:0.0057em}
 .side-panel-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1.25rem}
@@ -1789,7 +1848,8 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .spinner-wrap[data-delay],.skeleton-row[data-delay]{animation:ds-delay 0s var(--ds-delay,1s) both}
 @keyframes shimmer{to{transform:translateX(100%)}}
 .progress{width:100%;height:0.5rem;border-radius:var(--radius-full);background:var(--surface-neutral-strong);overflow:hidden;line-height:1.6}
-.progress i{display:block;height:100%;background:var(--foreground-brand-primary);border-radius:var(--radius-full);transition:width var(--motion-base)}
+/* 채움은 늘 트랙 폭이고 --p 만큼 보이게 왼쪽으로 민다 — 움직임은 translate 하나(2026-11-27). 옛 마크업의 width:N% 도 그대로 그려진다(이동 0 · 전환 없음) */
+.progress i{display:block;width:100%;height:100%;translate:calc(var(--p,100%) - 100%) 0;background:var(--foreground-brand-primary);border-radius:var(--radius-full);transition:translate var(--motion-base)}
 .progress.sm{height:0.25rem}
 .progress.success i{background:var(--foreground-positive-primary)}
 .progress.danger i{background:var(--foreground-negative-primary)}
@@ -1869,6 +1929,17 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .stepper .form{max-width:none}   /* 마법사 안 폼 카드는 패널 폭을 채운다(사람의 요청 2026-11-18 — 폼 최대 640 이 이전 · 다음 버튼 줄과 어긋나 보였다). 다른 자리의 Form 은 640 그대로 */
 .step-actions{display:flex;gap:0.5rem;justify-content:flex-end;flex-wrap:wrap}
 .steps .step-actions{margin-top:1rem;justify-content:flex-start}
+/* 긴 폼의 버튼 줄 고정(2026-11-26 — 옵션 .sticky). 스크롤 영역 아래 끝에 붙고 폼 끝에 닿으면 제자리로. 놓인 자리의 면을 칠해 아래로 지나가는 글이 비치지 않게,
+   아래 여백 1rem 은 음수 바깥 여백으로 갚아 쉬는 자리는 그대로다. 붙어 있는 동안만(.stuck — ds.js · React 가 단다) 위 선을 보인다. 폼의 버튼 줄은 늘 위 선이 있어 따로 보이지 않는다 */
+.form-actions.sticky,.step-actions.sticky{position:sticky;bottom:0;z-index:2;padding-bottom:1rem;margin-bottom:-1rem;background:var(--background-neutral-primary)}
+.form .form-actions.sticky,.card .step-actions.sticky,.form .step-actions.sticky{background:var(--surface-elevated-primary)}
+.step-actions.sticky{padding-top:calc(1rem - 1px);border-top:1px solid transparent}
+.stepper>.step-actions.sticky{margin-top:-1rem}
+.steps .step-actions.sticky{margin-top:0}
+.step-actions.sticky.stuck{border-top-color:var(--line-neutral-secondary)}
+.example-preview .form-actions.sticky:not(.form .form-actions),.example-preview .step-actions.sticky:not(.card .step-actions,.form .step-actions){background:var(--surface-elevated-primary)}   /* 문서 미리보기 면이 elevated */
+/* 표 행 방향키(2026-11-26 — 옵션 table.tbl[data-row-nav]). 행이 Tab 칸 하나(roving tabindex — ds.js · React 가 단다), 포커스 링은 행 안쪽 1px */
+.tbl[data-row-nav] tbody tr:focus-visible{outline:1px solid var(--foreground-brand-primary);outline-offset:-1px}
 
 /* Divider */
 .divider{border:0;border-top:1px solid var(--line-neutral-secondary);margin:1rem 0;width:100%;line-height:1.6}
@@ -2232,6 +2303,7 @@ a.menu-item,.page a.menu-item{color:var(--foreground-neutral-primary);text-decor
 .code-view .copy .t,.copy-field .copy .t{display:inline-block;min-width:3em;text-align:left}   /* 복사 → 복사됨 에도 옆 칸이 움직이지 않게 */
 .code-view .copy.copy-done .ico,.copy-field .copy.copy-done .ico{color:var(--foreground-positive-primary)}
 .code-view .copy.copy-failed .ico,.copy-field .copy.copy-failed .ico{color:var(--foreground-negative-strong)}
+.copy:is(.copy-done,.copy-failed) .ico>svg{animation:ds-check var(--motion-fast)}   /* 체크 · 실패 아이콘만 커지며 나타나고, 2초 뒤 복사 아이콘으로는 바로 돌아간다(2026-11-26) */
 .copy-field .affix .reveal{margin-right:0}
 .copy-field .affix .copy span{color:inherit;font-size:inherit}   /* .field .affix span 은 접두 · 접미 글자용 */
 .copy-field .affix .copy{flex:none;margin-right:-0.375rem}

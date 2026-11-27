@@ -299,7 +299,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       await go("components/data-table.html");
       const W = page.locator("#ex-data-table-row-actions .tbl-wrap"), R = page.locator("#ex-data-table-row-actions .dropdown").first(), RT = R.locator("button");
       await RT.scrollIntoViewIfNeeded(); await page.evaluate(() => window.scrollBy({ top: -200, behavior: "instant" })); await page.waitForTimeout(60);
-      await RT.click(); await page.waitForTimeout(60);
+      await RT.click(); await page.waitForTimeout(60); await page.evaluate(() => document.getAnimations().forEach((a) => { if (a.effect && a.effect.getComputedTiming().endTime !== Infinity) a.finish(); }));   // 들어오는 4px 움직임이 끝난 자리
       const fl = await R.evaluate((e) => { const m = e.querySelector(".menu"), r = m.getBoundingClientRect(), t = e.querySelector("button").getBoundingClientRect(), w = e.closest(".tbl-wrap").getBoundingClientRect(), last = [...m.querySelectorAll(".menu-item")].pop().getBoundingClientRect(), hit = document.elementFromPoint(last.left + 20, last.top + last.height / 2); return { float: e.classList.contains("float"), pos: getComputedStyle(m).position, gap: Math.round(r.top - t.bottom), right: Math.abs(r.right - t.right) < 1, past: r.bottom > w.bottom, hit: m.contains(hit), width: r.width, focus: m.contains(document.activeElement) }; });
       ok("dropdown: inside a scroll area the menu floats on the viewport", fl.float && fl.pos === "fixed" && fl.gap === 4, JSON.stringify(fl));
       ok("dropdown: the floated menu passes the area edge and is not clipped", fl.past && fl.hit, JSON.stringify(fl));
@@ -318,7 +318,7 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       await page.evaluate(() => window.dispatchEvent(new Event("resize"))); await page.waitForTimeout(60);   // 실제로 창을 바꾸면 스크롤 이벤트도 나서 resize 를 따로 잴 수 없다
       ok("dropdown: resizing closes a floated menu", wasOpen && await R.evaluate((e) => !e.classList.contains("open")), String(wasOpen));
       await RT.evaluate((e) => { const t = e.getBoundingClientRect(); window.scrollBy({ top: t.top - (window.innerHeight - 90), behavior: "instant" }); }); await page.waitForTimeout(60);
-      await RT.click(); await page.waitForTimeout(60);
+      await RT.click(); await page.waitForTimeout(60); await page.evaluate(() => document.getAnimations().forEach((a) => { if (a.effect && a.effect.getComputedTiming().endTime !== Infinity) a.finish(); }));
       const fu = await R.evaluate((e) => { const r = e.querySelector(".menu").getBoundingClientRect(), t = e.querySelector("button").getBoundingClientRect(); return { up: e.classList.contains("up"), float: e.classList.contains("float"), gap: Math.round(t.top - r.bottom), inside: r.top >= 0 && r.bottom <= window.innerHeight }; });
       ok("dropdown: a floated menu flips up near the viewport bottom", fu.up && fu.float && fu.gap === 4 && fu.inside, JSON.stringify(fu));
       await page.keyboard.press("Escape"); await page.waitForTimeout(30);
@@ -1991,9 +1991,9 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
       await page.evaluate(() => document.documentElement.removeAttribute("data-theme")); th[sec] = { light, dark };
     }
     ok("overview thumbnails are Figma SVGs that follow the theme, masks stay white in dark",
-      /* 2026-11-20 분석 · 리포트 패턴은 Figma 카드가 아직 없어(thumbs.js PENDING) 기본 그림 — 그 하나만 SVG 가 아니다 */
+      /* Figma 카드가 아직 없는 페이지(thumbs.js PENDING — 분석 · 리포트 패턴 · Kbd · Command Palette)만 기본 그림이다 */
       Object.values(th).every(({ light, dark }) => light.cards > 0 && light.svgs === light.cards - light.plain.length && light.vis && light.faces > 0 && light.face !== dark.face
-        && dark.mask.length > 0 && dark.mask.every(c => c === "rgb(255, 255, 255)")) && th.patterns.light.cards === 23 && th.patterns.light.plain.join() === "analytics.html" && th.components.light.plain.length === 0, JSON.stringify(th));
+        && dark.mask.length > 0 && dark.mask.every(c => c === "rgb(255, 255, 255)")) && th.patterns.light.cards === 23 && ["patterns", "components"].every((k) => th[k].light.plain.join() === Object.keys(require("./thumbs").PENDING[k]).sort().map((x) => x + ".html").join()), JSON.stringify(th));
   });
   await part("part 48 · components/notification.html", async () => {
 
@@ -2152,8 +2152,8 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   await part("part 69 · components/data-table.html", async () => {
     await go("components/data-table.html");
     const chT = await chooseOf();
-    ok("Data Table rules are grouped under five h3 headings, each followed by its own dl.kv (22 rows in all — 상태 묶음에 '다시 불러오기', 2026-11-23)",
-      chT.keys === "언제 쓰는가|Placement" && chT.above && chT.afterEx && chT.toSpec && chT.seq === "H3,DL.kv3,H3,DL.kv3,H3,DL.kv6,H3,DL.kv7,H3,DL.kv3", JSON.stringify(chT));
+    ok("Data Table rules are grouped under five h3 headings, each followed by its own dl.kv (23 rows in all — 상태 묶음에 '다시 불러오기' 2026-11-23 · 행 동작 묶음에 '키보드' 2026-11-26)",
+      chT.keys === "언제 쓰는가|Placement" && chT.above && chT.afterEx && chT.toSpec && chT.seq === "H3,DL.kv3,H3,DL.kv3,H3,DL.kv7,H3,DL.kv7,H3,DL.kv3", JSON.stringify(chT));
   });
   await part("part 70 · patterns/input-form.html", async () => {
 
@@ -2499,9 +2499,10 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
        단독으로 둔 예제다 — 사람의 결정(2026-10-26): 따르게 두고 Props · 설명에 적는다 */
     fs = require("fs");
     const ADAPTIVE = ["ex-pagination-basic", "ex-select-default", "ex-select-open", "ex-severity-scale"];
-    const sig = () => Object.fromEntries([...document.querySelectorAll(".example-preview")].map((pv) => { const P = pv.getBoundingClientRect();
+    const sig = () => { document.getAnimations().forEach((x) => { if (x.effect && isFinite(x.effect.getComputedTiming().endTime)) x.finish(); });   // 처음부터 열린 팝오버의 들어오는 확대(ds-pop) 도중에 재지 않게 — 끝이 있는 것만(2026-11-27)
+      return Object.fromEntries([...document.querySelectorAll(".example-preview")].map((pv) => { const P = pv.getBoundingClientRect();
       const els = [...pv.querySelectorAll("*")].filter((e) => e.getClientRects().length && !e.closest(".spinner, .skeleton, .indicator.pulse"));   // 숨은 것 · 움직이는 것은 뺀다
-      return [(pv.closest(".example") || {}).id, els.map((e) => { const r = e.getBoundingClientRect(); return [r.left - P.left, r.top - P.top, r.width, r.height].map((x) => Math.round(x * 2) / 2).join(","); }).join("|")]; }));
+      return [(pv.closest(".example") || {}).id, els.map((e) => { const r = e.getBoundingClientRect(); return [r.left - P.left, r.top - P.top, r.width, r.height].map((x) => Math.round(x * 2) / 2).join(","); }).join("|")]; })); };
     leaned = [];
     for (const sec of ["components", "patterns"]) for (const f of fs.readdirSync(path.join(SITE, sec))) { await go(`${sec}/${f}`);
       if (!f.endsWith(".html") || /^(index|overview)\.html$/.test(f)) continue;
@@ -2604,6 +2605,15 @@ const bedOf = (stack) => { let out = { r: 255, g: 255, b: 255, a: 1 }; for (let 
   });
   await part("part 93j · behave.fix25.js", async () => {
     await require("./behave.fix25.js")({ page, ok, go });   // 추가 수정 일곱 — 표 머리글 면 · hover 옵션 · Toast 500 · Combobox 전체 · 팀 이름(2026-11-25)
+  });
+  await part("part 93k · behave.motion.js", async () => {
+    await require("./behave.motion.js")({ page, ok, go });   // 모션 · 인터랙션 보강 — 이징 토큰 · 팝오버 · 탭 밑줄 · 사이드 내비 폭(2026-11-26)
+  });
+  await part("part 93l · behave.kbd.js", async () => {
+    await require("./behave.kbd.js")({ page, ok, go });   // Kbd · 명령 팔레트 · 단축키 도움말(2026-11-26)
+  });
+  await part("part 93m · behave.rownav.js", async () => {
+    await require("./behave.rownav.js")({ page, ok, go });   // 표 행 방향키 · 긴 폼 버튼 줄 고정(2026-11-26)
   });
   await part("part 93 · behave.shell.js", async () => {
     await require("./behave.shell.js")({ page, ok, go });   // 템플릿 검토 수정 일곱 — 상단 바 · 접기 · 테마 · 알림 점 · flush 표 · 로그인 · 버튼 묶음 · 대시보드(2026-11-18)

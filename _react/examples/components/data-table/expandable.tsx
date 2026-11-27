@@ -35,6 +35,7 @@ export default function Example() {
   return (
     <DataTable
       compact
+      rowNavigation
       columns={COLUMNS}
       rows={ROWS}
       rowKey={(r) => r.id}

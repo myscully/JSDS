@@ -145,14 +145,15 @@ module.exports = async ({ b, ok, SITE, path }) => {
       first.nextElementSibling.querySelector("pre").focus();
       const before = tb.children.length; window.DS.table.removeRow(first);
       const a = document.activeElement;
-      const res = { before, after: tb.children.length, lead: tb.firstElementChild.classList.contains("row-detail"), focus: [a.className, a.closest("tr")?.children[1]?.textContent.trim()] };
+      const live = Array.from(tb.children).filter((tr) => !tr.classList.contains("ds-leaving"));   /* 흐려지는 동안 남은 행은 세지 않는다 · 행 방향키 표(data-row-nav)라 포커스는 다음 행 자체로(2026-11-26) */
+      const res = { before, after: live.length, lead: live[0].classList.contains("row-detail"), focus: [a.className, a.closest("tr")?.children[1]?.textContent.trim()] };
       /* 마지막 행을 지우면 앞 행으로 — 바로 앞은 앞 행의 상세(Spinner 뿐)라 건너뛴다 */
-      const last = Array.from(tb.children).filter((tr) => !tr.classList.contains("row-detail")).pop();
+      const last = Array.from(tb.children).filter((tr) => !tr.classList.contains("row-detail") && !tr.classList.contains("ds-leaving")).pop();
       last.querySelector(".expand-btn").focus(); window.DS.table.removeRow(last);
       const z = document.activeElement; res.back = [z.className, z.closest("tr")?.children[1]?.textContent.trim()];
       return res;
     }, EX);
-    ok("row expand: removeRow takes the detail too and moves focus to the next row", r.after === r.before - 2 && !r.lead && r.focus[0] === "expand-btn" && r.focus[1] === "09:41:11.870" && r.back[0] === "expand-btn" && r.back[1] === "09:41:11.870", JSON.stringify(r));
+    ok("row expand: removeRow takes the detail too and moves focus to the next row", r.after === r.before - 2 && !r.lead && r.focus[0] === "log-row" && r.focus[1] === "09:41:11.870" && r.back[0] === "log-row" && r.back[1] === "09:41:11.870", JSON.stringify(r));
   });
 
   ok("row expand: no page errors", errors.length === 0, errors.join(" | "));

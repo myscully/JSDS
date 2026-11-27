@@ -236,7 +236,7 @@ module.exports = async function patterns({ page, ok, go }) {
 
   await part("17 · 일괄 작업 진행 — 진행 막대 이름 · 값, 실패 수가 표 행 수와 다시 실행 버튼에 같음", async () => {
     await go("patterns/bulk-progress.html");
-    const r = await page.evaluate(() => { const pb = document.querySelector("#ex-bulk-progress-running [role=progressbar]"); const res = document.querySelector("#ex-bulk-progress-result .example-preview"); return { now: pb && pb.getAttribute("aria-valuenow"), name: pb && pb.getAttribute("aria-label"), fill: pb && pb.querySelector("i").style.width, rows: res.querySelectorAll("tbody tr").length, main: res.querySelector(".btn.solid.primary").textContent.trim(), cancel: !!document.querySelector("#ex-bulk-progress-running .card .desc") }; });
+    const r = await page.evaluate(() => { const pb = document.querySelector("#ex-bulk-progress-running [role=progressbar]"); const res = document.querySelector("#ex-bulk-progress-result .example-preview"); return { now: pb && pb.getAttribute("aria-valuenow"), name: pb && pb.getAttribute("aria-label"), fill: pb && pb.querySelector("i").style.getPropertyValue("--p"), rows: res.querySelectorAll("tbody tr").length, main: res.querySelector(".btn.solid.primary").textContent.trim(), cancel: !!document.querySelector("#ex-bulk-progress-running .card .desc") }; });
     ok("bulk progress: the progressbar is named with value 66 and fill 66%, the cancel note explains what stops; the result lists 3 failures and the retry button says 3대",
       r.now === "66" && !!r.name && r.fill === "66%" && r.cancel && r.rows === 3 && r.main === "실패한 3대 다시 배포", JSON.stringify(r));
   });

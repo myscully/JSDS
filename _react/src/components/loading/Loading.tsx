@@ -99,7 +99,7 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>(function Progr
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   const bar = (
     <div ref={ref} className={cx("progress", tone, size, className)} role="progressbar" aria-valuenow={Math.round(value)} aria-valuemin={0} aria-valuemax={max} aria-label={typeof label === "string" && !rest["aria-label"] && !rest["aria-labelledby"] ? label : undefined} {...rest}>
-      <i style={{ width: `${pct}%` }} />
+      <i style={{ "--p": `${pct}%` } as CSSProperties} />
     </div>
   );
   if (label === undefined) return bar;

@@ -7,6 +7,7 @@ import type { IconName } from "../../icons/icons.data";
 import { LABELS } from "../../labels";
 import { Button } from "../button/Button";
 import { mergeRefs } from "../../utils/hooks";
+import { ghostPut, ghostTake } from "../../utils/ghost";
 
 export interface ChipProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onChange" | "color"> {
   /** 필터 칩 선택 상태 (제어) */
@@ -74,10 +75,12 @@ export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
       const self = e.currentTarget, chip = self.closest<HTMLElement>(".chip")!, box = chip.parentElement!;
       const spots = box.closest(".combobox") ? [] : Array.from(box.querySelectorAll<HTMLElement>(":scope > button:not([disabled]), :scope > .chip > .x:not([disabled])"));
       const at = spots.indexOf(self), to = spots[at + 1] ?? spots[at - 1];
+      const snap = ghostTake([chip]);   // 지워지면 사본이 그 자리에서 흐려진다(2026-11-26 — 사이트 칩 지우기와 같은 모습)
       onRemove();
-      if (at < 0) return;
       requestAnimationFrame(() => {
         if (chip.isConnected) return;
+        ghostPut(snap);
+        if (at < 0) return;
         if (to?.isConnected) to.focus({ preventScroll: true });
         else if (box.isConnected) { box.tabIndex = -1; box.focus({ preventScroll: true }); }
       });

@@ -5,6 +5,8 @@ import { Button, ButtonGroup, type ButtonProps } from "../button/Button";
 import { LABELS } from "../../labels";
 import { validationMessage } from "../text-field/validation";
 import { useOptionalToast } from "../notification/Notification";
+import { swapIn } from "../../utils/motion";
+import { useStuck } from "../../utils/stuck";
 
 export type StepsLayout = "horizontal" | "label-below" | "vertical";
 
@@ -125,6 +127,8 @@ export interface StepperProps extends Omit<HTMLAttributes<HTMLDivElement>, "chil
   nonLinear?: boolean;
   /** 이전 · 다음 · 완료 버튼 줄(.step-actions)을 그린다. false 면 내용 안에 StepButton 을 직접 둔다 */
   actions?: boolean;
+  /** 버튼 줄을 스크롤 영역 아래 끝에 붙인다(.step-actions.sticky, 2026-11-26) — 단계 내용이 긴 마법사에 */
+  stickyActions?: boolean;
   labels?: Partial<StepLabels>;
   /** 단계 목록의 접근 이름. 기본 '진행 단계' */
   "aria-label"?: string;
@@ -137,7 +141,7 @@ const quiet = (panel: HTMLElement | null) =>
 
 /** Steps 마법사 — 단계 패널 · 이전/다음/완료 · 단계별 폼 검사. 패널은 늘 그려 두고 숨겨서 입력값이 남는다 */
 export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper(
-  { steps, current, defaultCurrent = 0, onStepChange, onFinish, async: isAsync, layout = "horizontal", nonLinear, actions = true, labels, "aria-label": ariaLabel = "진행 단계", className, ...rest }, ref) {
+  { steps, current, defaultCurrent = 0, onStepChange, onFinish, async: isAsync, layout = "horizontal", nonLinear, actions = true, stickyActions, labels, "aria-label": ariaLabel = "진행 단계", className, ...rest }, ref) {
   useCountWarning(steps.length);
   /* 완료 버튼은 결과를 말하는 이름으로(2026-11-23 — Writing › Buttons) */
   useEffect(() => { if (actions && !labels?.finish) warnOnce("stepper-finish", "[ds-react] Stepper 완료 버튼이 기본 문구 '완료' 입니다. labels.finish 에 결과를 말하는 이름(예: 정책 만들기)을 주세요."); }, [actions, labels?.finish]);
@@ -192,6 +196,8 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper
   const act = (kind: "prev" | "next" | "finish") => { if (busyRef.current && kind !== "prev") return; if (kind === "prev") { leave(); go(cur - 1, "prev"); } else check(kind); };
   const onPanelSubmit = (e: FormEvent<HTMLDivElement>) => { e.preventDefault(); passed(); mode.current = "next"; };
 
+  const swapAt = useRef(cur);
+  useLayoutEffect(() => { if (swapAt.current !== cur) swapIn(panels.current[cur]); swapAt.current = cur; }, [cur]);   // 새 단계 패널이 흐림에서 나타남(2026-11-26)
   useEffect(() => {
     const p = panels.current[cur];
     if (focusPanel.current && p) {
@@ -202,7 +208,7 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper
     if (showAt.current === cur) { showAt.current = -1; mode.current = "finish"; p?.querySelector("form")?.requestSubmit(); mode.current = "next"; }
   }, [cur]);
 
-  const bar = <div className="step-actions"><ButtonGroup><StepButton step="prev" /><StepButton step="next" /><StepButton step="finish" /></ButtonGroup></div>;   // 나란한 버튼은 묶음(2026-11-18)
+  const bar = <StepActionsBar sticky={stickyActions} />;   // 나란한 버튼은 묶음(2026-11-18)
   const panel = (i: number) => (
     <div key={i} ref={(el) => { panels.current[i] = el; }} className="step-panel" tabIndex={-1} hidden={i !== cur} onSubmit={onPanelSubmit}>
       {steps[i].content}
@@ -219,6 +225,13 @@ export const Stepper = forwardRef<HTMLDivElement, StepperProps>(function Stepper
     </StepperContext.Provider>
   );
 });
+
+/* 버튼 줄 — sticky 면 붙어 있는 동안 .stuck(위 선) */
+function StepActionsBar({ sticky }: { sticky?: boolean }) {
+  const self = useRef<HTMLDivElement>(null);
+  const stuck = useStuck(self, sticky);
+  return <div ref={self} className={cx("step-actions", { sticky, stuck })}><ButtonGroup><StepButton step="prev" /><StepButton step="next" /><StepButton step="finish" /></ButtonGroup></div>;   // 나란한 버튼은 묶음(2026-11-18)
+}
 
 export interface StepButtonProps extends Omit<ButtonProps, "onClick"> {
   step: "prev" | "next" | "finish";

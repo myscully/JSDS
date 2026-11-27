@@ -98,7 +98,7 @@ module.exports = async function chart({ page, ok, go }) {
     ok("spark: 40 tall at the bottom of the KPI, no axes or legend, filled under the line", s.h === 40 && s.last && s.x === false && s.y === false && s.legend === false && s.fill === "origin", JSON.stringify(s));
     const pl = await page.evaluate(() => [...document.querySelectorAll("#ex-data-visual-progress .progress")].map((m) => {
       const i = m.firstElementChild, c = getComputedStyle(m);
-      return { r: i.getBoundingClientRect().width / m.getBoundingClientRect().width, want: +m.getAttribute("aria-valuenow") / +m.getAttribute("aria-valuemax"), role: m.getAttribute("role"), name: document.getElementById(m.getAttribute("aria-labelledby"))?.textContent, text: m.getAttribute("aria-valuetext"), radius: c.borderTopLeftRadius + getComputedStyle(i).borderTopLeftRadius, h: m.getBoundingClientRect().height };
+      return { r: (i.getBoundingClientRect().right - m.getBoundingClientRect().left) / m.getBoundingClientRect().width,   /* 채움은 translate 로 밀린다 — 보이는 폭 = 채움 오른쪽 끝 − 트랙 왼쪽 */ want: +m.getAttribute("aria-valuenow") / +m.getAttribute("aria-valuemax"), role: m.getAttribute("role"), name: document.getElementById(m.getAttribute("aria-labelledby"))?.textContent, text: m.getAttribute("aria-valuetext"), radius: c.borderTopLeftRadius + getComputedStyle(i).borderTopLeftRadius, h: m.getBoundingClientRect().height };
     }));
     ok("progress list: fill width = value / target, role=meter with a name and value text, square, 8 tall", pl.length === 4 && pl.every((x) => Math.abs(x.r - x.want) < 0.006 && x.role === "meter" && x.name && /\/.*%$/.test(x.text) && x.radius === "0px0px" && x.h === 8), JSON.stringify(pl));
   });

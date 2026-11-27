@@ -3,7 +3,9 @@ import { cx } from "../../utils/cx";
 import { useId } from "../../utils/useId";
 import { useControllable } from "../../utils/useControllable";
 import { useEscape, useOutsideClick } from "../../utils/hooks";
+import { useTabInk } from "../../utils/tabInk";
 import { announce } from "../../utils/copy";
+import { flash, restRect } from "../../utils/motion";
 import { Icon } from "../../icons/Icon";
 import { Button } from "../button/Button";
 import { Tooltip } from "../tooltip/Tooltip";
@@ -68,6 +70,8 @@ export function NotificationCenter({ items, onRead, hasMore, onMore, open, defau
   const uid = useId(undefined, "notify");
   const [isOpen, setOpen] = useControllable<boolean>({ value: open, defaultValue: defaultOpen, onChange: onOpenChange });
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const tabBar = useRef<HTMLDivElement>(null);
+  useTabInk(tabBar, `${filter}${isOpen}`);   // 고른 탭으로 밑줄이 미끄러진다(2026-11-26)
   const [busy, setBusy] = useState(false);
   const [failMsg, setFailMsg] = useState("");
   const [float, setFloat] = useState<CSSProperties | null>(null);
@@ -102,7 +106,7 @@ export function NotificationCenter({ items, onRead, hasMore, onMore, open, defau
     p.style.maxWidth = ""; p.style.removeProperty("--nf-dx");
     const c = clipRect(h), room = c.right - c.left - 16, mw = p.offsetWidth > room ? room : null;
     if (mw != null) p.style.maxWidth = `${mw}px`;
-    const left = p.getBoundingClientRect().left, d = left < c.left + 8 ? c.left + 8 - left : 0;
+    const left = restRect(p).left, d = left < c.left + 8 ? c.left + 8 - left : 0;
     if (d) p.style.setProperty("--nf-dx", `${d}px`);
     setMaxW(mw); setDx(d);
   }
@@ -126,6 +130,7 @@ export function NotificationCenter({ items, onRead, hasMore, onMore, open, defau
     if (seen.current && !moreFrom.current) {
       const fresh = items.filter((it) => !seen.current!.has(it.id) && it.unread);
       if (fresh.length) announce(fresh.length === 1 ? L.fresh.replace("{title}", fresh[0].title) : L.freshMany.replace("{n}", String(fresh.length)));
+      flash(fresh.map((it) => root.current?.querySelector(`.notify-item[data-id="${CSS.escape(it.id)}"]`)), { announce: false });   // 새 알림이 한 번 흐려지는 면(2026-11-26 — 사이트 DS.notify.add 와 같음)
     }
     seen.current = ids;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -186,7 +191,7 @@ export function NotificationCenter({ items, onRead, hasMore, onMore, open, defau
           <h2 className="notify-title" id={`${uid}-title`}>{L.title}</h2>
           <Button variant="text" color="assistive" size="sm" className="notify-read-all" aria-disabled={n ? undefined : true} onClick={readAll}>{L.readAllButton}</Button>
         </div>
-        <div className="tabs sm" role="tablist" aria-label={L.tabs} onKeyDown={tabKey}>
+        <div ref={tabBar} className="tabs sm" role="tablist" aria-label={L.tabs} onKeyDown={tabKey}>
           <button type="button" className={cx("tab", filter === "all" && "on")} role="tab" id={`${uid}-tab-all`} aria-selected={filter === "all"} tabIndex={filter === "all" ? 0 : -1} data-filter="all" onClick={() => setFilter("all")}>{L.tabAll}</button>
           <button type="button" className={cx("tab", filter === "unread" && "on")} role="tab" id={`${uid}-tab-unread`} aria-selected={filter === "unread"} tabIndex={filter === "unread" ? 0 : -1} data-filter="unread" onClick={() => setFilter("unread")}>{L.tabUnread}{n > 0 && <>{" "}<span className="count">{n99(n)}</span></>}</button>
         </div>

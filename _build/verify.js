@@ -39,7 +39,7 @@ for (const sec of ["components", "patterns"]) {
     for (const m of body.matchAll(/data-copy="([^"]+)"/g)) if (!new RegExp(`id="${m[1]}"`).test(body)) fails.push(`${f}: data-copy 대상 #${m[1]} 없음`);
     for (const ex of body.split('<section class="example"').slice(1)) { if (!/data-pane="html"/.test(ex) || !/data-pane="react"/.test(ex)) fails.push(`${f}: example 에 html/react pane 누락`); if (!/@jiran\/ds-react/.test(ex)) (sec === "components" ? fails : warns).push(`${f}: React 탭이 패키지 코드가 아님(htmlToJsx 폴백)`); }
     if (!/<title>[^<]+<\/title>/.test(html)) fails.push(`${f}: title 없음`);
-    const gl = (body.match(/>[✕⋯‹›↕↑↓▲▼]<\//g) || []).map(s => s[1]); if (gl.length) fails.push(`${f}: 아이콘 대신 글리프 사용 ${[...new Set(gl)].join(" ")}`);
+    const gl = (body.replace(/<kbd\b[^>]*>[^<]*<\/kbd>/g, "").match(/>[✕⋯‹›↕↑↓▲▼]<\//g) || []).map(s => s[1]);   /* kbd 안의 화살표는 키 이름이라 뺀다(2026-11-26) */ if (gl.length) fails.push(`${f}: 아이콘 대신 글리프 사용 ${[...new Set(gl)].join(" ")}`);
   }
 }
 // 사이트 전체
@@ -92,14 +92,35 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   /* 메인 히어로(B4)의 움직임 — 사람의 결정 2026-11-18. 첫 화면에 한 번 들어오는 연출과 도형의 느린 떠 있기는 상태 표시가 아니라 사이트의 얼굴이라 토큰 밖을 허용한다.
      index 에서만 data-hm 이 붙어 돌고, 줄인 모션이면 data-hm 이 없어 처음부터 마지막 모습이다(behave.home 이 잰다) */
   const HOME_MOTION = ["hm-rise .9s cubic-bezier(.16,1,.3,1) calc(var(--hm-i,0) * 80ms) both", "hm-in 1.3s cubic-bezier(.16,1,.3,1) calc(.25s + var(--hm-d,0s)) both", "hm-float 8s ease-in-out calc(1.8s + var(--hm-d,0s)) infinite alternate"];   // Loading 지연 표시(2026-11-11) — 반복이 아니라 한 번 보이게 할 뿐이고 상태 표시 루프와 함께만 쓴다
+  /* transition 속성 허용 목록(2026-11-27, 사람의 결정 — VectorLab motion · transitions 스킬) — 합성 단계에서 끝나는 transform 계열 · opacity 와 다시 칠하기만 하는 색 · 그림자 · 외곽선.
+     레이아웃 속성은 아래 예외만 받는다. 셀렉터 · 속성이 정확히 같아야 하고, 새로 더하려면 이유를 적는다 */
+  const MOTION_PROPS = ["transform", "translate", "scale", "rotate", "opacity", "color", "background", "background-color", "border-color", "box-shadow", "outline", "outline-color"];
+  const MOTION_LAYOUT = [
+    [".accordion::details-content", "height", "펼침 높이는 내용에 달려 transform 으로 낼 수 없다(interpolate-size 로 auto 까지) — 눌러서 한 번, 패널 하나"],
+    [".accordion::details-content", "content-visibility", "닫힐 때 높이 전환이 끝날 때까지 내용을 그려 두는 짝(allow-discrete) — 실제 움직임이 아니다"],
+    [".sidenav[data-nav-ready]", "width", "내비 폭이 본문 폭을 정한다 — 접고 펼 때 본문이 함께 밀려야 해서 transform 으로는 자리가 비거나 겹친다"],
+    [".sidenav[data-nav-ready]", "padding", "같은 이유 — 접힌 레일의 좌우 여백이 폭과 함께 줄어야 아이콘이 가운데에 남는다"],
+    [".tabs.pill[data-ink-ready]::after", "width", "pill 면은 모서리 · 그림자가 있어 scale 이면 일그러진다 — 탭 줄 안 장식 하나라 둘레 배치에 영향이 없다(선 밑줄은 scale)"],
+    [".sem-row .bar", "height", "문서 셸 — Foundations › Colors 의 견본 막대(제품 화면에 없음)"],
+    [".sem-row .bar", "margin-top", "문서 셸 — 같은 견본 막대가 아래 기준으로 자란다"],
+    [".pal .scale .val-cell", "height", "문서 셸 — Colors 팔레트 칸의 hover 확대(제품 화면에 없음)"],
+    [".hm-btn", "gap", "문서 셸 — 메인 화면 배너 버튼의 화살표 벌어짐(사이트의 얼굴 · 메인 히어로 예외와 같은 자리)"],
+    [".hm-ic-c::after", "width", "문서 셸 — 메인 화면 배너 아이콘(스위치 막대)"],
+    [".hm-ic-p b", "width", "문서 셸 — 메인 화면 배너 아이콘(창 안 블록)"],
+  ];
   for (const m of src.matchAll(/(?<![-\w])(transition|animation):([^;}]*)/g)) {
     const [, prop, val] = m; const v = val.trim(), at = `style.src.css:${lineOf(m.index)}`;
     if (v === "none!important") continue;
-    if (prop === "animation") { if (HOME_MOTION.includes(v)) continue; if (!v.replace(/!important$/, "").split(/,(?![^(]*\))/).every((p) => LOOPS.includes(p) || p === DELAY) && !/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
+    if (prop === "animation") { if (HOME_MOTION.includes(v)) continue; if (!v.replace(/!important$/, "").split(/,(?![^(]*\))/).every((p) => LOOPS.includes(p) || p === DELAY) && !/^[\w-]+ var\(--motion-(fast|base|slow|enter|exit|flash)\)$/.test(v)) fails.push(`${at}: animation "${v}" — 반복은 LOOPS 셋만, 그 밖은 --motion-* 토큰`); continue; }
+    const sel = (() => { const o = src.lastIndexOf("{", m.index), p = Math.max(src.lastIndexOf("}", o), src.lastIndexOf("{", o - 1)); return src.slice(p + 1, o).replace(/\s+/g, " ").trim(); })();
     for (const part of v.split(/,(?![^(]*\))/).map((x) => x.trim())) {
-      if (!/^[\w-]+ var\(--motion-(fast|base|slow)\)$/.test(part)) fails.push(`${at}: transition "${part}" — 속성 하나 + var(--motion-*) 하나만(숫자 · 이징을 덧붙이면 무효가 되거나 토큰을 벗어난다)`);
+      if (!/^[\w-]+ var\(--motion-(fast|base|slow|enter|exit|flash)\)$/.test(part)) { fails.push(`${at}: transition "${part}" — 속성 하나 + var(--motion-*) 하나만(숫자 · 이징을 덧붙이면 무효가 되거나 토큰을 벗어난다)`); continue; }
+      const prop = part.split(" ")[0];
+      const ex = MOTION_LAYOUT.find(([s, q]) => s === sel && q === prop); if (ex) ex.used = true;
+      if (!MOTION_PROPS.includes(prop) && !ex) fails.push(`${at}: transition "${part}" (${sel}) — 움직임은 transform · opacity · 색만. 레이아웃 속성(폭 · 높이 · 위치 · 여백)은 매 프레임 배치를 다시 해서 끊긴다 — translate · scale 로 바꾸거나, 꼭 필요하면 MOTION_LAYOUT 에 이유와 함께 적는다`);
     }
   }
+  for (const e of MOTION_LAYOUT) if (!e.used) fails.push(`verify.js MOTION_LAYOUT: "${e[0]}" ${e[1]} — 이 transition 이 더는 없다. 예외에서 지운다`);
   const rm = /@media \(prefers-reduced-motion:reduce\)\{[^@]*?\*,\*::before,\*::after,\*::details-content\{transition:none!important;animation:none!important\}/.test(src);
   if (!rm) fails.push("style.src.css: prefers-reduced-motion 규칙이 *, ::before, ::after, ::details-content 를 모두 멈추지 않는다");
 }
@@ -153,6 +174,28 @@ if (!fs.existsSync(path.join(__dirname, "icons.gen.js"))) fails.push("icons.gen.
   for (const sec of ["components", "patterns"]) for (const k of LIB.allPages(DATA.SITE, sec).map((p) => p.key).filter((k) => k !== "overview")) {
     const f = `${sec}/${k}.html`; if (!fs.existsSync(path.join(OUT, f))) continue;
     if ((read(f).match(/class="searchbar[^>]*\sdata-hotkey/g) || []).length > 1) fails.push(`${f}: data-hotkey 는 화면에 하나(Search › 단축키)`);
+    /* 명령 팔레트 · 단축키 도움말은 화면에 하나(2026-11-26 — Mod K · ? 가 여는 것이 하나여야 함) */
+    if ((read(f).match(/class="popup cmdk[^"]*"[^>]*\sdata-hotkey[\s>]/g) || []).length > 1) fails.push(`${f}: 명령 팔레트(data-hotkey)는 화면에 하나(Command Palette › 열기)`);
+    if ((read(f).match(/\sdata-hotkey-help[\s>=]/g) || []).length > 1) fails.push(`${f}: data-hotkey-help 는 화면에 하나(Kbd › 단축키 도움말)`);
+    /* 표 행 방향키(2026-11-26) — data-row-nav 는 table.tbl 에만, 행의 tabindex 는 ds.js · React 가 단다(마크업에 적으면 Tab 칸이 여럿이 됨) */
+    for (const m of read(f).matchAll(/<(\w+)((?:[^>]*?)\sdata-row-nav[\s>=][^>]*)>/g)) if (m[1] !== "table" || !/\sclass="tbl[\s"]/.test(m[2])) fails.push(`${f}: data-row-nav 는 table.tbl 에만(Data Table › 키보드)`);
+    if (/<tr[^>]*\stabindex=/.test(read(f).replace(/<pre[\s\S]*?<\/pre>/g, ""))) fails.push(`${f}: 표 행에 tabindex 를 적지 않는다 — 행 방향키는 data-row-nav 로(Data Table › 키보드)`);
+    for (const pv of read(f).split('class="example-preview').slice(1).map((s) => s.slice(0, s.indexOf('class="example-code') >>> 0))) {
+      for (const m of pv.matchAll(/<div class="popup cmdk[^"]*"([^>]*)>([\s\S]*?)<span class="sr-only" role="status"><\/span>/g)) {
+        const at = m[1], body = m[2];
+        if (!/role="dialog"/.test(at) || !/aria-modal="true"/.test(at) || !/aria-labelledby="([^"]+)"/.test(at)) fails.push(`${f}: 명령 팔레트는 role=dialog · aria-modal · aria-labelledby`);
+        const inp = /<input\b[^>]*>/.exec(body); const ia = inp ? inp[0] : "";
+        const ctl = (/aria-controls="([^"]+)"/.exec(ia) || [])[1];
+        if (!/role="combobox"/.test(ia) || !/aria-label="[^"]+"/.test(ia) || !ctl) fails.push(`${f}: 명령 팔레트 입력은 role=combobox · aria-label · aria-controls`);
+        else if (!new RegExp(`id="${ctl}" role="listbox"[^>]*tabindex="-1"`).test(body)) fails.push(`${f}: 명령 팔레트 aria-controls 는 role=listbox · tabindex=-1 목록`);
+        for (const it of body.matchAll(/<div class="cmdk-item"([^>]*)>/g)) if (!/role="option"/.test(it[1]) || !/aria-selected="(true|false)"/.test(it[1]) || !/data-value="[^"]+"/.test(it[1])) fails.push(`${f}: .cmdk-item 은 role=option · aria-selected · data-value`);
+        for (const g of body.matchAll(/<div class="cmdk-group"([^>]*)>/g)) if (!/role="group"/.test(g[1]) || !/aria-labelledby=/.test(g[1])) fails.push(`${f}: .cmdk-group 은 role=group · aria-labelledby`);
+        const ad = (/aria-activedescendant="([^"]+)"/.exec(ia) || [])[1], on = (/id="([^"]+)" role="option" aria-selected="true"/.exec(body) || [])[1];
+        if (ad !== on) fails.push(`${f}: 명령 팔레트 aria-activedescendant(${ad}) = 고른 항목(${on})`);
+      }
+      for (const m of pv.matchAll(/<([a-z]+)\b[^>]*\sdata-kbd-mod[\s>][^>]*>|<([a-z]+)\b[^>]*\sdata-kbd-mod>/g)) if (!/^<kbd class="kbd/.test(m[0])) fails.push(`${f}: data-kbd-mod 는 kbd.kbd 에만`);
+      for (const m of pv.matchAll(/<span class="kbd-combo[^"]*menu-kbd[^"]*"([^>]*)>/g)) if (!/aria-hidden="true"/.test(m[1])) fails.push(`${f}: .menu-kbd 는 aria-hidden(단축키는 항목의 aria-keyshortcuts)`);
+    }
     for (const pv of read(f).split('class="example-preview').slice(1).map((s) => s.slice(0, s.indexOf('class="example-code') >>> 0))) {
       for (const m of pv.matchAll(/<(button|a)\b([^>]*)>([\s\S]*?)<\/\1>/g)) {
         const t = text(m[3]); if (BANNED_LABELS.includes(t)) fails.push(`${f}: 모호한 ${m[1]} 라벨 "${t}" — 열리는 것 · 일어날 동작으로(Writing › Vague labels)`);
@@ -1024,7 +1067,7 @@ if (fs.existsSync(path.join(OUT, "home/overview.html"))) fails.push("home/overvi
 const jsonPath = path.join(__dirname, "components.json");
 if (!fs.existsSync(jsonPath)) fails.push("components.json 없음"); else {
   const j = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
-  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 46) fails.push(`components.json 컴포넌트 ${j.components.length}개(46 기대)`);
+  if (j.components.length !== Object.keys(COMPONENTS).length || j.components.length !== 48) fails.push(`components.json 컴포넌트 ${j.components.length}개(48 기대)`);
   if (j.patterns.length !== Object.keys(PATTERNS).length || j.patterns.length !== 23) fails.push(`components.json 패턴 ${j.patterns.length}개(23 기대 — 2026-11-20 분석 · 리포트)`);
   for (const c of [...j.components, ...j.patterns]) { if (!c.examples || !c.examples.length) fails.push(`components.json ${c.key}: 예제 없음`); if (!c.css || c.css.split("\n").length < 2) fails.push(`components.json ${c.key}: CSS 비어 있음`); }
 }

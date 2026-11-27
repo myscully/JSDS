@@ -57,7 +57,7 @@ module.exports = async function dataBundle({ page, ok, go }) {
     await go("components/data-table.html");
     sel = "#ex-data-table-selectable .example-preview";
     const rm = await page.evaluate((s) => {
-      const rows = () => [...document.querySelectorAll(`${s} tbody tr`)], name = () => document.activeElement.getAttribute("aria-label");
+      const rows = () => [...document.querySelectorAll(`${s} tbody tr:not(.ds-leaving)`)],   /* 지운 행은 그 자리에서 흐려지는 동안 inert 로 남는다(2026-11-26) */ name = () => document.activeElement.getAttribute("aria-label");
       const out = [];
       rows()[0].querySelector("input").focus(); window.DS.table.removeRow(rows()[0]); out.push(name(), rows().length, document.querySelector(`${s} .action-bar b`).textContent);
       const last = rows()[rows().length - 1]; last.querySelector("input").focus(); window.DS.table.removeRow(last); out.push(name());

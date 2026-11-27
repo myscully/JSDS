@@ -121,7 +121,7 @@ describe("진행 막대 목록 · 도넛 색 · 스파크 캔버스", () => {
     expect([m.getAttribute("aria-valuenow"), m.getAttribute("aria-valuemin"), m.getAttribute("aria-valuemax")]).toEqual(["412", "0", "450"]);
     expect(m.getAttribute("aria-valuetext")).toBe("412대 / 450대, 92%");
     expect(document.getElementById(m.getAttribute("aria-labelledby")!)!.textContent).toBe("개발팀");
-    expect((m.firstElementChild as HTMLElement).style.width).toBe("91.6%");
+    expect((m.firstElementChild as HTMLElement).style.getPropertyValue("--p")).toBe("91.6%");
   });
   it("tone 없는 4조각은 .mono + 한 톤 1~4, 6조각은 .categorical + 계열 색, 심각도 도넛은 클래스 없음", () => {
     const four = render(<Donut segments={[1, 2, 3, 4].map((v) => ({ label: String(v), value: v }))} />).container.firstElementChild as HTMLElement;

@@ -28,7 +28,7 @@
 | 파일 | 내용 |
 |---|---|
 | `data.js` | 사이트 구조(SITE) · 제품 컬러(PRODUCTS) · 버전 · Changelog |
-| `components.data.js` | 컴포넌트 46개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
+| `components.data.js` | 컴포넌트 48개: 설명 · 예제(html/react) · props · spec · figma 스펙 · 가이드라인 |
 | `patterns.data.js` | 패턴 23개: 사용 컴포넌트(uses) · 예제 · 가이드라인 |
 | `templates.data.js` · `templates.build.js` | 템플릿 화면 9개: 문서 페이지의 글과 화면 생성기. 화면은 `templates/screen/`, 앱 틀 배치와 흉내 동작은 `assets/templates.css` · `templates.js` |
 | `style.src.css` | 스타일 원본. 컴포넌트 CSS 는 `/* ---------- Live component samples ---------- */` 블록 안에 평면 규칙으로 작성(코드 패널 추출 대상) |
@@ -48,7 +48,7 @@
 | `contrast.js` | 그 선언을 생성 사이트에서 전수 측정(라이트·다크 × 제품 색 팔레트 7가지). 미달이면 빌드 실패 · 샘플 블록의 프리미티브 직접 참조 금지 · 소비자 0 토큰 경고 |
 
 ## React 패키지 (`_react/`)
-`@jiran/ds-react` — 컴포넌트 46개 페이지 전부와 패턴 래퍼를 실제 React 컴포넌트로 구현. 같은 클래스 마크업을 렌더링하므로 `dist/style.css`(토큰 + 컴포넌트 CSS 만 합성) 하나로 동작합니다.
+`@jiran/ds-react` — 컴포넌트 48개 페이지 전부와 패턴 래퍼를 실제 React 컴포넌트로 구현. 같은 클래스 마크업을 렌더링하므로 `dist/style.css`(토큰 + 컴포넌트 CSS 만 합성) 하나로 동작합니다.
 - `src/components/<page>/` 컴포넌트 · `examples/<sec>/<page>/<id>.tsx` 예제(= 사이트 React 탭 소스 = 테스트 대상) · `tests/site-consistency.test.tsx` 사이트 HTML 과 구조 비교
 - `cd _react && npm i && npm test && npm run build` → `dist/`(ESM·CJS·d.ts·style.css·fonts). `npm run demo` 로 전체 예제 확인
 - 사용: `import "@jiran/ds-react/style.css"` · `<html data-theme="dark">` · `applyProductColor("red")` · 앱 루트에 `<ToastProvider>`. 자세한 내용은 사이트 Resources › React Package

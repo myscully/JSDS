@@ -321,7 +321,7 @@ module.exports = async function shell({ page, ok, go }) {
     const t = await page.evaluate(async () => {
       const ex = document.querySelector("#ex-top-navigation-search"), nav = ex.querySelector(".sidenav"), btn = ex.querySelector("[data-sidenav-toggle]");
       const top = () => nav.querySelector("a").getBoundingClientRect().top - nav.getBoundingClientRect().top;
-      const before = top(); btn.click(); await new Promise((r) => setTimeout(r, 50)); const col = nav.classList.contains("collapsed"), after = top(), w = nav.querySelector("a").getBoundingClientRect().width; btn.click();
+      const before = top(); btn.click(); await new Promise((r) => setTimeout(r, 50)); document.getAnimations().forEach((a) => { if (a.effect && a.effect.getComputedTiming().endTime !== Infinity) a.finish(); }); const col = nav.classList.contains("collapsed"), after = top(), w = nav.querySelector("a").getBoundingClientRect().width; btn.click();
       return { before, after, col, w };
     });
     ok("folding the side nav keeps the first item at the same height and the rail item fills 64 − 10 − 10 − the 1px right line (2026-11-18)", t.col && Math.abs(t.before - t.after) < 0.6 && Math.abs(t.w - (2.75 * rs - 1)) < 0.6, JSON.stringify(t));
@@ -333,7 +333,7 @@ module.exports = async function shell({ page, ok, go }) {
     const path = require("path"), ROOT = path.resolve(__dirname, "..");
     const c = await page.context().browser().newContext({ viewport: { width: 1440, height: 900 } }); const p = await c.newPage();
     try {
-      const st = () => p.evaluate(() => { const n = document.querySelector(".sidenav"), t = document.querySelector("[data-sidenav-toggle]"), rs = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const st = () => p.evaluate(() => { document.getAnimations().forEach((a) => { if (a.effect && a.effect.getComputedTiming().endTime !== Infinity) a.finish(); }); const n = document.querySelector(".sidenav"), t = document.querySelector("[data-sidenav-toggle]"), rs = parseFloat(getComputedStyle(document.documentElement).fontSize);
         return { col: n.classList.contains("collapsed"), w: n.getBoundingClientRect().width / rs, exp: t.getAttribute("aria-expanded"), name: t.getAttribute("aria-label"), ev: (window.__ev || []).join(",") }; });
       const scr = (k) => "file://" + path.join(ROOT, "templates", "screen", k + ".html");
       await p.goto(scr("dashboard")); await p.waitForTimeout(300);

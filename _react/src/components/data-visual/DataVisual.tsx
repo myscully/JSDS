@@ -157,7 +157,7 @@ export const ProgressList = forwardRef<HTMLDivElement, ProgressListProps>(functi
         return (
           <div key={i} className="progress-row">
             <div className="row"><span id={id}>{it.label}</span><span><b>{fmt(it.value)}</b><span className="target">/ {fmt(it.max)}{u}</span></span></div>
-            <div className="progress" role="meter" aria-labelledby={id} aria-valuemin={0} aria-valuemax={it.max} aria-valuenow={it.value} aria-valuetext={`${fmt(it.value)}${u} / ${fmt(it.max)}${u}, ${Math.round(pct)}%`}><i style={{ width: `${pct}%` }} /></div>
+            <div className="progress" role="meter" aria-labelledby={id} aria-valuemin={0} aria-valuemax={it.max} aria-valuenow={it.value} aria-valuetext={`${fmt(it.value)}${u} / ${fmt(it.max)}${u}, ${Math.round(pct)}%`}><i style={{ "--p": `${pct}%` } as CSSProperties} /></div>
           </div>
         );
       })}

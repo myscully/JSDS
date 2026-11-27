@@ -21,7 +21,7 @@ module.exports = async ({ b, ok, SITE, path }) => {
   /* 상단 고정 헤더에 가리지 않게, 아래로 펼칠 자리가 있게 필드를 화면 위쪽으로 */
   const toTop = (loc) => loc.evaluate((e) => { e.scrollIntoView({ block: "start", behavior: "instant" }); window.scrollBy(0, -140); });
   const day = (loc, k) => loc.locator(`.calendar .day[data-date="${k}"]:not(.muted)`);
-  const openCal = (dp) => dp.locator(".cal-btn").click();
+  const openCal = async (dp) => { await dp.locator(".cal-btn").click(); await page.evaluate(() => document.getAnimations().forEach((a) => { if (a.effect && a.effect.getComputedTiming().endTime !== Infinity) a.finish(); })); };   // 팝오버 들어옴(2026-11-26)이 끝난 자리에서 잰다
   /* ds:date 를 모은다 — date 는 Date(또는 {start, end})라 ISO 로 · Invalid Date 는 "NaN" 으로 바꿔 둔다 */
   const listen = (pg = page) => pg.evaluate(() => {
     window.__dsd = [];
