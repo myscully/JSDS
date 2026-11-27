@@ -370,3 +370,15 @@ Noto Sans KR 에는 SemiBold 가 없어 **SemiBold 조합은 Noto Bold 로 그�
 - **Foundations › Writing**(1185:30) — 머리말 소개(1185:33)와 카드 여덟: Sentence endings 1425:188 · Buttons 1425:285 · Vague labels 1425:337 · Titles 1425:468 · Numbers 1425:491 · Errors and empty states 1425:519 · Placeholders 1425:616 · One fact, one wording 1425:639(글자 110 + 소개 1).
 - **Foundations › Interaction**(1185:22) — 머리말 소개 둘(1185:25 · 1429:215)과 카드 여덟: Disabled 1429:216 · Input errors 1429:342 · Overlays 1429:447 · Choosing feedback 1429:545 · Destructive actions 1429:650 · Overflow 1429:774 · Loading 1429:850 · Choosing a selection control 1429:933(글자 142). Card/Motion(311:50)은 손대지 않았다.
 - **열 이름표**(Title 2) — Components 1432:5851 ~ 1432:5860, Patterns 1432:6985 ~ 1432:6988.
+
+## 2026-11-26 Pretendard 되돌린 뒤 높이 확인
+사람이 데스크톱에서 위 두 절의 글자를 Pretendard 로 되돌린 뒤 쟀다. 세 페이지 모두 스타일 서체가 Pretendard 이고, Writing · Interaction 카드 16장 · 열 이름표의 높이는 행간의 배수다.
+- **높이가 옛 값으로 남아 다시 배치한 글자 다섯**(Noto 로 쓴 뒤 원래 스타일에 묶음):
+  - Combobox 고른 옵션 'Critical' · 'High'(1410:5864 · 1410:5869): 22 → 20. 옵션 틀(1410:5863 · 1410:5868)은 38 고정 · 가운데 정렬.
+  - 'Examples' 제목(1407:5757 · 1411:134): 17 · 14 → 20.
+  - 알림 센터 '안 읽음' 탭 글자(I1261:5592;331:2375): 16 → 18.
+- **Tab Item 세트** — Underline · Accent 의 Default · Disabled 8변형이 고른 탭보다 2 낮았다(42 · 36). 아래 여백을 +2 해서 44 · 38 로 맞췄다. 사이트는 상태와 무관하게 44 · 38 이다.
+- **아직 Noto 인 글자** — 다음 글자는 맞는 텍스트 스타일이 없어 사람이 데스크톱에서 Pretendard Bold 로 바꾼다:
+  - Data Table 액션 바 건수 '1건 선택됨'(328:1843 과 인스턴스 I328:2067;328:1843): Noto Sans KR Bold 14/20.
+  - 약관 동의 '서비스 이용약관 필수'(I854:177;853:4291;324:553).
+  - Patterns Overview 사이드바(1195:355 · 371 · 383 · 408)와 숨긴 ov-grid(1343:*)의 글자도 Noto 로 남아 있다. 이전부터 남은 것이다.
